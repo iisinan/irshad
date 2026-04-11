@@ -1,0 +1,23 @@
+# IDEs
+.vscode/
+.idea/
+.DS_Store
+
+# Dependencies
+node_modules/
+vendor/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Specific environment files
+.env
+.env.*
+!.env.example
+
+# Build outputs
+build/
+dist/
+/public/storage
+/storage/*.key
+/rr

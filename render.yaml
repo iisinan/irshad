@@ -1,0 +1,38 @@
+services:
+  # The Laravel Backend
+  - type: web
+    name: irshad-backend
+    env: docker
+    dockerContext: backend
+    dockerfilePath: backend/Dockerfile
+    plan: free
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_KEY
+        fromContext: APP_KEY
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_URL
+        fromDatabase:
+          name: irshad-db
+          property: connectionString
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: PORT
+        value: 8080
+
+  # The Flutter Mobile Web Preview
+  - type: web
+    name: irshad-mobile-web
+    env: docker
+    dockerContext: .
+    dockerfilePath: mobile.Dockerfile
+    plan: free
+
+databases:
+  - name: irshad-db
+    plan: free
+    region: oregon # or specify your preferred region

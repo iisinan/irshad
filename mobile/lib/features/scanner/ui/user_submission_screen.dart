@@ -1,0 +1,288 @@
+import 'package:flutter/material.dart';
+
+class UserSubmissionScreen extends StatefulWidget {
+  final String? initialBarcode;
+
+  const UserSubmissionScreen({super.key, this.initialBarcode});
+
+  @override
+  State<UserSubmissionScreen> createState() => _UserSubmissionScreenState();
+}
+
+class _UserSubmissionScreenState extends State<UserSubmissionScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _brandController = TextEditingController();
+  final _barcodeController = TextEditingController();
+  final _ingredientsController = TextEditingController();
+  
+  bool _isLoading = false;
+
+  // Theme Constants
+  static const Color bgColor = Color(0xFFFAFAFA);
+  static const Color primaryGreen = Color(0xFF16A34A);
+  static const Color textDark = Color(0xFF111827);
+  static const Color textMuted = Color(0xFF6B7280);
+  static const Color divider = Color(0xFFE5E7EB);
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialBarcode != null) {
+      _barcodeController.text = widget.initialBarcode!;
+    }
+  }
+
+  void _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+    try {
+      await Future.delayed(const Duration(seconds: 2));
+      
+      if (mounted) {
+        _showSuccessDialog();
+      }
+    } catch (e) {
+      _showError(e.toString());
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        titlePadding: const EdgeInsets.only(top: 40),
+        title: const Column(
+          children: [
+            Icon(Icons.check_circle_rounded, color: primaryGreen, size: 64),
+            SizedBox(height: 24),
+            Text(
+              'Submission Received', 
+              textAlign: TextAlign.center,
+              style: TextStyle(fontWeight: FontWeight.w900, fontSize: 20),
+            ),
+          ],
+        ),
+        content: const Text(
+          'Thank you for contributing to the IRSHAD community! Our scholars will review this product shortly.',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: textMuted, height: 1.5, fontSize: 14),
+        ),
+        actionsPadding: const EdgeInsets.all(24),
+        actions: [
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context); // Close dialog
+                Navigator.pop(context); // Go back
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: textDark,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                elevation: 0,
+              ),
+              child: const Text('Return to Home', style: TextStyle(fontWeight: FontWeight.w700)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.redAccent,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: bgColor,
+      appBar: AppBar(
+        title: const Text('New Submission', style: TextStyle(fontWeight: FontWeight.w900, color: textDark, letterSpacing: -0.5)),
+        backgroundColor: bgColor,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: textDark, size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(),
+              const SizedBox(height: 32),
+              
+              _buildSectionLabel('PRODUCT DATA'),
+              const SizedBox(height: 12),
+              _buildCustomTextField(
+                controller: _nameController,
+                hint: 'Product Name (e.g. Peak Milk)',
+                icon: Icons.shopping_bag_outlined,
+                validator: (v) => v!.isEmpty ? 'Name is required' : null,
+              ),
+              const SizedBox(height: 16),
+              
+              _buildCustomTextField(
+                controller: _brandController,
+                hint: 'Brand (e.g. FrieslandCampina)',
+                icon: Icons.business_outlined,
+              ),
+              const SizedBox(height: 16),
+              
+              _buildCustomTextField(
+                controller: _barcodeController,
+                hint: 'Barcode ID',
+                icon: Icons.qr_code_rounded,
+                validator: (v) => v!.isEmpty ? 'Barcode is required' : null,
+              ),
+              const SizedBox(height: 16),
+              
+              _buildCustomTextField(
+                controller: _ingredientsController,
+                hint: 'Ingredients list...',
+                icon: Icons.list_alt_rounded,
+                maxLines: 4,
+              ),
+              const SizedBox(height: 32),
+              
+              // Photo Upload 
+              _buildSectionLabel('VISUAL PROOF'),
+              const SizedBox(height: 12),
+              _buildPhotoUploadSection(),
+              const SizedBox(height: 48),
+              
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _submit,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: textDark,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    elevation: 0,
+                  ),
+                  child: _isLoading 
+                    ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) 
+                    : const Text('Submit for Verification', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                ),
+              ),
+              const SizedBox(height: 40),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionLabel(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: Text(
+        title,
+        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: textMuted, letterSpacing: 1),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return const Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Missing Product?',
+          style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: textDark, letterSpacing: -0.5),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'Help the IRSHAD community by submitting this product for scholar verification.',
+          style: TextStyle(color: textMuted, fontSize: 15, height: 1.5, fontWeight: FontWeight.w400),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCustomTextField({
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    int maxLines = 1,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      maxLines: maxLines,
+      validator: validator,
+      style: const TextStyle(color: textDark, fontWeight: FontWeight.w600),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w400),
+        prefixIcon: Padding(
+          padding: const EdgeInsets.only(bottom: 0),
+          child: Icon(icon, color: textMuted, size: 20),
+        ),
+        filled: true,
+        fillColor: Colors.white,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: divider, width: 1.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: textDark, width: 1.5),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      ),
+    );
+  }
+
+  Widget _buildPhotoUploadSection() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: divider, width: 1.5),
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(12)),
+            child: const Icon(Icons.camera_alt_rounded, color: primaryGreen, size: 28),
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'Upload Product Image',
+            style: TextStyle(color: textDark, fontWeight: FontWeight.w800, fontSize: 14),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'High quality photo of ingredients list preferred',
+            style: TextStyle(color: textMuted, fontSize: 12, fontWeight: FontWeight.w500),
+          ),
+        ],
+      ),
+    );
+  }
+}
