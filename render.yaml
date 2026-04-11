@@ -12,7 +12,7 @@ services:
       - key: APP_DEBUG
         value: false
       - key: APP_KEY
-        fromContext: APP_KEY
+        sync: false # Render will ask you to fill this in manually
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_URL
@@ -31,8 +31,11 @@ services:
     dockerContext: .
     dockerfilePath: mobile.Dockerfile
     plan: free
+    envVars:
+      - key: PORT
+        value: 80 # Nginx default in the Dockerfile
 
 databases:
   - name: irshad-db
     plan: free
-    region: oregon # or specify your preferred region
+    region: oregon 
