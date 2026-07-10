@@ -53,6 +53,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/stocks/baskets',                 [BasketController::class, 'index']);
         Route::get('/stocks/baskets/{basket}',        [BasketController::class, 'show']);
         Route::get('/stocks/check/{symbol}',          [StockController::class, 'check']);
+        Route::get('/stocks/{symbol}/analysis',       [StockController::class, 'getAiAnalysis']);
         Route::put('/stocks/{symbol}/status',         [StockController::class, 'updateStatus']); // Scholar/Admin only (role checked in controller)
 
         // Brokerage

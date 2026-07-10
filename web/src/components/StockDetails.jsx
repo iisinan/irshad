@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { fetchStockDetails } from '../services/api';
-
+import { fetchStockDetails, fetchAiAnalysis } from '../services/api';
+import ReactMarkdown from 'react-markdown';
 const StockDetails = () => {
   const { symbol } = useParams();
   const [stock, setStock] = useState(null);
@@ -91,6 +91,20 @@ const StockDetails = () => {
   const priceChangePct = previousPrice > 0 ? (priceChange / previousPrice) * 100 : 0;
   const isPositive = priceChange >= 0;
 
+  // ─── AI Analysis ───────────────────────────────────
+  const [aiAnalysis, setAiAnalysis] = useState(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState(null);
+
+  const handleAskAI = () => {
+    setAiLoading(true);
+    setAiError(null);
+    fetchAiAnalysis(symbol)
+      .then(r => setAiAnalysis(r.analysis))
+      .catch(e => setAiError('Failed to get AI analysis. Ensure GEMINI_API_KEY is set.'))
+      .finally(() => setAiLoading(false));
+  };
+
   return (
     <div className="animate-fade-in page-wrapper">
       {/* Back link */}
@@ -151,6 +165,33 @@ const StockDetails = () => {
         {/* Left Column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           
+          {/* AI Assistant */}
+          <div className="detail-panel" style={{ background: 'linear-gradient(145deg, var(--bg) 0%, rgba(59, 130, 246, 0.05) 100%)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div className="detail-section-label" style={{ marginBottom: 0, color: '#3b82f6', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '1.2rem' }}>✨</span> AI Halal Assistant
+              </div>
+              {!aiAnalysis && !aiLoading && (
+                <button onClick={handleAskAI} className="btn-primary" style={{ padding: '8px 16px', fontSize: '0.85rem', background: '#3b82f6', color: '#fff', border: 'none' }}>
+                  Ask Gemini AI
+                </button>
+              )}
+            </div>
+            
+            {aiLoading && <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontStyle: 'italic' }}>Gemini is analyzing the financials...</div>}
+            {aiError && <div style={{ color: 'var(--non-halal)', fontSize: '0.9rem' }}>{aiError}</div>}
+            {aiAnalysis && (
+              <div style={{ color: 'var(--text-body)', lineHeight: 1.7, fontSize: '0.95rem' }}>
+                <ReactMarkdown>{aiAnalysis}</ReactMarkdown>
+              </div>
+            )}
+            {!aiAnalysis && !aiLoading && !aiError && (
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', margin: 0 }}>
+                Get a plain-English explanation of why {stock.symbol} is classified as {statusStr}.
+              </p>
+            )}
+          </div>
+
           {/* About Company */}
           <div className="detail-panel">
             <div className="detail-section-label">About Company</div>

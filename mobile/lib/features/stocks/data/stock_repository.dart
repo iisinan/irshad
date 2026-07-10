@@ -115,4 +115,16 @@ class StockRepository {
     final history = prefs.getStringList('stock_history') ?? [];
     return history.map((item) => Map<String, dynamic>.from(jsonDecode(item))).toList();
   }
+
+  Future<String?> fetchAiAnalysis(String symbol) async {
+    try {
+      final response = await _apiService.get('stocks/$symbol/analysis');
+      if (response.statusCode == 200) {
+        return response.data['data']['analysis'];
+      }
+    } on DioException catch (e) {
+       throw e.response?.data['message'] ?? 'Failed to fetch AI analysis';
+    }
+    return null;
+  }
 }

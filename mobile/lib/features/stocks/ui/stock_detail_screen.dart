@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../core/providers/app_state_provider.dart';
 import '../data/stock_repository.dart';
 import '../../profile/data/user_activity_repository.dart';
+import 'ai_analysis_sheet.dart';
 
 class StockDetailScreen extends StatefulWidget {
   final Map<String, dynamic> stock;
@@ -218,6 +219,10 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                   _buildSectionHeader('Business Screening'),
                   const SizedBox(height: 12),
                   _buildBusinessScreening(statusColor, badgeBg, statusLabel, reason),
+                  const SizedBox(height: 32),
+
+                  // AI Halal Assistant Button
+                  _buildAiAssistantButton(),
                   const SizedBox(height: 32),
 
                   // Purification
@@ -614,6 +619,30 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
             ),
           ],
         ],
+      ),
+    );
+  }
+
+  Widget _buildAiAssistantButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 56,
+      child: ElevatedButton(
+        onPressed: () => AiAnalysisSheet.show(context, _currentStock['symbol']),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.blue.withOpacity(0.1),
+          foregroundColor: Colors.blue,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          elevation: 0,
+        ),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('✨', style: TextStyle(fontSize: 18)),
+            SizedBox(width: 8),
+            Text('Ask AI Assistant', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
+          ],
+        ),
       ),
     );
   }

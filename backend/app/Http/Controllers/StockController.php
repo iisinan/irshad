@@ -139,4 +139,19 @@ class StockController extends Controller
 
         return $this->success($company->load('status'), 'Stock status updated successfully by scholar.');
     }
+
+    /**
+     * Ask Gemini AI for a plain-English explanation of the stock's compliance status.
+     */
+    public function getAiAnalysis(string $symbol, \App\Services\GeminiAiService $aiService): JsonResponse
+    {
+        $company = Company::with(['status', 'financials' => fn($q) => $q->latest()])->where('symbol', $symbol)->firstOrFail();
+        
+        $statusStr = $company->status ? $company->status->status : 'unknown';
+        $financials = $company->financials->first();
+
+        $analysis = $aiService->analyzeCompliance($company, $financials, $statusStr);
+
+        return $this->success(['analysis' => $analysis]);
+    }
 }

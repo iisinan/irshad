@@ -93,4 +93,14 @@ export const fetchStockDetails = async (symbol) => {
   }
 };
 
+export const fetchAiAnalysis = async (symbol) => {
+  try {
+    const response = await api.get(`/stocks/${symbol}/analysis`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching AI analysis for ${symbol}:`, error);
+    throw error;
+  }
+};
+
 export default api;
