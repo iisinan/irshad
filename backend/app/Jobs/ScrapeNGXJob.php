@@ -123,8 +123,7 @@ class ScrapeNGXJob implements ShouldQueue
                             $financials = Financial::updateOrCreate(
                                 [
                                     'company_id' => $company->id,
-                                    'year' => now()->year,
-                                    'quarter' => ceil(now()->month / 3),
+                                    'reporting_period' => now()->year . '-Q' . ceil(now()->month / 3),
                                 ],
                                 [
                                     'total_assets' => $result['total_assets'] ?? 0,
@@ -235,8 +234,7 @@ class ScrapeNGXJob implements ShouldQueue
                 $financials = Financial::updateOrCreate(
                     [
                         'company_id' => $company->id,
-                        'year' => now()->year,
-                        'quarter' => ceil(now()->month / 3),
+                        'reporting_period' => now()->year . '-Q' . ceil(now()->month / 3),
                     ],
                     [
                         'total_assets' => $item['total_assets'] ?: $item['market_cap'], // Fallback to market cap if total assets is 0
