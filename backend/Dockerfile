@@ -28,6 +28,7 @@ WORKDIR /var/www
 COPY . /var/www
 
 # Install dependencies
+ENV COMPOSER_MEMORY_LIMIT=-1
 RUN composer install --no-interaction --optimize-autoloader --no-dev
 
 # Set permissions for Laravel
