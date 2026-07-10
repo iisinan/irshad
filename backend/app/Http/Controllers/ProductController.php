@@ -79,4 +79,39 @@ class ProductController extends Controller
 
         return $this->success($product, 'Product status updated and verified.');
     }
+
+    /**
+     * Submit a new product for review.
+     */
+    public function store(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'brand' => 'nullable|string|max:255',
+            'barcode' => 'required|string|max:255|unique:products,barcode',
+            'ingredients_text' => 'nullable|string',
+            'image' => 'nullable|image|max:5120', // Max 5MB
+        ]);
+
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('products', 'public');
+        }
+
+        $product = Product::create([
+            'name' => $validated['name'],
+            'brand' => $validated['brand'],
+            'barcode' => $validated['barcode'],
+            'status' => 'doubtful', // Pending review
+            'status_reason' => 'Submitted by user, pending scholar review.',
+            'verified_by_scholar' => false,
+            'metadata' => [
+                'ingredients_text' => $validated['ingredients_text'] ?? null,
+                'submitted_by' => $request->user()->id,
+                'image_path' => $imagePath,
+            ]
+        ]);
+
+        return $this->success($product, 'Product submitted successfully', 201);
+    }
 }

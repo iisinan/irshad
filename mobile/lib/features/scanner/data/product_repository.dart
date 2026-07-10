@@ -22,7 +22,7 @@ class ProductRepository {
 
   Future<List<Map<String, dynamic>>> searchProducts(String query) async {
     try {
-      final response = await _apiService.get('products/search?q=$query');
+      final response = await _apiService.get('products/search', queryParameters: {'q': query});
       if (response.statusCode == 200) {
         return List<Map<String, dynamic>>.from(response.data['data']);
       }
@@ -30,6 +30,27 @@ class ProductRepository {
       // Handle error
     }
     return [];
+  }
+
+  Future<bool> submitProduct(Map<String, dynamic> data, {String? imagePath}) async {
+    try {
+      dynamic postData;
+      if (imagePath != null) {
+        final formData = FormData.fromMap(data);
+        formData.files.add(MapEntry(
+          'image',
+          await MultipartFile.fromFile(imagePath),
+        ));
+        postData = formData;
+      } else {
+        postData = data;
+      }
+
+      final response = await _apiService.post('products', postData);
+      return response.statusCode == 201;
+    } on DioException catch (e) {
+       throw e.response?.data['message'] ?? 'Submission failed';
+    }
   }
 
   Future<void> _cacheProduct(Map<String, dynamic> product) async {

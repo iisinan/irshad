@@ -23,4 +23,9 @@ class StockStatus extends Model
         'verified_by_scholar' => 'boolean',
         'last_updated' => 'datetime',
     ];
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
 }

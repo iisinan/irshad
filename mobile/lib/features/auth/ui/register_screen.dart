@@ -16,6 +16,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _authRepository = AuthRepository();
   bool _isLoading = false;
   bool _obscurePassword = true;
+  bool _obscureConfirm  = true;
 
   // Theme Constants
   static const Color bgColor = Color(0xFFFAFAFA);
@@ -138,7 +139,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 hint: 'Repeat your password',
                 icon: Icons.lock_reset_rounded,
                 isPassword: true,
-                obscure: _obscurePassword,
+                obscure: _obscureConfirm,
+                toggleObscure: () => setState(() => _obscureConfirm = !_obscureConfirm),
               ),
               const SizedBox(height: 40),
 

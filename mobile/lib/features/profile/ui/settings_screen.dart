@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/api/api_service.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -13,12 +17,90 @@ class _SettingsScreenState extends State<SettingsScreen> {
   String _selectedLanguage = 'English';
   final List<String> _languages = ['English', 'Hausa', 'Yoruba', 'Igbo'];
 
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _biometricsEnabled = prefs.getBool('biometrics_enabled') ?? false;
+    });
+  }
+
+  Future<void> _toggleBiometrics(bool val) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('biometrics_enabled', val);
+    setState(() {
+      _biometricsEnabled = val;
+    });
+  }
+
   // Theme Constants
   static const Color bgColor = Color(0xFFFAFAFA);
   static const Color primaryGreen = Color(0xFF16A34A);
   static const Color textDark = Color(0xFF111827);
   static const Color textMuted = Color(0xFF6B7280);
   static const Color divider = Color(0xFFE5E7EB);
+  
+  final ApiService _apiService = ApiService();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+
+  Future<void> _launchUrl(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    if (!await launchUrl(url)) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not launch URL')));
+    }
+  }
+
+  void _showDeleteAccountDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Account?'),
+        content: const Text('Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently removed.', style: TextStyle(color: textMuted)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(color: textDark)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () async {
+              Navigator.pop(context); // Close dialog
+              
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => const Center(child: CircularProgressIndicator()),
+              );
+              
+              try {
+                await _apiService.delete('account');
+                await _storage.deleteAll();
+                if (mounted) {
+                  Navigator.pop(context); // Close loading dialog
+                  Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+                }
+              } catch (e) {
+                if (mounted) {
+                  Navigator.pop(context); // Close loading dialog
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to delete account. Try again.')));
+                }
+              }
+            },
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +148,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 icon: Icons.fingerprint_rounded,
                 title: 'Biometric Login',
                 value: _biometricsEnabled,
-                onChanged: (val) => setState(() => _biometricsEnabled = val),
+                onChanged: _toggleBiometrics,
               ),
             ]),
 
@@ -79,24 +161,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildActionTile(
                 icon: Icons.help_outline_rounded,
                 title: 'Help Center',
-                onTap: () {},
+                onTap: () => _launchUrl('https://irshad.app/help'),
               ),
               _buildActionTile(
                 icon: Icons.privacy_tip_outlined,
                 title: 'Privacy Policy',
-                onTap: () {},
+                onTap: () => _launchUrl('https://irshad.app/privacy'),
               ),
               _buildActionTile(
                 icon: Icons.info_outline_rounded,
                 title: 'About IRSHAD',
                 subtitle: 'Version 1.0.0',
-                onTap: () {},
+                onTap: () => _launchUrl('https://irshad.app/about'),
               ),
             ]),
 
             const SizedBox(height: 48),
             TextButton(
-              onPressed: () {},
+              onPressed: _showDeleteAccountDialog,
               child: const Text('Delete Account', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w800, fontSize: 13)),
             ),
             const SizedBox(height: 40),

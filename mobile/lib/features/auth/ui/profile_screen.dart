@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../../../core/providers/app_state_provider.dart';
 import '../data/auth_repository.dart';
+import '../../portfolio/ui/zakat_calculator_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -10,7 +14,6 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final _authRepository = AuthRepository();
-  Map<String, dynamic>? _user;
   bool _isLoading = true;
   String _selectedLanguage = 'English';
 
@@ -32,11 +35,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _fetchProfile() async {
     setState(() => _isLoading = true);
-    final user = await _authRepository.getProfile();
-    setState(() {
-      _user = user;
-      _isLoading = false;
-    });
+    await Provider.of<AppStateProvider>(context, listen: false).loadProfile();
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   void _logout() async {
@@ -46,6 +50,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<AppStateProvider>(context).userProfile;
+
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
@@ -65,7 +71,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: primaryGreen))
-          : _user == null
+          : user == null
               ? const Center(child: Text('Failed to load profile', style: TextStyle(color: textDark)))
               : SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
@@ -80,6 +86,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(height: 12),
                       _buildInfoCard(),
                       
+                      const SizedBox(height: 32),
+                      _buildSectionHeader('Tools'),
+                      const SizedBox(height: 12),
+                      _buildToolsCard(),
+
                       const SizedBox(height: 32),
                       _buildSectionHeader('Preferences'),
                       const SizedBox(height: 12),
@@ -110,52 +121,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildHeaderCard() {
-    return Center(
-      child: Column(
+    final user = Provider.of<AppStateProvider>(context).userProfile;
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: divider),
+      ),
+      child: Row(
         children: [
-          Stack(
-            alignment: Alignment.bottomRight,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(3),
-                decoration: BoxDecoration(
-                  color: primaryGreen.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: primaryGreen.withOpacity(0.1)),
-                ),
-                child: const CircleAvatar(
-                  radius: 54,
-                  backgroundColor: Colors.white,
-                  child: Icon(Icons.person_rounded, size: 50, color: divider),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: primaryGreen,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 3),
-                ),
-                child: const Icon(Icons.camera_alt_rounded, size: 14, color: Colors.white),
-              ),
-            ],
+          CircleAvatar(
+            radius: 36,
+            backgroundColor: primaryGreen.withOpacity(0.1),
+            child: Text(user?['first_name']?[0] ?? 'U', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: primaryGreen)),
           ),
-          const SizedBox(height: 20),
-          Text(
-            _user!['name'] ?? 'Guest User',
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: textDark),
-          ),
-          const SizedBox(height: 4),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.verified_rounded, size: 14, color: primaryGreen),
-              const SizedBox(width: 6),
-              Text(
-                (_user!['role'] ?? 'User').toUpperCase(),
-                style: const TextStyle(color: primaryGreen, fontWeight: FontWeight.w800, fontSize: 11, letterSpacing: 0.5),
-              ),
-            ],
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${user?['first_name'] ?? ''} ${user?['last_name'] ?? ''}',
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: textDark, letterSpacing: -0.5),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  user?['email'] ?? '',
+                  style: const TextStyle(fontSize: 14, color: textMuted),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -176,6 +172,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildInfoCard() {
+    final user = Provider.of<AppStateProvider>(context).userProfile;
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -184,12 +181,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       child: Column(
         children: [
-          _buildInfoTile(Icons.alternate_email_rounded, 'Email', _user!['email'] ?? ''),
-          Divider(color: divider, height: 1, indent: 56),
-          _buildInfoTile(Icons.location_on_outlined, 'Location', _user!['location'] ?? 'Nigeria'),
-          Divider(color: divider, height: 1, indent: 56),
-          _buildInfoTile(Icons.calendar_today_outlined, 'Member Since', 'March 2024'),
+          _buildInfoTile(Icons.alternate_email_rounded, 'Email', user?['email'] ?? ''),
+          const Divider(color: divider, height: 1, indent: 56),
+          _buildInfoTile(Icons.location_on_outlined, 'Location', user?['location'] ?? 'Nigeria'),
+          const Divider(color: divider, height: 1, indent: 56),
+          _buildInfoTile(Icons.calendar_today_outlined, 'Member Since', 
+            user?['created_at'] != null 
+              ? DateFormat('MMMM yyyy').format(DateTime.parse(user!['created_at']))
+              : 'March 2024'),
         ],
+      ),
+    );
+  }
+
+  Widget _buildToolsCard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: divider),
+      ),
+      child: ListTile(
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(8)),
+          child: const Icon(Icons.calculate_outlined, color: textMuted, size: 20),
+        ),
+        title: const Text('Zakat Calculator', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textDark)),
+        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: textMuted),
+        onTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const _ZakatWrapper()));
+        },
       ),
     );
   }
@@ -249,4 +271,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     );
   }
+}
+
+
+class _ZakatWrapper extends StatelessWidget {
+  const _ZakatWrapper();
+  @override
+  Widget build(BuildContext context) => const ZakatCalculatorScreen();
 }

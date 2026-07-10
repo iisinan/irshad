@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -17,14 +18,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   final List<Map<String, String>> _onboardingData = [
     {
-      'title': 'NGX Stock Screening',
-      'subtitle': 'Search Nigerian stocks and screen them for Shariah compliance based on AAOIFI standards.',
+      'title': 'Stock Screening',
+      'subtitle': 'We analyze hundreds of companies. Easily spot fully compliant, questionable, and haram investments.',
       'image': 'assets/onboarding_search.png',
       'icon': 'search',
     },
     {
-      'title': 'Nigerian Baskets',
-      'subtitle': 'Explore curated collections of halal Nigerian stocks like "NGX Blue Chips" or "Halal Agriculture".',
+      'title': 'Thematic Baskets',
+      'subtitle': 'Explore curated collections of halal Nigerian stocks like "Market Blue Chips" or "Halal Agriculture".',
       'image': 'assets/onboarding_baskets.png',
       'icon': 'widgets',
     },
@@ -52,7 +53,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Align(
               alignment: Alignment.topRight,
               child: TextButton(
-                onPressed: () => Navigator.pushReplacementNamed(context, '/main'),
+                onPressed: () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setBool('hasSeenOnboarding', true);
+                  if (mounted) Navigator.pushReplacementNamed(context, '/main');
+                },
                 child: const Text('Skip', style: TextStyle(color: textMuted)),
               ),
             ),
@@ -145,14 +150,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             width: double.infinity,
             height: 56,
             child: ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 if (_currentPage < _onboardingData.length - 1) {
                   _pageController.nextPage(
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeInOut,
                   );
                 } else {
-                  Navigator.pushReplacementNamed(context, '/main');
+                  // Mark onboarding as seen so it is never shown again
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setBool('hasSeenOnboarding', true);
+                  if (mounted) Navigator.pushReplacementNamed(context, '/main');
                 }
               },
               style: ElevatedButton.styleFrom(

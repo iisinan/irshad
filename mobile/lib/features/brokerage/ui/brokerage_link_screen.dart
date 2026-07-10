@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:url_launcher/url_launcher.dart';
 class BrokerageLinkScreen extends StatefulWidget {
   const BrokerageLinkScreen({super.key});
 
@@ -103,63 +103,42 @@ class _BrokerageLinkScreenState extends State<BrokerageLinkScreen> {
           style: const TextStyle(color: textMuted, fontSize: 13, height: 1.4),
         ),
         trailing: const Icon(Icons.link_rounded, color: textMuted),
-        onTap: () => _simulatedAuth(broker['name']!),
+        onTap: () => _initiateOAuth(broker['name']!),
       ),
     );
   }
 
-  void _simulatedAuth(String name) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(width: 40, height: 4, decoration: BoxDecoration(color: divider, borderRadius: BorderRadius.circular(2))),
-            const SizedBox(height: 32),
-            const Icon(Icons.account_balance_rounded, size: 64, color: primaryGreen),
-            const SizedBox(height: 24),
-            Text('Connect to $name', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: textDark)),
-            const SizedBox(height: 12),
-            const Text(
-              'IRSHAD will only sync your portfolio and enable trading. We never see your password.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: textMuted, fontSize: 14, height: 1.5),
+
+  Future<void> _initiateOAuth(String name) async {
+    // This is a skeleton OAuth URL. In production, this would be fetched from the backend.
+    final String oauthUrl = 'https://oauth.mockbroker.com/authorize?client_id=IRSHAD&redirect_uri=irshad://brokerage-callback';
+    final Uri url = Uri.parse(oauthUrl);
+
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+        
+        // When the user returns to the app via deep link, we'd handle the callback.
+        // For now, we simulate a successful return.
+        if (mounted) {
+           ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('$name authorization initiated.'),
+              backgroundColor: textDark,
+              behavior: SnackBarBehavior.floating,
             ),
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.pop(context); // Go back to Detail
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('$name linked successfully!'),
-                      backgroundColor: textDark,
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: textDark,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  elevation: 0,
-                ),
-                child: const Text('Authorize Connection', style: TextStyle(fontWeight: FontWeight.w800)),
-              ),
-            ),
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
-    );
+          );
+        }
+      } else {
+        throw 'Could not launch $url';
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error launching OAuth: $e')),
+        );
+      }
+    }
   }
 
   Widget _buildSecurityNotice() {

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../../core/providers/app_state_provider.dart';
 import '../data/user_activity_repository.dart';
 
 class FavoritesScreen extends StatefulWidget {
@@ -30,16 +32,20 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   void _fetchFavorites() async {
     setState(() => _isLoading = true);
     final favs = await _activityRepository.getFavorites();
-    setState(() {
-      _favorites = favs;
-      _isLoading = false;
-    });
+    if (mounted) {
+      Provider.of<AppStateProvider>(context, listen: false).setWatchlistCount(favs.length);
+      setState(() {
+        _favorites = favs;
+        _isLoading = false;
+      });
+    }
   }
 
-  void _removeFavorite(String type, int id) async {
-    final success = await _activityRepository.removeFromFavorites(type, id);
+  void _removeFavorite(int favoriteId) async {
+    final success = await _activityRepository.removeFromFavorites(favoriteId);
     if (success) {
       if (mounted) {
+        Provider.of<AppStateProvider>(context, listen: false).decrementWatchlist();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Removed from watchlist'), 
@@ -176,7 +182,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 4),
           child: Text(
-            isProduct ? (item['brand'] ?? 'NGX Listed') : item['name'],
+            isProduct ? (item['brand'] ?? 'Market Listed') : item['name'],
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(color: textMuted, fontSize: 13),
@@ -184,7 +190,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         ),
         trailing: IconButton(
           icon: const Icon(Icons.favorite_rounded, color: Colors.redAccent, size: 22),
-          onPressed: () => _removeFavorite(fav['type'], fav['item_id']),
+          onPressed: () => _removeFavorite(fav['id'] as int),
         ),
         onTap: () {
           if (isProduct) {

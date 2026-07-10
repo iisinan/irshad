@@ -19,7 +19,9 @@ class PushNotificationService {
     const DarwinInitializationSettings iosSettings = DarwinInitializationSettings();
     const InitializationSettings initSettings = InitializationSettings(android: androidSettings, iOS: iosSettings);
     
-    await _localNotifications.initialize(initSettings, onDidReceiveNotificationResponse: (details) {
+    await _localNotifications.initialize(
+      settings: initSettings,
+      onDidReceiveNotificationResponse: (details) {
        // Handle notification tap while app is in foreground
        if (details.payload != null) {
          _handleDeepLink(details.payload!);
@@ -53,10 +55,10 @@ class PushNotificationService {
     const NotificationDetails details = NotificationDetails(android: androidDetails);
     
     await _localNotifications.show(
-      0,
-      message.notification?.title,
-      message.notification?.body,
-      details,
+      id: 0,
+      title: message.notification?.title,
+      body: message.notification?.body,
+      notificationDetails: details,
       payload: message.data['type'] + ':' + message.data['reference_id'].toString(),
     );
   }
@@ -70,7 +72,7 @@ class PushNotificationService {
   void _handleDeepLink(String payload) {
     final parts = payload.split(':');
     final type = parts[0];
-    final id = parts[1];
+    final id = parts.length > 1 ? parts[1] : null;
 
     if (type == 'product') {
        // Logic to fetch product and navigate

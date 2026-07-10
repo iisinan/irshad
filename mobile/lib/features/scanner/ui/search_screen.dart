@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import '../data/product_repository.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -14,6 +15,7 @@ class _SearchScreenState extends State<SearchScreen> {
   List<Map<String, dynamic>> _scanHistory = [];
   bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
 
   // Theme Constants
   static const Color bgColor = Color(0xFFFAFAFA);
@@ -28,12 +30,21 @@ class _SearchScreenState extends State<SearchScreen> {
     _fetchHistory();
   }
 
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _searchController.dispose();
+    super.dispose();
+  }
+
   void _fetchHistory() async {
     final history = await _productRepository.getScanHistory();
     setState(() => _scanHistory = history);
   }
 
-  void _onSearch(String query) async {
+  void _onSearch(String query) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+
     if (query.isEmpty) {
       setState(() {
         _searchResults = [];
@@ -43,14 +54,21 @@ class _SearchScreenState extends State<SearchScreen> {
     }
 
     setState(() => _isSearching = true);
-    try {
-      final results = await _productRepository.searchProducts(query);
-      setState(() => _searchResults = results);
-    } catch (e) {
-      // Handle error
-    } finally {
-      setState(() => _isSearching = false);
-    }
+    
+    _debounce = Timer(const Duration(milliseconds: 500), () async {
+      try {
+        final results = await _productRepository.searchProducts(query);
+        if (mounted) {
+          setState(() => _searchResults = results);
+        }
+      } catch (e) {
+        // Handle error
+      } finally {
+        if (mounted) {
+          setState(() => _isSearching = false);
+        }
+      }
+    });
   }
 
   @override

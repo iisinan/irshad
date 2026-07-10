@@ -17,6 +17,7 @@ class _ScanScreenState extends State<ScanScreen> {
 
   void _onDetect(BarcodeCapture capture) async {
     if (!_isScanning) return;
+    if (capture.barcodes.isEmpty) return;
     
     final barcode = capture.barcodes.first.rawValue;
     if (barcode == null) return;
@@ -98,21 +99,21 @@ class _ScanScreenState extends State<ScanScreen> {
                     onPressed: () => Navigator.pop(context),
                   ),
                 ),
-                /* CircleAvatar(
+                CircleAvatar(
                   backgroundColor: Colors.black.withOpacity(0.5),
                   child: IconButton(
                     icon: ValueListenableBuilder(
-                      valueListenable: _controller.torchState,
+                      valueListenable: _controller,
                       builder: (context, state, child) {
                         return Icon(
-                          state == TorchState.on ? Icons.flash_on : Icons.flash_off,
+                          state.torchState == TorchState.on ? Icons.flash_on : Icons.flash_off,
                           color: Colors.white,
                         );
                       },
                     ),
                     onPressed: () => _controller.toggleTorch(),
                   ),
-                ), */
+                ),
               ],
             ),
           ),

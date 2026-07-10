@@ -3,65 +3,65 @@
 namespace App\Services;
 
 use App\Models\Company;
+use App\Models\DailyPrice;
 use App\Models\Financial;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class NgxService
 {
-    protected string $baseUrl = 'https://api.ngxgroup.com/v1'; // Example placeholder
-    protected string $apiKey;
-
-    public function __construct()
-    {
-        $this->apiKey = config('services.ngx.key', '');
-        $this->baseUrl = config('services.ngx.url', 'https://api.ngxgroup.com/v1');
-    }
-
     /**
-     * Fetch latest price and financial indicators for a given symbol.
+     * Fetch the latest stored price and financial data for a company.
+     * Falls back to reasonable defaults if data is missing.
+     * Does NOT use rand() — all data is from the database.
      */
     public function fetchStockData(string $symbol): array
     {
-        // In a real scenario:
-        // $response = Http::withHeaders(['X-API-KEY' => $this->apiKey])->get("{$this->baseUrl}/marketdata/{$symbol}");
-        // return $response->json();
+        $company = Company::with(['dailyPrices' => fn($q) => $q->latest('date')->limit(2), 'financials' => fn($q) => $q->latest()])->where('symbol', trim($symbol))->first();
 
-        // Mocking NGX data for Nigerian stocks
+        if (!$company) {
+            return [
+                'symbol'         => $symbol,
+                'price'          => 0,
+                'prev_price'     => 0,
+                'market_cap'     => 0,
+                'total_assets'   => 0,
+                'total_debt'     => 0,
+                'interest_income' => 0,
+                'total_revenue'  => 0,
+                'timestamp'      => now()->toIso8601String(),
+            ];
+        }
+
+        $prices     = $company->dailyPrices;
+        $latest     = $prices->first();
+        $prev       = $prices->skip(1)->first();
+        $financials = $company->financials->first();
+
         return [
-            'symbol' => $symbol,
-            'price' => rand(10, 500),
-            'market_cap' => rand(1000000000, 5000000000),
-            'total_assets' => rand(2000000000, 8000000000),
-            'total_debt' => rand(500000000, 1500000000),
-            'interest_income' => rand(1000000, 50000000),
-            'timestamp' => now()->toIso8601String(),
+            'symbol'          => $symbol,
+            'price'           => $latest?->price ?? 0,
+            'prev_price'      => $prev?->price ?? $latest?->price ?? 0,
+            'market_cap'      => $financials?->market_cap ?? 0,
+            'total_assets'    => $financials?->total_assets ?? 0,
+            'total_debt'      => $financials?->total_debt ?? 0,
+            'interest_income' => $financials?->interest_income ?? 0,
+            'total_revenue'   => $financials?->total_revenue ?? 0,
+            'timestamp'       => now()->toIso8601String(),
         ];
     }
 
     /**
-     * Sync local database with NGX data.
+     * Sync the database with the latest stored NGX data.
+     * Does NOT overwrite financial data fetched via PDF scraper;
+     * only updates the daily price record.
      */
     public function syncCompany(Company $company): void
     {
         try {
-            $data = $this->fetchStockData($company->symbol);
-
-            Financial::updateOrCreate(
-                [
-                    'company_id' => $company->id,
-                    'reporting_period' => now()->format('Y-\QQ'),
-                ],
-                [
-                    'total_assets' => $data['total_assets'],
-                    'total_debt' => $data['total_debt'],
-                    'interest_income' => $data['interest_income'],
-                    'total_revenue' => rand(500000000, 2000000000), // Mocked revenue
-                    'net_income' => rand(50000000, 300000000), // Mocked income
-                ]
-            );
-
-            Log::info("Successfully synced NGX data for {$company->symbol}");
+            // We do not re-scrape or overwrite financials here.
+            // Financials come from the PDF extractor in ScrapeNGXJob.
+            // This method is intentionally a no-op to preserve real data.
+            Log::info("syncCompany called for {$company->symbol} — using stored DB data.");
         } catch (\Exception $e) {
             Log::error("Failed to sync NGX data for {$company->symbol}: " . $e->getMessage());
         }

@@ -80,7 +80,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Widget _buildTimeline() {
     Map<String, List<Map<String, dynamic>>> grouped = {};
     for (var item in _history) {
-      final date = DateTime.parse(item['created_at'].toString()).toLocal();
+      final createdAtStr = item['created_at']?.toString() ?? DateTime.now().toIso8601String();
+      final date = DateTime.parse(createdAtStr).toLocal();
       final dateString = DateFormat('MMMM d, yyyy').format(date);
       grouped.putIfAbsent(dateString, () => []).add(item);
     }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../core/api/api_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -8,42 +10,31 @@ class NotificationsScreen extends StatefulWidget {
 }
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
-  // Mock data for demonstration
-  final List<Map<String, dynamic>> _notifications = [
-    {
-      'id': 1,
-      'title': 'Halal Status Updated',
-      'body': 'DANGCEM has been verified as HALAL by our scholars.',
-      'type': 'status_update',
-      'status': 'halal',
-      'is_read': false,
-      'time': '2h ago',
-      'deep_link': '/stock_details',
-      'arguments': {'symbol': 'DANGCEM', 'name': 'Dangote Cement', 'status': {'status': 'halal'}}
-    },
-    {
-      'id': 2,
-      'title': 'Compliance Warning',
-      'body': 'NESTLE has exceeded the recommended debt threshold.',
-      'type': 'compliance_alert',
-      'status': 'non-halal',
-      'is_read': true,
-      'time': 'Yesterday',
-      'deep_link': '/stock_details',
-      'arguments': {'symbol': 'NESTLE', 'name': 'Nestle Nigeria', 'status': {'status': 'non-halal'}}
-    },
-    {
-      'id': 3,
-      'title': 'Welcome to IRSHAD',
-      'body': 'Start exploring Shariah-compliant opportunities today.',
-      'type': 'general',
-      'status': 'info',
-      'is_read': true,
-      'time': '3d ago',
-      'deep_link': null,
-      'arguments': null
-    },
-  ];
+  final ApiService _apiService = ApiService();
+  List<Map<String, dynamic>> _notifications = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchNotifications();
+  }
+
+  Future<void> _fetchNotifications() async {
+    try {
+      final response = await _apiService.get('notifications');
+      if (response.statusCode == 200) {
+        setState(() {
+          _notifications = List<Map<String, dynamic>>.from(response.data['data'] ?? []);
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
 
   // Theme Constants
   static const Color bgColor = Color(0xFFFAFAFA);

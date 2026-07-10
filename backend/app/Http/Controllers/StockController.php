@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Company;
 use App\Models\StockStatus;
+use App\Services\AaoifiComplianceService;
 use App\Services\NgxService;
 use App\Traits\ApiResponder;
 use Illuminate\Http\JsonResponse;
@@ -14,18 +15,20 @@ class StockController extends Controller
     use ApiResponder;
 
     protected NgxService $ngxService;
+    protected AaoifiComplianceService $complianceService;
 
-    public function __construct(NgxService $ngxService)
+    public function __construct(NgxService $ngxService, AaoifiComplianceService $complianceService)
     {
         $this->ngxService = $ngxService;
+        $this->complianceService = $complianceService;
     }
 
     /**
-     * List all stocks.
+     * List all stocks with latest price and compliance status.
      */
     public function index(): JsonResponse
     {
-        $stocks = Company::with('status')->get();
+        $stocks = Company::with(['status', 'dailyPrices' => fn($q) => $q->latest('date')->limit(1)])->get();
         return $this->success($stocks);
     }
 
@@ -34,7 +37,7 @@ class StockController extends Controller
      */
     public function show(string $symbol): JsonResponse
     {
-        $stock = Company::with(['status', 'financials'])->where('symbol', $symbol)->firstOrFail();
+        $stock = Company::with(['status', 'financials' => fn($q) => $q->latest(), 'dailyPrices' => fn($q) => $q->latest('date')->limit(30)])->where('symbol', $symbol)->firstOrFail();
         return $this->success($stock);
     }
 
@@ -43,71 +46,97 @@ class StockController extends Controller
      */
     public function search(Request $request): JsonResponse
     {
-        $query = $request->get('q');
-        
-        $stocks = Company::with('status')->where('name', 'LIKE', "%{$query}%")
+        $query = substr(trim($request->get('q', '')), 0, 100); // Sanitize query length
+
+        $stocks = Company::with(['status', 'dailyPrices' => fn($q) => $q->latest('date')->limit(1)])
+            ->where('name', 'LIKE', "%{$query}%")
             ->orWhere('symbol', 'LIKE', "%{$query}%")
-            ->limit(10)
+            ->limit(20)
             ->get();
 
         return $this->success($stocks);
     }
 
     /**
-     * Run screening logic for a stock.
+     * Get live NGX stocks data with compliance status and latest price.
+     */
+    public function ngx(): JsonResponse
+    {
+        $stocks = Company::with([
+            'status',
+            'dailyPrices' => fn($q) => $q->latest('date')->limit(2),
+        ])->get()->map(function ($company) {
+            $prices   = $company->dailyPrices;
+            $latest   = $prices->first();
+            $prev     = $prices->skip(1)->first();
+
+            $latestPrice = (float) ($latest?->price ?? 0);
+            $prevPrice   = (float) ($prev?->price ?? $latestPrice);
+
+            $change    = $latestPrice - $prevPrice;
+            $changePct = $prevPrice > 0 ? round(($change / $prevPrice) * 100, 2) : 0;
+
+            $company->latest_price      = $latestPrice;
+            $company->price_change      = round($change, 2);
+            $company->price_change_pct  = $changePct;
+
+            return $company;
+        });
+
+        return $this->success($stocks);
+    }
+
+    /**
+     * Run the 3-stage AAOIFI screening for a given stock using real DB data.
+     * Uses AaoifiComplianceService (the authoritative engine).
      */
     public function check(string $symbol): JsonResponse
     {
-        $company = Company::with('financials')->where('symbol', $symbol)->firstOrFail();
-        
-        // Sync with NGX before checking
-        $this->ngxService->syncCompany($company);
-        
-        $financials = $company->financials()->latest()->first();
+        $company = Company::with(['financials' => fn($q) => $q->latest()])->where('symbol', $symbol)->firstOrFail();
+
+        $financials = $company->financials->first();
 
         if (!$financials) {
-            return $this->error('Financial data not available for screening.', 404);
+            return $this->error('No financial data available for this stock. Please wait for the next scheduled scrape.', 404);
         }
 
-        $status = 'halal';
-        $reasons = [];
+        // Use the authoritative 3-stage compliance engine
+        $status = $this->complianceService->evaluateCompliance($company, $financials, $company->sector);
 
-        // 1. Business Activity Screening
-        $prohibitedBusinesses = ['alcohol', 'gambling', 'banking', 'pork', 'conventional finance'];
-        if (in_array(strtolower($company->business_type), $prohibitedBusinesses)) {
-            $status = 'non-halal';
-            $reasons[] = "Prohibited business activity: {$company->business_type}";
+        return $this->success($company->load(['status', 'financials', 'dailyPrices' => fn($q) => $q->latest('date')->limit(1)]), 'Screening completed.');
+    }
+
+    /**
+     * Scholar/Admin override for stock compliance status.
+     * Requires admin or scholar role.
+     */
+    public function updateStatus(Request $request, string $symbol): JsonResponse
+    {
+        // Role check — only scholars and admins may override
+        $user = auth()->user();
+        if (!$user || !in_array($user->role, ['scholar', 'admin'])) {
+            return $this->error('Forbidden. Only scholars and admins may override compliance status.', 403);
         }
 
-        // 2. Financial Ratio Screening
-        if ($financials->total_assets > 0) {
-            $debtRatio = ($financials->total_debt / $financials->total_assets) * 100;
-            if ($debtRatio > 33) {
-                $status = 'non-halal';
-                $reasons[] = "Debt ratio is " . number_format($debtRatio, 2) . "%, exceeding AAOIFI threshold (33%)";
-            }
+        $request->validate([
+            'status' => 'required|in:halal,non-halal,doubtful',
+            'reason' => 'required|string|max:500',
+        ]);
 
-            $interestRatio = ($financials->interest_income / $financials->total_assets) * 100; // Using assets as proxy for total revenue if not available
-            if ($interestRatio > 5) {
-                if ($status !== 'non-halal') $status = 'doubtful';
-                $reasons[] = "Interest income is " . number_format($interestRatio, 2) . "%, exceeding threshold (5%)";
-            }
-        }
+        $company = Company::where('symbol', $symbol)->firstOrFail();
 
-        if (empty($reasons)) {
-            $reasons[] = "Compliant with AAOIFI business and financial standards.";
-        }
-
-        // Update or Create Stock Status
-        $company->status()->updateOrCreate(
+        $status = $company->status()->updateOrCreate(
             ['company_id' => $company->id],
             [
-                'status' => $status,
-                'reason' => implode(", ", $reasons),
-                'last_updated' => now(),
+                'status'             => $request->status,
+                'reason'             => 'Scholar Override: ' . $request->reason,
+                'verified_by_scholar' => true,
+                'last_updated'       => now(),
             ]
         );
 
-        return $this->success($company->load('status'), 'Screening completed.');
+        event(new \App\Events\StockStatusChanged($company, $status));
+
+        return $this->success($company->load('status'), 'Stock status updated successfully by scholar.');
     }
 }

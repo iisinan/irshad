@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../data/auth_repository.dart';
+import 'forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,8 +15,59 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _authRepository = AuthRepository();
+  final LocalAuthentication _localAuth = LocalAuthentication();
   bool _isLoading = false;
   bool _obscurePassword = true;
+  bool _biometricsEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkBiometrics();
+  }
+
+  Future<void> _checkBiometrics() async {
+    final prefs = await SharedPreferences.getInstance();
+    final enabled = prefs.getBool('biometrics_enabled') ?? false;
+    
+    if (enabled) {
+      final canCheckBiometrics = await _localAuth.canCheckBiometrics;
+      final isDeviceSupported = await _localAuth.isDeviceSupported();
+      setState(() {
+        _biometricsEnabled = canCheckBiometrics && isDeviceSupported;
+      });
+    }
+  }
+
+  Future<void> _authenticateWithBiometrics() async {
+    try {
+      final authenticated = await _localAuth.authenticate(
+        localizedReason: 'Authenticate to log in securely',
+        options: const AuthenticationOptions(
+          stickyAuth: true,
+          biometricOnly: true,
+        ),
+      );
+      
+      if (authenticated) {
+        setState(() => _isLoading = true);
+        final prefs = await SharedPreferences.getInstance();
+        final email = prefs.getString('saved_email');
+        final password = prefs.getString('saved_password');
+        
+        if (email != null && password != null) {
+          _emailController.text = email;
+          _passwordController.text = password;
+          _login();
+        } else {
+          setState(() => _isLoading = false);
+          _showError('No saved credentials found. Please log in with your password once.');
+        }
+      }
+    } catch (e) {
+      _showError('Biometric authentication failed.');
+    }
+  }
 
   // Theme Constants
   static const Color bgColor = Color(0xFFFAFAFA);
@@ -33,6 +87,9 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final user = await _authRepository.login(_emailController.text, _passwordController.text);
       if (user != null) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('saved_email', _emailController.text);
+        await prefs.setString('saved_password', _passwordController.text);
         if (mounted) Navigator.pushReplacementNamed(context, '/main');
       }
     } catch (e) {
@@ -62,7 +119,7 @@ class _LoginScreenState extends State<LoginScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: textDark, size: 20),
-          onPressed: () => Navigator.pushNamedAndRemoveUntil(context, '/main', (route) => false),
+          onPressed: () => Navigator.canPop(context) ? Navigator.pop(context) : Navigator.pushReplacementNamed(context, '/main'),
         ),
       ),
       body: SafeArea(
@@ -104,7 +161,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   _buildLabel('Password'),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ForgotPasswordScreen())),
                     style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
                     child: const Text('Forgot Password?', 
                       style: TextStyle(color: primaryGreen, fontWeight: FontWeight.w700, fontSize: 13)),
@@ -121,22 +178,43 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 40),
 
-              // Login Button
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _login,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: textDark,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                    elevation: 0,
+              // Login Button & Biometrics
+              Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 56,
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _login,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: textDark,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          elevation: 0,
+                        ),
+                        child: _isLoading 
+                          ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) 
+                          : const Text('Sign In', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                      ),
+                    ),
                   ),
-                  child: _isLoading 
-                    ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) 
-                    : const Text('Sign In', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-                ),
+                  if (_biometricsEnabled) ...[
+                    const SizedBox(width: 16),
+                    SizedBox(
+                      height: 56,
+                      width: 56,
+                      child: OutlinedButton(
+                        onPressed: _isLoading ? null : _authenticateWithBiometrics,
+                        style: OutlinedButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          side: const BorderSide(color: Color(0xFFE5E7EB)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        ),
+                        child: const Icon(Icons.fingerprint_rounded, color: textDark, size: 28),
+                      ),
+                    ),
+                  ],
+                ],
               ),
               
               const SizedBox(height: 32),

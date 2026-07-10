@@ -1,23 +1,35 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+/// Singleton ApiService — one Dio instance, one interceptor stack, everywhere.
 class ApiService {
   static const String _prodUrl = 'https://irshad-backend.onrender.com/api/v1/';
-  static const String _devUrl = 'http://10.0.2.2:8000/api/v1/';
+  static const String _devUrl  = 'http://127.0.0.1:8000/api/v1/';
 
-  final Dio dio = Dio(BaseOptions(
-    baseUrl: kReleaseMode ? _prodUrl : _devUrl,
-    receiveDataWhenStatusError: true,
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-    },
-  ));
+  static final ApiService _instance = ApiService._internal();
+  factory ApiService() => _instance;
 
+  late final Dio dio;
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
-  ApiService() {
+  /// Global navigator key for redirecting to /login on 401.
+  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+  ApiService._internal() {
+    dio = Dio(BaseOptions(
+      baseUrl: kReleaseMode ? _prodUrl : _devUrl,
+      connectTimeout: const Duration(seconds: 15),
+      receiveTimeout: const Duration(seconds: 30),
+      receiveDataWhenStatusError: true,
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    ));
+
+    // Auth token injection
     dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
         final token = await _storage.read(key: 'access_token');
@@ -26,18 +38,30 @@ class ApiService {
         }
         return handler.next(options);
       },
+      onError: (DioException error, handler) async {
+        // Global 401 handler — session expired, go back to login
+        if (error.response?.statusCode == 401) {
+          await _storage.delete(key: 'access_token');
+          // navigatorKey.currentState?.pushNamedAndRemoveUntil('/login', (route) => false);
+        }
+        return handler.next(error);
+      },
     ));
   }
 
   Future<Response> post(String path, Map<String, dynamic> data) async {
-    return await dio.post(path, data: data);
+    return dio.post(path, data: data);
   }
 
-  Future<Response> get(String path) async {
-    return await dio.get(path);
+  Future<Response> get(String path, {Map<String, dynamic>? queryParameters}) async {
+    return dio.get(path, queryParameters: queryParameters);
   }
 
   Future<Response> put(String path, Map<String, dynamic> data) async {
-    return await dio.put(path, data: data);
+    return dio.put(path, data: data);
+  }
+
+  Future<Response> delete(String path) async {
+    return dio.delete(path);
   }
 }

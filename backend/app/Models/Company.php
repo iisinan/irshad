@@ -16,6 +16,11 @@ class Company extends Model
         'symbol',
         'sector',
         'business_type',
+        'overview',
+        'analysts_target',
+        'valuation_info',
+        'growth_info',
+        'div_yield',
     ];
 
     public function financials(): HasMany
@@ -31,5 +36,10 @@ class Company extends Model
     public function dataSources(): HasMany
     {
         return $this->hasMany(DataSource::class);
+    }
+
+    public function dailyPrices(): HasMany
+    {
+        return $this->hasMany(DailyPrice::class);
     }
 }

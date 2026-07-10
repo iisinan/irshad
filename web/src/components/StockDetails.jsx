@@ -1,0 +1,374 @@
+import React, { useEffect, useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2 } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { fetchStockDetails } from '../services/api';
+
+const StockDetails = () => {
+  const { symbol } = useParams();
+  const [stock, setStock] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [dividendInput, setDividendInput] = useState('');
+
+  useEffect(() => {
+    fetchStockDetails(symbol)
+      .then(r => { if (r.data) setStock(r.data); })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [symbol]);
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '120px 0' }}>
+        <div className="spinner" />
+      </div>
+    );
+  }
+
+  if (!stock) {
+    return (
+      <div className="animate-fade-in" style={{ padding: '80px 0', textAlign: 'center' }}>
+        <BarChart2 size={48} strokeWidth={1} style={{ margin: '0 auto 20px', color: 'var(--text-light)' }} />
+        <h2 style={{ marginBottom: '8px' }}>Stock not found</h2>
+        <p style={{ color: 'var(--text-muted)', marginBottom: '24px' }}>We couldn't load data for this symbol.</p>
+        <Link to="/market" className="btn-primary">Back to Market</Link>
+      </div>
+    );
+  }
+
+  // ─── Status logic ───────────────────────────────────
+  let statusStr = 'QUESTIONABLE';
+  let badgeClass = 'status-doubtful';
+  let reason = 'Manual screening recommended.';
+  let StatusIcon = HelpCircle;
+  let isHalal = false;
+  let isNonHalal = false;
+
+  const rawStatus = stock.status;
+  if (typeof rawStatus === 'object' && rawStatus !== null) {
+    const s = rawStatus.status?.toLowerCase();
+    if (s === 'halal') {
+      statusStr = 'SHARIAH COMPLIANT'; badgeClass = 'status-halal'; StatusIcon = CheckCircle; isHalal = true;
+    } else if (s === 'non-halal') {
+      statusStr = 'NOT COMPLIANT'; badgeClass = 'status-non-halal'; StatusIcon = AlertCircle; isNonHalal = true;
+    }
+    reason = rawStatus.reason ?? reason;
+  } else if (typeof rawStatus === 'string') {
+    const s = rawStatus.toLowerCase();
+    if (s === 'compliant' || s === 'halal') {
+      statusStr = 'SHARIAH COMPLIANT'; badgeClass = 'status-halal'; StatusIcon = CheckCircle; isHalal = true;
+    } else if (s === 'non-halal') {
+      statusStr = 'NOT COMPLIANT'; badgeClass = 'status-non-halal'; StatusIcon = AlertCircle; isNonHalal = true;
+    }
+    reason = 'Automated business activity analysis.';
+  }
+
+  // ─── Financial ratios ─────────────────────────────
+  const financials = stock.financials;
+  const latest = Array.isArray(financials) && financials.length > 0 ? financials[0] : null;
+  const debt = latest?.total_debt || 0;
+  const assets = latest?.total_assets || 1;
+  const interest = latest?.interest_income || 0;
+  const revenue = latest?.total_revenue || assets || 1;
+  const debtRatio = ((debt / assets) * 100).toFixed(1);
+  const interestRatio = ((interest / revenue) * 100).toFixed(1);
+  const purificationRate = latest?.non_compliant_revenue_ratio ? (latest.non_compliant_revenue_ratio * 100).toFixed(2) : interestRatio;
+
+  const purificationAmount = dividendInput
+    ? ((parseFloat(dividendInput) || 0) * (parseFloat(purificationRate) / 100)).toFixed(2)
+    : null;
+
+  const screeningColor = isHalal ? 'var(--halal)' : isNonHalal ? 'var(--non-halal)' : 'var(--doubtful)';
+  const screeningBg = isHalal ? 'var(--halal-bg)' : isNonHalal ? 'var(--non-halal-bg)' : 'var(--doubtful-bg)';
+  const screeningBorder = isHalal ? 'var(--halal-border)' : isNonHalal ? 'var(--non-halal-border)' : 'var(--doubtful-border)';
+
+  const dailyPrices = stock.daily_prices || [];
+  const latestPriceObj = dailyPrices.length > 0 ? dailyPrices[0] : null;
+  const previousPriceObj = dailyPrices.length > 1 ? dailyPrices[1] : null;
+  const latestPrice = latestPriceObj ? parseFloat(latestPriceObj.price) : 0;
+  const previousPrice = previousPriceObj ? parseFloat(previousPriceObj.price) : latestPrice;
+  const priceChange = latestPrice - previousPrice;
+  const priceChangePct = previousPrice > 0 ? (priceChange / previousPrice) * 100 : 0;
+  const isPositive = priceChange >= 0;
+
+  return (
+    <div className="animate-fade-in page-wrapper">
+      {/* Back link */}
+      <Link to="/market" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', textDecoration: 'none', fontWeight: 600, marginBottom: '28px', fontSize: '0.9rem' }}>
+        <ArrowLeft size={16} /> Back to Market
+      </Link>
+
+      {/* ─── Header Card ─── */}
+      <div className="detail-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '24px', position: 'relative', overflow: 'hidden' }}>
+        {/* Background logo watermark */}
+        <img
+          src="/logo.png"
+          alt=""
+          aria-hidden="true"
+          style={{
+            position: 'absolute', right: '-20px', top: '50%', transform: 'translateY(-50%)',
+            height: '160px', opacity: 0.055,
+            pointerEvents: 'none', userSelect: 'none',
+            filter: 'saturate(0)',
+          }}
+        />
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '10px' }}>
+            <div style={{
+              width: '52px', height: '52px',
+              background: 'var(--primary-50)',
+              borderRadius: '14px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              border: '1px solid var(--primary-100)',
+            }}>
+              <Building2 size={24} color="var(--primary)" />
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <h1 style={{ fontSize: '1.9rem', fontWeight: '800', letterSpacing: '-0.5px' }}>{stock.name}</h1>
+                <span className={`status-badge ${badgeClass}`} style={{ fontSize: '0.75rem' }}>
+                  <StatusIcon size={12} /> {statusStr}
+                </span>
+              </div>
+              <p style={{ color: 'var(--text-muted)', fontWeight: 600, marginTop: '4px', letterSpacing: '0.5px' }}>
+                {stock.symbol} · {stock.sector ?? 'Market Listed'} · Stock Exchange
+              </p>
+            </div>
+          </div>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <p style={{ color: 'var(--text-light)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase' }}>Latest Price</p>
+          <div style={{ fontSize: '2.2rem', fontWeight: '800', color: 'var(--text-dark)', letterSpacing: '-1px' }}>₦ {latestPrice.toFixed(2)}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: isPositive ? 'var(--primary)' : 'var(--non-halal)', fontWeight: 700, justifyContent: 'flex-end', marginTop: '4px' }}>
+            {isPositive ? <TrendingUp size={14} /> : <TrendingDown size={14} />} {priceChangePct.toFixed(2)}%
+          </div>
+        </div>
+      </div>
+
+      {/* ─── Two Column Layout ─── */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '28px', alignItems: 'start' }}>
+        
+        {/* Left Column */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          
+          {/* About Company */}
+          <div className="detail-panel">
+            <div className="detail-section-label">About Company</div>
+            <p style={{ fontSize: '1.05rem', lineHeight: 1.85, color: 'var(--text-body)' }}>
+              {stock.overview || `${stock.name} is a publicly traded company on the Stock Exchange, operating within the ${stock.sector || 'Unknown'} sector. Its primary business activities include the production, provision, and distribution of goods and services specific to the ${stock.sector || 'Unknown'} industry. The company focuses on delivering sustainable, long-term value to its shareholders and stakeholders across the region.`}
+            </p>
+          </div>
+
+          {/* Business Screening */}
+          <div className="detail-panel" style={{ borderLeft: `4px solid ${screeningColor}` }}>
+            <div className="detail-section-label">Business Screening</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+              <div style={{
+                background: screeningBg,
+                border: `1px solid ${screeningBorder}`,
+                borderRadius: '10px',
+                padding: '8px',
+                display: 'flex',
+              }}>
+                <StatusIcon size={20} color={screeningColor} />
+              </div>
+              <h3 style={{ fontSize: '1.15rem', color: screeningColor, fontWeight: 700 }}>
+                {isHalal ? 'Business activities are Halal' : isNonHalal ? 'Non-Halal activities detected' : 'Screening result is Questionable'}
+              </h3>
+            </div>
+            <p style={{ color: 'var(--text-muted)', lineHeight: 1.75, fontSize: '1rem' }}>{reason}</p>
+          </div>
+
+          {/* Financial Ratios */}
+          <div className="detail-panel">
+            <div className="detail-section-label">Financial Ratios (AAOIFI)</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              {[
+                { label: 'Debt to Asset Ratio', value: parseFloat(debtRatio), limit: 33, unit: '%' },
+                { label: 'Cash & Interest Ratio', value: parseFloat(interestRatio), limit: 5, unit: '%' },
+              ].map(({ label, value, limit, unit }) => {
+                const pass = value <= limit;
+                const pct = Math.min((value / (limit * 1.5)) * 100, 100);
+                return (
+                  <div key={label}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                      <span style={{ fontWeight: 600, color: 'var(--text-dark)' }}>{label}</span>
+                      <span style={{ fontWeight: 700, color: pass ? 'var(--halal)' : 'var(--non-halal)', fontSize: '0.9rem' }}>
+                        {value}{unit} / {limit}{unit} max
+                      </span>
+                    </div>
+                    <div style={{ height: '8px', background: 'var(--bg-section)', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{
+                        height: '100%',
+                        width: `${pct}%`,
+                        background: pass ? 'var(--halal)' : 'var(--non-halal)',
+                        borderRadius: '4px',
+                        transition: 'width 0.6s ease',
+                      }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Advanced Metrics (Market Data) */}
+          <div className="detail-panel">
+            <div className="detail-section-label">Advanced Metrics</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <div style={{ background: 'var(--bg)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Valuation</span>
+                <span style={{ fontSize: '1rem', color: 'var(--text-dark)', fontWeight: 700 }}>{stock.valuation_info || 'N/A'}</span>
+              </div>
+              <div style={{ background: 'var(--bg)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Growth Forecast</span>
+                <span style={{ fontSize: '1rem', color: 'var(--text-dark)', fontWeight: 700 }}>{stock.growth_info || 'N/A'}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Price Chart */}
+          <div className="detail-panel">
+            <div className="detail-section-label">Price History (30 Days)</div>
+            <div style={{ height: '240px', width: '100%', marginTop: '16px' }}>
+              {dailyPrices.length > 1 ? (() => {
+                const chartData = [...dailyPrices].reverse().map(p => ({
+                  date: new Date(p.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+                  price: parseFloat(p.price)
+                }));
+                const minPrice = Math.min(...chartData.map(d => d.price));
+                const maxPrice = Math.max(...chartData.map(d => d.price));
+                return (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                      <XAxis 
+                        dataKey="date" 
+                        stroke="var(--text-muted)" 
+                        fontSize={11} 
+                        tickLine={false} 
+                        axisLine={false} 
+                        minTickGap={20}
+                      />
+                      <YAxis 
+                        domain={[Math.floor(minPrice * 0.9), Math.ceil(maxPrice * 1.1)]} 
+                        stroke="var(--text-muted)" 
+                        fontSize={11} 
+                        tickLine={false} 
+                        axisLine={false} 
+                        tickFormatter={(val) => `₦${val}`}
+                      />
+                      <Tooltip 
+                        contentStyle={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '8px', fontSize: '12px' }}
+                        itemStyle={{ color: 'var(--primary)' }}
+                        labelStyle={{ color: 'var(--text-muted)', marginBottom: '4px' }}
+                        formatter={(val) => [`₦${val}`, 'Price']}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="price" 
+                        stroke="var(--primary)" 
+                        strokeWidth={2} 
+                        dot={false} 
+                        activeDot={{ r: 6, fill: 'var(--primary)' }} 
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                );
+              })() : (
+                <div style={{
+                  height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  background: 'var(--bg)', borderRadius: 'var(--radius-md)', color: 'var(--text-light)', border: '1.5px dashed var(--border)', gap: '12px'
+                }}>
+                  <BarChart2 size={36} strokeWidth={1} />
+                  <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>Not enough data</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+          {/* Overview */}
+          <div className="detail-panel">
+            <div className="detail-section-label">Overview</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {[
+                { label: 'Sector', value: stock.sector || 'N/A' },
+                { label: 'Industry', value: stock.business_type || 'Equities' },
+                { label: 'Exchange', value: 'Stock Exchange' },
+                { label: 'Analyst Target', value: stock.analysts_target ? `₦ ${stock.analysts_target}` : 'N/A' },
+                { label: 'Dividend Yield', value: stock.div_yield ? `${stock.div_yield}%` : 'N/A' },
+              ].map(row => (
+                <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: 'var(--text-muted)', fontSize: '0.88rem', fontWeight: 500 }}>{row.label}</span>
+                  <span style={{ color: 'var(--text-dark)', fontWeight: 700, fontSize: '0.95rem' }}>{row.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Purification Calculator */}
+          <div className="purification-card">
+            <h3 style={{ color: 'white', fontWeight: 700, marginBottom: '6px', fontSize: '1rem' }}>
+              🌿 Purification Calculator
+            </h3>
+            <p style={{ color: 'rgba(255,255,255,0.72)', fontSize: '0.88rem', marginBottom: '20px', lineHeight: 1.6 }}>
+              Received dividends from this holding? Calculate your purification obligation instantly.
+            </p>
+
+            <div style={{ marginBottom: '12px' }}>
+              <label style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.5px', display: 'block', marginBottom: '8px' }}>
+                DIVIDEND AMOUNT (₦)
+              </label>
+              <input
+                type="number"
+                placeholder="0.00"
+                value={dividendInput}
+                onChange={e => setDividendInput(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  borderRadius: '10px',
+                  border: '1.5px solid rgba(255,255,255,0.25)',
+                  background: 'rgba(255,255,255,0.12)',
+                  color: 'white',
+                  fontSize: '1rem',
+                  fontFamily: 'inherit',
+                  outline: 'none',
+                }}
+              />
+            </div>
+
+            {purificationAmount !== null && (
+              <div style={{
+                background: 'rgba(255,255,255,0.12)',
+                borderRadius: '10px',
+                padding: '16px',
+                textAlign: 'center',
+                marginTop: '16px',
+              }}>
+                <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase' }}>Purification Due</div>
+                <div style={{ color: 'white', fontSize: '2rem', fontWeight: '800', marginTop: '4px' }}>₦ {purificationAmount}</div>
+                <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.78rem', marginTop: '4px' }}>Rate: {purificationRate}% of dividends</div>
+              </div>
+            )}
+          </div>
+
+          {/* Buy Now */}
+          <Link to="/register" className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '15px', fontSize: '1rem' }}>
+            Buy This Stock <ArrowLeft size={16} style={{ transform: 'rotate(180deg)' }} />
+          </Link>
+
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-light)', textAlign: 'center', lineHeight: 1.5 }}>
+            Link your Nigerian brokerage account to enable live trading.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default StockDetails;

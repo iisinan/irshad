@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import '../data/product_repository.dart';
 
 class UserSubmissionScreen extends StatefulWidget {
   final String? initialBarcode;
@@ -17,6 +20,8 @@ class _UserSubmissionScreenState extends State<UserSubmissionScreen> {
   final _ingredientsController = TextEditingController();
   
   bool _isLoading = false;
+  XFile? _imageFile;
+  final ImagePicker _picker = ImagePicker();
 
   // Theme Constants
   static const Color bgColor = Color(0xFFFAFAFA);
@@ -33,18 +38,25 @@ class _UserSubmissionScreenState extends State<UserSubmissionScreen> {
     }
   }
 
+  final _productRepo = ProductRepository();
+
   void _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
     try {
-      await Future.delayed(const Duration(seconds: 2));
+      final success = await _productRepo.submitProduct({
+        'name': _nameController.text.trim(),
+        'brand': _brandController.text.trim(),
+        'barcode': _barcodeController.text.trim(),
+        'ingredients_text': _ingredientsController.text.trim(),
+      }, imagePath: _imageFile?.path);
       
-      if (mounted) {
+      if (success && mounted) {
         _showSuccessDialog();
       }
     } catch (e) {
-      _showError(e.toString());
+      if (mounted) _showError(e.toString());
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -256,32 +268,56 @@ class _UserSubmissionScreenState extends State<UserSubmissionScreen> {
   }
 
   Widget _buildPhotoUploadSection() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: divider, width: 1.5),
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(12)),
-            child: const Icon(Icons.camera_alt_rounded, color: primaryGreen, size: 28),
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'Upload Product Image',
-            style: TextStyle(color: textDark, fontWeight: FontWeight.w800, fontSize: 14),
-          ),
-          const SizedBox(height: 6),
-          const Text(
-            'High quality photo of ingredients list preferred',
-            style: TextStyle(color: textMuted, fontSize: 12, fontWeight: FontWeight.w500),
-          ),
-        ],
+    return GestureDetector(
+      onTap: () async {
+        final XFile? image = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
+        if (image != null) {
+          setState(() => _imageFile = image);
+        }
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: divider, width: 1.5),
+        ),
+        child: _imageFile != null 
+          ? Column(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.file(
+                    File(_imageFile!.path),
+                    height: 120,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text('Tap to change photo', style: TextStyle(color: textMuted, fontSize: 12, fontWeight: FontWeight.w500)),
+              ],
+            )
+          : Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(12)),
+                  child: const Icon(Icons.camera_alt_rounded, color: primaryGreen, size: 28),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Upload Product Image',
+                  style: TextStyle(color: textDark, fontWeight: FontWeight.w800, fontSize: 14),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'High quality photo of ingredients list preferred',
+                  style: TextStyle(color: textMuted, fontSize: 12, fontWeight: FontWeight.w500),
+                ),
+              ],
+            ),
       ),
     );
   }

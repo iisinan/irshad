@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'core/api/api_service.dart';
 import 'features/auth/ui/login_screen.dart';
 import 'features/auth/ui/register_screen.dart';
 import 'features/auth/ui/profile_screen.dart';
@@ -12,18 +14,53 @@ import 'features/scanner/ui/product_details_screen.dart';
 import 'features/scanner/ui/user_submission_screen.dart';
 import 'features/stocks/ui/stock_search_screen.dart';
 import 'features/stocks/ui/stock_detail_screen.dart';
+import 'features/stocks/ui/basket_detail_screen.dart';
 import 'features/onboarding/ui/onboarding_screen.dart';
 import 'features/profile/ui/favorites_screen.dart';
 import 'features/profile/ui/history_screen.dart';
 import 'features/brokerage/ui/brokerage_link_screen.dart';
+import 'features/portfolio/ui/portfolio_screen.dart';
+import 'features/portfolio/ui/zakat_calculator_screen.dart';
 
+import 'package:provider/provider.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'core/notifications/notification_service.dart';
+import 'features/stocks/providers/stock_provider.dart';
+import 'core/providers/app_state_provider.dart';
 
-void main() {
-  runApp(const IrshadApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Firebase first
+  try {
+    await Firebase.initializeApp();
+    // Initialize Push Notifications only if Firebase succeeds
+    await PushNotificationService().initialize();
+  } catch (e) {
+    debugPrint("Firebase init failed (missing google-services.json?): $e");
+  }
+
+  // Initialize Hive
+  await Hive.initFlutter();
+  
+  final prefs = await SharedPreferences.getInstance();
+  final hasSeenOnboarding = prefs.getBool('hasSeenOnboarding') ?? false;
+  
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => StockProvider()),
+        ChangeNotifierProvider(create: (_) => AppStateProvider()),
+      ],
+      child: IrshadApp(initialRoute: hasSeenOnboarding ? '/main' : '/onboarding'),
+    ),
+  );
 }
 
 class IrshadApp extends StatelessWidget {
-  const IrshadApp({super.key});
+  final String initialRoute;
+  const IrshadApp({super.key, this.initialRoute = '/onboarding'});
 
   static const Color bgColor = Color(0xFFFAFAFA);
   static const Color primaryGreen = Color(0xFF16A34A);
@@ -33,6 +70,7 @@ class IrshadApp extends StatelessWidget {
     return MaterialApp(
       title: 'IRSHAD',
       debugShowCheckedModeBanner: false,
+      navigatorKey: ApiService.navigatorKey,
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.light,
@@ -60,8 +98,7 @@ class IrshadApp extends StatelessWidget {
           unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w500, fontSize: 11),
         ),
       ),
-      // App starts at the onboarding screen for new users
-      initialRoute: '/onboarding',
+      initialRoute: initialRoute,
       onGenerateRoute: (settings) {
         if (settings.name == '/product_details') {
           final product = settings.arguments as Map<String, dynamic>;
@@ -70,6 +107,10 @@ class IrshadApp extends StatelessWidget {
         if (settings.name == '/stock_details') {
           final stock = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(builder: (context) => StockDetailScreen(stock: stock));
+        }
+        if (settings.name == '/basket_details') {
+          final basket = settings.arguments;
+          return MaterialPageRoute(builder: (context) => BasketDetailScreen(basket: basket));
         }
         if (settings.name == '/submit_product') {
           final barcode = settings.arguments as String?;
@@ -91,6 +132,7 @@ class IrshadApp extends StatelessWidget {
         '/settings': (context) => const SettingsScreen(),
         '/submit_product': (context) => const UserSubmissionScreen(),
         '/brokerage/link': (context) => const BrokerageLinkScreen(),
+        '/zakat_calculator': (context) => const ZakatCalculatorScreen(),
       },
     );
   }
@@ -110,7 +152,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     const HomeScreen(),        // Explore
     const StockSearchScreen(), // Search
     const FavoritesScreen(),   // Watchlist
-    const ProfileScreen(),     // Portfolio
+    const PortfolioScreen(),   // Portfolio
+    const ProfileScreen(),     // Profile
   ];
 
   @override
@@ -151,6 +194,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               icon: Icon(Icons.pie_chart_outline_rounded),
               activeIcon: Icon(Icons.pie_chart_rounded),
               label: 'Portfolio',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_outline_rounded),
+              activeIcon: Icon(Icons.person_rounded),
+              label: 'Profile',
             ),
           ],
         ),

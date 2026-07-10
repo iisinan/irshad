@@ -28,12 +28,9 @@ class UserActivityRepository {
     }
   }
 
-  Future<bool> removeFromFavorites(String type, int referenceId) async {
+  Future<bool> removeFromFavorites(int favoriteId) async {
     try {
-      final response = await _apiService.dio.delete('favorites', data: {
-        'type': type,
-        'reference_id': referenceId,
-      });
+      final response = await _apiService.delete('favorites/$favoriteId');
       return response.statusCode == 200;
     } catch (e) {
       return false;

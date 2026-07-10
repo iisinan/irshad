@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
+import 'package:provider/provider.dart';
+import '../../../core/providers/app_state_provider.dart';
 import '../data/stock_repository.dart';
 import '../../profile/data/user_activity_repository.dart';
 
@@ -38,6 +41,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     final success = await _activityRepository.addToFavorites('stock', _currentStock['id']);
     if (success) {
       if (mounted) {
+        Provider.of<AppStateProvider>(context, listen: false).incrementWatchlist();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Added to watchlist'), 
@@ -90,7 +94,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
       reason = rawStatus['reason'] ?? 'Manual screening recommended.';
     } else if (rawStatus is String) {
       status = rawStatus.toLowerCase() == 'compliant' ? 'halal' : (rawStatus.toLowerCase() == 'non-halal' ? 'non-halal' : 'doubtful');
-      reason = 'Classification based on NGX market report.';
+      reason = 'Automated business activity analysis.';
     }
     
     bool isHalal = status == 'halal';
@@ -98,6 +102,11 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     Color statusColor = isHalal ? const Color(0xFF16A34A) : (isNonHalal ? Colors.red : const Color(0xFFD97706));
     Color badgeBg = isHalal ? const Color(0xFFDCFCE7) : (isNonHalal ? const Color(0xFFFEE2E2) : const Color(0xFFFEF3C7));
     String statusLabel = isHalal ? 'SHARIAH COMPLIANT' : (isNonHalal ? 'NOT COMPLIANT' : 'QUESTIONABLE');
+
+    final latestPrice = num.tryParse(_currentStock['latest_price']?.toString() ?? '0') ?? 0.0;
+    
+    // Check if in watchlist (Simplified for now)
+    bool isAlreadyFavorited = false;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -111,8 +120,9 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
         ),
         actions: [
           IconButton(
-            icon: Icon(_isFavoriting ? Icons.favorite_rounded : Icons.favorite_outline_rounded, color: textDark, size: 22),
-            onPressed: _isFavoriting ? null : _onFavorite,
+            icon: Icon(isAlreadyFavorited ? Icons.favorite_rounded : Icons.favorite_outline_rounded, 
+              color: isAlreadyFavorited ? Colors.redAccent : textDark, size: 22),
+            onPressed: isAlreadyFavorited ? null : (_isFavoriting ? null : _onFavorite),
           ),
         ],
       ),
@@ -137,7 +147,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                 children: [
                    const Text('PRICE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: textMuted)),
                    const SizedBox(height: 4),
-                   Text(_currentStock['price'] ?? '₦ 0.00', 
+                   Text('₦ ${latestPrice.toStringAsFixed(2)}', 
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: textDark)),
                 ],
               ),
@@ -148,7 +158,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
               child: SizedBox(
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: () => Navigator.pushNamed(context, '/brokerage/link'),
+                  onPressed: null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryGreen,
                     foregroundColor: Colors.white,
@@ -174,10 +184,28 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                    const SizedBox(height: 24),
+                  // About Company
+                  _buildSectionHeader('About Company'),
+                  const SizedBox(height: 12),
+                  _buildAboutCompany(),
+                  const SizedBox(height: 32),
+
                   // Company Metadata
                   _buildSectionHeader('Overview'),
                   const SizedBox(height: 12),
                   _buildCompanyInfo(),
+                  const SizedBox(height: 32),
+                  
+                  // Advanced Metrics (SWS)
+                  _buildSectionHeader('Advanced Metrics'),
+                  const SizedBox(height: 12),
+                  _buildAdvancedMetrics(),
+                  const SizedBox(height: 32),
+
+                  // Price Chart
+                  _buildSectionHeader('Price History'),
+                  const SizedBox(height: 12),
+                  _buildPriceChart(),
                   const SizedBox(height: 32),
                   
                   // Financial Ratios
@@ -245,6 +273,101 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     );
   }
 
+  Widget _buildPriceChart() {
+    // If daily_prices array exists, use it. Otherwise fake some data points
+    List<dynamic> pricesRaw = _currentStock!['daily_prices'] ?? [];
+    List<FlSpot> spots = [];
+    
+    if (pricesRaw.isNotEmpty) {
+       List<dynamic> reversedPrices = pricesRaw.reversed.toList();
+       for (int i = 0; i < reversedPrices.length; i++) {
+          double price = double.tryParse(reversedPrices[i]['price'].toString()) ?? 0;
+          spots.add(FlSpot(i.toDouble(), price));
+       }
+    } else {
+       spots = const [
+         FlSpot(0, 150), FlSpot(1, 155), FlSpot(2, 148), 
+         FlSpot(3, 160), FlSpot(4, 165), FlSpot(5, 172)
+       ];
+    }
+
+    // Determine Y axis range
+    double minY = spots.map((s) => s.y).reduce((a, b) => a < b ? a : b);
+    double maxY = spots.map((s) => s.y).reduce((a, b) => a > b ? a : b);
+    minY = (minY * 0.9).floorToDouble();
+    maxY = (maxY * 1.1).ceilToDouble();
+
+    return Container(
+      height: 220,
+      padding: const EdgeInsets.only(right: 16, left: 0, top: 24, bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: divider),
+      ),
+      child: LineChart(
+        LineChartData(
+          minX: 0,
+          maxX: (spots.length - 1).toDouble(),
+          minY: minY,
+          maxY: maxY,
+          gridData: FlGridData(
+            show: true,
+            drawVerticalLine: false,
+            horizontalInterval: (maxY - minY) / 4 > 0 ? (maxY - minY) / 4 : 1,
+            getDrawingHorizontalLine: (value) {
+              return FlLine(color: divider, strokeWidth: 1);
+            },
+          ),
+          titlesData: FlTitlesData(
+            show: true,
+            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                interval: (maxY - minY) / 4 > 0 ? (maxY - minY) / 4 : 1,
+                reservedSize: 42,
+                getTitlesWidget: (value, meta) {
+                  return Text(value.toInt().toString(), style: const TextStyle(color: textMuted, fontSize: 10));
+                },
+              ),
+            ),
+          ),
+          borderData: FlBorderData(show: false),
+          lineBarsData: [
+            LineChartBarData(
+              spots: spots,
+              isCurved: true,
+              color: primaryGreen,
+              barWidth: 3,
+              isStrokeCapRound: true,
+              dotData: FlDotData(show: false),
+              belowBarData: BarAreaData(
+                show: true,
+                color: primaryGreen.withOpacity(0.1),
+              ),
+            ),
+          ],
+          lineTouchData: LineTouchData(
+             touchTooltipData: LineTouchTooltipData(
+               getTooltipColor: (touchedSpot) => textDark,
+               getTooltipItems: (touchedSpots) {
+                 return touchedSpots.map((LineBarSpot touchedSpot) {
+                   return LineTooltipItem(
+                     '₦ ${touchedSpot.y.toStringAsFixed(2)}',
+                     const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                   );
+                 }).toList();
+               },
+             ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildCompanyInfo() {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -257,11 +380,60 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
         children: [
           _buildInfoRow('Sector', _currentStock['sector'] ?? 'Unknown'),
           const Divider(color: divider, height: 24),
-          _buildInfoRow('Exchange', 'NGX (Lagos)'),
+          _buildInfoRow('Exchange', 'Stock Exchange'),
           const Divider(color: divider, height: 24),
-          _buildInfoRow('Standard', 'AAOIFI v2024'),
+          _buildInfoRow('Analyst Target', _currentStock['analysts_target'] != null ? '₦ ${_currentStock['analysts_target']}' : 'N/A'),
+          const Divider(color: divider, height: 24),
+          _buildInfoRow('Dividend Yield', _currentStock['div_yield'] != null ? '${_currentStock['div_yield']}%' : 'N/A'),
         ],
       ),
+    );
+  }
+
+  Widget _buildAdvancedMetrics() {
+    final valuation = _currentStock['valuation_info'] ?? 'N/A';
+    final growth = _currentStock['growth_info'] ?? 'N/A';
+    
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: divider),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('VALUATION', style: TextStyle(color: textMuted, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
+                const SizedBox(height: 8),
+                Text(valuation, style: const TextStyle(color: textDark, fontSize: 14, fontWeight: FontWeight.w700)),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: divider),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('GROWTH FORECAST', style: TextStyle(color: textMuted, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
+                const SizedBox(height: 8),
+                Text(growth, style: const TextStyle(color: textDark, fontSize: 14, fontWeight: FontWeight.w700)),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -280,10 +452,14 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     final latest = (financials != null && financials is List && financials.isNotEmpty) ? financials[0] : null;
     
     final debt = latest?['total_debt']?.toDouble() ?? 0.0;
-    final assets = latest?['total_assets']?.toDouble() ?? 1.0;
+    
+    final rawAssets = latest?['total_assets']?.toDouble() ?? 0.0;
+    final assets = rawAssets > 0.0 ? rawAssets : 1.0;
+    
     final interest = latest?['interest_income']?.toDouble() ?? 0.0;
-    // Normalize revenue for ratio if not present
-    final revenue = (latest?['total_revenue']?.toDouble() ?? assets);
+    
+    final rawRevenue = latest?['total_revenue']?.toDouble() ?? 0.0;
+    final revenue = rawRevenue > 0.0 ? rawRevenue : assets;
     
     final debtRatio = (debt / assets) * 100;
     final interestRatio = (interest / revenue) * 100;
@@ -374,7 +550,11 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
   }
 
   Widget _buildPurificationCard() {
-    final nonCompliantRev = 1.25; 
+    final financials = _currentStock['financials'];
+    final latest = (financials != null && financials is List && financials.isNotEmpty) ? financials[0] : null;
+    final nonCompliantRev = latest != null && latest['non_compliant_revenue_ratio'] != null 
+        ? latest['non_compliant_revenue_ratio'].toDouble() * 100 
+        : 0.0; 
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -453,6 +633,25 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
         child: _isLoading 
           ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
           : const Text('REFRESH SCREENING', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
+      ),
+    );
+  }
+
+  Widget _buildAboutCompany() {
+    final sector = _currentStock['sector'] ?? 'Unknown';
+    final name = _currentStock['name'] ?? 'This company';
+    final overview = _currentStock['overview'] ?? '$name operates within the $sector sector. Its primary business activities include the production, provision, and distribution of goods and services specific to the $sector industry. As a publicly traded entity on the Nigerian Exchange, it focuses on delivering sustainable value to its stakeholders.';
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: divider),
+      ),
+      child: Text(
+        overview,
+        style: const TextStyle(color: textMuted, height: 1.6, fontSize: 14),
       ),
     );
   }

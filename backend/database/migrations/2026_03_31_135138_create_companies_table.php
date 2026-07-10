@@ -16,7 +16,9 @@ return new class extends Migration
             $table->string('name');
             $table->string('symbol')->unique()->index();
             $table->string('sector');
+            $table->string('industry')->nullable();
             $table->string('business_type')->nullable();
+            $table->text('description')->nullable();
             $table->timestamps();
         });
     }

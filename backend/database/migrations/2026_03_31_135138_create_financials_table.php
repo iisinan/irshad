@@ -17,6 +17,8 @@ return new class extends Migration
             $table->decimal('total_assets', 20, 2);
             $table->decimal('total_debt', 20, 2);
             $table->decimal('interest_income', 20, 2);
+            $table->decimal('net_income', 20, 2)->nullable();
+            $table->string('reporting_period')->nullable();
             $table->timestamps();
         });
     }

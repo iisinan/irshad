@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../../core/providers/app_state_provider.dart';
 import '../data/auth_repository.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -35,11 +37,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
-  void _loadUserDetails() async {
+  void _loadUserDetails() {
     setState(() => _isLoading = true);
-    final user = await _authRepository.getProfile();
+    // Need to import Provider at top of file
+    final user = Provider.of<AppStateProvider>(context, listen: false).userProfile;
     if (user != null) {
-      _nameController.text = user['name'] ?? '';
+      _nameController.text = '${user['first_name'] ?? ''} ${user['last_name'] ?? ''}'.trim();
       _emailController.text = user['email'] ?? '';
       _locationController.text = user['location'] ?? '';
     }

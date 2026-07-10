@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_service.dart';
+import '../../../core/notifications/notification_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -21,6 +22,7 @@ class AuthRepository {
       if (response.statusCode == 201) {
         final data = response.data['data'];
         await _storage.write(key: 'access_token', value: data['access_token']);
+        _registerFCMToken();
         return data['user'];
       }
     } on DioException catch (e) {
@@ -39,6 +41,7 @@ class AuthRepository {
       if (response.statusCode == 200) {
         final data = response.data['data'];
         await _storage.write(key: 'access_token', value: data['access_token']);
+        _registerFCMToken();
         return data['user'];
       }
     } on DioException catch (e) {
@@ -87,5 +90,17 @@ class AuthRepository {
        throw e.response?.data['message'] ?? 'Profile update failed';
     }
     return null;
+  }
+
+  void _registerFCMToken() async {
+    try {
+      final pushService = PushNotificationService();
+      final token = await pushService.getToken();
+      if (token != null) {
+        await _apiService.post('notifications/subscribe', {'fcm_token': token});
+      }
+    } catch (e) {
+      // Non-fatal
+    }
   }
 }

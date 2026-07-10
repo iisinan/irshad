@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import '../data/stock_repository.dart';
 
 class StockSearchScreen extends StatefulWidget {
@@ -14,6 +15,7 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
   List<Map<String, dynamic>> _history = [];
   bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
 
   // Theme Constants
   static const Color bgColor = Color(0xFFFAFAFA);
@@ -28,13 +30,22 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
     super.initState();
     _fetchHistory();
   }
+  
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _searchController.dispose();
+    super.dispose();
+  }
 
   void _fetchHistory() async {
     final history = await _stockRepository.getStockHistory();
     setState(() => _history = history);
   }
 
-  void _onSearch(String query) async {
+  void _onSearch(String query) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    
     if (query.isEmpty) {
       setState(() {
         _searchResults = [];
@@ -44,14 +55,17 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
     }
 
     setState(() => _isSearching = true);
-    try {
-      final results = await _stockRepository.searchStocks(query);
-      setState(() => _searchResults = results);
-    } catch (e) {
-      // Handle error
-    } finally {
-      setState(() => _isSearching = false);
-    }
+    
+    _debounce = Timer(const Duration(milliseconds: 500), () async {
+      try {
+        final results = await _stockRepository.searchStocks(query);
+        if (mounted) setState(() => _searchResults = results);
+      } catch (e) {
+        // Handle error
+      } finally {
+        if (mounted) setState(() => _isSearching = false);
+      }
+    });
   }
 
   @override
@@ -59,7 +73,7 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
-        title: const Text('Search NGX', style: TextStyle(fontWeight: FontWeight.w900, color: textDark, letterSpacing: -0.5)),
+        title: const Text('Search Market', style: TextStyle(fontWeight: FontWeight.w900, color: textDark, letterSpacing: -0.5)),
         backgroundColor: bgColor,
         elevation: 0,
         centerTitle: false,
@@ -195,7 +209,7 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
                 border: Border.all(color: divider),
               ),
               child: Text(
-                stock['sector']?.toUpperCase() ?? 'NGX', 
+                stock['sector']?.toUpperCase() ?? 'MARKET', 
                 style: const TextStyle(color: textMuted, fontSize: 9, fontWeight: FontWeight.w800),
               ),
             ),
@@ -226,7 +240,7 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
             ),
             const SizedBox(height: 24),
             const Text(
-              'Search NGX Stocks',
+              'Search Market Stocks',
               style: TextStyle(fontSize: 20, color: textDark, fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 12),

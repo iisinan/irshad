@@ -13,6 +13,8 @@ class Financial extends Model
         'company_id',
         'total_assets',
         'total_debt',
+        'total_revenue',
+        'market_cap',
         'interest_income',
     ];
 }

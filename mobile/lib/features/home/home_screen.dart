@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../stocks/ui/stock_search_screen.dart';
-
+import '../stocks/ui/ngx_market_screen.dart';
+import 'package:provider/provider.dart';
+import '../../core/api/api_service.dart';
+import '../stocks/providers/stock_provider.dart';
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
 
@@ -23,23 +27,54 @@ class _ExploreScreenState extends State<ExploreScreen>
   static const Color textMuted = Color(0xFF6B7280);
   static const Color divider = Color(0xFFE5E7EB);
 
-  final List<Map<String, dynamic>> _stocks = [
-    {'symbol': 'DANGCEM', 'name': 'Dangote Cement PLC', 'status': 'COMPLIANT', 'price': '₦ 448.00', 'change': '+1.25%', 'positive': true},
-    {'symbol': 'MTNN', 'name': 'MTN Nigeria Communications PLC', 'status': 'COMPLIANT', 'price': '₦ 245.50', 'change': '+0.45%', 'positive': true},
-    {'symbol': 'BUACEMENT', 'name': 'BUA Cement PLC', 'status': 'COMPLIANT', 'price': '₦ 105.00', 'change': '+2.10%', 'positive': true},
-    {'symbol': 'NESTLE', 'name': 'Nestle Nigeria PLC', 'status': 'QUESTIONABLE', 'price': '₦ 1,150.00', 'change': '-0.15%', 'positive': false},
-    {'symbol': 'OKOMUOIL', 'name': 'Okomu Oil Palm PLC', 'status': 'COMPLIANT', 'price': '₦ 265.00', 'change': '+1.10%', 'positive': true},
-    {'symbol': 'PRESCO', 'name': 'Presco PLC', 'status': 'COMPLIANT', 'price': '₦ 195.00', 'change': '+0.85%', 'positive': true},
-    {'symbol': 'DANGSUGAR', 'name': 'Dangote Sugar Refinery PLC', 'status': 'COMPLIANT', 'price': '₦ 65.40', 'change': '+1.45%', 'positive': true},
-    {'symbol': 'FRIESLAND', 'name': 'FrieslandCampina WAMCO Nigeria PLC', 'status': 'QUESTIONABLE', 'price': '₦ 75.20', 'change': '-0.40%', 'positive': false},
-    {'symbol': 'JULI', 'name': 'Juli PLC', 'status': 'COMPLIANT', 'price': '₦ 9.42', 'change': '+9.98%', 'positive': true},
-    {'symbol': 'UPDC', 'name': 'UPDC PLC', 'status': 'QUESTIONABLE', 'price': '₦ 1.55', 'change': '0.00%', 'positive': true},
-  ];
+  List<dynamic> _disclosures = [];
+  bool _isLoadingDisclosures = true;
+  
+  List<dynamic> _baskets = [];
+  bool _isLoadingBaskets = true;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<StockProvider>(context, listen: false).fetchNgxStocks();
+    });
+    _fetchDisclosures();
+    _fetchBaskets();
+  }
+
+  Future<void> _fetchStocks() async {
+    await Provider.of<StockProvider>(context, listen: false).fetchNgxStocks();
+  }
+  Future<void> _fetchDisclosures() async {
+    try {
+      final response = await ApiService().get('disclosures?limit=30');
+      if (response.statusCode == 200 && response.data['status'] == 'success') {
+        setState(() {
+          _disclosures = response.data['data'];
+          _isLoadingDisclosures = false;
+        });
+      }
+    } catch (e) {
+      setState(() => _isLoadingDisclosures = false);
+      debugPrint('Error fetching disclosures: $e');
+    }
+  }
+
+  Future<void> _fetchBaskets() async {
+    try {
+      final response = await ApiService().get('stocks/baskets');
+      if (response.statusCode == 200 && response.data['status'] == 'success') {
+        setState(() {
+          _baskets = response.data['data'];
+          _isLoadingBaskets = false;
+        });
+      }
+    } catch (e) {
+      setState(() => _isLoadingBaskets = false);
+      debugPrint('Error fetching baskets: $e');
+    }
   }
 
   @override
@@ -73,24 +108,32 @@ class _ExploreScreenState extends State<ExploreScreen>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Icon(Icons.settings_outlined, color: textDark, size: 26),
-          GestureDetector(
-            onTap: () => Navigator.pushNamed(context, '/upgrade'),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-              decoration: BoxDecoration(
-                border: Border.all(color: textDark, width: 1.5),
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Text(
-                'Upgrade',
-                style: TextStyle(
-                  color: textDark,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
+          IconButton(
+            icon: const Icon(Icons.settings_outlined, color: textDark, size: 26),
+            onPressed: () => Navigator.pushNamed(context, '/settings'),
+          ),
+          Row(
+            children: [
+
+              GestureDetector(
+                onTap: () => Navigator.pushNamed(context, '/upgrade'),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: textDark, width: 1.5),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Text(
+                    'Upgrade',
+                    style: TextStyle(
+                      color: textDark,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
         ],
       ),
@@ -127,6 +170,7 @@ class _ExploreScreenState extends State<ExploreScreen>
         unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15),
         tabs: const [
           Tab(text: 'Stocks'),
+          Tab(text: 'News'),
           Tab(text: 'Funds'),
           Tab(text: 'Baskets'),
         ],
@@ -201,27 +245,80 @@ class _ExploreScreenState extends State<ExploreScreen>
       controller: _tabController,
       children: [
         _buildStocksTab(),
+        _buildNewsTab(),
         _buildComingSoon('Funds'),
-        _buildComingSoon('Baskets'),
+        _buildBasketsTab(),
       ],
     );
   }
 
   Widget _buildStocksTab() {
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      itemCount: _stocks.length,
-      separatorBuilder: (_, __) => Divider(color: divider, height: 1),
-      itemBuilder: (context, index) => _buildStockRow(_stocks[index]),
+    return Consumer<StockProvider>(
+      builder: (context, provider, child) {
+        if (provider.isLoading && provider.ngxStocks.isEmpty) {
+          return const Center(child: CircularProgressIndicator(color: primaryGreen));
+        }
+        if (provider.ngxStocks.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('No stocks available'),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: _fetchStocks,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryGreen,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          );
+        }
+        return RefreshIndicator(
+          onRefresh: _fetchStocks,
+          color: primaryGreen,
+          backgroundColor: Colors.white,
+          child: ListView.separated(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            itemCount: provider.ngxStocks.length,
+            separatorBuilder: (_, __) => const Divider(color: divider, height: 1),
+            itemBuilder: (context, index) => _buildStockRow(provider.ngxStocks[index]),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildStockRow(Map<String, dynamic> stock) {
-    final isCompliant = stock['status'] == 'COMPLIANT';
-    final isPositive = stock['positive'] as bool;
+  Widget _buildStockRow(dynamic company) {
+    final statusObj = company['status'];
+    final statusStr = statusObj != null ? statusObj['status'].toString().toUpperCase() : 'QUESTIONABLE';
+    final isCompliant = statusStr == 'HALAL';
+    
+    double latestPrice = 0.0;
+    double priceChange = 0.0;
+    double changePct = 0.0;
+    
+    final dailyPrices = company['daily_prices'] as List<dynamic>? ?? [];
+    if (dailyPrices.isNotEmpty) {
+      latestPrice = double.tryParse(dailyPrices[0]['price']?.toString() ?? '0') ?? 0.0;
+      if (dailyPrices.length > 1) {
+        final prevPrice = double.tryParse(dailyPrices[1]['price']?.toString() ?? '0') ?? 0.0;
+        if (prevPrice > 0) {
+          priceChange = latestPrice - prevPrice;
+          changePct = (priceChange / prevPrice) * 100;
+        }
+      }
+    }
+    
+    final isPositive = priceChange >= 0;
+    final priceStr = '₦ ${latestPrice.toStringAsFixed(2)}';
+    final changeStr = '${isPositive ? '+' : ''}${changePct.toStringAsFixed(2)}%';
 
     return InkWell(
-      onTap: () => Navigator.pushNamed(context, '/stock_details', arguments: stock),
+      onTap: () => Navigator.pushNamed(context, '/stock_details', arguments: company),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 14),
         child: Row(
@@ -235,7 +332,7 @@ class _ExploreScreenState extends State<ExploreScreen>
                   Row(
                     children: [
                       Text(
-                        stock['symbol'],
+                        company['symbol'],
                         style: TextStyle(
                           color: textDark,
                           fontWeight: FontWeight.w800,
@@ -243,14 +340,14 @@ class _ExploreScreenState extends State<ExploreScreen>
                         ),
                       ),
                       const SizedBox(width: 8),
-                      _buildStatusBadge(stock['status'], isCompliant),
+                      _buildStatusBadge(statusStr, isCompliant),
                       const SizedBox(width: 6),
                       Icon(Icons.flag_outlined, size: 14, color: textMuted),
                     ],
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    stock['name'],
+                    company['name'],
                     style: TextStyle(color: textMuted, fontSize: 13),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -263,7 +360,7 @@ class _ExploreScreenState extends State<ExploreScreen>
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  stock['price'],
+                  priceStr,
                   style: TextStyle(
                     color: textDark,
                     fontWeight: FontWeight.w700,
@@ -272,7 +369,7 @@ class _ExploreScreenState extends State<ExploreScreen>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  stock['change'],
+                  changeStr,
                   style: TextStyle(
                     color: isPositive ? compliantGreen : Colors.red,
                     fontWeight: FontWeight.w600,
@@ -325,6 +422,183 @@ class _ExploreScreenState extends State<ExploreScreen>
             style: TextStyle(color: textMuted.withOpacity(0.6), fontSize: 13),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildBasketsTab() {
+    if (_isLoadingBaskets) {
+      return const Center(child: CircularProgressIndicator(color: primaryGreen));
+    }
+    if (_baskets.isEmpty) {
+      return const Center(child: Text('No curated baskets available.', style: TextStyle(color: textMuted)));
+    }
+    return RefreshIndicator(
+      color: primaryGreen,
+      onRefresh: _fetchBaskets,
+      child: ListView.separated(
+        padding: const EdgeInsets.all(16),
+        itemCount: _baskets.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 16),
+        itemBuilder: (context, index) {
+          final basket = _baskets[index];
+          return _buildBasketCard(basket);
+        },
+      ),
+    );
+  }
+
+  Widget _buildBasketCard(dynamic basket) {
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(context, '/basket_details', arguments: basket),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: divider),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (basket['image_url'] != null)
+              Image.network(
+                basket['image_url'],
+                height: 140,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  height: 140,
+                  color: Colors.grey.shade200,
+                  child: const Icon(Icons.image_not_supported, color: textMuted),
+                ),
+              ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (basket['category'] != null) ...[
+                    Text(
+                      basket['category'].toString().toUpperCase(),
+                      style: const TextStyle(color: primaryGreen, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1),
+                    ),
+                    const SizedBox(height: 6),
+                  ],
+                  Text(
+                    basket['name'] ?? 'Unnamed Basket',
+                    style: const TextStyle(fontWeight: FontWeight.w900, color: textDark, fontSize: 18),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    basket['description'] ?? '',
+                    style: const TextStyle(color: textMuted, fontSize: 13, height: 1.4),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNewsTab() {
+    if (_isLoadingDisclosures) {
+      return const Center(child: CircularProgressIndicator(color: primaryGreen));
+    }
+    if (_disclosures.isEmpty) {
+      return const Center(child: Text('No corporate disclosures found.', style: TextStyle(color: textMuted)));
+    }
+    return RefreshIndicator(
+      color: primaryGreen,
+      onRefresh: _fetchDisclosures,
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        itemCount: _disclosures.length,
+        separatorBuilder: (_, __) => Divider(color: divider, height: 1),
+        itemBuilder: (context, index) {
+          final item = _disclosures[index];
+          final title = item['title'] ?? item['company_name'] ?? 'Disclosure';
+          final type = item['submission_type'] ?? 'News';
+          final url = item['pdf_url'] ?? item['url'];
+          
+          return InkWell(
+            onTap: () async {
+              if (url != null) {
+                final uri = Uri.parse(url);
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                }
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: primaryGreen.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(Icons.picture_as_pdf_rounded, color: primaryGreen, size: 24),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              item['company_symbol'] ?? '',
+                              style: const TextStyle(fontWeight: FontWeight.w800, color: textDark, fontSize: 14),
+                            ),
+                            Text(
+                              item['published_at'] != null ? item['published_at'].toString().split('T')[0] : '',
+                              style: const TextStyle(color: textMuted, fontSize: 12),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          title,
+                          style: const TextStyle(color: textDark, fontSize: 15, fontWeight: FontWeight.w600),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            type,
+                            style: const TextStyle(fontSize: 11, color: textMuted, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
