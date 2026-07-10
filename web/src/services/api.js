@@ -59,7 +59,7 @@ const getNext3AM = () => {
 
 export const fetchNgxStocks = async () => {
   try {
-    const cacheKey = 'irshad_stocks_cache_v3';
+    const cacheKey = 'irshad_stocks_cache_v4';
     const cached = localStorage.getItem(cacheKey);
     if (cached) {
       const { data, expiry } = JSON.parse(cached);
@@ -77,7 +77,7 @@ export const fetchNgxStocks = async () => {
 
 export const fetchStockDetails = async (symbol) => {
   try {
-    const cacheKey = `irshad_stock_${symbol}_cache_v3`;
+    const cacheKey = `irshad_stock_${symbol}_cache_v4`;
     const cached = localStorage.getItem(cacheKey);
     if (cached) {
       const { data, expiry } = JSON.parse(cached);
