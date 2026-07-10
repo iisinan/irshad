@@ -28,6 +28,8 @@ Route::prefix('v1')->group(function () {
     Route::post('/reset-password', [PasswordResetController::class, 'reset']);
 
     // ── Public Data (no auth required) ───────────────────────────────────
+    Route::get('/stocks',                         [StockController::class, 'index']);
+    Route::get('/stocks/search',                  [StockController::class, 'search']);
     Route::get('/stocks/ngx',           [StockController::class, 'ngx']);
     Route::get('/stocks/baskets',                 [BasketController::class, 'index']);
     Route::get('/stocks/baskets/{basket}',        [BasketController::class, 'show']);
@@ -50,8 +52,6 @@ Route::prefix('v1')->group(function () {
         Route::put('/products/{product}/status',      [ProductController::class, 'updateStatus']);
 
         // ── Stocks ── (order matters: specific routes before {symbol} wildcard)
-        Route::get('/stocks',                         [StockController::class, 'index']);
-        Route::get('/stocks/search',                  [StockController::class, 'search']);
         // Baskets moved to public routes above
         Route::get('/stocks/check/{symbol}',          [StockController::class, 'check']);
         Route::get('/stocks/{symbol}/analysis',       [StockController::class, 'getAiAnalysis']);
