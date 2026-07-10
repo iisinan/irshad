@@ -29,6 +29,8 @@ Route::prefix('v1')->group(function () {
 
     // ── Public Data (no auth required) ───────────────────────────────────
     Route::get('/stocks/ngx',           [StockController::class, 'ngx']);
+    Route::get('/stocks/baskets',                 [BasketController::class, 'index']);
+    Route::get('/stocks/baskets/{basket}',        [BasketController::class, 'show']);
     Route::get('/disclosures',          [\App\Http\Controllers\Api\V1\CorporateDisclosureController::class, 'index']);
 
     // ── Protected Routes ─────────────────────────────────────────────────
@@ -50,8 +52,7 @@ Route::prefix('v1')->group(function () {
         // ── Stocks ── (order matters: specific routes before {symbol} wildcard)
         Route::get('/stocks',                         [StockController::class, 'index']);
         Route::get('/stocks/search',                  [StockController::class, 'search']);
-        Route::get('/stocks/baskets',                 [BasketController::class, 'index']);
-        Route::get('/stocks/baskets/{basket}',        [BasketController::class, 'show']);
+        // Baskets moved to public routes above
         Route::get('/stocks/check/{symbol}',          [StockController::class, 'check']);
         Route::get('/stocks/{symbol}/analysis',       [StockController::class, 'getAiAnalysis']);
         Route::put('/stocks/{symbol}/status',         [StockController::class, 'updateStatus']); // Scholar/Admin only (role checked in controller)
