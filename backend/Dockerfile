@@ -16,7 +16,7 @@ RUN apk add --no-cache \
     libzip-dev
 
 # Install PHP extensions
-RUN docker-php-ext-install pdo_pgsql mbstring exif pcntl bcmath gd xml zip
+RUN docker-php-ext-install pdo_pgsql mbstring exif pcntl bcmath gd xml zip sockets
 
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
