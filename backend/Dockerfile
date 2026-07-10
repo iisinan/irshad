@@ -35,8 +35,8 @@ RUN composer install --no-interaction --optimize-autoloader --no-dev --ignore-pl
 # Set permissions for Laravel
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-# Install RoadRunner
-RUN ./vendor/bin/rr get --location /usr/local/bin
+# Install RoadRunner by copying the binary from the official image to bypass GitHub API rate limits
+COPY --from=ghcr.io/roadrunner-server/roadrunner:latest /usr/bin/rr /usr/local/bin/rr
 
 # Expose port 8080 (Render's default)
 EXPOSE 8080
