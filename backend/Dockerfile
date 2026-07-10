@@ -29,7 +29,7 @@ COPY . /var/www
 
 # Install dependencies
 ENV COMPOSER_MEMORY_LIMIT=-1
-RUN composer install --no-interaction --optimize-autoloader --no-dev
+RUN composer install --no-interaction --optimize-autoloader --no-dev --ignore-platform-reqs
 
 # Set permissions for Laravel
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
