@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: '/api/v1',
+  baseURL: import.meta.env.VITE_API_URL || 'https://irshad-k3el.onrender.com/api/v1',
   headers: {
     'Accept': 'application/json',
     'Content-Type': 'application/json',
@@ -59,7 +59,7 @@ const getNext3AM = () => {
 
 export const fetchNgxStocks = async () => {
   try {
-    const cacheKey = 'irshad_stocks_cache_v2';
+    const cacheKey = 'irshad_stocks_cache_v3';
     const cached = localStorage.getItem(cacheKey);
     if (cached) {
       const { data, expiry } = JSON.parse(cached);
@@ -77,7 +77,7 @@ export const fetchNgxStocks = async () => {
 
 export const fetchStockDetails = async (symbol) => {
   try {
-    const cacheKey = `irshad_stock_${symbol}_cache_v2`;
+    const cacheKey = `irshad_stock_${symbol}_cache_v3`;
     const cached = localStorage.getItem(cacheKey);
     if (cached) {
       const { data, expiry } = JSON.parse(cached);
