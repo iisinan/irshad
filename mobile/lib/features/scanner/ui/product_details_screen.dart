@@ -15,11 +15,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   bool _isFavoriting = false;
 
   // Theme Constants
-  static const Color bgColor = Color(0xFFFAFAFA);
-  static const Color primaryGreen = Color(0xFF16A34A);
-  static const Color textDark = Color(0xFF111827);
-  static const Color textMuted = Color(0xFF6B7280);
-  static const Color divider = Color(0xFFE5E7EB);
+  static const Color bgColor = Color(0xFFF5F0E8);
+  static const Color primaryGold = Color(0xFFC9A84C);
+  static const Color textDark = Color(0xFF1A1208);
+  static const Color textMuted = Color(0xFF9A8C70);
+  static const Color divider = Color(0xFFE8E2D9);
 
   void _onFavorite() async {
     setState(() => _isFavoriting = true);
@@ -44,7 +44,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     
     bool isHalal = status == 'halal';
     bool isNonHalal = status == 'non-halal';
-    Color statusColor = isHalal ? const Color(0xFF16A34A) : (isNonHalal ? Colors.red : const Color(0xFFD97706));
+    Color statusColor = isHalal ? const Color(0xFF2E7D32) : (isNonHalal ? Colors.red : const Color(0xFFD97706));
     Color badgeBg = isHalal ? const Color(0xFFDCFCE7) : (isNonHalal ? const Color(0xFFFEE2E2) : const Color(0xFFFEF3C7));
     String statusLabel = isHalal ? 'CERTIFIED HALAL' : (isNonHalal ? 'NOT HALAL' : 'QUESTIONABLE');
 
@@ -232,7 +232,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         final iStatus = i['status']?.toString().toLowerCase() ?? 'doubtful';
         bool iHalal = iStatus == 'halal';
         bool iNonHalal = iStatus == 'non-halal';
-        Color iColor = iHalal ? primaryGreen : (iNonHalal ? Colors.red : const Color(0xFFD97706));
+        Color iColor = iHalal ? primaryGold : (iNonHalal ? Colors.red : const Color(0xFFD97706));
         
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -261,7 +261,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: primaryGreen, 
+        color: primaryGold, 
         borderRadius: BorderRadius.circular(24),
       ),
       child: Column(
@@ -281,7 +281,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               onPressed: () => Navigator.pushNamed(context, '/submit_product', arguments: widget.product['barcode']),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
-                foregroundColor: primaryGreen,
+                foregroundColor: primaryGold,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 elevation: 0,
               ),

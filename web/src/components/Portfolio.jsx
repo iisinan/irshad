@@ -184,13 +184,14 @@ const Portfolio = () => {
         <div style={{ background: 'white', borderRadius: 'var(--radius-xl)', padding: '32px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-md)' }}>
           <h3 style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-muted)', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '16px' }}>Portfolio Health</h3>
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <div style={{ width: '80px', height: '80px', borderRadius: '50%', border: data.summary.health_percentage < 100 ? '8px solid var(--doubtful)' : '8px solid var(--primary-50)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <PieChart size={32} color={data.summary.health_percentage < 100 ? "var(--doubtful)" : "var(--primary)"} />
+            <div style={{ width: '80px', height: '80px', borderRadius: '50%', border: data.summary.health_percentage < 100 ? '8px solid var(--doubtful)' : '8px solid var(--halal)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <PieChart size={32} color={data.summary.health_percentage < 100 ? "var(--doubtful)" : "var(--halal)"} />
             </div>
             <div>
+              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-light)', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Score</div>
               <div style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--text-dark)' }}>{data.summary.health_percentage}%</div>
-              <div style={{ color: data.summary.health_percentage < 100 ? 'var(--doubtful)' : 'var(--primary)', fontWeight: '700', fontSize: '0.85rem', letterSpacing: '0.5px' }}>
-                {data.summary.health_percentage < 100 ? 'NEEDS ATTENTION' : 'SHARIAH COMPLIANT'}
+              <div style={{ color: data.summary.health_percentage < 100 ? 'var(--doubtful)' : 'var(--halal)', fontWeight: '700', fontSize: '0.85rem', letterSpacing: '0.5px' }}>
+                {data.summary.health_percentage === 100 ? 'Perfectly Aligned' : 'Needs Attention'}
               </div>
             </div>
           </div>

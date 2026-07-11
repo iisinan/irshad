@@ -18,13 +18,13 @@ class _ExploreScreenState extends State<ExploreScreen>
   String _selectedSort = 'Sort by market cap';
 
   // Theme
-  static const Color bgColor = Color(0xFFFAFAFA);
-  static const Color primaryGreen = Color(0xFF16A34A);
-  static const Color compliantGreen = Color(0xFF16A34A);
+  static const Color bgColor = Color(0xFFF5F0E8);
+  static const Color primaryGold = Color(0xFFC9A84C);
+  static const Color compliantGreen = Color(0xFF2E7D32);
   static const Color questionableAmber = Color(0xFFD97706);
-  static const Color textDark = Color(0xFF111827);
-  static const Color textMuted = Color(0xFF6B7280);
-  static const Color divider = Color(0xFFE5E7EB);
+  static const Color textDark = Color(0xFF1A1208);
+  static const Color textMuted = Color(0xFF9A8C70);
+  static const Color divider = Color(0xFFE8E2D9);
 
   List<dynamic> _baskets = [];
   bool _isLoadingBaskets = true;
@@ -145,9 +145,9 @@ class _ExploreScreenState extends State<ExploreScreen>
       ),
       child: TabBar(
         controller: _tabController,
-        labelColor: primaryGreen,
+        labelColor: primaryGold,
         unselectedLabelColor: textMuted,
-        indicatorColor: primaryGreen,
+        indicatorColor: primaryGold,
         indicatorWeight: 2.5,
         labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
         unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15),
@@ -237,7 +237,7 @@ class _ExploreScreenState extends State<ExploreScreen>
     return Consumer<StockProvider>(
       builder: (context, provider, child) {
         if (provider.isLoading && provider.ngxStocks.isEmpty) {
-          return const Center(child: CircularProgressIndicator(color: primaryGreen));
+          return const Center(child: CircularProgressIndicator(color: primaryGold));
         }
         if (provider.ngxStocks.isEmpty) {
           return Center(
@@ -249,7 +249,7 @@ class _ExploreScreenState extends State<ExploreScreen>
                 ElevatedButton(
                   onPressed: _fetchStocks,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryGreen,
+                    backgroundColor: primaryGold,
                     foregroundColor: Colors.white,
                   ),
                   child: const Text('Retry'),
@@ -260,7 +260,7 @@ class _ExploreScreenState extends State<ExploreScreen>
         }
         return RefreshIndicator(
           onRefresh: _fetchStocks,
-          color: primaryGreen,
+          color: primaryGold,
           backgroundColor: Colors.white,
           child: ListView.separated(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -409,13 +409,13 @@ class _ExploreScreenState extends State<ExploreScreen>
 
   Widget _buildBasketsTab() {
     if (_isLoadingBaskets) {
-      return const Center(child: CircularProgressIndicator(color: primaryGreen));
+      return const Center(child: CircularProgressIndicator(color: primaryGold));
     }
     if (_baskets.isEmpty) {
       return const Center(child: Text('No curated baskets available.', style: TextStyle(color: textMuted)));
     }
     return RefreshIndicator(
-      color: primaryGreen,
+      color: primaryGold,
       onRefresh: _fetchBaskets,
       child: ListView.separated(
         padding: const EdgeInsets.all(16),
@@ -469,7 +469,7 @@ class _ExploreScreenState extends State<ExploreScreen>
                   if (basket['category'] != null) ...[
                     Text(
                       basket['category'].toString().toUpperCase(),
-                      style: const TextStyle(color: primaryGreen, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1),
+                      style: const TextStyle(color: primaryGold, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1),
                     ),
                     const SizedBox(height: 6),
                   ],

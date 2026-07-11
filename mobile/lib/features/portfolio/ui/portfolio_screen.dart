@@ -12,11 +12,11 @@ class PortfolioScreen extends StatefulWidget {
 
 class _PortfolioScreenState extends State<PortfolioScreen> {
   // Theme Constants
-  static const Color bgColor = Color(0xFFFAFAFA);
-  static const Color primaryGreen = Color(0xFF16A34A);
-  static const Color textDark = Color(0xFF111827);
-  static const Color textMuted = Color(0xFF6B7280);
-  static const Color divider = Color(0xFFE5E7EB);
+  static const Color bgColor = Color(0xFFF5F0E8);
+  static const Color primaryGold = Color(0xFFC9A84C);
+  static const Color textDark = Color(0xFF1A1208);
+  static const Color textMuted = Color(0xFF9A8C70);
+  static const Color divider = Color(0xFFE8E2D9);
   static const Color doubtfulColor = Color(0xFFF59E0B);
   static const Color nonHalalColor = Color(0xFFEF4444);
 
@@ -24,7 +24,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
   final List<Color> _chartColors = [
     const Color(0xFF0284C7),
     const Color(0xFFEAB308),
-    const Color(0xFF16A34A),
+    const Color(0xFF2E7D32),
     const Color(0xFF9333EA),
     const Color(0xFFF97316),
   ];
@@ -92,7 +92,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
         ],
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator(color: primaryGreen))
+          ? const Center(child: CircularProgressIndicator(color: primaryGold))
           : _isGuest
               ? _buildGuestView()
               : SingleChildScrollView(
@@ -143,7 +143,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
                 color: const Color(0xFFECFDF5),
                 borderRadius: BorderRadius.circular(24),
               ),
-              child: const Icon(Icons.pie_chart_outline_rounded, size: 40, color: primaryGreen),
+              child: const Icon(Icons.pie_chart_outline_rounded, size: 40, color: primaryGold),
             ),
             const SizedBox(height: 24),
             const Text('Track Your Halal Portfolio',
@@ -162,7 +162,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
               child: ElevatedButton(
                 onPressed: () => Navigator.pushNamed(context, '/login'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryGreen,
+                  backgroundColor: primaryGold,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -174,7 +174,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
             const SizedBox(height: 12),
             TextButton(
               onPressed: () => Navigator.pushNamed(context, '/register'),
-              child: const Text('Create a free account →', style: TextStyle(color: primaryGreen, fontWeight: FontWeight.w600)),
+              child: const Text('Create a free account →', style: TextStyle(color: primaryGold, fontWeight: FontWeight.w600)),
             ),
           ],
         ),
@@ -208,16 +208,16 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: summary['health_percentage'] < 100 ? doubtfulColor.withOpacity(0.2) : primaryGreen.withOpacity(0.2),
+                  color: summary['health_percentage'] < 100 ? doubtfulColor.withOpacity(0.2) : primaryGold.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Row(
                   children: [
-                    Icon(summary['health_percentage'] < 100 ? Icons.warning_rounded : Icons.check_circle_rounded, color: summary['health_percentage'] < 100 ? doubtfulColor : primaryGreen, size: 14),
+                    Icon(summary['health_percentage'] < 100 ? Icons.warning_rounded : Icons.check_circle_rounded, color: summary['health_percentage'] < 100 ? doubtfulColor : primaryGold, size: 14),
                     const SizedBox(width: 4),
                     Text(
                       '${summary['health_percentage']}% Halal',
-                      style: TextStyle(color: summary['health_percentage'] < 100 ? doubtfulColor : primaryGreen, fontWeight: FontWeight.w700, fontSize: 12),
+                      style: TextStyle(color: summary['health_percentage'] < 100 ? doubtfulColor : primaryGold, fontWeight: FontWeight.w700, fontSize: 12),
                     ),
                   ],
                 ),
@@ -366,7 +366,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
               Text(
                 '${returnPct >= 0 ? '+' : ''}${returnPct.toStringAsFixed(2)}%',
                 style: TextStyle(
-                  color: returnPct >= 0 ? primaryGreen : nonHalalColor, 
+                  color: returnPct >= 0 ? primaryGold : nonHalalColor, 
                   fontWeight: FontWeight.w700, 
                   fontSize: 13
                 ),

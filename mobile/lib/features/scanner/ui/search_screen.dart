@@ -18,11 +18,11 @@ class _SearchScreenState extends State<SearchScreen> {
   Timer? _debounce;
 
   // Theme Constants
-  static const Color bgColor = Color(0xFFFAFAFA);
-  static const Color primaryGreen = Color(0xFF16A34A);
-  static const Color textDark = Color(0xFF111827);
-  static const Color textMuted = Color(0xFF6B7280);
-  static const Color divider = Color(0xFFE5E7EB);
+  static const Color bgColor = Color(0xFFF5F0E8);
+  static const Color primaryGold = Color(0xFFC9A84C);
+  static const Color textDark = Color(0xFF1A1208);
+  static const Color textMuted = Color(0xFF9A8C70);
+  static const Color divider = Color(0xFFE8E2D9);
 
   @override
   void initState() {
@@ -108,7 +108,7 @@ class _SearchScreenState extends State<SearchScreen> {
         decoration: InputDecoration(
           hintText: 'Brand name or product...',
           hintStyle: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w400),
-          prefixIcon: const Icon(Icons.search_rounded, color: primaryGreen),
+          prefixIcon: const Icon(Icons.search_rounded, color: primaryGold),
           suffixIcon: _searchController.text.isNotEmpty 
             ? IconButton(
                 icon: const Icon(Icons.clear_rounded, color: textMuted),
@@ -159,7 +159,7 @@ class _SearchScreenState extends State<SearchScreen> {
     final status = product['status']?.toString().toLowerCase() ?? 'unknown';
     bool isHalal = status == 'halal';
     bool isNonHalal = status == 'non-halal';
-    Color statusColor = isHalal ? const Color(0xFF16A34A) : (isNonHalal ? Colors.red : const Color(0xFFD97706));
+    Color statusColor = isHalal ? const Color(0xFF2E7D32) : (isNonHalal ? Colors.red : const Color(0xFFD97706));
     Color badgeBg = isHalal ? const Color(0xFFDCFCE7) : (isNonHalal ? const Color(0xFFFEE2E2) : const Color(0xFFFEF3C7));
 
     return GestureDetector(
@@ -216,7 +216,7 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget _buildLoading() {
-    return const Center(child: CircularProgressIndicator(color: primaryGreen));
+    return const Center(child: CircularProgressIndicator(color: primaryGold));
   }
 
   Widget _buildEmptyState() {
@@ -229,10 +229,10 @@ class _SearchScreenState extends State<SearchScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: primaryGreen.withOpacity(0.05),
+                color: primaryGold.withOpacity(0.05),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.qr_code_scanner_rounded, size: 40, color: primaryGreen),
+              child: const Icon(Icons.qr_code_scanner_rounded, size: 40, color: primaryGold),
             ),
             const SizedBox(height: 24),
             const Text(

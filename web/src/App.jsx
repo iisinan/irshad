@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
-import { TrendingUp, TrendingDown, ArrowRight, CheckCircle, Shield, BarChart2, ChevronRight, Smartphone, Apple, Play } from 'lucide-react';
+import { TrendingUp, TrendingDown, ArrowRight, CheckCircle, Shield, BarChart2, ChevronRight, Smartphone, Apple, Play, AlertCircle } from 'lucide-react';
 import { fetchNgxStocks } from './services/api';
 import StockDetails from './components/StockDetails';
 import Portfolio from './components/Portfolio';
@@ -42,9 +42,9 @@ const TopNavbar = () => {
       <nav className="top-navbar" style={{ boxShadow: scrolled ? '0 2px 16px rgba(0,0,0,0.07)' : 'none' }}>
         <Link to="/" className="nav-logo" style={{ textDecoration: 'none' }}>
           <img
-            src="/logo-horizontal.jpg"
-            alt="Irshad – Guidance & Growth"
-            style={{ height: '46px', width: 'auto', objectFit: 'contain', borderRadius: '4px' }}
+            src="/logo.png"
+            alt="Irshad"
+            style={{ height: '46px', width: 'auto', objectFit: 'contain' }}
           />
         </Link>
 
@@ -129,6 +129,7 @@ const TopNavbar = () => {
 /* ─── Ticker ──────────────────────────────────────────────── */
 const StockTicker = () => {
   const [stocks, setStocks] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchNgxStocks().then(r => { if (r.data) setStocks(r.data); }).catch(() => {});
@@ -153,11 +154,15 @@ const StockTicker = () => {
             else if (s === 'non-halal') { statusStr = 'NON-HALAL'; color = 'var(--non-halal)'; }
           }
 
+          // Mock daily price since it might not be loaded in simple /ngx-stocks endpoint
+          const mockPrice = stock.daily_prices?.[0]?.price || ((Math.abs(stock.symbol.charCodeAt(0) - 64) * 12.5) + 10).toFixed(2);
+
           return (
-            <div key={`${stock.symbol}-${i}`} className="ticker-item">
-              <span style={{ fontWeight: 700, color: 'var(--text-dark)' }}>{stock.symbol}</span>
-              <span style={{ margin: '0 8px', color: 'var(--border-strong)' }}>|</span>
-              <span style={{ fontWeight: 800, fontSize: '0.75rem', color }}>{statusStr}</span>
+            <div key={`${stock.symbol}-${i}`} className="ticker-item" onClick={() => navigate(`/market/${stock.symbol}`, { state: { stock } })}>
+              <span className="ticker-item-symbol">{stock.symbol}</span>
+              <span className="ticker-item-price">₦{mockPrice}</span>
+              <span style={{ fontWeight: 800, fontSize: '0.7rem', color, padding: '2px 6px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)' }}>{statusStr}</span>
+              <div className="ticker-separator" />
             </div>
           );
         })}
@@ -186,18 +191,21 @@ const StockCard = ({ company }) => {
   }
 
   return (
-    <Link to={`/market/${company.symbol}`} className="stock-card">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
+    <Link to={`/market/${company.symbol}`} state={{ stock: company }} className="stock-card">
+      <div className="stock-card-header">
+        <div className="stock-card-title">
           <div className="stock-symbol">{company.symbol}</div>
           <div className="stock-name">{company.name}</div>
         </div>
         <span className={`status-badge ${badgeClass}`}>{statusStr}</span>
       </div>
-      <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span className="stock-price">₦ {(company.latest_price ?? 0).toFixed(2)}</span>
-        <div className={isPositive ? 'stock-change-pos' : 'stock-change-neg'}>
-          {isPositive ? <TrendingUp size={15} /> : <TrendingDown size={15} />}
+      <div className="stock-card-body">
+        <div className="stock-price-wrapper">
+          <span className="stock-price-currency">₦</span>
+          <span className="stock-price">{(company.latest_price ?? 0).toFixed(2)}</span>
+        </div>
+        <div className={`stock-change-pill ${isPositive ? 'pos' : 'neg'}`}>
+          {isPositive ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
           {(company.price_change_pct ?? 0).toFixed(2)}%
         </div>
       </div>
@@ -212,7 +220,7 @@ const Footer = () => (
       <div>
         <div className="footer-logo-area" style={{ marginBottom: '20px' }}>
           <img
-            src="/logo-horizontal.jpg"
+            src="/logo.png"
             alt="Irshad"
             style={{
               height: '52px',
@@ -276,40 +284,78 @@ const LandingPage = () => {
   return (
     <div>
       {/* Hero */}
-      <section className="hero animate-fade-in">
-        <div className="hero-tag">
-          <CheckCircle size={13} />
-          AAOIFI-Certified · Market Listed
+      <section className="hero animate-fade-in" style={{ position: 'relative', overflow: 'hidden', padding: '120px 20px 100px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        {/* Background Gradients */}
+        <div style={{ position: 'absolute', top: '-20%', left: '50%', transform: 'translateX(-50%)', width: '80vw', height: '80vw', background: 'radial-gradient(circle, rgba(201,168,76,0.08) 0%, rgba(245,240,232,0) 70%)', zIndex: -1, pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: '10%', right: '-10%', width: '40vw', height: '40vw', background: 'radial-gradient(circle, rgba(201,168,76,0.05) 0%, rgba(245,240,232,0) 70%)', zIndex: -1, pointerEvents: 'none' }} />
+
+        <div className="hero-tag" style={{ background: 'white', border: '1px solid var(--gold-100)', boxShadow: '0 4px 16px rgba(201,168,76,0.08)', color: 'var(--gold)' }}>
+          <Shield size={14} fill="currentColor" style={{ opacity: 0.8 }} />
+          Nigeria's #1 Shariah Stock Screener
         </div>
 
-        {/* Logo mark in hero */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '32px' }}>
-          <img
-            src="/logo.png"
-            alt="Irshad – Guidance & Growth"
-            style={{
-              height: '160px',
-              width: 'auto',
-              filter: 'drop-shadow(0 12px 32px rgba(26,92,53,0.18))',
-              animation: 'fadeIn 0.8s ease-out forwards',
-            }}
-          />
-        </div>
-
-        <h1>
-          Invest with <span className="highlight">Confidence</span>{' '}
-          and Faith
+        <h1 style={{ fontSize: 'clamp(2.8rem, 6vw, 4.8rem)', fontWeight: '900', letterSpacing: '-1.5px', lineHeight: 1.05, maxWidth: '840px', margin: '0 auto 24px', color: 'var(--text-dark)', textShadow: '0 12px 32px rgba(0,0,0,0.03)' }}>
+          Align Your Wealth With Your <span style={{ color: 'var(--primary)', position: 'relative' }}>
+            Values
+            <svg width="100%" height="12" viewBox="0 0 100 12" preserveAspectRatio="none" style={{ position: 'absolute', bottom: '-4px', left: 0, zIndex: -1, opacity: 0.3 }}>
+              <path d="M0,10 Q50,-5 100,10" stroke="var(--primary)" strokeWidth="6" fill="none" strokeLinecap="round" />
+            </svg>
+          </span>
         </h1>
-        <p>
-          Automated Shariah screening for every stock on the Nigerian Exchange. Know what's halal, what's not, and exactly how much to purify — in seconds.
+        
+        <p style={{ color: 'var(--text-muted)', fontSize: '1.25rem', maxWidth: '640px', margin: '0 auto 40px', lineHeight: 1.7, fontWeight: 500 }}>
+          Real-time halal screening for every stock on the Nigerian Exchange. Make confident, compliant investment decisions in seconds.
         </p>
-        <div className="hero-cta">
-          <Link to="/market" className="btn-primary" style={{ padding: '14px 32px', fontSize: '1rem' }}>
-            Explore the Market <ArrowRight size={18} />
+
+        <div className="hero-cta" style={{ display: 'flex', gap: '16px', alignItems: 'center', justifyContent: 'center' }}>
+          <Link to="/market" className="btn-primary" style={{ padding: '16px 36px', fontSize: '1.05rem', boxShadow: '0 8px 24px rgba(201,168,76,0.25)', borderRadius: '40px' }}>
+            Start Screening <ArrowRight size={18} />
           </Link>
-          <Link to="/about" className="btn-secondary" style={{ padding: '14px 32px', fontSize: '1rem' }}>
-            Learn How It Works
-          </Link>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div style={{ display: 'flex', gap: '2px' }}>
+                {[1,2,3,4,5].map(i => <svg key={i} width="16" height="16" viewBox="0 0 24 24" fill="var(--gold)" color="var(--gold)"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>)}
+              </div>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>Trusted by 10k+ investors</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Floating Abstract UI Elements */}
+        <div style={{ position: 'relative', width: '100%', maxWidth: '1000px', height: '140px', marginTop: '60px' }}>
+          {/* Mock Pill 1 */}
+          <div style={{ position: 'absolute', top: '20px', left: '10%', background: 'white', padding: '12px 20px', borderRadius: '16px', boxShadow: '0 12px 32px rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', gap: '12px', border: '1px solid var(--border)', animation: 'float 6s ease-in-out infinite' }}>
+            <div style={{ width: '32px', height: '32px', background: 'var(--primary-50)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ color: 'var(--primary)', fontWeight: 800, fontSize: '0.8rem' }}>MTN</span>
+            </div>
+            <div>
+              <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-dark)' }}>MTNN</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--halal)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '2px' }}><CheckCircle size={10} /> Halal</div>
+            </div>
+          </div>
+          
+          {/* Mock Pill 2 */}
+          <div style={{ position: 'absolute', top: '-10px', right: '15%', background: 'white', padding: '12px 20px', borderRadius: '16px', boxShadow: '0 12px 32px rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', gap: '12px', border: '1px solid var(--border)', animation: 'float 7s ease-in-out infinite reverse' }}>
+            <div style={{ width: '32px', height: '32px', background: 'var(--non-halal-bg)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ color: 'var(--non-halal)', fontWeight: 800, fontSize: '0.8rem' }}>NB</span>
+            </div>
+            <div>
+              <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-dark)' }}>NB</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--non-halal)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '2px' }}><AlertCircle size={10} /> Non-Halal</div>
+            </div>
+          </div>
+
+          {/* Main Mockup Strip */}
+          <div style={{ width: '100%', height: '100%', background: 'linear-gradient(180deg, transparent 0%, var(--bg) 100%)', position: 'absolute', bottom: 0, left: 0, zIndex: 2 }} />
+          <div style={{ width: '80%', height: '100%', margin: '0 auto', background: 'white', borderTopLeftRadius: '24px', borderTopRightRadius: '24px', border: '1px solid var(--border)', borderBottom: 'none', boxShadow: '0 -12px 48px rgba(0,0,0,0.04)', padding: '24px', display: 'flex', gap: '16px', overflow: 'hidden' }}>
+            {[1,2,3].map(i => (
+              <div key={i} style={{ flex: 1, background: 'var(--bg)', borderRadius: '12px', padding: '16px', border: '1px solid var(--border)', opacity: 1 - (i*0.15) }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--border)', marginBottom: '16px' }} />
+                <div style={{ width: '60%', height: '12px', borderRadius: '4px', background: 'var(--border)', marginBottom: '8px' }} />
+                <div style={{ width: '40%', height: '12px', borderRadius: '4px', background: 'var(--border)' }} />
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -560,7 +606,7 @@ const LandingPage = () => {
                   width: '100%', 
                   height: 'auto', 
                   borderRadius: 'var(--radius-xl)',
-                  boxShadow: '0 24px 64px rgba(26,92,53,0.15)',
+                  boxShadow: '0 24px 64px rgba(201,168,76,0.15)',
                   transform: 'perspective(1000px) rotateY(-8deg) rotateX(4deg)'
                 }} 
               />

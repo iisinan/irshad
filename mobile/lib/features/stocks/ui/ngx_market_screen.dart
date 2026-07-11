@@ -11,12 +11,12 @@ class NgxMarketScreen extends StatefulWidget {
 
 class _NgxMarketScreenState extends State<NgxMarketScreen> {
   // Theme Constants
-  static const Color bgColor = Color(0xFFFAFAFA);
-  static const Color primaryGreen = Color(0xFF16A34A);
-  static const Color textDark = Color(0xFF111827);
-  static const Color textMuted = Color(0xFF6B7280);
+  static const Color bgColor = Color(0xFFF5F0E8);
+  static const Color primaryGold = Color(0xFFC9A84C);
+  static const Color textDark = Color(0xFF1A1208);
+  static const Color textMuted = Color(0xFF9A8C70);
   static const Color cardBg = Colors.white;
-  static const Color divider = Color(0xFFE5E7EB);
+  static const Color divider = Color(0xFFE8E2D9);
 
   @override
   void initState() {
@@ -41,7 +41,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
         centerTitle: false,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: primaryGreen),
+            icon: const Icon(Icons.refresh, color: primaryGold),
             onPressed: _fetchNgxData,
           ),
         ],
@@ -49,7 +49,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
       body: Consumer<StockProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading && provider.ngxStocks.isEmpty) {
-            return const Center(child: CircularProgressIndicator(color: primaryGreen));
+            return const Center(child: CircularProgressIndicator(color: primaryGold));
           }
 
           if (provider.ngxStocks.isEmpty) {
@@ -57,7 +57,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
           }
 
           return RefreshIndicator(
-            color: primaryGreen,
+            color: primaryGold,
             onRefresh: _fetchNgxData,
             child: ListView.builder(
               padding: const EdgeInsets.all(16.0),
@@ -103,7 +103,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
     IconData statusIcon;
     switch (status) {
       case 'halal':
-        statusColor = const Color(0xFF16A34A); // Green
+        statusColor = const Color(0xFF2E7D32); // Green
         statusIcon = Icons.check_circle_rounded;
         break;
       case 'non-halal':

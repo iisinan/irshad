@@ -12,9 +12,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  static const Color primaryGreen = Color(0xFF16A34A);
-  static const Color textDark = Color(0xFF111827);
-  static const Color textMuted = Color(0xFF6B7280);
+  static const Color primaryGold = Color(0xFFC9A84C);
+  static const Color textDark = Color(0xFF1A1208);
+  static const Color textMuted = Color(0xFF9A8C70);
 
   final List<Map<String, String>> _onboardingData = [
     {
@@ -93,10 +93,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: primaryGreen.withOpacity(0.05),
+              color: primaryGold.withOpacity(0.05),
               shape: BoxShape.circle,
             ),
-            child: Icon(iconData, size: 80, color: primaryGreen),
+            child: Icon(iconData, size: 80, color: primaryGold),
           ),
           const SizedBox(height: 60),
           Text(
@@ -139,7 +139,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 width: _currentPage == index ? 24 : 8,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: _currentPage == index ? primaryGreen : Colors.grey[300],
+                  color: _currentPage == index ? primaryGold : Colors.grey[300],
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),

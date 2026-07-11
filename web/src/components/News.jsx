@@ -20,42 +20,42 @@ const NewsPage = () => (
           { 
             tag: 'Market Update', 
             date: 'Jul 9, 2026', 
-            gradient: 'linear-gradient(135deg, #0f4c31, #1a7a4f)', 
+            gradient: 'linear-gradient(135deg, #1A1208, #2a1f11)', 
             title: 'Market records positive trading week amidst new regulations', 
             excerpt: 'The Nigerian equities market closed on a positive note this week as investors reacted favorably to the CBN revised directives on foreign exchange.' 
           },
           { 
             tag: 'Islamic Finance', 
             date: 'Jul 2, 2026', 
-            gradient: 'linear-gradient(135deg, #C9952A, #eab308)', 
+            gradient: 'linear-gradient(135deg, #C9A84C, #e0bc59)', 
             title: 'Understanding AAOIFI Standards for Retail Investors in 2026', 
             excerpt: 'A deep dive into how the new AAOIFI standards affect methodology and what it means for everyday Nigerian investors building halal portfolios.' 
           },
           { 
             tag: 'Company News', 
             date: 'Jun 25, 2026', 
-            gradient: 'linear-gradient(135deg, #1e3a8a, #3b82f6)', 
+            gradient: 'radial-gradient(circle at top right, #F5F0E8, #e5dfd4)', 
             title: 'MTN Nigeria announces green bond and sustainability initiative', 
             excerpt: 'Following their Q2 earnings, MTN Nigeria unveiled a sweeping new environmental initiative aimed at reducing carbon emissions across cell sites.' 
           },
           { 
             tag: 'Platform', 
             date: 'Jun 18, 2026', 
-            gradient: 'linear-gradient(135deg, #1A5C35, #25A35A)', 
+            gradient: 'linear-gradient(135deg, #0d0a04, #1a1409)', 
             title: 'Irshad launches automated Purification Calculator for dividends', 
             excerpt: 'We are excited to announce the launch of our fully automated purification calculator, enabling users to calculate their exact obligation.' 
           },
           { 
             tag: 'Market Update', 
             date: 'Jun 10, 2026', 
-            gradient: 'linear-gradient(135deg, #0e7490, #22d3ee)', 
+            gradient: 'linear-gradient(135deg, #A48430, #C9A84C)', 
             title: 'Dangote Cement beats Q2 estimates; compliance status remains Halal', 
             excerpt: 'DANGCEM posted strong quarterly results driven by improved cement prices and operational efficiencies across the group.' 
           },
           { 
             tag: 'Islamic Finance', 
             date: 'Jun 2, 2026', 
-            gradient: 'linear-gradient(135deg, #92400e, #fbbf24)', 
+            gradient: 'linear-gradient(135deg, #2a2012, #1A1208)', 
             title: 'Zakat on stocks: A comprehensive guide for investors', 
             excerpt: 'Calculating Zakat on listed equities can be complex. This guide breaks down the scholarly opinions and provides a practical framework.' 
           },

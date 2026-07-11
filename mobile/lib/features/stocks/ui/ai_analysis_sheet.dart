@@ -97,7 +97,7 @@ class _AiAnalysisSheetState extends State<AiAnalysisSheet> {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w800,
-                          color: Color(0xFF111827),
+                          color: Color(0xFF1A1208),
                           letterSpacing: -0.5,
                         ),
                       ),
@@ -146,8 +146,8 @@ class _AiAnalysisSheetState extends State<AiAnalysisSheet> {
                         data: _analysis ?? 'No analysis available.',
                         styleSheet: MarkdownStyleSheet(
                           p: const TextStyle(fontSize: 16, height: 1.6, color: Color(0xFF374151)),
-                          h1: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF111827)),
-                          h2: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF111827)),
+                          h1: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF1A1208)),
+                          h2: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1A1208)),
                           listBullet: const TextStyle(color: Colors.blue, fontSize: 18),
                         ),
                       ),

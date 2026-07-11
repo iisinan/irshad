@@ -71,12 +71,12 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // Theme Constants
-  static const Color bgColor = Color(0xFFFAFAFA);
-  static const Color primaryGreen = Color(0xFF16A34A);
-  static const Color textDark = Color(0xFF111827);
-  static const Color textMuted = Color(0xFF6B7280);
+  static const Color bgColor = Color(0xFFF5F0E8);
+  static const Color primaryGold = Color(0xFFC9A84C);
+  static const Color textDark = Color(0xFF1A1208);
+  static const Color textMuted = Color(0xFF9A8C70);
   static const Color cardBg = Colors.white;
-  static const Color divider = Color(0xFFE5E7EB);
+  static const Color divider = Color(0xFFE8E2D9);
 
   void _login() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
@@ -170,7 +170,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ForgotPasswordScreen())),
                     style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
                     child: const Text('Forgot Password?', 
-                      style: TextStyle(color: primaryGreen, fontWeight: FontWeight.w700, fontSize: 13)),
+                      style: TextStyle(color: primaryGold, fontWeight: FontWeight.w700, fontSize: 13)),
                   ),
                 ],
               ),
@@ -213,7 +213,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: _isLoading ? null : _authenticateWithBiometrics,
                         style: OutlinedButton.styleFrom(
                           padding: EdgeInsets.zero,
-                          side: const BorderSide(color: Color(0xFFE5E7EB)),
+                          side: const BorderSide(color: Color(0xFFE8E2D9)),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                         ),
                         child: const Icon(Icons.fingerprint_rounded, color: textDark, size: 28),
@@ -244,7 +244,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.verified_user_rounded, size: 14, color: primaryGreen),
+                  Icon(Icons.verified_user_rounded, size: 14, color: primaryGold),
                   SizedBox(width: 8),
                   Text(
                     'Secure & Shariah Compliant',

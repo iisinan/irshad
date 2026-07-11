@@ -1,23 +1,28 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2 } from 'lucide-react';
+import { useParams, Link, useLocation } from 'react-router-dom';
+import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2, Brain } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { fetchStockDetails, fetchAiAnalysis } from '../services/api';
 import ReactMarkdown from 'react-markdown';
 const StockDetails = () => {
   const { symbol } = useParams();
-  const [stock, setStock] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const location = useLocation();
+  // Use optimistic data passed via router state for instant render
+  const optimisticStock = location.state?.stock || null;
+  const [stock, setStock] = useState(optimisticStock);
+  const [loading, setLoading] = useState(!optimisticStock); // only show full spinner if no optimistic data
+  const [enriching, setEnriching] = useState(!!optimisticStock); // silent background fetch
   const [dividendInput, setDividendInput] = useState('');
   const [aiAnalysis, setAiAnalysis] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState(null);
 
   useEffect(() => {
+    // Always fetch full data in background; merge so we add financials & chart
     fetchStockDetails(symbol)
       .then(r => { if (r.data) setStock(r.data); })
       .catch(console.error)
-      .finally(() => setLoading(false));
+      .finally(() => { setLoading(false); setEnriching(false); });
   }, [symbol]);
 
   if (loading) {
@@ -124,6 +129,14 @@ const StockDetails = () => {
         <ArrowLeft size={16} /> Back to Market
       </Link>
 
+      {/* Subtle enriching indicator */}
+      {enriching && (
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginLeft: '16px', color: 'var(--text-muted)', fontSize: '0.78rem', verticalAlign: 'middle' }}>
+          <div className="spinner" style={{ width: '12px', height: '12px', borderWidth: '2px' }} />
+          Loading full data...
+        </div>
+      )}
+
       {/* ─── Header Card ─── */}
       <div className="detail-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '24px', position: 'relative', overflow: 'hidden' }}>
         {/* Background logo watermark */}
@@ -177,14 +190,13 @@ const StockDetails = () => {
         {/* Left Column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           
-          {/* AI Assistant */}
-          <div className="detail-panel" style={{ background: 'linear-gradient(145deg, var(--bg) 0%, rgba(59, 130, 246, 0.05) 100%)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+          <div className="detail-panel" style={{ background: 'var(--bg-section)', border: '1px solid var(--border-strong)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <div className="detail-section-label" style={{ marginBottom: 0, color: '#3b82f6', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '1.2rem' }}>✨</span> AI Halal Assistant
+              <div className="detail-section-label" style={{ marginBottom: 0, color: 'var(--gold)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Brain size={16} /> Irshad AI
               </div>
               {!aiAnalysis && !aiLoading && (
-                <button onClick={handleAskAI} className="btn-primary" style={{ padding: '8px 16px', fontSize: '0.85rem', background: '#3b82f6', color: '#fff', border: 'none' }}>
+                <button onClick={handleAskAI} className="btn-primary" style={{ padding: '8px 16px', fontSize: '0.85rem', background: 'var(--gold)', color: '#1A1208', border: 'none' }}>
                   Ask Gemini AI
                 </button>
               )}

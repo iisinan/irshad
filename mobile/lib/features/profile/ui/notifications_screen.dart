@@ -37,11 +37,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   // Theme Constants
-  static const Color bgColor = Color(0xFFFAFAFA);
-  static const Color primaryGreen = Color(0xFF16A34A);
-  static const Color textDark = Color(0xFF111827);
-  static const Color textMuted = Color(0xFF6B7280);
-  static const Color divider = Color(0xFFE5E7EB);
+  static const Color bgColor = Color(0xFFF5F0E8);
+  static const Color primaryGold = Color(0xFFC9A84C);
+  static const Color textDark = Color(0xFF1A1208);
+  static const Color textMuted = Color(0xFF9A8C70);
+  static const Color divider = Color(0xFFE8E2D9);
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +78,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     
     switch (status) {
       case 'halal':
-        iconColor = primaryGreen;
+        iconColor = primaryGold;
         bgIconColor = const Color(0xFFDCFCE7);
         iconData = Icons.verified_user_rounded;
         break;
@@ -98,10 +98,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: isRead ? divider : primaryGreen.withOpacity(0.3)),
+        border: Border.all(color: isRead ? divider : primaryGold.withOpacity(0.3)),
         boxShadow: isRead ? null : [
           BoxShadow(
-            color: primaryGreen.withOpacity(0.05),
+            color: primaryGold.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           )
@@ -167,10 +167,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: primaryGreen.withOpacity(0.05),
+                color: primaryGold.withOpacity(0.05),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.notifications_none_rounded, size: 40, color: primaryGreen),
+              child: const Icon(Icons.notifications_none_rounded, size: 40, color: primaryGold),
             ),
             const SizedBox(height: 24),
             const Text(

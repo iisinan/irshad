@@ -18,11 +18,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
   String? _filter;
 
   // Theme Constants
-  static const Color bgColor = Color(0xFFFAFAFA);
-  static const Color primaryGreen = Color(0xFF16A34A);
-  static const Color textDark = Color(0xFF111827);
-  static const Color textMuted = Color(0xFF6B7280);
-  static const Color divider = Color(0xFFE5E7EB);
+  static const Color bgColor = Color(0xFFF5F0E8);
+  static const Color primaryGold = Color(0xFFC9A84C);
+  static const Color textDark = Color(0xFF1A1208);
+  static const Color textMuted = Color(0xFF9A8C70);
+  static const Color divider = Color(0xFFE8E2D9);
 
   @override
   void initState() {
@@ -82,7 +82,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: primaryGreen))
+          ? const Center(child: CircularProgressIndicator(color: primaryGold))
           : _history.isEmpty
               ? _buildEmptyState()
               : _buildTimeline(),
@@ -192,10 +192,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: primaryGreen.withOpacity(0.05),
+                color: primaryGold.withOpacity(0.05),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.history_rounded, size: 40, color: primaryGreen),
+              child: const Icon(Icons.history_rounded, size: 40, color: primaryGold),
             ),
             const SizedBox(height: 24),
             Text(

@@ -39,11 +39,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   // Theme Constants
-  static const Color bgColor = Color(0xFFFAFAFA);
-  static const Color primaryGreen = Color(0xFF16A34A);
-  static const Color textDark = Color(0xFF111827);
-  static const Color textMuted = Color(0xFF6B7280);
-  static const Color divider = Color(0xFFE5E7EB);
+  static const Color bgColor = Color(0xFFF5F0E8);
+  static const Color primaryGold = Color(0xFFC9A84C);
+  static const Color textDark = Color(0xFF1A1208);
+  static const Color textMuted = Color(0xFF9A8C70);
+  static const Color divider = Color(0xFFE8E2D9);
   
   final ApiService _apiService = ApiService();
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
@@ -234,7 +234,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         value: _selectedLanguage,
         underline: const SizedBox(),
         dropdownColor: Colors.white,
-        style: const TextStyle(color: primaryGreen, fontWeight: FontWeight.w800, fontSize: 14),
+        style: const TextStyle(color: primaryGold, fontWeight: FontWeight.w800, fontSize: 14),
         icon: const Icon(Icons.keyboard_arrow_down_rounded, color: textMuted),
         items: _languages.map((l) => DropdownMenuItem(value: l, child: Text(l))).toList(),
         onChanged: (val) {
@@ -261,7 +261,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: textDark)),
       value: value,
       onChanged: onChanged,
-      activeColor: primaryGreen,
+      activeColor: primaryGold,
       contentPadding: const EdgeInsets.only(left: 16, right: 8),
     );
   }

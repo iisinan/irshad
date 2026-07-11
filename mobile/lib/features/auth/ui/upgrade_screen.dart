@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 class UpgradeScreen extends StatelessWidget {
   const UpgradeScreen({super.key});
 
-  static const Color bgColor = Color(0xFFFAFAFA);
-  static const Color primaryGreen = Color(0xFF16A34A);
-  static const Color textDark = Color(0xFF111827);
-  static const Color textMuted = Color(0xFF6B7280);
-  static const Color divider = Color(0xFFE5E7EB);
+  static const Color bgColor = Color(0xFFF5F0E8);
+  static const Color primaryGold = Color(0xFFC9A84C);
+  static const Color textDark = Color(0xFF1A1208);
+  static const Color textMuted = Color(0xFF9A8C70);
+  static const Color divider = Color(0xFFE8E2D9);
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +19,7 @@ class UpgradeScreen extends StatelessWidget {
         backgroundColor: bgColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF111827), size: 20),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF1A1208), size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -39,12 +39,12 @@ class UpgradeScreen extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.auto_awesome_rounded, size: 14, color: primaryGreen),
+                    const Icon(Icons.auto_awesome_rounded, size: 14, color: primaryGold),
                     const SizedBox(width: 6),
                     Text(
                       'IRSHAD Premium',
                       style: TextStyle(
-                        color: primaryGreen,
+                        color: primaryGold,
                         fontWeight: FontWeight.w700,
                         fontSize: 12,
                         letterSpacing: 0.3,
@@ -82,7 +82,7 @@ class UpgradeScreen extends StatelessWidget {
                 Icons.verified_rounded,
                 'Unlimited Shariah Screening',
                 'Screen any stock globally against AAOIFI standards',
-                primaryGreen,
+                primaryGold,
               ),
               _buildFeature(
                 Icons.show_chart_rounded,
@@ -123,7 +123,7 @@ class UpgradeScreen extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.info_outline_rounded, color: primaryGreen, size: 18),
+                    const Icon(Icons.info_outline_rounded, color: primaryGold, size: 18),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -214,7 +214,7 @@ class UpgradeScreen extends StatelessWidget {
                 Text(
                   title,
                   style: const TextStyle(
-                    color: Color(0xFF111827),
+                    color: Color(0xFF1A1208),
                     fontWeight: FontWeight.w700,
                     fontSize: 14,
                   ),
@@ -233,7 +233,7 @@ class UpgradeScreen extends StatelessWidget {
           ),
           const Padding(
             padding: EdgeInsets.only(top: 10),
-            child: Icon(Icons.check_circle_rounded, color: primaryGreen, size: 18),
+            child: Icon(Icons.check_circle_rounded, color: primaryGold, size: 18),
           ),
         ],
       ),

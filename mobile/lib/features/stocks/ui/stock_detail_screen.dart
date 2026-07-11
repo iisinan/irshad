@@ -28,11 +28,11 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
   bool _isAlreadyFavorited = false;
 
   // Theme Constants
-  static const Color bgColor = Color(0xFFFAFAFA);
-  static const Color primaryGreen = Color(0xFF16A34A);
-  static const Color textDark = Color(0xFF111827);
-  static const Color textMuted = Color(0xFF6B7280);
-  static const Color divider = Color(0xFFE5E7EB);
+  static const Color bgColor = Color(0xFFF5F0E8);
+  static const Color primaryGold = Color(0xFFC9A84C);
+  static const Color textDark = Color(0xFF1A1208);
+  static const Color textMuted = Color(0xFF9A8C70);
+  static const Color divider = Color(0xFFE8E2D9);
 
   @override
   void initState() {
@@ -114,7 +114,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     
     bool isHalal = status == 'halal';
     bool isNonHalal = status == 'non-halal';
-    Color statusColor = isHalal ? const Color(0xFF16A34A) : (isNonHalal ? Colors.red : const Color(0xFFD97706));
+    Color statusColor = isHalal ? const Color(0xFF2E7D32) : (isNonHalal ? Colors.red : const Color(0xFFD97706));
     Color badgeBg = isHalal ? const Color(0xFFDCFCE7) : (isNonHalal ? const Color(0xFFFEE2E2) : const Color(0xFFFEF3C7));
     String statusLabel = isHalal ? 'SHARIAH COMPLIANT' : (isNonHalal ? 'NOT COMPLIANT' : 'QUESTIONABLE');
 
@@ -173,7 +173,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                          style: TextStyle(
                            fontSize: 12, 
                            fontWeight: FontWeight.w700, 
-                           color: _currentStock['price_change_pct'] >= 0 ? primaryGreen : Colors.red
+                           color: _currentStock['price_change_pct'] >= 0 ? primaryGold : Colors.red
                          )
                        ),
                      )
@@ -188,7 +188,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                 child: ElevatedButton(
                   onPressed: () => TradeBottomSheet.show(context, _currentStock),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryGreen,
+                    backgroundColor: primaryGold,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     elevation: 0,
@@ -502,13 +502,13 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
             LineChartBarData(
               spots: spots,
               isCurved: true,
-              color: primaryGreen,
+              color: primaryGold,
               barWidth: 3,
               isStrokeCapRound: true,
               dotData: FlDotData(show: false),
               belowBarData: BarAreaData(
                 show: true,
-                color: primaryGreen.withOpacity(0.1),
+                color: primaryGold.withOpacity(0.1),
               ),
             ),
           ],
@@ -654,7 +654,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
           children: [
             Text(title, style: const TextStyle(color: textDark, fontWeight: FontWeight.w700, fontSize: 14)),
             Text('${value.toStringAsFixed(2)}% / ${limit.toInt()}%', 
-              style: TextStyle(color: isFail ? Colors.red : primaryGreen, fontWeight: FontWeight.w800, fontSize: 12)),
+              style: TextStyle(color: isFail ? Colors.red : primaryGold, fontWeight: FontWeight.w800, fontSize: 12)),
           ],
         ),
         const SizedBox(height: 12),
@@ -669,7 +669,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
               height: 8,
               width: (MediaQuery.of(context).size.width - 80) * progress,
               decoration: BoxDecoration(
-                color: isFail ? Colors.red : primaryGreen, 
+                color: isFail ? Colors.red : primaryGold, 
                 borderRadius: BorderRadius.circular(4)
               ),
             ),
@@ -728,7 +728,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
         children: [
           const Row(
             children: [
-              Icon(Icons.volunteer_activism_rounded, color: primaryGreen, size: 20),
+              Icon(Icons.volunteer_activism_rounded, color: primaryGold, size: 20),
               const SizedBox(width: 10),
               const Text('Purification (Zakat al-Mustaghalat)', 
                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14)),
@@ -748,9 +748,9 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
               filled: true,
               fillColor: Colors.white.withOpacity(0.05),
               prefixText: '₦ ',
-              prefixStyle: const TextStyle(color: primaryGreen, fontWeight: FontWeight.w800),
+              prefixStyle: const TextStyle(color: primaryGold, fontWeight: FontWeight.w800),
               enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: primaryGreen)),
+              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: primaryGold)),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             ),
             onChanged: (v) => _calculatePurification(v, nonCompliantRev),
@@ -766,7 +766,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                   const Text('PURIFICATION AMOUNT', style: TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.w800)),
                   const SizedBox(height: 4),
                   Text('₦ ${_purificationResult.toStringAsFixed(2)}', 
-                    style: const TextStyle(color: primaryGreen, fontSize: 32, fontWeight: FontWeight.w900)),
+                    style: const TextStyle(color: primaryGold, fontSize: 32, fontWeight: FontWeight.w900)),
                   const SizedBox(height: 8),
                   Text('Purification rate: $nonCompliantRev%', 
                     style: const TextStyle(color: Colors.white30, fontSize: 11)),

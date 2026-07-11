@@ -65,8 +65,9 @@ class IrshadApp extends StatelessWidget {
   final String initialRoute;
   const IrshadApp({super.key, this.initialRoute = '/onboarding'});
 
-  static const Color bgColor = Color(0xFFFAFAFA);
-  static const Color primaryGreen = Color(0xFF16A34A);
+  static const Color bgColor = Color(0xFFF5F0E8); // Cream
+  static const Color primaryGold = Color(0xFFC9A84C); // Gold
+  static const Color darkSlate = Color(0xFF1A1208); // Dark Slate
 
   @override
   Widget build(BuildContext context) {
@@ -83,20 +84,20 @@ class IrshadApp extends StatelessWidget {
           centerTitle: false,
           elevation: 0,
           backgroundColor: Colors.transparent,
-          foregroundColor: Color(0xFF111827),
+          foregroundColor: darkSlate,
         ),
         colorScheme: const ColorScheme.light(
-          primary: primaryGreen,
-          secondary: Color(0xFFD97706),
+          primary: primaryGold,
+          secondary: Color(0xFFE8C96A),
           surface: Colors.white,
-          onSurface: Color(0xFF111827),
+          onSurface: darkSlate,
           background: bgColor,
         ),
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          backgroundColor: Colors.white,
-          selectedItemColor: primaryGreen,
-          unselectedItemColor: Color(0xFF9CA3AF),
-          elevation: 8,
+          backgroundColor: darkSlate,
+          selectedItemColor: primaryGold,
+          unselectedItemColor: Color(0xFF9A8C70),
+          elevation: 16,
           selectedLabelStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 11),
           unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w500, fontSize: 11),
         ),
@@ -260,7 +261,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       ),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: Color(0xFFE5E7EB), width: 1)),
+          border: Border(top: BorderSide(color: Color(0xFFE8E2D9), width: 1)),
         ),
         child: BottomNavigationBar(
           currentIndex: _selectedIndex,

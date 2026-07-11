@@ -16,11 +16,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final ApiService _apiService = ApiService();
 
   // Theme Constants
-  static const Color bgColor = Color(0xFFFAFAFA);
-  static const Color primaryGreen = Color(0xFF16A34A);
-  static const Color textDark = Color(0xFF111827);
-  static const Color textMuted = Color(0xFF6B7280);
-  static const Color divider = Color(0xFFE5E7EB);
+  static const Color bgColor = Color(0xFFF5F0E8);
+  static const Color primaryGold = Color(0xFFC9A84C);
+  static const Color textDark = Color(0xFF1A1208);
+  static const Color textMuted = Color(0xFF9A8C70);
+  static const Color divider = Color(0xFFE8E2D9);
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
@@ -72,7 +72,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.lock_reset_rounded, color: primaryGreen, size: 48),
+          const Icon(Icons.lock_reset_rounded, color: primaryGold, size: 48),
           const SizedBox(height: 24),
           const Text(
             'Reset Password',
@@ -156,7 +156,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             color: const Color(0xFFDCFCE7),
             borderRadius: BorderRadius.circular(24),
           ),
-          child: const Icon(Icons.mark_email_read_rounded, color: primaryGreen, size: 48),
+          child: const Icon(Icons.mark_email_read_rounded, color: primaryGold, size: 48),
         ),
         const SizedBox(height: 24),
         const Text(

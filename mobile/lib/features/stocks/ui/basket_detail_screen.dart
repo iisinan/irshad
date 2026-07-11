@@ -14,12 +14,12 @@ class BasketDetailScreen extends StatefulWidget {
 
 class _BasketDetailScreenState extends State<BasketDetailScreen> {
   // Theme Constants
-  static const Color bgColor = Color(0xFFFAFAFA);
-  static const Color primaryGreen = Color(0xFF16A34A);
-  static const Color textDark = Color(0xFF111827);
-  static const Color textMuted = Color(0xFF6B7280);
-  static const Color divider = Color(0xFFE5E7EB);
-  static const Color compliantGreen = Color(0xFF16A34A);
+  static const Color bgColor = Color(0xFFF5F0E8);
+  static const Color primaryGold = Color(0xFFC9A84C);
+  static const Color textDark = Color(0xFF1A1208);
+  static const Color textMuted = Color(0xFF9A8C70);
+  static const Color divider = Color(0xFFE8E2D9);
+  static const Color compliantGreen = Color(0xFF2E7D32);
   static const Color questionableAmber = Color(0xFFD97706);
 
   List<dynamic> _basketStocks = [];
@@ -109,7 +109,7 @@ class _BasketDetailScreenState extends State<BasketDetailScreen> {
           ),
           if (_isLoading)
             const SliverFillRemaining(
-              child: Center(child: CircularProgressIndicator(color: primaryGreen)),
+              child: Center(child: CircularProgressIndicator(color: primaryGold)),
             )
           else if (_basketStocks.isEmpty)
             const SliverFillRemaining(

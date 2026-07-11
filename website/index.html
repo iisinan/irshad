@@ -3,125 +3,345 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IRSHAD | Premium Shariah-Compliant Investment & Insights</title>
-  <meta name="description" content="The ultimate Shariah-compliant stock screener and product scanner for the discerning Muslim investor." />
-  <link rel="icon" type="image/png" href="/images/logo.png" />
+  <title>IRSHAD | Guidance · Integrity · Leadership</title>
+  <meta name="description" content="The premium Shariah-compliant stock screener and product scanner for the discerning Muslim investor. Powered by AAOIFI gold standard screening." />
+  <link rel="icon" type="image/png" href="./public/images/irshad-logo.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
+
+  <!-- ── Navbar ──────────────────────────────────────────────── -->
   <nav id="navbar">
     <div class="container nav-content">
       <div class="logo">
-        <img src="/images/logo.png" alt="IRSHAD" class="logo-img">
-        <span class="logo-text">IRSHAD</span>
+        <a href="#hero"><img src="./public/images/irshad-logo.png" alt="IRSHAD" class="logo-img"></a>
       </div>
       <ul class="nav-links">
-        <li><a href="#features">Features</a></li>
-        <li><a href="#shariah">Shariah Standard</a></li>
-        <li><a href="#invest">Investing</a></li>
+        <li><a href="#hero">Home</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="http://localhost:5173/market">Market</a></li>
+        <li><a href="http://localhost:5173/portfolio">Portfolio</a></li>
+        <li><a href="http://localhost:5173/news">News</a></li>
       </ul>
-      <a href="#download" class="btn btn-primary nav-cta">Get App</a>
+      <div class="nav-actions" style="display: flex; gap: 20px; align-items: center;">
+        <a href="http://localhost:5173/login" style="font-size: 14px; font-weight: 700; color: var(--text-dark); letter-spacing: 0.5px; text-transform: uppercase;">Logon</a>
+        <a href="http://localhost:5173/register" class="btn btn-primary nav-cta">Get Started</a>
+      </div>
+    </div>
+    <!-- ── Stock Ticker ──────────────────────────────────────── -->
+    <div class="ticker-wrap">
+      <div class="ticker">
+        <!-- Ticker Items -->
+        <div class="ticker-item">MTNN <span class="up">▲ 1.2%</span></div>
+        <div class="ticker-item">DANGCEM <span class="down">▼ 0.5%</span></div>
+        <div class="ticker-item">AIRTELAFRI <span class="up">▲ 2.4%</span></div>
+        <div class="ticker-item">ZENITHBANK <span class="up">▲ 0.8%</span></div>
+        <div class="ticker-item">GTCO <span class="down">▼ 1.1%</span></div>
+        <div class="ticker-item">BUAFOODS <span class="up">▲ 3.0%</span></div>
+        <div class="ticker-item">SEPLAT <span class="up">▲ 1.5%</span></div>
+        <div class="ticker-item">WAPCO <span class="down">▼ 0.2%</span></div>
+        <div class="ticker-item">UBA <span class="up">▲ 0.9%</span></div>
+        <div class="ticker-item">ACCESS <span class="up">▲ 1.1%</span></div>
+        <div class="ticker-item">NESTLE <span class="down">▼ 1.4%</span></div>
+        <div class="ticker-item">PRESCO <span class="up">▲ 2.1%</span></div>
+        <!-- Duplicated for Infinite Loop -->
+        <div class="ticker-item">MTNN <span class="up">▲ 1.2%</span></div>
+        <div class="ticker-item">DANGCEM <span class="down">▼ 0.5%</span></div>
+        <div class="ticker-item">AIRTELAFRI <span class="up">▲ 2.4%</span></div>
+        <div class="ticker-item">ZENITHBANK <span class="up">▲ 0.8%</span></div>
+        <div class="ticker-item">GTCO <span class="down">▼ 1.1%</span></div>
+        <div class="ticker-item">BUAFOODS <span class="up">▲ 3.0%</span></div>
+        <div class="ticker-item">SEPLAT <span class="up">▲ 1.5%</span></div>
+        <div class="ticker-item">WAPCO <span class="down">▼ 0.2%</span></div>
+        <div class="ticker-item">UBA <span class="up">▲ 0.9%</span></div>
+        <div class="ticker-item">ACCESS <span class="up">▲ 1.1%</span></div>
+        <div class="ticker-item">NESTLE <span class="down">▼ 1.4%</span></div>
+        <div class="ticker-item">PRESCO <span class="up">▲ 2.1%</span></div>
+      </div>
     </div>
   </nav>
 
+  <!-- ── Hero ────────────────────────────────────────────────── -->
   <header id="hero">
     <div class="container hero-content">
       <div class="hero-text">
-        <div class="badge">SHARIAH-COMPLIANT FINTECH</div>
-        <h1>Empower Your Wealth <br><span class="gradient-text">The Halal Way</span></h1>
-        <p>Expertly screened stocks, ingredient-level product verification, and automated purification calculations. Precision for the modern Muslim investor.</p>
+        <div class="badge">✦ Shariah-Compliant Fintech · Nigeria</div>
+        <h1>Empower Your Wealth<br><span class="gradient-text">The Halal Way</span></h1>
+        <p>Expert stock screening, ingredient-level product verification, and automated purification calculations. Precision built for the modern Muslim investor.</p>
         <div class="hero-actions">
-          <a href="#download" class="btn btn-primary">Start Monitoring</a>
-          <a href="#features" class="btn btn-outline">Explore Features</a>
+          <a href="#download" class="btn btn-primary">Start Investing</a>
+          <a href="#about" class="btn btn-outline">Explore IRSHAD</a>
         </div>
         <div class="app-badges">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="App Store" />
-          <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Play Store" />
+          <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="Download on the App Store" />
+          <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play" />
         </div>
       </div>
       <div class="hero-visual">
-        <img src="/images/hero.png" alt="IRSHAD Insights" class="floating-image">
+        <div class="phone-mockup">
+          <div class="phone-frame">
+            <div class="phone-screen">
+              <img src="./public/images/hero.png" alt="IRSHAD App" class="app-screenshot">
+            </div>
+          </div>
+          <div class="phone-glow"></div>
+        </div>
       </div>
+    </div>
+    <!-- Decorative geometric ornament -->
+    <div class="hero-ornament" aria-hidden="true">
+      <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="100" cy="100" r="80" stroke="url(#go)" stroke-width="0.5" opacity="0.3"/>
+        <circle cx="100" cy="100" r="60" stroke="url(#go)" stroke-width="0.5" opacity="0.25"/>
+        <circle cx="100" cy="100" r="40" stroke="url(#go)" stroke-width="0.5" opacity="0.2"/>
+        <path d="M100 20 L180 100 L100 180 L20 100 Z" stroke="url(#go)" stroke-width="0.5" opacity="0.2"/>
+        <path d="M100 40 L160 100 L100 160 L40 100 Z" stroke="url(#go)" stroke-width="0.5" opacity="0.15"/>
+        <defs>
+          <linearGradient id="go" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#E8C96A"/>
+            <stop offset="100%" stop-color="#9A7A30"/>
+          </linearGradient>
+        </defs>
+      </svg>
     </div>
   </header>
 
-  <section id="stats" class="container">
+  <!-- ── Stats Bar ────────────────────────────────────────────── -->
+  <section id="stats">
     <div class="stat-card">
-      <h3>10,000+</h3>
-      <p>NGX & Global Stocks</p>
-    </div>
-    <div class="stat-card">
-      <h3>5k+</h3>
-      <p>Verified Products</p>
+      <h3>NGX</h3>
+      <p>Nigerian Exchange Listed</p>
     </div>
     <div class="stat-card">
       <h3>AAOIFI</h3>
       <p>Gold Standard Screening</p>
     </div>
+    <div class="stat-card">
+      <h3 data-count="5000" data-suffix="+">5,000+</h3>
+      <p>Verified Halal Products</p>
+    </div>
+    <div class="stat-card">
+      <h3>AI</h3>
+      <p>Halal Finance Assistant</p>
+    </div>
   </section>
 
-  <section id="features" class="container">
-    <div class="section-badge">CORE CAPABILITIES</div>
-    <h2 class="section-title">Everything you need for <br>a halal lifestyle.</h2>
-    
-    <div class="features-grid">
-      <div class="feature-card">
-        <div class="icon">📈</div>
-        <h3>Stock Screener</h3>
-        <p>Real-time Shariah screening of Nigerian and international stocks based on AAOIFI financial ratios.</p>
-      </div>
-      <div class="feature-card">
-        <div class="icon">🔍</div>
-        <h3>Product Scanner</h3>
-        <p>Instantly check if food and consumer goods are Halal or Haram by scanning barcodes.</p>
-      </div>
-      <div class="feature-card">
-        <div class="icon">💎</div>
-        <h3>Purification Calc</h3>
-        <p>Automated calculation of interest-bearing revenue to clarify your investment returns.</p>
+  <!-- ── About Section ───────────────────────────────────────── -->
+  <section id="about">
+    <div class="container">
+      <div class="shariah-grid">
+        <div>
+          <div class="section-label">✦ About Us</div>
+          <h2 class="section-title">Bridging Islamic Finance<br>& Modern Wealth</h2>
+          <p class="about-text">IRSHAD was founded to solve a core problem for the modern Nigerian Muslim: how to participate in the booming financial markets while remaining uncompromising on faith.</p>
+          <p class="about-text">We leverage cutting-edge AI and the globally recognised AAOIFI framework to provide instant Shariah compliance verdicts on stocks, ETFs, and everyday consumer products.</p>
+          <ul class="shariah-points">
+            <li>Strict adherence to the AAOIFI Rulebook.</li>
+            <li>Real-time automated purification calculations.</li>
+            <li>Localised focus on the Nigerian Exchange (NGX).</li>
+          </ul>
+        </div>
+        <div class="shariah-badge-box">
+          <span class="big-badge">🕌</span>
+          <h3>Guidance · Integrity · Leadership</h3>
+          <p>Every data point, every calculation, every screening decision is grounded in scholarly Islamic finance principles — so you can invest and live with complete confidence.</p>
+        </div>
       </div>
     </div>
   </section>
 
+  <!-- ── Market Section (Stock Screener) ────────────────────────── -->
+  <section id="market">
+    <div class="container">
+      <div class="section-label text-center">✦ The Market ✦</div>
+      <h2 class="section-title text-center">AAOIFI-Powered<br>Stock Screener</h2>
+      <p class="section-sub text-center">We analyze the financials of all major NGX stocks against the 5 key Shariah metrics.</p>
+
+      <div class="market-cards">
+        <div class="market-card compliant">
+          <div class="mc-head">
+            <h4>MTNN</h4>
+            <span class="badge-status compliant">Halal</span>
+          </div>
+          <div class="mc-price">₦ 245.00 <span class="up">▲ 1.2%</span></div>
+          <div class="mc-metrics">
+            <div><span>Debt/Assets:</span> <strong>28%</strong> (Pass)</div>
+            <div><span>Interest/Revenue:</span> <strong>2%</strong> (Pass)</div>
+          </div>
+        </div>
+        
+        <div class="market-card non-compliant">
+          <div class="mc-head">
+            <h4>ZENITHBANK</h4>
+            <span class="badge-status non-compliant">Haram</span>
+          </div>
+          <div class="mc-price">₦ 38.50 <span class="up">▲ 0.8%</span></div>
+          <div class="mc-metrics">
+            <div><span>Sector:</span> <strong>Banking</strong> (Fail)</div>
+            <div><span>Interest/Revenue:</span> <strong>85%</strong> (Fail)</div>
+          </div>
+        </div>
+
+        <div class="market-card borderline">
+          <div class="mc-head">
+            <h4>DANGCEM</h4>
+            <span class="badge-status borderline">Doubtful</span>
+          </div>
+          <div class="mc-price">₦ 650.00 <span class="down">▼ 0.5%</span></div>
+          <div class="mc-metrics">
+            <div><span>Debt/Assets:</span> <strong>32%</strong> (Pass)</div>
+            <div><span>Purification:</span> <strong>4.2%</strong> Req</div>
+          </div>
+        </div>
+      </div>
+      <div class="text-center mt-40">
+        <a href="#download" class="btn btn-primary">Scan the full NGX Market</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Portfolio Section ────────────────────────────────────── -->
+  <section id="portfolio">
+    <div class="container">
+      <div class="portfolio-grid">
+        <div class="portfolio-visual">
+          <div class="dashboard-mockup">
+            <div class="dash-header">
+              <h4>Total Portfolio Value</h4>
+              <h2>₦ 2,450,000.00</h2>
+            </div>
+            <div class="dash-body">
+              <div class="dash-row">
+                <span>Total Gain</span>
+                <span class="up">+₦ 150,000 (6.5%)</span>
+              </div>
+              <div class="dash-divider"></div>
+              <div class="dash-row highlight">
+                <span>Pending Purification <span class="info-icon">i</span></span>
+                <span class="down">-₦ 12,450.00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="portfolio-text">
+          <div class="section-label">✦ Portfolio Manager</div>
+          <h2 class="section-title">Track & Purify<br>Automatically</h2>
+          <p>Link your brokerage account or manually enter your holdings. IRSHAD doesn't just track your performance; it tracks your Shariah compliance continuously.</p>
+          
+          <div class="feature-list">
+            <div class="f-item">
+              <span class="f-icon">💰</span>
+              <div>
+                <h4>Automated Zakat & Purification</h4>
+                <p>We automatically calculate exactly how much of your dividends and capital gains need to be purified and donated based on company financials.</p>
+              </div>
+            </div>
+            <div class="f-item">
+              <span class="f-icon">🔔</span>
+              <div>
+                <h4>Compliance Alerts</h4>
+                <p>Get instant push notifications if a stock in your portfolio crosses the 33% debt threshold and becomes non-compliant.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── News Section ─────────────────────────────────────────── -->
+  <section id="news">
+    <div class="container">
+      <div class="section-label">✦ Latest Intelligence</div>
+      <div class="news-header-row">
+        <h2 class="section-title">Nigerian Financial News</h2>
+        <a href="#download" class="view-all-link">Read all on the App →</a>
+      </div>
+
+      <div class="news-grid">
+        <div class="news-card">
+          <div class="news-source">Nairametrics · 2 hours ago</div>
+          <h3>Central Bank reviews MPR, impacts on Islamic Finance windows</h3>
+          <p>The latest monetary policy decisions could see a shift in sukuk yields and non-interest banking sector liquidity...</p>
+        </div>
+        <div class="news-card">
+          <div class="news-source">BusinessDay · 5 hours ago</div>
+          <h3>FGN Sukuk oversubscribed by 430% signaling strong halal demand</h3>
+          <p>Retail and institutional investors scrambled for the latest tranche of the sovereign sukuk issuance...</p>
+        </div>
+        <div class="news-card">
+          <div class="news-source">PremiumTimes · 1 day ago</div>
+          <h3>NGX proposes new rules for Shariah-compliant listings</h3>
+          <p>The exchange aims to deepen the market with tailored indices and reporting requirements for Islamic finance...</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Testimonial strip ────────────────────────────────────── -->
+  <section id="trust" class="trust-section">
+    <div class="container trust-inner">
+      <div class="trust-item">
+        <div class="trust-stars">★★★★★</div>
+        <p>"Finally, a halal investment app designed for Nigeria."</p>
+        <span>— Beta User</span>
+      </div>
+      <div class="trust-divider" aria-hidden="true">✦</div>
+      <div class="trust-item">
+        <div class="trust-stars">★★★★★</div>
+        <p>"The purification calculator alone is worth downloading."</p>
+        <span>— Investor, Lagos</span>
+      </div>
+      <div class="trust-divider" aria-hidden="true">✦</div>
+      <div class="trust-item">
+        <div class="trust-stars">★★★★★</div>
+        <p>"AAOIFI-compliant screening I can actually trust."</p>
+        <span>— Fund Manager</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CTA ──────────────────────────────────────────────────── -->
   <section id="download" class="cta-section">
     <div class="container">
-      <h2>Transform your halal <br>journey today.</h2>
-      <p>Join thousands of users who trust IRSHAD for their financial and dietary decisions.</p>
+      <div class="cta-ornament" aria-hidden="true">✦</div>
+      <h2>Begin Your Halal<br>Wealth Journey</h2>
+      <p>Join investors who trust IRSHAD to guide every financial and lifestyle decision the Shariah way.</p>
       <div class="app-badges">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="App Store" />
-        <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Play Store" />
+        <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="Download on the App Store" />
+        <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play" />
       </div>
     </div>
   </section>
 
+  <!-- ── Footer ───────────────────────────────────────────────── -->
   <footer>
     <div class="container footer-content">
       <div class="footer-brand">
-        <div class="logo">
-          <img src="/images/logo.png" alt="IRSHAD">
-          <span>IRSHAD</span>
-        </div>
-        <p>Precision Shariah Governance for the Digital Age.</p>
+        <img src="./public/images/irshad-logo.png" alt="IRSHAD" class="logo-img" style="height:44px; margin-bottom:16px;">
+        <p>Precision Shariah Governance for the Digital Age.<br>Guidance · Integrity · Leadership.</p>
       </div>
       <div class="footer-links">
         <h4>Legal</h4>
         <a href="#">Privacy Policy</a>
         <a href="#">Terms of Service</a>
+        <a href="#">Shariah Methodology</a>
       </div>
       <div class="footer-social">
         <h4>Connect</h4>
         <a href="#">LinkedIn</a>
-        <a href="#">Twitter/X</a>
+        <a href="#">Twitter / X</a>
+        <a href="#">Instagram</a>
       </div>
     </div>
-    <div class="footer-bottom">
-      <p>&copy; 2024 IRSHAD Fintech. All rights reserved.</p>
+    <div class="footer-bottom container">
+      <p>&copy; 2025 IRSHAD Fintech. All rights reserved. &nbsp;·&nbsp; Built with integrity in Nigeria 🇳🇬</p>
     </div>
   </footer>
 
-  <script type="module" src="/main.js"></script>
+  <script type="module" src="./main.js"></script>
 </body>
 </html>

@@ -22,11 +22,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   bool _isInit = true;
 
   // Theme Constants
-  static const Color bgColor = Color(0xFFFAFAFA);
-  static const Color primaryGreen = Color(0xFF16A34A);
-  static const Color textDark = Color(0xFF111827);
-  static const Color textMuted = Color(0xFF6B7280);
-  static const Color divider = Color(0xFFE5E7EB);
+  static const Color bgColor = Color(0xFFF5F0E8);
+  static const Color primaryGold = Color(0xFFC9A84C);
+  static const Color textDark = Color(0xFF1A1208);
+  static const Color textMuted = Color(0xFF9A8C70);
+  static const Color divider = Color(0xFFE8E2D9);
 
   @override
   void didChangeDependencies() {
@@ -80,7 +80,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Profile updated successfully!'),
-            backgroundColor: Color(0xFF111827),
+            backgroundColor: Color(0xFF1A1208),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -123,7 +123,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               child: const Text(
                 'Save',
                 style: TextStyle(
-                  color: primaryGreen,
+                  color: primaryGold,
                   fontWeight: FontWeight.w800,
                   fontSize: 16,
                 ),
@@ -133,7 +133,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ],
       ),
       body: _isLoading && _nameController.text.isEmpty
-          ? const Center(child: CircularProgressIndicator(color: primaryGreen))
+          ? const Center(child: CircularProgressIndicator(color: primaryGold))
           : SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
               child: Column(
@@ -159,7 +159,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: primaryGreen,
+                            color: primaryGold,
                             shape: BoxShape.circle,
                             border: Border.all(color: Colors.white, width: 3),
                           ),

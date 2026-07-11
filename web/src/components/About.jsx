@@ -72,14 +72,13 @@ const AboutPage = () => (
       ))}
     </div>
 
-    {/* Mission statement */}
     <div style={{
-      background: 'linear-gradient(135deg, var(--primary) 0%, #25A35A 100%)',
+      background: '#1A1208',
       borderRadius: 'var(--radius-xl)',
       padding: '48px 40px',
       textAlign: 'center',
       marginTop: '0',
-      boxShadow: 'var(--shadow-green)',
+      boxShadow: '0 16px 48px rgba(201,168,76,0.15)',
     }}>
       <h2 style={{ color: 'white', fontSize: '1.8rem', fontWeight: '800', marginBottom: '16px', letterSpacing: '-0.5px' }}>
         Our Mission

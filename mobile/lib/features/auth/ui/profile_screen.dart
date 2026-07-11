@@ -20,12 +20,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final List<String> _languages = ['English', 'Hausa', 'Yoruba', 'Igbo'];
 
   // Theme Constants
-  static const Color bgColor = Color(0xFFFAFAFA);
-  static const Color primaryGreen = Color(0xFF16A34A);
-  static const Color textDark = Color(0xFF111827);
-  static const Color textMuted = Color(0xFF6B7280);
+  static const Color bgColor = Color(0xFFF5F0E8);
+  static const Color primaryGold = Color(0xFFC9A84C);
+  static const Color textDark = Color(0xFF1A1208);
+  static const Color textMuted = Color(0xFF9A8C70);
   static const Color cardBg = Colors.white;
-  static const Color divider = Color(0xFFE5E7EB);
+  static const Color divider = Color(0xFFE8E2D9);
 
   @override
   void initState() {
@@ -70,7 +70,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: primaryGreen))
+          ? const Center(child: CircularProgressIndicator(color: primaryGold))
           : user == null
               ? const Center(child: Text('Failed to load profile', style: TextStyle(color: textDark)))
               : SingleChildScrollView(
@@ -190,8 +190,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           CircleAvatar(
             radius: 36,
-            backgroundColor: primaryGreen.withOpacity(0.1),
-            child: Text(user?['first_name']?[0] ?? 'U', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: primaryGreen)),
+            backgroundColor: primaryGold.withOpacity(0.1),
+            child: Text(user?['first_name']?[0] ?? 'U', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: primaryGold)),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -296,7 +296,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             dropdownColor: Colors.white,
             underline: const SizedBox(),
             icon: const Icon(Icons.keyboard_arrow_down_rounded, color: textMuted),
-            style: const TextStyle(color: primaryGreen, fontWeight: FontWeight.w800, fontSize: 14),
+            style: const TextStyle(color: primaryGold, fontWeight: FontWeight.w800, fontSize: 14),
             items: _languages.map((String lang) {
               return DropdownMenuItem<String>(
                 value: lang,

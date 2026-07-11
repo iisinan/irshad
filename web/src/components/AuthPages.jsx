@@ -78,16 +78,15 @@ export const LoginPage = () => {
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <img
-            src="/logo-icon.jpg"
+            src="/logo.png"
             alt="Irshad"
             style={{
               height: '72px',
-              width: '72px',
+              width: 'auto',
               objectFit: 'contain',
               margin: '0 auto 20px',
               display: 'block',
-              borderRadius: '50%',
-              boxShadow: '0 4px 20px rgba(26,92,53,0.14)',
+              filter: 'drop-shadow(0 4px 20px rgba(201,168,76,0.14))',
             }}
           />
           <h1 style={{ fontSize: '1.9rem', fontWeight: '800', marginBottom: '6px' }}>Welcome back</h1>

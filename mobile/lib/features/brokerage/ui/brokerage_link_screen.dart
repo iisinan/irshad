@@ -9,11 +9,11 @@ class BrokerageLinkScreen extends StatefulWidget {
 
 class _BrokerageLinkScreenState extends State<BrokerageLinkScreen> {
   // Theme Constants
-  static const Color bgColor = Color(0xFFFAFAFA);
-  static const Color primaryGreen = Color(0xFF16A34A);
-  static const Color textDark = Color(0xFF111827);
-  static const Color textMuted = Color(0xFF6B7280);
-  static const Color divider = Color(0xFFE5E7EB);
+  static const Color bgColor = Color(0xFFF5F0E8);
+  static const Color primaryGold = Color(0xFFC9A84C);
+  static const Color textDark = Color(0xFF1A1208);
+  static const Color textMuted = Color(0xFF9A8C70);
+  static const Color divider = Color(0xFFE8E2D9);
 
   final List<Map<String, String>> _brokers = [
     {'name': 'Bamboo', 'logo': 'B', 'description': 'Invest in US and Nigerian stocks'},
@@ -84,13 +84,13 @@ class _BrokerageLinkScreenState extends State<BrokerageLinkScreen> {
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: primaryGreen.withOpacity(0.1),
+            color: primaryGold.withOpacity(0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Center(
             child: Text(
               broker['logo']!,
-              style: const TextStyle(color: primaryGreen, fontWeight: FontWeight.w900, fontSize: 20),
+              style: const TextStyle(color: primaryGold, fontWeight: FontWeight.w900, fontSize: 20),
             ),
           ),
         ),
@@ -114,7 +114,7 @@ class _BrokerageLinkScreenState extends State<BrokerageLinkScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Center(child: CircularProgressIndicator(color: primaryGreen)),
+      builder: (context) => const Center(child: CircularProgressIndicator(color: primaryGold)),
     );
 
     try {
@@ -128,7 +128,7 @@ class _BrokerageLinkScreenState extends State<BrokerageLinkScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Successfully linked $name and funded account with ₦1,000,000!'),
-            backgroundColor: primaryGreen,
+            backgroundColor: primaryGold,
             behavior: SnackBarBehavior.floating,
           ),
         );

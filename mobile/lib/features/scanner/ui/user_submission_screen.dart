@@ -24,11 +24,11 @@ class _UserSubmissionScreenState extends State<UserSubmissionScreen> {
   final ImagePicker _picker = ImagePicker();
 
   // Theme Constants
-  static const Color bgColor = Color(0xFFFAFAFA);
-  static const Color primaryGreen = Color(0xFF16A34A);
-  static const Color textDark = Color(0xFF111827);
-  static const Color textMuted = Color(0xFF6B7280);
-  static const Color divider = Color(0xFFE5E7EB);
+  static const Color bgColor = Color(0xFFF5F0E8);
+  static const Color primaryGold = Color(0xFFC9A84C);
+  static const Color textDark = Color(0xFF1A1208);
+  static const Color textMuted = Color(0xFF9A8C70);
+  static const Color divider = Color(0xFFE8E2D9);
 
   @override
   void initState() {
@@ -72,7 +72,7 @@ class _UserSubmissionScreenState extends State<UserSubmissionScreen> {
         titlePadding: const EdgeInsets.only(top: 40),
         title: const Column(
           children: [
-            Icon(Icons.check_circle_rounded, color: primaryGreen, size: 64),
+            Icon(Icons.check_circle_rounded, color: primaryGold, size: 64),
             SizedBox(height: 24),
             Text(
               'Submission Received', 
@@ -304,7 +304,7 @@ class _UserSubmissionScreenState extends State<UserSubmissionScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(12)),
-                  child: const Icon(Icons.camera_alt_rounded, color: primaryGreen, size: 28),
+                  child: const Icon(Icons.camera_alt_rounded, color: primaryGold, size: 28),
                 ),
                 const SizedBox(height: 16),
                 const Text(

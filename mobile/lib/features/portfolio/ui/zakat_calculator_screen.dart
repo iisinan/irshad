@@ -16,10 +16,10 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
   Map<String, dynamic>? _selectedStock;
   double _zakatOwed = 0.0;
   
-  static const Color bgColor = Color(0xFFFAFAFA);
-  static const Color primaryGreen = Color(0xFF16A34A);
-  static const Color textDark = Color(0xFF111827);
-  static const Color textMuted = Color(0xFF6B7280);
+  static const Color bgColor = Color(0xFFF5F0E8);
+  static const Color primaryGold = Color(0xFFC9A84C);
+  static const Color textDark = Color(0xFF1A1208);
+  static const Color textMuted = Color(0xFF9A8C70);
 
   @override
   void initState() {
@@ -92,8 +92,8 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                 filled: true,
                 fillColor: Colors.white,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFE5E7EB))),
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFE5E7EB))),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFE8E2D9))),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFE8E2D9))),
               ),
               hint: const Text('Choose a company...'),
               value: _selectedStock,
@@ -130,8 +130,8 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                 hintText: 'e.g. 1000',
                 prefixIcon: const Icon(Icons.pie_chart_outline_rounded, color: textMuted),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFE5E7EB))),
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFE5E7EB))),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFE8E2D9))),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFE8E2D9))),
               ),
             ),
             
@@ -149,8 +149,8 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                 hintText: '0.00',
                 prefixIcon: const Icon(Icons.payments_outlined, color: textMuted),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFE5E7EB))),
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFE5E7EB))),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFE8E2D9))),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFE8E2D9))),
               ),
             ),
             
@@ -160,10 +160,10 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: primaryGreen,
+                color: primaryGold,
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
-                  BoxShadow(color: primaryGreen.withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 10)),
+                  BoxShadow(color: primaryGold.withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 10)),
                 ],
               ),
               child: Column(

@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 
-  static const Color primaryGreen = Color(0xFF16A34A);
-  static const Color textDark = Color(0xFF111827);
-  static const Color textMuted = Color(0xFF6B7280);
-  static const Color bgColor = Color(0xFFFAFAFA);
+  static const Color primaryGold = Color(0xFFC9A84C);
+  static const Color textDark = Color(0xFF1A1208);
+  static const Color textMuted = Color(0xFF9A8C70);
+  static const Color bgColor = Color(0xFFF5F0E8);
 
   @override
   Widget build(BuildContext context) {
@@ -22,15 +22,11 @@ class WelcomeScreen extends StatelessWidget {
 
               // Logo / Brand mark
               Container(
-                padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  color: primaryGreen.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Icon(
-                  Icons.mosque_rounded,
-                  size: 48,
-                  color: primaryGreen,
+                padding: const EdgeInsets.symmetric(vertical: 18),
+                child: Image.asset(
+                  'assets/images/logo.png',
+                  height: 64,
+                  fit: BoxFit.contain,
                 ),
               ),
               const SizedBox(height: 32),
@@ -98,7 +94,7 @@ class WelcomeScreen extends StatelessWidget {
                   onPressed: () => Navigator.pushNamed(context, '/register'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: textDark,
-                    side: const BorderSide(color: Color(0xFFE5E7EB), width: 1.5),
+                    side: const BorderSide(color: Color(0xFFE8E2D9), width: 1.5),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -135,7 +131,7 @@ class WelcomeScreen extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 15, color: primaryGreen),
+        Icon(icon, size: 15, color: primaryGold),
         const SizedBox(width: 5),
         Text(
           label,
