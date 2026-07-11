@@ -614,17 +614,16 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     final latest = (financials != null && financials is List && financials.isNotEmpty) ? financials[0] : null;
     
     final debt = latest?['total_debt']?.toDouble() ?? 0.0;
-    
-    final rawAssets = latest?['total_assets']?.toDouble() ?? 0.0;
-    final assets = rawAssets > 0.0 ? rawAssets : 1.0;
+    final assets = latest?['total_assets']?.toDouble() ?? 0.0;
+    final safeAssets = assets > 0 ? assets : 1.0;
     
     final interest = latest?['interest_income']?.toDouble() ?? 0.0;
     
     final rawRevenue = latest?['total_revenue']?.toDouble() ?? 0.0;
-    final revenue = rawRevenue > 0.0 ? rawRevenue : assets;
+    final revenue = rawRevenue > 0.0 ? rawRevenue : safeAssets;
     
-    final debtRatio = (debt / assets) * 100;
-    final interestRatio = (interest / revenue) * 100;
+    final debtRatio = assets > 0 ? (debt / assets) * 100 : 0.0;
+    final interestRatio = revenue > 0 ? (interest / revenue) * 100 : 0.0;
 
     return Container(
       padding: const EdgeInsets.all(20),

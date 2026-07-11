@@ -69,13 +69,16 @@ const StockDetails = () => {
   // ─── Financial ratios ─────────────────────────────
   const financials = stock.financials;
   const latest = Array.isArray(financials) && financials.length > 0 ? financials[0] : null;
-  const debt = latest?.total_debt || 0;
-  const assets = latest?.total_assets || 1;
-  const interest = latest?.interest_income || 0;
-  const revenue = latest?.total_revenue || assets || 1;
-  const debtRatio = ((debt / assets) * 100).toFixed(1);
+  const debt = parseFloat(latest?.total_debt) || 0;
+  const assets = parseFloat(latest?.total_assets) || 0;
+  const safeAssets = assets > 0 ? assets : 1;
+  const interest = parseFloat(latest?.interest_income) || 0;
+  const rawRevenue = parseFloat(latest?.total_revenue) || 0;
+  const revenue = rawRevenue > 0 ? rawRevenue : safeAssets;
+  
+  const debtRatio = ((debt / safeAssets) * 100).toFixed(1);
   const interestRatio = ((interest / revenue) * 100).toFixed(1);
-  const purificationRate = latest?.non_compliant_revenue_ratio ? (latest.non_compliant_revenue_ratio * 100).toFixed(2) : interestRatio;
+  const purificationRate = latest?.non_compliant_revenue_ratio ? (parseFloat(latest.non_compliant_revenue_ratio) * 100).toFixed(2) : interestRatio;
 
   const purificationAmount = dividendInput
     ? ((parseFloat(dividendInput) || 0) * (parseFloat(purificationRate) / 100)).toFixed(2)
