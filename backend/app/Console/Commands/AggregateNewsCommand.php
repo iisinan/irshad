@@ -15,6 +15,8 @@ class AggregateNewsCommand extends Command
 
     protected $feeds = [
         'BusinessDay' => 'https://businessday.ng/feed/',
+        'Nairametrics' => 'https://nairametrics.com/feed/',
+        'PremiumTimes (Business)' => 'https://www.premiumtimesng.com/category/business/feed',
     ];
 
     public function handle()
