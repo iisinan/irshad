@@ -834,6 +834,14 @@ button { font-family: inherit; cursor: pointer; }
   box-shadow: 0 0 0 3px var(--primary-50);
 }
 
+.auth-input:-webkit-autofill,
+.auth-input:-webkit-autofill:hover, 
+.auth-input:-webkit-autofill:focus, 
+.auth-input:-webkit-autofill:active{
+    -webkit-box-shadow: 0 0 0 30px var(--bg) inset !important;
+    -webkit-text-fill-color: var(--text-dark) !important;
+}
+
 .auth-label {
   font-size: 0.82rem;
   font-weight: 700;

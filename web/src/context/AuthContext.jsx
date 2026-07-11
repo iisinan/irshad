@@ -30,11 +30,12 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     try {
       const res = await loginUser(credentials);
-      if (res.token) {
-        localStorage.setItem('auth_token', res.token);
-        setUser(res.user);
+      if (res.data && res.data.access_token) {
+        localStorage.setItem('auth_token', res.data.access_token);
+        setUser(res.data.user);
         return { success: true };
       }
+      return { success: false, error: 'Invalid response from server' };
     } catch (error) {
       return { 
         success: false, 
@@ -46,11 +47,12 @@ export const AuthProvider = ({ children }) => {
   const register = async (data) => {
     try {
       const res = await registerUser(data);
-      if (res.token) {
-        localStorage.setItem('auth_token', res.token);
-        setUser(res.user);
+      if (res.data && res.data.access_token) {
+        localStorage.setItem('auth_token', res.data.access_token);
+        setUser(res.data.user);
         return { success: true };
       }
+      return { success: false, error: 'Invalid response from server' };
     } catch (error) {
       return { 
         success: false, 

@@ -172,8 +172,7 @@ export const RegisterPage = () => {
     setLoading(true);
     
     const res = await register({ 
-      first_name: firstName, 
-      last_name: lastName, 
+      name: `${firstName} ${lastName}`.trim(),
       email, 
       password,
       password_confirmation: password // Laravel expects this
