@@ -7,6 +7,7 @@ import Portfolio from './components/Portfolio';
 import AboutPage from './components/About';
 import NewsPage from './components/News';
 import ShariahPage from './components/Shariah';
+import Profile from './components/Profile';
 import { LoginPage, RegisterPage } from './components/AuthPages';
 import AdminDashboard from './components/AdminDashboard';
 import { useAuth } from './context/AuthContext';
@@ -62,9 +63,14 @@ const TopNavbar = () => {
           {!loading && (
             user ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <span style={{ fontSize: '0.9rem', color: 'var(--text-dark)', fontWeight: 600 }}>
-                  {user.first_name || user.name || 'User'}
-                </span>
+                <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--primary-50)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, border: '1px solid var(--primary-100)' }}>
+                    {(user.first_name || user.name || 'U').charAt(0).toUpperCase()}
+                  </div>
+                  <span style={{ fontSize: '0.9rem', color: 'var(--text-dark)', fontWeight: 600 }}>
+                    {user.first_name || user.name || 'Profile'}
+                  </span>
+                </Link>
                 <button onClick={logout} className="nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
                   Log Out
                 </button>
@@ -105,9 +111,14 @@ const TopNavbar = () => {
           {!loading && (
             user ? (
               <>
-                <span style={{ fontWeight: 700, color: 'var(--text-dark)', padding: '0 4px' }}>
-                  👤 {user.first_name || user.name}
-                </span>
+                <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', padding: '12px 16px', background: 'var(--bg-section)', borderRadius: '10px' }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--primary-50)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
+                    {(user.first_name || user.name || 'U').charAt(0).toUpperCase()}
+                  </div>
+                  <span style={{ fontWeight: 700, color: 'var(--text-dark)' }}>
+                    {user.first_name || user.name || 'Profile'}
+                  </span>
+                </Link>
                 <button onClick={logout} className="btn-secondary" style={{ justifyContent: 'center', padding: '13px' }}>
                   Log Out
                 </button>
@@ -813,6 +824,7 @@ function App() {
             <Route path="/market/:symbol" element={<StockDetails />} />
             <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
           </Routes>
