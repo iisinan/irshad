@@ -10,3 +10,4 @@ Artisan::command('inspire', function () {
 use Illuminate\Support\Facades\Schedule;
 
 Schedule::command('app:scrape-ngx')->dailyAt('03:00');
+Schedule::command('news:aggregate')->hourly();

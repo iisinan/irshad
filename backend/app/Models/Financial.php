@@ -17,4 +17,17 @@ class Financial extends Model
         'market_cap',
         'interest_income',
     ];
+
+    protected $appends = ['interest_income_ratio', 'non_compliant_income_ratio'];
+
+    public function getInterestIncomeRatioAttribute()
+    {
+        $revenue = $this->total_revenue ?: 1;
+        return round(($this->interest_income / $revenue) * 100, 2);
+    }
+
+    public function getNonCompliantIncomeRatioAttribute()
+    {
+        return $this->interest_income_ratio;
+    }
 }

@@ -16,6 +16,7 @@ import './index.css';
 const TopNavbar = () => {
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const { user, logout, loading } = useAuth();
 
   useEffect(() => {
@@ -24,59 +25,106 @@ const TopNavbar = () => {
     return () => window.removeEventListener('scroll', handler);
   }, []);
 
-  return (
-    <nav className="top-navbar" style={{ boxShadow: scrolled ? '0 2px 16px rgba(0,0,0,0.07)' : 'none' }}>
-      <Link to="/" className="nav-logo" style={{ textDecoration: 'none' }}>
-        <img
-          src="/logo-horizontal.jpg"
-          alt="Irshad – Guidance & Growth"
-          style={{
-            height: '46px',
-            width: 'auto',
-            objectFit: 'contain',
-            borderRadius: '4px',
-          }}
-        />
-      </Link>
+  // Close drawer on route change
+  useEffect(() => { setMenuOpen(false); }, [location.pathname]);
 
-      <div className="nav-links">
-        <Link to="/" className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}>Home</Link>
-        <Link to="/about" className={`nav-link ${location.pathname === '/about' ? 'active' : ''}`}>About</Link>
-        <Link to="/news" className={`nav-link ${location.pathname === '/news' ? 'active' : ''}`}>News</Link>
-        <Link to="/market" className={`nav-link ${location.pathname.startsWith('/market') ? 'active' : ''}`}>Market</Link>
-        <Link to="/portfolio" className={`nav-link ${location.pathname === '/portfolio' ? 'active' : ''}`}>Portfolio</Link>
+  // Lock body scroll when drawer open
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [menuOpen]);
+
+  const navLinkClass = (path) =>
+    `nav-link ${location.pathname === path || (path !== '/' && location.pathname.startsWith(path)) ? 'active' : ''}`;
+
+  return (
+    <>
+      <nav className="top-navbar" style={{ boxShadow: scrolled ? '0 2px 16px rgba(0,0,0,0.07)' : 'none' }}>
+        <Link to="/" className="nav-logo" style={{ textDecoration: 'none' }}>
+          <img
+            src="/logo-horizontal.jpg"
+            alt="Irshad – Guidance & Growth"
+            style={{ height: '46px', width: 'auto', objectFit: 'contain', borderRadius: '4px' }}
+          />
+        </Link>
+
+        {/* Desktop links */}
+        <div className="nav-links">
+          <Link to="/" className={navLinkClass('/')}>Home</Link>
+          <Link to="/about" className={navLinkClass('/about')}>About</Link>
+          <Link to="/news" className={navLinkClass('/news')}>News</Link>
+          <Link to="/market" className={navLinkClass('/market')}>Market</Link>
+          <Link to="/portfolio" className={navLinkClass('/portfolio')}>Portfolio</Link>
+          {(user?.role === 'admin' || user?.role === 'scholar') && (
+            <Link to="/admin" className={navLinkClass('/admin')} style={{ color: 'var(--primary)' }}>Admin</Link>
+          )}
+          <div className="nav-divider" />
+          {!loading && (
+            user ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <span style={{ fontSize: '0.9rem', color: 'var(--text-dark)', fontWeight: 600 }}>
+                  {user.first_name || user.name || 'User'}
+                </span>
+                <button onClick={logout} className="nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                  Log Out
+                </button>
+              </div>
+            ) : (
+              <>
+                <Link to="/login" className="nav-link">Log In</Link>
+                <Link to="/register" className="btn-primary" style={{ padding: '9px 20px', fontSize: '0.9rem' }}>
+                  Get Started
+                </Link>
+              </>
+            )
+          )}
+        </div>
+
+        {/* Hamburger button (mobile only) */}
+        <button
+          className={`nav-hamburger ${menuOpen ? 'open' : ''}`}
+          onClick={() => setMenuOpen(o => !o)}
+          aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+          aria-expanded={menuOpen}
+        >
+          <span /><span /><span />
+        </button>
+      </nav>
+
+      {/* Mobile drawer */}
+      <div className={`mobile-nav-drawer ${menuOpen ? 'open' : ''}`}>
+        <Link to="/" className={navLinkClass('/')}>🏠 Home</Link>
+        <Link to="/about" className={navLinkClass('/about')}>ℹ️ About</Link>
+        <Link to="/news" className={navLinkClass('/news')}>📰 News</Link>
+        <Link to="/market" className={navLinkClass('/market')}>📈 Market</Link>
+        <Link to="/portfolio" className={navLinkClass('/portfolio')}>💼 Portfolio</Link>
         {(user?.role === 'admin' || user?.role === 'scholar') && (
-          <Link to="/admin" className={`nav-link ${location.pathname === '/admin' ? 'active' : ''}`} style={{ color: 'var(--primary-green)' }}>Admin</Link>
+          <Link to="/admin" className={navLinkClass('/admin')}>⚙️ Admin</Link>
         )}
-        <div className="nav-divider" />
-        
-        {!loading && (
-          user ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <span style={{ fontSize: '0.9rem', color: 'var(--text-dark)', fontWeight: 600 }}>
-                {user.first_name || user.name || 'User'}
-              </span>
-              <button 
-                onClick={logout} 
-                className="nav-link" 
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-              >
-                Log Out
-              </button>
-            </div>
-          ) : (
-            <>
-              <Link to="/login" className="nav-link">Log In</Link>
-              <Link to="/register" className="btn-primary" style={{ padding: '9px 20px', fontSize: '0.9rem' }}>
-                Get Started
-              </Link>
-            </>
-          )
-        )}
+        <div className="mobile-nav-auth">
+          {!loading && (
+            user ? (
+              <>
+                <span style={{ fontWeight: 700, color: 'var(--text-dark)', padding: '0 4px' }}>
+                  👤 {user.first_name || user.name}
+                </span>
+                <button onClick={logout} className="btn-secondary" style={{ justifyContent: 'center', padding: '13px' }}>
+                  Log Out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="btn-secondary" style={{ justifyContent: 'center', padding: '13px' }}>Log In</Link>
+                <Link to="/register" className="btn-primary">Get Started →</Link>
+              </>
+            )
+          )}
+        </div>
       </div>
-    </nav>
+    </>
   );
 };
+
 
 /* ─── Ticker ──────────────────────────────────────────────── */
 const StockTicker = () => {
@@ -327,16 +375,16 @@ const LandingPage = () => {
 
       {/* Live Market Preview */}
       {stocks.length > 0 && (
-        <section style={{ padding: '100px 0' }}>
+        <section style={{ padding: '80px 0' }}>
           <div className="main-content">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '40px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px', flexWrap: 'wrap', gap: '12px' }}>
               <div>
                 <div className="section-label">Live Market</div>
                 <h2 style={{ fontSize: '2.2rem', fontWeight: '800', letterSpacing: '-0.5px' }}>Market Snapshot</h2>
               </div>
               <Link to="/market" className="btn-ghost">View All Stocks <ChevronRight size={16} /></Link>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
+            <div className="stock-grid-home">
               {stocks.map(s => <StockCard key={s.symbol} company={s} />)}
             </div>
           </div>
@@ -344,9 +392,9 @@ const LandingPage = () => {
       )}
 
       {/* About Strip */}
-      <section style={{ padding: '100px 0', background: 'var(--bg-section)' }}>
+      <section style={{ padding: '80px 0', background: 'var(--bg-section)' }}>
         <div className="main-content">
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '80px', alignItems: 'center' }}>
+          <div className="about-strip-grid">
             <div>
               <div className="section-label">Our Story</div>
               <h2 style={{ fontSize: '2.4rem', fontWeight: '800', letterSpacing: '-0.5px', margin: '16px 0 24px' }}>
@@ -465,7 +513,7 @@ const LandingPage = () => {
       {/* Mobile App Section */}
       <section style={{ padding: '80px 0', background: 'var(--primary-50)' }}>
         <div className="main-content">
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '60px', alignItems: 'center' }}>
+          <div className="app-section-grid">
             <div>
               <div className="section-label">Get the App</div>
               <h2 style={{ fontSize: '2.6rem', fontWeight: '900', letterSpacing: '-1px', margin: '16px 0 24px', color: 'var(--text-dark)' }}>
@@ -475,7 +523,7 @@ const LandingPage = () => {
                 Download the Irshad mobile app for iOS and Android to track your investments, calculate your Zakat, and receive real-time halal screening alerts directly on your phone.
               </p>
               
-              <div style={{ display: 'flex', gap: '16px' }}>
+              <div className="app-store-btns">
                 <a href="#" style={{
                   display: 'flex', alignItems: 'center', gap: '12px',
                   background: '#000', color: 'white',
@@ -522,21 +570,8 @@ const LandingPage = () => {
       </section>
 
       {/* CTA Banner */}
-      <section style={{ padding: '100px 40px' }}>
-        <div style={{
-          maxWidth: '1240px',
-          margin: '0 auto',
-          background: 'linear-gradient(135deg, var(--primary) 0%, #1d6b3d 60%, #25A35A 100%)',
-          borderRadius: 'var(--radius-xl)',
-          padding: '72px 80px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '40px',
-          boxShadow: '0 16px 48px rgba(26,92,53,0.25)',
-          position: 'relative',
-          overflow: 'hidden',
-        }}>
+      <section style={{ padding: '60px 20px' }}>
+        <div className="cta-banner">
           {/* Background logo watermark */}
           <img
             src="/logo.png"
@@ -557,7 +592,7 @@ const LandingPage = () => {
               Join thousands of Nigerian Muslims who trust Irshad to screen their investments. Get started free today.
             </p>
           </div>
-          <div style={{ display: 'flex', gap: '16px', flexShrink: 0 }}>
+          <div className="cta-banner-btns">
             <Link to="/register" style={{
               background: 'white',
               color: 'var(--primary)',

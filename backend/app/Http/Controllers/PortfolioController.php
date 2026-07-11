@@ -17,21 +17,21 @@ class PortfolioController extends Controller
      */
     public function index(): JsonResponse
     {
-        $holdings = Holding::with(['company.status', 'company.latestPrice', 'company.financials'])
+        $holdings = Holding::with(['company.status', 'company.dailyPrices' => fn($q) => $q->latest('date')->limit(1), 'company.financials'])
             ->where('user_id', Auth::id())
             ->get();
 
         $portfolioData = $holdings->map(function ($holding) {
             $company = $holding->company;
-            $currentPrice = $company?->latestPrice?->close ?? 0;
+            $currentPrice = $company?->dailyPrices?->first()?->price ?? 0;
             $status = $company?->status?->status ?? 'doubtful';
-            $nonCompliantRatio = $company?->financials?->non_compliant_income_ratio ?? 0;
+            
+            // Financials relationship returns a collection, take first
+            $financials = $company?->financials?->first();
+            $nonCompliantRatio = $financials?->non_compliant_income_ratio ?? 0;
 
             $totalValue = $holding->shares * $currentPrice;
             
-            // Calculate purification due (Total Value * nonCompliantRatio)
-            // Or just on dividends? Usually purification is on dividends, but for simplicity here we'll 
-            // show the ratio so the frontend can calculate it.
             $purificationDue = $totalValue * ($nonCompliantRatio / 100);
 
             // Calculate return
@@ -42,7 +42,7 @@ class PortfolioController extends Controller
 
             return [
                 'id' => $holding->id,
-                'symbol' => $holding->symbol,
+                'symbol' => $company->symbol ?? $holding->symbol,
                 'name' => $company->name ?? $holding->symbol,
                 'shares' => $holding->shares,
                 'average_buy_price' => $holding->average_buy_price,
@@ -55,16 +55,22 @@ class PortfolioController extends Controller
             ];
         });
 
+        // Get Brokerage Cash
+        $brokerage = \App\Models\BrokerageAccount::where('user_id', Auth::id())->first();
+        $cashBalance = $brokerage ? $brokerage->cash_balance : 0;
+
         // Summary
-        $totalBalance = $portfolioData->sum('total_value');
+        $stocksBalance = $portfolioData->sum('total_value');
+        $totalBalance = $stocksBalance + $cashBalance;
         $totalPurification = $portfolioData->sum('purification_due');
         
         $halalValue = $portfolioData->where('is_halal', true)->sum('total_value');
-        $healthPercentage = $totalBalance > 0 ? round(($halalValue / $totalBalance) * 100, 1) : 100;
+        $healthPercentage = $stocksBalance > 0 ? round(($halalValue / $stocksBalance) * 100, 1) : 100;
 
         return $this->success([
             'holdings' => $portfolioData,
             'summary' => [
+                'cash_balance' => $cashBalance,
                 'total_balance' => $totalBalance,
                 'purification_due' => $totalPurification,
                 'health_percentage' => $healthPercentage

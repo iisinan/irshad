@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../stocks/ui/stock_search_screen.dart';
 import '../stocks/ui/ngx_market_screen.dart';
 import 'package:provider/provider.dart';
@@ -27,52 +26,36 @@ class _ExploreScreenState extends State<ExploreScreen>
   static const Color textMuted = Color(0xFF6B7280);
   static const Color divider = Color(0xFFE5E7EB);
 
-  List<dynamic> _disclosures = [];
-  bool _isLoadingDisclosures = true;
-  
   List<dynamic> _baskets = [];
   bool _isLoadingBaskets = true;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<StockProvider>(context, listen: false).fetchNgxStocks();
     });
-    _fetchDisclosures();
     _fetchBaskets();
   }
 
   Future<void> _fetchStocks() async {
     await Provider.of<StockProvider>(context, listen: false).fetchNgxStocks();
   }
-  Future<void> _fetchDisclosures() async {
-    try {
-      final response = await ApiService().get('disclosures?limit=30');
-      if (response.statusCode == 200 && response.data['status'] == 'success') {
-        setState(() {
-          _disclosures = response.data['data'];
-          _isLoadingDisclosures = false;
-        });
-      }
-    } catch (e) {
-      setState(() => _isLoadingDisclosures = false);
-      debugPrint('Error fetching disclosures: $e');
-    }
-  }
 
   Future<void> _fetchBaskets() async {
     try {
       final response = await ApiService().get('stocks/baskets');
       if (response.statusCode == 200 && response.data['status'] == 'success') {
-        setState(() {
-          _baskets = response.data['data'];
-          _isLoadingBaskets = false;
-        });
+        if (mounted) {
+          setState(() {
+            _baskets = response.data['data'];
+            _isLoadingBaskets = false;
+          });
+        }
       }
     } catch (e) {
-      setState(() => _isLoadingBaskets = false);
+      if (mounted) setState(() => _isLoadingBaskets = false);
       debugPrint('Error fetching baskets: $e');
     }
   }
@@ -170,7 +153,6 @@ class _ExploreScreenState extends State<ExploreScreen>
         unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15),
         tabs: const [
           Tab(text: 'Stocks'),
-          Tab(text: 'News'),
           Tab(text: 'Funds'),
           Tab(text: 'Baskets'),
         ],
@@ -245,7 +227,6 @@ class _ExploreScreenState extends State<ExploreScreen>
       controller: _tabController,
       children: [
         _buildStocksTab(),
-        _buildNewsTab(),
         _buildComingSoon('Funds'),
         _buildBasketsTab(),
       ],
@@ -512,96 +493,6 @@ class _ExploreScreenState extends State<ExploreScreen>
     );
   }
 
-  Widget _buildNewsTab() {
-    if (_isLoadingDisclosures) {
-      return const Center(child: CircularProgressIndicator(color: primaryGreen));
-    }
-    if (_disclosures.isEmpty) {
-      return const Center(child: Text('No corporate disclosures found.', style: TextStyle(color: textMuted)));
-    }
-    return RefreshIndicator(
-      color: primaryGreen,
-      onRefresh: _fetchDisclosures,
-      child: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        itemCount: _disclosures.length,
-        separatorBuilder: (_, __) => Divider(color: divider, height: 1),
-        itemBuilder: (context, index) {
-          final item = _disclosures[index];
-          final title = item['title'] ?? item['company_name'] ?? 'Disclosure';
-          final type = item['submission_type'] ?? 'News';
-          final url = item['pdf_url'] ?? item['url'];
-          
-          return InkWell(
-            onTap: () async {
-              if (url != null) {
-                final uri = Uri.parse(url);
-                if (await canLaunchUrl(uri)) {
-                  await launchUrl(uri, mode: LaunchMode.externalApplication);
-                }
-              }
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: primaryGreen.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(Icons.picture_as_pdf_rounded, color: primaryGreen, size: 24),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              item['company_symbol'] ?? '',
-                              style: const TextStyle(fontWeight: FontWeight.w800, color: textDark, fontSize: 14),
-                            ),
-                            Text(
-                              item['published_at'] != null ? item['published_at'].toString().split('T')[0] : '',
-                              style: const TextStyle(color: textMuted, fontSize: 12),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          title,
-                          style: const TextStyle(color: textDark, fontSize: 15, fontWeight: FontWeight.w600),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            type,
-                            style: const TextStyle(fontSize: 11, color: textMuted, fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
 }
 
 // Keep HomeScreen as alias for backward compatibility

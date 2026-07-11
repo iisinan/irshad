@@ -60,6 +60,16 @@ class AuthRepository {
     }
   }
 
+  Future<void> deleteAccount() async {
+    try {
+      await _apiService.delete('account');
+    } catch (e) {
+      // Ignore network errors, proceed with local logout
+    } finally {
+      await _storage.delete(key: 'access_token');
+    }
+  }
+
   Future<Map<String, dynamic>?> getProfile() async {
     try {
       final response = await _apiService.get('profile');

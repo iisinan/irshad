@@ -54,18 +54,25 @@ class PushNotificationService {
     );
     const NotificationDetails details = NotificationDetails(android: androidDetails);
     
+    final type = message.data['type'] ?? 'unknown';
+    final refId = message.data['reference_id']?.toString() ?? '';
+    final payload = refId.isNotEmpty ? '$type:$refId' : type;
+
     await _localNotifications.show(
       id: 0,
       title: message.notification?.title,
       body: message.notification?.body,
       notificationDetails: details,
-      payload: message.data['type'] + ':' + message.data['reference_id'].toString(),
+      payload: payload,
     );
   }
 
   void _handleMessage(RemoteMessage message) {
     if (message.data.containsKey('type')) {
-      _handleDeepLink('${message.data['type']}:${message.data['reference_id']}');
+      final type = message.data['type'] ?? 'unknown';
+      final refId = message.data['reference_id']?.toString() ?? '';
+      final payload = refId.isNotEmpty ? '$type:$refId' : type;
+      _handleDeepLink(payload);
     }
   }
 

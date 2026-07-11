@@ -5,6 +5,8 @@ import '../../../core/providers/app_state_provider.dart';
 import '../data/stock_repository.dart';
 import '../../profile/data/user_activity_repository.dart';
 import 'ai_analysis_sheet.dart';
+import 'trade_bottom_sheet.dart';
+import 'alert_bottom_sheet.dart';
 
 class StockDetailScreen extends StatefulWidget {
   final Map<String, dynamic> stock;
@@ -23,6 +25,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
   bool _isFavoriting = false;
   final TextEditingController _purificationController = TextEditingController();
   double _purificationResult = 0;
+  bool _isAlreadyFavorited = false;
 
   // Theme Constants
   static const Color bgColor = Color(0xFFFAFAFA);
@@ -35,6 +38,16 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
   void initState() {
     super.initState();
     _currentStock = widget.stock;
+    _checkIfFavorited();
+  }
+
+  void _checkIfFavorited() async {
+    final favorites = await _activityRepository.getFavorites();
+    if (mounted) {
+      setState(() {
+        _isAlreadyFavorited = favorites.any((f) => f['reference_id'] == _currentStock['id'].toString() || f['reference_id'] == _currentStock['id']);
+      });
+    }
   }
 
   void _onFavorite() async {
@@ -42,6 +55,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     final success = await _activityRepository.addToFavorites('stock', _currentStock['id']);
     if (success) {
       if (mounted) {
+        setState(() => _isAlreadyFavorited = true);
         Provider.of<AppStateProvider>(context, listen: false).incrementWatchlist();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -105,9 +119,6 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     String statusLabel = isHalal ? 'SHARIAH COMPLIANT' : (isNonHalal ? 'NOT COMPLIANT' : 'QUESTIONABLE');
 
     final latestPrice = num.tryParse(_currentStock['latest_price']?.toString() ?? '0') ?? 0.0;
-    
-    // Check if in watchlist (Simplified for now)
-    bool isAlreadyFavorited = false;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -121,9 +132,13 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
         ),
         actions: [
           IconButton(
-            icon: Icon(isAlreadyFavorited ? Icons.favorite_rounded : Icons.favorite_outline_rounded, 
-              color: isAlreadyFavorited ? Colors.redAccent : textDark, size: 22),
-            onPressed: isAlreadyFavorited ? null : (_isFavoriting ? null : _onFavorite),
+            icon: const Icon(Icons.notifications_active_outlined, color: textDark, size: 22),
+            onPressed: () => AlertBottomSheet.show(context, _currentStock),
+          ),
+          IconButton(
+            icon: Icon(_isAlreadyFavorited ? Icons.favorite_rounded : Icons.favorite_outline_rounded, 
+              color: _isAlreadyFavorited ? Colors.redAccent : textDark, size: 22),
+            onPressed: _isAlreadyFavorited ? null : (_isFavoriting ? null : _onFavorite),
           ),
         ],
       ),
@@ -150,6 +165,18 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                    const SizedBox(height: 4),
                    Text('₦ ${latestPrice.toStringAsFixed(2)}', 
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: textDark)),
+                   if (_currentStock.containsKey('price_change_pct'))
+                     Padding(
+                       padding: const EdgeInsets.only(top: 2),
+                       child: Text(
+                         '${_currentStock['price_change_pct'] >= 0 ? '+' : ''}${_currentStock['price_change_pct']}%',
+                         style: TextStyle(
+                           fontSize: 12, 
+                           fontWeight: FontWeight.w700, 
+                           color: _currentStock['price_change_pct'] >= 0 ? primaryGreen : Colors.red
+                         )
+                       ),
+                     )
                 ],
               ),
             ),
@@ -159,7 +186,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
               child: SizedBox(
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: null,
+                  onPressed: () => TradeBottomSheet.show(context, _currentStock),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryGreen,
                     foregroundColor: Colors.white,
@@ -231,12 +258,142 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                   
                   // Action Button
                   _buildScreeningButton(statusColor),
+                  const SizedBox(height: 24),
+
+                  // Scholar/Admin Override Button
+                  _buildAdminOverrideButton(),
                   const SizedBox(height: 40),
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildAdminOverrideButton() {
+    final user = Provider.of<AppStateProvider>(context).userProfile;
+    final role = user?['role'] ?? 'user';
+    if (role != 'admin' && role != 'scholar') {
+      return const SizedBox.shrink();
+    }
+    
+    return SizedBox(
+      width: double.infinity,
+      height: 56,
+      child: OutlinedButton.icon(
+        onPressed: () => _showAdminOverrideDialog(),
+        icon: const Icon(Icons.admin_panel_settings_rounded, size: 18, color: Colors.orange),
+        label: const Text('SCHOLAR OVERRIDE', style: TextStyle(fontWeight: FontWeight.w800, color: Colors.orange, letterSpacing: 0.5)),
+        style: OutlinedButton.styleFrom(
+          side: const BorderSide(color: Colors.orange, width: 2),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        ),
+      ),
+    );
+  }
+
+  void _showAdminOverrideDialog() {
+    String selectedStatus = 'halal';
+    final reasonController = TextEditingController();
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setModalState) {
+          return Container(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Override Compliance Status', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: textDark)),
+                  const SizedBox(height: 8),
+                  const Text('Update the status manually as a scholar or admin.', style: TextStyle(color: textMuted)),
+                  const SizedBox(height: 24),
+                  
+                  const Text('Status', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: textMuted)),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    value: selectedStatus,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: bgColor,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: 'halal', child: Text('Halal')),
+                      DropdownMenuItem(value: 'doubtful', child: Text('Doubtful')),
+                      DropdownMenuItem(value: 'non-halal', child: Text('Non-Halal')),
+                    ],
+                    onChanged: (v) => setModalState(() => selectedStatus = v!),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  const Text('Reason', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: textMuted)),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: reasonController,
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      hintText: 'Explanation for override...',
+                      filled: true,
+                      fillColor: bgColor,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        if (reasonController.text.trim().isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please provide a reason')));
+                          return;
+                        }
+                        
+                        Navigator.pop(ctx);
+                        setState(() => _isLoading = true);
+                        try {
+                          final updated = await _stockRepository.updateStockStatus(
+                            _currentStock['symbol'], 
+                            selectedStatus, 
+                            reasonController.text.trim()
+                          );
+                          if (updated != null && mounted) {
+                            setState(() => _currentStock = updated);
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Status overridden successfully')));
+                          }
+                        } catch (e) {
+                          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
+                        } finally {
+                          if (mounted) setState(() => _isLoading = false);
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      ),
+                      child: const Text('Confirm Override', style: TextStyle(fontWeight: FontWeight.w800)),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          );
+        }
       ),
     );
   }
@@ -557,8 +714,8 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
   Widget _buildPurificationCard() {
     final financials = _currentStock['financials'];
     final latest = (financials != null && financials is List && financials.isNotEmpty) ? financials[0] : null;
-    final nonCompliantRev = latest != null && latest['non_compliant_revenue_ratio'] != null 
-        ? latest['non_compliant_revenue_ratio'].toDouble() * 100 
+    final nonCompliantRev = latest != null && latest['non_compliant_income_ratio'] != null 
+        ? latest['non_compliant_income_ratio'].toDouble() 
         : 0.0; 
 
     return Container(

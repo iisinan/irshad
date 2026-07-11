@@ -30,6 +30,16 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   }
 
   void _fetchFavorites() async {
+    final isAuth = Provider.of<AppStateProvider>(context, listen: false).isAuthenticated;
+    if (!isAuth) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+      return;
+    }
+
     setState(() => _isLoading = true);
     final favs = await _activityRepository.getFavorites();
     if (mounted) {
@@ -204,6 +214,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   }
 
   Widget _buildEmptyState() {
+    final isAuth = Provider.of<AppStateProvider>(context, listen: false).isAuthenticated;
+    
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40.0),
@@ -219,16 +231,35 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               child: const Icon(Icons.favorite_outline_rounded, size: 40, color: primaryGreen),
             ),
             const SizedBox(height: 24),
-            const Text(
-              'Your Watchlist is Empty',
-              style: TextStyle(fontSize: 20, color: textDark, fontWeight: FontWeight.w900),
+            Text(
+              isAuth ? 'Your Watchlist is Empty' : 'Login to view Watchlist',
+              style: const TextStyle(fontSize: 20, color: textDark, fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Add stocks or products to your watchlist\nto track their Shariah status and prices.',
+            Text(
+              isAuth 
+                  ? 'Add stocks or products to your watchlist\nto track their Shariah status and prices.'
+                  : 'You must be logged in to save and track items in your watchlist.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: textMuted, height: 1.5, fontSize: 14),
+              style: const TextStyle(color: textMuted, height: 1.5, fontSize: 14),
             ),
+            if (!isAuth) ...[
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pushNamed(context, '/login'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: textDark,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    elevation: 0,
+                  ),
+                  child: const Text('Login / Register', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                ),
+              ),
+            ],
           ],
         ),
       ),

@@ -815,19 +815,293 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 /* ===================================================
-   RESPONSIVE — basic
+   ABOUT PAGE LAYOUTS (responsive via class)
    =================================================== */
-@media (max-width: 900px) {
-  .top-navbar { padding: 0 24px; }
-  .page-wrapper { padding: 40px 20px; }
-  .hero { padding: 72px 20px 60px; }
-  .feature-grid, .news-grid { grid-template-columns: 1fr; }
-  .stats-strip { grid-template-columns: 1fr; }
-  .stat-item { border-right: none; border-bottom: 1px solid var(--border); }
-  .stat-item:last-child { border-bottom: none; }
+.about-hero-h1 {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 900;
+  letter-spacing: -1px;
+  margin: 16px 0 24px;
+  color: var(--text-dark);
+  line-height: 1.15;
 }
 
-/* Ticker Animation */
+.about-vision-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+  margin-bottom: 48px;
+}
+
+.about-values-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.about-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 48px;
+}
+
+/* ===================================================
+   HOME PAGE LAYOUTS (responsive via class)
+   =================================================== */
+.stock-grid-home {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.about-strip-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+.app-section-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.app-store-btns {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.cta-banner {
+  max-width: 1240px;
+  margin: 0 auto;
+  background: linear-gradient(135deg, var(--primary) 0%, #1d6b3d 60%, #25A35A 100%);
+  border-radius: var(--radius-xl);
+  padding: 72px 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  box-shadow: 0 16px 48px rgba(26,92,53,0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-banner-btns {
+  display: flex;
+  gap: 16px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+/* ===================================================
+   MOBILE NAV
+   =================================================== */
+.nav-hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: var(--transition);
+}
+.nav-hamburger:hover { background: var(--bg-section); }
+.nav-hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--text-dark);
+  border-radius: 2px;
+  transition: var(--transition);
+}
+.nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* Mobile drawer */
+.mobile-nav-drawer {
+  display: none;
+  position: fixed;
+  top: 68px;
+  left: 0; right: 0;
+  background: white;
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+  z-index: 199;
+  padding: 16px 24px 24px;
+  flex-direction: column;
+  gap: 4px;
+  animation: slideDown 0.22s ease-out;
+}
+.mobile-nav-drawer.open { display: flex; }
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.mobile-nav-drawer .nav-link {
+  padding: 14px 16px;
+  font-size: 1rem;
+  border-radius: 10px;
+}
+.mobile-nav-auth {
+  margin-top: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.mobile-nav-auth .btn-primary {
+  justify-content: center;
+  padding: 13px;
+  font-size: 0.97rem;
+}
+
+/* ===================================================
+   RESPONSIVE — Full Mobile
+   =================================================== */
+
+/* --- Tablet (≤900px) --- */
+@media (max-width: 900px) {
+  /* Navbar */
+  .top-navbar { padding: 0 20px; }
+  .nav-links { display: none; }
+  .nav-hamburger { display: flex; }
+
+  /* Layout */
+  .page-wrapper { padding: 32px 16px; }
+  .main-content { padding: 0 16px; }
+
+  /* Hero */
+  .hero { padding: 56px 20px 48px; }
+  .hero h1 { font-size: clamp(2rem, 8vw, 3rem); letter-spacing: -1px; }
+  .hero p { font-size: 1rem; }
+  .hero-cta { flex-direction: column; align-items: center; }
+  .hero-cta .btn-primary,
+  .hero-cta .btn-secondary { width: 100%; max-width: 320px; justify-content: center; }
+
+  /* Stats */
+  .stats-strip { grid-template-columns: 1fr 1fr; max-width: 100%; margin-bottom: 60px; }
+  .stat-item { border-right: 1px solid var(--border); }
+  .stat-item:nth-child(2) { border-right: none; }
+  .stat-item:nth-child(3) { border-right: none; border-top: 1px solid var(--border); grid-column: 1 / -1; }
+
+  /* Grids */
+  .feature-grid { grid-template-columns: 1fr; gap: 16px; }
+  .news-grid    { grid-template-columns: 1fr; gap: 16px; }
+
+  /* Home page section grids */
+  .stock-grid-home { grid-template-columns: 1fr 1fr; gap: 16px; }
+  .about-strip-grid { grid-template-columns: 1fr; gap: 36px; }
+  .app-section-grid { grid-template-columns: 1fr; gap: 32px; }
+  .app-store-btns { flex-direction: row; flex-wrap: wrap; }
+  .app-store-btns a { flex: 1; min-width: 140px; justify-content: center; }
+  .cta-banner { flex-direction: column; padding: 48px 32px; text-align: center; border-radius: var(--radius-lg); }
+  .cta-banner-btns { justify-content: center; flex-shrink: unset; width: 100%; }
+
+  /* About page */
+  .about-vision-grid { grid-template-columns: 1fr; gap: 24px; }
+  .about-stats-grid  { grid-template-columns: repeat(3, 1fr); }
+
+  /* Footer */
+  .footer-inner {
+    grid-template-columns: 1fr 1fr;
+    gap: 36px;
+  }
+  .site-footer { padding: 48px 20px 32px; }
+  .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+
+  /* Auth */
+  .auth-card { padding: 32px 24px; }
+}
+
+/* --- Mobile (≤600px) --- */
+@media (max-width: 600px) {
+  /* Navbar */
+  .top-navbar { padding: 0 16px; height: 60px; }
+  .mobile-nav-drawer { top: 60px; }
+
+  /* Layout */
+  .page-wrapper { padding: 24px 16px; }
+  .section { padding: 56px 0; }
+
+  /* Hero */
+  .hero { padding: 40px 16px 36px; }
+  .hero h1 { font-size: clamp(1.8rem, 9vw, 2.6rem); }
+
+  /* Stats */
+  .stats-strip { grid-template-columns: 1fr; }
+  .stat-item { border-right: none; border-bottom: 1px solid var(--border); }
+  .stat-item:nth-child(3) { grid-column: auto; border-top: none; }
+  .stat-item:last-child { border-bottom: none; }
+  .stat-number { font-size: 2rem; }
+
+  /* Stock Cards */
+  .stock-price { font-size: 1.2rem; }
+  .stock-symbol { font-size: 1.1rem; }
+
+  /* Home page section grids — full single column on phone */
+  .stock-grid-home { grid-template-columns: 1fr; gap: 14px; }
+  .about-strip-grid { gap: 24px; }
+  .app-section-grid img { display: none; } /* hide mockup on small phones */
+  .cta-banner { padding: 36px 20px; border-radius: var(--radius-md); }
+  .cta-banner h2 { font-size: 1.5rem !important; }
+  .cta-banner-btns { flex-direction: column; }
+  .cta-banner-btns a { justify-content: center; text-align: center; width: 100%; }
+
+  /* About page — single column on phone */
+  .about-vision-grid { grid-template-columns: 1fr; gap: 20px; }
+  .about-values-grid { grid-template-columns: 1fr 1fr; }
+  .about-stats-grid  { grid-template-columns: 1fr; gap: 14px; }
+
+  /* Stock Detail page — fix the two-column layout */
+  .detail-two-col {
+    grid-template-columns: 1fr !important;
+  }
+  .detail-header {
+    padding: 20px 16px;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 16px !important;
+  }
+  .detail-header > div:last-child {
+    text-align: left !important;
+  }
+  .detail-panel { padding: 20px 16px; }
+  .purification-card { padding: 20px 16px; }
+
+  /* Advanced Metrics 2-col → 1-col */
+  .detail-metrics-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Footer */
+  .footer-inner { grid-template-columns: 1fr; gap: 28px; }
+  .footer-desc { max-width: 100%; }
+
+  /* Auth */
+  .auth-card { padding: 24px 16px; border-radius: var(--radius-lg); }
+
+  /* Section headers */
+  .section-label { font-size: 0.72rem; }
+
+  /* Feature cards */
+  .feature-card { padding: 28px 20px; }
+
+  /* General typography */
+  h2 { font-size: 1.6rem !important; }
+}
+
+/* ===================================================
+   Ticker Animation
+   =================================================== */
 .ticker-wrap {
   width: 100%;
   overflow: hidden;

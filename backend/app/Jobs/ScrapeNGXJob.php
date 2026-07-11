@@ -14,6 +14,7 @@ use App\Models\Company;
 use App\Models\DailyPrice;
 use App\Models\Financial;
 use App\Models\CorporateDisclosure;
+use App\Models\PriceAlert;
 use App\Services\AaoifiComplianceService;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
@@ -29,12 +30,12 @@ class ScrapeNGXJob implements ShouldQueue
         //
     }
 
-    public function handle(AaoifiComplianceService $complianceService): void
+    public function handle(AaoifiComplianceService $complianceService, \App\Services\NotificationService $notificationService): void
     {
         Log::info('Starting Dual NGX Scraping Job');
         
         $this->scrapeNews($complianceService);
-        $this->scrapeFinancials($complianceService);
+        $this->scrapeFinancials($complianceService, $notificationService);
 
         Log::info('Completed Dual NGX Scraping Job successfully.');
     }
@@ -149,7 +150,7 @@ class ScrapeNGXJob implements ShouldQueue
         }
     }
 
-    private function scrapeFinancials(AaoifiComplianceService $complianceService): void
+    private function scrapeFinancials(AaoifiComplianceService $complianceService, \App\Services\NotificationService $notificationService): void
     {
         Log::info('Executing Yahoo Finance Python Scraper...');
         
@@ -249,7 +250,39 @@ class ScrapeNGXJob implements ShouldQueue
 
                 // 4. Run Compliance Service
                 $complianceService->evaluateCompliance($company, $financials);
+
+                // 5. Check Price Alerts
+                $activeAlerts = PriceAlert::where('company_id', $company->id)
+                    ->where('is_active', true)
+                    ->with('user')
+                    ->get();
+
+                foreach ($activeAlerts as $alert) {
+                    $hit = false;
+                    if ($alert->condition === 'above' && $price >= $alert->target_price) {
+                        $hit = true;
+                    } elseif ($alert->condition === 'below' && $price <= $alert->target_price) {
+                        $hit = true;
+                    }
+
+                    if ($hit) {
+                        $alert->update(['is_active' => false]);
+
+                        if ($alert->user->fcm_token) {
+                            $title = "Price Alert: {$symbol} hit ₦{$alert->target_price}";
+                            $body = "{$symbol} is currently trading at ₦{$price}.";
+                            $notificationService->sendPushNotification($alert->user->fcm_token, $title, $body);
+                        }
+                    }
+                }
+                
+                // Clear individual stock cache
+                \Illuminate\Support\Facades\Cache::forget("stocks.show.{$symbol}");
             }
+
+            // Clear global lists caches
+            \Illuminate\Support\Facades\Cache::forget('stocks.index');
+            \Illuminate\Support\Facades\Cache::forget('stocks.ngx');
 
             Log::info('Yahoo Finance Scraping completed.');
 

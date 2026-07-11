@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../core/api/api_service.dart';
 
 class PortfolioScreen extends StatefulWidget {
@@ -38,6 +39,8 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
   };
   List<dynamic> holdings = [];
 
+  bool _isGuest = false;
+
   @override
   void initState() {
     super.initState();
@@ -45,6 +48,13 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
   }
 
   Future<void> _fetchPortfolio() async {
+    // Check if user has a token before hitting the API
+    const storage = FlutterSecureStorage();
+    final token = await storage.read(key: 'access_token');
+    if (token == null) {
+      setState(() { _isGuest = true; isLoading = false; });
+      return;
+    }
     try {
       final response = await ApiService().get('portfolio');
       if (response.data['status'] == 'success') {
@@ -53,10 +63,13 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
           holdings = response.data['data']['holdings'];
           isLoading = false;
         });
+      } else {
+        setState(() { isLoading = false; });
       }
     } catch (e) {
       setState(() {
-        errorMessage = 'Failed to load portfolio.';
+        // If 401, treat as guest
+        _isGuest = true;
         isLoading = false;
       });
     }
@@ -80,8 +93,8 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator(color: primaryGreen))
-          : errorMessage.isNotEmpty
-              ? Center(child: Text(errorMessage))
+          : _isGuest
+              ? _buildGuestView()
               : SingleChildScrollView(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -96,7 +109,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
                         ),
                         const SizedBox(height: 16),
                         if (holdings.isNotEmpty) _buildPieChart(),
-                        if (holdings.isEmpty) 
+                        if (holdings.isEmpty)
                           Container(
                             padding: const EdgeInsets.all(24),
                             alignment: Alignment.center,
@@ -114,6 +127,58 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
                     ),
                   ),
                 ),
+    );
+  }
+
+  Widget _buildGuestView() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 80, height: 80,
+              decoration: BoxDecoration(
+                color: const Color(0xFFECFDF5),
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: const Icon(Icons.pie_chart_outline_rounded, size: 40, color: primaryGreen),
+            ),
+            const SizedBox(height: 24),
+            const Text('Track Your Halal Portfolio',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: textDark),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Sign in to track your NGX holdings, monitor Shariah compliance and calculate your Zakat.',
+              style: TextStyle(color: textMuted, fontSize: 15, height: 1.6),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pushNamed(context, '/login'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryGreen,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  elevation: 0,
+                ),
+                child: const Text('Sign In', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: () => Navigator.pushNamed(context, '/register'),
+              child: const Text('Create a free account →', style: TextStyle(color: primaryGreen, fontWeight: FontWeight.w600)),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

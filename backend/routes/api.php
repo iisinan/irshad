@@ -9,8 +9,10 @@ use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\BasketController;
 use App\Http\Controllers\BrokerageController;
 use App\Http\Controllers\PortfolioController;
+use App\Http\Controllers\TradeController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\PriceAlertController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -34,6 +36,8 @@ Route::prefix('v1')->group(function () {
     Route::get('/stocks/baskets',                 [BasketController::class, 'index']);
     Route::get('/stocks/baskets/{basket}',        [BasketController::class, 'show']);
     Route::get('/disclosures',          [\App\Http\Controllers\Api\V1\CorporateDisclosureController::class, 'index']);
+    Route::get('/news',                 [\App\Http\Controllers\NewsController::class, 'index']);
+    Route::get('/stocks/{symbol}/analysis',       [StockController::class, 'getAiAnalysis']);
 
     // ── Protected Routes ─────────────────────────────────────────────────
     Route::middleware('auth:sanctum')->group(function () {
@@ -54,7 +58,6 @@ Route::prefix('v1')->group(function () {
         // ── Stocks ── (order matters: specific routes before {symbol} wildcard)
         // Baskets moved to public routes above
         Route::get('/stocks/check/{symbol}',          [StockController::class, 'check']);
-        Route::get('/stocks/{symbol}/analysis',       [StockController::class, 'getAiAnalysis']);
         Route::put('/stocks/{symbol}/status',         [StockController::class, 'updateStatus']); // Scholar/Admin only (role checked in controller)
 
         // Brokerage
@@ -62,8 +65,10 @@ Route::prefix('v1')->group(function () {
         Route::get('/brokerage/accounts', [BrokerageController::class, 'accounts']);
         Route::post('/brokerage/trade',   [BrokerageController::class, 'trade']);
 
-        // Portfolio
-        Route::get('/portfolio',               [PortfolioController::class, 'index']);
+        // Portfolio & Trading
+        Route::get('/portfolio', [PortfolioController::class, 'index']);
+        Route::post('/broker/link', [TradeController::class, 'linkBroker']);
+        Route::post('/portfolio/trade', [TradeController::class, 'executeTrade']);
         Route::post('/portfolio',              [PortfolioController::class, 'store']);
         Route::delete('/portfolio/{id}',       [PortfolioController::class, 'destroy']);
 
@@ -75,6 +80,11 @@ Route::prefix('v1')->group(function () {
         // History
         Route::get('/history',  [HistoryController::class, 'index']);
         Route::post('/history', [HistoryController::class, 'store']);
+
+        // Price Alerts
+        Route::get('/alerts', [PriceAlertController::class, 'index']);
+        Route::post('/stocks/{symbol}/alerts', [PriceAlertController::class, 'store']);
+        Route::delete('/alerts/{id}', [PriceAlertController::class, 'destroy']);
 
         // Notifications
         Route::post('/notifications/subscribe', function (Request $request) {

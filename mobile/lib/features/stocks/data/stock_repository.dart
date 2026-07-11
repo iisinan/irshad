@@ -127,4 +127,19 @@ class StockRepository {
     }
     return null;
   }
+
+  Future<Map<String, dynamic>?> updateStockStatus(String symbol, String status, String reason) async {
+    try {
+      final response = await _apiService.put('stocks/$symbol/status', {
+        'status': status,
+        'reason': reason,
+      });
+      if (response.statusCode == 200) {
+        return response.data['data'];
+      }
+    } on DioException catch (e) {
+      throw e.response?.data['message'] ?? 'Failed to update status';
+    }
+    return null;
+  }
 }

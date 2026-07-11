@@ -84,13 +84,47 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
           Expanded(
             child: _isSearching 
               ? _buildLoading() 
-              : (_searchResults.isNotEmpty
-                  ? _buildList('Search Results', _searchResults)
-                  : _history.isNotEmpty
+              : (_searchController.text.isNotEmpty
+                  ? (_searchResults.isNotEmpty
+                      ? _buildList('Search Results', _searchResults)
+                      : _buildNoResults())
+                  : (_history.isNotEmpty
                       ? _buildList('Recent Checks', _history)
-                      : _buildEmptyState()),
+                      : _buildEmptyState())),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildNoResults() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(40.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.05),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.search_off_rounded, size: 40, color: Colors.red),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'No Results Found',
+              style: TextStyle(fontSize: 20, color: textDark, fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'We couldn\'t find any stocks matching "${_searchController.text}".\nPlease check the spelling and try again.',
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: textMuted, height: 1.5, fontSize: 14),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -161,7 +195,11 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
     Color badgeBg = isHalal ? const Color(0xFFDCFCE7) : (isNonHalal ? const Color(0xFFFEE2E2) : const Color(0xFFFEF3C7));
 
     return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, '/stock_details', arguments: stock),
+      onTap: () {
+        // Fetch details in background to cache in history
+        _stockRepository.getStockDetails(stock['symbol']);
+        Navigator.pushNamed(context, '/stock_details', arguments: stock);
+      },
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),

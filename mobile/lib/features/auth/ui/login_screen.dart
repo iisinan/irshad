@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../../core/providers/app_state_provider.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/auth_repository.dart';
 import 'forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final VoidCallback? onBack;
+  const LoginScreen({super.key, this.onBack});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -43,10 +46,8 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final authenticated = await _localAuth.authenticate(
         localizedReason: 'Authenticate to log in securely',
-        options: const AuthenticationOptions(
-          stickyAuth: true,
-          biometricOnly: true,
-        ),
+        biometricOnly: true,
+        persistAcrossBackgrounding: true,
       );
       
       if (authenticated) {
@@ -90,7 +91,10 @@ class _LoginScreenState extends State<LoginScreen> {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('saved_email', _emailController.text);
         await prefs.setString('saved_password', _passwordController.text);
-        if (mounted) Navigator.pushReplacementNamed(context, '/main');
+        if (mounted) {
+          Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
+          Navigator.of(context, rootNavigator: true).pushReplacementNamed('/main');
+        }
       }
     } catch (e) {
       _showError(e.toString());
@@ -114,14 +118,16 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: bgColor,
-      appBar: AppBar(
-        backgroundColor: bgColor,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: textDark, size: 20),
-          onPressed: () => Navigator.canPop(context) ? Navigator.pop(context) : Navigator.pushReplacementNamed(context, '/main'),
-        ),
-      ),
+      appBar: (widget.onBack != null || Navigator.canPop(context))
+          ? AppBar(
+              backgroundColor: bgColor,
+              elevation: 0,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, color: textDark, size: 20),
+                onPressed: () => widget.onBack != null ? widget.onBack!() : Navigator.pop(context),
+              ),
+            )
+          : null,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),

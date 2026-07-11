@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../../core/providers/app_state_provider.dart';
 import '../data/auth_repository.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -48,7 +50,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _passwordConfirmationController.text,
       );
       if (user != null) {
-        if (mounted) Navigator.pushReplacementNamed(context, '/main');
+        if (mounted) {
+          Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
+          Navigator.of(context, rootNavigator: true).pushReplacementNamed('/main');
+        }
       }
     } catch (e) {
       _showError(e.toString());

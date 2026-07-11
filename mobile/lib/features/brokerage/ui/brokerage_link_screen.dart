@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import '../../../core/api/api_service.dart';
 class BrokerageLinkScreen extends StatefulWidget {
   const BrokerageLinkScreen({super.key});
 
@@ -110,32 +110,37 @@ class _BrokerageLinkScreenState extends State<BrokerageLinkScreen> {
 
 
   Future<void> _initiateOAuth(String name) async {
-    // This is a skeleton OAuth URL. In production, this would be fetched from the backend.
-    final String oauthUrl = 'https://oauth.mockbroker.com/authorize?client_id=IRSHAD&redirect_uri=irshad://brokerage-callback';
-    final Uri url = Uri.parse(oauthUrl);
+    // Show a loading indicator since we are simulating the connection
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator(color: primaryGreen)),
+    );
 
     try {
-      if (await canLaunchUrl(url)) {
-        await launchUrl(url, mode: LaunchMode.externalApplication);
+      final apiService = ApiService();
+      await apiService.post('broker/link', {'broker_name': name});
+      
+      if (mounted) {
+        Navigator.pop(context); // Close loading dialog
         
-        // When the user returns to the app via deep link, we'd handle the callback.
-        // For now, we simulate a successful return.
-        if (mounted) {
-           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('$name authorization initiated.'),
-              backgroundColor: textDark,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
-      } else {
-        throw 'Could not launch $url';
+        // Show success snackbar
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Successfully linked $name and funded account with ₦1,000,000!'),
+            backgroundColor: primaryGreen,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        
+        // Pop back to portfolio
+        Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
+        Navigator.pop(context); // Close loading dialog
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error launching OAuth: $e')),
+          SnackBar(content: Text('Error linking broker: $e'), backgroundColor: Colors.red),
         );
       }
     }

@@ -9,6 +9,9 @@ const StockDetails = () => {
   const [stock, setStock] = useState(null);
   const [loading, setLoading] = useState(true);
   const [dividendInput, setDividendInput] = useState('');
+  const [aiAnalysis, setAiAnalysis] = useState(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState(null);
 
   useEffect(() => {
     fetchStockDetails(symbol)
@@ -92,16 +95,22 @@ const StockDetails = () => {
   const isPositive = priceChange >= 0;
 
   // ─── AI Analysis ───────────────────────────────────
-  const [aiAnalysis, setAiAnalysis] = useState(null);
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiError, setAiError] = useState(null);
-
   const handleAskAI = () => {
     setAiLoading(true);
     setAiError(null);
     fetchAiAnalysis(symbol)
-      .then(r => setAiAnalysis(r.analysis))
-      .catch(e => setAiError('Failed to get AI analysis. Ensure GEMINI_API_KEY is set.'))
+      .then(r => {
+        const analysisText = r.data?.analysis || r.analysis || "No analysis returned.";
+        setAiAnalysis(analysisText);
+      })
+      .catch(e => {
+        console.error(e);
+        if (e.response?.status === 401) {
+          setAiError('Unauthorized. Please log in or wait for the backend to update public access.');
+        } else {
+          setAiError(e.response?.data?.message || 'Failed to get AI analysis. Ensure GEMINI_API_KEY is set or backend is updated.');
+        }
+      })
       .finally(() => setAiLoading(false));
   };
 
@@ -160,7 +169,7 @@ const StockDetails = () => {
       </div>
 
       {/* ─── Two Column Layout ─── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '28px', alignItems: 'start' }}>
+      <div className="detail-two-col" style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '28px', alignItems: 'start' }}>
         
         {/* Left Column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -256,7 +265,7 @@ const StockDetails = () => {
           {/* Advanced Metrics (Market Data) */}
           <div className="detail-panel">
             <div className="detail-section-label">Advanced Metrics</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <div className="detail-metrics-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
               <div style={{ background: 'var(--bg)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)' }}>
                 <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Valuation</span>
                 <span style={{ fontSize: '1rem', color: 'var(--text-dark)', fontWeight: 700 }}>{stock.valuation_info || 'N/A'}</span>

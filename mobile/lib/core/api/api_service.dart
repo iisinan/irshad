@@ -5,8 +5,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 /// Singleton ApiService — one Dio instance, one interceptor stack, everywhere.
 class ApiService {
-  static const String _prodUrl = 'https://irshad-backend.onrender.com/api/v1/';
-  static const String _devUrl  = 'http://127.0.0.1:8000/api/v1/';
+  static const String _prodUrl = 'https://irshad-k3el.onrender.com/api/v1/';
+  static const String _devUrl  = 'http://10.0.2.2:8000/api/v1/';
 
   static final ApiService _instance = ApiService._internal();
   factory ApiService() => _instance;
@@ -39,17 +39,18 @@ class ApiService {
         return handler.next(options);
       },
       onError: (DioException error, handler) async {
-        // Global 401 handler — session expired, go back to login
         if (error.response?.statusCode == 401) {
-          await _storage.delete(key: 'access_token');
-          // navigatorKey.currentState?.pushNamedAndRemoveUntil('/login', (route) => false);
+          final isAuthRoute = error.requestOptions.path.contains('login') || error.requestOptions.path.contains('register');
+          if (!isAuthRoute) {
+            await _storage.delete(key: 'access_token');
+          }
         }
         return handler.next(error);
       },
     ));
   }
 
-  Future<Response> post(String path, Map<String, dynamic> data) async {
+  Future<Response> post(String path, dynamic data) async {
     return dio.post(path, data: data);
   }
 
@@ -57,7 +58,7 @@ class ApiService {
     return dio.get(path, queryParameters: queryParameters);
   }
 
-  Future<Response> put(String path, Map<String, dynamic> data) async {
+  Future<Response> put(String path, dynamic data) async {
     return dio.put(path, data: data);
   }
 

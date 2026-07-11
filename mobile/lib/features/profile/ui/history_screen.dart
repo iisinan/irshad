@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../../../core/providers/app_state_provider.dart';
 import '../data/user_activity_repository.dart';
 
 class HistoryScreen extends StatefulWidget {
@@ -29,6 +31,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   void _fetchHistory() async {
+    final isAuth = Provider.of<AppStateProvider>(context, listen: false).isAuthenticated;
+    if (!isAuth) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+      return;
+    }
+
     setState(() => _isLoading = true);
     final history = await _activityRepository.getHistory(action: _filter);
     setState(() {
@@ -169,6 +181,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Widget _buildEmptyState() {
+    final isAuth = Provider.of<AppStateProvider>(context, listen: false).isAuthenticated;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40.0),
@@ -184,16 +198,35 @@ class _HistoryScreenState extends State<HistoryScreen> {
               child: const Icon(Icons.history_rounded, size: 40, color: primaryGreen),
             ),
             const SizedBox(height: 24),
-            const Text(
-              'No Activity Yet',
-              style: TextStyle(fontSize: 20, color: textDark, fontWeight: FontWeight.w900),
+            Text(
+              isAuth ? 'No Activity Yet' : 'Login to view History',
+              style: const TextStyle(fontSize: 20, color: textDark, fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Your scan and screening history will be\nsaved here for quick access.',
+            Text(
+              isAuth 
+                  ? 'Your scan and screening history will be\nsaved here for quick access.'
+                  : 'You must be logged in to view your scan and screening history.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: textMuted, height: 1.5, fontSize: 14),
+              style: const TextStyle(color: textMuted, height: 1.5, fontSize: 14),
             ),
+            if (!isAuth) ...[
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pushNamed(context, '/login'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: textDark,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    elevation: 0,
+                  ),
+                  child: const Text('Login / Register', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                ),
+              ),
+            ],
           ],
         ),
       ),

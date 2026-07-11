@@ -28,7 +28,10 @@ class StockController extends Controller
      */
     public function index(): JsonResponse
     {
-        $stocks = Company::with(['status', 'dailyPrices' => fn($q) => $q->latest('date')->limit(1)])->get();
+        $stocks = \Illuminate\Support\Facades\Cache::rememberForever('stocks.index', function () {
+            return Company::with(['status', 'dailyPrices' => fn($q) => $q->latest('date')->limit(1)])->get();
+        });
+        
         return $this->success($stocks);
     }
 
@@ -37,7 +40,10 @@ class StockController extends Controller
      */
     public function show(string $symbol): JsonResponse
     {
-        $stock = Company::with(['status', 'financials' => fn($q) => $q->latest(), 'dailyPrices' => fn($q) => $q->latest('date')->limit(30)])->where('symbol', $symbol)->firstOrFail();
+        $stock = \Illuminate\Support\Facades\Cache::rememberForever("stocks.show.{$symbol}", function () use ($symbol) {
+            return Company::with(['status', 'financials' => fn($q) => $q->latest(), 'dailyPrices' => fn($q) => $q->latest('date')->limit(30)])->where('symbol', $symbol)->firstOrFail();
+        });
+
         return $this->success($stock);
     }
 
@@ -62,25 +68,27 @@ class StockController extends Controller
      */
     public function ngx(): JsonResponse
     {
-        $stocks = Company::with([
-            'status',
-            'dailyPrices' => fn($q) => $q->latest('date')->limit(2),
-        ])->get()->map(function ($company) {
-            $prices   = $company->dailyPrices;
-            $latest   = $prices->first();
-            $prev     = $prices->skip(1)->first();
+        $stocks = \Illuminate\Support\Facades\Cache::rememberForever('stocks.ngx', function () {
+            return Company::with([
+                'status',
+                'dailyPrices' => fn($q) => $q->latest('date')->limit(2),
+            ])->get()->map(function ($company) {
+                $prices   = $company->dailyPrices;
+                $latest   = $prices->first();
+                $prev     = $prices->skip(1)->first();
 
-            $latestPrice = (float) ($latest?->price ?? 0);
-            $prevPrice   = (float) ($prev?->price ?? $latestPrice);
+                $latestPrice = (float) ($latest?->price ?? 0);
+                $prevPrice   = (float) ($prev?->price ?? $latestPrice);
 
-            $change    = $latestPrice - $prevPrice;
-            $changePct = $prevPrice > 0 ? round(($change / $prevPrice) * 100, 2) : 0;
+                $change    = $latestPrice - $prevPrice;
+                $changePct = $prevPrice > 0 ? round(($change / $prevPrice) * 100, 2) : 0;
 
-            $company->latest_price      = $latestPrice;
-            $company->price_change      = round($change, 2);
-            $company->price_change_pct  = $changePct;
+                $company->latest_price      = $latestPrice;
+                $company->price_change      = round($change, 2);
+                $company->price_change_pct  = $changePct;
 
-            return $company;
+                return $company;
+            });
         });
 
         return $this->success($stocks);
@@ -102,6 +110,11 @@ class StockController extends Controller
 
         // Use the authoritative 3-stage compliance engine
         $status = $this->complianceService->evaluateCompliance($company, $financials, $company->sector);
+
+        // Clear relevant caches since status might have changed
+        \Illuminate\Support\Facades\Cache::forget('stocks.index');
+        \Illuminate\Support\Facades\Cache::forget('stocks.ngx');
+        \Illuminate\Support\Facades\Cache::forget("stocks.show.{$symbol}");
 
         return $this->success($company->load(['status', 'financials', 'dailyPrices' => fn($q) => $q->latest('date')->limit(1)]), 'Screening completed.');
     }
@@ -136,6 +149,11 @@ class StockController extends Controller
         );
 
         event(new \App\Events\StockStatusChanged($company, $status));
+
+        // Clear caches so the new status reflects immediately
+        \Illuminate\Support\Facades\Cache::forget('stocks.index');
+        \Illuminate\Support\Facades\Cache::forget('stocks.ngx');
+        \Illuminate\Support\Facades\Cache::forget("stocks.show.{$symbol}");
 
         return $this->success($company->load('status'), 'Stock status updated successfully by scholar.');
     }

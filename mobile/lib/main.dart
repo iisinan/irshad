@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'core/api/api_service.dart';
 import 'features/auth/ui/login_screen.dart';
 import 'features/auth/ui/register_screen.dart';
+import 'features/auth/ui/welcome_screen.dart';
 import 'features/auth/ui/profile_screen.dart';
 import 'features/auth/ui/edit_profile_screen.dart';
 import 'features/auth/ui/upgrade_screen.dart';
@@ -31,29 +33,30 @@ import 'core/providers/app_state_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Initialize Firebase first
+
+  // Initialize Firebase
   try {
     await Firebase.initializeApp();
-    // Initialize Push Notifications only if Firebase succeeds
     await PushNotificationService().initialize();
   } catch (e) {
     debugPrint("Firebase init failed (missing google-services.json?): $e");
   }
 
-  // Initialize Hive
   await Hive.initFlutter();
-  
+
   final prefs = await SharedPreferences.getInstance();
   final hasSeenOnboarding = prefs.getBool('hasSeenOnboarding') ?? false;
-  
+
+  // Always go straight to /main after onboarding — guest mode, no forced login
+  final String startRoute = hasSeenOnboarding ? '/main' : '/onboarding';
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => StockProvider()),
         ChangeNotifierProvider(create: (_) => AppStateProvider()),
       ],
-      child: IrshadApp(initialRoute: hasSeenOnboarding ? '/main' : '/onboarding'),
+      child: IrshadApp(initialRoute: startRoute),
     ),
   );
 }
@@ -119,20 +122,68 @@ class IrshadApp extends StatelessWidget {
         return null;
       },
       routes: {
-        '/onboarding': (context) => const OnboardingScreen(),
-        '/login': (context) => const LoginScreen(),
-        '/register': (context) => const RegisterScreen(),
-        '/upgrade': (context) => const UpgradeScreen(),
-        '/main': (context) => const MainNavigationScreen(),
-        '/profile': (context) => const ProfileScreen(),
-        '/edit_profile': (context) => const EditProfileScreen(),
-        '/favorites': (context) => const FavoritesScreen(),
-        '/history': (context) => const HistoryScreen(),
-        '/notifications': (context) => const NotificationsScreen(),
-        '/settings': (context) => const SettingsScreen(),
-        '/submit_product': (context) => const UserSubmissionScreen(),
-        '/brokerage/link': (context) => const BrokerageLinkScreen(),
+        '/onboarding':       (context) => const OnboardingScreen(),
+        '/welcome':          (context) => const WelcomeScreen(),
+        '/login':            (context) => const LoginScreen(),
+        '/register':         (context) => const RegisterScreen(),
+        '/upgrade':          (context) => const UpgradeScreen(),
+        '/main':             (context) => const MainNavigationScreen(),
+        '/profile':          (context) => const ProfileScreen(),
+        '/edit_profile':     (context) => const EditProfileScreen(),
+        '/favorites':        (context) => const FavoritesScreen(),
+        '/history':          (context) => const HistoryScreen(),
+        '/notifications':    (context) => const NotificationsScreen(),
+        '/settings':         (context) => const SettingsScreen(),
+        '/submit_product':   (context) => const UserSubmissionScreen(),
+        '/brokerage/link':   (context) => const BrokerageLinkScreen(),
         '/zakat_calculator': (context) => const ZakatCalculatorScreen(),
+      },
+    );
+  }
+}
+
+// ─── Tab indices ──────────────────────────────────────────────────────────────
+// 0 = Explore   (public)
+// 1 = Search    (public)
+// 2 = Watchlist (protected – requires login)
+// 3 = Portfolio (protected – requires login)
+// 4 = Profile   (protected – requires login)
+
+class AuthTabWrapper extends StatefulWidget {
+  final Widget child;
+  final VoidCallback onBackToExplore;
+
+  const AuthTabWrapper({
+    super.key,
+    required this.child,
+    required this.onBackToExplore,
+  });
+
+  @override
+  State<AuthTabWrapper> createState() => _AuthTabWrapperState();
+}
+
+class _AuthTabWrapperState extends State<AuthTabWrapper> {
+  final _navigatorKey = GlobalKey<NavigatorState>();
+
+  @override
+  Widget build(BuildContext context) {
+    final isAuthenticated = context.watch<AppStateProvider>().isAuthenticated;
+
+    if (isAuthenticated) {
+      return widget.child;
+    }
+
+    return Navigator(
+      key: _navigatorKey,
+      onGenerateRoute: (settings) {
+        Widget page;
+        if (settings.name == '/register') {
+          page = const RegisterScreen();
+        } else {
+          page = LoginScreen(onBack: widget.onBackToExplore);
+        }
+        return MaterialPageRoute(builder: (_) => page);
       },
     );
   }
@@ -147,27 +198,69 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _selectedIndex = 0;
+  final _storage = const FlutterSecureStorage();
 
-  final List<Widget> _screens = [
-    const HomeScreen(),        // Explore
-    const StockSearchScreen(), // Search
-    const FavoritesScreen(),   // Watchlist
-    const PortfolioScreen(),   // Portfolio
-    const ProfileScreen(),     // Profile
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _checkInitialAuth();
+  }
+
+  Future<void> _checkInitialAuth() async {
+    final token = await _storage.read(key: 'access_token');
+    if (token != null && token.isNotEmpty) {
+      if (mounted) {
+        Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
+      }
+    }
+  }
+
+  void _onBackToExplore() {
+    if (mounted) setState(() => _selectedIndex = 0);
+  }
+
+  Widget _buildScreen(int index) {
+    switch (index) {
+      case 0:
+        return const HomeScreen();
+      case 1:
+        return const StockSearchScreen();
+      case 2:
+        return AuthTabWrapper(
+          onBackToExplore: _onBackToExplore,
+          child: const FavoritesScreen(),
+        );
+      case 3:
+        return AuthTabWrapper(
+          onBackToExplore: _onBackToExplore,
+          child: const PortfolioScreen(),
+        );
+      case 4:
+        return AuthTabWrapper(
+          onBackToExplore: _onBackToExplore,
+          child: const ProfileScreen(),
+        );
+      default:
+        return const HomeScreen();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(
         index: _selectedIndex,
-        children: _screens,
+        children: [
+          _buildScreen(0),
+          _buildScreen(1),
+          _buildScreen(2),
+          _buildScreen(3),
+          _buildScreen(4),
+        ],
       ),
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          border: Border(
-            top: BorderSide(color: const Color(0xFFE5E7EB), width: 1),
-          ),
+        decoration: const BoxDecoration(
+          border: Border(top: BorderSide(color: Color(0xFFE5E7EB), width: 1)),
         ),
         child: BottomNavigationBar(
           currentIndex: _selectedIndex,
@@ -206,3 +299,4 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     );
   }
 }
+
