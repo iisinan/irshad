@@ -85,6 +85,8 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const rawRevenue = parseFloat(latest?.total_revenue) || 0;
   const revenue = rawRevenue > 0 ? rawRevenue : safeAssets;
   
+  const hasFinancialHighlights = assets > 0 || debt > 0 || rawRevenue > 0 || interest > 0;
+
   const debtRatio = ((debt / safeAssets) * 100).toFixed(1);
   const interestRatio = ((interest / revenue) * 100).toFixed(1);
   const purificationRate = latest?.non_compliant_revenue_ratio ? (parseFloat(latest.non_compliant_revenue_ratio) * 100).toFixed(2) : interestRatio;
@@ -282,27 +284,29 @@ const StockDetails = ({ symbol: propSymbol }) => {
           </div>
 
           {/* Raw Financial Data */}
-          <div className="detail-panel">
-            <div className="detail-section-label">Financial Highlights</div>
-            <div className="detail-metrics-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              <div style={{ background: 'var(--bg)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)' }}>
-                <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total Assets</span>
-                <span style={{ fontSize: '1.1rem', color: 'var(--text-dark)', fontWeight: 800 }}>₦ {assets > 0 ? assets.toLocaleString() : 'N/A'}</span>
-              </div>
-              <div style={{ background: 'var(--bg)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)' }}>
-                <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total Debt</span>
-                <span style={{ fontSize: '1.1rem', color: 'var(--text-dark)', fontWeight: 800 }}>₦ {debt > 0 ? debt.toLocaleString() : '0'}</span>
-              </div>
-              <div style={{ background: 'var(--bg)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)' }}>
-                <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total Revenue</span>
-                <span style={{ fontSize: '1.1rem', color: 'var(--text-dark)', fontWeight: 800 }}>₦ {rawRevenue > 0 ? rawRevenue.toLocaleString() : 'N/A'}</span>
-              </div>
-              <div style={{ background: 'var(--bg)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)' }}>
-                <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Interest Income</span>
-                <span style={{ fontSize: '1.1rem', color: 'var(--text-dark)', fontWeight: 800 }}>₦ {interest > 0 ? interest.toLocaleString() : '0'}</span>
+          {hasFinancialHighlights && (
+            <div className="detail-panel">
+              <div className="detail-section-label">Financial Highlights</div>
+              <div className="detail-metrics-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div style={{ background: 'var(--bg)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                  <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total Assets</span>
+                  <span style={{ fontSize: '1.1rem', color: 'var(--text-dark)', fontWeight: 800 }}>₦ {assets > 0 ? assets.toLocaleString() : 'N/A'}</span>
+                </div>
+                <div style={{ background: 'var(--bg)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                  <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total Debt</span>
+                  <span style={{ fontSize: '1.1rem', color: 'var(--text-dark)', fontWeight: 800 }}>₦ {debt > 0 ? debt.toLocaleString() : '0'}</span>
+                </div>
+                <div style={{ background: 'var(--bg)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                  <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total Revenue</span>
+                  <span style={{ fontSize: '1.1rem', color: 'var(--text-dark)', fontWeight: 800 }}>₦ {rawRevenue > 0 ? rawRevenue.toLocaleString() : 'N/A'}</span>
+                </div>
+                <div style={{ background: 'var(--bg)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                  <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Interest Income</span>
+                  <span style={{ fontSize: '1.1rem', color: 'var(--text-dark)', fontWeight: 800 }}>₦ {interest > 0 ? interest.toLocaleString() : '0'}</span>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Advanced Metrics (Market Data) */}
           <div className="detail-panel">

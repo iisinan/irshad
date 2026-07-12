@@ -7,7 +7,27 @@
     <title>web</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <style>
+        body, html { margin: 0; padding: 0; background-color: #F5F0E8; height: 100vh; overflow: hidden; }
+        .splash-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        .splash-logo { width: 80px; height: 80px; background-color: #C9A84C; border-radius: 20px; display: flex; align-items: center; justify-content: center; animation: pulse 2s infinite ease-in-out; margin-bottom: 24px; box-shadow: 0 10px 25px rgba(201, 168, 76, 0.4); }
+        .splash-logo svg { width: 40px; height: 40px; color: white; }
+        .splash-text { color: #1A1208; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; animation: fade 2s infinite; }
+        @keyframes pulse {
+          0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(201, 168, 76, 0.7); }
+          70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(201, 168, 76, 0); }
+          100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(201, 168, 76, 0); }
+        }
+        @keyframes fade { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+      </style>
+      <div class="splash-container">
+        <div class="splash-logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+        </div>
+        <div class="splash-text">Irshad</div>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

@@ -3,7 +3,8 @@ import 'package:provider/provider.dart';
 import '../../stocks/providers/stock_provider.dart';
 
 class ZakatCalculatorScreen extends StatefulWidget {
-  const ZakatCalculatorScreen({super.key});
+  final bool isTab;
+  const ZakatCalculatorScreen({super.key, this.isTab = false});
 
   @override
   State<ZakatCalculatorScreen> createState() => _ZakatCalculatorScreenState();
@@ -59,7 +60,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
 
     return Scaffold(
       backgroundColor: bgColor,
-      appBar: AppBar(
+      appBar: widget.isTab ? null : AppBar(
         title: const Text('Zakat Calculator', style: TextStyle(fontWeight: FontWeight.w900, color: textDark, letterSpacing: -0.5)),
         backgroundColor: bgColor,
         elevation: 0,

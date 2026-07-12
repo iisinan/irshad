@@ -118,6 +118,15 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     Color badgeBg = isHalal ? const Color(0xFFDCFCE7) : (isNonHalal ? const Color(0xFFFEE2E2) : const Color(0xFFFEF3C7));
     String statusLabel = isHalal ? 'SHARIAH COMPLIANT' : (isNonHalal ? 'NOT COMPLIANT' : 'QUESTIONABLE');
 
+    final financials = _currentStock['financials'];
+    final latestFin = (financials != null && financials is List && financials.isNotEmpty) ? financials[0] : null;
+    final hasFinancialHighlights = latestFin != null && (
+      (latestFin['total_assets']?.toDouble() ?? 0.0) > 0 ||
+      (latestFin['total_debt']?.toDouble() ?? 0.0) > 0 ||
+      (latestFin['total_revenue']?.toDouble() ?? 0.0) > 0 ||
+      (latestFin['interest_income']?.toDouble() ?? 0.0) > 0
+    );
+
     final latestPrice = num.tryParse(_currentStock['latest_price']?.toString() ?? '0') ?? 0.0;
 
     return Scaffold(
@@ -241,6 +250,14 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                   const SizedBox(height: 12),
                   _buildFinancialRatios(statusColor),
                   const SizedBox(height: 32),
+                  
+                  // Financial Highlights
+                  if (hasFinancialHighlights) ...[
+                    _buildSectionHeader('Financial Highlights'),
+                    const SizedBox(height: 12),
+                    _buildFinancialHighlights(),
+                    const SizedBox(height: 32),
+                  ],
                   
                   // Business Screening
                   _buildSectionHeader('Business Screening'),
@@ -605,6 +622,61 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
       children: [
         Text(label, style: const TextStyle(color: textMuted, fontSize: 13, fontWeight: FontWeight.w500)),
         Text(value, style: const TextStyle(color: textDark, fontWeight: FontWeight.w800, fontSize: 14)),
+      ],
+    );
+  }
+
+  Widget _buildMetricCard(String label, String value) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: divider),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: const TextStyle(color: textMuted, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
+          const SizedBox(height: 8),
+          Text(value, style: const TextStyle(color: textDark, fontSize: 14, fontWeight: FontWeight.w700)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFinancialHighlights() {
+    final financials = _currentStock['financials'];
+    final latest = (financials != null && financials is List && financials.isNotEmpty) ? financials[0] : null;
+
+    final assets = latest?['total_assets']?.toDouble() ?? 0.0;
+    final debt = latest?['total_debt']?.toDouble() ?? 0.0;
+    final revenue = latest?['total_revenue']?.toDouble() ?? 0.0;
+    final interest = latest?['interest_income']?.toDouble() ?? 0.0;
+
+    String formatAmt(double amt) {
+      if (amt == 0) return '0';
+      String s = amt.toStringAsFixed(0);
+      return s.replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},');
+    }
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(child: _buildMetricCard('TOTAL ASSETS', assets > 0 ? '₦ ${formatAmt(assets)}' : 'N/A')),
+            const SizedBox(width: 16),
+            Expanded(child: _buildMetricCard('TOTAL DEBT', debt > 0 ? '₦ ${formatAmt(debt)}' : '0')),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(child: _buildMetricCard('TOTAL REVENUE', revenue > 0 ? '₦ ${formatAmt(revenue)}' : 'N/A')),
+            const SizedBox(width: 16),
+            Expanded(child: _buildMetricCard('INTEREST INCOME', interest > 0 ? '₦ ${formatAmt(interest)}' : '0')),
+          ],
+        ),
       ],
     );
   }
