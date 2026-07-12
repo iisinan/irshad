@@ -1,37 +1,37 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Inter:wght@400;500;600;700&display=swap');
 
 /* ===================================================
-   IRSHAD — Luxury Gold & Cream Design System
+   IRSHAD — Premium Fintech Design System
    =================================================== */
 :root {
   /* Core Palette */
-  --bg:           #F8FAFC;
+  --bg:           #F9FAFB;
   --bg-alt:       #FFFFFF;
-  --bg-section:   #F1F5F9;
+  --bg-section:   #F3F4F6;
 
-  --primary:      #0F766E;
-  --primary-hover:#115E59;
-  --primary-50:   rgba(15, 118, 110, 0.1);
-  --primary-100:  rgba(15, 118, 110, 0.25);
+  --primary:      #111827;
+  --primary-hover:#1F2937;
+  --primary-50:   rgba(17, 24, 39, 0.1);
+  --primary-100:  rgba(17, 24, 39, 0.25);
   
-  --accent:       #D4AF37;
+  --accent:       #10B981;
 
-  --text-dark:    #1E293B;
-  --text-body:    #64748B;
-  --text-muted:   #94A3B8;
-  --text-light:   #CBD5E1;
+  --text-dark:    #111827;
+  --text-body:    #6B7280;
+  --text-muted:   #9CA3AF;
+  --text-light:   #D1D5DB;
 
-  --border:       #E2E8F0;
-  --border-strong:#CBD5E1;
+  --border:       #E5E7EB;
+  --border-strong:#ECEFF3;
 
   /* Status */
-  --halal:        #16A34A;
-  --halal-bg:     rgba(22, 163, 74, 0.1);
-  --halal-border: rgba(22, 163, 74, 0.3);
+  --halal:        #22C55E;
+  --halal-bg:     rgba(34, 197, 94, 0.1);
+  --halal-border: rgba(34, 197, 94, 0.3);
 
-  --non-halal:    #DC2626;
-  --non-halal-bg: rgba(220, 38, 38, 0.1);
-  --non-halal-border: rgba(220, 38, 38, 0.3);
+  --non-halal:    #EF4444;
+  --non-halal-bg: rgba(239, 68, 68, 0.1);
+  --non-halal-border: rgba(239, 68, 68, 0.3);
 
   --doubtful:     #F59E0B;
   --doubtful-bg:  rgba(245, 158, 11, 0.1);

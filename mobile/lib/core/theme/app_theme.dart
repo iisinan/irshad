@@ -2,27 +2,27 @@ import 'package:flutter/material.dart';
 
 class AppTheme {
   // Core Palette
-  static const Color primary = Color(0xFF0F766E); // Deep Emerald Green
-  static const Color primaryHover = Color(0xFF115E59);
-  static const Color accent = Color(0xFFD4AF37); // Premium Gold, use sparingly
+  static const Color primary = Color(0xFF111827); // Deep Charcoal
+  static const Color primaryHover = Color(0xFF1F2937);
+  static const Color accent = Color(0xFF10B981); // Emerald Green
   
   // Backgrounds
-  static const Color bg = Color(0xFFF8FAFC);
+  static const Color bg = Color(0xFFF9FAFB);
   static const Color bgAlt = Color(0xFFFFFFFF); // Cards
-  static const Color bgSection = Color(0xFFF1F5F9); // Secondary Background
-  static const Color divider = Color(0xFFE2E8F0);
+  static const Color bgSection = Color(0xFFF3F4F6); // Secondary Background
+  static const Color divider = Color(0xFFECEFF3);
 
   // Typography
-  static const Color textDark = Color(0xFF1E293B);
-  static const Color textBody = Color(0xFF64748B);
-  static const Color textMuted = Color(0xFF94A3B8);
-  static const Color textDisabled = Color(0xFFCBD5E1);
+  static const Color textDark = Color(0xFF111827);
+  static const Color textBody = Color(0xFF6B7280);
+  static const Color textMuted = Color(0xFF9CA3AF);
+  static const Color textDisabled = Color(0xFFD1D5DB);
 
   // Status
-  static const Color halal = Color(0xFF16A34A);
+  static const Color halal = Color(0xFF22C55E);
   static const Color questionable = Color(0xFFF59E0B);
-  static const Color haram = Color(0xFFDC2626);
-  static const Color review = Color(0xFF2563EB);
+  static const Color haram = Color(0xFFEF4444);
+  static const Color review = Color(0xFF3B82F6); // Modern Blue for Review
 
   // Theme Data
   static ThemeData get lightTheme {
@@ -46,11 +46,48 @@ class AppTheme {
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: bgAlt,
-        selectedItemColor: primary,
+        selectedItemColor: primary, // Active navigation items are Deep Charcoal
         unselectedItemColor: textMuted,
-        elevation: 16,
+        elevation: 8,
         selectedLabelStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 11),
         unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w500, fontSize: 11),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: primary,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          elevation: 0,
+        ),
+      ),
+      cardTheme: CardTheme(
+        color: bgAlt,
+        elevation: 1,
+        shadowColor: Colors.black.withOpacity(0.05),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: const BorderSide(color: Color(0xFFE5E7EB), width: 1),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        fillColor: bgAlt,
+        filled: true,
+        hintStyle: const TextStyle(color: textMuted),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: accent, width: 2), // Focus is Emerald Green
+        ),
       ),
     );
   }
