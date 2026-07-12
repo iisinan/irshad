@@ -200,7 +200,14 @@ const StockTicker = () => {
 
 /* ─── Stock Card ─────────────────────────────────────────── */
 const StockCard = ({ company }) => {
-  const priceChange = company.price_change ?? 0;
+  const priceChange = parseFloat(company.price_change ?? 0);
+  const latestPrice = parseFloat(company.latest_price ?? 0);
+  
+  let pct = parseFloat(company.price_change_pct ?? 0);
+  if (!pct && priceChange && latestPrice) {
+    pct = (priceChange / (latestPrice - priceChange)) * 100;
+  }
+  
   const isPositive = priceChange >= 0;
 
   let statusStr = 'QUESTIONABLE';
@@ -229,16 +236,17 @@ const StockCard = ({ company }) => {
       <div className="stock-card-body">
         <div className="stock-price-wrapper">
           <span className="stock-price-currency">₦</span>
-          <span className="stock-price">{(company.latest_price ?? 0).toFixed(2)}</span>
+          <span className="stock-price">{latestPrice.toFixed(2)}</span>
         </div>
         <div className={`stock-change-pill ${isPositive ? 'pos' : 'neg'}`}>
           {isPositive ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-          {(company.price_change_pct ?? 0).toFixed(2)}%
+          {isPositive ? '+' : ''}{pct.toFixed(2)}%
         </div>
       </div>
     </Link>
   );
 };
+
 
 /* ─── Footer ─────────────────────────────────────────────── */
 const Footer = () => (
