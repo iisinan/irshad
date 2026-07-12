@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 class AppTheme {
   // Core Palette
-  static const Color primary = Color(0xFF111827); // Deep Charcoal
-  static const Color primaryHover = Color(0xFF1F2937);
-  static const Color accent = Color(0xFF10B981); // Emerald Green
+  static const Color primary = Color(0xFF000000); // Intense Pitch Black
+  static const Color primaryHover = Color(0xFF1A1A1A);
+  static const Color accent = Color(0xFF00D287); // Vibrant Intense Emerald
   
   // Backgrounds
   static const Color bg = Color(0xFFF9FAFB);
@@ -13,16 +13,16 @@ class AppTheme {
   static const Color divider = Color(0xFFECEFF3);
 
   // Typography
-  static const Color textDark = Color(0xFF111827);
-  static const Color textBody = Color(0xFF6B7280);
+  static const Color textDark = Color(0xFF000000);
+  static const Color textBody = Color(0xFF4B5563); // Slightly darker for contrast
   static const Color textMuted = Color(0xFF9CA3AF);
   static const Color textDisabled = Color(0xFFD1D5DB);
 
   // Status
-  static const Color halal = Color(0xFF22C55E);
-  static const Color questionable = Color(0xFFF59E0B);
-  static const Color haram = Color(0xFFEF4444);
-  static const Color review = Color(0xFF3B82F6); // Modern Blue for Review
+  static const Color halal = Color(0xFF00D287); // Matches accent
+  static const Color questionable = Color(0xFFFF9F00); // Intense Orange
+  static const Color haram = Color(0xFFFF3344); // Intense Red
+  static const Color review = Color(0xFF2563EB); // Deep Blue
 
   // Theme Data
   static ThemeData get lightTheme {
@@ -63,7 +63,7 @@ class AppTheme {
           elevation: 0,
         ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: bgAlt,
         elevation: 1,
         shadowColor: Colors.black.withOpacity(0.05),

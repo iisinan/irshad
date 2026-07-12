@@ -118,6 +118,7 @@ final List<Map<String, String>> _onboardingData = [
           ),
         ],
       ),
+      ),
     );
   }
 
