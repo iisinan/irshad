@@ -143,7 +143,7 @@ export default function ZakatTab({ data }) {
               </div>
             </div>
 
-            <button onClick={handlePrint} className="no-print" style={{ marginTop: '24px', background: 'var(--gold)', color: 'white', border: 'none', padding: '14px', borderRadius: '12px', fontWeight: 800, fontSize: '1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 8px 24px rgba(212,175,55,0.3)' }}>
+            <button onClick={handlePrint} className="no-print" style={{ marginTop: '24px', background: 'var(--primary)', color: 'white', border: 'none', padding: '14px', borderRadius: '12px', fontWeight: 800, fontSize: '1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 8px 24px rgba(15,82,87,0.3)' }}>
               <Download size={18} />
               Download Statement
             </button>
