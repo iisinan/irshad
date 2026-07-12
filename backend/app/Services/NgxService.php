@@ -134,6 +134,19 @@ class NgxService
                         'volume' => 0,
                     ]
                 );
+                
+                if (isset($data['prev_price']) && $data['prev_price'] > 0) {
+                    DailyPrice::updateOrCreate(
+                        [
+                            'company_id' => $company->id,
+                            'date' => now()->subDay()->toDateString(),
+                        ],
+                        [
+                            'price' => $data['prev_price'],
+                            'volume' => 0,
+                        ]
+                    );
+                }
             }
             Log::info("syncCompany called for {$company->symbol} — Synced with Yahoo Finance.");
         } catch (\Exception $e) {
