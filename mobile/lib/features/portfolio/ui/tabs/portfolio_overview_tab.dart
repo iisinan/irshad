@@ -13,14 +13,14 @@ class PortfolioOverviewTab extends StatefulWidget {
 
 class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
   // Theme Constants
-static const Color doubtfulColor = Color(0xFFF59E0B);
+
 // Chart Colors
   final List<Color> _chartColors = [
-    const Color(0xFF0284C7),
-    const Color(0xFFEAB308),
+    AppTheme.accent,
+    const Color(0xFF2A6F73),
     AppTheme.halal,
-    const Color(0xFF9333EA),
-    const Color(0xFFF97316),
+    const Color(0xFF8B5CF6),
+    AppTheme.primary,
   ];
 
   bool isLoading = true;
@@ -130,7 +130,7 @@ static const Color doubtfulColor = Color(0xFFF59E0B);
             Container(
               width: 80, height: 80,
               decoration: BoxDecoration(
-                color: const Color(0xFFECFDF5),
+                color: AppTheme.accentSoft,
                 borderRadius: BorderRadius.circular(24),
               ),
               child: const Icon(Icons.pie_chart_outline_rounded, size: 40, color: AppTheme.primary),
@@ -177,8 +177,8 @@ static const Color doubtfulColor = Color(0xFFF59E0B);
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppTheme.textDark,
-        borderRadius: BorderRadius.circular(24),
+        color: AppTheme.primary,
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -198,16 +198,16 @@ static const Color doubtfulColor = Color(0xFFF59E0B);
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: summary['health_percentage'] < 100 ? doubtfulColor.withOpacity(0.2) : AppTheme.primary.withOpacity(0.2),
+                  color: summary['health_percentage'] < 100 ? AppTheme.questionable.withOpacity(0.2) : AppTheme.halal.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Row(
                   children: [
-                    Icon(summary['health_percentage'] < 100 ? Icons.warning_rounded : Icons.check_circle_rounded, color: summary['health_percentage'] < 100 ? doubtfulColor : AppTheme.primary, size: 14),
+                    Icon(summary['health_percentage'] < 100 ? Icons.warning_rounded : Icons.check_circle_rounded, color: summary['health_percentage'] < 100 ? AppTheme.questionable : AppTheme.halal, size: 14),
                     const SizedBox(width: 4),
                     Text(
                       '${summary['health_percentage']}% Halal',
-                      style: TextStyle(color: summary['health_percentage'] < 100 ? doubtfulColor : AppTheme.primary, fontWeight: FontWeight.w700, fontSize: 12),
+                      style: TextStyle(color: summary['health_percentage'] < 100 ? AppTheme.questionable : AppTheme.halal, fontWeight: FontWeight.w700, fontSize: 12),
                     ),
                   ],
                 ),
@@ -216,7 +216,7 @@ static const Color doubtfulColor = Color(0xFFF59E0B);
                 const SizedBox(width: 8),
                 Text(
                   'Purify: ₦${summary['purification_due'].toStringAsFixed(2)}',
-                  style: const TextStyle(color: doubtfulColor, fontSize: 13, fontWeight: FontWeight.w600),
+                  style: const TextStyle(color: AppTheme.questionable, fontSize: 13, fontWeight: FontWeight.w600),
                 ),
               ]
             ],

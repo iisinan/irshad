@@ -101,8 +101,8 @@ function AddModal({ onClose, onAdd, isAdding }) {
               </div>
             </div>
             <div style={{ display:'flex', gap:'12px' }}>
-              <button type="button" onClick={onClose} style={{ flex:1, padding:'14px', borderRadius:'12px', background:'white', border:'1.5px solid var(--border)', color:'var(--text-dark)', fontWeight:700, fontSize:'0.9rem', cursor:'pointer' }}>Cancel</button>
-              <button type="submit" disabled={isAdding} style={{ flex:1.5, padding:'14px', borderRadius:'12px', background:'var(--primary)', border:'none', color:'white', fontWeight:700, fontSize:'0.9rem', cursor:isAdding ? 'not-allowed' : 'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', boxShadow:'0 8px 20px rgba(34,197,94,0.2)' }}>
+              <button type="button" onClick={onClose} style={{ flex:1, padding:'14px', borderRadius:'12px', background:'var(--bg-alt)', border:'1px solid var(--primary)', color:'var(--primary)', fontWeight:700, fontSize:'0.9rem', cursor:'pointer' }}>Cancel</button>
+              <button type="submit" disabled={isAdding} style={{ flex:1.5, padding:'14px', borderRadius:'12px', background:'var(--primary)', border:'none', color:'white', fontWeight:700, fontSize:'0.9rem', cursor:isAdding ? 'not-allowed' : 'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', boxShadow:'0 8px 20px rgba(15, 82, 87, 0.2)' }}>
                 {isAdding ? <div className="spinner" style={{ width:'16px', height:'16px', borderTopColor:'white' }}/> : 'Add Holding'}
               </button>
             </div>
@@ -116,7 +116,7 @@ function AddModal({ onClose, onAdd, isAdding }) {
             <p style={{ color:'var(--text-muted)', fontSize:'0.95rem', lineHeight:1.6, marginBottom:'24px' }}>
               Automatically sync your portfolio and trades by linking your CSCS account or supported Nigerian brokerages.
             </p>
-            <button type="button" style={{ width:'100%', padding:'14px', borderRadius:'12px', background:'var(--primary)', border:'none', color:'white', fontWeight:800, fontSize:'0.95rem', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', boxShadow:'0 8px 24px rgba(34,197,94,0.25)' }}>
+            <button type="button" style={{ width:'100%', padding:'14px', borderRadius:'12px', background:'var(--primary)', border:'none', color:'white', fontWeight:800, fontSize:'0.95rem', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', boxShadow:'0 8px 24px rgba(15, 82, 87, 0.25)' }}>
               Coming Soon
             </button>
             <p style={{ fontSize:'0.8rem', color:'var(--text-light)', marginTop:'16px' }}>Secure, read-only access powered by Mono</p>
@@ -230,7 +230,7 @@ export default function Portfolio() {
   const summary = data?.summary || {};
   const totalBalance = summary.total_balance || 0;
   
-  const PIE_COLORS = ['#c9a84c','#22c55e','#3b82f6','#8b5cf6','#f97316','#06b6d4'];
+  const PIE_COLORS = ['#C9B89C','#2A6F73','#3B82F6','#8b5cf6','#0F5257','#06b6d4'];
   const pieData = holdings.slice(0,6).map((h,i) => ({
     name: h.symbol, value: h.total_value || 0, color: PIE_COLORS[i % PIE_COLORS.length],
   }));
