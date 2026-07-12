@@ -16,9 +16,15 @@ class News extends Model
         'thumbnail_url',
         'published_at',
         'excerpt',
+        'company_id',
     ];
 
     protected $casts = [
         'published_at' => 'datetime',
     ];
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
 }

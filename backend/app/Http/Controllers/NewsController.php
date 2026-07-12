@@ -16,10 +16,13 @@ class NewsController extends Controller
         $query = News::orderBy('published_at', 'desc');
 
         if ($symbol) {
-            $query->where(function ($q) use ($symbol) {
-                $q->where('title', 'LIKE', '%' . $symbol . '%')
-                  ->orWhere('excerpt', 'LIKE', '%' . $symbol . '%');
-            });
+            $company = \App\Models\Company::where('symbol', $symbol)->first();
+            if ($company) {
+                $query->where('company_id', $company->id);
+            } else {
+                // Fallback to empty if company not found
+                $query->where('company_id', -1);
+            }
         }
 
         $news = $query->paginate($limit);
