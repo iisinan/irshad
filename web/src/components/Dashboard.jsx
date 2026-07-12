@@ -92,14 +92,14 @@ function Ticker({ tickerItems = [] }) {
 }
 
 /* ─── Stat Card ───────────────────────────────────────────── */
-function StatCard({icon:Icon,label,value,sub,gradient,badge}) {
+function StatCard({icon:Icon,label,value,sub,primary,badge}) {
   return (
     <div
-      style={{background:gradient||'white',border:gradient?'none':'1px solid var(--border)',borderRadius:'20px',padding:'24px 26px',color:gradient?'white':'var(--text-dark)',position:'relative',overflow:'hidden',boxShadow:gradient?'0 8px 32px rgba(201,168,76,0.28)':'var(--shadow-sm)',transition:'transform 0.2s,box-shadow 0.2s',}}
-      onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-2px)';e.currentTarget.style.boxShadow=gradient?'0 14px 42px rgba(201,168,76,0.38)':'var(--shadow-md)';}}
-      onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.boxShadow=gradient?'0 8px 32px rgba(201,168,76,0.28)':'var(--shadow-sm)';}}
+      style={{background:primary?'var(--primary)':'white',border:primary?'none':'1px solid var(--border)',borderRadius:'20px',padding:'24px 26px',color:primary?'white':'var(--text-dark)',position:'relative',overflow:'hidden',boxShadow:primary?'0 8px 32px rgba(15,82,87,0.28)':'var(--shadow-sm)',transition:'transform 0.2s,box-shadow 0.2s',}}
+      onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-2px)';e.currentTarget.style.boxShadow=primary?'0 14px 42px rgba(15,82,87,0.38)':'var(--shadow-md)';}}
+      onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.boxShadow=primary?'0 8px 32px rgba(15,82,87,0.28)':'var(--shadow-sm)';}}
     >
-      {gradient&&(
+      {primary&&(
         <>
           <div style={{position:'absolute',top:'-20px',right:'-20px',width:'120px',height:'120px',borderRadius:'50%',background:'rgba(255,255,255,0.08)'}}/>
           <div style={{position:'absolute',bottom:'-35px',left:'10px',width:'80px',height:'80px',borderRadius:'50%',background:'rgba(255,255,255,0.05)'}}/>
@@ -108,10 +108,10 @@ function StatCard({icon:Icon,label,value,sub,gradient,badge}) {
       <div style={{position:'relative',zIndex:1}}>
         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'16px'}}>
           <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
-            <div style={{width:'36px',height:'36px',borderRadius:'10px',background:gradient?'rgba(255,255,255,0.2)':'var(--primary-50)',display:'flex',alignItems:'center',justifyContent:'center'}}>
-              <Icon size={17} color={gradient?'white':'var(--primary)'}/>
+            <div style={{width:'36px',height:'36px',borderRadius:'10px',background:primary?'rgba(255,255,255,0.2)':'var(--primary-50)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+              <Icon size={17} color={primary?'white':'var(--primary)'}/>
             </div>
-            <span style={{fontSize:'0.75rem',fontWeight:700,letterSpacing:'0.8px',textTransform:'uppercase',opacity:gradient?0.85:1,color:gradient?'white':'var(--text-muted)'}}>
+            <span style={{fontSize:'0.75rem',fontWeight:700,letterSpacing:'0.8px',textTransform:'uppercase',opacity:primary?0.85:1,color:primary?'white':'var(--text-muted)'}}>
               {label}
             </span>
           </div>
@@ -475,7 +475,7 @@ export default function Dashboard() {
 
         {/* ═ Stats Grid ═ */}
         <div className="stagger-2" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:'16px',marginBottom:'18px'}}>
-          <StatCard icon={Wallet} label="Portfolio Value" gradient="var(--gold-grad)"
+          <StatCard icon={Wallet} label="Portfolio Value" primary={true}
             value={`₦${fmt(summary.total_balance)}`}
             sub={<><TrendingUp size={12}/> Active portfolio</>} badge="NGX"/>
           <StatCard icon={Shield} label="Compliance Score" value={`${compliance}%`}
