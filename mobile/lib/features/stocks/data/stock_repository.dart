@@ -73,7 +73,7 @@ class StockRepository {
   Future<List<Map<String, dynamic>>> getNgxStocks() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final cacheKey = 'irshad_stocks_cache_v2';
+      final cacheKey = 'irshad_stocks_cache_v3';
       final cachedStr = prefs.getString(cacheKey);
       if (cachedStr != null) {
         final cachedData = jsonDecode(cachedStr);

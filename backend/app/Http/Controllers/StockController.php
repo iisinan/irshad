@@ -28,8 +28,8 @@ class StockController extends Controller
      */
     public function index(): JsonResponse
     {
-        $stocks = \Illuminate\Support\Facades\Cache::rememberForever('stocks.index', function () {
-            return Company::with(['status', 'dailyPrices' => fn($q) => $q->latest('date')->limit(1)])->get();
+        $stocks = \Illuminate\Support\Facades\Cache::remember('stocks.index_v3', 60, function () {
+            return Company::with(['status', 'dailyPrices' => fn($q) => $q->latest('date')->limit(2)])->get();
         });
         
         return $this->success($stocks);
@@ -68,7 +68,7 @@ class StockController extends Controller
      */
     public function ngx(): JsonResponse
     {
-        $stocks = \Illuminate\Support\Facades\Cache::remember('stocks.ngx.v2', 3600, function () {
+        $stocks = \Illuminate\Support\Facades\Cache::remember('stocks.ngx_v3', 60, function () {
             return Company::with([
                 'status',
                 'dailyPrices' => fn($q) => $q->latest('date')->limit(2),

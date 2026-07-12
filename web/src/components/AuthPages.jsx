@@ -295,7 +295,7 @@ export const RegisterPage = () => {
               text="signup_with"
             />
           </div>
-        </div>
+        </form>
 
         <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '24px' }}>
           Already have an account?{' '}
