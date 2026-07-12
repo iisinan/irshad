@@ -1,46 +1,46 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&display=swap');
 
 /* ===================================================
-   IRSHAD — Premium Fintech Design System
+   IRSHAD — Modern Premium Color Palette
    =================================================== */
 :root {
   /* Core Palette */
-  --bg:           #F9FAFB;
+  --bg:           #F8FAFC;
   --bg-alt:       #FFFFFF;
-  --bg-section:   #F3F4F6;
+  --bg-section:   #EEF2FF;
 
-  --primary:      #000000;
-  --primary-hover:#1A1A1A;
-  --primary-50:   rgba(0, 0, 0, 0.1);
-  --primary-100:  rgba(0, 0, 0, 0.25);
+  --primary:      #4F46E5;
+  --primary-hover:#4338CA;
+  --primary-50:   rgba(79, 70, 229, 0.1);
+  --primary-100:  rgba(79, 70, 229, 0.25);
   
-  --accent:       #00D287;
+  --accent:       #14B8A6;
+  --accent-soft:  #38BDF8;
 
-  --text-dark:    #000000;
-  --text-body:    #4B5563;
-  --text-muted:   #9CA3AF;
-  --text-light:   #D1D5DB;
+  --text-dark:    #1E1B4B;
+  --text-body:    #64748B;
+  --text-muted:   #94A3B8;
+  --text-light:   #CBD5E1;
 
-  --border:       #E5E7EB;
-  --border-strong:#ECEFF3;
+  --border:       #E2E8F0;
+  --border-strong:#E5E7EB;
 
   /* Status */
-  --halal:        #00D287;
-  --halal-bg:     rgba(0, 210, 135, 0.1);
-  --halal-border: rgba(0, 210, 135, 0.3);
+  --halal:        #22C55E;
+  --halal-bg:     rgba(34, 197, 94, 0.1);
+  --halal-border: rgba(34, 197, 94, 0.3);
 
-  --non-halal:    #FF3344;
-  --non-halal-bg: rgba(255, 51, 68, 0.1);
-  --non-halal-border: rgba(255, 51, 68, 0.3);
+  --non-halal:    #EF4444;
+  --non-halal-bg: rgba(239, 68, 68, 0.1);
+  --non-halal-border: rgba(239, 68, 68, 0.3);
 
-  --doubtful:     #FF9F00;
-  --doubtful-bg:  rgba(255, 159, 0, 0.1);
-  --doubtful-border: rgba(255, 159, 0, 0.3);
+  --doubtful:     #F59E0B;
+  --doubtful-bg:  rgba(245, 158, 11, 0.1);
+  --doubtful-border: rgba(245, 158, 11, 0.3);
 
-  --review:       #2563EB;
-  --review-bg:    rgba(37, 99, 235, 0.1);
-  --review-border:rgba(37, 99, 235, 0.3);
-
+  --review:       #3B82F6;
+  --review-bg:    rgba(59, 130, 246, 0.1);
+  --review-border:rgba(59, 130, 246, 0.3);
   /* Shadows */
   --shadow-sm:  0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
   --shadow-md:  0 4px 16px rgba(15, 118, 110, 0.04), 0 2px 6px rgba(15, 118, 110, 0.02);
@@ -54,8 +54,8 @@
 
   --transition: all 0.35s cubic-bezier(0.16,1,0.3,1);
   
-  --sans:       'Inter', sans-serif;
-  --serif:      'Inter', sans-serif; /* Fallback to make sure headings use Inter */
+  --sans:       'Manrope', sans-serif;
+  --serif:      'Manrope', sans-serif; /* Fallback to make sure headings use Manrope */
 }
 
 /* ===================================================
