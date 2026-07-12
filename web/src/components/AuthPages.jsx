@@ -5,7 +5,7 @@ import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
 
 /* ─── Input Component ────────────────────────────────────── */
-const FormField = ({ label, type = 'text', placeholder, value, onChange, hint }) => {
+const FormField = ({ label, name, type = 'text', placeholder, value, onChange, hint }) => {
   const [show, setShow] = useState(false);
   const isPassword = type === 'password';
   const inputType = isPassword ? (show ? 'text' : 'password') : type;
@@ -15,6 +15,7 @@ const FormField = ({ label, type = 'text', placeholder, value, onChange, hint })
       <label className="auth-label">{label}</label>
       <div style={{ position: 'relative' }}>
         <input
+          name={name}
           type={inputType}
           placeholder={placeholder}
           value={value}
@@ -199,11 +200,17 @@ export const RegisterPage = () => {
     setError('');
     setLoading(true);
     
+    const formData = new FormData(e.target);
+    const fname = formData.get('firstName') || firstName;
+    const lname = formData.get('lastName') || lastName;
+    const em = formData.get('email') || email;
+    const pass = formData.get('password') || password;
+
     const res = await register({ 
-      name: `${firstName} ${lastName}`.trim(),
-      email, 
-      password,
-      password_confirmation: password // Laravel expects this
+      name: `${fname} ${lname}`.trim(),
+      email: em, 
+      password: pass,
+      password_confirmation: pass // Laravel expects this
     });
     
     if (res.success) {
@@ -229,14 +236,15 @@ export const RegisterPage = () => {
         </div>
 
         {/* Form */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+        <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-            <FormField label="First Name" placeholder="Omar" value={firstName} onChange={e => setFirstName(e.target.value)} />
-            <FormField label="Last Name" placeholder="Bello" value={lastName} onChange={e => setLastName(e.target.value)} />
+            <FormField label="First Name" name="firstName" placeholder="Omar" value={firstName} onChange={e => setFirstName(e.target.value)} />
+            <FormField label="Last Name" name="lastName" placeholder="Bello" value={lastName} onChange={e => setLastName(e.target.value)} />
           </div>
 
           <FormField
             label="Email Address"
+            name="email"
             type="email"
             placeholder="you@example.com"
             value={email}
@@ -245,6 +253,7 @@ export const RegisterPage = () => {
 
           <FormField
             label="Password"
+            name="password"
             type="password"
             placeholder="Create a strong password"
             value={password}

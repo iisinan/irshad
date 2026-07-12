@@ -382,8 +382,9 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   void _showAddHoldingSheet() {
     showModalBottomSheet(

@@ -19,7 +19,7 @@ class ApiService {
 
   ApiService._internal() {
     dio = Dio(BaseOptions(
-      baseUrl: kReleaseMode ? _prodUrl : _devUrl,
+      baseUrl: _prodUrl,
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 30),
       receiveDataWhenStatusError: true,
