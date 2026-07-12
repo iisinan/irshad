@@ -132,7 +132,34 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
-        title: Text(_currentStock['symbol'], style: const TextStyle(fontWeight: FontWeight.w900, color: textDark, letterSpacing: -0.5)),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (_currentStock['logo_url'] != null)
+              Container(
+                margin: const EdgeInsets.only(right: 8),
+                width: 28, height: 28,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  image: DecorationImage(image: NetworkImage(_currentStock['logo_url']), fit: BoxFit.contain)
+                ),
+              )
+            else
+              Container(
+                margin: const EdgeInsets.only(right: 8),
+                width: 28, height: 28,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(6),
+                  gradient: const LinearGradient(colors: [Color(0xFFFFD700), Color(0xFFD4AF37)]),
+                ),
+                alignment: Alignment.center,
+                child: Text((_currentStock['symbol'] ?? 'S')[0], style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 12)),
+              ),
+            Text(_currentStock['symbol'], style: const TextStyle(fontWeight: FontWeight.w900, color: textDark, letterSpacing: -0.5)),
+          ],
+        ),
         backgroundColor: bgColor,
         elevation: 0,
         leading: IconButton(

@@ -303,8 +303,30 @@ class _ExploreScreenState extends State<ExploreScreen>
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 14),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            if (company['logo_url'] != null)
+              Container(
+                margin: const EdgeInsets.only(right: 12),
+                width: 40, height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  image: DecorationImage(image: NetworkImage(company['logo_url']), fit: BoxFit.contain)
+                ),
+              )
+            else
+              Container(
+                margin: const EdgeInsets.only(right: 12),
+                width: 40, height: 40,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  gradient: const LinearGradient(colors: [Color(0xFFFFD700), Color(0xFFD4AF37)]),
+                ),
+                alignment: Alignment.center,
+                child: Text((company['symbol'] ?? 'S')[0], style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 16)),
+              ),
             // Left: Symbol + Status Badge + Name + Flag
             Expanded(
               child: Column(

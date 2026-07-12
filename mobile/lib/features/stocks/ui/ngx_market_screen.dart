@@ -251,6 +251,25 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.all(16),
+        leading: stock['logo_url'] != null ? 
+            Container(
+              width: 44, height: 44,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+                image: DecorationImage(image: NetworkImage(stock['logo_url']), fit: BoxFit.contain)
+              ),
+            ) :
+            Container(
+              width: 44, height: 44,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                gradient: const LinearGradient(colors: [Color(0xFFFFD700), Color(0xFFD4AF37)]),
+              ),
+              alignment: Alignment.center,
+              child: Text((stock['symbol'] ?? 'S')[0], style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 18)),
+            ),
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -353,12 +372,32 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                stock['symbol'] ?? '',
-                style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: textDark),
-              ),
+              stock['logo_url'] != null ? 
+                  Container(
+                    width: 32, height: 32,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      image: DecorationImage(image: NetworkImage(stock['logo_url']), fit: BoxFit.contain)
+                    ),
+                  ) :
+                  Container(
+                    width: 32, height: 32,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      gradient: const LinearGradient(colors: [Color(0xFFFFD700), Color(0xFFD4AF37)]),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text((stock['symbol'] ?? 'S')[0], style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 14)),
+                  ),
               Icon(statusIcon, size: 18, color: statusColor),
             ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            stock['symbol'] ?? '',
+            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: textDark),
           ),
           const SizedBox(height: 6),
           Text(

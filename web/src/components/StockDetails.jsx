@@ -159,15 +159,28 @@ const StockDetails = ({ symbol: propSymbol }) => {
         />
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '10px' }}>
-            <div style={{
-              width: '52px', height: '52px',
-              background: 'var(--primary-50)',
-              borderRadius: '14px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              border: '1px solid var(--primary-100)',
-            }}>
-              <Building2 size={24} color="var(--primary)" />
-            </div>
+            {stock.logo_url ? (
+              <img 
+                src={stock.logo_url} 
+                alt={`${stock.symbol} logo`}
+                style={{
+                  width: '56px', height: '56px', borderRadius: '14px',
+                  objectFit: 'contain', background: 'white',
+                  border: '1px solid var(--border)',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+                }}
+              />
+            ) : (
+              <div style={{
+                width: '56px', height: '56px', borderRadius: '14px',
+                background: 'linear-gradient(135deg, var(--gold), #D4AF37)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#1A1208', fontSize: '1.4rem', fontWeight: 800,
+                boxShadow: '0 4px 12px rgba(212,175,55,0.3)'
+              }}>
+                {stock.symbol?.charAt(0) || 'S'}
+              </div>
+            )}
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <h1 style={{ fontSize: '1.9rem', fontWeight: '800', letterSpacing: '-0.5px' }}>{stock.name}</h1>

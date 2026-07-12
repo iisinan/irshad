@@ -14,8 +14,11 @@ class Company extends Model
     protected $fillable = [
         'name',
         'symbol',
+        'logo_url',
         'sector',
+        'industry',
         'business_type',
+        'description',
         'overview',
         'analysts_target',
         'valuation_info',
