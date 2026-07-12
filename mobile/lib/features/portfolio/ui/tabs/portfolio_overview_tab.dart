@@ -305,7 +305,7 @@ static const Color doubtfulColor = Color(0xFFF59E0B);
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: isHalal ? AppTheme.divider : Colors.red.withOpacity(0.3)),
+          border: Border.all(color: isHalal ? AppTheme.divider : AppTheme.haram.withOpacity(0.3)),
         ),
         child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -332,7 +332,7 @@ static const Color doubtfulColor = Color(0xFFF59E0B);
                       ),
                       if (!isHalal) ...[
                         const SizedBox(width: 6),
-                        const Icon(Icons.warning_rounded, color: Colors.red, size: 14),
+                        const Icon(Icons.warning_rounded, color: AppTheme.haram, size: 14),
                       ]
                     ],
                   ),
@@ -356,7 +356,7 @@ static const Color doubtfulColor = Color(0xFFF59E0B);
               Text(
                 '${returnPct >= 0 ? '+' : ''}${returnPct.toStringAsFixed(2)}%',
                 style: TextStyle(
-                  color: returnPct >= 0 ? AppTheme.primary : Colors.red, 
+                  color: returnPct >= 0 ? AppTheme.primary : AppTheme.haram, 
                   fontWeight: FontWeight.w700, 
                   fontSize: 13
                 ),
@@ -507,8 +507,8 @@ static const Color doubtfulColor = Color(0xFFF59E0B);
                       _fetchPortfolio();
                     },
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.red,
-                      side: const BorderSide(color: Colors.red),
+                      foregroundColor: AppTheme.haram,
+                      side: const BorderSide(color: AppTheme.haram),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       minimumSize: const Size(0, 50),
                     ),

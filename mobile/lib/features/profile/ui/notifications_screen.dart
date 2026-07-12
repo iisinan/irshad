@@ -78,7 +78,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         iconData = Icons.verified_user_rounded;
         break;
       case 'non-halal':
-        iconColor = Colors.red;
+        iconColor = AppTheme.haram;
         bgIconColor = const Color(0xFFFEE2E2);
         iconData = Icons.warning_amber_rounded;
         break;

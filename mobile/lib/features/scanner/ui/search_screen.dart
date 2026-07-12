@@ -101,7 +101,7 @@ class _SearchScreenState extends State<SearchScreen> {
         style: const TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w600),
         decoration: InputDecoration(
           hintText: 'Brand name or product...',
-          hintStyle: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w400),
+          hintStyle: const TextStyle(color: AppTheme.textMuted, fontWeight: FontWeight.w400),
           prefixIcon: const Icon(Icons.search_rounded, color: AppTheme.primary),
           suffixIcon: _searchController.text.isNotEmpty 
             ? IconButton(
@@ -153,7 +153,7 @@ class _SearchScreenState extends State<SearchScreen> {
     final status = product['status']?.toString().toLowerCase() ?? 'unknown';
     bool isHalal = status == 'halal';
     bool isNonHalal = status == 'non-halal';
-    Color statusColor = isHalal ? AppTheme.halal : (isNonHalal ? Colors.red : AppTheme.questionable);
+    Color statusColor = isHalal ? AppTheme.halal : (isNonHalal ? AppTheme.haram : AppTheme.questionable);
     Color badgeBg = isHalal ? const Color(0xFFDCFCE7) : (isNonHalal ? const Color(0xFFFEE2E2) : const Color(0xFFFEF3C7));
 
     return GestureDetector(

@@ -59,7 +59,7 @@ static const Color cardBg = Colors.white;
             onPressed: () => Navigator.pushNamed(context, '/settings'),
           ),
           IconButton(
-            icon: const Icon(Icons.logout_rounded, color: Colors.redAccent, size: 22),
+            icon: const Icon(Icons.logout_rounded, color: AppTheme.haram, size: 22),
             onPressed: _logout,
           ),
         ],
@@ -115,10 +115,10 @@ static const Color cardBg = Colors.white;
                         height: 56,
                         child: OutlinedButton.icon(
                           onPressed: () => _showDeleteConfirmation(context),
-                          icon: const Icon(Icons.delete_forever_rounded, size: 18, color: Colors.redAccent),
-                          label: const Text('Delete Account', style: TextStyle(fontWeight: FontWeight.w700, color: Colors.redAccent)),
+                          icon: const Icon(Icons.delete_forever_rounded, size: 18, color: AppTheme.haram),
+                          label: const Text('Delete Account', style: TextStyle(fontWeight: FontWeight.w700, color: AppTheme.haram)),
                           style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Colors.redAccent, width: 1.5),
+                            side: const BorderSide(color: AppTheme.haram, width: 1.5),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                           ),
                         ),
@@ -138,7 +138,7 @@ static const Color cardBg = Colors.white;
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: Colors.redAccent, size: 28),
+            Icon(Icons.warning_amber_rounded, color: AppTheme.haram, size: 28),
             SizedBox(width: 8),
             Text('Delete Account', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 20)),
           ],
@@ -160,7 +160,7 @@ static const Color cardBg = Colors.white;
               if (mounted) Navigator.pushReplacementNamed(context, '/login');
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.redAccent,
+              backgroundColor: AppTheme.haram,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               elevation: 0,

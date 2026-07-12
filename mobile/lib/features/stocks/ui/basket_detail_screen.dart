@@ -153,9 +153,9 @@ class _BasketDetailScreenState extends State<BasketDetailScreen> {
             ? Image.network(
                 widget.basket['image_url'],
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(color: Colors.grey.shade200),
+                errorBuilder: (_, __, ___) => Container(color: AppTheme.divider),
               )
-            : Container(color: Colors.grey.shade200),
+            : Container(color: AppTheme.divider),
       ),
     );
   }
@@ -271,7 +271,7 @@ class _BasketDetailScreenState extends State<BasketDetailScreen> {
                 Text(
                   changeStr,
                   style: TextStyle(
-                    color: isPositive ? AppTheme.halal : Colors.red,
+                    color: isPositive ? AppTheme.halal : AppTheme.haram,
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
                   ),

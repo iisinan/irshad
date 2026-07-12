@@ -69,7 +69,7 @@ class _AiAnalysisSheetState extends State<AiAnalysisSheet> {
               height: 4,
               width: 40,
               decoration: BoxDecoration(
-                color: Colors.grey[300],
+                color: AppTheme.divider,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -110,7 +110,7 @@ class _AiAnalysisSheetState extends State<AiAnalysisSheet> {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close_rounded, color: Colors.grey),
+                  icon: const Icon(Icons.close_rounded, color: AppTheme.textMuted),
                   onPressed: () => Navigator.pop(context),
                 ),
               ],
@@ -128,7 +128,7 @@ class _AiAnalysisSheetState extends State<AiAnalysisSheet> {
                       children: [
                         CircularProgressIndicator(color: Colors.blue),
                         SizedBox(height: 16),
-                        Text('Gemini is analyzing the financials...', style: TextStyle(color: Colors.grey)),
+                        Text('Gemini is analyzing the financials...', style: TextStyle(color: AppTheme.textMuted)),
                       ],
                     ),
                   )
@@ -139,7 +139,7 @@ class _AiAnalysisSheetState extends State<AiAnalysisSheet> {
                           child: Text(
                             _error!,
                             textAlign: TextAlign.center,
-                            style: const TextStyle(color: Colors.red, fontSize: 16),
+                            style: const TextStyle(color: AppTheme.haram, fontSize: 16),
                           ),
                         ),
                       )

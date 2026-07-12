@@ -32,7 +32,7 @@ Future<void> _submit() async {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to send reset link: ${e.toString()}'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Failed to send reset link: ${e.toString()}'), backgroundColor: AppTheme.haram),
         );
       }
     } finally {
@@ -100,7 +100,7 @@ Future<void> _submit() async {
             },
             decoration: InputDecoration(
               hintText: 'Email Address',
-              hintStyle: const TextStyle(color: Colors.grey),
+              hintStyle: const TextStyle(color: AppTheme.textMuted),
               prefixIcon: const Icon(Icons.email_outlined, color: AppTheme.textMuted, size: 20),
               filled: true,
               fillColor: Colors.white,

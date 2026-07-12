@@ -92,7 +92,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.redAccent,
+        backgroundColor: AppTheme.haram,
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -224,7 +224,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       style: const TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w600),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w400),
+        hintStyle: const TextStyle(color: AppTheme.textMuted, fontWeight: FontWeight.w400),
         prefixIcon: Icon(icon, color: AppTheme.textMuted, size: 20),
         filled: true,
         fillColor: Colors.white,

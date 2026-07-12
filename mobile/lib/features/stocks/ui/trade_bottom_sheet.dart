@@ -69,7 +69,7 @@ class _TradeBottomSheetState extends State<TradeBottomSheet> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Trade failed: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Trade failed: $e'), backgroundColor: AppTheme.haram),
         );
       }
     } finally {
@@ -102,7 +102,7 @@ class _TradeBottomSheetState extends State<TradeBottomSheet> {
                     style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close_rounded, color: Colors.grey),
+                    icon: const Icon(Icons.close_rounded, color: AppTheme.textMuted),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],

@@ -83,21 +83,22 @@ final List<Map<String, String>> _onboardingData = [
 
     return Padding(
       padding: const EdgeInsets.all(40.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(32),
-            decoration: BoxDecoration(
-              color: AppTheme.primary.withOpacity(0.05),
-              shape: BoxShape.circle,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(32),
+              decoration: BoxDecoration(
+                color: AppTheme.primary.withOpacity(0.05),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(iconData, size: 80, color: AppTheme.primary),
             ),
-            child: Icon(iconData, size: 80, color: AppTheme.primary),
-          ),
-          const SizedBox(height: 60),
-          Text(
-            data['title']!,
-            style: const TextStyle(
+            const SizedBox(height: 60),
+            Text(
+              data['title']!,
+              style: const TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w900,
               color: AppTheme.textDark,
@@ -135,7 +136,7 @@ final List<Map<String, String>> _onboardingData = [
                 width: _currentPage == index ? 24 : 8,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: _currentPage == index ? AppTheme.primary : Colors.grey[300],
+                  color: _currentPage == index ? AppTheme.primary : AppTheme.divider,
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),

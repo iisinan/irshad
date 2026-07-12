@@ -73,7 +73,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString()), backgroundColor: Colors.redAccent, behavior: SnackBarBehavior.floating),
+          SnackBar(content: Text(e.toString()), backgroundColor: AppTheme.haram, behavior: SnackBarBehavior.floating),
         );
       }
     } finally {
@@ -167,7 +167,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
           ),
           IconButton(
             icon: Icon(_isAlreadyFavorited ? Icons.favorite_rounded : Icons.favorite_outline_rounded, 
-              color: _isAlreadyFavorited ? Colors.redAccent : AppTheme.textDark, size: 22),
+              color: _isAlreadyFavorited ? AppTheme.haram : AppTheme.textDark, size: 22),
             onPressed: _isAlreadyFavorited ? null : (_isFavoriting ? null : _onFavorite),
           ),
         ],
@@ -203,7 +203,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                          style: TextStyle(
                            fontSize: 12, 
                            fontWeight: FontWeight.w700, 
-                           color: _currentStock['price_change_pct'] >= 0 ? AppTheme.primary : Colors.red
+                           color: _currentStock['price_change_pct'] >= 0 ? AppTheme.primary : AppTheme.haram
                          )
                        ),
                      )
@@ -414,7 +414,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Status overridden successfully')));
                           }
                         } catch (e) {
-                          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
+                          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: AppTheme.haram));
                         } finally {
                           if (mounted) setState(() => _isLoading = false);
                         }
@@ -747,7 +747,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
           children: [
             Text(title, style: const TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w700, fontSize: 14)),
             Text('${value.toStringAsFixed(2)}% / ${limit.toInt()}%', 
-              style: TextStyle(color: isFail ? Colors.red : AppTheme.primary, fontWeight: FontWeight.w800, fontSize: 12)),
+              style: TextStyle(color: isFail ? AppTheme.haram : AppTheme.primary, fontWeight: FontWeight.w800, fontSize: 12)),
           ],
         ),
         const SizedBox(height: 12),
@@ -762,7 +762,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
               height: 8,
               width: (MediaQuery.of(context).size.width - 80) * progress,
               decoration: BoxDecoration(
-                color: isFail ? Colors.red : AppTheme.primary, 
+                color: isFail ? AppTheme.haram : AppTheme.primary, 
                 borderRadius: BorderRadius.circular(4)
               ),
             ),

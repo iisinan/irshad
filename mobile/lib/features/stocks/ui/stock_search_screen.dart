@@ -103,10 +103,10 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.05),
+                color: AppTheme.haram.withOpacity(0.05),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.search_off_rounded, size: 40, color: Colors.red),
+              child: const Icon(Icons.search_off_rounded, size: 40, color: AppTheme.haram),
             ),
             const SizedBox(height: 24),
             const Text(
@@ -134,7 +134,7 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
         style: const TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w600),
         decoration: InputDecoration(
           hintText: 'Search stock name or symbol...',
-          hintStyle: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w400),
+          hintStyle: const TextStyle(color: AppTheme.textMuted, fontWeight: FontWeight.w400),
           prefixIcon: const Icon(Icons.search_rounded, color: AppTheme.primary),
           suffixIcon: _searchController.text.isNotEmpty 
             ? IconButton(

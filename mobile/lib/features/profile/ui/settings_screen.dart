@@ -64,7 +64,7 @@ final ApiService _apiService = ApiService();
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.redAccent,
+              backgroundColor: AppTheme.haram,
               foregroundColor: Colors.white,
             ),
             onPressed: () async {
@@ -174,7 +174,7 @@ final ApiService _apiService = ApiService();
             const SizedBox(height: 48),
             TextButton(
               onPressed: _showDeleteAccountDialog,
-              child: const Text('Delete Account', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w800, fontSize: 13)),
+              child: const Text('Delete Account', style: TextStyle(color: AppTheme.haram, fontWeight: FontWeight.w800, fontSize: 13)),
             ),
             const SizedBox(height: 40),
           ],

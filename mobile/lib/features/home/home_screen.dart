@@ -344,7 +344,7 @@ List<dynamic> _baskets = [];
                 Text(
                   changeStr,
                   style: TextStyle(
-                    color: isPositive ? AppTheme.halal : Colors.red,
+                    color: isPositive ? AppTheme.halal : AppTheme.haram,
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
                   ),
@@ -444,7 +444,7 @@ List<dynamic> _baskets = [];
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => Container(
                   height: 140,
-                  color: Colors.grey.shade200,
+                  color: AppTheme.divider,
                   child: const Icon(Icons.image_not_supported, color: AppTheme.textMuted),
                 ),
               ),

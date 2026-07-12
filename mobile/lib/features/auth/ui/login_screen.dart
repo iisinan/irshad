@@ -119,7 +119,7 @@ void _login() async {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.redAccent,
+        backgroundColor: AppTheme.haram,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
@@ -327,10 +327,10 @@ void _login() async {
       style: const TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w500),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w400),
-        prefixIcon: Icon(icon, color: Colors.grey, size: 20),
+        hintStyle: const TextStyle(color: AppTheme.textMuted, fontWeight: FontWeight.w400),
+        prefixIcon: Icon(icon, color: AppTheme.textMuted, size: 20),
         suffixIcon: isPassword ? IconButton(
-          icon: Icon(obscure! ? Icons.visibility_off_rounded : Icons.visibility_rounded, color: Colors.grey, size: 20),
+          icon: Icon(obscure! ? Icons.visibility_off_rounded : Icons.visibility_rounded, color: AppTheme.textMuted, size: 20),
           onPressed: toggleObscure,
         ) : null,
         filled: true,

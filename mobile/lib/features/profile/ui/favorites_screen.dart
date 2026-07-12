@@ -147,7 +147,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
     bool isHalal = status == 'halal';
     bool isNonHalal = status == 'non-halal';
-    Color statusColor = isHalal ? AppTheme.halal : (isNonHalal ? Colors.red : AppTheme.questionable);
+    Color statusColor = isHalal ? AppTheme.halal : (isNonHalal ? AppTheme.haram : AppTheme.questionable);
     Color badgeBg = isHalal ? const Color(0xFFDCFCE7) : (isNonHalal ? const Color(0xFFFEE2E2) : const Color(0xFFFEF3C7));
 
     return Container(
@@ -194,7 +194,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           ),
         ),
         trailing: IconButton(
-          icon: const Icon(Icons.favorite_rounded, color: Colors.redAccent, size: 22),
+          icon: const Icon(Icons.favorite_rounded, color: AppTheme.haram, size: 22),
           onPressed: () => _removeFavorite(fav['id'] as int),
         ),
         onTap: () {

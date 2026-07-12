@@ -39,7 +39,7 @@ void _onFavorite() async {
     
     bool isHalal = status == 'halal';
     bool isNonHalal = status == 'non-halal';
-    Color statusColor = isHalal ? AppTheme.halal : (isNonHalal ? Colors.red : AppTheme.questionable);
+    Color statusColor = isHalal ? AppTheme.halal : (isNonHalal ? AppTheme.haram : AppTheme.questionable);
     Color badgeBg = isHalal ? const Color(0xFFDCFCE7) : (isNonHalal ? const Color(0xFFFEE2E2) : const Color(0xFFFEF3C7));
     String statusLabel = isHalal ? 'CERTIFIED HALAL' : (isNonHalal ? 'NOT HALAL' : 'QUESTIONABLE');
 
@@ -227,7 +227,7 @@ void _onFavorite() async {
         final iStatus = i['status']?.toString().toLowerCase() ?? 'doubtful';
         bool iHalal = iStatus == 'halal';
         bool iNonHalal = iStatus == 'non-halal';
-        Color iColor = iHalal ? AppTheme.primary : (iNonHalal ? Colors.red : AppTheme.questionable);
+        Color iColor = iHalal ? AppTheme.primary : (iNonHalal ? AppTheme.haram : AppTheme.questionable);
         
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

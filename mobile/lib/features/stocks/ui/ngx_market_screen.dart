@@ -195,7 +195,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.query_stats_rounded, size: 64, color: Colors.grey.shade300),
+          Icon(Icons.query_stats_rounded, size: 64, color: AppTheme.divider),
           const SizedBox(height: 16),
           const Text(
             'No market data available',
@@ -204,7 +204,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
           const SizedBox(height: 8),
           const Text(
             'Check back after the next market scrape.',
-            style: TextStyle(color: Colors.grey),
+            style: TextStyle(color: AppTheme.textMuted),
           ),
         ],
       ),

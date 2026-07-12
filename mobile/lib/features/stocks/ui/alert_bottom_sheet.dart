@@ -71,7 +71,7 @@ class _AlertBottomSheetState extends State<AlertBottomSheet> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to set alert: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Failed to set alert: $e'), backgroundColor: AppTheme.haram),
         );
       }
     } finally {
@@ -110,7 +110,7 @@ class _AlertBottomSheetState extends State<AlertBottomSheet> {
                     ],
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close_rounded, color: Colors.grey),
+                    icon: const Icon(Icons.close_rounded, color: AppTheme.textMuted),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],

@@ -135,7 +135,7 @@ final List<Map<String, String>> _brokers = [
       if (mounted) {
         Navigator.pop(context); // Close loading dialog
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error linking broker: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Error linking broker: $e'), backgroundColor: AppTheme.haram),
         );
       }
     }
