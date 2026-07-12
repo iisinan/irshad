@@ -260,7 +260,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
               width: 44, height: 44,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                gradient: LinearGradient(colors: [AppTheme.primaryHover, AppTheme.primary]),
+                color: AppTheme.primary,
               ),
               alignment: Alignment.center,
               child: Text((stock['symbol'] ?? 'S')[0], style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 18)),
@@ -381,7 +381,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
                     width: 32, height: 32,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
-                      gradient: LinearGradient(colors: [AppTheme.primaryHover, AppTheme.primary]),
+                      color: AppTheme.primary,
                     ),
                     alignment: Alignment.center,
                     child: Text((stock['symbol'] ?? 'S')[0], style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 14)),

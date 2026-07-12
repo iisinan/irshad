@@ -292,7 +292,7 @@ List<dynamic> _baskets = [];
                 width: 40, height: 40,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
-                  gradient: LinearGradient(colors: [AppTheme.primaryHover, AppTheme.primary]),
+                  color: AppTheme.primary,
                 ),
                 alignment: Alignment.center,
                 child: Text((company['symbol'] ?? 'S')[0], style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 16)),

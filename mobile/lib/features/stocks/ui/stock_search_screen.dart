@@ -212,14 +212,7 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
               height: 44,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                gradient: stock['logo_url'] != null
-                    ? null
-                    : const LinearGradient(
-                        colors: [AppTheme.primaryHover, AppTheme.primary],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                color: stock['logo_url'] != null ? Colors.white : null,
+                color: stock['logo_url'] != null ? Colors.white : AppTheme.primary,
                 border: stock['logo_url'] != null
                     ? Border.all(color: AppTheme.divider, width: 1)
                     : null,

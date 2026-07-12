@@ -184,14 +184,7 @@ class _BasketDetailScreenState extends State<BasketDetailScreen> {
               margin: const EdgeInsets.only(right: 12),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                gradient: company['logo_url'] != null
-                    ? null
-                    : const LinearGradient(
-                        colors: [AppTheme.primaryHover, AppTheme.primary],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                color: company['logo_url'] != null ? Colors.white : null,
+                color: company['logo_url'] != null ? Colors.white : AppTheme.primary,
                 border: company['logo_url'] != null
                     ? Border.all(color: AppTheme.divider, width: 1)
                     : null,

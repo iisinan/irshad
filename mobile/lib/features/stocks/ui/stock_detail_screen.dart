@@ -146,7 +146,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                 width: 28, height: 28,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(6),
-                  gradient: LinearGradient(colors: [AppTheme.primaryHover, AppTheme.primary]),
+                  color: AppTheme.primary,
                 ),
                 alignment: Alignment.center,
                 child: Text((_currentStock['symbol'] ?? 'S')[0], style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 12)),
