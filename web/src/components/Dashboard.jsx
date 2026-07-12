@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { fetchPortfolio } from '../services/api';
+import { fetchPortfolio, fetchNgxStocks } from '../services/api';
 import {
   Search, Bell, Star, Wallet, TrendingUp, TrendingDown,
   ShieldAlert, CheckCircle, AlertTriangle, ArrowUpRight,
@@ -71,8 +71,8 @@ const NGX_STATUS = {
 };
 
 /* ─── Ticker Strip ────────────────────────────────────────── */
-function Ticker() {
-  const items=[...TICKER_ITEMS,...TICKER_ITEMS];
+function Ticker({ tickerItems = [] }) {
+  const items=[...tickerItems,...tickerItems];
   return (
     <div style={{background:'white',borderBottom:'1px solid var(--border)',overflow:'hidden',paddingLeft:'8px'}}>
       <div style={{display:'flex',gap:'48px',animation:'ticker-anim 40s linear infinite',width:'max-content',padding:'10px 0'}}>
@@ -311,15 +311,17 @@ export default function Dashboard() {
   const [liveTime,setLiveTime]=useState(getTime());
   const [perfRange,setPerfRange]=useState(1);
   const [moversTab,setMoversTab]=useState('gainers');
+  const [ngxStocks, setNgxStocks] = useState([]);
   const searchRef=useRef(null);
 
   useEffect(()=>{
     if(!authLoading&&!user){navigate('/login');return;}
     if(user){
-      fetchPortfolio()
-        .then(res=>{
-          if (res && res.data) setData(res.data);
-          else if (res && !res.data) setData(res);
+      Promise.all([fetchPortfolio(), fetchNgxStocks()])
+        .then(([portRes, ngxRes]) => {
+          if (portRes && portRes.data) setData(portRes.data);
+          else if (portRes && !portRes.data) setData(portRes);
+          if (ngxRes && ngxRes.data) setNgxStocks(ngxRes.data);
         })
         .catch(()=>{})
         .finally(()=>setLoading(false));
@@ -351,26 +353,65 @@ export default function Dashboard() {
     {icon:Calculator,label:'Zakat',     color:'#8b5cf6',       bg:'#ede9fe',         to:'/portfolio#zakat'},
   ];
 
-  const movers=moversTab==='gainers'?TOP_GAINERS:TOP_LOSERS;
+  let dynamicTicker = [];
+  let topGainers = [];
+  let topLosers = [];
+  let adv = 0; let dec = 0;
+  
+  if (ngxStocks && ngxStocks.length > 0) {
+    const validStocks = ngxStocks.filter(s => s.price_change_pct != null);
+    const sorted = [...validStocks].sort((a, b) => b.price_change_pct - a.price_change_pct);
+    topGainers = sorted.slice(0, 5).map(s => ({
+      symbol: s.symbol, name: s.name, price: `₦${(s.latest_price || 0).toFixed(2)}`,
+      change: `+${(s.price_change_pct || 0).toFixed(2)}%`, up: true
+    }));
+    topLosers = [...validStocks].sort((a, b) => a.price_change_pct - b.price_change_pct).slice(0, 5).map(s => ({
+      symbol: s.symbol, name: s.name, price: `₦${(s.latest_price || 0).toFixed(2)}`,
+      change: `${(s.price_change_pct || 0).toFixed(2)}%`, up: false
+    }));
+    
+    // Pick 15 random active stocks for the ticker
+    const shuffled = [...validStocks].sort(() => 0.5 - Math.random());
+    dynamicTicker = shuffled.slice(0, 15).map(s => ({
+      symbol: s.symbol, price: `₦${(s.latest_price || 0).toFixed(2)}`,
+      change: `${(s.price_change_pct || 0).toFixed(2)}%`, up: (s.price_change_pct || 0) >= 0
+    }));
+
+    validStocks.forEach(s => {
+      if ((s.price_change_pct || 0) > 0) adv++;
+      else if ((s.price_change_pct || 0) < 0) dec++;
+    });
+  }
+
+  const dynamicNgxStatus = {
+    isOpen: new Date().getDay() !== 0 && new Date().getDay() !== 6 && new Date().getHours() >= 10 && new Date().getHours() < 15,
+    asi: '99,448.90', // Hardcoded ASI for now since it's not in the API
+    asiChange: '+0.12%',
+    volume: '245.8M',
+    advances: adv,
+    declines: dec,
+  };
+
+  const movers = moversTab === 'gainers' ? topGainers : topLosers;
   const moverColor=moversTab==='gainers'?'var(--halal)':'var(--non-halal)';
   const moverBg=moversTab==='gainers'?'#dcfce7':'#fee2e2';
 
   return (
     <div className="animate-fade-in">
-      <Ticker/>
+      <Ticker tickerItems={dynamicTicker}/>
       {/* NGX Market Status Bar */}
       <div style={{background:'white',borderBottom:'1px solid var(--border)',padding:'9px 24px',display:'flex',alignItems:'center',gap:'24px',flexWrap:'wrap',overflow:'hidden'}}>
         <div style={{display:'flex',alignItems:'center',gap:'7px',flexShrink:0}}>
-          <div style={{width:'7px',height:'7px',borderRadius:'50%',background:NGX_STATUS.isOpen?'var(--halal)':'var(--non-halal)',boxShadow:NGX_STATUS.isOpen?'0 0 0 3px rgba(34,197,94,0.2)':'0 0 0 3px rgba(239,68,68,0.15)',animation:NGX_STATUS.isOpen?'pulse 2s infinite':'none'}}/>
-          <span style={{fontSize:'0.74rem',fontWeight:800,color:NGX_STATUS.isOpen?'var(--halal)':'var(--non-halal)',textTransform:'uppercase',letterSpacing:'0.5px'}}>{NGX_STATUS.isOpen?'Market Open':'Market Closed'}</span>
+          <div style={{width:'7px',height:'7px',borderRadius:'50%',background:dynamicNgxStatus.isOpen?'var(--halal)':'var(--non-halal)',boxShadow:dynamicNgxStatus.isOpen?'0 0 0 3px rgba(34,197,94,0.2)':'0 0 0 3px rgba(239,68,68,0.15)',animation:dynamicNgxStatus.isOpen?'pulse 2s infinite':'none'}}/>
+          <span style={{fontSize:'0.74rem',fontWeight:800,color:dynamicNgxStatus.isOpen?'var(--halal)':'var(--non-halal)',textTransform:'uppercase',letterSpacing:'0.5px'}}>{dynamicNgxStatus.isOpen?'Market Open':'Market Closed'}</span>
         </div>
         <div style={{display:'flex',alignItems:'center',gap:'5px'}}>
           <span style={{fontSize:'0.72rem',fontWeight:700,color:'var(--text-muted)'}}>NGX ASI</span>
-          <span style={{fontSize:'0.82rem',fontWeight:900,color:'var(--text-dark)'}}>{NGX_STATUS.asi}</span>
-          <span style={{fontSize:'0.74rem',fontWeight:700,color:'var(--halal)',display:'flex',alignItems:'center',gap:'1px'}}><ArrowUpRight size={11}/>{NGX_STATUS.asiChange}</span>
+          <span style={{fontSize:'0.82rem',fontWeight:900,color:'var(--text-dark)'}}>{dynamicNgxStatus.asi}</span>
+          <span style={{fontSize:'0.74rem',fontWeight:700,color:'var(--halal)',display:'flex',alignItems:'center',gap:'1px'}}><ArrowUpRight size={11}/>{dynamicNgxStatus.asiChange}</span>
         </div>
         <div style={{display:'flex',gap:'16px',marginLeft:'auto',flexWrap:'wrap'}}>
-          {[['Vol',NGX_STATUS.volume],['↑ Adv',NGX_STATUS.advances],['↓ Dec',NGX_STATUS.declines]].map(([k,v])=>(
+          {[['Vol',dynamicNgxStatus.volume],['↑ Adv',dynamicNgxStatus.advances],['↓ Dec',dynamicNgxStatus.declines]].map(([k,v])=>(
             <div key={k} style={{display:'flex',gap:'4px',alignItems:'center'}}>
               <span style={{fontSize:'0.68rem',fontWeight:600,color:'var(--text-muted)'}}>{k}</span>
               <span style={{fontSize:'0.75rem',fontWeight:800,color:'var(--text-dark)'}}>{v}</span>
