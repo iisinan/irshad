@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link, useLocation } from 'react-router-dom';
+import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2, Brain } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { fetchStockDetails, fetchAiAnalysis } from '../services/api';
 import ReactMarkdown from 'react-markdown';
+import { useAuth } from '../context/AuthContext';
 const StockDetails = ({ symbol: propSymbol }) => {
   const { symbol: paramSymbol } = useParams();
   const symbol = propSymbol || paramSymbol;
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   // Use optimistic data passed via router state for instant render
   const optimisticStock = location.state?.stock || null;
   const [stock, setStock] = useState(optimisticStock);
@@ -447,9 +450,20 @@ const StockDetails = ({ symbol: propSymbol }) => {
           </div>
 
           {/* Buy Now */}
-          <Link to="/register" className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '15px', fontSize: '1rem' }}>
-            Buy This Stock <ArrowLeft size={16} style={{ transform: 'rotate(180deg)' }} />
-          </Link>
+          <button 
+            onClick={(e) => {
+              e.preventDefault();
+              if (!user) {
+                navigate('/login');
+              } else {
+                alert("Irshad Brokerage integration is coming soon! You'll be able to trade directly from your portfolio.");
+              }
+            }}
+            className="btn-primary" 
+            style={{ width: '100%', justifyContent: 'center', padding: '15px', fontSize: '1rem', border: 'none', cursor: 'pointer' }}
+          >
+            Buy Now
+          </button>
 
           <p style={{ fontSize: '0.8rem', color: 'var(--text-light)', textAlign: 'center', lineHeight: 1.5 }}>
             Link your Nigerian brokerage account to enable live trading.
