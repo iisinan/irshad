@@ -11,7 +11,7 @@ import {
 const NAV_ITEMS = [
   { section: 'Main' },
   { label: 'Dashboard',   icon: LayoutDashboard, to: '/dashboard'   },
-  { label: 'Portfolio',   icon: Briefcase,        to: '/portfolio'   },
+
   { label: 'Market',      icon: BarChart2,         to: '/portfolio#market'      },
   { label: 'Watchlist',   icon: Star,              to: '/portfolio#watchlist' },
   { section: 'Islamic Finance' },

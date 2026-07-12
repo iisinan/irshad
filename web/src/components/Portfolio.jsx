@@ -266,7 +266,7 @@ export default function Portfolio() {
         </div>
 
         {/* Custom Nav Bar */}
-        <div style={{ display: 'flex', gap: '8px', borderBottom: '2px solid var(--border)', paddingBottom: '0', overflowX: 'auto' }}>
+        <div className="hide-scrollbar" style={{ display: 'flex', gap: '8px', borderBottom: '2px solid var(--border)', paddingBottom: '0', overflowX: 'auto' }}>
           {tabs.map(tab => (
             <button
               key={tab.id}

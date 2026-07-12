@@ -1386,6 +1386,14 @@ button { font-family: inherit; cursor: pointer; }
   background: var(--primary-light);
 }
 
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* ===================================================
    STAGGERED ANIMATIONS
    =================================================== */
@@ -1486,6 +1494,20 @@ button { font-family: inherit; cursor: pointer; }
   
   .holding-card .sparkline-container {
     display: none; /* Hide sparkline on very small screens to save space */
+  }
+
+  /* Make action buttons take full width on mobile */
+  .holding-card > div:last-child {
+    flex: 1 1 100% !important;
+    flex-direction: row !important;
+    justify-content: flex-end !important;
+    margin-top: 8px;
+    border-top: 1px dashed var(--border);
+    padding-top: 12px;
+  }
+  
+  .holding-card > div:last-child > div {
+    justify-content: flex-end !important;
   }
 }
 
