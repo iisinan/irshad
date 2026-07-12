@@ -91,6 +91,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppTheme.divider)),
                 enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppTheme.divider)),
               ),
+              isExpanded: true,
               hint: const Text('Choose a company...'),
               value: _selectedStock,
               items: stocks.map((stock) {
