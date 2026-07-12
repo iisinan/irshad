@@ -38,7 +38,7 @@ export const fetchProfile = async () => {
 };
 
 export const fetchPortfolio = async () => {
-  const cacheKey = 'irshad_portfolio_cache_v7';
+  const cacheKey = 'irshad_portfolio_cache_v8';
   try {
     const response = await api.get('/portfolio');
     localStorage.setItem(cacheKey, JSON.stringify(response.data));
@@ -93,7 +93,7 @@ const getNext3AM = () => {
 
 export const fetchNgxStocks = async () => {
   try {
-    const cacheKey = 'irshad_stocks_cache_v7';
+    const cacheKey = 'irshad_stocks_cache_v8';
     const cached = localStorage.getItem(cacheKey);
     if (cached) {
       const { data, expiry } = JSON.parse(cached);
@@ -111,7 +111,7 @@ export const fetchNgxStocks = async () => {
 
 export const fetchStockDetails = async (symbol) => {
   try {
-    const cacheKey = `irshad_stock_${symbol}_cache_v7`;
+    const cacheKey = `irshad_stock_${symbol}_cache_v8`;
     const cached = localStorage.getItem(cacheKey);
     if (cached) {
       const { data, expiry } = JSON.parse(cached);
@@ -129,7 +129,7 @@ export const fetchStockDetails = async (symbol) => {
 
 export const fetchAiAnalysis = async (symbol) => {
   try {
-    const cacheKey = `irshad_ai_${symbol}_cache_v7`;
+    const cacheKey = `irshad_ai_${symbol}_cache_v8`;
     const cached = localStorage.getItem(cacheKey);
     if (cached) {
       const { data, expiry } = JSON.parse(cached);
