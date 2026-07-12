@@ -22,7 +22,7 @@ class StockProvider extends ChangeNotifier {
   Future<void> _loadCachedData() async {
     try {
       final box = await Hive.openBox(_boxName);
-      final cachedStr = box.get('ngx_stocks_v2');
+      final cachedStr = box.get('ngx_stocks_v4');
       if (cachedStr != null) {
         final Map<String, dynamic> cacheWrapper = jsonDecode(cachedStr);
         final int expiry = cacheWrapper['expiry'] ?? 0;
@@ -68,7 +68,7 @@ class StockProvider extends ChangeNotifier {
             'data': _ngxStocks,
             'expiry': _getNext3AM(),
           };
-          await box.put('ngx_stocks_v2', jsonEncode(cacheWrapper));
+          await box.put('ngx_stocks_v4', jsonEncode(cacheWrapper));
         } catch (e) {
           debugPrint("Hive cache save error: $e");
         }
@@ -86,7 +86,7 @@ class StockProvider extends ChangeNotifier {
   Future<Map<String, dynamic>?> getStockDetails(String symbol) async {
     try {
       final box = await Hive.openBox(_boxName);
-      final cachedStr = box.get('details_v2_$symbol');
+      final cachedStr = box.get('details_v4_$symbol');
       if (cachedStr != null) {
         final Map<String, dynamic> cacheWrapper = jsonDecode(cachedStr);
         final int expiry = cacheWrapper['expiry'] ?? 0;
@@ -110,9 +110,9 @@ class StockProvider extends ChangeNotifier {
           'data': data,
           'expiry': _getNext3AM(),
         };
-        await box.put('details_v2_$symbol', jsonEncode(cacheWrapper));
+        await box.put('details_v4_$symbol', jsonEncode(cacheWrapper));
       } catch (e) {
-        debugPrint("Hive cache save error: $e");
+        debugPrint("Hive cache details save error: $e");
       }
     }
     return data;
