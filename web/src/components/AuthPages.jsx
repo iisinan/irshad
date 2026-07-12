@@ -200,7 +200,7 @@ export const RegisterPage = () => {
     setError('');
     setLoading(true);
     
-    const formData = new FormData(e.target);
+    const formData = new FormData(e.currentTarget);
     const fname = formData.get('firstName') || firstName;
     const lname = formData.get('lastName') || lastName;
     const em = formData.get('email') || email;
@@ -279,7 +279,7 @@ export const RegisterPage = () => {
 
           {error && <div style={{ background: '#fef2f2', color: '#dc2626', padding: '12px', borderRadius: '8px', fontSize: '0.9rem', border: '1px solid #f87171' }}>{error}</div>}
 
-          <button onClick={handleRegister} disabled={!agreed || loading} className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '14px', marginTop: '4px', fontSize: '1rem', opacity: (agreed && !loading) ? 1 : 0.55 }}>
+          <button type="submit" disabled={!agreed || loading} className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '14px', marginTop: '4px', fontSize: '1rem', opacity: (agreed && !loading) ? 1 : 0.55 }}>
             {loading ? 'Creating Account...' : 'Create My Account'}
           </button>
 
