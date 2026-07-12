@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, Search, Filter, AlertTriangle, CheckCircle, Edit2, X } from 'lucide-react';
-import { fetchNgxStocks } from '../services/api';
+import api, { fetchNgxStocks } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 const AdminDashboard = () => {
@@ -40,25 +40,12 @@ const AdminDashboard = () => {
     
     setUpdating(true);
     try {
-      const token = localStorage.getItem('auth_token');
-      const response = await fetch(`http://localhost:8000/api/v1/stocks/${selectedStock.symbol}/status`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          status: newStatus,
-          reason: reason
-        })
+      const response = await api.put(`/stocks/${selectedStock.symbol}/status`, {
+        status: newStatus,
+        reason: reason
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to update status. Are you logged in as an Admin/Scholar?');
-      }
-
-      const result = await response.json();
+      const result = response.data;
       
       // Update local state
       setStocks(stocks.map(s => s.symbol === selectedStock.symbol ? result.data : s));

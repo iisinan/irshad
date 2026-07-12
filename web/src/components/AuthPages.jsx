@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
 
 /* ─── Input Component ────────────────────────────────────── */
 const FormField = ({ label, name, type = 'text', placeholder, value, onChange, hint }) => {
@@ -323,20 +324,10 @@ export const ForgotPasswordPage = () => {
     setMessage('');
     
     try {
-      const res = await fetch('http://localhost:8000/api/v1/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-      const data = await res.json();
-      
-      if (res.ok) {
-        setMessage(data.message || 'If an account exists, a password reset link has been sent.');
-      } else {
-        setError(data.message || 'Something went wrong. Please try again.');
-      }
+      const res = await api.post('/forgot-password', { email });
+      setMessage(res.data?.message || 'If an account exists, a password reset link has been sent.');
     } catch (err) {
-      setError('Network error. Please try again later.');
+      setError(err.response?.data?.message || 'Network error. Please try again later.');
     }
     setLoading(false);
   };
@@ -416,21 +407,11 @@ export const ResetPasswordPage = () => {
     setMessage('');
     
     try {
-      const res = await fetch('http://localhost:8000/api/v1/reset-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ email, token, password, password_confirmation: passwordConfirmation })
-      });
-      const data = await res.json();
-      
-      if (res.ok) {
-        setMessage('Password successfully reset! Redirecting to login...');
-        setTimeout(() => navigate('/login'), 2000);
-      } else {
-        setError(data.message || 'Invalid or expired token.');
-      }
+      const res = await api.post('/reset-password', { email, token, password, password_confirmation: passwordConfirmation });
+      setMessage('Password successfully reset! Redirecting to login...');
+      setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
-      setError('Network error. Please try again later.');
+      setError(err.response?.data?.message || 'Invalid or expired token.');
     }
     setLoading(false);
   };

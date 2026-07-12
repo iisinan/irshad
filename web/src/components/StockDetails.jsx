@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2, Brain, Globe, Newspaper } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { fetchStockDetails, fetchAiAnalysis } from '../services/api';
+import api, { fetchStockDetails, fetchAiAnalysis } from '../services/api';
 import ReactMarkdown from 'react-markdown';
 import { useAuth } from '../context/AuthContext';
 const StockDetails = ({ symbol: propSymbol }) => {
@@ -34,9 +34,8 @@ const StockDetails = ({ symbol: propSymbol }) => {
       
     // Fetch related news
     setNewsLoading(true);
-    fetch(`http://127.0.0.1:8000/api/news?symbol=${symbol}`)
-      .then(res => res.json())
-      .then(data => setStockNews(data.data || []))
+    api.get(`/news?symbol=${symbol}`)
+      .then(res => setStockNews(res.data?.data || []))
       .catch(console.error)
       .finally(() => setNewsLoading(false));
   }, [symbol]);
