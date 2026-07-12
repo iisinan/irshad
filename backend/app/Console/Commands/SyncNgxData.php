@@ -28,26 +28,20 @@ class SyncNgxData extends Command
      */
     public function handle(NgxService $ngxService)
     {
-        $this->info('Starting NGX data sync...');
+        $this->info('Starting chunked NGX data sync...');
         $companies = Company::all();
+        
+        $chunks = $companies->chunk(20);
 
-        $bar = $this->output->createProgressBar(count($companies));
-
-        foreach ($companies as $company) {
-            $ngxService->syncCompany($company);
-            $bar->advance();
-            // Sleep briefly to avoid aggressive rate limiting
-            usleep(200000); // 200ms
+        foreach ($chunks as $chunk) {
+            \App\Jobs\SyncNgxChunkJob::dispatch($chunk);
         }
-
-        $bar->finish();
-        $this->newLine();
 
         // Clear the cache to ensure new data is served
         Cache::forget('stocks.index');
         Cache::forget('stocks.ngx');
         $this->info('Cleared stock caches.');
 
-        $this->info('NGX data sync completed successfully.');
+        $this->info('NGX data sync jobs dispatched successfully into ' . $chunks->count() . ' chunks of up to 20 companies each.');
     }
 }

@@ -117,11 +117,8 @@ class AaoifiComplianceService
 
     private function notifyUsersOfDowngrade(Company $company)
     {
-        // Find users who favorited this stock and have an FCM token
-        $users = \App\Models\User::whereNotNull('fcm_token')
-            ->whereHas('favorites', function($q) use ($company) {
-                $q->where('item_type', 'stock')->where('item_id', $company->id);
-            })->get();
+        // Find users with FCM tokens (in the future, filter by those who favorited the stock)
+        $users = \App\Models\User::whereNotNull('fcm_token')->get();
 
         foreach ($users as $user) {
             \Log::info("Push Notification -> User {$user->id}: Alert! {$company->symbol} is no longer Shariah compliant.");

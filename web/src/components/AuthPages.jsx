@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
+import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
 
 /* ─── Input Component ────────────────────────────────────── */
@@ -55,8 +56,20 @@ export const LoginPage = () => {
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setError('');
+    setLoading(true);
+    const res = await loginWithGoogle(credentialResponse.credential);
+    if (res.success) {
+      navigate('/dashboard');
+    } else {
+      setError(res.error || 'Google login failed');
+    }
+    setLoading(false);
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -65,7 +78,7 @@ export const LoginPage = () => {
     
     const res = await login({ email, password });
     if (res.success) {
-      navigate('/portfolio');
+      navigate('/dashboard');
     } else {
       setError(res.error);
     }
@@ -133,12 +146,15 @@ export const LoginPage = () => {
 
           <Divider label="or continue with" />
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            {['Google', 'Apple'].map(provider => (
-              <button key={provider} className="btn-secondary" style={{ justifyContent: 'center', padding: '11px' }}>
-                {provider}
-              </button>
-            ))}
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => setError('Google login failed or was canceled.')}
+              useOneTap
+              theme="outline"
+              shape="rectangular"
+              text="continue_with"
+            />
           </div>
         </div>
 
@@ -162,8 +178,20 @@ export const RegisterPage = () => {
   const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { register } = useAuth();
+  const { register, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setError('');
+    setLoading(true);
+    const res = await loginWithGoogle(credentialResponse.credential);
+    if (res.success) {
+      navigate('/dashboard');
+    } else {
+      setError(res.error || 'Google signup failed');
+    }
+    setLoading(false);
+  };
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -179,7 +207,7 @@ export const RegisterPage = () => {
     });
     
     if (res.success) {
-      navigate('/portfolio');
+      navigate('/dashboard');
     } else {
       setError(res.error);
     }
@@ -248,12 +276,15 @@ export const RegisterPage = () => {
 
           <Divider label="or sign up with" />
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            {['Google', 'Apple'].map(provider => (
-              <button key={provider} className="btn-secondary" style={{ justifyContent: 'center', padding: '11px' }}>
-                {provider}
-              </button>
-            ))}
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => setError('Google signup failed or was canceled.')}
+              useOneTap
+              theme="outline"
+              shape="rectangular"
+              text="signup_with"
+            />
           </div>
         </div>
 
@@ -263,6 +294,193 @@ export const RegisterPage = () => {
             Log in
           </Link>
         </p>
+      </div>
+    </div>
+  );
+};
+
+/* ─── Forgot Password Page ───────────────────────────────── */
+export const ForgotPasswordPage = () => {
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!email) return;
+    setLoading(true);
+    setError('');
+    setMessage('');
+    
+    try {
+      const res = await fetch('http://localhost:8000/api/v1/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
+      
+      if (res.ok) {
+        setMessage(data.message || 'If an account exists, a password reset link has been sent.');
+      } else {
+        setError(data.message || 'Something went wrong. Please try again.');
+      }
+    } catch (err) {
+      setError('Network error. Please try again later.');
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="auth-wrapper">
+      <div className="auth-card animate-fade-in">
+        {/* Logo */}
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <img
+            src="/logo.png"
+            alt="Irshad"
+            style={{
+              height: '72px',
+              width: 'auto',
+              objectFit: 'contain',
+              margin: '0 auto 20px',
+              display: 'block',
+              filter: 'drop-shadow(0 4px 20px rgba(201,168,76,0.14))',
+            }}
+          />
+          <h1 style={{ fontSize: '1.9rem', fontWeight: '800', marginBottom: '6px' }}>Reset Password</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.97rem' }}>Enter your email to receive a reset link.</p>
+        </div>
+
+        {/* Form */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          <FormField
+            label="Email Address"
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+          />
+
+          {error && <div style={{ background: '#fef2f2', color: '#dc2626', padding: '12px', borderRadius: '8px', fontSize: '0.9rem', border: '1px solid #f87171' }}>{error}</div>}
+          {message && <div style={{ background: '#ecfdf5', color: '#059669', padding: '12px', borderRadius: '8px', fontSize: '0.9rem', border: '1px solid #6ee7b7' }}>{message}</div>}
+
+          <button onClick={handleSubmit} disabled={loading || !email} className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '14px', marginTop: '4px', fontSize: '1rem', opacity: (loading || !email) ? 0.7 : 1 }}>
+            {loading ? 'Sending...' : 'Send Reset Link'}
+          </button>
+        </div>
+
+        <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '24px' }}>
+          Remember your password?{' '}
+          <Link to="/login" style={{ color: 'var(--primary)', fontWeight: 700, textDecoration: 'none' }}>
+            Back to login
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+};
+
+/* ─── Reset Password Page ────────────────────────────────── */
+export const ResetPasswordPage = () => {
+  const [password, setPassword] = useState('');
+  const [passwordConfirmation, setPasswordConfirmation] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  const queryParams = new URLSearchParams(window.location.search);
+  const email = queryParams.get('email');
+  const token = queryParams.get('token');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!password || password !== passwordConfirmation) {
+      setError('Passwords do not match');
+      return;
+    }
+    
+    setLoading(true);
+    setError('');
+    setMessage('');
+    
+    try {
+      const res = await fetch('http://localhost:8000/api/v1/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ email, token, password, password_confirmation: passwordConfirmation })
+      });
+      const data = await res.json();
+      
+      if (res.ok) {
+        setMessage('Password successfully reset! Redirecting to login...');
+        setTimeout(() => navigate('/login'), 2000);
+      } else {
+        setError(data.message || 'Invalid or expired token.');
+      }
+    } catch (err) {
+      setError('Network error. Please try again later.');
+    }
+    setLoading(false);
+  };
+
+  if (!email || !token) {
+    return (
+      <div className="auth-wrapper">
+        <div className="auth-card animate-fade-in" style={{ textAlign: 'center' }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: '800', color: '#dc2626', marginBottom: '12px' }}>Invalid Link</h1>
+          <p style={{ color: 'var(--text-muted)', marginBottom: '24px' }}>The password reset link is invalid or missing required parameters.</p>
+          <Link to="/forgot" className="btn-primary" style={{ display: 'inline-flex', padding: '12px 24px' }}>Request New Link</Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="auth-wrapper">
+      <div className="auth-card animate-fade-in">
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <img
+            src="/logo.png"
+            alt="Irshad"
+            style={{
+              height: '72px',
+              width: 'auto',
+              objectFit: 'contain',
+              margin: '0 auto 20px',
+              display: 'block',
+              filter: 'drop-shadow(0 4px 20px rgba(201,168,76,0.14))',
+            }}
+          />
+          <h1 style={{ fontSize: '1.9rem', fontWeight: '800', marginBottom: '6px' }}>Create New Password</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.97rem' }}>Please enter your new password below.</p>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          <FormField
+            label="New Password"
+            type="password"
+            placeholder="Create a strong password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+          />
+          <FormField
+            label="Confirm Password"
+            type="password"
+            placeholder="Repeat your new password"
+            value={passwordConfirmation}
+            onChange={e => setPasswordConfirmation(e.target.value)}
+          />
+
+          {error && <div style={{ background: '#fef2f2', color: '#dc2626', padding: '12px', borderRadius: '8px', fontSize: '0.9rem', border: '1px solid #f87171' }}>{error}</div>}
+          {message && <div style={{ background: '#ecfdf5', color: '#059669', padding: '12px', borderRadius: '8px', fontSize: '0.9rem', border: '1px solid #6ee7b7' }}>{message}</div>}
+
+          <button onClick={handleSubmit} disabled={loading || !password} className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '14px', marginTop: '4px', fontSize: '1rem', opacity: (loading || !password) ? 0.7 : 1 }}>
+            {loading ? 'Resetting...' : 'Reset Password'}
+          </button>
+        </div>
       </div>
     </div>
   );

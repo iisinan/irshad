@@ -22,6 +22,11 @@ export const loginUser = async (credentials) => {
   return response.data;
 };
 
+export const googleLoginUser = async (credential) => {
+  const response = await api.post('/auth/google', { credential });
+  return response.data;
+};
+
 export const registerUser = async (data) => {
   const response = await api.post('/register', data);
   return response.data;
@@ -33,8 +38,17 @@ export const fetchProfile = async () => {
 };
 
 export const fetchPortfolio = async () => {
-  const response = await api.get('/portfolio');
-  return response.data;
+  const cacheKey = 'irshad_portfolio_cache_v7';
+  try {
+    const response = await api.get('/portfolio');
+    localStorage.setItem(cacheKey, JSON.stringify(response.data));
+    return response.data;
+  } catch (error) {
+    // On failure, return cached data if available
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) return JSON.parse(cached);
+    throw error;
+  }
 };
 
 export const addHolding = async (data) => {
@@ -44,6 +58,26 @@ export const addHolding = async (data) => {
 
 export const removeHolding = async (id) => {
   const response = await api.delete(`/portfolio/${id}`);
+  return response.data;
+};
+
+export const updateHolding = async (id, data) => {
+  const response = await api.put(`/portfolio/${id}`, data);
+  return response.data;
+};
+
+export const fetchWatchlist = async () => {
+  const response = await api.get('/watchlist');
+  return response.data;
+};
+
+export const addToWatchlist = async (symbol) => {
+  const response = await api.post('/watchlist', { symbol });
+  return response.data;
+};
+
+export const removeFromWatchlist = async (symbol) => {
+  const response = await api.delete(`/watchlist/${symbol}`);
   return response.data;
 };
 
@@ -95,7 +129,15 @@ export const fetchStockDetails = async (symbol) => {
 
 export const fetchAiAnalysis = async (symbol) => {
   try {
+    const cacheKey = `irshad_ai_${symbol}_cache_v7`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      const { data, expiry } = JSON.parse(cached);
+      if (Date.now() < expiry) return data;
+    }
+
     const response = await api.get(`/stocks/${symbol}/analysis`);
+    localStorage.setItem(cacheKey, JSON.stringify({ data: response.data, expiry: getNext3AM() }));
     return response.data;
   } catch (error) {
     console.error(`Error fetching AI analysis for ${symbol}:`, error);

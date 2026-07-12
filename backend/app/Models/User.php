@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 use Laravel\Sanctum\HasApiTokens;
+use App\Notifications\QueuedResetPasswordNotification;
 
 class User extends Authenticatable
 {
@@ -26,6 +27,8 @@ class User extends Authenticatable
         'location',
         'role',
         'preferences',
+        'google_id',
+        'avatar',
     ];
 
     /**
@@ -60,5 +63,14 @@ class User extends Authenticatable
             'password' => 'hashed',
             'preferences' => 'array',
         ];
+    }
+
+    /**
+     * Override to use our queued notification so the HTTP response
+     * is instant — the actual email is dispatched via Redis queue.
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new QueuedResetPasswordNotification($token));
     }
 }

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../core/providers/app_state_provider.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../data/auth_repository.dart';
 import 'forgot_password_screen.dart';
 
@@ -19,6 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   final _authRepository = AuthRepository();
   final LocalAuthentication _localAuth = LocalAuthentication();
+  final _secureStorage = const FlutterSecureStorage();
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _biometricsEnabled = false;
@@ -52,9 +54,8 @@ class _LoginScreenState extends State<LoginScreen> {
       
       if (authenticated) {
         setState(() => _isLoading = true);
-        final prefs = await SharedPreferences.getInstance();
-        final email = prefs.getString('saved_email');
-        final password = prefs.getString('saved_password');
+        final email = await _secureStorage.read(key: 'saved_email');
+        final password = await _secureStorage.read(key: 'saved_password');
         
         if (email != null && password != null) {
           _emailController.text = email;
@@ -88,9 +89,25 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final user = await _authRepository.login(_emailController.text, _passwordController.text);
       if (user != null) {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('saved_email', _emailController.text);
-        await prefs.setString('saved_password', _passwordController.text);
+        await _secureStorage.write(key: 'saved_email', value: _emailController.text);
+        await _secureStorage.write(key: 'saved_password', value: _passwordController.text);
+        if (mounted) {
+          Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
+          Navigator.of(context, rootNavigator: true).pushReplacementNamed('/main');
+        }
+      }
+    } catch (e) {
+      _showError(e.toString());
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _loginWithGoogle() async {
+    setState(() => _isLoading = true);
+    try {
+      final user = await _authRepository.signInWithGoogleFlow();
+      if (user != null) {
         if (mounted) {
           Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
           Navigator.of(context, rootNavigator: true).pushReplacementNamed('/main');
@@ -221,6 +238,32 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ],
                 ],
+              ),
+              
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  const Expanded(child: Divider(color: divider)),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: Text('or continue with', style: TextStyle(color: textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
+                  ),
+                  const Expanded(child: Divider(color: divider)),
+                ],
+              ),
+              const SizedBox(height: 24),
+              
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: OutlinedButton(
+                  onPressed: _isLoading ? null : _loginWithGoogle,
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: divider, width: 1.5),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  ),
+                  child: const Text('Continue with Google', style: TextStyle(color: textDark, fontWeight: FontWeight.w700, fontSize: 16)),
+                ),
               ),
               
               const SizedBox(height: 32),

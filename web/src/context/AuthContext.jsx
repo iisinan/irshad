@@ -61,13 +61,32 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const loginWithGoogle = async (credential) => {
+    try {
+      // Import here or at the top
+      const { googleLoginUser } = await import('../services/api');
+      const res = await googleLoginUser(credential);
+      if (res.data && res.data.access_token) {
+        localStorage.setItem('auth_token', res.data.access_token);
+        setUser(res.data.user);
+        return { success: true };
+      }
+      return { success: false, error: 'Invalid response from server' };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error.response?.data?.message || 'Google Login failed' 
+      };
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('auth_token');
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, register, loginWithGoogle, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

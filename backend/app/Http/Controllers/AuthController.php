@@ -48,7 +48,8 @@ class AuthController extends Controller
             return $this->unauthorized('Invalid login details');
         }
 
-        $user = User::where('email', $request->email)->firstOrFail();
+        // Auth::user() returns the already-loaded user — no second DB query needed
+        $user = Auth::user();
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return $this->success([
@@ -56,6 +57,58 @@ class AuthController extends Controller
             'access_token' => $token,
             'token_type' => 'Bearer',
         ], 'Login successful');
+    }
+
+    /**
+     * Login or Register user using Google id_token.
+     */
+    public function googleLogin(Request $request): JsonResponse
+    {
+        $request->validate([
+            'credential' => 'required|string',
+        ]);
+
+        $client = new \Google_Client(['client_id' => env('GOOGLE_CLIENT_ID')]);
+        $payload = $client->verifyIdToken($request->credential);
+
+        if (!$payload) {
+            return $this->unauthorized('Invalid Google token');
+        }
+
+        $googleId = $payload['sub'];
+        $email = $payload['email'];
+        $name = $payload['name'];
+        $avatar = $payload['picture'] ?? null;
+
+        // Find user by google_id or email
+        $user = User::where('google_id', $googleId)->orWhere('email', $email)->first();
+
+        if (!$user) {
+            // Register new user
+            $user = User::create([
+                'name' => $name,
+                'email' => $email,
+                'google_id' => $googleId,
+                'avatar' => $avatar,
+                'password' => null,
+                'role' => 'user',
+                'preferences' => [],
+            ]);
+        } else {
+            // Update google_id and avatar if missing
+            $user->update([
+                'google_id' => $googleId,
+                'avatar' => $user->avatar ?? $avatar,
+            ]);
+        }
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return $this->success([
+            'user' => $user,
+            'access_token' => $token,
+            'token_type' => 'Bearer',
+        ], 'Google login successful');
     }
 
     /**

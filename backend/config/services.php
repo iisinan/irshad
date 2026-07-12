@@ -40,4 +40,12 @@ return [
         'url' => env('NGX_API_URL', 'https://api.ngxgroup.com/v1'),
     ],
 
+    'gemini' => [
+        'key' => env('GEMINI_API_KEY'),
+    ],
+
+    'scraperapi' => [
+        'key' => env('SCRAPERAPI_KEY'),
+    ],
+
 ];

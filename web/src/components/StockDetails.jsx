@@ -4,8 +4,9 @@ import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp,
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { fetchStockDetails, fetchAiAnalysis } from '../services/api';
 import ReactMarkdown from 'react-markdown';
-const StockDetails = () => {
-  const { symbol } = useParams();
+const StockDetails = ({ symbol: propSymbol }) => {
+  const { symbol: paramSymbol } = useParams();
+  const symbol = propSymbol || paramSymbol;
   const location = useLocation();
   // Use optimistic data passed via router state for instant render
   const optimisticStock = location.state?.stock || null;
@@ -39,7 +40,7 @@ const StockDetails = () => {
         <BarChart2 size={48} strokeWidth={1} style={{ margin: '0 auto 20px', color: 'var(--text-light)' }} />
         <h2 style={{ marginBottom: '8px' }}>Stock not found</h2>
         <p style={{ color: 'var(--text-muted)', marginBottom: '24px' }}>We couldn't load data for this symbol.</p>
-        <Link to="/market" className="btn-primary">Back to Market</Link>
+        <button onClick={() => window.history.back()} className="btn-primary">Go Back</button>
       </div>
     );
   }
@@ -125,9 +126,9 @@ const StockDetails = () => {
   return (
     <div className="animate-fade-in page-wrapper">
       {/* Back link */}
-      <Link to="/market" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', textDecoration: 'none', fontWeight: 600, marginBottom: '28px', fontSize: '0.9rem' }}>
-        <ArrowLeft size={16} /> Back to Market
-      </Link>
+      <button onClick={() => window.history.back()} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', textDecoration: 'none', fontWeight: 600, marginBottom: '28px', fontSize: '0.9rem' }}>
+        <ArrowLeft size={16} /> Back
+      </button>
 
       {/* Subtle enriching indicator */}
       {enriching && (

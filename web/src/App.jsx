@@ -4,18 +4,24 @@ import { TrendingUp, TrendingDown, ArrowRight, CheckCircle, Shield, BarChart2, C
 import { fetchNgxStocks } from './services/api';
 import StockDetails from './components/StockDetails';
 import Portfolio from './components/Portfolio';
+import Dashboard from './components/Dashboard';
+import DashboardLayout from './components/DashboardLayout';
 import AboutPage from './components/About';
 import NewsPage from './components/News';
 import ShariahPage from './components/Shariah';
 import Profile from './components/Profile';
-import { LoginPage, RegisterPage } from './components/AuthPages';
+import { LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage } from './components/AuthPages';
 import AdminDashboard from './components/AdminDashboard';
 import { useAuth } from './context/AuthContext';
 import './index.css';
 
+const DASHBOARD_ROUTES = ['/dashboard', '/portfolio', '/profile'];
+
 /* ─── Navbar ──────────────────────────────────────────────── */
 const TopNavbar = () => {
   const location = useLocation();
+  // Hide top navbar on dashboard / portfolio / profile — those use the sidebar
+  const isDashboard = DASHBOARD_ROUTES.some(r => location.pathname.startsWith(r));
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const { user, logout, loading } = useAuth();
@@ -40,6 +46,7 @@ const TopNavbar = () => {
 
   return (
     <>
+      {isDashboard ? null : (
       <nav className="top-navbar" style={{ boxShadow: scrolled ? '0 2px 16px rgba(0,0,0,0.07)' : 'none' }}>
         <Link to="/" className="nav-logo" style={{ textDecoration: 'none' }}>
           <img
@@ -55,7 +62,11 @@ const TopNavbar = () => {
           <Link to="/about" className={navLinkClass('/about')}>About</Link>
           <Link to="/news" className={navLinkClass('/news')}>News</Link>
           <Link to="/market" className={navLinkClass('/market')}>Market</Link>
-          <Link to="/portfolio" className={navLinkClass('/portfolio')}>Portfolio</Link>
+          {user ? (
+            <Link to="/dashboard" className={navLinkClass('/dashboard')}>Dashboard</Link>
+          ) : (
+            <Link to="/portfolio" className={navLinkClass('/portfolio')}>Portfolio</Link>
+          )}
           {(user?.role === 'admin' || user?.role === 'scholar') && (
             <Link to="/admin" className={navLinkClass('/admin')} style={{ color: 'var(--primary)' }}>Admin</Link>
           )}
@@ -96,14 +107,19 @@ const TopNavbar = () => {
           <span /><span /><span />
         </button>
       </nav>
+      )}
 
-      {/* Mobile drawer */}
-      <div className={`mobile-nav-drawer ${menuOpen ? 'open' : ''}`}>
+      {/* Mobile drawer — also hidden on dashboard */}
+      {!isDashboard && (<div className={`mobile-nav-drawer ${menuOpen ? 'open' : ''}`}>
         <Link to="/" className={navLinkClass('/')}>🏠 Home</Link>
         <Link to="/about" className={navLinkClass('/about')}>ℹ️ About</Link>
         <Link to="/news" className={navLinkClass('/news')}>📰 News</Link>
         <Link to="/market" className={navLinkClass('/market')}>📈 Market</Link>
-        <Link to="/portfolio" className={navLinkClass('/portfolio')}>💼 Portfolio</Link>
+        {user ? (
+          <Link to="/dashboard" className={navLinkClass('/dashboard')}>📊 Dashboard</Link>
+        ) : (
+          <Link to="/portfolio" className={navLinkClass('/portfolio')}>💼 Portfolio</Link>
+        )}
         {(user?.role === 'admin' || user?.role === 'scholar') && (
           <Link to="/admin" className={navLinkClass('/admin')}>⚙️ Admin</Link>
         )}
@@ -132,6 +148,7 @@ const TopNavbar = () => {
           )}
         </div>
       </div>
+      )}
     </>
   );
 };
@@ -165,13 +182,12 @@ const StockTicker = () => {
             else if (s === 'non-halal') { statusStr = 'NON-HALAL'; color = 'var(--non-halal)'; }
           }
 
-          // Mock daily price since it might not be loaded in simple /ngx-stocks endpoint
-          const mockPrice = stock.daily_prices?.[0]?.price || ((Math.abs(stock.symbol.charCodeAt(0) - 64) * 12.5) + 10).toFixed(2);
+          const displayPrice = Number(stock.daily_prices?.[0]?.price || 0).toFixed(2);
 
           return (
             <div key={`${stock.symbol}-${i}`} className="ticker-item" onClick={() => navigate(`/market/${stock.symbol}`, { state: { stock } })}>
               <span className="ticker-item-symbol">{stock.symbol}</span>
-              <span className="ticker-item-price">₦{mockPrice}</span>
+              <span className="ticker-item-price">₦{displayPrice}</span>
               <span style={{ fontWeight: 800, fontSize: '0.7rem', color, padding: '2px 6px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)' }}>{statusStr}</span>
               <div className="ticker-separator" />
             </div>
@@ -799,8 +815,14 @@ const MarketPage = () => {
           <p>Try adjusting your search or filter.</p>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-          {filtered.map(stock => <StockCard key={stock.symbol} company={stock} />)}
+        <div className="custom-scroll-container">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+            {filtered.map((stock, i) => (
+              <div key={stock.symbol} className="roll-in-anim" style={{ animationDelay: `${(i % 15) * 0.05}s` }}>
+                <StockCard company={stock} />
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
@@ -822,11 +844,20 @@ function App() {
             <Route path="/shariah" element={<ShariahPage />} />
             <Route path="/market" element={<MarketPage />} />
             <Route path="/market/:symbol" element={<StockDetails />} />
-            <Route path="/portfolio" element={<Portfolio />} />
+            <Route path="/dashboard" element={
+              <DashboardLayout><Dashboard /></DashboardLayout>
+            } />
+            <Route path="/portfolio" element={
+              <DashboardLayout><Portfolio /></DashboardLayout>
+            } />
+            <Route path="/profile" element={
+              <DashboardLayout><Profile /></DashboardLayout>
+            } />
             <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/profile" element={<Profile />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
           </Routes>
         </main>
       </div>

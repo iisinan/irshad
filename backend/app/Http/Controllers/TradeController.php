@@ -54,18 +54,12 @@ class TradeController extends Controller
 
         $user = auth()->user();
 
-        // 1. Verify user has a linked brokerage account
-        $brokerage = BrokerageAccount::where('user_id', $user->id)->first();
-        if (!$brokerage) {
-            return $this->error('Please link a broker before trading.', 400);
-        }
-
-        // 2. Load company, its status, and latest price
+        // 1. Load company, its status, and latest price
         $company = Company::with(['status', 'dailyPrices' => fn($q) => $q->latest('date')->limit(1)])
             ->where('symbol', $request->symbol)
             ->first();
 
-        // 3. Shariah Compliance Check
+        // 2. Shariah Compliance Check
         $statusStr = strtolower($company->status?->status ?? 'unknown');
         if ($statusStr === 'non-halal') {
             return $this->error('Cannot trade this stock. It has been screened as non-halal.', 403);
@@ -75,7 +69,7 @@ class TradeController extends Controller
             return $this->error('Cannot trade this stock. Its compliance status is currently doubtful.', 403);
         }
 
-        // 4. Calculate cost
+        // 3. Calculate cost
         $latestPrice = $company->dailyPrices->first()?->price ?? 0;
         if ($latestPrice <= 0) {
             return $this->error('Current price unavailable. Cannot execute trade.', 400);
@@ -83,47 +77,58 @@ class TradeController extends Controller
 
         $totalCost = $latestPrice * $request->shares;
 
-        // 5. Verify funds
-        if ($brokerage->cash_balance < $totalCost) {
-            return $this->error('Insufficient funds.', 400);
-        }
-
-        DB::beginTransaction();
         try {
-            // Deduct funds
-            $brokerage->cash_balance -= $totalCost;
-            $brokerage->save();
+            $result = DB::transaction(function () use ($user, $company, $request, $latestPrice, $totalCost) {
+                // 4. Lock the brokerage account to prevent race conditions
+                $brokerage = BrokerageAccount::where('user_id', $user->id)->lockForUpdate()->first();
+                if (!$brokerage) {
+                    throw new \Exception('Please link a broker before trading.');
+                }
 
-            // Add/Update Holdings
-            $holding = Holding::firstOrNew([
-                'user_id' => $user->id,
-                'company_id' => $company->id,
-            ]);
+                // 5. Verify funds
+                if ($brokerage->cash_balance < $totalCost) {
+                    throw new \Exception('Insufficient funds.');
+                }
 
-            if ($holding->exists) {
-                // Average down cost basis
-                $oldTotalValue = $holding->average_buy_price * $holding->shares;
-                $newTotalValue = $oldTotalValue + $totalCost;
-                $newShares = $holding->shares + $request->shares;
-                
-                $holding->shares = $newShares;
-                $holding->average_buy_price = $newTotalValue / $newShares;
-            } else {
-                $holding->shares = $request->shares;
-                $holding->average_buy_price = $latestPrice;
-            }
+                // 6. Deduct funds
+                $brokerage->cash_balance -= $totalCost;
+                $brokerage->save();
 
-            $holding->save();
-            DB::commit();
+                // 7. Lock the holding if it exists, or create new
+                $holding = Holding::where('user_id', $user->id)
+                    ->where('company_id', $company->id)
+                    ->lockForUpdate()
+                    ->first();
 
-            return $this->success([
-                'holding' => $holding,
-                'new_balance' => $brokerage->cash_balance
-            ], "Successfully purchased {$request->shares} shares of {$company->symbol}.");
+                if ($holding) {
+                    // Average down cost basis
+                    $oldTotalValue = $holding->average_buy_price * $holding->shares;
+                    $newTotalValue = $oldTotalValue + $totalCost;
+                    $newShares = $holding->shares + $request->shares;
+                    
+                    $holding->shares = $newShares;
+                    $holding->average_buy_price = $newTotalValue / $newShares;
+                } else {
+                    $holding = new Holding([
+                        'user_id' => $user->id,
+                        'company_id' => $company->id,
+                        'shares' => $request->shares,
+                        'average_buy_price' => $latestPrice,
+                    ]);
+                }
+                $holding->save();
+
+                return [
+                    'holding' => $holding,
+                    'new_balance' => $brokerage->cash_balance
+                ];
+            });
+
+            return $this->success($result, "Successfully purchased {$request->shares} shares of {$company->symbol}.");
 
         } catch (\Exception $e) {
-            DB::rollBack();
-            return $this->error('Trade execution failed: ' . $e->getMessage(), 500);
+            $code = $e->getMessage() === 'Insufficient funds.' || $e->getMessage() === 'Please link a broker before trading.' ? 400 : 500;
+            return $this->error('Trade execution failed: ' . $e->getMessage(), $code);
         }
     }
 }

@@ -1282,3 +1282,244 @@ button { font-family: inherit; cursor: pointer; }
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-12px); }
 }
+
+/* ===================================================
+   DASHBOARD RESPONSIVE GRIDS
+   =================================================== */
+.dashboard-main-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 24px;
+}
+
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+/* Tablet / Small Desktop */
+@media (max-width: 1024px) {
+  .dashboard-main-grid {
+    grid-template-columns: 1fr 300px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 820px) {
+  .dashboard-main-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .quick-actions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .dashboard-sidebar-container {
+    position: fixed;
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  .dashboard-sidebar-container.open {
+    transform: translateX(0);
+  }
+  
+  /* Show hamburger menu icon on mobile dashboard */
+  .mobile-dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background: white;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 900;
+  }
+  
+  .desktop-only-btn {
+    display: none !important;
+  }
+}
+
+@media (min-width: 821px) {
+  .mobile-dashboard-header {
+    display: none;
+  }
+  
+  .mobile-only-btn {
+    display: none !important;
+  }
+  
+  /* Reset display flex for desktop button since it has a class */
+  .desktop-only-btn {
+    display: flex !important;
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ===================================================
+   CUSTOM SCROLLBARS
+   =================================================== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-light);
+}
+
+/* ===================================================
+   STAGGERED ANIMATIONS
+   =================================================== */
+@keyframes slideUpFade {
+  0% { opacity: 0; transform: translateY(15px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.stagger-1, .stagger-2, .stagger-3, .stagger-4, .stagger-5 {
+  opacity: 0;
+  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.15s; }
+.stagger-3 { animation-delay: 0.25s; }
+.stagger-4 { animation-delay: 0.35s; }
+.stagger-5 { animation-delay: 0.45s; }
+
+/* Pulse for market-open dot */
+@keyframes pulse {
+  0%   { box-shadow: 0 0 0 0   rgba(34,197,94,0.45); }
+  70%  { box-shadow: 0 0 0 7px rgba(34,197,94,0); }
+  100% { box-shadow: 0 0 0 0   rgba(34,197,94,0); }
+}
+
+/* Spin for refresh button */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.spin { animation: spin 0.9s linear infinite; }
+
+/* Doubtful bg/border tokens (fallbacks) */
+:root {
+  --doubtful-bg:     rgba(230, 81, 0, 0.06);
+  --doubtful-border: rgba(230, 81, 0, 0.2);
+  --non-halal-bg:    rgba(239, 68, 68, 0.08);
+  --halal-bg:        rgba(34, 197, 94, 0.08);
+}
+.portfolio-layout-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 24px;
+  align-items: start;
+}
+
+.holding-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 22px;
+}
+
+.holding-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 22px 10px;
+}
+
+@media (max-width: 900px) {
+  .portfolio-layout-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .holding-header {
+    display: none; /* Hide headers on small screens */
+  }
+  
+  .holding-card {
+    flex-wrap: wrap;
+    padding: 16px;
+    gap: 12px;
+  }
+  
+  .holding-card > div:first-child {
+    margin-right: 12px;
+  }
+  
+  .holding-card > div:nth-child(2) {
+    flex: 1 1 50% !important; /* Title taking full available space */
+  }
+  
+  .holding-card > div:nth-child(n+3) {
+    flex: 1 1 calc(50% - 12px) !important;
+    text-align: left !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  .holding-card > div:nth-child(n+3) > div {
+    justify-content: flex-start !important;
+  }
+  
+  .holding-card .sparkline-container {
+    display: none; /* Hide sparkline on very small screens to save space */
+  }
+}
+
+
+/* ===================================================
+   SCROLLING STOCK ANIMATIONS
+   =================================================== */
+.custom-scroll-container {
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 720px;
+  padding-right: 12px;
+  padding-bottom: 24px;
+}
+
+.custom-scroll-container::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scroll-container::-webkit-scrollbar-track {
+  background: var(--bg-section);
+  border-radius: 10px;
+}
+.custom-scroll-container::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 10px;
+}
+.custom-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: var(--gold);
+}
+
+.roll-in-anim {
+  animation: rollInFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+  transform: translateY(30px) scale(0.95);
+}
+
+@keyframes rollInFade {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

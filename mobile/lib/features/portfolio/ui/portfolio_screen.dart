@@ -127,6 +127,11 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
                     ),
                   ),
                 ),
+      floatingActionButton: _isGuest ? null : FloatingActionButton(
+        onPressed: _showAddHoldingSheet,
+        backgroundColor: textDark,
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
     );
   }
 
@@ -307,15 +312,17 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
     double returnPct = (holding['return_percentage'] as num).toDouble();
     double val = (holding['total_value'] as num).toDouble();
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: isHalal ? divider : nonHalalColor.withOpacity(0.3)),
-      ),
-      child: Row(
+    return GestureDetector(
+      onTap: () => _showEditHoldingSheet(holding),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: isHalal ? divider : nonHalalColor.withOpacity(0.3)),
+        ),
+        child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // Left: Symbol and Name
@@ -374,6 +381,183 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  void _showAddHoldingSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (context) => DefaultTabController(
+        length: 2,
+        child: Container(
+          height: MediaQuery.of(context).size.height * 0.7,
+          padding: const EdgeInsets.only(top: 24),
+          child: Column(
+            children: [
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Add Assets', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: textDark)),
+                    CloseButton(),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              const TabBar(
+                labelColor: textDark,
+                unselectedLabelColor: textMuted,
+                indicatorColor: primaryGold,
+                tabs: [
+                  Tab(text: 'Link Brokerage'),
+                  Tab(text: 'Manual Entry'),
+                ],
+              ),
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    // Link Brokerage
+                    Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.account_balance_rounded, size: 64, color: primaryGold),
+                          const SizedBox(height: 24),
+                          const Text('Connect your NGX Broker', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: textDark)),
+                          const SizedBox(height: 12),
+                          const Text('Securely sync your holdings directly from your broker. Currently supporting Stanbic IBTC, Meristem, and ARM.', textAlign: TextAlign.center, style: TextStyle(color: textMuted)),
+                          const SizedBox(height: 32),
+                          ElevatedButton(
+                            onPressed: () {},
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: textDark, 
+                              foregroundColor: Colors.white, 
+                              minimumSize: const Size(double.infinity, 50),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                            child: const Text('Connect Broker'),
+                          )
+                        ],
+                      ),
+                    ),
+                    // Manual Entry
+                    Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        children: [
+                          const TextField(decoration: InputDecoration(labelText: 'Symbol', border: OutlineInputBorder())),
+                          const SizedBox(height: 16),
+                          const TextField(decoration: InputDecoration(labelText: 'Quantity', border: OutlineInputBorder())),
+                          const SizedBox(height: 16),
+                          const TextField(decoration: InputDecoration(labelText: 'Average Price', border: OutlineInputBorder())),
+                          const Spacer(),
+                          ElevatedButton(
+                            onPressed: () {},
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: textDark, 
+                              foregroundColor: Colors.white, 
+                              minimumSize: const Size(double.infinity, 50),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                            child: const Text('Add Holding'),
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showEditHoldingSheet(dynamic holding) {
+    final qtyController = TextEditingController(text: holding['shares'].toString());
+    final priceController = TextEditingController(text: holding['average_buy_price'].toString());
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, left: 24, right: 24, top: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Edit ${holding['symbol']}', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: textDark)),
+                IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
+              ],
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: qtyController,
+              decoration: const InputDecoration(labelText: 'Quantity', border: OutlineInputBorder()),
+              keyboardType: TextInputType.number,
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: priceController,
+              decoration: const InputDecoration(labelText: 'Average Buy Price', border: OutlineInputBorder()),
+              keyboardType: TextInputType.number,
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () async {
+                      await ApiService().delete('portfolio/${holding['id']}');
+                      if (mounted) Navigator.pop(context);
+                      _fetchPortfolio();
+                    },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.red,
+                      side: const BorderSide(color: Colors.red),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      minimumSize: const Size(0, 50),
+                    ),
+                    child: const Text('Delete'),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      await ApiService().put('portfolio/${holding['id']}', {
+                        'shares': double.parse(qtyController.text),
+                        'average_buy_price': double.parse(priceController.text),
+                      });
+                      if (mounted) Navigator.pop(context);
+                      _fetchPortfolio();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: textDark, 
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      minimumSize: const Size(0, 50),
+                    ),
+                    child: const Text('Save'),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 32),
+          ],
+        ),
       ),
     );
   }

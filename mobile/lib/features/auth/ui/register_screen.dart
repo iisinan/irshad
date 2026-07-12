@@ -62,6 +62,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
+  void _registerWithGoogle() async {
+    setState(() => _isLoading = true);
+    try {
+      final user = await _authRepository.signInWithGoogleFlow();
+      if (user != null) {
+        if (mounted) {
+          Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
+          Navigator.of(context, rootNavigator: true).pushReplacementNamed('/main');
+        }
+      }
+    } catch (e) {
+      _showError(e.toString());
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -164,6 +181,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: _isLoading 
                     ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) 
                     : const Text('Create Account', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                ),
+              ),
+              
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  const Expanded(child: Divider(color: divider)),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: Text('or sign up with', style: TextStyle(color: textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
+                  ),
+                  const Expanded(child: Divider(color: divider)),
+                ],
+              ),
+              const SizedBox(height: 24),
+              
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: OutlinedButton(
+                  onPressed: _isLoading ? null : _registerWithGoogle,
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: divider, width: 1.5),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  ),
+                  child: const Text('Sign up with Google', style: TextStyle(color: textDark, fontWeight: FontWeight.w700, fontSize: 16)),
                 ),
               ),
               

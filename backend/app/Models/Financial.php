@@ -22,8 +22,11 @@ class Financial extends Model
 
     public function getInterestIncomeRatioAttribute()
     {
-        $revenue = $this->total_revenue ?: 1;
-        return round(($this->interest_income / $revenue) * 100, 2);
+        $revenue = (float) $this->total_revenue;
+        if ($revenue == 0) {
+            return 0;
+        }
+        return round(((float) $this->interest_income / $revenue) * 100, 2);
     }
 
     public function getNonCompliantIncomeRatioAttribute()

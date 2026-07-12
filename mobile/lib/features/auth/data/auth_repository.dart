@@ -3,11 +3,13 @@ import '../../../core/api/api_service.dart';
 import '../../../core/notifications/notification_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'dart:convert';
 
 class AuthRepository {
   final ApiService _apiService = ApiService();
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
 
   Future<Map<String, dynamic>?> register(String name, String email, String password, String passwordConfirmation, {String? location}) async {
     try {
@@ -50,13 +52,48 @@ class AuthRepository {
     return null;
   }
 
+  Future<Map<String, dynamic>?> loginWithGoogle(String idToken) async {
+    try {
+      final response = await _apiService.post('auth/google', {
+        'credential': idToken,
+      });
+
+      if (response.statusCode == 200) {
+        final data = response.data['data'];
+        await _storage.write(key: 'access_token', value: data['access_token']);
+        _registerFCMToken();
+        return data['user'];
+      }
+    } on DioException catch (e) {
+      throw e.response?.data['message'] ?? 'Google login failed';
+    }
+    return null;
+  }
+
+  Future<Map<String, dynamic>?> signInWithGoogleFlow() async {
+    try {
+      final GoogleSignInAccount? account = await _googleSignIn.signIn();
+      if (account == null) return null; // user canceled
+      
+      final GoogleSignInAuthentication auth = await account.authentication;
+      final String? idToken = auth.idToken;
+      
+      if (idToken == null) throw 'Missing Google ID Token';
+      
+      return await loginWithGoogle(idToken);
+    } catch (e) {
+      throw 'Google Sign In failed: $e';
+    }
+  }
+
   Future<void> logout() async {
     try {
+      await _googleSignIn.signOut();
       await _apiService.post('logout', {});
     } catch (e) {
       // In case of network error, still clear local token
     } finally {
-      await _storage.delete(key: 'access_token');
+      await _storage.deleteAll();
     }
   }
 
@@ -66,7 +103,7 @@ class AuthRepository {
     } catch (e) {
       // Ignore network errors, proceed with local logout
     } finally {
-      await _storage.delete(key: 'access_token');
+      await _storage.deleteAll();
     }
   }
 

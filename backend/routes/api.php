@@ -24,10 +24,13 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
     // ── Public Auth ──────────────────────────────────────────────────────
-    Route::post('/register', [AuthController::class, 'register']);
-    Route::post('/login',    [AuthController::class, 'login']);
-    Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink']);
-    Route::post('/reset-password', [PasswordResetController::class, 'reset']);
+    Route::middleware('throttle:6,1')->group(function () {
+        Route::post('/register', [AuthController::class, 'register']);
+        Route::post('/login',    [AuthController::class, 'login']);
+        Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink']);
+        Route::post('/reset-password', [PasswordResetController::class, 'reset']);
+    });
+    Route::post('/auth/google', [AuthController::class, 'googleLogin']);
 
     // ── Public Data (no auth required) ───────────────────────────────────
     Route::get('/stocks',                         [StockController::class, 'index']);
@@ -71,6 +74,11 @@ Route::prefix('v1')->group(function () {
         Route::post('/portfolio/trade', [TradeController::class, 'executeTrade']);
         Route::post('/portfolio',              [PortfolioController::class, 'store']);
         Route::delete('/portfolio/{id}',       [PortfolioController::class, 'destroy']);
+
+        // Watchlist
+        Route::get('/watchlist',               [\App\Http\Controllers\WatchlistController::class, 'index']);
+        Route::post('/watchlist',              [\App\Http\Controllers\WatchlistController::class, 'store']);
+        Route::delete('/watchlist/{symbol}',   [\App\Http\Controllers\WatchlistController::class, 'destroy']);
 
         // Favorites (CRUD)
         Route::get('/favorites',               [FavoriteController::class, 'index']);
