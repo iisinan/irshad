@@ -110,7 +110,7 @@ export default function WatchlistTab() {
   // Hydrate from cache for instant render
   const [allStocks, setAllStocks] = useState(() => {
     try {
-      const cached = localStorage.getItem('irshad_stocks_cache_v7');
+      const cached = localStorage.getItem('irshad_stocks_cache_v9');
       if (cached) {
         const { data, expiry } = JSON.parse(cached);
         if (Date.now() < expiry) return data?.data || [];

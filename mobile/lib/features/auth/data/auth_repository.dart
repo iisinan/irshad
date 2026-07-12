@@ -112,14 +112,12 @@ class AuthRepository {
       final response = await _apiService.get('profile');
       if (response.statusCode == 200) {
         final data = response.data['data'];
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('cached_profile', jsonEncode(data));
+        await _storage.write(key: 'cached_profile', value: jsonEncode(data));
         return data;
       }
     } on DioException catch (e) {
       // Return cached data if offline
-      final prefs = await SharedPreferences.getInstance();
-      final cached = prefs.getString('cached_profile');
+      final cached = await _storage.read(key: 'cached_profile');
       if (cached != null) {
         return jsonDecode(cached);
       }

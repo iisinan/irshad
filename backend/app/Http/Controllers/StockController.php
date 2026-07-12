@@ -28,8 +28,8 @@ class StockController extends Controller
      */
     public function index(): JsonResponse
     {
-        $stocks = \Illuminate\Support\Facades\Cache::rememberForever('stocks.index_v3', function () {
-            return Company::with(['status', 'dailyPrices' => fn($q) => $q->latest('date')->limit(2)])->get();
+        $stocks = Cache::rememberForever('stocks.index_v3', function () {
+            return Company::with(['status', 'dailyPrices' => fn($q) => $q->latest('date')])->get();
         });
         
         return $this->success($stocks);
@@ -40,8 +40,8 @@ class StockController extends Controller
      */
     public function show(string $symbol): JsonResponse
     {
-        $stock = \Illuminate\Support\Facades\Cache::rememberForever("stocks.show.{$symbol}", function () use ($symbol) {
-            return Company::with(['status', 'financials' => fn($q) => $q->latest(), 'dailyPrices' => fn($q) => $q->latest('date')->limit(30)])->where('symbol', $symbol)->firstOrFail();
+        $stock = Cache::rememberForever("stocks.show.{$symbol}", function () use ($symbol) {
+            return Company::with(['status', 'financials' => fn($q) => $q->latest(), 'dailyPrices' => fn($q) => $q->latest('date')])->where('symbol', $symbol)->firstOrFail();
         });
 
         return $this->success($stock);

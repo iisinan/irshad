@@ -91,15 +91,7 @@ class NgxService
             if ($response['interest_income'] == 0) $response['interest_income'] = $financials?->interest_income ?? 0;
         }
 
-        // Consistent Pseudo-Random Fallback if STILL 0
-        if ($response['price'] == 0) {
-            $hash = crc32($symbol);
-            $basePrice = 10 + ($hash % 200);
-            $change = (($hash % 100) - 50) / 10;
-            
-            $response['price'] = round($basePrice + $change, 2);
-            $response['prev_price'] = $basePrice;
-        }
+
 
         return $response;
     }

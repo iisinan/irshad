@@ -118,17 +118,8 @@ function StatCard({icon:Icon,label,value,sub,primary,badge}) {
           {badge&&<span style={{fontSize:'0.68rem',fontWeight:700,padding:'3px 9px',borderRadius:'20px',background:'rgba(255,255,255,0.22)',color:'white'}}>{badge}</span>}
         </div>
         <div style={{fontSize:'2.3rem',fontWeight:900,letterSpacing:'-1.5px',lineHeight:1,marginBottom:'10px'}}>{value}</div>
-        {sub&&<div style={{fontSize:'0.83rem',fontWeight:600,color:gradient?'rgba(255,255,255,0.8)':'var(--text-muted)',display:'flex',alignItems:'center',gap:'6px'}}>{sub}</div>}
+        {sub&&<div style={{fontSize:'0.83rem',fontWeight:600,color:primary?'rgba(255,255,255,0.8)':'var(--text-muted)',display:'flex',alignItems:'center',gap:'6px'}}>{sub}</div>}
       </div>
-      {gradient&&(
-        <div style={{position:'absolute',bottom:0,left:0,right:0,height:'55px',opacity:0.22,zIndex:0,pointerEvents:'none'}}>
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={[{v:40},{v:45},{v:42},{v:55},{v:50},{v:65},{v:70}]}>
-              <Area type="monotone" dataKey="v" stroke="none" fill="white"/>
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      )}
     </div>
   );
 }
@@ -297,7 +288,7 @@ export default function Dashboard() {
   const navigate=useNavigate();
   const [data,setData]=useState(()=>{
     try {
-      const cached = localStorage.getItem('irshad_portfolio_cache_v7');
+      const cached = localStorage.getItem('irshad_portfolio_cache_v9');
       if (cached) return JSON.parse(cached)?.data || {summary:{},holdings:[]};
     } catch {}
     return {summary:{},holdings:[]};

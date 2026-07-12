@@ -67,7 +67,7 @@ export default function MarketTab() {
   // Hydrate from cache for instant render
   const [stocks, setStocks] = useState(() => {
     try {
-      const cached = localStorage.getItem('irshad_stocks_cache_v7');
+      const cached = localStorage.getItem('irshad_stocks_cache_v9');
       if (cached) {
         const { data, expiry } = JSON.parse(cached);
         if (Date.now() < expiry) return data?.data || [];

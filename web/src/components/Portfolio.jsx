@@ -134,7 +134,7 @@ export default function Portfolio() {
   // Try to hydrate from localStorage cache for instant render
   const [data, setData] = useState(() => {
     try {
-      const cached = localStorage.getItem('irshad_portfolio_cache_v7');
+      const cached = localStorage.getItem('irshad_portfolio_cache_v9');
       if (cached) return JSON.parse(cached)?.data || null;
     } catch {}
     return null;

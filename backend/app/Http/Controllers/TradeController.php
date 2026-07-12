@@ -96,7 +96,7 @@ class TradeController extends Controller
 
                 // 7. Lock the holding if it exists, or create new
                 $holding = Holding::where('user_id', $user->id)
-                    ->where('company_id', $company->id)
+                    ->where('symbol', $company->symbol)
                     ->lockForUpdate()
                     ->first();
 
@@ -111,7 +111,7 @@ class TradeController extends Controller
                 } else {
                     $holding = new Holding([
                         'user_id' => $user->id,
-                        'company_id' => $company->id,
+                        'symbol' => $company->symbol,
                         'shares' => $request->shares,
                         'average_buy_price' => $latestPrice,
                     ]);
