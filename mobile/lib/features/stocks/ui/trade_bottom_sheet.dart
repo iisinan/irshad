@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/api/api_service.dart';
 
+import 'package:irshad_mobile/core/theme/app_theme.dart';
 class TradeBottomSheet extends StatefulWidget {
   final Map<String, dynamic> stock;
 
@@ -60,7 +61,7 @@ class _TradeBottomSheetState extends State<TradeBottomSheet> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Successfully purchased $shares shares of ${widget.stock['symbol']}!'),
-            backgroundColor: const Color(0xFF2E7D32),
+            backgroundColor: AppTheme.halal,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -98,7 +99,7 @@ class _TradeBottomSheetState extends State<TradeBottomSheet> {
                 children: [
                   Text(
                     'Buy ${widget.stock['symbol']}',
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Color(0xFF1A1208), letterSpacing: -0.5),
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close_rounded, color: Colors.grey),
@@ -109,7 +110,7 @@ class _TradeBottomSheetState extends State<TradeBottomSheet> {
               const SizedBox(height: 8),
               Text(
                 'Current Price: ₦ ${_currentPrice.toStringAsFixed(2)}',
-                style: const TextStyle(color: Color(0xFF9A8C70), fontSize: 16),
+                style: const TextStyle(color: AppTheme.textMuted, fontSize: 16),
               ),
               const SizedBox(height: 24),
               TextField(
@@ -127,10 +128,10 @@ class _TradeBottomSheetState extends State<TradeBottomSheet> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Estimated Cost', style: TextStyle(fontSize: 16, color: Color(0xFF9A8C70))),
+                  const Text('Estimated Cost', style: TextStyle(fontSize: 16, color: AppTheme.textMuted)),
                   Text(
                     '₦ ${_totalCost.toStringAsFixed(2)}',
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFF1A1208)),
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppTheme.textDark),
                   ),
                 ],
               ),
@@ -141,7 +142,7 @@ class _TradeBottomSheetState extends State<TradeBottomSheet> {
                 child: ElevatedButton(
                   onPressed: _isLoading || _totalCost <= 0 ? null : _executeTrade,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2E7D32),
+                    backgroundColor: AppTheme.halal,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),

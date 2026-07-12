@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:irshad_mobile/core/theme/app_theme.dart';
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -11,12 +12,7 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
-
-  static const Color primaryGold = Color(0xFFC9A84C);
-  static const Color textDark = Color(0xFF1A1208);
-  static const Color textMuted = Color(0xFF9A8C70);
-
-  final List<Map<String, String>> _onboardingData = [
+final List<Map<String, String>> _onboardingData = [
     {
       'title': 'Stock Screening',
       'subtitle': 'We analyze hundreds of companies. Easily spot fully compliant, questionable, and haram investments.',
@@ -58,7 +54,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   await prefs.setBool('hasSeenOnboarding', true);
                   if (mounted) Navigator.pushReplacementNamed(context, '/main');
                 },
-                child: const Text('Skip', style: TextStyle(color: textMuted)),
+                child: const Text('Skip', style: TextStyle(color: AppTheme.textMuted)),
               ),
             ),
             Expanded(
@@ -93,10 +89,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: primaryGold.withOpacity(0.05),
+              color: AppTheme.primary.withOpacity(0.05),
               shape: BoxShape.circle,
             ),
-            child: Icon(iconData, size: 80, color: primaryGold),
+            child: Icon(iconData, size: 80, color: AppTheme.primary),
           ),
           const SizedBox(height: 60),
           Text(
@@ -104,7 +100,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             style: const TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w900,
-              color: textDark,
+              color: AppTheme.textDark,
               letterSpacing: -0.5,
             ),
             textAlign: TextAlign.center,
@@ -114,7 +110,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             data['subtitle']!,
             style: const TextStyle(
               fontSize: 16,
-              color: textMuted,
+              color: AppTheme.textMuted,
               height: 1.5,
             ),
             textAlign: TextAlign.center,
@@ -139,7 +135,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 width: _currentPage == index ? 24 : 8,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: _currentPage == index ? primaryGold : Colors.grey[300],
+                  color: _currentPage == index ? AppTheme.primary : Colors.grey[300],
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -164,7 +160,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: textDark,
+                backgroundColor: AppTheme.textDark,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 elevation: 0,

@@ -4,6 +4,7 @@ import '../stocks/ui/ngx_market_screen.dart';
 import 'package:provider/provider.dart';
 import '../../core/api/api_service.dart';
 import '../stocks/providers/stock_provider.dart';
+import 'package:irshad_mobile/core/theme/app_theme.dart';
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
 
@@ -18,15 +19,7 @@ class _ExploreScreenState extends State<ExploreScreen>
   String _selectedSort = 'Sort by market cap';
 
   // Theme
-  static const Color bgColor = Color(0xFFF5F0E8);
-  static const Color primaryGold = Color(0xFFC9A84C);
-  static const Color compliantGreen = Color(0xFF2E7D32);
-  static const Color questionableAmber = Color(0xFFD97706);
-  static const Color textDark = Color(0xFF1A1208);
-  static const Color textMuted = Color(0xFF9A8C70);
-  static const Color divider = Color(0xFFE8E2D9);
-
-  List<dynamic> _baskets = [];
+List<dynamic> _baskets = [];
   bool _isLoadingBaskets = true;
 
   @override
@@ -69,7 +62,7 @@ class _ExploreScreenState extends State<ExploreScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: AppTheme.bg,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,31 +85,8 @@ class _ExploreScreenState extends State<ExploreScreen>
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
-            icon: const Icon(Icons.settings_outlined, color: textDark, size: 26),
+            icon: const Icon(Icons.settings_outlined, color: AppTheme.textDark, size: 26),
             onPressed: () => Navigator.pushNamed(context, '/settings'),
-          ),
-          Row(
-            children: [
-
-              GestureDetector(
-                onTap: () => Navigator.pushNamed(context, '/upgrade'),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: textDark, width: 1.5),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Text(
-                    'Upgrade',
-                    style: TextStyle(
-                      color: textDark,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-              ),
-            ],
           ),
         ],
       ),
@@ -131,7 +101,7 @@ class _ExploreScreenState extends State<ExploreScreen>
         style: TextStyle(
           fontSize: 32,
           fontWeight: FontWeight.w900,
-          color: textDark,
+          color: AppTheme.textDark,
           letterSpacing: -0.5,
         ),
       ),
@@ -141,13 +111,13 @@ class _ExploreScreenState extends State<ExploreScreen>
   Widget _buildTabBar() {
     return Container(
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: divider, width: 1)),
+        border: Border(bottom: BorderSide(color: AppTheme.divider, width: 1)),
       ),
       child: TabBar(
         controller: _tabController,
-        labelColor: primaryGold,
-        unselectedLabelColor: textMuted,
-        indicatorColor: primaryGold,
+        labelColor: AppTheme.primary,
+        unselectedLabelColor: AppTheme.textMuted,
+        indicatorColor: AppTheme.primary,
         indicatorWeight: 2.5,
         labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
         unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15),
@@ -170,12 +140,12 @@ class _ExploreScreenState extends State<ExploreScreen>
           _buildDropdownChip('🇳🇬', _selectedRegion),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Text('·', style: TextStyle(color: textMuted, fontSize: 18)),
+            child: Text('·', style: TextStyle(color: AppTheme.textMuted, fontSize: 18)),
           ),
           Expanded(
             child: Text(
               _selectedSort,
-              style: TextStyle(color: textMuted, fontSize: 13, fontWeight: FontWeight.w500),
+              style: TextStyle(color: AppTheme.textMuted, fontSize: 13, fontWeight: FontWeight.w500),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -190,13 +160,13 @@ class _ExploreScreenState extends State<ExploreScreen>
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: divider),
+        border: Border.all(color: AppTheme.divider),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: textDark),
+          Icon(icon, size: 16, color: AppTheme.textDark),
           const SizedBox(width: 4),
-          Text(badge, style: TextStyle(color: textDark, fontWeight: FontWeight.w600, fontSize: 13)),
+          Text(badge, style: TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w600, fontSize: 13)),
         ],
       ),
     );
@@ -208,15 +178,15 @@ class _ExploreScreenState extends State<ExploreScreen>
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: divider),
+        border: Border.all(color: AppTheme.divider),
       ),
       child: Row(
         children: [
           Text(flag, style: const TextStyle(fontSize: 14)),
           const SizedBox(width: 6),
-          Text(label, style: TextStyle(color: textDark, fontWeight: FontWeight.w500, fontSize: 13)),
+          Text(label, style: TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w500, fontSize: 13)),
           const SizedBox(width: 4),
-          Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: textMuted),
+          Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: AppTheme.textMuted),
         ],
       ),
     );
@@ -237,7 +207,7 @@ class _ExploreScreenState extends State<ExploreScreen>
     return Consumer<StockProvider>(
       builder: (context, provider, child) {
         if (provider.isLoading && provider.ngxStocks.isEmpty) {
-          return const Center(child: CircularProgressIndicator(color: primaryGold));
+          return const Center(child: CircularProgressIndicator(color: AppTheme.primary));
         }
         if (provider.ngxStocks.isEmpty) {
           return Center(
@@ -249,7 +219,7 @@ class _ExploreScreenState extends State<ExploreScreen>
                 ElevatedButton(
                   onPressed: _fetchStocks,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryGold,
+                    backgroundColor: AppTheme.primary,
                     foregroundColor: Colors.white,
                   ),
                   child: const Text('Retry'),
@@ -260,12 +230,12 @@ class _ExploreScreenState extends State<ExploreScreen>
         }
         return RefreshIndicator(
           onRefresh: _fetchStocks,
-          color: primaryGold,
+          color: AppTheme.primary,
           backgroundColor: Colors.white,
           child: ListView.separated(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             itemCount: provider.ngxStocks.length,
-            separatorBuilder: (_, __) => const Divider(color: divider, height: 1),
+            separatorBuilder: (_, __) => const Divider(color: AppTheme.divider, height: 1),
             itemBuilder: (context, index) => _buildStockRow(provider.ngxStocks[index]),
           ),
         );
@@ -322,7 +292,7 @@ class _ExploreScreenState extends State<ExploreScreen>
                 width: 40, height: 40,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
-                  gradient: const LinearGradient(colors: [Color(0xFFFFD700), Color(0xFFD4AF37)]),
+                  gradient: LinearGradient(colors: [AppTheme.primaryHover, AppTheme.primary]),
                 ),
                 alignment: Alignment.center,
                 child: Text((company['symbol'] ?? 'S')[0], style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 16)),
@@ -337,7 +307,7 @@ class _ExploreScreenState extends State<ExploreScreen>
                       Text(
                         company['symbol'],
                         style: TextStyle(
-                          color: textDark,
+                          color: AppTheme.textDark,
                           fontWeight: FontWeight.w800,
                           fontSize: 16,
                         ),
@@ -345,13 +315,13 @@ class _ExploreScreenState extends State<ExploreScreen>
                       const SizedBox(width: 8),
                       _buildStatusBadge(statusStr, isCompliant),
                       const SizedBox(width: 6),
-                      Icon(Icons.flag_outlined, size: 14, color: textMuted),
+                      Icon(Icons.flag_outlined, size: 14, color: AppTheme.textMuted),
                     ],
                   ),
                   const SizedBox(height: 4),
                   Text(
                     company['name'],
-                    style: TextStyle(color: textMuted, fontSize: 13),
+                    style: TextStyle(color: AppTheme.textMuted, fontSize: 13),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -365,7 +335,7 @@ class _ExploreScreenState extends State<ExploreScreen>
                 Text(
                   priceStr,
                   style: TextStyle(
-                    color: textDark,
+                    color: AppTheme.textDark,
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
                   ),
@@ -374,7 +344,7 @@ class _ExploreScreenState extends State<ExploreScreen>
                 Text(
                   changeStr,
                   style: TextStyle(
-                    color: isPositive ? compliantGreen : Colors.red,
+                    color: isPositive ? AppTheme.halal : Colors.red,
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
                   ),
@@ -399,7 +369,7 @@ class _ExploreScreenState extends State<ExploreScreen>
       child: Text(
         status,
         style: TextStyle(
-          color: isCompliant ? compliantGreen : questionableAmber,
+          color: isCompliant ? AppTheme.halal : AppTheme.questionable,
           fontSize: 10,
           fontWeight: FontWeight.w700,
           letterSpacing: 0.3,
@@ -413,16 +383,11 @@ class _ExploreScreenState extends State<ExploreScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.lock_outline_rounded, size: 48, color: textMuted),
+          Icon(Icons.lock_outline_rounded, size: 48, color: AppTheme.textMuted),
           const SizedBox(height: 16),
           Text(
             '$label coming soon',
-            style: TextStyle(color: textMuted, fontSize: 16, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Upgrade to access all asset classes',
-            style: TextStyle(color: textMuted.withOpacity(0.6), fontSize: 13),
+            style: TextStyle(color: AppTheme.textMuted, fontSize: 16, fontWeight: FontWeight.w600),
           ),
         ],
       ),
@@ -431,13 +396,13 @@ class _ExploreScreenState extends State<ExploreScreen>
 
   Widget _buildBasketsTab() {
     if (_isLoadingBaskets) {
-      return const Center(child: CircularProgressIndicator(color: primaryGold));
+      return const Center(child: CircularProgressIndicator(color: AppTheme.primary));
     }
     if (_baskets.isEmpty) {
-      return const Center(child: Text('No curated baskets available.', style: TextStyle(color: textMuted)));
+      return const Center(child: Text('No curated baskets available.', style: TextStyle(color: AppTheme.textMuted)));
     }
     return RefreshIndicator(
-      color: primaryGold,
+      color: AppTheme.primary,
       onRefresh: _fetchBaskets,
       child: ListView.separated(
         padding: const EdgeInsets.all(16),
@@ -458,7 +423,7 @@ class _ExploreScreenState extends State<ExploreScreen>
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: divider),
+          border: Border.all(color: AppTheme.divider),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.03),
@@ -480,7 +445,7 @@ class _ExploreScreenState extends State<ExploreScreen>
                 errorBuilder: (_, __, ___) => Container(
                   height: 140,
                   color: Colors.grey.shade200,
-                  child: const Icon(Icons.image_not_supported, color: textMuted),
+                  child: const Icon(Icons.image_not_supported, color: AppTheme.textMuted),
                 ),
               ),
             Padding(
@@ -491,18 +456,18 @@ class _ExploreScreenState extends State<ExploreScreen>
                   if (basket['category'] != null) ...[
                     Text(
                       basket['category'].toString().toUpperCase(),
-                      style: const TextStyle(color: primaryGold, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1),
+                      style: const TextStyle(color: AppTheme.primary, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1),
                     ),
                     const SizedBox(height: 6),
                   ],
                   Text(
                     basket['name'] ?? 'Unnamed Basket',
-                    style: const TextStyle(fontWeight: FontWeight.w900, color: textDark, fontSize: 18),
+                    style: const TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, fontSize: 18),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     basket['description'] ?? '',
-                    style: const TextStyle(color: textMuted, fontSize: 13, height: 1.4),
+                    style: const TextStyle(color: AppTheme.textMuted, fontSize: 13, height: 1.4),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../core/providers/app_state_provider.dart';
 import '../data/auth_repository.dart';
 
+import 'package:irshad_mobile/core/theme/app_theme.dart';
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
 
@@ -22,13 +23,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   bool _isInit = true;
 
   // Theme Constants
-  static const Color bgColor = Color(0xFFF5F0E8);
-  static const Color primaryGold = Color(0xFFC9A84C);
-  static const Color textDark = Color(0xFF1A1208);
-  static const Color textMuted = Color(0xFF9A8C70);
-  static const Color divider = Color(0xFFE8E2D9);
-
-  @override
+@override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_isInit) {
@@ -80,7 +75,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Profile updated successfully!'),
-            backgroundColor: Color(0xFF1A1208),
+            backgroundColor: AppTheme.textDark,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -106,13 +101,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: AppTheme.bg,
       appBar: AppBar(
-        title: const Text('Edit Profile', style: TextStyle(fontWeight: FontWeight.w900, color: textDark, letterSpacing: -0.5)),
-        backgroundColor: bgColor,
+        title: const Text('Edit Profile', style: TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5)),
+        backgroundColor: AppTheme.bg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close_rounded, color: textDark, size: 24),
+          icon: const Icon(Icons.close_rounded, color: AppTheme.textDark, size: 24),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
@@ -123,7 +118,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               child: const Text(
                 'Save',
                 style: TextStyle(
-                  color: primaryGold,
+                  color: AppTheme.primary,
                   fontWeight: FontWeight.w800,
                   fontSize: 16,
                 ),
@@ -133,7 +128,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ],
       ),
       body: _isLoading && _nameController.text.isEmpty
-          ? const Center(child: CircularProgressIndicator(color: primaryGold))
+          ? const Center(child: CircularProgressIndicator(color: AppTheme.primary))
           : SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
               child: Column(
@@ -148,18 +143,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           decoration: BoxDecoration(
                             color: Colors.white,
                             shape: BoxShape.circle,
-                            border: Border.all(color: divider),
+                            border: Border.all(color: AppTheme.divider),
                           ),
                           child: CircleAvatar(
                             radius: 60,
-                            backgroundColor: bgColor,
-                            child: const Icon(Icons.person_rounded, size: 60, color: divider),
+                            backgroundColor: AppTheme.bg,
+                            child: const Icon(Icons.person_rounded, size: 60, color: AppTheme.divider),
                           ),
                         ),
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: primaryGold,
+                            color: AppTheme.primary,
                             shape: BoxShape.circle,
                             border: Border.all(color: Colors.white, width: 3),
                           ),
@@ -183,7 +178,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   const SizedBox(height: 4),
                   const Text(
                     'Update your password only if necessary.',
-                    style: TextStyle(color: textMuted, fontSize: 13, fontWeight: FontWeight.w500),
+                    style: TextStyle(color: AppTheme.textMuted, fontSize: 13, fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 20),
                   _buildTextField(_passwordController, 'New Password', Icons.lock_outline_rounded, obscureText: true),
@@ -197,7 +192,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _updateProfile,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: textDark,
+                        backgroundColor: AppTheme.textDark,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                         elevation: 0,
@@ -217,7 +212,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget _buildSectionLabel(String title) {
     return Text(
       title,
-      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: textMuted, letterSpacing: 1),
+      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppTheme.textMuted, letterSpacing: 1),
     );
   }
 
@@ -226,20 +221,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       controller: controller,
       obscureText: obscureText,
       keyboardType: keyboardType,
-      style: const TextStyle(color: textDark, fontWeight: FontWeight.w600),
+      style: const TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w600),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w400),
-        prefixIcon: Icon(icon, color: textMuted, size: 20),
+        prefixIcon: Icon(icon, color: AppTheme.textMuted, size: 20),
         filled: true,
         fillColor: Colors.white,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: divider, width: 1.5),
+          borderSide: const BorderSide(color: AppTheme.divider, width: 1.5),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: textDark, width: 1.5),
+          borderSide: const BorderSide(color: AppTheme.textDark, width: 1.5),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),

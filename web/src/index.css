@@ -5,45 +5,47 @@
    =================================================== */
 :root {
   /* Core Palette */
-  --bg:           #F5F0E8;       /* Cream */
+  --bg:           #F8FAFC;
   --bg-alt:       #FFFFFF;
-  --bg-section:   #FAF7F2;       /* Cream-mid */
+  --bg-section:   #F1F5F9;
 
-  --primary:      #C9A84C;       /* Gold */
-  --primary-50:   rgba(201,168,76,0.1);
-  --primary-100:  rgba(201,168,76,0.25);
-  --primary-200:  #E8C96A;       /* Gold Light */
-  --primary-light:#9A7A30;       /* Gold Dark */
+  --primary:      #0F766E;
+  --primary-hover:#115E59;
+  --primary-50:   rgba(15, 118, 110, 0.1);
+  --primary-100:  rgba(15, 118, 110, 0.25);
+  
+  --accent:       #D4AF37;
 
-  --gold:         #C9A84C;
-  --gold-grad:    linear-gradient(135deg, #E8C96A 0%, #C9A84C 45%, #9A7A30 100%);
+  --text-dark:    #1E293B;
+  --text-body:    #64748B;
+  --text-muted:   #94A3B8;
+  --text-light:   #CBD5E1;
 
-  --text-dark:    #1A1208;
-  --text-body:    #5A4A2A;       /* text-mid */
-  --text-muted:   #9A8C70;
-  --text-light:   #C0B5A1;
-
-  --border:       rgba(201,168,76,0.25);
-  --border-strong:rgba(201,168,76,0.4);
+  --border:       #E2E8F0;
+  --border-strong:#CBD5E1;
 
   /* Status */
-  --halal:        #2E7D32;
-  --halal-bg:     rgba(76, 175, 80, 0.1);
-  --halal-border: rgba(76, 175, 80, 0.3);
+  --halal:        #16A34A;
+  --halal-bg:     rgba(22, 163, 74, 0.1);
+  --halal-border: rgba(22, 163, 74, 0.3);
 
-  --non-halal:    #C62828;
-  --non-halal-bg: rgba(244, 67, 54, 0.1);
-  --non-halal-border: rgba(244, 67, 54, 0.3);
+  --non-halal:    #DC2626;
+  --non-halal-bg: rgba(220, 38, 38, 0.1);
+  --non-halal-border: rgba(220, 38, 38, 0.3);
 
-  --doubtful:     #E65100;
-  --doubtful-bg:  rgba(255, 152, 0, 0.1);
-  --doubtful-border: rgba(255, 152, 0, 0.3);
+  --doubtful:     #F59E0B;
+  --doubtful-bg:  rgba(245, 158, 11, 0.1);
+  --doubtful-border: rgba(245, 158, 11, 0.3);
+
+  --review:       #2563EB;
+  --review-bg:    rgba(37, 99, 235, 0.1);
+  --review-border:rgba(37, 99, 235, 0.3);
 
   /* Shadows */
   --shadow-sm:  0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
-  --shadow-md:  0 4px 16px rgba(100,70,0,0.06), 0 2px 6px rgba(100,70,0,0.03);
-  --shadow-lg:  0 12px 40px rgba(100,70,0,0.08), 0 4px 12px rgba(100,70,0,0.04);
-  --shadow-green: 0 4px 20px rgba(201,168,76,0.3); /* Actually Gold shadow now */
+  --shadow-md:  0 4px 16px rgba(15, 118, 110, 0.04), 0 2px 6px rgba(15, 118, 110, 0.02);
+  --shadow-lg:  0 12px 40px rgba(15, 118, 110, 0.06), 0 4px 12px rgba(15, 118, 110, 0.03);
+  --shadow-green: 0 4px 20px rgba(15, 118, 110, 0.2);
 
   --radius-sm:  4px;
   --radius-md:  8px;
@@ -52,8 +54,8 @@
 
   --transition: all 0.35s cubic-bezier(0.16,1,0.3,1);
   
-  --serif:      'Cormorant Garamond', Georgia, serif;
   --sans:       'Inter', sans-serif;
+  --serif:      'Inter', sans-serif; /* Fallback to make sure headings use Inter */
 }
 
 /* ===================================================
@@ -111,7 +113,7 @@ button { font-family: inherit; cursor: pointer; }
 .nav-logo-icon {
   width: 38px;
   height: 38px;
-  background: var(--gold-grad);
+  background: var(--primary);
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -157,8 +159,8 @@ button { font-family: inherit; cursor: pointer; }
 .ticker-wrapper {
   overflow: hidden;
   white-space: nowrap;
-  background: #1A1208;
-  border-bottom: 1px solid var(--gold);
+  background: var(--text-dark);
+  border-bottom: 1px solid var(--primary);
   height: 32px;
   display: flex;
   align-items: center;
@@ -192,13 +194,13 @@ button { font-family: inherit; cursor: pointer; }
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: var(--gold-grad);
-  color: #1A1208;
+  background: var(--primary);
+  color: white;
   border: none;
   padding: 11px 24px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   font-family: inherit;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.95rem;
   cursor: pointer;
   transition: var(--transition);
@@ -207,9 +209,9 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 .btn-primary:hover {
-  background: var(--primary-200);
-  box-shadow: 0 8px 28px rgba(201,168,76,0.45);
-  transform: translateY(-2px);
+  background: var(--primary-hover);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
 }
 
 .btn-secondary {
@@ -217,10 +219,10 @@ button { font-family: inherit; cursor: pointer; }
   align-items: center;
   gap: 8px;
   background: white;
-  color: var(--text-dark);
-  border: 1.5px solid var(--border-strong);
+  color: var(--primary);
+  border: 1px solid var(--primary);
   padding: 11px 24px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   font-family: inherit;
   font-weight: 600;
   font-size: 0.95rem;
@@ -231,8 +233,8 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 .btn-secondary:hover {
-  border-color: var(--text-dark);
-  background: white;
+  border-color: var(--primary-hover);
+  background: var(--primary-50);
   transform: translateY(-1px);
   box-shadow: var(--shadow-sm);
 }
@@ -244,15 +246,18 @@ button { font-family: inherit; cursor: pointer; }
   background: transparent;
   color: var(--primary);
   border: none;
-  padding: 8px 0;
+  padding: 8px 16px;
+  border-radius: var(--radius-lg);
   font-family: inherit;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.95rem;
   cursor: pointer;
   transition: var(--transition);
   text-decoration: none;
 }
-.btn-ghost:hover { gap: 10px; }
+.btn-ghost:hover { 
+  background: var(--primary-50);
+}
 
 /* ===================================================
    CARDS
@@ -462,7 +467,7 @@ button { font-family: inherit; cursor: pointer; }
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 3px;
-  background: var(--gold-grad);
+  background: var(--primary);
   opacity: 0;
   transition: var(--transition);
 }
@@ -514,7 +519,7 @@ button { font-family: inherit; cursor: pointer; }
 
 .news-card:hover {
   box-shadow: 0 12px 32px rgba(201, 168, 76, 0.08);
-  border-color: var(--gold-200);
+  border-color: var(--primary-100);
   transform: translateY(-4px);
 }
 
@@ -550,8 +555,8 @@ button { font-family: inherit; cursor: pointer; }
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: var(--gold);
-  background: var(--gold-50);
+  color: var(--accent);
+  background: var(--primary-50);
   padding: 4px 12px;
   border-radius: 20px;
   margin-bottom: 12px;
@@ -607,14 +612,14 @@ button { font-family: inherit; cursor: pointer; }
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, var(--gold-200), transparent);
+  background: linear-gradient(90deg, transparent, var(--primary-100), transparent);
   opacity: 0;
   transition: opacity 0.3s;
 }
 
 .stock-card:hover {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
-  border-color: var(--gold-300);
+  border-color: var(--border-strong);
   transform: translateY(-2px);
 }
 
@@ -702,9 +707,9 @@ button { font-family: inherit; cursor: pointer; }
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: var(--gold-50);
-  color: var(--gold);
-  border: 1px solid var(--gold-100);
+  background: var(--primary-50);
+  color: var(--accent);
+  border: 1px solid var(--primary-100);
   padding: 5px 14px;
   border-radius: 40px;
   font-size: 0.78rem;
@@ -1208,7 +1213,7 @@ button { font-family: inherit; cursor: pointer; }
   width: 100%;
   overflow: hidden;
   background: #1A1208;
-  border-bottom: 1px solid var(--gold-200);
+  border-bottom: 1px solid var(--primary-100);
   box-sizing: border-box;
   display: flex;
   align-items: center;
@@ -1227,11 +1232,11 @@ button { font-family: inherit; cursor: pointer; }
 }
 .ticker-wrap::before {
   left: 0;
-  background: linear-gradient(to right, #1A1208, transparent);
+  background: linear-gradient(to right, var(--bg-alt), transparent);
 }
 .ticker-wrap::after {
   right: 0;
-  background: linear-gradient(to left, #1A1208, transparent);
+  background: linear-gradient(to left, var(--bg-alt), transparent);
 }
 .ticker {
   display: inline-flex;
@@ -1248,7 +1253,7 @@ button { font-family: inherit; cursor: pointer; }
   padding: 0 20px;
   font-size: 0.85rem;
   font-weight: 700;
-  color: var(--gold-50);
+  color: var(--primary-50);
   gap: 8px;
   transition: opacity 0.2s;
   cursor: pointer;
@@ -1262,14 +1267,14 @@ button { font-family: inherit; cursor: pointer; }
   letter-spacing: 0.5px;
 }
 .ticker-item-price {
-  color: var(--gold-100);
+  color: var(--primary-100);
   font-weight: 600;
 }
 .ticker-separator {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: var(--gold-300);
+  background: var(--border-strong);
   margin: 0 8px;
   opacity: 0.4;
 }
@@ -1508,7 +1513,7 @@ button { font-family: inherit; cursor: pointer; }
   border-radius: 10px;
 }
 .custom-scroll-container::-webkit-scrollbar-thumb:hover {
-  background: var(--gold);
+  background: var(--accent);
 }
 
 .roll-in-anim {

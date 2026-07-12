@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../stocks/providers/stock_provider.dart';
 
+import 'package:irshad_mobile/core/theme/app_theme.dart';
 class ZakatCalculatorScreen extends StatefulWidget {
   final bool isTab;
   const ZakatCalculatorScreen({super.key, this.isTab = false});
@@ -16,13 +17,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
   
   Map<String, dynamic>? _selectedStock;
   double _zakatOwed = 0.0;
-  
-  static const Color bgColor = Color(0xFFF5F0E8);
-  static const Color primaryGold = Color(0xFFC9A84C);
-  static const Color textDark = Color(0xFF1A1208);
-  static const Color textMuted = Color(0xFF9A8C70);
-
-  @override
+@override
   void initState() {
     super.initState();
     _sharesController.addListener(_calculateZakat);
@@ -59,13 +54,13 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
     final stocks = stockProvider.ngxStocks;
 
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: AppTheme.bg,
       appBar: widget.isTab ? null : AppBar(
-        title: const Text('Zakat Calculator', style: TextStyle(fontWeight: FontWeight.w900, color: textDark, letterSpacing: -0.5)),
-        backgroundColor: bgColor,
+        title: const Text('Zakat Calculator', style: TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5)),
+        backgroundColor: AppTheme.bg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: textDark, size: 20),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppTheme.textDark, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -76,25 +71,25 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
           children: [
             const Text(
               'Calculate Your Obligations',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: textDark),
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppTheme.textDark),
             ),
             const SizedBox(height: 8),
             const Text(
               'Select a stock to automatically apply its specific purification factor based on our latest algorithmic screening.',
-              style: TextStyle(color: textMuted, fontSize: 14, height: 1.5),
+              style: TextStyle(color: AppTheme.textMuted, fontSize: 14, height: 1.5),
             ),
             const SizedBox(height: 32),
             
             // Stock Selection
-            const Text('SELECT STOCK', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: textMuted, letterSpacing: 1.2)),
+            const Text('SELECT STOCK', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppTheme.textMuted, letterSpacing: 1.2)),
             const SizedBox(height: 8),
             DropdownButtonFormField<Map<String, dynamic>>(
               decoration: InputDecoration(
                 filled: true,
                 fillColor: Colors.white,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFE8E2D9))),
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFE8E2D9))),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppTheme.divider)),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppTheme.divider)),
               ),
               hint: const Text('Choose a company...'),
               value: _selectedStock,
@@ -120,7 +115,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
             const SizedBox(height: 24),
             
             // Shares Input
-            const Text('NUMBER OF SHARES', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: textMuted, letterSpacing: 1.2)),
+            const Text('NUMBER OF SHARES', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppTheme.textMuted, letterSpacing: 1.2)),
             const SizedBox(height: 8),
             TextField(
               controller: _sharesController,
@@ -129,17 +124,17 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                 filled: true,
                 fillColor: Colors.white,
                 hintText: 'e.g. 1000',
-                prefixIcon: const Icon(Icons.pie_chart_outline_rounded, color: textMuted),
+                prefixIcon: const Icon(Icons.pie_chart_outline_rounded, color: AppTheme.textMuted),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFE8E2D9))),
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFE8E2D9))),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppTheme.divider)),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppTheme.divider)),
               ),
             ),
             
             const SizedBox(height: 24),
             
             // Price Input
-            const Text('CURRENT PRICE (₦)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: textMuted, letterSpacing: 1.2)),
+            const Text('CURRENT PRICE (₦)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppTheme.textMuted, letterSpacing: 1.2)),
             const SizedBox(height: 8),
             TextField(
               controller: _priceController,
@@ -148,10 +143,10 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                 filled: true,
                 fillColor: Colors.white,
                 hintText: '0.00',
-                prefixIcon: const Icon(Icons.payments_outlined, color: textMuted),
+                prefixIcon: const Icon(Icons.payments_outlined, color: AppTheme.textMuted),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFE8E2D9))),
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFE8E2D9))),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppTheme.divider)),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppTheme.divider)),
               ),
             ),
             
@@ -161,10 +156,10 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: primaryGold,
+                color: AppTheme.primary,
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
-                  BoxShadow(color: primaryGold.withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 10)),
+                  BoxShadow(color: AppTheme.primary.withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 10)),
                 ],
               ),
               child: Column(

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'dart:convert';
 import '../providers/stock_provider.dart';
 
+import 'package:irshad_mobile/core/theme/app_theme.dart';
 class BasketDetailScreen extends StatefulWidget {
   final dynamic basket;
 
@@ -13,15 +14,6 @@ class BasketDetailScreen extends StatefulWidget {
 }
 
 class _BasketDetailScreenState extends State<BasketDetailScreen> {
-  // Theme Constants
-  static const Color bgColor = Color(0xFFF5F0E8);
-  static const Color primaryGold = Color(0xFFC9A84C);
-  static const Color textDark = Color(0xFF1A1208);
-  static const Color textMuted = Color(0xFF9A8C70);
-  static const Color divider = Color(0xFFE8E2D9);
-  static const Color compliantGreen = Color(0xFF2E7D32);
-  static const Color questionableAmber = Color(0xFFD97706);
-
   List<dynamic> _basketStocks = [];
   bool _isLoading = true;
 
@@ -63,7 +55,7 @@ class _BasketDetailScreenState extends State<BasketDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: AppTheme.bg,
       body: CustomScrollView(
         slivers: [
           _buildSliverAppBar(),
@@ -78,7 +70,7 @@ class _BasketDetailScreenState extends State<BasketDetailScreen> {
                     style: const TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.w900,
-                      color: textDark,
+                      color: AppTheme.textDark,
                       letterSpacing: -0.5,
                     ),
                   ),
@@ -86,7 +78,7 @@ class _BasketDetailScreenState extends State<BasketDetailScreen> {
                   Text(
                     widget.basket['description'] ?? '',
                     style: const TextStyle(
-                      color: textMuted,
+                      color: AppTheme.textMuted,
                       fontSize: 15,
                       height: 1.5,
                       fontWeight: FontWeight.w400,
@@ -98,7 +90,7 @@ class _BasketDetailScreenState extends State<BasketDetailScreen> {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
-                      color: textMuted,
+                      color: AppTheme.textMuted,
                       letterSpacing: 1,
                     ),
                   ),
@@ -109,11 +101,11 @@ class _BasketDetailScreenState extends State<BasketDetailScreen> {
           ),
           if (_isLoading)
             const SliverFillRemaining(
-              child: Center(child: CircularProgressIndicator(color: primaryGold)),
+              child: Center(child: CircularProgressIndicator(color: AppTheme.primary)),
             )
           else if (_basketStocks.isEmpty)
             const SliverFillRemaining(
-              child: Center(child: Text('No stocks found in this basket', style: TextStyle(color: textMuted))),
+              child: Center(child: Text('No stocks found in this basket', style: TextStyle(color: AppTheme.textMuted))),
             )
           else
             SliverList(
@@ -125,7 +117,7 @@ class _BasketDetailScreenState extends State<BasketDetailScreen> {
                       children: [
                         _buildStockRow(_basketStocks[index]),
                         if (index < _basketStocks.length - 1)
-                          const Divider(color: divider, height: 1),
+                          const Divider(color: AppTheme.divider, height: 1),
                       ],
                     ),
                   );
@@ -144,14 +136,14 @@ class _BasketDetailScreenState extends State<BasketDetailScreen> {
       expandedHeight: 200.0,
       floating: false,
       pinned: true,
-      backgroundColor: bgColor,
+      backgroundColor: AppTheme.bg,
       elevation: 0,
       leading: Padding(
         padding: const EdgeInsets.all(8.0),
         child: CircleAvatar(
           backgroundColor: Colors.white,
           child: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: textDark, size: 20),
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppTheme.textDark, size: 20),
             onPressed: () => Navigator.pop(context),
           ),
         ),
@@ -186,6 +178,41 @@ class _BasketDetailScreenState extends State<BasketDetailScreen> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Container(
+              width: 44,
+              height: 44,
+              margin: const EdgeInsets.only(right: 12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                gradient: company['logo_url'] != null
+                    ? null
+                    : const LinearGradient(
+                        colors: [AppTheme.primaryHover, AppTheme.primary],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                color: company['logo_url'] != null ? Colors.white : null,
+                border: company['logo_url'] != null
+                    ? Border.all(color: AppTheme.divider, width: 1)
+                    : null,
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(11),
+                child: company['logo_url'] != null
+                    ? Image.network(
+                        company['logo_url'],
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Center(child: Icon(Icons.show_chart, color: Colors.white, size: 24)),
+                      )
+                    : const Center(
+                        child: Icon(Icons.show_chart_rounded, color: Colors.white, size: 24),
+                      ),
+              ),
+            ),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,7 +222,7 @@ class _BasketDetailScreenState extends State<BasketDetailScreen> {
                       Text(
                         company['symbol'],
                         style: const TextStyle(
-                          color: textDark,
+                          color: AppTheme.textDark,
                           fontWeight: FontWeight.w800,
                           fontSize: 16,
                         ),
@@ -210,7 +237,7 @@ class _BasketDetailScreenState extends State<BasketDetailScreen> {
                         child: Text(
                           statusStr,
                           style: TextStyle(
-                            color: isCompliant ? compliantGreen : questionableAmber,
+                            color: isCompliant ? AppTheme.halal : AppTheme.questionable,
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 0.3,
@@ -222,7 +249,7 @@ class _BasketDetailScreenState extends State<BasketDetailScreen> {
                   const SizedBox(height: 4),
                   Text(
                     company['name'],
-                    style: const TextStyle(color: textMuted, fontSize: 13),
+                    style: const TextStyle(color: AppTheme.textMuted, fontSize: 13),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -235,7 +262,7 @@ class _BasketDetailScreenState extends State<BasketDetailScreen> {
                 Text(
                   priceStr,
                   style: const TextStyle(
-                    color: textDark,
+                    color: AppTheme.textDark,
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
                   ),
@@ -244,7 +271,7 @@ class _BasketDetailScreenState extends State<BasketDetailScreen> {
                 Text(
                   changeStr,
                   style: TextStyle(
-                    color: isPositive ? compliantGreen : Colors.red,
+                    color: isPositive ? AppTheme.halal : Colors.red,
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
                   ),

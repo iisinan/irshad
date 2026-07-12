@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/stock_provider.dart';
 
+import 'package:irshad_mobile/core/theme/app_theme.dart';
 class NgxMarketScreen extends StatefulWidget {
   const NgxMarketScreen({super.key});
 
@@ -11,13 +12,7 @@ class NgxMarketScreen extends StatefulWidget {
 
 class _NgxMarketScreenState extends State<NgxMarketScreen> {
   // Theme Constants
-  static const Color bgColor = Color(0xFFF5F0E8);
-  static const Color primaryGold = Color(0xFFC9A84C);
-  static const Color textDark = Color(0xFF1A1208);
-  static const Color textMuted = Color(0xFF9A8C70);
   static const Color cardBg = Colors.white;
-  static const Color divider = Color(0xFFE8E2D9);
-
   @override
   void initState() {
     super.initState();
@@ -68,15 +63,15 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: AppTheme.bg,
       appBar: AppBar(
-        title: const Text('Live Stock Market', style: TextStyle(fontWeight: FontWeight.w900, color: textDark, letterSpacing: -0.5)),
+        title: const Text('Live Stock Market', style: TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5)),
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: false,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: primaryGold),
+            icon: const Icon(Icons.refresh, color: AppTheme.primary),
             onPressed: _fetchNgxData,
           ),
         ],
@@ -84,7 +79,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
       body: Consumer<StockProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading && provider.ngxStocks.isEmpty) {
-            return const Center(child: CircularProgressIndicator(color: primaryGold));
+            return const Center(child: CircularProgressIndicator(color: AppTheme.primary));
           }
 
           if (provider.ngxStocks.isEmpty) {
@@ -99,7 +94,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
               _buildFilters(sectors),
               Expanded(
                 child: RefreshIndicator(
-                  color: primaryGold,
+                  color: AppTheme.primary,
                   onRefresh: _fetchNgxData,
                   child: filteredStocks.isEmpty
                     ? SingleChildScrollView(
@@ -107,7 +102,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
                         child: Container(
                           height: MediaQuery.of(context).size.height * 0.6,
                           alignment: Alignment.center,
-                          child: const Text('No stocks match the selected filters.', style: TextStyle(color: textMuted)),
+                          child: const Text('No stocks match the selected filters.', style: TextStyle(color: AppTheme.textMuted)),
                         ),
                       )
                     : _isGridView
@@ -152,8 +147,8 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
                 DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
                     value: _sortBy,
-                    icon: const Icon(Icons.keyboard_arrow_down_rounded, color: textMuted, size: 20),
-                    style: const TextStyle(fontWeight: FontWeight.w700, color: textDark, fontSize: 14),
+                    icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppTheme.textMuted, size: 20),
+                    style: const TextStyle(fontWeight: FontWeight.w700, color: AppTheme.textDark, fontSize: 14),
                     items: ['Symbol (A-Z)', 'Symbol (Z-A)', 'Price (High-Low)', 'Price (Low-High)']
                         .map((s) => DropdownMenuItem(value: s, child: Text(s)))
                         .toList(),
@@ -163,7 +158,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
                   ),
                 ),
                 IconButton(
-                  icon: Icon(_isGridView ? Icons.view_agenda_rounded : Icons.grid_view_rounded, color: textDark, size: 22),
+                  icon: Icon(_isGridView ? Icons.view_agenda_rounded : Icons.grid_view_rounded, color: AppTheme.textDark, size: 22),
                   onPressed: () => setState(() => _isGridView = !_isGridView),
                 )
               ],
@@ -177,12 +172,12 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
               children: sectors.map((s) => Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: ChoiceChip(
-                  label: Text(s, style: TextStyle(color: _selectedSector == s ? Colors.white : textDark, fontWeight: FontWeight.w700, fontSize: 13)),
+                  label: Text(s, style: TextStyle(color: _selectedSector == s ? Colors.white : AppTheme.textDark, fontWeight: FontWeight.w700, fontSize: 13)),
                   selected: _selectedSector == s,
-                  selectedColor: textDark,
-                  backgroundColor: bgColor,
+                  selectedColor: AppTheme.textDark,
+                  backgroundColor: AppTheme.bg,
                   showCheckmark: false,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: _selectedSector == s ? textDark : divider)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: _selectedSector == s ? AppTheme.textDark : AppTheme.divider)),
                   onSelected: (selected) {
                     if (selected) setState(() => _selectedSector = s);
                   },
@@ -204,7 +199,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
           const SizedBox(height: 16),
           const Text(
             'No market data available',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: textMuted),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppTheme.textMuted),
           ),
           const SizedBox(height: 8),
           const Text(
@@ -223,7 +218,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
     IconData statusIcon;
     switch (status) {
       case 'halal':
-        statusColor = const Color(0xFF2E7D32); // Green
+        statusColor = AppTheme.halal; // Green
         statusIcon = Icons.check_circle_rounded;
         break;
       case 'non-halal':
@@ -231,7 +226,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
         statusIcon = Icons.cancel_rounded;
         break;
       default:
-        statusColor = const Color(0xFFD97706); // Orange
+        statusColor = AppTheme.questionable; // Orange
         statusIcon = Icons.help_rounded;
     }
 
@@ -240,7 +235,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: divider),
+        border: Border.all(color: AppTheme.divider),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.02),
@@ -265,7 +260,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
               width: 44, height: 44,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                gradient: const LinearGradient(colors: [Color(0xFFFFD700), Color(0xFFD4AF37)]),
+                gradient: LinearGradient(colors: [AppTheme.primaryHover, AppTheme.primary]),
               ),
               alignment: Alignment.center,
               child: Text((stock['symbol'] ?? 'S')[0], style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 18)),
@@ -276,12 +271,12 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
             Expanded(
               child: Text(
                 stock['symbol'] ?? '',
-                style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: textDark),
+                style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: AppTheme.textDark),
               ),
             ),
             Text(
               '₦ ${(stock['latest_price'] ?? 0).toStringAsFixed(2)}',
-              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: textDark),
+              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: AppTheme.textDark),
             ),
           ],
         ),
@@ -291,7 +286,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
             const SizedBox(height: 6),
             Text(
               stock['name'] ?? '',
-              style: const TextStyle(color: textMuted, fontWeight: FontWeight.w500, fontSize: 13),
+              style: const TextStyle(color: AppTheme.textMuted, fontWeight: FontWeight.w500, fontSize: 13),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -324,7 +319,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
                   ),
                 ),
                 if (stock['sector'] != null) 
-                  Text(stock['sector'], style: const TextStyle(color: textMuted, fontSize: 11, fontWeight: FontWeight.w600)),
+                  Text(stock['sector'], style: const TextStyle(color: AppTheme.textMuted, fontSize: 11, fontWeight: FontWeight.w600)),
               ],
             ),
           ],
@@ -340,7 +335,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
     IconData statusIcon;
     switch (status) {
       case 'halal':
-        statusColor = const Color(0xFF2E7D32);
+        statusColor = AppTheme.halal;
         statusIcon = Icons.check_circle_rounded;
         break;
       case 'non-halal':
@@ -348,7 +343,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
         statusIcon = Icons.cancel_rounded;
         break;
       default:
-        statusColor = const Color(0xFFD97706);
+        statusColor = AppTheme.questionable;
         statusIcon = Icons.help_rounded;
     }
 
@@ -357,7 +352,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: divider),
+        border: Border.all(color: AppTheme.divider),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.02),
@@ -386,7 +381,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
                     width: 32, height: 32,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
-                      gradient: const LinearGradient(colors: [Color(0xFFFFD700), Color(0xFFD4AF37)]),
+                      gradient: LinearGradient(colors: [AppTheme.primaryHover, AppTheme.primary]),
                     ),
                     alignment: Alignment.center,
                     child: Text((stock['symbol'] ?? 'S')[0], style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 14)),
@@ -397,19 +392,19 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
           const SizedBox(height: 12),
           Text(
             stock['symbol'] ?? '',
-            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: textDark),
+            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: AppTheme.textDark),
           ),
           const SizedBox(height: 6),
           Text(
             stock['name'] ?? '',
-            style: const TextStyle(color: textMuted, fontWeight: FontWeight.w500, fontSize: 12),
+            style: const TextStyle(color: AppTheme.textMuted, fontWeight: FontWeight.w500, fontSize: 12),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
           const Spacer(),
           Text(
             '₦ ${(stock['latest_price'] ?? 0).toStringAsFixed(2)}',
-            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: textDark),
+            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: AppTheme.textDark),
           ),
           const SizedBox(height: 8),
           Container(

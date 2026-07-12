@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import '../data/stock_repository.dart';
 
+import 'package:irshad_mobile/core/theme/app_theme.dart';
 class AiAnalysisSheet extends StatefulWidget {
   final String symbol;
 
@@ -97,7 +98,7 @@ class _AiAnalysisSheetState extends State<AiAnalysisSheet> {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w800,
-                          color: Color(0xFF1A1208),
+                          color: AppTheme.textDark,
                           letterSpacing: -0.5,
                         ),
                       ),
@@ -146,8 +147,8 @@ class _AiAnalysisSheetState extends State<AiAnalysisSheet> {
                         data: _analysis ?? 'No analysis available.',
                         styleSheet: MarkdownStyleSheet(
                           p: const TextStyle(fontSize: 16, height: 1.6, color: Color(0xFF374151)),
-                          h1: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF1A1208)),
-                          h2: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1A1208)),
+                          h1: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.textDark),
+                          h2: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.textDark),
                           listBullet: const TextStyle(color: Colors.blue, fontSize: 18),
                         ),
                       ),

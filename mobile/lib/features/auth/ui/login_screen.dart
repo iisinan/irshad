@@ -7,6 +7,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../data/auth_repository.dart';
 import 'forgot_password_screen.dart';
 
+import 'package:irshad_mobile/core/theme/app_theme.dart';
 class LoginScreen extends StatefulWidget {
   final VoidCallback? onBack;
   const LoginScreen({super.key, this.onBack});
@@ -72,14 +73,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // Theme Constants
-  static const Color bgColor = Color(0xFFF5F0E8);
-  static const Color primaryGold = Color(0xFFC9A84C);
-  static const Color textDark = Color(0xFF1A1208);
-  static const Color textMuted = Color(0xFF9A8C70);
-  static const Color cardBg = Colors.white;
-  static const Color divider = Color(0xFFE8E2D9);
-
-  void _login() async {
+static const Color cardBg = Colors.white;
+void _login() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       _showError('Please fill in all fields');
       return;
@@ -134,13 +129,13 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: AppTheme.bg,
       appBar: (widget.onBack != null || Navigator.canPop(context))
           ? AppBar(
-              backgroundColor: bgColor,
+              backgroundColor: AppTheme.bg,
               elevation: 0,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded, color: textDark, size: 20),
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppTheme.textDark, size: 20),
                 onPressed: () => widget.onBack != null ? widget.onBack!() : Navigator.pop(context),
               ),
             )
@@ -158,14 +153,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.w900,
-                  color: textDark,
+                  color: AppTheme.textDark,
                   letterSpacing: -1,
                 ),
               ),
               const SizedBox(height: 12),
               const Text(
                 'Sign in to your IRSHAD account to access your\nportfolio and premium features.',
-                style: TextStyle(color: textMuted, height: 1.5, fontSize: 15),
+                style: TextStyle(color: AppTheme.textMuted, height: 1.5, fontSize: 15),
               ),
               const SizedBox(height: 48),
 
@@ -187,7 +182,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ForgotPasswordScreen())),
                     style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
                     child: const Text('Forgot Password?', 
-                      style: TextStyle(color: primaryGold, fontWeight: FontWeight.w700, fontSize: 13)),
+                      style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.w700, fontSize: 13)),
                   ),
                 ],
               ),
@@ -210,7 +205,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _login,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: textDark,
+                          backgroundColor: AppTheme.textDark,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                           elevation: 0,
@@ -230,10 +225,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: _isLoading ? null : _authenticateWithBiometrics,
                         style: OutlinedButton.styleFrom(
                           padding: EdgeInsets.zero,
-                          side: const BorderSide(color: Color(0xFFE8E2D9)),
+                          side: const BorderSide(color: AppTheme.divider),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                         ),
-                        child: const Icon(Icons.fingerprint_rounded, color: textDark, size: 28),
+                        child: const Icon(Icons.fingerprint_rounded, color: AppTheme.textDark, size: 28),
                       ),
                     ),
                   ],
@@ -243,12 +238,12 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 24),
               Row(
                 children: [
-                  const Expanded(child: Divider(color: divider)),
+                  const Expanded(child: Divider(color: AppTheme.divider)),
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: Text('or continue with', style: TextStyle(color: textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
+                    child: Text('or continue with', style: TextStyle(color: AppTheme.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
                   ),
-                  const Expanded(child: Divider(color: divider)),
+                  const Expanded(child: Divider(color: AppTheme.divider)),
                 ],
               ),
               const SizedBox(height: 24),
@@ -259,10 +254,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: OutlinedButton(
                   onPressed: _isLoading ? null : _loginWithGoogle,
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: divider, width: 1.5),
+                    side: const BorderSide(color: AppTheme.divider, width: 1.5),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   ),
-                  child: const Text('Continue with Google', style: TextStyle(color: textDark, fontWeight: FontWeight.w700, fontSize: 16)),
+                  child: const Text('Continue with Google', style: TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w700, fontSize: 16)),
                 ),
               ),
               
@@ -272,12 +267,12 @@ class _LoginScreenState extends State<LoginScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('Don\'t have an account?', style: TextStyle(color: textMuted)),
+                  const Text('Don\'t have an account?', style: TextStyle(color: AppTheme.textMuted)),
                   TextButton(
                     onPressed: () => Navigator.pushNamed(context, '/register'),
                     child: const Text(
                       'Create Account',
-                      style: TextStyle(color: textDark, fontWeight: FontWeight.w800),
+                      style: TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w800),
                     ),
                   ),
                 ],
@@ -287,11 +282,11 @@ class _LoginScreenState extends State<LoginScreen> {
               const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.verified_user_rounded, size: 14, color: primaryGold),
+                  Icon(Icons.verified_user_rounded, size: 14, color: AppTheme.primary),
                   SizedBox(width: 8),
                   Text(
                     'Secure & Shariah Compliant',
-                    style: TextStyle(color: textMuted, fontSize: 12, fontWeight: FontWeight.w600),
+                    style: TextStyle(color: AppTheme.textMuted, fontSize: 12, fontWeight: FontWeight.w600),
                   ),
                 ],
               ),
@@ -308,7 +303,7 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Text(
         label,
         style: const TextStyle(
-          color: textDark,
+          color: AppTheme.textDark,
           fontWeight: FontWeight.w700,
           fontSize: 14,
         ),
@@ -329,7 +324,7 @@ class _LoginScreenState extends State<LoginScreen> {
       controller: controller,
       obscureText: obscure ?? false,
       keyboardType: keyboardType,
-      style: const TextStyle(color: textDark, fontWeight: FontWeight.w500),
+      style: const TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w500),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w400),
@@ -342,11 +337,11 @@ class _LoginScreenState extends State<LoginScreen> {
         fillColor: Colors.white,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: divider, width: 1.5),
+          borderSide: const BorderSide(color: AppTheme.divider, width: 1.5),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: textDark, width: 1.5),
+          borderSide: const BorderSide(color: AppTheme.textDark, width: 1.5),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),

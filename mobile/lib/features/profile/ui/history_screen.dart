@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../core/providers/app_state_provider.dart';
 import '../data/user_activity_repository.dart';
 
+import 'package:irshad_mobile/core/theme/app_theme.dart';
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
 
@@ -18,13 +19,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   String? _filter;
 
   // Theme Constants
-  static const Color bgColor = Color(0xFFF5F0E8);
-  static const Color primaryGold = Color(0xFFC9A84C);
-  static const Color textDark = Color(0xFF1A1208);
-  static const Color textMuted = Color(0xFF9A8C70);
-  static const Color divider = Color(0xFFE8E2D9);
-
-  @override
+@override
   void initState() {
     super.initState();
     _fetchHistory();
@@ -52,13 +47,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: AppTheme.bg,
       appBar: AppBar(
-        title: const Text('Activity History', style: TextStyle(fontWeight: FontWeight.w900, color: textDark, letterSpacing: -0.5)),
-        backgroundColor: bgColor,
+        title: const Text('Activity History', style: TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5)),
+        backgroundColor: AppTheme.bg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: textDark, size: 20),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppTheme.textDark, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
@@ -76,13 +71,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 const PopupMenuItem(value: 'scan', child: Text('Products Only')),
                 const PopupMenuItem(value: 'check', child: Text('Stocks Only')),
               ],
-              icon: const Icon(Icons.tune_rounded, color: textDark, size: 22),
+              icon: const Icon(Icons.tune_rounded, color: AppTheme.textDark, size: 22),
             ),
           ),
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: primaryGold))
+          ? const Center(child: CircularProgressIndicator(color: AppTheme.primary))
           : _history.isEmpty
               ? _buildEmptyState()
               : _buildTimeline(),
@@ -115,7 +110,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               child: Text(
                 date.toUpperCase(),
                 style: const TextStyle(
-                  color: textMuted,
+                  color: AppTheme.textMuted,
                   fontWeight: FontWeight.w800,
                   fontSize: 11,
                   letterSpacing: 0.5,
@@ -139,25 +134,25 @@ class _HistoryScreenState extends State<HistoryScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: divider),
+        border: Border.all(color: AppTheme.divider),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.all(12),
         leading: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: bgColor,
+            color: AppTheme.bg,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(
             isScan ? Icons.qr_code_scanner_rounded : Icons.show_chart_rounded,
             size: 20,
-            color: textMuted,
+            color: AppTheme.textMuted,
           ),
         ),
         title: Text(
           isScan ? detail['name'] : detail['symbol'],
-          style: const TextStyle(fontWeight: FontWeight.w900, color: textDark, fontSize: 16),
+          style: const TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, fontSize: 16),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -165,10 +160,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
           padding: const EdgeInsets.only(top: 4),
           child: Text(
             isScan ? 'Product Verification' : 'Market Screening',
-            style: const TextStyle(color: textMuted, fontSize: 13, fontWeight: FontWeight.w500),
+            style: const TextStyle(color: AppTheme.textMuted, fontSize: 13, fontWeight: FontWeight.w500),
           ),
         ),
-        trailing: const Icon(Icons.chevron_right_rounded, color: divider),
+        trailing: const Icon(Icons.chevron_right_rounded, color: AppTheme.divider),
         onTap: () {
           if (isScan) {
             Navigator.pushNamed(context, '/product_details', arguments: detail);
@@ -192,15 +187,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: primaryGold.withOpacity(0.05),
+                color: AppTheme.primary.withOpacity(0.05),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.history_rounded, size: 40, color: primaryGold),
+              child: const Icon(Icons.history_rounded, size: 40, color: AppTheme.primary),
             ),
             const SizedBox(height: 24),
             Text(
               isAuth ? 'No Activity Yet' : 'Login to view History',
-              style: const TextStyle(fontSize: 20, color: textDark, fontWeight: FontWeight.w900),
+              style: const TextStyle(fontSize: 20, color: AppTheme.textDark, fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 12),
             Text(
@@ -208,7 +203,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   ? 'Your scan and screening history will be\nsaved here for quick access.'
                   : 'You must be logged in to view your scan and screening history.',
               textAlign: TextAlign.center,
-              style: const TextStyle(color: textMuted, height: 1.5, fontSize: 14),
+              style: const TextStyle(color: AppTheme.textMuted, height: 1.5, fontSize: 14),
             ),
             if (!isAuth) ...[
               const SizedBox(height: 32),
@@ -218,7 +213,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 child: ElevatedButton(
                   onPressed: () => Navigator.pushNamed(context, '/login'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: textDark,
+                    backgroundColor: AppTheme.textDark,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     elevation: 0,

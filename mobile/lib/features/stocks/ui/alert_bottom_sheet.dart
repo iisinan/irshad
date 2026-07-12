@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/api/api_service.dart';
 
+import 'package:irshad_mobile/core/theme/app_theme.dart';
 class AlertBottomSheet extends StatefulWidget {
   final Map<String, dynamic> stock;
 
@@ -62,7 +63,7 @@ class _AlertBottomSheetState extends State<AlertBottomSheet> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Alert set! We will notify you when $symbol goes $_condition ₦$target.'),
-            backgroundColor: const Color(0xFF2E7D32),
+            backgroundColor: AppTheme.halal,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -100,11 +101,11 @@ class _AlertBottomSheetState extends State<AlertBottomSheet> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.notifications_active_rounded, color: Color(0xFF1A1208)),
+                      const Icon(Icons.notifications_active_rounded, color: AppTheme.textDark),
                       const SizedBox(width: 8),
                       Text(
                         'Set Alert for ${widget.stock['symbol']}',
-                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFF1A1208), letterSpacing: -0.5),
+                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5),
                       ),
                     ],
                   ),
@@ -117,7 +118,7 @@ class _AlertBottomSheetState extends State<AlertBottomSheet> {
               const SizedBox(height: 8),
               Text(
                 'Current Price: ₦ ${_currentPrice.toStringAsFixed(2)}',
-                style: const TextStyle(color: Color(0xFF9A8C70), fontSize: 16),
+                style: const TextStyle(color: AppTheme.textMuted, fontSize: 16),
               ),
               const SizedBox(height: 24),
               TextField(
@@ -153,7 +154,7 @@ class _AlertBottomSheetState extends State<AlertBottomSheet> {
                 child: ElevatedButton(
                   onPressed: _isLoading || (double.tryParse(_priceController.text) ?? 0) <= 0 ? null : _setAlert,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2E7D32),
+                    backgroundColor: AppTheme.halal,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),

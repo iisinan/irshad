@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/api/api_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import 'package:irshad_mobile/core/theme/app_theme.dart';
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -38,14 +39,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
-  // Theme Constants
-  static const Color bgColor = Color(0xFFF5F0E8);
-  static const Color primaryGold = Color(0xFFC9A84C);
-  static const Color textDark = Color(0xFF1A1208);
-  static const Color textMuted = Color(0xFF9A8C70);
-  static const Color divider = Color(0xFFE8E2D9);
-  
-  final ApiService _apiService = ApiService();
+
+final ApiService _apiService = ApiService();
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   Future<void> _launchUrl(String urlString) async {
@@ -60,12 +55,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Account?'),
-        content: const Text('Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently removed.', style: TextStyle(color: textMuted)),
+        content: const Text('Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently removed.', style: TextStyle(color: AppTheme.textMuted)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: textDark)),
+            child: const Text('Cancel', style: TextStyle(color: AppTheme.textDark)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -105,13 +100,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: AppTheme.bg,
       appBar: AppBar(
-        title: const Text('Settings', style: TextStyle(fontWeight: FontWeight.w900, color: textDark, letterSpacing: -0.5)),
-        backgroundColor: bgColor,
+        title: const Text('Settings', style: TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5)),
+        backgroundColor: AppTheme.bg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: textDark, size: 20),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppTheme.textDark, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -195,7 +190,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         alignment: Alignment.centerLeft,
         child: Text(
           title,
-          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: textMuted, letterSpacing: 1),
+          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppTheme.textMuted, letterSpacing: 1),
         ),
       ),
     );
@@ -207,7 +202,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     for (int i = 0; i < children.length; i++) {
       divided.add(children[i]);
       if (i < children.length - 1) {
-        divided.add(const Divider(color: divider, height: 1, indent: 56));
+        divided.add(const Divider(color: AppTheme.divider, height: 1, indent: 56));
       }
     }
 
@@ -216,7 +211,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: divider),
+        border: Border.all(color: AppTheme.divider),
       ),
       child: Column(children: divided),
     );
@@ -226,16 +221,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return ListTile(
       leading: Container(
         padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(8)),
-        child: const Icon(Icons.language_rounded, color: textMuted, size: 20),
+        decoration: BoxDecoration(color: AppTheme.bg, borderRadius: BorderRadius.circular(8)),
+        child: const Icon(Icons.language_rounded, color: AppTheme.textMuted, size: 20),
       ),
-      title: const Text('Language', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: textDark)),
+      title: const Text('Language', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: AppTheme.textDark)),
       trailing: DropdownButton<String>(
         value: _selectedLanguage,
         underline: const SizedBox(),
         dropdownColor: Colors.white,
-        style: const TextStyle(color: primaryGold, fontWeight: FontWeight.w800, fontSize: 14),
-        icon: const Icon(Icons.keyboard_arrow_down_rounded, color: textMuted),
+        style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.w800, fontSize: 14),
+        icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppTheme.textMuted),
         items: _languages.map((l) => DropdownMenuItem(value: l, child: Text(l))).toList(),
         onChanged: (val) {
           if (val != null) {
@@ -255,13 +250,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return SwitchListTile(
       secondary: Container(
         padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(8)),
-        child: Icon(icon, color: textMuted, size: 20),
+        decoration: BoxDecoration(color: AppTheme.bg, borderRadius: BorderRadius.circular(8)),
+        child: Icon(icon, color: AppTheme.textMuted, size: 20),
       ),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: textDark)),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: AppTheme.textDark)),
       value: value,
       onChanged: onChanged,
-      activeColor: primaryGold,
+      activeColor: AppTheme.primary,
       contentPadding: const EdgeInsets.only(left: 16, right: 8),
     );
   }
@@ -275,12 +270,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return ListTile(
       leading: Container(
         padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(8)),
-        child: Icon(icon, color: textMuted, size: 20),
+        decoration: BoxDecoration(color: AppTheme.bg, borderRadius: BorderRadius.circular(8)),
+        child: Icon(icon, color: AppTheme.textMuted, size: 20),
       ),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: textDark)),
-      subtitle: subtitle != null ? Text(subtitle, style: const TextStyle(fontSize: 12, color: textMuted)) : null,
-      trailing: const Icon(Icons.chevron_right_rounded, size: 20, color: divider),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: AppTheme.textDark)),
+      subtitle: subtitle != null ? Text(subtitle, style: const TextStyle(fontSize: 12, color: AppTheme.textMuted)) : null,
+      trailing: const Icon(Icons.chevron_right_rounded, size: 20, color: AppTheme.divider),
       onTap: onTap,
     );
   }

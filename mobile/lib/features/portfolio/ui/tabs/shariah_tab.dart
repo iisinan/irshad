@@ -1,26 +1,25 @@
 import 'package:flutter/material.dart';
 
+import 'package:irshad_mobile/core/theme/app_theme.dart';
 class ShariahTab extends StatelessWidget {
   const ShariahTab({super.key});
 
   @override
   Widget build(BuildContext context) {
-    const Color textDark = Color(0xFF1A1208);
-    const Color textMuted = Color(0xFF9A8C70);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Shariah Methodology',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: textDark),
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppTheme.textDark),
           ),
           const SizedBox(height: 12),
-          const Text(
+          Text(
             'Our screening strictly follows the AAOIFI Shariah standards, ensuring all evaluated companies adhere to Islamic financial principles.',
-            style: TextStyle(fontSize: 15, color: textMuted, height: 1.5),
+            style: TextStyle(fontSize: 15, color: AppTheme.textMuted, height: 1.5),
           ),
           const SizedBox(height: 32),
           _buildMethodologyCard(
@@ -53,14 +52,14 @@ class ShariahTab extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE8E2D9)),
+        border: Border.all(color: AppTheme.divider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF1A1208))),
+          Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppTheme.textDark)),
           const SizedBox(height: 8),
-          Text(description, style: const TextStyle(fontSize: 14, color: Color(0xFF9A8C70), height: 1.5)),
+          Text(description, style: TextStyle(fontSize: 14, color: AppTheme.textMuted, height: 1.5)),
         ],
       ),
     );

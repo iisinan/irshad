@@ -3,6 +3,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../../core/api/api_service.dart';
 
+import 'package:irshad_mobile/core/theme/app_theme.dart';
 class PortfolioOverviewTab extends StatefulWidget {
   const PortfolioOverviewTab({super.key});
 
@@ -12,19 +13,12 @@ class PortfolioOverviewTab extends StatefulWidget {
 
 class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
   // Theme Constants
-  static const Color bgColor = Color(0xFFF5F0E8);
-  static const Color primaryGold = Color(0xFFC9A84C);
-  static const Color textDark = Color(0xFF1A1208);
-  static const Color textMuted = Color(0xFF9A8C70);
-  static const Color divider = Color(0xFFE8E2D9);
-  static const Color doubtfulColor = Color(0xFFF59E0B);
-  static const Color nonHalalColor = Color(0xFFEF4444);
-
-  // Chart Colors
+static const Color doubtfulColor = Color(0xFFF59E0B);
+// Chart Colors
   final List<Color> _chartColors = [
     const Color(0xFF0284C7),
     const Color(0xFFEAB308),
-    const Color(0xFF2E7D32),
+    AppTheme.halal,
     const Color(0xFF9333EA),
     const Color(0xFFF97316),
   ];
@@ -81,9 +75,9 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: AppTheme.bg,
       body: isLoading
-          ? const Center(child: CircularProgressIndicator(color: primaryGold))
+          ? const Center(child: CircularProgressIndicator(color: AppTheme.primary))
           : _isGuest
               ? _buildGuestView()
               : SingleChildScrollView(
@@ -96,7 +90,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                         const SizedBox(height: 24),
                         const Text(
                           'Allocation',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: textDark),
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppTheme.textDark),
                         ),
                         const SizedBox(height: 16),
                         if (holdings.isNotEmpty) _buildPieChart(),
@@ -104,12 +98,12 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                           Container(
                             padding: const EdgeInsets.all(24),
                             alignment: Alignment.center,
-                            child: const Text('No assets in your portfolio.', style: TextStyle(color: textMuted)),
+                            child: const Text('No assets in your portfolio.', style: TextStyle(color: AppTheme.textMuted)),
                           ),
                         const SizedBox(height: 32),
                         const Text(
                           'Holdings',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: textDark),
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppTheme.textDark),
                         ),
                         const SizedBox(height: 12),
                         ...holdings.asMap().entries.map((entry) => _buildHoldingItem(entry.value, entry.key)),
@@ -120,7 +114,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                 ),
       floatingActionButton: _isGuest ? null : FloatingActionButton(
         onPressed: _showAddHoldingSheet,
-        backgroundColor: textDark,
+        backgroundColor: AppTheme.textDark,
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );
@@ -139,17 +133,17 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                 color: const Color(0xFFECFDF5),
                 borderRadius: BorderRadius.circular(24),
               ),
-              child: const Icon(Icons.pie_chart_outline_rounded, size: 40, color: primaryGold),
+              child: const Icon(Icons.pie_chart_outline_rounded, size: 40, color: AppTheme.primary),
             ),
             const SizedBox(height: 24),
             const Text('Track Your Halal Portfolio',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: textDark),
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppTheme.textDark),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
             const Text(
               'Sign in to track your NGX holdings, monitor Shariah compliance and calculate your Zakat.',
-              style: TextStyle(color: textMuted, fontSize: 15, height: 1.6),
+              style: TextStyle(color: AppTheme.textMuted, fontSize: 15, height: 1.6),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
@@ -158,7 +152,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
               child: ElevatedButton(
                 onPressed: () => Navigator.pushNamed(context, '/login'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryGold,
+                  backgroundColor: AppTheme.primary,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -170,7 +164,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
             const SizedBox(height: 12),
             TextButton(
               onPressed: () => Navigator.pushNamed(context, '/register'),
-              child: const Text('Create a free account →', style: TextStyle(color: primaryGold, fontWeight: FontWeight.w600)),
+              child: const Text('Create a free account →', style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.w600)),
             ),
           ],
         ),
@@ -183,7 +177,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: textDark,
+        color: AppTheme.textDark,
         borderRadius: BorderRadius.circular(24),
       ),
       child: Column(
@@ -204,16 +198,16 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: summary['health_percentage'] < 100 ? doubtfulColor.withOpacity(0.2) : primaryGold.withOpacity(0.2),
+                  color: summary['health_percentage'] < 100 ? doubtfulColor.withOpacity(0.2) : AppTheme.primary.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Row(
                   children: [
-                    Icon(summary['health_percentage'] < 100 ? Icons.warning_rounded : Icons.check_circle_rounded, color: summary['health_percentage'] < 100 ? doubtfulColor : primaryGold, size: 14),
+                    Icon(summary['health_percentage'] < 100 ? Icons.warning_rounded : Icons.check_circle_rounded, color: summary['health_percentage'] < 100 ? doubtfulColor : AppTheme.primary, size: 14),
                     const SizedBox(width: 4),
                     Text(
                       '${summary['health_percentage']}% Halal',
-                      style: TextStyle(color: summary['health_percentage'] < 100 ? doubtfulColor : primaryGold, fontWeight: FontWeight.w700, fontSize: 12),
+                      style: TextStyle(color: summary['health_percentage'] < 100 ? doubtfulColor : AppTheme.primary, fontWeight: FontWeight.w700, fontSize: 12),
                     ),
                   ],
                 ),
@@ -239,7 +233,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: divider),
+        border: Border.all(color: AppTheme.divider),
       ),
       child: Row(
         children: [
@@ -285,7 +279,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                       const SizedBox(width: 8),
                       Text(
                         h['symbol'],
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: textDark),
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppTheme.textDark),
                       ),
                     ],
                   ),
@@ -311,7 +305,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: isHalal ? divider : nonHalalColor.withOpacity(0.3)),
+          border: Border.all(color: isHalal ? AppTheme.divider : Colors.red.withOpacity(0.3)),
         ),
         child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -334,18 +328,18 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                     children: [
                       Text(
                         holding['symbol'],
-                        style: const TextStyle(fontWeight: FontWeight.w900, color: textDark, fontSize: 16),
+                        style: const TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, fontSize: 16),
                       ),
                       if (!isHalal) ...[
                         const SizedBox(width: 6),
-                        const Icon(Icons.warning_rounded, color: nonHalalColor, size: 14),
+                        const Icon(Icons.warning_rounded, color: Colors.red, size: 14),
                       ]
                     ],
                   ),
                   const SizedBox(height: 4),
                   Text(
                     '${holding['shares']} shares',
-                    style: const TextStyle(color: textMuted, fontSize: 13),
+                    style: const TextStyle(color: AppTheme.textMuted, fontSize: 13),
                   ),
                 ],
               ),
@@ -356,13 +350,13 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
             children: [
               Text(
                 '₦ ${val.toStringAsFixed(2)}',
-                style: const TextStyle(fontWeight: FontWeight.w800, color: textDark, fontSize: 15),
+                style: const TextStyle(fontWeight: FontWeight.w800, color: AppTheme.textDark, fontSize: 15),
               ),
               const SizedBox(height: 4),
               Text(
                 '${returnPct >= 0 ? '+' : ''}${returnPct.toStringAsFixed(2)}%',
                 style: TextStyle(
-                  color: returnPct >= 0 ? primaryGold : nonHalalColor, 
+                  color: returnPct >= 0 ? AppTheme.primary : Colors.red, 
                   fontWeight: FontWeight.w700, 
                   fontSize: 13
                 ),
@@ -393,16 +387,16 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Add Assets', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: textDark)),
+                    Text('Add Assets', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppTheme.textDark)),
                     CloseButton(),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
               const TabBar(
-                labelColor: textDark,
-                unselectedLabelColor: textMuted,
-                indicatorColor: primaryGold,
+                labelColor: AppTheme.textDark,
+                unselectedLabelColor: AppTheme.textMuted,
+                indicatorColor: AppTheme.primary,
                 tabs: [
                   Tab(text: 'Link Brokerage'),
                   Tab(text: 'Manual Entry'),
@@ -416,16 +410,16 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.account_balance_rounded, size: 64, color: primaryGold),
+                          const Icon(Icons.account_balance_rounded, size: 64, color: AppTheme.primary),
                           const SizedBox(height: 24),
-                          const Text('Connect your NGX Broker', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: textDark)),
+                          const Text('Connect your NGX Broker', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppTheme.textDark)),
                           const SizedBox(height: 12),
-                          const Text('Securely sync your holdings directly from your broker. Currently supporting Stanbic IBTC, Meristem, and ARM.', textAlign: TextAlign.center, style: TextStyle(color: textMuted)),
+                          const Text('Securely sync your holdings directly from your broker. Currently supporting Stanbic IBTC, Meristem, and ARM.', textAlign: TextAlign.center, style: TextStyle(color: AppTheme.textMuted)),
                           const SizedBox(height: 32),
                           ElevatedButton(
                             onPressed: () {},
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: textDark, 
+                              backgroundColor: AppTheme.textDark, 
                               foregroundColor: Colors.white, 
                               minimumSize: const Size(double.infinity, 50),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -448,7 +442,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                           ElevatedButton(
                             onPressed: () {},
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: textDark, 
+                              backgroundColor: AppTheme.textDark, 
                               foregroundColor: Colors.white, 
                               minimumSize: const Size(double.infinity, 50),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -486,7 +480,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Edit ${holding['symbol']}', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: textDark)),
+                Text('Edit ${holding['symbol']}', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppTheme.textDark)),
                 IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
               ],
             ),
@@ -533,7 +527,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                       _fetchPortfolio();
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: textDark, 
+                      backgroundColor: AppTheme.textDark, 
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       minimumSize: const Size(0, 50),

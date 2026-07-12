@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/api/api_service.dart';
+import 'package:irshad_mobile/core/theme/app_theme.dart';
 class BrokerageLinkScreen extends StatefulWidget {
   const BrokerageLinkScreen({super.key});
 
@@ -9,13 +10,7 @@ class BrokerageLinkScreen extends StatefulWidget {
 
 class _BrokerageLinkScreenState extends State<BrokerageLinkScreen> {
   // Theme Constants
-  static const Color bgColor = Color(0xFFF5F0E8);
-  static const Color primaryGold = Color(0xFFC9A84C);
-  static const Color textDark = Color(0xFF1A1208);
-  static const Color textMuted = Color(0xFF9A8C70);
-  static const Color divider = Color(0xFFE8E2D9);
-
-  final List<Map<String, String>> _brokers = [
+final List<Map<String, String>> _brokers = [
     {'name': 'Bamboo', 'logo': 'B', 'description': 'Invest in US and Nigerian stocks'},
     {'name': 'Chaka', 'logo': 'C', 'description': 'Global and local investment access'},
     {'name': 'Risevest', 'logo': 'R', 'description': 'Automated dollar investments'},
@@ -25,13 +20,13 @@ class _BrokerageLinkScreenState extends State<BrokerageLinkScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: AppTheme.bg,
       appBar: AppBar(
-        title: const Text('Linked Brokerage', style: TextStyle(fontWeight: FontWeight.w900, color: textDark, letterSpacing: -0.5)),
-        backgroundColor: bgColor,
+        title: const Text('Linked Brokerage', style: TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5)),
+        backgroundColor: AppTheme.bg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: textDark, size: 20),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppTheme.textDark, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -42,12 +37,12 @@ class _BrokerageLinkScreenState extends State<BrokerageLinkScreen> {
           children: [
             const Text(
               'Trade Instantly',
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: textDark, letterSpacing: -0.5),
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5),
             ),
             const SizedBox(height: 12),
             const Text(
               'Connect your existing brokerage account to execute Shariah-compliant trades directly from IRSHAD.',
-              style: TextStyle(color: textMuted, fontSize: 15, height: 1.5, fontWeight: FontWeight.w400),
+              style: TextStyle(color: AppTheme.textMuted, fontSize: 15, height: 1.5, fontWeight: FontWeight.w400),
             ),
             const SizedBox(height: 32),
             
@@ -66,7 +61,7 @@ class _BrokerageLinkScreenState extends State<BrokerageLinkScreen> {
   Widget _buildSectionLabel(String title) {
     return Text(
       title,
-      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: textMuted, letterSpacing: 1),
+      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppTheme.textMuted, letterSpacing: 1),
     );
   }
 
@@ -76,7 +71,7 @@ class _BrokerageLinkScreenState extends State<BrokerageLinkScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: divider),
+        border: Border.all(color: AppTheme.divider),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.all(16),
@@ -84,25 +79,25 @@ class _BrokerageLinkScreenState extends State<BrokerageLinkScreen> {
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: primaryGold.withOpacity(0.1),
+            color: AppTheme.primary.withOpacity(0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Center(
             child: Text(
               broker['logo']!,
-              style: const TextStyle(color: primaryGold, fontWeight: FontWeight.w900, fontSize: 20),
+              style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.w900, fontSize: 20),
             ),
           ),
         ),
         title: Text(
           broker['name']!,
-          style: const TextStyle(fontWeight: FontWeight.w900, color: textDark, fontSize: 16),
+          style: const TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, fontSize: 16),
         ),
         subtitle: Text(
           broker['description']!,
-          style: const TextStyle(color: textMuted, fontSize: 13, height: 1.4),
+          style: const TextStyle(color: AppTheme.textMuted, fontSize: 13, height: 1.4),
         ),
-        trailing: const Icon(Icons.link_rounded, color: textMuted),
+        trailing: const Icon(Icons.link_rounded, color: AppTheme.textMuted),
         onTap: () => _initiateOAuth(broker['name']!),
       ),
     );
@@ -114,7 +109,7 @@ class _BrokerageLinkScreenState extends State<BrokerageLinkScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Center(child: CircularProgressIndicator(color: primaryGold)),
+      builder: (context) => const Center(child: CircularProgressIndicator(color: AppTheme.primary)),
     );
 
     try {
@@ -128,7 +123,7 @@ class _BrokerageLinkScreenState extends State<BrokerageLinkScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Successfully linked $name and funded account with ₦1,000,000!'),
-            backgroundColor: primaryGold,
+            backgroundColor: AppTheme.primary,
             behavior: SnackBarBehavior.floating,
           ),
         );

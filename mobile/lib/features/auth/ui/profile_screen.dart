@@ -5,6 +5,7 @@ import '../../../core/providers/app_state_provider.dart';
 import '../data/auth_repository.dart';
 import '../../portfolio/ui/zakat_calculator_screen.dart';
 
+import 'package:irshad_mobile/core/theme/app_theme.dart';
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -20,14 +21,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final List<String> _languages = ['English', 'Hausa', 'Yoruba', 'Igbo'];
 
   // Theme Constants
-  static const Color bgColor = Color(0xFFF5F0E8);
-  static const Color primaryGold = Color(0xFFC9A84C);
-  static const Color textDark = Color(0xFF1A1208);
-  static const Color textMuted = Color(0xFF9A8C70);
-  static const Color cardBg = Colors.white;
-  static const Color divider = Color(0xFFE8E2D9);
-
-  @override
+static const Color cardBg = Colors.white;
+@override
   void initState() {
     super.initState();
     _fetchProfile();
@@ -53,14 +48,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final user = Provider.of<AppStateProvider>(context).userProfile;
 
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: AppTheme.bg,
       appBar: AppBar(
-        title: const Text('Profile', style: TextStyle(fontWeight: FontWeight.w900, color: textDark, letterSpacing: -0.5)),
-        backgroundColor: bgColor,
+        title: const Text('Profile', style: TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5)),
+        backgroundColor: AppTheme.bg,
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings_outlined, color: textDark, size: 22),
+            icon: const Icon(Icons.settings_outlined, color: AppTheme.textDark, size: 22),
             onPressed: () => Navigator.pushNamed(context, '/settings'),
           ),
           IconButton(
@@ -70,9 +65,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: primaryGold))
+          ? const Center(child: CircularProgressIndicator(color: AppTheme.primary))
           : user == null
-              ? const Center(child: Text('Failed to load profile', style: TextStyle(color: textDark)))
+              ? const Center(child: Text('Failed to load profile', style: TextStyle(color: AppTheme.textDark)))
               : SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                   child: Column(
@@ -106,7 +101,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           icon: const Icon(Icons.edit_rounded, size: 18),
                           label: const Text('Edit Profile', style: TextStyle(fontWeight: FontWeight.w700)),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: textDark,
+                            backgroundColor: AppTheme.textDark,
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                             elevation: 0,
@@ -150,12 +145,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         content: const Text(
           'Are you sure you want to permanently delete your account? This action cannot be undone and you will lose all saved portfolio and favorite stocks.',
-          style: TextStyle(color: textMuted, height: 1.5),
+          style: TextStyle(color: AppTheme.textMuted, height: 1.5),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel', style: TextStyle(color: textDark, fontWeight: FontWeight.w700)),
+            child: const Text('Cancel', style: TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w700)),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -184,14 +179,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: divider),
+        border: Border.all(color: AppTheme.divider),
       ),
       child: Row(
         children: [
           CircleAvatar(
             radius: 36,
-            backgroundColor: primaryGold.withOpacity(0.1),
-            child: Text(user?['first_name']?[0] ?? 'U', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: primaryGold)),
+            backgroundColor: AppTheme.primary.withOpacity(0.1),
+            child: Text(user?['first_name']?[0] ?? 'U', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: AppTheme.primary)),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -200,12 +195,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 Text(
                   '${user?['first_name'] ?? ''} ${user?['last_name'] ?? ''}',
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: textDark, letterSpacing: -0.5),
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   user?['email'] ?? '',
-                  style: const TextStyle(fontSize: 14, color: textMuted),
+                  style: const TextStyle(fontSize: 14, color: AppTheme.textMuted),
                 ),
               ],
             ),
@@ -222,7 +217,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         alignment: Alignment.centerLeft,
         child: Text(
           title,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: textDark),
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppTheme.textDark),
         ),
       ),
     );
@@ -234,14 +229,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: divider),
+        border: Border.all(color: AppTheme.divider),
       ),
       child: Column(
         children: [
           _buildInfoTile(Icons.alternate_email_rounded, 'Email', user?['email'] ?? ''),
-          const Divider(color: divider, height: 1, indent: 56),
+          const Divider(color: AppTheme.divider, height: 1, indent: 56),
           _buildInfoTile(Icons.location_on_outlined, 'Location', user?['location'] ?? 'Nigeria'),
-          const Divider(color: divider, height: 1, indent: 56),
+          const Divider(color: AppTheme.divider, height: 1, indent: 56),
           _buildInfoTile(Icons.calendar_today_outlined, 'Member Since', 
             user?['created_at'] != null 
               ? DateFormat('MMMM yyyy').format(DateTime.parse(user!['created_at']))
@@ -256,16 +251,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: divider),
+        border: Border.all(color: AppTheme.divider),
       ),
       child: ListTile(
         leading: Container(
           padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(8)),
-          child: const Icon(Icons.calculate_outlined, color: textMuted, size: 20),
+          decoration: BoxDecoration(color: AppTheme.bg, borderRadius: BorderRadius.circular(8)),
+          child: const Icon(Icons.calculate_outlined, color: AppTheme.textMuted, size: 20),
         ),
-        title: const Text('Zakat Calculator', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textDark)),
-        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: textMuted),
+        title: const Text('Zakat Calculator', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppTheme.textDark)),
+        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppTheme.textMuted),
         onTap: () {
           Navigator.push(context, MaterialPageRoute(builder: (_) => const _ZakatWrapper()));
         },
@@ -279,24 +274,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: divider),
+        border: Border.all(color: AppTheme.divider),
       ),
       child: Row(
         children: [
-          const Icon(Icons.language_rounded, color: textMuted, size: 20),
+          const Icon(Icons.language_rounded, color: AppTheme.textMuted, size: 20),
           const SizedBox(width: 16),
           const Expanded(
             child: Text(
               'Preferred Language',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textDark),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppTheme.textDark),
             ),
           ),
           DropdownButton<String>(
             value: _selectedLanguage,
             dropdownColor: Colors.white,
             underline: const SizedBox(),
-            icon: const Icon(Icons.keyboard_arrow_down_rounded, color: textMuted),
-            style: const TextStyle(color: primaryGold, fontWeight: FontWeight.w800, fontSize: 14),
+            icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppTheme.textMuted),
+            style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.w800, fontSize: 14),
             items: _languages.map((String lang) {
               return DropdownMenuItem<String>(
                 value: lang,
@@ -317,13 +312,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: bgColor,
+          color: AppTheme.bg,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Icon(icon, color: textMuted, size: 20),
+        child: Icon(icon, color: AppTheme.textMuted, size: 20),
       ),
-      title: Text(label, style: const TextStyle(fontSize: 11, color: textMuted, fontWeight: FontWeight.w600)),
-      subtitle: Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textDark)),
+      title: Text(label, style: const TextStyle(fontSize: 11, color: AppTheme.textMuted, fontWeight: FontWeight.w600)),
+      subtitle: Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppTheme.textDark)),
       dense: true,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     );

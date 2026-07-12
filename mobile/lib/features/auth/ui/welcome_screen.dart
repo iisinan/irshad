@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
 
+import 'package:irshad_mobile/core/theme/app_theme.dart';
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
-
-  static const Color primaryGold = Color(0xFFC9A84C);
-  static const Color textDark = Color(0xFF1A1208);
-  static const Color textMuted = Color(0xFF9A8C70);
-  static const Color bgColor = Color(0xFFF5F0E8);
-
-  @override
+@override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
@@ -37,7 +32,7 @@ class WelcomeScreen extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 38,
                   fontWeight: FontWeight.w900,
-                  color: textDark,
+                  color: AppTheme.textDark,
                   height: 1.15,
                   letterSpacing: -1,
                 ),
@@ -47,7 +42,7 @@ class WelcomeScreen extends StatelessWidget {
                 'Screen Nigerian stocks for Shariah compliance. Invest with confidence and peace of mind.',
                 style: TextStyle(
                   fontSize: 16,
-                  color: textMuted,
+                  color: AppTheme.textMuted,
                   height: 1.6,
                 ),
               ),
@@ -71,7 +66,7 @@ class WelcomeScreen extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () => Navigator.pushNamed(context, '/login'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: textDark,
+                    backgroundColor: AppTheme.textDark,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -93,8 +88,8 @@ class WelcomeScreen extends StatelessWidget {
                 child: OutlinedButton(
                   onPressed: () => Navigator.pushNamed(context, '/register'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: textDark,
-                    side: const BorderSide(color: Color(0xFFE8E2D9), width: 1.5),
+                    foregroundColor: AppTheme.textDark,
+                    side: const BorderSide(color: AppTheme.divider, width: 1.5),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -114,7 +109,7 @@ class WelcomeScreen extends StatelessWidget {
                   'By continuing, you agree to our Terms & Privacy Policy',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: textMuted.withOpacity(0.7),
+                    color: AppTheme.textMuted.withOpacity(0.7),
                     fontSize: 12,
                   ),
                 ),
@@ -131,14 +126,14 @@ class WelcomeScreen extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 15, color: primaryGold),
+        Icon(icon, size: 15, color: AppTheme.primary),
         const SizedBox(width: 5),
         Text(
           label,
           style: const TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: textMuted,
+            color: AppTheme.textMuted,
           ),
         ),
       ],

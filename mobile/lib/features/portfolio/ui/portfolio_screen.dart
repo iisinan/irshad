@@ -7,6 +7,7 @@ import 'tabs/shariah_tab.dart';
 import 'tabs/news_tab.dart';
 import 'zakat_calculator_screen.dart';
 
+import 'package:irshad_mobile/core/theme/app_theme.dart';
 class PortfolioScreen extends StatefulWidget {
   const PortfolioScreen({super.key});
 
@@ -15,26 +16,21 @@ class PortfolioScreen extends StatefulWidget {
 }
 
 class _PortfolioScreenState extends State<PortfolioScreen> {
-  static const Color bgColor = Color(0xFFF5F0E8);
-  static const Color textDark = Color(0xFF1A1208);
-  static const Color textMuted = Color(0xFF9A8C70);
-  static const Color primaryGold = Color(0xFFC9A84C);
-
-  @override
+@override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 5,
       child: Scaffold(
-        backgroundColor: bgColor,
+        backgroundColor: AppTheme.bg,
         appBar: AppBar(
-          title: const Text('Portfolio', style: TextStyle(fontWeight: FontWeight.w900, color: textDark, letterSpacing: -0.5)),
-          backgroundColor: bgColor,
+          title: const Text('Portfolio', style: TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5)),
+          backgroundColor: AppTheme.bg,
           elevation: 0,
           bottom: const TabBar(
             isScrollable: true,
-            labelColor: textDark,
-            unselectedLabelColor: textMuted,
-            indicatorColor: primaryGold,
+            labelColor: AppTheme.textDark,
+            unselectedLabelColor: AppTheme.textMuted,
+            indicatorColor: AppTheme.primary,
             indicatorWeight: 3,
             labelStyle: TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
             unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),

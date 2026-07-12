@@ -8,6 +8,7 @@ import 'ai_analysis_sheet.dart';
 import 'trade_bottom_sheet.dart';
 import 'alert_bottom_sheet.dart';
 
+import 'package:irshad_mobile/core/theme/app_theme.dart';
 class StockDetailScreen extends StatefulWidget {
   final Map<String, dynamic> stock;
 
@@ -26,13 +27,6 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
   final TextEditingController _purificationController = TextEditingController();
   double _purificationResult = 0;
   bool _isAlreadyFavorited = false;
-
-  // Theme Constants
-  static const Color bgColor = Color(0xFFF5F0E8);
-  static const Color primaryGold = Color(0xFFC9A84C);
-  static const Color textDark = Color(0xFF1A1208);
-  static const Color textMuted = Color(0xFF9A8C70);
-  static const Color divider = Color(0xFFE8E2D9);
 
   @override
   void initState() {
@@ -61,7 +55,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
           const SnackBar(
             content: Text('Added to watchlist'), 
             behavior: SnackBarBehavior.floating,
-            backgroundColor: textDark,
+            backgroundColor: AppTheme.textDark,
           ),
         );
       }
@@ -114,7 +108,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     
     bool isHalal = status == 'halal';
     bool isNonHalal = status == 'non-halal';
-    Color statusColor = isHalal ? const Color(0xFF2E7D32) : (isNonHalal ? Colors.red : const Color(0xFFD97706));
+    Color statusColor = isHalal ? AppTheme.halal : (isNonHalal ? AppTheme.haram : AppTheme.questionable);
     Color badgeBg = isHalal ? const Color(0xFFDCFCE7) : (isNonHalal ? const Color(0xFFFEE2E2) : const Color(0xFFFEF3C7));
     String statusLabel = isHalal ? 'SHARIAH COMPLIANT' : (isNonHalal ? 'NOT COMPLIANT' : 'QUESTIONABLE');
 
@@ -130,7 +124,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     final latestPrice = num.tryParse(_currentStock['latest_price']?.toString() ?? '0') ?? 0.0;
 
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: AppTheme.bg,
       appBar: AppBar(
         title: Row(
           mainAxisSize: MainAxisSize.min,
@@ -152,28 +146,28 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                 width: 28, height: 28,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(6),
-                  gradient: const LinearGradient(colors: [Color(0xFFFFD700), Color(0xFFD4AF37)]),
+                  gradient: LinearGradient(colors: [AppTheme.primaryHover, AppTheme.primary]),
                 ),
                 alignment: Alignment.center,
                 child: Text((_currentStock['symbol'] ?? 'S')[0], style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 12)),
               ),
-            Text(_currentStock['symbol'], style: const TextStyle(fontWeight: FontWeight.w900, color: textDark, letterSpacing: -0.5)),
+            Text(_currentStock['symbol'], style: const TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5)),
           ],
         ),
-        backgroundColor: bgColor,
+        backgroundColor: AppTheme.bg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: textDark, size: 20),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppTheme.textDark, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_active_outlined, color: textDark, size: 22),
+            icon: const Icon(Icons.notifications_active_outlined, color: AppTheme.textDark, size: 22),
             onPressed: () => AlertBottomSheet.show(context, _currentStock),
           ),
           IconButton(
             icon: Icon(_isAlreadyFavorited ? Icons.favorite_rounded : Icons.favorite_outline_rounded, 
-              color: _isAlreadyFavorited ? Colors.redAccent : textDark, size: 22),
+              color: _isAlreadyFavorited ? Colors.redAccent : AppTheme.textDark, size: 22),
             onPressed: _isAlreadyFavorited ? null : (_isFavoriting ? null : _onFavorite),
           ),
         ],
@@ -197,10 +191,10 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                   const Text('PRICE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: textMuted)),
+                   const Text('PRICE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppTheme.textMuted)),
                    const SizedBox(height: 4),
                    Text('₦ ${latestPrice.toStringAsFixed(2)}', 
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: textDark)),
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppTheme.textDark)),
                    if (_currentStock.containsKey('price_change_pct'))
                      Padding(
                        padding: const EdgeInsets.only(top: 2),
@@ -209,7 +203,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                          style: TextStyle(
                            fontSize: 12, 
                            fontWeight: FontWeight.w700, 
-                           color: _currentStock['price_change_pct'] >= 0 ? primaryGold : Colors.red
+                           color: _currentStock['price_change_pct'] >= 0 ? AppTheme.primary : Colors.red
                          )
                        ),
                      )
@@ -224,7 +218,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                 child: ElevatedButton(
                   onPressed: () => TradeBottomSheet.show(context, _currentStock),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryGold,
+                    backgroundColor: AppTheme.primary,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     elevation: 0,
@@ -360,18 +354,18 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Override Compliance Status', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: textDark)),
+                  const Text('Override Compliance Status', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppTheme.textDark)),
                   const SizedBox(height: 8),
-                  const Text('Update the status manually as a scholar or admin.', style: TextStyle(color: textMuted)),
+                  const Text('Update the status manually as a scholar or admin.', style: TextStyle(color: AppTheme.textMuted)),
                   const SizedBox(height: 24),
                   
-                  const Text('Status', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: textMuted)),
+                  const Text('Status', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppTheme.textMuted)),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     value: selectedStatus,
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: bgColor,
+                      fillColor: AppTheme.bg,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                     ),
                     items: const [
@@ -383,7 +377,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                   ),
                   const SizedBox(height: 16),
                   
-                  const Text('Reason', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: textMuted)),
+                  const Text('Reason', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppTheme.textMuted)),
                   const SizedBox(height: 8),
                   TextField(
                     controller: reasonController,
@@ -391,7 +385,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                     decoration: InputDecoration(
                       hintText: 'Explanation for override...',
                       filled: true,
-                      fillColor: bgColor,
+                      fillColor: AppTheme.bg,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                     ),
                   ),
@@ -445,7 +439,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
   Widget _buildSectionHeader(String title) {
     return Text(
       title.toUpperCase(),
-      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: textMuted, letterSpacing: 1),
+      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppTheme.textMuted, letterSpacing: 1),
     );
   }
 
@@ -473,7 +467,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
           Text(label, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: color, letterSpacing: 0.5)),
           const SizedBox(height: 8),
           Text(_currentStock['name'] ?? 'N/A', 
-            style: const TextStyle(color: textMuted, fontSize: 15, fontWeight: FontWeight.w500), textAlign: TextAlign.center),
+            style: const TextStyle(color: AppTheme.textMuted, fontSize: 15, fontWeight: FontWeight.w500), textAlign: TextAlign.center),
         ],
       ),
     );
@@ -509,7 +503,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: divider),
+        border: Border.all(color: AppTheme.divider),
       ),
       child: LineChart(
         LineChartData(
@@ -522,7 +516,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
             drawVerticalLine: false,
             horizontalInterval: (maxY - minY) / 4 > 0 ? (maxY - minY) / 4 : 1,
             getDrawingHorizontalLine: (value) {
-              return FlLine(color: divider, strokeWidth: 1);
+              return FlLine(color: AppTheme.divider, strokeWidth: 1);
             },
           ),
           titlesData: FlTitlesData(
@@ -536,7 +530,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                 interval: (maxY - minY) / 4 > 0 ? (maxY - minY) / 4 : 1,
                 reservedSize: 42,
                 getTitlesWidget: (value, meta) {
-                  return Text(value.toInt().toString(), style: const TextStyle(color: textMuted, fontSize: 10));
+                  return Text(value.toInt().toString(), style: const TextStyle(color: AppTheme.textMuted, fontSize: 10));
                 },
               ),
             ),
@@ -546,19 +540,19 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
             LineChartBarData(
               spots: spots,
               isCurved: true,
-              color: primaryGold,
+              color: AppTheme.primary,
               barWidth: 3,
               isStrokeCapRound: true,
               dotData: FlDotData(show: false),
               belowBarData: BarAreaData(
                 show: true,
-                color: primaryGold.withOpacity(0.1),
+                color: AppTheme.primary.withOpacity(0.1),
               ),
             ),
           ],
           lineTouchData: LineTouchData(
              touchTooltipData: LineTouchTooltipData(
-               getTooltipColor: (touchedSpot) => textDark,
+               getTooltipColor: (touchedSpot) => AppTheme.textDark,
                getTooltipItems: (touchedSpots) {
                  return touchedSpots.map((LineBarSpot touchedSpot) {
                    return LineTooltipItem(
@@ -580,16 +574,16 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
       decoration: BoxDecoration(
         color: Colors.white, 
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: divider),
+        border: Border.all(color: AppTheme.divider),
       ),
       child: Column(
         children: [
           _buildInfoRow('Sector', _currentStock['sector'] ?? 'Unknown'),
-          const Divider(color: divider, height: 24),
+          const Divider(color: AppTheme.divider, height: 24),
           _buildInfoRow('Exchange', 'Stock Exchange'),
-          const Divider(color: divider, height: 24),
+          const Divider(color: AppTheme.divider, height: 24),
           _buildInfoRow('Analyst Target', _currentStock['analysts_target'] != null ? '₦ ${_currentStock['analysts_target']}' : 'N/A'),
-          const Divider(color: divider, height: 24),
+          const Divider(color: AppTheme.divider, height: 24),
           _buildInfoRow('Dividend Yield', _currentStock['div_yield'] != null ? '${_currentStock['div_yield']}%' : 'N/A'),
         ],
       ),
@@ -608,14 +602,14 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: divider),
+              border: Border.all(color: AppTheme.divider),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('VALUATION', style: TextStyle(color: textMuted, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
+                const Text('VALUATION', style: TextStyle(color: AppTheme.textMuted, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
                 const SizedBox(height: 8),
-                Text(valuation, style: const TextStyle(color: textDark, fontSize: 14, fontWeight: FontWeight.w700)),
+                Text(valuation, style: const TextStyle(color: AppTheme.textDark, fontSize: 14, fontWeight: FontWeight.w700)),
               ],
             ),
           ),
@@ -627,14 +621,14 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: divider),
+              border: Border.all(color: AppTheme.divider),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('GROWTH FORECAST', style: TextStyle(color: textMuted, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
+                const Text('GROWTH FORECAST', style: TextStyle(color: AppTheme.textMuted, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
                 const SizedBox(height: 8),
-                Text(growth, style: const TextStyle(color: textDark, fontSize: 14, fontWeight: FontWeight.w700)),
+                Text(growth, style: const TextStyle(color: AppTheme.textDark, fontSize: 14, fontWeight: FontWeight.w700)),
               ],
             ),
           ),
@@ -647,8 +641,8 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(color: textMuted, fontSize: 13, fontWeight: FontWeight.w500)),
-        Text(value, style: const TextStyle(color: textDark, fontWeight: FontWeight.w800, fontSize: 14)),
+        Text(label, style: const TextStyle(color: AppTheme.textMuted, fontSize: 13, fontWeight: FontWeight.w500)),
+        Text(value, style: const TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w800, fontSize: 14)),
       ],
     );
   }
@@ -659,14 +653,14 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: divider),
+        border: Border.all(color: AppTheme.divider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(color: textMuted, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
+          Text(label, style: const TextStyle(color: AppTheme.textMuted, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
           const SizedBox(height: 8),
-          Text(value, style: const TextStyle(color: textDark, fontSize: 14, fontWeight: FontWeight.w700)),
+          Text(value, style: const TextStyle(color: AppTheme.textDark, fontSize: 14, fontWeight: FontWeight.w700)),
         ],
       ),
     );
@@ -729,7 +723,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
       decoration: BoxDecoration(
         color: Colors.white, 
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: divider),
+        border: Border.all(color: AppTheme.divider),
       ),
       child: Column(
         children: [
@@ -751,9 +745,9 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(title, style: const TextStyle(color: textDark, fontWeight: FontWeight.w700, fontSize: 14)),
+            Text(title, style: const TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w700, fontSize: 14)),
             Text('${value.toStringAsFixed(2)}% / ${limit.toInt()}%', 
-              style: TextStyle(color: isFail ? Colors.red : primaryGold, fontWeight: FontWeight.w800, fontSize: 12)),
+              style: TextStyle(color: isFail ? Colors.red : AppTheme.primary, fontWeight: FontWeight.w800, fontSize: 12)),
           ],
         ),
         const SizedBox(height: 12),
@@ -762,13 +756,13 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
             Container(
               height: 8,
               width: double.infinity,
-              decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(4)),
+              decoration: BoxDecoration(color: AppTheme.bg, borderRadius: BorderRadius.circular(4)),
             ),
             Container(
               height: 8,
               width: (MediaQuery.of(context).size.width - 80) * progress,
               decoration: BoxDecoration(
-                color: isFail ? Colors.red : primaryGold, 
+                color: isFail ? Colors.red : AppTheme.primary, 
                 borderRadius: BorderRadius.circular(4)
               ),
             ),
@@ -785,7 +779,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
       decoration: BoxDecoration(
         color: Colors.white, 
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: divider),
+        border: Border.all(color: AppTheme.divider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -802,7 +796,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
           const SizedBox(height: 12),
           Text(
             reason,
-            style: const TextStyle(color: textMuted, height: 1.5, fontSize: 14, fontWeight: FontWeight.w400),
+            style: const TextStyle(color: AppTheme.textMuted, height: 1.5, fontSize: 14, fontWeight: FontWeight.w400),
           ),
         ],
       ),
@@ -819,7 +813,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: textDark, 
+        color: AppTheme.textDark, 
         borderRadius: BorderRadius.circular(24),
       ),
       child: Column(
@@ -827,7 +821,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
         children: [
           const Row(
             children: [
-              Icon(Icons.volunteer_activism_rounded, color: primaryGold, size: 20),
+              Icon(Icons.volunteer_activism_rounded, color: AppTheme.primary, size: 20),
               const SizedBox(width: 10),
               const Text('Purification (Zakat al-Mustaghalat)', 
                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14)),
@@ -847,9 +841,9 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
               filled: true,
               fillColor: Colors.white.withOpacity(0.05),
               prefixText: '₦ ',
-              prefixStyle: const TextStyle(color: primaryGold, fontWeight: FontWeight.w800),
+              prefixStyle: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.w800),
               enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: primaryGold)),
+              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppTheme.primary)),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             ),
             onChanged: (v) => _calculatePurification(v, nonCompliantRev),
@@ -865,7 +859,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                   const Text('PURIFICATION AMOUNT', style: TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.w800)),
                   const SizedBox(height: 4),
                   Text('₦ ${_purificationResult.toStringAsFixed(2)}', 
-                    style: const TextStyle(color: primaryGold, fontSize: 32, fontWeight: FontWeight.w900)),
+                    style: const TextStyle(color: AppTheme.primary, fontSize: 32, fontWeight: FontWeight.w900)),
                   const SizedBox(height: 8),
                   Text('Purification rate: $nonCompliantRev%', 
                     style: const TextStyle(color: Colors.white30, fontSize: 11)),
@@ -909,7 +903,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
       child: ElevatedButton(
         onPressed: _isLoading ? null : _runScreening,
         style: ElevatedButton.styleFrom(
-          backgroundColor: textDark,
+          backgroundColor: AppTheme.textDark,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           elevation: 0,
@@ -931,11 +925,11 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: divider),
+        border: Border.all(color: AppTheme.divider),
       ),
       child: Text(
         overview,
-        style: const TextStyle(color: textMuted, height: 1.6, fontSize: 14),
+        style: const TextStyle(color: AppTheme.textMuted, height: 1.6, fontSize: 14),
       ),
     );
   }

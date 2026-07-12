@@ -7,7 +7,7 @@ import 'features/auth/ui/register_screen.dart';
 import 'features/auth/ui/welcome_screen.dart';
 import 'features/auth/ui/profile_screen.dart';
 import 'features/auth/ui/edit_profile_screen.dart';
-import 'features/auth/ui/upgrade_screen.dart';
+import 'core/theme/app_theme.dart';
 import 'features/home/home_screen.dart';
 import 'features/profile/ui/settings_screen.dart';
 import 'features/profile/ui/notifications_screen.dart';
@@ -65,43 +65,13 @@ class IrshadApp extends StatelessWidget {
   final String initialRoute;
   const IrshadApp({super.key, this.initialRoute = '/onboarding'});
 
-  static const Color bgColor = Color(0xFFF5F0E8); // Cream
-  static const Color primaryGold = Color(0xFFC9A84C); // Gold
-  static const Color darkSlate = Color(0xFF1A1208); // Dark Slate
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'IRSHAD',
       debugShowCheckedModeBanner: false,
       navigatorKey: ApiService.navigatorKey,
-      theme: ThemeData(
-        useMaterial3: true,
-        brightness: Brightness.light,
-        fontFamily: 'Inter',
-        scaffoldBackgroundColor: bgColor,
-        appBarTheme: const AppBarTheme(
-          centerTitle: false,
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-          foregroundColor: darkSlate,
-        ),
-        colorScheme: const ColorScheme.light(
-          primary: primaryGold,
-          secondary: Color(0xFFE8C96A),
-          surface: Colors.white,
-          onSurface: darkSlate,
-          background: bgColor,
-        ),
-        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          backgroundColor: darkSlate,
-          selectedItemColor: primaryGold,
-          unselectedItemColor: Color(0xFF9A8C70),
-          elevation: 16,
-          selectedLabelStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 11),
-          unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w500, fontSize: 11),
-        ),
-      ),
+      theme: AppTheme.lightTheme,
       initialRoute: initialRoute,
       onGenerateRoute: (settings) {
         if (settings.name == '/product_details') {
@@ -127,7 +97,7 @@ class IrshadApp extends StatelessWidget {
         '/welcome':          (context) => const WelcomeScreen(),
         '/login':            (context) => const LoginScreen(),
         '/register':         (context) => const RegisterScreen(),
-        '/upgrade':          (context) => const UpgradeScreen(),
+
         '/main':             (context) => const MainNavigationScreen(),
         '/profile':          (context) => const ProfileScreen(),
         '/edit_profile':     (context) => const EditProfileScreen(),
@@ -261,7 +231,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       ),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: Color(0xFFE8E2D9), width: 1)),
+          border: Border(top: BorderSide(color: AppTheme.divider, width: 1)),
         ),
         child: BottomNavigationBar(
           currentIndex: _selectedIndex,

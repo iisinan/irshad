@@ -3,6 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../data/product_repository.dart';
 
+import 'package:irshad_mobile/core/theme/app_theme.dart';
 class UserSubmissionScreen extends StatefulWidget {
   final String? initialBarcode;
 
@@ -22,13 +23,6 @@ class _UserSubmissionScreenState extends State<UserSubmissionScreen> {
   bool _isLoading = false;
   XFile? _imageFile;
   final ImagePicker _picker = ImagePicker();
-
-  // Theme Constants
-  static const Color bgColor = Color(0xFFF5F0E8);
-  static const Color primaryGold = Color(0xFFC9A84C);
-  static const Color textDark = Color(0xFF1A1208);
-  static const Color textMuted = Color(0xFF9A8C70);
-  static const Color divider = Color(0xFFE8E2D9);
 
   @override
   void initState() {
@@ -72,7 +66,7 @@ class _UserSubmissionScreenState extends State<UserSubmissionScreen> {
         titlePadding: const EdgeInsets.only(top: 40),
         title: const Column(
           children: [
-            Icon(Icons.check_circle_rounded, color: primaryGold, size: 64),
+            Icon(Icons.check_circle_rounded, color: AppTheme.primary, size: 64),
             SizedBox(height: 24),
             Text(
               'Submission Received', 
@@ -84,7 +78,7 @@ class _UserSubmissionScreenState extends State<UserSubmissionScreen> {
         content: const Text(
           'Thank you for contributing to the IRSHAD community! Our scholars will review this product shortly.',
           textAlign: TextAlign.center,
-          style: TextStyle(color: textMuted, height: 1.5, fontSize: 14),
+          style: TextStyle(color: AppTheme.textMuted, height: 1.5, fontSize: 14),
         ),
         actionsPadding: const EdgeInsets.all(24),
         actions: [
@@ -97,7 +91,7 @@ class _UserSubmissionScreenState extends State<UserSubmissionScreen> {
                 Navigator.pop(context); // Go back
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: textDark,
+                backgroundColor: AppTheme.textDark,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 elevation: 0,
@@ -123,13 +117,13 @@ class _UserSubmissionScreenState extends State<UserSubmissionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: AppTheme.bg,
       appBar: AppBar(
-        title: const Text('New Submission', style: TextStyle(fontWeight: FontWeight.w900, color: textDark, letterSpacing: -0.5)),
-        backgroundColor: bgColor,
+        title: const Text('New Submission', style: TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5)),
+        backgroundColor: AppTheme.bg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: textDark, size: 20),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppTheme.textDark, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -188,7 +182,7 @@ class _UserSubmissionScreenState extends State<UserSubmissionScreen> {
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _submit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: textDark,
+                    backgroundColor: AppTheme.textDark,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     elevation: 0,
@@ -211,7 +205,7 @@ class _UserSubmissionScreenState extends State<UserSubmissionScreen> {
       padding: const EdgeInsets.only(left: 4),
       child: Text(
         title,
-        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: textMuted, letterSpacing: 1),
+        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppTheme.textMuted, letterSpacing: 1),
       ),
     );
   }
@@ -222,12 +216,12 @@ class _UserSubmissionScreenState extends State<UserSubmissionScreen> {
       children: [
         Text(
           'Missing Product?',
-          style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: textDark, letterSpacing: -0.5),
+          style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5),
         ),
         const SizedBox(height: 12),
         Text(
           'Help the IRSHAD community by submitting this product for scholar verification.',
-          style: TextStyle(color: textMuted, fontSize: 15, height: 1.5, fontWeight: FontWeight.w400),
+          style: TextStyle(color: AppTheme.textMuted, fontSize: 15, height: 1.5, fontWeight: FontWeight.w400),
         ),
       ],
     );
@@ -244,23 +238,23 @@ class _UserSubmissionScreenState extends State<UserSubmissionScreen> {
       controller: controller,
       maxLines: maxLines,
       validator: validator,
-      style: const TextStyle(color: textDark, fontWeight: FontWeight.w600),
+      style: const TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w600),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w400),
         prefixIcon: Padding(
           padding: const EdgeInsets.only(bottom: 0),
-          child: Icon(icon, color: textMuted, size: 20),
+          child: Icon(icon, color: AppTheme.textMuted, size: 20),
         ),
         filled: true,
         fillColor: Colors.white,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: divider, width: 1.5),
+          borderSide: const BorderSide(color: AppTheme.divider, width: 1.5),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: textDark, width: 1.5),
+          borderSide: const BorderSide(color: AppTheme.textDark, width: 1.5),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
@@ -281,7 +275,7 @@ class _UserSubmissionScreenState extends State<UserSubmissionScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: divider, width: 1.5),
+          border: Border.all(color: AppTheme.divider, width: 1.5),
         ),
         child: _imageFile != null 
           ? Column(
@@ -296,25 +290,25 @@ class _UserSubmissionScreenState extends State<UserSubmissionScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                const Text('Tap to change photo', style: TextStyle(color: textMuted, fontSize: 12, fontWeight: FontWeight.w500)),
+                const Text('Tap to change photo', style: TextStyle(color: AppTheme.textMuted, fontSize: 12, fontWeight: FontWeight.w500)),
               ],
             )
           : Column(
               children: [
                 Container(
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(12)),
-                  child: const Icon(Icons.camera_alt_rounded, color: primaryGold, size: 28),
+                  decoration: BoxDecoration(color: AppTheme.bg, borderRadius: BorderRadius.circular(12)),
+                  child: const Icon(Icons.camera_alt_rounded, color: AppTheme.primary, size: 28),
                 ),
                 const SizedBox(height: 16),
                 const Text(
                   'Upload Product Image',
-                  style: TextStyle(color: textDark, fontWeight: FontWeight.w800, fontSize: 14),
+                  style: TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w800, fontSize: 14),
                 ),
                 const SizedBox(height: 6),
                 const Text(
                   'High quality photo of ingredients list preferred',
-                  style: TextStyle(color: textMuted, fontSize: 12, fontWeight: FontWeight.w500),
+                  style: TextStyle(color: AppTheme.textMuted, fontSize: 12, fontWeight: FontWeight.w500),
                 ),
               ],
             ),
