@@ -68,7 +68,7 @@ class StockController extends Controller
      */
     public function ngx(): JsonResponse
     {
-        $stocks = \Illuminate\Support\Facades\Cache::rememberForever('stocks.ngx', function () {
+        $stocks = \Illuminate\Support\Facades\Cache::remember('stocks.ngx.v2', 3600, function () {
             return Company::with([
                 'status',
                 'dailyPrices' => fn($q) => $q->latest('date')->limit(2),
