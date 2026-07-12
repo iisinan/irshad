@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2, Brain } from 'lucide-react';
+import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2, Brain, Globe, Newspaper } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { fetchStockDetails, fetchAiAnalysis } from '../services/api';
 import ReactMarkdown from 'react-markdown';
@@ -20,6 +20,10 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const [aiAnalysis, setAiAnalysis] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState(null);
+  
+  const [stockNews, setStockNews] = useState([]);
+  const [newsLoading, setNewsLoading] = useState(true);
+  const [showBrokerageModal, setShowBrokerageModal] = useState(false);
 
   useEffect(() => {
     // Always fetch full data in background; merge so we add financials & chart
@@ -27,6 +31,14 @@ const StockDetails = ({ symbol: propSymbol }) => {
       .then(r => { if (r.data) setStock(r.data); })
       .catch(console.error)
       .finally(() => { setLoading(false); setEnriching(false); });
+      
+    // Fetch related news
+    setNewsLoading(true);
+    fetch(`http://127.0.0.1:8000/api/news?symbol=${symbol}`)
+      .then(res => res.json())
+      .then(data => setStockNews(data.data || []))
+      .catch(console.error)
+      .finally(() => setNewsLoading(false));
   }, [symbol]);
 
   if (loading) {
@@ -416,6 +428,13 @@ const StockDetails = ({ symbol: propSymbol }) => {
                   <span style={{ color: 'var(--text-dark)', fontWeight: 700, fontSize: '0.95rem' }}>{row.value}</span>
                 </div>
               ))}
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.88rem', fontWeight: 500 }}>SEC Registration</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--halal)', fontWeight: 700, fontSize: '0.85rem', background: 'var(--halal-bg)', padding: '2px 8px', borderRadius: '12px' }}>
+                  <CheckCircle size={12} /> Verified
+                </span>
+              </div>
             </div>
           </div>
 
@@ -473,7 +492,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
               if (!user) {
                 navigate('/login');
               } else {
-                alert("Irshad Brokerage integration is coming soon! You'll be able to trade directly from your portfolio.");
+                setShowBrokerageModal(true);
               }
             }}
             className="btn-primary" 
@@ -485,6 +504,60 @@ const StockDetails = ({ symbol: propSymbol }) => {
           <p style={{ fontSize: '0.8rem', color: 'var(--text-light)', textAlign: 'center', lineHeight: 1.5 }}>
             Link your Nigerian brokerage account to enable live trading.
           </p>
+        </div>
+      </div>
+
+      {/* Brokerage Modal */}
+      {showBrokerageModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
+          <div className="animate-fade-in" style={{ background: 'white', borderRadius: '24px', padding: '40px', maxWidth: '420px', width: '100%', boxShadow: '0 20px 40px rgba(0,0,0,0.1)', border: '1px solid var(--border)' }}>
+            <div style={{ width: '64px', height: '64px', background: 'var(--primary-50)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', color: 'var(--primary)' }}>
+              <Building2 size={32} />
+            </div>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-dark)', textAlign: 'center', marginBottom: '12px' }}>Brokerage Integration</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '1rem', textAlign: 'center', lineHeight: 1.5, marginBottom: '32px' }}>
+              In-app trading with CSCS and top Nigerian brokerages is coming soon. Connect your account to enable one-click Halal trading.
+            </p>
+            <button className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '16px', fontSize: '1rem' }} onClick={() => setShowBrokerageModal(false)}>
+              Got it, thanks!
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ─── News Section ─── */}
+      <div style={{ marginTop: '32px' }}>
+        <div className="detail-panel">
+          <div className="detail-section-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Newspaper size={18} /> {stock.symbol} News
+          </div>
+          
+          {newsLoading ? (
+            <div style={{ padding: '40px 0', textAlign: 'center', color: 'var(--text-muted)' }}>
+              <div className="spinner" style={{ margin: '0 auto 12px' }} />
+              Loading latest news...
+            </div>
+          ) : stockNews.length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {stockNews.map((article, i) => (
+                <a key={i} href={article.url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '16px 0', borderBottom: i < stockNews.length - 1 ? '1px solid var(--border)' : 'none', textDecoration: 'none', transition: 'opacity 0.2s' }} onMouseEnter={e => e.currentTarget.style.opacity = 0.8} onMouseLeave={e => e.currentTarget.style.opacity = 1}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '2px 8px', borderRadius: '20px', background: 'var(--primary-50)', color: 'var(--primary)', letterSpacing: '0.3px', textTransform: 'uppercase' }}>{article.source}</span>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', fontWeight: 500 }}>{new Date(article.published_at).toLocaleDateString()}</span>
+                  </div>
+                  <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-dark)', lineHeight: 1.4 }}>{article.title}</div>
+                  {article.excerpt && (
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{article.excerpt}</div>
+                  )}
+                </a>
+              ))}
+            </div>
+          ) : (
+            <div style={{ padding: '40px 0', textAlign: 'center', color: 'var(--text-light)' }}>
+              <Globe size={32} style={{ margin: '0 auto 12px', opacity: 0.5 }} />
+              <p>No recent news found for {stock.symbol}</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

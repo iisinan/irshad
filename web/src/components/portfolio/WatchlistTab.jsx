@@ -1,7 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import { Eye, BarChart2, Star, TrendingUp, TrendingDown, Trash2 } from 'lucide-react';
 import { fetchWatchlist, removeFromWatchlist, fetchNgxStocks } from '../../services/api';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+
+/* ─── Ticker Component ─── */
+const StockTicker = ({ stocks }) => {
+  const navigate = useNavigate();
+  if (!stocks || stocks.length === 0) return null;
+
+  return (
+    <div className="ticker-wrap" style={{ margin: '-40px -32px 32px -32px', borderRadius: '24px 24px 0 0', overflow: 'hidden', borderBottom: '1px solid var(--border)' }}>
+      <div className="ticker">
+        {stocks.slice(0, 20).concat(stocks.slice(0, 20)).map((stock, i) => {
+          let statusStr = 'QUESTIONABLE';
+          let color = 'var(--doubtful)';
+          const rawStatus = stock.status;
+          if (typeof rawStatus === 'object' && rawStatus !== null) {
+            const s = rawStatus.status?.toLowerCase();
+            if (s === 'halal') { statusStr = 'HALAL'; color = 'var(--halal)'; }
+            else if (s === 'non-halal') { statusStr = 'NON-HALAL'; color = 'var(--non-halal)'; }
+          } else if (typeof rawStatus === 'string') {
+            const s = rawStatus.toLowerCase();
+            if (s === 'compliant' || s === 'halal') { statusStr = 'HALAL'; color = 'var(--halal)'; }
+            else if (s === 'non-halal') { statusStr = 'NON-HALAL'; color = 'var(--non-halal)'; }
+          }
+          const displayPrice = Number(stock.latest_price || stock.daily_prices?.[0]?.price || 0).toFixed(2);
+          return (
+            <div key={`${stock.symbol}-${i}`} className="ticker-item" onClick={() => navigate(`/market/${stock.symbol}`, { state: { stock } })}>
+              <span className="ticker-item-symbol">{stock.symbol}</span>
+              <span className="ticker-item-price">₦{displayPrice}</span>
+              <span style={{ fontWeight: 800, fontSize: '0.7rem', color, padding: '2px 6px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)' }}>{statusStr}</span>
+              <div className="ticker-separator" />
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
 /* ─── Shared StockCard (Watchlist Version) ─── */
 const WatchlistCard = ({ company, onRemove }) => {
@@ -118,6 +154,7 @@ export default function WatchlistTab() {
 
   return (
     <div className="animate-fade-in stagger-1" style={{ background:'white', borderRadius:'24px', padding:'40px 32px', boxShadow:'var(--shadow-sm)', border:'1px solid var(--border)' }}>
+      <StockTicker stocks={allStocks} />
       
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
         <div style={{ width: '48px', height: '48px', background: 'var(--primary-50)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>

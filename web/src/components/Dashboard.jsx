@@ -60,7 +60,7 @@ const SECTOR_DATA = [];
 const TOP_GAINERS = [];
 const TOP_LOSERS = [];
 const RECENT_TRANSACTIONS = [];
-const NEWS_ITEMS = [];
+
 const NGX_STATUS = {
   isOpen: false,
   asi: '0.00',
@@ -349,7 +349,7 @@ export default function Dashboard() {
   const QUICK_ACTIONS=[
     {icon:PlusCircle,label:'Add Trade', color:'var(--primary)',bg:'var(--primary-50)',to:'/portfolio'},
     {icon:BarChart2, label:'Market',    color:'#3b82f6',       bg:'#dbeafe',         to:'/portfolio#market'},
-    {icon:Globe,     label:'News',      color:'#10b981',       bg:'#d1fae5',         to:'/portfolio#news'},
+
     {icon:Calculator,label:'Zakat',     color:'#8b5cf6',       bg:'#ede9fe',         to:'/portfolio#zakat'},
   ];
 
@@ -718,25 +718,6 @@ export default function Dashboard() {
                       <div style={{fontSize:'0.84rem',color:'var(--text-dark)',fontWeight:600,lineHeight:1.5}}>{alert.message}</div>
                       <div style={{fontSize:'0.7rem',color:'var(--text-muted)',marginTop:'3px',fontWeight:500}}>{alert.time}</div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </Panel>
-
-            {/* News Feed */}
-            <Panel>
-              <PanelHeader icon={Globe} title="Market News"
-                action={<Link to="/news" style={{fontSize:'0.78rem',fontWeight:700,color:'var(--primary)',display:'flex',alignItems:'center',gap:'3px'}}>All News <ChevronRight size={12}/></Link>}/>
-              <div style={{display:'flex',flexDirection:'column',gap:'0px'}}>
-                {NEWS_ITEMS.map((item,i)=>(
-                  <div key={item.id} style={{display:'flex',flexDirection:'column',gap:'5px',padding:'11px 0',borderBottom:i<NEWS_ITEMS.length-1?'1px solid var(--border)':'none',cursor:'pointer',transition:'all 0.2s'}}
-                    onMouseEnter={e=>e.currentTarget.style.paddingLeft='6px'}
-                    onMouseLeave={e=>e.currentTarget.style.paddingLeft='0'}>
-                    <div style={{display:'flex',alignItems:'center',gap:'6px',marginBottom:'2px'}}>
-                      <span style={{fontSize:'0.62rem',fontWeight:700,padding:'2px 8px',borderRadius:'20px',background:'var(--primary-50)',color:'var(--primary)',letterSpacing:'0.3px'}}>{item.tag}</span>
-                      <span style={{fontSize:'0.68rem',color:'var(--text-light)',fontWeight:500}}>{item.time}</span>
-                    </div>
-                    <div style={{fontSize:'0.83rem',fontWeight:600,color:'var(--text-dark)',lineHeight:1.5}}>{item.title}</div>
                   </div>
                 ))}
               </div>

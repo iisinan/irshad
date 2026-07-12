@@ -19,7 +19,7 @@ const NAV_ITEMS = [
   { label: 'Zakat',       icon: Calculator,        to: '/portfolio#zakat' },
   { label: 'Shariah',     icon: Shield,            to: '/portfolio#shariah'    },
   { section: 'Discover' },
-  { label: 'News',        icon: Newspaper,         to: '/portfolio#news'        },
+
   { label: 'About',       icon: Globe,             to: '/portfolio#about'       },
   { section: 'Account' },
   { label: 'Profile',     icon: User,              to: '/profile'     },

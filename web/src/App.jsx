@@ -7,7 +7,7 @@ import Portfolio from './components/Portfolio';
 import Dashboard from './components/Dashboard';
 import DashboardLayout from './components/DashboardLayout';
 import AboutPage from './components/About';
-import NewsPage from './components/News';
+
 import ShariahPage from './components/Shariah';
 import Profile from './components/Profile';
 import { LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage } from './components/AuthPages';
@@ -59,8 +59,8 @@ const TopNavbar = () => {
         {/* Desktop links */}
         <div className="nav-links">
           <Link to="/" className={navLinkClass('/')}>Home</Link>
-          <Link to="/about" className={navLinkClass('/about')}>About</Link>
-          <Link to="/news" className={navLinkClass('/news')}>News</Link>
+          <Link to="/shariah" className={navLinkClass('/shariah')}>Shariah Framework</Link>
+          <Link to="/about" className={navLinkClass('/about')}>About Us</Link>
           <Link to="/market" className={navLinkClass('/market')}>Market</Link>
           {user ? (
             <Link to="/dashboard" className={navLinkClass('/dashboard')}>Dashboard</Link>
@@ -112,8 +112,8 @@ const TopNavbar = () => {
       {/* Mobile drawer — also hidden on dashboard */}
       {!isDashboard && (<div className={`mobile-nav-drawer ${menuOpen ? 'open' : ''}`}>
         <Link to="/" className={navLinkClass('/')}>🏠 Home</Link>
-        <Link to="/about" className={navLinkClass('/about')}>ℹ️ About</Link>
-        <Link to="/news" className={navLinkClass('/news')}>📰 News</Link>
+        <Link to="/shariah" className={navLinkClass('/shariah')}>⚖️ Shariah Framework</Link>
+        <Link to="/about" className={navLinkClass('/about')}>ℹ️ About Us</Link>
         <Link to="/market" className={navLinkClass('/market')}>📈 Market</Link>
         {user ? (
           <Link to="/dashboard" className={navLinkClass('/dashboard')}>📊 Dashboard</Link>
@@ -283,9 +283,8 @@ const Footer = () => (
       <div className="footer-col">
         <h4>Company</h4>
         <ul>
-          <li><Link to="/about">About Us</Link></li>
-          <li><Link to="/news">Latest News</Link></li>
-          <li><Link to="/contact">Contact</Link></li>
+          <li><Link to="/shariah">Shariah Method</Link></li>
+          <li><Link to="/about">Our Story</Link></li>
           <li><Link to="/shariah">Our Methodology</Link></li>
         </ul>
       </div>
@@ -534,62 +533,6 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* News Section */}
-      <section style={{ padding: '100px 0' }}>
-        <div className="main-content">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px' }}>
-            <div>
-              <div className="section-label">Insights</div>
-              <h2 style={{ fontSize: '2.2rem', fontWeight: '800', letterSpacing: '-0.5px' }}>Latest News & Analysis</h2>
-              <p style={{ color: 'var(--text-muted)', marginTop: '10px' }}>
-                Market updates, Islamic finance insights, and platform news.
-              </p>
-            </div>
-            <Link to="/news" className="btn-secondary">View All Articles</Link>
-          </div>
-
-          <div className="news-grid">
-            {[
-              {
-                tag: 'Market Update',
-                date: 'Jul 9, 2026',
-                gradient: 'linear-gradient(135deg, #0f4c31 0%, #1a7a4f 100%)',
-                title: 'Market records positive trading week amidst new Central Bank regulations',
-                excerpt: 'The Nigerian equities market closed on a positive note as investors reacted favorably to the CBN\'s revised compliance directives...',
-              },
-              {
-                tag: 'Islamic Finance',
-                date: 'Jul 2, 2026',
-                gradient: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
-                title: 'Understanding AAOIFI Standards for Retail Investors in 2026',
-                excerpt: 'A deep dive into how AAOIFI\'s updated 2024 standards affect stock screening methodology and what it means for Nigerian investors...',
-              },
-              {
-                tag: 'Company News',
-                date: 'Jun 25, 2026',
-                gradient: 'linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%)',
-                title: 'MTN Nigeria announces green bond initiative and sustainability targets',
-                excerpt: 'Following their Q2 earnings report, MTN Nigeria unveiled a sweeping new environmental initiative aimed at reducing carbon emissions...',
-              },
-            ].map((article, i) => (
-              <div className="news-card" key={i}>
-                <div className="news-thumb-placeholder" style={{ background: article.gradient }} />
-                <div className="news-body">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-                    <span className="news-tag">{article.tag}</span>
-                    <span className="news-date">{article.date}</span>
-                  </div>
-                  <h3>{article.title}</h3>
-                  <p style={{ marginTop: '10px' }}>{article.excerpt}</p>
-                  <Link to="/news" className="btn-ghost" style={{ marginTop: '16px', fontSize: '0.9rem' }}>
-                    Read more <ChevronRight size={14} />
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Mobile App Section */}
       <section style={{ padding: '80px 0', background: 'var(--primary-50)' }}>
@@ -848,7 +791,7 @@ function App() {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/about" element={<AboutPage />} />
-            <Route path="/news" element={<NewsPage />} />
+
             <Route path="/shariah" element={<ShariahPage />} />
             <Route path="/market" element={<MarketPage />} />
             <Route path="/market/:symbol" element={<StockDetails />} />

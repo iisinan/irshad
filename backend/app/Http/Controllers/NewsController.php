@@ -11,7 +11,18 @@ class NewsController extends Controller
     public function index(Request $request)
     {
         $limit = $request->query('limit', 20);
-        $news = News::orderBy('published_at', 'desc')->paginate($limit);
+        $symbol = $request->query('symbol');
+
+        $query = News::orderBy('published_at', 'desc');
+
+        if ($symbol) {
+            $query->where(function ($q) use ($symbol) {
+                $q->where('title', 'LIKE', '%' . $symbol . '%')
+                  ->orWhere('excerpt', 'LIKE', '%' . $symbol . '%');
+            });
+        }
+
+        $news = $query->paginate($limit);
 
         return response()->json([
             'status' => 'success',

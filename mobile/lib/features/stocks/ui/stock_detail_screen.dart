@@ -9,6 +9,7 @@ import 'trade_bottom_sheet.dart';
 import 'alert_bottom_sheet.dart';
 
 import 'package:irshad_mobile/core/theme/app_theme.dart';
+import '../../../core/api/api_service.dart';
 class StockDetailScreen extends StatefulWidget {
   final Map<String, dynamic> stock;
 
@@ -27,12 +28,29 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
   final TextEditingController _purificationController = TextEditingController();
   double _purificationResult = 0;
   bool _isAlreadyFavorited = false;
+  List<dynamic> _news = [];
+  bool _isLoadingNews = true;
 
   @override
   void initState() {
     super.initState();
     _currentStock = widget.stock;
     _checkIfFavorited();
+    _fetchNews();
+  }
+
+  void _fetchNews() async {
+    try {
+      final response = await ApiService().get('news?symbol=${_currentStock['symbol']}');
+      if (mounted) {
+        setState(() {
+          _news = response.data['data'] ?? [];
+          _isLoadingNews = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isLoadingNews = false);
+    }
   }
 
   void _checkIfFavorited() async {
@@ -297,6 +315,12 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                   // Action Button
                   _buildScreeningButton(statusColor),
                   const SizedBox(height: 24),
+                  
+                  // News Section
+                  _buildSectionHeader('Latest News'),
+                  const SizedBox(height: 12),
+                  _buildNewsSection(),
+                  const SizedBox(height: 32),
 
                   // Scholar/Admin Override Button
                   _buildAdminOverrideButton(),
@@ -582,6 +606,24 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
           const Divider(color: AppTheme.divider, height: 24),
           _buildInfoRow('Exchange', 'Stock Exchange'),
           const Divider(color: AppTheme.divider, height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('SEC Registration', style: TextStyle(color: AppTheme.textMuted, fontSize: 13, fontWeight: FontWeight.w500)),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(color: AppTheme.halal.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                child: Row(
+                  children: const [
+                    Icon(Icons.check_circle_rounded, color: AppTheme.halal, size: 14),
+                    SizedBox(width: 4),
+                    Text('Verified', style: TextStyle(color: AppTheme.halal, fontWeight: FontWeight.w800, fontSize: 12)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const Divider(color: AppTheme.divider, height: 24),
           _buildInfoRow('Analyst Target', _currentStock['analysts_target'] != null ? '₦ ${_currentStock['analysts_target']}' : 'N/A'),
           const Divider(color: AppTheme.divider, height: 24),
           _buildInfoRow('Dividend Yield', _currentStock['div_yield'] != null ? '${_currentStock['div_yield']}%' : 'N/A'),
@@ -634,6 +676,90 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildNewsSection() {
+    if (_isLoadingNews) {
+      return Container(
+        padding: const EdgeInsets.all(32),
+        alignment: Alignment.center,
+        child: const CircularProgressIndicator(color: AppTheme.primary),
+      );
+    }
+    
+    if (_news.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(32),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppTheme.divider),
+        ),
+        child: Column(
+          children: const [
+            Icon(Icons.article_outlined, color: AppTheme.textMuted, size: 32),
+            SizedBox(height: 12),
+            Text('No recent news found for this stock.', style: TextStyle(color: AppTheme.textMuted)),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.divider),
+      ),
+      child: ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: _news.length,
+        separatorBuilder: (ctx, i) => const Divider(color: AppTheme.divider, height: 1),
+        itemBuilder: (ctx, i) {
+          final article = _news[i];
+          final date = DateTime.tryParse(article['published_at'] ?? '');
+          final dateStr = date != null ? '${date.day}/${date.month}/${date.year}' : 'Recent';
+          
+          return InkWell(
+            onTap: () {
+              // Open URL logic could go here
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(article['source']?.toUpperCase() ?? 'NEWS', 
+                          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppTheme.primary)),
+                      ),
+                      Text(dateStr, style: const TextStyle(fontSize: 11, color: AppTheme.textMuted, fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(article['title'] ?? '', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppTheme.textDark, height: 1.4)),
+                  if (article['excerpt'] != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(article['excerpt'], maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13, color: AppTheme.textMuted, height: 1.5)),
+                    ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 
