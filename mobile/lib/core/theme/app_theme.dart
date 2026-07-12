@@ -2,34 +2,35 @@ import 'package:flutter/material.dart';
 
 class AppTheme {
   // Core Palette
-  static const Color primary = Color(0xFF000000); // Intense Pitch Black
-  static const Color primaryHover = Color(0xFF1A1A1A);
-  static const Color accent = Color(0xFF00D287); // Vibrant Intense Emerald
+  static const Color primary = Color(0xFF0F5257); // Deep Teal
+  static const Color primaryHover = Color(0xFF0B4347);
+  static const Color accent = Color(0xFFC9B89C); // Warm Sand
+  static const Color accentSoft = Color(0xFFEAF4F3); // Active Background
   
   // Backgrounds
-  static const Color bg = Color(0xFFF9FAFB);
+  static const Color bg = Color(0xFFFAF8F5);
   static const Color bgAlt = Color(0xFFFFFFFF); // Cards
-  static const Color bgSection = Color(0xFFF3F4F6); // Secondary Background
+  static const Color bgSection = Color(0xFFF5F7FA); // Secondary Background
   static const Color divider = Color(0xFFECEFF3);
 
   // Typography
-  static const Color textDark = Color(0xFF000000);
-  static const Color textBody = Color(0xFF4B5563); // Slightly darker for contrast
-  static const Color textMuted = Color(0xFF9CA3AF);
-  static const Color textDisabled = Color(0xFFD1D5DB);
+  static const Color textDark = Color(0xFF0D1B2A); // Primary Heading
+  static const Color textBody = Color(0xFF334155); // Primary Text
+  static const Color textMuted = Color(0xFF94A3B8);
+  static const Color textDisabled = Color(0xFFCBD5E1);
 
   // Status
-  static const Color halal = Color(0xFF00D287); // Matches accent
-  static const Color questionable = Color(0xFFFF9F00); // Intense Orange
-  static const Color haram = Color(0xFFFF3344); // Intense Red
-  static const Color review = Color(0xFF2563EB); // Deep Blue
+  static const Color halal = Color(0xFF22C55E);
+  static const Color questionable = Color(0xFFF59E0B);
+  static const Color haram = Color(0xFFEF4444);
+  static const Color review = Color(0xFF3B82F6);
 
   // Theme Data
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      fontFamily: 'Inter',
+      fontFamily: 'Manrope',
       scaffoldBackgroundColor: bg,
       appBarTheme: const AppBarTheme(
         centerTitle: false,
@@ -46,7 +47,7 @@ class AppTheme {
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: bgAlt,
-        selectedItemColor: primary, // Active navigation items are Deep Charcoal
+        selectedItemColor: primary, // Active navigation items are Deep Indigo
         unselectedItemColor: textMuted,
         elevation: 8,
         selectedLabelStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 11),
@@ -68,8 +69,8 @@ class AppTheme {
         elevation: 1,
         shadowColor: Colors.black.withOpacity(0.05),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-          side: const BorderSide(color: Color(0xFFE5E7EB), width: 1),
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(

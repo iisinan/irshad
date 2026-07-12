@@ -5,25 +5,25 @@
    =================================================== */
 :root {
   /* Core Palette */
-  --bg:           #F8FAFC;
+  --bg:           #FAF8F5;
   --bg-alt:       #FFFFFF;
-  --bg-section:   #EEF2FF;
+  --bg-section:   #F5F7FA;
 
-  --primary:      #4F46E5;
-  --primary-hover:#4338CA;
-  --primary-50:   rgba(79, 70, 229, 0.1);
-  --primary-100:  rgba(79, 70, 229, 0.25);
+  --primary:      #0F5257;
+  --primary-hover:#0B4347;
+  --primary-50:   rgba(15, 82, 87, 0.1);
+  --primary-100:  rgba(15, 82, 87, 0.25);
   
-  --accent:       #14B8A6;
-  --accent-soft:  #38BDF8;
+  --accent:       #C9B89C;
+  --accent-soft:  #EAF4F3;
 
-  --text-dark:    #1E1B4B;
-  --text-body:    #64748B;
+  --text-dark:    #0D1B2A;
+  --text-body:    #334155;
   --text-muted:   #94A3B8;
   --text-light:   #CBD5E1;
 
-  --border:       #E2E8F0;
-  --border-strong:#E5E7EB;
+  --border:       #E6E8EC;
+  --border-strong:#ECEFF3;
 
   /* Status */
   --halal:        #22C55E;
