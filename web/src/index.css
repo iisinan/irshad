@@ -1212,8 +1212,8 @@ button { font-family: inherit; cursor: pointer; }
 .ticker-wrap {
   width: 100%;
   overflow: hidden;
-  background: #1A1208;
-  border-bottom: 1px solid var(--primary-100);
+  background: var(--primary);
+  border-bottom: 1px solid var(--primary-hover);
   box-sizing: border-box;
   display: flex;
   align-items: center;
@@ -1232,11 +1232,11 @@ button { font-family: inherit; cursor: pointer; }
 }
 .ticker-wrap::before {
   left: 0;
-  background: linear-gradient(to right, var(--bg-alt), transparent);
+  background: linear-gradient(to right, var(--primary), transparent);
 }
 .ticker-wrap::after {
   right: 0;
-  background: linear-gradient(to left, var(--bg-alt), transparent);
+  background: linear-gradient(to left, var(--primary), transparent);
 }
 .ticker {
   display: inline-flex;
@@ -1253,7 +1253,7 @@ button { font-family: inherit; cursor: pointer; }
   padding: 0 20px;
   font-size: 0.85rem;
   font-weight: 700;
-  color: var(--primary-50);
+  color: var(--accent);
   gap: 8px;
   transition: opacity 0.2s;
   cursor: pointer;
@@ -1267,14 +1267,14 @@ button { font-family: inherit; cursor: pointer; }
   letter-spacing: 0.5px;
 }
 .ticker-item-price {
-  color: var(--primary-100);
+  color: var(--accent);
   font-weight: 600;
 }
 .ticker-separator {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: var(--border-strong);
+  background: var(--accent);
   margin: 0 8px;
   opacity: 0.4;
 }
