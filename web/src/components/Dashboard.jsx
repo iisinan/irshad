@@ -445,9 +445,9 @@ export default function Dashboard() {
               <span style={{fontFamily:'monospace',color:'var(--primary)',fontWeight:800}}>{liveTime}</span>
             </p>
             <h1 style={{fontSize:'2.4rem',fontWeight:900,color:'var(--text-dark)',letterSpacing:'-1px',lineHeight:1.1}}>
-              {getGreeting()},<br/>
+              Assalamu Alaikum,<br/>
               <span style={{background:'var(--gold-grad)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundClip:'text'}}>
-                {user?.first_name||'Investor'} 👋
+                {user?.name || user?.first_name || 'Investor'} 👋
               </span>
             </h1>
             <p style={{color:'var(--text-muted)',fontSize:'0.98rem',marginTop:'8px',fontWeight:500}}>Your Islamic investment command centre.</p>
