@@ -146,4 +146,23 @@ export const fetchAiAnalysis = async (symbol) => {
   }
 };
 
+export const fetchNews = async () => {
+  try {
+    const cacheKey = 'irshad_news_cache_v9';
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      const { data, expiry } = JSON.parse(cached);
+      if (Date.now() < expiry) return data;
+    }
+
+    const response = await api.get('/news');
+    // Cache for 30 minutes to stay fresh
+    localStorage.setItem(cacheKey, JSON.stringify({ data: response.data, expiry: Date.now() + 30 * 60 * 1000 }));
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching news:', error);
+    throw error;
+  }
+};
+
 export default api;

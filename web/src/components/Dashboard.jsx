@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { fetchPortfolio, fetchNgxStocks } from '../services/api';
+import { fetchPortfolio, fetchNgxStocks, fetchNews } from '../services/api';
 import {
   Search, Bell, Star, Wallet, TrendingUp, TrendingDown,
   ShieldAlert, CheckCircle, AlertTriangle, ArrowUpRight,
@@ -303,16 +303,18 @@ export default function Dashboard() {
   const [perfRange,setPerfRange]=useState(1);
   const [moversTab,setMoversTab]=useState('gainers');
   const [ngxStocks, setNgxStocks] = useState([]);
+  const [news, setNews] = useState([]);
   const searchRef=useRef(null);
 
   useEffect(()=>{
     if(!authLoading&&!user){navigate('/login');return;}
     if(user){
-      Promise.all([fetchPortfolio(), fetchNgxStocks()])
-        .then(([portRes, ngxRes]) => {
+      Promise.all([fetchPortfolio(), fetchNgxStocks(), fetchNews().catch(()=>({ data: [] }))])
+        .then(([portRes, ngxRes, newsRes]) => {
           if (portRes && portRes.data) setData(portRes.data);
           else if (portRes && !portRes.data) setData(portRes);
           if (ngxRes && ngxRes.data) setNgxStocks(ngxRes.data);
+          if (newsRes && newsRes.data) setNews(newsRes.data);
         })
         .catch(()=>{})
         .finally(()=>setLoading(false));
@@ -664,6 +666,26 @@ export default function Dashboard() {
                 <p style={{fontSize:'0.68rem',color:'var(--text-light)',marginTop:'6px',lineHeight:1.5}}>
                   Based on {zakatManual?'your input':'portfolio value'} of ₦{fmt(zakatBase)}
                 </p>
+              </div>
+            </Panel>
+
+            {/* Market News */}
+            <Panel>
+              <PanelHeader icon={Globe} title="Market News"/>
+              <div style={{display:'flex',flexDirection:'column',gap:'12px',maxHeight:'300px',overflowY:'auto',paddingRight:'3px'}}>
+                {news.length > 0 ? news.map((item, i) => (
+                  <div key={item.id || i} style={{display:'flex',flexDirection:'column',gap:'4px',paddingBottom:'12px',borderBottom:i<news.length-1?'1px solid var(--border)':'none'}}>
+                    <a href={item.url} target="_blank" rel="noopener noreferrer" style={{fontSize:'0.85rem',color:'var(--text-dark)',fontWeight:700,textDecoration:'none',lineHeight:1.4}} onMouseEnter={e=>e.target.style.color='var(--primary)'} onMouseLeave={e=>e.target.style.color='var(--text-dark)'}>
+                      {item.title}
+                    </a>
+                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                      <span style={{fontSize:'0.7rem',color:'var(--primary)',fontWeight:600}}>{item.source}</span>
+                      <span style={{fontSize:'0.65rem',color:'var(--text-muted)'}}>{item.published_human}</span>
+                    </div>
+                  </div>
+                )) : (
+                  <div style={{fontSize:'0.8rem',color:'var(--text-muted)',textAlign:'center',padding:'20px 0'}}>No news available at the moment.</div>
+                )}
               </div>
             </Panel>
 
