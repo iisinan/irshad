@@ -64,8 +64,13 @@ function HoldingCard({holding, onDelete, onEdit}) {
         background: 'var(--primary-50)', border: '1px solid var(--border)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontWeight: 900, fontSize: '0.65rem', color: 'var(--primary)', letterSpacing: '0.5px',
+        overflow: 'hidden',
       }}>
-        {(holding.symbol || '').slice(0, 5)}
+        {holding.logo_url ? (
+            <img src={'http://127.0.0.1:8000' + holding.logo_url} alt={holding.symbol} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+        ) : (
+            (holding.symbol || '').slice(0, 5)
+        )}
       </div>
 
       <div style={{ flex: 1.4, minWidth: 0 }}>

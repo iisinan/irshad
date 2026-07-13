@@ -52,6 +52,7 @@ class PortfolioController extends Controller
                 'status' => strtolower($status),
                 'is_halal' => strtolower($status) === 'halal' || strtolower($status) === 'compliant',
                 'purification_due' => round($purificationDue, 2),
+                'logo_url' => $company->logo_url ?? null,
             ];
         });
 

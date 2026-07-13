@@ -27,9 +27,24 @@ const StockCard = ({ company, isWatched, onToggleWatch }) => {
     <div style={{ position: 'relative' }}>
       <Link to={`/portfolio#stock-${company.symbol}`} state={{ stock: company }} className="stock-card" style={{ display: 'block' }}>
         <div className="stock-card-header">
-          <div className="stock-card-title">
-            <div className="stock-symbol">{company.symbol}</div>
-            <div className="stock-name">{company.name}</div>
+          <div className="stock-card-title" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{
+              width: '38px', height: '38px', borderRadius: '10px', flexShrink: 0,
+              background: 'var(--primary-50)', border: '1px solid var(--border)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontWeight: 900, fontSize: '0.6rem', color: 'var(--primary)', letterSpacing: '0.5px',
+              overflow: 'hidden',
+            }}>
+              {company.logo_url ? (
+                  <img src={'http://127.0.0.1:8000' + company.logo_url} alt={company.symbol} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              ) : (
+                  (company.symbol || '').slice(0, 5)
+              )}
+            </div>
+            <div>
+              <div className="stock-symbol">{company.symbol}</div>
+              <div className="stock-name">{company.name}</div>
+            </div>
           </div>
           <span className={`status-badge ${badgeClass}`}>{statusStr}</span>
         </div>
