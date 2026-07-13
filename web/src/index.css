@@ -1467,44 +1467,25 @@ button { font-family: inherit; cursor: pointer; }
   }
   
   .holding-card {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: 
+      "symbol symbol"
+      "shares value"
+      "return status"
+      "actions actions";
     padding: 16px;
     gap: 12px;
   }
   
-  .holding-card > div:first-child {
-    margin-right: 12px;
-  }
-  
-  .holding-card > div:nth-child(2) {
-    flex: 1 1 50% !important; /* Title taking full available space */
-  }
-  
-  .holding-card > div:nth-child(n+3) {
-    flex: 1 1 calc(50% - 12px) !important;
-    text-align: left !important;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-  
-  .holding-card > div:nth-child(n+3) > div {
-    justify-content: flex-start !important;
-  }
-  
-  .holding-card .sparkline-container {
-    display: none; /* Hide sparkline on very small screens to save space */
-  }
-
-  /* Make action buttons take full width on mobile */
-  .holding-card > div:last-child {
-    flex: 1 1 100% !important;
-    flex-direction: row !important;
-    justify-content: flex-end !important;
-    margin-top: 8px;
-    border-top: 1px dashed var(--border);
-    padding-top: 12px;
-  }
+  .holding-card > div:nth-child(1) { display: none; /* hide logo icon to save space */ }
+  .holding-card > div:nth-child(2) { grid-area: symbol; text-align: left; }
+  .holding-card > div:nth-child(3) { grid-area: shares; text-align: left !important; }
+  .holding-card > div:nth-child(4) { grid-area: value; text-align: right !important; }
+  .holding-card > div:nth-child(5) { display: none; /* hide sparkline */ }
+  .holding-card > div:nth-child(6) { grid-area: return; text-align: left !important; }
+  .holding-card > div:nth-child(7) { grid-area: status; display: flex; justify-content: flex-end; }
+  .holding-card > div:nth-child(8) { grid-area: actions; justify-content: center; margin-top: 8px; border-top: 1px dashed var(--border); padding-top: 12px; }
   
   .holding-card > div:last-child > div {
     justify-content: flex-end !important;

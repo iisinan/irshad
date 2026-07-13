@@ -26,7 +26,7 @@ class SyncNgxData extends Command
     /**
      * Execute the console command.
      */
-    public function handle(NgxService $ngxService)
+    public function handle(NgxService $ngxService, \App\Services\AaoifiComplianceService $complianceService)
     {
         $this->info('Starting ATOMIC NGX data sync...');
         $companies = Company::all();
@@ -81,8 +81,8 @@ class SyncNgxData extends Command
                 }
 
                 // Update financials if available from Yahoo Finance
-                if (isset($data['total_assets']) && $data['total_assets'] > 0) {
-                    \App\Models\Financial::updateOrCreate(
+                if (isset($data['total_assets']) && $data['total_assets'] > 0 || isset($data['market_cap']) && $data['market_cap'] > 0) {
+                    $financial = \App\Models\Financial::updateOrCreate(
                         ['company_id' => $company->id],
                         [
                             'total_assets' => $data['total_assets'] ?? 0,
@@ -90,8 +90,23 @@ class SyncNgxData extends Command
                             'total_revenue' => $data['total_revenue'] ?? 0,
                             'interest_income' => $data['interest_income'] ?? 0,
                             'market_cap' => $data['market_cap'] ?? 0,
+                            'eps' => $data['eps'] ?? null,
+                            'pe_ratio' => $data['pe_ratio'] ?? null,
+                            'roe' => $data['roe'] ?? null,
+                            'dividend_yield' => $data['dividend_yield'] ?? null,
+                            'profit_margin' => $data['profit_margin'] ?? null,
                         ]
                     );
+                    
+                    // Trigger AAOIFI compliance check automatically if we have new financials
+                    $complianceService->evaluateCompliance($company, $financial, $company->sector);
+                } else {
+                    // Even if we didn't get new financials from Yahoo, we might need to re-evaluate
+                    // because price or market cap changes might affect the 30% thresholds.
+                    $financial = $company->financials()->latest()->first();
+                    if ($financial) {
+                        $complianceService->evaluateCompliance($company, $financial, $company->sector);
+                    }
                 }
             }
             

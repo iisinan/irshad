@@ -26,6 +26,11 @@ class NgxService
             'total_debt'      => 0,
             'interest_income' => 0,
             'total_revenue'   => 0,
+            'eps'             => null,
+            'pe_ratio'        => null,
+            'roe'             => null,
+            'dividend_yield'  => null,
+            'profit_margin'   => null,
             'timestamp'       => now()->toIso8601String(),
         ];
 
@@ -52,7 +57,7 @@ class NgxService
             'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
             'Accept' => 'application/json',
         ])->retry(3, 1000, throw: false)->timeout(10)->get("https://query2.finance.yahoo.com/v10/finance/quoteSummary/{$yahooSymbol}", [
-            'modules' => 'financialData,defaultKeyStatistics,balanceSheetHistory'
+            'modules' => 'financialData,defaultKeyStatistics,balanceSheetHistory,summaryDetail'
         ]);
 
         $fundamentalResponse->throwIfServerError();
@@ -63,8 +68,14 @@ class NgxService
                 $financialData = $modules['financialData'] ?? [];
                 
                 $response['market_cap'] = $modules['defaultKeyStatistics']['enterpriseValue']['raw'] ?? 0;
+                $response['eps'] = $modules['defaultKeyStatistics']['trailingEps']['raw'] ?? null;
+                $response['pe_ratio'] = $modules['summaryDetail']['trailingPE']['raw'] ?? null;
+                $response['dividend_yield'] = $modules['summaryDetail']['dividendYield']['raw'] ?? null;
+
                 $response['total_revenue'] = $financialData['totalRevenue']['raw'] ?? 0;
                 $response['total_debt'] = $financialData['totalDebt']['raw'] ?? 0;
+                $response['profit_margin'] = $financialData['profitMargins']['raw'] ?? null;
+                $response['roe'] = $financialData['returnOnEquity']['raw'] ?? null;
                 
                 $balanceSheets = $modules['balanceSheetHistory']['balanceSheetStatements'] ?? [];
                 if (!empty($balanceSheets)) {

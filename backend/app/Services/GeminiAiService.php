@@ -74,4 +74,58 @@ class GeminiAiService
             return "The AI Halal Assistant encountered an error connecting to the service.";
         }
     }
+
+    /**
+     * Consolidate company data from multiple sources into a Golden Record.
+     */
+    public function consolidateCompanyData(string $symbol, array $sourcesData): ?array
+    {
+        if (empty($this->apiKey)) {
+            Log::error("Gemini API key is not configured for consolidation.");
+            return null;
+        }
+
+        $prompt = "You are an expert financial data steward. Below is raw profile data for the stock {$symbol} from multiple sources.\n";
+        $prompt .= "Your job is to read them all and produce the single most accurate, standardized output.\n";
+        $prompt .= "The 'sector' field MUST be one of standard global financial sectors (e.g. Financials, Consumer Staples, Telecommunications, Healthcare, Energy, Materials, Industrials, Consumer Discretionary, Information Technology, Utilities, Real Estate). DO NOT invent new sectors.\n";
+        $prompt .= "The 'description' should be a beautifully written, comprehensive 1-2 paragraph overview combining the best details from the sources.\n\n";
+        
+        $prompt .= "RAW SOURCES:\n";
+        $prompt .= json_encode($sourcesData, JSON_PRETTY_PRINT) . "\n\n";
+        
+        $prompt .= "Output ONLY valid JSON (no markdown block wrap) with exactly these keys: 'sector', 'industry', 'business_type', 'description'.";
+
+        try {
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+            ])->post("{$this->baseUrl}/gemini-flash-latest:generateContent?key={$this->apiKey}", [
+                'contents' => [
+                    [
+                        'parts' => [
+                            ['text' => $prompt]
+                        ]
+                    ]
+                ]
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? "";
+                
+                // Clean up any potential markdown wrap
+                $text = str_replace('```json', '', $text);
+                $text = str_replace('```', '', $text);
+                $text = trim($text);
+
+                return json_decode($text, true);
+            }
+
+            Log::error('Gemini Consolidation Error', ['response' => $response->body()]);
+            
+        } catch (\Exception $e) {
+            Log::error('Gemini Consolidation Exception', ['message' => $e->getMessage()]);
+        }
+        
+        return null;
+    }
 }

@@ -62,10 +62,8 @@ const TopNavbar = () => {
           <Link to="/shariah" className={navLinkClass('/shariah')}>Shariah Framework</Link>
           <Link to="/about" className={navLinkClass('/about')}>About Us</Link>
           <Link to="/market" className={navLinkClass('/market')}>Market</Link>
-          {user ? (
+          {user && (
             <Link to="/dashboard" className={navLinkClass('/dashboard')}>Dashboard</Link>
-          ) : (
-            <Link to="/portfolio" className={navLinkClass('/portfolio')}>Portfolio</Link>
           )}
           {(user?.role === 'admin' || user?.role === 'scholar') && (
             <Link to="/admin" className={navLinkClass('/admin')} style={{ color: 'var(--primary)' }}>Admin</Link>
@@ -115,10 +113,8 @@ const TopNavbar = () => {
         <Link to="/shariah" className={navLinkClass('/shariah')}>⚖️ Shariah Framework</Link>
         <Link to="/about" className={navLinkClass('/about')}>ℹ️ About Us</Link>
         <Link to="/market" className={navLinkClass('/market')}>📈 Market</Link>
-        {user ? (
+        {user && (
           <Link to="/dashboard" className={navLinkClass('/dashboard')}>📊 Dashboard</Link>
-        ) : (
-          <Link to="/portfolio" className={navLinkClass('/portfolio')}>💼 Portfolio</Link>
         )}
         {(user?.role === 'admin' || user?.role === 'scholar') && (
           <Link to="/admin" className={navLinkClass('/admin')}>⚙️ Admin</Link>

@@ -90,6 +90,11 @@ class FetchNgxFinancialsCommand extends Command
                     'total_debt' => $this->cleanNumber($extractedData['total_debt']),
                     'total_revenue' => $this->cleanNumber($extractedData['total_revenue']),
                     'interest_income' => $this->cleanNumber($extractedData['interest_income']),
+                    'eps' => $this->cleanNumber($extractedData['eps']),
+                    'pe_ratio' => $this->cleanNumber($extractedData['pe_ratio']),
+                    'roe' => $this->cleanNumber($extractedData['roe']),
+                    'dividend_yield' => $this->cleanNumber($extractedData['dividend_yield']),
+                    'profit_margin' => $this->cleanNumber($extractedData['profit_margin']),
                 ]
             );
 
@@ -111,6 +116,9 @@ class FetchNgxFinancialsCommand extends Command
 
     private function cleanNumber($value)
     {
+        if ($value === null) {
+            return null;
+        }
         if (is_numeric($value)) {
             return $value;
         }

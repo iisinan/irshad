@@ -52,4 +52,19 @@ class SimplyWallStService
             'revenue' => rand(800000000, 4000000000),
         ];
     }
+
+    /**
+     * Fetch company profile (Sector, Industry, Description)
+     */
+    public function fetchProfile(string $symbol): ?array
+    {
+        // Simulate an API call to Simply Wall St to get the company profile.
+        // SWS usually categorizes companies strictly by global standards (GICS).
+        return [
+            'source' => 'SimplyWallSt',
+            'sector' => 'Financials', // Simulated
+            'industry' => 'Banks', // Simulated
+            'description' => "{$symbol} operates in the financial sector, providing retail and corporate banking services.",
+        ];
+    }
 }
