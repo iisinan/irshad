@@ -162,7 +162,7 @@ export default function WatchlistTab() {
           </button>
         </div>
       ) : (
-        <div style={{ border: '1px solid var(--border)', borderRadius: '16px', overflow: 'hidden' }}>
+        <div className="watchlist-table-wrap">
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: 'var(--bg-section)', borderBottom: '1px solid var(--border)' }}>

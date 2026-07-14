@@ -126,7 +126,7 @@ export default function LecturesTab() {
           <p>No resources found matching your search.</p>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px' }}>
+        <div className="lectures-grid">
           {filtered.map((item, i) => (
             <a 
               key={item.id} 

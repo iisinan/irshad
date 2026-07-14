@@ -252,7 +252,7 @@ export default function Portfolio() {
   };
 
   return (
-    <div className="page-wrapper animate-fade-in" style={{ maxWidth: '1400px', margin: '0 auto' }}>
+    <div className="page-wrapper animate-fade-in" style={{ maxWidth: '1400px', margin: '0 auto', padding: '36px 24px 80px' }}>
       {showAddModal && <AddModal onClose={() => setShowAddModal(false)} onAdd={handleAdd} isAdding={isAdding} />}
 
       {/* Header & Tabs */}
