@@ -32,9 +32,9 @@ const StockDetails = ({ symbol: propSymbol }) => {
       .catch(console.error)
       .finally(() => { setLoading(false); setEnriching(false); });
       
-    // Fetch related news
+    // Fetch related news (limit to 5 latest)
     setNewsLoading(true);
-    api.get(`/news?symbol=${symbol}`)
+    api.get(`/news?symbol=${symbol}&limit=5`)
       .then(res => setStockNews(res.data?.data || []))
       .catch(console.error)
       .finally(() => setNewsLoading(false));

@@ -94,7 +94,7 @@ const getNext3AM = () => {
 
 export const fetchNgxStocks = async () => {
   try {
-    const cacheKey = 'irshad_stocks_cache_v9';
+    const cacheKey = 'irshad_stocks_cache_v10';
     const cached = localStorage.getItem(cacheKey);
     if (cached) {
       const { data, expiry } = JSON.parse(cached);
@@ -102,7 +102,8 @@ export const fetchNgxStocks = async () => {
     }
 
     const response = await api.get('/stocks/ngx');
-    localStorage.setItem(cacheKey, JSON.stringify({ data: response.data, expiry: getNext3AM() }));
+    // Cache for 5 minutes instead of until 3AM to allow updates
+    localStorage.setItem(cacheKey, JSON.stringify({ data: response.data, expiry: Date.now() + 5 * 60 * 1000 }));
     return response.data;
   } catch (error) {
     console.error('Error fetching NGX stocks:', error);
@@ -112,7 +113,7 @@ export const fetchNgxStocks = async () => {
 
 export const fetchStockDetails = async (symbol) => {
   try {
-    const cacheKey = `irshad_stock_${symbol}_cache_v8`;
+    const cacheKey = `irshad_stock_${symbol}_cache_v10`;
     const cached = localStorage.getItem(cacheKey);
     if (cached) {
       const { data, expiry } = JSON.parse(cached);
@@ -120,7 +121,8 @@ export const fetchStockDetails = async (symbol) => {
     }
 
     const response = await api.get(`/stocks/${symbol}`);
-    localStorage.setItem(cacheKey, JSON.stringify({ data: response.data, expiry: getNext3AM() }));
+    // Cache for 5 minutes to show latest financial highlights
+    localStorage.setItem(cacheKey, JSON.stringify({ data: response.data, expiry: Date.now() + 5 * 60 * 1000 }));
     return response.data;
   } catch (error) {
     console.error(`Error fetching details for ${symbol}:`, error);
@@ -130,7 +132,7 @@ export const fetchStockDetails = async (symbol) => {
 
 export const fetchAiAnalysis = async (symbol) => {
   try {
-    const cacheKey = `irshad_ai_${symbol}_cache_v8`;
+    const cacheKey = `irshad_ai_${symbol}_cache_v10`;
     const cached = localStorage.getItem(cacheKey);
     if (cached) {
       const { data, expiry } = JSON.parse(cached);
@@ -138,7 +140,7 @@ export const fetchAiAnalysis = async (symbol) => {
     }
 
     const response = await api.get(`/stocks/${symbol}/analysis`);
-    localStorage.setItem(cacheKey, JSON.stringify({ data: response.data, expiry: getNext3AM() }));
+    localStorage.setItem(cacheKey, JSON.stringify({ data: response.data, expiry: Date.now() + 60 * 60 * 1000 }));
     return response.data;
   } catch (error) {
     console.error(`Error fetching AI analysis for ${symbol}:`, error);

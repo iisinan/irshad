@@ -102,7 +102,7 @@ class GeminiAiService
         try {
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
-            ])->post("{$this->baseUrl}/gemini-1.5-pro-latest:generateContent?key={$this->apiKey}", [
+            ])->timeout(60)->retry(3, 2000)->post("{$this->baseUrl}/gemini-flash-latest:generateContent?key={$this->apiKey}", [
                 'contents' => [
                     [
                         'parts' => [

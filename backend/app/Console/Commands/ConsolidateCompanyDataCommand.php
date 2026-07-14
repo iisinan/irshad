@@ -43,11 +43,10 @@ class ConsolidateCompanyDataCommand extends Command
                 'description' => $company->description,
             ];
 
-            $goldenRecord = null;
+            $goldenRecord = $aiService->consolidateCompanyData($company->symbol, $sourcesData);
             
-            // Bypass Gemini temporarily to instantly generate fallback data
             if ($goldenRecord === null) {
-                $this->warn("Using smart industry fallback data for {$company->symbol}.");
+                $this->warn("Gemini failed or rate limited. Using smart industry fallback data for {$company->symbol}.");
                 $goldenRecord = $this->generateFallbackData($company);
             }
             

@@ -61,7 +61,6 @@ const TopNavbar = () => {
           <Link to="/" className={navLinkClass('/')}>Home</Link>
           <Link to="/shariah" className={navLinkClass('/shariah')}>Shariah Framework</Link>
           <Link to="/about" className={navLinkClass('/about')}>About Us</Link>
-          <Link to="/market" className={navLinkClass('/market')}>Market</Link>
           {user && (
             <Link to="/dashboard" className={navLinkClass('/dashboard')}>Dashboard</Link>
           )}
@@ -112,7 +111,6 @@ const TopNavbar = () => {
         <Link to="/" className={navLinkClass('/')}>🏠 Home</Link>
         <Link to="/shariah" className={navLinkClass('/shariah')}>⚖️ Shariah Framework</Link>
         <Link to="/about" className={navLinkClass('/about')}>ℹ️ About Us</Link>
-        <Link to="/market" className={navLinkClass('/market')}>📈 Market</Link>
         {user && (
           <Link to="/dashboard" className={navLinkClass('/dashboard')}>📊 Dashboard</Link>
         )}
@@ -181,7 +179,7 @@ const StockTicker = () => {
           const displayPrice = Number(stock.daily_prices?.[0]?.price || 0).toFixed(2);
 
           return (
-            <div key={`${stock.symbol}-${i}`} className="ticker-item" onClick={() => navigate(`/market/${stock.symbol}`, { state: { stock } })}>
+            <div key={`${stock.symbol}-${i}`} className="ticker-item" onClick={() => navigate('/login')}>
               <span className="ticker-item-symbol">{stock.symbol}</span>
               <span className="ticker-item-price">₦{displayPrice}</span>
               <span style={{ fontWeight: 800, fontSize: '0.7rem', color, padding: '2px 6px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)' }}>{statusStr}</span>
@@ -220,8 +218,9 @@ const StockCard = ({ company }) => {
     else if (s === 'non-halal') { statusStr = 'NON-HALAL'; badgeClass = 'status-non-halal'; }
   }
 
+  const navigate = useNavigate();
   return (
-    <Link to={`/market/${company.symbol}`} state={{ stock: company }} className="stock-card">
+    <div onClick={() => navigate('/login')} className="stock-card" style={{ cursor: 'pointer' }}>
       <div className="stock-card-header">
         <div className="stock-card-title">
           <div className="stock-symbol">{company.symbol}</div>
@@ -239,7 +238,7 @@ const StockCard = ({ company }) => {
           {isPositive ? '+' : ''}{pct.toFixed(2)}%
         </div>
       </div>
-    </Link>
+    </div>
   );
 };
 
@@ -338,7 +337,7 @@ const LandingPage = () => {
         </p>
 
         <div className="hero-cta" style={{ display: 'flex', gap: '16px', alignItems: 'center', justifyContent: 'center' }}>
-          <Link to="/market" className="btn-primary" style={{ padding: '16px 36px', fontSize: '1.05rem', boxShadow: '0 8px 24px rgba(201,168,76,0.25)', borderRadius: '40px' }}>
+          <Link to="/login" className="btn-primary" style={{ padding: '16px 36px', fontSize: '1.05rem', boxShadow: '0 8px 24px rgba(201,168,76,0.25)', borderRadius: '40px' }}>
             Start Screening <ArrowRight size={18} />
           </Link>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: '12px' }}>
@@ -458,7 +457,7 @@ const LandingPage = () => {
                 <div className="section-label">Live Market</div>
                 <h2 style={{ fontSize: '2.2rem', fontWeight: '800', letterSpacing: '-0.5px' }}>Market Snapshot</h2>
               </div>
-              <Link to="/market" className="btn-ghost">View All Stocks <ChevronRight size={16} /></Link>
+              <Link to="/login" className="btn-ghost">View All Stocks <ChevronRight size={16} /></Link>
             </div>
             <div className="stock-grid-home">
               {stocks.map(s => <StockCard key={s.symbol} company={s} />)}
@@ -655,6 +654,8 @@ const LandingPage = () => {
 
 /* ─── Market Page ────────────────────────────────────────── */
 const MarketPage = () => {
+  const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const [stocks, setStocks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -662,11 +663,20 @@ const MarketPage = () => {
   const [search, setSearch] = useState('');
 
   useEffect(() => {
+    if (!authLoading && !user) {
+      navigate('/login', { replace: true });
+    }
+  }, [user, authLoading, navigate]);
+
+  useEffect(() => {
+    if (!user) return;
     fetchNgxStocks()
       .then(r => { if (r.data) setStocks(r.data); })
       .catch(err => setError(err?.message || 'Failed to load stocks. Please try again.'))
       .finally(() => setLoading(false));
-  }, []);
+  }, [user]);
+
+  if (!user) return null;
 
   const getStatus = (company) => {
     const raw = company.status;
