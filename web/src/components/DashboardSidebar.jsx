@@ -2,28 +2,25 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
-  LayoutDashboard, BarChart2, Briefcase, Star, Bell,
+  BarChart2, Briefcase, Star, Bell,
   HeartHandshake, Calculator, BookOpen, Newspaper,
   User, Settings, LogOut, ChevronLeft, ChevronRight,
-  Shield, Globe, X
+  Shield, Globe, X, Search
 } from 'lucide-react';
 
 const NAV_ITEMS = [
   { section: 'Main' },
-  { label: 'Dashboard',   icon: LayoutDashboard, to: '/dashboard'   },
-
-  { label: 'Market',      icon: BarChart2,         to: '/portfolio#market'      },
-  { label: 'Watchlist',   icon: Star,              to: '/portfolio#watchlist' },
+  { label: 'Screen a Stock', icon: Search,          to: '/market'         },
+  { label: 'Watchlist',      icon: Star,             to: '/portfolio#watchlist' },
   { section: 'Islamic Finance' },
-  { label: 'Purification',icon: HeartHandshake,   to: '/portfolio#purification' },
-  { label: 'Zakat',       icon: Calculator,        to: '/portfolio#zakat' },
-  { label: 'Shariah',     icon: Shield,            to: '/portfolio#shariah'    },
+  { label: 'Purification',   icon: HeartHandshake,   to: '/portfolio#purification' },
+  { label: 'Zakat',          icon: Calculator,        to: '/portfolio#zakat' },
+  { label: 'Shariah',        icon: Shield,            to: '/portfolio#shariah'    },
   { section: 'Discover' },
-
-  { label: 'About',       icon: Globe,             to: '/portfolio#about'       },
+  { label: 'About',          icon: Globe,             to: '/portfolio#about'       },
   { section: 'Account' },
-  { label: 'Profile',     icon: User,              to: '/profile'     },
-  { label: 'Settings',    icon: Settings,          to: '/profile#settings' },
+  { label: 'Profile',        icon: User,              to: '/profile'     },
+  { label: 'Settings',       icon: Settings,          to: '/profile#settings' },
 ];
 
 export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
@@ -33,9 +30,7 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
 
   const isActive = (to) => {
     const path = to.split('#')[0];
-    return path === '/dashboard'
-      ? location.pathname === path
-      : location.pathname.startsWith(path);
+    return location.pathname === path || (path !== '/' && location.pathname.startsWith(path));
   };
 
   const handleLogout = () => {

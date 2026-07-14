@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
-import { TrendingUp, TrendingDown, ArrowRight, CheckCircle, Shield, BarChart2, ChevronRight, Smartphone, Apple, Play, AlertCircle } from 'lucide-react';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
+import { TrendingUp, TrendingDown, ArrowRight, CheckCircle, Shield, BarChart2, ChevronRight, Smartphone, Apple, Play, AlertCircle, HelpCircle } from 'lucide-react';
 import { fetchNgxStocks } from './services/api';
 import StockDetails from './components/StockDetails';
 import Portfolio from './components/Portfolio';
@@ -652,27 +652,25 @@ const LandingPage = () => {
   );
 };
 
-/* ─── Market Page ────────────────────────────────────────── */
+/* ─── Screen a Stock Page ──────────────────────────────────── */
 const MarketPage = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const [stocks, setStocks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState('all');
+  const [focused, setFocused] = useState(false);
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      navigate('/login', { replace: true });
-    }
+    if (!authLoading && !user) navigate('/login', { replace: true });
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
     if (!user) return;
     fetchNgxStocks()
       .then(r => { if (r.data) setStocks(r.data); })
-      .catch(err => setError(err?.message || 'Failed to load stocks. Please try again.'))
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, [user]);
 
@@ -681,110 +679,246 @@ const MarketPage = () => {
   const getStatus = (company) => {
     const raw = company.status;
     if (typeof raw === 'object' && raw !== null) return raw.status?.toLowerCase() ?? 'doubtful';
-    if (typeof raw === 'string') {
-      const s = raw.toLowerCase();
-      if (s === 'compliant') return 'halal';
-      return s;
-    }
+    if (typeof raw === 'string') { const s = raw.toLowerCase(); return s === 'compliant' ? 'halal' : s; }
     return 'doubtful';
   };
 
   const filtered = stocks.filter(s => {
     const statusMatch = filter === 'all' || getStatus(s) === filter;
-    const nameMatch = s.name?.toLowerCase().includes(search.toLowerCase()) || s.symbol?.toLowerCase().includes(search.toLowerCase());
+    const q = search.toLowerCase();
+    const nameMatch = s.name?.toLowerCase().includes(q) || s.symbol?.toLowerCase().includes(q);
     return statusMatch && nameMatch;
   });
 
+  const statusConfig = {
+    halal:    { label: 'HALAL',    cls: 'status-halal',     icon: <CheckCircle size={11} /> },
+    'non-halal': { label: 'NON-HALAL', cls: 'status-non-halal', icon: <AlertCircle size={11} /> },
+    doubtful: { label: 'DOUBTFUL', cls: 'status-doubtful',  icon: <HelpCircle size={11} /> },
+  };
+
+  const showResults = search.length > 0 || filter !== 'all';
+
   return (
-    <div className="animate-fade-in page-wrapper">
-      {/* Page Header */}
-      <div style={{ marginBottom: '40px' }}>
-        <div className="section-label" style={{ marginBottom: '12px' }}>Live Market</div>
-        <h1 style={{ fontSize: '2.6rem', fontWeight: '800', letterSpacing: '-1px', marginBottom: '8px' }}>Stock Market</h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem' }}>
-          Halal compliance screening for every stock on the Nigerian Exchange.
+    <div className="animate-fade-in" style={{ minHeight: '100vh', background: 'var(--bg)' }}>
+
+      {/* ── Hero Search Banner ── */}
+      <div style={{
+        background: 'linear-gradient(135deg, var(--text-dark) 0%, #1a2a1a 60%, #0F2B0F 100%)',
+        padding: '60px 24px 80px',
+        textAlign: 'center',
+        position: 'relative',
+        overflow: 'hidden',
+      }}>
+        {/* Subtle grid pattern */}
+        <div style={{
+          position: 'absolute', inset: 0, opacity: 0.04,
+          backgroundImage: 'linear-gradient(var(--gold) 1px, transparent 1px), linear-gradient(90deg, var(--gold) 1px, transparent 1px)',
+          backgroundSize: '40px 40px',
+        }} />
+
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: '8px',
+          background: 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.3)',
+          borderRadius: '40px', padding: '6px 16px', marginBottom: '24px',
+          color: 'var(--gold)', fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.5px',
+        }}>
+          <Shield size={13} /> AAOIFI Shariah Screening
+        </div>
+
+        <h1 style={{
+          fontSize: 'clamp(2rem, 5vw, 3.2rem)', fontWeight: 900,
+          color: 'white', letterSpacing: '-1px', marginBottom: '12px',
+        }}>
+          Screen a Stock
+        </h1>
+        <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '1.05rem', marginBottom: '40px', maxWidth: '480px', margin: '0 auto 40px' }}>
+          Search any company on the Nigerian Exchange and instantly see its Shariah compliance status.
         </p>
-      </div>
 
-      {/* Filters */}
-      <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap' }}>
-        <input
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Search symbol or company..."
-          style={{
-            padding: '10px 16px',
-            borderRadius: 'var(--radius-sm)',
-            border: '1.5px solid var(--border)',
+        {/* ── Big Search Box ── */}
+        <div style={{
+          maxWidth: '600px', margin: '0 auto',
+          position: 'relative',
+        }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '12px',
             background: 'white',
-            fontSize: '0.95rem',
-            color: 'var(--text-dark)',
-            outline: 'none',
-            width: '260px',
-            fontFamily: 'inherit',
-          }}
-        />
-        {['all', 'halal', 'doubtful', 'non-halal'].map(f => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            style={{
-              padding: '9px 18px',
-              borderRadius: '40px',
-              border: filter === f ? '1.5px solid var(--primary)' : '1.5px solid var(--border)',
-              background: filter === f ? 'var(--primary-50)' : 'white',
-              color: filter === f ? 'var(--primary)' : 'var(--text-muted)',
-              fontWeight: 600,
-              fontSize: '0.88rem',
-              cursor: 'pointer',
-              fontFamily: 'inherit',
-              textTransform: 'capitalize',
-              transition: 'all 0.2s',
-            }}
-          >
-            {f === 'all' ? 'All Stocks' : f}
-          </button>
-        ))}
-        <span style={{ marginLeft: 'auto', color: 'var(--text-light)', fontSize: '0.88rem', fontWeight: 600 }}>
-          {filtered.length} {filtered.length === 1 ? 'result' : 'results'}
-        </span>
-      </div>
-
-      {loading ? (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '100px 0', gap: '16px' }}>
-          <div className="spinner" />
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading stocks...</p>
-        </div>
-      ) : error ? (
-        <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-muted)' }}>
-          <BarChart2 size={48} strokeWidth={1} style={{ margin: '0 auto 20px', color: 'var(--non-halal)' }} />
-          <h3 style={{ marginBottom: '8px', color: 'var(--non-halal)' }}>Could not load stocks</h3>
-          <p style={{ marginBottom: '24px' }}>{error}</p>
-          <button
-            onClick={() => { setError(null); setLoading(true); fetchNgxStocks().then(r => { if (r.data) setStocks(r.data); }).catch(err => setError(err?.message || 'Failed')).finally(() => setLoading(false)); }}
-            className="btn-primary"
-          >Try Again</button>
-        </div>
-      ) : filtered.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-muted)' }}>
-          <BarChart2 size={48} strokeWidth={1} style={{ margin: '0 auto 20px' }} />
-          <h3 style={{ marginBottom: '8px' }}>No stocks found</h3>
-          <p>Try adjusting your search or filter.</p>
-        </div>
-      ) : (
-        <div className="custom-scroll-container">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-            {filtered.map((stock, i) => (
-              <div key={stock.symbol} className="roll-in-anim" style={{ animationDelay: `${(i % 15) * 0.05}s` }}>
-                <StockCard company={stock} />
-              </div>
-            ))}
+            borderRadius: '16px',
+            padding: '6px 6px 6px 20px',
+            boxShadow: focused ? '0 0 0 3px rgba(201,168,76,0.4), 0 20px 60px rgba(0,0,0,0.3)' : '0 20px 60px rgba(0,0,0,0.25)',
+            transition: 'box-shadow 0.2s',
+          }}>
+            <BarChart2 size={20} color="var(--text-light)" style={{ flexShrink: 0 }} />
+            <input
+              autoFocus
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
+              placeholder="Search by company name or stock symbol…"
+              style={{
+                flex: 1, border: 'none', outline: 'none', background: 'transparent',
+                fontSize: '1.05rem', color: 'var(--text-dark)', fontFamily: 'inherit',
+                padding: '10px 0',
+              }}
+            />
+            {search && (
+              <button onClick={() => setSearch('')} style={{
+                background: 'var(--bg-section)', border: 'none', borderRadius: '8px',
+                padding: '6px 10px', cursor: 'pointer', color: 'var(--text-muted)',
+                fontSize: '0.78rem', fontWeight: 600,
+              }}>Clear</button>
+            )}
+            <button
+              onClick={() => { if (filtered.length === 1) navigate(`/market/${filtered[0].symbol}`, { state: { stock: filtered[0] } }); }}
+              style={{
+                background: 'var(--gold-grad)', border: 'none', borderRadius: '12px',
+                padding: '12px 24px', color: 'white', fontWeight: 700, fontSize: '0.95rem',
+                cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
+                boxShadow: '0 4px 16px rgba(201,168,76,0.35)',
+              }}>
+              Screen →
+            </button>
           </div>
         </div>
-      )}
+
+        {/* Filter Pills */}
+        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '20px', flexWrap: 'wrap' }}>
+          {['all', 'halal', 'doubtful', 'non-halal'].map(f => (
+            <button key={f} onClick={() => setFilter(f)} style={{
+              padding: '7px 18px', borderRadius: '40px', cursor: 'pointer',
+              border: filter === f ? '1.5px solid var(--gold)' : '1.5px solid rgba(255,255,255,0.15)',
+              background: filter === f ? 'rgba(201,168,76,0.2)' : 'rgba(255,255,255,0.07)',
+              color: filter === f ? 'var(--gold)' : 'rgba(255,255,255,0.55)',
+              fontWeight: 600, fontSize: '0.82rem', fontFamily: 'inherit',
+              textTransform: 'capitalize', transition: 'all 0.18s',
+            }}>{f === 'all' ? 'All Stocks' : f}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Results Area ── */}
+      <div style={{ maxWidth: '960px', margin: '0 auto', padding: '40px 24px' }}>
+
+        {loading ? (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '80px 0', gap: '16px' }}>
+            <div className="spinner" />
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading stocks…</p>
+          </div>
+        ) : !showResults ? (
+          /* ── Idle State: show stats + tip ── */
+          <div style={{ textAlign: 'center', padding: '20px 0 60px' }}>
+            <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '48px' }}>
+              {[
+                { label: 'Total Stocks', value: stocks.length, color: 'var(--primary)' },
+                { label: 'Halal', value: stocks.filter(s => getStatus(s) === 'halal').length, color: 'var(--halal)' },
+                { label: 'Non-Halal', value: stocks.filter(s => getStatus(s) === 'non-halal').length, color: 'var(--non-halal)' },
+                { label: 'Doubtful', value: stocks.filter(s => getStatus(s) === 'doubtful').length, color: 'var(--doubtful)' },
+              ].map(stat => (
+                <div key={stat.label} style={{
+                  background: 'white', border: '1px solid var(--border)',
+                  borderRadius: '16px', padding: '24px 32px', textAlign: 'center',
+                  boxShadow: 'var(--shadow-sm)',
+                }}>
+                  <div style={{ fontSize: '2.2rem', fontWeight: 900, color: stat.color }}>{stat.value}</div>
+                  <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600, marginTop: '4px' }}>{stat.label}</div>
+                </div>
+              ))}
+            </div>
+            <BarChart2 size={40} strokeWidth={1} style={{ color: 'var(--border)', margin: '0 auto 16px' }} />
+            <p style={{ color: 'var(--text-light)', fontSize: '1rem', fontWeight: 500 }}>
+              Start typing to search for a stock above
+            </p>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '80px 0' }}>
+            <BarChart2 size={48} strokeWidth={1} style={{ color: 'var(--border)', margin: '0 auto 20px' }} />
+            <h3 style={{ color: 'var(--text-dark)', marginBottom: '8px' }}>No stocks found</h3>
+            <p style={{ color: 'var(--text-muted)' }}>Try a different name or symbol.</p>
+          </div>
+        ) : (
+          <>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>
+                {filtered.length} {filtered.length === 1 ? 'result' : 'results'}
+                {search ? ` for "${search}"` : ''}
+              </span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {filtered.map((company, i) => {
+                const st = getStatus(company);
+                const cfg = statusConfig[st] || statusConfig.doubtful;
+                const price = parseFloat(company.daily_prices?.[0]?.price || company.latest_price || 0);
+                const change = parseFloat(company.price_change_pct || 0);
+                const isPos = change >= 0;
+                return (
+                  <div
+                    key={company.symbol}
+                    onClick={() => navigate(`/market/${company.symbol}`, { state: { stock: company } })}
+                    className="roll-in-anim"
+                    style={{
+                      animationDelay: `${(i % 10) * 0.04}s`,
+                      display: 'flex', alignItems: 'center', gap: '16px',
+                      background: 'white', border: '1px solid var(--border)',
+                      borderRadius: '16px', padding: '16px 20px',
+                      cursor: 'pointer', transition: 'all 0.18s',
+                      boxShadow: 'var(--shadow-sm)',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.boxShadow = 'var(--shadow-md)'; e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.boxShadow = 'var(--shadow-sm)'; e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'none'; }}
+                  >
+                    {/* Logo */}
+                    {company.logo_url ? (
+                      <img src={company.logo_url} alt={company.symbol}
+                        style={{ width: '44px', height: '44px', borderRadius: '12px', objectFit: 'contain', border: '1px solid var(--border)', flexShrink: 0 }} />
+                    ) : (
+                      <div style={{
+                        width: '44px', height: '44px', borderRadius: '12px', flexShrink: 0,
+                        background: 'var(--primary-50)', display: 'flex', alignItems: 'center',
+                        justifyContent: 'center', fontWeight: 800, fontSize: '1rem', color: 'var(--primary)',
+                      }}>{company.symbol?.charAt(0)}</div>
+                    )}
+                    {/* Name + sector */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-dark)', letterSpacing: '-0.2px' }}>
+                        {company.symbol}
+                      </div>
+                      <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {company.name}
+                      </div>
+                    </div>
+                    {/* Sector pill */}
+                    <span style={{
+                      fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-light)',
+                      background: 'var(--bg-section)', padding: '4px 10px', borderRadius: '20px',
+                      whiteSpace: 'nowrap', display: 'none',
+                    }} className="hide-mobile">{company.sector || 'Equities'}</span>
+                    {/* Status badge */}
+                    <span className={`status-badge ${cfg.cls}`} style={{ fontSize: '0.7rem', flexShrink: 0 }}>
+                      {cfg.icon} {cfg.label}
+                    </span>
+                    {/* Price */}
+                    <div style={{ textAlign: 'right', flexShrink: 0, minWidth: '80px' }}>
+                      <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '1rem' }}>
+                        ₦{price.toFixed(2)}
+                      </div>
+                      <div style={{ fontSize: '0.78rem', fontWeight: 700, color: isPos ? 'var(--halal)' : 'var(--non-halal)', display: 'flex', alignItems: 'center', gap: '3px', justifyContent: 'flex-end' }}>
+                        {isPos ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                        {isPos ? '+' : ''}{change.toFixed(2)}%
+                      </div>
+                    </div>
+                    <ChevronRight size={16} color="var(--text-light)" style={{ flexShrink: 0 }} />
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 };
+
 
 /* ─── App Shell ──────────────────────────────────────────── */
 function App() {
@@ -801,9 +935,7 @@ function App() {
             <Route path="/shariah" element={<ShariahPage />} />
             <Route path="/market" element={<MarketPage />} />
             <Route path="/market/:symbol" element={<StockDetails />} />
-            <Route path="/dashboard" element={
-              <DashboardLayout><Dashboard /></DashboardLayout>
-            } />
+            <Route path="/dashboard" element={<Navigate to="/portfolio" replace />} />
             <Route path="/portfolio" element={
               <DashboardLayout><Portfolio /></DashboardLayout>
             } />
