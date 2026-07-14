@@ -678,8 +678,7 @@ export default function Dashboard() {
                     <a href={item.url} target="_blank" rel="noopener noreferrer" style={{fontSize:'0.85rem',color:'var(--text-dark)',fontWeight:700,textDecoration:'none',lineHeight:1.4}} onMouseEnter={e=>e.target.style.color='var(--primary)'} onMouseLeave={e=>e.target.style.color='var(--text-dark)'}>
                       {item.title}
                     </a>
-                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-                      <span style={{fontSize:'0.7rem',color:'var(--primary)',fontWeight:600}}>{item.source}</span>
+                    <div style={{display:'flex',justifyContent:'flex-end',alignItems:'center'}}>
                       <span style={{fontSize:'0.65rem',color:'var(--text-muted)'}}>{item.published_human}</span>
                     </div>
                   </div>
