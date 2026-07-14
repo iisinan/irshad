@@ -28,7 +28,7 @@ class StockController extends Controller
      */
     public function index(): JsonResponse
     {
-        $stocks = Cache::rememberForever('stocks.index_v3', function () {
+        $stocks = \Illuminate\Support\Facades\Cache::rememberForever('stocks.index_v3', function () {
             return Company::with(['status', 'dailyPrices' => fn($q) => $q->latest('date')])->get();
         });
         
@@ -40,7 +40,7 @@ class StockController extends Controller
      */
     public function show(string $symbol): JsonResponse
     {
-        $stock = Cache::rememberForever("stocks.show.{$symbol}", function () use ($symbol) {
+        $stock = \Illuminate\Support\Facades\Cache::rememberForever("stocks.show.{$symbol}", function () use ($symbol) {
             return Company::with(['status', 'financials' => fn($q) => $q->latest(), 'dailyPrices' => fn($q) => $q->latest('date')])->where('symbol', $symbol)->firstOrFail();
         });
 

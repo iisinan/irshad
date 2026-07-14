@@ -16,6 +16,11 @@ class Financial extends Model
         'total_revenue',
         'market_cap',
         'interest_income',
+        'eps',
+        'pe_ratio',
+        'roe',
+        'dividend_yield',
+        'profit_margin',
     ];
 
     protected $appends = ['interest_income_ratio', 'non_compliant_income_ratio'];

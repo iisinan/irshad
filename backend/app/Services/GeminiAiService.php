@@ -88,17 +88,21 @@ class GeminiAiService
         $prompt = "You are an expert financial data steward. Below is raw profile data for the stock {$symbol} from multiple sources.\n";
         $prompt .= "Your job is to read them all and produce the single most accurate, standardized output.\n";
         $prompt .= "The 'sector' field MUST be one of standard global financial sectors (e.g. Financials, Consumer Staples, Telecommunications, Healthcare, Energy, Materials, Industrials, Consumer Discretionary, Information Technology, Utilities, Real Estate). DO NOT invent new sectors.\n";
-        $prompt .= "The 'description' should be a beautifully written, comprehensive 1-2 paragraph overview combining the best details from the sources.\n\n";
+        $prompt .= "The 'description' should be a beautifully written, comprehensive 1-2 paragraph overview combining the best details from the sources.\n";
+        $prompt .= "Additionally, provide the most recent reliable estimates for the following financial metrics for the Nigerian Exchange. You MUST estimate these numerically based on your deep knowledge of NGX stocks, or use the sources if provided.\n";
+        $prompt .= "If you do not know the exact number, provide your best reasonable estimate for a recent trailing 12 month period. DO NOT output null for financials if possible.\n\n";
         
         $prompt .= "RAW SOURCES:\n";
         $prompt .= json_encode($sourcesData, JSON_PRETTY_PRINT) . "\n\n";
         
-        $prompt .= "Output ONLY valid JSON (no markdown block wrap) with exactly these keys: 'sector', 'industry', 'business_type', 'description'.";
+        $prompt .= "Output ONLY valid JSON (no markdown block wrap) with exactly these keys:\n";
+        $prompt .= "'sector', 'industry', 'business_type', 'description', 'eps', 'pe_ratio', 'roe', 'dividend_yield', 'profit_margin', 'market_cap', 'total_assets', 'total_debt', 'total_revenue', 'interest_income'.\n";
+        $prompt .= "For percentages (roe, dividend_yield, profit_margin), use decimals (e.g. 0.05 for 5%). For absolute values, use raw numbers (e.g. 5000000000).";
 
         try {
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
-            ])->post("{$this->baseUrl}/gemini-flash-latest:generateContent?key={$this->apiKey}", [
+            ])->post("{$this->baseUrl}/gemini-1.5-pro-latest:generateContent?key={$this->apiKey}", [
                 'contents' => [
                     [
                         'parts' => [

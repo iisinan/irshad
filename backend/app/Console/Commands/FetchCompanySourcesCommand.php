@@ -15,6 +15,7 @@ class FetchCompanySourcesCommand extends Command
 
     public function handle(AfricanFinancialsService $afService, SimplyWallStService $swsService)
     {
+        ini_set('memory_limit', '-1');
         $symbol = $this->option('symbol');
         
         $query = Company::query();
@@ -47,6 +48,7 @@ class FetchCompanySourcesCommand extends Command
             }
             
             $this->info("Saved sources for {$company->symbol}");
+            unset($afData, $swsData);
             usleep(200000); // Respect rate limits
         }
         
