@@ -85,7 +85,7 @@ export default function LecturesTab() {
             <BookOpen size={24} fill="currentColor" />
           </div>
           <div>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-dark)' }}>Lectures & Resources</h2>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-dark)' }}>Resources</h2>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>Learn from verified Islamic scholars and institutions.</p>
           </div>
         </div>

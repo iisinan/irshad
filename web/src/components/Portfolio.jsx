@@ -222,7 +222,7 @@ export default function Portfolio() {
     { id: 'zakat',        label: 'Zakat' },
     { id: 'purification', label: 'Purification' },
     { id: 'shariah',      label: 'Shariah' },
-    { id: 'lectures',     label: 'Lectures' },
+    { id: 'lectures',     label: 'Resources' },
     { id: 'about',        label: 'About' }
   ];
 

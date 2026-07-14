@@ -16,7 +16,7 @@ const NAV_ITEMS = [
   { label: 'Purification',   icon: HeartHandshake,   to: '/portfolio#purification' },
   { label: 'Zakat',          icon: Calculator,        to: '/portfolio#zakat' },
   { label: 'Shariah',        icon: Shield,            to: '/portfolio#shariah'    },
-  { label: 'Lectures',       icon: BookOpen,          to: '/portfolio#lectures'   },
+  { label: 'Resources',      icon: BookOpen,          to: '/portfolio#lectures'   },
   { section: 'Discover' },
   { label: 'About',          icon: Globe,             to: '/portfolio#about'       },
   { section: 'Account' },
