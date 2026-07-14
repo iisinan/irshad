@@ -660,6 +660,7 @@ const MarketPage = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
+  const [sectorFilter, setSectorFilter] = useState('all');
   const [focused, setFocused] = useState(false);
 
   useEffect(() => {
@@ -685,10 +686,19 @@ const MarketPage = () => {
 
   const filtered = stocks.filter(s => {
     const statusMatch = filter === 'all' || getStatus(s) === filter;
+    
+    // Determine sector (defaulting to 'Other' if empty)
+    const stockSector = (s.sector || 'Other').toLowerCase();
+    const sectorMatch = sectorFilter === 'all' || stockSector.includes(sectorFilter.toLowerCase());
+    
     const q = search.toLowerCase();
-    const nameMatch = s.name?.toLowerCase().includes(q) || s.symbol?.toLowerCase().includes(q);
-    return statusMatch && nameMatch;
+    const nameMatch = s.name?.toLowerCase().includes(q) || s.symbol?.toLowerCase().includes(q) || stockSector.includes(q);
+    
+    return statusMatch && sectorMatch && nameMatch;
   });
+
+  // Extract unique sectors from loaded stocks
+  const uniqueSectors = Array.from(new Set(stocks.map(s => (s.sector || 'Other').trim()))).filter(Boolean).sort();
 
   const statusConfig = {
     halal:    { label: 'HALAL',    cls: 'status-halal',     icon: <CheckCircle size={11} /> },
@@ -782,7 +792,7 @@ const MarketPage = () => {
           </div>
         </div>
 
-        {/* Filter Pills */}
+        {/* Status Filter Pills */}
         <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '20px', flexWrap: 'wrap' }}>
           {['all', 'halal', 'doubtful', 'non-halal'].map(f => (
             <button key={f} onClick={() => setFilter(f)} style={{
@@ -792,9 +802,40 @@ const MarketPage = () => {
               color: filter === f ? 'var(--gold)' : 'rgba(255,255,255,0.55)',
               fontWeight: 600, fontSize: '0.82rem', fontFamily: 'inherit',
               textTransform: 'capitalize', transition: 'all 0.18s',
-            }}>{f === 'all' ? 'All Stocks' : f}</button>
+            }}>{f === 'all' ? 'All Status' : f}</button>
           ))}
         </div>
+
+        {/* Sector Filter Dropdown/Pills */}
+        {uniqueSectors.length > 0 && (
+          <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginTop: '12px', flexWrap: 'wrap', maxWidth: '800px', margin: '12px auto 0' }}>
+            <button 
+              onClick={() => setSectorFilter('all')} 
+              style={{
+                padding: '5px 12px', borderRadius: '8px', cursor: 'pointer',
+                background: sectorFilter === 'all' ? 'rgba(255,255,255,0.15)' : 'transparent',
+                color: sectorFilter === 'all' ? 'white' : 'rgba(255,255,255,0.4)',
+                border: 'none', fontSize: '0.75rem', fontWeight: 600, transition: 'all 0.2s'
+              }}
+            >
+              All Sectors
+            </button>
+            {uniqueSectors.map(sec => (
+              <button 
+                key={sec} 
+                onClick={() => setSectorFilter(sec)} 
+                style={{
+                  padding: '5px 12px', borderRadius: '8px', cursor: 'pointer',
+                  background: sectorFilter === sec ? 'rgba(255,255,255,0.15)' : 'transparent',
+                  color: sectorFilter === sec ? 'white' : 'rgba(255,255,255,0.4)',
+                  border: 'none', fontSize: '0.75rem', fontWeight: 600, transition: 'all 0.2s'
+                }}
+              >
+                {sec}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* ── Results Area ── */}
@@ -933,7 +974,9 @@ function App() {
             <Route path="/about" element={<AboutPage />} />
 
             <Route path="/shariah" element={<ShariahPage />} />
-            <Route path="/market" element={<MarketPage />} />
+            <Route path="/market" element={
+              <DashboardLayout><MarketPage /></DashboardLayout>
+            } />
             <Route path="/market/:symbol" element={<StockDetails />} />
             <Route path="/dashboard" element={<Navigate to="/portfolio" replace />} />
             <Route path="/portfolio" element={

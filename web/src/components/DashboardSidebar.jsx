@@ -10,12 +10,13 @@ import {
 
 const NAV_ITEMS = [
   { section: 'Main' },
-  { label: 'Screen a Stock', icon: Search,          to: '/market'         },
+  { label: 'Search for Stock', icon: Search,          to: '/market'         },
   { label: 'Watchlist',      icon: Star,             to: '/portfolio#watchlist' },
   { section: 'Islamic Finance' },
   { label: 'Purification',   icon: HeartHandshake,   to: '/portfolio#purification' },
   { label: 'Zakat',          icon: Calculator,        to: '/portfolio#zakat' },
   { label: 'Shariah',        icon: Shield,            to: '/portfolio#shariah'    },
+  { label: 'Lectures',       icon: BookOpen,          to: '/portfolio#lectures'   },
   { section: 'Discover' },
   { label: 'About',          icon: Globe,             to: '/portfolio#about'       },
   { section: 'Account' },

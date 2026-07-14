@@ -9,6 +9,7 @@ import MarketTab from './portfolio/MarketTab';
 import WatchlistTab from './portfolio/WatchlistTab';
 import ZakatTab from './portfolio/ZakatTab';
 import PurificationTab from './portfolio/PurificationTab';
+import LecturesTab from './portfolio/LecturesTab';
 import ShariahPage from './Shariah';
 
 import AboutPage from './About';
@@ -146,7 +147,7 @@ export default function Portfolio() {
   const getTabFromHash = (hash) => {
     const h = hash.replace('#', '');
     if (h.startsWith('stock-')) return h;
-    return ['overview', 'market', 'watchlist', 'zakat', 'purification', 'shariah', 'about'].includes(h) ? h : 'overview';
+    return ['overview', 'market', 'watchlist', 'zakat', 'purification', 'shariah', 'lectures', 'about'].includes(h) ? h : 'overview';
   };
   
   const [activeTab, setActiveTab] = useState(() => getTabFromHash(location.hash));
@@ -221,7 +222,7 @@ export default function Portfolio() {
     { id: 'zakat',        label: 'Zakat' },
     { id: 'purification', label: 'Purification' },
     { id: 'shariah',      label: 'Shariah' },
-
+    { id: 'lectures',     label: 'Lectures' },
     { id: 'about',        label: 'About' }
   ];
 
@@ -326,6 +327,11 @@ export default function Portfolio() {
           {mountedTabs.includes('shariah') && (
             <div style={{ display: activeTab === 'shariah' ? 'block' : 'none' }}>
               <ShariahPage />
+            </div>
+          )}
+          {mountedTabs.includes('lectures') && (
+            <div style={{ display: activeTab === 'lectures' ? 'block' : 'none' }}>
+              <LecturesTab />
             </div>
           )}
 
