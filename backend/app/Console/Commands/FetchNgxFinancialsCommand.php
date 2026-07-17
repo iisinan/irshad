@@ -70,12 +70,29 @@ class FetchNgxFinancialsCommand extends Command
 
             $this->info("Found PDF: {$pdfUrl}");
 
-            // For testing the AI pipeline without dealing with Cloudflare PDF blocks
-            $tempPath = '/tmp/dummy_mtnn.txt';
+            // 2. Download the PDF locally
+            $tempPath = storage_path('app/temp_financials_' . $company->symbol . '.pdf');
+            try {
+                $response = Http::timeout(60)->get($pdfUrl);
+                if ($response->successful()) {
+                    file_put_contents($tempPath, $response->body());
+                } else {
+                    $this->warn("Failed to download PDF for {$company->symbol}");
+                    continue;
+                }
+            } catch (\Exception $e) {
+                $this->warn("Error downloading PDF for {$company->symbol}: " . $e->getMessage());
+                continue;
+            }
 
             // 3. Extract Financials
             $this->info("Sending Document to Gemini for extraction...");
             $extractedData = $this->parser->extractFinancialsFromPdf($tempPath);
+
+            // Clean up the temporary file
+            if (file_exists($tempPath)) {
+                unlink($tempPath);
+            }
 
             if (!$extractedData) {
                 $this->error("AI Extraction failed for {$company->symbol}");

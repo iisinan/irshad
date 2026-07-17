@@ -104,41 +104,151 @@ final List<Map<String, String>> _brokers = [
   }
 
 
-  Future<void> _initiateOAuth(String name) async {
-    // Show a loading indicator since we are simulating the connection
-    showDialog(
+  void _initiateOAuth(String name) {
+    showModalBottomSheet(
       context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(child: CircularProgressIndicator(color: AppTheme.primary)),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _buildOAuthBottomSheet(name),
     );
+  }
 
-    try {
-      final apiService = ApiService();
-      await apiService.post('broker/link', {'broker_name': name});
-      
-      if (mounted) {
-        Navigator.pop(context); // Close loading dialog
-        
-        // Show success snackbar
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Successfully linked $name and funded account with ₦1,000,000!'),
-            backgroundColor: AppTheme.primary,
-            behavior: SnackBarBehavior.floating,
+  Widget _buildOAuthBottomSheet(String brokerName) {
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+    bool isConnecting = false;
+
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return Container(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppTheme.divider,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    const Icon(Icons.link_rounded, color: AppTheme.primary, size: 28),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Connect to $brokerName',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                        color: AppTheme.textDark,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Enter your $brokerName credentials to securely link your account. IRSHAD does not store your password.',
+                  style: const TextStyle(color: AppTheme.textMuted, fontSize: 14, height: 1.5),
+                ),
+                const SizedBox(height: 24),
+                const Text('Email or Username', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: AppTheme.textDark)),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: emailController,
+                  decoration: InputDecoration(
+                    hintText: 'Enter your email',
+                    filled: true,
+                    fillColor: AppTheme.bg,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text('Password', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: AppTheme.textDark)),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: passwordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    hintText: 'Enter your password',
+                    filled: true,
+                    fillColor: AppTheme.bg,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  ),
+                ),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: isConnecting
+                        ? null
+                        : () async {
+                            if (emailController.text.isEmpty || passwordController.text.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Please enter your credentials'), backgroundColor: AppTheme.haram),
+                              );
+                              return;
+                            }
+                            
+                            setState(() => isConnecting = true);
+                            try {
+                              await ApiService().post('broker/link', {'broker_name': brokerName});
+                              
+                              if (context.mounted) {
+                                Navigator.pop(context); // Close bottom sheet
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Successfully linked $brokerName and funded account with ₦1,000,000!'),
+                                    backgroundColor: AppTheme.primary,
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                                Navigator.pop(context); // Go back to portfolio
+                              }
+                            } catch (e) {
+                              if (context.mounted) {
+                                setState(() => isConnecting = false);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Error linking broker: $e'), backgroundColor: AppTheme.haram),
+                                );
+                              }
+                            }
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primary,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      elevation: 0,
+                    ),
+                    child: isConnecting
+                        ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                        : const Text('Secure Connect', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
           ),
         );
-        
-        // Pop back to portfolio
-        Navigator.pop(context);
-      }
-    } catch (e) {
-      if (mounted) {
-        Navigator.pop(context); // Close loading dialog
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error linking broker: $e'), backgroundColor: AppTheme.haram),
-        );
-      }
-    }
+      },
+    );
   }
 
   Widget _buildSecurityNotice() {

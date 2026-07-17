@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "900192262603",
+    "project_id": "irshad-72bfd",
+    "storage_bucket": "irshad-72bfd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:900192262603:android:6765036b763b123f72be4e",
+        "android_client_info": {
+          "package_name": "com.irshad.irshad"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDM3Vc3cpAbQ9iRxLFQPkfzN238TebGKQs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

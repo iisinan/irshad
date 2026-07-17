@@ -76,21 +76,24 @@ export default function PurificationTab({ data }) {
       )}
 
       {/* Header */}
-      <div style={{ background:'white', borderRadius:'24px', padding:'32px', boxShadow:'var(--shadow-sm)', border:'1px solid var(--border)', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ width: '56px', height: '56px', background: purificationDue > 0 ? 'rgba(230,81,0,0.08)' : 'var(--halal-bg)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: purificationDue > 0 ? 'var(--doubtful)' : 'var(--halal)' }}>
-            {purificationDue > 0 ? <ShieldAlert size={28} /> : <CheckCircle size={28} />}
+      <div style={{ background: 'linear-gradient(135deg, #0D1B2A 0%, #0F5257 65%, #0B6B71 100%)', borderRadius:'24px', padding:'32px', boxShadow:'0 12px 32px rgba(13,27,42,0.15)', border:'none', marginBottom: '24px', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(201,168,76,0.08)', borderRadius: '50%' }} />
+        <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ width: '56px', height: '56px', background: 'rgba(255,255,255,0.1)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', border: '1px solid rgba(255,255,255,0.2)' }}>
+              {purificationDue > 0 ? <ShieldAlert size={28} color="var(--gold)" /> : <CheckCircle size={28} color="var(--halal)" />}
+            </div>
+            <div>
+              <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'white', letterSpacing: '-0.5px' }}>Dividend Purification</h2>
+              <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.9rem', marginTop: '4px' }}>Cleanse your portfolio of non-compliant income</p>
+            </div>
           </div>
-          <div>
-            <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-dark)' }}>Dividend Purification</h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '4px' }}>Cleanse your portfolio of non-compliant income</p>
-          </div>
-        </div>
-        
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700, color: 'var(--text-muted)' }}>Total Due</div>
-          <div style={{ fontSize: '2rem', fontWeight: 900, color: purificationDue > 0 ? 'var(--doubtful)' : 'var(--text-dark)', letterSpacing: '-1px', transition: 'color 0.3s' }}>
-            ₦{purificationDue.toLocaleString()}
+          
+          <div style={{ textAlign: 'right', background: 'rgba(255,255,255,0.05)', padding: '16px 24px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)', backdropFilter: 'blur(10px)' }}>
+            <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700, color: 'rgba(255,255,255,0.5)', marginBottom: '4px' }}>Total Due</div>
+            <div style={{ fontSize: '2rem', fontWeight: 900, color: purificationDue > 0 ? '#f87171' : 'white', letterSpacing: '-1px', transition: 'color 0.3s', lineHeight: 1 }}>
+              ₦{purificationDue.toLocaleString()}
+            </div>
           </div>
         </div>
       </div>
@@ -120,20 +123,58 @@ export default function PurificationTab({ data }) {
             </p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {needsPurification.map(h => (
-              <div key={h.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px', background: 'var(--bg-section)', borderRadius: '16px', border: '1px solid var(--border)', transition: 'transform 0.2s', ':hover': { transform: 'translateY(-2px)' } }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            {needsPurification.map((h, idx) => (
+              <div key={h.id} style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr auto',
+                gap: '16px',
+                alignItems: 'center',
+                padding: '20px 24px',
+                background: 'white',
+                borderRadius: '18px',
+                border: '1px solid var(--doubtful-border)',
+                boxShadow: '0 2px 8px rgba(245, 158, 11, 0.05)',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 8px 24px rgba(245,158,11,0.12)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='0 2px 8px rgba(245,158,11,0.05)'; }}
+              >
                 <div>
-                  <div style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--text-dark)' }}>{h.symbol}</div>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '2px' }}>{h.shares} Shares</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                    <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'var(--doubtful-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.7rem', color: 'var(--doubtful)' }}>
+                      {(h.symbol || '').slice(0, 4)}
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--text-dark)' }}>{h.symbol}</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '1px' }}>{h.shares} shares</div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ flex: 1, height: '5px', background: 'var(--bg-section)', borderRadius: '3px', overflow: 'hidden' }}>
+                      <div style={{ width: `${Math.min(100, (h.purification_due / h.total_value) * 100 * 5)}%`, height: '100%', background: 'var(--doubtful)', borderRadius: '3px' }} />
+                    </div>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                      {((h.purification_due / h.total_value) * 100).toFixed(2)}% of value
+                    </span>
+                  </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--doubtful)' }}>₦{Number(h.purification_due).toLocaleString()}</div>
+                  <div style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--doubtful)', marginBottom: '8px' }}>₦{Number(h.purification_due).toLocaleString()}</div>
                   <button 
                     onClick={() => setSelectedHolding(h)}
-                    style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 700, fontSize: '0.8rem', marginTop: '4px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                    style={{ 
+                      background: 'var(--doubtful)', color: 'white', border: 'none', 
+                      fontWeight: 800, fontSize: '0.82rem', cursor: 'pointer', 
+                      display: 'inline-flex', alignItems: 'center', gap: '6px',
+                      padding: '8px 16px', borderRadius: '10px',
+                      boxShadow: '0 4px 12px rgba(245,158,11,0.25)',
+                      transition: 'opacity 0.2s'
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.opacity='0.85'}
+                    onMouseLeave={e => e.currentTarget.style.opacity='1'}
                   >
-                    Purify Now <ArrowRight size={12} />
+                    Purify Now <ArrowRight size={13} />
                   </button>
                 </div>
               </div>

@@ -593,42 +593,35 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
   }
 
   Widget _buildCompanyInfo() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white, 
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.divider),
-      ),
-      child: Column(
-        children: [
-          _buildInfoRow('Sector', _currentStock['sector'] ?? 'Unknown'),
-          const Divider(color: AppTheme.divider, height: 24),
-          _buildInfoRow('Exchange', 'Stock Exchange'),
-          const Divider(color: AppTheme.divider, height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('SEC Registration', style: TextStyle(color: AppTheme.textMuted, fontSize: 13, fontWeight: FontWeight.w500)),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(color: AppTheme.halal.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-                child: Row(
-                  children: const [
-                    Icon(Icons.check_circle_rounded, color: AppTheme.halal, size: 14),
-                    SizedBox(width: 4),
-                    Text('Verified', style: TextStyle(color: AppTheme.halal, fontWeight: FontWeight.w800, fontSize: 12)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const Divider(color: AppTheme.divider, height: 24),
-          _buildInfoRow('Analyst Target', _currentStock['analysts_target'] != null ? '₦ ${_currentStock['analysts_target']}' : 'N/A'),
-          const Divider(color: AppTheme.divider, height: 24),
-          _buildInfoRow('Dividend Yield', _currentStock['div_yield'] != null ? '${_currentStock['div_yield']}%' : 'N/A'),
-        ],
-      ),
+    String formatAmt(double amt) {
+      if (amt == 0) return '0';
+      String s = amt.toStringAsFixed(0);
+      return s.replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},');
+    }
+
+    final mcap = _currentStock['market_cap'] != null ? double.tryParse(_currentStock['market_cap'].toString()) ?? 0.0 : 0.0;
+    final pe = _currentStock['pe_ratio']?.toString() ?? 'N/A';
+    final divYield = _currentStock['div_yield'] != null ? '${_currentStock['div_yield']}%' : 'N/A';
+    final roe = _currentStock['roe']?.toString() ?? 'N/A';
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(child: _buildMetricCard('MARKET CAP', mcap > 0 ? '₦ ${formatAmt(mcap)}' : 'N/A')),
+            const SizedBox(width: 16),
+            Expanded(child: _buildMetricCard('P/E RATIO', pe)),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(child: _buildMetricCard('DIVIDEND YIELD', divYield)),
+            const SizedBox(width: 16),
+            Expanded(child: _buildMetricCard('ROE', roe != 'N/A' ? '$roe%' : 'N/A')),
+          ],
+        ),
+      ],
     );
   }
 
@@ -763,15 +756,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label, style: const TextStyle(color: AppTheme.textMuted, fontSize: 13, fontWeight: FontWeight.w500)),
-        Text(value, style: const TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w800, fontSize: 14)),
-      ],
-    );
-  }
+
 
   Widget _buildMetricCard(String label, String value) {
     return Container(

@@ -2,23 +2,24 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
-  BarChart2, Briefcase, Star, Bell,
+  BarChart2, Briefcase, Star, Bell, Activity,
   HeartHandshake, Calculator, BookOpen, Newspaper,
   User, Settings, LogOut, ChevronLeft, ChevronRight,
-  Shield, Globe, X, Search
+  Shield, Globe, X, Search, LayoutDashboard
 } from 'lucide-react';
 
 const NAV_ITEMS = [
   { section: 'Main' },
+  { label: 'Overview',       icon: LayoutDashboard,  to: '/portfolio#overview' },
   { label: 'Search for Stock', icon: Search,          to: '/market'         },
   { label: 'Watchlist',      icon: Star,             to: '/portfolio#watchlist' },
+  { label: 'Thematic Baskets',icon: Briefcase,       to: '/portfolio#baskets' },
   { section: 'Islamic Finance' },
   { label: 'Purification',   icon: HeartHandshake,   to: '/portfolio#purification' },
   { label: 'Zakat',          icon: Calculator,        to: '/portfolio#zakat' },
-  { label: 'Shariah',        icon: Shield,            to: '/portfolio#shariah'    },
   { label: 'Resources',      icon: BookOpen,          to: '/portfolio#lectures'   },
   { section: 'Discover' },
-  { label: 'About',          icon: Globe,             to: '/portfolio#about'       },
+  { label: 'About',          icon: Globe,             to: '/about'       },
   { section: 'Account' },
   { label: 'Profile',        icon: User,              to: '/profile'     },
   { label: 'Settings',       icon: Settings,          to: '/profile#settings' },
@@ -30,8 +31,17 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
   const { user, logout } = useAuth();
 
   const isActive = (to) => {
-    const path = to.split('#')[0];
-    return location.pathname === path || (path !== '/' && location.pathname.startsWith(path));
+    const toPath = to.split('#')[0];
+    const toHash = to.split('#')[1] ? '#' + to.split('#')[1] : '';
+
+    if (toPath === '/portfolio' || toPath === '/profile') {
+      if (location.pathname !== toPath) return false;
+      const currentHash = location.hash || (toPath === '/portfolio' ? '#overview' : '');
+      if (toHash) return currentHash === toHash;
+      return currentHash === '';
+    }
+
+    return location.pathname === toPath || (toPath !== '/' && location.pathname.startsWith(toPath));
   };
 
   const handleLogout = () => {

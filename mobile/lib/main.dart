@@ -43,6 +43,7 @@ void main() async {
   }
 
   await Hive.initFlutter();
+  await Hive.openBox('api_cache');
 
   final prefs = await SharedPreferences.getInstance();
   final hasSeenOnboarding = prefs.getBool('hasSeenOnboarding') ?? false;

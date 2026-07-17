@@ -21,7 +21,7 @@ const fmtK = (n) => {
 
 const MOCK_PERF = [];
 
-const PIE_COLORS = ['#c9a84c','#22c55e','#3b82f6','#8b5cf6','#f97316','#06b6d4'];
+const PIE_COLORS = ['#0F5257', '#C9B89C', '#22C55E', '#14B8A6', '#D4AF37', '#0B4347'];
 
 const statusConfig = {
   true:  {label:'Halal',    color:'var(--halal)',    bg:'var(--halal-bg)',    icon:CheckCircle},
@@ -46,30 +46,34 @@ function HoldingCard({holding, onDelete, onEdit}) {
     {v: holding.total_value * (isUp ? 1.0 : 0.96)},
   ];
 
+  const statusBorderColor = holding.purification_due > 0 ? 'var(--doubtful)' : holding.is_halal ? 'var(--halal)' : 'var(--non-halal)';
+
   return (
     <div
       className="holding-card"
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => { setHov(false); setConfirmDelete(false); }}
       style={{
-        background: 'white', border: `1px solid ${hov ? 'var(--primary-light)' : 'var(--border)'}`,
-        borderRadius: '18px',
-        marginBottom: '10px', transition: 'all 0.2s ease',
-        boxShadow: hov ? 'var(--shadow-md)' : 'var(--shadow-sm)',
-        transform: hov ? 'translateY(-1px)' : 'none',
+        background: 'white', 
+        border: `1.5px solid ${hov ? 'var(--primary-100)' : 'var(--border)'}`,
+        borderLeft: `4px solid ${statusBorderColor}`,
+        borderRadius: '20px',
+        marginBottom: '12px', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+        boxShadow: hov ? '0 12px 32px rgba(15,82,87,0.10)' : 'var(--shadow-sm)',
+        transform: hov ? 'translateY(-3px)' : 'none',
       }}
     >
       <div style={{
-        width: '46px', height: '46px', borderRadius: '12px', flexShrink: 0,
-        background: 'var(--primary-50)', border: '1px solid var(--border)',
+        width: '48px', height: '48px', borderRadius: '14px', flexShrink: 0,
+        background: 'var(--primary-50)', border: '1px solid var(--primary-100)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontWeight: 900, fontSize: '0.65rem', color: 'var(--primary)', letterSpacing: '0.5px',
-        overflow: 'hidden',
+        fontWeight: 900, fontSize: '0.7rem', color: 'var(--primary)', letterSpacing: '0.5px',
+        overflow: 'hidden', boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.5)'
       }}>
         {holding.logo_url ? (
-            <img src={'http://127.0.0.1:8000' + holding.logo_url} alt={holding.symbol} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            <img src={'http://127.0.0.1:8000' + holding.logo_url} alt={holding.symbol} style={{ width: '100%', height: '100%', objectFit: 'contain', transform: hov ? 'scale(1.15)' : 'scale(1)', transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }} />
         ) : (
-            (holding.symbol || '').slice(0, 5)
+            <div style={{ transform: hov ? 'scale(1.1)' : 'scale(1)', transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>{(holding.symbol || '').slice(0, 5)}</div>
         )}
       </div>
 
@@ -257,71 +261,109 @@ export default function OverviewTab({ data, setShowAddModal, handleDelete, chang
       {/* ═ Stats Row ═ */}
       <div className="stagger-1" style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))', gap:'14px', marginBottom:'24px' }}>
         {/* Total Value */}
-        <div style={{ background:'var(--gold-grad)', borderRadius:'18px', padding:'22px 24px', color:'white', position:'relative', overflow:'hidden', boxShadow:'0 6px 28px rgba(201,168,76,0.3)' }}>
-          <div style={{ position:'absolute', top:'-15px', right:'-15px', width:'90px', height:'90px', borderRadius:'50%', background:'rgba(255,255,255,0.08)' }}/>
-          <div style={{ fontSize:'0.7rem', fontWeight:700, textTransform:'uppercase', letterSpacing:'1px', opacity:0.85, marginBottom:'12px', display:'flex', alignItems:'center', gap:'6px' }}>
-            <Wallet size={12}/> Total Value
+        <div style={{ background:'var(--gold-grad)', borderRadius:'24px', padding:'26px', color:'white', position:'relative', overflow:'hidden', boxShadow:'0 12px 32px rgba(201,168,76,0.35)', transition:'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }}
+          onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 16px 40px rgba(201,168,76,0.45)'; }}
+          onMouseLeave={e => { e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='0 12px 32px rgba(201,168,76,0.35)'; }}>
+          <div style={{ position:'absolute', top:'-15px', right:'-15px', width:'120px', height:'120px', borderRadius:'50%', background:'rgba(255,255,255,0.1)', pointerEvents:'none' }}/>
+          <div style={{ position:'absolute', bottom:'-15px', left:'15px', width:'60px', height:'60px', borderRadius:'50%', background:'rgba(255,255,255,0.05)', pointerEvents:'none' }}/>
+          <div style={{ fontSize:'0.75rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'1px', opacity:0.9, marginBottom:'16px', display:'flex', alignItems:'center', gap:'8px', position:'relative', zIndex:1 }}>
+            <Wallet size={16}/> Total Value
           </div>
-          <div style={{ fontSize:'2rem', fontWeight:900, letterSpacing:'-1px', lineHeight:1, marginBottom:'8px' }}>
+          <div style={{ fontSize:'2.4rem', fontWeight:900, letterSpacing:'-1.5px', lineHeight:1, marginBottom:'10px', position:'relative', zIndex:1 }}>
             {fmtK(totalBalance)}
           </div>
-          <div style={{ fontSize:'0.78rem', fontWeight:600, opacity:0.85 }}>Portfolio market value</div>
+          <div style={{ fontSize:'0.85rem', fontWeight:600, opacity:0.85, position:'relative', zIndex:1 }}>Portfolio market value</div>
         </div>
 
         {/* Compliance */}
-        <div style={{ background:'white', border:'1px solid var(--border)', borderRadius:'18px', padding:'22px 24px', boxShadow:'var(--shadow-sm)' }}
-          onMouseEnter={e => e.currentTarget.style.boxShadow='var(--shadow-md)'}
-          onMouseLeave={e => e.currentTarget.style.boxShadow='var(--shadow-sm)'}>
-          <div style={{ fontSize:'0.7rem', fontWeight:700, textTransform:'uppercase', letterSpacing:'1px', color:'var(--text-muted)', marginBottom:'12px', display:'flex', alignItems:'center', gap:'6px' }}>
-            <Shield size={12} color="var(--primary)"/> Compliance
+        <div style={{ background:'white', border:'1px solid var(--border)', borderRadius:'24px', padding:'26px', boxShadow:'var(--shadow-sm)', transition:'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', position:'relative', overflow:'hidden' }}
+          onMouseEnter={e => { e.currentTarget.style.boxShadow='var(--shadow-md)'; e.currentTarget.style.transform='translateY(-2px)'; }}
+          onMouseLeave={e => { e.currentTarget.style.boxShadow='var(--shadow-sm)'; e.currentTarget.style.transform='none'; }}>
+          <div style={{ position:'absolute', top:'-20px', right:'-20px', width:'100px', height:'100px', borderRadius:'50%', background:'var(--primary-50)', opacity:0.5, pointerEvents:'none' }}/>
+          <div style={{ fontSize:'0.75rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'1px', color:'var(--text-muted)', marginBottom:'16px', display:'flex', alignItems:'center', gap:'8px', position:'relative', zIndex:1 }}>
+            <Shield size={16} color="var(--primary)"/> Compliance
           </div>
-          <div style={{ fontSize:'2rem', fontWeight:900, letterSpacing:'-1px', color: compliance >= 90 ? 'var(--halal)' : compliance >= 70 ? 'var(--doubtful)' : 'var(--non-halal)', lineHeight:1, marginBottom:'8px' }}>
+          <div style={{ fontSize:'2.4rem', fontWeight:900, letterSpacing:'-1.5px', color: compliance >= 90 ? 'var(--halal)' : compliance >= 70 ? 'var(--doubtful)' : 'var(--non-halal)', lineHeight:1, marginBottom:'10px', position:'relative', zIndex:1 }}>
             {compliance}%
           </div>
-          <div style={{ fontSize:'0.78rem', fontWeight:600, color:'var(--text-muted)' }}>
+          <div style={{ fontSize:'0.85rem', fontWeight:600, color:'var(--text-muted)', position:'relative', zIndex:1 }}>
             {compliance >= 90 ? 'Excellent Shariah standing' : 'Needs attention'}
           </div>
         </div>
 
         {/* Purification */}
-        <div style={{ background: purificationDue > 0 ? 'rgba(230,81,0,0.04)' : 'white', border: `1px solid ${purificationDue > 0 ? 'var(--doubtful-border)' : 'var(--border)'}`, borderRadius:'18px', padding:'22px 24px', boxShadow:'var(--shadow-sm)' }}>
-          <div style={{ fontSize:'0.7rem', fontWeight:700, textTransform:'uppercase', letterSpacing:'1px', color: purificationDue > 0 ? 'var(--doubtful)' : 'var(--text-muted)', marginBottom:'12px', display:'flex', alignItems:'center', gap:'6px' }}>
-            <ShieldAlert size={12}/> Purification Due
+        <div style={{ background: purificationDue > 0 ? 'rgba(230,81,0,0.02)' : 'white', border: `1px solid ${purificationDue > 0 ? 'rgba(230,81,0,0.15)' : 'var(--border)'}`, borderRadius:'24px', padding:'26px', boxShadow:'var(--shadow-sm)', transition:'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', position:'relative', overflow:'hidden' }}
+          onMouseEnter={e => { e.currentTarget.style.boxShadow='var(--shadow-md)'; e.currentTarget.style.transform='translateY(-2px)'; }}
+          onMouseLeave={e => { e.currentTarget.style.boxShadow='var(--shadow-sm)'; e.currentTarget.style.transform='none'; }}>
+          {purificationDue > 0 && <div style={{ position:'absolute', top:'-20px', right:'-20px', width:'100px', height:'100px', borderRadius:'50%', background:'var(--doubtful-bg)', opacity:0.5, pointerEvents:'none' }}/>}
+          <div style={{ fontSize:'0.75rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'1px', color: purificationDue > 0 ? 'var(--doubtful)' : 'var(--text-muted)', marginBottom:'16px', display:'flex', alignItems:'center', gap:'8px', position:'relative', zIndex:1 }}>
+            <ShieldAlert size={16} color={purificationDue > 0 ? 'var(--doubtful)' : 'var(--text-muted)'}/> Purification Due
           </div>
-          <div style={{ fontSize:'2rem', fontWeight:900, letterSpacing:'-1px', color: purificationDue > 0 ? 'var(--doubtful)' : 'var(--text-dark)', lineHeight:1, marginBottom:'8px' }}>
+          <div style={{ fontSize:'2.4rem', fontWeight:900, letterSpacing:'-1.5px', color: purificationDue > 0 ? 'var(--doubtful)' : 'var(--text-dark)', lineHeight:1, marginBottom:'10px', position:'relative', zIndex:1 }}>
             {fmtK(purificationDue)}
           </div>
-          <div style={{ fontSize:'0.78rem', fontWeight:600, color: purificationDue > 0 ? 'var(--doubtful)' : 'var(--text-muted)' }}>
+          <div style={{ fontSize:'0.85rem', fontWeight:600, color: purificationDue > 0 ? 'var(--doubtful)' : 'var(--text-muted)', position:'relative', zIndex:1 }}>
             {purificationDue > 0 ? `${needsPurif} stock${needsPurif > 1 ? 's' : ''} need purification` : 'All holdings clean'}
           </div>
         </div>
 
         {/* Holdings Count */}
-        <div style={{ background:'white', border:'1px solid var(--border)', borderRadius:'18px', padding:'22px 24px', boxShadow:'var(--shadow-sm)' }}>
-          <div style={{ fontSize:'0.7rem', fontWeight:700, textTransform:'uppercase', letterSpacing:'1px', color:'var(--text-muted)', marginBottom:'12px', display:'flex', alignItems:'center', gap:'6px' }}>
-            <Activity size={12} color="var(--primary)"/> Holdings
+        <div style={{ background:'white', border:'1px solid var(--border)', borderRadius:'24px', padding:'26px', boxShadow:'var(--shadow-sm)', transition:'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', position:'relative', overflow:'hidden' }}
+          onMouseEnter={e => { e.currentTarget.style.boxShadow='var(--shadow-md)'; e.currentTarget.style.transform='translateY(-2px)'; }}
+          onMouseLeave={e => { e.currentTarget.style.boxShadow='var(--shadow-sm)'; e.currentTarget.style.transform='none'; }}>
+          <div style={{ position:'absolute', top:'-20px', right:'-20px', width:'100px', height:'100px', borderRadius:'50%', background:'var(--primary-50)', opacity:0.3, pointerEvents:'none' }}/>
+          <div style={{ fontSize:'0.75rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'1px', color:'var(--text-muted)', marginBottom:'16px', display:'flex', alignItems:'center', gap:'8px', position:'relative', zIndex:1 }}>
+            <Activity size={16} color="var(--primary)"/> Holdings
           </div>
-          <div style={{ fontSize:'2rem', fontWeight:900, letterSpacing:'-1px', color:'var(--text-dark)', lineHeight:1, marginBottom:'8px' }}>
+          <div style={{ fontSize:'2.4rem', fontWeight:900, letterSpacing:'-1.5px', color:'var(--text-dark)', lineHeight:1, marginBottom:'10px', position:'relative', zIndex:1 }}>
             {holdings.length}
           </div>
-          <div style={{ fontSize:'0.78rem', fontWeight:600, color:'var(--text-muted)' }}>
+          <div style={{ fontSize:'0.85rem', fontWeight:600, color:'var(--text-muted)', position:'relative', zIndex:1 }}>
             {halalCount} Halal · {nonHalalCount} Non-Halal
           </div>
         </div>
       </div>
 
+      {/* ── Performance Chart ── */}
+      {data.history && data.history.length > 1 && (
+        <div className="stagger-1" style={{ background:'white', border:'1px solid var(--border)', borderRadius:'20px', padding:'24px', marginBottom:'24px', boxShadow:'var(--shadow-sm)' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'20px' }}>
+            <TrendingUp size={16} color="var(--primary)" />
+            <h3 style={{ fontSize:'1.1rem', fontWeight:800, color:'var(--text-dark)' }}>Portfolio Performance (30D)</h3>
+          </div>
+          <div style={{ height:'240px', width:'100%' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={data.history} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <Tooltip 
+                  formatter={(val) => [fmtK(val), 'Value']}
+                  labelFormatter={(label) => new Date(label).toLocaleDateString('en-NG', { month:'short', day:'numeric' })}
+                  contentStyle={{ borderRadius:'12px', border:'1px solid var(--border)', fontWeight:700, fontSize:'0.85rem' }}
+                />
+                <Area type="monotone" dataKey="value" stroke="var(--primary)" strokeWidth={3} fillOpacity={1} fill="url(#colorValue)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
+
       {/* ── Holdings Table ── */}
       <div className="stagger-2">
         {/* Filters + Sort */}
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:'10px', marginBottom:'16px' }}>
-          <div style={{ display:'flex', gap:'6px' }}>
-            {[['all','All'],['halal','Halal'],['needs','Needs Purif.'],['nonhalal','Non-Halal']].map(([val,lbl]) => (
+          <div style={{ display:'flex', gap:'6px', flexWrap: 'wrap' }}>
+            {[['all','All'],['halal','✓ Halal'],['needs','⚠ Purif.'],['nonhalal','✕ Non-Halal']].map(([val,lbl]) => (
               <button key={val} onClick={() => setActiveFilter(val)} style={{
                 padding:'6px 14px', borderRadius:'20px', fontSize:'0.76rem', fontWeight:700, cursor:'pointer', transition:'all 0.18s',
                 background: activeFilter === val ? 'var(--primary)' : 'white',
                 color:       activeFilter === val ? 'white' : 'var(--text-muted)',
                 border:      activeFilter === val ? 'none' : '1.5px solid var(--border)',
-                boxShadow:   activeFilter === val ? 'none' : 'var(--shadow-sm)',
+                boxShadow:   activeFilter === val ? '0 4px 12px rgba(15,82,87,0.2)' : 'var(--shadow-sm)',
               }}>{lbl}</button>
             ))}
           </div>

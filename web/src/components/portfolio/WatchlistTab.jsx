@@ -40,7 +40,13 @@ const StockTicker = ({ stocks }) => {
 };
 
 export default function WatchlistTab() {
-  const [watchlistSymbols, setWatchlistSymbols] = useState([]);
+  const [watchlistSymbols, setWatchlistSymbols] = useState(() => {
+    try {
+      const cached = localStorage.getItem('irshad_watchlist_cache_v1');
+      if (cached) return JSON.parse(cached) || [];
+    } catch {}
+    return [];
+  });
   const navigate = useNavigate();
   
   // Hydrate from cache for instant render
@@ -63,8 +69,11 @@ export default function WatchlistTab() {
         fetchWatchlist(),
         fetchNgxStocks()
       ]);
-      setWatchlistSymbols(wlRes.map(item => item.symbol));
+      const newWl = wlRes.map(item => item.symbol);
+      setWatchlistSymbols(newWl);
+      localStorage.setItem('irshad_watchlist_cache_v1', JSON.stringify(newWl));
       setAllStocks(stocksRes.data || []);
+      localStorage.setItem('irshad_stocks_cache_v10', JSON.stringify({ data: stocksRes, expiry: Date.now() + 1000 * 60 * 60 }));
     } catch (err) {
       console.error(err);
     } finally {
@@ -110,17 +119,18 @@ export default function WatchlistTab() {
     <div className="animate-fade-in stagger-1" style={{ background:'white', borderRadius:'24px', padding:'40px 32px', boxShadow:'var(--shadow-sm)', border:'1px solid var(--border)' }}>
       <StockTicker stocks={allStocks} />
       
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '32px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ width: '48px', height: '48px', background: 'var(--primary-50)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
-            <Star size={24} fill="currentColor" />
+      <div style={{ background: 'linear-gradient(135deg, #0D1B2A 0%, #0F5257 65%, #0B6B71 100%)', borderRadius:'24px', padding:'32px', boxShadow:'0 12px 32px rgba(13,27,42,0.15)', border:'none', marginBottom: '32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(201,168,76,0.08)', borderRadius: '50%' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', zIndex: 1 }}>
+          <div style={{ width: '56px', height: '56px', background: 'rgba(255,255,255,0.1)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gold)', border: '1px solid rgba(255,255,255,0.2)' }}>
+            <Star size={28} fill="currentColor" />
           </div>
           <div>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-dark)' }}>Watchlist</h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>Tracked stocks and compliance alerts</p>
+            <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'white', letterSpacing: '-0.5px' }}>Watchlist</h2>
+            <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.9rem', marginTop: '4px' }}>Tracked stocks and compliance alerts</p>
           </div>
         </div>
-        <div style={{ color: 'var(--text-light)', fontSize: '0.9rem', fontWeight: 600 }}>
+        <div style={{ color: 'white', fontSize: '0.9rem', fontWeight: 800, background: 'rgba(255,255,255,0.1)', padding: '8px 16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.2)', position: 'relative', zIndex: 1, backdropFilter: 'blur(10px)' }}>
           {watchedStocks.length} {watchedStocks.length === 1 ? 'Asset' : 'Assets'}
         </div>
       </div>

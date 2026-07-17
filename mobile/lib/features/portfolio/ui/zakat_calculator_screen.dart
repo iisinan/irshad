@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../stocks/providers/stock_provider.dart';
+import '../../../../core/api/api_service.dart';
 
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 class ZakatCalculatorScreen extends StatefulWidget {
@@ -17,11 +18,47 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
   
   Map<String, dynamic>? _selectedStock;
   double _zakatOwed = 0.0;
-@override
+
+  List<dynamic> _portfolioHoldings = [];
+  bool _isLoadingPortfolio = true;
+  bool _isPortfolioMode = false;
+  double _totalPortfolioZakat = 0.0;
+
+  @override
   void initState() {
     super.initState();
     _sharesController.addListener(_calculateZakat);
     _priceController.addListener(_calculateZakat);
+    _fetchPortfolio();
+  }
+
+  Future<void> _fetchPortfolio() async {
+    try {
+      final response = await ApiService().get('portfolio');
+      if (response.data['status'] == 'success') {
+        if (mounted) {
+          setState(() {
+            _portfolioHoldings = response.data['data']['holdings'] ?? [];
+            _isLoadingPortfolio = false;
+            
+            // Calculate total portfolio zakat right away
+            double total = 0.0;
+            for (var holding in _portfolioHoldings) {
+              final double shares = (holding['shares'] ?? 0).toDouble();
+              final double price = (holding['current_price'] ?? 0).toDouble();
+              final double purificationDue = (holding['purification_due'] ?? 0).toDouble();
+              
+              final totalValue = shares * price;
+              final standardZakat = (totalValue - purificationDue) * 0.025;
+              total += standardZakat + purificationDue;
+            }
+            _totalPortfolioZakat = total;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isLoadingPortfolio = false);
+    }
   }
 
   void _calculateZakat() {
@@ -80,76 +117,133 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
             ),
             const SizedBox(height: 32),
             
-            // Stock Selection
-            const Text('SELECT STOCK', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppTheme.textMuted, letterSpacing: 1.2)),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<Map<String, dynamic>>(
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppTheme.divider)),
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppTheme.divider)),
+            if (_portfolioHoldings.isNotEmpty)
+              Container(
+                margin: const EdgeInsets.only(bottom: 24),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(colors: [AppTheme.primary, Color(0xFF1E565A)]),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(16),
+                    onTap: () {
+                      setState(() {
+                        _isPortfolioMode = !_isPortfolioMode;
+                        if (_isPortfolioMode) {
+                          _zakatOwed = _totalPortfolioZakat;
+                          _selectedStock = null;
+                          _sharesController.clear();
+                          _priceController.clear();
+                        } else {
+                          _zakatOwed = 0.0;
+                        }
+                      });
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Row(
+                        children: [
+                          Icon(_isPortfolioMode ? Icons.check_circle_rounded : Icons.auto_awesome_rounded, color: Colors.white, size: 28),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _isPortfolioMode ? 'Portfolio Zakat Applied' : 'Auto-calculate Portfolio',
+                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 16),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  _isPortfolioMode 
+                                    ? 'Tap to enter a single stock manually' 
+                                    : 'Instantly calculate Zakat for your ${_portfolioHoldings.length} linked assets',
+                                  style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 13, height: 1.3),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ),
-              isExpanded: true,
-              hint: const Text('Choose a company...'),
-              value: _selectedStock,
-              items: stocks.map((stock) {
-                return DropdownMenuItem(
-                  value: stock,
-                  child: Text('${stock['symbol']} - ${stock['name']}'),
-                );
-              }).toList(),
-              onChanged: (val) {
-                setState(() {
-                  _selectedStock = val;
-                  // Auto-fill price
-                  final dailyPrices = val?['daily_prices'] as List<dynamic>? ?? [];
-                  if (dailyPrices.isNotEmpty) {
-                    _priceController.text = dailyPrices[0]['price'].toString();
-                  }
-                  _calculateZakat();
-                });
-              },
-            ),
-            
-            const SizedBox(height: 24),
-            
-            // Shares Input
-            const Text('NUMBER OF SHARES', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppTheme.textMuted, letterSpacing: 1.2)),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _sharesController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.white,
-                hintText: 'e.g. 1000',
-                prefixIcon: const Icon(Icons.pie_chart_outline_rounded, color: AppTheme.textMuted),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppTheme.divider)),
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppTheme.divider)),
+
+            if (!_isPortfolioMode) ...[
+              // Stock Selection
+              const Text('SELECT STOCK', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppTheme.textMuted, letterSpacing: 1.2)),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<Map<String, dynamic>>(
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppTheme.divider)),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppTheme.divider)),
+                ),
+                isExpanded: true,
+                hint: const Text('Choose a company...'),
+                value: _selectedStock,
+                items: stocks.map((stock) {
+                  return DropdownMenuItem(
+                    value: stock,
+                    child: Text('${stock['symbol']} - ${stock['name']}'),
+                  );
+                }).toList(),
+                onChanged: (val) {
+                  setState(() {
+                    _selectedStock = val;
+                    // Auto-fill price
+                    final dailyPrices = val?['daily_prices'] as List<dynamic>? ?? [];
+                    if (dailyPrices.isNotEmpty) {
+                      _priceController.text = dailyPrices[0]['price'].toString();
+                    }
+                    _calculateZakat();
+                  });
+                },
               ),
-            ),
-            
-            const SizedBox(height: 24),
-            
-            // Price Input
-            const Text('CURRENT PRICE (₦)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppTheme.textMuted, letterSpacing: 1.2)),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _priceController,
-              keyboardType: TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.white,
-                hintText: '0.00',
-                prefixIcon: const Icon(Icons.payments_outlined, color: AppTheme.textMuted),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppTheme.divider)),
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppTheme.divider)),
+              
+              const SizedBox(height: 24),
+              
+              // Shares Input
+              const Text('NUMBER OF SHARES', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppTheme.textMuted, letterSpacing: 1.2)),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _sharesController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  hintText: 'e.g. 1000',
+                  prefixIcon: const Icon(Icons.pie_chart_outline_rounded, color: AppTheme.textMuted),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppTheme.divider)),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppTheme.divider)),
+                ),
               ),
-            ),
+              
+              const SizedBox(height: 24),
+              
+              // Price Input
+              const Text('CURRENT PRICE (₦)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppTheme.textMuted, letterSpacing: 1.2)),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _priceController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  hintText: '0.00',
+                  prefixIcon: const Icon(Icons.payments_outlined, color: AppTheme.textMuted),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppTheme.divider)),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppTheme.divider)),
+                ),
+              ),
+            ],
             
             const SizedBox(height: 40),
             
@@ -179,9 +273,11 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      _selectedStock != null 
-                        ? 'Includes standard 2.5% + purification for ${_selectedStock!['symbol']}'
-                        : 'Select a stock to see breakdown',
+                      _isPortfolioMode 
+                        ? 'Includes 2.5% + purification across all portfolio assets'
+                        : _selectedStock != null 
+                          ? 'Includes standard 2.5% + purification for ${_selectedStock!['symbol']}'
+                          : 'Select a stock to see breakdown',
                       style: const TextStyle(color: Colors.white, fontSize: 12),
                       textAlign: TextAlign.center,
                     ),

@@ -101,44 +101,66 @@ export default function ZakatTab({ data }) {
           </div>
 
           {/* Results Panel */}
-          <div style={{ background: 'linear-gradient(135deg, var(--gold-50) 0%, #fff 100%)', borderRadius: '24px', padding: '32px', border: '1px solid var(--gold-border)', display: 'flex', flexDirection: 'column' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '24px' }}>Calculation Result</h3>
+          <div style={{ background: 'linear-gradient(135deg, #0D1B2A 0%, #0F5257 65%, #0B6B71 100%)', borderRadius: '24px', padding: '32px', border: 'none', display: 'flex', flexDirection: 'column', boxShadow: '0 12px 32px rgba(13,27,42,0.15)', position: 'relative', overflow: 'hidden', color: 'white' }}>
+            <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '200px', height: '200px', background: 'rgba(201,168,76,0.08)', borderRadius: '50%', filter: 'blur(30px)' }} />
             
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid var(--border)' }}>
-              <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Total Wealth</span>
-              <span style={{ color: 'var(--text-dark)', fontWeight: 800 }}>₦{totalWealth.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'white', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px', position: 'relative', zIndex: 1 }}>
+              <Calculator size={18} color="var(--gold)" /> Calculation Result
+            </h3>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px dashed rgba(255,255,255,0.2)', position: 'relative', zIndex: 1 }}>
+              <span style={{ color: 'rgba(255,255,255,0.65)', fontWeight: 600 }}>Total Wealth</span>
+              <span style={{ color: 'white', fontWeight: 900 }}>₦{totalWealth.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px', paddingBottom: '12px', borderBottom: '1px solid var(--border)' }}>
-              <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Nisab Threshold</span>
-              <span style={{ color: 'var(--text-dark)', fontWeight: 800 }}>₦{NISAB_THRESHOLD.toLocaleString()}</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px', paddingBottom: '12px', borderBottom: '1px dashed rgba(255,255,255,0.2)', position: 'relative', zIndex: 1 }}>
+              <span style={{ color: 'rgba(255,255,255,0.65)', fontWeight: 600 }}>Nisab Threshold</span>
+              <span style={{ color: 'white', fontWeight: 900 }}>₦{NISAB_THRESHOLD.toLocaleString()}</span>
+            </div>
+
+            {/* Nisab Progress */}
+            <div style={{ marginBottom: '32px', background: 'white', padding: '20px', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-dark)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Nisab Progress</span>
+                <span style={{ fontSize: '0.85rem', fontWeight: 800, color: isEligible ? 'var(--halal)' : 'var(--text-muted)' }}>
+                  {Math.min(100, Math.round((totalWealth / NISAB_THRESHOLD) * 100))}%
+                </span>
+              </div>
+              <div style={{ width: '100%', height: '14px', background: 'var(--bg-section)', borderRadius: '10px', overflow: 'hidden', marginBottom: '12px', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)' }}>
+                <div style={{ 
+                  width: `${Math.min(100, (totalWealth / NISAB_THRESHOLD) * 100)}%`, 
+                  height: '100%', 
+                  background: isEligible ? 'var(--primary)' : 'var(--gold)', 
+                  transition: 'width 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
+                  borderRadius: '10px'
+                }} />
+              </div>
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', fontWeight: 600, color: isEligible ? 'var(--primary)' : 'var(--text-muted)' }}>
+                {isEligible ? <CheckCircle size={16} color="var(--primary)" /> : <Info size={16} color="var(--text-light)" />}
+                {isEligible ? 'You have reached the Nisab threshold. Zakat is due.' : `₦${(NISAB_THRESHOLD - totalWealth).toLocaleString(undefined, { maximumFractionDigits: 0 })} away from Nisab threshold.`}
+              </div>
             </div>
 
             {/* Visual Breakdown */}
             {totalWealth > 0 && (
               <div style={{ marginBottom: '32px' }}>
-                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Asset Breakdown</div>
-                <div style={{ display: 'flex', height: '12px', borderRadius: '6px', overflow: 'hidden', marginBottom: '12px' }}>
-                  <div style={{ width: `${(portfolioValue / totalWealth) * 100}%`, background: 'var(--primary)', transition: 'width 0.3s ease' }} title="Portfolio" />
-                  <div style={{ width: `${(cashValue / totalWealth) * 100}%`, background: 'var(--gold)', transition: 'width 0.3s ease' }} title="Cash" />
-                  <div style={{ width: `${(goldValue / totalWealth) * 100}%`, background: '#fbbf24', transition: 'width 0.3s ease' }} title="Gold" />
+                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Asset Breakdown</div>
+                <div style={{ display: 'flex', height: '14px', borderRadius: '10px', overflow: 'hidden', marginBottom: '14px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+                  <div style={{ width: `${(portfolioValue / totalWealth) * 100}%`, background: 'var(--primary)', transition: 'width 0.5s ease' }} title="Portfolio" />
+                  <div style={{ width: `${(cashValue / totalWealth) * 100}%`, background: 'var(--gold)', transition: 'width 0.5s ease' }} title="Cash" />
+                  <div style={{ width: `${(goldValue / totalWealth) * 100}%`, background: '#fbbf24', transition: 'width 0.5s ease' }} title="Gold" />
                 </div>
-                <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)' }}/> Portfolio</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--gold)' }}/> Cash</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#fbbf24' }}/> Gold</div>
+                <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><div style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--primary)' }}/> Portfolio</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><div style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--gold)' }}/> Cash</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#fbbf24' }}/> Gold</div>
                 </div>
               </div>
             )}
 
-            <div style={{ marginTop: 'auto' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                {isEligible ? <CheckCircle size={18} color="var(--primary)" /> : <Info size={18} color="var(--text-light)" />}
-                <span style={{ fontWeight: 700, fontSize: '0.9rem', color: isEligible ? 'var(--primary)' : 'var(--text-muted)' }}>
-                  {isEligible ? 'Eligible for Zakat' : 'Below Nisab Threshold'}
-                </span>
-              </div>
-              <div style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700, color: 'var(--text-muted)' }}>Zakat Due (2.5%)</div>
-              <div style={{ fontSize: '2.5rem', fontWeight: 900, color: 'var(--gold)', letterSpacing: '-1px', textShadow: '0 2px 10px rgba(212,175,55,0.2)' }}>
+            <div style={{ marginTop: 'auto', background: 'white', padding: '24px', borderRadius: '20px', border: '1px solid var(--border)', textAlign: 'center', boxShadow: '0 8px 32px rgba(212,175,55,0.08)' }}>
+              <div style={{ fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '8px' }}>Zakat Due (2.5%)</div>
+              <div style={{ fontSize: '3rem', fontWeight: 900, color: 'var(--gold)', letterSpacing: '-1.5px', textShadow: '0 4px 20px rgba(212,175,55,0.25)', lineHeight: 1 }}>
                 ₦{zakatDue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
               </div>
             </div>

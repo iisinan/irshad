@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:provider/provider.dart';
 import '../data/stock_repository.dart';
-
+import '../providers/stock_provider.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
+
 class StockSearchScreen extends StatefulWidget {
   const StockSearchScreen({super.key});
 
@@ -18,8 +20,10 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
 
-  // Theme Constants
-  static const Color cardBg = Colors.white;
+  // Filter State
+  bool _halalOnly = false;
+  String _selectedSector = 'All';
+  final List<String> _sectors = ['All', 'Financial Services', 'ICT', 'Consumer Goods', 'Oil and Gas', 'Healthcare', 'Agriculture', 'Industrial Goods'];
 
   @override
   void initState() {
@@ -64,8 +68,55 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
     });
   }
 
+  void _toggleHalalOnly(bool value) {
+    setState(() => _halalOnly = value);
+  }
+
+  void _selectSector(String sector) {
+    setState(() => _selectedSector = sector);
+  }
+
+  List<Map<String, dynamic>> _applyFilters(List<Map<String, dynamic>> list) {
+    return list.where((stock) {
+      final status = stock['status']?['status']?.toString().toLowerCase() ?? 'doubtful';
+      final isHalal = status == 'halal';
+      
+      // Filter by halal
+      if (_halalOnly && !isHalal) return false;
+      
+      // Filter by sector
+      if (_selectedSector != 'All') {
+        final stockSector = stock['sector']?.toString().toLowerCase() ?? '';
+        if (stockSector != _selectedSector.toLowerCase()) return false;
+      }
+      
+      return true;
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
+    // If we have a query, use filtered search results
+    // If no query but filters are active, use filtered cached stocks to browse
+    // If no query and no filters, use history
+    
+    final bool isBrowsing = _searchController.text.isEmpty && (_selectedSector != 'All' || _halalOnly);
+    
+    List<Map<String, dynamic>> displayList = [];
+    String listTitle = '';
+
+    if (_searchController.text.isNotEmpty) {
+      displayList = _applyFilters(_searchResults);
+      listTitle = 'Search Results';
+    } else if (isBrowsing) {
+      final provider = Provider.of<StockProvider>(context, listen: false);
+      displayList = _applyFilters(provider.ngxStocks);
+      listTitle = 'Browsing: $_selectedSector';
+    } else {
+      displayList = _applyFilters(_history);
+      listTitle = 'Recent Checks';
+    }
+
     return Scaffold(
       backgroundColor: AppTheme.bg,
       appBar: AppBar(
@@ -75,17 +126,20 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
         centerTitle: false,
       ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSearchField(),
+          _buildFilterOptions(),
+          const SizedBox(height: 8),
           Expanded(
             child: _isSearching 
               ? _buildLoading() 
-              : (_searchController.text.isNotEmpty
-                  ? (_searchResults.isNotEmpty
-                      ? _buildList('Search Results', _searchResults)
+              : ((_searchController.text.isNotEmpty || isBrowsing)
+                  ? (displayList.isNotEmpty
+                      ? _buildList(listTitle, displayList)
                       : _buildNoResults())
-                  : (_history.isNotEmpty
-                      ? _buildList('Recent Checks', _history)
+                  : (displayList.isNotEmpty
+                      ? _buildList(listTitle, displayList)
                       : _buildEmptyState())),
           ),
         ],
@@ -93,34 +147,56 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
     );
   }
 
-  Widget _buildNoResults() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(40.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: AppTheme.haram.withOpacity(0.05),
-                shape: BoxShape.circle,
+  Widget _buildFilterOptions() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          // Halal Only Toggle
+          FilterChip(
+            selected: _halalOnly,
+            label: Row(
+              children: [
+                Icon(Icons.shield_rounded, size: 16, color: _halalOnly ? AppTheme.halal : AppTheme.textMuted),
+                const SizedBox(width: 4),
+                Text('Halal Only', style: TextStyle(color: _halalOnly ? AppTheme.textDark : AppTheme.textMuted, fontWeight: FontWeight.w700, fontSize: 13)),
+              ],
+            ),
+            selectedColor: AppTheme.halal.withOpacity(0.15),
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: BorderSide(color: _halalOnly ? AppTheme.halal : AppTheme.divider, width: 1.5),
+            ),
+            onSelected: _toggleHalalOnly,
+            showCheckmark: false,
+          ),
+          const SizedBox(width: 8),
+          Container(height: 24, width: 1.5, color: AppTheme.divider, margin: const EdgeInsets.symmetric(horizontal: 4)),
+          const SizedBox(width: 8),
+          // Sectors
+          ..._sectors.map((sector) {
+            final isSelected = _selectedSector == sector;
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: ChoiceChip(
+                label: Text(sector, style: TextStyle(color: isSelected ? Colors.white : AppTheme.textDark, fontWeight: FontWeight.w700, fontSize: 13)),
+                selected: isSelected,
+                selectedColor: AppTheme.primary,
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  side: BorderSide(color: isSelected ? AppTheme.primary : AppTheme.divider, width: 1.5),
+                ),
+                onSelected: (selected) {
+                  if (selected) _selectSector(sector);
+                },
+                showCheckmark: false,
               ),
-              child: const Icon(Icons.search_off_rounded, size: 40, color: AppTheme.haram),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'No Results Found',
-              style: TextStyle(fontSize: 20, color: AppTheme.textDark, fontWeight: FontWeight.w900),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'We couldn\'t find any stocks matching "${_searchController.text}".\nPlease check the spelling and try again.',
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: AppTheme.textMuted, height: 1.5, fontSize: 14),
-            ),
-          ],
-        ),
+            );
+          }),
+        ],
       ),
     );
   }
@@ -169,9 +245,18 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
         if (index == 0) {
           return Padding(
             padding: const EdgeInsets.only(bottom: 16, top: 8),
-            child: Text(
-              title,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppTheme.textDark),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppTheme.textDark),
+                ),
+                Text(
+                  '${items.length} stocks',
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.textMuted),
+                ),
+              ],
             ),
           );
         }
@@ -272,6 +357,38 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
     return const Center(child: CircularProgressIndicator(color: AppTheme.primary));
   }
 
+  Widget _buildNoResults() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(40.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: AppTheme.haram.withOpacity(0.05),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.search_off_rounded, size: 40, color: AppTheme.haram),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'No Results Found',
+              style: TextStyle(fontSize: 20, color: AppTheme.textDark, fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'We couldn\'t find any stocks matching your criteria.\nPlease try a different search or filter.',
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: AppTheme.textMuted, height: 1.5, fontSize: 14),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildEmptyState() {
     return Center(
       child: Padding(
@@ -285,16 +402,16 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
                 color: AppTheme.primary.withOpacity(0.05),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.show_chart_rounded, size: 40, color: AppTheme.primary),
+              child: const Icon(Icons.travel_explore_rounded, size: 40, color: AppTheme.primary),
             ),
             const SizedBox(height: 24),
             const Text(
-              'Search Market Stocks',
+              'Discover Stocks',
               style: TextStyle(fontSize: 20, color: AppTheme.textDark, fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 12),
             const Text(
-              'Search for Nigerian companies to find\nethical investment opportunities.',
+              'Search for specific stocks or use the filters above to browse sectors.',
               textAlign: TextAlign.center,
               style: TextStyle(color: AppTheme.textMuted, height: 1.5, fontSize: 14),
             ),

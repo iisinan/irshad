@@ -215,8 +215,8 @@ export default function Profile() {
 
       {/* ── Hero Banner ── */}
       <div style={{
-        background: 'var(--gold-grad)',
-        borderRadius: 'var(--radius-xl)',
+        background: 'linear-gradient(135deg, #0D1B2A 0%, #0F5257 65%, #0B6B71 100%)',
+        borderRadius: '28px',
         padding: '36px 40px',
         marginBottom: '28px',
         display: 'flex',
@@ -225,10 +225,11 @@ export default function Profile() {
         flexWrap: 'wrap',
         position: 'relative',
         overflow: 'hidden',
+        boxShadow: '0 12px 32px rgba(13,27,42,0.15)',
       }}>
         {/* Background decoration */}
-        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', borderRadius: '50%', background: 'rgba(255,255,255,0.08)' }} />
-        <div style={{ position: 'absolute', bottom: '-60px', right: '120px', width: '160px', height: '160px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
+        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', borderRadius: '50%', background: 'rgba(201,168,76,0.08)' }} />
+        <div style={{ position: 'absolute', bottom: '-60px', right: '120px', width: '160px', height: '160px', borderRadius: '50%', background: 'rgba(255,255,255,0.03)' }} />
 
         {/* Avatar */}
         <div style={{
@@ -246,25 +247,33 @@ export default function Profile() {
         </div>
 
         {/* Name & email */}
-        <div style={{ flex: 1 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-            <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'white', margin: 0, fontFamily: 'var(--serif)' }}>
+        <div style={{ flex: 1, position: 'relative', zIndex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+            <h1 style={{ margin: 0, fontSize: '2rem', fontWeight: 800, color: 'white', letterSpacing: '-0.5px' }}>
               {displayName}
             </h1>
-            <span style={{ background: 'rgba(255,255,255,0.25)', color: 'white', fontSize: '0.72rem', fontWeight: 800, padding: '3px 10px', borderRadius: '20px', letterSpacing: '0.5px' }}>
-              ✓ VERIFIED
-            </span>
+            {user.premium && (
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(201,168,76,0.2)', border: '1px solid rgba(201,168,76,0.4)', color: 'var(--gold)', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 800 }}>
+                <Award size={13} /> PREMIUM
+              </span>
+            )}
           </div>
-          <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.95rem', marginTop: '6px' }}>{user.email}</div>
-          <div style={{ display: 'flex', gap: '20px', marginTop: '14px', flexWrap: 'wrap' }}>
+          <p style={{ margin: '6px 0 16px', color: 'rgba(255,255,255,0.65)', fontSize: '0.95rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {user.email} <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'rgba(255,255,255,0.3)' }} /> Member since '23
+          </p>
+          <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
             {[
-              { label: 'Member since', value: '2024' },
-              { label: 'Stocks screened', value: '48' },
-              { label: 'Watchlist', value: `${watchlist.length} stocks` },
+              { label: 'Stocks Screened', value: '48', icon: CheckCircle },
+              { label: 'Watchlist', value: `${watchlist.length} saved`, icon: Star },
             ].map(stat => (
-              <div key={stat.label}>
-                <div style={{ color: 'white', fontWeight: 800, fontSize: '1.1rem' }}>{stat.value}</div>
-                <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.75rem' }}>{stat.label}</div>
+              <div key={stat.label} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <stat.icon size={14} color="var(--gold)" />
+                </div>
+                <div>
+                  <div style={{ color: 'white', fontWeight: 800, fontSize: '1.05rem', lineHeight: 1 }}>{stat.value}</div>
+                  <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginTop: '2px', fontWeight: 700 }}>{stat.label}</div>
+                </div>
               </div>
             ))}
           </div>

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../core/theme/app_theme.dart';
+import 'package:irshad_mobile/core/theme/app_theme.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../data/product_repository.dart';
 

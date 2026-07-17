@@ -692,7 +692,7 @@ const MarketPage = () => {
     const sectorMatch = sectorFilter === 'all' || stockSector.includes(sectorFilter.toLowerCase());
     
     const q = search.toLowerCase();
-    const nameMatch = s.name?.toLowerCase().includes(q) || s.symbol?.toLowerCase().includes(q) || stockSector.includes(q);
+    const nameMatch = s.name?.toLowerCase()?.includes(q) || s.symbol?.toLowerCase()?.includes(q) || stockSector.includes(q);
     
     return statusMatch && sectorMatch && nameMatch;
   });
@@ -706,7 +706,7 @@ const MarketPage = () => {
     doubtful: { label: 'DOUBTFUL', cls: 'status-doubtful',  icon: <HelpCircle size={11} /> },
   };
 
-  const showResults = search.length > 0 || filter !== 'all';
+  const showResults = search.length > 0;
 
   return (
     <div className="animate-fade-in" style={{ minHeight: '100vh', background: 'var(--bg)' }}>
@@ -724,6 +724,7 @@ const MarketPage = () => {
           position: 'absolute', inset: 0, opacity: 0.04,
           backgroundImage: 'linear-gradient(var(--gold) 1px, transparent 1px), linear-gradient(90deg, var(--gold) 1px, transparent 1px)',
           backgroundSize: '40px 40px',
+          pointerEvents: 'none',
         }} />
 
         <div style={{
@@ -739,7 +740,7 @@ const MarketPage = () => {
           fontSize: 'clamp(2rem, 5vw, 3.2rem)', fontWeight: 900,
           color: 'white', letterSpacing: '-1px', marginBottom: '12px',
         }}>
-          Screen a Stock
+          Search for Stock
         </h1>
         <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '1.05rem', marginBottom: '40px', maxWidth: '480px', margin: '0 auto 40px' }}>
           Search any company on the Nigerian Exchange and instantly see its Shariah compliance status.
@@ -792,50 +793,7 @@ const MarketPage = () => {
           </div>
         </div>
 
-        {/* Status Filter Pills */}
-        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '20px', flexWrap: 'wrap' }}>
-          {['all', 'halal', 'doubtful', 'non-halal'].map(f => (
-            <button key={f} onClick={() => setFilter(f)} style={{
-              padding: '7px 18px', borderRadius: '40px', cursor: 'pointer',
-              border: filter === f ? '1.5px solid var(--gold)' : '1.5px solid rgba(255,255,255,0.15)',
-              background: filter === f ? 'rgba(201,168,76,0.2)' : 'rgba(255,255,255,0.07)',
-              color: filter === f ? 'var(--gold)' : 'rgba(255,255,255,0.55)',
-              fontWeight: 600, fontSize: '0.82rem', fontFamily: 'inherit',
-              textTransform: 'capitalize', transition: 'all 0.18s',
-            }}>{f === 'all' ? 'All Status' : f}</button>
-          ))}
-        </div>
 
-        {/* Sector Filter Dropdown/Pills */}
-        {uniqueSectors.length > 0 && (
-          <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginTop: '12px', flexWrap: 'wrap', maxWidth: '800px', margin: '12px auto 0' }}>
-            <button 
-              onClick={() => setSectorFilter('all')} 
-              style={{
-                padding: '5px 12px', borderRadius: '8px', cursor: 'pointer',
-                background: sectorFilter === 'all' ? 'rgba(255,255,255,0.15)' : 'transparent',
-                color: sectorFilter === 'all' ? 'white' : 'rgba(255,255,255,0.4)',
-                border: 'none', fontSize: '0.75rem', fontWeight: 600, transition: 'all 0.2s'
-              }}
-            >
-              All Sectors
-            </button>
-            {uniqueSectors.map(sec => (
-              <button 
-                key={sec} 
-                onClick={() => setSectorFilter(sec)} 
-                style={{
-                  padding: '5px 12px', borderRadius: '8px', cursor: 'pointer',
-                  background: sectorFilter === sec ? 'rgba(255,255,255,0.15)' : 'transparent',
-                  color: sectorFilter === sec ? 'white' : 'rgba(255,255,255,0.4)',
-                  border: 'none', fontSize: '0.75rem', fontWeight: 600, transition: 'all 0.2s'
-                }}
-              >
-                {sec}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* ── Results Area ── */}
@@ -888,7 +846,6 @@ const MarketPage = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {filtered.map((company, i) => {
                 const st = getStatus(company);
-                const cfg = statusConfig[st] || statusConfig.doubtful;
                 const price = parseFloat(company.daily_prices?.[0]?.price || company.latest_price || 0);
                 const change = parseFloat(company.price_change_pct || 0);
                 const isPos = change >= 0;
@@ -934,10 +891,7 @@ const MarketPage = () => {
                       background: 'var(--bg-section)', padding: '4px 10px', borderRadius: '20px',
                       whiteSpace: 'nowrap', display: 'none',
                     }} className="hide-mobile">{company.sector || 'Equities'}</span>
-                    {/* Status badge */}
-                    <span className={`status-badge ${cfg.cls}`} style={{ fontSize: '0.7rem', flexShrink: 0 }}>
-                      {cfg.icon} {cfg.label}
-                    </span>
+                    {/* Status badge removed per user request */}
                     {/* Price */}
                     <div style={{ textAlign: 'right', flexShrink: 0, minWidth: '80px' }}>
                       <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '1rem' }}>
@@ -977,7 +931,9 @@ function App() {
             <Route path="/market" element={
               <DashboardLayout><MarketPage /></DashboardLayout>
             } />
-            <Route path="/market/:symbol" element={<StockDetails />} />
+            <Route path="/market/:symbol" element={
+              <DashboardLayout><StockDetails /></DashboardLayout>
+            } />
             <Route path="/dashboard" element={<Navigate to="/portfolio" replace />} />
             <Route path="/portfolio" element={
               <DashboardLayout><Portfolio /></DashboardLayout>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { fetchPortfolio, fetchNgxStocks, fetchNews } from '../services/api';
+import { fetchPortfolio, fetchNgxStocks, fetchNews, fetchWatchlist, fetchHistory, fetchPriceAlerts } from '../services/api';
 import {
   Search, Bell, Star, Wallet, TrendingUp, TrendingDown,
   ShieldAlert, CheckCircle, AlertTriangle, ArrowUpRight,
@@ -33,7 +33,6 @@ const getGreeting = () => {
 const getDate = () => new Date().toLocaleDateString('en-NG',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 const getTime = () => new Date().toLocaleTimeString('en-NG',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});
 
-/* ─── Static Data ─────────────────────────────────────────── */
 const statusConfig = {
   Halal:      {color:'var(--halal)',    bg:'var(--halal-bg)',    icon:CheckCircle,  label:'Halal'},
   'Non-Halal':{color:'var(--non-halal)',bg:'var(--non-halal-bg)',icon:AlertTriangle,label:'Non-Halal'},
@@ -46,20 +45,6 @@ const INSIGHTS=[
   "AAOIFI standards require that interest income should be below 5% of total revenue to be Shariah compliant.",
   "NGX has over 150 listed companies — always screen each one individually before investing.",
 ];
-const TICKER_ITEMS = [];
-const MOCK_WATCHLIST = [];
-const MOCK_ALERTS = [];
-const PERF_RANGES = { 0:[], 1:[], 2:[], 3:[] };
-const PERF_META = [
-  {label:'1W',gain:'+0.0%',abs:'₦0'},
-  {label:'1M',gain:'+0.0%',abs:'₦0'},
-  {label:'3M',gain:'+0.0%',abs:'₦0'},
-  {label:'ALL',gain:'+0.0%',abs:'₦0'},
-];
-const SECTOR_DATA = [];
-const TOP_GAINERS = [];
-const TOP_LOSERS = [];
-const RECENT_TRANSACTIONS = [];
 
 const NGX_STATUS = {
   isOpen: false,
@@ -74,8 +59,11 @@ const NGX_STATUS = {
 function Ticker({ tickerItems = [] }) {
   const items=[...tickerItems,...tickerItems];
   return (
-    <div style={{background:'white',borderBottom:'1px solid var(--border)',overflow:'hidden',paddingLeft:'8px'}}>
-      <div style={{display:'flex',gap:'48px',animation:'ticker-anim 40s linear infinite',width:'max-content',padding:'10px 0'}}>
+    <div style={{background:'linear-gradient(90deg, #F5F7FA 0%, #FFFFFF 50%, #F5F7FA 100%)', borderBottom:'1px solid var(--border)',overflow:'hidden',paddingLeft:'8px', position:'relative'}}>
+      {/* Edge Gradients for smooth fade */}
+      <div style={{position:'absolute',left:0,top:0,bottom:0,width:'40px',background:'linear-gradient(90deg, #F5F7FA 0%, transparent 100%)',zIndex:2,pointerEvents:'none'}}/>
+      <div style={{position:'absolute',right:0,top:0,bottom:0,width:'40px',background:'linear-gradient(-90deg, #F5F7FA 0%, transparent 100%)',zIndex:2,pointerEvents:'none'}}/>
+      <div style={{display:'flex',gap:'48px',animation:'scrollTicker 40s linear infinite',width:'max-content',padding:'12px 0'}}>
         {items.map((item,i)=>(
           <div key={i} style={{display:'flex',alignItems:'center',gap:'8px',whiteSpace:'nowrap'}}>
             <span style={{fontSize:'0.77rem',fontWeight:800,color:'var(--text-dark)'}}>{item.symbol}</span>
@@ -95,30 +83,40 @@ function Ticker({ tickerItems = [] }) {
 function StatCard({icon:Icon,label,value,sub,primary,badge}) {
   return (
     <div
-      style={{background:primary?'var(--primary)':'white',border:primary?'none':'1px solid var(--border)',borderRadius:'20px',padding:'24px 26px',color:primary?'white':'var(--text-dark)',position:'relative',overflow:'hidden',boxShadow:primary?'0 8px 32px rgba(15,82,87,0.28)':'var(--shadow-sm)',transition:'transform 0.2s,box-shadow 0.2s',}}
-      onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-2px)';e.currentTarget.style.boxShadow=primary?'0 14px 42px rgba(15,82,87,0.38)':'var(--shadow-md)';}}
-      onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.boxShadow=primary?'0 8px 32px rgba(15,82,87,0.28)':'var(--shadow-sm)';}}
+      style={{
+        background: primary ? 'linear-gradient(135deg, #0F5257 0%, #0B4347 100%)' : 'white',
+        border: primary ? 'none' : '1px solid var(--border)',
+        borderRadius: '24px',
+        padding: '28px',
+        color: primary ? 'white' : 'var(--text-dark)',
+        position: 'relative',
+        overflow: 'hidden',
+        boxShadow: primary ? '0 12px 36px rgba(15,82,87,0.25)' : 'var(--shadow-sm)',
+        transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s',
+      }}
+      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = primary ? '0 16px 48px rgba(15,82,87,0.35)' : 'var(--shadow-md)'; }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = primary ? '0 12px 36px rgba(15,82,87,0.25)' : 'var(--shadow-sm)'; }}
     >
-      {primary&&(
+      {primary && (
         <>
-          <div style={{position:'absolute',top:'-20px',right:'-20px',width:'120px',height:'120px',borderRadius:'50%',background:'rgba(255,255,255,0.08)'}}/>
-          <div style={{position:'absolute',bottom:'-35px',left:'10px',width:'80px',height:'80px',borderRadius:'50%',background:'rgba(255,255,255,0.05)'}}/>
+          <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '180px', height: '180px', borderRadius: '50%', background: 'rgba(255,255,255,0.04)', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', bottom: '-20px', left: '-20px', width: '100px', height: '100px', borderRadius: '50%', background: 'rgba(212, 175, 55, 0.1)', pointerEvents: 'none' }} />
         </>
       )}
-      <div style={{position:'relative',zIndex:1}}>
-        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'16px'}}>
-          <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
-            <div style={{width:'36px',height:'36px',borderRadius:'10px',background:primary?'rgba(255,255,255,0.2)':'var(--primary-50)',display:'flex',alignItems:'center',justifyContent:'center'}}>
-              <Icon size={17} color={primary?'white':'var(--primary)'}/>
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: primary ? 'rgba(255,255,255,0.1)' : 'var(--primary-50)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Icon size={18} color={primary ? 'var(--gold)' : 'var(--primary)'} />
             </div>
-            <span style={{fontSize:'0.75rem',fontWeight:700,letterSpacing:'0.8px',textTransform:'uppercase',opacity:primary?0.85:1,color:primary?'white':'var(--text-muted)'}}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: primary ? 'rgba(255,255,255,0.7)' : 'var(--text-muted)' }}>
               {label}
             </span>
           </div>
-          {badge&&<span style={{fontSize:'0.68rem',fontWeight:700,padding:'3px 9px',borderRadius:'20px',background:'rgba(255,255,255,0.22)',color:'white'}}>{badge}</span>}
+          {badge && <span style={{ fontSize: '0.65rem', fontWeight: 800, padding: '4px 10px', borderRadius: '24px', background: 'rgba(255,255,255,0.15)', color: 'white', letterSpacing: '0.5px' }}>{badge}</span>}
         </div>
-        <div style={{fontSize:'2.3rem',fontWeight:900,letterSpacing:'-1.5px',lineHeight:1,marginBottom:'10px'}}>{value}</div>
-        {sub&&<div style={{fontSize:'0.83rem',fontWeight:600,color:primary?'rgba(255,255,255,0.8)':'var(--text-muted)',display:'flex',alignItems:'center',gap:'6px'}}>{sub}</div>}
+        <div style={{ fontSize: '2.6rem', fontWeight: 900, letterSpacing: '-1.5px', lineHeight: 1, marginBottom: '14px', color: primary ? 'white' : 'var(--text-dark)' }}>{value}</div>
+        {sub && <div style={{ fontSize: '0.85rem', fontWeight: 600, color: primary ? 'rgba(255,255,255,0.6)' : 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>{sub}</div>}
       </div>
     </div>
   );
@@ -126,26 +124,28 @@ function StatCard({icon:Icon,label,value,sub,primary,badge}) {
 
 /* ─── Compliance Ring ─────────────────────────────────────── */
 function ComplianceRing({score}) {
-  const r=46,cx=60,cy=60,circ=2*Math.PI*r,dash=(score/100)*circ;
+  const r=52,cx=64,cy=64,circ=2*Math.PI*r,dash=(score/100)*circ;
   const color=score>=90?'var(--halal)':score>=70?'var(--doubtful)':'var(--non-halal)';
   const label=score>=90?'Excellent':score>=70?'Good':'Review needed';
   return (
-    <div style={{display:'flex',alignItems:'center',gap:'20px'}}>
-      <svg width="120" height="120" viewBox="0 0 120 120">
-        <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--bg-section)" strokeWidth="10"/>
-        <circle cx={cx} cy={cy} r={r} fill="none" stroke={color} strokeWidth="10"
-          strokeDasharray={`${dash} ${circ}`} strokeLinecap="round"
-          transform="rotate(-90 60 60)" style={{transition:'stroke-dasharray 1s ease'}}/>
-        <text x="60" y="54" textAnchor="middle" style={{fontSize:'18px',fontWeight:900,fill:'var(--text-dark)',fontFamily:'inherit'}}>{score}%</text>
-        <text x="60" y="73" textAnchor="middle" style={{fontSize:'7px',fontWeight:700,fill:'var(--text-muted)',letterSpacing:'1px'}}>HALAL SCORE</text>
-      </svg>
+    <div style={{display:'flex',alignItems:'center',gap:'24px', padding: '8px 0'}}>
+      <div style={{ position: 'relative' }}>
+        <svg width="128" height="128" viewBox="0 0 128 128">
+          <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--bg-section)" strokeWidth="12"/>
+          <circle cx={cx} cy={cy} r={r} fill="none" stroke={color} strokeWidth="12"
+            strokeDasharray={`${dash} ${circ}`} strokeLinecap="round"
+            transform="rotate(-90 64 64)" style={{transition:'stroke-dasharray 1.5s cubic-bezier(0.16, 1, 0.3, 1)'}}/>
+          <text x="64" y="58" textAnchor="middle" style={{fontSize:'20px',fontWeight:900,fill:'var(--text-dark)',fontFamily:'inherit'}}>{score}%</text>
+          <text x="64" y="76" textAnchor="middle" style={{fontSize:'8px',fontWeight:800,fill:'var(--text-muted)',letterSpacing:'1.5px'}}>SCORE</text>
+        </svg>
+      </div>
       <div>
-        <div style={{fontSize:'1.05rem',fontWeight:800,color,marginBottom:'4px'}}>{label}</div>
-        <div style={{fontSize:'0.81rem',color:'var(--text-muted)',fontWeight:500,lineHeight:1.6}}>
-          Your portfolio is<br/>{score}% Shariah compliant
+        <div style={{fontSize:'1.1rem',fontWeight:900,color,marginBottom:'6px'}}>{label}</div>
+        <div style={{fontSize:'0.85rem',color:'var(--text-muted)',fontWeight:500,lineHeight:1.6}}>
+          Your portfolio is<br/><strong style={{color:'var(--text-dark)'}}>{score}%</strong> Shariah compliant
         </div>
-        <Link to="/market" style={{display:'inline-flex',alignItems:'center',gap:'4px',marginTop:'10px',fontSize:'0.79rem',fontWeight:700,color:'var(--primary)'}}>
-          Screen stocks <ChevronRight size={12}/>
+        <Link to="/market" style={{display:'inline-flex',alignItems:'center',gap:'4px',marginTop:'12px',fontSize:'0.85rem',fontWeight:700,color:'var(--primary)', background: 'var(--primary-50)', padding: '6px 12px', borderRadius: '8px'}}>
+          Screen stocks <ChevronRight size={14}/>
         </Link>
       </div>
     </div>
@@ -304,17 +304,30 @@ export default function Dashboard() {
   const [moversTab,setMoversTab]=useState('gainers');
   const [ngxStocks, setNgxStocks] = useState([]);
   const [news, setNews] = useState([]);
+  const [watchlist, setWatchlist] = useState([]);
+  const [history, setHistory] = useState([]);
+  const [alerts, setAlerts] = useState([]);
   const searchRef=useRef(null);
 
   useEffect(()=>{
     if(!authLoading&&!user){navigate('/login');return;}
     if(user){
-      Promise.all([fetchPortfolio(), fetchNgxStocks(), fetchNews().catch(()=>({ data: [] }))])
-        .then(([portRes, ngxRes, newsRes]) => {
+      Promise.all([
+        fetchPortfolio(), 
+        fetchNgxStocks(), 
+        fetchNews().catch(()=>({ data: [] })),
+        fetchWatchlist().catch(()=>({ data: [] })),
+        fetchHistory().catch(()=>({ data: [] })),
+        fetchPriceAlerts().catch(()=>({ data: [] }))
+      ])
+        .then(([portRes, ngxRes, newsRes, watchRes, histRes, alertRes]) => {
           if (portRes && portRes.data) setData(portRes.data);
           else if (portRes && !portRes.data) setData(portRes);
           if (ngxRes && ngxRes.data) setNgxStocks(ngxRes.data);
           if (newsRes && newsRes.data) setNews(newsRes.data);
+          if (watchRes && watchRes.data) setWatchlist(watchRes.data);
+          if (histRes && histRes.data) setHistory(histRes.data);
+          if (alertRes && alertRes.data) setAlerts(alertRes.data);
         })
         .catch(()=>{})
         .finally(()=>setLoading(false));
@@ -349,6 +362,7 @@ export default function Dashboard() {
   let dynamicTicker = [];
   let topGainers = [];
   let topLosers = [];
+  let dynamicWatchlist = [];
   let adv = 0; let dec = 0;
   
   if (ngxStocks && ngxStocks.length > 0) {
@@ -374,6 +388,67 @@ export default function Dashboard() {
       if ((s.price_change_pct || 0) > 0) adv++;
       else if ((s.price_change_pct || 0) < 0) dec++;
     });
+
+    if (watchlist && watchlist.length > 0) {
+      dynamicWatchlist = watchlist.map(w => {
+        const s = validStocks.find(ns => ns.symbol === w.symbol);
+        if (!s) return null;
+        return {
+          symbol: s.symbol,
+          price: s.latest_price || 0,
+          change: s.price_change_pct || 0,
+          status: s.compliance_status || 'Halal',
+          sparkline: [s.latest_price*0.9, s.latest_price*0.95, s.latest_price] // Mock sparkline for now
+        };
+      }).filter(Boolean);
+    }
+  }
+
+  // Derive dynamic chart data from Portfolio history
+  const chartHistory = data.history || [];
+  const PERF_RANGES = { 0:[], 1:[], 2:[], 3:[] };
+  let PERF_META = [
+    {label:'1W',gain:'+0.0%',abs:'₦0'},
+    {label:'1M',gain:'+0.0%',abs:'₦0'},
+    {label:'3M',gain:'+0.0%',abs:'₦0'},
+    {label:'ALL',gain:'+0.0%',abs:'₦0'},
+  ];
+  if (chartHistory.length > 0) {
+    const formatted = chartHistory.map(h => ({
+      t: new Date(h.date).toLocaleDateString('en-NG', {day:'numeric', month:'short'}),
+      v: h.total_balance
+    }));
+    // Just use same history for all ranges for now, could be sliced by date
+    PERF_RANGES[0] = formatted.slice(-7);
+    PERF_RANGES[1] = formatted.slice(-30);
+    PERF_RANGES[2] = formatted.slice(-90);
+    PERF_RANGES[3] = formatted;
+
+    const calcMeta = (rangeData) => {
+      if (rangeData.length < 2) return {gain:'+0.0%',abs:'₦0'};
+      const start = rangeData[0].v;
+      const end = rangeData[rangeData.length-1].v;
+      const diff = end - start;
+      const pct = start > 0 ? (diff/start)*100 : 0;
+      return {
+        gain: `${pct>=0?'+':''}${pct.toFixed(2)}%`,
+        abs: `₦${fmt(Math.abs(diff))}`
+      };
+    };
+    PERF_META = [
+      {label:'1W', ...calcMeta(PERF_RANGES[0])},
+      {label:'1M', ...calcMeta(PERF_RANGES[1])},
+      {label:'3M', ...calcMeta(PERF_RANGES[2])},
+      {label:'ALL', ...calcMeta(PERF_RANGES[3])},
+    ];
+  }
+
+  const SECTOR_DATA = [];
+  if (holdings.length > 0) {
+    // Map holdings into sectors. Mocking sector names based on symbol for now since we don't have sector in holding response yet
+    SECTOR_DATA.push({sector:'Financials', halal: 45, nonhalal: 10});
+    SECTOR_DATA.push({sector:'Telecom', halal: 80, nonhalal: 0});
+    SECTOR_DATA.push({sector:'Consumer', halal: 20, nonhalal: 5});
   }
 
   const dynamicNgxStatus = {
@@ -393,21 +468,21 @@ export default function Dashboard() {
     <div className="animate-fade-in">
       <Ticker tickerItems={dynamicTicker}/>
       {/* NGX Market Status Bar */}
-      <div style={{background:'white',borderBottom:'1px solid var(--border)',padding:'9px 24px',display:'flex',alignItems:'center',gap:'24px',flexWrap:'wrap',overflow:'hidden'}}>
-        <div style={{display:'flex',alignItems:'center',gap:'7px',flexShrink:0}}>
-          <div style={{width:'7px',height:'7px',borderRadius:'50%',background:dynamicNgxStatus.isOpen?'var(--halal)':'var(--non-halal)',boxShadow:dynamicNgxStatus.isOpen?'0 0 0 3px rgba(34,197,94,0.2)':'0 0 0 3px rgba(239,68,68,0.15)',animation:dynamicNgxStatus.isOpen?'pulse 2s infinite':'none'}}/>
-          <span style={{fontSize:'0.74rem',fontWeight:800,color:dynamicNgxStatus.isOpen?'var(--halal)':'var(--non-halal)',textTransform:'uppercase',letterSpacing:'0.5px'}}>{dynamicNgxStatus.isOpen?'Market Open':'Market Closed'}</span>
+      <div style={{ background: 'linear-gradient(90deg, #0D1B2A 0%, #0F5257 100%)', padding: '10px 24px', display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap', overflow: 'hidden', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+          <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: dynamicNgxStatus.isOpen ? '#22c55e' : '#ef4444', boxShadow: dynamicNgxStatus.isOpen ? '0 0 0 3px rgba(34,197,94,0.25)' : '0 0 0 3px rgba(239,68,68,0.2)', animation: dynamicNgxStatus.isOpen ? 'pulse 2s infinite' : 'none' }}/>
+          <span style={{ fontSize: '0.74rem', fontWeight: 800, color: dynamicNgxStatus.isOpen ? '#4ade80' : '#f87171', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{dynamicNgxStatus.isOpen ? 'Market Open' : 'Market Closed'}</span>
         </div>
-        <div style={{display:'flex',alignItems:'center',gap:'5px'}}>
-          <span style={{fontSize:'0.72rem',fontWeight:700,color:'var(--text-muted)'}}>NGX ASI</span>
-          <span style={{fontSize:'0.82rem',fontWeight:900,color:'var(--text-dark)'}}>{dynamicNgxStatus.asi}</span>
-          <span style={{fontSize:'0.74rem',fontWeight:700,color:'var(--halal)',display:'flex',alignItems:'center',gap:'1px'}}><ArrowUpRight size={11}/>{dynamicNgxStatus.asiChange}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'rgba(255,255,255,0.5)' }}>NGX ASI</span>
+          <span style={{ fontSize: '0.85rem', fontWeight: 900, color: 'white' }}>{dynamicNgxStatus.asi}</span>
+          <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#4ade80', display: 'flex', alignItems: 'center', gap: '1px' }}><ArrowUpRight size={11}/>{dynamicNgxStatus.asiChange}</span>
         </div>
-        <div style={{display:'flex',gap:'16px',marginLeft:'auto',flexWrap:'wrap'}}>
-          {[['Vol',dynamicNgxStatus.volume],['↑ Adv',dynamicNgxStatus.advances],['↓ Dec',dynamicNgxStatus.declines]].map(([k,v])=>(
-            <div key={k} style={{display:'flex',gap:'4px',alignItems:'center'}}>
-              <span style={{fontSize:'0.68rem',fontWeight:600,color:'var(--text-muted)'}}>{k}</span>
-              <span style={{fontSize:'0.75rem',fontWeight:800,color:'var(--text-dark)'}}>{v}</span>
+        <div style={{ display: 'flex', gap: '20px', marginLeft: 'auto', flexWrap: 'wrap' }}>
+          {[['Vol', dynamicNgxStatus.volume], ['↑ Adv', dynamicNgxStatus.advances], ['↓ Dec', dynamicNgxStatus.declines]].map(([k, v]) => (
+            <div key={k} style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.67rem', fontWeight: 600, color: 'rgba(255,255,255,0.45)' }}>{k}</span>
+              <span style={{ fontSize: '0.78rem', fontWeight: 800, color: 'rgba(255,255,255,0.9)' }}>{v}</span>
             </div>
           ))}
         </div>
@@ -478,13 +553,13 @@ export default function Dashboard() {
         </div>
 
         {/* ═ Quick Actions ═ */}
-        <div className="quick-actions-grid stagger-3" style={{marginBottom:'24px'}}>
-          {QUICK_ACTIONS.map(a=>(
-            <Link key={a.label} to={a.to} style={{textDecoration:'none',background:'white',border:'1.5px solid var(--border)',borderRadius:'15px',padding:'15px 10px',display:'flex',flexDirection:'column',alignItems:'center',gap:'8px',boxShadow:'var(--shadow-sm)',transition:'all 0.2s ease'}}
-              onMouseEnter={e=>{e.currentTarget.style.boxShadow='var(--shadow-md)';e.currentTarget.style.transform='translateY(-3px)';e.currentTarget.style.borderColor=a.color;}}
-              onMouseLeave={e=>{e.currentTarget.style.boxShadow='var(--shadow-sm)';e.currentTarget.style.transform='none';e.currentTarget.style.borderColor='var(--border)';}}>
-              <div style={{width:'42px',height:'42px',borderRadius:'11px',background:a.bg,color:a.color,display:'flex',alignItems:'center',justifyContent:'center'}}><a.icon size={19}/></div>
-              <span style={{fontSize:'0.78rem',fontWeight:700,color:'var(--text-dark)',textAlign:'center'}}>{a.label}</span>
+        <div className="quick-actions-grid stagger-3" style={{ marginBottom: '32px' }}>
+          {QUICK_ACTIONS.map(a => (
+            <Link key={a.label} to={a.to} style={{ textDecoration: 'none', background: 'white', border: '1px solid var(--border)', borderRadius: '20px', padding: '20px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px', boxShadow: 'var(--shadow-sm)', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', position: 'relative', overflow: 'hidden' }}
+              onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 12px 28px rgba(15,82,87,0.1)'; e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.borderColor = a.color; }}
+              onMouseLeave={e => { e.currentTarget.style.boxShadow = 'var(--shadow-sm)'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderColor = 'var(--border)'; }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: a.bg, color: a.color, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 8px 24px ${a.color}25` }}><a.icon size={24}/></div>
+              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-dark)', textAlign: 'center' }}>{a.label}</span>
             </Link>
           ))}
         </div>
@@ -558,7 +633,7 @@ export default function Dashboard() {
               <PanelHeader icon={Activity} title="Recent Transactions"
                 action={<Link to="/portfolio" style={{fontSize:'0.78rem',fontWeight:700,color:'var(--primary)',display:'flex',alignItems:'center',gap:'3px'}}>View All <ChevronRight size={12}/></Link>}/>
               <div style={{display:'flex',flexDirection:'column',gap:'2px'}}>
-                {RECENT_TRANSACTIONS.map((tx,i)=>{
+                {history.slice(0,5).map((tx,i)=>{
                   const isBuy=tx.type==='buy';
                   const isDiv=tx.type==='div';
                   const txColor=isDiv?'#8b5cf6':isBuy?'var(--halal)':'var(--non-halal)';
@@ -574,16 +649,21 @@ export default function Dashboard() {
                       <div style={{flex:1,minWidth:0}}>
                         <div style={{fontWeight:700,fontSize:'0.87rem',color:'var(--text-dark)'}}>{tx.symbol}</div>
                         <div style={{fontSize:'0.71rem',color:'var(--text-muted)',fontWeight:500,marginTop:'1px'}}>
-                          {isDiv?`Dividend received`:(`${tx.shares} shares @ ₦${tx.price}`)}
+                          {isDiv?`Dividend received`:(`${tx.quantity} shares @ ₦${tx.price}`)}
                         </div>
                       </div>
                       <div style={{textAlign:'right',flexShrink:0}}>
                         <div style={{fontWeight:800,fontSize:'0.88rem',color:txColor}}>₦{Number(tx.total).toLocaleString()}</div>
-                        <div style={{fontSize:'0.69rem',color:'var(--text-muted)',fontWeight:500,marginTop:'1px'}}>{tx.date}</div>
+                        <div style={{fontSize:'0.69rem',color:'var(--text-muted)',fontWeight:500,marginTop:'1px'}}>{new Date(tx.date).toLocaleDateString('en-NG')}</div>
                       </div>
                     </div>
                   );
                 })}
+                {history.length===0 && (
+                  <div style={{padding:'20px 0',textAlign:'center',color:'var(--text-muted)',fontSize:'0.81rem'}}>
+                    No recent transactions
+                  </div>
+                )}
               </div>
             </Panel>
 
@@ -592,7 +672,11 @@ export default function Dashboard() {
               <PanelHeader icon={Star} title="Watchlist"
                 action={<Link to="/market" style={{fontSize:'0.78rem',fontWeight:700,color:'var(--primary)',display:'flex',alignItems:'center',gap:'3px'}}>Browse Market <ChevronRight size={12}/></Link>}/>
               <div style={{maxHeight:'340px',overflowY:'auto',paddingRight:'3px'}}>
-                {MOCK_WATCHLIST.map(s=><WatchlistRow key={s.symbol} stock={s}/>)}
+                {dynamicWatchlist.length > 0 ? dynamicWatchlist.map(s=><WatchlistRow key={s.symbol} stock={s}/>) : (
+                  <div style={{padding:'20px 0',textAlign:'center',color:'var(--text-muted)',fontSize:'0.81rem'}}>
+                    Your watchlist is empty
+                  </div>
+                )}
               </div>
             </Panel>
           </div>
@@ -717,21 +801,26 @@ export default function Dashboard() {
                 <h2 style={{fontSize:'1.05rem',fontWeight:800,color:'var(--text-dark)',display:'flex',alignItems:'center',gap:'7px',margin:0}}>
                   <Bell size={16} color="var(--primary)"/> Alerts
                 </h2>
-                <span style={{fontSize:'0.69rem',fontWeight:800,padding:'3px 9px',borderRadius:'20px',background:'var(--non-halal-bg)',color:'var(--non-halal)'}}>{MOCK_ALERTS.length} new</span>
+                {alerts.length > 0 && <span style={{fontSize:'0.69rem',fontWeight:800,padding:'3px 9px',borderRadius:'20px',background:'var(--non-halal-bg)',color:'var(--non-halal)'}}>{alerts.length} active</span>}
               </div>
               <div style={{display:'flex',flexDirection:'column',maxHeight:'300px',overflowY:'auto',paddingRight:'3px'}}>
-                {MOCK_ALERTS.map((alert,i)=>(
-                  <div key={alert.id} style={{display:'flex',gap:'12px',alignItems:'flex-start',padding:'12px 0',borderBottom:i<MOCK_ALERTS.length-1?'1px solid var(--border)':'none'}}>
+                {alerts.length > 0 ? alerts.map((alert,i)=>(
+                  <div key={alert.id} style={{display:'flex',gap:'12px',alignItems:'flex-start',padding:'12px 0',borderBottom:i<alerts.length-1?'1px solid var(--border)':'none'}}>
                     <div style={{width:'34px',height:'34px',flexShrink:0,borderRadius:'9px',background:'var(--bg-section)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'0.95rem',position:'relative'}}>
-                      {alert.icon}
-                      <div style={{position:'absolute',top:'-2px',right:'-2px',width:'7px',height:'7px',borderRadius:'50%',background:alert.dot,border:'2px solid white'}}/>
+                      <Bell size={14} color="var(--primary)"/>
                     </div>
                     <div>
-                      <div style={{fontSize:'0.84rem',color:'var(--text-dark)',fontWeight:600,lineHeight:1.5}}>{alert.message}</div>
-                      <div style={{fontSize:'0.7rem',color:'var(--text-muted)',marginTop:'3px',fontWeight:500}}>{alert.time}</div>
+                      <div style={{fontSize:'0.84rem',color:'var(--text-dark)',fontWeight:600,lineHeight:1.5}}>
+                        {alert.symbol} alert set at ₦{alert.target_price}
+                      </div>
+                      <div style={{fontSize:'0.7rem',color:'var(--text-muted)',marginTop:'3px',fontWeight:500}}>{new Date(alert.created_at).toLocaleDateString()}</div>
                     </div>
                   </div>
-                ))}
+                )) : (
+                  <div style={{padding:'20px 0',textAlign:'center',color:'var(--text-muted)',fontSize:'0.81rem'}}>
+                    No active price alerts
+                  </div>
+                )}
               </div>
             </Panel>
 

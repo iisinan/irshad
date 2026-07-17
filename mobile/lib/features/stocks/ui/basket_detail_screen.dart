@@ -31,7 +31,7 @@ class _BasketDetailScreenState extends State<BasketDetailScreen> {
         final decoded = jsonDecode(widget.basket['symbols']);
         symbols = List<String>.from(decoded);
       } catch (e) {
-        debugPrint('Error decoding symbols: $e');
+        // ignore
       }
     } else if (widget.basket['symbols'] is List) {
       symbols = List<String>.from(widget.basket['symbols']);

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'cache_interceptor.dart';
 
 /// Singleton ApiService — one Dio instance, one interceptor stack, everywhere.
 class ApiService {
@@ -28,6 +29,9 @@ class ApiService {
         'Content-Type': 'application/json',
       },
     ));
+
+    // Cache Interceptor for offline support
+    dio.interceptors.add(CacheInterceptor());
 
     // Auth token injection
     dio.interceptors.add(InterceptorsWrapper(

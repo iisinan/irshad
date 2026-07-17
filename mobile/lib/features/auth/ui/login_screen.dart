@@ -55,13 +55,14 @@ class _LoginScreenState extends State<LoginScreen> {
       
       if (authenticated) {
         setState(() => _isLoading = true);
-        final email = await _secureStorage.read(key: 'saved_email');
-        final password = await _secureStorage.read(key: 'saved_password');
+        final token = await _secureStorage.read(key: 'access_token');
         
-        if (email != null && password != null) {
-          _emailController.text = email;
-          _passwordController.text = password;
-          _login();
+        if (token != null) {
+          // If token exists, just proceed as authenticated
+          if (mounted) {
+            Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
+            Navigator.of(context, rootNavigator: true).pushReplacementNamed('/main');
+          }
         } else {
           setState(() => _isLoading = false);
           _showError('No saved credentials found. Please log in with your password once.');
@@ -85,7 +86,6 @@ void _login() async {
       final user = await _authRepository.login(_emailController.text, _passwordController.text);
       if (user != null) {
         await _secureStorage.write(key: 'saved_email', value: _emailController.text);
-        await _secureStorage.write(key: 'saved_password', value: _passwordController.text);
         if (mounted) {
           Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
           Navigator.of(context, rootNavigator: true).pushReplacementNamed('/main');

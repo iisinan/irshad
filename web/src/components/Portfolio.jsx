@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { fetchPortfolio, addHolding, removeHolding } from '../services/api';
+import { fetchPortfolio, addHolding, removeHolding, fetchNgxStocks } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { X, Search } from 'lucide-react';
+import { X, Search, LayoutDashboard, BarChart2, Star, Calculator, ShieldCheck, BookOpen, Info, Landmark, Briefcase, Bell, Activity } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import OverviewTab from './portfolio/OverviewTab';
 import MarketTab from './portfolio/MarketTab';
@@ -10,10 +10,8 @@ import WatchlistTab from './portfolio/WatchlistTab';
 import ZakatTab from './portfolio/ZakatTab';
 import PurificationTab from './portfolio/PurificationTab';
 import LecturesTab from './portfolio/LecturesTab';
-import ShariahPage from './Shariah';
+import BasketsTab from './portfolio/BasketsTab';
 
-import AboutPage from './About';
-import StockDetails from './StockDetails';
 
 /* ─── Skeleton ─────────────────────────────────────────────── */
 function Skeleton() {
@@ -49,10 +47,39 @@ function Skeleton() {
 
 /* ─── Add Holding Modal ────────────────────────────────────── */
 function AddModal({ onClose, onAdd, isAdding }) {
-  const [tab, setTab] = useState('manual'); // 'manual' | 'broker'
+  const [tab, setTab] = useState('manual');
   const [sym, setSym] = useState('');
   const [sh, setSh] = useState('');
   const [pr, setPr] = useState('');
+  const [allStocks, setAllStocks] = useState([]);
+  const [filteredStocks, setFilteredStocks] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  
+  // Broker State
+  const [linking, setLinking] = useState(false);
+  const [brokerName, setBrokerName] = useState('Meristem');
+  const [linkMessage, setLinkMessage] = useState('');
+
+  useEffect(() => {
+    fetchNgxStocks().then(res => setAllStocks(res.data || [])).catch(console.error);
+  }, []);
+
+  const handleSymChange = (e) => {
+    const val = e.target.value.toUpperCase();
+    setSym(val);
+    if (val.length > 0) {
+      const filtered = allStocks.filter(s => s.symbol.includes(val) || s.name.toUpperCase().includes(val)).slice(0, 5);
+      setFilteredStocks(filtered);
+      setShowDropdown(true);
+    } else {
+      setShowDropdown(false);
+    }
+  };
+
+  const selectSymbol = (s) => {
+    setSym(s);
+    setShowDropdown(false);
+  };
 
   const submit = (e) => {
     e.preventDefault();
@@ -83,11 +110,34 @@ function AddModal({ onClose, onAdd, isAdding }) {
               <label style={{ display:'block', fontSize:'0.75rem', fontWeight:700, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.5px', marginBottom:'8px' }}>Ticker Symbol</label>
               <div style={{ position:'relative' }}>
                 <Search size={14} color="var(--text-light)" style={{ position:'absolute', left:'14px', top:'14px' }}/>
-                <input value={sym} onChange={e=>setSym(e.target.value)} placeholder="e.g. MTNN" style={{ width:'100%', padding:'12px 14px 12px 38px', borderRadius:'12px', border:'1.5px solid var(--border)', fontSize:'0.95rem', fontWeight:600, color:'var(--text-dark)', textTransform:'uppercase', outline:'none' }}/>
+                <input 
+                  value={sym} 
+                  onChange={handleSymChange} 
+                  onFocus={() => { if(sym) setShowDropdown(true); }}
+                  onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+                  placeholder="e.g. MTNN" 
+                  style={{ width:'100%', padding:'12px 14px 12px 38px', borderRadius:'12px', border:'1.5px solid var(--border)', fontSize:'0.95rem', fontWeight:600, color:'var(--text-dark)', textTransform:'uppercase', outline:'none' }}
+                />
+                {showDropdown && filteredStocks.length > 0 && (
+                  <div style={{ position:'absolute', top:'100%', left:0, right:0, background:'white', border:'1px solid var(--border)', borderRadius:'12px', marginTop:'4px', zIndex:10, boxShadow:'var(--shadow-md)', overflow:'hidden' }}>
+                    {filteredStocks.map(stock => (
+                      <div 
+                        key={stock.symbol} 
+                        onClick={() => selectSymbol(stock.symbol)}
+                        style={{ padding:'10px 14px', cursor:'pointer', borderBottom:'1px solid var(--bg-section)' }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'var(--primary-50)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'white'}
+                      >
+                        <div style={{ fontWeight:800, color:'var(--text-dark)' }}>{stock.symbol}</div>
+                        <div style={{ fontSize:'0.75rem', color:'var(--text-muted)' }}>{stock.name}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-              <div style={{ display:'flex', gap:'8px', marginTop:'10px' }}>
-                {['MTNN','ZENITHBANK','DANGCEM'].map(s => (
-                  <button key={s} type="button" onClick={()=>setSym(s)} style={{ background:'var(--bg-section)', border:'none', padding:'4px 10px', borderRadius:'6px', fontSize:'0.7rem', fontWeight:700, color:'var(--text-muted)', cursor:'pointer' }}>{s}</button>
+              <div style={{ display:'flex', gap:'8px', marginTop:'10px', overflowX:'auto', paddingBottom:'4px' }}>
+                {allStocks.slice(0, 5).map(s => (
+                  <button key={s.symbol} type="button" onClick={()=>selectSymbol(s.symbol)} style={{ background:'var(--bg-section)', border:'none', padding:'4px 10px', borderRadius:'6px', fontSize:'0.7rem', fontWeight:700, color:'var(--text-muted)', cursor:'pointer', whiteSpace:'nowrap' }}>{s.symbol}</button>
                 ))}
               </div>
             </div>
@@ -111,16 +161,58 @@ function AddModal({ onClose, onAdd, isAdding }) {
         ) : (
           <div style={{ padding:'32px 24px', textAlign:'center' }}>
             <div style={{ width:'64px', height:'64px', borderRadius:'20px', background:'var(--primary-50)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 20px', border:'1px solid var(--primary-100)' }}>
-              <LinkIcon size={28} color="var(--primary)" />
+              <Activity size={28} color="var(--primary)" />
             </div>
             <h4 style={{ fontSize:'1.2rem', fontWeight:800, color:'var(--text-dark)', marginBottom:'12px' }}>Connect Your Broker</h4>
             <p style={{ color:'var(--text-muted)', fontSize:'0.95rem', lineHeight:1.6, marginBottom:'24px' }}>
-              Automatically sync your portfolio and trades by linking your CSCS account or supported Nigerian brokerages.
+              Link your brokerage account to get ₦1,000,000 in simulated trading capital.
             </p>
-            <button type="button" style={{ width:'100%', padding:'14px', borderRadius:'12px', background:'var(--primary)', border:'none', color:'white', fontWeight:800, fontSize:'0.95rem', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', boxShadow:'0 8px 24px rgba(15, 82, 87, 0.25)' }}>
-              Coming Soon
+            
+            <div style={{ marginBottom:'20px', textAlign:'left' }}>
+              <label style={{ display:'block', fontSize:'0.75rem', fontWeight:700, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.5px', marginBottom:'8px' }}>Select Broker</label>
+              <select 
+                value={brokerName} 
+                onChange={e => setBrokerName(e.target.value)}
+                style={{ width:'100%', padding:'12px 14px', borderRadius:'12px', border:'1.5px solid var(--border)', fontSize:'0.95rem', fontWeight:600, outline:'none', background:'white', cursor:'pointer' }}
+              >
+                <option value="Meristem">Meristem Securities</option>
+                <option value="Stanbic IBTC">Stanbic IBTC Stockbrokers</option>
+                <option value="CSCS">CSCS Direct</option>
+                <option value="Risevest">Risevest</option>
+              </select>
+            </div>
+
+            {linkMessage && (
+              <div style={{ marginBottom:'16px', padding:'12px', borderRadius:'8px', background: linkMessage.includes('successfully') ? 'var(--halal-bg)' : 'var(--non-halal-bg)', color: linkMessage.includes('successfully') ? 'var(--halal)' : 'var(--non-halal)', fontSize:'0.85rem', fontWeight:700 }}>
+                {linkMessage}
+              </div>
+            )}
+
+            <button 
+              type="button" 
+              onClick={async () => {
+                try {
+                  setLinking(true);
+                  setLinkMessage('');
+                  // Dynamically import linkBroker here to avoid cyclic dependency issues if not imported above
+                  const { linkBroker } = await import('../services/api');
+                  const res = await linkBroker(brokerName);
+                  setLinkMessage(res.message || 'Broker linked successfully!');
+                  setTimeout(() => {
+                    onClose();
+                  }, 2000);
+                } catch(err) {
+                  setLinkMessage(err.response?.data?.message || 'Failed to link broker.');
+                } finally {
+                  setLinking(false);
+                }
+              }}
+              disabled={linking}
+              style={{ width:'100%', padding:'14px', borderRadius:'12px', background:'var(--primary)', border:'none', color:'white', fontWeight:800, fontSize:'0.95rem', cursor: linking ? 'not-allowed' : 'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', boxShadow:'0 8px 24px rgba(15, 82, 87, 0.25)', opacity: linking ? 0.7 : 1 }}
+            >
+              {linking ? 'Linking...' : 'Link Simulated Broker'}
             </button>
-            <p style={{ fontSize:'0.8rem', color:'var(--text-light)', marginTop:'16px' }}>Secure, read-only access powered by Mono</p>
+            <p style={{ fontSize:'0.75rem', color:'var(--text-light)', marginTop:'16px' }}>For demo purposes. Connects a mock broker profile.</p>
           </div>
         )}
       </div>
@@ -146,8 +238,7 @@ export default function Portfolio() {
   const location = useLocation();
   const getTabFromHash = (hash) => {
     const h = hash.replace('#', '');
-    if (h.startsWith('stock-')) return h;
-    return ['overview', 'market', 'watchlist', 'zakat', 'purification', 'shariah', 'lectures', 'about'].includes(h) ? h : 'overview';
+    return ['overview', 'market', 'watchlist', 'zakat', 'purification', 'lectures', 'baskets'].includes(h) ? h : 'overview';
   };
   
   const [activeTab, setActiveTab] = useState(() => getTabFromHash(location.hash));
@@ -173,16 +264,23 @@ export default function Portfolio() {
     window.history.replaceState(null, '', `#${tabId}`);
   };
 
-  const loadData = () => {
-    if (!data) setLoading(true);
-    setError(null);
+  const loadData = (silent = false) => {
+    if (!data && !silent) setLoading(true);
+    if (!silent) setError(null);
     fetchPortfolio()
       .then(r => setData(r.data))
-      .catch(e => { if (!data) setError(e?.message || 'Failed to load portfolio'); })
-      .finally(() => setLoading(false));
+      .catch(e => { if (!data && !silent) setError(e?.message || 'Failed to load portfolio'); })
+      .finally(() => { if(!silent) setLoading(false); });
   };
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => { 
+    loadData(); 
+    // Poll for real-time updates every 30 seconds
+    const interval = setInterval(() => {
+      loadData(true);
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleAdd = async (payload) => {
     try {
@@ -216,14 +314,13 @@ export default function Portfolio() {
   );
 
   const tabs = [
-    { id: 'overview',     label: 'Overview' },
-    { id: 'market',       label: 'Market Screener' },
-    { id: 'watchlist',    label: 'Watchlist' },
-    { id: 'zakat',        label: 'Zakat' },
-    { id: 'purification', label: 'Purification' },
-    { id: 'shariah',      label: 'Shariah' },
-    { id: 'lectures',     label: 'Resources' },
-    { id: 'about',        label: 'About' }
+    { id: 'overview',     label: 'Overview',        icon: LayoutDashboard },
+    { id: 'market',       label: 'Market Screener', icon: BarChart2 },
+    { id: 'watchlist',    label: 'Watchlist',       icon: Star },
+    { id: 'zakat',        label: 'Zakat',           icon: Calculator },
+    { id: 'purification', label: 'Purification',    icon: ShieldCheck },
+    { id: 'lectures',     label: 'Resources',       icon: BookOpen },
+    { id: 'baskets',      label: 'Thematic Baskets',icon: Briefcase }
   ];
 
   // Compute sidebar data
@@ -257,40 +354,75 @@ export default function Portfolio() {
 
       {/* Header & Tabs */}
       <div style={{ marginBottom: '32px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '24px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <div className="section-label" style={{ marginBottom: '10px' }}>Hub</div>
-            <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-1px', color: 'var(--text-dark)', lineHeight: 1.1 }}>
+            <div className="section-label" style={{ marginBottom: '12px', background: 'var(--primary-50)', color: 'var(--primary)', border: 'none' }}>Personal Hub</div>
+            <h1 style={{ fontSize: '2.8rem', fontWeight: 900, letterSpacing: '-1.5px', color: 'var(--text-dark)', lineHeight: 1.1 }}>
               Portfolio & Tools
             </h1>
+            {totalBalance > 0 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '8px' }}>
+                <span style={{ fontSize: '1rem', color: 'var(--text-muted)', fontWeight: 600 }}>Total Value:</span>
+                <span style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--primary)', letterSpacing: '-0.5px' }}>{fmtK(totalBalance)}</span>
+                {holdings.length > 0 && (
+                  <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', background: 'var(--bg-section)', padding: '2px 10px', borderRadius: '20px', border: '1px solid var(--border)' }}>
+                    {holdings.length} holdings
+                  </span>
+                )}
+              </div>
+            )}
           </div>
+          <button
+            onClick={() => setShowAddModal(true)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '8px',
+              padding: '12px 22px', borderRadius: '14px',
+              background: 'var(--primary)', color: 'white', border: 'none',
+              fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer',
+              boxShadow: '0 8px 24px rgba(15,82,87,0.25)',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              flexShrink: 0,
+            }}
+            onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 14px 32px rgba(15,82,87,0.3)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='0 8px 24px rgba(15,82,87,0.25)'; }}
+          >
+            <Search size={15} style={{ display: 'none' }} /> <span style={{ fontSize: '1.1rem', lineHeight: 1 }}>+</span> Add Holding
+          </button>
         </div>
 
-        {/* Custom Nav Bar */}
-        <div className="hide-scrollbar" style={{ display: 'flex', gap: '8px', borderBottom: '2px solid var(--border)', paddingBottom: '0', overflowX: 'auto' }}>
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => handleTabChange(tab.id)}
-              style={{
-                background: 'none',
-                border: 'none',
-                padding: '12px 20px',
-                fontSize: '0.95rem',
-                fontWeight: 700,
-                color: activeTab === tab.id ? 'var(--primary)' : 'var(--text-muted)',
-                cursor: 'pointer',
-                position: 'relative',
-                transition: 'color 0.2s',
-                whiteSpace: 'nowrap'
-              }}
-            >
-              {tab.label}
-              {activeTab === tab.id && (
-                <div style={{ position: 'absolute', bottom: '-2px', left: 0, right: 0, height: '3px', background: 'var(--primary)', borderTopLeftRadius: '3px', borderTopRightRadius: '3px' }} />
-              )}
-            </button>
-          ))}
+        {/* Custom Nav Bar - Polished Segmented Control Style */}
+        <div className="hide-scrollbar" style={{ display: 'flex', gap: '8px', padding: '6px', overflowX: 'auto', background: 'white', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)', marginBottom: '32px' }}>
+          {tabs.map(tab => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => handleTabChange(tab.id)}
+                style={{
+                  background: isActive ? 'var(--primary)' : 'transparent',
+                  border: 'none',
+                  padding: '10px 18px',
+                  fontSize: '0.85rem',
+                  fontWeight: isActive ? 800 : 700,
+                  color: isActive ? 'white' : 'var(--text-muted)',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                  whiteSpace: 'nowrap',
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  boxShadow: isActive ? '0 4px 12px rgba(15, 82, 87, 0.25)' : 'none',
+                }}
+                onMouseEnter={e => { if(!isActive) { e.currentTarget.style.color = 'var(--text-dark)'; e.currentTarget.style.background = 'var(--bg-section)'; } }}
+                onMouseLeave={e => { if(!isActive) { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.background = 'transparent'; } }}
+              >
+                <Icon size={16} color={isActive ? 'white' : 'currentColor'} />
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -324,60 +456,65 @@ export default function Portfolio() {
               <PurificationTab data={data} />
             </div>
           )}
-          {mountedTabs.includes('shariah') && (
-            <div style={{ display: activeTab === 'shariah' ? 'block' : 'none' }}>
-              <ShariahPage />
-            </div>
-          )}
           {mountedTabs.includes('lectures') && (
             <div style={{ display: activeTab === 'lectures' ? 'block' : 'none' }}>
               <LecturesTab />
             </div>
           )}
+          {mountedTabs.includes('baskets') && (
+            <div style={{ display: activeTab === 'baskets' ? 'block' : 'none' }}>
+              <BasketsTab />
+            </div>
+          )}
 
-          {mountedTabs.includes('about') && (
-            <div style={{ display: activeTab === 'about' ? 'block' : 'none' }}>
-              <AboutPage />
-            </div>
-          )}
-          {activeTab.startsWith('stock-') && (
-            <div style={{ display: 'block' }}>
-              <StockDetails key={activeTab} symbol={activeTab.replace('stock-', '')} />
-            </div>
-          )}
         </div>
 
         {/* ── Right Sidebar (Always Visible) ── */}
         <div className="stagger-3" style={{ display:'flex', flexDirection:'column', gap:'18px' }}>
           {/* Pie Chart */}
-          <div style={{ background:'white', border:'1px solid var(--border)', borderRadius:'20px', padding:'22px', boxShadow:'var(--shadow-sm)' }}>
-            <h3 style={{ fontSize:'1rem', fontWeight:800, color:'var(--text-dark)', marginBottom:'18px', display:'flex', alignItems:'center', gap:'7px' }}>
-              <div style={{ width:'8px', height:'8px', borderRadius:'50%', background:'var(--primary)' }}/> Allocation
-            </h3>
+          <div style={{ background:'white', border:'1px solid var(--border)', borderRadius:'24px', padding:'26px', boxShadow:'var(--shadow-sm)', transition:'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', position:'relative', overflow:'hidden' }}
+            onMouseEnter={e => { e.currentTarget.style.boxShadow='var(--shadow-md)'; e.currentTarget.style.transform='translateY(-2px)'; }}
+            onMouseLeave={e => { e.currentTarget.style.boxShadow='var(--shadow-sm)'; e.currentTarget.style.transform='none'; }}>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'20px', position:'relative', zIndex:1 }}>
+              <h3 style={{ fontSize:'1rem', fontWeight:800, color:'var(--text-dark)', display:'flex', alignItems:'center', gap:'8px' }}>
+                <div style={{ width:'10px', height:'10px', borderRadius:'50%', background:'var(--primary)' }}/> Allocation
+              </h3>
+              {holdings.length > 0 && (
+                <span style={{ fontSize:'0.75rem', fontWeight:800, color:'var(--text-muted)' }}>{fmtK(totalBalance)}</span>
+              )}
+            </div>
             {holdings.length === 0 ? (
-              <div style={{ height:'160px', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--text-light)', fontSize:'0.85rem' }}>No data yet</div>
+              <div style={{ height:'180px', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', color:'var(--text-muted)', fontSize:'0.9rem', fontWeight:600, background:'linear-gradient(180deg, var(--bg-section) 0%, #ffffff 100%)', borderRadius:'16px', border:'1.5px dashed var(--border)' }}>
+                <Activity size={28} style={{ marginBottom:'12px', opacity:0.3, color:'var(--primary)' }} />
+                <span>No allocation data</span>
+              </div>
             ) : (
               <>
-                <div style={{ height:'160px' }}>
+                <div style={{ height:'160px', position:'relative' }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
-                      <Pie data={pieData} dataKey="value" cx="50%" cy="50%" innerRadius={44} outerRadius={70} paddingAngle={3}>
+                      <Pie data={pieData} dataKey="value" cx="50%" cy="50%" innerRadius={48} outerRadius={72} paddingAngle={3}>
                         {pieData.map((entry,i) => <Cell key={i} fill={entry.color}/>)}
                       </Pie>
                       <Tooltip formatter={(v) => [fmtK(v),'Value']} contentStyle={{ borderRadius:'10px', border:'1px solid var(--border)', fontSize:'0.78rem', fontWeight:700 }}/>
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
-                <div style={{ display:'flex', flexDirection:'column', gap:'6px', marginTop:'16px' }}>
+                <div style={{ display:'flex', flexDirection:'column', gap:'7px', marginTop:'18px' }}>
                   {pieData.map((d,i) => (
                     <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-                      <div style={{ display:'flex', alignItems:'center', gap:'7px' }}>
-                        <div style={{ width:'8px', height:'8px', borderRadius:'2px', background:d.color, flexShrink:0 }}/>
-                        <span style={{ fontSize:'0.76rem', fontWeight:600, color:'var(--text-dark)' }}>{d.name}</span>
+                      <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+                        <div style={{ width:'10px', height:'10px', borderRadius:'3px', background:d.color, flexShrink:0 }}/>
+                        <span style={{ fontSize:'0.8rem', fontWeight:700, color:'var(--text-dark)' }}>{d.name}</span>
                       </div>
-                      <span style={{ fontSize:'0.76rem', fontWeight:700, color:'var(--text-muted)' }}>
-                        {totalBalance > 0 ? `${((d.value / totalBalance)*100).toFixed(1)}%` : '—'}
-                      </span>
+                      <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+                        <div style={{ width:'50px', height:'4px', borderRadius:'2px', background:'var(--bg-section)', overflow:'hidden' }}>
+                          <div style={{ width:`${totalBalance > 0 ? ((d.value / totalBalance)*100) : 0}%`, height:'100%', background:d.color, borderRadius:'2px' }}/>
+                        </div>
+                        <span style={{ fontSize:'0.78rem', fontWeight:800, color:'var(--text-muted)', minWidth:'32px', textAlign:'right' }}>
+                          {totalBalance > 0 ? `${((d.value / totalBalance)*100).toFixed(0)}%` : '—'}
+                        </span>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -386,27 +523,51 @@ export default function Portfolio() {
           </div>
 
           {/* Shariah Summary */}
-          <div style={{ background:'white', border:'1px solid var(--border)', borderRadius:'20px', padding:'22px', boxShadow:'var(--shadow-sm)' }}>
-            <h3 style={{ fontSize:'1rem', fontWeight:800, color:'var(--text-dark)', marginBottom:'16px', display:'flex', alignItems:'center', gap:'7px' }}>
-              <div style={{ width:'8px', height:'8px', borderRadius:'50%', background:'var(--primary)' }}/> Shariah Summary
+          <div style={{ background:'white', border:'1px solid var(--border)', borderRadius:'24px', padding:'26px', boxShadow:'var(--shadow-sm)', transition:'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', position:'relative', overflow:'hidden' }}
+            onMouseEnter={e => { e.currentTarget.style.boxShadow='var(--shadow-md)'; e.currentTarget.style.transform='translateY(-2px)'; }}
+            onMouseLeave={e => { e.currentTarget.style.boxShadow='var(--shadow-sm)'; e.currentTarget.style.transform='none'; }}>
+            <h3 style={{ fontSize:'1rem', fontWeight:800, color:'var(--text-dark)', marginBottom:'20px', display:'flex', alignItems:'center', gap:'8px', position:'relative', zIndex:1 }}>
+              <div style={{ width:'10px', height:'10px', borderRadius:'50%', background:'var(--halal)', boxShadow:'0 0 10px rgba(34,197,94,0.4)' }}/> Shariah Health
             </h3>
-            <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
+            
+            {/* Compliance Score Bar */}
+            {holdings.length > 0 && (
+              <div style={{ marginBottom:'18px', padding:'16px', background:'var(--bg-section)', borderRadius:'14px' }}>
+                <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'8px' }}>
+                  <span style={{ fontSize:'0.78rem', fontWeight:700, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.5px' }}>Compliance Score</span>
+                  <span style={{ fontSize:'0.9rem', fontWeight:900, color: halalCount === holdings.length ? 'var(--halal)' : nonHalalCount > 0 ? 'var(--non-halal)' : 'var(--doubtful)' }}>
+                    {holdings.length > 0 ? `${Math.round((halalCount / holdings.length) * 100)}%` : '—'}
+                  </span>
+                </div>
+                <div style={{ height:'8px', background:'var(--border)', borderRadius:'4px', overflow:'hidden' }}>
+                  <div style={{ 
+                    width: holdings.length > 0 ? `${(halalCount / holdings.length) * 100}%` : '0%',
+                    height:'100%',
+                    background: halalCount === holdings.length ? 'var(--halal)' : 'var(--doubtful)',
+                    borderRadius:'4px',
+                    transition:'width 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
+                  }}/>
+                </div>
+              </div>
+            )}
+
+            <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
               {[
-                { label: 'Halal Holdings',   value: halalCount,    color: 'var(--halal)',     bg: 'var(--halal-bg)' },
-                { label: 'Non-Halal',        value: nonHalalCount, color: 'var(--non-halal)', bg: 'var(--non-halal-bg)' },
-                { label: 'Need Purification',value: needsPurif,    color: 'var(--doubtful)',  bg: 'var(--doubtful-bg)' },
+                { label: 'Halal Holdings',   value: halalCount,    color: 'var(--halal)',     bg: 'var(--halal-bg)',     border: 'var(--halal-border)' },
+                { label: 'Non-Halal',        value: nonHalalCount, color: 'var(--non-halal)', bg: 'var(--non-halal-bg)', border: 'var(--non-halal-border)' },
+                { label: 'Need Purification',value: needsPurif,    color: 'var(--doubtful)',  bg: 'var(--doubtful-bg)',  border: 'var(--doubtful-border)' },
               ].map(row => (
-                <div key={row.label} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 12px', borderRadius:'11px', background:row.bg }}>
-                  <span style={{ fontSize:'0.8rem', fontWeight:600, color:row.color }}>{row.label}</span>
-                  <span style={{ fontSize:'1rem', fontWeight:900, color:row.color }}>{row.value}</span>
+                <div key={row.label} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 14px', borderRadius:'12px', background:row.bg, border:`1px solid ${row.border}` }}>
+                  <span style={{ fontSize:'0.82rem', fontWeight:700, color:row.color }}>{row.label}</span>
+                  <span style={{ fontSize:'1.1rem', fontWeight:900, color:row.color }}>{row.value}</span>
                 </div>
               ))}
             </div>
             
             {activeTab !== 'market' && (
-              <button onClick={() => handleTabChange('market')} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginTop:'14px', padding:'11px 14px', borderRadius:'12px', background:'var(--primary-50)', color:'var(--primary)', border:'none', width:'100%', cursor:'pointer', transition:'all 0.2s' }}>
-                <span style={{ fontSize:'0.82rem', fontWeight:700 }}>Screen more stocks</span>
-                <span style={{ fontSize:'1rem' }}>→</span>
+              <button onClick={() => handleTabChange('market')} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginTop:'14px', padding:'12px 14px', borderRadius:'12px', background:'var(--primary-50)', color:'var(--primary)', border:'1px solid var(--primary-100)', width:'100%', cursor:'pointer', transition:'all 0.2s' }}>
+                <span style={{ fontSize:'0.85rem', fontWeight:800 }}>Screen more stocks</span>
+                <BarChart2 size={14} />
               </button>
             )}
           </div>

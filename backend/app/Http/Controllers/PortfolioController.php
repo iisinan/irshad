@@ -68,14 +68,29 @@ class PortfolioController extends Controller
         $halalValue = $portfolioData->where('is_halal', true)->sum('total_value');
         $healthPercentage = $stocksBalance > 0 ? round(($halalValue / $stocksBalance) * 100, 1) : 100;
 
+        // Fetch trailing 30 days of history
+        $history = \App\Models\PortfolioSnapshot::where('user_id', Auth::id())
+            ->where('date', '>=', now()->subDays(30)->toDateString())
+            ->orderBy('date', 'asc')
+            ->get(['date', 'total_balance as value']);
+
+        // If today isn't in history yet, append current balance
+        if ($history->isEmpty() || $history->last()->date->toDateString() !== now()->toDateString()) {
+            $history->push([
+                'date' => now()->toDateString(),
+                'value' => $totalBalance
+            ]);
+        }
+
         return $this->success([
             'holdings' => $portfolioData,
             'summary' => [
                 'cash_balance' => $cashBalance,
                 'total_balance' => $totalBalance,
                 'purification_due' => $totalPurification,
-                'health_percentage' => $healthPercentage
-            ]
+                'health_percentage' => $healthPercentage,
+            ],
+            'history' => $history
         ]);
     }
 

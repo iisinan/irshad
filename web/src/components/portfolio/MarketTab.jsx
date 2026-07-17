@@ -25,7 +25,7 @@ const StockCard = ({ company, isWatched, onToggleWatch }) => {
 
   return (
     <div style={{ position: 'relative' }}>
-      <Link to={`/portfolio#stock-${company.symbol}`} state={{ stock: company }} className="stock-card" style={{ display: 'block' }}>
+      <Link to={`/market/${company.symbol}`} state={{ stock: company }} className="stock-card" style={{ display: 'block' }}>
         <div className="stock-card-header">
           <div className="stock-card-title" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div style={{
@@ -46,7 +46,6 @@ const StockCard = ({ company, isWatched, onToggleWatch }) => {
               <div className="stock-name">{company.name}</div>
             </div>
           </div>
-          <span className={`status-badge ${badgeClass}`}>{statusStr}</span>
         </div>
         <div className="stock-card-body">
           <div className="stock-price-wrapper">
@@ -93,9 +92,7 @@ export default function MarketTab() {
   const [watchlist, setWatchlist] = useState([]);
   const [loading, setLoading] = useState(stocks.length === 0);
   const [error, setError] = useState(null);
-  const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
-  const [sectorFilter, setSectorFilter] = useState('all');
   const [sortMode, setSortMode] = useState('default');
   const [viewMode, setViewMode] = useState('grid');
 
@@ -111,6 +108,7 @@ export default function MarketTab() {
       
       setWatchlist(wlRes.map(w => w.symbol));
       setStocks(stocksRes.data || []);
+      localStorage.setItem('irshad_stocks_cache_v9', JSON.stringify({ data: stocksRes, expiry: Date.now() + 1000 * 60 * 60 }));
     } catch (err) {
       if (stocks.length === 0) setError(err?.message || 'Failed to load market data.');
     } finally {
@@ -147,91 +145,108 @@ export default function MarketTab() {
     return 'doubtful';
   };
 
-  const sectors = [...new Set(stocks.map(s => s.sector).filter(Boolean))].sort();
-
   const filtered = stocks.filter(s => {
-    const statusMatch = filter === 'all' || getStatus(s) === filter;
-    const nameMatch = s.name?.toLowerCase().includes(search.toLowerCase()) || s.symbol?.toLowerCase().includes(search.toLowerCase());
-    const sectorMatch = sectorFilter === 'all' || s.sector === sectorFilter;
-    return statusMatch && nameMatch && sectorMatch;
+    const nameMatch = s.name?.toLowerCase()?.includes(search.toLowerCase()) || s.symbol?.toLowerCase()?.includes(search.toLowerCase());
+    return nameMatch;
   }).sort((a, b) => {
     if (sortMode === 'gainers') return (b.price_change_pct || 0) - (a.price_change_pct || 0);
     if (sortMode === 'losers') return (a.price_change_pct || 0) - (b.price_change_pct || 0);
     return 0;
   });
 
+  // Derive live market stats
+  const halalCount  = stocks.filter(s => getStatus(s) === 'halal').length;
+  const nonHalalCount = stocks.filter(s => getStatus(s) === 'non-halal').length;
+  const doubtfulCount = stocks.filter(s => !['halal','non-halal'].includes(getStatus(s))).length;
+
   return (
-    <div className="animate-fade-in stagger-1" style={{ background:'white', borderRadius:'24px', padding:'32px', boxShadow:'var(--shadow-sm)', border:'1px solid var(--border)' }}>
-      {/* Filters */}
-      <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap' }}>
-        <div style={{ position: 'relative', width: '260px', flexShrink: 0 }}>
-          <Search size={16} color="var(--text-light)" style={{ position: 'absolute', left: '16px', top: '12px' }}/>
-          <input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search symbol or company..."
-            style={{
-              padding: '10px 16px 10px 40px',
-              borderRadius: '12px',
-              border: '1px solid var(--border)',
-              background: 'var(--bg-section)',
-              fontSize: '0.95rem',
-              color: 'var(--text-dark)',
-              outline: 'none',
-              width: '100%',
-              fontFamily: 'inherit',
-              transition: 'all 0.2s',
-            }}
-          />
+    <div className="animate-fade-in stagger-1" style={{ borderRadius:'24px', boxShadow:'var(--shadow-sm)', border:'1px solid var(--border)', overflow: 'hidden' }}>
+      
+      {/* Market Header Banner */}
+      <div style={{ background: 'linear-gradient(135deg, #0D1B2A 0%, #0F5257 60%, #0B6B71 100%)', padding: '28px 32px', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: '-60px', right: '-30px', width: '220px', height: '220px', background: 'rgba(255,255,255,0.03)', borderRadius: '50%', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: '-80px', left: '20%', width: '180px', height: '180px', background: 'rgba(255,255,255,0.02)', borderRadius: '50%', pointerEvents: 'none' }} />
+        
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px', marginBottom: stocks.length > 0 ? '24px' : '0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <div style={{ width: '48px', height: '48px', background: 'rgba(255,255,255,0.12)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.15)' }}>
+              <BarChart2 size={24} color="white" />
+            </div>
+            <div>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 900, color: 'white', letterSpacing: '-0.5px' }}>Search for Stock</h2>
+              <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.88rem', marginTop: '2px' }}>Nigerian Exchange</p>
+            </div>
+          </div>
+          
+          {stocks.length > 0 && (
+            <div style={{ display: 'flex', gap: '10px' }}>
+              {[
+                { label: 'Halal', value: halalCount, color: '#22C55E', bg: 'rgba(34,197,94,0.15)', border: 'rgba(34,197,94,0.3)' },
+                { label: 'Doubtful', value: doubtfulCount, color: '#F59E0B', bg: 'rgba(245,158,11,0.15)', border: 'rgba(245,158,11,0.3)' },
+                { label: 'Non-Halal', value: nonHalalCount, color: '#EF4444', bg: 'rgba(239,68,68,0.15)', border: 'rgba(239,68,68,0.3)' },
+              ].map(stat => (
+                <div key={stat.label} style={{ padding: '8px 14px', background: stat.bg, border: `1px solid ${stat.border}`, borderRadius: '12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '1.2rem', fontWeight: 900, color: stat.color, lineHeight: 1 }}>{stat.value}</div>
+                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.5px', marginTop: '3px' }}>{stat.label}</div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
-        <select value={sectorFilter} onChange={e => setSectorFilter(e.target.value)} style={{ padding: '10px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-dark)', outline: 'none', cursor: 'pointer' }}>
-          <option value="all">All Sectors</option>
-          {sectors.map(s => <option key={s} value={s}>{s}</option>)}
-        </select>
+        {/* Integrated Filter Toolbar */}
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', position: 'relative', zIndex: 10 }}>
+          {/* Search */}
+          <div style={{ position: 'relative', flex: '1 1 220px', maxWidth: '280px' }}>
+            <Search size={14} color="rgba(255,255,255,0.5)" style={{ position: 'absolute', left: '14px', top: '11px' }}/>
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search symbol or company..."
+              style={{
+                padding: '10px 14px 10px 36px',
+                borderRadius: '12px',
+                border: '1.5px solid rgba(255,255,255,0.15)',
+                background: 'rgba(255,255,255,0.1)',
+                fontSize: '0.88rem',
+                color: 'white',
+                outline: 'none',
+                width: '100%',
+                fontFamily: 'inherit',
+                backdropFilter: 'blur(4px)',
+              }}
+            />
+          </div>
 
-        <select value={sortMode} onChange={e => setSortMode(e.target.value)} style={{ padding: '10px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-dark)', outline: 'none', cursor: 'pointer' }}>
-          <option value="default">Default Sort</option>
-          <option value="gainers">Top Gainers</option>
-          <option value="losers">Top Losers</option>
-        </select>
 
-        <div style={{ display: 'flex', background: 'var(--bg-section)', borderRadius: '12px', padding: '4px', marginLeft: 'auto' }}>
-          <button onClick={() => setViewMode('grid')} style={{ padding: '6px 12px', borderRadius: '8px', border: 'none', background: viewMode === 'grid' ? 'white' : 'transparent', color: viewMode === 'grid' ? 'var(--primary)' : 'var(--text-muted)', boxShadow: viewMode === 'grid' ? 'var(--shadow-sm)' : 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', transition: 'all 0.2s' }}>
-            <LayoutGrid size={16} />
-          </button>
-          <button onClick={() => setViewMode('list')} style={{ padding: '6px 12px', borderRadius: '8px', border: 'none', background: viewMode === 'list' ? 'white' : 'transparent', color: viewMode === 'list' ? 'var(--primary)' : 'var(--text-muted)', boxShadow: viewMode === 'list' ? 'var(--shadow-sm)' : 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', transition: 'all 0.2s' }}>
-            <ListIcon size={16} />
-          </button>
+
+          {/* Sort select */}
+          <select value={sortMode} onChange={e => setSortMode(e.target.value)} style={{ padding: '10px 14px', borderRadius: '12px', border: '1.5px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.1)', fontSize: '0.88rem', fontWeight: 600, color: 'white', outline: 'none', cursor: 'pointer', backdropFilter: 'blur(4px)' }}>
+            <option value="default" style={{ color: '#0D1B2A' }}>Default Sort</option>
+            <option value="gainers" style={{ color: '#0D1B2A' }}>Top Gainers</option>
+            <option value="losers" style={{ color: '#0D1B2A' }}>Top Losers</option>
+          </select>
+
+          {/* View mode toggle */}
+          <div style={{ display: 'flex', background: 'rgba(255,255,255,0.12)', borderRadius: '10px', padding: '3px', gap: '2px', border: '1px solid rgba(255,255,255,0.15)', marginLeft: 'auto' }}>
+            <button onClick={() => setViewMode('grid')} style={{ padding: '7px 12px', borderRadius: '8px', border: 'none', background: viewMode === 'grid' ? 'white' : 'transparent', color: viewMode === 'grid' ? 'var(--primary)' : 'rgba(255,255,255,0.7)', cursor: 'pointer', display: 'flex', alignItems: 'center', transition: 'all 0.2s' }}>
+              <LayoutGrid size={15} />
+            </button>
+            <button onClick={() => setViewMode('list')} style={{ padding: '7px 12px', borderRadius: '8px', border: 'none', background: viewMode === 'list' ? 'white' : 'transparent', color: viewMode === 'list' ? 'var(--primary)' : 'rgba(255,255,255,0.7)', cursor: 'pointer', display: 'flex', alignItems: 'center', transition: 'all 0.2s' }}>
+              <ListIcon size={15} />
+            </button>
+          </div>
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '32px', overflowX: 'auto', paddingBottom: '4px' }}>
-        {['all', 'halal', 'doubtful', 'non-halal'].map(f => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            style={{
-              padding: '8px 16px',
-              borderRadius: '20px',
-              border: filter === f ? '1px solid var(--primary)' : '1px solid var(--border)',
-              background: filter === f ? 'var(--primary-50)' : 'white',
-              color: filter === f ? 'var(--primary)' : 'var(--text-muted)',
-              fontWeight: 700,
-              fontSize: '0.85rem',
-              cursor: 'pointer',
-              textTransform: 'capitalize',
-              whiteSpace: 'nowrap',
-              transition: 'all 0.2s',
-            }}
-          >
-            {f === 'all' ? 'All Stocks' : f}
-          </button>
-        ))}
-        <span style={{ marginLeft: 'auto', color: 'var(--text-light)', fontSize: '0.88rem', fontWeight: 600, display: 'flex', alignItems: 'center' }}>
-          {filtered.length} {filtered.length === 1 ? 'result' : 'results'}
+      {/* Stock count */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '16px 32px', background: 'var(--bg-section)', borderBottom: '1px solid var(--border)' }}>
+        <span style={{ color: 'var(--text-light)', fontSize: '0.82rem', fontWeight: 700, background: 'white', padding: '4px 12px', borderRadius: '20px', border: '1px solid var(--border)', whiteSpace: 'nowrap' }}>
+          {filtered.length} {filtered.length === 1 ? 'stock' : 'stocks'}
         </span>
       </div>
+
+      <div style={{ background: 'white', padding: '24px 32px 32px' }}>
 
       {loading ? (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '100px 0', gap: '16px' }}>
@@ -278,7 +293,6 @@ export default function MarketTab() {
                       <th style={{ padding: '16px', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 700 }}>Sector</th>
                       <th style={{ padding: '16px', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 700, textAlign: 'right' }}>Price (₦)</th>
                       <th style={{ padding: '16px', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 700, textAlign: 'right' }}>Change</th>
-                      <th style={{ padding: '16px', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 700, textAlign: 'center' }}>Compliance</th>
                       <th style={{ padding: '16px' }}></th>
                     </tr>
                   </thead>
@@ -300,7 +314,7 @@ export default function MarketTab() {
                       return (
                         <tr key={stock.symbol} className="roll-in-anim" style={{ borderTop: '1px solid var(--border)', animationDelay: `${(i % 15) * 0.03}s` }}>
                           <td style={{ padding: '16px', fontWeight: 800, color: 'var(--text-dark)' }}>
-                            <Link to={`/portfolio#stock-${stock.symbol}`} state={{ stock }} style={{ color: 'inherit', textDecoration: 'none' }}>{stock.symbol}</Link>
+                            <Link to={`/market/${stock.symbol}`} state={{ stock }} style={{ color: 'inherit', textDecoration: 'none' }}>{stock.symbol}</Link>
                           </td>
                           <td style={{ padding: '16px', color: 'var(--text-muted)', fontSize: '0.9rem', maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{stock.name}</td>
                           <td style={{ padding: '16px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>{stock.sector || '-'}</td>
@@ -310,9 +324,6 @@ export default function MarketTab() {
                               {isPositive ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                               {(stock.price_change_pct ?? 0).toFixed(2)}%
                             </span>
-                          </td>
-                          <td style={{ padding: '16px', textAlign: 'center' }}>
-                            <span className={`status-badge ${badgeClass}`}>{statusStr}</span>
                           </td>
                           <td style={{ padding: '16px', textAlign: 'right' }}>
                             <button onClick={() => handleToggleWatch(stock.symbol, isWatched)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: isWatched ? 'var(--gold)' : 'var(--border)' }}>
@@ -332,6 +343,7 @@ export default function MarketTab() {
 
         </>
       )}
+      </div>
     </div>
   );
 }

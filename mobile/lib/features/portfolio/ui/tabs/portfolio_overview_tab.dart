@@ -98,7 +98,24 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                           Container(
                             padding: const EdgeInsets.all(24),
                             alignment: Alignment.center,
-                            child: const Text('No assets in your portfolio.', style: TextStyle(color: AppTheme.textMuted)),
+                            child: Column(
+                              children: [
+                                const Icon(Icons.account_balance_wallet_rounded, size: 48, color: AppTheme.divider),
+                                const SizedBox(height: 16),
+                                const Text('No assets in your portfolio.', style: TextStyle(color: AppTheme.textMuted, fontWeight: FontWeight.w600)),
+                                const SizedBox(height: 16),
+                                OutlinedButton.icon(
+                                  onPressed: () => Navigator.pushNamed(context, '/brokerage/link'),
+                                  icon: const Icon(Icons.link_rounded),
+                                  label: const Text('Link Brokerage Account'),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: AppTheme.primary,
+                                    side: const BorderSide(color: AppTheme.primary),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         const SizedBox(height: 32),
                         const Text(
@@ -502,9 +519,17 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () async {
-                      await ApiService().delete('portfolio/${holding['id']}');
-                      if (mounted) Navigator.pop(context);
-                      _fetchPortfolio();
+                      try {
+                        await ApiService().delete('portfolio/${holding['id']}');
+                        if (mounted) Navigator.pop(context);
+                        _fetchPortfolio();
+                      } catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Failed to delete: $e'), backgroundColor: AppTheme.haram),
+                          );
+                        }
+                      }
                     },
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppTheme.haram,
@@ -519,12 +544,22 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () async {
-                      await ApiService().put('portfolio/${holding['id']}', {
-                        'shares': double.parse(qtyController.text),
-                        'average_buy_price': double.parse(priceController.text),
-                      });
-                      if (mounted) Navigator.pop(context);
-                      _fetchPortfolio();
+                      try {
+                        final shares = double.parse(qtyController.text);
+                        final price = double.parse(priceController.text);
+                        await ApiService().put('portfolio/${holding['id']}', {
+                          'shares': shares,
+                          'average_buy_price': price,
+                        });
+                        if (mounted) Navigator.pop(context);
+                        _fetchPortfolio();
+                      } catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Failed to save: $e'), backgroundColor: AppTheme.haram),
+                          );
+                        }
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.textDark, 

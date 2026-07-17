@@ -38,9 +38,9 @@ class StockProvider extends ChangeNotifier {
         fetchNgxStocks();
       }
     } catch (e) {
-      debugPrint("Hive cache load error: $e");
-      fetchNgxStocks();
+      // ignore
     }
+    fetchNgxStocks();
   }
 
   int _getNext3AM() {
@@ -70,7 +70,7 @@ class StockProvider extends ChangeNotifier {
           };
           await box.put('ngx_stocks_v4', jsonEncode(cacheWrapper));
         } catch (e) {
-          debugPrint("Hive cache save error: $e");
+          // ignore
         }
       } else {
         _error = "No stocks available.";
@@ -112,7 +112,7 @@ class StockProvider extends ChangeNotifier {
         };
         await box.put('details_v4_$symbol', jsonEncode(cacheWrapper));
       } catch (e) {
-        debugPrint("Hive cache details save error: $e");
+        // ignore
       }
     }
     return data;

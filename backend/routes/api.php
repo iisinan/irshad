@@ -33,6 +33,7 @@ Route::prefix('v1')->group(function () {
     Route::post('/auth/google', [AuthController::class, 'googleLogin']);
 
     // ── Public Data (no auth required) ───────────────────────────────────
+    Route::get('/resources',                      [\App\Http\Controllers\ResourceController::class, 'index']);
     Route::get('/stocks',                         [StockController::class, 'index']);
     Route::get('/stocks/search',                  [StockController::class, 'search']);
     Route::get('/stocks/ngx',           [StockController::class, 'ngx']);
@@ -45,6 +46,11 @@ Route::prefix('v1')->group(function () {
     // ── Protected Routes ─────────────────────────────────────────────────
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
+
+        // Custom Baskets
+        Route::post('/stocks/baskets', [BasketController::class, 'store']);
+        Route::delete('/stocks/baskets/{basket}', [BasketController::class, 'destroy']);
+        Route::post('/stocks/baskets/{basket}/invest', [BasketController::class, 'invest']);
 
         // Profile
         Route::get('/profile',  [ProfileController::class, 'show']);

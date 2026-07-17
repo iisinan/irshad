@@ -7,6 +7,8 @@ use App\Traits\ApiResponder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+use Illuminate\Support\Facades\Http;
+
 class ProductController extends Controller
 {
     use ApiResponder;
@@ -20,13 +22,104 @@ class ProductController extends Controller
             'barcode' => 'required|string',
         ]);
 
-        $product = Product::with('ingredients')->where('barcode', $request->barcode)->first();
+        $barcode = $request->barcode;
+        $product = Product::with('ingredients')->where('barcode', $barcode)->first();
 
-        if (!$product) {
-            return $this->error('Product not found in our database. You can submit it for review.', 404);
+        // If found locally, return immediately
+        if ($product) {
+            return $this->success($product, 'Product found locally');
         }
 
-        return $this->success($product, 'Product found');
+        // Fallback to OpenFoodFacts
+        try {
+            $response = Http::timeout(10)->get("https://world.openfoodfacts.org/api/v0/product/{$barcode}.json");
+            
+            if ($response->successful() && $response->json('status') === 1) {
+                $productData = $response->json('product');
+                
+                $ingredientsText = $productData['ingredients_text_en'] 
+                    ?? $productData['ingredients_text'] 
+                    ?? null;
+                
+                $statusData = $this->analyzeHalalStatus($ingredientsText);
+                
+                $product = Product::create([
+                    'barcode' => $barcode,
+                    'name' => $productData['product_name'] ?? 'Unknown Product',
+                    'brand' => $productData['brands'] ?? null,
+                    'image_url' => $productData['image_url'] ?? null,
+                    'ingredients_text' => $ingredientsText,
+                    'status' => $statusData['status'],
+                    'status_reason' => $statusData['reason'],
+                    'verified_by_scholar' => false, // Needs manual verification if doubtful
+                ]);
+
+                return $this->success($product, 'Product found via OpenFoodFacts and auto-screened');
+            }
+        } catch (\Exception $e) {
+            // Silently ignore HTTP errors and fallback to not found
+        }
+
+        return $this->error('Product not found in our database or global registry. You can submit it for review.', 404);
+    }
+
+    /**
+     * Analyze ingredients text to determine preliminary Halal status.
+     */
+    private function analyzeHalalStatus(?string $ingredientsText): array
+    {
+        if (empty($ingredientsText)) {
+            return [
+                'status' => 'doubtful',
+                'reason' => 'No ingredients listed. Status cannot be verified automatically.'
+            ];
+        }
+
+        $text = strtolower($ingredientsText);
+
+        $haramKeywords = [
+            'pork', 'lard', 'bacon', 'ham', 'swine', 'porcine', 
+            'gelatin', 'gelatine', 'carmine', 'cochineal', 'e120', 
+            'wine', 'beer', 'rum', 'alcohol', 'liqueur', 'brandy'
+        ];
+
+        $doubtfulKeywords = [
+            'e471', 'e472', 'mono- and diglycerides', 'monoglycerides', 'diglycerides',
+            'rennet', 'pepsin', 'whey', 'shortening', 'glycerin', 'glycerol', 'stearic acid'
+        ];
+
+        $foundHaram = [];
+        foreach ($haramKeywords as $keyword) {
+            if (str_contains($text, $keyword)) {
+                $foundHaram[] = $keyword;
+            }
+        }
+
+        if (!empty($foundHaram)) {
+            return [
+                'status' => 'non-halal',
+                'reason' => 'Contains strictly prohibited ingredients: ' . implode(', ', $foundHaram)
+            ];
+        }
+
+        $foundDoubtful = [];
+        foreach ($doubtfulKeywords as $keyword) {
+            if (str_contains($text, $keyword)) {
+                $foundDoubtful[] = $keyword;
+            }
+        }
+
+        if (!empty($foundDoubtful)) {
+            return [
+                'status' => 'doubtful',
+                'reason' => 'Contains ambiguous ingredients that require scholar verification: ' . implode(', ', $foundDoubtful)
+            ];
+        }
+
+        return [
+            'status' => 'halal',
+            'reason' => 'No prohibited or doubtful ingredients detected by automatic screening.'
+        ];
     }
 
     /**

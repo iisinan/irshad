@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2, Brain, Globe, Newspaper } from 'lucide-react';
+import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2, Brain, Globe, Newspaper, Bell, X } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import api, { fetchStockDetails, fetchAiAnalysis } from '../services/api';
+import api, { fetchStockDetails, fetchAiAnalysis, setPriceAlert } from '../services/api';
 import ReactMarkdown from 'react-markdown';
 import { useAuth } from '../context/AuthContext';
 const StockDetails = ({ symbol: propSymbol }) => {
@@ -24,6 +24,9 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const [stockNews, setStockNews] = useState([]);
   const [newsLoading, setNewsLoading] = useState(true);
   const [showBrokerageModal, setShowBrokerageModal] = useState(false);
+  const [showAlertDialog, setShowAlertDialog] = useState(false);
+  const [alertPrice, setAlertPrice] = useState('');
+  const [alertSaving, setAlertSaving] = useState(false);
 
   useEffect(() => {
     // Always fetch full data in background; merge so we add financials & chart
@@ -155,19 +158,10 @@ const StockDetails = ({ symbol: propSymbol }) => {
       )}
 
       {/* ─── Header Card ─── */}
-      <div className="detail-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '24px', position: 'relative', overflow: 'hidden' }}>
-        {/* Background logo watermark */}
-        <img
-          src="/logo.png"
-          alt=""
-          aria-hidden="true"
-          style={{
-            position: 'absolute', right: '-20px', top: '50%', transform: 'translateY(-50%)',
-            height: '160px', opacity: 0.055,
-            pointerEvents: 'none', userSelect: 'none',
-            filter: 'saturate(0)',
-          }}
-        />
+      <div className="detail-header" style={{ background: 'linear-gradient(135deg, #0D1B2A 0%, #0F5257 65%, #0B6B71 100%)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '24px', position: 'relative', overflow: 'hidden' }}>
+        {/* Background orbs instead of plain logo */}
+        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(201,168,76,0.08)', borderRadius: '50%' }} />
+        <div style={{ position: 'absolute', bottom: '-80px', left: '-40px', width: '180px', height: '180px', background: 'rgba(255,255,255,0.03)', borderRadius: '50%' }} />
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '10px' }}>
             {stock.logo_url ? (
@@ -192,25 +186,38 @@ const StockDetails = ({ symbol: propSymbol }) => {
                 {stock.symbol?.charAt(0) || 'S'}
               </div>
             )}
-            <div>
+            <div style={{ position: 'relative', zIndex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <h1 style={{ fontSize: '1.9rem', fontWeight: '800', letterSpacing: '-0.5px' }}>{stock.name}</h1>
-                <span className={`status-badge ${badgeClass}`} style={{ fontSize: '0.75rem' }}>
+                <h1 style={{ fontSize: '1.9rem', fontWeight: '800', letterSpacing: '-0.5px', color: 'white' }}>{stock.name}</h1>
+                <span className={`status-badge ${badgeClass}`} style={{ fontSize: '0.75rem', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
                   <StatusIcon size={12} /> {statusStr}
                 </span>
               </div>
-              <p style={{ color: 'var(--text-muted)', fontWeight: 600, marginTop: '4px', letterSpacing: '0.5px' }}>
+              <p style={{ color: 'rgba(255,255,255,0.65)', fontWeight: 600, marginTop: '6px', letterSpacing: '0.5px' }}>
                 {stock.symbol} · {stock.sector ?? 'Market Listed'} · Stock Exchange
               </p>
             </div>
           </div>
         </div>
-        <div style={{ textAlign: 'right' }}>
-          <p style={{ color: 'var(--text-light)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase' }}>Latest Price</p>
-          <div style={{ fontSize: '2.2rem', fontWeight: '800', color: 'var(--text-dark)', letterSpacing: '-1px' }}>₦ {latestPrice.toFixed(2)}</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: isPositive ? 'var(--primary)' : 'var(--non-halal)', fontWeight: 700, justifyContent: 'flex-end', marginTop: '4px' }}>
+        <div style={{ textAlign: 'right', position: 'relative', zIndex: 1 }}>
+          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase' }}>Latest Price</p>
+          <div style={{ fontSize: '2.2rem', fontWeight: '800', color: 'white', letterSpacing: '-1px' }}>₦ {latestPrice.toFixed(2)}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: isPositive ? '#4ade80' : '#f87171', fontWeight: 700, justifyContent: 'flex-end', marginTop: '4px' }}>
             {isPositive ? <TrendingUp size={14} /> : <TrendingDown size={14} />} {priceChangePct.toFixed(2)}%
           </div>
+          <button 
+            onClick={() => setShowAlertDialog(true)}
+            style={{ 
+              marginTop: '16px', display: 'flex', alignItems: 'center', gap: '8px', 
+              background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', 
+              color: 'white', padding: '8px 16px', borderRadius: '12px', fontSize: '0.85rem', 
+              fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s', float: 'right'
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.25)' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.15)' }}
+          >
+            <Bell size={14} /> Set Alert
+          </button>
         </div>
       </div>
 
@@ -558,6 +565,57 @@ const StockDetails = ({ symbol: propSymbol }) => {
           )}
         </div>
       </div>
+      {/* ─── Price Alert Modal ─── */}
+      {showAlertDialog && (
+        <div className="animate-fade-in" style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.4)', backdropFilter:'blur(4px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999, padding:'20px' }}>
+          <div style={{ background:'white', borderRadius:'24px', width:'100%', maxWidth:'400px', boxShadow:'0 24px 64px rgba(0,0,0,0.1)', overflow:'hidden', animation:'slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'20px 24px', borderBottom:'1px solid var(--border)' }}>
+              <h3 style={{ fontSize:'1.1rem', fontWeight:800, color:'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Bell size={18} color="var(--primary)" /> Set Price Alert
+              </h3>
+              <button onClick={() => setShowAlertDialog(false)} style={{ background:'var(--bg-section)', border:'none', width:'32px', height:'32px', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--text-muted)', cursor:'pointer' }}><X size={16}/></button>
+            </div>
+            
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              if (!alertPrice) return alert('Enter a target price');
+              setAlertSaving(true);
+              try {
+                await setPriceAlert(symbol, alertPrice);
+                alert('Price alert set successfully!');
+                setShowAlertDialog(false);
+                setAlertPrice('');
+              } catch (err) {
+                alert(err.response?.data?.message || 'Failed to set price alert');
+              } finally {
+                setAlertSaving(false);
+              }
+            }} style={{ padding:'24px' }}>
+              <div style={{ marginBottom:'24px' }}>
+                <label style={{ display:'block', fontSize:'0.75rem', fontWeight:700, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.5px', marginBottom:'8px' }}>Target Price (₦)</label>
+                <input 
+                  type="number" 
+                  step="0.01"
+                  value={alertPrice} 
+                  onChange={e=>setAlertPrice(e.target.value)} 
+                  placeholder={`e.g. ${(latestPrice * 1.05).toFixed(2)}`} 
+                  style={{ width:'100%', padding:'14px', borderRadius:'12px', border:'1.5px solid var(--border)', fontSize:'1rem', fontWeight:600, outline:'none' }}
+                />
+                <p style={{ color: 'var(--text-light)', fontSize: '0.8rem', marginTop: '8px' }}>
+                  Current price is ₦{latestPrice.toFixed(2)}. We will notify you when it crosses your target.
+                </p>
+              </div>
+              <div style={{ display:'flex', gap:'12px' }}>
+                <button type="button" onClick={() => setShowAlertDialog(false)} style={{ flex:1, padding:'14px', borderRadius:'12px', background:'var(--bg-alt)', border:'1px solid var(--border)', color:'var(--text-muted)', fontWeight:700, fontSize:'0.9rem', cursor:'pointer' }}>Cancel</button>
+                <button type="submit" disabled={alertSaving} style={{ flex:1.5, padding:'14px', borderRadius:'12px', background:'var(--primary)', border:'none', color:'white', fontWeight:700, fontSize:'0.9rem', cursor:alertSaving ? 'not-allowed' : 'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', boxShadow:'0 8px 20px rgba(15, 82, 87, 0.2)' }}>
+                  {alertSaving ? <div className="spinner" style={{ width:'16px', height:'16px', borderTopColor:'white' }}/> : 'Save Alert'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

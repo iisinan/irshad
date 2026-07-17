@@ -62,6 +62,11 @@ export const removeHolding = async (id) => {
   return response.data;
 };
 
+export const linkBroker = async (brokerName) => {
+  const response = await api.post('/broker/link', { broker_name: brokerName });
+  return response.data;
+};
+
 export const updateHolding = async (id, data) => {
   const response = await api.put(`/portfolio/${id}`, data);
   return response.data;
@@ -109,6 +114,63 @@ export const fetchNgxStocks = async () => {
     console.error('Error fetching NGX stocks:', error);
     throw error;
   }
+};
+
+export const fetchBaskets = async () => {
+  try {
+    const cacheKey = 'irshad_baskets_cache_v1';
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      const { data, expiry } = JSON.parse(cached);
+      if (Date.now() < expiry) return data;
+    }
+
+    const response = await api.get('/stocks/baskets');
+    localStorage.setItem(cacheKey, JSON.stringify({ data: response.data, expiry: Date.now() + 60 * 60 * 1000 }));
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching baskets:', error);
+    throw error;
+  }
+};
+
+export const fetchBasketDetails = async (id) => {
+  try {
+    const cacheKey = `irshad_basket_${id}_cache_v1`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      const { data, expiry } = JSON.parse(cached);
+      if (Date.now() < expiry) return data;
+    }
+
+    const response = await api.get(`/stocks/baskets/${id}`);
+    localStorage.setItem(cacheKey, JSON.stringify({ data: response.data, expiry: Date.now() + 60 * 60 * 1000 }));
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching basket ${id}:`, error);
+    throw error;
+  }
+};
+
+export const createBasket = async (data) => {
+  const response = await api.post('/stocks/baskets', data);
+  // Clear baskets cache so new one shows up immediately
+  localStorage.removeItem('irshad_baskets_cache_v1');
+  return response.data;
+};
+
+export const deleteBasket = async (id) => {
+  const response = await api.delete(`/stocks/baskets/${id}`);
+  // Clear baskets cache so it is removed immediately
+  localStorage.removeItem('irshad_baskets_cache_v1');
+  return response.data;
+};
+
+export const investInBasket = async (id, amount) => {
+  const response = await api.post(`/stocks/baskets/${id}/invest`, { amount });
+  // Clear portfolio and history caches so the new investments show up
+  localStorage.removeItem('irshad_portfolio_cache_v9');
+  return response.data;
 };
 
 export const fetchStockDetails = async (symbol) => {
@@ -165,6 +227,26 @@ export const fetchNews = async () => {
     console.error('Error fetching news:', error);
     throw error;
   }
+};
+
+export const fetchPriceAlerts = async () => {
+  const response = await api.get('/alerts');
+  return response.data;
+};
+
+export const setPriceAlert = async (symbol, targetPrice) => {
+  const response = await api.post(`/stocks/${symbol}/alerts`, { target_price: targetPrice });
+  return response.data;
+};
+
+export const deletePriceAlert = async (id) => {
+  const response = await api.delete(`/alerts/${id}`);
+  return response.data;
+};
+
+export const fetchHistory = async () => {
+  const response = await api.get('/history');
+  return response.data;
 };
 
 export default api;

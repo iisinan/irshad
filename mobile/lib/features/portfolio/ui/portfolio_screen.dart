@@ -4,10 +4,10 @@ import '../../../core/api/api_service.dart';
 import 'tabs/portfolio_overview_tab.dart';
 import 'tabs/purification_tab.dart';
 import 'tabs/shariah_tab.dart';
-
+import 'tabs/resources_tab.dart'; // Added
 import 'zakat_calculator_screen.dart';
-
 import 'package:irshad_mobile/core/theme/app_theme.dart';
+
 class PortfolioScreen extends StatefulWidget {
   const PortfolioScreen({super.key});
 
@@ -16,10 +16,10 @@ class PortfolioScreen extends StatefulWidget {
 }
 
 class _PortfolioScreenState extends State<PortfolioScreen> {
-@override
+  @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 4,
+      length: 5, // Changed to 5
       child: Scaffold(
         backgroundColor: AppTheme.bg,
         appBar: AppBar(
@@ -41,18 +41,17 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
               Tab(text: 'Zakat'),
               Tab(text: 'Purification'),
               Tab(text: 'Shariah'),
-
+              Tab(text: 'Resources'), // Added
             ],
           ),
         ),
         body: const TabBarView(
           children: [
             PortfolioOverviewTab(),
-            // Ensure ZakatCalculatorScreen can fit in a Tab (it has its own Scaffold, but that's fine)
             ZakatCalculatorScreen(isTab: true),
             PurificationTab(),
             ShariahTab(),
-
+            ResourcesTab(), // Added
           ],
         ),
       ),
