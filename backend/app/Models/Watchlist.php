@@ -12,6 +12,13 @@ class Watchlist extends Model
     protected $fillable = [
         'user_id',
         'symbol',
+        'alert_whatsapp',
+        'alert_email',
+    ];
+
+    protected $casts = [
+        'alert_whatsapp' => 'boolean',
+        'alert_email' => 'boolean',
     ];
 
     public function user()

@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Favorite;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Jobs\NotifyUsersOfAssetChange;
 
 class NotificationService
 {
@@ -31,6 +32,9 @@ class NotificationService
                 ]
             ]);
         }
+
+        // Also dispatch the Email and WhatsApp alerts via the background job
+        NotifyUsersOfAssetChange::dispatch($item, $oldStatus, $newStatus, $type);
     }
 
     /**

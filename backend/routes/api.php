@@ -84,12 +84,14 @@ Route::prefix('v1')->group(function () {
         // Watchlist
         Route::get('/watchlist',               [\App\Http\Controllers\WatchlistController::class, 'index']);
         Route::post('/watchlist',              [\App\Http\Controllers\WatchlistController::class, 'store']);
+        Route::put('/watchlist/{symbol}',      [\App\Http\Controllers\WatchlistController::class, 'update']);
         Route::delete('/watchlist/{symbol}',   [\App\Http\Controllers\WatchlistController::class, 'destroy']);
 
-        // Favorites (CRUD)
-        Route::get('/favorites',               [FavoriteController::class, 'index']);
-        Route::post('/favorites',              [FavoriteController::class, 'store']);
-        Route::delete('/favorites/{favorite}', [FavoriteController::class, 'destroy']); // uses route model binding on {favorite} ID
+        // Favorites
+        Route::get('/favorites',               [\App\Http\Controllers\FavoriteController::class, 'index']);
+        Route::post('/favorites',              [\App\Http\Controllers\FavoriteController::class, 'store']);
+        Route::put('/favorites/{favorite}',    [\App\Http\Controllers\FavoriteController::class, 'update']);
+        Route::delete('/favorites/{favorite}', [\App\Http\Controllers\FavoriteController::class, 'destroy']); // uses route model binding on {favorite} ID
 
         // History
         Route::get('/history',  [HistoryController::class, 'index']);

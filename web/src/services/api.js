@@ -77,8 +77,13 @@ export const fetchWatchlist = async () => {
   return response.data;
 };
 
-export const addToWatchlist = async (symbol) => {
-  const response = await api.post('/watchlist', { symbol });
+export const addToWatchlist = async (symbol, alert_whatsapp = false, alert_email = false) => {
+  const response = await api.post('/watchlist', { symbol, alert_whatsapp, alert_email });
+  return response.data;
+};
+
+export const updateWatchlist = async (symbol, data) => {
+  const response = await api.put(`/watchlist/${symbol}`, data);
   return response.data;
 };
 

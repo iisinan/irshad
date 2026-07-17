@@ -16,9 +16,7 @@ services:
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_URL
-        fromDatabase:
-          name: irshad-db
-          property: connectionString
+        sync: false # Render will ask you to fill this in manually with your Neon DB string
       - key: LOG_CHANNEL
         value: stderr
       - key: PORT
@@ -35,7 +33,3 @@ services:
       - key: PORT
         value: 80 # Nginx default in the Dockerfile
 
-databases:
-  - name: irshad-db
-    plan: free
-    region: oregon 

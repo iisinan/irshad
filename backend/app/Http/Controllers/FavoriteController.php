@@ -31,6 +31,9 @@ class FavoriteController extends Controller
             return [
                 'id' => $favorite->id,
                 'type' => $favorite->type,
+                'reference_id' => $favorite->reference_id,
+                'alert_whatsapp' => $favorite->alert_whatsapp,
+                'alert_email' => $favorite->alert_email,
                 'item' => $item,
             ];
         })->filter(fn($f) => $f['item'] !== null);
@@ -46,6 +49,8 @@ class FavoriteController extends Controller
         $validated = $request->validate([
             'type' => 'required|in:product,stock',
             'reference_id' => 'required|integer',
+            'alert_whatsapp' => 'sometimes|boolean',
+            'alert_email' => 'sometimes|boolean',
         ]);
 
         $exists = Favorite::where('user_id', Auth::id())
@@ -61,9 +66,30 @@ class FavoriteController extends Controller
             'user_id' => Auth::id(),
             'type' => $validated['type'],
             'reference_id' => $validated['reference_id'],
+            'alert_whatsapp' => $request->input('alert_whatsapp', false),
+            'alert_email' => $request->input('alert_email', false),
         ]);
 
         return $this->success($favorite, 'Added to favorites', 201);
+    }
+
+    /**
+     * Update an item in favorites.
+     */
+    public function update(Request $request, Favorite $favorite): JsonResponse
+    {
+        if ($favorite->user_id !== Auth::id()) {
+            return $this->unauthorized();
+        }
+
+        $validated = $request->validate([
+            'alert_whatsapp' => 'sometimes|boolean',
+            'alert_email' => 'sometimes|boolean',
+        ]);
+
+        $favorite->update($validated);
+
+        return $this->success($favorite, 'Favorite alerts updated');
     }
 
     /**

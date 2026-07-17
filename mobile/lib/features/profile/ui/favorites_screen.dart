@@ -63,6 +63,19 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     }
   }
 
+  void _toggleAlert(int favoriteId, bool currentWhatsapp, bool currentEmail, String alertType) async {
+    bool newWhatsapp = currentWhatsapp;
+    bool newEmail = currentEmail;
+    
+    if (alertType == 'whatsapp') newWhatsapp = !newWhatsapp;
+    if (alertType == 'email') newEmail = !newEmail;
+    
+    final success = await _activityRepository.updateFavoriteAlerts(favoriteId, newWhatsapp, newEmail);
+    if (success) {
+      _fetchFavorites();
+    }
+  }
+
   List<Map<String, dynamic>> get _filteredFavorites {
     if (_currentFilter == 'all') return _favorites;
     return _favorites.where((f) => f['type'] == _currentFilter).toList();
@@ -95,6 +108,101 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                       ),
           ),
         ],
+      ),
+      floatingActionButton: _filteredFavorites.isEmpty && !_isLoading ? null : FloatingActionButton(
+        onPressed: () {
+          _showAddBottomSheet(context);
+        },
+        backgroundColor: AppTheme.textDark,
+        child: const Icon(Icons.add_rounded, color: Colors.white),
+      ),
+    );
+  }
+
+  void _showAddBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Add to Watchlist',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppTheme.textDark),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'What would you like to track?',
+              style: TextStyle(color: AppTheme.textMuted, fontSize: 14),
+            ),
+            const SizedBox(height: 24),
+            _buildAddOption(
+              icon: Icons.storefront_rounded,
+              title: 'Search NGX Stocks',
+              subtitle: 'Track Nigerian stocks & their Shariah status',
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/market');
+              },
+            ),
+            const SizedBox(height: 12),
+            _buildAddOption(
+              icon: Icons.qr_code_scanner_rounded,
+              title: 'Scan a Product',
+              subtitle: 'Check if a food item is Halal',
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/scan');
+              },
+            ),
+            const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAddOption({required IconData icon, required String title, required String subtitle, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppTheme.bg,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppTheme.divider),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppTheme.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: AppTheme.primary),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: const TextStyle(fontWeight: FontWeight.w800, color: AppTheme.textDark, fontSize: 16)),
+                  const SizedBox(height: 4),
+                  Text(subtitle, style: const TextStyle(color: AppTheme.textMuted, fontSize: 13)),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right_rounded, color: AppTheme.textMuted),
+          ],
+        ),
       ),
     );
   }
@@ -184,14 +292,34 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             ),
           ],
         ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 4),
-          child: Text(
-            isProduct ? (item['brand'] ?? 'Market Listed') : item['name'],
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(color: AppTheme.textMuted, fontSize: 13),
-          ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 4, bottom: 8),
+              child: Text(
+                isProduct ? (item['brand'] ?? 'Market Listed') : item['name'],
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(color: AppTheme.textMuted, fontSize: 13),
+              ),
+            ),
+            Row(
+              children: [
+                _buildAlertButton(
+                  icon: Icons.email_rounded,
+                  isActive: fav['alert_email'] == true,
+                  onTap: () => _toggleAlert(fav['id'], fav['alert_whatsapp'] == true, fav['alert_email'] == true, 'email'),
+                ),
+                const SizedBox(width: 8),
+                _buildAlertButton(
+                  icon: Icons.chat_bubble_rounded, // Assuming WhatsApp representation
+                  isActive: fav['alert_whatsapp'] == true,
+                  onTap: () => _toggleAlert(fav['id'], fav['alert_whatsapp'] == true, fav['alert_email'] == true, 'whatsapp'),
+                ),
+              ],
+            )
+          ],
         ),
         trailing: IconButton(
           icon: const Icon(Icons.favorite_rounded, color: AppTheme.haram, size: 22),
@@ -204,6 +332,25 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             Navigator.pushNamed(context, '/stock_details', arguments: item);
           }
         },
+      ),
+    );
+  }
+
+  Widget _buildAlertButton({required IconData icon, required bool isActive, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: isActive ? AppTheme.primary : AppTheme.bg,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: isActive ? AppTheme.primary : AppTheme.divider),
+        ),
+        child: Icon(
+          icon,
+          size: 16,
+          color: isActive ? Colors.white : AppTheme.textMuted,
+        ),
       ),
     );
   }
@@ -252,6 +399,22 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                     elevation: 0,
                   ),
                   child: const Text('Login / Register', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                ),
+              ),
+            ] else ...[
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: () => _showAddBottomSheet(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    elevation: 0,
+                  ),
+                  child: const Text('Add Item to Watchlist', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
                 ),
               ),
             ],

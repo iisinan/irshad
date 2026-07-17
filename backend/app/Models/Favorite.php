@@ -13,5 +13,12 @@ class Favorite extends Model
         'user_id',
         'type',
         'reference_id',
+        'alert_whatsapp',
+        'alert_email',
+    ];
+
+    protected $casts = [
+        'alert_whatsapp' => 'boolean',
+        'alert_email' => 'boolean',
     ];
 }
