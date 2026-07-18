@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const PROD_API = 'https://irshad-k3el.onrender.com/api/v1';
+const PROD_API = 'https://irshad-z8us.onrender.com/api/v1';
 const api = axios.create({
   baseURL: import.meta.env.DEV ? (import.meta.env.VITE_API_URL || PROD_API) : PROD_API,
   headers: {
