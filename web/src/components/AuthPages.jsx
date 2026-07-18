@@ -66,7 +66,7 @@ export const LoginPage = () => {
     setLoading(true);
     const res = await loginWithGoogle(credentialResponse.credential);
     if (res.success) {
-      navigate('/dashboard');
+      navigate('/portfolio');
     } else {
       setError(res.error || 'Google login failed');
     }
@@ -80,7 +80,7 @@ export const LoginPage = () => {
     
     const res = await login({ email, password });
     if (res.success) {
-      navigate('/dashboard');
+      navigate('/portfolio');
     } else {
       setError(res.error);
     }
@@ -188,7 +188,7 @@ export const RegisterPage = () => {
     setLoading(true);
     const res = await loginWithGoogle(credentialResponse.credential);
     if (res.success) {
-      navigate('/dashboard');
+      navigate('/portfolio');
     } else {
       setError(res.error || 'Google signup failed');
     }
@@ -215,7 +215,7 @@ export const RegisterPage = () => {
     });
     
     if (res.success) {
-      navigate('/dashboard');
+      navigate('/portfolio');
     } else {
       setError(res.error);
     }

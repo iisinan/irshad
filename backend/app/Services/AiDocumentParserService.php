@@ -50,11 +50,29 @@ class AiDocumentParserService
                 ]
             ];
 
-            // Wait time can be long for large PDFs
-            $response = Http::timeout(120)->post($url, $payload);
+            $maxRetries = 5;
+            for ($attempt = 0; $attempt < $maxRetries; $attempt++) {
+                $response = Http::timeout(120)->post($url, $payload);
+
+                if ($response->successful()) {
+                    break;
+                }
+
+                if ($response->status() == 429) {
+                    echo "Gemini Rate Limit Hit (429). Sleeping for 60 seconds before retry (Attempt " . ($attempt + 1) . ")...\n";
+                    Log::warning("Gemini Rate Limit Hit (429). Sleeping for 60 seconds before retry...");
+                    sleep(60);
+                    continue;
+                }
+
+                echo "Gemini API Error: " . $response->body() . "\n";
+                Log::error("Gemini API Error: " . $response->body());
+                return null;
+            }
 
             if (!$response->successful()) {
-                Log::error("Gemini API Error: " . $response->body());
+                echo "Gemini API failed after retries: " . $response->body() . "\n";
+                Log::error("Gemini API failed after retries: " . $response->body());
                 return null;
             }
 

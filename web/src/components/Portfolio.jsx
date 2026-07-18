@@ -46,14 +46,15 @@ function Skeleton() {
 }
 
 /* ─── Add Holding Modal ────────────────────────────────────── */
-function AddModal({ onClose, onAdd, isAdding }) {
+function AddModal({ onClose, onAdd, isAdding, onBrokerLinked }) {
   const [tab, setTab] = useState('manual');
-  const [sym, setSym] = useState('');
-  const [sh, setSh] = useState('');
-  const [pr, setPr] = useState('');
+  
+  // Rows for bulk add
+  const [rows, setRows] = useState([{ id: Date.now(), sym: '', sh: '', pr: '' }]);
+  const [activeRowId, setActiveRowId] = useState(null);
+
   const [allStocks, setAllStocks] = useState([]);
   const [filteredStocks, setFilteredStocks] = useState([]);
-  const [showDropdown, setShowDropdown] = useState(false);
   
   // Broker State
   const [linking, setLinking] = useState(false);
@@ -64,27 +65,48 @@ function AddModal({ onClose, onAdd, isAdding }) {
     fetchNgxStocks().then(res => setAllStocks(res.data || [])).catch(console.error);
   }, []);
 
-  const handleSymChange = (e) => {
-    const val = e.target.value.toUpperCase();
-    setSym(val);
-    if (val.length > 0) {
-      const filtered = allStocks.filter(s => s.symbol.includes(val) || s.name.toUpperCase().includes(val)).slice(0, 5);
-      setFilteredStocks(filtered);
-      setShowDropdown(true);
-    } else {
-      setShowDropdown(false);
+  const handleRowChange = (id, field, value) => {
+    setRows(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r));
+    
+    if (field === 'sym') {
+      const val = value.toUpperCase();
+      if (val.length > 0) {
+        const filtered = allStocks.filter(s => s.symbol.includes(val) || s.name.toUpperCase().includes(val)).slice(0, 5);
+        setFilteredStocks(filtered);
+        setActiveRowId(id);
+      } else {
+        setActiveRowId(null);
+      }
     }
   };
 
-  const selectSymbol = (s) => {
-    setSym(s);
-    setShowDropdown(false);
+  const selectSymbolForRow = (id, s) => {
+    let priceToFill = '';
+    const match = allStocks.find(x => x.symbol === s);
+    if (match) {
+      const latestPrice = match.daily_prices?.[0]?.price || match.latest_price;
+      if (latestPrice) priceToFill = Number(latestPrice).toFixed(2);
+    }
+    setRows(prev => prev.map(r => r.id === id ? { ...r, sym: s, pr: priceToFill || r.pr } : r));
+    setActiveRowId(null);
   };
+
+  const addRow = () => setRows(prev => [...prev, { id: Date.now(), sym: '', sh: '', pr: '' }]);
+  const removeRow = (id) => setRows(prev => prev.length > 1 ? prev.filter(r => r.id !== id) : prev);
+
+  const totalCost = rows.reduce((acc, r) => acc + ((Number(r.sh)||0) * (Number(r.pr)||0)), 0);
 
   const submit = (e) => {
     e.preventDefault();
-    if (!sym || !sh || !pr) return alert('Fill all fields');
-    onAdd({ symbol: sym.toUpperCase(), shares: Number(sh), average_price: Number(pr) });
+    const validRows = rows.filter(r => r.sym && r.sh && r.pr);
+    if (validRows.length === 0) return alert('Fill at least one complete holding row.');
+    
+    const holdings = validRows.map(r => ({
+      symbol: r.sym.toUpperCase(),
+      shares: Number(r.sh),
+      average_buy_price: Number(r.pr)
+    }));
+    onAdd(holdings);
   };
 
   return (
@@ -105,56 +127,80 @@ function AddModal({ onClose, onAdd, isAdding }) {
         </div>
 
         {tab === 'manual' ? (
-          <form onSubmit={submit} style={{ padding:'24px' }}>
-            <div style={{ marginBottom:'16px' }}>
-              <label style={{ display:'block', fontSize:'0.75rem', fontWeight:700, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.5px', marginBottom:'8px' }}>Ticker Symbol</label>
-              <div style={{ position:'relative' }}>
-                <Search size={14} color="var(--text-light)" style={{ position:'absolute', left:'14px', top:'14px' }}/>
-                <input 
-                  value={sym} 
-                  onChange={handleSymChange} 
-                  onFocus={() => { if(sym) setShowDropdown(true); }}
-                  onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
-                  placeholder="e.g. MTNN" 
-                  style={{ width:'100%', padding:'12px 14px 12px 38px', borderRadius:'12px', border:'1.5px solid var(--border)', fontSize:'0.95rem', fontWeight:600, color:'var(--text-dark)', textTransform:'uppercase', outline:'none' }}
-                />
-                {showDropdown && filteredStocks.length > 0 && (
-                  <div style={{ position:'absolute', top:'100%', left:0, right:0, background:'white', border:'1px solid var(--border)', borderRadius:'12px', marginTop:'4px', zIndex:10, boxShadow:'var(--shadow-md)', overflow:'hidden' }}>
-                    {filteredStocks.map(stock => (
-                      <div 
-                        key={stock.symbol} 
-                        onClick={() => selectSymbol(stock.symbol)}
-                        style={{ padding:'10px 14px', cursor:'pointer', borderBottom:'1px solid var(--bg-section)' }}
-                        onMouseEnter={e => e.currentTarget.style.background = 'var(--primary-50)'}
-                        onMouseLeave={e => e.currentTarget.style.background = 'white'}
-                      >
-                        <div style={{ fontWeight:800, color:'var(--text-dark)' }}>{stock.symbol}</div>
-                        <div style={{ fontSize:'0.75rem', color:'var(--text-muted)' }}>{stock.name}</div>
-                      </div>
-                    ))}
-                  </div>
+          <form onSubmit={submit} style={{ padding:'24px', maxHeight:'65vh', overflowY:'auto' }}>
+            {rows.map((row, index) => (
+              <div key={row.id} style={{ background:'var(--bg)', padding:'16px', borderRadius:'16px', marginBottom:'16px', border:'1px solid var(--border)', position:'relative' }}>
+                {rows.length > 1 && (
+                  <button type="button" onClick={() => removeRow(row.id)} style={{ position:'absolute', top:'12px', right:'12px', background:'var(--bg-section)', border:'none', width:'28px', height:'28px', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--text-muted)', cursor:'pointer', zIndex:5 }}><X size={14}/></button>
                 )}
+                
+                <div style={{ marginBottom:'16px' }}>
+                  <label style={{ display:'block', fontSize:'0.75rem', fontWeight:800, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.5px', marginBottom:'8px' }}>Ticker Symbol</label>
+                  <div style={{ position:'relative' }}>
+                    <Search size={16} color="var(--text-light)" style={{ position:'absolute', left:'14px', top:'50%', transform:'translateY(-50%)' }}/>
+                    <input 
+                      value={row.sym} 
+                      onChange={e => handleRowChange(row.id, 'sym', e.target.value)} 
+                      onFocus={() => { if(row.sym) setActiveRowId(row.id); }}
+                      onBlur={() => setTimeout(() => setActiveRowId(null), 200)}
+                      placeholder="e.g. MTNN" 
+                      style={{ width:'100%', padding:'12px 14px 12px 40px', borderRadius:'12px', border:'2px solid var(--border)', fontSize:'0.95rem', fontWeight:700, color:'var(--text-dark)', textTransform:'uppercase', outline:'none', transition:'border-color 0.2s', background:'white' }}
+                      onFocusCapture={e => e.target.style.borderColor = 'var(--primary)'}
+                      onBlurCapture={e => e.target.style.borderColor = 'var(--border)'}
+                    />
+                    {activeRowId === row.id && filteredStocks.length > 0 && (
+                      <div style={{ position:'absolute', top:'calc(100% + 4px)', left:0, right:0, background:'white', border:'1px solid var(--border)', borderRadius:'12px', zIndex:10, boxShadow:'0 12px 32px rgba(0,0,0,0.1)', overflow:'hidden', animation:'slideUpFade 0.2s ease' }}>
+                        {filteredStocks.map(stock => (
+                          <div 
+                            key={stock.symbol} 
+                            onClick={() => selectSymbolForRow(row.id, stock.symbol)}
+                            style={{ padding:'10px 14px', cursor:'pointer', borderBottom:'1px solid var(--bg-section)', display:'flex', justifyContent:'space-between', alignItems:'center' }}
+                            onMouseEnter={e => e.currentTarget.style.background = 'var(--primary-50)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'white'}
+                          >
+                            <div>
+                              <div style={{ fontWeight:800, color:'var(--text-dark)' }}>{stock.symbol}</div>
+                              <div style={{ fontSize:'0.75rem', color:'var(--text-muted)' }}>{stock.name}</div>
+                            </div>
+                            <div style={{ fontSize:'0.8rem', fontWeight:700, color:'var(--primary)' }}>
+                              ₦{Number(stock.daily_prices?.[0]?.price || stock.latest_price || 0).toFixed(2)}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
+                  <div>
+                    <label style={{ display:'block', fontSize:'0.75rem', fontWeight:800, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.5px', marginBottom:'8px' }}>Shares</label>
+                    <input type="number" value={row.sh} onChange={e=>handleRowChange(row.id, 'sh', e.target.value)} placeholder="0" min="0" step="any" style={{ width:'100%', padding:'12px', borderRadius:'12px', border:'2px solid var(--border)', fontSize:'0.95rem', fontWeight:700, outline:'none', background:'white' }} onFocus={e => e.target.style.borderColor = 'var(--primary)'} onBlur={e => e.target.style.borderColor = 'var(--border)'}/>
+                  </div>
+                  <div>
+                    <label style={{ display:'block', fontSize:'0.75rem', fontWeight:800, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.5px', marginBottom:'8px' }}>Avg Price (₦)</label>
+                    <input type="number" value={row.pr} onChange={e=>handleRowChange(row.id, 'pr', e.target.value)} placeholder="0.00" min="0" step="any" style={{ width:'100%', padding:'12px', borderRadius:'12px', border:'2px solid var(--border)', fontSize:'0.95rem', fontWeight:700, outline:'none', background:'white' }} onFocus={e => e.target.style.borderColor = 'var(--primary)'} onBlur={e => e.target.style.borderColor = 'var(--border)'}/>
+                  </div>
+                </div>
               </div>
-              <div style={{ display:'flex', gap:'8px', marginTop:'10px', overflowX:'auto', paddingBottom:'4px' }}>
-                {allStocks.slice(0, 5).map(s => (
-                  <button key={s.symbol} type="button" onClick={()=>selectSymbol(s.symbol)} style={{ background:'var(--bg-section)', border:'none', padding:'4px 10px', borderRadius:'6px', fontSize:'0.7rem', fontWeight:700, color:'var(--text-muted)', cursor:'pointer', whiteSpace:'nowrap' }}>{s.symbol}</button>
-                ))}
-              </div>
+            ))}
+
+            <button type="button" onClick={addRow} style={{ width:'100%', padding:'12px', borderRadius:'14px', background:'var(--primary-50)', border:'1px dashed var(--primary)', color:'var(--primary)', fontWeight:800, fontSize:'0.9rem', cursor:'pointer', marginBottom:'24px', transition:'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--primary-100)'} onMouseLeave={e => e.currentTarget.style.background = 'var(--primary-50)'}>
+              + Add Another Holding
+            </button>
+
+            {/* Live Total Cost Calculation */}
+            <div style={{ background:'var(--primary-50)', border:'1px solid var(--primary-100)', borderRadius:'12px', padding:'12px 16px', display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'24px' }}>
+              <span style={{ fontSize:'0.85rem', fontWeight:700, color:'var(--primary)' }}>Estimated Total Cost</span>
+              <span style={{ fontSize:'1.1rem', fontWeight:800, color:'var(--primary)' }}>
+                ₦{totalCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+              </span>
             </div>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px', marginBottom:'24px' }}>
-              <div>
-                <label style={{ display:'block', fontSize:'0.75rem', fontWeight:700, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.5px', marginBottom:'8px' }}>Shares</label>
-                <input type="number" value={sh} onChange={e=>setSh(e.target.value)} placeholder="0" style={{ width:'100%', padding:'12px 14px', borderRadius:'12px', border:'1.5px solid var(--border)', fontSize:'0.95rem', fontWeight:600, outline:'none' }}/>
-              </div>
-              <div>
-                <label style={{ display:'block', fontSize:'0.75rem', fontWeight:700, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.5px', marginBottom:'8px' }}>Avg Price (₦)</label>
-                <input type="number" value={pr} onChange={e=>setPr(e.target.value)} placeholder="0.00" style={{ width:'100%', padding:'12px 14px', borderRadius:'12px', border:'1.5px solid var(--border)', fontSize:'0.95rem', fontWeight:600, outline:'none' }}/>
-              </div>
-            </div>
+
             <div style={{ display:'flex', gap:'12px' }}>
-              <button type="button" onClick={onClose} style={{ flex:1, padding:'14px', borderRadius:'12px', background:'var(--bg-alt)', border:'1px solid var(--primary)', color:'var(--primary)', fontWeight:700, fontSize:'0.9rem', cursor:'pointer' }}>Cancel</button>
-              <button type="submit" disabled={isAdding} style={{ flex:1.5, padding:'14px', borderRadius:'12px', background:'var(--primary)', border:'none', color:'white', fontWeight:700, fontSize:'0.9rem', cursor:isAdding ? 'not-allowed' : 'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', boxShadow:'0 8px 20px rgba(15, 82, 87, 0.2)' }}>
-                {isAdding ? <div className="spinner" style={{ width:'16px', height:'16px', borderTopColor:'white' }}/> : 'Add Holding'}
+              <button type="button" onClick={onClose} style={{ flex:1, padding:'14px', borderRadius:'14px', background:'white', border:'2px solid var(--border)', color:'var(--text-dark)', fontWeight:700, fontSize:'0.95rem', cursor:'pointer' }}>Cancel</button>
+              <button type="submit" disabled={isAdding} style={{ flex:2, padding:'14px', borderRadius:'14px', background:'var(--primary)', border:'none', color:'white', fontWeight:700, fontSize:'0.95rem', cursor:isAdding ? 'not-allowed' : 'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', boxShadow:'0 8px 20px rgba(15, 82, 87, 0.25)', opacity: isAdding ? 0.7 : 1 }}>
+                {isAdding ? <div className="spinner" style={{ width:'16px', height:'16px', borderTopColor:'white' }}/> : 'Add to Portfolio'}
               </button>
             </div>
           </form>
@@ -198,9 +244,10 @@ function AddModal({ onClose, onAdd, isAdding }) {
                   const { linkBroker } = await import('../services/api');
                   const res = await linkBroker(brokerName);
                   setLinkMessage(res.message || 'Broker linked successfully!');
+                  if (onBrokerLinked) onBrokerLinked();
                   setTimeout(() => {
                     onClose();
-                  }, 2000);
+                  }, 1200);
                 } catch(err) {
                   setLinkMessage(err.response?.data?.message || 'Failed to link broker.');
                 } finally {
@@ -285,11 +332,12 @@ export default function Portfolio() {
   const handleAdd = async (payload) => {
     try {
       setIsAdding(true);
-      await addHolding(payload);
+      const { addBulkHoldings } = await import('../services/api');
+      await addBulkHoldings(payload);
       setShowAddModal(false);
-      loadData();
+      loadData(true); // Optimistic seamless reload
     } catch (err) {
-      alert(err?.message || 'Failed to add holding');
+      alert(err?.message || 'Failed to add holdings');
     } finally {
       setIsAdding(false);
     }
@@ -350,7 +398,14 @@ export default function Portfolio() {
 
   return (
     <div className="page-wrapper animate-fade-in" style={{ maxWidth: '1400px', margin: '0 auto', padding: '36px 24px 80px' }}>
-      {showAddModal && <AddModal onClose={() => setShowAddModal(false)} onAdd={handleAdd} isAdding={isAdding} />}
+      {showAddModal && (
+        <AddModal 
+          onClose={() => setShowAddModal(false)} 
+          onAdd={handleAdd} 
+          isAdding={isAdding} 
+          onBrokerLinked={() => loadData(true)} // instantly reload when broker seeded
+        />
+      )}
 
       {/* Header & Tabs */}
       <div style={{ marginBottom: '32px' }}>

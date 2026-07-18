@@ -1,0 +1,774 @@
+[
+    {
+        "symbol": "BERGER",
+        "name": "BERGER PAINTS PLC"
+    },
+    {
+        "symbol": "UNILEVER",
+        "name": "UNILEVER NIGERIA PLC."
+    },
+    {
+        "symbol": "GUARANTY",
+        "name": "GUARANTY TRUST BANK PLC."
+    },
+    {
+        "symbol": "STERLNBANK",
+        "name": "STERLING BANK PLC."
+    },
+    {
+        "symbol": "ACCESS",
+        "name": "ACCESS BANK PLC."
+    },
+    {
+        "symbol": "NAHCO",
+        "name": "NIGERIAN AVIATION HANDLING COMPANY PLC"
+    },
+    {
+        "symbol": "AIRSERVICE",
+        "name": "AIRLINE SERVICES AND LOGISTICS PLC"
+    },
+    {
+        "symbol": "OKOMUOIL",
+        "name": "OKOMU OIL PALM PLC."
+    },
+    {
+        "symbol": "LINKASSURE",
+        "name": "LINKAGE ASSURANCE PLC"
+    },
+    {
+        "symbol": "ELLAHLAKES",
+        "name": "ELLAH LAKES PLC."
+    },
+    {
+        "symbol": "DIAMONDBNK",
+        "name": "DIAMOND BANK PLC"
+    },
+    {
+        "symbol": "TOTAL",
+        "name": "TOTAL NIGERIA PLC."
+    },
+    {
+        "symbol": "TRANSEXPR",
+        "name": "TRANS-NATIONWIDE EXPRESS PLC."
+    },
+    {
+        "symbol": "TANTALIZER",
+        "name": "TANTALIZERS PLC"
+    },
+    {
+        "symbol": "FIDELITYBK",
+        "name": "FIDELITY BANK PLC"
+    },
+    {
+        "symbol": "PZ",
+        "name": "P Z CUSSONS NIGERIA PLC."
+    },
+    {
+        "symbol": "DANGSUGAR",
+        "name": "DANGOTE SUGAR REFINERY PLC"
+    },
+    {
+        "symbol": "UNITYBNK",
+        "name": "UNITY BANK PLC"
+    },
+    {
+        "symbol": "STANBIC",
+        "name": "STANBIC IBTC  HOLDINGS PLC"
+    },
+    {
+        "symbol": "ZENITHBANK",
+        "name": "ZENITH BANK PLC"
+    },
+    {
+        "symbol": "ETI",
+        "name": "ECOBANK TRANSNATIONAL INCORPORATED"
+    },
+    {
+        "symbol": "SKYEBANK",
+        "name": "SKYE BANK PLC"
+    },
+    {
+        "symbol": "DANGCEM",
+        "name": "DANGOTE CEMENT PLC"
+    },
+    {
+        "symbol": "FO",
+        "name": "FORTE OIL PLC."
+    },
+    {
+        "symbol": "FIRSTALUM",
+        "name": "FIRST ALUMINIUM NIGERIA PLC"
+    },
+    {
+        "symbol": "FCMB",
+        "name": "FIRST CITY MONUMENT BANK PLC."
+    },
+    {
+        "symbol": "LIVESTOCK",
+        "name": "LIVESTOCK FEEDS PLC."
+    },
+    {
+        "symbol": "PAINTCOM",
+        "name": "PAINTS AND COATINGS MANUFACTURES PLC"
+    },
+    {
+        "symbol": "UBN",
+        "name": "UNION BANK NIG.PLC."
+    },
+    {
+        "symbol": "GLAXOSMITH",
+        "name": "GLAXO SMITHKLINE CONSUMER NIG. PLC."
+    },
+    {
+        "symbol": "MOBIL",
+        "name": "MOBIL OIL NIG PLC."
+    },
+    {
+        "symbol": "MANSARD",
+        "name": "MANSARD INSURANCE PLC"
+    },
+    {
+        "symbol": "BETAGLAS",
+        "name": "BETA GLASS CO PLC."
+    },
+    {
+        "symbol": "CAP",
+        "name": "CAP PLC"
+    },
+    {
+        "symbol": "RTBRISCOE",
+        "name": "R T BRISCOE PLC."
+    },
+    {
+        "symbol": "CHAMS",
+        "name": "CHAMS PLC"
+    },
+    {
+        "symbol": "AFROMEDIA",
+        "name": "AFROMEDIA PLC"
+    },
+    {
+        "symbol": "PORTPAINT",
+        "name": "PORTLAND PAINTS & PRODUCTS NIGERIA PLC"
+    },
+    {
+        "symbol": "UACN",
+        "name": "U A C N  OF NIGERIA PLC."
+    },
+    {
+        "symbol": "SCOA",
+        "name": "S C O A  NIG. PLC."
+    },
+    {
+        "symbol": "AGLEVENT",
+        "name": "A.G. LEVENTIS NIGERIA PLC."
+    },
+    {
+        "symbol": "UAC-PROP",
+        "name": "UACN PROPERTY DEVELOPMENT CO. PLC"
+    },
+    {
+        "symbol": "MULTITREX",
+        "name": "MULTI-TREX INTEGRATED FOODS PLC"
+    },
+    {
+        "symbol": "FBNH",
+        "name": "FBN HOLDINGS PLC"
+    },
+    {
+        "symbol": "FIDSON",
+        "name": "FIDSON HEALTHCARE PLC"
+    },
+    {
+        "symbol": "PRESCO",
+        "name": "PRESCO PLC"
+    },
+    {
+        "symbol": "NEIMETH",
+        "name": "NEIMETH INTERNATIONAL PHARMACEUTICALS PLC"
+    },
+    {
+        "symbol": "BOCGAS",
+        "name": "B.O.C. GASES PLC."
+    },
+    {
+        "symbol": "NESTLE",
+        "name": "NESTLE NIGERIA PLC."
+    },
+    {
+        "symbol": "ABCTRANS",
+        "name": "ABC TRANSPORT PLC"
+    },
+    {
+        "symbol": "ETRANZACT",
+        "name": "E-TRANZACT INTERNATIONAL PLC"
+    },
+    {
+        "symbol": "NASCON",
+        "name": "NATIONAL SALT CO. NIG. PLC"
+    },
+    {
+        "symbol": "JAPAULOIL",
+        "name": "JAPAUL OIL & MARITIME SERVICES PLC"
+    },
+    {
+        "symbol": "WAPCO",
+        "name": "LAFARGE WAPCO PLC."
+    },
+    {
+        "symbol": "AFRIPRUD",
+        "name": "AFRICA PRUDENTIAL REGISTRARS PLC"
+    },
+    {
+        "symbol": "COURTVILLE",
+        "name": "COURTEVILLE BUSINESS SOLUTIONS PLC"
+    },
+    {
+        "symbol": "JBERGER",
+        "name": "JULIUS BERGER NIG. PLC."
+    },
+    {
+        "symbol": "ASHAKACEM",
+        "name": "ASHAKA CEM PLC"
+    },
+    {
+        "symbol": "GUINNESS",
+        "name": "GUINNESS NIG PLC"
+    },
+    {
+        "symbol": "CCNN",
+        "name": "CEMENT CO. OF NORTH.NIG. PLC"
+    },
+    {
+        "symbol": "MCNICHOLS",
+        "name": "MCNICHOLS PLC"
+    },
+    {
+        "symbol": "UBCAP",
+        "name": "UBA CAPITAL PLC"
+    },
+    {
+        "symbol": "UNIONVENT",
+        "name": "UNION VENTURES & PET. PLC"
+    },
+    {
+        "symbol": "NPFMCRFBK",
+        "name": "NPF MICROFINANCE BANK PLC"
+    },
+    {
+        "symbol": "CADBURY",
+        "name": "CADBURY NIGERIA PLC."
+    },
+    {
+        "symbol": "MRS",
+        "name": "MRS OIL NIGERIA PLC."
+    },
+    {
+        "symbol": "DUNLOP",
+        "name": "DN TYRE & RUBBER PLC"
+    },
+    {
+        "symbol": "LEARNAFRCA",
+        "name": "LEARN AFRICA PLC"
+    },
+    {
+        "symbol": "TRANSCORP",
+        "name": "TRANSNATIONAL CORPORATION OF NIGERIA PLC"
+    },
+    {
+        "symbol": "JOHNHOLT",
+        "name": "JOHN HOLT PLC."
+    },
+    {
+        "symbol": "INTBREW",
+        "name": "INTERNATIONAL BREWERIES PLC."
+    },
+    {
+        "symbol": "DANGFLOUR",
+        "name": "DANGOTE FLOUR MILLS PLC"
+    },
+    {
+        "symbol": "ALEX",
+        "name": "ALUMINIUM EXTRUSION IND. PLC."
+    },
+    {
+        "symbol": "EVANSMED",
+        "name": "EVANS MEDICAL PLC."
+    },
+    {
+        "symbol": "OANDO",
+        "name": "OANDO PLC"
+    },
+    {
+        "symbol": "AUSTINLAZ",
+        "name": "AUSTIN LAZ & COMPANY PLC"
+    },
+    {
+        "symbol": "WAPIC",
+        "name": "WAPIC INSURANCE PLC"
+    },
+    {
+        "symbol": "CHELLARAM",
+        "name": "CHELLARAMS PLC."
+    },
+    {
+        "symbol": "UPL",
+        "name": "UNIVERSITY PRESS PLC."
+    },
+    {
+        "symbol": "UNIONDAC",
+        "name": "UNION DIAGNOSTIC & CLINICAL SERVICES PLC"
+    },
+    {
+        "symbol": "NSLTECH",
+        "name": "SECURE ELECTRONIC TECHNOLOGY PLC"
+    },
+    {
+        "symbol": "MULTIVERSE",
+        "name": "MULTIVERSE PLC"
+    },
+    {
+        "symbol": "STUDPRESS",
+        "name": "STUDIO PRESS (NIG) PLC."
+    },
+    {
+        "symbol": "NCR",
+        "name": "NCR (NIGERIA) PLC."
+    },
+    {
+        "symbol": "HMARKINS",
+        "name": "CONSOLIDATED HALLMARK INSURANCE PLC"
+    },
+    {
+        "symbol": "OASISINS",
+        "name": "OASIS INSURANCE PLC"
+    },
+    {
+        "symbol": "NB",
+        "name": "NIGERIAN BREWERIES PLC."
+    },
+    {
+        "symbol": "HONYFLOUR",
+        "name": "HONEYWELL FLOUR MILL PLC"
+    },
+    {
+        "symbol": "CONTINSURE",
+        "name": "CONTINENTAL REINSURANCE PLC"
+    },
+    {
+        "symbol": "VONO",
+        "name": "VONO PRODUCTS PLC."
+    },
+    {
+        "symbol": "WEMABANK",
+        "name": "WEMA BANK PLC."
+    },
+    {
+        "symbol": "PHARMDEKO",
+        "name": "PHARMA-DEKO PLC."
+    },
+    {
+        "symbol": "UBA",
+        "name": "U B A PLC"
+    },
+    {
+        "symbol": "CUTIX",
+        "name": "CUTIX PLC."
+    },
+    {
+        "symbol": "NIGROPES",
+        "name": "NIGERIAN ROPES PLC"
+    },
+    {
+        "symbol": "CHAMPION",
+        "name": "CHAMPION BREW. PLC."
+    },
+    {
+        "symbol": "VITAFOAM",
+        "name": "VITAFOAM NIG PLC."
+    },
+    {
+        "symbol": "FLOURMILL",
+        "name": "FLOUR MILLS NIG. PLC."
+    },
+    {
+        "symbol": "ABBEYBDS",
+        "name": "ABBEY BUILDING SOCIETY PLC"
+    },
+    {
+        "symbol": "REDSTAREX",
+        "name": "RED STAR EXPRESS PLC"
+    },
+    {
+        "symbol": "NNFM",
+        "name": "N NIG. FLOUR MILLS PLC."
+    },
+    {
+        "symbol": "AIICO",
+        "name": "AIICO INSURANCE PLC."
+    },
+    {
+        "symbol": "CONOIL",
+        "name": "CONOIL PLC"
+    },
+    {
+        "symbol": "MORISON",
+        "name": "MORISON INDUSTRIES PLC."
+    },
+    {
+        "symbol": "DNMEYER",
+        "name": "DN MEYER PLC."
+    },
+    {
+        "symbol": "AVONCROWN",
+        "name": "AVON CROWNCAPS & CONTAINERS"
+    },
+    {
+        "symbol": "PREMPAINTS",
+        "name": "PREMIER PAINTS PLC."
+    },
+    {
+        "symbol": "CAPHOTEL",
+        "name": "CAPITAL HOTEL PLC"
+    },
+    {
+        "symbol": "FORTISMFB",
+        "name": "FORTIS MICROFINANCE BANK PLC"
+    },
+    {
+        "symbol": "UNITYKAP",
+        "name": "UNITY KAPITAL ASSURANCE PLC"
+    },
+    {
+        "symbol": "CUSTODYINS",
+        "name": "CUSTODIAN AND ALLIED INSURANCE PLC"
+    },
+    {
+        "symbol": "SOVRENINS",
+        "name": "SOVEREIGN TRUST INSURANCE PLC"
+    },
+    {
+        "symbol": "NIG-GERMAN",
+        "name": "NIGERIA-GERMAN CHEMICALS PLC."
+    },
+    {
+        "symbol": "REGALINS",
+        "name": "REGENCY ALLIANCE INSURANCE PLC"
+    },
+    {
+        "symbol": "7UP",
+        "name": "7-UP BOTTLING COMP. PLC."
+    },
+    {
+        "symbol": "ETERNA",
+        "name": "ETERNA PLC."
+    },
+    {
+        "symbol": "ROYALEX",
+        "name": "ROYAL EXCHANGE PLC."
+    },
+    {
+        "symbol": "LAWUNION",
+        "name": "LAW UNION AND ROCK INS. PLC."
+    },
+    {
+        "symbol": "CORNERST",
+        "name": "CORNERSTONE INSURANCE PLC"
+    },
+    {
+        "symbol": "OMATEK",
+        "name": "OMATEK VENTURES PLC"
+    },
+    {
+        "symbol": "EQUITYASUR",
+        "name": "EQUITY ASSURANCE PLC."
+    },
+    {
+        "symbol": "IHS",
+        "name": "IHS PLC"
+    },
+    {
+        "symbol": "NEM",
+        "name": "NEM INSURANCE PLC."
+    },
+    {
+        "symbol": "STACO",
+        "name": "STACO INSURANCE PLC"
+    },
+    {
+        "symbol": "RAKUNITY",
+        "name": "RAK UNITY PET. COMP. PLC."
+    },
+    {
+        "symbol": "GNI",
+        "name": "GREAT NIGERIA INSURANCE PLC"
+    },
+    {
+        "symbol": "GUINEAINS",
+        "name": "GUINEA INSURANCE PLC."
+    },
+    {
+        "symbol": "TRIPPLEG",
+        "name": "TRIPPLE GEE AND COMPANY PLC."
+    },
+    {
+        "symbol": "STDINSURE",
+        "name": "STANDARD ALLIANCE INSURANCE PLC."
+    },
+    {
+        "symbol": "AFRINSURE",
+        "name": "AFRICAN ALLIANCE INSURANCE PLC"
+    },
+    {
+        "symbol": "UNIVINSURE",
+        "name": "UNIVERSAL INSURANCE COMPANY PLC"
+    },
+    {
+        "symbol": "ENAMELWA",
+        "name": "NIGERIAN ENAMELWARE PLC."
+    },
+    {
+        "symbol": "INFINITY",
+        "name": "Infinity Trust Mortgage Bank Plc"
+    },
+    {
+        "symbol": "ANINO",
+        "name": "ANINO INTERNATIONAL PLC."
+    },
+    {
+        "symbol": "CWG",
+        "name": "Computer Warehouse Group Plc"
+    },
+    {
+        "symbol": "VANLEER",
+        "name": "GREIF NIGERIA PLC"
+    },
+    {
+        "symbol": "UNHOMES",
+        "name": "UNION HOMES SAVINGS AND LOANS PLC."
+    },
+    {
+        "symbol": "INTENEGINS",
+        "name": "INTERNATIONAL ENERGY INSURANCE PLC"
+    },
+    {
+        "symbol": "AFRPAINTS",
+        "name": "AFRICAN PAINTS (NIGERIA) PLC."
+    },
+    {
+        "symbol": "INTERLINK",
+        "name": "INTERLINKED TECHNOLOGIES PLC"
+    },
+    {
+        "symbol": "UNIONDICON",
+        "name": "UNION DICON SALT PLC."
+    },
+    {
+        "symbol": "FTNCOCOA",
+        "name": "FTN COCOA PROCESSORS PLC"
+    },
+    {
+        "symbol": "SMURFIT",
+        "name": "SMART PRODUCTS NIGERIA PLC"
+    },
+    {
+        "symbol": "NIGERINS",
+        "name": "NIGER INSURANCE PLC."
+    },
+    {
+        "symbol": "SEPLAT",
+        "name": "SEPLAT PETROLEUM DEVELOPMENT COMPANY"
+    },
+    {
+        "symbol": "CILEASING",
+        "name": "C & I LEASING PLC."
+    },
+    {
+        "symbol": "ROADS",
+        "name": "ROADS NIG PLC."
+    },
+    {
+        "symbol": "Caverton",
+        "name": "Caverton Offshore Support Group Plc"
+    },
+    {
+        "symbol": "UNIC",
+        "name": "UNIC INSURANCE  PLC."
+    },
+    {
+        "symbol": "NEWGOLD",
+        "name": "NEWGOLD EXCHANGE TRADED FUND"
+    },
+    {
+        "symbol": "PRESTIGE",
+        "name": "PRESTIGE ASSURANCE CO. PLC."
+    },
+    {
+        "symbol": "ACADEMY",
+        "name": "ACADEMY PRESS PLC."
+    },
+    {
+        "symbol": "ARBICO",
+        "name": "ARBICO PLC."
+    },
+    {
+        "symbol": "DAARCOMM",
+        "name": "DAAR COMMUNICATIONS PLC"
+    },
+    {
+        "symbol": "IKEJAHOTEL",
+        "name": "IKEJA HOTEL PLC"
+    },
+    {
+        "symbol": "LASACO",
+        "name": "LASACO ASSURANCE PLC."
+    },
+    {
+        "symbol": "THOMASWY",
+        "name": "THOMAS WYATT NIG. PLC."
+    },
+    {
+        "symbol": "TOURIST",
+        "name": "TOURIST COMPANY OF NIGERIA PLC"
+    },
+    {
+        "symbol": "EKOCORP",
+        "name": "EKOCORP PLC"
+    },
+    {
+        "symbol": "ROKANA",
+        "name": "ROKANA INDUSTRIES PLC"
+    },
+    {
+        "symbol": "UTC",
+        "name": "U T C NIG. PLC."
+    },
+    {
+        "symbol": "IPWA",
+        "name": "IPWA PLC"
+    },
+    {
+        "symbol": "GOLDINSURE",
+        "name": "GOLDLINK INSURANCE PLC"
+    },
+    {
+        "symbol": "MBENEFIT",
+        "name": "MUTUAL BENEFITS ASSURANCE PLC."
+    },
+    {
+        "symbol": "ASOSAVINGS",
+        "name": "ASO SAVINGS AND LOANS PLC"
+    },
+    {
+        "symbol": "RESORTSAL",
+        "name": "RESORT SAVINGS & LOANS PLC"
+    },
+    {
+        "symbol": "TRANSCOHOT",
+        "name": "TRANSCORP HOTELS PLC"
+    },
+    {
+        "symbol": "MAYBAKER",
+        "name": "MAY & BAKER NIGERIA PLC"
+    },
+    {
+        "symbol": "SKYESHELT",
+        "name": "SKYE SHELTER FUND PLC "
+    },
+    {
+        "symbol": "JULI",
+        "name": "JULI PLC."
+    },
+    {
+        "symbol": "OMOSAVBNK",
+        "name": "Omoluabi Savings and Loans Plc"
+    },
+    {
+        "symbol": "MANDRID",
+        "name": "P S MANDRIDES & CO PLC"
+    },
+    {
+        "symbol": "BECOPETRO",
+        "name": "BECO PETROLEUM PRODUCT PLC"
+    },
+    {
+        "symbol": "CAPOIL",
+        "name": "CAPITAL OIL PLC"
+    },
+    {
+        "symbol": "TIGERBRANDS",
+        "name": "TIGER BRANDED CONSUMER GOODS PLC"
+    },
+    {
+        "symbol": "NESF",
+        "name": "NIGERIA ENERYGY SECTOR FUND"
+    },
+    {
+        "symbol": "UCAP",
+        "name": "UNITED CAPITAL PLC"
+    },
+    {
+        "symbol": "DANFLOUR",
+        "name": "DANGOTE FLOUR MILLS PLC"
+    },
+    {
+        "symbol": "MEYER",
+        "name": "MEYER PLC"
+    },
+    {
+        "symbol": "MEDVIEWAIR",
+        "name": "MEDVIEW AIRLINE PLC"
+    },
+    {
+        "symbol": "OMOMORBNK",
+        "name": "OMOLUABI MORTGAGE BANK PLC"
+    },
+    {
+        "symbol": "INITSPLC",
+        "name": "THE INITIATES PLC"
+    },
+    {
+        "symbol": "JAIZBANK",
+        "name": "JAIZ BANK PLC"
+    },
+    {
+        "symbol": "DEAPCAP",
+        "name": "DEAP CAPITAL MANAGEMENT & TRUST PLC"
+    },
+    {
+        "symbol": "SIMCAPVAL",
+        "name": "SIM CAPITAL ALLIANCE VALUE FUND"
+    },
+    {
+        "symbol": "UPDC REIT",
+        "name": " UPDC Real Estate Investment Trust"
+    },
+    {
+        "symbol": "UHOMREIT",
+        "name": "UNION HOMES REAL ESTATE INVESTMENT TRUST (REIT)"
+    },
+    {
+        "symbol": "CUSTODIAN",
+        "name": "CUSTODIAN AND ALLIED INSURANCE PLC"
+    },
+    {
+        "symbol": "\tCILEASING",
+        "name": "C & I LEASING PLC"
+    },
+    {
+        "symbol": "GSPECPLC",
+        "name": "Global Spectrum Energy Services Plc"
+    },
+    {
+        "symbol": "VALUEFUND",
+        "name": "VALUALLIANCE VALUE FUND"
+    },
+    {
+        "symbol": "GOLDBREW",
+        "name": "GOLDEN GUINEA BREW. PLC."
+    },
+    {
+        "symbol": "NOTORE",
+        "name": "Notore Chemical Industries Plc"
+    }
+]

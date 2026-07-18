@@ -134,4 +134,40 @@ class PortfolioController extends Controller
 
         return $this->success(null, 'Holding removed from portfolio.');
     }
+
+    /**
+     * Bulk add or update holdings.
+     */
+    public function bulkStore(Request $request): JsonResponse
+    {
+        $request->validate([
+            'holdings' => 'required|array',
+            'holdings.*.symbol' => 'required|string',
+            'holdings.*.shares' => 'required|numeric|min:0.01',
+            'holdings.*.average_buy_price' => 'nullable|numeric|min:0',
+        ]);
+
+        $userId = Auth::id();
+        $upsertData = [];
+
+        foreach ($request->holdings as $holdingData) {
+            $upsertData[] = [
+                'user_id' => $userId,
+                'symbol' => strtoupper($holdingData['symbol']),
+                'shares' => $holdingData['shares'],
+                'average_buy_price' => $holdingData['average_buy_price'] ?? null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        // Upsert by user_id and symbol
+        Holding::upsert(
+            $upsertData,
+            ['user_id', 'symbol'], // Unique keys
+            ['shares', 'average_buy_price', 'updated_at'] // Columns to update if exists
+        );
+
+        return $this->success(null, 'Holdings added to portfolio successfully.');
+    }
 }

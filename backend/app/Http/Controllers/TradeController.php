@@ -39,7 +39,28 @@ class TradeController extends Controller
             'cash_balance' => 1000000.00, // ₦1M
         ]);
 
-        return $this->success($brokerage, 'Brokerage account successfully linked. Your account has been funded with ₦1,000,000 in simulated trading capital.');
+        // Seed some mock holdings to populate the portfolio instantly
+        $mockStocks = [
+            ['symbol' => 'MTNN', 'shares' => 500, 'price' => 240.50],
+            ['symbol' => 'DANGCEM', 'shares' => 100, 'price' => 650.00],
+            ['symbol' => 'ZENITHBANK', 'shares' => 2000, 'price' => 38.00],
+            ['symbol' => 'GTCO', 'shares' => 1500, 'price' => 42.50]
+        ];
+
+        foreach ($mockStocks as $stock) {
+            \App\Models\Holding::updateOrCreate(
+                [
+                    'user_id' => $user->id,
+                    'symbol' => $stock['symbol']
+                ],
+                [
+                    'shares' => $stock['shares'],
+                    'average_buy_price' => $stock['price']
+                ]
+            );
+        }
+
+        return $this->success($brokerage, 'Brokerage account successfully linked. Your portfolio has been populated with simulated holdings and ₦1,000,000 in cash.');
     }
 
     /**

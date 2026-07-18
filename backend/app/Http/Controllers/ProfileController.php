@@ -17,7 +17,13 @@ class ProfileController extends Controller
      */
     public function show(Request $request): JsonResponse
     {
-        return $this->success($request->user(), 'Profile retrieved successfully');
+        $user = $request->user();
+        $user->screened_count = \App\Models\History::where('user_id', $user->id)
+            ->whereIn('action', ['scan', 'check'])
+            ->distinct('reference_id')
+            ->count('reference_id');
+            
+        return $this->success($user, 'Profile retrieved successfully');
     }
 
     /**
@@ -30,6 +36,7 @@ class ProfileController extends Controller
         $validated = $request->validate([
             'name' => ['sometimes', 'string', 'max:255'],
             'email' => ['sometimes', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'phone_number' => ['sometimes', 'string', 'nullable', 'max:20'],
             'location' => ['sometimes', 'string', 'max:255'],
             'preferences' => ['sometimes', 'array'],
             'fcm_token' => ['sometimes', 'string', 'nullable'],

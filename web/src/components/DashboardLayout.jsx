@@ -2,11 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
 import DashboardSidebar from './DashboardSidebar';
 import { useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import SetYourIrshad from './SetYourIrshad';
 
 export default function DashboardLayout({ children }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+  const { user } = useAuth();
+  
+  const needsOnboarding = !user?.preferences?.onboarded;
 
   // Close mobile menu on navigation
   useEffect(() => {
@@ -25,6 +30,8 @@ export default function DashboardLayout({ children }) {
       minHeight: '100vh',
       background: 'var(--bg)',
     }}>
+      {needsOnboarding && <SetYourIrshad />}
+
       {/* Mobile Overlay */}
       {mobileOpen && (
         <div 

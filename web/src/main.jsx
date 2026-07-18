@@ -11,16 +11,14 @@ const queryClient = new QueryClient();
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'placeholder-client-id.apps.googleusercontent.com';
 
-setTimeout(() => {
-  createRoot(document.getElementById('root')).render(
-    <StrictMode>
-      <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-        <AuthProvider>
-          <QueryClientProvider client={queryClient}>
-            <App />
-          </QueryClientProvider>
-        </AuthProvider>
-      </GoogleOAuthProvider>
-    </StrictMode>,
-  )
-}, 1500);
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <AuthProvider>
+        <QueryClientProvider client={queryClient}>
+          <App />
+        </QueryClientProvider>
+      </AuthProvider>
+    </GoogleOAuthProvider>
+  </StrictMode>,
+);

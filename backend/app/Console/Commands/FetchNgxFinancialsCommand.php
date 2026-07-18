@@ -19,7 +19,7 @@ class FetchNgxFinancialsCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'financials:fetch {--ticker= : Fetch for a specific ticker}';
+    protected $signature = 'financials:fetch {--ticker= : Fetch for a specific ticker} {--skip-existing : Skip companies that already have financials}';
 
     /**
      * The console command description.
@@ -48,11 +48,19 @@ class FetchNgxFinancialsCommand extends Command
      */
     public function handle()
     {
+        ini_set('memory_limit', '1G');
+        ini_set('max_execution_time', 0);
+        
         $tickerOpt = $this->option('ticker');
+        $skipExisting = $this->option('skip-existing');
         
         $query = Company::query();
         if ($tickerOpt) {
             $query->where('symbol', strtoupper($tickerOpt));
+        }
+        
+        if ($skipExisting) {
+            $query->doesntHave('financials');
         }
 
         $companies = $query->get();
@@ -124,8 +132,9 @@ class FetchNgxFinancialsCommand extends Command
 
             $this->info("Completed {$company->symbol} successfully.");
             
-            // Add a small delay to avoid hitting rate limits (15 RPM free tier limit)
-            sleep(5);
+            // Add a delay to avoid hitting rate limits (15 RPM free tier limit)
+            $this->info('Sleeping for 120 seconds to respect Gemini API free tier limits...');
+            sleep(120);
         }
 
         $this->info("All done!");

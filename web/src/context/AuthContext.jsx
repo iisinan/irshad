@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { loginUser, registerUser, fetchProfile } from '../services/api';
+import { loginUser, registerUser, fetchProfile, googleLoginUser, updateProfile } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -17,6 +17,9 @@ export const AuthProvider = ({ children }) => {
         try {
           const profile = await fetchProfile();
           setUser(profile.data);
+          if (window.location.pathname === '/login' || window.location.pathname === '/register') {
+            window.location.href = '/portfolio';
+          }
         } catch (error) {
           console.error("Failed to load profile", error);
           localStorage.removeItem('auth_token');
@@ -63,8 +66,6 @@ export const AuthProvider = ({ children }) => {
 
   const loginWithGoogle = async (credential) => {
     try {
-      // Import here or at the top
-      const { googleLoginUser } = await import('../services/api');
       const res = await googleLoginUser(credential);
       if (res.data && res.data.access_token) {
         localStorage.setItem('auth_token', res.data.access_token);
@@ -80,13 +81,31 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateUser = async (data) => {
+    try {
+      const res = await updateProfile(data);
+      // ProfileController wraps in ApiResponder: { data: user, message }
+      const updatedUser = res?.data ?? res?.user;
+      if (updatedUser) {
+        setUser(updatedUser);
+        return { success: true };
+      }
+      return { success: false, error: 'Invalid response from server' };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error.response?.data?.message || 'Update failed' 
+      };
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('auth_token');
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, loginWithGoogle, logout, loading }}>
+    <AuthContext.Provider value={{ user, setUser, login, register, loginWithGoogle, logout, updateUser, loading }}>
       {children}
     </AuthContext.Provider>
   );

@@ -12,6 +12,7 @@ import ShariahPage from './components/Shariah';
 import Profile from './components/Profile';
 import { LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage } from './components/AuthPages';
 import AdminDashboard from './components/AdminDashboard';
+import SplashScreen from './components/SplashScreen';
 import RoleBasedDashboard from './components/RoleBasedDashboard';
 import { useAuth } from './context/AuthContext';
 import './index.css';
@@ -63,7 +64,7 @@ const TopNavbar = () => {
           <Link to="/shariah" className={navLinkClass('/shariah')}>Shariah Framework</Link>
           <Link to="/about" className={navLinkClass('/about')}>About Us</Link>
           {user && (
-            <Link to="/dashboard" className={navLinkClass('/dashboard')}>Dashboard</Link>
+            <Link to="/portfolio" className={navLinkClass('/portfolio')}>Dashboard</Link>
           )}
           {(user?.role === 'admin' || user?.role === 'scholar') && (
             <Link to="/admin" className={navLinkClass('/admin')} style={{ color: 'var(--primary)' }}>Admin</Link>
@@ -113,7 +114,7 @@ const TopNavbar = () => {
         <Link to="/shariah" className={navLinkClass('/shariah')}>⚖️ Shariah Framework</Link>
         <Link to="/about" className={navLinkClass('/about')}>ℹ️ About Us</Link>
         {user && (
-          <Link to="/dashboard" className={navLinkClass('/dashboard')}>📊 Dashboard</Link>
+          <Link to="/portfolio" className={navLinkClass('/portfolio')}>📊 Dashboard</Link>
         )}
         {(user?.role === 'admin' || user?.role === 'scholar') && (
           <Link to="/admin" className={navLinkClass('/admin')}>⚙️ Admin</Link>
@@ -918,41 +919,55 @@ const MarketPage = () => {
 
 /* ─── App Shell ──────────────────────────────────────────── */
 function App() {
-  return (
-    <Router>
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-        <TopNavbar />
-        <StockTicker />
-        <main style={{ flex: 1 }}>
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/about" element={<AboutPage />} />
+  const { loading: authLoading } = useAuth();
+  const [showSplash, setShowSplash] = useState(() => window.location.pathname === '/');
 
-            <Route path="/shariah" element={<ShariahPage />} />
-            <Route path="/market" element={
-              <DashboardLayout><MarketPage /></DashboardLayout>
-            } />
-            <Route path="/market/:symbol" element={
-              <DashboardLayout><StockDetails /></DashboardLayout>
-            } />
-            <Route path="/dashboard" element={
-              <DashboardLayout><RoleBasedDashboard /></DashboardLayout>
-            } />
-            <Route path="/portfolio" element={
-              <DashboardLayout><Portfolio /></DashboardLayout>
-            } />
-            <Route path="/profile" element={
-              <DashboardLayout><Profile /></DashboardLayout>
-            } />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/forgot" element={<ForgotPasswordPage />} />
-            <Route path="/reset-password" element={<ResetPasswordPage />} />
-          </Routes>
-        </main>
-      </div>
-    </Router>
+  return (
+    <>
+      {/* Splash covers the screen until auth resolves AND min time elapses */}
+      {showSplash && (
+        <SplashScreen
+          authReady={!authLoading}
+          onDone={() => setShowSplash(false)}
+        />
+      )}
+
+      {/* Render the app immediately so it preloads in the background */}
+      <Router>
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+            <TopNavbar />
+            <StockTicker />
+            <main style={{ flex: 1 }}>
+              <Routes>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/about" element={<AboutPage />} />
+
+                <Route path="/shariah" element={<ShariahPage />} />
+                <Route path="/market" element={
+                  <DashboardLayout><MarketPage /></DashboardLayout>
+                } />
+                <Route path="/market/:symbol" element={
+                  <DashboardLayout><StockDetails /></DashboardLayout>
+                } />
+                <Route path="/dashboard" element={
+                  <DashboardLayout><RoleBasedDashboard /></DashboardLayout>
+                } />
+                <Route path="/portfolio" element={
+                  <DashboardLayout><Portfolio /></DashboardLayout>
+                } />
+                <Route path="/profile" element={
+                  <DashboardLayout><Profile /></DashboardLayout>
+                } />
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/forgot" element={<ForgotPasswordPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
+              </Routes>
+            </main>
+          </div>
+        </Router>
+    </>
   );
 }
 

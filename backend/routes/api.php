@@ -80,13 +80,19 @@ Route::prefix('v1')->group(function () {
         Route::post('/broker/link', [TradeController::class, 'linkBroker']);
         Route::post('/portfolio/trade', [TradeController::class, 'executeTrade']);
         Route::post('/portfolio',              [PortfolioController::class, 'store']);
+        Route::post('/portfolio/bulk',         [PortfolioController::class, 'bulkStore']);
         Route::delete('/portfolio/{id}',       [PortfolioController::class, 'destroy']);
 
         // Watchlist
         Route::get('/watchlist',               [\App\Http\Controllers\WatchlistController::class, 'index']);
         Route::post('/watchlist',              [\App\Http\Controllers\WatchlistController::class, 'store']);
+        Route::post('/watchlist/bulk',         [\App\Http\Controllers\WatchlistController::class, 'bulkStore']);
         Route::put('/watchlist/{symbol}',      [\App\Http\Controllers\WatchlistController::class, 'update']);
         Route::delete('/watchlist/{symbol}',   [\App\Http\Controllers\WatchlistController::class, 'destroy']);
+
+        // Onboarding (atomic: bulk watchlist + mark onboarded in one request)
+        Route::post('/onboard',                [\App\Http\Controllers\WatchlistController::class, 'onboard']);
+
 
         // Favorites
         Route::get('/favorites',               [\App\Http\Controllers\FavoriteController::class, 'index']);

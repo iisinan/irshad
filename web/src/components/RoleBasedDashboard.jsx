@@ -5,12 +5,17 @@ import ConsumerDashboard from './ConsumerDashboard';
 
 export default function RoleBasedDashboard() {
   const { user } = useAuth();
-  
-  // Default to investor if no role is explicitly set yet, 
-  // or handle strictly if you enforce role setting.
-  if (user?.role === 'investor' || !user?.role) {
+
+  const renderDashboard = () => {
+    if (user?.role === 'consumer') {
+      return <ConsumerDashboard />;
+    }
     return <Portfolio />;
-  }
-  
-  return <ConsumerDashboard />;
+  };
+
+  return (
+    <>
+      {renderDashboard()}
+    </>
+  );
 }

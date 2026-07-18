@@ -38,6 +38,16 @@ export const fetchProfile = async () => {
   return response.data;
 };
 
+export const updateProfile = async (data) => {
+  const response = await api.put('/profile', data);
+  return response.data;
+};
+
+export const deleteAccount = async () => {
+  const response = await api.delete('/account');
+  return response.data;
+};
+
 export const fetchPortfolio = async () => {
   const cacheKey = 'irshad_portfolio_cache_v9';
   try {
@@ -54,6 +64,11 @@ export const fetchPortfolio = async () => {
 
 export const addHolding = async (data) => {
   const response = await api.post('/portfolio', data);
+  return response.data;
+};
+
+export const addBulkHoldings = async (holdings) => {
+  const response = await api.post('/portfolio/bulk', { holdings });
   return response.data;
 };
 
@@ -80,6 +95,15 @@ export const fetchWatchlist = async () => {
 export const addToWatchlist = async (symbol, alert_whatsapp = false, alert_email = false) => {
   const response = await api.post('/watchlist', { symbol, alert_whatsapp, alert_email });
   return response.data;
+};
+
+/**
+ * Single-request onboarding: bulk-adds all stocks to watchlist AND marks user onboarded.
+ * Much faster than N separate addToWatchlist() + updateProfile() calls.
+ */
+export const onboardUser = async ({ symbols, alert_email, alert_whatsapp, phone_number, risk_profile }) => {
+  const response = await api.post('/onboard', { symbols, alert_email, alert_whatsapp, phone_number, risk_profile });
+  return response.data; // { message, user }
 };
 
 export const updateWatchlist = async (symbol, data) => {
@@ -119,6 +143,11 @@ export const fetchNgxStocks = async () => {
     console.error('Error fetching NGX stocks:', error);
     throw error;
   }
+};
+
+export const searchStocks = async (query) => {
+  const response = await api.get('/stocks/search', { params: { query } });
+  return response.data;
 };
 
 export const fetchBaskets = async () => {

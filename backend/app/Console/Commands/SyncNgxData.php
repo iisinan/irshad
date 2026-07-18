@@ -48,11 +48,19 @@ class SyncNgxData extends Command
             $this->info('Successfully fetched all data. Preparing atomic update...');
             
             // Step 2: Atomic Database Transaction
+            // The DB connection might have dropped while fetching data, so we reconnect
+            DB::reconnect();
             DB::beginTransaction();
             
             foreach ($allData as $item) {
                 $company = $item['company'];
                 $data = $item['data'];
+                
+                if (isset($data['sector']) && $data['sector']) {
+                    if ($company->sector === 'Unknown' || empty($company->sector)) {
+                        $company->update(['sector' => $data['sector']]);
+                    }
+                }
                 
                 if ($data['price'] > 0) {
                     DailyPrice::updateOrCreate(
