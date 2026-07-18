@@ -51,7 +51,7 @@ const TopNavbar = () => {
       <nav className="top-navbar" style={{ boxShadow: scrolled ? '0 2px 16px rgba(0,0,0,0.07)' : 'none' }}>
         <Link to="/" className="nav-logo" style={{ textDecoration: 'none' }}>
           <img
-            src="/logo.png"
+            src="/logo.svg"
             alt="Irshad"
             style={{ height: '46px', width: 'auto', objectFit: 'contain' }}
           />
@@ -251,7 +251,7 @@ const Footer = () => (
       <div>
         <div className="footer-logo-area" style={{ marginBottom: '20px' }}>
           <img
-            src="/logo.png"
+            src="/logo.svg"
             alt="Irshad"
             style={{
               height: '52px',
@@ -498,7 +498,7 @@ const LandingPage = () => {
             }}>
               {/* Watermark logo */}
               <img
-                src="/logo.png"
+                src="/logo.svg"
                 alt=""
                 aria-hidden="true"
                 style={{
@@ -594,7 +594,7 @@ const LandingPage = () => {
         <div className="cta-banner">
           {/* Background logo watermark */}
           <img
-            src="/logo.png"
+            src="/logo.svg"
             alt=""
             aria-hidden="true"
             style={{

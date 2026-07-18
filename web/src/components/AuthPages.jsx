@@ -93,7 +93,7 @@ export const LoginPage = () => {
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <img
-            src="/logo.png"
+            src="/logo.svg"
             alt="Irshad"
             style={{
               height: '72px',
@@ -228,7 +228,7 @@ export const RegisterPage = () => {
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <img
-            src="/logo.png"
+            src="/logo.svg"
             alt="Irshad"
             style={{ height: '80px', width: 'auto', margin: '0 auto 20px', display: 'block' }}
           />
@@ -338,7 +338,7 @@ export const ForgotPasswordPage = () => {
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <img
-            src="/logo.png"
+            src="/logo.svg"
             alt="Irshad"
             style={{
               height: '72px',
@@ -433,7 +433,7 @@ export const ResetPasswordPage = () => {
       <div className="auth-card animate-fade-in">
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <img
-            src="/logo.png"
+            src="/logo.svg"
             alt="Irshad"
             style={{
               height: '72px',
