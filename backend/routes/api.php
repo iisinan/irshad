@@ -58,6 +58,7 @@ Route::prefix('v1')->group(function () {
         Route::delete('/account', [AccountController::class, 'destroy']);
 
         // Products (Scanner & Search)
+        Route::get('/products',                       [ProductController::class, 'index']);
         Route::post('/scan',                          [ProductController::class, 'scan']);
         Route::get('/products/search',                [ProductController::class, 'search']);
         Route::post('/products',                      [ProductController::class, 'store']);

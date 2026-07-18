@@ -14,6 +14,24 @@ class ProductController extends Controller
     use ApiResponder;
 
     /**
+     * Get all products (Admin/Scholar).
+     */
+    public function index(Request $request): JsonResponse
+    {
+        // Check if user is scholar or admin
+        if (!in_array($request->user()->role, ['admin', 'scholar'])) {
+            return $this->unauthorized('Only scholars or admins can view all products list.');
+        }
+
+        // Prioritize doubtful products
+        $products = Product::orderByRaw("CASE WHEN status = 'doubtful' THEN 1 ELSE 2 END")
+            ->orderBy('created_at', 'desc')
+            ->paginate(50);
+
+        return $this->success($products);
+    }
+
+    /**
      * Scan barcode and return product details.
      */
     public function scan(Request $request): JsonResponse

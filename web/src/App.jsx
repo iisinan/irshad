@@ -12,6 +12,7 @@ import ShariahPage from './components/Shariah';
 import Profile from './components/Profile';
 import { LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage } from './components/AuthPages';
 import AdminDashboard from './components/AdminDashboard';
+import RoleBasedDashboard from './components/RoleBasedDashboard';
 import { useAuth } from './context/AuthContext';
 import './index.css';
 
@@ -934,7 +935,9 @@ function App() {
             <Route path="/market/:symbol" element={
               <DashboardLayout><StockDetails /></DashboardLayout>
             } />
-            <Route path="/dashboard" element={<Navigate to="/portfolio" replace />} />
+            <Route path="/dashboard" element={
+              <DashboardLayout><RoleBasedDashboard /></DashboardLayout>
+            } />
             <Route path="/portfolio" element={
               <DashboardLayout><Portfolio /></DashboardLayout>
             } />

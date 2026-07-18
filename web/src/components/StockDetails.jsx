@@ -41,7 +41,12 @@ const StockDetails = ({ symbol: propSymbol }) => {
       .then(res => setStockNews(res.data?.data || []))
       .catch(console.error)
       .finally(() => setNewsLoading(false));
-  }, [symbol]);
+
+    // Log history
+    if (user) {
+      api.post('/history', { action: 'check', reference_id: symbol }).catch(() => {});
+    }
+  }, [symbol, user]);
 
   if (loading) {
     return (

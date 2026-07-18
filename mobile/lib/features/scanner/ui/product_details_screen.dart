@@ -16,7 +16,15 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   bool _isFavoriting = false;
 
 
-void _onFavorite() async {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.product['barcode'] != null) {
+      _activityRepository.trackAction('scan', widget.product['barcode']);
+    }
+  }
+
+  void _onFavorite() async {
     setState(() => _isFavoriting = true);
     final success = await _activityRepository.addToFavorites('product', widget.product['id']);
     if (success) {

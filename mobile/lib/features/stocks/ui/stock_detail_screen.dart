@@ -37,6 +37,9 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     _currentStock = widget.stock;
     _checkIfFavorited();
     _fetchNews();
+    
+    // Log history silently
+    _activityRepository.trackAction('check', _currentStock['symbol']);
   }
 
   void _fetchNews() async {

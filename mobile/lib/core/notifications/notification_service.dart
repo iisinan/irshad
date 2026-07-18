@@ -2,6 +2,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'dart:io';
+import '../../features/scanner/data/product_repository.dart';
+import '../../features/stocks/data/stock_repository.dart';
 
 class PushNotificationService {
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
@@ -76,16 +78,23 @@ class PushNotificationService {
     }
   }
 
-  void _handleDeepLink(String payload) {
+  void _handleDeepLink(String payload) async {
     final parts = payload.split(':');
     final type = parts[0];
     final id = parts.length > 1 ? parts[1] : null;
 
-    if (type == 'product') {
-       // Logic to fetch product and navigate
-       // navigatorKey.currentState?.pushNamed('/product_details', arguments: {...});
-    } else if (type == 'stock') {
-       // Logic to fetch stock and navigate
+    if (type == 'product' && id != null) {
+       final repo = ProductRepository();
+       final product = await repo.scanBarcode(id);
+       if (product != null) {
+         navigatorKey.currentState?.pushNamed('/product_details', arguments: product);
+       }
+    } else if (type == 'stock' && id != null) {
+       final repo = StockRepository();
+       final stock = await repo.getStockDetails(id);
+       if (stock != null) {
+         navigatorKey.currentState?.pushNamed('/stock_details', arguments: stock);
+       }
     }
   }
 

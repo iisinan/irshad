@@ -29,7 +29,17 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'core/notifications/notification_service.dart';
 import 'features/stocks/providers/stock_provider.dart';
+import 'package:workmanager/workmanager.dart';
 import 'core/providers/app_state_provider.dart';
+
+@pragma('vm:entry-point')
+void callbackDispatcher() {
+  Workmanager().executeTask((task, inputData) async {
+    debugPrint("Native called background task: $task");
+    // TODO: Reconcile cached halal product data with backend API when online
+    return Future.value(true);
+  });
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,6 +51,17 @@ void main() async {
   } catch (e) {
     debugPrint("Firebase init failed (missing google-services.json?): $e");
   }
+
+  Workmanager().initialize(
+    callbackDispatcher, 
+    isInDebugMode: true 
+  );
+
+  Workmanager().registerPeriodicTask(
+    "syncTask",
+    "backgroundSync",
+    frequency: const Duration(minutes: 15),
+  );
 
   await Hive.initFlutter();
   await Hive.openBox('api_cache');
