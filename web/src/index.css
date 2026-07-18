@@ -1637,3 +1637,13 @@ button { font-family: inherit; cursor: pointer; }
     transform: translateY(0) scale(1);
   }
 }
+
+/* Smart Transparency for White-Background Logo */
+img[src="/logo.svg"] {
+  mix-blend-mode: multiply;
+}
+
+.footer-logo-area img[src="/logo.svg"] {
+  filter: invert(1) brightness(1.2);
+  mix-blend-mode: screen;
+}
