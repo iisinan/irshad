@@ -18,8 +18,6 @@ const NAV_ITEMS = [
   { label: 'Purification',   icon: HeartHandshake,   to: '/portfolio#purification' },
   { label: 'Zakat',          icon: Calculator,        to: '/portfolio#zakat' },
   { label: 'Resources',      icon: BookOpen,          to: '/portfolio#lectures'   },
-  { section: 'Discover' },
-  { label: 'About',          icon: Globe,             to: '/about'       },
   { section: 'Account' },
   { label: 'Profile',        icon: User,              to: '/profile'     },
   { label: 'Settings',       icon: Settings,          to: '/profile#settings' },
