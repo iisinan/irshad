@@ -1495,10 +1495,8 @@ button { font-family: inherit; cursor: pointer; }
 @media (max-width: 900px) {
   .portfolio-layout-grid {
     grid-template-columns: 1fr;
-  }
-  /* Hide the right sidebar (pie chart / shariah summary) on mobile - moves below content */
-  .portfolio-layout-grid > div:last-child {
-    display: none;
+    display: flex;
+    flex-direction: column;
   }
 }
 
