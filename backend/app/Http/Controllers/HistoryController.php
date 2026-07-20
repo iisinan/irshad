@@ -27,11 +27,22 @@ class HistoryController extends Controller
 
         $history = $query->paginate(20);
 
-        $results = collect($history->items())->map(function ($item) {
+        $results = collect($history->items());
+        
+        $scanRefs = $results->where('action', 'scan')->pluck('reference_id')->unique();
+        $otherRefs = $results->where('action', '!=', 'scan')->pluck('reference_id')->unique();
+        
+        $products = Product::whereIn('barcode', $scanRefs)->get()->keyBy('barcode');
+        $companies = Company::whereIn('symbol', $otherRefs)->get()->keyBy('symbol');
+
+        $formatted = $results->map(function ($item) use ($products, $companies) {
             if ($item->action === 'scan') {
-                $detail = Product::where('barcode', $item->reference_id)->first();
+                $detail = $products->get($item->reference_id);
             } else {
-                $detail = Company::with('status')->where('symbol', $item->reference_id)->first();
+                $detail = $companies->get($item->reference_id);
+                if ($detail) {
+                    $detail->status = $detail->current_status ? ['status' => $detail->current_status] : null;
+                }
             }
 
             return [
@@ -43,7 +54,7 @@ class HistoryController extends Controller
         });
 
         return $this->success([
-            'history' => $results,
+            'history' => $formatted,
             'meta' => [
                 'current_page' => $history->currentPage(),
                 'last_page' => $history->lastPage(),
