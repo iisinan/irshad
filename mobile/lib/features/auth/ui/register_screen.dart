@@ -168,9 +168,9 @@ void _register() async {
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _register,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.textDark,
+                    backgroundColor: AppTheme.primary,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                     elevation: 0,
                   ),
                   child: _isLoading 
@@ -199,7 +199,7 @@ void _register() async {
                   onPressed: _isLoading ? null : _registerWithGoogle,
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: AppTheme.divider, width: 1.5),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                   ),
                   child: const Text('Sign up with Google', style: TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w700, fontSize: 16)),
                 ),
@@ -268,12 +268,12 @@ void _register() async {
         filled: true,
         fillColor: Colors.white,
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppTheme.divider, width: 1.5),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppTheme.divider, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppTheme.textDark, width: 1.5),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppTheme.primary, width: 1.5),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),

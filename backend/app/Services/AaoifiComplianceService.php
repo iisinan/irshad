@@ -31,19 +31,26 @@ class AaoifiComplianceService
         "Distillers and Vintners"
     ];
 
-    public function evaluateCompliance(Company $company, Financial $financials, ?string $swsIndustry = null)
+    public function evaluateCompliance(Company $company, Financial $financials, ?string $swsIndustry = null, ?array $aiSectorEval = null)
     {
-        // For Rule 1: Use provided SWS Industry, fallback to company's sector from DB
-        $industry = $swsIndustry ?? $company->sector;
+        // For Rule 1: Use AI evaluation if available, fallback to legacy SWS Industry check
+        if ($aiSectorEval && isset($aiSectorEval['is_compliant'])) {
+            if ($aiSectorEval['is_compliant'] === false) {
+                $reason = $aiSectorEval['reason'] ?? "Failed Rule 1: AI Sector Check. The company's core business activity is Shariah non-compliant according to AAOIFI standards.";
+                return $this->saveStatus($company, 'non-halal', "Failed Rule 1 (AI Verified): " . $reason);
+            }
+        } else {
+            // Legacy fallback
+            $industry = $swsIndustry ?? $company->sector;
+            $isBlacklistedSector = in_array($industry, self::BLACKLIST_INDUSTRIES);
 
-        $isBlacklistedSector = in_array($industry, self::BLACKLIST_INDUSTRIES);
-
-        if ($isBlacklistedSector) {
-            return $this->saveStatus(
-                $company, 
-                'non-halal', 
-                "Failed Rule 1: Sector Check. The industry '{$industry}' is explicitly Shariah non-compliant."
-            );
+            if ($isBlacklistedSector) {
+                return $this->saveStatus(
+                    $company, 
+                    'non-halal', 
+                    "Failed Rule 1: Sector Check. The industry '{$industry}' is explicitly Shariah non-compliant."
+                );
+            }
         }
 
         // Ensure variables are not zero to avoid division by zero
@@ -107,6 +114,8 @@ class AaoifiComplianceService
                 'last_updated' => now(),
             ]
         );
+
+        $company->update(['current_status' => $status]);
 
         if ($oldStatus === 'halal' && $status === 'non-halal') {
             $this->notifyUsersOfDowngrade($company);

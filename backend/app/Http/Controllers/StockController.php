@@ -23,13 +23,13 @@ class StockController extends Controller
         $this->complianceService = $complianceService;
     }
 
-    /**
-     * List all stocks with latest price and compliance status.
-     */
     public function index(): JsonResponse
     {
-        $stocks = \Illuminate\Support\Facades\Cache::rememberForever('stocks.index_v3', function () {
-            return Company::with(['status', 'dailyPrices' => fn($q) => $q->latest('date')])->get();
+        $stocks = \Illuminate\Support\Facades\Cache::remember('stocks.index_v4', 300, function () {
+            return Company::all()->map(function ($company) {
+                $company->status = $company->current_status ? ['status' => $company->current_status] : null;
+                return $company;
+            });
         });
         
         return $this->success($stocks);
@@ -47,84 +47,46 @@ class StockController extends Controller
         return $this->success($stock);
     }
 
-    /**
-     * Search stocks by name or symbol.
-     */
     public function search(Request $request): JsonResponse
     {
-        $query = substr(trim($request->get('q', '')), 0, 100); // Sanitize query length
+        $query = substr(trim($request->get('q', '')), 0, 100);
 
-        $stocks = Company::with(['status', 'dailyPrices' => fn($q) => $q->latest('date')->limit(2)])
-            ->where('name', 'LIKE', "%{$query}%")
+        $stocks = Company::where('name', 'LIKE', "%{$query}%")
             ->orWhere('symbol', 'LIKE', "%{$query}%")
             ->limit(20)
             ->get()->map(function ($company) {
-                $prices   = $company->dailyPrices;
-                $latest   = $prices->first();
-                $prev     = $prices->skip(1)->first();
-
-                $latestPrice = (float) ($latest?->price ?? 0);
-                $prevPrice   = (float) ($prev?->price ?? $latestPrice);
-
-                // Fallback pseudo-random realistic price if DB is empty
-                if ($latestPrice == 0) {
-                    $hash = crc32($company->symbol);
-                    $basePrice = 10 + ($hash % 200);
-                    $change = (($hash % 100) - 50) / 10;
-                    
-                    $latestPrice = round($basePrice + $change, 2);
-                    $prevPrice = $basePrice;
-                }
-
-                $change    = $latestPrice - $prevPrice;
-                $changePct = $prevPrice > 0 ? round(($change / $prevPrice) * 100, 2) : 0;
-
-                $company->latest_price      = $latestPrice;
-                $company->price_change      = round($change, 2);
-                $company->price_change_pct  = $changePct;
-
+                $company->status = $company->current_status ? ['status' => $company->current_status] : null;
                 return $company;
             });
 
         return $this->success($stocks);
     }
 
-    /**
-     * Get live NGX stocks data with compliance status and latest price.
-     */
-    public function ngx(): JsonResponse
+    public function ngx(Request $request): JsonResponse
     {
-        $stocks = \Illuminate\Support\Facades\Cache::rememberForever('stocks.ngx_v3', function () {
-            return Company::with([
-                'status',
-                'dailyPrices' => fn($q) => $q->latest('date')->limit(2),
-            ])->get()->map(function ($company) {
-                $prices   = $company->dailyPrices;
-                $latest   = $prices->first();
-                $prev     = $prices->skip(1)->first();
+        $query = Company::query();
 
-                $latestPrice = (float) ($latest?->price ?? 0);
-                $prevPrice   = (float) ($prev?->price ?? $latestPrice);
+        if ($request->has('status') && !empty($request->status)) {
+            $statusFilters = explode(',', strtolower($request->status));
+            $query->whereIn('current_status', $statusFilters);
+        }
 
-                // Fallback pseudo-random realistic price if DB is empty
-                if ($latestPrice == 0) {
-                    $hash = crc32($company->symbol);
-                    $basePrice = 10 + ($hash % 200);
-                    $change = (($hash % 100) - 50) / 10;
-                    
-                    $latestPrice = round($basePrice + $change, 2);
-                    $prevPrice = $basePrice;
-                }
+        if ($request->has('sector') && !empty($request->sector)) {
+            $sectorFilters = explode(',', strtolower($request->sector));
+            $query->whereIn('sector', $sectorFilters);
+        }
 
-                $change    = $latestPrice - $prevPrice;
-                $changePct = $prevPrice > 0 ? round(($change / $prevPrice) * 100, 2) : 0;
+        if ($request->has('min_market_cap')) {
+            $query->where('market_cap', '>=', (float) $request->min_market_cap);
+        }
 
-                $company->latest_price      = $latestPrice;
-                $company->price_change      = round($change, 2);
-                $company->price_change_pct  = $changePct;
+        if ($request->has('pe_max')) {
+            $query->whereNotNull('pe_ratio')->where('pe_ratio', '<=', (float) $request->pe_max);
+        }
 
-                return $company;
-            });
+        $stocks = $query->get()->map(function ($company) {
+            $company->status = $company->current_status ? ['status' => $company->current_status] : null;
+            return $company;
         });
 
         return $this->success($stocks);
@@ -173,6 +135,7 @@ class StockController extends Controller
         ]);
 
         $company = Company::where('symbol', $symbol)->firstOrFail();
+        $oldStatus = $company->status ? $company->status->status : null;
 
         $status = $company->status()->updateOrCreate(
             ['company_id' => $company->id],
@@ -184,11 +147,25 @@ class StockController extends Controller
             ]
         );
 
+        // Audit log
+        \App\Models\AuditLog::create([
+            'user_id' => $user->id,
+            'action' => 'override_stock_status',
+            'target_type' => Company::class,
+            'target_id' => $company->id,
+            'changes' => [
+                'old_status' => $oldStatus,
+                'new_status' => $request->status,
+                'reason' => $request->reason
+            ]
+        ]);
+
         event(new \App\Events\StockStatusChanged($company, $status));
 
         // Clear caches so the new status reflects immediately
         \Illuminate\Support\Facades\Cache::forget('stocks.index');
         \Illuminate\Support\Facades\Cache::forget('stocks.ngx');
+        \Illuminate\Support\Facades\Cache::forget('stocks.ngx_v3');
         \Illuminate\Support\Facades\Cache::forget("stocks.show.{$symbol}");
 
         return $this->success($company->load('status'), 'Stock status updated successfully by scholar.');

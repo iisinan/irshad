@@ -66,6 +66,8 @@ final ApiService _apiService = ApiService();
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.haram,
               foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+              elevation: 0,
             ),
             onPressed: () async {
               Navigator.pop(context); // Close dialog

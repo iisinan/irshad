@@ -121,7 +121,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
               Container(
                 margin: const EdgeInsets.only(bottom: 24),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [AppTheme.primary, Color(0xFF1E565A)]),
+                  color: AppTheme.primary,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Material(
@@ -253,9 +253,6 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
               decoration: BoxDecoration(
                 color: AppTheme.primary,
                 borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(color: AppTheme.primary.withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 10)),
-                ],
               ),
               child: Column(
                 children: [

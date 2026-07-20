@@ -172,7 +172,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                   backgroundColor: AppTheme.primary,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)), // Pill
                   elevation: 0,
                 ),
                 child: const Text('Sign In', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
@@ -317,12 +317,10 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
     return GestureDetector(
       onTap: () => _showEditHoldingSheet(holding),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: isHalal ? AppTheme.divider : AppTheme.haram.withOpacity(0.3)),
+          border: Border(bottom: BorderSide(color: AppTheme.divider, width: 1)),
         ),
         child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -436,12 +434,13 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                           ElevatedButton(
                             onPressed: () {},
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.textDark, 
+                              backgroundColor: AppTheme.primary, 
                               foregroundColor: Colors.white, 
-                              minimumSize: const Size(double.infinity, 50),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              minimumSize: const Size(double.infinity, 56),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)), // Pill
+                              elevation: 0,
                             ),
-                            child: const Text('Connect Broker'),
+                            child: const Text('Connect Broker', style: TextStyle(fontWeight: FontWeight.w800)),
                           )
                         ],
                       ),
@@ -459,12 +458,13 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                           ElevatedButton(
                             onPressed: () {},
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.textDark, 
+                              backgroundColor: AppTheme.primary, 
                               foregroundColor: Colors.white, 
-                              minimumSize: const Size(double.infinity, 50),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              minimumSize: const Size(double.infinity, 56),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                              elevation: 0,
                             ),
-                            child: const Text('Add Holding'),
+                            child: const Text('Add Holding', style: TextStyle(fontWeight: FontWeight.w800)),
                           )
                         ],
                       ),
@@ -534,10 +534,10 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppTheme.haram,
                       side: const BorderSide(color: AppTheme.haram),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      minimumSize: const Size(0, 50),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                      minimumSize: const Size(0, 56),
                     ),
-                    child: const Text('Delete'),
+                    child: const Text('Delete', style: TextStyle(fontWeight: FontWeight.w800)),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -562,12 +562,13 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.textDark, 
+                      backgroundColor: AppTheme.primary, 
                       foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      minimumSize: const Size(0, 50),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                      elevation: 0,
+                      minimumSize: const Size(0, 56),
                     ),
-                    child: const Text('Save'),
+                    child: const Text('Save', style: TextStyle(fontWeight: FontWeight.w800)),
                   ),
                 ),
               ],

@@ -11,44 +11,50 @@ class WatchlistController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $watchlistItems = Watchlist::with(['company.status', 'company.dailyPrices' => function($q) {
-                $q->latest('date')->take(2);
-            }])
-            ->where('user_id', $user->id)
-            ->get();
+        $watchlistItems = Watchlist::where('user_id', $user->id)->get();
 
-        $formatted = $watchlistItems->map(function ($item) {
-            $company = $item->company;
-            $prices = $company?->dailyPrices;
+        $allStocks = \Illuminate\Support\Facades\Cache::rememberForever('stocks.index_v3', function () {
+            return \App\Models\Company::with(['status', 'dailyPrices' => fn($q) => $q->latest('date')])->get();
+        });
+
+        $formatted = $watchlistItems->map(function ($item) use ($allStocks) {
+            $company = $allStocks->firstWhere('symbol', strtoupper($item->symbol));
             $currentPrice = 0;
             $changePct = 0;
+            $statusString = 'Doubtful';
 
-            if ($prices && $prices->count() > 0) {
-                $currentPrice = $prices->first()->price;
-                if ($prices->count() > 1) {
-                    $prevPrice = $prices->last()->price;
-                    if ($prevPrice > 0) {
-                        $changePct = (($currentPrice - $prevPrice) / $prevPrice) * 100;
+            if ($company) {
+                $prices = $company->dailyPrices;
+                if ($prices && $prices->count() > 0) {
+                    $currentPrice = (float) $prices->first()->price;
+                    if ($prices->count() > 1) {
+                        $prevPrice = (float) $prices->skip(1)->first()->price;
+                        if ($prevPrice > 0) {
+                            $changePct = (($currentPrice - $prevPrice) / $prevPrice) * 100;
+                        }
                     }
                 }
-            }
 
-            $statusString = 'Doubtful';
-            if ($company?->status?->status) {
-                $rawStatus = strtolower($company->status->status);
-                if ($rawStatus === 'halal' || $rawStatus === 'compliant') $statusString = 'Halal';
-                elseif ($rawStatus === 'non-halal' || $rawStatus === 'non-compliant') $statusString = 'Non-Halal';
+                // Get last 7 days of prices for sparkline (order by date ASC so sparkline goes left to right)
+                $historicalPrices = $company->dailyPrices->take(7)->reverse()->pluck('price')->map(fn($p) => (float)$p)->values()->toArray();
+
+                if ($company->status && $company->status->status) {
+                    $rawStatus = strtolower($company->status->status);
+                    if (in_array($rawStatus, ['halal', 'compliant'])) $statusString = 'Halal';
+                    elseif (in_array($rawStatus, ['non-halal', 'non-compliant'])) $statusString = 'Non-Halal';
+                }
             }
 
             return [
                 'id' => $item->id,
-                'symbol' => $item->symbol,
+                'symbol' => strtoupper($item->symbol),
                 'name' => $company->name ?? $item->symbol,
                 'alert_whatsapp' => $item->alert_whatsapp,
                 'alert_email' => $item->alert_email,
                 'price' => $currentPrice,
                 'change' => round($changePct, 2),
                 'status' => $statusString,
+                'historical_prices' => $historicalPrices ?? [],
             ];
         });
 

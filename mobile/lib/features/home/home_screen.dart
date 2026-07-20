@@ -8,6 +8,8 @@ import '../stocks/ui/stock_search_screen.dart';
 import '../portfolio/ui/portfolio_screen.dart';
 import '../portfolio/ui/zakat_calculator_screen.dart';
 import '../stocks/ui/ngx_market_screen.dart';
+import '../stocks/ui/stock_screener_screen.dart';
+import '../stocks/ui/create_basket_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -111,14 +113,8 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  )
-                ],
+                borderRadius: BorderRadius.circular(100), // Circular pill shape
+                border: Border.all(color: AppTheme.divider), // Flat border
               ),
               child: const Icon(Icons.notifications_none_rounded, color: AppTheme.textDark, size: 24),
             ),
@@ -139,15 +135,8 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(100), // Pill search bar
             border: Border.all(color: AppTheme.divider, width: 1.5),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.02),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              )
-            ],
           ),
           child: Row(
             children: [
@@ -252,7 +241,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Row(
         children: [
           Expanded(child: _buildActionCard(context, Icons.radar_rounded, 'Screener', AppTheme.primary, () {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => const StockSearchScreen()));
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const StockScreenerScreen()));
           })),
           const SizedBox(width: 12),
           Expanded(child: _buildActionCard(context, Icons.pie_chart_rounded, 'Portfolio', const Color(0xFF3B82F6), () {
@@ -406,7 +395,31 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Text('Curated Themes', style: _widgetTitleStyle()),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Curated Themes', style: _widgetTitleStyle()),
+                GestureDetector(
+                  onTap: () async {
+                    final created = await Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateBasketScreen()));
+                    if (created == true) {
+                      _fetchBaskets();
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(color: AppTheme.primary, borderRadius: BorderRadius.circular(100)),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.add_rounded, color: Colors.white, size: 14),
+                        SizedBox(width: 4),
+                        Text('Create', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w800)),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 16),
           SizedBox(

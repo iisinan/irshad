@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { fetchPortfolio, addHolding, removeHolding, fetchNgxStocks } from '../services/api';
+import { toastError, toastSuccess } from '../utils/toast';
 import { useAuth } from '../context/AuthContext';
 import { X, Search, LayoutDashboard, BarChart2, Star, Calculator, ShieldCheck, BookOpen, Info, Landmark, Briefcase, Bell, Activity } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
@@ -99,7 +100,7 @@ function AddModal({ onClose, onAdd, isAdding, onBrokerLinked }) {
   const submit = (e) => {
     e.preventDefault();
     const validRows = rows.filter(r => r.sym && r.sh && r.pr);
-    if (validRows.length === 0) return alert('Fill at least one complete holding row.');
+    if (validRows.length === 0) return toastError('Fill at least one complete holding row.');
     
     const holdings = validRows.map(r => ({
       symbol: r.sym.toUpperCase(),
@@ -274,7 +275,7 @@ export default function Portfolio() {
   // Try to hydrate from localStorage cache for instant render
   const [data, setData] = useState(() => {
     try {
-      const cached = localStorage.getItem('irshad_portfolio_cache_v9');
+      const cached = localStorage.getItem('irshad_portfolio_cache_v10');
       if (cached) return JSON.parse(cached)?.data || null;
     } catch {}
     return null;
@@ -335,9 +336,10 @@ export default function Portfolio() {
       const { addBulkHoldings } = await import('../services/api');
       await addBulkHoldings(payload);
       setShowAddModal(false);
-      loadData(true); // Optimistic seamless reload
+      loadData();
+      toastSuccess('Holdings added to portfolio');
     } catch (err) {
-      alert(err?.message || 'Failed to add holdings');
+      toastError(err?.message || 'Failed to add holdings');
     } finally {
       setIsAdding(false);
     }
@@ -347,8 +349,9 @@ export default function Portfolio() {
     try {
       await removeHolding(id);
       loadData();
+      toastSuccess('Holding removed');
     } catch (err) {
-      alert(err?.message || 'Failed to remove holding');
+      toastError(err?.message || 'Failed to remove holding');
     }
   };
 

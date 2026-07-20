@@ -156,7 +156,8 @@ class _AlertBottomSheetState extends State<AlertBottomSheet> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.halal,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                    elevation: 0,
                   ),
                   child: _isLoading
                       ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))

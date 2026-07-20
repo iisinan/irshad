@@ -142,12 +142,20 @@ class FetchNgxFinancialsCommand extends Command
 
     private function cleanNumber($value)
     {
-        if ($value === null) {
+        if ($value === null || $value === '' || stripos($value, 'n/a') !== false || stripos($value, 'not disclosed') !== false) {
             return null;
         }
         if (is_numeric($value)) {
-            return $value;
+            return (float) $value;
         }
-        return (float) preg_replace('/[^0-9.]/', '', $value);
+        
+        // Remove everything except numbers, dots, and minus signs
+        $cleaned = preg_replace('/[^0-9.-]/', '', $value);
+        
+        if ($cleaned === '' || $cleaned === '-' || $cleaned === '.') {
+            return null;
+        }
+        
+        return (float) $cleaned;
     }
 }

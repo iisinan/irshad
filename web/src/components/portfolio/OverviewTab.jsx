@@ -1,210 +1,127 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Wallet, TrendingUp, AlertCircle, ShieldAlert,
   Plus, X, Trash2, CheckCircle, ArrowUpRight, ArrowDownRight,
-  BarChart2, PieChart as PieIcon, ChevronRight, RefreshCw,
-  Shield, Activity, Link as LinkIcon, Edit2
+  BarChart2, PieChart as PieIcon, ChevronRight, Shield,
+  Activity, Edit2, Zap, ArrowRight, BookOpen, Award,
+  Star, Clock, Newspaper, Eye, ExternalLink, RefreshCw,
+  TrendingDown
 } from 'lucide-react';
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, AreaChart, Area, YAxis } from 'recharts';
+import {
+  PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
+  AreaChart, Area, YAxis, XAxis, CartesianGrid
+} from 'recharts';
 import { Link } from 'react-router-dom';
-import { updateHolding } from '../../services/api';
+import { updateHolding, fetchHistory, fetchNews, fetchWatchlist } from '../../services/api';
+import { toastError, toastSuccess } from '../../utils/toast';
 
-/* ─── Helpers ──────────────────────────────────────────────── */
-const fmt  = (n) => Number(n||0).toLocaleString('en-NG',{maximumFractionDigits:0});
+/* ─── Helpers ───────────────────────────────────────────────── */
 const fmtK = (n) => {
-  const v = Number(n||0);
-  if (v >= 1_000_000_000) return `₦${(v/1_000_000_000).toFixed(2)}B`;
-  if (v >= 1_000_000)     return `₦${(v/1_000_000).toFixed(2)}M`;
-  if (v >= 1_000)         return `₦${(v/1_000).toFixed(1)}K`;
-  return `₦${fmt(v)}`;
+  const v = Number(n || 0);
+  if (v >= 1_000_000_000) return `₦${(v / 1_000_000_000).toFixed(2)}B`;
+  if (v >= 1_000_000)     return `₦${(v / 1_000_000).toFixed(2)}M`;
+  if (v >= 1_000)         return `₦${(v / 1_000).toFixed(1)}K`;
+  return `₦${v.toLocaleString('en-NG', { maximumFractionDigits: 0 })}`;
+};
+const timeAgo = (d) => {
+  if (!d) return '';
+  const m = Math.floor((Date.now() - new Date(d)) / 60000);
+  if (m < 1) return 'Just now';
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
 };
 
-const MOCK_PERF = [];
+const PIE_COLORS   = ['#0F5257','#D4AF37','#22C55E','#14B8A6','#6366f1','#f59e0b','#0B4347','#C9A84C'];
+const SECTOR_COLORS = ['#0F5257','#D4AF37','#22C55E','#14B8A6','#6366f1','#f59e0b'];
 
-const PIE_COLORS = ['#0F5257', '#C9B89C', '#22C55E', '#14B8A6', '#D4AF37', '#0B4347'];
+/* ─── Animated Counter ─────────────────────────────────────── */
+function AnimCounter({ target }) {
+  const [val, setVal] = useState(0);
+  const raf = useRef(null);
+  useEffect(() => {
+    if (!target) return;
+    const start = Date.now();
+    const dur = 1400;
+    const tick = () => {
+      const p = Math.min((Date.now() - start) / dur, 1);
+      const ease = 1 - Math.pow(1 - p, 4);
+      setVal(Math.round(target * ease));
+      if (p < 1) raf.current = requestAnimationFrame(tick);
+    };
+    raf.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf.current);
+  }, [target]);
+  return <>{fmtK(val)}</>;
+}
 
-const statusConfig = {
-  true:  {label:'Halal',    color:'var(--halal)',    bg:'var(--halal-bg)',    icon:CheckCircle},
-  false: {label:'Non-Halal',color:'var(--non-halal)',bg:'var(--non-halal-bg)',icon:ShieldAlert},
-};
-
-/* ─── Holding Row ──────────────────────────────────────────── */
-function HoldingCard({holding, onDelete, onEdit}) {
-  const [hov, setHov] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const isUp = (holding.return_percentage || 0) >= 0;
-  const sc = statusConfig[holding.is_halal ? 'true' : 'false'];
-  const SIcon = sc.icon;
-
-  const pct = Math.min(100, Math.max(0, Math.abs(holding.return_percentage || 0)));
-  const sparkData = [
-    {v: holding.total_value * 0.88},
-    {v: holding.total_value * 0.92},
-    {v: holding.total_value * 0.89},
-    {v: holding.total_value * 0.94},
-    {v: holding.total_value * 0.97},
-    {v: holding.total_value * (isUp ? 1.0 : 0.96)},
-  ];
-
-  const statusBorderColor = holding.purification_due > 0 ? 'var(--doubtful)' : holding.is_halal ? 'var(--halal)' : 'var(--non-halal)';
-
+/* ─── Compliance Ring ───────────────────────────────────────── */
+function ComplianceRing({ pct, size = 108 }) {
+  const r = size * 0.38;
+  const circ = 2 * Math.PI * r;
+  const dash = Math.min(pct, 100) / 100 * circ;
+  const color = pct >= 90 ? '#22c55e' : pct >= 70 ? '#f59e0b' : '#ef4444';
+  const cx = size / 2, cy = size / 2;
   return (
-    <div
-      className="holding-card"
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => { setHov(false); setConfirmDelete(false); }}
-      style={{
-        background: 'white', 
-        border: `1.5px solid ${hov ? 'var(--primary-100)' : 'var(--border)'}`,
-        borderLeft: `4px solid ${statusBorderColor}`,
-        borderRadius: '20px',
-        marginBottom: '12px', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-        boxShadow: hov ? '0 12px 32px rgba(15,82,87,0.10)' : 'var(--shadow-sm)',
-        transform: hov ? 'translateY(-3px)' : 'none',
-      }}
-    >
-      <div style={{
-        width: '48px', height: '48px', borderRadius: '14px', flexShrink: 0,
-        background: 'var(--primary-50)', border: '1px solid var(--primary-100)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontWeight: 900, fontSize: '0.7rem', color: 'var(--primary)', letterSpacing: '0.5px',
-        overflow: 'hidden', boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.5)'
-      }}>
-        {holding.logo_url ? (
-            <img src={'http://127.0.0.1:8000' + holding.logo_url} alt={holding.symbol} style={{ width: '100%', height: '100%', objectFit: 'contain', transform: hov ? 'scale(1.15)' : 'scale(1)', transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }} />
-        ) : (
-            <div style={{ transform: hov ? 'scale(1.1)' : 'scale(1)', transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>{(holding.symbol || '').slice(0, 5)}</div>
-        )}
-      </div>
-
-      <div style={{ flex: 1.4, minWidth: 0 }}>
-        <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.95rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          {holding.symbol}
-        </div>
-        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 500, marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          {holding.name || holding.symbol}
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px', fontSize: '0.68rem', color: sc.color, fontWeight: 700 }}>
-          <SIcon size={9}/> {sc.label}
-        </div>
-      </div>
-
-      <div style={{ textAlign: 'right', flex: 0.7 }}>
-        <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', color: 'var(--text-muted)', marginBottom: '3px' }}>Shares</div>
-        <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.92rem' }}>{Number(holding.shares).toLocaleString()}</div>
-      </div>
-
-      <div style={{ textAlign: 'right', flex: 1 }}>
-        <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', color: 'var(--text-muted)', marginBottom: '3px' }}>Value</div>
-        <div style={{ fontWeight: 900, color: 'var(--text-dark)', fontSize: '1rem' }}>{fmtK(holding.total_value)}</div>
-      </div>
-
-      <div className="sparkline-container" style={{ width: '70px', height: '34px', flexShrink: 0 }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={sparkData}>
-            <defs>
-              <linearGradient id={`pk-${holding.id}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor={isUp ? '#22c55e' : '#ef4444'} stopOpacity={0.25}/>
-                <stop offset="95%" stopColor={isUp ? '#22c55e' : '#ef4444'} stopOpacity={0}/>
-              </linearGradient>
-            </defs>
-            <YAxis domain={['dataMin - 10000','dataMax + 10000']} hide/>
-            <Area type="monotone" dataKey="v" stroke={isUp ? '#22c55e' : '#ef4444'} strokeWidth={1.8} fill={`url(#pk-${holding.id})`} dot={false}/>
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-
-      <div style={{ textAlign: 'right', flex: 0.8 }}>
-        <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', color: 'var(--text-muted)', marginBottom: '3px' }}>Return</div>
-        <div style={{
-          fontWeight: 800, fontSize: '0.92rem',
-          color: isUp ? 'var(--halal)' : 'var(--non-halal)',
-          display: 'flex', alignItems: 'center', gap: '2px', justifyContent: 'flex-end',
-        }}>
-          {isUp ? <ArrowUpRight size={13}/> : <ArrowDownRight size={13}/>}
-          {isUp ? '+' : ''}{Number(holding.return_percentage || 0).toFixed(2)}%
-        </div>
-      </div>
-
-      <div style={{ flex: 0.9, textAlign: 'right' }}>
-        {holding.purification_due > 0 ? (
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 10px', borderRadius: '20px', background: 'rgba(230,81,0,0.08)', color: 'var(--doubtful)', fontSize: '0.7rem', fontWeight: 700 }}>
-            <AlertCircle size={10}/> Purify {fmtK(holding.purification_due)}
-          </div>
-        ) : (
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 10px', borderRadius: '20px', background: 'var(--halal-bg)', color: 'var(--halal)', fontSize: '0.7rem', fontWeight: 700 }}>
-            <CheckCircle size={10}/> Compliant
-          </div>
-        )}
-      </div>
-
-      <div style={{ flexShrink: 0 }}>
-        {confirmDelete ? (
-          <div style={{ display: 'flex', gap: '6px' }}>
-            <button onClick={() => onDelete(holding.id)} style={{ padding: '6px 12px', borderRadius: '8px', background: 'var(--non-halal)', color: 'white', border: 'none', fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer' }}>
-              Confirm
-            </button>
-            <button onClick={() => setConfirmDelete(false)} style={{ padding: '6px 12px', borderRadius: '8px', background: 'var(--bg-section)', color: 'var(--text-muted)', border: 'none', fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer' }}>
-              Cancel
-            </button>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', gap: '4px' }}>
-            <button onClick={() => onEdit(holding)} style={{ background: hov ? 'var(--primary-50)' : 'none', border: 'none', color: hov ? 'var(--primary)' : 'var(--text-light)', cursor: 'pointer', padding: '6px 8px', borderRadius: '8px', transition: 'all 0.2s' }}>
-              <Edit2 size={15}/>
-            </button>
-            <button onClick={() => setConfirmDelete(true)} style={{ background: hov ? '#fee2e2' : 'none', border: 'none', color: hov ? 'var(--non-halal)' : 'var(--text-light)', cursor: 'pointer', padding: '6px 8px', borderRadius: '8px', transition: 'all 0.2s' }}>
-              <Trash2 size={15}/>
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}
+      style={{ filter: `drop-shadow(0 0 8px ${color}55)`, flexShrink: 0 }}>
+      {/* track */}
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={size * 0.085} />
+      {/* progress */}
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke={color} strokeWidth={size * 0.085}
+        strokeDasharray={`${dash} ${circ}`} strokeLinecap="round"
+        transform={`rotate(-90 ${cx} ${cy})`}
+        style={{ transition: 'stroke-dasharray 1.4s cubic-bezier(0.16,1,0.3,1)' }} />
+      <text x={cx} y={cy - 4} textAnchor="middle" fontSize={size * 0.17} fontWeight="900" fill={color}>{pct}%</text>
+      <text x={cx} y={cy + size * 0.115} textAnchor="middle" fontSize={size * 0.085} fontWeight="700" fill="rgba(255,255,255,0.38)">HALAL</text>
+    </svg>
   );
 }
+
+/* ─── Skeleton block ────────────────────────────────────────── */
+const Skel = ({ h = 52, r = 12 }) => (
+  <div style={{ height: h, borderRadius: r, background: 'var(--bg-section)', animation: 'shimmer 1.5s infinite linear', backgroundImage: 'linear-gradient(90deg,var(--bg-section) 0%,#fff 50%,var(--bg-section) 100%)', backgroundSize: '200% 100%', marginBottom: 8 }} />
+);
 
 /* ─── Edit Modal ────────────────────────────────────────────── */
 function EditHoldingModal({ holding, onClose, onSuccess }) {
   const [sh, setSh] = useState(holding.shares || '');
   const [pr, setPr] = useState(holding.average_price || '');
   const [loading, setLoading] = useState(false);
-
   const submit = async (e) => {
     e.preventDefault();
-    if (!sh || !pr) return alert('Fill all fields');
-    try {
-      setLoading(true);
-      await updateHolding(holding.id, { shares: Number(sh), average_price: Number(pr) });
-      onSuccess();
-    } catch (err) {
-      alert(err?.message || 'Failed to update holding');
-    } finally {
-      setLoading(false);
-    }
+    if (!sh || !pr) return;
+    try { setLoading(true); await updateHolding(holding.id, { shares: +sh, average_price: +pr }); onSuccess(); toastSuccess('Holding updated'); }
+    catch (err) { toastError(err?.message || 'Failed to update holding'); }
+    finally { setLoading(false); }
   };
-
   return (
-    <div className="animate-fade-in" style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.4)', backdropFilter:'blur(4px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:999, padding:'20px' }}>
-      <div style={{ background:'white', borderRadius:'24px', width:'100%', maxWidth:'420px', boxShadow:'0 24px 64px rgba(0,0,0,0.1)', overflow:'hidden', animation:'slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'20px 24px', borderBottom:'1px solid var(--border)' }}>
-          <h3 style={{ fontSize:'1.1rem', fontWeight:800, color:'var(--text-dark)' }}>Edit {holding.symbol}</h3>
-          <button onClick={onClose} style={{ background:'var(--bg-section)', border:'none', width:'32px', height:'32px', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--text-muted)', cursor:'pointer' }}><X size={16}/></button>
-        </div>
-        <form onSubmit={submit} style={{ padding:'24px' }}>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px', marginBottom:'24px' }}>
-            <div>
-              <label style={{ display:'block', fontSize:'0.75rem', fontWeight:700, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.5px', marginBottom:'8px' }}>Shares</label>
-              <input type="number" value={sh} onChange={e=>setSh(e.target.value)} placeholder="0" style={{ width:'100%', padding:'12px 14px', borderRadius:'12px', border:'1.5px solid var(--border)', fontSize:'0.95rem', fontWeight:600, outline:'none' }}/>
-            </div>
-            <div>
-              <label style={{ display:'block', fontSize:'0.75rem', fontWeight:700, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.5px', marginBottom:'8px' }}>Avg Price (₦)</label>
-              <input type="number" value={pr} onChange={e=>setPr(e.target.value)} placeholder="0.00" style={{ width:'100%', padding:'12px 14px', borderRadius:'12px', border:'1.5px solid var(--border)', fontSize:'0.95rem', fontWeight:600, outline:'none' }}/>
-            </div>
+    <div className="animate-fade-in" style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.5)', backdropFilter:'blur(8px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:999, padding:'20px' }}>
+      <div style={{ background:'white', borderRadius:'24px', width:'100%', maxWidth:'400px', boxShadow:'0 32px 80px rgba(0,0,0,0.18)', overflow:'hidden', animation:'slideUpFade 0.3s cubic-bezier(0.16,1,0.3,1)' }}>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'18px 22px', borderBottom:'1px solid var(--border)' }}>
+          <div>
+            <div style={{ fontWeight:800, fontSize:'1rem', color:'var(--text-dark)' }}>Edit {holding.symbol}</div>
+            <div style={{ fontSize:'0.75rem', color:'var(--text-muted)', marginTop:'2px' }}>Update your position</div>
           </div>
-          <div style={{ display:'flex', gap:'12px' }}>
-            <button type="button" onClick={onClose} style={{ flex:1, padding:'14px', borderRadius:'12px', background:'white', border:'1.5px solid var(--border)', color:'var(--text-dark)', fontWeight:700, fontSize:'0.9rem', cursor:'pointer' }}>Cancel</button>
-            <button type="submit" disabled={loading} style={{ flex:1.5, padding:'14px', borderRadius:'12px', background:'var(--primary)', border:'none', color:'white', fontWeight:700, fontSize:'0.9rem', cursor:loading ? 'not-allowed' : 'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', boxShadow:'0 8px 20px rgba(34,197,94,0.2)' }}>
-              {loading ? <div className="spinner" style={{ width:'16px', height:'16px', borderTopColor:'white' }}/> : 'Save Changes'}
+          <button onClick={onClose} style={{ background:'var(--bg-section)', border:'none', width:'32px', height:'32px', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', color:'var(--text-muted)' }}><X size={14}/></button>
+        </div>
+        <form onSubmit={submit} style={{ padding:'22px' }}>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px', marginBottom:'18px' }}>
+            {[['Shares', sh, setSh, '0'], ['Avg Price (₦)', pr, setPr, '0.00']].map(([lbl, val, fn, ph]) => (
+              <div key={lbl}>
+                <label style={{ display:'block', fontSize:'0.7rem', fontWeight:800, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.6px', marginBottom:'6px' }}>{lbl}</label>
+                <input type="number" value={val} onChange={e => fn(e.target.value)} placeholder={ph}
+                  style={{ width:'100%', padding:'10px 12px', borderRadius:'10px', border:'1.5px solid var(--border)', fontSize:'0.9rem', fontWeight:600, outline:'none', transition:'border-color 0.2s' }}
+                  onFocus={e => e.target.style.borderColor='var(--primary)'}
+                  onBlur={e => e.target.style.borderColor='var(--border)'} />
+              </div>
+            ))}
+          </div>
+          <div style={{ display:'flex', gap:'10px' }}>
+            <button type="button" onClick={onClose} style={{ flex:1, padding:'12px', borderRadius:'10px', background:'white', border:'1.5px solid var(--border)', fontWeight:700, fontSize:'0.88rem', cursor:'pointer', color:'var(--text-dark)' }}>Cancel</button>
+            <button type="submit" disabled={loading} style={{ flex:1.5, padding:'12px', borderRadius:'10px', background:'var(--primary)', color:'white', border:'none', fontWeight:700, fontSize:'0.88rem', cursor:loading?'not-allowed':'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', boxShadow:'0 6px 16px rgba(15,82,87,0.2)' }}>
+              {loading ? <div className="spinner" style={{ width:'14px', height:'14px', borderTopColor:'white' }}/> : 'Save Changes'}
             </button>
           </div>
         </form>
@@ -213,219 +130,684 @@ function EditHoldingModal({ holding, onClose, onSuccess }) {
   );
 }
 
+/* ─── Holding Row ───────────────────────────────────────────── */
+function HoldingRow({ holding, onDelete, onEdit, rank }) {
+  const [hov, setHov] = useState(false);
+  const [confirm, setConfirm] = useState(false);
+  const isUp = (holding.return_percentage || 0) >= 0;
+  const isHalal = !!holding.is_halal;
+  const hasPurif = (holding.purification_due || 0) > 0;
+  const leftBorder = hasPurif ? 'var(--doubtful)' : isHalal ? 'var(--halal)' : 'var(--non-halal)';
+  const sparkData = [0.88,0.92,0.89,0.95,0.97,isUp?1.0:0.95].map(m => ({ v:(holding.total_value||0)*m }));
+
+  return (
+    <div
+      className="holding-card-v2"
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => { setHov(false); setConfirm(false); }}
+      style={{
+        display:'flex', alignItems:'center', gap:'14px', padding:'18px 20px',
+        background: hov ? 'linear-gradient(135deg,#f9fffd,white)' : 'white',
+        border:`1.5px solid ${hov ? 'rgba(15,82,87,0.2)' : 'var(--border)'}`,
+        borderLeft:`4px solid ${leftBorder}`,
+        borderRadius:'18px', marginBottom:'8px',
+        boxShadow: hov ? '0 8px 28px rgba(15,82,87,0.09)' : '0 1px 3px rgba(0,0,0,0.03)',
+        transform: hov ? 'translateY(-2px)' : 'none',
+        transition:'all 0.22s cubic-bezier(0.16,1,0.3,1)',
+      }}
+    >
+      {/* Rank */}
+      <div style={{ width:'20px', fontSize:'0.6rem', fontWeight:900, color:'var(--text-light)', textAlign:'center', flexShrink:0 }}>#{rank}</div>
+
+      {/* Logo */}
+      <div style={{ width:'42px', height:'42px', borderRadius:'11px', flexShrink:0, background:'var(--primary-50)', border:'1px solid var(--primary-100)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.62rem', fontWeight:900, color:'var(--primary)', overflow:'hidden' }}>
+        {holding.logo_url
+          ? <img loading="lazy" src={'http://127.0.0.1:8000'+holding.logo_url} alt="" style={{ width:'100%', height:'100%', objectFit:'contain', transition:'transform 0.3s', transform:hov?'scale(1.12)':'scale(1)' }}/>
+          : <span style={{ transform:hov?'scale(1.1)':'scale(1)', transition:'transform 0.3s' }}>{(holding.symbol||'').slice(0,4)}</span>}
+      </div>
+
+      {/* Name + badge */}
+      <div style={{ flex:1.6, minWidth:0 }}>
+        <div style={{ fontWeight:800, color:'var(--text-dark)', fontSize:'0.75rem', lineHeight:1.2 }}>{holding.symbol}</div>
+        <div style={{ fontSize:'0.6rem', color:'var(--text-muted)', marginTop:'2px', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{holding.name||holding.symbol}</div>
+        <div style={{ display:'inline-flex', alignItems:'center', gap:'3px', marginTop:'4px', fontSize:'0.55rem', fontWeight:700,
+          color: isHalal?'var(--halal)':'var(--non-halal)',
+          background: isHalal?'var(--halal-bg)':'var(--non-halal-bg)',
+          padding:'2px 6px', borderRadius:'4px' }}>
+          {isHalal ? <CheckCircle size={8}/> : <ShieldAlert size={8}/>} {isHalal?'Halal':'Non-Halal'}
+        </div>
+      </div>
+
+      {/* Shares */}
+      <div style={{ flex:0.65, textAlign:'right' }}>
+        <div style={{ fontSize:'0.55rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'0.6px', color:'var(--text-muted)', marginBottom:'3px' }}>Shares</div>
+        <div style={{ fontWeight:800, color:'var(--text-dark)', fontSize:'0.75rem' }}>{Number(holding.shares).toLocaleString()}</div>
+      </div>
+
+      {/* Value */}
+      <div style={{ flex:1, textAlign:'right' }}>
+        <div style={{ fontSize:'0.55rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'0.6px', color:'var(--text-muted)', marginBottom:'3px' }}>Value</div>
+        {holding.total_value > 0 ? (
+          <div style={{ fontWeight:900, color:'var(--text-dark)', fontSize:'0.85rem' }}>{fmtK(holding.total_value)}</div>
+        ) : (
+          <div style={{ fontSize:'0.65rem', color:'var(--text-muted)', fontWeight:600 }}>Unavailable</div>
+        )}
+      </div>
+
+      {/* Sparkline */}
+      <div style={{ width:'62px', height:'28px', flexShrink:0 }}>
+        {holding.total_value > 0 && (
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={sparkData}>
+              <defs>
+                <linearGradient id={`sp-${holding.id}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={isUp?'#22c55e':'#ef4444'} stopOpacity={0.3}/>
+                  <stop offset="100%" stopColor={isUp?'#22c55e':'#ef4444'} stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <YAxis domain={['dataMin - 5000','dataMax + 5000']} hide/>
+              <Area type="monotone" dataKey="v" stroke={isUp?'#22c55e':'#ef4444'} strokeWidth={1.5} fill={`url(#sp-${holding.id})`} dot={false}/>
+            </AreaChart>
+          </ResponsiveContainer>
+        )}
+      </div>
+
+      {/* Return */}
+      <div style={{ flex:0.75, textAlign:'right' }}>
+        <div style={{ fontSize:'0.55rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'0.6px', color:'var(--text-muted)', marginBottom:'3px' }}>Return</div>
+        {(holding.return_percentage !== null && holding.return_percentage !== undefined && holding.return_percentage !== 0) ? (
+          <div style={{ fontWeight:800, fontSize:'0.75rem', color:isUp?'var(--halal)':'var(--non-halal)', display:'flex', alignItems:'center', gap:'2px', justifyContent:'flex-end' }}>
+            {isUp ? <ArrowUpRight size={10}/> : <ArrowDownRight size={10}/>}
+            {isUp?'+':''}{Number(holding.return_percentage||0).toFixed(2)}%
+          </div>
+        ) : (
+          <div style={{ fontSize:'0.65rem', color:'var(--text-muted)', fontWeight:600 }}>-</div>
+        )}
+      </div>
+
+      {/* Status chip */}
+      <div style={{ flex:0.85, textAlign:'right' }}>
+        {hasPurif ? (
+          <div style={{ display:'inline-flex', alignItems:'center', gap:'3px', padding:'3px 8px', borderRadius:'20px', background:'rgba(180,83,9,0.08)', color:'var(--doubtful)', fontSize:'0.62rem', fontWeight:700 }}>
+            <AlertCircle size={9}/> {fmtK(holding.purification_due)}
+          </div>
+        ) : (
+          <div style={{ display:'inline-flex', alignItems:'center', gap:'3px', padding:'3px 8px', borderRadius:'20px', background:'var(--halal-bg)', color:'var(--halal)', fontSize:'0.62rem', fontWeight:700 }}>
+            <CheckCircle size={9}/> Clean
+          </div>
+        )}
+      </div>
+
+      {/* Actions */}
+      <div style={{ flexShrink:0, display:'flex', gap:'3px' }}>
+        {confirm ? (
+          <>
+            <button onClick={() => onDelete(holding.id)} style={{ padding:'5px 9px', borderRadius:'7px', background:'var(--non-halal)', color:'white', border:'none', fontWeight:700, fontSize:'0.68rem', cursor:'pointer' }}>Delete</button>
+            <button onClick={() => setConfirm(false)} style={{ padding:'5px 9px', borderRadius:'7px', background:'var(--bg-section)', color:'var(--text-muted)', border:'none', fontWeight:700, fontSize:'0.68rem', cursor:'pointer' }}>No</button>
+          </>
+        ) : (
+          <>
+            <button onClick={() => onEdit(holding)} style={{ background:hov?'var(--primary-50)':'transparent', border:'none', color:hov?'var(--primary)':'var(--text-light)', cursor:'pointer', padding:'5px 7px', borderRadius:'7px', transition:'all 0.18s' }}><Edit2 size={13}/></button>
+            <button onClick={() => setConfirm(true)} style={{ background:hov?'#fee2e2':'transparent', border:'none', color:hov?'var(--non-halal)':'var(--text-light)', cursor:'pointer', padding:'5px 7px', borderRadius:'7px', transition:'all 0.18s' }}><Trash2 size={13}/></button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ─── Card shell ────────────────────────────────────────────── */
+const Card = ({ children, style = {}, className = '' }) => (
+  <div className={`hover-card ${className}`} style={{ background:'white', border:'1px solid var(--border)', borderRadius:'22px', padding:'22px', boxShadow:'0 2px 12px rgba(0,0,0,0.04)', ...style }}>
+    {children}
+  </div>
+);
+
+/* ─── Card header ───────────────────────────────────────────── */
+const CardHead = ({ icon: Icon, iconBg, iconColor = 'var(--primary)', title, sub, right }) => (
+  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'18px' }}>
+    <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+      <div style={{ width:'32px', height:'32px', background:iconBg||'var(--primary-50)', borderRadius:'9px', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+        <Icon size={15} color={iconColor}/>
+      </div>
+      <div>
+        <div style={{ fontWeight:800, color:'var(--text-dark)', fontSize:'0.92rem', lineHeight:1.2 }}>{title}</div>
+        {sub && <div style={{ fontSize:'0.7rem', color:'var(--text-muted)', fontWeight:500, marginTop:'1px' }}>{sub}</div>}
+      </div>
+    </div>
+    {right}
+  </div>
+);
+
+/* ─── Main Component ────────────────────────────────────────── */
 export default function OverviewTab({ data, setShowAddModal, handleDelete, changeTab, refreshData }) {
   const [activeFilter, setActiveFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('value');
+  const [sortBy, setSortBy]             = useState('value');
   const [editingHolding, setEditingHolding] = useState(null);
+  const [activity, setActivity]   = useState([]);
+  const [news, setNews]           = useState([]);
+  const [watchlist, setWatchlist] = useState([]);
+  const [loadingActivity, setLoadingActivity] = useState(true);
+  const [loadingNews, setLoadingNews]         = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   const { summary, holdings } = data;
-  const totalBalance = summary.total_balance || 0;
+  const totalBalance    = summary.total_balance    || 0;
   const purificationDue = summary.purification_due || 0;
-  const compliance = summary.health_percentage ?? 100;
+  const compliance      = summary.health_percentage ?? 100;
+  const halalCount      = holdings.filter(h => h.is_halal).length;
+  const nonHalalCount   = holdings.filter(h => !h.is_halal).length;
+  const needsPurif      = holdings.filter(h => (h.purification_due||0) > 0).length;
+  const totalGainPct    = holdings.length ? (holdings.reduce((s,h) => s + (h.return_percentage||0), 0) / holdings.length).toFixed(2) : null;
+  const isPortfolioUp   = totalGainPct !== null ? Number(totalGainPct) >= 0 : true;
 
-  // Filter & sort
+  useEffect(() => {
+    fetchHistory()
+      .then(r => setActivity((r.data?.history || []).slice(0, 5)))
+      .catch(() => {})
+      .finally(() => setLoadingActivity(false));
+    fetchNews()
+      .then(r => { const a = r.news || r.data?.news || []; setNews(a.slice(0, 3)); })
+      .catch(() => {})
+      .finally(() => setLoadingNews(false));
+    fetchWatchlist()
+      .then(r => setWatchlist((r.data || r || []).slice(0, 5)))
+      .catch(() => {});
+  }, []);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try { await refreshData?.(); } finally { setTimeout(() => setRefreshing(false), 800); }
+  };
+
   const filterFn = h => {
-    if (activeFilter === 'halal')    return h.is_halal && !h.purification_due;
-    if (activeFilter === 'needs')    return h.purification_due > 0;
+    if (activeFilter === 'halal')    return h.is_halal && !(h.purification_due);
+    if (activeFilter === 'needs')    return (h.purification_due||0) > 0;
     if (activeFilter === 'nonhalal') return !h.is_halal;
     return true;
   };
   const sortFn = (a, b) => {
-    if (sortBy === 'value')  return (b.total_value || 0) - (a.total_value || 0);
-    if (sortBy === 'return') return (b.return_percentage || 0) - (a.return_percentage || 0);
-    if (sortBy === 'name')   return (a.symbol || '').localeCompare(b.symbol || '');
-    return 0;
+    if (sortBy === 'value')  return (b.total_value||0) - (a.total_value||0);
+    if (sortBy === 'return') return (b.return_percentage||0) - (a.return_percentage||0);
+    return (a.symbol||'').localeCompare(b.symbol||'');
   };
   const displayHoldings = [...holdings].filter(filterFn).sort(sortFn);
 
-  // Pie chart data
-  const pieData = holdings.slice(0,6).map((h,i) => ({
-    name: h.symbol, value: h.total_value || 0, color: PIE_COLORS[i % PIE_COLORS.length],
+  // Pie data
+  const total   = holdings.reduce((s,h) => s + (h.total_value||0), 0) || 1;
+  const pieData = holdings.slice(0,8).map((h,i) => ({
+    name: h.symbol, value: h.total_value||0,
+    color: PIE_COLORS[i % PIE_COLORS.length],
+    pct:  ((h.total_value||0)/total*100).toFixed(1),
   }));
-  if (pieData.length === 0) pieData.push({ name: 'No Holdings', value: 1, color: '#e5e7eb' });
+  if (!pieData.length) pieData.push({ name:'Empty', value:1, color:'#e5e7eb', pct:'0' });
 
-  const halalCount    = holdings.filter(h => h.is_halal).length;
-  const nonHalalCount = holdings.filter(h => !h.is_halal).length;
-  const needsPurif    = holdings.filter(h => h.purification_due > 0).length;
+  // Sector data
+  const sectorMap = {};
+  holdings.forEach(h => { const s = h.sector||'Other'; sectorMap[s] = (sectorMap[s]||0) + (h.total_value||0); });
+  const sectorData = Object.entries(sectorMap).sort((a,b) => b[1]-a[1]).slice(0,6)
+    .map(([sector, value], i) => ({ sector: sector.length > 15 ? sector.slice(0,15)+'…' : sector, value, pct:(value/total*100).toFixed(1), color: SECTOR_COLORS[i] }));
+
+  // Performers
+  const byReturn      = [...holdings].filter(h => h.return_percentage != null).sort((a,b) => (b.return_percentage||0)-(a.return_percentage||0));
+  const topPerformers = byReturn.slice(0,3);
+  const worstPerfomers= [...byReturn].reverse().slice(0,2).filter(h => (h.return_percentage||0) < 0);
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in" style={{ display:'flex', flexDirection:'column', gap:'18px' }}>
+
       {editingHolding && (
-        <EditHoldingModal 
-          holding={editingHolding} 
-          onClose={() => setEditingHolding(null)} 
-          onSuccess={() => { setEditingHolding(null); refreshData?.(); }} 
+        <EditHoldingModal
+          holding={editingHolding}
+          onClose={() => setEditingHolding(null)}
+          onSuccess={() => { setEditingHolding(null); refreshData?.(); }}
         />
       )}
-      
-      {/* ═ Stats Row ═ */}
-      <div className="stagger-1" style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))', gap:'14px', marginBottom:'24px' }}>
-        {/* Total Value */}
-        <div style={{ background:'var(--gold-grad)', borderRadius:'24px', padding:'26px', color:'white', position:'relative', overflow:'hidden', boxShadow:'0 12px 32px rgba(201,168,76,0.35)', transition:'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }}
-          onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 16px 40px rgba(201,168,76,0.45)'; }}
-          onMouseLeave={e => { e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='0 12px 32px rgba(201,168,76,0.35)'; }}>
-          <div style={{ position:'absolute', top:'-15px', right:'-15px', width:'120px', height:'120px', borderRadius:'50%', background:'rgba(255,255,255,0.1)', pointerEvents:'none' }}/>
-          <div style={{ position:'absolute', bottom:'-15px', left:'15px', width:'60px', height:'60px', borderRadius:'50%', background:'rgba(255,255,255,0.05)', pointerEvents:'none' }}/>
-          <div style={{ fontSize:'0.75rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'1px', opacity:0.9, marginBottom:'16px', display:'flex', alignItems:'center', gap:'8px', position:'relative', zIndex:1 }}>
-            <Wallet size={16}/> Total Value
+
+      {/* ════════════════════════════════════════════════
+          HERO BANNER
+      ════════════════════════════════════════════════ */}
+      <div className="stagger-1" style={{ borderRadius:'26px', overflow:'hidden', boxShadow:'0 20px 60px rgba(15,82,87,0.22)', position:'relative' }}>
+
+        {/* Background */}
+        <div style={{ position:'absolute', inset:0, background:'linear-gradient(135deg,#08131f 0%,#0D2137 30%,#0F5257 70%,#0A6B6B 100%)', zIndex:0 }}/>
+        {/* Orbs */}
+        <div style={{ position:'absolute', top:'-80px', right:'-80px', width:'320px', height:'320px', background:'radial-gradient(circle,rgba(212,175,55,0.13) 0%,transparent 65%)', borderRadius:'50%', zIndex:1, pointerEvents:'none' }}/>
+        <div style={{ position:'absolute', bottom:'-100px', left:'15%', width:'280px', height:'280px', background:'radial-gradient(circle,rgba(34,197,94,0.08) 0%,transparent 65%)', borderRadius:'50%', zIndex:1, pointerEvents:'none' }}/>
+        <div style={{ position:'absolute', top:'40%', left:'-60px', width:'200px', height:'200px', background:'radial-gradient(circle,rgba(255,255,255,0.03) 0%,transparent 70%)', borderRadius:'50%', zIndex:1, pointerEvents:'none' }}/>
+
+        {/* Main content */}
+        <div className="overview-hero" style={{ position:'relative', zIndex:2, padding:'34px 38px' }}>
+          <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', flexWrap:'wrap', gap:'24px' }}>
+
+            {/* Left: value + stats */}
+            <div style={{ flex:1, minWidth:'240px' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'6px' }}>
+                <span style={{ fontSize:'0.68rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'1.5px', color:'rgba(255,255,255,0.45)' }}>Total Portfolio Value</span>
+                <button
+                  onClick={handleRefresh}
+                  style={{ background:'none', border:'none', cursor:'pointer', color:'rgba(255,255,255,0.3)', padding:'2px', display:'flex', lineHeight:1 }}
+                  title="Refresh portfolio"
+                >
+                  <RefreshCw size={11} style={{ animation: refreshing ? 'spin 0.8s linear infinite' : 'none' }}/>
+                </button>
+                {/* live dot */}
+                <div style={{ display:'flex', alignItems:'center', gap:'4px' }}>
+                  <div style={{ width:'6px', height:'6px', borderRadius:'50%', background:'#22c55e', animation:'pulse 2s ease infinite', boxShadow:'0 0 0 0 rgba(34,197,94,0.45)' }}/>
+                  <span style={{ fontSize:'0.58rem', fontWeight:700, color:'rgba(255,255,255,0.35)', textTransform:'uppercase', letterSpacing:'0.5px' }}>Live</span>
+                </div>
+              </div>
+
+              <div style={{ fontSize:'clamp(2.2rem,5vw,3.4rem)', fontWeight:900, color:'white', letterSpacing:'-2px', lineHeight:1, marginBottom:'6px' }}>
+                <AnimCounter target={totalBalance}/>
+              </div>
+
+              {/* Avg return badge */}
+              {totalGainPct !== null && (
+                <div style={{ display:'inline-flex', alignItems:'center', gap:'5px', padding:'4px 10px', borderRadius:'8px', background: isPortfolioUp ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)', marginBottom:'20px' }}>
+                  {isPortfolioUp ? <ArrowUpRight size={13} color="#22c55e"/> : <ArrowDownRight size={13} color="#ef4444"/>}
+                  <span style={{ fontSize:'0.78rem', fontWeight:800, color: isPortfolioUp ? '#22c55e' : '#ef4444' }}>
+                    {isPortfolioUp?'+':''}{totalGainPct}% avg return
+                  </span>
+                </div>
+              )}
+
+              {/* Divider stats */}
+              <div style={{ display:'flex', gap:'18px', flexWrap:'wrap' }}>
+                {[
+                  { lbl:'Holdings', val:`${holdings.length}`, color:'rgba(255,255,255,0.9)' },
+                  { lbl:'Halal', val:`${halalCount}`, color:'#22c55e' },
+                  ...(nonHalalCount > 0 ? [{ lbl:'Non-Halal', val:`${nonHalalCount}`, color:'#ef4444' }] : []),
+                  ...(purificationDue > 0 ? [{ lbl:'Purify', val:fmtK(purificationDue), color:'#f59e0b' }] : []),
+                ].map(({ lbl, val, color }, i, arr) => (
+                  <React.Fragment key={lbl}>
+                    <div>
+                      <div style={{ fontSize:'0.6rem', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.8px', color:'rgba(255,255,255,0.35)', marginBottom:'3px' }}>{lbl}</div>
+                      <div style={{ fontSize:'1rem', fontWeight:800, color }}>{val}</div>
+                    </div>
+                    {i < arr.length-1 && <div style={{ width:'1px', background:'rgba(255,255,255,0.08)', alignSelf:'stretch' }}/>}
+                  </React.Fragment>
+                ))}
+              </div>
+            </div>
+
+            {/* Right: ring + CTA */}
+            <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'10px' }}>
+              <ComplianceRing pct={compliance} size={108}/>
+              <div style={{ textAlign:'center' }}>
+                <div style={{ fontSize:'0.65rem', fontWeight:800, color:'rgba(255,255,255,0.45)', textTransform:'uppercase', letterSpacing:'0.8px' }}>
+                  {compliance >= 90 ? '🌟 Excellent' : compliance >= 70 ? '⚠️ Review Needed' : '🚨 Urgent'}
+                </div>
+              </div>
+              <div style={{ display:'flex', gap:'8px' }}>
+                <button
+                  onClick={() => setShowAddModal(true)}
+                  style={{ display:'flex', alignItems:'center', gap:'6px', padding:'9px 18px', borderRadius:'12px', background:'linear-gradient(135deg,#E6C875,#D4AF37)', color:'#0D1B2A', border:'none', fontWeight:800, fontSize:'0.82rem', cursor:'pointer', boxShadow:'0 6px 18px rgba(212,175,55,0.4)', transition:'all 0.2s', whiteSpace:'nowrap' }}
+                  onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 10px 26px rgba(212,175,55,0.5)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='0 6px 18px rgba(212,175,55,0.4)'; }}
+                >
+                  <Plus size={14}/> Add Holding
+                </button>
+                <button
+                  onClick={() => changeTab?.('purification')}
+                  style={{ display:'flex', alignItems:'center', gap:'6px', padding:'9px 14px', borderRadius:'12px', background:'rgba(255,255,255,0.08)', color:'rgba(255,255,255,0.75)', border:'1px solid rgba(255,255,255,0.14)', fontWeight:700, fontSize:'0.82rem', cursor:'pointer', transition:'all 0.2s', whiteSpace:'nowrap' }}
+                  onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,0.14)'}
+                  onMouseLeave={e => e.currentTarget.style.background='rgba(255,255,255,0.08)'}
+                >
+                  <Shield size={13}/> Purify
+                </button>
+              </div>
+            </div>
           </div>
-          <div style={{ fontSize:'2.4rem', fontWeight:900, letterSpacing:'-1.5px', lineHeight:1, marginBottom:'10px', position:'relative', zIndex:1 }}>
-            {fmtK(totalBalance)}
-          </div>
-          <div style={{ fontSize:'0.85rem', fontWeight:600, opacity:0.85, position:'relative', zIndex:1 }}>Portfolio market value</div>
         </div>
 
-        {/* Compliance */}
-        <div style={{ background:'white', border:'1px solid var(--border)', borderRadius:'24px', padding:'26px', boxShadow:'var(--shadow-sm)', transition:'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', position:'relative', overflow:'hidden' }}
-          onMouseEnter={e => { e.currentTarget.style.boxShadow='var(--shadow-md)'; e.currentTarget.style.transform='translateY(-2px)'; }}
-          onMouseLeave={e => { e.currentTarget.style.boxShadow='var(--shadow-sm)'; e.currentTarget.style.transform='none'; }}>
-          <div style={{ position:'absolute', top:'-20px', right:'-20px', width:'100px', height:'100px', borderRadius:'50%', background:'var(--primary-50)', opacity:0.5, pointerEvents:'none' }}/>
-          <div style={{ fontSize:'0.75rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'1px', color:'var(--text-muted)', marginBottom:'16px', display:'flex', alignItems:'center', gap:'8px', position:'relative', zIndex:1 }}>
-            <Shield size={16} color="var(--primary)"/> Compliance
-          </div>
-          <div style={{ fontSize:'2.4rem', fontWeight:900, letterSpacing:'-1.5px', color: compliance >= 90 ? 'var(--halal)' : compliance >= 70 ? 'var(--doubtful)' : 'var(--non-halal)', lineHeight:1, marginBottom:'10px', position:'relative', zIndex:1 }}>
-            {compliance}%
-          </div>
-          <div style={{ fontSize:'0.85rem', fontWeight:600, color:'var(--text-muted)', position:'relative', zIndex:1 }}>
-            {compliance >= 90 ? 'Excellent Shariah standing' : 'Needs attention'}
-          </div>
-        </div>
-
-        {/* Purification */}
-        <div style={{ background: purificationDue > 0 ? 'rgba(230,81,0,0.02)' : 'white', border: `1px solid ${purificationDue > 0 ? 'rgba(230,81,0,0.15)' : 'var(--border)'}`, borderRadius:'24px', padding:'26px', boxShadow:'var(--shadow-sm)', transition:'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', position:'relative', overflow:'hidden' }}
-          onMouseEnter={e => { e.currentTarget.style.boxShadow='var(--shadow-md)'; e.currentTarget.style.transform='translateY(-2px)'; }}
-          onMouseLeave={e => { e.currentTarget.style.boxShadow='var(--shadow-sm)'; e.currentTarget.style.transform='none'; }}>
-          {purificationDue > 0 && <div style={{ position:'absolute', top:'-20px', right:'-20px', width:'100px', height:'100px', borderRadius:'50%', background:'var(--doubtful-bg)', opacity:0.5, pointerEvents:'none' }}/>}
-          <div style={{ fontSize:'0.75rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'1px', color: purificationDue > 0 ? 'var(--doubtful)' : 'var(--text-muted)', marginBottom:'16px', display:'flex', alignItems:'center', gap:'8px', position:'relative', zIndex:1 }}>
-            <ShieldAlert size={16} color={purificationDue > 0 ? 'var(--doubtful)' : 'var(--text-muted)'}/> Purification Due
-          </div>
-          <div style={{ fontSize:'2.4rem', fontWeight:900, letterSpacing:'-1.5px', color: purificationDue > 0 ? 'var(--doubtful)' : 'var(--text-dark)', lineHeight:1, marginBottom:'10px', position:'relative', zIndex:1 }}>
-            {fmtK(purificationDue)}
-          </div>
-          <div style={{ fontSize:'0.85rem', fontWeight:600, color: purificationDue > 0 ? 'var(--doubtful)' : 'var(--text-muted)', position:'relative', zIndex:1 }}>
-            {purificationDue > 0 ? `${needsPurif} stock${needsPurif > 1 ? 's' : ''} need purification` : 'All holdings clean'}
-          </div>
-        </div>
-
-        {/* Holdings Count */}
-        <div style={{ background:'white', border:'1px solid var(--border)', borderRadius:'24px', padding:'26px', boxShadow:'var(--shadow-sm)', transition:'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', position:'relative', overflow:'hidden' }}
-          onMouseEnter={e => { e.currentTarget.style.boxShadow='var(--shadow-md)'; e.currentTarget.style.transform='translateY(-2px)'; }}
-          onMouseLeave={e => { e.currentTarget.style.boxShadow='var(--shadow-sm)'; e.currentTarget.style.transform='none'; }}>
-          <div style={{ position:'absolute', top:'-20px', right:'-20px', width:'100px', height:'100px', borderRadius:'50%', background:'var(--primary-50)', opacity:0.3, pointerEvents:'none' }}/>
-          <div style={{ fontSize:'0.75rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'1px', color:'var(--text-muted)', marginBottom:'16px', display:'flex', alignItems:'center', gap:'8px', position:'relative', zIndex:1 }}>
-            <Activity size={16} color="var(--primary)"/> Holdings
-          </div>
-          <div style={{ fontSize:'2.4rem', fontWeight:900, letterSpacing:'-1.5px', color:'var(--text-dark)', lineHeight:1, marginBottom:'10px', position:'relative', zIndex:1 }}>
-            {holdings.length}
-          </div>
-          <div style={{ fontSize:'0.85rem', fontWeight:600, color:'var(--text-muted)', position:'relative', zIndex:1 }}>
-            {halalCount} Halal · {nonHalalCount} Non-Halal
-          </div>
+        {/* Bottom info strip */}
+        <div className="overview-hero-bottom" style={{ position:'relative', zIndex:2, background:'rgba(0,0,0,0.22)', borderTop:'1px solid rgba(255,255,255,0.06)', padding:'13px 38px', display:'flex', gap:'28px', flexWrap:'wrap' }}>
+          {[
+            { lbl:'Standard', val:'AAOIFI Shariah', color:'#22c55e' },
+            { lbl:'Exchange', val:'Nigerian Exchange (NGX)', color:'rgba(255,255,255,0.65)' },
+            { lbl:'Compliance', val:`${compliance}% Halal`, color: compliance>=90?'#22c55e':compliance>=70?'#f59e0b':'#ef4444' },
+            { lbl:'Non-Compliant', val:`${nonHalalCount} position${nonHalalCount!==1?'s':''}`, color:nonHalalCount>0?'#ef4444':'#22c55e' },
+          ].map(({ lbl, val, color }) => (
+            <div key={lbl}>
+              <div style={{ fontSize:'0.56rem', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.7px', color:'rgba(255,255,255,0.3)', marginBottom:'2px' }}>{lbl}</div>
+              <div style={{ fontSize:'0.78rem', fontWeight:800, color }}>{val}</div>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* ── Performance Chart ── */}
-      {data.history && data.history.length > 1 && (
-        <div className="stagger-1" style={{ background:'white', border:'1px solid var(--border)', borderRadius:'20px', padding:'24px', marginBottom:'24px', boxShadow:'var(--shadow-sm)' }}>
-          <div style={{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'20px' }}>
-            <TrendingUp size={16} color="var(--primary)" />
-            <h3 style={{ fontSize:'1.1rem', fontWeight:800, color:'var(--text-dark)' }}>Portfolio Performance (30D)</h3>
-          </div>
-          <div style={{ height:'240px', width:'100%' }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={data.history} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <Tooltip 
-                  formatter={(val) => [fmtK(val), 'Value']}
-                  labelFormatter={(label) => new Date(label).toLocaleDateString('en-NG', { month:'short', day:'numeric' })}
-                  contentStyle={{ borderRadius:'12px', border:'1px solid var(--border)', fontWeight:700, fontSize:'0.85rem' }}
-                />
-                <Area type="monotone" dataKey="value" stroke="var(--primary)" strokeWidth={3} fillOpacity={1} fill="url(#colorValue)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      )}
+      {/* ════════════════════════════════════════════════
+          ROW 2 — Allocation · Sectors · Actions
+      ════════════════════════════════════════════════ */}
+      <div className="overview-row2 stagger-2" style={{ display:'grid', gridTemplateColumns:'1fr 1fr 256px', gap:'14px' }}>
 
-      {/* ── Holdings Table ── */}
-      <div className="stagger-2">
-        {/* Filters + Sort */}
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:'10px', marginBottom:'16px' }}>
-          <div style={{ display:'flex', gap:'6px', flexWrap: 'wrap' }}>
-            {[['all','All'],['halal','✓ Halal'],['needs','⚠ Purif.'],['nonhalal','✕ Non-Halal']].map(([val,lbl]) => (
-              <button key={val} onClick={() => setActiveFilter(val)} style={{
-                padding:'6px 14px', borderRadius:'20px', fontSize:'0.76rem', fontWeight:700, cursor:'pointer', transition:'all 0.18s',
-                background: activeFilter === val ? 'var(--primary)' : 'white',
-                color:       activeFilter === val ? 'white' : 'var(--text-muted)',
-                border:      activeFilter === val ? 'none' : '1.5px solid var(--border)',
-                boxShadow:   activeFilter === val ? '0 4px 12px rgba(15,82,87,0.2)' : 'var(--shadow-sm)',
-              }}>{lbl}</button>
-            ))}
+        {/* Allocation Pie */}
+        <Card>
+          <CardHead icon={PieIcon} title="Allocation" sub={`${holdings.length} positions`}/>
+          {holdings.length > 0 ? (
+            <div style={{ display:'flex', alignItems:'center', gap:'14px' }}>
+              <div style={{ width:'148px', height:'148px', flexShrink:0 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={pieData} cx="50%" cy="50%" innerRadius={42} outerRadius={68} paddingAngle={2} dataKey="value">
+                      {pieData.map((e,i) => <Cell key={i} fill={e.color} stroke="none"/>)}
+                    </Pie>
+                    <Tooltip formatter={(v,n,p) => [fmtK(v), p.payload.name]} contentStyle={{ borderRadius:'10px', border:'1px solid var(--border)', fontSize:'0.78rem', fontWeight:700 }}/>
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div style={{ flex:1, display:'flex', flexDirection:'column', gap:'5px', maxHeight:'148px', overflowY:'auto' }}>
+                {pieData.map((d,i) => (
+                  <div key={i} style={{ display:'flex', alignItems:'center', gap:'7px' }}>
+                    <div style={{ width:'8px', height:'8px', borderRadius:'2px', background:d.color, flexShrink:0 }}/>
+                    <span style={{ fontSize:'0.74rem', fontWeight:700, color:'var(--text-dark)', flex:1 }}>{d.name}</span>
+                    <span style={{ fontSize:'0.7rem', fontWeight:700, color:'var(--text-muted)' }}>{d.pct}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div style={{ textAlign:'center', padding:'28px 0', color:'var(--text-muted)' }}>
+              <PieIcon size={28} style={{ opacity:0.15, marginBottom:'8px' }}/>
+              <p style={{ fontSize:'0.8rem' }}>Add holdings to see allocation</p>
+            </div>
+          )}
+        </Card>
+
+        {/* Sector Breakdown */}
+        <Card>
+          <CardHead icon={BarChart2} iconBg="#eef2ff" iconColor="#6366f1" title="Sectors" sub={`${sectorData.length} industries`}/>
+          {sectorData.length > 0 ? (
+            <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
+              {sectorData.map((s,i) => (
+                <div key={i}>
+                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'4px' }}>
+                    <span style={{ fontSize:'0.76rem', fontWeight:700, color:'var(--text-dark)' }}>{s.sector}</span>
+                    <span style={{ fontSize:'0.7rem', fontWeight:700, color:'var(--text-muted)' }}>{s.pct}%</span>
+                  </div>
+                  <div style={{ height:'5px', background:'var(--bg-section)', borderRadius:'3px', overflow:'hidden' }}>
+                    <div style={{ height:'100%', width:`${s.pct}%`, background:s.color, borderRadius:'3px', transition:'width 1.2s cubic-bezier(0.16,1,0.3,1)', animationDelay:`${i*0.08}s` }}/>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ textAlign:'center', padding:'28px 0', color:'var(--text-muted)', fontSize:'0.8rem' }}>
+              <BarChart2 size={28} style={{ opacity:0.15, marginBottom:'8px' }}/>
+              <p>No sector data yet</p>
+            </div>
+          )}
+        </Card>
+
+        {/* Quick Actions */}
+        <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
+          {[
+            { icon:Plus,     label:'Add Holding',   sub:'Track a new stock',   color:'#0F5257', bg:'var(--primary-50)', fn:() => setShowAddModal(true) },
+            { icon:BarChart2, label:'Screen Stocks', sub:'Find halal picks',    color:'#6366f1', bg:'#eef2ff',         to:'/market' },
+            { icon:Eye,      label:'Watchlist',     sub:'Monitor your picks',   color:'#f59e0b', bg:'#fffbeb',         fn:() => changeTab?.('watchlist') },
+            { icon:BookOpen, label:'Resources',     sub:'Learn Islamic finance', color:'#14b8a6', bg:'#f0fdfa',        fn:() => changeTab?.('lectures') },
+            { icon:Shield,   label:'Purify',        sub:'Calculate haram income',color:'#B45309', bg:'var(--doubtful-bg)', fn:() => changeTab?.('purification') },
+          ].map(({ icon:Icon, label, sub, color, bg, to, fn }) => {
+            const inner = (
+              <div key={label} onClick={fn} style={{ display:'flex', alignItems:'center', gap:'10px', padding:'11px 14px', borderRadius:'13px', background:'white', border:'1.5px solid var(--border)', cursor:'pointer', transition:'all 0.18s' }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor=color; e.currentTarget.style.background=bg; e.currentTarget.style.transform='translateX(4px)'; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor='var(--border)'; e.currentTarget.style.background='white'; e.currentTarget.style.transform='none'; }}>
+                <div style={{ width:'32px', height:'32px', borderRadius:'8px', background:bg, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}><Icon size={14} color={color}/></div>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ fontWeight:800, fontSize:'0.82rem', color:'var(--text-dark)', lineHeight:1.2 }}>{label}</div>
+                  <div style={{ fontSize:'0.66rem', color:'var(--text-muted)', fontWeight:500 }}>{sub}</div>
+                </div>
+                <ArrowRight size={12} color="var(--text-light)"/>
+              </div>
+            );
+            return to ? <Link key={label} to={to} style={{ textDecoration:'none' }}>{inner}</Link> : <React.Fragment key={label}>{inner}</React.Fragment>;
+          })}
+        </div>
+      </div>
+
+      {/* ════════════════════════════════════════════════
+          ROW 3 — Performance + Performers + Watchlist
+      ════════════════════════════════════════════════ */}
+      <div className="overview-row3 stagger-3" style={{ display:'grid', gridTemplateColumns:'1.6fr 1fr', gap:'14px' }}>
+
+        {data.history && data.history.length > 1 ? (
+          <Card>
+            <CardHead
+              icon={TrendingUp}
+              title="Performance"
+              sub="30-day portfolio history"
+              right={<span style={{ fontSize:'0.7rem', color:'var(--text-muted)', fontWeight:600 }}>{data.history.length} snapshots</span>}
+            />
+            <div style={{ height:'190px' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={data.history} margin={{ top:5, right:0, left:0, bottom:0 }}>
+                  <defs>
+                    <linearGradient id="perfGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%"   stopColor="#0F5257" stopOpacity={0.18}/>
+                      <stop offset="100%" stopColor="#0F5257" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="date" hide/>
+                  <CartesianGrid stroke="#f1f5f9" strokeDasharray="0" vertical={false}/>
+                  <Tooltip
+                    formatter={v => [fmtK(v), 'Value']}
+                    labelFormatter={l => new Date(l).toLocaleDateString('en-NG', { month:'short', day:'numeric' })}
+                    contentStyle={{ borderRadius:'10px', border:'1px solid var(--border)', fontSize:'0.78rem', fontWeight:700 }}
+                  />
+                  <Area type="monotone" dataKey="value" stroke="#0F5257" strokeWidth={2.2} fill="url(#perfGrad)" dot={false}/>
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+        ) : (
+          /* Performers shown when no chart data */
+          <Card>
+            <CardHead icon={Award} iconBg="#fffbeb" iconColor="#f59e0b" title="Performers" sub="By return %"/>
+            {topPerformers.length === 0
+              ? <div style={{ textAlign:'center', padding:'32px', color:'var(--text-muted)', fontSize:'0.8rem' }}>Add holdings to see performance</div>
+              : <div style={{ display:'flex', flexDirection:'column', gap:'7px' }}>
+                  {[...topPerformers,...worstPerfomers].map(h => {
+                    const up = (h.return_percentage||0) >= 0;
+                    return (
+                      <div key={h.id} style={{ display:'flex', alignItems:'center', gap:'10px', padding:'10px 12px', background:up?'var(--halal-bg)':'var(--non-halal-bg)', borderRadius:'11px' }}>
+                        {up ? <Star size={12} color="var(--halal)"/> : <TrendingDown size={12} color="var(--non-halal)"/>}
+                        <div style={{ flex:1 }}>
+                          <div style={{ fontWeight:800, fontSize:'0.82rem', color:'var(--text-dark)' }}>{h.symbol}</div>
+                          <div style={{ fontSize:'0.68rem', color:'var(--text-muted)' }}>{fmtK(h.total_value)}</div>
+                        </div>
+                        <div style={{ fontWeight:800, color:up?'var(--halal)':'var(--non-halal)', fontSize:'0.82rem', display:'flex', alignItems:'center', gap:'2px' }}>
+                          {up?<ArrowUpRight size={12}/>:<ArrowDownRight size={12}/>}
+                          {up?'+':''}{Number(h.return_percentage||0).toFixed(2)}%
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+            }
+          </Card>
+        )}
+
+        {/* Watchlist snapshot */}
+        <Card>
+          <CardHead
+            icon={Eye} iconBg="#fffbeb" iconColor="#f59e0b"
+            title="Watchlist"
+            right={<button onClick={() => changeTab?.('watchlist')} style={{ fontSize:'0.7rem', fontWeight:700, color:'var(--primary)', background:'var(--primary-50)', border:'none', cursor:'pointer', padding:'4px 9px', borderRadius:'7px', display:'flex', alignItems:'center', gap:'3px' }}>All <ChevronRight size={11}/></button>}
+          />
+          {watchlist.length === 0 ? (
+            <div style={{ textAlign:'center', padding:'24px 0', color:'var(--text-muted)' }}>
+              <Eye size={26} style={{ opacity:0.12, marginBottom:'8px' }}/>
+              <p style={{ fontSize:'0.8rem' }}>Your watchlist is empty</p>
+            </div>
+          ) : (
+            <div style={{ display:'flex', flexDirection:'column', gap:'7px' }}>
+              {watchlist.map((item,i) => {
+                const price  = item.latest_price || item.current_price || 0;
+                const change = item.price_change_pct || 0;
+                const up = change >= 0;
+                return (
+                  <div key={i} style={{ display:'flex', alignItems:'center', gap:'10px', padding:'9px 11px', background:'var(--bg-section)', borderRadius:'11px', transition:'all 0.18s', cursor:'default' }}
+                    onMouseEnter={e => e.currentTarget.style.background='var(--primary-50)'}
+                    onMouseLeave={e => e.currentTarget.style.background='var(--bg-section)'}>
+                    <div style={{ width:'32px', height:'32px', borderRadius:'8px', background:'var(--primary)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.58rem', fontWeight:900, color:'white', flexShrink:0 }}>
+                      {(item.symbol||'').slice(0,4)}
+                    </div>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <div style={{ fontWeight:800, fontSize:'0.8rem', color:'var(--text-dark)' }}>{item.symbol}</div>
+                      <div style={{ fontSize:'0.66rem', color:'var(--text-muted)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{item.name||''}</div>
+                    </div>
+                    <div style={{ textAlign:'right' }}>
+                      <div style={{ fontWeight:800, fontSize:'0.8rem', color:'var(--text-dark)' }}>₦{Number(price).toFixed(2)}</div>
+                      <div style={{ fontSize:'0.66rem', fontWeight:700, color:up?'var(--halal)':'var(--non-halal)', display:'flex', alignItems:'center', gap:'2px', justifyContent:'flex-end' }}>
+                        {up?<ArrowUpRight size={9}/>:<ArrowDownRight size={9}/>}{up?'+':''}{Number(change).toFixed(2)}%
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </Card>
+      </div>
+
+      {/* ════════════════════════════════════════════════
+          ROW 4 — News · Activity
+      ════════════════════════════════════════════════ */}
+      <div className="overview-row4 stagger-4" style={{ display:'grid', gridTemplateColumns:'1.3fr 1fr', gap:'14px' }}>
+
+        {/* Market News */}
+        <Card>
+          <CardHead
+            icon={Newspaper} iconBg="#f0fdfa" iconColor="#14b8a6"
+            title="Market News"
+            right={<Link to="/market" style={{ fontSize:'0.7rem', fontWeight:700, color:'var(--primary)', background:'var(--primary-50)', textDecoration:'none', padding:'4px 9px', borderRadius:'7px', display:'flex', alignItems:'center', gap:'3px' }}>More <ChevronRight size={11}/></Link>}
+          />
+          {loadingNews ? [1,2,3].map(i => <Skel key={i} h={66}/>) : news.length === 0 ? (
+            <div style={{ textAlign:'center', padding:'24px', color:'var(--text-muted)', fontSize:'0.8rem' }}>No news available</div>
+          ) : news.map((item,i) => (
+            <a key={i} href={item.url||item.link||'#'} target="_blank" rel="noreferrer"
+              style={{ display:'flex', gap:'11px', padding:'11px', borderRadius:'13px', border:'1px solid var(--border)', textDecoration:'none', marginBottom:'8px', background:'white', transition:'all 0.18s' }}
+              onMouseEnter={e => { e.currentTarget.style.background='var(--primary-50)'; e.currentTarget.style.borderColor='var(--primary-100)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background='white'; e.currentTarget.style.borderColor='var(--border)'; }}>
+              {item.image_url && <img loading="lazy" src={item.image_url} alt="" style={{ width:'52px', height:'52px', borderRadius:'9px', objectFit:'cover', flexShrink:0 }} onError={e => { e.target.style.display='none'; }}/>}
+              <div style={{ flex:1, minWidth:0 }}>
+                <div style={{ fontWeight:700, fontSize:'0.79rem', color:'var(--text-dark)', lineHeight:1.4, display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>{item.title}</div>
+                <div style={{ display:'flex', alignItems:'center', gap:'5px', marginTop:'4px' }}>
+                  <span style={{ fontSize:'0.65rem', color:'var(--text-muted)', fontWeight:600 }}>{item.source||'NGX'}</span>
+                  <span style={{ color:'var(--text-light)' }}>·</span>
+                  <span style={{ fontSize:'0.65rem', color:'var(--text-light)' }}>{timeAgo(item.published_at||item.created_at)}</span>
+                </div>
+              </div>
+              <ExternalLink size={10} color="var(--text-light)" style={{ flexShrink:0, marginTop:'3px' }}/>
+            </a>
+          ))}
+        </Card>
+
+        {/* Recent Activity */}
+        <Card>
+          <CardHead icon={Activity} title="Recent Activity"/>
+          {loadingActivity ? [1,2,3].map(i => <Skel key={i} h={50}/>) : activity.length === 0 ? (
+            <div style={{ textAlign:'center', padding:'24px 0', color:'var(--text-muted)' }}>
+              <Clock size={26} style={{ opacity:0.12, marginBottom:'8px' }}/>
+              <p style={{ fontSize:'0.8rem' }}>Screen stocks to see activity</p>
+            </div>
+          ) : activity.map((item,i) => (
+            <div key={i} style={{ display:'flex', alignItems:'center', gap:'10px', padding:'10px 11px', background:'var(--bg-section)', borderRadius:'11px', marginBottom:'7px' }}>
+              <div style={{ width:'32px', height:'32px', background:'var(--primary-50)', borderRadius:'8px', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                <Activity size={13} color="var(--primary)"/>
+              </div>
+              <div style={{ flex:1, minWidth:0 }}>
+                <div style={{ fontWeight:700, fontSize:'0.79rem', color:'var(--text-dark)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                  {item.action === 'check' ? `Screened ${item.detail?.symbol||'—'}` : 'Activity'}
+                </div>
+                <div style={{ fontSize:'0.65rem', color:'var(--text-muted)', marginTop:'1px' }}>{timeAgo(item.created_at)}</div>
+              </div>
+              {item.detail?.symbol && (
+                <Link to={`/market/${item.detail.symbol}`} style={{ fontSize:'0.66rem', fontWeight:700, color:'var(--primary)', textDecoration:'none', background:'var(--primary-50)', padding:'3px 7px', borderRadius:'6px', display:'flex', alignItems:'center', gap:'2px', whiteSpace:'nowrap' }}>
+                  View <ChevronRight size={9}/>
+                </Link>
+              )}
+            </div>
+          ))}
+        </Card>
+      </div>
+
+      {/* ════════════════════════════════════════════════
+          HOLDINGS TABLE
+      ════════════════════════════════════════════════ */}
+      <div className="stagger-5">
+        {/* Table header */}
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:'10px', marginBottom:'14px' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+            <div style={{ width:'32px', height:'32px', background:'linear-gradient(135deg,#0F5257,#0A6B6B)', borderRadius:'9px', display:'flex', alignItems:'center', justifyContent:'center' }}>
+              <Wallet size={14} color="white"/>
+            </div>
+            <div>
+              <div style={{ fontWeight:800, color:'var(--text-dark)', fontSize:'0.92rem' }}>My Holdings</div>
+              <div style={{ fontSize:'0.68rem', color:'var(--text-muted)', fontWeight:500 }}>{displayHoldings.length} position{displayHoldings.length!==1?'s':''} shown</div>
+            </div>
           </div>
-          <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-            <span style={{ fontSize:'0.75rem', color:'var(--text-muted)', fontWeight:600 }}>Sort:</span>
-            <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={{ padding:'6px 10px', borderRadius:'9px', border:'1.5px solid var(--border)', background:'white', fontSize:'0.78rem', fontWeight:600, color:'var(--text-dark)', outline:'none', cursor:'pointer' }}>
-              <option value="value">By Value</option>
-              <option value="return">By Return</option>
-              <option value="name">By Name</option>
+
+          <div style={{ display:'flex', gap:'7px', flexWrap:'wrap', alignItems:'center' }}>
+            {/* Segmented filter */}
+            <div style={{ display:'flex', background:'white', border:'1.5px solid var(--border)', borderRadius:'10px', padding:'3px', gap:'2px' }}>
+              {[['all','All'],['halal','✓ Halal'],['needs','⚠ Purif.'],['nonhalal','✕ Non-Halal']].map(([val,lbl]) => (
+                <button key={val} onClick={() => setActiveFilter(val)} style={{
+                  padding:'5px 11px', borderRadius:'7px', fontSize:'0.72rem', fontWeight:700, cursor:'pointer', border:'none', transition:'all 0.16s',
+                  background: activeFilter===val ? 'var(--primary)' : 'transparent',
+                  color:       activeFilter===val ? 'white' : 'var(--text-muted)',
+                  boxShadow:   activeFilter===val ? '0 2px 8px rgba(15,82,87,0.2)' : 'none',
+                }}>{lbl}</button>
+              ))}
+            </div>
+            <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={{ padding:'6px 10px', borderRadius:'9px', border:'1.5px solid var(--border)', background:'white', fontSize:'0.74rem', fontWeight:600, color:'var(--text-dark)', outline:'none', cursor:'pointer' }}>
+              <option value="value">Sort: Value</option>
+              <option value="return">Sort: Return</option>
+              <option value="name">Sort: Name</option>
             </select>
+            <button onClick={() => setShowAddModal(true)} style={{ display:'flex', alignItems:'center', gap:'5px', padding:'7px 13px', borderRadius:'9px', background:'var(--primary)', color:'white', border:'none', fontWeight:700, fontSize:'0.78rem', cursor:'pointer', boxShadow:'0 4px 12px rgba(15,82,87,0.2)' }}>
+              <Plus size={13}/> Add
+            </button>
           </div>
         </div>
 
-        {/* Column Labels */}
+        {/* Column labels */}
         {displayHoldings.length > 0 && (
-          <div className="holding-header" style={{ borderBottom:'1px solid var(--border)', marginBottom:'8px' }}>
-            <div style={{ flex:1.4, fontSize:'0.67rem', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.8px', color:'var(--text-muted)' }}>Stock</div>
-            <div style={{ flex:0.7, textAlign:'right', fontSize:'0.67rem', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.8px', color:'var(--text-muted)' }}>Shares</div>
-            <div style={{ flex:1, textAlign:'right', fontSize:'0.67rem', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.8px', color:'var(--text-muted)' }}>Value</div>
-            <div style={{ width:'70px', fontSize:'0.67rem', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.8px', color:'var(--text-muted)', textAlign:'center' }}>Trend</div>
-            <div style={{ flex:0.8, textAlign:'right', fontSize:'0.67rem', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.8px', color:'var(--text-muted)' }}>Return</div>
-            <div style={{ flex:0.9, textAlign:'right', fontSize:'0.67rem', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.8px', color:'var(--text-muted)' }}>Status</div>
-            <div style={{ width:'32px' }}/>
+          <div className="holding-header" style={{ borderBottom:'1.5px solid var(--border)', marginBottom:'8px', paddingBottom:'7px', paddingLeft:'20px', paddingRight:'20px', gap:'14px' }}>
+            <div style={{ width:'20px' }}/>
+            <div style={{ width:'42px' }}/>
+            <div style={{ flex:1.6, fontSize:'0.6rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'0.7px', color:'var(--text-muted)' }}>Stock</div>
+            <div style={{ flex:0.65, textAlign:'right', fontSize:'0.6rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'0.7px', color:'var(--text-muted)' }}>Shares</div>
+            <div style={{ flex:1, textAlign:'right', fontSize:'0.6rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'0.7px', color:'var(--text-muted)' }}>Value</div>
+            <div style={{ width:'62px', textAlign:'center', fontSize:'0.6rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'0.7px', color:'var(--text-muted)' }}>Trend</div>
+            <div style={{ flex:0.75, textAlign:'right', fontSize:'0.6rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'0.7px', color:'var(--text-muted)' }}>Return</div>
+            <div style={{ flex:0.85, textAlign:'right', fontSize:'0.6rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'0.7px', color:'var(--text-muted)' }}>Status</div>
+            <div style={{ width:'66px' }}/>
           </div>
         )}
 
-        {/* Holdings */}
+        {/* Rows */}
         {displayHoldings.length === 0 ? (
-          <div style={{ 
-            padding:'80px 40px', textAlign:'center', background:'linear-gradient(180deg, #ffffff 0%, var(--bg-section) 100%)', 
-            borderRadius:'24px', border:'1px dashed var(--border-strong)', boxShadow:'var(--shadow-sm)',
-            display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center'
-          }}>
-            <div style={{ 
-              width:'80px', height:'80px', background:'var(--primary-50)', borderRadius:'24px', 
-              display:'flex', alignItems:'center', justifyContent:'center', marginBottom:'24px',
-              border:'1px solid var(--primary-100)', boxShadow:'0 12px 32px rgba(201,168,76,0.15)'
-            }}>
-              <Wallet size={36} color="var(--primary)" />
+          <div style={{ padding:'72px 40px', textAlign:'center', background:'linear-gradient(135deg,white,var(--bg-section))', borderRadius:'22px', border:'1.5px dashed var(--border)' }}>
+            <div style={{ width:'68px', height:'68px', background:'var(--primary-50)', borderRadius:'18px', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 18px', border:'1px solid var(--primary-100)' }}>
+              <Wallet size={30} color="var(--primary)"/>
             </div>
-            <div style={{ fontSize:'1.4rem', fontWeight:900, color:'var(--text-dark)', marginBottom:'12px', letterSpacing:'-0.5px' }}>
-              {activeFilter === 'all' ? 'Your Portfolio is Empty' : `No ${activeFilter} holdings found`}
+            <div style={{ fontSize:'1.25rem', fontWeight:900, color:'var(--text-dark)', marginBottom:'10px', letterSpacing:'-0.5px' }}>
+              {activeFilter==='all' ? 'Portfolio is Empty' : `No ${activeFilter} holdings`}
             </div>
-            <p style={{ color:'var(--text-muted)', fontSize:'1rem', marginBottom:'32px', maxWidth:'400px', lineHeight:1.6 }}>
-              {activeFilter === 'all' 
-                ? 'Start tracking your investments by adding your first NGX stock. Ensure your portfolio remains Shariah-compliant.' 
-                : 'Try changing the filter above to see other holdings in your portfolio.'}
+            <p style={{ color:'var(--text-muted)', marginBottom:'24px', maxWidth:'360px', margin:'0 auto 24px', lineHeight:1.6, fontSize:'0.9rem' }}>
+              {activeFilter==='all' ? 'Track your NGX investments and maintain full Shariah compliance.' : 'Adjust the filter to see other holdings.'}
             </p>
-            {activeFilter === 'all' && (
-              <button onClick={() => setShowAddModal(true)} style={{ 
-                display:'inline-flex', alignItems:'center', gap:'8px', padding:'14px 28px', 
-                borderRadius:'14px', background:'var(--gold-grad)', color:'white', border:'none', 
-                fontWeight:800, fontSize:'0.95rem', cursor:'pointer', 
-                boxShadow:'0 8px 24px rgba(201,168,76,0.3)', transition:'transform 0.2s, boxShadow 0.2s' 
-              }}>
-                <Plus size={18}/> Add Your First Holding
+            {activeFilter==='all' && (
+              <button onClick={() => setShowAddModal(true)} style={{ display:'inline-flex', alignItems:'center', gap:'7px', padding:'12px 24px', borderRadius:'13px', background:'var(--gold-grad)', color:'white', border:'none', fontWeight:800, fontSize:'0.9rem', cursor:'pointer', boxShadow:'0 8px 22px rgba(212,175,55,0.3)', transition:'all 0.2s' }} className="hover-lift">
+                <Plus size={16}/> Add Your First Holding
               </button>
             )}
           </div>
         ) : (
-          displayHoldings.map(h => (
-            <HoldingCard key={h.id} holding={h} onDelete={handleDelete} onEdit={(holding) => setEditingHolding(holding)} />
+          displayHoldings.map((h, i) => (
+            <HoldingRow key={h.id} holding={h} rank={i+1} onDelete={handleDelete} onEdit={setEditingHolding}/>
           ))
         )}
       </div>

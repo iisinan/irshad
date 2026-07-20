@@ -234,7 +234,7 @@ final List<Map<String, String>> _brokers = [
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.primary,
                       foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                       elevation: 0,
                     ),
                     child: isConnecting

@@ -85,10 +85,20 @@ class GeminiAiService
             return null;
         }
 
-        $prompt = "You are an expert financial data steward. Below is raw profile data for the stock {$symbol} from multiple sources.\n";
+        $prompt = "You are an expert Islamic financial data steward and AAOIFI Shariah advisor. Below is raw profile data for the stock {$symbol} from multiple sources.\n";
         $prompt .= "Your job is to read them all and produce the single most accurate, standardized output.\n";
-        $prompt .= "The 'sector' field MUST be one of standard global financial sectors (e.g. Financials, Consumer Staples, Telecommunications, Healthcare, Energy, Materials, Industrials, Consumer Discretionary, Information Technology, Utilities, Real Estate). DO NOT invent new sectors.\n";
+        $prompt .= "The 'sector' field MUST be one of standard global financial sectors (e.g. Financials, Consumer Staples, Telecommunications, Healthcare, Energy, Materials, Industrials, Consumer Discretionary, Information Technology, Utilities, Real Estate).\n";
         $prompt .= "The 'description' should be a beautifully written, comprehensive 1-2 paragraph overview combining the best details from the sources.\n";
+        $prompt .= "\n*** CRITICAL AAOIFI STAGE 1 BUSINESS ACTIVITY SCREENING ***\n";
+        $prompt .= "You MUST carefully evaluate if the core business activity is permissible under Shariah law. The following activities are STRICTLY PROHIBITED (haram):\n";
+        $prompt .= "- Conventional banking, conventional insurance, or any interest-based financial services.\n";
+        $prompt .= "- Production, sale, or distribution of alcohol or pork products.\n";
+        $prompt .= "- Gambling, casinos, or betting.\n";
+        $prompt .= "- Adult entertainment, pornography, or immoral activities.\n";
+        $prompt .= "- Tobacco or weapons/arms manufacturing.\n";
+        $prompt .= "If the primary business falls into any of these, set 'is_aaoifi_sector_compliant' to false. Otherwise, true.\n";
+        $prompt .= "Provide a 1-2 sentence explanation in 'aaoifi_sector_reason' detailing exactly why the core business passes or fails this rule.\n\n";
+        
         $prompt .= "Additionally, provide the most recent reliable estimates for the following financial metrics for the Nigerian Exchange. You MUST estimate these numerically based on your deep knowledge of NGX stocks, or use the sources if provided.\n";
         $prompt .= "If you do not know the exact number, provide your best reasonable estimate for a recent trailing 12 month period. DO NOT output null for financials if possible.\n\n";
         
@@ -96,7 +106,7 @@ class GeminiAiService
         $prompt .= json_encode($sourcesData, JSON_PRETTY_PRINT) . "\n\n";
         
         $prompt .= "Output ONLY valid JSON (no markdown block wrap) with exactly these keys:\n";
-        $prompt .= "'sector', 'industry', 'business_type', 'description', 'eps', 'pe_ratio', 'roe', 'dividend_yield', 'profit_margin', 'market_cap', 'total_assets', 'total_debt', 'total_revenue', 'interest_income'.\n";
+        $prompt .= "'sector', 'industry', 'business_type', 'description', 'is_aaoifi_sector_compliant' (boolean), 'aaoifi_sector_reason' (string), 'eps', 'pe_ratio', 'roe', 'dividend_yield', 'profit_margin', 'market_cap', 'total_assets', 'total_debt', 'total_revenue', 'interest_income'.\n";
         $prompt .= "For percentages (roe, dividend_yield, profit_margin), use decimals (e.g. 0.05 for 5%). For absolute values, use raw numbers (e.g. 5000000000).";
 
         try {

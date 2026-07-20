@@ -2,13 +2,11 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'cache_interceptor.dart';
 
 /// Singleton ApiService — one Dio instance, one interceptor stack, everywhere.
 class ApiService {
-  static const String _prodUrl = 'https://irshad-k3el.onrender.com/api/v1/';
-  static const String _devUrl  = 'http://10.0.2.2:8000/api/v1/';
-
   static final ApiService _instance = ApiService._internal();
   factory ApiService() => _instance;
 
@@ -20,7 +18,7 @@ class ApiService {
 
   ApiService._internal() {
     dio = Dio(BaseOptions(
-      baseUrl: _prodUrl,
+      baseUrl: dotenv.env['API_BASE_URL'] ?? 'https://irshad-k3el.onrender.com/api/v1/',
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 30),
       receiveDataWhenStatusError: true,

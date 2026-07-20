@@ -1,5 +1,6 @@
 import React from 'react';
 import { ShieldCheck, FileText, CheckCircle, Scale, XCircle, AlertTriangle, Sparkles, BookOpen } from 'lucide-react';
+import Footer from './Footer';
 
 /* Ratio gauge bar component */
 const RatioGauge = ({ threshold, label, note }) => (
@@ -27,6 +28,7 @@ const RatioGauge = ({ threshold, label, note }) => (
 );
 
 const ShariahPage = () => (
+  <>
   <div className="animate-fade-in page-wrapper">
     <div style={{ maxWidth: '880px', margin: '0 auto' }}>
 
@@ -185,6 +187,8 @@ const ShariahPage = () => (
 
     </div>
   </div>
+  <Footer />
+  </>
 );
 
 export default ShariahPage;

@@ -285,7 +285,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: AppTheme.primary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                 elevation: 0,
               ),
               child: const Text('Submit Correction', style: TextStyle(fontWeight: FontWeight.w800)),

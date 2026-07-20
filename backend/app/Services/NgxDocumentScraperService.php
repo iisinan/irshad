@@ -23,7 +23,10 @@ class NgxDocumentScraperService
         try {
             $response = Http::withHeaders([
                 'Accept' => 'application/json;odata=verbose',
-            ])->timeout(10)->get($url, [
+            ])->retry(3, 5000, function ($exception, $request) {
+                Log::warning("Retrying NGX API request for {$ticker} due to: " . $exception->getMessage());
+                return $exception instanceof \Illuminate\Http\Client\ConnectionException || $exception->getCode() >= 500;
+            })->timeout(15)->get($url, [
                 '$select' => 'URL,Modified,Created,CompanyName,CompanySymbol,InternationSecIN,Type_of_Submission',
                 '$orderby' => 'Created desc',
                 '$filter' => "CompanySymbol eq '{$ticker}' and Type_of_Submission eq 'Financial Statements'",

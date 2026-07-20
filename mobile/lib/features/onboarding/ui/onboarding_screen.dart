@@ -162,9 +162,9 @@ final List<Map<String, String>> _onboardingData = [
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.textDark,
+                backgroundColor: AppTheme.primary,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                 elevation: 0,
               ),
               child: Text(

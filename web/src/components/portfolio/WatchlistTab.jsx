@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Eye, BarChart2, Star, TrendingUp, TrendingDown, Trash2, Shield, AlertCircle, HelpCircle, CheckCircle, ChevronRight, Search, Mail, MessageSquare, Filter } from 'lucide-react';
 import { fetchWatchlist, removeFromWatchlist, fetchNgxStocks, addToWatchlist, updateWatchlist } from '../../services/api';
+import { toastError, toastSuccess } from '../../utils/toast';
 import { Link, useNavigate } from 'react-router-dom';
 
 /* ─── Ticker Component ─── */
@@ -9,7 +10,7 @@ const StockTicker = ({ stocks }) => {
   if (!stocks || stocks.length === 0) return null;
 
   return (
-    <div className="ticker-wrap" style={{ margin: '-40px -32px 32px -32px', borderRadius: '24px 24px 0 0', overflow: 'hidden', borderBottom: '1px solid var(--border)' }}>
+    <div className="ticker-wrap" style={{ margin: '0 0 32px 0', borderRadius: '24px 24px 0 0', overflow: 'hidden', borderBottom: '1px solid var(--border)' }}>
       <div className="ticker">
         {stocks.slice(0, 20).concat(stocks.slice(0, 20)).map((stock, i) => {
           let statusStr = 'QUESTIONABLE';
@@ -42,7 +43,7 @@ const StockTicker = ({ stocks }) => {
 export default function WatchlistTab() {
   const [watchlistItems, setWatchlistItems] = useState(() => {
     try {
-      const cached = localStorage.getItem('irshad_watchlist_items_cache_v2');
+      const cached = localStorage.getItem('irshad_watchlist_items_cache_v3');
       if (cached) return JSON.parse(cached) || [];
     } catch {}
     return [];
@@ -77,7 +78,7 @@ export default function WatchlistTab() {
       const newWl = wlRes.map(item => item.symbol);
       setWatchlistItems(wlRes);
       setWatchlistSymbols(newWl);
-      localStorage.setItem('irshad_watchlist_items_cache_v2', JSON.stringify(wlRes));
+      localStorage.setItem('irshad_watchlist_items_cache_v3', JSON.stringify(wlRes));
       setAllStocks(stocksRes.data || []);
       localStorage.setItem('irshad_stocks_cache_v10', JSON.stringify({ data: stocksRes, expiry: Date.now() + 1000 * 60 * 60 }));
     } catch (err) {
@@ -109,8 +110,9 @@ export default function WatchlistTab() {
       setWatchlistSymbols(prev => [...prev, symbol]);
       setSearchQuery('');
       setIsSearching(false);
+      toastSuccess('Added to watchlist');
     } catch (err) {
-      alert('Failed to add to watchlist');
+      toastError('Failed to add to watchlist');
     }
   };
 
@@ -128,10 +130,11 @@ export default function WatchlistTab() {
 
     try {
       await updateWatchlist(symbol, data);
+      toastSuccess('Alert preferences updated');
     } catch (err) {
       // Revert on error
       setWatchlistItems(prev => prev.map(i => i.symbol === symbol ? item : i));
-      alert('Failed to update alert preferences');
+      toastError('Failed to update alert preferences');
     }
   };
 
@@ -316,7 +319,7 @@ export default function WatchlistTab() {
               >
                 <div style={{ flex: '1 1 200px', display: 'flex', alignItems: 'center', gap: '16px' }}>
                   {stock.logo_url ? (
-                    <img src={stock.logo_url} alt={stock.symbol} style={{ width: '48px', height: '48px', borderRadius: '14px', objectFit: 'contain', border: '1px solid var(--border)', flexShrink: 0 }} />
+                    <img loading="lazy" src={stock.logo_url} alt={stock.symbol} style={{ width: '48px', height: '48px', borderRadius: '14px', objectFit: 'contain', border: '1px solid var(--border)', flexShrink: 0 }} />
                   ) : (
                     <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'var(--primary-10)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '1.2rem', flexShrink: 0 }}>
                       {stock.symbol.charAt(0)}

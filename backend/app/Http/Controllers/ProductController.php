@@ -179,14 +179,26 @@ class ProductController extends Controller
             'status_reason' => 'required|string',
         ]);
 
+        $oldStatus = $product->getOriginal('status');
+        
         $product->update([
             'status' => $validated['status'],
             'status_reason' => $validated['status_reason'],
             'verified_by_scholar' => true,
         ]);
 
-        // Audit log (Phase 1Requirement)
-        // ... (Audit Log logic)
+        // Audit log
+        \App\Models\AuditLog::create([
+            'user_id' => $request->user()->id,
+            'action' => 'override_product_status',
+            'target_type' => Product::class,
+            'target_id' => $product->id,
+            'changes' => [
+                'old_status' => $oldStatus,
+                'new_status' => $validated['status'],
+                'reason' => $validated['status_reason']
+            ]
+        ]);
 
         return $this->success($product, 'Product status updated and verified.');
     }

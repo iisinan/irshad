@@ -154,44 +154,57 @@ function ComplianceRing({score}) {
 
 /* ─── Watchlist Row ───────────────────────────────────────── */
 function WatchlistRow({stock}) {
-  const isUp=stock.change>=0;
-  const s=statusConfig[stock.status]||statusConfig.Halal;
-  const SIcon=s.icon;
-  const [hov,setHov]=useState(false);
-  const miniData=stock.sparkline.map(v=>({v}));
+  const change = stock.change ?? 0;
+  const price = stock.price ?? 0;
+  const isUp = change >= 0;
+  const s = statusConfig[stock.status] || statusConfig.Halal;
+  const SIcon = s.icon;
+  const [hov, setHov] = useState(false);
+  const miniData = stock.sparkline ? stock.sparkline.map(v => ({ v })) : [];
+  
   return (
     <Link to={`/market/${stock.symbol}`} state={{stock}}
-      onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)}
-      style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'11px 12px',borderRadius:'13px',margin:'2px 0',background:hov?'var(--primary-50)':'transparent',textDecoration:'none',transition:'background 0.2s'}}>
-      <div style={{display:'flex',alignItems:'center',gap:'11px'}}>
-        <div style={{width:'38px',height:'38px',borderRadius:'10px',background:hov?'var(--primary-100)':'var(--bg-section)',border:'1px solid var(--border)',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:'0.62rem',color:'var(--primary)',flexShrink:0}}>
+      onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
+      style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 12px',borderRadius:'12px',margin:'2px 0',background:hov?'var(--primary-50)':'transparent',textDecoration:'none',transition:'background 0.2s'}}>
+      <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
+        <div style={{width:'34px',height:'34px',borderRadius:'8px',background:hov?'var(--primary-100)':'var(--bg-section)',border:'1px solid var(--border)',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:'0.6rem',color:'var(--primary)',flexShrink:0}}>
           {stock.symbol.slice(0,5)}
         </div>
         <div>
-          <div style={{fontWeight:700,color:'var(--text-dark)',fontSize:'0.88rem'}}>{stock.symbol}</div>
-          <div style={{display:'flex',alignItems:'center',gap:'3px',fontSize:'0.68rem',color:s.color,marginTop:'2px',fontWeight:600}}>
-            <SIcon size={9}/> {s.label}
+          <div style={{fontWeight:700,color:'var(--text-dark)',fontSize:'0.75rem'}}>{stock.symbol}</div>
+          <div style={{display:'flex',alignItems:'center',gap:'3px',fontSize:'0.6rem',color:s.color,marginTop:'2px',fontWeight:600}}>
+            <SIcon size={8}/> {s.label}
           </div>
         </div>
       </div>
-      <div style={{width:'56px',height:'26px'}}>
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={miniData}>
-            <defs>
-              <linearGradient id={`sg-${stock.symbol}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor={isUp?'#22c55e':'#ef4444'} stopOpacity={0.3}/>
-                <stop offset="95%" stopColor={isUp?'#22c55e':'#ef4444'} stopOpacity={0}/>
-              </linearGradient>
-            </defs>
-            <Area type="monotone" dataKey="v" stroke={isUp?'#22c55e':'#ef4444'} strokeWidth={1.5} fill={`url(#sg-${stock.symbol})`} dot={false}/>
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-      <div style={{textAlign:'right',minWidth:'70px'}}>
-        <div style={{fontWeight:800,color:'var(--text-dark)',fontSize:'0.88rem'}}>₦{stock.price.toLocaleString()}</div>
-        <div style={{fontSize:'0.73rem',fontWeight:700,color:isUp?'var(--halal)':'var(--non-halal)',display:'flex',alignItems:'center',gap:'1px',justifyContent:'flex-end'}}>
-          {isUp?<ArrowUpRight size={11}/>:<ArrowDownRight size={11}/>}{isUp?'+':''}{stock.change.toFixed(2)}%
+      {miniData.length > 0 && (
+        <div style={{width:'50px',height:'24px'}}>
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={miniData}>
+              <defs>
+                <linearGradient id={`sg-${stock.symbol}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%"  stopColor={isUp?'#22c55e':'#ef4444'} stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor={isUp?'#22c55e':'#ef4444'} stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <Area type="monotone" dataKey="v" stroke={isUp?'#22c55e':'#ef4444'} strokeWidth={1.5} fill={`url(#sg-${stock.symbol})`} dot={false}/>
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
+      )}
+      <div style={{textAlign:'right',minWidth:'60px'}}>
+        {price > 0 ? (
+          <>
+            <div style={{fontWeight:800,color:'var(--text-dark)',fontSize:'0.75rem'}}>₦{price.toLocaleString()}</div>
+            {change !== 0 && (
+              <div style={{fontSize:'0.65rem',fontWeight:700,color:isUp?'var(--halal)':'var(--non-halal)',display:'flex',alignItems:'center',gap:'1px',justifyContent:'flex-end'}}>
+                {isUp?<ArrowUpRight size={10}/>:<ArrowDownRight size={10}/>}{isUp?'+':''}{change.toFixed(2)}%
+              </div>
+            )}
+          </>
+        ) : (
+          <div style={{fontSize:'0.65rem',color:'var(--text-muted)',fontWeight:600}}>Unavailable</div>
+        )}
       </div>
     </Link>
   );
@@ -199,25 +212,37 @@ function WatchlistRow({stock}) {
 
 /* ─── Holding Row ─────────────────────────────────────────── */
 function HoldingRow({holding}) {
-  const isUp=(holding.gain_loss??0)>=0;
-  const [hov,setHov]=useState(false);
+  const gainLoss = holding.gain_loss ?? 0;
+  const currentValue = holding.current_value ?? 0;
+  const isUp = gainLoss >= 0;
+  const [hov, setHov] = useState(false);
+  const shares = holding.quantity || holding.shares || 0;
+
   return (
-    <div onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)}
-      style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'11px 12px',borderRadius:'13px',margin:'2px 0',background:hov?'var(--primary-50)':'transparent',transition:'background 0.2s',cursor:'pointer'}}>
-      <div style={{display:'flex',alignItems:'center',gap:'11px'}}>
-        <div style={{width:'38px',height:'38px',borderRadius:'10px',background:'var(--bg-section)',border:'1px solid var(--border)',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:'0.62rem',color:'var(--primary)',flexShrink:0}}>
+    <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
+      style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 12px',borderRadius:'12px',margin:'2px 0',background:hov?'var(--primary-50)':'transparent',transition:'background 0.2s',cursor:'pointer'}}>
+      <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
+        <div style={{width:'34px',height:'34px',borderRadius:'8px',background:'var(--bg-section)',border:'1px solid var(--border)',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:'0.6rem',color:'var(--primary)',flexShrink:0}}>
           {(holding.symbol||holding.stock_code||'N/A').slice(0,5)}
         </div>
         <div>
-          <div style={{fontWeight:700,color:'var(--text-dark)',fontSize:'0.88rem'}}>{holding.symbol||holding.stock_code}</div>
-          <div style={{fontSize:'0.7rem',color:'var(--text-muted)',marginTop:'2px',fontWeight:500}}>{holding.quantity||holding.shares} shares</div>
+          <div style={{fontWeight:700,color:'var(--text-dark)',fontSize:'0.75rem'}}>{holding.symbol||holding.stock_code}</div>
+          <div style={{fontSize:'0.6rem',color:'var(--text-muted)',marginTop:'2px',fontWeight:500}}>{shares} shares</div>
         </div>
       </div>
       <div style={{textAlign:'right'}}>
-        <div style={{fontWeight:800,color:'var(--text-dark)',fontSize:'0.88rem'}}>{fmtK(holding.current_value)}</div>
-        <div style={{fontSize:'0.73rem',fontWeight:700,color:isUp?'var(--halal)':'var(--non-halal)',display:'flex',alignItems:'center',gap:'1px',justifyContent:'flex-end'}}>
-          {isUp?<ArrowUpRight size={11}/>:<ArrowDownRight size={11}/>}{isUp?'+':''}{fmtK(holding.gain_loss??0)}
-        </div>
+        {currentValue > 0 ? (
+          <>
+            <div style={{fontWeight:800,color:'var(--text-dark)',fontSize:'0.75rem'}}>{fmtK(currentValue)}</div>
+            {gainLoss !== 0 && (
+              <div style={{fontSize:'0.65rem',fontWeight:700,color:isUp?'var(--halal)':'var(--non-halal)',display:'flex',alignItems:'center',gap:'1px',justifyContent:'flex-end'}}>
+                {isUp?<ArrowUpRight size={10}/>:<ArrowDownRight size={10}/>}{isUp?'+':''}{fmtK(gainLoss)}
+              </div>
+            )}
+          </>
+        ) : (
+          <div style={{fontSize:'0.65rem',color:'var(--text-muted)',fontWeight:600}}>Unavailable</div>
+        )}
       </div>
     </div>
   );
@@ -288,7 +313,7 @@ export default function Dashboard() {
   const navigate=useNavigate();
   const [data,setData]=useState(()=>{
     try {
-      const cached = localStorage.getItem('irshad_portfolio_cache_v9');
+      const cached = localStorage.getItem('irshad_portfolio_cache_v10');
       if (cached) return JSON.parse(cached)?.data || {summary:{},holdings:[]};
     } catch {}
     return {summary:{},holdings:[]};
@@ -398,7 +423,7 @@ export default function Dashboard() {
           price: s.latest_price || 0,
           change: s.price_change_pct || 0,
           status: s.compliance_status || 'Halal',
-          sparkline: [s.latest_price*0.9, s.latest_price*0.95, s.latest_price] // Mock sparkline for now
+          sparkline: w.historical_prices && w.historical_prices.length >= 2 ? w.historical_prices : [s.latest_price, s.latest_price]
         };
       }).filter(Boolean);
     }
@@ -445,10 +470,16 @@ export default function Dashboard() {
 
   const SECTOR_DATA = [];
   if (holdings.length > 0) {
-    // Map holdings into sectors. Mocking sector names based on symbol for now since we don't have sector in holding response yet
-    SECTOR_DATA.push({sector:'Financials', halal: 45, nonhalal: 10});
-    SECTOR_DATA.push({sector:'Telecom', halal: 80, nonhalal: 0});
-    SECTOR_DATA.push({sector:'Consumer', halal: 20, nonhalal: 5});
+    const sectorMap = {};
+    holdings.forEach(h => {
+      const sec = h.sector || 'Equities';
+      if (!sectorMap[sec]) sectorMap[sec] = { sector: sec, halal: 0, nonhalal: 0 };
+      if (h.is_halal) sectorMap[sec].halal += h.total_value;
+      else sectorMap[sec].nonhalal += h.total_value;
+    });
+    for (const val of Object.values(sectorMap)) {
+      SECTOR_DATA.push(val);
+    }
   }
 
   const dynamicNgxStatus = {

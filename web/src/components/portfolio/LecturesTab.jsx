@@ -127,7 +127,7 @@ export default function LecturesTab() {
               >
                 {item.type === 'video' ? (
                   <div style={{ width: '100%', height: '180px', position: 'relative', background: '#000' }}>
-                    <img src={item.thumbnail} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} />
+                    <img loading="lazy" src={item.thumbnail} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} />
                     <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <div style={{ width: '48px', height: '48px', background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(4px)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
                         <Play size={20} fill="currentColor" style={{ marginLeft: '4px' }} />

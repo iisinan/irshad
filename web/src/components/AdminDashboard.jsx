@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Shield, Search, Filter, AlertTriangle, CheckCircle, Edit2, X, Package, TrendingUp } from 'lucide-react';
 import api, { fetchNgxStocks, fetchProducts } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { toastError, toastSuccess } from '../utils/toast';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -73,9 +74,10 @@ const AdminDashboard = () => {
       setSelectedItem(null);
       setNewStatus('');
       setReason('');
+      toastSuccess('Status updated successfully');
       
     } catch (err) {
-      alert(err.message);
+      toastError(err.message || 'Failed to update status');
     } finally {
       setUpdating(false);
     }

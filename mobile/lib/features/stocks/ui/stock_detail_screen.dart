@@ -241,7 +241,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primary,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)), // Pill
                     elevation: 0,
                   ),
                   child: const Text('Buy Now', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
@@ -262,7 +262,11 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                   const SizedBox(height: 24),
+                  const SizedBox(height: 12),
+                  // Price Chart
+                  _buildPriceChart(),
+                  const SizedBox(height: 32),
+
                   // About Company
                   _buildSectionHeader('About Company'),
                   const SizedBox(height: 12),
@@ -279,12 +283,6 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                   _buildSectionHeader('Advanced Metrics'),
                   const SizedBox(height: 12),
                   _buildAdvancedMetrics(),
-                  const SizedBox(height: 32),
-
-                  // Price Chart
-                  _buildSectionHeader('Price History'),
-                  const SizedBox(height: 12),
-                  _buildPriceChart(),
                   const SizedBox(height: 32),
                   
                   // Financial Ratios
@@ -353,7 +351,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
         label: const Text('SCHOLAR OVERRIDE', style: TextStyle(fontWeight: FontWeight.w800, color: Colors.orange, letterSpacing: 0.5)),
         style: OutlinedButton.styleFrom(
           side: const BorderSide(color: Colors.orange, width: 2),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
         ),
       ),
     );
@@ -449,7 +447,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
                         foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                       ),
                       child: const Text('Confirm Override', style: TextStyle(fontWeight: FontWeight.w800)),
                     ),
@@ -471,30 +469,52 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
   }
 
   Widget _buildStatusHeader(Color color, Color bg, String label) {
+    final latestPrice = num.tryParse(_currentStock['latest_price']?.toString() ?? '0') ?? 0.0;
+    final priceChange = _currentStock['price_change_pct'];
+
     return Container(
       width: double.infinity,
       color: Colors.white,
-      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          Text(_currentStock['name'] ?? '', style: const TextStyle(color: AppTheme.textMuted, fontSize: 14, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 8),
+          Text('₦${latestPrice.toStringAsFixed(2)}', style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -1)),
+          if (priceChange != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                '${priceChange >= 0 ? '+' : ''}$priceChange%',
+                style: TextStyle(
+                  fontSize: 16, 
+                  fontWeight: FontWeight.w700, 
+                  color: priceChange >= 0 ? AppTheme.primary : AppTheme.haram
+                )
+              ),
+            ),
+          const SizedBox(height: 24),
           Container(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
               color: bg,
-              shape: BoxShape.circle,
+              borderRadius: BorderRadius.circular(100), // Pill badge
             ),
-            child: Icon(
-              label == 'SHARIAH COMPLIANT' ? Icons.check_circle_rounded : 
-              label == 'NOT COMPLIANT' ? Icons.cancel_rounded : Icons.help_rounded,
-              color: color, 
-              size: 56
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  label == 'SHARIAH COMPLIANT' ? Icons.check_circle_rounded : 
+                  label == 'NOT COMPLIANT' ? Icons.cancel_rounded : Icons.help_rounded,
+                  color: color, 
+                  size: 16
+                ),
+                const SizedBox(width: 8),
+                Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: color, letterSpacing: 0.5)),
+              ],
             ),
           ),
-          const SizedBox(height: 24),
-          Text(label, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: color, letterSpacing: 0.5)),
-          const SizedBox(height: 8),
-          Text(_currentStock['name'] ?? 'N/A', 
-            style: const TextStyle(color: AppTheme.textMuted, fontSize: 15, fontWeight: FontWeight.w500), textAlign: TextAlign.center),
         ],
       ),
     );
@@ -995,7 +1015,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.blue.withOpacity(0.1),
           foregroundColor: Colors.blue,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
           elevation: 0,
         ),
         child: const Row(
@@ -1019,7 +1039,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppTheme.textDark,
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
           elevation: 0,
         ),
         child: _isLoading 

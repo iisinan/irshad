@@ -31,6 +31,7 @@ import 'core/notifications/notification_service.dart';
 import 'features/stocks/providers/stock_provider.dart';
 import 'package:workmanager/workmanager.dart';
 import 'core/providers/app_state_provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 @pragma('vm:entry-point')
 void callbackDispatcher() {
@@ -43,6 +44,7 @@ void callbackDispatcher() {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
 
   // Initialize Firebase
   try {
@@ -253,13 +255,21 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       ),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
+          color: Colors.white,
           border: Border(top: BorderSide(color: AppTheme.divider, width: 1)),
         ),
         child: BottomNavigationBar(
           currentIndex: _selectedIndex,
           onTap: (index) => setState(() => _selectedIndex = index),
           type: BottomNavigationBarType.fixed,
+          backgroundColor: Colors.white,
           elevation: 0,
+          selectedItemColor: AppTheme.primary,
+          unselectedItemColor: AppTheme.textMuted,
+          selectedFontSize: 11,
+          unselectedFontSize: 11,
+          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w800),
+          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),
           items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.explore_outlined),

@@ -92,7 +92,7 @@ const SkeletonRow = () => (
 
 // ─── Main component ────────────────────────────────────────────────────────────
 const SetYourIrshad = ({ onComplete }) => {
-  const { user, updateUser } = useAuth();
+  const { user, setUser, updateUser } = useAuth();
   const [step, setStep] = useState(1);
   const TOTAL_STEPS = 3;
 

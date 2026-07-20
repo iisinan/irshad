@@ -1,23 +1,59 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { TrendingUp, TrendingDown, ArrowRight, CheckCircle, Shield, BarChart2, ChevronRight, Smartphone, Apple, Play, AlertCircle, HelpCircle } from 'lucide-react';
 import { fetchNgxStocks } from './services/api';
-import StockDetails from './components/StockDetails';
-import Portfolio from './components/Portfolio';
-import Dashboard from './components/Dashboard';
 import DashboardLayout from './components/DashboardLayout';
-import AboutPage from './components/About';
-
-import ShariahPage from './components/Shariah';
-import Profile from './components/Profile';
+import Footer from './components/Footer';
 import { LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage } from './components/AuthPages';
-import AdminDashboard from './components/AdminDashboard';
-import SplashScreen from './components/SplashScreen';
-import RoleBasedDashboard from './components/RoleBasedDashboard';
+import ErrorBoundary from './components/ErrorBoundary';
+import NotFound from './components/NotFound';
 import { useAuth } from './context/AuthContext';
 import './index.css';
 
+const StockDetails = React.lazy(() => import('./components/StockDetails'));
+const Portfolio = React.lazy(() => import('./components/Portfolio'));
+const Dashboard = React.lazy(() => import('./components/Dashboard'));
+const AboutPage = React.lazy(() => import('./components/About'));
+const ShariahPage = React.lazy(() => import('./components/Shariah'));
+const ResourcesPage = React.lazy(() => import('./components/Resources'));
+const Profile = React.lazy(() => import('./components/Profile'));
+const AdminDashboard = React.lazy(() => import('./components/AdminDashboard'));
+const RoleBasedDashboard = React.lazy(() => import('./components/RoleBasedDashboard'));
+
 const DASHBOARD_ROUTES = ['/dashboard', '/portfolio', '/profile'];
+
+/* ─── Animated Routes Wrapper ─────────────────────────────── */
+const AnimatedRoutes = ({ children }) => {
+  const location = useLocation();
+  // Using location.pathname as a key triggers a re-render and animation on route change
+  return (
+    <div key={location.pathname} className="animate-fade-in" style={{ animationDuration: '0.3s' }}>
+      <Routes location={location}>
+        {children}
+      </Routes>
+    </div>
+  );
+};
+
+/* ─── Document Title Updater ──────────────────────────────── */
+const DocumentTitleUpdater = () => {
+  const location = useLocation();
+  useEffect(() => {
+    const path = location.pathname;
+    let title = 'Irshad - Islamic Finance & Shariah Screening';
+    if (path === '/') title = 'Home | Irshad';
+    else if (path.startsWith('/market')) title = 'Market Screener | Irshad';
+    else if (path.startsWith('/portfolio')) title = 'My Portfolio | Irshad';
+    else if (path.startsWith('/profile')) title = 'My Profile | Irshad';
+    else if (path.startsWith('/login')) title = 'Login | Irshad';
+    else if (path.startsWith('/register')) title = 'Register | Irshad';
+    else if (path.startsWith('/shariah')) title = 'Shariah Framework | Irshad';
+    else if (path.startsWith('/resources')) title = 'Resources | Irshad';
+    else if (path.startsWith('/about')) title = 'About Us | Irshad';
+    document.title = title;
+  }, [location]);
+  return null;
+};
 
 /* ─── Navbar ──────────────────────────────────────────────── */
 const TopNavbar = () => {
@@ -62,6 +98,7 @@ const TopNavbar = () => {
         <div className="nav-links">
           <Link to="/" className={navLinkClass('/')}>Home</Link>
           <Link to="/shariah" className={navLinkClass('/shariah')}>Shariah Framework</Link>
+          <Link to="/resources" className={navLinkClass('/resources')}>Resources</Link>
           <Link to="/about" className={navLinkClass('/about')}>About Us</Link>
           {user && (
             <Link to="/portfolio" className={navLinkClass('/portfolio')}>Dashboard</Link>
@@ -178,7 +215,7 @@ const StockTicker = () => {
             else if (s === 'non-halal') { statusStr = 'NON-HALAL'; color = 'var(--non-halal)'; }
           }
 
-          const displayPrice = Number(stock.daily_prices?.[0]?.price || 0).toFixed(2);
+          const displayPrice = Number(stock.latest_price || stock.daily_prices?.[0]?.price || 0).toFixed(2);
 
           return (
             <div key={`${stock.symbol}-${i}`} className="ticker-item" onClick={() => navigate('/login')}>
@@ -206,7 +243,7 @@ const StockCard = ({ company }) => {
   
   const isPositive = priceChange >= 0;
 
-  let statusStr = 'QUESTIONABLE';
+  let statusStr = 'REVIEWING';
   let badgeClass = 'status-doubtful';
 
   const rawStatus = company.status;
@@ -222,87 +259,38 @@ const StockCard = ({ company }) => {
 
   const navigate = useNavigate();
   return (
-    <div onClick={() => navigate('/login')} className="stock-card" style={{ cursor: 'pointer' }}>
-      <div className="stock-card-header">
+    <div onClick={() => navigate('/login')} className="stock-card hover-card" style={{ cursor: 'pointer', padding: '16px' }}>
+      <div className="stock-card-header" style={{ marginBottom: '12px' }}>
         <div className="stock-card-title">
-          <div className="stock-symbol">{company.symbol}</div>
-          <div className="stock-name">{company.name}</div>
+          <div className="stock-symbol" style={{ fontSize: '0.85rem' }}>{company.symbol}</div>
+          {company.name && <div className="stock-name" style={{ fontSize: '0.65rem' }}>{company.name}</div>}
         </div>
-        <span className={`status-badge ${badgeClass}`}>{statusStr}</span>
+        {statusStr && <span className={`status-badge ${badgeClass}`} style={{ fontSize: '0.55rem', padding: '2px 6px' }}>{statusStr}</span>}
       </div>
       <div className="stock-card-body">
-        <div className="stock-price-wrapper">
-          <span className="stock-price-currency">₦</span>
-          <span className="stock-price">{latestPrice.toFixed(2)}</span>
-        </div>
-        <div className={`stock-change-pill ${isPositive ? 'pos' : 'neg'}`}>
-          {isPositive ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-          {isPositive ? '+' : ''}{pct.toFixed(2)}%
-        </div>
+        {latestPrice > 0 ? (
+          <>
+            <div className="stock-price-wrapper">
+              <span className="stock-price-currency" style={{ fontSize: '0.75rem' }}>₦</span>
+              <span className="stock-price" style={{ fontSize: '1.05rem' }}>{latestPrice.toFixed(2)}</span>
+            </div>
+            {pct !== 0 && (
+              <div className={`stock-change-pill ${isPositive ? 'pos' : 'neg'}`} style={{ fontSize: '0.65rem', padding: '2px 6px' }}>
+                {isPositive ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+                {isPositive ? '+' : ''}{pct.toFixed(2)}%
+              </div>
+            )}
+          </>
+        ) : (
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Data unavailable</div>
+        )}
       </div>
     </div>
   );
 };
 
 
-/* ─── Footer ─────────────────────────────────────────────── */
-const Footer = () => (
-  <footer className="site-footer">
-    <div className="footer-inner">
-      <div>
-        <div className="footer-logo-area" style={{ marginBottom: '20px' }}>
-          <img
-            src="/logo.svg"
-            alt="Irshad"
-            style={{
-              height: '52px',
-              width: 'auto',
-              filter: 'brightness(0) invert(1)',
-              opacity: 0.88,
-            }}
-          />
-        </div>
-        <p className="footer-desc">
-          The premier platform for Shariah-compliant stock screening and market analytics on the Nigerian Exchange.
-        </p>
-      </div>
-
-      <div className="footer-col">
-        <h4>Platform</h4>
-        <ul>
-          <li><Link to="/market">Market Explorer</Link></li>
-          <li><Link to="/portfolio">Portfolio Tracker</Link></li>
-          <li><Link to="/market">Halal Baskets</Link></li>
-          <li><Link to="/market">Purification Calc</Link></li>
-        </ul>
-      </div>
-
-      <div className="footer-col">
-        <h4>Company</h4>
-        <ul>
-          <li><Link to="/shariah">Shariah Method</Link></li>
-          <li><Link to="/about">Our Story</Link></li>
-          <li><Link to="/shariah">Our Methodology</Link></li>
-        </ul>
-      </div>
-
-      <div className="footer-col">
-        <h4>Legal</h4>
-        <ul>
-          <li><Link to="/terms">Terms of Service</Link></li>
-          <li><Link to="/privacy">Privacy Policy</Link></li>
-          <li><Link to="/shariah">Shariah Standards</Link></li>
-          <li><Link to="/disclosure">Disclosures</Link></li>
-        </ul>
-      </div>
-    </div>
-
-    <div className="footer-bottom">
-      <span>© {new Date().getFullYear()} Irshad Financial Services Ltd. All rights reserved.</span>
-      <span>Regulated · AAOIFI Compliant · Nigeria</span>
-    </div>
-  </footer>
-);
+// Footer moved to components/Footer.jsx
 
 /* ─── Landing Page ───────────────────────────────────────── */
 const LandingPage = () => {
@@ -790,7 +778,7 @@ const MarketPage = () => {
                 cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
                 boxShadow: '0 4px 16px rgba(201,168,76,0.35)',
               }}>
-              Screen →
+              Search →
             </button>
           </div>
         </div>
@@ -920,53 +908,76 @@ const MarketPage = () => {
 /* ─── App Shell ──────────────────────────────────────────── */
 function App() {
   const { loading: authLoading } = useAuth();
-  const [showSplash, setShowSplash] = useState(() => window.location.pathname === '/');
+
+  // Handle the seamless handoff from the native HTML splash screen
+  useEffect(() => {
+    const splash = document.getElementById('irshad-splash');
+    if (!splash) return;
+
+    if (!authLoading) {
+      splash.classList.add('splash-hidden');
+      document.body.classList.remove('no-scroll');
+      document.documentElement.classList.remove('no-scroll');
+      setTimeout(() => splash.remove(), 600); // Wait for transition
+    }
+  }, [authLoading]);
+
+  // Once auth is loaded, we can render the app. The native splash will fade over it.
+  if (authLoading) {
+    return null; // The native HTML splash is still visible
+  }
 
   return (
     <>
-      {/* Splash covers the screen until auth resolves AND min time elapses */}
-      {showSplash && (
-        <SplashScreen
-          authReady={!authLoading}
-          onDone={() => setShowSplash(false)}
-        />
-      )}
-
-      {/* Render the app immediately so it preloads in the background */}
-      <Router>
+      <ErrorBoundary>
+        <Router>
+          <DocumentTitleUpdater />
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
             <TopNavbar />
             <StockTicker />
             <main style={{ flex: 1 }}>
-              <Routes>
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/about" element={<AboutPage />} />
-
-                <Route path="/shariah" element={<ShariahPage />} />
-                <Route path="/market" element={
-                  <DashboardLayout><MarketPage /></DashboardLayout>
-                } />
-                <Route path="/market/:symbol" element={
-                  <DashboardLayout><StockDetails /></DashboardLayout>
-                } />
-                <Route path="/dashboard" element={
-                  <DashboardLayout><RoleBasedDashboard /></DashboardLayout>
-                } />
-                <Route path="/portfolio" element={
-                  <DashboardLayout><Portfolio /></DashboardLayout>
-                } />
-                <Route path="/profile" element={
-                  <DashboardLayout><Profile /></DashboardLayout>
-                } />
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-                <Route path="/forgot" element={<ForgotPasswordPage />} />
-                <Route path="/reset-password" element={<ResetPasswordPage />} />
-              </Routes>
+              <Suspense fallback={
+                <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: '20px' }}>
+                  <div style={{ position: 'relative', width: '64px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ position: 'absolute', inset: 0, border: '3px solid var(--primary-100)', borderRadius: '50%' }} />
+                    <div style={{ position: 'absolute', inset: 0, border: '3px solid var(--primary)', borderRadius: '50%', borderTopColor: 'transparent', animation: 'spin 1s linear infinite' }} />
+                    <Shield size={24} color="var(--primary)" style={{ animation: 'pulse 2s infinite' }} />
+                  </div>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', fontWeight: 700, letterSpacing: '0.5px' }}>Loading Irshad...</p>
+                </div>
+              }>
+                <AnimatedRoutes>
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/about" element={<AboutPage />} />
+                  <Route path="/shariah" element={<ShariahPage />} />
+                  <Route path="/resources" element={<ResourcesPage />} />
+                  <Route path="/market" element={
+                    <DashboardLayout><MarketPage /></DashboardLayout>
+                  } />
+                  <Route path="/market/:symbol" element={
+                    <DashboardLayout><StockDetails /></DashboardLayout>
+                  } />
+                  <Route path="/dashboard" element={
+                    <DashboardLayout><RoleBasedDashboard /></DashboardLayout>
+                  } />
+                  <Route path="/portfolio" element={
+                    <DashboardLayout><Portfolio /></DashboardLayout>
+                  } />
+                  <Route path="/profile" element={
+                    <DashboardLayout><Profile /></DashboardLayout>
+                  } />
+                  <Route path="/admin" element={<AdminDashboard />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/register" element={<RegisterPage />} />
+                  <Route path="/forgot" element={<ForgotPasswordPage />} />
+                  <Route path="/reset-password" element={<ResetPasswordPage />} />
+                  <Route path="*" element={<NotFound />} />
+                </AnimatedRoutes>
+              </Suspense>
             </main>
           </div>
         </Router>
+      </ErrorBoundary>
     </>
   );
 }

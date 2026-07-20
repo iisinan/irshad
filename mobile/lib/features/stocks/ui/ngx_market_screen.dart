@@ -230,97 +230,110 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
         statusIcon = Icons.help_rounded;
     }
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.divider),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(16),
-        leading: stock['logo_url'] != null ? 
-            Container(
-              width: 44, height: 44,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
-                image: DecorationImage(image: NetworkImage(stock['logo_url']), fit: BoxFit.contain)
-              ),
-            ) :
-            Container(
-              width: 44, height: 44,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: AppTheme.primary,
-              ),
-              alignment: Alignment.center,
-              child: Text((stock['symbol'] ?? 'S')[0], style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 18)),
-            ),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Text(
-                stock['symbol'] ?? '',
-                style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: AppTheme.textDark),
-              ),
-            ),
-            Text(
-              '₦ ${(stock['latest_price'] ?? 0).toStringAsFixed(2)}',
-              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: AppTheme.textDark),
-            ),
-          ],
+    return InkWell(
+      onTap: () {
+        Navigator.pushNamed(context, '/stock-detail', arguments: stock);
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(bottom: BorderSide(color: AppTheme.divider, width: 1)),
         ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(height: 6),
-            Text(
-              stock['name'] ?? '',
-              style: const TextStyle(color: AppTheme.textMuted, fontWeight: FontWeight.w500, fontSize: 13),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            // Logo
+            stock['logo_url'] != null ? 
+              Container(
+                width: 44, height: 44,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  image: DecorationImage(image: NetworkImage(stock['logo_url']), fit: BoxFit.contain)
+                ),
+              ) :
+              Container(
+                width: 44, height: 44,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppTheme.primary.withOpacity(0.1),
+                ),
+                alignment: Alignment.center,
+                child: Text((stock['symbol'] ?? 'S')[0], style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold, fontSize: 18)),
+              ),
+            const SizedBox(width: 14),
+            // Ticker & Name
+            Expanded(
+              flex: 2,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    stock['symbol'] ?? '',
+                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: AppTheme.textDark, letterSpacing: -0.3),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    stock['name'] ?? '',
+                    style: const TextStyle(color: AppTheme.textMuted, fontWeight: FontWeight.w500, fontSize: 12),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            // Compliance Pill
+            Expanded(
+              flex: 2,
+              child: Align(
+                alignment: Alignment.center,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: statusColor.withOpacity(0.2)),
+                    color: statusColor.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(100), // Pill shape
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(statusIcon, size: 14, color: statusColor),
-                      const SizedBox(width: 6),
+                      Icon(statusIcon, size: 12, color: statusColor),
+                      const SizedBox(width: 4),
                       Text(
                         status.toUpperCase(),
                         style: TextStyle(
                           color: statusColor,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
                           letterSpacing: 0.5,
                         ),
                       ),
                     ],
                   ),
                 ),
-                if (stock['sector'] != null) 
-                  Text(stock['sector'], style: const TextStyle(color: AppTheme.textMuted, fontSize: 11, fontWeight: FontWeight.w600)),
-              ],
+              ),
+            ),
+            // Price & Sector
+            Expanded(
+              flex: 2,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '₦${(stock['latest_price'] ?? 0).toStringAsFixed(2)}',
+                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: AppTheme.textDark),
+                  ),
+                  const SizedBox(height: 2),
+                  if (stock['sector'] != null)
+                    Text(
+                      stock['sector'].length > 10 ? '${stock['sector'].substring(0, 10)}...' : stock['sector'], 
+                      style: const TextStyle(color: AppTheme.textMuted, fontSize: 11, fontWeight: FontWeight.w500),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                ],
+              ),
             ),
           ],
         ),
@@ -347,78 +360,87 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
         statusIcon = Icons.help_rounded;
     }
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.divider),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              stock['logo_url'] != null ? 
-                  Container(
-                    width: 32, height: 32,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
-                      image: DecorationImage(image: NetworkImage(stock['logo_url']), fit: BoxFit.contain)
+    return InkWell(
+      onTap: () {
+        Navigator.pushNamed(context, '/stock-detail', arguments: stock);
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppTheme.divider),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                stock['logo_url'] != null ? 
+                    Container(
+                      width: 32, height: 32,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                        image: DecorationImage(image: NetworkImage(stock['logo_url']), fit: BoxFit.contain)
+                      ),
+                    ) :
+                    Container(
+                      width: 32, height: 32,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppTheme.primary.withOpacity(0.1),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text((stock['symbol'] ?? 'S')[0], style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold, fontSize: 14)),
                     ),
-                  ) :
-                  Container(
-                    width: 32, height: 32,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      color: AppTheme.primary,
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              stock['symbol'] ?? '',
+              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: AppTheme.textDark),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              stock['name'] ?? '',
+              style: const TextStyle(color: AppTheme.textMuted, fontWeight: FontWeight.w500, fontSize: 12),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const Spacer(),
+            Text(
+              '₦${(stock['latest_price'] ?? 0).toStringAsFixed(2)}',
+              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: AppTheme.textDark),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: statusColor.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(100), // Pill shape
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(statusIcon, size: 12, color: statusColor),
+                  const SizedBox(width: 4),
+                  Text(
+                    status.toUpperCase(),
+                    style: TextStyle(
+                      color: statusColor,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.5,
                     ),
-                    alignment: Alignment.center,
-                    child: Text((stock['symbol'] ?? 'S')[0], style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 14)),
                   ),
-              Icon(statusIcon, size: 18, color: statusColor),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            stock['symbol'] ?? '',
-            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: AppTheme.textDark),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            stock['name'] ?? '',
-            style: const TextStyle(color: AppTheme.textMuted, fontWeight: FontWeight.w500, fontSize: 12),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const Spacer(),
-          Text(
-            '₦ ${(stock['latest_price'] ?? 0).toStringAsFixed(2)}',
-            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: AppTheme.textDark),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(20),
+                ],
+              ),
             ),
-            child: Text(
-              status.toUpperCase(),
-              style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

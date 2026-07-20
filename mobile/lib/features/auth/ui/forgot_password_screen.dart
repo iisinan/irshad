@@ -114,7 +114,7 @@ Future<void> _submit() async {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: AppTheme.textDark, width: 1.5),
+                borderSide: const BorderSide(color: AppTheme.primary, width: 1.5),
               ),
             ),
           ),
@@ -126,10 +126,10 @@ Future<void> _submit() async {
             child: ElevatedButton(
               onPressed: _isLoading ? null : _submit,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.textDark,
+                backgroundColor: AppTheme.primary,
                 foregroundColor: Colors.white,
                 elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
               ),
               child: _isLoading
                   ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))

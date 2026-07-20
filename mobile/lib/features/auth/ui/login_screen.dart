@@ -205,9 +205,9 @@ void _login() async {
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _login,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.textDark,
+                          backgroundColor: AppTheme.primary,
                           foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                           elevation: 0,
                         ),
                         child: _isLoading 
@@ -226,7 +226,7 @@ void _login() async {
                         style: OutlinedButton.styleFrom(
                           padding: EdgeInsets.zero,
                           side: const BorderSide(color: AppTheme.divider),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                         ),
                         child: const Icon(Icons.fingerprint_rounded, color: AppTheme.textDark, size: 28),
                       ),
@@ -255,7 +255,7 @@ void _login() async {
                   onPressed: _isLoading ? null : _loginWithGoogle,
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: AppTheme.divider, width: 1.5),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                   ),
                   child: const Text('Continue with Google', style: TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w700, fontSize: 16)),
                 ),
@@ -336,12 +336,12 @@ void _login() async {
         filled: true,
         fillColor: Colors.white,
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppTheme.divider, width: 1.5),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppTheme.divider, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppTheme.textDark, width: 1.5),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppTheme.primary, width: 1.5),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),

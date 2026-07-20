@@ -2,28 +2,28 @@ import 'package:flutter/material.dart';
 
 class AppTheme {
   // Core Palette
-  static const Color primary = Color(0xFF0F5257); // Deep Teal
-  static const Color primaryHover = Color(0xFF0B4347);
-  static const Color accent = Color(0xFFC9B89C); // Warm Sand
-  static const Color accentSoft = Color(0xFFEAF4F3); // Active Background
+  static const Color primary = Color(0xFF7B61FF); // Zoya Purple
+  static const Color primaryHover = Color(0xFF6246E5);
+  static const Color accent = Color(0xFF7B61FF); 
+  static const Color accentSoft = Color(0xFFF3F0FF); // Light Purple bg
   
   // Backgrounds
-  static const Color bg = Color(0xFFFAF8F5);
-  static const Color bgAlt = Color(0xFFFFFFFF); // Cards
-  static const Color bgSection = Color(0xFFF5F7FA); // Secondary Background
-  static const Color divider = Color(0xFFECEFF3);
+  static const Color bg = Color(0xFFF8F9FA); // Off-white scaffold
+  static const Color bgAlt = Color(0xFFFFFFFF); // Pure white cards
+  static const Color bgSection = Color(0xFFF1F5F9); 
+  static const Color divider = Color(0xFFF1F5F9);
 
   // Typography
-  static const Color textDark = Color(0xFF0D1B2A); // Primary Heading
-  static const Color textBody = Color(0xFF334155); // Primary Text
-  static const Color textMuted = Color(0xFF94A3B8);
-  static const Color textDisabled = Color(0xFFCBD5E1);
+  static const Color textDark = Color(0xFF111827); // Almost black
+  static const Color textBody = Color(0xFF4B5563); 
+  static const Color textMuted = Color(0xFF9CA3AF);
+  static const Color textDisabled = Color(0xFFD1D5DB);
 
-  // Status
-  static const Color halal = Color(0xFF22C55E);
-  static const Color questionable = Color(0xFFF59E0B);
-  static const Color haram = Color(0xFFEF4444);
-  static const Color review = Color(0xFF3B82F6);
+  // Status (Zoya Style)
+  static const Color halal = Color(0xFF10B981); // Emerald Green
+  static const Color questionable = Color(0xFFF59E0B); // Amber
+  static const Color haram = Color(0xFFEF4444); // Red
+  static const Color review = Color(0xFF3B82F6); // Blue
 
   // Theme Data
   static ThemeData get lightTheme {
@@ -58,7 +58,7 @@ class AppTheme {
           backgroundColor: primary,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(100), // Aggressively rounded pill
           ),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           elevation: 0,
@@ -66,11 +66,12 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(
         color: bgAlt,
-        elevation: 1,
-        shadowColor: Colors.black.withOpacity(0.05),
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        shadowColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
+          side: const BorderSide(color: divider, width: 1),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(

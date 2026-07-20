@@ -56,6 +56,9 @@ class ConsolidateCompanyDataCommand extends Command
                     'industry' => $goldenRecord['industry'] ?? null,
                     'business_type' => $goldenRecord['business_type'] ?? null,
                     'description' => $goldenRecord['description'] ?? null,
+                    'market_cap' => $goldenRecord['market_cap'] ?? null,
+                    'eps' => $goldenRecord['eps'] ?? null,
+                    'pe_ratio' => $goldenRecord['pe_ratio'] ?? null,
                 ]);
                 
                 $financial = \App\Models\Financial::updateOrCreate(
@@ -76,7 +79,14 @@ class ConsolidateCompanyDataCommand extends Command
                 
                 // Re-evaluate AAOIFI compliance with the new AI-derived metrics
                 $complianceService = app(\App\Services\AaoifiComplianceService::class);
-                $complianceService->evaluateCompliance($company, $financial, $company->sector);
+                
+                // Pass the AI sector evaluation array to the compliance service
+                $aiSectorEval = [
+                    'is_compliant' => $goldenRecord['is_aaoifi_sector_compliant'] ?? null,
+                    'reason' => $goldenRecord['aaoifi_sector_reason'] ?? null,
+                ];
+                
+                $complianceService->evaluateCompliance($company, $financial, $company->sector, $aiSectorEval);
 
                 // Clear caches so the updated data is instantly available to the frontend
                 \Illuminate\Support\Facades\Cache::forget('stocks.index_v3');

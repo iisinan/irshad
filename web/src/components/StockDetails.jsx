@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2, Brain, Globe, Newspaper, Bell, X } from 'lucide-react';
+import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2, Brain, Globe, Newspaper, Bell, X, ShieldCheck, XCircle, AlertTriangle } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import api, { fetchStockDetails, fetchAiAnalysis, setPriceAlert } from '../services/api';
 import ReactMarkdown from 'react-markdown';
@@ -266,56 +266,126 @@ const StockDetails = ({ symbol: propSymbol }) => {
             </p>
           </div>
 
-          {/* Business Screening */}
-          <div className="detail-panel" style={{ borderLeft: `4px solid ${screeningColor}` }}>
-            <div className="detail-section-label">Business Screening</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-              <div style={{
-                background: screeningBg,
-                border: `1px solid ${screeningBorder}`,
-                borderRadius: '10px',
-                padding: '8px',
-                display: 'flex',
-              }}>
-                <StatusIcon size={20} color={screeningColor} />
-              </div>
-              <h3 style={{ fontSize: '1.15rem', color: screeningColor, fontWeight: 700 }}>
-                {isHalal ? 'Business activities are Halal' : isNonHalal ? 'Non-Halal activities detected' : 'Screening result is Questionable'}
-              </h3>
-            </div>
-            <p style={{ color: 'var(--text-muted)', lineHeight: 1.75, fontSize: '1rem' }}>{reason}</p>
-          </div>
+          {/* AAOIFI Screening Breakdown */}
+          <div className="detail-panel" style={{ 
+            borderLeft: `4px solid ${screeningColor}`, 
+            background: 'linear-gradient(145deg, #ffffff, #f8fafc)',
+            padding: '32px',
+            position: 'relative',
+            overflow: 'hidden',
+            boxShadow: '0 8px 30px rgba(0,0,0,0.04)'
+          }}>
+            {/* Decorative background accent */}
+            <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: '200px', height: '200px', background: screeningBg, borderRadius: '50%', filter: 'blur(50px)', opacity: 0.6, zIndex: 0 }} />
 
-          {/* Financial Ratios */}
-          <div className="detail-panel">
-            <div className="detail-section-label">Financial Ratios (AAOIFI)</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              {[
-                { label: 'Debt to Asset Ratio', value: parseFloat(debtRatio), limit: 33, unit: '%' },
-                { label: 'Cash & Interest Ratio', value: parseFloat(interestRatio), limit: 5, unit: '%' },
-              ].map(({ label, value, limit, unit }) => {
-                const pass = value <= limit;
-                const pct = Math.min((value / (limit * 1.5)) * 100, 100);
-                return (
-                  <div key={label}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                      <span style={{ fontWeight: 600, color: 'var(--text-dark)' }}>{label}</span>
-                      <span style={{ fontWeight: 700, color: pass ? 'var(--halal)' : 'var(--non-halal)', fontSize: '0.9rem' }}>
-                        {value}{unit} / {limit}{unit} max
-                      </span>
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(0,0,0,0.06)', paddingBottom: '20px', marginBottom: '28px' }}>
+                <div className="detail-section-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                  <ShieldCheck size={22} color="var(--gold)" />
+                  AAOIFI Screening Breakdown
+                </div>
+                {/* Master Status Badge */}
+                <div style={{ 
+                  background: isHalal ? 'rgba(74, 222, 128, 0.15)' : isNonHalal ? 'rgba(248, 113, 113, 0.15)' : 'rgba(250, 204, 21, 0.15)', 
+                  border: `1px solid ${isHalal ? 'rgba(74, 222, 128, 0.3)' : isNonHalal ? 'rgba(248, 113, 113, 0.3)' : 'rgba(250, 204, 21, 0.3)'}`,
+                  color: isHalal ? '#16a34a' : isNonHalal ? '#dc2626' : '#ca8a04',
+                  padding: '6px 16px', borderRadius: '30px', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px',
+                  display: 'flex', alignItems: 'center', gap: '6px'
+                }}>
+                  <StatusIcon size={14} />
+                  {isHalal ? '100% Compliant' : isNonHalal ? 'Non-Compliant' : 'Under Review'}
+                </div>
+              </div>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                
+                {/* A. Business Activity Screen */}
+                <div style={{ 
+                  background: 'linear-gradient(to right, #ffffff, #fcfcfd)', border: '1px solid var(--border)', borderRadius: '16px', padding: '24px',
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.02)', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  cursor: 'default'
+                }} className="hover-card">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '16px' }}>
+                    <div style={{ background: screeningBg, border: `1px solid ${screeningBorder}`, borderRadius: '12px', padding: '10px', display: 'flex', boxShadow: `0 4px 12px ${screeningBg}` }}>
+                      {isHalal ? <CheckCircle size={20} color={screeningColor} /> : isNonHalal ? <XCircle size={20} color={screeningColor} /> : <AlertTriangle size={20} color={screeningColor} />}
                     </div>
-                    <div style={{ height: '8px', background: 'var(--bg-section)', borderRadius: '4px', overflow: 'hidden' }}>
-                      <div style={{
-                        height: '100%',
-                        width: `${pct}%`,
-                        background: pass ? 'var(--halal)' : 'var(--non-halal)',
-                        borderRadius: '4px',
-                        transition: 'width 0.6s ease',
-                      }} />
+                    <h3 style={{ fontSize: '1.1rem', color: 'var(--text-dark)', fontWeight: 800, margin: 0, letterSpacing: '-0.3px' }}>A. Business Activity</h3>
+                    <div style={{ marginLeft: 'auto', background: screeningBg, color: screeningColor, padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>
+                      {isHalal ? 'PASS' : isNonHalal ? 'FAIL' : 'REVIEW'}
                     </div>
                   </div>
-                );
-              })}
+                  <p style={{ color: 'var(--text-muted)', lineHeight: 1.6, fontSize: '0.95rem', margin: 0, paddingLeft: '46px' }}>
+                    {reason}
+                  </p>
+                </div>
+
+                {/* B. Financial Screen */}
+                <div style={{ 
+                  background: 'linear-gradient(to right, #ffffff, #fcfcfd)', border: '1px solid var(--border)', borderRadius: '16px', padding: '24px',
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.02)', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  cursor: 'default'
+                }} className="hover-card">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+                    <div style={{ width: '6px', height: '18px', background: 'var(--primary)', borderRadius: '4px' }} />
+                    <h3 style={{ fontSize: '1.05rem', color: 'var(--text-dark)', fontWeight: 800, margin: 0, letterSpacing: '-0.3px' }}>B. Financial Screen <span style={{ color: 'var(--text-muted)', fontWeight: 600, fontSize: '0.9rem' }}>(Impermissible Income)</span></h3>
+                  </div>
+                  
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '12px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Cash & Interest Ratio</span>
+                      <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                        Interest: <strong style={{ color: 'var(--text-dark)', fontWeight: 700 }}>₦{interest > 0 ? interest.toLocaleString() : '0'}</strong> <span style={{ opacity: 0.5, margin: '0 4px' }}>/</span> Revenue: <strong style={{ color: 'var(--text-dark)', fontWeight: 700 }}>₦{rawRevenue > 0 ? rawRevenue.toLocaleString() : 'N/A'}</strong>
+                      </span>
+                    </div>
+                    <span style={{ fontWeight: 800, color: parseFloat(interestRatio) <= 5 ? 'var(--halal)' : 'var(--non-halal)', fontSize: '1.25rem', letterSpacing: '-0.5px', background: parseFloat(interestRatio) <= 5 ? 'var(--halal-50)' : 'rgba(248,113,113,0.1)', padding: '4px 12px', borderRadius: '8px' }}>
+                      {interestRatio}% <span style={{ fontSize: '0.75rem', color: 'inherit', fontWeight: 700, opacity: 0.8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>/ 5% max</span>
+                    </span>
+                  </div>
+                  <div style={{ height: '8px', background: 'rgba(0,0,0,0.04)', borderRadius: '99px', overflow: 'hidden', border: '1px solid rgba(0,0,0,0.02)', position: 'relative' }}>
+                    <div style={{
+                      position: 'absolute', top: 0, left: 0,
+                      height: '100%', width: `${Math.min((parseFloat(interestRatio) / 7.5) * 100, 100)}%`,
+                      background: parseFloat(interestRatio) <= 5 ? 'linear-gradient(90deg, #4ade80, #16a34a)' : 'linear-gradient(90deg, #f87171, #dc2626)', 
+                      borderRadius: '99px', transition: 'width 1s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                      boxShadow: parseFloat(interestRatio) <= 5 ? '0 0 10px rgba(74,222,128,0.4)' : '0 0 10px rgba(248,113,113,0.4)'
+                    }} />
+                  </div>
+                </div>
+
+                {/* C. Interest Bearing Debt */}
+                <div style={{ 
+                  background: 'linear-gradient(to right, #ffffff, #fcfcfd)', border: '1px solid var(--border)', borderRadius: '16px', padding: '24px',
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.02)', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  cursor: 'default'
+                }} className="hover-card">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+                    <div style={{ width: '6px', height: '18px', background: 'var(--gold)', borderRadius: '4px' }} />
+                    <h3 style={{ fontSize: '1.05rem', color: 'var(--text-dark)', fontWeight: 800, margin: 0, letterSpacing: '-0.3px' }}>C. Interest Bearing Debt</h3>
+                  </div>
+                  
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '12px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Debt to Asset Ratio</span>
+                      <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                        Debt: <strong style={{ color: 'var(--text-dark)', fontWeight: 700 }}>₦{debt > 0 ? debt.toLocaleString() : '0'}</strong> <span style={{ opacity: 0.5, margin: '0 4px' }}>/</span> Assets: <strong style={{ color: 'var(--text-dark)', fontWeight: 700 }}>₦{assets > 0 ? assets.toLocaleString() : 'N/A'}</strong>
+                      </span>
+                    </div>
+                    <span style={{ fontWeight: 800, color: parseFloat(debtRatio) <= 30 ? 'var(--halal)' : 'var(--non-halal)', fontSize: '1.25rem', letterSpacing: '-0.5px', background: parseFloat(debtRatio) <= 30 ? 'var(--halal-50)' : 'rgba(248,113,113,0.1)', padding: '4px 12px', borderRadius: '8px' }}>
+                      {debtRatio}% <span style={{ fontSize: '0.75rem', color: 'inherit', fontWeight: 700, opacity: 0.8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>/ 30% max</span>
+                    </span>
+                  </div>
+                  <div style={{ height: '8px', background: 'rgba(0,0,0,0.04)', borderRadius: '99px', overflow: 'hidden', border: '1px solid rgba(0,0,0,0.02)', position: 'relative' }}>
+                    <div style={{
+                      position: 'absolute', top: 0, left: 0,
+                      height: '100%', width: `${Math.min((parseFloat(debtRatio) / 45) * 100, 100)}%`,
+                      background: parseFloat(debtRatio) <= 30 ? 'linear-gradient(90deg, #4ade80, #16a34a)' : 'linear-gradient(90deg, #f87171, #dc2626)', 
+                      borderRadius: '99px', transition: 'width 1s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                      boxShadow: parseFloat(debtRatio) <= 30 ? '0 0 10px rgba(74,222,128,0.4)' : '0 0 10px rgba(248,113,113,0.4)'
+                    }} />
+                  </div>
+                </div>
+
+              </div>
             </div>
           </div>
 

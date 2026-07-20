@@ -66,10 +66,10 @@ class WelcomeScreen extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () => Navigator.pushNamed(context, '/login'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.textDark,
+                    backgroundColor: AppTheme.primary,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(100),
                     ),
                     elevation: 0,
                   ),
@@ -91,7 +91,7 @@ class WelcomeScreen extends StatelessWidget {
                     foregroundColor: AppTheme.textDark,
                     side: const BorderSide(color: AppTheme.divider, width: 1.5),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(100),
                     ),
                   ),
                   child: const Text(

@@ -101,9 +101,9 @@ static const Color cardBg = Colors.white;
                           icon: const Icon(Icons.edit_rounded, size: 18),
                           label: const Text('Edit Profile', style: TextStyle(fontWeight: FontWeight.w700)),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppTheme.textDark,
+                            backgroundColor: AppTheme.primary,
                             foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                             elevation: 0,
                           ),
                         ),
@@ -119,7 +119,7 @@ static const Color cardBg = Colors.white;
                           label: const Text('Delete Account', style: TextStyle(fontWeight: FontWeight.w700, color: AppTheme.haram)),
                           style: OutlinedButton.styleFrom(
                             side: const BorderSide(color: AppTheme.haram, width: 1.5),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                           ),
                         ),
                       ),

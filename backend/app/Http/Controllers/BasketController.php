@@ -102,11 +102,30 @@ class BasketController extends Controller
             return $this->error('This basket has no stocks to invest in.', 400);
         }
 
-        $allocationPerStock = $totalAmount / count($symbols);
+        // 1. Pre-filter symbols to only include Halal/Compliant stocks
+        $investableSymbols = [];
+        $skippedSymbols = [];
+
+        foreach ($symbols as $symbol) {
+            $company = Company::with('status')->where('symbol', $symbol)->first();
+            if (!$company) continue;
+            
+            $statusStr = strtolower($company->status?->status ?? 'unknown');
+            if (in_array($statusStr, ['halal', 'compliant'])) {
+                $investableSymbols[] = $symbol;
+            } else {
+                $skippedSymbols[] = $symbol;
+            }
+        }
+
+        if (empty($investableSymbols)) {
+            return $this->error('Investment blocked: None of the stocks in this basket are currently Shariah-compliant.', 400);
+        }
+
+        $allocationPerStock = $totalAmount / count($investableSymbols);
 
         try {
-            $result = DB::transaction(function () use ($user, $symbols, $allocationPerStock, $totalAmount) {
-                // 1. Lock brokerage account
+            $result = DB::transaction(function () use ($user, $investableSymbols, $allocationPerStock, $totalAmount) {
                 $brokerage = BrokerageAccount::where('user_id', $user->id)->lockForUpdate()->first();
                 if (!$brokerage) {
                     throw new \Exception('Please link a broker before trading.');
@@ -119,18 +138,10 @@ class BasketController extends Controller
                 $totalCost = 0;
                 $purchases = [];
 
-                foreach ($symbols as $symbol) {
-                    $company = Company::with(['status', 'dailyPrices' => fn($q) => $q->latest('date')->limit(1)])
+                foreach ($investableSymbols as $symbol) {
+                    $company = Company::with(['dailyPrices' => fn($q) => $q->latest('date')->limit(1)])
                         ->where('symbol', $symbol)
                         ->first();
-
-                    if (!$company) continue;
-
-                    // Strict Shariah Compliance check
-                    $statusStr = strtolower($company->status?->status ?? 'unknown');
-                    if ($statusStr === 'non-halal' || $statusStr === 'doubtful') {
-                        throw new \Exception("Cannot invest: {$symbol} is currently non-halal or doubtful.");
-                    }
 
                     $latestPrice = $company->dailyPrices->first()?->price ?? 0;
                     if ($latestPrice <= 0) continue;

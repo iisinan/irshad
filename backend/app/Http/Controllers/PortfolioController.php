@@ -44,6 +44,7 @@ class PortfolioController extends Controller
                 'id' => $holding->id,
                 'symbol' => $company->symbol ?? $holding->symbol,
                 'name' => $company->name ?? $holding->symbol,
+                'sector' => $company->sector ?? 'Equities',
                 'shares' => $holding->shares,
                 'average_buy_price' => $holding->average_buy_price,
                 'current_price' => $currentPrice,
@@ -142,7 +143,7 @@ class PortfolioController extends Controller
     {
         $request->validate([
             'holdings' => 'required|array',
-            'holdings.*.symbol' => 'required|string',
+            'holdings.*.symbol' => 'required|string|exists:companies,symbol',
             'holdings.*.shares' => 'required|numeric|min:0.01',
             'holdings.*.average_buy_price' => 'nullable|numeric|min:0',
         ]);

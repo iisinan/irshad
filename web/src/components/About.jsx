@@ -1,5 +1,6 @@
 import React from 'react';
 import { Shield, Target, Users, BookOpen, Sparkles, Globe, Award } from 'lucide-react';
+import Footer from './Footer';
 
 const STATS = [
   { num: '2023', label: 'Founded', icon: '🚀' },
@@ -15,6 +16,7 @@ const VALUES = [
 ];
 
 const AboutPage = () => (
+  <>
   <div className="animate-fade-in page-wrapper">
     <div style={{ maxWidth: '940px', margin: '0 auto' }}>
 
@@ -118,6 +120,8 @@ const AboutPage = () => (
 
     </div>
   </div>
+  <Footer />
+  </>
 );
 
 export default AboutPage;

@@ -1,13 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import { Briefcase, ArrowLeft, ChevronRight, Activity, TrendingUp, TrendingDown, Star, Plus, X, Trash2, Check, DollarSign } from 'lucide-react';
 import { fetchBaskets, fetchBasketDetails, fetchNgxStocks, createBasket, deleteBasket, investInBasket } from '../../services/api';
+import { toastError, toastSuccess } from '../../utils/toast';
 import { useNavigate } from 'react-router-dom';
 
-export default function BasketsTab() {
+const getStatus = (company) => {
+  if (!company) return 'unknown';
+  const raw = company.status;
+  if (typeof raw === 'object' && raw !== null) return raw.status?.toLowerCase() ?? 'unknown';
+  if (typeof raw === 'string') return raw.toLowerCase();
+  return 'unknown';
+};
+
+class BasketsErrorBoundary extends React.Component {
+  constructor(props) { super(props); this.state = { hasError: false, error: null, info: null }; }
+  static getDerivedStateFromError(error) { return { hasError: true, error }; }
+  componentDidCatch(error, info) { this.setState({ info }); }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: '20px', background: 'darkred', color: 'white', borderRadius: '12px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+          <h3>Crash inside BasketsTab:</h3>
+          <p>{String(this.state.error)}</p>
+          <pre style={{ fontSize: '0.8rem' }}>{this.state.error?.stack}</pre>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+function BasketsTabContent() {
   const [baskets, setBaskets] = useState(() => {
     try {
       const cached = localStorage.getItem('irshad_baskets_cache_v1');
-      if (cached) return JSON.parse(cached) || [];
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed)) return parsed;
+        if (parsed?.data?.data && Array.isArray(parsed.data.data)) return parsed.data.data;
+        if (parsed?.data && Array.isArray(parsed.data)) return parsed.data;
+      }
     } catch {}
     return [];
   });
@@ -54,12 +86,11 @@ export default function BasketsTab() {
     setSelectedBasket(basket);
     try {
       setLoadingDetails(true);
-      const [basketRes, stocksRes] = await Promise.all([
-        fetchBasketDetails(basket.id),
-        fetchNgxStocks()
-      ]);
+      const basketRes = await fetchBasketDetails(basket.id);
       const basketData = basketRes.data || {};
-      const allStocksList = stocksRes.data || [];
+      
+      // Use the pre-loaded allStocks state instead of making another heavy API call
+      const allStocksList = allStocks.length > 0 ? allStocks : (await fetchNgxStocks()).data || [];
       
       let symbols = [];
       try {
@@ -72,7 +103,7 @@ export default function BasketsTab() {
         console.error('Failed to parse basket symbols', e);
       }
       
-      const populatedStocks = allStocksList.filter(s => symbols.includes(s.symbol));
+      const populatedStocks = allStocksList.filter(s => symbols.includes(s.symbol) && ['halal', 'compliant'].includes(getStatus(s)));
       setBasketDetails({ ...basketData, stocks: populatedStocks });
     } catch (err) {
       console.error('Failed to load basket details:', err);
@@ -125,17 +156,15 @@ export default function BasketsTab() {
     
     try {
       setInvesting(true);
-      setInvestMessage('');
       const res = await investInBasket(selectedBasket.id, amount);
-      setInvestMessage(res.message || 'Successfully invested!');
+      toastSuccess(res.message || 'Successfully invested!');
       setTimeout(() => {
         setShowInvestModal(false);
         setInvestAmount('');
-        setInvestMessage('');
-      }, 2000);
+      }, 500);
     } catch (err) {
       console.error('Failed to invest', err);
-      setInvestMessage(err.response?.data?.message || 'Failed to invest. Please check your broker balance.');
+      toastError(err.response?.data?.message || 'Failed to invest. Please check your broker balance.');
     } finally {
       setInvesting(false);
     }
@@ -148,6 +177,7 @@ export default function BasketsTab() {
 
   if (selectedBasket) {
     return (
+      <BasketsErrorBoundary>
       <div className="animate-fade-in stagger-1" style={{ background:'white', borderRadius:'24px', padding:'32px', boxShadow:'var(--shadow-sm)', border:'1px solid var(--border)' }}>
         <button onClick={handleBack} style={{ display:'flex', alignItems:'center', gap:'8px', background:'none', border:'none', color:'var(--text-muted)', fontWeight:700, cursor:'pointer', marginBottom:'24px', padding:'0' }}>
           <ArrowLeft size={16} /> Back to Baskets
@@ -246,12 +276,6 @@ export default function BasketsTab() {
                   )}
                 </div>
                 
-                {investMessage && (
-                  <div style={{ padding:'12px', borderRadius:'8px', background: investMessage.includes('Success') ? 'var(--halal)' : 'var(--non-halal)', color:'white', fontSize:'0.9rem', fontWeight:700, textAlign:'center' }}>
-                    {investMessage}
-                  </div>
-                )}
-
                 <button 
                   type="submit" 
                   disabled={investing || !investAmount || parseFloat(investAmount) < 1000}
@@ -264,6 +288,7 @@ export default function BasketsTab() {
           </div>
         )}
       </div>
+      </BasketsErrorBoundary>
     );
   }
 
@@ -381,7 +406,7 @@ export default function BasketsTab() {
                   Select Stocks ({newBasket.symbols.length} selected)
                 </label>
                 <div style={{ border:'1px solid var(--border)', borderRadius:'12px', overflow:'hidden', maxHeight:'200px', overflowY:'auto', background:'white' }}>
-                  {allStocks.map(stock => {
+                  {allStocks.filter(s => ['halal', 'compliant'].includes(getStatus(s))).map(stock => {
                     const isSelected = newBasket.symbols.includes(stock.symbol);
                     return (
                       <div 
@@ -417,5 +442,13 @@ export default function BasketsTab() {
       )}
 
     </div>
+  );
+}
+
+export default function BasketsTab() {
+  return (
+    <BasketsErrorBoundary>
+      <BasketsTabContent />
+    </BasketsErrorBoundary>
   );
 }

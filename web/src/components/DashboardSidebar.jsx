@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { section: 'Main' },
   { label: 'Overview',       icon: LayoutDashboard,  to: '/portfolio#overview' },
   { label: 'Search for Stock', icon: Search,          to: '/market'         },
+  { label: 'Market Screener', icon: BarChart2,        to: '/portfolio#market' },
   { label: 'Watchlist',      icon: Star,             to: '/portfolio#watchlist' },
   { label: 'Thematic Baskets',icon: Briefcase,       to: '/portfolio#baskets' },
   { section: 'Islamic Finance' },
@@ -48,7 +49,7 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
   };
 
   return (
-    <aside className={`dashboard-sidebar-container ${mobileOpen ? 'open' : ''}`} style={{
+    <aside aria-label="Dashboard Navigation" className={`dashboard-sidebar-container ${mobileOpen ? 'open' : ''}`} style={{
       width: collapsed ? '72px' : '240px',
       minHeight: '100vh',
       background: 'white',
@@ -134,7 +135,9 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
       {collapsed && (
         <div style={{ padding: '12px 0', display: 'flex', justifyContent: 'center', borderBottom: '1px solid var(--border)' }}>
           <button
-            onClick={() => setCollapsed(false)}
+            onClick={() => setCollapsed(!collapsed)}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-expanded={!collapsed}
             style={{
               width: '32px', height: '32px', borderRadius: '8px',
               background: 'var(--bg-section)', border: '1px solid var(--border)',
@@ -273,6 +276,7 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
             <button
               onClick={handleLogout}
               title="Log Out"
+              aria-label="Log Out"
               style={{
                 width: '36px', height: '36px', borderRadius: '10px',
                 background: 'none', border: '1px solid var(--border)',

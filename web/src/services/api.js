@@ -1,4 +1,5 @@
 import axios from 'axios';
+import axiosRetry from 'axios-retry';
 
 const PROD_API = 'https://irshad-z8us.onrender.com/api/v1';
 const api = axios.create({
@@ -7,6 +8,16 @@ const api = axios.create({
     'Accept': 'application/json',
     'Content-Type': 'application/json',
   },
+});
+
+// Configure automatic retries for network resilience
+axiosRetry(api, {
+  retries: 3,
+  retryDelay: axiosRetry.exponentialDelay,
+  retryCondition: (error) => {
+    // Retry on network errors or 5xx status codes
+    return axiosRetry.isNetworkOrIdempotentRequestError(error) || (error.response && error.response.status >= 500);
+  }
 });
 
 // Attach token to requests if it exists
@@ -40,6 +51,8 @@ export const fetchProfile = async () => {
 
 export const updateProfile = async (data) => {
   const response = await api.put('/profile', data);
+  // Clear any cached profile/portfolio if needed (currently we don't aggressively cache the profile API itself, but if we do in the future this is where we clear it)
+  localStorage.removeItem('irshad_portfolio_cache_v10');
   return response.data;
 };
 
@@ -49,7 +62,7 @@ export const deleteAccount = async () => {
 };
 
 export const fetchPortfolio = async () => {
-  const cacheKey = 'irshad_portfolio_cache_v9';
+  const cacheKey = 'irshad_portfolio_cache_v10';
   try {
     const response = await api.get('/portfolio');
     localStorage.setItem(cacheKey, JSON.stringify(response.data));
@@ -94,6 +107,7 @@ export const fetchWatchlist = async () => {
 
 export const addToWatchlist = async (symbol, alert_whatsapp = false, alert_email = false) => {
   const response = await api.post('/watchlist', { symbol, alert_whatsapp, alert_email });
+  localStorage.removeItem('irshad_portfolio_cache_v10'); // Invalidate portfolio cache to reflect new watchlist state
   return response.data;
 };
 
@@ -103,16 +117,19 @@ export const addToWatchlist = async (symbol, alert_whatsapp = false, alert_email
  */
 export const onboardUser = async ({ symbols, alert_email, alert_whatsapp, phone_number, risk_profile }) => {
   const response = await api.post('/onboard', { symbols, alert_email, alert_whatsapp, phone_number, risk_profile });
+  localStorage.removeItem('irshad_portfolio_cache_v10'); // Invalidate portfolio/watchlist cache on onboarding
   return response.data; // { message, user }
 };
 
 export const updateWatchlist = async (symbol, data) => {
   const response = await api.put(`/watchlist/${symbol}`, data);
+  localStorage.removeItem('irshad_portfolio_cache_v10');
   return response.data;
 };
 
 export const removeFromWatchlist = async (symbol) => {
   const response = await api.delete(`/watchlist/${symbol}`);
+  localStorage.removeItem('irshad_portfolio_cache_v10');
   return response.data;
 };
 
@@ -203,7 +220,7 @@ export const deleteBasket = async (id) => {
 export const investInBasket = async (id, amount) => {
   const response = await api.post(`/stocks/baskets/${id}/invest`, { amount });
   // Clear portfolio and history caches so the new investments show up
-  localStorage.removeItem('irshad_portfolio_cache_v9');
+  localStorage.removeItem('irshad_portfolio_cache_v10');
   return response.data;
 };
 
