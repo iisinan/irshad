@@ -214,7 +214,7 @@ const SetYourIrshad = ({ onComplete }) => {
               <div className="syi-icon-badge search-badge"><TrendingUp size={22} /></div>
               <div>
                 <h2>Hey {firstName}, find your stocks</h2>
-                <p>Search for NGX-listed companies and select those you want to monitor.</p>
+                <p>Search for listed companies and select those you want to monitor.</p>
               </div>
             </div>
 

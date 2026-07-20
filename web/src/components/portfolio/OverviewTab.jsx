@@ -465,7 +465,7 @@ export default function OverviewTab({ data, setShowAddModal, handleDelete, chang
         <div className="overview-hero-bottom" style={{ position:'relative', zIndex:2, background:'rgba(0,0,0,0.22)', borderTop:'1px solid rgba(255,255,255,0.06)', padding:'13px 38px', display:'flex', gap:'28px', flexWrap:'wrap' }}>
           {[
             { lbl:'Standard', val:'AAOIFI Shariah', color:'#22c55e' },
-            { lbl:'Exchange', val:'Nigerian Exchange (NGX)', color:'rgba(255,255,255,0.65)' },
+            { lbl:'Exchange', val:'National Exchange', color:'rgba(255,255,255,0.65)' },
             { lbl:'Compliance', val:`${compliance}% Halal`, color: compliance>=90?'#22c55e':compliance>=70?'#f59e0b':'#ef4444' },
             { lbl:'Non-Compliant', val:`${nonHalalCount} position${nonHalalCount!==1?'s':''}`, color:nonHalalCount>0?'#ef4444':'#22c55e' },
           ].map(({ lbl, val, color }) => (
@@ -694,7 +694,7 @@ export default function OverviewTab({ data, setShowAddModal, handleDelete, chang
               <div style={{ flex:1, minWidth:0 }}>
                 <div style={{ fontWeight:700, fontSize:'0.79rem', color:'var(--text-dark)', lineHeight:1.4, display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>{item.title}</div>
                 <div style={{ display:'flex', alignItems:'center', gap:'5px', marginTop:'4px' }}>
-                  <span style={{ fontSize:'0.65rem', color:'var(--text-muted)', fontWeight:600 }}>{item.source||'NGX'}</span>
+                  <span style={{ fontSize:'0.65rem', color:'var(--text-muted)', fontWeight:600 }}>{item.source||'Market'}</span>
                   <span style={{ color:'var(--text-light)' }}>·</span>
                   <span style={{ fontSize:'0.65rem', color:'var(--text-light)' }}>{timeAgo(item.published_at||item.created_at)}</span>
                 </div>
@@ -797,7 +797,7 @@ export default function OverviewTab({ data, setShowAddModal, handleDelete, chang
               {activeFilter==='all' ? 'Portfolio is Empty' : `No ${activeFilter} holdings`}
             </div>
             <p style={{ color:'var(--text-muted)', marginBottom:'24px', maxWidth:'360px', margin:'0 auto 24px', lineHeight:1.6, fontSize:'0.9rem' }}>
-              {activeFilter==='all' ? 'Track your NGX investments and maintain full Shariah compliance.' : 'Adjust the filter to see other holdings.'}
+              {activeFilter==='all' ? 'Track your investments and maintain full Shariah compliance.' : 'Adjust the filter to see other holdings.'}
             </p>
             {activeFilter==='all' && (
               <button onClick={() => setShowAddModal(true)} style={{ display:'inline-flex', alignItems:'center', gap:'7px', padding:'12px 24px', borderRadius:'13px', background:'var(--gold-grad)', color:'white', border:'none', fontWeight:800, fontSize:'0.9rem', cursor:'pointer', boxShadow:'0 8px 22px rgba(212,175,55,0.3)', transition:'all 0.2s' }} className="hover-lift">

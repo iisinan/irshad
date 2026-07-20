@@ -33,11 +33,11 @@ class AaoifiComplianceService
 
     public function evaluateCompliance(Company $company, Financial $financials, ?string $swsIndustry = null, ?array $aiSectorEval = null)
     {
-        // For Rule 1: Use AI evaluation if available, fallback to legacy SWS Industry check
-        if ($aiSectorEval && isset($aiSectorEval['is_compliant'])) {
-            if ($aiSectorEval['is_compliant'] === false) {
-                $reason = $aiSectorEval['reason'] ?? "Failed Rule 1: AI Sector Check. The company's core business activity is Shariah non-compliant according to AAOIFI standards.";
-                return $this->saveStatus($company, 'non-halal', "Failed Rule 1 (AI Verified): " . $reason);
+        // For Rule 1: Use activity detection if available, fallback to legacy SWS Industry check
+        if ($aiSectorEval && isset($aiSectorEval['has_prohibited_activities'])) {
+            if ($aiSectorEval['has_prohibited_activities'] === true) {
+                $reason = $aiSectorEval['reason'] ?? "Failed Rule 1: Sector Check. The company's core business activity involves prohibited elements (e.g., alcohol, gambling, conventional finance) according to AAOIFI standards.";
+                return $this->saveStatus($company, 'non-halal', "Failed Rule 1 (Activity Verified): " . $reason);
             }
         } else {
             // Legacy fallback
@@ -66,7 +66,7 @@ class AaoifiComplianceService
             return $this->saveStatus(
                 $company, 
                 'non-halal', 
-                "Failed Rule 2: Debt Limit Check via NGX financial disclosure. Interest-bearing debt-to-market-cap ratio is " . round($debtToMarketCap * 100, 2) . "% (Max permitted threshold is 30.00%)."
+                "Failed Rule 2: Debt Limit Check based on recent financial disclosure. Interest-bearing debt-to-market-cap ratio is " . round($debtToMarketCap * 100, 2) . "% (Max permitted threshold is 30.00%)."
             );
         }
 
@@ -75,7 +75,7 @@ class AaoifiComplianceService
             return $this->saveStatus(
                 $company, 
                 'non-halal', 
-                "Failed Rule 3: Interest Income Limit Check via NGX financial disclosure. Passive interest income represents " . round($purificationFactor * 100, 2) . "% of gross revenue (Max permitted threshold is 5.00%)."
+                "Failed Rule 3: Interest Income Limit Check based on recent financial disclosure. Passive interest income represents " . round($purificationFactor * 100, 2) . "% of gross revenue (Max permitted threshold is 5.00%)."
             );
         }
 

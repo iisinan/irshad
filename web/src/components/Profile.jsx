@@ -550,7 +550,7 @@ export default function Profile() {
           {/* Quick links to market */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
             {[
-              { icon: BarChart2, label: 'Market Overview', desc: 'Browse NGX stocks', href: '/market', color: '#6366F1' },
+              { icon: BarChart2, label: 'Market Overview', desc: 'Browse stocks', href: '/market', color: '#6366F1' },
               { icon: BookOpen, label: 'News & Insights', desc: 'Latest halal finance news', href: '/news', color: 'var(--primary)' },
               { icon: Shield, label: 'Shariah Guide', desc: 'Our screening methodology', href: '/shariah', color: 'var(--halal)' },
             ].map(item => (

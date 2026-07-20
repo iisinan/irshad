@@ -199,7 +199,7 @@ export default function WatchlistTab() {
           <Search size={20} color={isSearching ? 'var(--primary)' : 'var(--text-muted)'} style={{ transition: 'color 0.3s' }} />
           <input 
             type="text" 
-            placeholder="Search NGX stocks to add..." 
+            placeholder="Search stocks to add..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setIsSearching(true)}
@@ -281,7 +281,7 @@ export default function WatchlistTab() {
             {filter !== 'all' ? `No ${filter} assets found` : 'Your Watchlist is Empty'}
           </div>
           <p style={{ color:'var(--text-muted)', fontSize:'1rem', marginBottom:'32px', maxWidth:'400px', lineHeight:1.6 }}>
-            Keep an eye on promising NGX stocks. Add them to your watchlist to track their Shariah compliance status and daily performance.
+            Keep an eye on promising stocks. Add them to your watchlist to track their Shariah compliance status and daily performance.
           </p>
           <button 
             onClick={() => navigate('/market')} 

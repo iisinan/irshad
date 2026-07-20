@@ -43,7 +43,7 @@ const INSIGHTS=[
   "Purification in Islamic finance is the act of donating a small % of haram-tainted dividends to charity.",
   "Zakat on stocks is calculated on the current market value of the shares, not the purchase price.",
   "AAOIFI standards require that interest income should be below 5% of total revenue to be Shariah compliant.",
-  "NGX has over 150 listed companies — always screen each one individually before investing.",
+  "The market has over 150 listed companies — always screen each one individually before investing.",
 ];
 
 const NGX_STATUS = {
@@ -498,14 +498,14 @@ export default function Dashboard() {
   return (
     <div className="animate-fade-in">
       <Ticker tickerItems={dynamicTicker}/>
-      {/* NGX Market Status Bar */}
+      {/* Market Status Bar */}
       <div style={{ background: 'linear-gradient(90deg, #0D1B2A 0%, #0F5257 100%)', padding: '10px 24px', display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap', overflow: 'hidden', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
           <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: dynamicNgxStatus.isOpen ? '#22c55e' : '#ef4444', boxShadow: dynamicNgxStatus.isOpen ? '0 0 0 3px rgba(34,197,94,0.25)' : '0 0 0 3px rgba(239,68,68,0.2)', animation: dynamicNgxStatus.isOpen ? 'pulse 2s infinite' : 'none' }}/>
           <span style={{ fontSize: '0.74rem', fontWeight: 800, color: dynamicNgxStatus.isOpen ? '#4ade80' : '#f87171', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{dynamicNgxStatus.isOpen ? 'Market Open' : 'Market Closed'}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'rgba(255,255,255,0.5)' }}>NGX ASI</span>
+          <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'rgba(255,255,255,0.5)' }}>MARKET ASI</span>
           <span style={{ fontSize: '0.85rem', fontWeight: 900, color: 'white' }}>{dynamicNgxStatus.asi}</span>
           <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#4ade80', display: 'flex', alignItems: 'center', gap: '1px' }}><ArrowUpRight size={11}/>{dynamicNgxStatus.asiChange}</span>
         </div>
@@ -576,11 +576,11 @@ export default function Dashboard() {
         <div className="stagger-2" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:'16px',marginBottom:'18px'}}>
           <StatCard icon={Wallet} label="Portfolio Value" primary={true}
             value={`₦${fmt(summary.total_balance)}`}
-            sub={<><TrendingUp size={12}/> Active portfolio</>} badge="NGX"/>
+            sub={<><TrendingUp size={12}/> Active portfolio</>} badge="Market"/>
           <StatCard icon={Shield} label="Compliance Score" value={`${compliance}%`}
             sub={compliance>=90?<><CheckCircle size={12} color="var(--halal)"/> Excellent standing</>:<><AlertTriangle size={12} color="var(--doubtful)"/> Needs review</>}/>
           <StatCard icon={Activity} label="Total Holdings" value={holdings.length||0}
-            sub={<><Zap size={12} color="var(--primary)"/> Across NGX sectors</>}/>
+            sub={<><Zap size={12} color="var(--primary)"/> Across all sectors</>}/>
         </div>
 
         {/* ═ Quick Actions ═ */}

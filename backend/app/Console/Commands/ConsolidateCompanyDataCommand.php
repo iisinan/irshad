@@ -56,6 +56,7 @@ class ConsolidateCompanyDataCommand extends Command
                     'industry' => $goldenRecord['industry'] ?? null,
                     'business_type' => $goldenRecord['business_type'] ?? null,
                     'description' => $goldenRecord['description'] ?? null,
+                    'activity_reason' => $goldenRecord['prohibited_activities_reason'] ?? null,
                     'market_cap' => $goldenRecord['market_cap'] ?? null,
                     'eps' => $goldenRecord['eps'] ?? null,
                     'pe_ratio' => $goldenRecord['pe_ratio'] ?? null,
@@ -82,8 +83,8 @@ class ConsolidateCompanyDataCommand extends Command
                 
                 // Pass the AI sector evaluation array to the compliance service
                 $aiSectorEval = [
-                    'is_compliant' => $goldenRecord['is_aaoifi_sector_compliant'] ?? null,
-                    'reason' => $goldenRecord['aaoifi_sector_reason'] ?? null,
+                    'has_prohibited_activities' => $goldenRecord['has_prohibited_activities'] ?? null,
+                    'reason' => $goldenRecord['prohibited_activities_reason'] ?? null,
                 ];
                 
                 $complianceService->evaluateCompliance($company, $financial, $company->sector, $aiSectorEval);

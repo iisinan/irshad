@@ -141,7 +141,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
         if (e.response?.status === 401) {
           setAiError('Unauthorized. Please log in or wait for the backend to update public access.');
         } else {
-          setAiError(e.response?.data?.message || 'Failed to get AI analysis. Ensure GEMINI_API_KEY is set or backend is updated.');
+          setAiError(e.response?.data?.message || 'Failed to get analysis. Ensure the backend is updated.');
         }
       })
       .finally(() => setAiLoading(false));
@@ -239,12 +239,12 @@ const StockDetails = ({ symbol: propSymbol }) => {
               </div>
               {!aiAnalysis && !aiLoading && (
                 <button onClick={handleAskAI} className="btn-primary" style={{ padding: '8px 16px', fontSize: '0.85rem', background: 'var(--gold)', color: '#1A1208', border: 'none' }}>
-                  Ask Gemini AI
+                  Ask Halal Assistant
                 </button>
               )}
             </div>
             
-            {aiLoading && <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontStyle: 'italic' }}>Gemini is analyzing the financials...</div>}
+            {aiLoading && <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontStyle: 'italic' }}>Analyzing the financials...</div>}
             {aiError && <div style={{ color: 'var(--non-halal)', fontSize: '0.9rem' }}>{aiError}</div>}
             {aiAnalysis && (
               <div style={{ color: 'var(--text-body)', lineHeight: 1.7, fontSize: '0.95rem' }}>
@@ -315,7 +315,9 @@ const StockDetails = ({ symbol: propSymbol }) => {
                     </div>
                   </div>
                   <p style={{ color: 'var(--text-muted)', lineHeight: 1.6, fontSize: '0.95rem', margin: 0, paddingLeft: '46px' }}>
-                    {reason}
+                    {stock.activity_reason || (isHalal 
+                      ? "The core business operations of this company have been verified to be in a Halal industry, with no significant involvement in prohibited activities like conventional finance, alcohol, gambling, or tobacco."
+                      : "We were unable to verify the core business activity or it was flagged as potentially non-compliant. Please review the company's primary operations manually.")}
                   </p>
                 </div>
 

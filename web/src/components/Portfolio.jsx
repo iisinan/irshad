@@ -114,7 +114,7 @@ function AddModal({ onClose, onAdd, isAdding, onBrokerLinked }) {
     <div className="animate-fade-in" style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.4)', backdropFilter:'blur(4px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:999, padding:'20px' }}>
       <div style={{ background:'white', borderRadius:'24px', width:'100%', maxWidth:'420px', boxShadow:'0 24px 64px rgba(0,0,0,0.1)', overflow:'hidden', animation:'slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'20px 24px', borderBottom:'1px solid var(--border)' }}>
-          <h3 style={{ fontSize:'1.1rem', fontWeight:800, color:'var(--text-dark)' }}>Add NGX Holding</h3>
+          <h3 style={{ fontSize:'1.1rem', fontWeight:800, color:'var(--text-dark)' }}>Add Holding</h3>
           <button onClick={onClose} style={{ background:'var(--bg-section)', border:'none', width:'32px', height:'32px', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--text-muted)', cursor:'pointer' }}><X size={16}/></button>
         </div>
 
