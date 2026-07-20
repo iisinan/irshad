@@ -17,14 +17,14 @@ class PortfolioController extends Controller
      */
     public function index(): JsonResponse
     {
-        $holdings = Holding::with(['company.status', 'company.dailyPrices' => fn($q) => $q->latest('date'), 'company.financials'])
+        $holdings = Holding::with(['company.financials:id,company_id,non_compliant_income_ratio'])
             ->where('user_id', Auth::id())
             ->get();
 
         $portfolioData = $holdings->map(function ($holding) {
             $company = $holding->company;
-            $currentPrice = $company?->dailyPrices?->first()?->price ?? 0;
-            $status = $company?->status?->status ?? 'doubtful';
+            $currentPrice = (float) ($company->latest_price ?? 0);
+            $status = $company->current_status ?? 'doubtful';
             
             // Financials relationship returns a collection, take first
             $financials = $company?->financials?->first();

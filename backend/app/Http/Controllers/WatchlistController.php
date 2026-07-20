@@ -13,33 +13,40 @@ class WatchlistController extends Controller
         $user = $request->user();
         $watchlistItems = Watchlist::where('user_id', $user->id)->get();
 
-        $allStocks = \Illuminate\Support\Facades\Cache::rememberForever('stocks.index_v3', function () {
-            return \App\Models\Company::with(['status', 'dailyPrices' => fn($q) => $q->latest('date')])->get();
-        });
+        $watchlistSymbols = $watchlistItems->pluck('symbol')->map(fn($s) => strtoupper($s))->toArray();
 
-        $formatted = $watchlistItems->map(function ($item) use ($allStocks) {
-            $company = $allStocks->firstWhere('symbol', strtoupper($item->symbol));
+        // 1. Fetch only the companies in the watchlist
+        $companies = \App\Models\Company::whereIn('symbol', $watchlistSymbols)->get()->keyBy(fn($c) => strtoupper($c->symbol));
+
+        // 2. Fetch the last 7 daily prices for ONLY these symbols (for sparklines)
+        // Since sqlite/postgres might require complex window functions to get top N per group easily,
+        // it's often faster to just query date >= 7 days ago if it's daily data, or do a simple in-memory map.
+        // For 7 days, we can just grab the prices from the last 7 calendar days.
+        $recentPrices = \App\Models\DailyPrice::whereIn('company_id', $companies->pluck('id'))
+            ->where('date', '>=', now()->subDays(10)->toDateString())
+            ->orderBy('date', 'asc')
+            ->get()
+            ->groupBy('company_id');
+
+        $formatted = $watchlistItems->map(function ($item) use ($companies, $recentPrices) {
+            $symbol = strtoupper($item->symbol);
+            $company = $companies->get($symbol);
+            
             $currentPrice = 0;
             $changePct = 0;
             $statusString = 'Doubtful';
+            $historicalPrices = [];
 
             if ($company) {
-                $prices = $company->dailyPrices;
-                if ($prices && $prices->count() > 0) {
-                    $currentPrice = (float) $prices->first()->price;
-                    if ($prices->count() > 1) {
-                        $prevPrice = (float) $prices->skip(1)->first()->price;
-                        if ($prevPrice > 0) {
-                            $changePct = (($currentPrice - $prevPrice) / $prevPrice) * 100;
-                        }
-                    }
-                }
+                $currentPrice = (float) ($company->latest_price ?? 0);
+                $changePct = (float) ($company->price_change_pct ?? 0);
 
-                // Get last 7 days of prices for sparkline (order by date ASC so sparkline goes left to right)
-                $historicalPrices = $company->dailyPrices->take(7)->reverse()->pluck('price')->map(fn($p) => (float)$p)->values()->toArray();
+                // Get last 7 days of prices for sparkline
+                $prices = $recentPrices->get($company->id, collect());
+                $historicalPrices = $prices->take(-7)->pluck('price')->map(fn($p) => (float)$p)->values()->toArray();
 
-                if ($company->status && $company->status->status) {
-                    $rawStatus = strtolower($company->status->status);
+                if ($company->current_status) {
+                    $rawStatus = strtolower($company->current_status);
                     if (in_array($rawStatus, ['halal', 'compliant'])) $statusString = 'Halal';
                     elseif (in_array($rawStatus, ['non-halal', 'non-compliant'])) $statusString = 'Non-Halal';
                 }
