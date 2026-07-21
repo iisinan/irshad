@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import {
   Shield, Bell, Star, TrendingUp, TrendingDown, Eye, BarChart2,
   BookOpen, Award, CheckCircle, AlertTriangle, XCircle, 
-  ArrowUpRight, ArrowDownRight, Activity, Trash2, Settings
+  ArrowUpRight, ArrowDownRight, Activity, Trash2, Settings, Search, Sparkles
 } from 'lucide-react';
 import { fetchProfile, fetchWatchlist, fetchPortfolio, fetchHistory, removeFromWatchlist } from '../services/api';
 
@@ -152,6 +152,11 @@ export default function Profile() {
   const [history, setHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const handleReplayTour = () => {
+    setUser(prev => ({ ...prev, preferences: { ...(prev?.preferences || {}), onboarded: false } }));
+    navigate('/');
+  };
+
   useEffect(() => {
     if (!authLoading && !user) navigate('/login');
   }, [user, authLoading, navigate]);
@@ -291,7 +296,10 @@ export default function Profile() {
           </div>
         </div>
 
-        <div style={{ zIndex: 1 }}>
+        <div style={{ zIndex: 1, display: 'flex', gap: '12px' }}>
+          <button onClick={handleReplayTour} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.3)', color: 'white', borderRadius: '12px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.16,1,0.3,1)', backdropFilter: 'blur(10px)' }} onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.3)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.1)'; }} onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.2)'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; }}>
+            <Sparkles size={18} /> Replay Tour
+          </button>
           <button onClick={() => navigate('/settings')} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', borderRadius: '12px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.16,1,0.3,1)', backdropFilter: 'blur(10px)' }} onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.2)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.1)'; }} onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; }}>
             <Settings size={18} /> Edit Profile
           </button>
