@@ -20,7 +20,7 @@ const NAV_ITEMS = [
   { label: 'Resources',      icon: BookOpen,          to: '/portfolio#lectures'   },
   { section: 'Account' },
   { label: 'Profile',        icon: User,              to: '/profile'     },
-  { label: 'Settings',       icon: Settings,          to: '/profile#settings' },
+  { label: 'Settings',       icon: Settings,          to: '/settings' },
 ];
 
 export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {

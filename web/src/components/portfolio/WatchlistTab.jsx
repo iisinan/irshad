@@ -121,7 +121,6 @@ export default function WatchlistTab() {
     if (!item) return;
 
     const data = {
-      alert_whatsapp: type === 'whatsapp' ? !item.alert_whatsapp : item.alert_whatsapp,
       alert_email: type === 'email' ? !item.alert_email : item.alert_email,
     };
 
@@ -351,13 +350,6 @@ export default function WatchlistTab() {
                     title={wlItem.alert_email ? "Email Alerts Enabled" : "Enable Email Alerts"}
                   >
                     <Mail size={16} />
-                  </button>
-                  <button 
-                    onClick={() => toggleAlert(stock.symbol, 'whatsapp')}
-                    className={`alert-btn ${wlItem.alert_whatsapp ? 'active-wa' : ''}`}
-                    title={wlItem.alert_whatsapp ? "WhatsApp Alerts Enabled" : "Enable WhatsApp Alerts"}
-                  >
-                    <MessageSquare size={16} />
                   </button>
                 </div>
 

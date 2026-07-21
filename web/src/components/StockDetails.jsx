@@ -48,6 +48,12 @@ const StockDetails = ({ symbol: propSymbol }) => {
     }
   }, [symbol, user]);
 
+  useEffect(() => {
+    if (!loading) {
+      window.dispatchEvent(new CustomEvent('stock-data-loaded'));
+    }
+  }, [loading]);
+
   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', padding: '120px 0' }}>

@@ -17,10 +17,11 @@ const AboutPage = React.lazy(() => import('./components/About'));
 const ShariahPage = React.lazy(() => import('./components/Shariah'));
 const ResourcesPage = React.lazy(() => import('./components/Resources'));
 const Profile = React.lazy(() => import('./components/Profile'));
+const Settings = React.lazy(() => import('./components/Settings'));
 const AdminDashboard = React.lazy(() => import('./components/AdminDashboard'));
 const RoleBasedDashboard = React.lazy(() => import('./components/RoleBasedDashboard'));
 
-const DASHBOARD_ROUTES = ['/dashboard', '/portfolio', '/profile'];
+const DASHBOARD_ROUTES = ['/dashboard', '/portfolio', '/profile', '/settings'];
 
 /* ─── Animated Routes Wrapper ─────────────────────────────── */
 const AnimatedRoutes = ({ children }) => {
@@ -59,6 +60,7 @@ const DocumentTitleUpdater = () => {
     else if (path.startsWith('/market')) title = 'Market Screener | Irshad';
     else if (path.startsWith('/portfolio')) title = 'My Portfolio | Irshad';
     else if (path.startsWith('/profile')) title = 'My Profile | Irshad';
+    else if (path.startsWith('/settings')) title = 'Settings | Irshad';
     else if (path.startsWith('/login')) title = 'Login | Irshad';
     else if (path.startsWith('/register')) title = 'Register | Irshad';
     else if (path.startsWith('/shariah')) title = 'Shariah Framework | Irshad';
@@ -989,6 +991,9 @@ function App() {
                   } />
                   <Route path="/profile" element={
                     <DashboardLayout><Profile /></DashboardLayout>
+                  } />
+                  <Route path="/settings" element={
+                    <DashboardLayout><Settings /></DashboardLayout>
                   } />
                   <Route path="/admin" element={<AdminDashboard />} />
                   <Route path="/login" element={<LoginPage />} />

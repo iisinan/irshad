@@ -142,35 +142,52 @@ class GeminiAiService
         $prompt .= "'sector', 'industry', 'business_type', 'description', 'has_prohibited_activities' (boolean), 'prohibited_activities_reason' (string), 'eps', 'pe_ratio', 'roe', 'dividend_yield', 'profit_margin', 'market_cap', 'total_assets', 'total_debt', 'total_revenue', 'interest_income', 'valuation_info', 'growth_info'.\n";
         $prompt .= "For percentages (roe, dividend_yield, profit_margin), use decimals (e.g. 0.05 for 5%). For absolute values, use raw numbers (e.g. 5000000000).";
 
-        try {
-            $response = Http::withHeaders([
-                'Content-Type' => 'application/json',
-            ])->timeout(60)->retry(3, 2000)->post("{$this->baseUrl}/gemini-flash-latest:generateContent?key={$this->apiKey}", [
-                'contents' => [
-                    [
-                        'parts' => [
-                            ['text' => $prompt]
+        $apiKeys = array_map('trim', explode(',', $this->apiKey));
+        $currentKeyIndex = \Illuminate\Support\Facades\Cache::get('gemini_key_index', 0);
+        if (!isset($apiKeys[$currentKeyIndex])) {
+            $currentKeyIndex = 0;
+        }
+        $apiKey = $apiKeys[$currentKeyIndex];
+
+        $maxRetries = 10;
+        for ($attempt = 0; $attempt < $maxRetries; $attempt++) {
+            try {
+                $response = Http::withHeaders([
+                    'Content-Type' => 'application/json',
+                ])->timeout(60)->post("{$this->baseUrl}/gemini-flash-latest:generateContent?key={$apiKey}", [
+                    'contents' => [
+                        [
+                            'parts' => [
+                                ['text' => $prompt]
+                            ]
                         ]
                     ]
-                ]
-            ]);
+                ]);
 
-            if ($response->successful()) {
-                $data = $response->json();
-                $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? "";
+                if ($response->successful()) {
+                    $data = $response->json();
+                    $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? "";
+                    
+                    // Clean up any potential markdown wrap
+                    $text = str_replace('```json', '', $text);
+                    $text = str_replace('```', '', $text);
+                    $text = trim($text);
+
+                    return json_decode($text, true);
+                }
+
+                if ($response->status() == 429) {
+                    $apiKey = $this->getNextApiKey($currentKeyIndex, $apiKeys);
+                    continue;
+                }
+
+                Log::error('Gemini Consolidation Error', ['response' => $response->body()]);
+                return null;
                 
-                // Clean up any potential markdown wrap
-                $text = str_replace('```json', '', $text);
-                $text = str_replace('```', '', $text);
-                $text = trim($text);
-
-                return json_decode($text, true);
+            } catch (\Exception $e) {
+                Log::error('Gemini Consolidation Exception', ['message' => $e->getMessage()]);
+                return null;
             }
-
-            Log::error('Gemini Consolidation Error', ['response' => $response->body()]);
-            
-        } catch (\Exception $e) {
-            Log::error('Gemini Consolidation Exception', ['message' => $e->getMessage()]);
         }
         
         return null;

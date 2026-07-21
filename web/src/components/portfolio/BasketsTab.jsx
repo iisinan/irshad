@@ -416,22 +416,27 @@ function BasketsTabContent() {
       </div>
       {/* Create Basket Modal */}
       {showCreateModal && (
-        <div className="modal-overlay animate-fade-in" style={{ position:'fixed', top:0, left:0, width:'100%', height:'100%', background:'rgba(13, 27, 42, 0.4)', backdropFilter:'blur(4px)', zIndex:999, display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' }}>
-          <div className="modal-content roll-in-anim" style={{ background:'white', borderRadius:'24px', width:'100%', maxWidth:'600px', boxShadow:'var(--shadow-lg)', overflow:'hidden', display:'flex', flexDirection:'column', maxHeight:'80vh' }}>
-            <div style={{ padding:'24px 32px', borderBottom:'1px solid var(--border)', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-              <h2 style={{ fontSize:'1.2rem', fontWeight:800, color:'var(--text-dark)' }}>Create Custom Basket</h2>
-              <button onClick={() => setShowCreateModal(false)} style={{ background:'none', border:'none', color:'var(--text-muted)', cursor:'pointer' }}><X size={20}/></button>
+        <div className="modal-overlay animate-fade-in" style={{ position:'fixed', top:0, left:0, width:'100%', height:'100%', background:'rgba(13, 27, 42, 0.6)', backdropFilter:'blur(8px)', zIndex:999, display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' }}>
+          <div className="modal-content roll-in-anim" style={{ background:'white', borderRadius:'24px', width:'100%', maxWidth:'600px', boxShadow:'0 24px 64px rgba(0,0,0,0.2)', overflow:'hidden', display:'flex', flexDirection:'column', maxHeight:'80vh' }}>
+            <div style={{ padding:'24px 32px', borderBottom:'1px solid var(--border)', display:'flex', alignItems:'center', justifyContent:'space-between', background: 'linear-gradient(to right, var(--bg-section), white)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '40px', height: '40px', background: 'var(--primary-50)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}><Briefcase size={20} /></div>
+                <h2 style={{ fontSize:'1.25rem', fontWeight:800, color:'var(--text-dark)', margin: 0 }}>Create Custom Basket</h2>
+              </div>
+              <button onClick={() => setShowCreateModal(false)} style={{ background:'var(--bg-section)', border:'none', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color:'var(--text-muted)', cursor:'pointer', transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.background='var(--border)'} onMouseLeave={e => e.currentTarget.style.background='var(--bg-section)'}><X size={18}/></button>
             </div>
             
-            <form onSubmit={handleCreateBasket} style={{ padding:'32px', overflowY:'auto', display:'flex', flexDirection:'column', gap:'20px' }}>
+            <form onSubmit={handleCreateBasket} style={{ padding:'32px', overflowY:'auto', display:'flex', flexDirection:'column', gap:'24px' }}>
               <div>
-                <label style={{ display:'block', fontSize:'0.85rem', fontWeight:700, color:'var(--text-dark)', marginBottom:'8px' }}>Basket Name</label>
+                <label style={{ display:'block', fontSize:'0.9rem', fontWeight:700, color:'var(--text-dark)', marginBottom:'8px' }}>Basket Name</label>
                 <input 
                   required
                   value={newBasket.name}
                   onChange={e => setNewBasket({...newBasket, name: e.target.value})}
                   placeholder="e.g. My Dividend Kings"
-                  style={{ width:'100%', padding:'12px 16px', borderRadius:'12px', border:'1px solid var(--border)', fontSize:'1rem', background:'var(--bg-section)' }}
+                  style={{ width:'100%', padding:'14px 16px', borderRadius:'12px', border:'2px solid var(--border)', fontSize:'1rem', background:'var(--bg-section)', transition: 'border-color 0.2s', outline: 'none' }}
+                  onFocus={e => e.currentTarget.style.borderColor = 'var(--primary)'}
+                  onBlur={e => e.currentTarget.style.borderColor = 'var(--border)'}
                 />
               </div>
               
@@ -477,7 +482,9 @@ function BasketsTabContent() {
               <button 
                 type="submit" 
                 disabled={saving || !newBasket.name || newBasket.symbols.length === 0}
-                style={{ background:'var(--primary)', color:'white', border:'none', borderRadius:'12px', padding:'14px', fontSize:'1rem', fontWeight:800, cursor: (saving || !newBasket.name || newBasket.symbols.length === 0) ? 'not-allowed' : 'pointer', opacity: (saving || !newBasket.name || newBasket.symbols.length === 0) ? 0.5 : 1, marginTop:'10px' }}
+                style={{ background:'var(--primary)', color:'white', border:'none', borderRadius:'12px', padding:'16px', fontSize:'1rem', fontWeight:800, cursor: (saving || !newBasket.name || newBasket.symbols.length === 0) ? 'not-allowed' : 'pointer', opacity: (saving || !newBasket.name || newBasket.symbols.length === 0) ? 0.5 : 1, marginTop:'10px', transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)' }}
+                onMouseEnter={e => { if (!(saving || !newBasket.name || newBasket.symbols.length === 0)) e.currentTarget.style.transform = 'translateY(-2px)' }}
+                onMouseLeave={e => e.currentTarget.style.transform = 'none'}
               >
                 {saving ? 'Creating...' : 'Create Basket'}
               </button>

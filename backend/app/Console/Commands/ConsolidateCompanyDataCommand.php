@@ -101,6 +101,12 @@ class ConsolidateCompanyDataCommand extends Command
             } else {
                 $this->error("Failed to generate Golden Record for {$company->symbol}");
             }
+            
+            // Respect Gemini free tier limits (15 RPM)
+            if (!$symbol) {
+                $this->info("Sleeping for 4 seconds to respect API limits...");
+                sleep(4);
+            }
         }
         
         $this->info("Done consolidating data.");
