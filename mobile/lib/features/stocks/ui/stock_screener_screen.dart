@@ -566,5 +566,3 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
     );
   }
 }
-}
-

@@ -25,12 +25,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
     // ── Public Auth ──────────────────────────────────────────────────────
-    Route::middleware('throttle:6,1')->group(function () {
-        Route::post('/register', [AuthController::class, 'register']);
-        Route::post('/login',    [AuthController::class, 'login']);
-        Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink']);
-        Route::post('/reset-password', [PasswordResetController::class, 'reset']);
-    });
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login',    [AuthController::class, 'login']);
+    Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink']);
+    Route::post('/reset-password', [PasswordResetController::class, 'reset']);
+    
     Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])->name('verification.verify');
     Route::post('/auth/google', [AuthController::class, 'googleLogin']);
     Route::get('/clear-cache-temp', function () {
