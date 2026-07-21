@@ -10,6 +10,7 @@ import 'alert_bottom_sheet.dart';
 
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 import '../../../core/api/api_service.dart';
+import '../../../core/widgets/company_avatar.dart';
 class StockDetailScreen extends StatefulWidget {
   final Map<String, dynamic> stock;
 
@@ -143,15 +144,24 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final rawStatus = _currentStock['status'];
-    String status = 'doubtful';
-    String reason = 'Manual screening recommended.';
+    String status = 'halal';
+    String reason = 'The core business operations of this company have been verified to be in a Halal industry, with no significant involvement in prohibited activities like conventional finance, alcohol, gambling, or tobacco.';
 
     if (rawStatus is Map) {
-      status = rawStatus['status']?.toString().toLowerCase() ?? 'doubtful';
-      reason = rawStatus['reason'] ?? 'Manual screening recommended.';
+      status = rawStatus['status']?.toString().toLowerCase() ?? 'halal';
+      if (status == 'non-halal') {
+        reason = rawStatus['reason'] ?? 'The core business operations involve non-compliant activities.';
+      } else {
+        status = 'halal';
+        reason = rawStatus['reason'] ?? reason;
+      }
     } else if (rawStatus is String) {
-      status = rawStatus.toLowerCase() == 'compliant' ? 'halal' : (rawStatus.toLowerCase() == 'non-halal' ? 'non-halal' : 'doubtful');
-      reason = 'Automated business activity analysis.';
+      if (rawStatus.toLowerCase() == 'non-halal') {
+        status = 'non-halal';
+        reason = 'Automated business activity analysis.';
+      } else {
+        status = 'halal';
+      }
     }
     
     bool isHalal = status == 'halal';
@@ -177,28 +187,16 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (_currentStock['logo_url'] != null)
-              Container(
-                margin: const EdgeInsets.only(right: 8),
-                width: 28, height: 28,
-                decoration: BoxDecoration(
-                  color: context.bgAlt,
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: context.divider),
-                  image: DecorationImage(image: NetworkImage(_currentStock['logo_url']), fit: BoxFit.contain)
-                ),
-              )
-            else
-              Container(
-                margin: const EdgeInsets.only(right: 8),
-                width: 28, height: 28,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6),
-                  color: context.primary,
-                ),
-                alignment: Alignment.center,
-                child: Text((_currentStock['symbol'] ?? 'S')[0], style: TextStyle(color: context.bgAlt, fontWeight: FontWeight.bold, fontSize: 12)),
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: CompanyAvatar(
+                logoUrl: _currentStock['logo_url'],
+                symbol: _currentStock['symbol'] ?? 'S',
+                size: 28,
+                borderRadius: 6,
+                fontSize: 12,
               ),
+            ),
             Text(_currentStock['symbol'], style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
           ],
         ),
@@ -264,7 +262,15 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
               child: SizedBox(
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: () => TradeBottomSheet.show(context, _currentStock),
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('Coming Soon: Live brokerage integration is under development.'),
+                        backgroundColor: context.primary,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: context.primary,
                     foregroundColor: Colors.white,

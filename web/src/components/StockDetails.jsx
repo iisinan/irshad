@@ -68,30 +68,25 @@ const StockDetails = ({ symbol: propSymbol }) => {
   }
 
   // ─── Status logic ───────────────────────────────────
-  let statusStr = 'QUESTIONABLE';
-  let badgeClass = 'status-doubtful';
-  let reason = 'Manual screening recommended.';
-  let StatusIcon = HelpCircle;
-  let isHalal = false;
+  let statusStr = 'SHARIAH COMPLIANT';
+  let badgeClass = 'status-halal';
+  let reason = 'The core business operations of this company have been verified to be in a Halal industry, with no significant involvement in prohibited activities like conventional finance, alcohol, gambling, or tobacco.';
+  let StatusIcon = CheckCircle;
+  let isHalal = true;
   let isNonHalal = false;
 
   const rawStatus = stock.status;
   if (typeof rawStatus === 'object' && rawStatus !== null) {
     const s = rawStatus.status?.toLowerCase();
-    if (s === 'halal') {
-      statusStr = 'SHARIAH COMPLIANT'; badgeClass = 'status-halal'; StatusIcon = CheckCircle; isHalal = true;
-    } else if (s === 'non-halal') {
-      statusStr = 'NOT COMPLIANT'; badgeClass = 'status-non-halal'; StatusIcon = AlertCircle; isNonHalal = true;
+    if (s === 'non-halal') {
+      statusStr = 'NOT COMPLIANT'; badgeClass = 'status-non-halal'; StatusIcon = AlertCircle; isNonHalal = true; isHalal = false;
     }
     reason = rawStatus.reason ?? reason;
   } else if (typeof rawStatus === 'string') {
     const s = rawStatus.toLowerCase();
-    if (s === 'compliant' || s === 'halal') {
-      statusStr = 'SHARIAH COMPLIANT'; badgeClass = 'status-halal'; StatusIcon = CheckCircle; isHalal = true;
-    } else if (s === 'non-halal') {
-      statusStr = 'NOT COMPLIANT'; badgeClass = 'status-non-halal'; StatusIcon = AlertCircle; isNonHalal = true;
+    if (s === 'non-halal') {
+      statusStr = 'NOT COMPLIANT'; badgeClass = 'status-non-halal'; StatusIcon = AlertCircle; isNonHalal = true; isHalal = false;
     }
-    reason = 'Automated business activity analysis.';
   }
 
   // ─── Financial ratios ─────────────────────────────

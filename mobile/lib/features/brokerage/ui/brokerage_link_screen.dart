@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/api/api_service.dart';
+import '../../portfolio/providers/portfolio_provider.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 class BrokerageLinkScreen extends StatefulWidget {
   const BrokerageLinkScreen({super.key});
@@ -278,22 +280,31 @@ class _BrokerageLinkScreenState extends State<BrokerageLinkScreen> {
                                 SnackBar(content: Text('Please enter your credentials'), backgroundColor: context.haram),
                               );
                               return;
-                            }
+                          }
                             
                             setState(() => isConnecting = true);
                             try {
-                              await ApiService().post('broker/link', {'broker_name': brokerName});
+                              final success = await Provider.of<PortfolioProvider>(context, listen: false)
+                                  .linkBroker(brokerName);
                               
                               if (context.mounted) {
-                                Navigator.pop(context); // Close bottom sheet
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Successfully linked $brokerName and funded account with ₦1,000,000!'),
-                                    backgroundColor: context.primary,
-                                    behavior: SnackBarBehavior.floating,
-                                  ),
-                                );
-                                _fetchLinkedAccounts(); // Refresh the list
+                                if (success) {
+                                  Navigator.pop(context); // Close bottom sheet
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Successfully linked $brokerName and funded account with ₦1,000,000!'),
+                                      backgroundColor: context.primary,
+                                      behavior: SnackBarBehavior.floating,
+                                    ),
+                                  );
+                                  _fetchLinkedAccounts(); // Refresh the list
+                                } else {
+                                  setState(() => isConnecting = false);
+                                  final error = Provider.of<PortfolioProvider>(context, listen: false).error;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Error linking broker: $error'), backgroundColor: context.haram),
+                                  );
+                                }
                               }
                             } catch (e) {
                               if (context.mounted) {

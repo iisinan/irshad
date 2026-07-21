@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/stock_provider.dart';
 
 import 'package:irshad_mobile/core/theme/app_theme.dart';
+import '../../../core/widgets/company_avatar.dart';
 class NgxMarketScreen extends StatefulWidget {
   const NgxMarketScreen({super.key});
 
@@ -12,24 +13,45 @@ class NgxMarketScreen extends StatefulWidget {
 
 class _NgxMarketScreenState extends State<NgxMarketScreen> {
   // Theme Constants
+  String _selectedSector = 'All';
+  String _sortBy = 'Symbol (A-Z)';
+  bool _isGridView = false;
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<StockProvider>(context, listen: false).fetchNgxStocks();
     });
   }
 
-  String _selectedSector = 'All';
-  String _sortBy = 'Symbol (A-Z)';
-  bool _isGridView = false;
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      final provider = Provider.of<StockProvider>(context, listen: false);
+      if (!provider.isLoading) {
+        provider.fetchNgxStocks(loadMore: true);
+      }
+    }
+  }
 
   Future<void> _fetchNgxData() async {
     await Provider.of<StockProvider>(context, listen: false).fetchNgxStocks();
   }
 
   List<Map<String, dynamic>> _getFilteredAndSortedStocks(List<dynamic> allStocks) {
-    List<Map<String, dynamic>> list = List<Map<String, dynamic>>.from(allStocks);
+    List<Map<String, dynamic>> list = allStocks
+        .cast<Map<String, dynamic>>()
+        .where((s) => ((s['latest_price'] ?? 0) as num).toDouble() > 0)
+        .toList();
     
     if (_selectedSector != 'All') {
       list = list.where((s) => s['sector'] == _selectedSector).toList();
@@ -106,6 +128,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
                       )
                     : _isGridView
                         ? GridView.builder(
+                            controller: _scrollController,
                             padding: const EdgeInsets.all(16.0),
                             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 2,
@@ -113,13 +136,27 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
                               crossAxisSpacing: 12,
                               childAspectRatio: 0.85,
                             ),
-                            itemCount: filteredStocks.length,
-                            itemBuilder: (context, index) => _buildGridCard(filteredStocks[index]),
+                            itemCount: filteredStocks.length + (provider.isLoading ? 1 : 0),
+                            itemBuilder: (context, index) {
+                              if (index == filteredStocks.length) {
+                                return Center(child: CircularProgressIndicator(color: context.primary));
+                              }
+                              return _buildGridCard(filteredStocks[index]);
+                            },
                           )
                         : ListView.builder(
+                            controller: _scrollController,
                             padding: const EdgeInsets.all(16.0),
-                            itemCount: filteredStocks.length,
-                            itemBuilder: (context, index) => _buildStockCard(filteredStocks[index]),
+                            itemCount: filteredStocks.length + (provider.isLoading ? 1 : 0),
+                            itemBuilder: (context, index) {
+                              if (index == filteredStocks.length) {
+                                return Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Center(child: CircularProgressIndicator(color: context.primary)),
+                                );
+                              }
+                              return _buildStockCard(filteredStocks[index]);
+                            },
                           ),
                 ),
               ),
@@ -243,25 +280,12 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // Logo
-            stock['logo_url'] != null ? 
-              Container(
-                width: 44, height: 44,
-                decoration: BoxDecoration(
-                  color: context.bgAlt,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: context.divider),
-                  image: DecorationImage(image: NetworkImage(stock['logo_url']), fit: BoxFit.contain)
-                ),
-              ) :
-              Container(
-                width: 44, height: 44,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: context.primary.withOpacity(0.1),
-                ),
-                alignment: Alignment.center,
-                child: Text((stock['symbol'] ?? 'S')[0], style: TextStyle(color: context.primary, fontWeight: FontWeight.bold, fontSize: 18)),
-              ),
+            CompanyAvatar(
+              logoUrl: stock['logo_url'],
+              symbol: stock['symbol'] ?? 'S',
+              size: 44,
+              borderRadius: 22,
+            ),
             const SizedBox(width: 14),
             // Ticker & Name
             Expanded(
@@ -283,7 +307,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
                 ],
               ),
             ),
-            // Compliance Pill
+            // Sector
             Expanded(
               flex: 2,
               child: Align(
@@ -291,46 +315,34 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(100), // Pill shape
+                    color: context.primary.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(100),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(statusIcon, size: 12, color: statusColor),
-                      const SizedBox(width: 4),
-                      Text(
-                        status.toUpperCase(),
-                        style: TextStyle(
-                          color: statusColor,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    (stock['sector'] ?? 'Unknown').toUpperCase(),
+                    style: TextStyle(
+                      color: context.primary,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.5,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ),
             ),
-            // Price & Sector
+            // Price
             Expanded(
               flex: 2,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    '₦${(stock['latest_price'] ?? 0).toStringAsFixed(2)}',
+                    '₦${((stock['latest_price'] ?? 0) as num).toStringAsFixed(2)}',
                     style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: context.textDark),
                   ),
-                  const SizedBox(height: 2),
-                  if (stock['sector'] != null)
-                    Text(
-                      stock['sector'].length > 10 ? '${stock['sector'].substring(0, 10)}...' : stock['sector'], 
-                      style: TextStyle(color: context.textMuted, fontSize: 11, fontWeight: FontWeight.w500),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
                 ],
               ),
             ),
@@ -376,25 +388,13 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                stock['logo_url'] != null ? 
-                    Container(
-                      width: 32, height: 32,
-                      decoration: BoxDecoration(
-                        color: context.bgAlt,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: context.divider),
-                        image: DecorationImage(image: NetworkImage(stock['logo_url']), fit: BoxFit.contain)
-                      ),
-                    ) :
-                    Container(
-                      width: 32, height: 32,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: context.primary.withOpacity(0.1),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text((stock['symbol'] ?? 'S')[0], style: TextStyle(color: context.primary, fontWeight: FontWeight.bold, fontSize: 14)),
-                    ),
+                CompanyAvatar(
+                  logoUrl: stock['logo_url'],
+                  symbol: stock['symbol'] ?? 'S',
+                  size: 32,
+                  borderRadius: 16,
+                  fontSize: 14,
+                ),
               ],
             ),
             const SizedBox(height: 12),

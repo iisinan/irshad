@@ -34,6 +34,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'core/notifications/notification_service.dart';
 import 'features/stocks/providers/stock_provider.dart';
 import 'features/baskets/providers/basket_provider.dart';
+import 'features/portfolio/providers/portfolio_provider.dart';
 import 'package:workmanager/workmanager.dart';
 import 'core/providers/app_state_provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -158,6 +159,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => StockProvider()),
         ChangeNotifierProvider(create: (_) => BasketProvider()),
+        ChangeNotifierProvider(create: (_) => PortfolioProvider()),
         ChangeNotifierProvider.value(value: appState),
       ],
       child: IrshadApp(initialRoute: startRoute),

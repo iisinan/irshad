@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../stocks/providers/stock_provider.dart';
-import '../../../../core/api/api_service.dart';
-
+import '../providers/portfolio_provider.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 class ZakatCalculatorScreen extends StatefulWidget {
   final bool isTab;
@@ -29,36 +28,42 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
     super.initState();
     _sharesController.addListener(_calculateZakat);
     _priceController.addListener(_calculateZakat);
-    _fetchPortfolio();
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadPortfolioData();
+    });
   }
 
-  Future<void> _fetchPortfolio() async {
-    try {
-      final response = await ApiService().get('portfolio');
-      if (response.data['status'] == 'success') {
-        if (mounted) {
-          setState(() {
-            _portfolioHoldings = response.data['data']['holdings'] ?? [];
-            _isLoadingPortfolio = false;
-            
-            // Calculate total portfolio zakat right away
-            double total = 0.0;
-            for (var holding in _portfolioHoldings) {
-              final double shares = (holding['shares'] ?? 0).toDouble();
-              final double price = (holding['current_price'] ?? 0).toDouble();
-              final double purificationDue = (holding['purification_due'] ?? 0).toDouble();
-              
-              final totalValue = shares * price;
-              final standardZakat = (totalValue - purificationDue) * 0.025;
-              total += standardZakat + purificationDue;
-            }
-            _totalPortfolioZakat = total;
-          });
-        }
-      }
-    } catch (e) {
-      if (mounted) setState(() => _isLoadingPortfolio = false);
+  void _loadPortfolioData() {
+    final portfolioProvider = context.read<PortfolioProvider>();
+    if (!portfolioProvider.isLoading && portfolioProvider.holdings.isEmpty) {
+      portfolioProvider.fetchPortfolio();
     }
+    _updatePortfolioZakat();
+  }
+
+  void _updatePortfolioZakat() {
+    final portfolioProvider = context.read<PortfolioProvider>();
+    setState(() {
+      _portfolioHoldings = portfolioProvider.holdings;
+      _isLoadingPortfolio = portfolioProvider.isLoading;
+      
+      double total = 0.0;
+      for (var holding in _portfolioHoldings) {
+        final double shares = num.tryParse(holding['shares']?.toString() ?? '0')?.toDouble() ?? 0.0;
+        final double price = num.tryParse(holding['current_price']?.toString() ?? '0')?.toDouble() ?? 0.0;
+        final double purificationDue = num.tryParse(holding['purification_due']?.toString() ?? '0')?.toDouble() ?? 0.0;
+        
+        final totalValue = shares * price;
+        final standardZakat = (totalValue - purificationDue) * 0.025;
+        total += standardZakat + purificationDue;
+      }
+      _totalPortfolioZakat = total;
+      
+      if (_isPortfolioMode) {
+        _zakatOwed = _totalPortfolioZakat;
+      }
+    });
   }
 
   void _calculateZakat() {

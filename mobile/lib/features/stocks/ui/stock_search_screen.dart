@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../data/stock_repository.dart';
 import '../providers/stock_provider.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
+import '../../../core/widgets/company_avatar.dart';
 
 class StockSearchScreen extends StatefulWidget {
   const StockSearchScreen({super.key});
@@ -292,32 +293,11 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
         child: Row(
           children: [
             // Icon or Logo
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                color: stock['logo_url'] != null ? Colors.white : context.primary,
-                border: stock['logo_url'] != null
-                    ? Border.all(color: context.divider, width: 1)
-                    : null,
-                boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 4, offset: const Offset(0, 2))
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(11),
-                child: stock['logo_url'] != null
-                    ? Image.network(
-                        stock['logo_url'],
-                        fit: BoxFit.contain,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const Center(child: Icon(Icons.show_chart, color: Colors.white, size: 24)),
-                      )
-                    : const Center(
-                        child: Icon(Icons.show_chart_rounded, color: Colors.white, size: 24),
-                      ),
-              ),
+            CompanyAvatar(
+              logoUrl: stock['logo_url'],
+              symbol: stock['symbol'] ?? 'S',
+              size: 44,
+              borderRadius: 12,
             ),
             const SizedBox(width: 16),
             Expanded(

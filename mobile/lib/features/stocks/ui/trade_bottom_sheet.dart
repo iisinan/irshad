@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/api/api_service.dart';
-
+import '../../portfolio/providers/portfolio_provider.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 class TradeBottomSheet extends StatefulWidget {
   final Map<String, dynamic> stock;
@@ -45,26 +46,31 @@ class _TradeBottomSheetState extends State<TradeBottomSheet> {
   }
 
   Future<void> _executeTrade() async {
-    final shares = double.tryParse(_sharesController.text) ?? 0;
+    final shares = double.tryParse(_sharesController.text)?.toInt() ?? 0;
     if (shares <= 0) return;
 
     setState(() => _isLoading = true);
 
     try {
-      await _apiService.post('portfolio/trade', {
-        'symbol': widget.stock['symbol'],
-        'shares': shares,
-      });
+      final success = await Provider.of<PortfolioProvider>(context, listen: false)
+          .executeTrade(widget.stock['symbol'], shares);
 
       if (mounted) {
-        Navigator.pop(context); // close bottom sheet
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Successfully purchased $shares shares of ${widget.stock['symbol']}!'),
-            backgroundColor: context.halal,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        if (success) {
+          Navigator.pop(context); // close bottom sheet
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Successfully purchased $shares shares of ${widget.stock['symbol']}!'),
+              backgroundColor: context.halal,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        } else {
+          final error = Provider.of<PortfolioProvider>(context, listen: false).error;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Trade failed: $error'), backgroundColor: context.haram),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {

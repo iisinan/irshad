@@ -100,7 +100,7 @@ class StockController extends Controller
                 $query->whereNotNull('pe_ratio')->where('pe_ratio', '<=', (float) $request->pe_max);
             }
 
-            return $query->get()->map(function ($company) {
+            return $query->paginate(20)->through(function ($company) {
                 $company->status = $company->current_status ? ['status' => $company->current_status] : null;
                 return $company;
             });

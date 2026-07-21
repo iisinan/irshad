@@ -5,6 +5,8 @@ import 'dart:convert';
 import '../providers/stock_provider.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 import '../../baskets/providers/basket_provider.dart';
+import '../../portfolio/providers/portfolio_provider.dart';
+import '../../../core/widgets/company_avatar.dart';
 
 class BasketDetailScreen extends StatefulWidget {
   final dynamic basket;
@@ -471,20 +473,11 @@ class _BasketDetailScreenState extends State<BasketDetailScreen> {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(14),
-                    color: company['logo_url'] != null ? Colors.white : context.primary.withOpacity(0.1),
-                    border: company['logo_url'] != null ? Border.all(color: context.divider) : null,
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(13),
-                    child: company['logo_url'] != null
-                        ? Image.network(company['logo_url'], fit: BoxFit.contain, errorBuilder: (_, __, ___) => Icon(Icons.show_chart_rounded, color: context.primary))
-                        : Icon(Icons.show_chart_rounded, color: context.primary),
-                  ),
+                CompanyAvatar(
+                  logoUrl: company['logo_url'],
+                  symbol: company['symbol'] ?? '???',
+                  size: 48,
+                  borderRadius: 14,
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -603,6 +596,7 @@ class _InvestBottomSheetState extends State<_InvestBottomSheet> {
     Navigator.pop(context);
 
     if (result['success']) {
+      if (mounted) context.read<PortfolioProvider>().fetchPortfolio();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: const Text('Investment successful! 🎉'), backgroundColor: context.halal),
       );

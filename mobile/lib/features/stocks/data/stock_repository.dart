@@ -44,17 +44,17 @@ class StockRepository {
     return null;
   }
 
-  Future<List<Map<String, dynamic>>> getNgxStocks() async {
+  Future<Map<String, dynamic>> getNgxStocksPaginated(int page) async {
     try {
-      final response = await _apiService.get('stocks/ngx');
+      final response = await _apiService.get('stocks/ngx?page=$page');
       if (response.statusCode == 200) {
-        final dataList = List<Map<String, dynamic>>.from(response.data['data']);
-        return dataList;
+        // Return the whole pagination object wrapped in data
+        return response.data['data'];
       }
     } catch (e) {
       // Handle error
     }
-    return [];
+    return {'data': [], 'last_page': 1};
   }
 
   Future<void> _cacheStock(Map<String, dynamic> stock) async {

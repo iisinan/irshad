@@ -10,6 +10,8 @@ class StockProvider extends ChangeNotifier {
   List<Map<String, dynamic>> _ngxStocks = [];
   bool _isLoading = false;
   String? _error;
+  int _currentPage = 1;
+  int _lastPage = 1;
 
   List<Map<String, dynamic>> get ngxStocks => _ngxStocks;
   bool get isLoading => _isLoading;
@@ -51,37 +53,55 @@ class StockProvider extends ChangeNotifier {
     return next3AM.millisecondsSinceEpoch;
   }
 
-  Future<void> fetchNgxStocks() async {
+  Future<void> fetchNgxStocks({bool loadMore = false}) async {
+    if (_isLoading) return;
+    
+    if (loadMore) {
+      if (_currentPage > _lastPage) return; // Reached end
+    } else {
+      _currentPage = 1;
+      _ngxStocks.clear();
+    }
+
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      final stocks = await _repository.getNgxStocks();
-      final validStocks = stocks.where((s) {
+      // Modify repository to pass page
+      final response = await _repository.getNgxStocksPaginated(_currentPage);
+      
+      final List newStocks = response['data'] ?? [];
+      _lastPage = response['last_page'] ?? 1;
+
+      final validStocks = newStocks.where((s) {
         final priceStr = s['latest_price']?.toString() ?? '0';
         final price = double.tryParse(priceStr) ?? 0.0;
         return price > 0.0;
-      }).toList();
+      }).map((s) => Map<String, dynamic>.from(s)).toList();
 
       if (validStocks.isNotEmpty) {
-        _ngxStocks = validStocks;
-        // Cache it until next 3 AM
-        try {
-          final box = await Hive.openBox(_boxName);
-          final cacheWrapper = {
-            'data': _ngxStocks,
-            'expiry': _getNext3AM(),
-          };
-          await box.put('ngx_stocks_v7', jsonEncode(cacheWrapper));
-        } catch (e) {
-          // ignore
+        _ngxStocks.addAll(validStocks);
+        _currentPage++;
+        
+        // Only cache the first page for fast initial load
+        if (!loadMore) {
+          try {
+            final box = await Hive.openBox(_boxName);
+            final cacheWrapper = {
+              'data': _ngxStocks,
+              'expiry': _getNext3AM(),
+            };
+            await box.put('ngx_stocks_v8', jsonEncode(cacheWrapper));
+          } catch (e) {
+            // ignore
+          }
         }
-      } else {
+      } else if (!loadMore) {
         _error = "No stocks available.";
       }
     } catch (e) {
-      _error = e.toString();
+      if (!loadMore) _error = e.toString();
     } finally {
       _isLoading = false;
       notifyListeners();

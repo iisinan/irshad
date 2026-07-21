@@ -23,6 +23,7 @@ class AaoifiComplianceService
      */
     const BLACKLIST_INDUSTRIES = [
         "Banks", 
+        "Financial Services",
         "Insurance", 
         "Diversified Financials", 
         "Consumer Finance", 
@@ -44,7 +45,8 @@ class AaoifiComplianceService
             $industry = $swsIndustry ?? $company->sector;
             $isBlacklistedSector = in_array($industry, self::BLACKLIST_INDUSTRIES);
 
-            if ($isBlacklistedSector) {
+            // EXCEPT JAIZBANK
+            if ($isBlacklistedSector && strtoupper($company->symbol) !== 'JAIZBANK') {
                 return $this->saveStatus(
                     $company, 
                     'non-halal', 

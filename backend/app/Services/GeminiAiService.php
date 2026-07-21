@@ -175,4 +175,73 @@ class GeminiAiService
         
         return null;
     }
+
+    /**
+     * Analyze a product image (ingredients list) and optional text using Gemini Vision.
+     */
+    public function analyzeProductImage(string $imagePath, ?string $ingredientsText): ?array
+    {
+        if (empty($this->apiKey)) {
+            Log::error("Gemini API key is not configured for vision analysis.");
+            return null;
+        }
+
+        $fullPath = storage_path('app/public/' . $imagePath);
+        if (!file_exists($fullPath)) {
+            Log::error("Image file not found at path: " . $fullPath);
+            return null;
+        }
+
+        $mimeType = mime_content_type($fullPath) ?: 'image/jpeg';
+        $base64Image = base64_encode(file_get_contents($fullPath));
+
+        $prompt = "You are an expert Islamic dietary scholar. Please analyze the ingredients in this product.\n";
+        if (!empty($ingredientsText)) {
+            $prompt .= "The user also provided this text description of ingredients: \"{$ingredientsText}\"\n";
+        }
+        $prompt .= "Carefully read all ingredients from the image. If there are NO ingredients visible in the image, set 'status' to 'doubtful' and state that no ingredients were visible.\n";
+        $prompt .= "Look out for prohibited items (pork, alcohol, carmine, non-halal gelatin) and doubtful items (E471, mono- and diglycerides, whey, pepsin, rennet).\n";
+        $prompt .= "Respond ONLY with a valid JSON object with the following keys:\n";
+        $prompt .= "- 'status': Must be exactly 'halal', 'non-halal', or 'doubtful'.\n";
+        $prompt .= "- 'status_reason': A clear, friendly explanation (1-2 sentences) of why this status was chosen, mentioning any specific ingredients found.\n";
+        $prompt .= "- 'ingredients_text': The extracted list of ingredients from the image, combined with the user's text if applicable.\n";
+
+        try {
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+            ])->timeout(60)->post("{$this->baseUrl}/gemini-1.5-flash:generateContent?key={$this->apiKey}", [
+                'contents' => [
+                    [
+                        'parts' => [
+                            ['text' => $prompt],
+                            [
+                                'inlineData' => [
+                                    'mimeType' => $mimeType,
+                                    'data' => $base64Image
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? "";
+                
+                $text = str_replace('```json', '', $text);
+                $text = str_replace('```', '', $text);
+                $text = trim($text);
+
+                return json_decode($text, true);
+            }
+
+            Log::error('Gemini Vision Error', ['response' => $response->body()]);
+            
+        } catch (\Exception $e) {
+            Log::error('Gemini Vision Exception', ['message' => $e->getMessage()]);
+        }
+        
+        return null;
+    }
 }

@@ -206,7 +206,7 @@ class ProductController extends Controller
     /**
      * Submit a new product for review.
      */
-    public function store(Request $request): JsonResponse
+    public function store(Request $request, \App\Services\GeminiAiService $aiService): JsonResponse
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -221,20 +221,44 @@ class ProductController extends Controller
             $imagePath = $request->file('image')->store('products', 'public');
         }
 
+        $status = 'doubtful';
+        $statusReason = 'Submitted by user, pending scholar review.';
+        $extractedIngredients = $validated['ingredients_text'] ?? null;
+        $isAiAnalyzed = false;
+
+        // Use AI Vision if image is present
+        if ($imagePath) {
+            $analysis = $aiService->analyzeProductImage($imagePath, $extractedIngredients);
+            if ($analysis) {
+                $status = $analysis['status'] ?? 'doubtful';
+                $statusReason = "AI Analysis: " . ($analysis['status_reason'] ?? 'Unknown');
+                if (!empty($analysis['ingredients_text'])) {
+                    $extractedIngredients = $analysis['ingredients_text'];
+                }
+                $isAiAnalyzed = true;
+            }
+        } elseif (!empty($extractedIngredients)) {
+            // Fallback to text analysis if no image but text is provided
+            $analysis = $this->analyzeHalalStatus($extractedIngredients);
+            $status = $analysis['status'];
+            $statusReason = "Auto-screened text: " . $analysis['reason'];
+        }
+
         $product = Product::create([
             'name' => $validated['name'],
             'brand' => $validated['brand'],
             'barcode' => $validated['barcode'],
-            'status' => 'doubtful', // Pending review
-            'status_reason' => 'Submitted by user, pending scholar review.',
+            'ingredients_text' => $extractedIngredients,
+            'status' => $status,
+            'status_reason' => $statusReason,
             'verified_by_scholar' => false,
+            'image_url' => $imagePath ? asset('storage/' . $imagePath) : null,
             'metadata' => [
-                'ingredients_text' => $validated['ingredients_text'] ?? null,
                 'submitted_by' => $request->user()->id,
-                'image_path' => $imagePath,
+                'ai_analyzed' => $isAiAnalyzed,
             ]
         ]);
 
-        return $this->success($product, 'Product submitted successfully', 201);
+        return $this->success($product, 'Product submitted and analyzed successfully', 201);
     }
 }

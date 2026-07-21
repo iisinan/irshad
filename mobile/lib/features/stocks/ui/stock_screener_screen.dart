@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../core/api/api_service.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../core/api/api_service.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/company_avatar.dart';
 import 'stock_detail_screen.dart';
 
 class StockScreenerScreen extends StatefulWidget {
@@ -21,20 +22,37 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
   double? _minMarketCap;
   double? _maxPe;
 
+  int _currentPage = 1;
+  bool _hasMore = true;
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     _applyFilters();
   }
 
-  Future<void> _applyFilters() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = '';
-    });
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
 
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      if (!_isLoading && _hasMore) {
+        _loadMore();
+      }
+    }
+  }
+
+  Future<void> _loadMore() async {
+    setState(() => _isLoading = true);
     try {
-      final Map<String, dynamic> queryParams = {};
+      _currentPage++;
+      final Map<String, dynamic> queryParams = {'page': _currentPage, 'per_page': 10};
       if (_selectedStatuses.isNotEmpty) queryParams['status'] = _selectedStatuses.join(',');
       if (_selectedSectors.isNotEmpty) queryParams['sector'] = _selectedSectors.join(',');
       if (_minMarketCap != null) queryParams['min_market_cap'] = _minMarketCap;
@@ -42,9 +60,46 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
 
       final response = await ApiService().get('stocks/ngx', queryParameters: queryParams);
       if (response.statusCode == 200 && response.data['status'] == 'success') {
+        final newData = response.data['data']?['data'] ?? response.data['data'] ?? [];
         if (mounted) {
           setState(() {
-            _results = response.data['data'];
+            _results.addAll(newData);
+            _hasMore = newData.isNotEmpty && newData.length >= 10;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Load more error: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _applyFilters() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = '';
+      _currentPage = 1;
+      _hasMore = true;
+      _results.clear();
+    });
+
+    try {
+      final Map<String, dynamic> queryParams = {'page': _currentPage, 'per_page': 10};
+      if (_selectedStatuses.isNotEmpty) queryParams['status'] = _selectedStatuses.join(',');
+      if (_selectedSectors.isNotEmpty) queryParams['sector'] = _selectedSectors.join(',');
+      if (_minMarketCap != null) queryParams['min_market_cap'] = _minMarketCap;
+      if (_maxPe != null) queryParams['pe_max'] = _maxPe;
+
+      final response = await ApiService().get('stocks/ngx', queryParameters: queryParams);
+      if (response.statusCode == 200 && response.data['status'] == 'success') {
+        final data = response.data['data']?['data'] ?? response.data['data'] ?? [];
+        if (mounted) {
+          setState(() {
+            _results = data;
+            // Filter out 0 prices just in case
+            _results = _results.where((s) => ((s['latest_price'] ?? 0) as num).toDouble() > 0).toList();
+            _hasMore = data.length >= 10;
           });
         }
       } else {
@@ -223,7 +278,7 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
         _buildFilterBar(),
         Divider(height: 1, thickness: 1, color: context.divider),
         Expanded(
-          child: _isLoading
+          child: _isLoading && _results.isEmpty
               ? Center(child: CircularProgressIndicator(color: context.primary))
               : _errorMessage.isNotEmpty
                   ? Center(child: Text(_errorMessage, style: TextStyle(color: context.haram)))
@@ -234,10 +289,28 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
                           color: context.primary,
                           backgroundColor: context.bgAlt,
                           child: ListView.builder(
-                            itemCount: _results.length,
+                            controller: _scrollController,
+                            itemCount: _results.length + (_hasMore ? 1 : 0),
                             padding: const EdgeInsets.only(bottom: 100, top: 12),
                             itemBuilder: (context, index) {
-                              return _buildStockItem(_results[index]);
+                              if (index == _results.length) {
+                                return Center(child: Padding(padding: const EdgeInsets.all(16), child: CircularProgressIndicator(color: context.primary)));
+                              }
+                              return TweenAnimationBuilder(
+                                tween: Tween<double>(begin: 0, end: 1),
+                                duration: Duration(milliseconds: 300 + (index % 10) * 50),
+                                curve: Curves.easeOutCubic,
+                                builder: (context, value, child) {
+                                  return Opacity(
+                                    opacity: value,
+                                    child: Transform.translate(
+                                      offset: Offset(0, 50 * (1 - value)),
+                                      child: child,
+                                    ),
+                                  );
+                                },
+                                child: _buildStockItem(_results[index]),
+                              );
                             },
                           ),
                         ),
@@ -379,27 +452,6 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
   }
 
   Widget _buildStockItem(dynamic stock) {
-    final statusObj = stock['status'];
-    final statusString = statusObj != null ? statusObj['status'].toString().toLowerCase() : 'review';
-    
-    Color statusColor = context.review;
-    Color statusBg = context.review.withValues(alpha: 0.1);
-    
-    if (statusString == 'halal') {
-      statusColor = context.halal;
-      statusBg = context.halalBg;
-    } else if (statusString == 'non-halal') {
-      statusColor = context.haram;
-      statusBg = context.haramBg;
-    } else if (statusString == 'doubtful') {
-      statusColor = context.questionable;
-      statusBg = context.questionableBg;
-    }
-
-    String displayStatus = statusString.toUpperCase();
-    if (statusString == 'halal') displayStatus = 'COMPLIANT';
-    if (statusString == 'non-halal') displayStatus = 'NON-COMPLIANT';
-
     final priceChange = double.tryParse(stock['price_change']?.toString() ?? '0') ?? 0.0;
     final priceChangePct = double.tryParse(stock['price_change_pct']?.toString() ?? '0') ?? 0.0;
     final isPositive = priceChange >= 0;
@@ -432,6 +484,14 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                CompanyAvatar(
+                  logoUrl: stock['logo_url'],
+                  symbol: stock['symbol'] ?? 'S',
+                  size: 40,
+                  borderRadius: 20,
+                  fontSize: 16,
+                ),
+                const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -445,43 +505,43 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
                           const SizedBox(width: 10),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(color: statusBg, borderRadius: BorderRadius.circular(20)),
+                            decoration: BoxDecoration(color: context.primary.withOpacity(0.08), borderRadius: BorderRadius.circular(20)),
                             child: Text(
-                              displayStatus,
-                              style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5),
+                              (stock['sector'] ?? 'Unknown').toUpperCase(),
+                              style: TextStyle(color: context.primary, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                      const SizedBox(width: 6),
-                      Icon(Icons.flag_outlined, color: context.textMuted.withValues(alpha: 0.5), size: 14),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        stock['name'] ?? 'Unknown',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 14, color: context.textMuted),
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    stock['name'] ?? stock['sector'] ?? 'Unknown',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 14, color: context.textMuted),
-                  ),
-                ],
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  '₦${stock['latest_price']}',
-                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16, color: context.textDark),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  '${isPositive ? '+' : ''}${priceChangePct.toStringAsFixed(2)}%',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w400,
-                    fontSize: 14,
-                    color: isPositive ? context.halal : context.haram,
-                  ),
-                ),
-              ],
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '₦${((stock['latest_price'] ?? 0) as num).toStringAsFixed(2)}',
+                      style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16, color: context.textDark),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${isPositive ? '+' : ''}${priceChangePct.toStringAsFixed(2)}%',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                        fontSize: 14,
+                        color: isPositive ? context.halal : context.haram,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -490,5 +550,6 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
       ),
     );
   }
+}
 }
 

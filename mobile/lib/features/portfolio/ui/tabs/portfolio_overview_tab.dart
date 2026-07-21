@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/api/api_service.dart';
-
+import '../../../../core/widgets/company_avatar.dart';
+import '../../providers/portfolio_provider.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
+
 class PortfolioOverviewTab extends StatefulWidget {
   const PortfolioOverviewTab({super.key});
 
@@ -12,8 +14,6 @@ class PortfolioOverviewTab extends StatefulWidget {
 }
 
 class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
-  // Theme Constants
-
   List<Color> get _chartColors => [
     context.theme.colorScheme.secondary,
     Color(0xFF2A6F73),
@@ -22,142 +22,70 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
     context.primary,
   ];
 
-  bool isLoading = true;
-  String errorMessage = '';
-
-  Map<String, dynamic> summary = {
-    'total_balance': 0.0,
-    'purification_due': 0.0,
-    'health_percentage': 100.0,
-  };
-  List<dynamic> holdings = [];
-  bool _isGuest = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchPortfolio();
-  }
-
-  Future<void> _fetchPortfolio() async {
-    const storage = FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
-    final token = await storage.read(key: 'access_token');
-    if (token == null) {
-      if (mounted) {
-        setState(() { _isGuest = true; isLoading = false; });
-      }
-      return;
-    }
-    try {
-      final response = await ApiService().get('portfolio');
-      if (response.data['status'] == 'success') {
-        if (mounted) {
-          setState(() {
-            summary = response.data['data']['summary'];
-            holdings = response.data['data']['holdings'];
-            isLoading = false;
-          });
-        }
-      } else {
-        if (mounted) setState(() { isLoading = false; });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isGuest = true;
-          isLoading = false;
-        });
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: context.bg,
-      body: isLoading
-          ? Center(child: CircularProgressIndicator(color: context.primary))
-          : _isGuest
-              ? _buildGuestView()
-              : RefreshIndicator(
-                  onRefresh: _fetchPortfolio,
-                  color: context.primary,
-                  backgroundColor: context.bgAlt,
-                  child: SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0, bottom: 100.0),
-                      child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildBalanceCard(),
-                        const SizedBox(height: 24),
-                        Text(
-                          'Allocation',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: context.textDark),
-                        ),
-                        const SizedBox(height: 16),
-                        if (holdings.isNotEmpty) _buildPieChart(),
-                        if (holdings.isEmpty)
-                          Container(
-                            padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
-                            alignment: Alignment.center,
-                            child: Column(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(24),
-                                  decoration: BoxDecoration(
-                                    color: context.primary.withValues(alpha: 0.05),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(Icons.account_balance_wallet_rounded, size: 48, color: context.primary),
-                                ),
-                                const SizedBox(height: 24),
-                                Text('Your Portfolio is Empty', style: TextStyle(color: context.textDark, fontWeight: FontWeight.w900, fontSize: 20)),
-                                const SizedBox(height: 12),
-                                Text(
-                                  'Track your halal investments and automatically calculate required purification across your assets.',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(color: context.textMuted, height: 1.5, fontSize: 14),
-                                ),
-                                const SizedBox(height: 32),
-                                ElevatedButton.icon(
-                                  onPressed: () => Navigator.pushNamed(context, '/brokerage/link'),
-                                  icon: const Icon(Icons.link_rounded),
-                                  label: const Text('Link Brokerage Account', style: TextStyle(fontWeight: FontWeight.w700)),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: context.textDark,
-                                    foregroundColor: Colors.white,
-                                    elevation: 0,
-                                    minimumSize: const Size(double.infinity, 56),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        const SizedBox(height: 32),
-                        Text(
-                          'Holdings',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: context.textDark),
-                        ),
-                        const SizedBox(height: 12),
-                        ...holdings.asMap().entries.map((entry) => _buildHoldingItem(entry.value, entry.key)),
-                        const SizedBox(height: 40),
-                      ],
+      body: Consumer<PortfolioProvider>(
+        builder: (context, provider, child) {
+          if (provider.isLoading && provider.summary['total_balance'] == 0) {
+            return Center(child: CircularProgressIndicator(color: context.primary));
+          }
+
+          if (provider.isGuest) {
+            return _buildGuestView(context);
+          }
+
+          return RefreshIndicator(
+            onRefresh: provider.fetchPortfolio,
+            color: context.primary,
+            backgroundColor: context.bgAlt,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Padding(
+                padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0, bottom: 100.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildBalanceCard(context, provider),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Allocation',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: context.textDark),
                     ),
-                  ),
+                    const SizedBox(height: 16),
+                    if (provider.holdings.isNotEmpty) _buildPieChart(context, provider.holdings),
+                    if (provider.holdings.isEmpty) _buildEmptyState(context),
+                    const SizedBox(height: 32),
+                    Text(
+                      'Holdings',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: context.textDark),
+                    ),
+                    const SizedBox(height: 12),
+                    ...provider.holdings.asMap().entries.map((entry) => _buildHoldingItem(context, entry.value, entry.key)),
+                    const SizedBox(height: 40),
+                  ],
                 ),
               ),
-      floatingActionButton: _isGuest ? null : FloatingActionButton(
-        onPressed: _showAddHoldingSheet,
-        backgroundColor: context.textDark,
-        child: const Icon(Icons.add, color: Colors.white),
+            ),
+          );
+        },
+      ),
+      floatingActionButton: Consumer<PortfolioProvider>(
+        builder: (context, provider, child) {
+          return provider.isGuest 
+            ? const SizedBox() 
+            : FloatingActionButton(
+                onPressed: () => _showAddHoldingSheet(context),
+                backgroundColor: context.textDark,
+                child: const Icon(Icons.add, color: Colors.white),
+              );
+        },
       ),
     );
   }
 
-  Widget _buildGuestView() {
+  Widget _buildGuestView(BuildContext context) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -192,7 +120,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                   backgroundColor: context.primary,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)), // Pill
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                   elevation: 0,
                 ),
                 child: const Text('Sign In', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
@@ -209,7 +137,47 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
     );
   }
 
-  Widget _buildBalanceCard() {
+  Widget _buildEmptyState(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
+      alignment: Alignment.center,
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: context.primary.withValues(alpha: 0.05),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.account_balance_wallet_rounded, size: 48, color: context.primary),
+          ),
+          const SizedBox(height: 24),
+          Text('Your Portfolio is Empty', style: TextStyle(color: context.textDark, fontWeight: FontWeight.w900, fontSize: 20)),
+          const SizedBox(height: 12),
+          Text(
+            'Track your halal investments and automatically calculate required purification across your assets.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: context.textMuted, height: 1.5, fontSize: 14),
+          ),
+          const SizedBox(height: 32),
+          ElevatedButton.icon(
+            onPressed: () => Navigator.pushNamed(context, '/brokerage/link'),
+            icon: const Icon(Icons.link_rounded),
+            label: const Text('Link Brokerage Account', style: TextStyle(fontWeight: FontWeight.w700)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: context.textDark,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              minimumSize: const Size(double.infinity, 56),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBalanceCard(BuildContext context, PortfolioProvider provider) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
@@ -240,7 +208,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
           ),
           const SizedBox(height: 8),
           Text(
-            '₦ ${summary['total_balance'].toStringAsFixed(2)}',
+            '₦ ${provider.summary['total_balance'].toStringAsFixed(2)}',
             style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900, letterSpacing: -1),
           ),
           const SizedBox(height: 20),
@@ -249,24 +217,24 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: summary['health_percentage'] < 100 ? context.questionable.withValues(alpha: 0.2) : context.halal.withValues(alpha: 0.2),
+                  color: provider.summary['health_percentage'] < 100 ? context.questionable.withValues(alpha: 0.2) : context.halal.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
                   children: [
-                    Icon(summary['health_percentage'] < 100 ? Icons.warning_rounded : Icons.check_circle_rounded, color: summary['health_percentage'] < 100 ? context.questionable : context.halal, size: 14),
+                    Icon(provider.summary['health_percentage'] < 100 ? Icons.warning_rounded : Icons.check_circle_rounded, color: provider.summary['health_percentage'] < 100 ? context.questionable : context.halal, size: 14),
                     const SizedBox(width: 4),
                     Text(
-                      '${summary['health_percentage']}% Halal',
-                      style: TextStyle(color: summary['health_percentage'] < 100 ? context.questionable : context.halal, fontWeight: FontWeight.w700, fontSize: 12),
+                      '${provider.summary['health_percentage']}% Halal',
+                      style: TextStyle(color: provider.summary['health_percentage'] < 100 ? context.questionable : context.halal, fontWeight: FontWeight.w700, fontSize: 12),
                     ),
                   ],
                 ),
               ),
-              if (summary['purification_due'] > 0) ...[
+              if (provider.summary['purification_due'] > 0) ...[
                 const SizedBox(width: 8),
                 Text(
-                  'Purify: ₦${summary['purification_due'].toStringAsFixed(2)}',
+                  'Purify: ₦${provider.summary['purification_due'].toStringAsFixed(2)}',
                   style: TextStyle(color: context.questionable, fontSize: 13, fontWeight: FontWeight.w600),
                 ),
               ]
@@ -277,7 +245,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
     );
   }
 
-  Widget _buildPieChart() {
+  Widget _buildPieChart(BuildContext context, List<dynamic> holdings) {
     return Container(
       height: 200,
       padding: const EdgeInsets.all(16),
@@ -299,7 +267,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                   final idx = entry.key;
                   return PieChartSectionData(
                     color: _chartColors[idx % _chartColors.length],
-                    value: (h['total_value'] as num).toDouble(),
+                    value: num.tryParse(h['total_value']?.toString() ?? '0')?.toDouble() ?? 0.0,
                     title: '',
                     radius: 25,
                   );
@@ -343,13 +311,13 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
     );
   }
 
-  Widget _buildHoldingItem(dynamic holding, int index) {
-    bool isHalal = holding['is_halal'];
-    double returnPct = (holding['return_percentage'] as num).toDouble();
-    double val = (holding['total_value'] as num).toDouble();
+  Widget _buildHoldingItem(BuildContext context, dynamic holding, int index) {
+    bool isHalal = holding['is_halal'] ?? false;
+    double returnPct = num.tryParse(holding['return_percentage']?.toString() ?? '0')?.toDouble() ?? 0.0;
+    double val = num.tryParse(holding['total_value']?.toString() ?? '0')?.toDouble() ?? 0.0;
 
     return GestureDetector(
-      onTap: () => _showEditHoldingSheet(holding),
+      onTap: () => _showEditHoldingSheet(context, holding),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
@@ -357,68 +325,66 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
           border: Border(bottom: BorderSide(color: context.divider, width: 1)),
         ),
         child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 4,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: _chartColors[index % _chartColors.length],
-                  borderRadius: BorderRadius.circular(4),
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                CompanyAvatar(
+                  logoUrl: holding['logo_url'],
+                  symbol: holding['symbol'] ?? 'S',
+                  size: 40,
+                  borderRadius: 12,
                 ),
-              ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        holding['symbol'],
-                        style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, fontSize: 16),
-                      ),
-                      if (!isHalal) ...[
-                        const SizedBox(width: 6),
-                        Icon(Icons.warning_rounded, color: context.haram, size: 14),
-                      ]
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${holding['shares']} shares',
-                    style: TextStyle(color: context.textMuted, fontSize: 13),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '₦ ${val.toStringAsFixed(2)}',
-                style: TextStyle(fontWeight: FontWeight.w800, color: context.textDark, fontSize: 15),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '${returnPct >= 0 ? '+' : ''}${returnPct.toStringAsFixed(2)}%',
-                style: TextStyle(
-                  color: returnPct >= 0 ? context.primary : context.haram, 
-                  fontWeight: FontWeight.w700, 
-                  fontSize: 13
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          holding['symbol'],
+                          style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, fontSize: 16),
+                        ),
+                        if (!isHalal) ...[
+                          const SizedBox(width: 6),
+                          Icon(Icons.warning_rounded, color: context.haram, size: 14),
+                        ]
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${holding['shares']} shares',
+                      style: TextStyle(color: context.textMuted, fontSize: 13),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  '₦ ${val.toStringAsFixed(2)}',
+                  style: TextStyle(fontWeight: FontWeight.w800, color: context.textDark, fontSize: 15),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${returnPct >= 0 ? '+' : ''}${returnPct.toStringAsFixed(2)}%',
+                  style: TextStyle(
+                    color: returnPct >= 0 ? context.primary : context.haram, 
+                    fontWeight: FontWeight.w700, 
+                    fontSize: 13
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-  void _showAddHoldingSheet() {
+  void _showAddHoldingSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -446,7 +412,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                 labelColor: context.textDark,
                 unselectedLabelColor: context.textMuted,
                 indicatorColor: context.primary,
-                tabs: [
+                tabs: const [
                   Tab(text: 'Link Brokerage'),
                   Tab(text: 'Manual Entry'),
                 ],
@@ -466,12 +432,12 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                           Text('Securely sync your holdings directly from your broker. Currently supporting Stanbic IBTC, Meristem, and ARM.', textAlign: TextAlign.center, style: TextStyle(color: context.textMuted)),
                           const SizedBox(height: 32),
                           ElevatedButton(
-                            onPressed: () {},
+                            onPressed: () => Navigator.pushNamed(context, '/brokerage/link'),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: context.primary, 
                               foregroundColor: Colors.white, 
                               minimumSize: const Size(double.infinity, 56),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)), // Pill
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                               elevation: 0,
                             ),
                             child: const Text('Connect Broker', style: TextStyle(fontWeight: FontWeight.w800)),
@@ -513,7 +479,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
     );
   }
 
-  void _showEditHoldingSheet(dynamic holding) {
+  void _showEditHoldingSheet(BuildContext context, dynamic holding) {
     final qtyController = TextEditingController(text: holding['shares'].toString());
     final priceController = TextEditingController(text: holding['average_buy_price'].toString());
 
@@ -522,8 +488,8 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
       isScrollControlled: true,
       backgroundColor: context.bgAlt,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, left: 24, right: 24, top: 24),
+      builder: (bottomSheetContext) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(bottomSheetContext).viewInsets.bottom, left: 24, right: 24, top: 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -532,7 +498,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('Edit ${holding['symbol']}', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: context.textDark)),
-                IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
+                IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(bottomSheetContext)),
               ],
             ),
             const SizedBox(height: 16),
@@ -555,11 +521,11 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                     onPressed: () async {
                       try {
                         await ApiService().delete('portfolio/${holding['id']}');
-                        if (mounted) Navigator.pop(context);
-                        _fetchPortfolio();
+                        if (mounted) Navigator.pop(bottomSheetContext);
+                        if (mounted) Provider.of<PortfolioProvider>(context, listen: false).fetchPortfolio();
                       } catch (e) {
                         if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
+                          ScaffoldMessenger.of(bottomSheetContext).showSnackBar(
                             SnackBar(content: Text('Failed to delete: $e'), backgroundColor: context.haram),
                           );
                         }
@@ -579,17 +545,17 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                   child: ElevatedButton(
                     onPressed: () async {
                       try {
-                        final shares = double.parse(qtyController.text);
-                        final price = double.parse(priceController.text);
+                        final shares = double.tryParse(qtyController.text) ?? 0.0;
+                        final price = double.tryParse(priceController.text) ?? 0.0;
                         await ApiService().put('portfolio/${holding['id']}', {
                           'shares': shares,
                           'average_buy_price': price,
                         });
-                        if (mounted) Navigator.pop(context);
-                        _fetchPortfolio();
+                        if (mounted) Navigator.pop(bottomSheetContext);
+                        if (mounted) Provider.of<PortfolioProvider>(context, listen: false).fetchPortfolio();
                       } catch (e) {
                         if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
+                          ScaffoldMessenger.of(bottomSheetContext).showSnackBar(
                             SnackBar(content: Text('Failed to save: $e'), backgroundColor: context.haram),
                           );
                         }
@@ -614,3 +580,4 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
     );
   }
 }
+
