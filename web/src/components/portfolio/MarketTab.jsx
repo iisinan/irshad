@@ -103,15 +103,6 @@ const StockRow = React.memo(({ stock, idx, isWatched, onToggle }) => {
         </Link>
       </td>
 
-      {/* Sector */}
-      <td style={{ padding: '13px 16px', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
-        {normSector(stock.sector)}
-      </td>
-
-      {/* Industry */}
-      <td style={{ padding: '13px 16px', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
-        {stock.business_type || '—'}
-      </td>
 
       {/* Price */}
       <td style={{ padding: '13px 16px', textAlign: 'right', fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.88rem', fontVariantNumeric: 'tabular-nums' }}>
@@ -383,8 +374,7 @@ export default function MarketTab() {
                 <tr>
                   <TH>#</TH>
                   <TH>Company</TH>
-                  <TH>Sector</TH>
-                  <TH>Industry</TH>
+
                   <TH right>Price</TH>
                   <TH right>Change</TH>
                   <TH right>Mkt Cap</TH>
