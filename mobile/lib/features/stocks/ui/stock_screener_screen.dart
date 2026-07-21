@@ -503,14 +503,29 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
                             style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18, color: context.textDark, letterSpacing: -0.5),
                           ),
                           const SizedBox(width: 10),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(color: context.primary.withOpacity(0.08), borderRadius: BorderRadius.circular(20)),
-                            child: Text(
-                              (stock['sector'] ?? 'Unknown').toUpperCase(),
-                              style: TextStyle(color: context.primary, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                          Expanded(
+                            child: Wrap(
+                              spacing: 6,
+                              runSpacing: 4,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(color: context.primary.withOpacity(0.08), borderRadius: BorderRadius.circular(20)),
+                                  child: Text(
+                                    (stock['sector'] ?? 'Unknown').toUpperCase(),
+                                    style: TextStyle(color: context.primary, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5),
+                                  ),
+                                ),
+                                if (stock['industry'] != null && stock['industry'].toString().isNotEmpty)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(color: context.primary.withOpacity(0.08), borderRadius: BorderRadius.circular(20)),
+                                    child: Text(
+                                      stock['industry'].toString().toUpperCase(),
+                                      style: TextStyle(color: context.primary, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5),
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
                         ],

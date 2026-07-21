@@ -285,7 +285,10 @@ const StockCard = ({ company }) => {
           <div className="stock-symbol" style={{ fontSize: '0.9rem' }}>{company.symbol}</div>
           {company.name && <div className="stock-name" style={{ fontSize: '0.65rem' }}>{company.name}</div>}
         </div>
-        <span style={{ fontSize: '0.6rem', padding: '3px 8px', background: 'var(--bg-section)', color: 'var(--text-muted)', borderRadius: '12px', fontWeight: 700 }}>{sector}</span>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+          <span style={{ fontSize: '0.55rem', padding: '3px 8px', background: 'var(--bg-section)', color: 'var(--text-muted)', borderRadius: '12px', fontWeight: 700, whiteSpace: 'nowrap' }}>{sector}</span>
+          {company.industry && <span style={{ fontSize: '0.55rem', padding: '3px 8px', background: 'var(--bg-section)', color: 'var(--text-muted)', borderRadius: '12px', fontWeight: 700, whiteSpace: 'nowrap' }}>{company.industry}</span>}
+        </div>
       </div>
       <div className="stock-card-body">
         {latestPrice > 0 ? (
@@ -891,13 +894,14 @@ const MarketPage = () => {
                     {/* Price & Change */}
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px', flexShrink: 0 }}>
                       <div style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--text-dark)' }}>₦{price.toFixed(2)}</div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '0.65rem', padding: '3px 8px', background: 'var(--bg-section)', color: 'var(--text-muted)', borderRadius: '12px', fontWeight: 700 }}>{sector}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end', maxWidth: '200px' }}>
+                        <span style={{ fontSize: '0.65rem', padding: '3px 8px', background: 'var(--bg-section)', color: 'var(--text-muted)', borderRadius: '12px', fontWeight: 700, whiteSpace: 'nowrap' }}>{sector}</span>
+                        {company.industry && <span style={{ fontSize: '0.65rem', padding: '3px 8px', background: 'var(--bg-section)', color: 'var(--text-muted)', borderRadius: '12px', fontWeight: 700, whiteSpace: 'nowrap' }}>{company.industry}</span>}
                         {change !== 0 && (
                           <div style={{
                             display: 'flex', alignItems: 'center', gap: '2px',
                             color: isPos ? 'var(--halal)' : 'var(--non-halal)',
-                            fontSize: '0.75rem', fontWeight: 700
+                            fontSize: '0.75rem', fontWeight: 700, marginLeft: '4px'
                           }}>
                             {isPos ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                             {isPos ? '+' : ''}{change.toFixed(2)}%
