@@ -23,15 +23,23 @@ class AaoifiComplianceService
      */
     const BLACKLIST_KEYWORDS = [
         "bank", 
+        "financial services",
         "financial",
         "insurance", 
         "capital market",
         "mortgage",
+        "microfinance",
         "micro-finance",
         "tobacco", 
+        "distillery",
         "distiller",
+        "winery",
         "vintner",
-        "brewery"
+        "brewery",
+        "gambling",
+        "conventional lending",
+        "alcohol production",
+        "alcohol distribution"
     ];
 
     public function evaluateCompliance(Company $company, Financial $financials, ?string $swsIndustry = null, ?array $aiSectorEval = null)
