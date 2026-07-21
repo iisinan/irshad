@@ -7,7 +7,19 @@ Route::get('/', function () {
 });
 
 Route::get('/health', function () {
-    return response()->json(['status' => 'healthy', 'timestamp' => now()->toIso8601String()]);
+    try {
+        \Illuminate\Support\Facades\DB::connection()->getPdo();
+        $dbStatus = 'connected';
+    } catch (\Exception $e) {
+        $dbStatus = 'disconnected';
+        return response()->json(['status' => 'unhealthy', 'database' => $dbStatus, 'error' => $e->getMessage()], 500);
+    }
+
+    return response()->json([
+        'status' => 'healthy', 
+        'database' => $dbStatus,
+        'timestamp' => now()->toIso8601String()
+    ]);
 });
 
 Route::get('/metrics', function () {

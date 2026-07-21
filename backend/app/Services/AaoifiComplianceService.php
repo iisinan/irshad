@@ -21,36 +21,50 @@ class AaoifiComplianceService
     /**
      * STAGE 1: RULE 1 (Simply Wall St Industry Check)
      */
-    const BLACKLIST_INDUSTRIES = [
-        "Banks", 
-        "Financial Services",
-        "Insurance", 
-        "Diversified Financials", 
-        "Consumer Finance", 
-        "Capital Markets", 
-        "Tobacco", 
-        "Distillers and Vintners"
+    const BLACKLIST_KEYWORDS = [
+        "bank", 
+        "financial",
+        "insurance", 
+        "capital market",
+        "mortgage",
+        "micro-finance",
+        "tobacco", 
+        "distiller",
+        "vintner",
+        "brewery"
     ];
 
     public function evaluateCompliance(Company $company, Financial $financials, ?string $swsIndustry = null, ?array $aiSectorEval = null)
     {
-        // For Rule 1: Use activity detection if available, fallback to legacy SWS Industry check
+        // For Rule 1: Use activity detection if available, fallback to robust keyword check
         if ($aiSectorEval && isset($aiSectorEval['has_prohibited_activities'])) {
             if ($aiSectorEval['has_prohibited_activities'] === true) {
                 $reason = $aiSectorEval['reason'] ?? "Failed Rule 1: Sector Check. The company's core business activity involves prohibited elements (e.g., alcohol, gambling, conventional finance) according to AAOIFI standards.";
                 return $this->saveStatus($company, 'non-halal', "Failed Rule 1 (Activity Verified): " . $reason);
             }
         } else {
-            // Legacy fallback
-            $industry = $swsIndustry ?? $company->sector;
-            $isBlacklistedSector = in_array($industry, self::BLACKLIST_INDUSTRIES);
+            // Robust fallback check
+            $sector = strtolower($company->sector ?? '');
+            $businessType = strtolower($company->business_type ?? '');
+            $sws = strtolower($swsIndustry ?? '');
+
+            $isBlacklistedSector = false;
+            $matchedKeyword = '';
+            
+            foreach (self::BLACKLIST_KEYWORDS as $keyword) {
+                if (str_contains($sector, $keyword) || str_contains($businessType, $keyword) || str_contains($sws, $keyword)) {
+                    $isBlacklistedSector = true;
+                    $matchedKeyword = $keyword;
+                    break;
+                }
+            }
 
             // EXCEPT JAIZBANK
-            if ($isBlacklistedSector && strtoupper($company->symbol) !== 'JAIZBANK') {
+            if ($isBlacklistedSector && strtoupper($company->symbol) !== 'JAIZBANK' && strtoupper($company->symbol) !== 'JAIZ') {
                 return $this->saveStatus(
                     $company, 
                     'non-halal', 
-                    "Failed Rule 1: Sector Check. The industry '{$industry}' is explicitly Shariah non-compliant."
+                    "Failed Rule 1: Sector Check. The company's industry or sector involves prohibited elements ('{$matchedKeyword}')."
                 );
             }
         }

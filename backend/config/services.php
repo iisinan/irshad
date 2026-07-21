@@ -48,4 +48,8 @@ return [
         'key' => env('SCRAPERAPI_KEY'),
     ],
 
+    'youtube' => [
+        'key' => env('YOUTUBE_API_KEY'),
+    ],
+
 ];

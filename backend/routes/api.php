@@ -39,6 +39,7 @@ Route::prefix('v1')->group(function () {
     // ── Public Data (no auth required) ───────────────────────────────────
     Route::get('/resources',                      [\App\Http\Controllers\ResourceController::class, 'index']);
     Route::get('/stocks',                         [StockController::class, 'index']);
+    Route::get('/sectors',                        [\App\Http\Controllers\SectorController::class, 'index']);
     Route::get('/stocks/search',                  [StockController::class, 'search']);
     Route::get('/stocks/ngx',           [StockController::class, 'ngx']);
     Route::get('/stocks/baskets',                 [BasketController::class, 'index']);
