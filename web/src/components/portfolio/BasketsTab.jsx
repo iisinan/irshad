@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Briefcase, ArrowLeft, ChevronRight, Activity, TrendingUp, TrendingDown, Star, Plus, X, Trash2, Check, DollarSign, Edit2 } from 'lucide-react';
+import { Briefcase, ArrowLeft, ChevronRight, Activity, TrendingUp, TrendingDown, Star, Plus, X, Trash2, Check, Wallet, Edit2 } from 'lucide-react';
 import { fetchBaskets, fetchBasketDetails, fetchNgxStocks, createBasket, deleteBasket, investInBasket, updateBasket } from '../../services/api';
 import { toastError, toastSuccess } from '../../utils/toast';
 import { useNavigate } from 'react-router-dom';
@@ -242,7 +242,7 @@ function BasketsTabContent() {
               style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--gold)', color: '#0D1B2A', border: 'none', borderRadius: '12px', padding: '12px 20px', fontWeight: 800, cursor: 'pointer' }}
               className="hover-lift"
             >
-              <DollarSign size={18} /> Invest
+              <Wallet size={18} /> Invest
             </button>
           </div>
         </div>
@@ -276,10 +276,10 @@ function BasketsTabContent() {
                 </div>
                 <div style={{ display:'flex', alignItems:'center', gap:'16px' }}>
                   <div style={{ textAlign:'right' }}>
-                    <div style={{ fontSize:'1rem', fontWeight:800, color:'var(--text-dark)' }}>₦{Number(stock.price).toFixed(2)}</div>
-                    <div style={{ fontSize:'0.8rem', fontWeight:700, color: stock.change >= 0 ? 'var(--halal)' : 'var(--non-halal)', display:'flex', alignItems:'center', gap:'4px', justifyContent:'flex-end' }}>
-                      {stock.change >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-                      {Math.abs(stock.change).toFixed(2)}%
+                    <div style={{ fontSize:'1rem', fontWeight:800, color:'var(--text-dark)' }}>₦{Number(stock.price || 0).toFixed(2)}</div>
+                    <div style={{ fontSize:'0.8rem', fontWeight:700, color: (stock.change || 0) >= 0 ? 'var(--halal)' : 'var(--non-halal)', display:'flex', alignItems:'center', gap:'4px', justifyContent:'flex-end' }}>
+                      {(stock.change || 0) >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                      {Math.abs(stock.change || 0).toFixed(2)}%
                     </div>
                   </div>
                   <ChevronRight size={18} color="var(--text-light)" />
