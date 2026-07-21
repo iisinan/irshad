@@ -338,8 +338,8 @@ export default function Dashboard() {
     if(!authLoading&&!user){navigate('/login');return;}
     if(user){
       Promise.all([
-        fetchPortfolio(), 
-        fetchNgxStocks(), 
+        fetchPortfolio().catch(()=>({ data: { summary: {}, holdings: [], history: [] } })), 
+        fetchNgxStocks().catch(()=>({ data: [] })), 
         fetchNews().catch(()=>({ data: [] })),
         fetchWatchlist().catch(()=>({ data: [] })),
         fetchHistory().catch(()=>({ data: [] })),
@@ -415,7 +415,7 @@ export default function Dashboard() {
     });
 
     if (watchlist && watchlist.length > 0) {
-      dynamicWatchlist = watchlist.map(w => {
+      dynamicWatchlist = (watchlist || []).map(w => {
         const s = validStocks.find(ns => ns.symbol === w.symbol);
         if (!s) return null;
         return {
@@ -438,8 +438,8 @@ export default function Dashboard() {
     {label:'3M',gain:'+0.0%',abs:'₦0'},
     {label:'ALL',gain:'+0.0%',abs:'₦0'},
   ];
-  if (chartHistory.length > 0) {
-    const formatted = chartHistory.map(h => ({
+  if ((chartHistory || []).length > 0) {
+    const formatted = (chartHistory || []).map(h => ({
       t: new Date(h.date).toLocaleDateString('en-NG', {day:'numeric', month:'short'}),
       v: h.total_balance
     }));
@@ -650,7 +650,7 @@ export default function Dashboard() {
               <PanelHeader icon={Wallet} title="My Holdings"
                 action={<Link to="/portfolio" style={{fontSize:'0.78rem',fontWeight:700,color:'var(--primary)',display:'flex',alignItems:'center',gap:'3px'}}>Manage <ChevronRight size={12}/></Link>}/>
               <div style={{maxHeight:'360px',overflowY:'auto',paddingRight:'3px'}}>
-                {holdings.length>0?holdings.map(h=><HoldingRow key={h.id} holding={h}/>):(
+                {(holdings || []).length>0?(holdings || []).map(h=><HoldingRow key={h.id} holding={h}/>):(
                   <div style={{padding:'34px 0',textAlign:'center',color:'var(--text-muted)'}}>
                     <BarChart2 size={34} strokeWidth={1.2} style={{margin:'0 auto 10px',color:'var(--text-light)'}}/>
                     <div style={{fontWeight:700,fontSize:'0.93rem',marginBottom:'4px'}}>No holdings yet</div>
@@ -668,7 +668,7 @@ export default function Dashboard() {
               <PanelHeader icon={Activity} title="Recent Transactions"
                 action={<Link to="/portfolio" style={{fontSize:'0.78rem',fontWeight:700,color:'var(--primary)',display:'flex',alignItems:'center',gap:'3px'}}>View All <ChevronRight size={12}/></Link>}/>
               <div style={{display:'flex',flexDirection:'column',gap:'2px'}}>
-                {history.slice(0,5).map((tx,i)=>{
+                {(history || []).slice(0,5).map((tx,i)=>{
                   const isBuy=tx.type==='buy';
                   const isDiv=tx.type==='div';
                   const txColor=isDiv?'#8b5cf6':isBuy?'var(--halal)':'var(--non-halal)';
@@ -707,7 +707,7 @@ export default function Dashboard() {
               <PanelHeader icon={Star} title="Watchlist"
                 action={<Link to="/portfolio#market" style={{fontSize:'0.78rem',fontWeight:700,color:'var(--primary)',display:'flex',alignItems:'center',gap:'3px'}}>Browse Market <ChevronRight size={12}/></Link>}/>
               <div style={{maxHeight:'340px',overflowY:'auto',paddingRight:'3px'}}>
-                {dynamicWatchlist.length > 0 ? dynamicWatchlist.map(s=><WatchlistRow key={s.symbol} stock={s}/>) : (
+                {(dynamicWatchlist || []).length > 0 ? (dynamicWatchlist || []).map(s=><WatchlistRow key={s.symbol} stock={s}/>) : (
                   <div style={{padding:'20px 0',textAlign:'center',color:'var(--text-muted)',fontSize:'0.81rem'}}>
                     Your watchlist is empty
                   </div>
@@ -736,7 +736,7 @@ export default function Dashboard() {
                 ))}
               </div>
               <div style={{display:'flex',flexDirection:'column',gap:'2px'}}>
-                {movers.map((m,i)=>(
+                {(movers || []).map((m,i)=>(
                   <div key={m.symbol} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 11px',borderRadius:'11px',background:i%2===0?'var(--bg-section)':'transparent'}}>
                     <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
                       <div style={{width:'26px',height:'26px',borderRadius:'7px',background:moverBg,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:'0.58rem',color:moverColor}}>{i+1}</div>
@@ -792,7 +792,7 @@ export default function Dashboard() {
             <Panel>
               <PanelHeader icon={Globe} title="Market News"/>
               <div style={{display:'flex',flexDirection:'column',gap:'12px',maxHeight:'300px',overflowY:'auto',paddingRight:'3px'}}>
-                {news.length > 0 ? news.map((item, i) => (
+                {(news || []).length > 0 ? (news || []).map((item, i) => (
                   <div key={item.id || i} style={{display:'flex',flexDirection:'column',gap:'4px',paddingBottom:'12px',borderBottom:i<news.length-1?'1px solid var(--border)':'none'}}>
                     <a href={item.url} target="_blank" rel="noopener noreferrer" style={{fontSize:'0.85rem',color:'var(--text-dark)',fontWeight:700,textDecoration:'none',lineHeight:1.4}} onMouseEnter={e=>e.target.style.color='var(--primary)'} onMouseLeave={e=>e.target.style.color='var(--text-dark)'}>
                       {item.title}
@@ -839,7 +839,7 @@ export default function Dashboard() {
                 {alerts.length > 0 && <span style={{fontSize:'0.69rem',fontWeight:800,padding:'3px 9px',borderRadius:'20px',background:'var(--non-halal-bg)',color:'var(--non-halal)'}}>{alerts.length} active</span>}
               </div>
               <div style={{display:'flex',flexDirection:'column',maxHeight:'300px',overflowY:'auto',paddingRight:'3px'}}>
-                {alerts.length > 0 ? alerts.map((alert,i)=>(
+                {(alerts || []).length > 0 ? (alerts || []).map((alert,i)=>(
                   <div key={alert.id} style={{display:'flex',gap:'12px',alignItems:'flex-start',padding:'12px 0',borderBottom:i<alerts.length-1?'1px solid var(--border)':'none'}}>
                     <div style={{width:'34px',height:'34px',flexShrink:0,borderRadius:'9px',background:'var(--bg-section)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'0.95rem',position:'relative'}}>
                       <Bell size={14} color="var(--primary)"/>

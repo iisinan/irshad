@@ -12,6 +12,7 @@ use App\Http\Controllers\PortfolioController;
 use App\Http\Controllers\TradeController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\VerificationController;
 use App\Http\Controllers\PriceAlertController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -30,6 +31,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink']);
         Route::post('/reset-password', [PasswordResetController::class, 'reset']);
     });
+    Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])->name('verification.verify');
     Route::post('/auth/google', [AuthController::class, 'googleLogin']);
     Route::get('/clear-cache-temp', function () {
         \Illuminate\Support\Facades\Artisan::call('cache:clear');
@@ -51,6 +53,7 @@ Route::prefix('v1')->group(function () {
     // ── Protected Routes ─────────────────────────────────────────────────
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
+        Route::post('/email/verification-notification', [VerificationController::class, 'resend'])->name('verification.send');
 
         // Custom Baskets
         Route::post('/stocks/baskets', [BasketController::class, 'store']);

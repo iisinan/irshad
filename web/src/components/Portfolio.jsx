@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { fetchPortfolio, addHolding, removeHolding, fetchNgxStocks } from '../services/api';
 import { toastError, toastSuccess } from '../utils/toast';
 import { useAuth } from '../context/AuthContext';
-import { X, Search, LayoutDashboard, BarChart2, Star, Calculator, ShieldCheck, BookOpen, Info, Landmark, Briefcase, Bell, Activity } from 'lucide-react';
+import { X, Search, LayoutDashboard, BarChart2, Star, Calculator, ShieldCheck, BookOpen, Info, Landmark, Briefcase, Bell, Activity, Lock, CheckCircle2 } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import OverviewTab from './portfolio/OverviewTab';
 import MarketTab from './portfolio/MarketTab';
@@ -206,61 +206,92 @@ function AddModal({ onClose, onAdd, isAdding, onBrokerLinked }) {
             </div>
           </form>
         ) : (
-          <div style={{ padding:'32px 24px', textAlign:'center' }}>
-            <div style={{ width:'64px', height:'64px', borderRadius:'20px', background:'var(--primary-50)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 20px', border:'1px solid var(--primary-100)' }}>
-              <Activity size={28} color="var(--primary)" />
-            </div>
-            <h4 style={{ fontSize:'1.2rem', fontWeight:800, color:'var(--text-dark)', marginBottom:'12px' }}>Connect Your Broker</h4>
-            <p style={{ color:'var(--text-muted)', fontSize:'0.95rem', lineHeight:1.6, marginBottom:'24px' }}>
-              Link your brokerage account to get ₦1,000,000 in simulated trading capital.
-            </p>
+          <div style={{ padding: '0', display: 'flex', flexDirection: 'column', height: '100%' }}>
             
-            <div style={{ marginBottom:'20px', textAlign:'left' }}>
-              <label style={{ display:'block', fontSize:'0.75rem', fontWeight:700, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.5px', marginBottom:'8px' }}>Select Broker</label>
-              <select 
-                value={brokerName} 
-                onChange={e => setBrokerName(e.target.value)}
-                style={{ width:'100%', padding:'12px 14px', borderRadius:'12px', border:'1.5px solid var(--border)', fontSize:'0.95rem', fontWeight:600, outline:'none', background:'white', cursor:'pointer' }}
-              >
-                <option value="Meristem">Meristem Securities</option>
-                <option value="Stanbic IBTC">Stanbic IBTC Stockbrokers</option>
-                <option value="CSCS">CSCS Direct</option>
-                <option value="Risevest">Risevest</option>
-              </select>
+            {/* Widget Header */}
+            <div style={{ padding: '32px 32px 24px', textAlign: 'center', borderBottom: '1px solid var(--border)', background: 'var(--bg-section)' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 12px', background: 'var(--halal-bg)', color: 'var(--halal)', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 700, marginBottom: '24px' }}>
+                <Lock size={14} /> End-to-End Encrypted
+              </div>
+              <h4 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 12px', letterSpacing: '-0.5px' }}>
+                Link your Broker
+              </h4>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', margin: 0, lineHeight: 1.5 }}>
+                Connect your brokerage account to Irshad to seamlessly track your Shariah-compliant investments and receive a ₦1M simulated balance.
+              </p>
             </div>
 
-            {linkMessage && (
-              <div style={{ marginBottom:'16px', padding:'12px', borderRadius:'8px', background: linkMessage.includes('successfully') ? 'var(--halal-bg)' : 'var(--non-halal-bg)', color: linkMessage.includes('successfully') ? 'var(--halal)' : 'var(--non-halal)', fontSize:'0.85rem', fontWeight:700 }}>
-                {linkMessage}
-              </div>
-            )}
+            {/* Widget Body */}
+            <div style={{ padding: '32px', flex: 1, overflowY: 'auto' }}>
+              
+              {linkMessage && (
+                <div style={{ marginBottom: '24px', padding: '16px', borderRadius: '12px', background: linkMessage.includes('successfully') ? 'var(--halal-bg)' : 'var(--non-halal-bg)', color: linkMessage.includes('successfully') ? 'var(--halal)' : 'var(--non-halal)', fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <CheckCircle2 size={18} /> {linkMessage}
+                </div>
+              )}
 
-            <button 
-              type="button" 
-              onClick={async () => {
-                try {
-                  setLinking(true);
-                  setLinkMessage('');
-                  // Dynamically import linkBroker here to avoid cyclic dependency issues if not imported above
-                  const { linkBroker } = await import('../services/api');
-                  const res = await linkBroker(brokerName);
-                  setLinkMessage(res.message || 'Broker linked successfully!');
-                  if (onBrokerLinked) onBrokerLinked();
-                  setTimeout(() => {
-                    onClose();
-                  }, 1200);
-                } catch(err) {
-                  setLinkMessage(err.response?.data?.message || 'Failed to link broker.');
-                } finally {
-                  setLinking(false);
-                }
-              }}
-              disabled={linking}
-              style={{ width:'100%', padding:'14px', borderRadius:'12px', background:'var(--primary)', border:'none', color:'white', fontWeight:800, fontSize:'0.95rem', cursor: linking ? 'not-allowed' : 'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', boxShadow:'0 8px 24px rgba(15, 82, 87, 0.25)', opacity: linking ? 0.7 : 1 }}
-            >
-              {linking ? 'Linking...' : 'Link Simulated Broker'}
-            </button>
-            <p style={{ fontSize:'0.75rem', color:'var(--text-light)', marginTop:'16px' }}>For demo purposes. Connects a mock broker profile.</p>
+              <p style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px' }}>Select an Institution</p>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                {['Meristem', 'Stanbic IBTC', 'CSCS', 'Risevest'].map((broker) => (
+                  <div 
+                    key={broker}
+                    onClick={() => setBrokerName(broker)}
+                    style={{
+                      padding: '20px', borderRadius: '16px', border: brokerName === broker ? '2px solid var(--primary)' : '1px solid var(--border)',
+                      background: brokerName === broker ? 'var(--primary-50)' : 'white', cursor: 'pointer',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
+                      transition: 'all 0.2s', boxShadow: brokerName === broker ? '0 4px 12px rgba(15, 82, 87, 0.1)' : 'none'
+                    }}
+                  >
+                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--bg-section)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-dark)' }}>
+                      {broker.charAt(0)}
+                    </div>
+                    <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-dark)', textAlign: 'center' }}>{broker}</span>
+                  </div>
+                ))}
+              </div>
+
+            </div>
+
+            {/* Widget Footer */}
+            <div style={{ padding: '24px 32px', borderTop: '1px solid var(--border)', background: 'white' }}>
+              <button 
+                type="button" 
+                onClick={async () => {
+                  try {
+                    setLinking(true);
+                    setLinkMessage('');
+                    const { linkBroker } = await import('../services/api');
+                    const res = await linkBroker(brokerName);
+                    setLinkMessage(res.message || 'Broker linked successfully!');
+                    if (onBrokerLinked) onBrokerLinked();
+                    setTimeout(() => {
+                      onClose();
+                    }, 1500);
+                  } catch(err) {
+                    setLinkMessage(err.response?.data?.message || 'Failed to link broker.');
+                  } finally {
+                    setLinking(false);
+                  }
+                }}
+                disabled={linking || !brokerName}
+                style={{ 
+                  width: '100%', padding: '16px', borderRadius: '14px', background: 'var(--primary)', 
+                  border: 'none', color: 'white', fontWeight: 800, fontSize: '1rem', 
+                  cursor: (linking || !brokerName) ? 'not-allowed' : 'pointer', 
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', 
+                  boxShadow: '0 8px 24px rgba(15, 82, 87, 0.25)', opacity: (linking || !brokerName) ? 0.7 : 1,
+                  transition: 'all 0.2s'
+                }}
+              >
+                {linking ? <div className="spinner" style={{ width: '18px', height: '18px', borderTopColor: 'white' }} /> : 'Continue'}
+              </button>
+              <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '0.75rem', color: 'var(--text-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                <ShieldCheck size={14} /> Secured by Irshad OpenBanking
+              </div>
+            </div>
+
           </div>
         )}
       </div>
@@ -380,7 +411,7 @@ export default function Portfolio() {
   const totalBalance = summary.total_balance || 0;
   
   const PIE_COLORS = ['#C9B89C','#2A6F73','#3B82F6','#8b5cf6','#0F5257','#06b6d4'];
-  const pieData = holdings.slice(0,6).map((h,i) => ({
+  const pieData = (holdings || []).slice(0,6).map((h,i) => ({
     name: h.symbol, value: h.total_value || 0, color: PIE_COLORS[i % PIE_COLORS.length],
   }));
   if (pieData.length === 0) pieData.push({ name: 'No Holdings', value: 1, color: '#e5e7eb' });
@@ -589,19 +620,19 @@ export default function Portfolio() {
             </h3>
             
             {/* Compliance Score Bar */}
-            {holdings.length > 0 && (
+            {(holdings || []).length > 0 && (
               <div style={{ marginBottom:'18px', padding:'16px', background:'var(--bg-section)', borderRadius:'14px' }}>
                 <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'8px' }}>
                   <span style={{ fontSize:'0.78rem', fontWeight:700, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.5px' }}>Compliance Score</span>
-                  <span style={{ fontSize:'0.9rem', fontWeight:900, color: halalCount === holdings.length ? 'var(--halal)' : nonHalalCount > 0 ? 'var(--non-halal)' : 'var(--doubtful)' }}>
-                    {holdings.length > 0 ? `${Math.round((halalCount / holdings.length) * 100)}%` : '—'}
+                  <span style={{ fontSize:'0.9rem', fontWeight:900, color: halalCount === (holdings || []).length ? 'var(--halal)' : nonHalalCount > 0 ? 'var(--non-halal)' : 'var(--doubtful)' }}>
+                    {(holdings || []).length > 0 ? `${Math.round((halalCount / (holdings || []).length) * 100)}%` : '—'}
                   </span>
                 </div>
                 <div style={{ height:'8px', background:'var(--border)', borderRadius:'4px', overflow:'hidden' }}>
                   <div style={{ 
-                    width: holdings.length > 0 ? `${(halalCount / holdings.length) * 100}%` : '0%',
+                    width: (holdings || []).length > 0 ? `${(halalCount / (holdings || []).length) * 100}%` : '0%',
                     height:'100%',
-                    background: halalCount === holdings.length ? 'var(--halal)' : 'var(--doubtful)',
+                    background: halalCount === (holdings || []).length ? 'var(--halal)' : 'var(--doubtful)',
                     borderRadius:'4px',
                     transition:'width 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
                   }}/>

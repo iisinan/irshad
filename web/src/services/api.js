@@ -29,6 +29,22 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Handle 401 Unauthorized responses globally
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // Avoid redirecting if already on auth pages
+      const isAuthPage = window.location.pathname === '/login' || window.location.pathname === '/register';
+      if (!isAuthPage) {
+        localStorage.removeItem('auth_token');
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export const loginUser = async (credentials) => {
   const response = await api.post('/login', credentials);
   return response.data;
@@ -58,6 +74,11 @@ export const updateProfile = async (data) => {
 
 export const deleteAccount = async () => {
   const response = await api.delete('/account');
+  return response.data;
+};
+
+export const resendVerification = async () => {
+  const response = await api.post('/email/verification-notification');
   return response.data;
 };
 

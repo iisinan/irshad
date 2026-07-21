@@ -5,8 +5,13 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IRSHAD - Islamic Wealth Management</title>
+    <script>
+      if (localStorage.getItem('irshad_theme') === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    </script>
     <style>
-      body, html { margin: 0; padding: 0; background-color: #F8FAFC; }
+      body, html { margin: 0; padding: 0; background-color: var(--bg, #F8FAFC); }
       body.no-scroll, html.no-scroll { height: 100%; overflow: hidden; }
       #irshad-splash {
         position: fixed;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, AlertCircle } from 'lucide-react';
 import DashboardSidebar from './DashboardSidebar';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -81,6 +81,54 @@ export default function DashboardLayout({ children }) {
             <Menu size={24} />
           </button>
         </header>
+
+        {user && !user.email_verified_at && (
+          <div style={{
+            background: 'var(--non-halal-bg)',
+            color: 'var(--non-halal)',
+            padding: '12px 24px',
+            fontSize: '0.9rem',
+            fontWeight: 600,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '12px',
+            borderBottom: '1px solid #fecaca'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <AlertCircle size={18} />
+              <span>Please verify your email address to unlock all features.</span>
+            </div>
+            <button
+              onClick={async (e) => {
+                const btn = e.currentTarget;
+                btn.disabled = true;
+                btn.textContent = 'Sending...';
+                try {
+                  const { resendVerification } = await import('../services/api');
+                  await resendVerification();
+                  btn.textContent = 'Verification Link Sent!';
+                } catch(err) {
+                  btn.textContent = 'Failed. Try Again';
+                  btn.disabled = false;
+                }
+              }}
+              style={{
+                background: 'white',
+                color: 'var(--non-halal)',
+                border: '1px solid var(--non-halal)',
+                padding: '6px 12px',
+                borderRadius: '8px',
+                fontSize: '0.8rem',
+                fontWeight: 700,
+                cursor: 'pointer'
+              }}
+            >
+              Resend Link
+            </button>
+          </div>
+        )}
 
         {children}
       </main>

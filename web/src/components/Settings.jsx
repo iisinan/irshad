@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { User, Shield, BookOpen, Bell, Trash2, LogOut, CheckCircle, AlertCircle, Save } from 'lucide-react';
+import { User, Shield, BookOpen, Bell, Trash2, LogOut, CheckCircle, AlertCircle, Save, Monitor } from 'lucide-react';
 import { fetchProfile, updateProfile, deleteAccount } from '../services/api';
 
 export default function Settings() {
@@ -10,6 +10,7 @@ export default function Settings() {
   const [activeSection, setActiveSection] = useState('profile');
   const [profileUser, setProfileUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [theme, setTheme] = useState(() => localStorage.getItem('irshad_theme') || 'light');
 
   // Form States
   const [formData, setFormData] = useState({ 
@@ -117,6 +118,7 @@ export default function Settings() {
     { id: 'profile', icon: User, label: 'Personal Info' },
     { id: 'security', icon: Shield, label: 'Security' },
     { id: 'preferences', icon: BookOpen, label: 'Shariah Preferences' },
+    { id: 'appearance', icon: Monitor, label: 'Appearance' },
     { id: 'danger', icon: Trash2, label: 'Danger Zone', danger: true },
   ];
 
@@ -278,6 +280,43 @@ export default function Settings() {
                 </button>
               </div>
             </form>
+          )}
+
+          {activeSection === 'appearance' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div>
+                <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 4px' }}>Appearance Settings</h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', margin: 0 }}>Customize the look and feel of Irshad.</p>
+              </div>
+              <div style={{ height: '1px', background: 'var(--border)' }} />
+              
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', background: 'var(--bg-section)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                <div>
+                  <h3 style={{ margin: '0 0 4px', fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-dark)' }}>Theme</h3>
+                  <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)' }}>Choose between Light and Dark mode.</p>
+                </div>
+                <select 
+                  value={theme}
+                  onChange={(e) => {
+                    const newTheme = e.target.value;
+                    setTheme(newTheme);
+                    localStorage.setItem('irshad_theme', newTheme);
+                    if (newTheme === 'dark') {
+                      document.documentElement.setAttribute('data-theme', 'dark');
+                    } else {
+                      document.documentElement.removeAttribute('data-theme');
+                    }
+                    setMessage({ type: 'success', text: 'Theme updated successfully!' });
+                    setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+                  }}
+                  className="settings-input"
+                  style={{ width: '150px' }}
+                >
+                  <option value="light">Light Mode</option>
+                  <option value="dark">Dark Mode</option>
+                </select>
+              </div>
+            </div>
           )}
 
           {activeSection === 'danger' && (
