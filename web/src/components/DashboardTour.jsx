@@ -7,6 +7,7 @@ import { Sparkles } from 'lucide-react';
 const CustomTooltip = ({
   continuous,
   index,
+  size,
   step,
   backProps,
   closeProps,
@@ -18,44 +19,63 @@ const CustomTooltip = ({
   return (
     <div 
       {...tooltipProps} 
+      className="animate-slide-up"
       style={{ 
-        background: 'rgba(255, 255, 255, 0.95)', 
-        backdropFilter: 'blur(20px)',
-        borderRadius: '20px', 
-        padding: '24px', 
-        width: '320px', 
-        boxShadow: '0 24px 64px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.05)',
+        background: 'rgba(255, 255, 255, 0.98)', 
+        backdropFilter: 'blur(24px)',
+        borderRadius: '24px', 
+        padding: '28px', 
+        width: '340px', 
+        boxShadow: '0 32px 80px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.04)',
         border: 'none',
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        position: 'relative',
+        overflow: 'hidden'
       }}
     >
+      {/* Top gradient highlight */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'var(--gold-grad)' }} />
+
       {step.title && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-          <div style={{ background: 'var(--primary-10)', padding: '6px', borderRadius: '8px', color: 'var(--primary)' }}>
-            <Sparkles size={16} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+          <div style={{ background: 'var(--primary-10)', padding: '8px', borderRadius: '10px', color: 'var(--primary)' }}>
+            <Sparkles size={18} />
           </div>
-          <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-dark)', margin: 0 }}>{step.title}</h3>
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-dark)', margin: 0, letterSpacing: '-0.3px' }}>{step.title}</h3>
         </div>
       )}
       
-      <div style={{ fontSize: '0.95rem', color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: '24px' }}>
+      <div style={{ fontSize: '1rem', color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: '28px' }}>
         {step.content}
       </div>
       
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-light)', letterSpacing: '1px' }}>
-          STEP {index + 1}
+      {/* Progress Dots */}
+      <div style={{ display: 'flex', gap: '6px', marginBottom: '20px', alignSelf: 'center' }}>
+        {Array.from({ length: size }).map((_, i) => (
+          <div key={i} style={{ 
+            width: i === index ? '18px' : '6px', 
+            height: '6px', 
+            borderRadius: '6px', 
+            background: i === index ? 'var(--primary)' : 'var(--bg-section)',
+            transition: 'all 0.3s ease'
+          }} />
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
+        <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-light)', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
+          Step {index + 1} of {size}
         </div>
         
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           {index > 0 && (
-            <button {...backProps} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer', padding: '8px 12px', fontSize: '0.9rem' }}>
+            <button {...backProps} style={{ background: 'var(--bg-section)', border: 'none', color: 'var(--text-dark)', fontWeight: 700, cursor: 'pointer', padding: '10px 14px', fontSize: '0.9rem', borderRadius: '10px', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--border)'} onMouseLeave={e => e.currentTarget.style.background = 'var(--bg-section)'}>
               Back
             </button>
           )}
-          <button {...primaryProps} className="btn-primary" style={{ padding: '8px 20px', fontSize: '0.9rem', borderRadius: '10px', boxShadow: '0 4px 12px rgba(15,82,87,0.2)' }}>
-            {continuous && !isLastStep ? 'Next' : 'Finish'}
+          <button {...primaryProps} className="btn-primary" style={{ padding: '10px 24px', fontSize: '0.95rem', borderRadius: '10px', boxShadow: '0 8px 16px rgba(15,82,87,0.25)', fontWeight: 800, transition: 'transform 0.2s, box-shadow 0.2s' }} onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 20px rgba(15,82,87,0.3)'; }} onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 8px 16px rgba(15,82,87,0.25)'; }}>
+            {continuous && !isLastStep ? 'Next' : 'Finish Tour'}
           </button>
         </div>
       </div>
