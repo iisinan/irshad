@@ -301,16 +301,16 @@ const StockDetails = ({ symbol: propSymbol }) => {
                   cursor: 'default'
                 }} className="hover-card">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '16px' }}>
-                    <div style={{ background: (stock.status?.reason?.includes('prohibited industry') ? 'var(--non-halal-bg)' : 'var(--halal-bg)'), border: `1px solid ${(stock.status?.reason?.includes('prohibited industry') ? 'rgba(248,113,113,0.2)' : 'rgba(16,185,129,0.2)')}`, borderRadius: '12px', padding: '10px', display: 'flex', boxShadow: `0 4px 12px ${(stock.status?.reason?.includes('prohibited industry') ? 'var(--non-halal-bg)' : 'var(--halal-bg)')}` }}>
-                      {stock.status?.reason?.includes('prohibited industry') ? <XCircle size={20} color="var(--non-halal)" /> : <CheckCircle size={20} color="var(--halal)" />}
+                    <div style={{ background: (stock.status?.reason?.includes('Rule 1') ? 'var(--non-halal-bg)' : 'var(--halal-bg)'), border: `1px solid ${(stock.status?.reason?.includes('Rule 1') ? 'rgba(248,113,113,0.2)' : 'rgba(16,185,129,0.2)')}`, borderRadius: '12px', padding: '10px', display: 'flex', boxShadow: `0 4px 12px ${(stock.status?.reason?.includes('Rule 1') ? 'var(--non-halal-bg)' : 'var(--halal-bg)')}` }}>
+                      {stock.status?.reason?.includes('Rule 1') ? <XCircle size={20} color="var(--non-halal)" /> : <CheckCircle size={20} color="var(--halal)" />}
                     </div>
                     <h3 style={{ fontSize: '1.1rem', color: 'var(--text-dark)', fontWeight: 800, margin: 0, letterSpacing: '-0.3px' }}>A. Business Activity</h3>
-                    <div style={{ marginLeft: 'auto', background: (stock.status?.reason?.includes('prohibited industry') ? 'var(--non-halal-bg)' : 'var(--halal-bg)'), color: (stock.status?.reason?.includes('prohibited industry') ? 'var(--non-halal)' : 'var(--halal)'), padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>
-                      {stock.status?.reason?.includes('prohibited industry') ? 'FAIL' : 'PASS'}
+                    <div style={{ marginLeft: 'auto', background: (stock.status?.reason?.includes('Rule 1') ? 'var(--non-halal-bg)' : 'var(--halal-bg)'), color: (stock.status?.reason?.includes('Rule 1') ? 'var(--non-halal)' : 'var(--halal)'), padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>
+                      {stock.status?.reason?.includes('Rule 1') ? 'FAIL' : 'PASS'}
                     </div>
                   </div>
                   <p style={{ color: 'var(--text-muted)', lineHeight: 1.6, fontSize: '0.95rem', margin: 0, paddingLeft: '46px' }}>
-                    {stock.status?.reason?.includes('prohibited industry') 
+                    {stock.status?.reason?.includes('Rule 1') 
                       ? stock.status.reason
                       : "The core business operations of this company have been verified to be in a Halal industry, with no significant involvement in prohibited activities like conventional finance, alcohol, gambling, or tobacco."}
                   </p>
