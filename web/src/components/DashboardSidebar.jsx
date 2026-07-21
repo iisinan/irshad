@@ -10,16 +10,16 @@ import {
 
 const NAV_ITEMS = [
   { section: 'Main' },
-  { label: 'Overview',       icon: LayoutDashboard,  to: '/portfolio#overview' },
-  { label: 'Market Screener', icon: BarChart2,        to: '/portfolio#market' },
-  { label: 'Watchlist',      icon: Star,             to: '/portfolio#watchlist' },
-  { label: 'Thematic Baskets',icon: Briefcase,       to: '/portfolio#baskets' },
+  { label: 'Overview',       icon: LayoutDashboard,  to: '/portfolio#overview', id: 'tour-nav-overview' },
+  { label: 'Market Screener', icon: BarChart2,        to: '/portfolio#market', id: 'tour-nav-market' },
+  { label: 'Watchlist',      icon: Star,             to: '/portfolio#watchlist', id: 'tour-nav-watchlist' },
+  { label: 'Thematic Baskets',icon: Briefcase,       to: '/portfolio#baskets', id: 'tour-nav-baskets' },
   { section: 'Islamic Finance' },
-  { label: 'Purification',   icon: HeartHandshake,   to: '/portfolio#purification' },
-  { label: 'Zakat',          icon: Calculator,        to: '/portfolio#zakat' },
-  { label: 'Resources',      icon: BookOpen,          to: '/portfolio#lectures'   },
+  { label: 'Purification',   icon: HeartHandshake,   to: '/portfolio#purification', id: 'tour-nav-purification' },
+  { label: 'Zakat',          icon: Calculator,        to: '/portfolio#zakat', id: 'tour-nav-zakat' },
+  { label: 'Resources',      icon: BookOpen,          to: '/portfolio#lectures', id: 'tour-nav-resources' },
   { section: 'Account' },
-  { label: 'Profile',        icon: User,              to: '/profile'     },
+  { label: 'Profile',        icon: User,              to: '/profile', id: 'tour-nav-profile' },
   { label: 'Settings',       icon: Settings,          to: '/settings' },
 ];
 
@@ -171,6 +171,7 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
           return (
             <Link
               key={i}
+              id={item.id}
               to={item.to}
               title={collapsed ? item.label : undefined}
               style={{

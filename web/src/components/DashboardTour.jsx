@@ -104,6 +104,30 @@ export default function DashboardTour() {
       title: 'Instant Search',
       content: 'Looking for a specific stock? Search for any NGX ticker here to see its detailed, real-time Shariah analysis.',
       placement: 'bottom',
+    },
+    {
+      target: '#tour-nav-market',
+      title: 'Market Screener',
+      content: 'Explore the entire Nigerian Stock Exchange. We highlight which stocks are Halal, Doubtful, or Non-Halal in real-time.',
+      placement: 'right',
+    },
+    {
+      target: '#tour-nav-watchlist',
+      title: 'Your Watchlist',
+      content: 'Save stocks here to monitor their price movements and receive instant alerts if their Shariah compliance status changes.',
+      placement: 'right',
+    },
+    {
+      target: '#tour-nav-baskets',
+      title: 'Thematic Baskets',
+      content: 'Don\'t want to pick individual stocks? Invest in expertly curated collections of Halal stocks with a single click.',
+      placement: 'right',
+    },
+    {
+      target: '#tour-nav-resources',
+      title: 'Islamic Finance Hub',
+      content: 'Access premium lectures and educational resources to deepen your understanding of Halal investing.',
+      placement: 'right',
     }
   ];
 
