@@ -7,24 +7,24 @@ class ResourcesTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.only(left: 24.0, right: 24.0, top: 24.0, bottom: 100.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Islamic Finance Academy',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppTheme.textDark),
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: context.textDark),
           ),
           const SizedBox(height: 12),
-          const Text(
+          Text(
             'Learn the fundamentals of halal investing, shariah compliance, and how to purify your wealth.',
-            style: TextStyle(fontSize: 15, color: AppTheme.textMuted, height: 1.5),
+            style: TextStyle(fontSize: 15, color: context.textMuted, height: 1.5),
           ),
           const SizedBox(height: 32),
           
-          const Text(
+          Text(
             'Featured Videos',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppTheme.textDark),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: context.textDark),
           ),
           const SizedBox(height: 16),
           _buildResourceCard(
@@ -32,7 +32,7 @@ class ResourcesTab extends StatelessWidget {
             title: 'Introduction to Halal Investing',
             subtitle: '10 min video • Basics',
             icon: Icons.play_circle_fill_rounded,
-            color: AppTheme.primary,
+            color: context.primary,
             isDocument: false,
           ),
           const SizedBox(height: 12),
@@ -41,14 +41,14 @@ class ResourcesTab extends StatelessWidget {
             title: 'How Zakat is Calculated on Stocks',
             subtitle: '15 min video • Advanced',
             icon: Icons.play_circle_fill_rounded,
-            color: AppTheme.primary,
+            color: context.primary,
             isDocument: false,
           ),
           
           const SizedBox(height: 32),
-          const Text(
+          Text(
             'Essential Documents',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppTheme.textDark),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: context.textDark),
           ),
           const SizedBox(height: 16),
           _buildResourceCard(
@@ -56,7 +56,7 @@ class ResourcesTab extends StatelessWidget {
             title: 'AAOIFI Shariah Standards',
             subtitle: 'PDF • 45 pages',
             icon: Icons.picture_as_pdf_rounded,
-            color: AppTheme.haram,
+            color: context.haram,
             isDocument: true,
           ),
           const SizedBox(height: 12),
@@ -65,7 +65,7 @@ class ResourcesTab extends StatelessWidget {
             title: 'Dividend Purification Guide',
             subtitle: 'PDF • 5 pages',
             icon: Icons.picture_as_pdf_rounded,
-            color: AppTheme.haram,
+            color: context.haram,
             isDocument: true,
           ),
         ],
@@ -87,7 +87,7 @@ class ResourcesTab extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppTheme.divider),
+          border: Border.all(color: context.divider),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.02),
@@ -111,13 +111,13 @@ class ResourcesTab extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppTheme.textDark)),
+                  Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: context.textDark)),
                   const SizedBox(height: 4),
-                  Text(subtitle, style: const TextStyle(fontSize: 13, color: AppTheme.textMuted, fontWeight: FontWeight.w500)),
+                  Text(subtitle, style: TextStyle(fontSize: 13, color: context.textMuted, fontWeight: FontWeight.w500)),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded, color: AppTheme.textMuted),
+            Icon(Icons.chevron_right_rounded, color: context.textMuted),
           ],
         ),
       ),
@@ -131,8 +131,8 @@ class ResourcesTab extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         height: MediaQuery.of(context).size.height * 0.85,
-        decoration: const BoxDecoration(
-          color: AppTheme.bg,
+        decoration: BoxDecoration(
+          color: context.bg,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
@@ -164,14 +164,14 @@ class ResourcesTab extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(child: Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppTheme.textDark))),
+                      Expanded(child: Text(title, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: context.textDark))),
                       IconButton(icon: const Icon(Icons.close_rounded), onPressed: () => Navigator.pop(context)),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  const Text(
+                  Text(
                     'This is a placeholder for the video player. In a real scenario, this would host a YouTube player or a local video player widget.',
-                    style: TextStyle(fontSize: 15, color: AppTheme.textMuted, height: 1.5),
+                    style: TextStyle(fontSize: 15, color: context.textMuted, height: 1.5),
                   ),
                 ],
               ),
@@ -204,9 +204,9 @@ class ResourcesTab extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppTheme.textDark)),
+                        Text(title, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: context.textDark)),
                         const SizedBox(height: 4),
-                        const Text('PDF Document', style: TextStyle(color: AppTheme.textMuted, fontSize: 13)),
+                        Text('PDF Document', style: TextStyle(color: context.textMuted, fontSize: 13)),
                       ],
                     ),
                   ),
@@ -214,17 +214,17 @@ class ResourcesTab extends StatelessWidget {
                 ],
               ),
             ),
-            const Divider(height: 1, color: AppTheme.divider),
+            Divider(height: 1, color: context.divider),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
                   children: [
-                    const Icon(Icons.picture_as_pdf_rounded, size: 80, color: AppTheme.divider),
+                    Icon(Icons.picture_as_pdf_rounded, size: 80, color: context.divider),
                     const SizedBox(height: 24),
-                    const Text(
+                    Text(
                       'Document viewer goes here.\n\nYou would typically use a package like flutter_pdfview to render the PDF file here.',
-                      style: TextStyle(fontSize: 16, color: AppTheme.textMuted, height: 1.6),
+                      style: TextStyle(fontSize: 16, color: context.textMuted, height: 1.6),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -238,7 +238,7 @@ class ResourcesTab extends StatelessWidget {
                 icon: const Icon(Icons.download_rounded, size: 18),
                 label: const Text('Download PDF', style: TextStyle(fontWeight: FontWeight.w700)),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.textDark,
+                  backgroundColor: context.textDark,
                   foregroundColor: Colors.white,
                   minimumSize: const Size(double.infinity, 56),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),

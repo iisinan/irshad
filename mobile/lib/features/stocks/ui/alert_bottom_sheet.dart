@@ -63,7 +63,7 @@ class _AlertBottomSheetState extends State<AlertBottomSheet> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Alert set! We will notify you when $symbol goes $_condition ₦$target.'),
-            backgroundColor: AppTheme.halal,
+            backgroundColor: context.halal,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -71,7 +71,7 @@ class _AlertBottomSheetState extends State<AlertBottomSheet> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to set alert: $e'), backgroundColor: AppTheme.haram),
+          SnackBar(content: Text('Failed to set alert: $e'), backgroundColor: context.haram),
         );
       }
     } finally {
@@ -101,16 +101,16 @@ class _AlertBottomSheetState extends State<AlertBottomSheet> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.notifications_active_rounded, color: AppTheme.textDark),
+                      Icon(Icons.notifications_active_rounded, color: context.textDark),
                       const SizedBox(width: 8),
                       Text(
                         'Set Alert for ${widget.stock['symbol']}',
-                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5),
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5),
                       ),
                     ],
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close_rounded, color: AppTheme.textMuted),
+                    icon: Icon(Icons.close_rounded, color: context.textMuted),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],
@@ -118,7 +118,7 @@ class _AlertBottomSheetState extends State<AlertBottomSheet> {
               const SizedBox(height: 8),
               Text(
                 'Current Price: ₦ ${_currentPrice.toStringAsFixed(2)}',
-                style: const TextStyle(color: AppTheme.textMuted, fontSize: 16),
+                style: TextStyle(color: context.textMuted, fontSize: 16),
               ),
               const SizedBox(height: 24),
               TextField(
@@ -154,7 +154,7 @@ class _AlertBottomSheetState extends State<AlertBottomSheet> {
                 child: ElevatedButton(
                   onPressed: _isLoading || (double.tryParse(_priceController.text) ?? 0) <= 0 ? null : _setAlert,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.halal,
+                    backgroundColor: context.halal,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                     elevation: 0,

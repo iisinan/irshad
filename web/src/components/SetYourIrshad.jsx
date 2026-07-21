@@ -166,8 +166,14 @@ const SetYourIrshad = ({ onComplete }) => {
     try {
       const prefs = { ...(user?.preferences || {}), onboarded: true };
       await updateUser({ preferences: prefs });
-      onComplete?.();
-    } catch { setSaving(false); }
+    } catch (e) {
+      // Even if the API call fails, mark locally so the modal dismisses
+      console.warn('Skip onboarding API call failed, dismissing locally.', e);
+    }
+    // Always dismiss — update local user state directly so DashboardLayout unmounts the modal
+    setUser(prev => ({ ...prev, preferences: { ...(prev?.preferences || {}), onboarded: true } }));
+    onComplete?.();
+    setSaving(false);
   };
 
   const firstName = user?.name?.split(' ')[0] || 'there';

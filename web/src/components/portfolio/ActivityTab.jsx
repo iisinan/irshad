@@ -96,7 +96,7 @@ export default function ActivityTab() {
               Your stock screening and product scan history will appear here. Start exploring the market to build your activity log.
             </p>
             <button 
-              onClick={() => navigate('/market')} 
+              onClick={() => navigate('/portfolio#market')} 
               style={{ 
                 display:'inline-flex', alignItems:'center', gap:'8px', padding:'14px 28px', 
                 borderRadius:'14px', background:'var(--gold-grad)', color:'white', border:'none', 

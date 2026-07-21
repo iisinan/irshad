@@ -14,14 +14,14 @@ class FetchLogosCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'ngx:fetch-logos';
+    protected $signature = 'ngx:fetch-profiles {--force : Force fetch even if data exists}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Fetch stock logos using Yahoo Finance and Clearbit API';
+    protected $description = 'Fetch stock logos and company overviews using Yahoo Finance and Clearbit API';
 
     /**
      * Execute the console command.
@@ -29,7 +29,7 @@ class FetchLogosCommand extends Command
     public function handle()
     {
         $companies = Company::all();
-        $this->info("Found {$companies->count()} companies. Fetching logos...");
+        $this->info("Found {$companies->count()} companies. Fetching profiles (logos and overviews)...");
 
         // Ensure directory exists
         if (!Storage::disk('public')->exists('logos')) {
@@ -37,22 +37,25 @@ class FetchLogosCommand extends Command
         }
 
         $bar = $this->output->createProgressBar($companies->count());
+        $force = $this->option('force');
 
         foreach ($companies as $company) {
             $symbol = trim($company->symbol);
             $yahooSymbol = str_contains($symbol, '.') ? $symbol : "{$symbol}.LG";
 
-            // If we already have a logo downloaded, we can skip it.
-            // But let's check if the file actually exists
             $logoPath = "logos/{$symbol}.png";
+            $hasLogo = Storage::disk('public')->exists($logoPath) && $company->logo_url;
+            $hasOverview = !empty($company->overview);
 
-            if (Storage::disk('public')->exists($logoPath) && $company->logo_url) {
+            // Skip if we already have both and not forcing
+            if (!$force && $hasLogo && $hasOverview) {
                 $bar->advance();
                 continue;
             }
 
-            // Fetch website from Yahoo Finance
+            // Fetch data from Yahoo Finance
             $domain = null;
+            $overview = null;
             try {
                 $response = Http::withHeaders([
                     'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
@@ -62,12 +65,11 @@ class FetchLogosCommand extends Command
 
                 if ($response->successful()) {
                     $website = $response->json('quoteSummary.result.0.assetProfile.website');
+                    $overview = $response->json('quoteSummary.result.0.assetProfile.longBusinessSummary');
+                    
                     if ($website) {
-                        // Extract domain
                         $parsedUrl = parse_url($website);
                         $domain = $parsedUrl['host'] ?? null;
-                        
-                        // Remove www.
                         if ($domain && str_starts_with($domain, 'www.')) {
                             $domain = substr($domain, 4);
                         }
@@ -77,28 +79,32 @@ class FetchLogosCommand extends Command
                 // Ignore API timeouts
             }
 
+            $updated = false;
+
+            // Save Overview
+            if ($overview && (!$hasOverview || $force)) {
+                $company->overview = $overview;
+                $updated = true;
+            }
+
+            // Fetch and Save Logo URL directly
             if ($domain) {
-                try {
-                    // Fetch logo from Clearbit
-                    $logoResponse = Http::timeout(5)->get("https://logo.clearbit.com/{$domain}");
-                    
-                    if ($logoResponse->successful() && $logoResponse->header('Content-Type') !== 'application/json') {
-                        Storage::disk('public')->put($logoPath, $logoResponse->body());
-                        $company->logo_url = '/storage/' . $logoPath;
-                        $company->save();
-                    }
-                } catch (\Exception $e) {
-                    // Ignore
+                $clearbitUrl = "https://logo.clearbit.com/{$domain}";
+                if ($company->logo_url !== $clearbitUrl) {
+                    $company->logo_url = $clearbitUrl;
+                    $updated = true;
                 }
             }
             
-            // Sleep to avoid rate limiting
-            usleep(200000); // 200ms
+            if ($updated) {
+                $company->save();
+            }
             
+            usleep(200000); // 200ms
             $bar->advance();
         }
 
         $bar->finish();
-        $this->info("\nLogos fetched successfully!");
+        $this->info("\nProfiles fetched successfully!");
     }
 }

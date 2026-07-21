@@ -21,7 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   final _authRepository = AuthRepository();
   final LocalAuthentication _localAuth = LocalAuthentication();
-  final _secureStorage = const FlutterSecureStorage();
+  final _secureStorage = const FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _biometricsEnabled = false;
@@ -74,7 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // Theme Constants
-static const Color cardBg = Colors.white;
+Color get cardBg => context.bgAlt;
 void _login() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       _showError('Please fill in all fields');
@@ -119,7 +119,7 @@ void _login() async {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: AppTheme.haram,
+        backgroundColor: context.haram,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
@@ -129,13 +129,13 @@ void _login() async {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.bg,
+      backgroundColor: context.bg,
       appBar: (widget.onBack != null || Navigator.canPop(context))
           ? AppBar(
-              backgroundColor: AppTheme.bg,
+              backgroundColor: context.bg,
               elevation: 0,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppTheme.textDark, size: 20),
+                icon: Icon(Icons.arrow_back_ios_new_rounded, color: context.textDark, size: 20),
                 onPressed: () => widget.onBack != null ? widget.onBack!() : Navigator.pop(context),
               ),
             )
@@ -148,19 +148,19 @@ void _login() async {
             children: [
               const SizedBox(height: 20),
               // Header
-              const Text(
+              Text(
                 'Welcome back',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.w900,
-                  color: AppTheme.textDark,
+                  color: context.textDark,
                   letterSpacing: -1,
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 'Sign in to your IRSHAD account to access your\nportfolio and premium features.',
-                style: TextStyle(color: AppTheme.textMuted, height: 1.5, fontSize: 15),
+                style: TextStyle(color: context.textMuted, height: 1.5, fontSize: 15),
               ),
               const SizedBox(height: 48),
 
@@ -181,8 +181,8 @@ void _login() async {
                   TextButton(
                     onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ForgotPasswordScreen())),
                     style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
-                    child: const Text('Forgot Password?', 
-                      style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.w700, fontSize: 13)),
+                    child: Text('Forgot Password?', 
+                      style: TextStyle(color: context.primary, fontWeight: FontWeight.w700, fontSize: 13)),
                   ),
                 ],
               ),
@@ -205,7 +205,7 @@ void _login() async {
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _login,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.primary,
+                          backgroundColor: context.primary,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                           elevation: 0,
@@ -225,10 +225,10 @@ void _login() async {
                         onPressed: _isLoading ? null : _authenticateWithBiometrics,
                         style: OutlinedButton.styleFrom(
                           padding: EdgeInsets.zero,
-                          side: const BorderSide(color: AppTheme.divider),
+                          side: BorderSide(color: context.divider),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                         ),
-                        child: const Icon(Icons.fingerprint_rounded, color: AppTheme.textDark, size: 28),
+                        child: Icon(Icons.fingerprint_rounded, color: context.textDark, size: 28),
                       ),
                     ),
                   ],
@@ -238,12 +238,12 @@ void _login() async {
               const SizedBox(height: 24),
               Row(
                 children: [
-                  const Expanded(child: Divider(color: AppTheme.divider)),
-                  const Padding(
+                  Expanded(child: Divider(color: context.divider)),
+                  Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: Text('or continue with', style: TextStyle(color: AppTheme.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
+                    child: Text('or continue with', style: TextStyle(color: context.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
                   ),
-                  const Expanded(child: Divider(color: AppTheme.divider)),
+                  Expanded(child: Divider(color: context.divider)),
                 ],
               ),
               const SizedBox(height: 24),
@@ -254,10 +254,10 @@ void _login() async {
                 child: OutlinedButton(
                   onPressed: _isLoading ? null : _loginWithGoogle,
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppTheme.divider, width: 1.5),
+                    side: BorderSide(color: context.divider, width: 1.5),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                   ),
-                  child: const Text('Continue with Google', style: TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w700, fontSize: 16)),
+                  child: Text('Continue with Google', style: TextStyle(color: context.textDark, fontWeight: FontWeight.w700, fontSize: 16)),
                 ),
               ),
               
@@ -267,26 +267,26 @@ void _login() async {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('Don\'t have an account?', style: TextStyle(color: AppTheme.textMuted)),
+                  Text('Don\'t have an account?', style: TextStyle(color: context.textMuted)),
                   TextButton(
                     onPressed: () => Navigator.pushNamed(context, '/register'),
-                    child: const Text(
+                    child: Text(
                       'Create Account',
-                      style: TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w800),
+                      style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 60),
               
-              const Row(
+              Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.verified_user_rounded, size: 14, color: AppTheme.primary),
+                  Icon(Icons.verified_user_rounded, size: 14, color: context.primary),
                   SizedBox(width: 8),
                   Text(
                     'Secure & Shariah Compliant',
-                    style: TextStyle(color: AppTheme.textMuted, fontSize: 12, fontWeight: FontWeight.w600),
+                    style: TextStyle(color: context.textMuted, fontSize: 12, fontWeight: FontWeight.w600),
                   ),
                 ],
               ),
@@ -302,8 +302,8 @@ void _login() async {
       padding: const EdgeInsets.only(bottom: 8, left: 4),
       child: Text(
         label,
-        style: const TextStyle(
-          color: AppTheme.textDark,
+        style: TextStyle(
+          color: context.textDark,
           fontWeight: FontWeight.w700,
           fontSize: 14,
         ),
@@ -324,24 +324,24 @@ void _login() async {
       controller: controller,
       obscureText: obscure ?? false,
       keyboardType: keyboardType,
-      style: const TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w500),
+      style: TextStyle(color: context.textDark, fontWeight: FontWeight.w500),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: AppTheme.textMuted, fontWeight: FontWeight.w400),
-        prefixIcon: Icon(icon, color: AppTheme.textMuted, size: 20),
+        hintStyle: TextStyle(color: context.textMuted, fontWeight: FontWeight.w400),
+        prefixIcon: Icon(icon, color: context.textMuted, size: 20),
         suffixIcon: isPassword ? IconButton(
-          icon: Icon(obscure! ? Icons.visibility_off_rounded : Icons.visibility_rounded, color: AppTheme.textMuted, size: 20),
+          icon: Icon(obscure! ? Icons.visibility_off_rounded : Icons.visibility_rounded, color: context.textMuted, size: 20),
           onPressed: toggleObscure,
         ) : null,
         filled: true,
-        fillColor: Colors.white,
+        fillColor: context.bgAlt,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppTheme.divider, width: 1),
+          borderSide: BorderSide(color: context.divider, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppTheme.primary, width: 1.5),
+          borderSide: BorderSide(color: context.primary, width: 1.5),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),

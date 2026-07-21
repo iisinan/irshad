@@ -6,7 +6,7 @@ class WelcomeScreen extends StatelessWidget {
 @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.bg,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 28.0),
@@ -27,22 +27,22 @@ class WelcomeScreen extends StatelessWidget {
               const SizedBox(height: 32),
 
               // Headline
-              const Text(
+              Text(
                 'Your Halal\nInvestment Guide',
                 style: TextStyle(
                   fontSize: 38,
                   fontWeight: FontWeight.w900,
-                  color: AppTheme.textDark,
+                  color: context.textDark,
                   height: 1.15,
                   letterSpacing: -1,
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 'Screen Nigerian stocks for Shariah compliance. Invest with confidence and peace of mind.',
                 style: TextStyle(
                   fontSize: 16,
-                  color: AppTheme.textMuted,
+                  color: context.textMuted,
                   height: 1.6,
                 ),
               ),
@@ -52,9 +52,9 @@ class WelcomeScreen extends StatelessWidget {
               // Trust badges
               Row(
                 children: [
-                  _buildBadge(Icons.verified_outlined, 'AAOIFI Compliant'),
+                  _buildBadge(context, Icons.verified_outlined, 'AAOIFI Compliant'),
                   const SizedBox(width: 12),
-                  _buildBadge(Icons.lock_outline_rounded, 'Bank-Level Security'),
+                  _buildBadge(context, Icons.lock_outline_rounded, 'Bank-Level Security'),
                 ],
               ),
               const SizedBox(height: 40),
@@ -66,7 +66,7 @@ class WelcomeScreen extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () => Navigator.pushNamed(context, '/login'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primary,
+                    backgroundColor: context.primary,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(100),
@@ -88,8 +88,8 @@ class WelcomeScreen extends StatelessWidget {
                 child: OutlinedButton(
                   onPressed: () => Navigator.pushNamed(context, '/register'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppTheme.textDark,
-                    side: const BorderSide(color: AppTheme.divider, width: 1.5),
+                    foregroundColor: context.textDark,
+                    side: BorderSide(color: context.divider, width: 1.5),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(100),
                     ),
@@ -109,7 +109,7 @@ class WelcomeScreen extends StatelessWidget {
                   'By continuing, you agree to our Terms & Privacy Policy',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: AppTheme.textMuted.withOpacity(0.7),
+                    color: context.textMuted.withValues(alpha: 0.7),
                     fontSize: 12,
                   ),
                 ),
@@ -122,18 +122,18 @@ class WelcomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBadge(IconData icon, String label) {
+  Widget _buildBadge(BuildContext context, IconData icon, String label) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 15, color: AppTheme.primary),
-        const SizedBox(width: 5),
+        Icon(icon, size: 15, color: context.primary),
+        SizedBox(width: 5),
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: AppTheme.textMuted,
+            color: context.textMuted,
           ),
         ),
       ],

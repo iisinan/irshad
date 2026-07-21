@@ -10,68 +10,104 @@ class BrokerageLinkScreen extends StatefulWidget {
 
 class _BrokerageLinkScreenState extends State<BrokerageLinkScreen> {
   // Theme Constants
-final List<Map<String, String>> _brokers = [
+  final List<Map<String, String>> _brokers = [
     {'name': 'Bamboo', 'logo': 'B', 'description': 'Invest in US and Nigerian stocks'},
     {'name': 'Chaka', 'logo': 'C', 'description': 'Global and local investment access'},
     {'name': 'Risevest', 'logo': 'R', 'description': 'Automated dollar investments'},
     {'name': 'Trove', 'logo': 'T', 'description': 'Stocks, Bonds, and ETFs'},
   ];
 
+  List<dynamic> _linkedAccounts = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchLinkedAccounts();
+  }
+
+  Future<void> _fetchLinkedAccounts() async {
+    try {
+      final response = await ApiService().get('brokerage/accounts');
+      if (response.data['status'] == 'success') {
+        if (mounted) {
+          setState(() {
+            _linkedAccounts = response.data['data'];
+            _isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.bg,
+      backgroundColor: context.bg,
       appBar: AppBar(
-        title: const Text('Linked Brokerage', style: TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5)),
-        backgroundColor: AppTheme.bg,
+        title: Text('Linked Brokerage', style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
+        backgroundColor: context.bg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppTheme.textDark, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: context.textDark, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Trade Instantly',
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5),
+      body: _isLoading 
+        ? Center(child: CircularProgressIndicator(color: context.primary))
+        : SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Trade Instantly',
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Connect your existing brokerage account to execute Shariah-compliant trades directly from IRSHAD.',
+                  style: TextStyle(color: context.textMuted, fontSize: 15, height: 1.5, fontWeight: FontWeight.w400),
+                ),
+                const SizedBox(height: 32),
+                
+                if (_linkedAccounts.isNotEmpty) ...[
+                  _buildSectionLabel('LINKED ACCOUNTS'),
+                  const SizedBox(height: 16),
+                  ..._linkedAccounts.map((account) => _buildLinkedAccountCard(account)).toList(),
+                  const SizedBox(height: 32),
+                ],
+
+                _buildSectionLabel('AVAILABLE BROKERS'),
+                const SizedBox(height: 16),
+                ..._brokers.map((broker) => _buildBrokerCard(broker)).toList(),
+                
+                const SizedBox(height: 40),
+                _buildSecurityNotice(),
+              ],
             ),
-            const SizedBox(height: 12),
-            const Text(
-              'Connect your existing brokerage account to execute Shariah-compliant trades directly from IRSHAD.',
-              style: TextStyle(color: AppTheme.textMuted, fontSize: 15, height: 1.5, fontWeight: FontWeight.w400),
-            ),
-            const SizedBox(height: 32),
-            
-            _buildSectionLabel('AVAILABLE BROKERS'),
-            const SizedBox(height: 16),
-            ..._brokers.map((broker) => _buildBrokerCard(broker)).toList(),
-            
-            const SizedBox(height: 40),
-            _buildSecurityNotice(),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
   Widget _buildSectionLabel(String title) {
     return Text(
       title,
-      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppTheme.textMuted, letterSpacing: 1),
+      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: context.textMuted, letterSpacing: 1),
     );
   }
 
-  Widget _buildBrokerCard(Map<String, String> broker) {
+  Widget _buildLinkedAccountCard(dynamic account) {
+    final brokerName = account['broker_name'] ?? 'Unknown Broker';
+    final initial = brokerName.isNotEmpty ? brokerName[0] : '?';
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.bgAlt,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.divider),
+        border: Border.all(color: context.primary.withValues(alpha: 0.3)),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.all(16),
@@ -79,25 +115,62 @@ final List<Map<String, String>> _brokers = [
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: AppTheme.primary.withOpacity(0.1),
+            color: context.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Center(
+            child: Text(
+              initial,
+              style: TextStyle(color: context.primary, fontWeight: FontWeight.w900, fontSize: 20),
+            ),
+          ),
+        ),
+        title: Text(
+          brokerName,
+          style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, fontSize: 16),
+        ),
+        subtitle: Text(
+          'Active Connection',
+          style: TextStyle(color: context.primary, fontSize: 13, fontWeight: FontWeight.bold),
+        ),
+        trailing: Icon(Icons.check_circle_rounded, color: context.primary),
+      ),
+    );
+  }
+
+  Widget _buildBrokerCard(Map<String, String> broker) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: context.bgAlt,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: context.divider),
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.all(16),
+        leading: Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: context.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Center(
             child: Text(
               broker['logo']!,
-              style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.w900, fontSize: 20),
+              style: TextStyle(color: context.primary, fontWeight: FontWeight.w900, fontSize: 20),
             ),
           ),
         ),
         title: Text(
           broker['name']!,
-          style: const TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, fontSize: 16),
+          style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, fontSize: 16),
         ),
         subtitle: Text(
           broker['description']!,
-          style: const TextStyle(color: AppTheme.textMuted, fontSize: 13, height: 1.4),
+          style: TextStyle(color: context.textMuted, fontSize: 13, height: 1.4),
         ),
-        trailing: const Icon(Icons.link_rounded, color: AppTheme.textMuted),
+        trailing: Icon(Icons.link_rounded, color: context.textMuted),
         onTap: () => _initiateOAuth(broker['name']!),
       ),
     );
@@ -124,8 +197,8 @@ final List<Map<String, String>> _brokers = [
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          decoration: const BoxDecoration(
-            color: Colors.white,
+          decoration: BoxDecoration(
+            color: context.bgAlt,
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: Padding(
@@ -139,7 +212,7 @@ final List<Map<String, String>> _brokers = [
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: AppTheme.divider,
+                      color: context.divider,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -147,14 +220,14 @@ final List<Map<String, String>> _brokers = [
                 const SizedBox(height: 24),
                 Row(
                   children: [
-                    const Icon(Icons.link_rounded, color: AppTheme.primary, size: 28),
+                    Icon(Icons.link_rounded, color: context.primary, size: 28),
                     const SizedBox(width: 12),
                     Text(
                       'Connect to $brokerName',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w900,
-                        color: AppTheme.textDark,
+                        color: context.textDark,
                         letterSpacing: -0.5,
                       ),
                     ),
@@ -163,23 +236,23 @@ final List<Map<String, String>> _brokers = [
                 const SizedBox(height: 8),
                 Text(
                   'Enter your $brokerName credentials to securely link your account. IRSHAD does not store your password.',
-                  style: const TextStyle(color: AppTheme.textMuted, fontSize: 14, height: 1.5),
+                  style: TextStyle(color: context.textMuted, fontSize: 14, height: 1.5),
                 ),
                 const SizedBox(height: 24),
-                const Text('Email or Username', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: AppTheme.textDark)),
+                Text('Email or Username', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: context.textDark)),
                 const SizedBox(height: 8),
                 TextField(
                   controller: emailController,
                   decoration: InputDecoration(
                     hintText: 'Enter your email',
                     filled: true,
-                    fillColor: AppTheme.bg,
+                    fillColor: context.bg,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text('Password', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: AppTheme.textDark)),
+                Text('Password', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: context.textDark)),
                 const SizedBox(height: 8),
                 TextField(
                   controller: passwordController,
@@ -187,7 +260,7 @@ final List<Map<String, String>> _brokers = [
                   decoration: InputDecoration(
                     hintText: 'Enter your password',
                     filled: true,
-                    fillColor: AppTheme.bg,
+                    fillColor: context.bg,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   ),
@@ -202,7 +275,7 @@ final List<Map<String, String>> _brokers = [
                         : () async {
                             if (emailController.text.isEmpty || passwordController.text.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Please enter your credentials'), backgroundColor: AppTheme.haram),
+                                SnackBar(content: Text('Please enter your credentials'), backgroundColor: context.haram),
                               );
                               return;
                             }
@@ -216,23 +289,23 @@ final List<Map<String, String>> _brokers = [
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text('Successfully linked $brokerName and funded account with ₦1,000,000!'),
-                                    backgroundColor: AppTheme.primary,
+                                    backgroundColor: context.primary,
                                     behavior: SnackBarBehavior.floating,
                                   ),
                                 );
-                                Navigator.pop(context); // Go back to portfolio
+                                _fetchLinkedAccounts(); // Refresh the list
                               }
                             } catch (e) {
                               if (context.mounted) {
                                 setState(() => isConnecting = false);
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Error linking broker: $e'), backgroundColor: AppTheme.haram),
+                                  SnackBar(content: Text('Error linking broker: $e'), backgroundColor: context.haram),
                                 );
                               }
                             }
                           },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primary,
+                      backgroundColor: context.primary,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                       elevation: 0,

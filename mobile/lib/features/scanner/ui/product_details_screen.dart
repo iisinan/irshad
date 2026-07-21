@@ -30,10 +30,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     if (success) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('Added to favorites'), 
             behavior: SnackBarBehavior.floating,
-            backgroundColor: AppTheme.textDark,
+            backgroundColor: context.textDark,
           ),
         );
       }
@@ -47,23 +47,23 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     
     bool isHalal = status == 'halal';
     bool isNonHalal = status == 'non-halal';
-    Color statusColor = isHalal ? AppTheme.halal : (isNonHalal ? AppTheme.haram : AppTheme.questionable);
-    Color badgeBg = isHalal ? const Color(0xFFDCFCE7) : (isNonHalal ? const Color(0xFFFEE2E2) : const Color(0xFFFEF3C7));
+    Color statusColor = isHalal ? context.halal : (isNonHalal ? context.haram : context.questionable);
+    Color badgeBg = isHalal ? context.halalBg : (isNonHalal ? context.haramBg : context.questionableBg);
     String statusLabel = isHalal ? 'CERTIFIED HALAL' : (isNonHalal ? 'NOT HALAL' : 'QUESTIONABLE');
 
     return Scaffold(
-      backgroundColor: AppTheme.bg,
+      backgroundColor: context.bg,
       appBar: AppBar(
-        title: const Text('Product Status', style: TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5)),
-        backgroundColor: AppTheme.bg,
+        title: Text('Product Status', style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
+        backgroundColor: context.bg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppTheme.textDark, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: context.textDark, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
           IconButton(
-            icon: Icon(_isFavoriting ? Icons.favorite_rounded : Icons.favorite_outline_rounded, color: AppTheme.textDark, size: 22),
+            icon: Icon(_isFavoriting ? Icons.favorite_rounded : Icons.favorite_outline_rounded, color: context.textDark, size: 22),
             onPressed: _isFavoriting ? null : _onFavorite,
           ),
         ],
@@ -113,7 +113,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   Widget _buildSectionHeader(String title) {
     return Text(
       title.toUpperCase(),
-      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppTheme.textMuted, letterSpacing: 1),
+      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: context.textMuted, letterSpacing: 1),
     );
   }
 
@@ -141,10 +141,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           Text(label, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: color, letterSpacing: 0.5)),
           const SizedBox(height: 8),
           Text(widget.product['name'] ?? 'N/A', 
-            style: const TextStyle(color: AppTheme.textDark, fontSize: 16, fontWeight: FontWeight.w700), textAlign: TextAlign.center),
+            style: TextStyle(color: context.textDark, fontSize: 16, fontWeight: FontWeight.w700), textAlign: TextAlign.center),
           const SizedBox(height: 4),
           Text(widget.product['brand'] ?? 'Unknown Brand', 
-            style: const TextStyle(color: AppTheme.textMuted, fontSize: 13, fontWeight: FontWeight.w500)),
+            style: TextStyle(color: context.textMuted, fontSize: 13, fontWeight: FontWeight.w500)),
         ],
       ),
     );
@@ -156,14 +156,14 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       decoration: BoxDecoration(
         color: Colors.white, 
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.divider),
+        border: Border.all(color: context.divider),
       ),
       child: Column(
         children: [
           _buildInfoRow('Barcode', widget.product['barcode'] ?? 'N/A'),
-          const Divider(color: AppTheme.divider, height: 24),
+          Divider(color: context.divider, height: 24),
           _buildInfoRow('NAFDAC Reg.', widget.product['nafdac_number'] ?? 'Pending'),
-          const Divider(color: AppTheme.divider, height: 24),
+          Divider(color: context.divider, height: 24),
           _buildInfoRow('Region', 'Nigeria'),
         ],
       ),
@@ -174,8 +174,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(color: AppTheme.textMuted, fontSize: 13, fontWeight: FontWeight.w500)),
-        Text(value, style: const TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w800, fontSize: 14)),
+        Text(label, style: TextStyle(color: context.textMuted, fontSize: 13, fontWeight: FontWeight.w500)),
+        Text(value, style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800, fontSize: 14)),
       ],
     );
   }
@@ -187,14 +187,14 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       decoration: BoxDecoration(
         color: Colors.white, 
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.divider),
+        border: Border.all(color: context.divider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             widget.product['status_reason'] ?? 'Classification based on automated ingredient analysis and/or scholar verification.',
-            style: const TextStyle(color: AppTheme.textMuted, height: 1.6, fontSize: 14, fontWeight: FontWeight.w400),
+            style: TextStyle(color: context.textMuted, height: 1.6, fontSize: 14, fontWeight: FontWeight.w400),
           ),
           if (widget.product['verified_by_scholar'] == true) ...[
             const SizedBox(height: 16),
@@ -223,8 +223,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       return Container(
         padding: const EdgeInsets.all(24),
         width: double.infinity,
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: AppTheme.divider)),
-        child: const Text('Ingredient data not available.', textAlign: TextAlign.center, style: TextStyle(color: AppTheme.textMuted)),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: context.divider)),
+        child: Text('Ingredient data not available.', textAlign: TextAlign.center, style: TextStyle(color: context.textMuted)),
       );
     }
 
@@ -235,14 +235,14 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         final iStatus = i['status']?.toString().toLowerCase() ?? 'doubtful';
         bool iHalal = iStatus == 'halal';
         bool iNonHalal = iStatus == 'non-halal';
-        Color iColor = iHalal ? AppTheme.primary : (iNonHalal ? AppTheme.haram : AppTheme.questionable);
+        Color iColor = iHalal ? context.primary : (iNonHalal ? context.haram : context.questionable);
         
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: AppTheme.divider),
+            border: Border.all(color: context.divider),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -251,7 +251,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               const SizedBox(width: 8),
               Text(
                 i['name'],
-                style: const TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w700, fontSize: 13),
+                style: TextStyle(color: context.textDark, fontWeight: FontWeight.w700, fontSize: 13),
               ),
             ],
           ),
@@ -264,7 +264,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppTheme.primary, 
+        color: context.primary, 
         borderRadius: BorderRadius.circular(24),
       ),
       child: Column(
@@ -284,7 +284,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               onPressed: () => Navigator.pushNamed(context, '/submit_product', arguments: widget.product['barcode']),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
-                foregroundColor: AppTheme.primary,
+                foregroundColor: context.primary,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                 elevation: 0,
               ),

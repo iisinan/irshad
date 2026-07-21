@@ -1,499 +1,146 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
-import '../../core/api/api_service.dart';
-import '../stocks/providers/stock_provider.dart';
 import '../../core/theme/app_theme.dart';
-import '../stocks/ui/stock_search_screen.dart';
-import '../portfolio/ui/portfolio_screen.dart';
-import '../portfolio/ui/zakat_calculator_screen.dart';
-import '../stocks/ui/ngx_market_screen.dart';
 import '../stocks/ui/stock_screener_screen.dart';
-import '../stocks/ui/create_basket_screen.dart';
 
-class HomeScreen extends StatefulWidget {
+import '../baskets/ui/baskets_screen.dart';
+
+class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  List<dynamic> _baskets = [];
-  bool _isLoadingBaskets = true;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _refreshData();
-    });
-  }
-
-  Future<void> _refreshData() async {
-    Provider.of<StockProvider>(context, listen: false).fetchNgxStocks();
-    await _fetchBaskets();
-  }
-
-  Future<void> _fetchBaskets() async {
-    try {
-      final response = await ApiService().get('stocks/baskets');
-      if (response.statusCode == 200 && response.data['status'] == 'success') {
-        if (mounted) {
-          setState(() {
-            _baskets = response.data['data'];
-            _isLoadingBaskets = false;
-          });
-        }
-      }
-    } catch (e) {
-      if (mounted) setState(() => _isLoadingBaskets = false);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.bg,
-      body: SafeArea(
-        child: RefreshIndicator(
-          color: AppTheme.primary,
-          onRefresh: _refreshData,
-          child: CustomScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: [
-              SliverToBoxAdapter(child: _buildHeader()),
-              SliverToBoxAdapter(child: _buildSearchBar(context)),
-              SliverToBoxAdapter(child: _buildMarketSnapshotWidget()),
-              SliverToBoxAdapter(child: _buildQuickActionsGrid(context)),
-              SliverToBoxAdapter(child: _buildTopMoversWidget()),
-              SliverToBoxAdapter(child: _buildBasketsWidget()),
-              const SliverPadding(padding: EdgeInsets.only(bottom: 40)),
-            ],
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        backgroundColor: context.bg,
+        appBar: AppBar(
+          backgroundColor: context.bg,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.settings_outlined, color: context.textMuted),
+            onPressed: () => Navigator.pushNamed(context, '/settings'),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Salam, Investor',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900,
-                  color: AppTheme.textDark,
-                  letterSpacing: -0.5,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                DateFormat('EEEE, MMM d').format(DateTime.now()),
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.textMuted,
-                ),
-              ),
-            ],
-          ),
-          GestureDetector(
-            onTap: () {
-              Navigator.pushNamed(context, '/notifications');
-            },
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(100), // Circular pill shape
-                border: Border.all(color: AppTheme.divider), // Flat border
-              ),
-              child: const Icon(Icons.notifications_none_rounded, color: AppTheme.textDark, size: 24),
+          centerTitle: true,
+          title: Text(
+            'irshad',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: context.textDark,
+              letterSpacing: -1,
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSearchBar(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      child: GestureDetector(
-        onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => const StockSearchScreen()));
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(100), // Pill search bar
-            border: Border.all(color: AppTheme.divider, width: 1.5),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.search_rounded, color: AppTheme.textMuted, size: 22),
-              const SizedBox(width: 12),
-              Text(
-                'Search for stocks, symbols...',
-                style: TextStyle(
-                  color: AppTheme.textMuted,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMarketSnapshotWidget() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: _cardDecoration(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(100),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Market Snapshot',
-                  style: _widgetTitleStyle(),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppTheme.accentSoft,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
                   child: Text(
-                    'OPEN',
+                    'Explore',
                     style: TextStyle(
-                      color: AppTheme.primary,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.5,
+                      fontSize: 32,
+                      fontWeight: FontWeight.w400,
+                      color: context.textDark,
                     ),
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'NGX All-Share',
-                      style: TextStyle(fontSize: 13, color: AppTheme.textMuted, fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '97,745.73',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5),
-                    ),
-                  ],
-                ),
+                const SizedBox(height: 16),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: AppTheme.halal.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
+                    color: context.bgAlt,
+                    borderRadius: BorderRadius.circular(30),
                   ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.trending_up_rounded, color: AppTheme.halal, size: 16),
-                      const SizedBox(width: 4),
-                      Text(
-                        '+1.24%',
-                        style: TextStyle(color: AppTheme.halal, fontWeight: FontWeight.w800, fontSize: 13),
-                      ),
+                  child: TabBar(
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    dividerColor: Colors.transparent,
+                    indicator: BoxDecoration(
+                      color: context.primary,
+                      borderRadius: BorderRadius.circular(30),
+                      boxShadow: [
+                        BoxShadow(
+                          color: context.primary.withValues(alpha: 0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    labelColor: Colors.black, // High contrast on primary
+                    unselectedLabelColor: context.textMuted,
+                    labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                    unselectedLabelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                    tabs: const [
+                      Tab(text: 'Stocks'),
+                      Tab(text: 'Funds'),
+                      Tab(text: 'Baskets'),
                     ],
                   ),
                 ),
+                const SizedBox(height: 8),
               ],
             ),
+          ),
+        ),
+        body: TabBarView(
+          children: [
+            StockScreenerScreen(),
+            _buildComingSoonState(
+              context, 
+              Icons.trending_up_rounded, 
+              'Halal Mutual Funds', 
+              'We are partnering with leading asset managers to bring you curated, shariah-compliant mutual funds. Stay tuned!'
+            ),
+            const BasketsScreen(),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildQuickActionsGrid(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      child: Row(
-        children: [
-          Expanded(child: _buildActionCard(context, Icons.radar_rounded, 'Screener', AppTheme.primary, () {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => const StockScreenerScreen()));
-          })),
-          const SizedBox(width: 12),
-          Expanded(child: _buildActionCard(context, Icons.pie_chart_rounded, 'Portfolio', const Color(0xFF3B82F6), () {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => const PortfolioScreen()));
-          })),
-          const SizedBox(width: 12),
-          Expanded(child: _buildActionCard(context, Icons.calculate_rounded, 'Zakat', const Color(0xFFF59E0B), () {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => const ZakatCalculatorScreen()));
-          })),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionCard(BuildContext context, IconData icon, String title, Color color, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        decoration: _cardDecoration(),
+  Widget _buildComingSoonState(BuildContext context, IconData icon, String title, String description) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.only(left: 40.0, right: 40.0, bottom: 100.0), // Padding to account for nav pill
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: context.primary.withValues(alpha: 0.05),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: color, size: 24),
+              child: Icon(icon, size: 48, color: context.primary),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 24),
             Text(
               title,
-              style: TextStyle(
-                color: AppTheme.textDark,
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
+              style: TextStyle(fontSize: 22, color: context.textDark, fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              description,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: context.textMuted, height: 1.5, fontSize: 15),
+            ),
+            const SizedBox(height: 32),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: context.textDark,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Text(
+                'COMING SOON',
+                style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.5),
               ),
             ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildTopMoversWidget() {
-    return Consumer<StockProvider>(
-      builder: (context, provider, child) {
-        if (provider.isLoading && provider.ngxStocks.isEmpty) {
-          return const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator()));
-        }
-
-        final stocks = provider.ngxStocks.take(3).toList();
-        if (stocks.isEmpty) return const SizedBox.shrink();
-
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            decoration: _cardDecoration(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Top Movers', style: _widgetTitleStyle()),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => const NgxMarketScreen()));
-                      },
-                      child: Text('View All', style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.w700, fontSize: 13)),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                ...stocks.map((stock) => _buildMoverRow(stock)).toList(),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildMoverRow(dynamic stock) {
-    final price = stock['close_price']?.toString() ?? '0.00';
-    final change = stock['change_percent'] ?? 0.0;
-    final isPos = change >= 0;
-    final color = isPos ? AppTheme.halal : AppTheme.haram;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: AppTheme.bgSection,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Center(
-              child: Text(
-                stock['symbol'].substring(0, 1),
-                style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.w800, fontSize: 16),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(stock['symbol'], style: TextStyle(fontWeight: FontWeight.w800, color: AppTheme.textDark, fontSize: 15)),
-                Text(
-                  stock['name'] ?? '',
-                  style: TextStyle(color: AppTheme.textMuted, fontSize: 12, fontWeight: FontWeight.w500),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text('₦$price', style: TextStyle(fontWeight: FontWeight.w800, color: AppTheme.textDark, fontSize: 15)),
-              Text(
-                '${isPos ? '+' : ''}${change.toStringAsFixed(2)}%',
-                style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w700),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBasketsWidget() {
-    if (_isLoadingBaskets && _baskets.isEmpty) {
-      return const SizedBox.shrink();
-    }
-    if (_baskets.isEmpty) return const SizedBox.shrink();
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 10, bottom: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Curated Themes', style: _widgetTitleStyle()),
-                GestureDetector(
-                  onTap: () async {
-                    final created = await Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateBasketScreen()));
-                    if (created == true) {
-                      _fetchBaskets();
-                    }
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(color: AppTheme.primary, borderRadius: BorderRadius.circular(100)),
-                    child: const Row(
-                      children: [
-                        Icon(Icons.add_rounded, color: Colors.white, size: 14),
-                        SizedBox(width: 4),
-                        Text('Create', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w800)),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            height: 140,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: _baskets.length,
-              itemBuilder: (context, index) {
-                final b = _baskets[index];
-                return _buildThemeCard(b);
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildThemeCard(dynamic basket) {
-    return Container(
-      width: 130,
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      padding: const EdgeInsets.all(16),
-      decoration: _cardDecoration(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppTheme.accentSoft,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(Icons.category_rounded, color: AppTheme.primary, size: 20),
-          ),
-          const Spacer(),
-          Text(
-            basket['name'],
-            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: AppTheme.textDark, height: 1.2),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '${basket['stocks_count'] ?? 0} Stocks',
-            style: TextStyle(fontSize: 11, color: AppTheme.textMuted, fontWeight: FontWeight.w600),
-          ),
-        ],
-      ),
-    );
-  }
-
-  BoxDecoration _cardDecoration() {
-    return BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(20),
-      border: Border.all(color: Colors.black.withOpacity(0.03)),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.04),
-          blurRadius: 16,
-          offset: const Offset(0, 8),
-        )
-      ],
-    );
-  }
-
-  TextStyle _widgetTitleStyle() {
-    return TextStyle(
-      fontSize: 18,
-      fontWeight: FontWeight.w800,
-      color: AppTheme.textDark,
-      letterSpacing: -0.3,
     );
   }
 }

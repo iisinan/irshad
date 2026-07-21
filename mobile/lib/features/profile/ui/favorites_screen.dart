@@ -24,7 +24,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     _fetchFavorites();
   }
 
-  void _fetchFavorites() async {
+  Future<void> _fetchFavorites() async {
     final isAuth = Provider.of<AppStateProvider>(context, listen: false).isAuthenticated;
     if (!isAuth) {
       if (mounted) {
@@ -52,10 +52,10 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       if (mounted) {
         Provider.of<AppStateProvider>(context, listen: false).decrementWatchlist();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('Removed from watchlist'), 
             behavior: SnackBarBehavior.floating,
-            backgroundColor: AppTheme.textDark,
+            backgroundColor: context.textDark,
           ),
         );
       }
@@ -84,10 +84,10 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.bg,
+      backgroundColor: context.bg,
       appBar: AppBar(
-        title: const Text('Watchlist', style: TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5)),
-        backgroundColor: AppTheme.bg,
+        title: Text('Watchlist', style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
+        backgroundColor: context.bg,
         elevation: 0,
         centerTitle: false,
       ),
@@ -99,12 +99,17 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 ? _buildLoading()
                 : _filteredFavorites.isEmpty
                     ? _buildEmptyState()
-                    : ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        itemCount: _filteredFavorites.length,
-                        itemBuilder: (context, index) {
-                          return _buildFavoriteCard(_filteredFavorites[index]);
-                        },
+                    : RefreshIndicator(
+                        onRefresh: _fetchFavorites,
+                        color: context.primary,
+                        backgroundColor: context.bgAlt,
+                        child: ListView.builder(
+                          padding: const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 100),
+                          itemCount: _filteredFavorites.length,
+                          itemBuilder: (context, index) {
+                            return _buildFavoriteCard(_filteredFavorites[index]);
+                          },
+                        ),
                       ),
           ),
         ],
@@ -113,7 +118,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         onPressed: () {
           _showAddBottomSheet(context);
         },
-        backgroundColor: AppTheme.textDark,
+        backgroundColor: context.textDark,
         child: const Icon(Icons.add_rounded, color: Colors.white),
       ),
     );
@@ -125,22 +130,22 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         padding: const EdgeInsets.all(24),
-        decoration: const BoxDecoration(
-          color: Colors.white,
+        decoration: BoxDecoration(
+          color: context.bgAlt,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Add to Watchlist',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppTheme.textDark),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: context.textDark),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'What would you like to track?',
-              style: TextStyle(color: AppTheme.textMuted, fontSize: 14),
+              style: TextStyle(color: context.textMuted, fontSize: 14),
             ),
             const SizedBox(height: 24),
             _buildAddOption(
@@ -175,32 +180,32 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppTheme.bg,
+          color: context.bg,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppTheme.divider),
+          border: Border.all(color: context.divider),
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppTheme.primary.withOpacity(0.1),
+                color: context.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: AppTheme.primary),
+              child: Icon(icon, color: context.primary),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.w800, color: AppTheme.textDark, fontSize: 16)),
+                  Text(title, style: TextStyle(fontWeight: FontWeight.w800, color: context.textDark, fontSize: 16)),
                   const SizedBox(height: 4),
-                  Text(subtitle, style: const TextStyle(color: AppTheme.textMuted, fontSize: 13)),
+                  Text(subtitle, style: TextStyle(color: context.textMuted, fontSize: 13)),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded, color: AppTheme.textMuted),
+            Icon(Icons.chevron_right_rounded, color: context.textMuted),
           ],
         ),
       ),
@@ -230,14 +235,14 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.textDark : Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: isSelected ? AppTheme.textDark : AppTheme.divider),
+          color: isSelected ? context.textDark : context.bgAlt,
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(color: isSelected ? context.textDark : context.divider.withValues(alpha: 0.5)),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.white : AppTheme.textMuted,
+            color: isSelected ? Colors.white : context.textMuted,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
             fontSize: 13,
           ),
@@ -255,15 +260,22 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
     bool isHalal = status == 'halal';
     bool isNonHalal = status == 'non-halal';
-    Color statusColor = isHalal ? AppTheme.halal : (isNonHalal ? AppTheme.haram : AppTheme.questionable);
-    Color badgeBg = isHalal ? const Color(0xFFDCFCE7) : (isNonHalal ? const Color(0xFFFEE2E2) : const Color(0xFFFEF3C7));
+    Color statusColor = isHalal ? context.halal : (isNonHalal ? context.haram : context.questionable);
+    Color badgeBg = isHalal ? context.halalBg : (isNonHalal ? context.haramBg : context.questionableBg);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.bgAlt,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.divider),
+        border: Border.all(color: context.divider.withValues(alpha: 0.5)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.all(12),
@@ -285,7 +297,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             Expanded(
               child: Text(
                 isProduct ? item['name'] : item['symbol'],
-                style: const TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, fontSize: 16),
+                style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, fontSize: 16),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -301,7 +313,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 isProduct ? (item['brand'] ?? 'Market Listed') : item['name'],
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: AppTheme.textMuted, fontSize: 13),
+                style: TextStyle(color: context.textMuted, fontSize: 13),
               ),
             ),
             Row(
@@ -322,7 +334,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           ],
         ),
         trailing: IconButton(
-          icon: const Icon(Icons.favorite_rounded, color: AppTheme.haram, size: 22),
+          icon: Icon(Icons.favorite_rounded, color: context.haram, size: 22),
           onPressed: () => _removeFavorite(fav['id'] as int),
         ),
         onTap: () {
@@ -342,14 +354,14 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       child: Container(
         padding: const EdgeInsets.all(6),
         decoration: BoxDecoration(
-          color: isActive ? AppTheme.primary : AppTheme.bg,
+          color: isActive ? context.primary : context.accentSoft,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: isActive ? AppTheme.primary : AppTheme.divider),
+          border: Border.all(color: isActive ? context.primary : Colors.transparent),
         ),
         child: Icon(
           icon,
           size: 16,
-          color: isActive ? Colors.white : AppTheme.textMuted,
+          color: isActive ? Colors.white : context.textMuted,
         ),
       ),
     );
@@ -367,15 +379,15 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppTheme.primary.withOpacity(0.05),
+                color: context.primary.withValues(alpha: 0.05),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.favorite_outline_rounded, size: 40, color: AppTheme.primary),
+              child: Icon(Icons.favorite_outline_rounded, size: 40, color: context.primary),
             ),
             const SizedBox(height: 24),
             Text(
               isAuth ? 'Your Watchlist is Empty' : 'Login to view Watchlist',
-              style: const TextStyle(fontSize: 20, color: AppTheme.textDark, fontWeight: FontWeight.w900),
+              style: TextStyle(fontSize: 20, color: context.textDark, fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 12),
             Text(
@@ -383,7 +395,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   ? 'Add stocks or products to your watchlist\nto track their Shariah status and prices.'
                   : 'You must be logged in to save and track items in your watchlist.',
               textAlign: TextAlign.center,
-              style: const TextStyle(color: AppTheme.textMuted, height: 1.5, fontSize: 14),
+              style: TextStyle(color: context.textMuted, height: 1.5, fontSize: 14),
             ),
             if (!isAuth) ...[
               const SizedBox(height: 32),
@@ -393,7 +405,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 child: ElevatedButton(
                   onPressed: () => Navigator.pushNamed(context, '/login'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.textDark,
+                    backgroundColor: context.textDark,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     elevation: 0,
@@ -409,7 +421,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 child: ElevatedButton(
                   onPressed: () => _showAddBottomSheet(context),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primary,
+                    backgroundColor: context.primary,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     elevation: 0,
@@ -425,6 +437,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   }
 
   Widget _buildLoading() {
-    return const Center(child: CircularProgressIndicator(color: AppTheme.primary));
+    return Center(child: CircularProgressIndicator(color: context.primary));
   }
 }

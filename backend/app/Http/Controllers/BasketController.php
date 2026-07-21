@@ -69,6 +69,27 @@ class BasketController extends Controller
     }
 
     /**
+     * Update an existing custom basket.
+     */
+    public function update(Request $request, Basket $basket): JsonResponse
+    {
+        if ($basket->user_id !== auth('sanctum')->id()) {
+            return $this->error('Unauthorized', 403);
+        }
+
+        $validated = $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'description' => 'nullable|string',
+            'symbols' => 'sometimes|array',
+            'symbols.*' => 'string'
+        ]);
+
+        $basket->update($validated);
+
+        return $this->success($basket);
+    }
+
+    /**
      * Delete a custom basket.
      */
     public function destroy(Basket $basket): JsonResponse

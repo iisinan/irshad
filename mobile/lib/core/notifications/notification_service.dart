@@ -4,12 +4,11 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'dart:io';
 import '../../features/scanner/data/product_repository.dart';
 import '../../features/stocks/data/stock_repository.dart';
+import '../api/api_service.dart';
 
 class PushNotificationService {
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
-
-  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   Future<void> initialize() async {
     if (Platform.isIOS) {
@@ -87,13 +86,13 @@ class PushNotificationService {
        final repo = ProductRepository();
        final product = await repo.scanBarcode(id);
        if (product != null) {
-         navigatorKey.currentState?.pushNamed('/product_details', arguments: product);
+         ApiService.navigatorKey.currentState?.pushNamed('/product_details', arguments: product);
        }
     } else if (type == 'stock' && id != null) {
        final repo = StockRepository();
        final stock = await repo.getStockDetails(id);
        if (stock != null) {
-         navigatorKey.currentState?.pushNamed('/stock_details', arguments: stock);
+         ApiService.navigatorKey.currentState?.pushNamed('/stock_details', arguments: stock);
        }
     }
   }

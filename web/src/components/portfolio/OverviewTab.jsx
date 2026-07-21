@@ -544,7 +544,7 @@ export default function OverviewTab({ data, setShowAddModal, handleDelete, chang
         <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
           {[
             { icon:Plus,     label:'Add Holding',   sub:'Track a new stock',   color:'#0F5257', bg:'var(--primary-50)', fn:() => setShowAddModal(true) },
-            { icon:BarChart2, label:'Screen Stocks', sub:'Find halal picks',    color:'#6366f1', bg:'#eef2ff',         to:'/market' },
+            { icon:BarChart2, label:'Screen Stocks', sub:'Find halal picks',    color:'#6366f1', bg:'#eef2ff',         to:'/portfolio#market' },
             { icon:Eye,      label:'Watchlist',     sub:'Monitor your picks',   color:'#f59e0b', bg:'#fffbeb',         fn:() => changeTab?.('watchlist') },
             { icon:BookOpen, label:'Resources',     sub:'Learn Islamic finance', color:'#14b8a6', bg:'#f0fdfa',        fn:() => changeTab?.('lectures') },
             { icon:Shield,   label:'Purify',        sub:'Calculate haram income',color:'#B45309', bg:'var(--doubtful-bg)', fn:() => changeTab?.('purification') },
@@ -681,7 +681,7 @@ export default function OverviewTab({ data, setShowAddModal, handleDelete, chang
           <CardHead
             icon={Newspaper} iconBg="#f0fdfa" iconColor="#14b8a6"
             title="Market News"
-            right={<Link to="/market" style={{ fontSize:'0.7rem', fontWeight:700, color:'var(--primary)', background:'var(--primary-50)', textDecoration:'none', padding:'4px 9px', borderRadius:'7px', display:'flex', alignItems:'center', gap:'3px' }}>More <ChevronRight size={11}/></Link>}
+            right={<Link to="/portfolio#market" style={{ fontSize:'0.7rem', fontWeight:700, color:'var(--primary)', background:'var(--primary-50)', textDecoration:'none', padding:'4px 9px', borderRadius:'7px', display:'flex', alignItems:'center', gap:'3px' }}>More <ChevronRight size={11}/></Link>}
           />
           {loadingNews ? [1,2,3].map(i => <Skel key={i} h={66}/>) : news.length === 0 ? (
             <div style={{ textAlign:'center', padding:'24px', color:'var(--text-muted)', fontSize:'0.8rem' }}>No news available</div>

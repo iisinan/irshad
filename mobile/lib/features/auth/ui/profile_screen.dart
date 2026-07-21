@@ -21,7 +21,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final List<String> _languages = ['English', 'Hausa', 'Yoruba', 'Igbo'];
 
   // Theme Constants
-static const Color cardBg = Colors.white;
+Color get cardBg => context.bgAlt;
 @override
   void initState() {
     super.initState();
@@ -48,26 +48,26 @@ static const Color cardBg = Colors.white;
     final user = Provider.of<AppStateProvider>(context).userProfile;
 
     return Scaffold(
-      backgroundColor: AppTheme.bg,
+      backgroundColor: context.bg,
       appBar: AppBar(
-        title: const Text('Profile', style: TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5)),
-        backgroundColor: AppTheme.bg,
+        title: Text('Profile', style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
+        backgroundColor: context.bg,
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings_outlined, color: AppTheme.textDark, size: 22),
+            icon: Icon(Icons.settings_outlined, color: context.textDark, size: 22),
             onPressed: () => Navigator.pushNamed(context, '/settings'),
           ),
           IconButton(
-            icon: const Icon(Icons.logout_rounded, color: AppTheme.haram, size: 22),
+            icon: Icon(Icons.logout_rounded, color: context.haram, size: 22),
             onPressed: _logout,
           ),
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppTheme.primary))
+          ? Center(child: CircularProgressIndicator(color: context.primary))
           : user == null
-              ? const Center(child: Text('Failed to load profile', style: TextStyle(color: AppTheme.textDark)))
+              ? Center(child: Text('Failed to load profile', style: TextStyle(color: context.textDark)))
               : SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                   child: Column(
@@ -101,7 +101,7 @@ static const Color cardBg = Colors.white;
                           icon: const Icon(Icons.edit_rounded, size: 18),
                           label: const Text('Edit Profile', style: TextStyle(fontWeight: FontWeight.w700)),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppTheme.primary,
+                            backgroundColor: context.primary,
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                             elevation: 0,
@@ -115,10 +115,10 @@ static const Color cardBg = Colors.white;
                         height: 56,
                         child: OutlinedButton.icon(
                           onPressed: () => _showDeleteConfirmation(context),
-                          icon: const Icon(Icons.delete_forever_rounded, size: 18, color: AppTheme.haram),
-                          label: const Text('Delete Account', style: TextStyle(fontWeight: FontWeight.w700, color: AppTheme.haram)),
+                          icon: Icon(Icons.delete_forever_rounded, size: 18, color: context.haram),
+                          label: Text('Delete Account', style: TextStyle(fontWeight: FontWeight.w700, color: context.haram)),
                           style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: AppTheme.haram, width: 1.5),
+                            side: BorderSide(color: context.haram, width: 1.5),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                           ),
                         ),
@@ -134,23 +134,23 @@ static const Color cardBg = Colors.white;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: context.bg,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: AppTheme.haram, size: 28),
+            Icon(Icons.warning_amber_rounded, color: context.haram, size: 28),
             SizedBox(width: 8),
             Text('Delete Account', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 20)),
           ],
         ),
-        content: const Text(
+        content: Text(
           'Are you sure you want to permanently delete your account? This action cannot be undone and you will lose all saved portfolio and favorite stocks.',
-          style: TextStyle(color: AppTheme.textMuted, height: 1.5),
+          style: TextStyle(color: context.textMuted, height: 1.5),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel', style: TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w700)),
+            child: Text('Cancel', style: TextStyle(color: context.textDark, fontWeight: FontWeight.w700)),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -160,7 +160,7 @@ static const Color cardBg = Colors.white;
               if (mounted) Navigator.pushReplacementNamed(context, '/login');
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.haram,
+              backgroundColor: context.haram,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               elevation: 0,
@@ -177,16 +177,16 @@ static const Color cardBg = Colors.white;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.bgAlt,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.divider),
+        border: Border.all(color: context.divider),
       ),
       child: Row(
         children: [
           CircleAvatar(
             radius: 36,
-            backgroundColor: AppTheme.primary.withOpacity(0.1),
-            child: Text(user?['first_name']?[0] ?? 'U', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: AppTheme.primary)),
+            backgroundColor: context.primary.withOpacity(0.1),
+            child: Text(user?['first_name']?[0] ?? 'U', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: context.primary)),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -195,12 +195,25 @@ static const Color cardBg = Colors.white;
               children: [
                 Text(
                   '${user?['first_name'] ?? ''} ${user?['last_name'] ?? ''}',
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   user?['email'] ?? '',
-                  style: const TextStyle(fontSize: 14, color: AppTheme.textMuted),
+                  style: TextStyle(fontSize: 14, color: context.textMuted),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: context.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: context.primary.withOpacity(0.2)),
+                  ),
+                  child: Text(
+                    'Free Plan',
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: context.primary),
+                  ),
                 ),
               ],
             ),
@@ -217,7 +230,7 @@ static const Color cardBg = Colors.white;
         alignment: Alignment.centerLeft,
         child: Text(
           title,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppTheme.textDark),
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: context.textDark),
         ),
       ),
     );
@@ -227,16 +240,16 @@ static const Color cardBg = Colors.white;
     final user = Provider.of<AppStateProvider>(context).userProfile;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.bgAlt,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.divider),
+        border: Border.all(color: context.divider),
       ),
       child: Column(
         children: [
           _buildInfoTile(Icons.alternate_email_rounded, 'Email', user?['email'] ?? ''),
-          const Divider(color: AppTheme.divider, height: 1, indent: 56),
+          Divider(color: context.divider, height: 1, indent: 56),
           _buildInfoTile(Icons.location_on_outlined, 'Location', user?['location'] ?? 'Nigeria'),
-          const Divider(color: AppTheme.divider, height: 1, indent: 56),
+          Divider(color: context.divider, height: 1, indent: 56),
           _buildInfoTile(Icons.calendar_today_outlined, 'Member Since', 
             user?['created_at'] != null 
               ? DateFormat('MMMM yyyy').format(DateTime.parse(user!['created_at']))
@@ -249,18 +262,18 @@ static const Color cardBg = Colors.white;
   Widget _buildToolsCard() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.bgAlt,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.divider),
+        border: Border.all(color: context.divider),
       ),
       child: ListTile(
         leading: Container(
           padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(color: AppTheme.bg, borderRadius: BorderRadius.circular(8)),
-          child: const Icon(Icons.calculate_outlined, color: AppTheme.textMuted, size: 20),
+          decoration: BoxDecoration(color: context.bg, borderRadius: BorderRadius.circular(8)),
+          child: Icon(Icons.calculate_outlined, color: context.textMuted, size: 20),
         ),
-        title: const Text('Zakat Calculator', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppTheme.textDark)),
-        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppTheme.textMuted),
+        title: Text('Zakat Calculator', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: context.textDark)),
+        trailing: Icon(Icons.arrow_forward_ios_rounded, size: 14, color: context.textMuted),
         onTap: () {
           Navigator.push(context, MaterialPageRoute(builder: (_) => const _ZakatWrapper()));
         },
@@ -272,26 +285,26 @@ static const Color cardBg = Colors.white;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.bgAlt,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.divider),
+        border: Border.all(color: context.divider),
       ),
       child: Row(
         children: [
-          const Icon(Icons.language_rounded, color: AppTheme.textMuted, size: 20),
+          Icon(Icons.language_rounded, color: context.textMuted, size: 20),
           const SizedBox(width: 16),
-          const Expanded(
+          Expanded(
             child: Text(
               'Preferred Language',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppTheme.textDark),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: context.textDark),
             ),
           ),
           DropdownButton<String>(
             value: _selectedLanguage,
-            dropdownColor: Colors.white,
+            dropdownColor: context.bgAlt,
             underline: const SizedBox(),
-            icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppTheme.textMuted),
-            style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.w800, fontSize: 14),
+            icon: Icon(Icons.keyboard_arrow_down_rounded, color: context.textMuted),
+            style: TextStyle(color: context.primary, fontWeight: FontWeight.w800, fontSize: 14),
             items: _languages.map((String lang) {
               return DropdownMenuItem<String>(
                 value: lang,
@@ -312,13 +325,13 @@ static const Color cardBg = Colors.white;
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: AppTheme.bg,
+          color: context.bg,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Icon(icon, color: AppTheme.textMuted, size: 20),
+        child: Icon(icon, color: context.textMuted, size: 20),
       ),
-      title: Text(label, style: const TextStyle(fontSize: 11, color: AppTheme.textMuted, fontWeight: FontWeight.w600)),
-      subtitle: Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppTheme.textDark)),
+      title: Text(label, style: TextStyle(fontSize: 11, color: context.textMuted, fontWeight: FontWeight.w600)),
+      subtitle: Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: context.textDark)),
       dense: true,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     );

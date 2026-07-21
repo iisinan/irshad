@@ -56,8 +56,8 @@ class _AiAnalysisSheetState extends State<AiAnalysisSheet> {
   Widget build(BuildContext context) {
     return Container(
       height: MediaQuery.of(context).size.height * 0.85,
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: context.bgAlt,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
@@ -69,7 +69,7 @@ class _AiAnalysisSheetState extends State<AiAnalysisSheet> {
               height: 4,
               width: 40,
               decoration: BoxDecoration(
-                color: AppTheme.divider,
+                color: context.divider,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -83,13 +83,13 @@ class _AiAnalysisSheetState extends State<AiAnalysisSheet> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
+                    color: Colors.amber.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Text('✨', style: TextStyle(fontSize: 20)),
                 ),
                 const SizedBox(width: 16),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -98,19 +98,19 @@ class _AiAnalysisSheetState extends State<AiAnalysisSheet> {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w800,
-                          color: AppTheme.textDark,
+                          color: context.textDark,
                           letterSpacing: -0.5,
                         ),
                       ),
                       Text(
                         'Powered by Gemini',
-                        style: TextStyle(color: Colors.blue, fontWeight: FontWeight.w600, fontSize: 13),
+                        style: TextStyle(color: Colors.amber, fontWeight: FontWeight.w600, fontSize: 13),
                       ),
                     ],
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close_rounded, color: AppTheme.textMuted),
+                  icon: Icon(Icons.close_rounded, color: context.textMuted),
                   onPressed: () => Navigator.pop(context),
                 ),
               ],
@@ -122,13 +122,13 @@ class _AiAnalysisSheetState extends State<AiAnalysisSheet> {
           // Content
           Expanded(
             child: _isLoading
-                ? const Center(
+                ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         CircularProgressIndicator(color: Colors.blue),
                         SizedBox(height: 16),
-                        Text('Gemini is analyzing the financials...', style: TextStyle(color: AppTheme.textMuted)),
+                        Text('Gemini is analyzing the financials...', style: TextStyle(color: context.textMuted)),
                       ],
                     ),
                   )
@@ -139,17 +139,17 @@ class _AiAnalysisSheetState extends State<AiAnalysisSheet> {
                           child: Text(
                             _error!,
                             textAlign: TextAlign.center,
-                            style: const TextStyle(color: AppTheme.haram, fontSize: 16),
+                            style: TextStyle(color: context.haram, fontSize: 16),
                           ),
                         ),
                       )
                     : Markdown(
                         data: _analysis ?? 'No analysis available.',
                         styleSheet: MarkdownStyleSheet(
-                          p: const TextStyle(fontSize: 16, height: 1.6, color: Color(0xFF374151)),
-                          h1: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.textDark),
-                          h2: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.textDark),
-                          listBullet: const TextStyle(color: Colors.blue, fontSize: 18),
+                          p: TextStyle(fontSize: 16, height: 1.6, color: context.textMuted),
+                          h1: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: context.textDark),
+                          h2: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: context.textDark),
+                          listBullet: const TextStyle(color: Colors.amber, fontSize: 18),
                         ),
                       ),
           ),

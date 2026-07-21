@@ -31,6 +31,10 @@ Route::prefix('v1')->group(function () {
         Route::post('/reset-password', [PasswordResetController::class, 'reset']);
     });
     Route::post('/auth/google', [AuthController::class, 'googleLogin']);
+    Route::get('/clear-cache-temp', function () {
+        \Illuminate\Support\Facades\Artisan::call('cache:clear');
+        return 'Cache cleared';
+    });
 
     // ── Public Data (no auth required) ───────────────────────────────────
     Route::get('/resources',                      [\App\Http\Controllers\ResourceController::class, 'index']);
@@ -51,6 +55,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/stocks/baskets', [BasketController::class, 'store']);
         Route::delete('/stocks/baskets/{basket}', [BasketController::class, 'destroy']);
         Route::post('/stocks/baskets/{basket}/invest', [BasketController::class, 'invest']);
+        Route::put('/stocks/baskets/{basket}', [BasketController::class, 'update']);
 
         // Profile
         Route::get('/profile',  [ProfileController::class, 'show']);

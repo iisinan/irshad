@@ -31,15 +31,29 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
   List<dynamic> _news = [];
   bool _isLoadingNews = true;
 
+  double _parseDouble(dynamic val) {
+    if (val == null) return 0.0;
+    if (val is double) return val;
+    if (val is int) return val.toDouble();
+    return num.tryParse(val.toString())?.toDouble() ?? 0.0;
+  }
+
   @override
   void initState() {
     super.initState();
     _currentStock = widget.stock;
-    _checkIfFavorited();
     _fetchNews();
+    _fetchFullDetails();
     
-    // Log history silently
-    _activityRepository.trackAction('check', _currentStock['symbol']);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final auth = Provider.of<AppStateProvider>(context, listen: false).isAuthenticated;
+        if (auth) {
+          _checkIfFavorited();
+          _activityRepository.trackAction('check', _currentStock['symbol']);
+        }
+      }
+    });
   }
 
   void _fetchNews() async {
@@ -53,6 +67,19 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
       }
     } catch (e) {
       if (mounted) setState(() => _isLoadingNews = false);
+    }
+  }
+
+  void _fetchFullDetails() async {
+    try {
+      final fullData = await _stockRepository.getStockDetails(_currentStock['symbol']);
+      if (fullData != null && mounted) {
+        setState(() {
+          _currentStock = {..._currentStock, ...fullData};
+        });
+      }
+    } catch (e) {
+      // ignore silently
     }
   }
 
@@ -73,10 +100,10 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
         setState(() => _isAlreadyFavorited = true);
         Provider.of<AppStateProvider>(context, listen: false).incrementWatchlist();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('Added to watchlist'), 
             behavior: SnackBarBehavior.floating,
-            backgroundColor: AppTheme.textDark,
+            backgroundColor: context.textDark,
           ),
         );
       }
@@ -94,7 +121,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString()), backgroundColor: AppTheme.haram, behavior: SnackBarBehavior.floating),
+          SnackBar(content: Text(e.toString()), backgroundColor: context.haram, behavior: SnackBarBehavior.floating),
         );
       }
     } finally {
@@ -129,23 +156,23 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     
     bool isHalal = status == 'halal';
     bool isNonHalal = status == 'non-halal';
-    Color statusColor = isHalal ? AppTheme.halal : (isNonHalal ? AppTheme.haram : AppTheme.questionable);
-    Color badgeBg = isHalal ? const Color(0xFFDCFCE7) : (isNonHalal ? const Color(0xFFFEE2E2) : const Color(0xFFFEF3C7));
+    Color statusColor = isHalal ? context.halal : (isNonHalal ? context.haram : context.questionable);
+    Color badgeBg = isHalal ? context.halalBg : (isNonHalal ? context.haramBg : context.questionableBg);
     String statusLabel = isHalal ? 'SHARIAH COMPLIANT' : (isNonHalal ? 'NOT COMPLIANT' : 'QUESTIONABLE');
 
     final financials = _currentStock['financials'];
     final latestFin = (financials != null && financials is List && financials.isNotEmpty) ? financials[0] : null;
     final hasFinancialHighlights = latestFin != null && (
-      (latestFin['total_assets']?.toDouble() ?? 0.0) > 0 ||
-      (latestFin['total_debt']?.toDouble() ?? 0.0) > 0 ||
-      (latestFin['total_revenue']?.toDouble() ?? 0.0) > 0 ||
-      (latestFin['interest_income']?.toDouble() ?? 0.0) > 0
+      _parseDouble(latestFin['total_assets']) > 0 ||
+      _parseDouble(latestFin['total_debt']) > 0 ||
+      _parseDouble(latestFin['total_revenue']) > 0 ||
+      _parseDouble(latestFin['interest_income']) > 0
     );
 
     final latestPrice = num.tryParse(_currentStock['latest_price']?.toString() ?? '0') ?? 0.0;
 
     return Scaffold(
-      backgroundColor: AppTheme.bg,
+      backgroundColor: context.bg,
       appBar: AppBar(
         title: Row(
           mainAxisSize: MainAxisSize.min,
@@ -155,9 +182,9 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                 margin: const EdgeInsets.only(right: 8),
                 width: 28, height: 28,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.bgAlt,
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  border: Border.all(color: context.divider),
                   image: DecorationImage(image: NetworkImage(_currentStock['logo_url']), fit: BoxFit.contain)
                 ),
               )
@@ -167,28 +194,28 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                 width: 28, height: 28,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(6),
-                  color: AppTheme.primary,
+                  color: context.primary,
                 ),
                 alignment: Alignment.center,
-                child: Text((_currentStock['symbol'] ?? 'S')[0], style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 12)),
+                child: Text((_currentStock['symbol'] ?? 'S')[0], style: TextStyle(color: context.bgAlt, fontWeight: FontWeight.bold, fontSize: 12)),
               ),
-            Text(_currentStock['symbol'], style: const TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5)),
+            Text(_currentStock['symbol'], style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
           ],
         ),
-        backgroundColor: AppTheme.bg,
+        backgroundColor: context.bg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppTheme.textDark, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: context.textDark, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_active_outlined, color: AppTheme.textDark, size: 22),
+            icon: Icon(Icons.notifications_active_outlined, color: context.textDark, size: 22),
             onPressed: () => AlertBottomSheet.show(context, _currentStock),
           ),
           IconButton(
             icon: Icon(_isAlreadyFavorited ? Icons.favorite_rounded : Icons.favorite_outline_rounded, 
-              color: _isAlreadyFavorited ? AppTheme.haram : AppTheme.textDark, size: 22),
+              color: _isAlreadyFavorited ? context.haram : context.textDark, size: 22),
             onPressed: _isAlreadyFavorited ? null : (_isFavoriting ? null : _onFavorite),
           ),
         ],
@@ -196,11 +223,11 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
       bottomNavigationBar: Container(
         padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.bgAlt,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 20,
               offset: const Offset(0, -5),
             ),
           ],
@@ -212,19 +239,19 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                   const Text('PRICE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppTheme.textMuted)),
+                   Text('PRICE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: context.textMuted)),
                    const SizedBox(height: 4),
                    Text('₦ ${latestPrice.toStringAsFixed(2)}', 
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppTheme.textDark)),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark)),
                    if (_currentStock.containsKey('price_change_pct'))
                      Padding(
                        padding: const EdgeInsets.only(top: 2),
                        child: Text(
-                         '${_currentStock['price_change_pct'] >= 0 ? '+' : ''}${_currentStock['price_change_pct']}%',
+                         '${(double.tryParse(_currentStock['price_change_pct']?.toString() ?? '0') ?? 0.0) >= 0 ? '+' : ''}${_currentStock['price_change_pct']}%',
                          style: TextStyle(
                            fontSize: 12, 
                            fontWeight: FontWeight.w700, 
-                           color: _currentStock['price_change_pct'] >= 0 ? AppTheme.primary : AppTheme.haram
+                           color: (double.tryParse(_currentStock['price_change_pct']?.toString() ?? '0') ?? 0.0) >= 0 ? context.primary : context.haram
                          )
                        ),
                      )
@@ -239,7 +266,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                 child: ElevatedButton(
                   onPressed: () => TradeBottomSheet.show(context, _currentStock),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primary,
+                    backgroundColor: context.primary,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)), // Pill
                     elevation: 0,
@@ -264,64 +291,54 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                 children: [
                   const SizedBox(height: 12),
                   // Price Chart
-                  _buildPriceChart(),
-                  const SizedBox(height: 32),
-
-                  // About Company
-                  _buildSectionHeader('About Company'),
-                  const SizedBox(height: 12),
-                  _buildAboutCompany(),
-                  const SizedBox(height: 32),
-
-                  // Company Metadata
-                  _buildSectionHeader('Overview'),
-                  const SizedBox(height: 12),
-                  _buildCompanyInfo(),
-                  const SizedBox(height: 32),
-                  
-                  // Advanced Metrics (SWS)
-                  _buildSectionHeader('Advanced Metrics'),
-                  const SizedBox(height: 12),
-                  _buildAdvancedMetrics(),
-                  const SizedBox(height: 32),
-                  
-                  // Financial Ratios
-                  _buildSectionHeader('Financial Ratios (AAOIFI)'),
-                  const SizedBox(height: 12),
-                  _buildFinancialRatios(statusColor),
-                  const SizedBox(height: 32),
-                  
-                  // Financial Highlights
-                  if (hasFinancialHighlights) ...[
-                    _buildSectionHeader('Financial Highlights'),
-                    const SizedBox(height: 12),
-                    _buildFinancialHighlights(),
+                  if ((_currentStock['daily_prices'] ?? []).isNotEmpty) ...[
+                    _buildPriceChart(),
                     const SizedBox(height: 32),
                   ],
+
+                  // About Company
+                  if (_currentStock['overview'] != null && _currentStock['overview'].toString().trim().isNotEmpty) ...[
+                    _buildSectionHeader('About Company'),
+                    const SizedBox(height: 12),
+                    _buildAboutCompany(),
+                    const SizedBox(height: 32),
+                  ],
+
+                  // Company Metadata
+                  _buildCompanyInfo(),
                   
-                  // Business Screening
-                  _buildSectionHeader('Business Screening'),
-                  const SizedBox(height: 12),
-                  _buildBusinessScreening(statusColor, badgeBg, statusLabel, reason),
-                  const SizedBox(height: 32),
+                  // Advanced Metrics (SWS)
+                  _buildAdvancedMetrics(),
+                  
+                  // AAOIFI Screening Breakdown
+                  if ((_currentStock['financials'] ?? []).isNotEmpty) ...[
+                    _buildSectionHeader('AAOIFI Screening Breakdown'),
+                    const SizedBox(height: 12),
+                    _buildAaoifiBreakdown(statusColor, badgeBg, statusLabel, reason, isHalal, isNonHalal),
+                    const SizedBox(height: 32),
+                  ],
 
                   // AI Halal Assistant Button
                   _buildAiAssistantButton(),
                   const SizedBox(height: 32),
 
                   // Purification
-                  _buildPurificationCard(),
-                  const SizedBox(height: 48),
+                  if ((_currentStock['financials'] ?? []).isNotEmpty && isHalal) ...[
+                    _buildPurificationCard(),
+                    const SizedBox(height: 48),
+                  ],
                   
                   // Action Button
                   _buildScreeningButton(statusColor),
                   const SizedBox(height: 24),
                   
                   // News Section
-                  _buildSectionHeader('Latest News'),
-                  const SizedBox(height: 12),
-                  _buildNewsSection(),
-                  const SizedBox(height: 32),
+                  if (_isLoadingNews || _news.isNotEmpty) ...[
+                    _buildSectionHeader('Latest News'),
+                    const SizedBox(height: 12),
+                    _buildNewsSection(),
+                    const SizedBox(height: 32),
+                  ],
 
                   // Scholar/Admin Override Button
                   _buildAdminOverrideButton(),
@@ -369,8 +386,8 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
         builder: (ctx, setModalState) {
           return Container(
             padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
-            decoration: const BoxDecoration(
-              color: Colors.white,
+            decoration: BoxDecoration(
+              color: context.bgAlt,
               borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
             ),
             child: Padding(
@@ -379,18 +396,18 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Override Compliance Status', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppTheme.textDark)),
+                  Text('Override Compliance Status', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: context.textDark)),
                   const SizedBox(height: 8),
-                  const Text('Update the status manually as a scholar or admin.', style: TextStyle(color: AppTheme.textMuted)),
+                  Text('Update the status manually as a scholar or admin.', style: TextStyle(color: context.textMuted)),
                   const SizedBox(height: 24),
                   
-                  const Text('Status', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppTheme.textMuted)),
+                  Text('Status', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: context.textMuted)),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     value: selectedStatus,
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: AppTheme.bg,
+                      fillColor: context.bg,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                     ),
                     items: const [
@@ -402,7 +419,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                   ),
                   const SizedBox(height: 16),
                   
-                  const Text('Reason', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppTheme.textMuted)),
+                  Text('Reason', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: context.textMuted)),
                   const SizedBox(height: 8),
                   TextField(
                     controller: reasonController,
@@ -410,7 +427,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                     decoration: InputDecoration(
                       hintText: 'Explanation for override...',
                       filled: true,
-                      fillColor: AppTheme.bg,
+                      fillColor: context.bg,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                     ),
                   ),
@@ -439,7 +456,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Status overridden successfully')));
                           }
                         } catch (e) {
-                          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: AppTheme.haram));
+                          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: context.haram));
                         } finally {
                           if (mounted) setState(() => _isLoading = false);
                         }
@@ -464,24 +481,24 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
   Widget _buildSectionHeader(String title) {
     return Text(
       title.toUpperCase(),
-      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppTheme.textMuted, letterSpacing: 1),
+      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: context.textMuted, letterSpacing: 1),
     );
   }
 
   Widget _buildStatusHeader(Color color, Color bg, String label) {
     final latestPrice = num.tryParse(_currentStock['latest_price']?.toString() ?? '0') ?? 0.0;
-    final priceChange = _currentStock['price_change_pct'];
+    final priceChange = _currentStock['price_change_pct'] != null ? double.tryParse(_currentStock['price_change_pct'].toString()) : null;
 
     return Container(
       width: double.infinity,
-      color: Colors.white,
+      color: context.bg,
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(_currentStock['name'] ?? '', style: const TextStyle(color: AppTheme.textMuted, fontSize: 14, fontWeight: FontWeight.w600)),
+          Text(_currentStock['name'] ?? '', style: TextStyle(color: context.textMuted, fontSize: 14, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
-          Text('₦${latestPrice.toStringAsFixed(2)}', style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -1)),
+          Text('₦${latestPrice.toStringAsFixed(2)}', style: TextStyle(fontSize: 48, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -1)),
           if (priceChange != null)
             Padding(
               padding: const EdgeInsets.only(top: 4),
@@ -490,7 +507,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                 style: TextStyle(
                   fontSize: 16, 
                   fontWeight: FontWeight.w700, 
-                  color: priceChange >= 0 ? AppTheme.primary : AppTheme.haram
+                  color: priceChange >= 0 ? context.primary : context.haram
                 )
               ),
             ),
@@ -521,21 +538,29 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
   }
 
   Widget _buildPriceChart() {
-    // If daily_prices array exists, use it. Otherwise fake some data points
-    List<dynamic> pricesRaw = _currentStock!['daily_prices'] ?? [];
-    List<FlSpot> spots = [];
+    List<dynamic> pricesRaw = _currentStock['daily_prices'] ?? [];
     
-    if (pricesRaw.isNotEmpty) {
-       List<dynamic> reversedPrices = pricesRaw.reversed.toList();
-       for (int i = 0; i < reversedPrices.length; i++) {
-          double price = double.tryParse(reversedPrices[i]['price'].toString()) ?? 0;
-          spots.add(FlSpot(i.toDouble(), price));
-       }
-    } else {
-       spots = const [
-         FlSpot(0, 150), FlSpot(1, 155), FlSpot(2, 148), 
-         FlSpot(3, 160), FlSpot(4, 165), FlSpot(5, 172)
-       ];
+    if (pricesRaw.length < 2) {
+      return Container(
+        height: 220,
+        margin: const EdgeInsets.only(top: 24, bottom: 12),
+        decoration: BoxDecoration(
+          color: context.bgAlt,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          'Not enough historical data',
+          style: TextStyle(color: context.textMuted, fontSize: 14, fontWeight: FontWeight.w600),
+        ),
+      );
+    }
+
+    List<FlSpot> spots = [];
+    List<dynamic> reversedPrices = pricesRaw.reversed.toList();
+    for (int i = 0; i < reversedPrices.length; i++) {
+      double price = double.tryParse(reversedPrices[i]['price'].toString()) ?? 0;
+      spots.add(FlSpot(i.toDouble(), price));
     }
 
     // Determine Y axis range
@@ -548,9 +573,8 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
       height: 220,
       padding: const EdgeInsets.only(right: 16, left: 0, top: 24, bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.divider),
+        color: context.bgAlt,
+        borderRadius: BorderRadius.circular(24),
       ),
       child: LineChart(
         LineChartData(
@@ -563,7 +587,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
             drawVerticalLine: false,
             horizontalInterval: (maxY - minY) / 4 > 0 ? (maxY - minY) / 4 : 1,
             getDrawingHorizontalLine: (value) {
-              return FlLine(color: AppTheme.divider, strokeWidth: 1);
+              return FlLine(color: context.divider.withValues(alpha: 0.5), strokeWidth: 1, dashArray: [4, 4]);
             },
           ),
           titlesData: FlTitlesData(
@@ -577,7 +601,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                 interval: (maxY - minY) / 4 > 0 ? (maxY - minY) / 4 : 1,
                 reservedSize: 42,
                 getTitlesWidget: (value, meta) {
-                  return Text(value.toInt().toString(), style: const TextStyle(color: AppTheme.textMuted, fontSize: 10));
+                  return Text(value.toInt().toString(), style: TextStyle(color: context.textMuted, fontSize: 10, fontWeight: FontWeight.w600));
                 },
               ),
             ),
@@ -587,24 +611,31 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
             LineChartBarData(
               spots: spots,
               isCurved: true,
-              color: AppTheme.primary,
+              color: context.primary,
               barWidth: 3,
               isStrokeCapRound: true,
               dotData: FlDotData(show: false),
               belowBarData: BarAreaData(
                 show: true,
-                color: AppTheme.primary.withOpacity(0.1),
+                gradient: LinearGradient(
+                  colors: [
+                    context.primary.withValues(alpha: 0.2),
+                    context.primary.withValues(alpha: 0.0),
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
               ),
             ),
           ],
           lineTouchData: LineTouchData(
              touchTooltipData: LineTouchTooltipData(
-               getTooltipColor: (touchedSpot) => AppTheme.textDark,
+               getTooltipColor: (touchedSpot) => context.textDark,
                getTooltipItems: (touchedSpots) {
                  return touchedSpots.map((LineBarSpot touchedSpot) {
                    return LineTooltipItem(
                      '₦ ${touchedSpot.y.toStringAsFixed(2)}',
-                     const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                     TextStyle(color: context.bg, fontWeight: FontWeight.bold),
                    );
                  }).toList();
                },
@@ -623,74 +654,92 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     }
 
     final mcap = _currentStock['market_cap'] != null ? double.tryParse(_currentStock['market_cap'].toString()) ?? 0.0 : 0.0;
-    final pe = _currentStock['pe_ratio']?.toString() ?? 'N/A';
-    final divYield = _currentStock['div_yield'] != null ? '${_currentStock['div_yield']}%' : 'N/A';
-    final roe = _currentStock['roe']?.toString() ?? 'N/A';
+    final pe = _currentStock['pe_ratio']?.toString() ?? '—';
+    final divYield = _currentStock['div_yield'] != null ? '${_currentStock['div_yield']}%' : '—';
+    final roe = _currentStock['roe']?.toString() ?? '—';
+
+    List<Widget> availableMetrics = [];
+    if (mcap > 0) availableMetrics.add(_buildMetricCard('MARKET CAP', '₦ ${formatAmt(mcap)}'));
+    if (pe != '—') availableMetrics.add(_buildMetricCard('P/E RATIO', pe));
+    if (divYield != '—') availableMetrics.add(_buildMetricCard('DIVIDEND YIELD', divYield));
+    if (roe != '—') availableMetrics.add(_buildMetricCard('ROE', roe != '—' && !roe.contains('%') ? '$roe%' : roe));
+
+    if (availableMetrics.isEmpty) return const SizedBox.shrink();
+
+    List<Widget> rows = [];
+    for (int i = 0; i < availableMetrics.length; i += 2) {
+      rows.add(
+        Row(
+          children: [
+            Expanded(child: availableMetrics[i]),
+            if (i + 1 < availableMetrics.length) ...[
+              const SizedBox(width: 16),
+              Expanded(child: availableMetrics[i + 1]),
+            ] else ...[
+              const SizedBox(width: 16),
+              const Spacer(),
+            ],
+          ],
+        ),
+      );
+      if (i + 2 < availableMetrics.length) {
+        rows.add(const SizedBox(height: 16));
+      }
+    }
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(child: _buildMetricCard('MARKET CAP', mcap > 0 ? '₦ ${formatAmt(mcap)}' : 'N/A')),
-            const SizedBox(width: 16),
-            Expanded(child: _buildMetricCard('P/E RATIO', pe)),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(child: _buildMetricCard('DIVIDEND YIELD', divYield)),
-            const SizedBox(width: 16),
-            Expanded(child: _buildMetricCard('ROE', roe != 'N/A' ? '$roe%' : 'N/A')),
-          ],
-        ),
+        _buildSectionHeader('Overview'),
+        const SizedBox(height: 12),
+        Column(children: rows),
+        const SizedBox(height: 32),
       ],
     );
   }
 
   Widget _buildAdvancedMetrics() {
-    final valuation = _currentStock['valuation_info'] ?? 'N/A';
-    final growth = _currentStock['growth_info'] ?? 'N/A';
+    final valuation = _currentStock['valuation_info'] ?? '—';
+    final growth = _currentStock['growth_info'] ?? '—';
     
-    return Row(
+    if (valuation == '—' && growth == '—') return const SizedBox.shrink();
+
+    Widget buildCard(String title, String value) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: context.bgAlt,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: TextStyle(color: context.textMuted, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
+            const SizedBox(height: 8),
+            Text(value, style: TextStyle(color: context.textDark, fontSize: 14, fontWeight: FontWeight.w700)),
+          ],
+        ),
+      );
+    }
+    
+    List<Widget> cards = [];
+    if (valuation != '—') cards.add(Expanded(child: buildCard('VALUATION', valuation)));
+    if (growth != '—') cards.add(Expanded(child: buildCard('GROWTH FORECAST', growth)));
+
+    Widget metricsRow;
+    if (cards.length == 1) {
+      metricsRow = Row(children: cards);
+    } else {
+      metricsRow = Row(children: [cards[0], const SizedBox(width: 16), cards[1]]);
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppTheme.divider),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('VALUATION', style: TextStyle(color: AppTheme.textMuted, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
-                const SizedBox(height: 8),
-                Text(valuation, style: const TextStyle(color: AppTheme.textDark, fontSize: 14, fontWeight: FontWeight.w700)),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppTheme.divider),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('GROWTH FORECAST', style: TextStyle(color: AppTheme.textMuted, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
-                const SizedBox(height: 8),
-                Text(growth, style: const TextStyle(color: AppTheme.textDark, fontSize: 14, fontWeight: FontWeight.w700)),
-              ],
-            ),
-          ),
-        ),
+        _buildSectionHeader('Advanced Metrics'),
+        const SizedBox(height: 12),
+        metricsRow,
+        const SizedBox(height: 32),
       ],
     );
   }
@@ -700,7 +749,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
       return Container(
         padding: const EdgeInsets.all(32),
         alignment: Alignment.center,
-        child: const CircularProgressIndicator(color: AppTheme.primary),
+        child: CircularProgressIndicator(color: context.primary),
       );
     }
     
@@ -709,15 +758,14 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
         padding: const EdgeInsets.all(32),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.bgAlt,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppTheme.divider),
         ),
         child: Column(
-          children: const [
-            Icon(Icons.article_outlined, color: AppTheme.textMuted, size: 32),
+          children: [
+            Icon(Icons.article_outlined, color: context.textMuted, size: 32),
             SizedBox(height: 12),
-            Text('No recent news found for this stock.', style: TextStyle(color: AppTheme.textMuted)),
+            Text('No recent news found for this stock.', style: TextStyle(color: context.textMuted)),
           ],
         ),
       );
@@ -725,15 +773,16 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.divider),
+        color: context.bgAlt,
+        borderRadius: BorderRadius.circular(24),
       ),
-      child: ListView.separated(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: _news.length,
-        separatorBuilder: (ctx, i) => const Divider(color: AppTheme.divider, height: 1),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: _news.length,
+          separatorBuilder: (ctx, i) => Divider(color: context.divider, height: 1, indent: 16, endIndent: 16),
         itemBuilder: (ctx, i) {
           final article = _news[i];
           final date = DateTime.tryParse(article['published_at'] ?? '');
@@ -754,27 +803,28 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                          color: AppTheme.primary.withOpacity(0.1),
+                          color: context.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(article['source']?.toUpperCase() ?? 'NEWS', 
-                          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppTheme.primary)),
+                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: context.primary)),
                       ),
-                      Text(dateStr, style: const TextStyle(fontSize: 11, color: AppTheme.textMuted, fontWeight: FontWeight.w600)),
+                      Text(dateStr, style: TextStyle(fontSize: 11, color: context.textMuted, fontWeight: FontWeight.w600)),
                     ],
                   ),
                   const SizedBox(height: 12),
-                  Text(article['title'] ?? '', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppTheme.textDark, height: 1.4)),
+                  Text(article['title'] ?? '', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: context.textDark, height: 1.4)),
                   if (article['excerpt'] != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
-                      child: Text(article['excerpt'], maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13, color: AppTheme.textMuted, height: 1.5)),
+                      child: Text(article['excerpt'], maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13, color: context.textMuted, height: 1.5)),
                     ),
                 ],
               ),
             ),
           );
         },
+      ),
       ),
     );
   }
@@ -785,16 +835,15 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.divider),
+        color: context.bgAlt,
+        borderRadius: BorderRadius.circular(24),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(color: AppTheme.textMuted, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
+          Text(label, style: TextStyle(color: context.textMuted, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
           const SizedBox(height: 8),
-          Text(value, style: const TextStyle(color: AppTheme.textDark, fontSize: 14, fontWeight: FontWeight.w700)),
+          Text(value, style: TextStyle(color: context.textDark, fontSize: 14, fontWeight: FontWeight.w700)),
         ],
       ),
     );
@@ -804,10 +853,10 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     final financials = _currentStock['financials'];
     final latest = (financials != null && financials is List && financials.isNotEmpty) ? financials[0] : null;
 
-    final assets = latest?['total_assets']?.toDouble() ?? 0.0;
-    final debt = latest?['total_debt']?.toDouble() ?? 0.0;
-    final revenue = latest?['total_revenue']?.toDouble() ?? 0.0;
-    final interest = latest?['interest_income']?.toDouble() ?? 0.0;
+    final assets = _parseDouble(latest?['total_assets']);
+    final debt = _parseDouble(latest?['total_debt']);
+    final revenue = _parseDouble(latest?['total_revenue']);
+    final interest = _parseDouble(latest?['interest_income']);
 
     String formatAmt(double amt) {
       if (amt == 0) return '0';
@@ -836,104 +885,319 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     );
   }
 
-  Widget _buildFinancialRatios(Color statusColor) {
+  Widget _buildAaoifiBreakdown(Color statusColor, Color bg, String label, String reason, bool isHalal, bool isNonHalal) {
     final financials = _currentStock['financials'];
     final latest = (financials != null && financials is List && financials.isNotEmpty) ? financials[0] : null;
     
-    final debt = latest?['total_debt']?.toDouble() ?? 0.0;
-    final assets = latest?['total_assets']?.toDouble() ?? 0.0;
+    final debt = _parseDouble(latest?['total_debt']);
+    final assets = _parseDouble(latest?['total_assets']);
     final safeAssets = assets > 0 ? assets : 1.0;
     
-    final interest = latest?['interest_income']?.toDouble() ?? 0.0;
-    
-    final rawRevenue = latest?['total_revenue']?.toDouble() ?? 0.0;
+    final interest = _parseDouble(latest?['interest_income']);
+    final rawRevenue = _parseDouble(latest?['total_revenue']);
     final revenue = rawRevenue > 0.0 ? rawRevenue : safeAssets;
     
     final debtRatio = assets > 0 ? (debt / assets) * 100 : 0.0;
     final interestRatio = revenue > 0 ? (interest / revenue) * 100 : 0.0;
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white, 
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.divider),
-      ),
-      child: Column(
+    String formatAmt(double amt) {
+      if (amt == 0) return '0';
+      String s = amt.toStringAsFixed(0);
+      return s.replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},');
+    }
+
+    final isDebtFail = debtRatio > 30.0;
+    final isInterestFail = interestRatio > 5.0;
+
+    Widget buildCalculationCard(String numLabel, String denLabel, String numVal, String denVal) {
+      return Column(
         children: [
-          _buildRatioBar('Debt to Asset Ratio', debtRatio, 33.0),
+          Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: context.bg,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.orangeAccent.withValues(alpha: 0.3)),
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+            child: Column(
+              children: [
+                Text('CALCULATION', style: TextStyle(color: context.textMuted, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.2)),
+                const SizedBox(height: 16),
+                Text(numLabel, style: TextStyle(color: context.textDark, fontSize: 14, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 8),
+                Container(height: 1, width: 200, color: context.divider),
+                const SizedBox(height: 8),
+                Text(denLabel, style: TextStyle(color: context.textDark, fontSize: 14, fontWeight: FontWeight.w600)),
+              ],
+            ),
+          ),
           const SizedBox(height: 24),
-          _buildRatioBar('Cash & Interest Ratio', interestRatio, 5.0),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(numLabel, style: TextStyle(color: context.textMuted, fontSize: 13)),
+              Text('₦$numVal', style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800, fontSize: 13)),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Divider(color: context.divider, height: 1),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(denLabel, style: TextStyle(color: context.textMuted, fontSize: 13)),
+              Text('₦$denVal', style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800, fontSize: 13)),
+            ],
+          ),
         ],
-      ),
-    );
-  }
+      );
+    }
 
-  Widget _buildRatioBar(String title, double value, double limit) {
-    final isFail = value > limit;
-    final progress = (value / (limit * 1.5)).clamp(0.0, 1.0);
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(title, style: const TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w700, fontSize: 14)),
-            Text('${value.toStringAsFixed(2)}% / ${limit.toInt()}%', 
-              style: TextStyle(color: isFail ? AppTheme.haram : AppTheme.primary, fontWeight: FontWeight.w800, fontSize: 12)),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Stack(
-          children: [
-            Container(
-              height: 8,
-              width: double.infinity,
-              decoration: BoxDecoration(color: AppTheme.bg, borderRadius: BorderRadius.circular(4)),
-            ),
-            Container(
-              height: 8,
-              width: (MediaQuery.of(context).size.width - 80) * progress,
-              decoration: BoxDecoration(
-                color: isFail ? AppTheme.haram : AppTheme.primary, 
-                borderRadius: BorderRadius.circular(4)
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
+    final nonCompliantRev = latest != null && latest['non_compliant_income_ratio'] != null 
+        ? _parseDouble(latest['non_compliant_income_ratio']) 
+        : (isNonHalal ? 100.0 : 0.0);
+    final compliantRev = 100.0 - nonCompliantRev;
 
-  Widget _buildBusinessScreening(Color statusColor, Color bg, String label, String reason) {
+    Widget buildSegmentStat(String title, double val, Color color) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(width: 4, height: 32, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(4))),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: TextStyle(color: context.textMuted, fontSize: 10, fontWeight: FontWeight.w800)),
+              const SizedBox(height: 2),
+              Text('${val.toStringAsFixed(2)}%', style: TextStyle(color: context.textDark, fontWeight: FontWeight.w900, fontSize: 14)),
+            ],
+          ),
+        ],
+      );
+    }
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white, 
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.divider),
+        color: context.bgAlt,
+        borderRadius: BorderRadius.circular(24),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(label == 'NOT COMPLIANT' ? Icons.error_outline : Icons.check_circle_outline, 
-                color: statusColor, size: 20),
-              const SizedBox(width: 10),
-              Text(label == 'NOT COMPLIANT' ? 'Non-Halal Activities detected' : 'Business activities are Halal', 
-                style: TextStyle(color: statusColor, fontWeight: FontWeight.w800, fontSize: 14)),
-            ],
+          // Header
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Row(
+                    children: [
+                      Icon(Icons.shield_rounded, color: Colors.orangeAccent, size: 22),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'AAOIFI Screening Breakdown',
+                          style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800, fontSize: 13),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: bg.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(color: bg.withValues(alpha: 0.3)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(isHalal ? Icons.check_circle : (isNonHalal ? Icons.cancel : Icons.info), color: statusColor, size: 12),
+                      const SizedBox(width: 4),
+                      Text(isHalal ? '100% COMPLIANT' : (isNonHalal ? 'NON-COMPLIANT' : 'UNDER REVIEW'), 
+                        style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.w800)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 12),
-          Text(
-            reason,
-            style: const TextStyle(color: AppTheme.textMuted, height: 1.5, fontSize: 14, fontWeight: FontWeight.w400),
+          Divider(color: context.divider, height: 1),
+
+          // A. Business Activity
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('A. Business Activity', style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800, fontSize: 15)),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
+                      child: Text(isHalal ? 'PASS' : (isNonHalal ? 'FAIL' : 'REVIEW'), 
+                        style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.w900)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Icon(isHalal ? Icons.check_circle : Icons.cancel, color: isHalal ? context.halal : context.haram, size: 20),
+                    const SizedBox(width: 8),
+                    Text('Revenue', style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800, fontSize: 14)),
+                  ]
+                ),
+                const SizedBox(height: 12),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Row(
+                    children: [
+                      if (nonCompliantRev > 0)
+                        Expanded(flex: (nonCompliantRev * 100).toInt() > 0 ? (nonCompliantRev * 100).toInt() : 1, child: Container(height: 8, color: context.haram)),
+                      if (compliantRev > 0)
+                        Expanded(flex: (compliantRev * 100).toInt() > 0 ? (compliantRev * 100).toInt() : 1, child: Container(height: 8, color: context.halal)),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    buildSegmentStat('NON-COMPLIANT', nonCompliantRev, context.haram),
+                    buildSegmentStat('QUESTIONABLE', 0.0, Colors.orangeAccent),
+                    buildSegmentStat('COMPLIANT', compliantRev, context.halal),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(reason, style: TextStyle(color: context.textMuted, fontSize: 13, height: 1.5)),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: () {},
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: context.divider),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('See breakdown by segment', style: TextStyle(color: context.textDark, fontWeight: FontWeight.w700, fontSize: 13)),
+                        const SizedBox(width: 4),
+                        Icon(Icons.chevron_right_rounded, color: context.textMuted, size: 16),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Divider(color: context.divider, height: 1, indent: 24, endIndent: 24),
+
+          // B. Financial Screen (Impermissible Income)
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Icon(isInterestFail ? Icons.cancel : Icons.check_circle, color: isInterestFail ? context.haram : context.halal, size: 20),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text('Financial Screen (Impermissible Income)', style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800, fontSize: 14)),
+                          ),
+                        ]
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text('${interestRatio.toStringAsFixed(2)}%', style: TextStyle(color: isInterestFail ? context.haram : context.halal, fontWeight: FontWeight.w900, fontSize: 15)),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                _buildAaoifiProgressBar(interestRatio, 5.0, isInterestFail),
+                const SizedBox(height: 16),
+                Text('Measures how much of a company\'s income is derived from impermissible sources like interest. According to AAOIFI standards, this should not exceed 5%.', style: TextStyle(color: context.textMuted, fontSize: 13, height: 1.5)),
+                const SizedBox(height: 24),
+                buildCalculationCard('Interest Income', 'Total Revenue', formatAmt(interest), formatAmt(rawRevenue)),
+              ],
+            ),
+          ),
+          Divider(color: context.divider, height: 1, indent: 24, endIndent: 24),
+
+          // C. Interest Bearing Debt
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Icon(isDebtFail ? Icons.cancel : Icons.check_circle, color: isDebtFail ? context.haram : context.halal, size: 20),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text('Interest-bearing Debt', style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800, fontSize: 14)),
+                          ),
+                        ]
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text('${debtRatio.toStringAsFixed(2)}%', style: TextStyle(color: isDebtFail ? context.haram : context.halal, fontWeight: FontWeight.w900, fontSize: 15)),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                _buildAaoifiProgressBar(debtRatio, 30.0, isDebtFail),
+                const SizedBox(height: 16),
+                Text('Measures the company\'s exposure to interest-bearing debt relative to its total assets. A lower ratio indicates less reliance on debt financing. According to AAOIFI standards, this should not exceed 30%.', style: TextStyle(color: context.textMuted, fontSize: 13, height: 1.5)),
+                const SizedBox(height: 24),
+                buildCalculationCard('Total Debt', 'Total Assets', formatAmt(debt), formatAmt(assets)),
+              ],
+            ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildAaoifiProgressBar(double value, double limit, bool isFail) {
+    final progress = (value / (limit * 1.5)).clamp(0.0, 1.0);
+    return Stack(
+      children: [
+        Container(
+          height: 8,
+          width: double.infinity,
+          decoration: BoxDecoration(color: context.bg, borderRadius: BorderRadius.circular(4)),
+        ),
+        Container(
+          height: 8,
+          width: (MediaQuery.of(context).size.width - 88) * progress,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: isFail ? [Colors.redAccent, context.haram] : [Colors.greenAccent, context.halal],
+            ),
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ),
+      ],
     );
   }
 
@@ -941,44 +1205,44 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     final financials = _currentStock['financials'];
     final latest = (financials != null && financials is List && financials.isNotEmpty) ? financials[0] : null;
     final nonCompliantRev = latest != null && latest['non_compliant_income_ratio'] != null 
-        ? latest['non_compliant_income_ratio'].toDouble() 
+        ? _parseDouble(latest['non_compliant_income_ratio']) 
         : 0.0; 
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppTheme.textDark, 
+        color: context.bgAlt, 
         borderRadius: BorderRadius.circular(24),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.volunteer_activism_rounded, color: AppTheme.primary, size: 20),
+              Icon(Icons.volunteer_activism_rounded, color: context.primary, size: 20),
               const SizedBox(width: 10),
-              const Text('Purification (Zakat al-Mustaghalat)', 
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14)),
+              Text('Purification (Zakat al-Mustaghalat)', 
+                style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800, fontSize: 14)),
             ],
           ),
           const SizedBox(height: 16),
-          const Text('Received non-halal dividends from this stock? Calculate your purification due.', 
-            style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.4)),
+          Text('Received non-halal dividends from this stock? Calculate your purification due.', 
+            style: TextStyle(color: context.textMuted, fontSize: 13, height: 1.4)),
           const SizedBox(height: 24),
           TextField(
             controller: _purificationController,
             keyboardType: TextInputType.number,
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+            style: TextStyle(color: context.textDark, fontWeight: FontWeight.w700),
             decoration: InputDecoration(
               hintText: 'Dividend amount...',
-              hintStyle: const TextStyle(color: Colors.white24, fontWeight: FontWeight.w400),
+              hintStyle: TextStyle(color: context.textDisabled, fontWeight: FontWeight.w400),
               filled: true,
-              fillColor: Colors.white.withOpacity(0.05),
+              fillColor: context.bg,
               prefixText: '₦ ',
-              prefixStyle: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.w800),
-              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppTheme.primary)),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              prefixStyle: TextStyle(color: context.primary, fontWeight: FontWeight.w800),
+              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(100), borderSide: BorderSide(color: context.divider)),
+              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(100), borderSide: BorderSide(color: context.primary, width: 2)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             ),
             onChanged: (v) => _calculatePurification(v, nonCompliantRev),
           ),
@@ -986,17 +1250,17 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
             const SizedBox(height: 24),
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(12)),
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(color: context.bg, borderRadius: BorderRadius.circular(20), border: Border.all(color: context.divider)),
               child: Column(
                 children: [
-                  const Text('PURIFICATION AMOUNT', style: TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.w800)),
-                  const SizedBox(height: 4),
+                  Text('PURIFICATION AMOUNT', style: TextStyle(color: context.textMuted, fontSize: 10, fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 8),
                   Text('₦ ${_purificationResult.toStringAsFixed(2)}', 
-                    style: const TextStyle(color: AppTheme.primary, fontSize: 32, fontWeight: FontWeight.w900)),
+                    style: TextStyle(color: context.primary, fontSize: 32, fontWeight: FontWeight.w900)),
                   const SizedBox(height: 8),
                   Text('Purification rate: $nonCompliantRev%', 
-                    style: const TextStyle(color: Colors.white30, fontSize: 11)),
+                    style: TextStyle(color: context.textMuted, fontSize: 11)),
                 ],
               ),
             ),
@@ -1007,23 +1271,32 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
   }
 
   Widget _buildAiAssistantButton() {
-    return SizedBox(
+    return Container(
       width: double.infinity,
       height: 56,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(100),
+        gradient: LinearGradient(
+          colors: [Colors.blue.withValues(alpha: 0.15), Colors.purple.withValues(alpha: 0.15)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
       child: ElevatedButton(
         onPressed: () => AiAnalysisSheet.show(context, _currentStock['symbol']),
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue.withOpacity(0.1),
+          backgroundColor: Colors.transparent,
           foregroundColor: Colors.blue,
+          shadowColor: Colors.transparent,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
           elevation: 0,
         ),
-        child: const Row(
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text('✨', style: TextStyle(fontSize: 18)),
             SizedBox(width: 8),
-            Text('Ask AI Assistant', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
+            Text('Ask AI Assistant', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: context.textDark)),
           ],
         ),
       ),
@@ -1037,13 +1310,15 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
       child: ElevatedButton(
         onPressed: _isLoading ? null : _runScreening,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppTheme.textDark,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+          backgroundColor: context.bgAlt,
+          foregroundColor: context.textDark,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(100),
+          ),
           elevation: 0,
         ),
         child: _isLoading 
-          ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+          ? SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2, color: context.textDark))
           : const Text('REFRESH SCREENING', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
       ),
     );
@@ -1057,13 +1332,12 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.divider),
+        color: context.bgAlt,
+        borderRadius: BorderRadius.circular(24),
       ),
       child: Text(
         overview,
-        style: const TextStyle(color: AppTheme.textMuted, height: 1.6, fontSize: 14),
+        style: TextStyle(color: context.textMuted, height: 1.6, fontSize: 14),
       ),
     );
   }

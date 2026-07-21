@@ -25,11 +25,15 @@ class StockController extends Controller
 
     public function index(): JsonResponse
     {
-        $stocks = \Illuminate\Support\Facades\Cache::remember('stocks.index_v4', 300, function () {
-            return Company::all()->map(function ($company) {
-                $company->status = $company->current_status ? ['status' => $company->current_status] : null;
-                return $company;
-            });
+        $stocks = \Illuminate\Support\Facades\Cache::remember('stocks.index_v6', 300, function () {
+            return Company::select(['id', 'name', 'symbol', 'sector', 'current_status', 'latest_price', 'price_change_pct', 'logo_url', 'market_cap', 'pe_ratio'])
+                ->whereNotNull('latest_price')
+                ->where('latest_price', '>', 0)
+                ->get()
+                ->map(function ($company) {
+                    $company->status = $company->current_status ? ['status' => $company->current_status] : null;
+                    return $company;
+                });
         });
         
         return $this->success($stocks);
@@ -51,8 +55,13 @@ class StockController extends Controller
     {
         $query = substr(trim($request->get('q', '')), 0, 100);
 
-        $stocks = Company::where('name', 'LIKE', "%{$query}%")
-            ->orWhere('symbol', 'LIKE', "%{$query}%")
+        $stocks = Company::select(['id', 'name', 'symbol', 'sector', 'current_status', 'latest_price', 'price_change_pct', 'logo_url'])
+            ->whereNotNull('latest_price')
+            ->where('latest_price', '>', 0)
+            ->where(function($q) use ($query) {
+                $q->where('name', 'LIKE', "%{$query}%")
+                  ->orWhere('symbol', 'LIKE', "%{$query}%");
+            })
             ->limit(20)
             ->get()->map(function ($company) {
                 $company->status = $company->current_status ? ['status' => $company->current_status] : null;
@@ -64,29 +73,37 @@ class StockController extends Controller
 
     public function ngx(Request $request): JsonResponse
     {
-        $query = Company::query();
+        $cacheKey = 'stocks.ngx_v6_' . md5(json_encode($request->all()));
+        
+        $stocks = \Illuminate\Support\Facades\Cache::remember($cacheKey, 300, function () use ($request) {
+            $query = Company::select([
+                'id', 'name', 'symbol', 'sector', 'current_status', 
+                'latest_price', 'price_change', 'price_change_pct', 
+                'market_cap', 'pe_ratio', 'eps', 'logo_url'
+            ])->whereNotNull('latest_price')->where('latest_price', '>', 0);
 
-        if ($request->has('status') && !empty($request->status)) {
-            $statusFilters = explode(',', strtolower($request->status));
-            $query->whereIn('current_status', $statusFilters);
-        }
+            if ($request->has('status') && !empty($request->status)) {
+                $statusFilters = explode(',', strtolower($request->status));
+                $query->whereIn('current_status', $statusFilters);
+            }
 
-        if ($request->has('sector') && !empty($request->sector)) {
-            $sectorFilters = explode(',', strtolower($request->sector));
-            $query->whereIn('sector', $sectorFilters);
-        }
+            if ($request->has('sector') && !empty($request->sector)) {
+                $sectorFilters = explode(',', strtolower($request->sector));
+                $query->whereIn('sector', $sectorFilters);
+            }
 
-        if ($request->has('min_market_cap')) {
-            $query->where('market_cap', '>=', (float) $request->min_market_cap);
-        }
+            if ($request->has('min_market_cap')) {
+                $query->where('market_cap', '>=', (float) $request->min_market_cap);
+            }
 
-        if ($request->has('pe_max')) {
-            $query->whereNotNull('pe_ratio')->where('pe_ratio', '<=', (float) $request->pe_max);
-        }
+            if ($request->has('pe_max')) {
+                $query->whereNotNull('pe_ratio')->where('pe_ratio', '<=', (float) $request->pe_max);
+            }
 
-        $stocks = $query->get()->map(function ($company) {
-            $company->status = $company->current_status ? ['status' => $company->current_status] : null;
-            return $company;
+            return $query->get()->map(function ($company) {
+                $company->status = $company->current_status ? ['status' => $company->current_status] : null;
+                return $company;
+            });
         });
 
         return $this->success($stocks);

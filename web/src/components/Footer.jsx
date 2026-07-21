@@ -33,10 +33,10 @@ const Footer = () => (
       <div className="footer-col">
         <h4>Platform</h4>
         <ul>
-          <li><Link to="/market">Market Explorer</Link></li>
+          <li><Link to="/portfolio#market">Market Explorer</Link></li>
           <li><Link to="/portfolio">Portfolio Tracker</Link></li>
-          <li><Link to="/market">Halal Baskets</Link></li>
-          <li><Link to="/market">Purification Calc</Link></li>
+          <li><Link to="/portfolio#market">Halal Baskets</Link></li>
+          <li><Link to="/portfolio#market">Purification Calc</Link></li>
         </ul>
       </div>
 
@@ -45,7 +45,7 @@ const Footer = () => (
         <ul>
           <li><Link to="/about">Our Story</Link></li>
           <li><Link to="/shariah">Shariah Method</Link></li>
-          <li><Link to="/market">Pricing</Link></li>
+          <li><Link to="/portfolio#market">Pricing</Link></li>
         </ul>
       </div>
 

@@ -6,15 +6,6 @@ import 'dart:convert';
 class StockRepository {
   final ApiService _apiService = ApiService();
 
-  int _getNext3AM() {
-    final now = DateTime.now();
-    DateTime next3AM = DateTime(now.year, now.month, now.day, 3, 0, 0);
-    if (now.isAfter(next3AM)) {
-      next3AM = next3AM.add(const Duration(days: 1));
-    }
-    return next3AM.millisecondsSinceEpoch;
-  }
-
   Future<List<Map<String, dynamic>>> searchStocks(String query) async {
     try {
       final response = await _apiService.get('stocks/search?q=$query');
@@ -29,26 +20,9 @@ class StockRepository {
 
   Future<Map<String, dynamic>?> getStockDetails(String symbol) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final cacheKey = 'irshad_stock_${symbol}_cache_v2';
-      final cachedStr = prefs.getString(cacheKey);
-      if (cachedStr != null) {
-        final cachedData = jsonDecode(cachedStr);
-        final expiry = cachedData['expiry'] as int;
-        if (DateTime.now().millisecondsSinceEpoch < expiry) {
-          final data = Map<String, dynamic>.from(cachedData['data']);
-          await _cacheStock(data);
-          return data;
-        }
-      }
-
       final response = await _apiService.get('stocks/$symbol');
       if (response.statusCode == 200) {
         final data = response.data['data'];
-        await prefs.setString(cacheKey, jsonEncode({
-          'data': data,
-          'expiry': _getNext3AM(),
-        }));
         await _cacheStock(data);
         return data;
       }
@@ -72,24 +46,9 @@ class StockRepository {
 
   Future<List<Map<String, dynamic>>> getNgxStocks() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final cacheKey = 'irshad_stocks_cache_v3';
-      final cachedStr = prefs.getString(cacheKey);
-      if (cachedStr != null) {
-        final cachedData = jsonDecode(cachedStr);
-        final expiry = cachedData['expiry'] as int;
-        if (DateTime.now().millisecondsSinceEpoch < expiry) {
-          return List<Map<String, dynamic>>.from(cachedData['data']);
-        }
-      }
-
       final response = await _apiService.get('stocks/ngx');
       if (response.statusCode == 200) {
         final dataList = List<Map<String, dynamic>>.from(response.data['data']);
-        await prefs.setString(cacheKey, jsonEncode({
-          'data': dataList,
-          'expiry': _getNext3AM(),
-        }));
         return dataList;
       }
     } catch (e) {

@@ -11,7 +11,6 @@ import {
 const NAV_ITEMS = [
   { section: 'Main' },
   { label: 'Overview',       icon: LayoutDashboard,  to: '/portfolio#overview' },
-  { label: 'Search for Stock', icon: Search,          to: '/market'         },
   { label: 'Market Screener', icon: BarChart2,        to: '/portfolio#market' },
   { label: 'Watchlist',      icon: Star,             to: '/portfolio#watchlist' },
   { label: 'Thematic Baskets',icon: Briefcase,       to: '/portfolio#baskets' },

@@ -8,12 +8,12 @@ class UpgradeScreen extends StatelessWidget {
 @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.bg,
+      backgroundColor: context.bg,
       appBar: AppBar(
-        backgroundColor: AppTheme.bg,
+        backgroundColor: context.bg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppTheme.textDark, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: context.textDark, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -27,18 +27,18 @@ class UpgradeScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFDCFCE7),
+                  color: context.halalBg,
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.auto_awesome_rounded, size: 14, color: AppTheme.primary),
+                    Icon(Icons.auto_awesome_rounded, size: 14, color: context.primary),
                     const SizedBox(width: 6),
                     Text(
                       'IRSHAD Premium',
                       style: TextStyle(
-                        color: AppTheme.primary,
+                        color: context.primary,
                         fontWeight: FontWeight.w700,
                         fontSize: 12,
                         letterSpacing: 0.3,
@@ -55,7 +55,7 @@ class UpgradeScreen extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 36,
                   fontWeight: FontWeight.w900,
-                  color: AppTheme.textDark,
+                  color: context.textDark,
                   height: 1.1,
                   letterSpacing: -1,
                 ),
@@ -64,7 +64,7 @@ class UpgradeScreen extends StatelessWidget {
               Text(
                 'Get unlimited access to Shariah screening,\nreal-time prices, and portfolio analytics.',
                 style: TextStyle(
-                  color: AppTheme.textMuted,
+                  color: context.textMuted,
                   fontSize: 15,
                   height: 1.5,
                 ),
@@ -76,7 +76,7 @@ class UpgradeScreen extends StatelessWidget {
                 Icons.verified_rounded,
                 'Unlimited Shariah Screening',
                 'Screen any stock globally against AAOIFI standards',
-                AppTheme.primary,
+                context.primary,
               ),
               _buildFeature(
                 Icons.show_chart_rounded,
@@ -94,7 +94,7 @@ class UpgradeScreen extends StatelessWidget {
                 Icons.pie_chart_rounded,
                 'Portfolio Analytics',
                 'Halal score, purification calculator & more',
-                AppTheme.questionable,
+                context.questionable,
               ),
               _buildFeature(
                 Icons.notifications_active_rounded,
@@ -104,7 +104,7 @@ class UpgradeScreen extends StatelessWidget {
               ),
 
               const SizedBox(height: 32),
-              Divider(color: AppTheme.divider),
+              Divider(color: context.divider),
               const SizedBox(height: 20),
 
               // --- CTA note ---
@@ -117,7 +117,7 @@ class UpgradeScreen extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.info_outline_rounded, color: AppTheme.primary, size: 18),
+                    Icon(Icons.info_outline_rounded, color: context.primary, size: 18),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -137,7 +137,7 @@ class UpgradeScreen extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () => Navigator.pushNamed(context, '/register'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.textDark,
+                    backgroundColor: context.textDark,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     elevation: 0,
@@ -157,8 +157,8 @@ class UpgradeScreen extends StatelessWidget {
                 child: OutlinedButton(
                   onPressed: () => Navigator.pushNamed(context, '/login'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppTheme.textDark,
-                    side: BorderSide(color: AppTheme.divider, width: 1.5),
+                    foregroundColor: context.textDark,
+                    side: BorderSide(color: context.divider, width: 1.5),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   ),
                   child: const Text(
@@ -174,7 +174,7 @@ class UpgradeScreen extends StatelessWidget {
                 child: Text(
                   'By continuing, you agree to our Terms of Service\nand Privacy Policy.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: AppTheme.textMuted, fontSize: 11, height: 1.5),
+                  style: TextStyle(color: context.textMuted, fontSize: 11, height: 1.5),
                 ),
               ),
               const SizedBox(height: 24),
@@ -207,17 +207,17 @@ class UpgradeScreen extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    color: AppTheme.textDark,
+                  style: TextStyle(
+                    color: context.textDark,
                     fontWeight: FontWeight.w700,
                     fontSize: 14,
                   ),
                 ),
-                const SizedBox(height: 3),
+                SizedBox(height: 3),
                 Text(
                   subtitle,
                   style: TextStyle(
-                    color: AppTheme.textMuted,
+                    color: context.textMuted,
                     fontSize: 13,
                     height: 1.4,
                   ),
@@ -225,9 +225,9 @@ class UpgradeScreen extends StatelessWidget {
               ],
             ),
           ),
-          const Padding(
+          Padding(
             padding: EdgeInsets.only(top: 10),
-            child: Icon(Icons.check_circle_rounded, color: AppTheme.primary, size: 18),
+            child: Icon(Icons.check_circle_rounded, color: context.primary, size: 18),
           ),
         ],
       ),

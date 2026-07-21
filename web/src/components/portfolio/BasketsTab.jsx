@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Briefcase, ArrowLeft, ChevronRight, Activity, TrendingUp, TrendingDown, Star, Plus, X, Trash2, Check, DollarSign } from 'lucide-react';
-import { fetchBaskets, fetchBasketDetails, fetchNgxStocks, createBasket, deleteBasket, investInBasket } from '../../services/api';
+import { Briefcase, ArrowLeft, ChevronRight, Activity, TrendingUp, TrendingDown, Star, Plus, X, Trash2, Check, DollarSign, Edit2 } from 'lucide-react';
+import { fetchBaskets, fetchBasketDetails, fetchNgxStocks, createBasket, deleteBasket, investInBasket, updateBasket } from '../../services/api';
 import { toastError, toastSuccess } from '../../utils/toast';
 import { useNavigate } from 'react-router-dom';
 
@@ -50,6 +50,8 @@ function BasketsTabContent() {
   
   // Custom Baskets State
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingBasket, setEditingBasket] = useState({ id: null, name: '', description: '', symbols: [] });
   const [allStocks, setAllStocks] = useState([]);
   const [saving, setSaving] = useState(false);
   const [newBasket, setNewBasket] = useState({ name: '', description: '', symbols: [] });
@@ -139,6 +141,38 @@ function BasketsTabContent() {
     }
   };
 
+  const handleEditBasket = async (e) => {
+    e.preventDefault();
+    if (!editingBasket.name || editingBasket.symbols.length === 0) return;
+    try {
+      setSaving(true);
+      await updateBasket(editingBasket.id, editingBasket);
+      setShowEditModal(false);
+      await loadBaskets();
+      // Re-fetch details to show the updated basket
+      handleSelectBasket({ ...selectedBasket, name: editingBasket.name, description: editingBasket.description, symbols: editingBasket.symbols });
+    } catch (err) {
+      console.error('Failed to update basket', err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const openEditModal = () => {
+    let syms = [];
+    try {
+      if (typeof selectedBasket.symbols === 'string') syms = JSON.parse(selectedBasket.symbols);
+      else if (Array.isArray(selectedBasket.symbols)) syms = selectedBasket.symbols;
+    } catch(e) {}
+    setEditingBasket({
+      id: selectedBasket.id,
+      name: selectedBasket.name,
+      description: selectedBasket.description || '',
+      symbols: syms
+    });
+    setShowEditModal(true);
+  };
+
   const toggleSymbolSelection = (symbol) => {
     setNewBasket(prev => {
       const isSelected = prev.symbols.includes(symbol);
@@ -193,13 +227,24 @@ function BasketsTabContent() {
               <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginTop:'4px' }}>{selectedBasket.description}</p>
             </div>
           </div>
-          <button 
-            onClick={() => setShowInvestModal(true)}
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--gold)', color: '#0D1B2A', border: 'none', borderRadius: '12px', padding: '12px 20px', fontWeight: 800, cursor: 'pointer' }}
-            className="hover-lift"
-          >
-            <DollarSign size={18} /> Invest
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {selectedBasket.user_id && (
+              <button 
+                onClick={openEditModal}
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-section)', color: 'var(--text-dark)', border: '1px solid var(--border)', borderRadius: '12px', padding: '12px 16px', fontWeight: 800, cursor: 'pointer' }}
+                className="hover-lift"
+              >
+                <Edit2 size={18} /> Edit
+              </button>
+            )}
+            <button 
+              onClick={() => setShowInvestModal(true)}
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--gold)', color: '#0D1B2A', border: 'none', borderRadius: '12px', padding: '12px 20px', fontWeight: 800, cursor: 'pointer' }}
+              className="hover-lift"
+            >
+              <DollarSign size={18} /> Invest
+            </button>
+          </div>
         </div>
 
         {loadingDetails ? (
@@ -435,6 +480,83 @@ function BasketsTabContent() {
                 style={{ background:'var(--primary)', color:'white', border:'none', borderRadius:'12px', padding:'14px', fontSize:'1rem', fontWeight:800, cursor: (saving || !newBasket.name || newBasket.symbols.length === 0) ? 'not-allowed' : 'pointer', opacity: (saving || !newBasket.name || newBasket.symbols.length === 0) ? 0.5 : 1, marginTop:'10px' }}
               >
                 {saving ? 'Creating...' : 'Create Basket'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Basket Modal */}
+      {showEditModal && (
+        <div className="modal-overlay animate-fade-in" style={{ position:'fixed', top:0, left:0, width:'100%', height:'100%', background:'rgba(13, 27, 42, 0.4)', backdropFilter:'blur(4px)', zIndex:999, display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' }}>
+          <div className="modal-content roll-in-anim" style={{ background:'white', borderRadius:'24px', width:'100%', maxWidth:'600px', boxShadow:'var(--shadow-lg)', overflow:'hidden', display:'flex', flexDirection:'column', maxHeight:'80vh' }}>
+            <div style={{ padding:'24px 32px', borderBottom:'1px solid var(--border)', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+              <h2 style={{ fontSize:'1.2rem', fontWeight:800, color:'var(--text-dark)' }}>Edit Custom Basket</h2>
+              <button onClick={() => setShowEditModal(false)} style={{ background:'none', border:'none', color:'var(--text-muted)', cursor:'pointer' }}><X size={20}/></button>
+            </div>
+            
+            <form onSubmit={handleEditBasket} style={{ padding:'32px', overflowY:'auto', display:'flex', flexDirection:'column', gap:'20px' }}>
+              <div>
+                <label style={{ display:'block', fontSize:'0.85rem', fontWeight:700, color:'var(--text-dark)', marginBottom:'8px' }}>Basket Name</label>
+                <input 
+                  required
+                  value={editingBasket.name}
+                  onChange={e => setEditingBasket({...editingBasket, name: e.target.value})}
+                  placeholder="e.g. My Dividend Kings"
+                  style={{ width:'100%', padding:'12px 16px', borderRadius:'12px', border:'1px solid var(--border)', fontSize:'1rem', background:'var(--bg-section)' }}
+                />
+              </div>
+              
+              <div>
+                <label style={{ display:'block', fontSize:'0.85rem', fontWeight:700, color:'var(--text-dark)', marginBottom:'8px' }}>Description (Optional)</label>
+                <textarea 
+                  value={editingBasket.description}
+                  onChange={e => setEditingBasket({...editingBasket, description: e.target.value})}
+                  placeholder="What is this basket about?"
+                  rows={2}
+                  style={{ width:'100%', padding:'12px 16px', borderRadius:'12px', border:'1px solid var(--border)', fontSize:'1rem', background:'var(--bg-section)', resize:'none' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display:'block', fontSize:'0.85rem', fontWeight:700, color:'var(--text-dark)', marginBottom:'8px' }}>
+                  Select Stocks ({editingBasket.symbols.length} selected)
+                </label>
+                <div style={{ border:'1px solid var(--border)', borderRadius:'12px', overflow:'hidden', maxHeight:'200px', overflowY:'auto', background:'white' }}>
+                  {allStocks.filter(s => ['halal', 'compliant'].includes(getStatus(s))).map(stock => {
+                    const isSelected = editingBasket.symbols.includes(stock.symbol);
+                    return (
+                      <div 
+                        key={stock.symbol}
+                        onClick={() => {
+                          setEditingBasket(prev => {
+                            const selected = prev.symbols.includes(stock.symbol);
+                            return { ...prev, symbols: selected ? prev.symbols.filter(s => s !== stock.symbol) : [...prev.symbols, stock.symbol] };
+                          });
+                        }}
+                        style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 16px', borderBottom:'1px solid var(--bg-section)', cursor:'pointer', background: isSelected ? 'var(--primary-50)' : 'white', transition:'background 0.2s' }}
+                      >
+                        <div style={{ display:'flex', alignItems:'center', gap:'12px' }}>
+                          <div style={{ width:'20px', height:'20px', borderRadius:'4px', border: isSelected ? 'none' : '1px solid var(--text-light)', background: isSelected ? 'var(--primary)' : 'transparent', display:'flex', alignItems:'center', justifyContent:'center', color:'white' }}>
+                            {isSelected && <Check size={14} />}
+                          </div>
+                          <div>
+                            <span style={{ fontWeight:800, color:'var(--text-dark)', display:'block' }}>{stock.symbol}</span>
+                            <span style={{ fontSize:'0.8rem', color:'var(--text-muted)' }}>{stock.name}</span>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={saving || !editingBasket.name || editingBasket.symbols.length === 0}
+                style={{ background:'var(--primary)', color:'white', border:'none', borderRadius:'12px', padding:'14px', fontSize:'1rem', fontWeight:800, cursor: (saving || !editingBasket.name || editingBasket.symbols.length === 0) ? 'not-allowed' : 'pointer', opacity: (saving || !editingBasket.name || editingBasket.symbols.length === 0) ? 0.5 : 1, marginTop:'10px' }}
+              >
+                {saving ? 'Saving...' : 'Save Changes'}
               </button>
             </form>
           </div>

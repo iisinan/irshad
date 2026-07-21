@@ -68,10 +68,10 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.bg,
+      backgroundColor: context.bg,
       appBar: AppBar(
-        title: const Text('Search Products', style: TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5)),
-        backgroundColor: AppTheme.bg,
+        title: Text('Search Products', style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
+        backgroundColor: context.bg,
         elevation: 0,
         centerTitle: false,
       ),
@@ -98,14 +98,14 @@ class _SearchScreenState extends State<SearchScreen> {
       child: TextField(
         controller: _searchController,
         onChanged: _onSearch,
-        style: const TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w600),
+        style: TextStyle(color: context.textDark, fontWeight: FontWeight.w600),
         decoration: InputDecoration(
           hintText: 'Brand name or product...',
-          hintStyle: const TextStyle(color: AppTheme.textMuted, fontWeight: FontWeight.w400),
-          prefixIcon: const Icon(Icons.search_rounded, color: AppTheme.primary),
+          hintStyle: TextStyle(color: context.textMuted, fontWeight: FontWeight.w400),
+          prefixIcon: Icon(Icons.search_rounded, color: context.primary),
           suffixIcon: _searchController.text.isNotEmpty 
             ? IconButton(
-                icon: const Icon(Icons.clear_rounded, color: AppTheme.textMuted),
+                icon: Icon(Icons.clear_rounded, color: context.textMuted),
                 onPressed: () {
                   _searchController.clear();
                   _onSearch('');
@@ -116,11 +116,11 @@ class _SearchScreenState extends State<SearchScreen> {
           fillColor: Colors.white,
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: AppTheme.divider, width: 1.5),
+            borderSide: BorderSide(color: context.divider, width: 1.5),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: AppTheme.textDark, width: 1.5),
+            borderSide: BorderSide(color: context.textDark, width: 1.5),
           ),
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),
@@ -138,7 +138,7 @@ class _SearchScreenState extends State<SearchScreen> {
             padding: const EdgeInsets.only(bottom: 16, top: 4),
             child: Text(
               title,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppTheme.textDark),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: context.textDark),
             ),
           );
         }
@@ -153,8 +153,8 @@ class _SearchScreenState extends State<SearchScreen> {
     final status = product['status']?.toString().toLowerCase() ?? 'unknown';
     bool isHalal = status == 'halal';
     bool isNonHalal = status == 'non-halal';
-    Color statusColor = isHalal ? AppTheme.halal : (isNonHalal ? AppTheme.haram : AppTheme.questionable);
-    Color badgeBg = isHalal ? const Color(0xFFDCFCE7) : (isNonHalal ? const Color(0xFFFEE2E2) : const Color(0xFFFEF3C7));
+    Color statusColor = isHalal ? context.halal : (isNonHalal ? context.haram : context.questionable);
+    Color badgeBg = isHalal ? context.halalBg : (isNonHalal ? context.haramBg : context.questionableBg);
 
     return GestureDetector(
       onTap: () => Navigator.pushNamed(context, '/product_details', arguments: product),
@@ -164,7 +164,7 @@ class _SearchScreenState extends State<SearchScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppTheme.divider),
+          border: Border.all(color: context.divider),
         ),
         child: Row(
           children: [
@@ -188,21 +188,21 @@ class _SearchScreenState extends State<SearchScreen> {
                 children: [
                   Text(
                     product['name'],
-                    style: const TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, fontSize: 15),
+                    style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, fontSize: 15),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 2),
                   Text(
                     product['brand'] ?? 'Unknown Brand',
-                    style: const TextStyle(color: AppTheme.textMuted, fontSize: 13),
+                    style: TextStyle(color: context.textMuted, fontSize: 13),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded, color: AppTheme.divider),
+            Icon(Icons.chevron_right_rounded, color: context.divider),
           ],
         ),
       ),
@@ -210,7 +210,7 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget _buildLoading() {
-    return const Center(child: CircularProgressIndicator(color: AppTheme.primary));
+    return Center(child: CircularProgressIndicator(color: context.primary));
   }
 
   Widget _buildEmptyState() {
@@ -223,21 +223,21 @@ class _SearchScreenState extends State<SearchScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppTheme.primary.withOpacity(0.05),
+                color: context.primary.withOpacity(0.05),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.qr_code_scanner_rounded, size: 40, color: AppTheme.primary),
+              child: Icon(Icons.qr_code_scanner_rounded, size: 40, color: context.primary),
             ),
             const SizedBox(height: 24),
-            const Text(
+            Text(
               'Verify Your Lifestyle',
-              style: TextStyle(fontSize: 20, color: AppTheme.textDark, fontWeight: FontWeight.w900),
+              style: TextStyle(fontSize: 20, color: context.textDark, fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 12),
-            const Text(
+            Text(
               'Search for food, cosmetics, and household items\nto verify their Halal status instantly.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppTheme.textMuted, height: 1.5, fontSize: 14),
+              style: TextStyle(color: context.textMuted, height: 1.5, fontSize: 14),
             ),
           ],
         ),

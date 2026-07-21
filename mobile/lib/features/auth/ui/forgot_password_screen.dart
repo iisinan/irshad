@@ -32,7 +32,7 @@ Future<void> _submit() async {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to send reset link: ${e.toString()}'), backgroundColor: AppTheme.haram),
+          SnackBar(content: Text('Failed to send reset link: ${e.toString()}'), backgroundColor: context.haram),
         );
       }
     } finally {
@@ -43,12 +43,12 @@ Future<void> _submit() async {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.bg,
+      backgroundColor: context.bg,
       appBar: AppBar(
-        backgroundColor: AppTheme.bg,
+        backgroundColor: context.bg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppTheme.textDark, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: context.textDark, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -67,23 +67,23 @@ Future<void> _submit() async {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.lock_reset_rounded, color: AppTheme.primary, size: 48),
+          Icon(Icons.lock_reset_rounded, color: context.primary, size: 48),
           const SizedBox(height: 24),
-          const Text(
+          Text(
             'Reset Password',
             style: TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.w900,
-              color: AppTheme.textDark,
+              color: context.textDark,
               letterSpacing: -1,
             ),
           ),
           const SizedBox(height: 12),
-          const Text(
+          Text(
             'Enter the email associated with your account and we\'ll send an email with instructions to reset your password.',
             style: TextStyle(
               fontSize: 15,
-              color: AppTheme.textMuted,
+              color: context.textMuted,
               height: 1.5,
               fontWeight: FontWeight.w500,
             ),
@@ -100,21 +100,21 @@ Future<void> _submit() async {
             },
             decoration: InputDecoration(
               hintText: 'Email Address',
-              hintStyle: const TextStyle(color: AppTheme.textMuted),
-              prefixIcon: const Icon(Icons.email_outlined, color: AppTheme.textMuted, size: 20),
+              hintStyle: TextStyle(color: context.textMuted),
+              prefixIcon: Icon(Icons.email_outlined, color: context.textMuted, size: 20),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: context.bgAlt,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: AppTheme.divider, width: 1.5),
+                borderSide: BorderSide(color: context.divider, width: 1.5),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: AppTheme.divider, width: 1.5),
+                borderSide: BorderSide(color: context.divider, width: 1.5),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: AppTheme.primary, width: 1.5),
+                borderSide: BorderSide(color: context.primary, width: 1.5),
               ),
             ),
           ),
@@ -126,7 +126,7 @@ Future<void> _submit() async {
             child: ElevatedButton(
               onPressed: _isLoading ? null : _submit,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primary,
+                backgroundColor: context.primary,
                 foregroundColor: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
@@ -148,27 +148,27 @@ Future<void> _submit() async {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFFDCFCE7),
+            color: context.halalBg,
             borderRadius: BorderRadius.circular(24),
           ),
-          child: const Icon(Icons.mark_email_read_rounded, color: AppTheme.primary, size: 48),
+          child: Icon(Icons.mark_email_read_rounded, color: context.primary, size: 48),
         ),
         const SizedBox(height: 24),
-        const Text(
+        Text(
           'Check your email',
           style: TextStyle(
             fontSize: 32,
             fontWeight: FontWeight.w900,
-            color: AppTheme.textDark,
+            color: context.textDark,
             letterSpacing: -1,
           ),
         ),
         const SizedBox(height: 12),
         Text(
           'We have sent a password reset link to ${_emailController.text}.',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 15,
-            color: AppTheme.textMuted,
+            color: context.textMuted,
             height: 1.5,
             fontWeight: FontWeight.w500,
           ),
@@ -180,7 +180,7 @@ Future<void> _submit() async {
           child: ElevatedButton(
             onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.textDark,
+              backgroundColor: context.textDark,
               foregroundColor: Colors.white,
               elevation: 0,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),

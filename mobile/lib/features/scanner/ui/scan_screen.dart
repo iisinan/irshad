@@ -56,7 +56,7 @@ class _ScanScreenState extends State<ScanScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: AppTheme.haram,
+        backgroundColor: context.haram,
         behavior: SnackBarBehavior.floating,
       ),
     );

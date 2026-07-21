@@ -210,6 +210,14 @@ export const createBasket = async (data) => {
   return response.data;
 };
 
+export const updateBasket = async (id, data) => {
+  const response = await api.put(`/stocks/baskets/${id}`, data);
+  // Clear baskets cache and individual cache
+  localStorage.removeItem('irshad_baskets_cache_v1');
+  localStorage.removeItem(`irshad_basket_${id}_cache_v1`);
+  return response.data;
+};
+
 export const deleteBasket = async (id) => {
   const response = await api.delete(`/stocks/baskets/${id}`);
   // Clear baskets cache so it is removed immediately

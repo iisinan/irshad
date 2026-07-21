@@ -8,7 +8,7 @@ import 'dart:convert';
 
 class AuthRepository {
   final ApiService _apiService = ApiService();
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
   final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
 
   Future<Map<String, dynamic>?> register(String name, String email, String password, String passwordConfirmation, {String? location}) async {

@@ -21,16 +21,16 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
     return DefaultTabController(
       length: 5, // Changed to 5
       child: Scaffold(
-        backgroundColor: AppTheme.bg,
+        backgroundColor: context.bg,
         appBar: AppBar(
-          title: const Text('Portfolio', style: TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5)),
-          backgroundColor: AppTheme.bg,
+          title: Text('Portfolio', style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
+          backgroundColor: context.bg,
           elevation: 0,
-          bottom: const TabBar(
+          bottom: TabBar(
             isScrollable: true,
-            labelColor: AppTheme.textDark,
-            unselectedLabelColor: AppTheme.textMuted,
-            indicatorColor: AppTheme.primary,
+            labelColor: context.textDark,
+            unselectedLabelColor: context.textMuted,
+            indicatorColor: context.primary,
             indicatorWeight: 3,
             labelStyle: TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
             unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),

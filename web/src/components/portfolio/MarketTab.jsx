@@ -1,546 +1,418 @@
-import React, { useState, useEffect } from 'react';
-import { Search, ChevronRight, BarChart2, LayoutGrid, List as ListIcon, ChevronLeft } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Search, TrendingUp, TrendingDown, Star, BarChart2, X, CheckCircle, AlertCircle, HelpCircle } from 'lucide-react';
 import { fetchNgxStocks, fetchWatchlist, addToWatchlist, removeFromWatchlist } from '../../services/api';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { TrendingUp, TrendingDown } from 'lucide-react';
 
-const normalizeSectorDisplay = (s) => {
-  if (!s) return s;
-  const map = { 'Ict': 'ICT', 'Oil And Gas': 'Oil & Gas', 'Construction/Real Estate': 'Real Estate' };
+/* ─── Helpers ─────────────────────────────────────────────────────────────── */
+const fmtPrice = (p) => {
+  try { return Number(p ?? 0).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  catch { return Number(p ?? 0).toFixed(2); }
+};
+
+const fmtCap = (c) => {
+  if (!c || c === 0) return '—';
+  if (c >= 1e12) return `₦${(c / 1e12).toFixed(1)}T`;
+  if (c >= 1e9)  return `₦${(c / 1e9).toFixed(1)}B`;
+  return `₦${(c / 1e6).toFixed(0)}M`;
+};
+
+const normSector = (s) => {
+  if (!s) return '—';
+  const map = { Ict: 'ICT', 'Oil And Gas': 'Oil & Gas', 'Construction/Real Estate': 'Real Estate' };
   return map[s] || s;
 };
 
-/* ─── Stock Card ─── */
-const StockCard = React.memo(({ company, isWatched, onToggleWatch }) => {
-  const priceChange = company.price_change ?? 0;
-  const isPositive = priceChange >= 0;
-
-  let statusStr = 'QUESTIONABLE';
-  let badgeClass = 'status-doubtful';
-
-  const rawStatus = company.status;
-  if (typeof rawStatus === 'object' && rawStatus !== null) {
-    const s = rawStatus.status?.toLowerCase();
-    if (s === 'halal') { statusStr = 'HALAL'; badgeClass = 'status-halal'; }
-    else if (s === 'non-halal') { statusStr = 'NON-HALAL'; badgeClass = 'status-non-halal'; }
-  } else if (typeof rawStatus === 'string') {
-    const s = rawStatus.toLowerCase();
-    if (s === 'compliant' || s === 'halal') { statusStr = 'HALAL'; badgeClass = 'status-halal'; }
-    else if (s === 'non-halal') { statusStr = 'NON-HALAL'; badgeClass = 'status-non-halal'; }
+const getStatus = (company) => {
+  const raw = company.status;
+  if (typeof raw === 'object' && raw !== null) {
+    const s = raw.status?.toLowerCase();
+    return s === 'compliant' ? 'halal' : (s || 'doubtful');
   }
+  if (typeof raw === 'string') {
+    const s = raw.toLowerCase();
+    return s === 'compliant' ? 'halal' : s;
+  }
+  return 'doubtful';
+};
 
-  const fmtCap = (cap) => {
-    if (!cap || cap === 0) return null;
-    if (cap >= 1_000_000_000_000) return `₦${(cap / 1_000_000_000_000).toFixed(1)}T`;
-    return `₦${(cap / 1_000_000_000).toFixed(1)}B`;
-  };
+const STATUS_CFG = {
+  halal:       { label: 'Halal',     cls: 'status-halal',     Icon: CheckCircle },
+  'non-halal': { label: 'Non-Halal', cls: 'status-non-halal', Icon: AlertCircle },
+  doubtful:    { label: 'Doubtful',  cls: 'status-doubtful',  Icon: HelpCircle  },
+};
 
-  const fmtPrice = (price) => {
-    try {
-      return (price ?? 0).toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    } catch {
-      return (price ?? 0).toFixed(2);
-    }
-  };
+/* ─── Table header cell — defined OUTSIDE to avoid re-mounting ───────────── */
+const TH = ({ children, right }) => (
+  <th style={{
+    padding: '11px 16px',
+    fontSize: '0.71rem', fontWeight: 700,
+    textTransform: 'uppercase', letterSpacing: '0.5px',
+    color: 'var(--text-muted)',
+    textAlign: right ? 'right' : 'left',
+    background: 'var(--bg-section)',
+    borderBottom: '1px solid var(--border)',
+    whiteSpace: 'nowrap',
+    position: 'sticky', top: 0, zIndex: 2,
+  }}>
+    {children}
+  </th>
+);
+
+/* ─── Stock table row ────────────────────────────────────────────────────── */
+const StockRow = React.memo(({ stock, idx, isWatched, onToggle }) => {
+  const status = getStatus(stock);
+  const cfg    = STATUS_CFG[status] || STATUS_CFG.doubtful;
+  const isPos  = Number(stock.price_change_pct ?? 0) >= 0;
+  const Icon   = cfg.Icon;
 
   return (
-    <div style={{ position: 'relative', height: '100%' }}>
-      <Link to={`/market/${company.symbol}`} state={{ stock: company }} className="stock-card" style={{ display: 'flex', flexDirection: 'column' }}>
-
-        {/* ── Header: logo + name + symbol ── */}
-        <div className="stock-card-header">
-          <div className="stock-card-title">
-            <div className="stock-logo-wrap">
-              {company.logo_url
-                ? <img loading="lazy" src={'http://127.0.0.1:8000' + company.logo_url} alt={company.symbol} />
-                : (company.symbol || '').slice(0, 4)
-              }
-            </div>
-            <div>
-              <div className="stock-symbol">{company.symbol}</div>
-              <div className="stock-name">{company.name}</div>
-            </div>
-          </div>
-        </div>
-
-        {/* ── Price + change ── */}
-        <div className="stock-price-row">
-          <div className="stock-price-wrapper">
-            <span className="stock-price-currency">₦</span>
-            <span className="stock-price">{fmtPrice(company.latest_price)}</span>
-          </div>
-          <div className={`stock-change-pill ${isPositive ? 'pos' : 'neg'}`}>
-            {isPositive ? <TrendingUp size={13} /> : <TrendingDown size={13} />}
-            {isPositive ? '+' : ''}{(company.price_change_pct ?? 0).toFixed(2)}%
-          </div>
-        </div>
-
-        {/* ── Tags: status + sector ── */}
-        <div className="stock-tags-row">
-          <span className={`status-badge ${badgeClass}`} style={{ fontSize: '0.64rem', padding: '3px 9px' }}>{statusStr}</span>
-          {company.sector && <span className="stock-sector-tag">{normalizeSectorDisplay(company.sector)}</span>}
-        </div>
-
-        {/* ── Metrics footer ── */}
-        <div className="stock-metrics-row">
-          <div className="stock-metric">
-            <span className="metric-label">Div Yield</span>
-            <span className={`metric-value ${!company.div_yield ? 'dim' : ''}`}>
-              {company.div_yield > 0 ? `${company.div_yield}%` : '—'}
-            </span>
-          </div>
-          <div className="stock-metric">
-            <span className="metric-label">P/E Ratio</span>
-            <span className={`metric-value ${!company.pe_ratio ? 'dim' : ''}`}>
-              {company.pe_ratio ? company.pe_ratio.toFixed(1) : '—'}
-            </span>
-          </div>
-          <div className="stock-metric">
-            <span className="metric-label">Mkt Cap</span>
-            <span className={`metric-value ${!company.market_cap ? 'dim' : ''}`}>
-              {fmtCap(company.market_cap) || '—'}
-            </span>
-          </div>
-        </div>
-
-      </Link>
-
-      {/* ── Watchlist star ── */}
-      <button
-        onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleWatch(company.symbol, isWatched); }}
-        className={`stock-star-btn ${isWatched ? 'active' : ''}`}
-        style={{ position: 'absolute', top: '16px', right: '16px' }}
-        title={isWatched ? 'Remove from watchlist' : 'Add to watchlist'}
-      >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill={isWatched ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-        </svg>
-      </button>
-    </div>
-  );
-});
-
-const StockListRow = React.memo(({ stock, index, isWatched, onToggleWatch }) => {
-  const isPositive = (stock.price_change ?? 0) >= 0;
-  let statusStr = 'QUESTIONABLE';
-  let badgeClass = 'status-doubtful';
-  const rawStatus = stock.status;
-  if (typeof rawStatus === 'object' && rawStatus !== null) {
-    if (rawStatus.status?.toLowerCase() === 'halal') { statusStr = 'HALAL'; badgeClass = 'status-halal'; }
-    else if (rawStatus.status?.toLowerCase() === 'non-halal') { statusStr = 'NON-HALAL'; badgeClass = 'status-non-halal'; }
-  } else if (typeof rawStatus === 'string') {
-    if (rawStatus.toLowerCase() === 'compliant' || rawStatus.toLowerCase() === 'halal') { statusStr = 'HALAL'; badgeClass = 'status-halal'; }
-    else if (rawStatus.toLowerCase() === 'non-halal') { statusStr = 'NON-HALAL'; badgeClass = 'status-non-halal'; }
-  }
-
-  return (
-    <tr 
-      className="roll-in-anim" 
-      style={{ borderTop: '1px solid var(--border)', animationDelay: `${(index % 15) * 0.03}s`, transition: 'background 0.2s ease' }}
+    <tr
       onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-section)'}
       onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+      style={{ borderBottom: '1px solid var(--border)', transition: 'background 0.15s' }}
     >
-      <td style={{ padding: '16px', fontWeight: 800, color: 'var(--text-dark)' }}>
-        <Link to={`/market/${stock.symbol}`} state={{ stock }} style={{ color: 'inherit', textDecoration: 'none' }}>{stock.symbol}</Link>
+      {/* Rank */}
+      <td style={{ padding: '13px 8px 13px 20px', color: 'var(--text-light)', fontSize: '0.77rem', fontWeight: 700 }}>
+        {idx + 1}
       </td>
-      <td style={{ padding: '16px', color: 'var(--text-muted)', fontSize: '0.9rem', maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{stock.name}</td>
-      <td style={{ padding: '16px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>{normalizeSectorDisplay(stock.sector) || '-'}</td>
-      <td style={{ padding: '16px' }}>
-        <span className={`status-badge ${badgeClass}`} style={{ fontSize: '0.65rem', padding: '3px 8px' }}>{statusStr}</span>
+
+      {/* Company */}
+      <td style={{ padding: '13px 16px' }}>
+        <Link
+          to={`/market/${stock.symbol}`}
+          state={{ stock }}
+          style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '11px' }}
+        >
+          <div style={{
+            width: '36px', height: '36px', borderRadius: '9px', flexShrink: 0,
+            background: 'var(--primary-50)', border: '1px solid var(--border)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontWeight: 800, fontSize: '0.68rem', color: 'var(--primary)',
+          }}>
+            {(stock.symbol || '').slice(0, 4)}
+          </div>
+          <div>
+            <div style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.88rem', lineHeight: 1.2 }}>
+              {stock.symbol}
+            </div>
+            <div style={{ fontSize: '0.73rem', color: 'var(--text-muted)', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {stock.name}
+            </div>
+          </div>
+        </Link>
       </td>
-      <td style={{ padding: '16px', color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>{stock.div_yield > 0 ? `${stock.div_yield}%` : '-'}</td>
-      <td style={{ padding: '16px', color: 'var(--text-muted)', fontSize: '0.85rem', textAlign: 'right', fontWeight: 600 }}>{stock.pe_ratio ? stock.pe_ratio.toFixed(1) : '-'}</td>
-      <td style={{ padding: '16px', color: 'var(--text-muted)', fontSize: '0.85rem', textAlign: 'right', fontWeight: 600 }}>{stock.market_cap ? `₦${(stock.market_cap / 1000000000).toFixed(1)}B` : '-'}</td>
-      <td style={{ padding: '16px', fontWeight: 700, color: 'var(--text-dark)', textAlign: 'right' }}>{(stock.latest_price ?? 0).toFixed(2)}</td>
-      <td style={{ padding: '16px', textAlign: 'right' }}>
-        <span style={{ color: isPositive ? 'var(--halal)' : 'var(--non-halal)', fontWeight: 700, fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-          {isPositive ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-          {(stock.price_change_pct ?? 0).toFixed(2)}%
+
+      {/* Sector */}
+      <td style={{ padding: '13px 16px', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
+        {normSector(stock.sector)}
+      </td>
+
+      {/* Status */}
+      <td style={{ padding: '13px 16px' }}>
+        <span className={`status-badge ${cfg.cls}`} style={{ fontSize: '0.64rem', padding: '3px 9px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+          <Icon size={9} />
+          {cfg.label}
         </span>
       </td>
-      <td style={{ padding: '16px', textAlign: 'right' }}>
-        <button onClick={() => onToggleWatch(stock.symbol, isWatched)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: isWatched ? 'var(--gold)' : 'var(--border)' }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill={isWatched ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-          </svg>
+
+      {/* Price */}
+      <td style={{ padding: '13px 16px', textAlign: 'right', fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.88rem', fontVariantNumeric: 'tabular-nums' }}>
+        ₦{fmtPrice(stock.latest_price)}
+      </td>
+
+      {/* Change */}
+      <td style={{ padding: '13px 16px', textAlign: 'right' }}>
+        <span style={{
+          display: 'inline-flex', alignItems: 'center', gap: '3px',
+          fontSize: '0.8rem', fontWeight: 700,
+          color: isPos ? 'var(--halal)' : 'var(--non-halal)',
+          background: isPos ? 'var(--halal-bg)' : 'var(--non-halal-bg)',
+          padding: '3px 8px', borderRadius: '6px',
+        }}>
+          {isPos ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+          {isPos ? '+' : ''}{Number(stock.price_change_pct ?? 0).toFixed(2)}%
+        </span>
+      </td>
+
+      {/* Mkt Cap */}
+      <td style={{ padding: '13px 16px', textAlign: 'right', color: 'var(--text-muted)', fontSize: '0.82rem', fontWeight: 600 }}>
+        {fmtCap(stock.market_cap)}
+      </td>
+
+      {/* P/E */}
+      <td style={{ padding: '13px 16px', textAlign: 'right', color: 'var(--text-muted)', fontSize: '0.82rem', fontWeight: 600 }}>
+        {stock.pe_ratio ? Number(stock.pe_ratio).toFixed(1) : '—'}
+      </td>
+
+      {/* Star */}
+      <td style={{ padding: '13px 20px 13px 8px', textAlign: 'right' }}>
+        <button
+          onClick={() => onToggle(stock.symbol, isWatched)}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
+            color: isWatched ? 'var(--gold)' : 'var(--border)',
+            transition: 'color 0.15s, transform 0.15s',
+          }}
+          title={isWatched ? 'Remove from watchlist' : 'Add to watchlist'}
+          onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.25)'}
+          onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+        >
+          <Star size={16} fill={isWatched ? 'currentColor' : 'none'} />
         </button>
       </td>
     </tr>
   );
 });
 
+/* ─── Main component ─────────────────────────────────────────────────────── */
 export default function MarketTab() {
-  const { 
-    data: stocks = [], 
-    isLoading: loadingStocks, 
-    error: stocksError,
-    refetch: loadData
-  } = useQuery({
+  const { data: stocks = [], isLoading, error, refetch } = useQuery({
     queryKey: ['marketData'],
     queryFn: async () => {
-      const res = await fetchNgxStocks();
-      return res.data || [];
+      const r = await fetchNgxStocks();
+      return Array.isArray(r) ? r : (r?.data || []);
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: initialWatchlist = [] } = useQuery({
     queryKey: ['watchlist'],
     queryFn: async () => {
-      const res = await fetchWatchlist();
-      return res.map(w => w.symbol);
+      const r = await fetchWatchlist();
+      const list = Array.isArray(r) ? r : (r?.data || []);
+      return list.map(w => w.symbol);
     },
     staleTime: 5 * 60 * 1000,
   });
 
   const [watchlist, setWatchlist] = useState([]);
-  
+  const [search,    setSearch]    = useState('');
+  const [statusF,   setStatusF]   = useState('all');
+  const [sectorF,   setSectorF]   = useState('all');
+  const [sortBy,    setSortBy]    = useState('default');
+
+  // Safely extract from potentially stale cache shapes
+  const actualStocks = Array.isArray(stocks) ? stocks : (stocks?.data || []);
+  const actualInitialWatchlist = Array.isArray(initialWatchlist) ? initialWatchlist : (initialWatchlist?.data ? initialWatchlist.data.map(w => w.symbol) : []);
+
   useEffect(() => {
-    if (initialWatchlist.length > 0 && watchlist.length === 0) {
-      setWatchlist(initialWatchlist);
+    if (actualInitialWatchlist.length > 0 && watchlist.length === 0) {
+      setWatchlist(actualInitialWatchlist);
     }
-  }, [initialWatchlist]);
+  }, [actualInitialWatchlist]);
 
-  const loading = loadingStocks;
-  const error = stocksError?.message;
-
-  const [search, setSearch] = useState('');
-  const [sortMode, setSortMode] = useState('default');
-  const [viewMode, setViewMode] = useState('grid');
-
-  const [filterSector, setFilterSector] = useState('');
-  const [filterStatus, setFilterStatus] = useState('');
-  const [filterYield, setFilterYield] = useState('');
-  const [filterCap, setFilterCap] = useState('');
-
-  const handleToggleWatch = async (symbol, isWatched) => {
+  const handleToggle = async (symbol, isWatched) => {
     try {
-      if (isWatched) {
-        await removeFromWatchlist(symbol);
-        setWatchlist(prev => prev.filter(s => s !== symbol));
-      } else {
-        await addToWatchlist(symbol);
-        setWatchlist(prev => [...prev, symbol]);
-      }
-    } catch (err) {
-      alert('Failed to update watchlist');
-    }
+      if (isWatched) { await removeFromWatchlist(symbol); setWatchlist(p => p.filter(s => s !== symbol)); }
+      else           { await addToWatchlist(symbol);      setWatchlist(p => [...p, symbol]); }
+    } catch { /* silent */ }
   };
 
-  const getStatus = (company) => {
-    const raw = company.status;
-    if (typeof raw === 'object' && raw !== null) return raw.status?.toLowerCase() ?? 'doubtful';
-    if (typeof raw === 'string') {
-      const s = raw.toLowerCase();
-      if (s === 'compliant') return 'halal';
-      return s;
-    }
-    return 'doubtful';
-  };
+  const uniqueSectors = useMemo(
+    () => [...new Set(actualStocks.map(s => s.sector).filter(Boolean))].sort(),
+    [actualStocks]
+  );
 
-  // Normalize sector display: 'Ict' → 'ICT', 'Oil And Gas' → 'Oil & Gas'
-  const normalizeSector = (s) => {
-    if (!s) return s;
-    const map = { 'Ict': 'ICT', 'Oil And Gas': 'Oil & Gas', 'Construction/Real Estate': 'Real Estate' };
-    return map[s] || s;
-  };
+  const counts = useMemo(() => ({
+    halal:    actualStocks.filter(s => getStatus(s) === 'halal').length,
+    nonHalal: actualStocks.filter(s => getStatus(s) === 'non-halal').length,
+    doubtful: actualStocks.filter(s => !['halal', 'non-halal'].includes(getStatus(s))).length,
+  }), [actualStocks]);
 
-  const uniqueSectors = [...new Set(stocks.map(s => s.sector).filter(Boolean))].sort();
-  const sectorCounts = uniqueSectors.reduce((acc, sec) => {
-    acc[sec] = stocks.filter(s => s.sector === sec).length;
-    return acc;
-  }, {});
+  const filtered = useMemo(() => {
+    let list = actualStocks.filter(s => {
+      const q = search.toLowerCase();
+      if (q && !s.symbol?.toLowerCase().includes(q) && !s.name?.toLowerCase().includes(q)) return false;
+      if (statusF !== 'all' && getStatus(s) !== statusF) return false;
+      if (sectorF !== 'all' && s.sector !== sectorF)      return false;
+      return true;
+    });
+    if (sortBy === 'gainers')  list = [...list].sort((a, b) => (b.price_change_pct || 0) - (a.price_change_pct || 0));
+    if (sortBy === 'losers')   list = [...list].sort((a, b) => (a.price_change_pct || 0) - (b.price_change_pct || 0));
+    if (sortBy === 'cap_high') list = [...list].sort((a, b) => (b.market_cap || 0) - (a.market_cap || 0));
+    if (sortBy === 'pe_low')   list = [...list].sort((a, b) => (a.pe_ratio > 0 ? a.pe_ratio : 999) - (b.pe_ratio > 0 ? b.pe_ratio : 999));
+    return list;
+  }, [actualStocks, search, statusF, sectorF, sortBy]);
 
-  // Market stats
-  const totalMcap = stocks.reduce((sum, s) => sum + (s.market_cap || 0), 0);
-  const withChangePct = stocks.filter(s => (s.price_change_pct ?? 0) !== 0);
-  const topGainer = withChangePct.length ? [...withChangePct].sort((a,b) => (b.price_change_pct||0)-(a.price_change_pct||0))[0] : null;
-  const topLoser  = withChangePct.length ? [...withChangePct].sort((a,b) => (a.price_change_pct||0)-(b.price_change_pct||0))[0] : null;
+  const hasFilters = search || statusF !== 'all' || sectorF !== 'all';
+  const clearAll   = () => { setSearch(''); setStatusF('all'); setSectorF('all'); setSortBy('default'); };
 
-  const hasActiveFilters = filterSector || filterStatus || filterYield || filterCap;
-  const clearAllFilters = () => { setFilterSector(''); setFilterStatus(''); setFilterYield(''); setFilterCap(''); setSearch(''); };
-
-  const filtered = stocks.filter(s => {
-    const nameMatch = s.name?.toLowerCase()?.includes(search.toLowerCase()) || s.symbol?.toLowerCase()?.includes(search.toLowerCase());
-    
-    let sectorMatch = true;
-    if (filterSector) sectorMatch = s.sector === filterSector;
-    
-    let statusMatch = true;
-    if (filterStatus) statusMatch = getStatus(s) === filterStatus;
-    
-    let yieldMatch = true;
-    if (filterYield === 'positive') yieldMatch = (s.div_yield > 0);
-
-    let capMatch = true;
-    if (filterCap === 'large') capMatch = s.market_cap >= 1000000000000;
-    if (filterCap === 'mid') capMatch = s.market_cap >= 100000000000 && s.market_cap < 1000000000000;
-    if (filterCap === 'small') capMatch = s.market_cap >= 10000000000 && s.market_cap < 100000000000;
-    if (filterCap === 'micro') capMatch = s.market_cap < 10000000000 && s.market_cap > 0;
-
-    return nameMatch && sectorMatch && statusMatch && yieldMatch && capMatch;
-  }).sort((a, b) => {
-    if (sortMode === 'gainers') return (b.price_change_pct || 0) - (a.price_change_pct || 0);
-    if (sortMode === 'losers') return (a.price_change_pct || 0) - (b.price_change_pct || 0);
-    if (sortMode === 'yield') return (b.div_yield || 0) - (a.div_yield || 0);
-    if (sortMode === 'pe_lowest') return (a.pe_ratio > 0 ? a.pe_ratio : 999999) - (b.pe_ratio > 0 ? b.pe_ratio : 999999);
-    if (sortMode === 'cap_highest') return (b.market_cap || 0) - (a.market_cap || 0);
-    
-    const upsideA = a.analysts_target && a.latest_price ? ((a.analysts_target - a.latest_price) / a.latest_price) : -999;
-    const upsideB = b.analysts_target && b.latest_price ? ((b.analysts_target - b.latest_price) / b.latest_price) : -999;
-    if (sortMode === 'upside') return upsideB - upsideA;
-    
-    return 0;
+  const selectStyle = (active) => ({
+    padding: '9px 12px', borderRadius: '10px', outline: 'none', cursor: 'pointer',
+    fontSize: '0.84rem', fontWeight: 600, color: 'var(--text-dark)', fontFamily: 'inherit',
+    border: active ? '1.5px solid var(--primary)' : '1.5px solid var(--border)',
+    background: active ? 'var(--primary-50)' : 'var(--bg-section)',
   });
 
-  // Derive live market stats
-  const halalCount  = stocks.filter(s => getStatus(s) === 'halal').length;
-  const nonHalalCount = stocks.filter(s => getStatus(s) === 'non-halal').length;
-  const doubtfulCount = stocks.filter(s => !['halal','non-halal'].includes(getStatus(s))).length;
-
   return (
-    <div className="animate-fade-in stagger-1" style={{ borderRadius:'24px', boxShadow:'var(--shadow-sm)', border:'1px solid var(--border)', overflow: 'hidden' }}>
-      
-      {/* Market Header Banner */}
-      <div style={{ background: 'linear-gradient(135deg, #0D1B2A 0%, #0F5257 60%, #0B6B71 100%)', padding: '28px 32px', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: '-60px', right: '-30px', width: '220px', height: '220px', background: 'rgba(255,255,255,0.03)', borderRadius: '50%', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: '-80px', left: '20%', width: '180px', height: '180px', background: 'rgba(255,255,255,0.02)', borderRadius: '50%', pointerEvents: 'none' }} />
-        
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px', marginBottom: stocks.length > 0 ? '24px' : '0' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <div style={{ width: '48px', height: '48px', background: 'rgba(255,255,255,0.12)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.15)' }}>
-              <BarChart2 size={24} color="white" />
-            </div>
-            <div>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: 900, color: 'white', letterSpacing: '-0.5px' }}>Market Screener</h2>
-              <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.88rem', marginTop: '2px' }}>Nigerian Exchange</p>
-            </div>
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
+
+      {/* ── Header card ─────────────────────────────────────── */}
+      <div style={{
+        background: 'white', padding: '22px 24px 0',
+        borderRadius: '20px 20px 0 0', border: '1px solid var(--border)', borderBottom: 'none',
+      }}>
+        {/* Title + summary pills */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '18px', flexWrap: 'wrap', gap: '12px' }}>
+          <div>
+            <h2 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-dark)', letterSpacing: '-0.3px', margin: 0 }}>
+              Market Screener
+            </h2>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '3px' }}>
+              Nigerian Exchange · {actualStocks.length} companies
+            </p>
           </div>
-          
-          {stocks.length > 0 && (
-            <div style={{ display: 'flex', gap: '10px' }}>
+
+          {actualStocks.length > 0 && (
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
               {[
-                { label: 'Halal', value: halalCount, color: '#22C55E', bg: 'rgba(34,197,94,0.15)', border: 'rgba(34,197,94,0.3)' },
-                { label: 'Doubtful', value: doubtfulCount, color: '#F59E0B', bg: 'rgba(245,158,11,0.15)', border: 'rgba(245,158,11,0.3)' },
-                { label: 'Non-Halal', value: nonHalalCount, color: '#EF4444', bg: 'rgba(239,68,68,0.15)', border: 'rgba(239,68,68,0.3)' },
-              ].map(stat => (
-                <div key={stat.label} style={{ padding: '8px 14px', background: stat.bg, border: `1px solid ${stat.border}`, borderRadius: '12px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '1.2rem', fontWeight: 900, color: stat.color, lineHeight: 1 }}>{stat.value}</div>
-                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.5px', marginTop: '3px' }}>{stat.label}</div>
-                </div>
+                { key: 'halal',     label: 'Halal',     count: counts.halal,    cls: 'status-halal' },
+                { key: 'doubtful',  label: 'Doubtful',  count: counts.doubtful, cls: 'status-doubtful' },
+                { key: 'non-halal', label: 'Non-Halal', count: counts.nonHalal, cls: 'status-non-halal' },
+              ].map(({ key, label, count, cls }) => (
+                <button
+                  key={key}
+                  onClick={() => setStatusF(prev => prev === key ? 'all' : key)}
+                  className={cls}
+                  style={{
+                    border: 'none', cursor: 'pointer', borderRadius: '20px',
+                    padding: '5px 13px', fontWeight: 700, fontSize: '0.77rem',
+                    opacity: statusF !== 'all' && statusF !== key ? 0.35 : 1,
+                    transition: 'opacity 0.2s',
+                    outline: statusF === key ? '2px solid currentColor' : 'none',
+                    outlineOffset: '2px',
+                  }}
+                >
+                  {count} {label}
+                </button>
               ))}
             </div>
           )}
         </div>
 
-        {/* Integrated Filter Toolbar */}
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', position: 'relative', zIndex: 10 }}>
+        {/* Filter bar */}
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', paddingBottom: '1px' }}>
           {/* Search */}
-          <div style={{ position: 'relative', flex: '1 1 220px', maxWidth: '280px' }}>
-            <Search size={14} color="rgba(255,255,255,0.5)" style={{ position: 'absolute', left: '14px', top: '11px' }}/>
+          <div style={{ position: 'relative', flex: '1 1 220px', maxWidth: '320px' }}>
+            <Search size={14} color="var(--text-light)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Search symbol or company..."
+              placeholder="Search by symbol or name…"
               style={{
-                padding: '10px 14px 10px 36px',
-                borderRadius: '12px',
-                border: '1.5px solid rgba(255,255,255,0.15)',
-                background: 'rgba(255,255,255,0.1)',
-                fontSize: '0.88rem',
-                color: 'white',
-                outline: 'none',
-                width: '100%',
-                fontFamily: 'inherit',
-                backdropFilter: 'blur(4px)',
+                width: '100%', paddingLeft: '34px', paddingRight: search ? '32px' : '12px',
+                paddingTop: '9px', paddingBottom: '9px',
+                borderRadius: '10px', border: '1.5px solid var(--border)',
+                background: 'var(--bg-section)', fontSize: '0.84rem',
+                color: 'var(--text-dark)', outline: 'none', fontFamily: 'inherit',
+                boxSizing: 'border-box', transition: 'border-color 0.2s',
               }}
+              onFocus={e  => e.target.style.borderColor = 'var(--primary)'}
+              onBlur={e   => e.target.style.borderColor = 'var(--border)'}
             />
+            {search && (
+              <button onClick={() => setSearch('')} style={{ position: 'absolute', right: '9px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
+                <X size={13} />
+              </button>
+            )}
           </div>
 
-
-
-          {/* Sector filter */}
-          <select value={filterSector} onChange={e => setFilterSector(e.target.value)} style={{ padding: '10px 14px', borderRadius: '12px', border: filterSector ? '1.5px solid rgba(99,255,200,0.5)' : '1.5px solid rgba(255,255,255,0.15)', background: filterSector ? 'rgba(99,255,200,0.15)' : 'rgba(255,255,255,0.1)', fontSize: '0.88rem', fontWeight: 600, color: 'white', outline: 'none', cursor: 'pointer', backdropFilter: 'blur(4px)' }}>
-            <option value="" style={{ color: '#0D1B2A' }}>All Sectors</option>
-            {uniqueSectors.map(sector => (
-              <option key={sector} value={sector} style={{ color: '#0D1B2A' }}>{normalizeSector(sector)} ({sectorCounts[sector]})</option>
-            ))}
+          <select value={statusF} onChange={e => setStatusF(e.target.value)} style={selectStyle(statusF !== 'all')}>
+            <option value="all">All Status</option>
+            <option value="halal">Halal</option>
+            <option value="doubtful">Doubtful</option>
+            <option value="non-halal">Non-Halal</option>
           </select>
 
-          {/* Status filter */}
-          <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={{ padding: '10px 14px', borderRadius: '12px', border: '1.5px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.1)', fontSize: '0.88rem', fontWeight: 600, color: 'white', outline: 'none', cursor: 'pointer', backdropFilter: 'blur(4px)' }}>
-            <option value="" style={{ color: '#0D1B2A' }}>Any Status</option>
-            <option value="halal" style={{ color: '#0D1B2A' }}>Halal</option>
-            <option value="non-halal" style={{ color: '#0D1B2A' }}>Non-Halal</option>
-            <option value="doubtful" style={{ color: '#0D1B2A' }}>Doubtful</option>
+          <select value={sectorF} onChange={e => setSectorF(e.target.value)} style={selectStyle(sectorF !== 'all')}>
+            <option value="all">All Sectors</option>
+            {uniqueSectors.map(s => <option key={s} value={s}>{normSector(s)}</option>)}
           </select>
 
-          {/* Dividend filter */}
-          <select value={filterYield} onChange={e => setFilterYield(e.target.value)} style={{ padding: '10px 14px', borderRadius: '12px', border: '1.5px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.1)', fontSize: '0.88rem', fontWeight: 600, color: 'white', outline: 'none', cursor: 'pointer', backdropFilter: 'blur(4px)' }}>
-            <option value="" style={{ color: '#0D1B2A' }}>Any Dividend</option>
-            <option value="positive" style={{ color: '#0D1B2A' }}>Pays Dividends (&gt;0%)</option>
+          <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={selectStyle(false)}>
+            <option value="default">Default</option>
+            <option value="gainers">Top Gainers</option>
+            <option value="losers">Top Losers</option>
+            <option value="cap_high">Highest Mkt Cap</option>
+            <option value="pe_low">Lowest P/E</option>
           </select>
 
-          {/* Cap filter */}
-          <select value={filterCap} onChange={e => setFilterCap(e.target.value)} style={{ padding: '10px 14px', borderRadius: '12px', border: '1.5px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.1)', fontSize: '0.88rem', fontWeight: 600, color: 'white', outline: 'none', cursor: 'pointer', backdropFilter: 'blur(4px)' }}>
-            <option value="" style={{ color: '#0D1B2A' }}>Any Size</option>
-            <option value="large" style={{ color: '#0D1B2A' }}>Large Cap (&gt;₦1T)</option>
-            <option value="mid" style={{ color: '#0D1B2A' }}>Mid Cap (₦100B-₦1T)</option>
-            <option value="small" style={{ color: '#0D1B2A' }}>Small Cap (₦10B-₦100B)</option>
-            <option value="micro" style={{ color: '#0D1B2A' }}>Micro Cap (&lt;₦10B)</option>
-          </select>
-
-          {/* Sort select */}
-          <select value={sortMode} onChange={e => setSortMode(e.target.value)} style={{ padding: '10px 14px', borderRadius: '12px', border: '1.5px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.1)', fontSize: '0.88rem', fontWeight: 600, color: 'white', outline: 'none', cursor: 'pointer', backdropFilter: 'blur(4px)' }}>
-            <option value="default" style={{ color: '#0D1B2A' }}>Sort: Default</option>
-            <option value="gainers" style={{ color: '#0D1B2A' }}>Sort: Top Gainers</option>
-            <option value="losers" style={{ color: '#0D1B2A' }}>Sort: Top Losers</option>
-            <option value="yield" style={{ color: '#0D1B2A' }}>Sort: Highest Yield</option>
-            <option value="pe_lowest" style={{ color: '#0D1B2A' }}>Sort: Lowest P/E</option>
-            <option value="cap_highest" style={{ color: '#0D1B2A' }}>Sort: Highest Market Cap</option>
-            <option value="upside" style={{ color: '#0D1B2A' }}>Sort: Analyst Upside</option>
-          </select>
-
-          {/* View mode toggle */}
-          <div style={{ display: 'flex', background: 'rgba(255,255,255,0.12)', borderRadius: '10px', padding: '3px', gap: '2px', border: '1px solid rgba(255,255,255,0.15)', marginLeft: 'auto' }}>
-            <button onClick={() => setViewMode('grid')} style={{ padding: '7px 12px', borderRadius: '8px', border: 'none', background: viewMode === 'grid' ? 'white' : 'transparent', color: viewMode === 'grid' ? 'var(--primary)' : 'rgba(255,255,255,0.7)', cursor: 'pointer', display: 'flex', alignItems: 'center', transition: 'all 0.2s' }}>
-              <LayoutGrid size={15} />
+          {hasFilters && (
+            <button
+              onClick={clearAll}
+              style={{
+                padding: '9px 12px', borderRadius: '10px', border: '1.5px solid var(--border)',
+                background: 'white', fontSize: '0.82rem', fontWeight: 700,
+                color: 'var(--text-muted)', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: '5px',
+              }}
+            >
+              <X size={12} /> Clear
             </button>
-            <button onClick={() => setViewMode('list')} style={{ padding: '7px 12px', borderRadius: '8px', border: 'none', background: viewMode === 'list' ? 'white' : 'transparent', color: viewMode === 'list' ? 'var(--primary)' : 'rgba(255,255,255,0.7)', cursor: 'pointer', display: 'flex', alignItems: 'center', transition: 'all 0.2s' }}>
-              <ListIcon size={15} />
-            </button>
-          </div>
-        </div>
-      </div>
+          )}
 
-      {/* Stats + filter strip */}
-      <div style={{ padding: '12px 32px', background: 'var(--bg-section)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-        {/* Live market stat pills */}
-        {totalMcap > 0 && (
-          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', background: 'white', padding: '4px 12px', borderRadius: '20px', border: '1px solid var(--border)', whiteSpace: 'nowrap' }}>
-            Total Listed: ₦{(totalMcap / 1e12).toFixed(2)}T
-          </span>
-        )}
-        {topGainer && (
-          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--halal)', background: 'rgba(34,197,94,0.08)', padding: '4px 12px', borderRadius: '20px', border: '1px solid rgba(34,197,94,0.2)', whiteSpace: 'nowrap' }}>
-            ▲ {topGainer.symbol} +{(topGainer.price_change_pct||0).toFixed(2)}%
-          </span>
-        )}
-        {topLoser && (
-          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--non-halal)', background: 'rgba(239,68,68,0.08)', padding: '4px 12px', borderRadius: '20px', border: '1px solid rgba(239,68,68,0.2)', whiteSpace: 'nowrap' }}>
-            ▼ {topLoser.symbol} {(topLoser.price_change_pct||0).toFixed(2)}%
-          </span>
-        )}
-
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          {/* Active filter chips */}
-          {filterSector && (
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 700, color: 'var(--primary)', background: 'rgba(15,82,87,0.08)', padding: '4px 10px', borderRadius: '20px', border: '1px solid rgba(15,82,87,0.2)' }}>
-              {normalizeSector(filterSector)}
-              <button onClick={() => setFilterSector('')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, lineHeight: 1, color: 'var(--primary)', fontWeight: 900, fontSize: '1rem' }}>×</button>
-            </span>
-          )}
-          {filterStatus && (
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 700, color: 'var(--primary)', background: 'rgba(15,82,87,0.08)', padding: '4px 10px', borderRadius: '20px', border: '1px solid rgba(15,82,87,0.2)' }}>
-              {filterStatus.charAt(0).toUpperCase() + filterStatus.slice(1)}
-              <button onClick={() => setFilterStatus('')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, lineHeight: 1, color: 'var(--primary)', fontWeight: 900, fontSize: '1rem' }}>×</button>
-            </span>
-          )}
-          {filterYield && (
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 700, color: 'var(--primary)', background: 'rgba(15,82,87,0.08)', padding: '4px 10px', borderRadius: '20px', border: '1px solid rgba(15,82,87,0.2)' }}>
-              Pays Dividends
-              <button onClick={() => setFilterYield('')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, lineHeight: 1, color: 'var(--primary)', fontWeight: 900, fontSize: '1rem' }}>×</button>
-            </span>
-          )}
-          {filterCap && (
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 700, color: 'var(--primary)', background: 'rgba(15,82,87,0.08)', padding: '4px 10px', borderRadius: '20px', border: '1px solid rgba(15,82,87,0.2)' }}>
-              {filterCap.charAt(0).toUpperCase() + filterCap.slice(1)} Cap
-              <button onClick={() => setFilterCap('')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, lineHeight: 1, color: 'var(--primary)', fontWeight: 900, fontSize: '1rem' }}>×</button>
-            </span>
-          )}
-          {hasActiveFilters && (
-            <button onClick={clearAllFilters} style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', background: 'none', border: '1px solid var(--border)', borderRadius: '20px', padding: '4px 10px', cursor: 'pointer' }}>Clear all</button>
-          )}
-          <span style={{ color: 'var(--text-light)', fontSize: '0.82rem', fontWeight: 700, background: 'white', padding: '4px 12px', borderRadius: '20px', border: '1px solid var(--border)', whiteSpace: 'nowrap' }}>
-            {filtered.length} {filtered.length === 1 ? 'stock' : 'stocks'}
+          <span style={{ marginLeft: 'auto', fontSize: '0.81rem', fontWeight: 700, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+            {filtered.length} result{filtered.length !== 1 ? 's' : ''}
           </span>
         </div>
       </div>
 
-      <div style={{ background: 'white', padding: '24px 32px 32px' }}>
-
-      {loading ? (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '100px 0', gap: '16px' }}>
-          <div className="spinner" />
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading market data...</p>
-        </div>
-      ) : error ? (
-        <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-muted)' }}>
-          <BarChart2 size={48} strokeWidth={1} style={{ margin: '0 auto 20px', color: 'var(--non-halal)' }} />
-          <h3 style={{ marginBottom: '8px', color: 'var(--non-halal)' }}>Could not load market data</h3>
-          <p style={{ marginBottom: '24px' }}>{error}</p>
-          <button onClick={loadData} className="btn-primary">Try Again</button>
-        </div>
-      ) : filtered.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-muted)' }}>
-          <BarChart2 size={48} strokeWidth={1} style={{ margin: '0 auto 20px' }} />
-          <h3 style={{ marginBottom: '8px' }}>No stocks found</h3>
-          <p>Try adjusting your search or filter.</p>
-        </div>
-      ) : (
-        <>
-          {viewMode === 'grid' ? (
-            <div className="custom-scroll-container">
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+      {/* ── Table ─────────────────────────────────────────────── */}
+      <div style={{
+        background: 'white', border: '1px solid var(--border)',
+        borderTop: 'none', borderRadius: '0 0 20px 20px', overflow: 'hidden',
+      }}>
+        {isLoading ? (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '80px 0', gap: '14px' }}>
+            <div className="spinner" />
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.87rem' }}>Loading market data…</p>
+          </div>
+        ) : error ? (
+          <div style={{ textAlign: 'center', padding: '80px 24px', color: 'var(--text-muted)' }}>
+            <BarChart2 size={42} strokeWidth={1} style={{ margin: '0 auto 14px', color: 'var(--non-halal)' }} />
+            <h3 style={{ marginBottom: '8px', color: 'var(--non-halal)' }}>Could not load market data</h3>
+            <p style={{ marginBottom: '20px', fontSize: '0.87rem' }}>{error?.message || String(error)}</p>
+            <button onClick={() => refetch()} className="btn-primary" style={{ padding: '10px 24px' }}>Try Again</button>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '80px 24px', color: 'var(--text-muted)' }}>
+            <BarChart2 size={42} strokeWidth={1} style={{ margin: '0 auto 14px' }} />
+            <h3 style={{ marginBottom: '8px' }}>No stocks found</h3>
+            <p style={{ fontSize: '0.87rem' }}>Try adjusting your search or filters.</p>
+          </div>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'auto' }}>
+              <thead>
+                <tr>
+                  <TH>#</TH>
+                  <TH>Company</TH>
+                  <TH>Sector</TH>
+                  <TH>Status</TH>
+                  <TH right>Price</TH>
+                  <TH right>Change</TH>
+                  <TH right>Mkt Cap</TH>
+                  <TH right>P/E</TH>
+                  <TH right>Watch</TH>
+                </tr>
+              </thead>
+              <tbody>
                 {filtered.map((stock, i) => (
-                  <div key={stock.symbol} className="roll-in-anim" style={{ animationDelay: `${(i % 15) * 0.05}s` }}>
-                    <StockCard 
-                      company={stock} 
-                      isWatched={watchlist.includes(stock.symbol)} 
-                      onToggleWatch={handleToggleWatch} 
-                    />
-                  </div>
+                  <StockRow
+                    key={stock.symbol}
+                    stock={stock}
+                    idx={i}
+                    isWatched={watchlist.includes(stock.symbol)}
+                    onToggle={handleToggle}
+                  />
                 ))}
-              </div>
-            </div>
-          ) : (
-            <div className="custom-scroll-container" style={{ paddingRight: 0 }}>
-              <div style={{ overflowX: 'auto', borderRadius: '16px', border: '1px solid var(--border)' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                  <thead style={{ background: 'var(--bg-section)', position: 'sticky', top: 0, zIndex: 10 }}>
-                    <tr>
-                      <th style={{ padding: '16px', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 700 }}>Symbol</th>
-                      <th style={{ padding: '16px', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 700 }}>Company</th>
-                      <th style={{ padding: '16px', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 700 }}>Sector</th>
-                      <th style={{ padding: '16px', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 700 }}>Status</th>
-                      <th style={{ padding: '16px', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 700 }}>Yield</th>
-                      <th style={{ padding: '16px', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 700, textAlign: 'right' }}>P/E</th>
-                      <th style={{ padding: '16px', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 700, textAlign: 'right' }}>Mkt Cap</th>
-                      <th style={{ padding: '16px', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 700, textAlign: 'right' }}>Price (₦)</th>
-                      <th style={{ padding: '16px', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 700, textAlign: 'right' }}>Change</th>
-                      <th style={{ padding: '16px' }}></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filtered.map((stock, i) => (
-                      <StockListRow
-                        key={stock.symbol}
-                        stock={stock}
-                        index={i}
-                        isWatched={watchlist.includes(stock.symbol)}
-                        onToggleWatch={handleToggleWatch}
-                      />
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-        </>
-      )}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
+
     </div>
   );
 }

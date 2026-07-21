@@ -86,12 +86,15 @@ const TopNavbar = () => {
     <>
       {isDashboard ? null : (
       <nav className="top-navbar" style={{ boxShadow: scrolled ? '0 2px 16px rgba(0,0,0,0.07)' : 'none' }}>
-        <Link to="/" className="nav-logo" style={{ textDecoration: 'none' }}>
+        <Link to="/" className="nav-logo" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}>
           <img
             src="/logo.svg"
-            alt="Irshad"
+            alt="Irshad Logo"
             style={{ height: '46px', width: 'auto', objectFit: 'contain' }}
           />
+          <span style={{ fontWeight: 800, fontSize: '1.3rem', color: 'var(--text-dark)', letterSpacing: '-0.5px' }}>
+            Irshad
+          </span>
         </Link>
 
         {/* Desktop links */}
@@ -951,9 +954,6 @@ function App() {
                   <Route path="/about" element={<AboutPage />} />
                   <Route path="/shariah" element={<ShariahPage />} />
                   <Route path="/resources" element={<ResourcesPage />} />
-                  <Route path="/market" element={
-                    <DashboardLayout><MarketPage /></DashboardLayout>
-                  } />
                   <Route path="/market/:symbol" element={
                     <DashboardLayout><StockDetails /></DashboardLayout>
                   } />

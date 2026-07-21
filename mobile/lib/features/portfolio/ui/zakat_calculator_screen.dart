@@ -91,29 +91,29 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
     final stocks = stockProvider.ngxStocks;
 
     return Scaffold(
-      backgroundColor: AppTheme.bg,
+      backgroundColor: context.bg,
       appBar: widget.isTab ? null : AppBar(
-        title: const Text('Zakat Calculator', style: TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5)),
-        backgroundColor: AppTheme.bg,
+        title: Text('Zakat Calculator', style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
+        backgroundColor: context.bg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppTheme.textDark, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: context.textDark, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 100),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Calculate Your Obligations',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppTheme.textDark),
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: context.textDark),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Select a stock to automatically apply its specific purification factor based on our latest algorithmic screening.',
-              style: TextStyle(color: AppTheme.textMuted, fontSize: 14, height: 1.5),
+              style: TextStyle(color: context.textMuted, fontSize: 14, height: 1.5),
             ),
             const SizedBox(height: 32),
             
@@ -121,7 +121,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
               Container(
                 margin: const EdgeInsets.only(bottom: 24),
                 decoration: BoxDecoration(
-                  color: AppTheme.primary,
+                  color: context.primary,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Material(
@@ -145,7 +145,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                       padding: const EdgeInsets.all(20),
                       child: Row(
                         children: [
-                          Icon(_isPortfolioMode ? Icons.check_circle_rounded : Icons.auto_awesome_rounded, color: Colors.white, size: 28),
+                          Icon(_isPortfolioMode ? Icons.check_circle_rounded : Icons.auto_awesome_rounded, color: context.bgAlt, size: 28),
                           const SizedBox(width: 16),
                           Expanded(
                             child: Column(
@@ -153,7 +153,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                               children: [
                                 Text(
                                   _isPortfolioMode ? 'Portfolio Zakat Applied' : 'Auto-calculate Portfolio',
-                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 16),
+                                  style: TextStyle(color: context.bgAlt, fontWeight: FontWeight.w800, fontSize: 16),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
@@ -174,15 +174,15 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
 
             if (!_isPortfolioMode) ...[
               // Stock Selection
-              const Text('SELECT STOCK', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppTheme.textMuted, letterSpacing: 1.2)),
+              Text('SELECT STOCK', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: context.textMuted, letterSpacing: 1.2)),
               const SizedBox(height: 8),
               DropdownButtonFormField<Map<String, dynamic>>(
                 decoration: InputDecoration(
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: context.bgAlt,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppTheme.divider)),
-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppTheme.divider)),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: context.divider)),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: context.divider)),
                 ),
                 isExpanded: true,
                 hint: const Text('Choose a company...'),
@@ -209,38 +209,38 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
               const SizedBox(height: 24),
               
               // Shares Input
-              const Text('NUMBER OF SHARES', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppTheme.textMuted, letterSpacing: 1.2)),
+              Text('NUMBER OF SHARES', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: context.textMuted, letterSpacing: 1.2)),
               const SizedBox(height: 8),
               TextField(
                 controller: _sharesController,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: context.bgAlt,
                   hintText: 'e.g. 1000',
-                  prefixIcon: const Icon(Icons.pie_chart_outline_rounded, color: AppTheme.textMuted),
+                  prefixIcon: Icon(Icons.pie_chart_outline_rounded, color: context.textMuted),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppTheme.divider)),
-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppTheme.divider)),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: context.divider)),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: context.divider)),
                 ),
               ),
               
               const SizedBox(height: 24),
               
               // Price Input
-              const Text('CURRENT PRICE (₦)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppTheme.textMuted, letterSpacing: 1.2)),
+              Text('CURRENT PRICE (₦)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: context.textMuted, letterSpacing: 1.2)),
               const SizedBox(height: 8),
               TextField(
                 controller: _priceController,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 decoration: InputDecoration(
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: context.bgAlt,
                   hintText: '0.00',
-                  prefixIcon: const Icon(Icons.payments_outlined, color: AppTheme.textMuted),
+                  prefixIcon: Icon(Icons.payments_outlined, color: context.textMuted),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppTheme.divider)),
-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppTheme.divider)),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: context.divider)),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: context.divider)),
                 ),
               ),
             ],
@@ -251,7 +251,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppTheme.primary,
+                color: context.primary,
                 borderRadius: BorderRadius.circular(24),
               ),
               child: Column(
@@ -260,7 +260,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                   const SizedBox(height: 8),
                   Text(
                     '₦ ${_zakatOwed.toStringAsFixed(2)}',
-                    style: const TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.w900, letterSpacing: -1),
+                    style: TextStyle(color: context.bgAlt, fontSize: 36, fontWeight: FontWeight.w900, letterSpacing: -1),
                   ),
                   const SizedBox(height: 16),
                   Container(
@@ -275,7 +275,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                         : _selectedStock != null 
                           ? 'Includes standard 2.5% + purification for ${_selectedStock!['symbol']}'
                           : 'Select a stock to see breakdown',
-                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                      style: TextStyle(color: context.bgAlt, fontSize: 12),
                       textAlign: TextAlign.center,
                     ),
                   ),

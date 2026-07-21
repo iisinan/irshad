@@ -22,7 +22,7 @@ class StockProvider extends ChangeNotifier {
   Future<void> _loadCachedData() async {
     try {
       final box = await Hive.openBox(_boxName);
-      final cachedStr = box.get('ngx_stocks_v4');
+      final cachedStr = box.get('ngx_stocks_v7');
       if (cachedStr != null) {
         final Map<String, dynamic> cacheWrapper = jsonDecode(cachedStr);
         final int expiry = cacheWrapper['expiry'] ?? 0;
@@ -40,7 +40,6 @@ class StockProvider extends ChangeNotifier {
     } catch (e) {
       // ignore
     }
-    fetchNgxStocks();
   }
 
   int _getNext3AM() {
@@ -59,8 +58,14 @@ class StockProvider extends ChangeNotifier {
 
     try {
       final stocks = await _repository.getNgxStocks();
-      if (stocks.isNotEmpty) {
-        _ngxStocks = stocks;
+      final validStocks = stocks.where((s) {
+        final priceStr = s['latest_price']?.toString() ?? '0';
+        final price = double.tryParse(priceStr) ?? 0.0;
+        return price > 0.0;
+      }).toList();
+
+      if (validStocks.isNotEmpty) {
+        _ngxStocks = validStocks;
         // Cache it until next 3 AM
         try {
           final box = await Hive.openBox(_boxName);
@@ -68,7 +73,7 @@ class StockProvider extends ChangeNotifier {
             'data': _ngxStocks,
             'expiry': _getNext3AM(),
           };
-          await box.put('ngx_stocks_v4', jsonEncode(cacheWrapper));
+          await box.put('ngx_stocks_v7', jsonEncode(cacheWrapper));
         } catch (e) {
           // ignore
         }
@@ -86,7 +91,7 @@ class StockProvider extends ChangeNotifier {
   Future<Map<String, dynamic>?> getStockDetails(String symbol) async {
     try {
       final box = await Hive.openBox(_boxName);
-      final cachedStr = box.get('details_v4_$symbol');
+      final cachedStr = box.get('details_v6_$symbol');
       if (cachedStr != null) {
         final Map<String, dynamic> cacheWrapper = jsonDecode(cachedStr);
         final int expiry = cacheWrapper['expiry'] ?? 0;
@@ -110,7 +115,7 @@ class StockProvider extends ChangeNotifier {
           'data': data,
           'expiry': _getNext3AM(),
         };
-        await box.put('details_v4_$symbol', jsonEncode(cacheWrapper));
+        await box.put('details_v6_$symbol', jsonEncode(cacheWrapper));
       } catch (e) {
         // ignore
       }

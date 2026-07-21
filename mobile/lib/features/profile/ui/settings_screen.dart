@@ -3,6 +3,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/api/api_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:provider/provider.dart';
+import '../../../core/providers/app_state_provider.dart';
 
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 class SettingsScreen extends StatefulWidget {
@@ -41,7 +43,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
 
 final ApiService _apiService = ApiService();
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
 
   Future<void> _launchUrl(String urlString) async {
     final Uri url = Uri.parse(urlString);
@@ -55,16 +57,16 @@ final ApiService _apiService = ApiService();
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Account?'),
-        content: const Text('Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently removed.', style: TextStyle(color: AppTheme.textMuted)),
+        content: Text('Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently removed.', style: TextStyle(color: context.textMuted)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: AppTheme.textDark)),
+            child: Text('Cancel', style: TextStyle(color: context.textDark)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.haram,
+              backgroundColor: context.haram,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
               elevation: 0,
@@ -102,13 +104,13 @@ final ApiService _apiService = ApiService();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.bg,
+      backgroundColor: context.bg,
       appBar: AppBar(
-        title: const Text('Settings', style: TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5)),
-        backgroundColor: AppTheme.bg,
+        title: Text('Settings', style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
+        backgroundColor: context.bg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppTheme.textDark, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: context.textDark, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -121,6 +123,7 @@ final ApiService _apiService = ApiService();
             _buildSectionLabel('PREFERENCES'),
             const SizedBox(height: 8),
             _buildGroupedCard([
+              _buildThemeTile(),
               _buildLanguageTile(),
               _buildSwitchTile(
                 icon: Icons.notifications_active_rounded,
@@ -176,7 +179,7 @@ final ApiService _apiService = ApiService();
             const SizedBox(height: 48),
             TextButton(
               onPressed: _showDeleteAccountDialog,
-              child: const Text('Delete Account', style: TextStyle(color: AppTheme.haram, fontWeight: FontWeight.w800, fontSize: 13)),
+              child: Text('Delete Account', style: TextStyle(color: context.haram, fontWeight: FontWeight.w800, fontSize: 13)),
             ),
             const SizedBox(height: 40),
           ],
@@ -192,7 +195,7 @@ final ApiService _apiService = ApiService();
         alignment: Alignment.centerLeft,
         child: Text(
           title,
-          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppTheme.textMuted, letterSpacing: 1),
+          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: context.textMuted, letterSpacing: 1),
         ),
       ),
     );
@@ -204,16 +207,16 @@ final ApiService _apiService = ApiService();
     for (int i = 0; i < children.length; i++) {
       divided.add(children[i]);
       if (i < children.length - 1) {
-        divided.add(const Divider(color: AppTheme.divider, height: 1, indent: 56));
+        divided.add(Divider(color: context.divider, height: 1, indent: 56));
       }
     }
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.bgAlt,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.divider),
+        border: Border.all(color: context.divider),
       ),
       child: Column(children: divided),
     );
@@ -223,16 +226,16 @@ final ApiService _apiService = ApiService();
     return ListTile(
       leading: Container(
         padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(color: AppTheme.bg, borderRadius: BorderRadius.circular(8)),
-        child: const Icon(Icons.language_rounded, color: AppTheme.textMuted, size: 20),
+        decoration: BoxDecoration(color: context.bg, borderRadius: BorderRadius.circular(8)),
+        child: Icon(Icons.language_rounded, color: context.textMuted, size: 20),
       ),
-      title: const Text('Language', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: AppTheme.textDark)),
+      title: Text('Language', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: context.textDark)),
       trailing: DropdownButton<String>(
         value: _selectedLanguage,
         underline: const SizedBox(),
-        dropdownColor: Colors.white,
-        style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.w800, fontSize: 14),
-        icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppTheme.textMuted),
+        dropdownColor: context.bgAlt,
+        style: TextStyle(color: context.primary, fontWeight: FontWeight.w800, fontSize: 14),
+        icon: Icon(Icons.keyboard_arrow_down_rounded, color: context.textMuted),
         items: _languages.map((l) => DropdownMenuItem(value: l, child: Text(l))).toList(),
         onChanged: (val) {
           if (val != null) {
@@ -252,13 +255,13 @@ final ApiService _apiService = ApiService();
     return SwitchListTile(
       secondary: Container(
         padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(color: AppTheme.bg, borderRadius: BorderRadius.circular(8)),
-        child: Icon(icon, color: AppTheme.textMuted, size: 20),
+        decoration: BoxDecoration(color: context.bg, borderRadius: BorderRadius.circular(8)),
+        child: Icon(icon, color: context.textMuted, size: 20),
       ),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: AppTheme.textDark)),
+      title: Text(title, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: context.textDark)),
       value: value,
       onChanged: onChanged,
-      activeColor: AppTheme.primary,
+      activeColor: context.primary,
       contentPadding: const EdgeInsets.only(left: 16, right: 8),
     );
   }
@@ -272,13 +275,76 @@ final ApiService _apiService = ApiService();
     return ListTile(
       leading: Container(
         padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(color: AppTheme.bg, borderRadius: BorderRadius.circular(8)),
-        child: Icon(icon, color: AppTheme.textMuted, size: 20),
+        decoration: BoxDecoration(color: context.bg, borderRadius: BorderRadius.circular(8)),
+        child: Icon(icon, color: context.textMuted, size: 20),
       ),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: AppTheme.textDark)),
-      subtitle: subtitle != null ? Text(subtitle, style: const TextStyle(fontSize: 12, color: AppTheme.textMuted)) : null,
-      trailing: const Icon(Icons.chevron_right_rounded, size: 20, color: AppTheme.divider),
+      title: Text(title, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: context.textDark)),
+      subtitle: subtitle != null ? Text(subtitle, style: TextStyle(fontSize: 12, color: context.textMuted)) : null,
+      trailing: Icon(Icons.chevron_right_rounded, size: 20, color: context.divider),
       onTap: onTap,
+    );
+  }
+
+  Widget _buildThemeTile() {
+    final themeMode = Provider.of<AppStateProvider>(context).themeMode;
+    String modeText = 'System Default';
+    if (themeMode == ThemeMode.light) modeText = 'Light Mode';
+    if (themeMode == ThemeMode.dark) modeText = 'Dark Mode';
+
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(color: context.bg, borderRadius: BorderRadius.circular(8)),
+        child: Icon(Icons.brightness_medium_rounded, color: context.textMuted, size: 20),
+      ),
+      title: Text('Appearance', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: context.textDark)),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(modeText, style: TextStyle(color: context.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
+          const SizedBox(width: 4),
+          Icon(Icons.keyboard_arrow_down_rounded, color: context.textMuted),
+        ],
+      ),
+      onTap: () {
+        showModalBottomSheet(
+          context: context,
+          backgroundColor: Colors.transparent,
+          builder: (context) => Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: context.bgAlt,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Appearance', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: context.textDark)),
+                const SizedBox(height: 16),
+                _buildThemeOption(ThemeMode.light, 'Light Mode', Icons.light_mode_rounded),
+                _buildThemeOption(ThemeMode.dark, 'Dark Mode', Icons.dark_mode_rounded),
+                _buildThemeOption(ThemeMode.system, 'System Default', Icons.brightness_medium_rounded),
+                const SizedBox(height: 24),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildThemeOption(ThemeMode mode, String label, IconData icon) {
+    final appState = Provider.of<AppStateProvider>(context, listen: false);
+    final isSelected = appState.themeMode == mode;
+    return ListTile(
+      onTap: () {
+        appState.setThemeMode(mode);
+        Navigator.pop(context);
+      },
+      leading: Icon(icon, color: isSelected ? context.primary : context.textMuted),
+      title: Text(label, style: TextStyle(fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500, color: isSelected ? context.primary : context.textDark)),
+      trailing: isSelected ? Icon(Icons.check_circle_rounded, color: context.primary) : null,
     );
   }
 }

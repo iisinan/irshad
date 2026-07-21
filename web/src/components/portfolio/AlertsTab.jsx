@@ -86,7 +86,7 @@ export default function AlertsTab() {
               Set up price alerts for your favorite stocks to be notified immediately when they hit your target price.
             </p>
             <button 
-              onClick={() => navigate('/market')} 
+              onClick={() => navigate('/portfolio#market')} 
               style={{ 
                 display:'inline-flex', alignItems:'center', gap:'8px', padding:'14px 28px', 
                 borderRadius:'14px', background:'var(--gold-grad)', color:'white', border:'none', 

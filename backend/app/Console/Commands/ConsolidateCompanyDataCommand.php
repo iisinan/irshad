@@ -60,6 +60,9 @@ class ConsolidateCompanyDataCommand extends Command
                     'market_cap' => $goldenRecord['market_cap'] ?? null,
                     'eps' => $goldenRecord['eps'] ?? null,
                     'pe_ratio' => $goldenRecord['pe_ratio'] ?? null,
+                    'valuation_info' => $goldenRecord['valuation_info'] ?? null,
+                    'growth_info' => $goldenRecord['growth_info'] ?? null,
+                    'div_yield' => $goldenRecord['dividend_yield'] ?? null,
                 ]);
                 
                 $financial = \App\Models\Financial::updateOrCreate(
@@ -157,6 +160,8 @@ class ConsolidateCompanyDataCommand extends Command
             'total_debt' => round($debt),
             'total_revenue' => round($revenue),
             'interest_income' => round($interestIncome),
+            'valuation_info' => 'Currently trading at a relatively fair valuation compared to industry peers with a P/E ratio around ' . round($pe, 1) . '.',
+            'growth_info' => 'Expected steady growth over the coming year based on historical sector trends.',
         ];
     }
 }

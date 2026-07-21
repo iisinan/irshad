@@ -61,12 +61,12 @@ class _UserSubmissionScreenState extends State<UserSubmissionScreen> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: context.bgAlt,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         titlePadding: const EdgeInsets.only(top: 40),
-        title: const Column(
+        title: Column(
           children: [
-            Icon(Icons.check_circle_rounded, color: AppTheme.primary, size: 64),
+            Icon(Icons.check_circle_rounded, color: context.primary, size: 64),
             SizedBox(height: 24),
             Text(
               'Submission Received', 
@@ -75,10 +75,10 @@ class _UserSubmissionScreenState extends State<UserSubmissionScreen> {
             ),
           ],
         ),
-        content: const Text(
+        content: Text(
           'Thank you for contributing to the IRSHAD community! Our scholars will review this product shortly.',
           textAlign: TextAlign.center,
-          style: TextStyle(color: AppTheme.textMuted, height: 1.5, fontSize: 14),
+          style: TextStyle(color: context.textMuted, height: 1.5, fontSize: 14),
         ),
         actionsPadding: const EdgeInsets.all(24),
         actions: [
@@ -91,7 +91,7 @@ class _UserSubmissionScreenState extends State<UserSubmissionScreen> {
                 Navigator.pop(context); // Go back
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primary,
+                backgroundColor: context.primary,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                 elevation: 0,
@@ -108,7 +108,7 @@ class _UserSubmissionScreenState extends State<UserSubmissionScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: AppTheme.haram,
+        backgroundColor: context.haram,
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -117,13 +117,13 @@ class _UserSubmissionScreenState extends State<UserSubmissionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.bg,
+      backgroundColor: context.bg,
       appBar: AppBar(
-        title: const Text('New Submission', style: TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5)),
-        backgroundColor: AppTheme.bg,
+        title: Text('New Submission', style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
+        backgroundColor: context.bg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppTheme.textDark, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: context.textDark, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -182,7 +182,7 @@ class _UserSubmissionScreenState extends State<UserSubmissionScreen> {
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _submit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primary,
+                    backgroundColor: context.primary,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                     elevation: 0,
@@ -205,23 +205,23 @@ class _UserSubmissionScreenState extends State<UserSubmissionScreen> {
       padding: const EdgeInsets.only(left: 4),
       child: Text(
         title,
-        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppTheme.textMuted, letterSpacing: 1),
+        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: context.textMuted, letterSpacing: 1),
       ),
     );
   }
 
   Widget _buildHeader() {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Missing Product?',
-          style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5),
+          style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5),
         ),
         const SizedBox(height: 12),
         Text(
           'Help the IRSHAD community by submitting this product for scholar verification.',
-          style: TextStyle(color: AppTheme.textMuted, fontSize: 15, height: 1.5, fontWeight: FontWeight.w400),
+          style: TextStyle(color: context.textMuted, fontSize: 15, height: 1.5, fontWeight: FontWeight.w400),
         ),
       ],
     );
@@ -238,23 +238,23 @@ class _UserSubmissionScreenState extends State<UserSubmissionScreen> {
       controller: controller,
       maxLines: maxLines,
       validator: validator,
-      style: const TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w600),
+      style: TextStyle(color: context.textDark, fontWeight: FontWeight.w600),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: AppTheme.textMuted, fontWeight: FontWeight.w400),
+        hintStyle: TextStyle(color: context.textMuted, fontWeight: FontWeight.w400),
         prefixIcon: Padding(
           padding: const EdgeInsets.only(bottom: 0),
-          child: Icon(icon, color: AppTheme.textMuted, size: 20),
+          child: Icon(icon, color: context.textMuted, size: 20),
         ),
         filled: true,
         fillColor: Colors.white,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppTheme.divider, width: 1),
+          borderSide: BorderSide(color: context.divider, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppTheme.primary, width: 1.5),
+          borderSide: BorderSide(color: context.primary, width: 1.5),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
@@ -275,7 +275,7 @@ class _UserSubmissionScreenState extends State<UserSubmissionScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppTheme.divider, width: 1.5),
+          border: Border.all(color: context.divider, width: 1.5),
         ),
         child: _imageFile != null 
           ? Column(
@@ -290,25 +290,25 @@ class _UserSubmissionScreenState extends State<UserSubmissionScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                const Text('Tap to change photo', style: TextStyle(color: AppTheme.textMuted, fontSize: 12, fontWeight: FontWeight.w500)),
+                Text('Tap to change photo', style: TextStyle(color: context.textMuted, fontSize: 12, fontWeight: FontWeight.w500)),
               ],
             )
           : Column(
               children: [
                 Container(
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(color: AppTheme.bg, borderRadius: BorderRadius.circular(12)),
-                  child: const Icon(Icons.camera_alt_rounded, color: AppTheme.primary, size: 28),
+                  decoration: BoxDecoration(color: context.bg, borderRadius: BorderRadius.circular(12)),
+                  child: Icon(Icons.camera_alt_rounded, color: context.primary, size: 28),
                 ),
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   'Upload Product Image',
-                  style: TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w800, fontSize: 14),
+                  style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800, fontSize: 14),
                 ),
                 const SizedBox(height: 6),
-                const Text(
+                Text(
                   'High quality photo of ingredients list preferred',
-                  style: TextStyle(color: AppTheme.textMuted, fontSize: 12, fontWeight: FontWeight.w500),
+                  style: TextStyle(color: context.textMuted, fontSize: 12, fontWeight: FontWeight.w500),
                 ),
               ],
             ),

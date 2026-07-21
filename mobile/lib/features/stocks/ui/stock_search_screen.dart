@@ -118,10 +118,10 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
     }
 
     return Scaffold(
-      backgroundColor: AppTheme.bg,
+      backgroundColor: context.bg,
       appBar: AppBar(
-        title: const Text('Search Market', style: TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5)),
-        backgroundColor: AppTheme.bg,
+        title: Text('Search Market', style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
+        backgroundColor: context.bg,
         elevation: 0,
         centerTitle: false,
       ),
@@ -158,22 +158,22 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
             selected: _halalOnly,
             label: Row(
               children: [
-                Icon(Icons.shield_rounded, size: 16, color: _halalOnly ? AppTheme.halal : AppTheme.textMuted),
+                Icon(Icons.shield_rounded, size: 16, color: _halalOnly ? context.halal : context.textMuted),
                 const SizedBox(width: 4),
-                Text('Halal Only', style: TextStyle(color: _halalOnly ? AppTheme.textDark : AppTheme.textMuted, fontWeight: FontWeight.w700, fontSize: 13)),
+                Text('Halal Only', style: TextStyle(color: _halalOnly ? context.textDark : context.textMuted, fontWeight: FontWeight.w700, fontSize: 13)),
               ],
             ),
-            selectedColor: AppTheme.halal.withOpacity(0.15),
-            backgroundColor: Colors.white,
+            selectedColor: context.halal.withOpacity(0.15),
+            backgroundColor: context.bgAlt,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
-              side: BorderSide(color: _halalOnly ? AppTheme.halal : AppTheme.divider, width: 1.5),
+              side: BorderSide(color: _halalOnly ? context.halal : context.divider, width: 1.5),
             ),
             onSelected: _toggleHalalOnly,
             showCheckmark: false,
           ),
           const SizedBox(width: 8),
-          Container(height: 24, width: 1.5, color: AppTheme.divider, margin: const EdgeInsets.symmetric(horizontal: 4)),
+          Container(height: 24, width: 1.5, color: context.divider, margin: const EdgeInsets.symmetric(horizontal: 4)),
           const SizedBox(width: 8),
           // Sectors
           ..._sectors.map((sector) {
@@ -181,13 +181,13 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
             return Padding(
               padding: const EdgeInsets.only(right: 8),
               child: ChoiceChip(
-                label: Text(sector, style: TextStyle(color: isSelected ? Colors.white : AppTheme.textDark, fontWeight: FontWeight.w700, fontSize: 13)),
+                label: Text(sector, style: TextStyle(color: isSelected ? Colors.white : context.textDark, fontWeight: FontWeight.w700, fontSize: 13)),
                 selected: isSelected,
-                selectedColor: AppTheme.primary,
-                backgroundColor: Colors.white,
+                selectedColor: context.primary,
+                backgroundColor: context.bgAlt,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
-                  side: BorderSide(color: isSelected ? AppTheme.primary : AppTheme.divider, width: 1.5),
+                  side: BorderSide(color: isSelected ? context.primary : context.divider, width: 1.5),
                 ),
                 onSelected: (selected) {
                   if (selected) _selectSector(sector);
@@ -207,14 +207,14 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
       child: TextField(
         controller: _searchController,
         onChanged: _onSearch,
-        style: const TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w600),
+        style: TextStyle(color: context.textDark, fontWeight: FontWeight.w600),
         decoration: InputDecoration(
           hintText: 'Search stock name or symbol...',
-          hintStyle: const TextStyle(color: AppTheme.textMuted, fontWeight: FontWeight.w400),
-          prefixIcon: const Icon(Icons.search_rounded, color: AppTheme.primary),
+          hintStyle: TextStyle(color: context.textMuted, fontWeight: FontWeight.w400),
+          prefixIcon: Icon(Icons.search_rounded, color: context.primary),
           suffixIcon: _searchController.text.isNotEmpty 
             ? IconButton(
-                icon: const Icon(Icons.clear_rounded, color: AppTheme.textMuted),
+                icon: Icon(Icons.clear_rounded, color: context.textMuted),
                 onPressed: () {
                   _searchController.clear();
                   _onSearch('');
@@ -225,11 +225,11 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
           fillColor: Colors.white,
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(color: AppTheme.divider, width: 1.5),
+            borderSide: BorderSide(color: context.divider, width: 1.5),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(color: AppTheme.primary, width: 1.5),
+            borderSide: BorderSide(color: context.primary, width: 1.5),
           ),
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),
@@ -239,7 +239,7 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
 
   Widget _buildList(String title, List<Map<String, dynamic>> items) {
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 100),
       itemCount: items.length + 1,
       itemBuilder: (context, index) {
         if (index == 0) {
@@ -250,11 +250,11 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppTheme.textDark),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: context.textDark),
                 ),
                 Text(
                   '${items.length} stocks',
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.textMuted),
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: context.textMuted),
                 ),
               ],
             ),
@@ -272,8 +272,8 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
     final isHalal = status == 'halal';
     final isNonHalal = status == 'non-halal';
     
-    Color statusColor = isHalal ? AppTheme.halal : (isNonHalal ? AppTheme.haram : AppTheme.questionable);
-    Color badgeBg = isHalal ? const Color(0xFFDCFCE7) : (isNonHalal ? const Color(0xFFFEE2E2) : const Color(0xFFFEF3C7));
+    Color statusColor = isHalal ? context.halal : (isNonHalal ? context.haram : context.questionable);
+    Color badgeBg = isHalal ? context.halalBg : (isNonHalal ? context.haramBg : context.questionableBg);
 
     return GestureDetector(
       onTap: () {
@@ -285,9 +285,9 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.bgAlt,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppTheme.divider),
+          border: Border.all(color: context.divider),
         ),
         child: Row(
           children: [
@@ -297,12 +297,12 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
               height: 44,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                color: stock['logo_url'] != null ? Colors.white : AppTheme.primary,
+                color: stock['logo_url'] != null ? Colors.white : context.primary,
                 border: stock['logo_url'] != null
-                    ? Border.all(color: AppTheme.divider, width: 1)
+                    ? Border.all(color: context.divider, width: 1)
                     : null,
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))
+                  BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 4, offset: const Offset(0, 2))
                 ],
               ),
               child: ClipRRect(
@@ -326,11 +326,11 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
                 children: [
                   Text(
                     stock['symbol'],
-                    style: const TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, fontSize: 16),
+                    style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, fontSize: 16),
                   ),
                   const SizedBox(height: 2),
                   Text(stock['name'], maxLines: 1, overflow: TextOverflow.ellipsis, 
-                    style: const TextStyle(color: AppTheme.textMuted, fontSize: 13)),
+                    style: TextStyle(color: context.textMuted, fontSize: 13)),
                 ],
               ),
             ),
@@ -338,13 +338,13 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: AppTheme.bg,
+                color: context.bg,
                 borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: AppTheme.divider),
+                border: Border.all(color: context.divider),
               ),
               child: Text(
                 stock['sector']?.toUpperCase() ?? 'MARKET', 
-                style: const TextStyle(color: AppTheme.textMuted, fontSize: 9, fontWeight: FontWeight.w800),
+                style: TextStyle(color: context.textMuted, fontSize: 9, fontWeight: FontWeight.w800),
               ),
             ),
           ],
@@ -354,7 +354,7 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
   }
 
   Widget _buildLoading() {
-    return const Center(child: CircularProgressIndicator(color: AppTheme.primary));
+    return Center(child: CircularProgressIndicator(color: context.primary));
   }
 
   Widget _buildNoResults() {
@@ -367,21 +367,21 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppTheme.haram.withOpacity(0.05),
+                color: context.haram.withOpacity(0.05),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.search_off_rounded, size: 40, color: AppTheme.haram),
+              child: Icon(Icons.search_off_rounded, size: 40, color: context.haram),
             ),
             const SizedBox(height: 24),
-            const Text(
+            Text(
               'No Results Found',
-              style: TextStyle(fontSize: 20, color: AppTheme.textDark, fontWeight: FontWeight.w900),
+              style: TextStyle(fontSize: 20, color: context.textDark, fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 12),
             Text(
               'We couldn\'t find any stocks matching your criteria.\nPlease try a different search or filter.',
               textAlign: TextAlign.center,
-              style: const TextStyle(color: AppTheme.textMuted, height: 1.5, fontSize: 14),
+              style: TextStyle(color: context.textMuted, height: 1.5, fontSize: 14),
             ),
           ],
         ),
@@ -399,21 +399,21 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppTheme.primary.withOpacity(0.05),
+                color: context.primary.withOpacity(0.05),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.travel_explore_rounded, size: 40, color: AppTheme.primary),
+              child: Icon(Icons.travel_explore_rounded, size: 40, color: context.primary),
             ),
             const SizedBox(height: 24),
-            const Text(
+            Text(
               'Discover Stocks',
-              style: TextStyle(fontSize: 20, color: AppTheme.textDark, fontWeight: FontWeight.w900),
+              style: TextStyle(fontSize: 20, color: context.textDark, fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 12),
-            const Text(
+            Text(
               'Search for specific stocks or use the filters above to browse sectors.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppTheme.textMuted, height: 1.5, fontSize: 14),
+              style: TextStyle(color: context.textMuted, height: 1.5, fontSize: 14),
             ),
           ],
         ),

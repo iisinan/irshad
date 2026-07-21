@@ -42,7 +42,7 @@ final List<Map<String, String>> _onboardingData = [
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.bg,
       body: SafeArea(
         child: Column(
           children: [
@@ -52,9 +52,9 @@ final List<Map<String, String>> _onboardingData = [
                 onPressed: () async {
                   final prefs = await SharedPreferences.getInstance();
                   await prefs.setBool('hasSeenOnboarding', true);
-                  if (mounted) Navigator.pushReplacementNamed(context, '/main');
+                  if (mounted) Navigator.pushReplacementNamed(context, '/welcome');
                 },
-                child: const Text('Skip', style: TextStyle(color: AppTheme.textMuted)),
+                child: Text('Skip', style: TextStyle(color: context.textMuted)),
               ),
             ),
             Expanded(
@@ -90,18 +90,18 @@ final List<Map<String, String>> _onboardingData = [
             Container(
               padding: const EdgeInsets.all(32),
               decoration: BoxDecoration(
-                color: AppTheme.primary.withOpacity(0.05),
+                color: context.primary.withOpacity(0.05),
                 shape: BoxShape.circle,
               ),
-              child: Icon(iconData, size: 80, color: AppTheme.primary),
+              child: Icon(iconData, size: 80, color: context.primary),
             ),
             const SizedBox(height: 60),
             Text(
               data['title']!,
-              style: const TextStyle(
+              style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w900,
-              color: AppTheme.textDark,
+              color: context.textDark,
               letterSpacing: -0.5,
             ),
             textAlign: TextAlign.center,
@@ -109,9 +109,9 @@ final List<Map<String, String>> _onboardingData = [
           const SizedBox(height: 16),
           Text(
             data['subtitle']!,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
-              color: AppTheme.textMuted,
+              color: context.textMuted,
               height: 1.5,
             ),
             textAlign: TextAlign.center,
@@ -137,7 +137,7 @@ final List<Map<String, String>> _onboardingData = [
                 width: _currentPage == index ? 24 : 8,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: _currentPage == index ? AppTheme.primary : AppTheme.divider,
+                  color: _currentPage == index ? context.primary : context.divider,
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -158,11 +158,11 @@ final List<Map<String, String>> _onboardingData = [
                   // Mark onboarding as seen so it is never shown again
                   final prefs = await SharedPreferences.getInstance();
                   await prefs.setBool('hasSeenOnboarding', true);
-                  if (mounted) Navigator.pushReplacementNamed(context, '/main');
+                  if (mounted) Navigator.pushReplacementNamed(context, '/welcome');
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primary,
+                backgroundColor: context.primary,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                 elevation: 0,

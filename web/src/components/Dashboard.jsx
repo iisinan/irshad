@@ -144,7 +144,7 @@ function ComplianceRing({score}) {
         <div style={{fontSize:'0.85rem',color:'var(--text-muted)',fontWeight:500,lineHeight:1.6}}>
           Your portfolio is<br/><strong style={{color:'var(--text-dark)'}}>{score}%</strong> Shariah compliant
         </div>
-        <Link to="/market" style={{display:'inline-flex',alignItems:'center',gap:'4px',marginTop:'12px',fontSize:'0.85rem',fontWeight:700,color:'var(--primary)', background: 'var(--primary-50)', padding: '6px 12px', borderRadius: '8px'}}>
+        <Link to="/portfolio#market" style={{display:'inline-flex',alignItems:'center',gap:'4px',marginTop:'12px',fontSize:'0.85rem',fontWeight:700,color:'var(--primary)', background: 'var(--primary-50)', padding: '6px 12px', borderRadius: '8px'}}>
           Screen stocks <ChevronRight size={14}/>
         </Link>
       </div>
@@ -394,19 +394,19 @@ export default function Dashboard() {
     const validStocks = ngxStocks.filter(s => s.price_change_pct != null);
     const sorted = [...validStocks].sort((a, b) => b.price_change_pct - a.price_change_pct);
     topGainers = sorted.slice(0, 5).map(s => ({
-      symbol: s.symbol, name: s.name, price: `₦${(s.latest_price || 0).toFixed(2)}`,
-      change: `+${(s.price_change_pct || 0).toFixed(2)}%`, up: true
+      symbol: s.symbol, name: s.name, price: `₦${Number(s.latest_price || 0).toFixed(2)}`,
+      change: `+${Number(s.price_change_pct || 0).toFixed(2)}%`, up: true
     }));
     topLosers = [...validStocks].sort((a, b) => a.price_change_pct - b.price_change_pct).slice(0, 5).map(s => ({
-      symbol: s.symbol, name: s.name, price: `₦${(s.latest_price || 0).toFixed(2)}`,
-      change: `${(s.price_change_pct || 0).toFixed(2)}%`, up: false
+      symbol: s.symbol, name: s.name, price: `₦${Number(s.latest_price || 0).toFixed(2)}`,
+      change: `${Number(s.price_change_pct || 0).toFixed(2)}%`, up: false
     }));
     
     // Pick 15 random active stocks for the ticker
     const shuffled = [...validStocks].sort(() => 0.5 - Math.random());
     dynamicTicker = shuffled.slice(0, 15).map(s => ({
-      symbol: s.symbol, price: `₦${(s.latest_price || 0).toFixed(2)}`,
-      change: `${(s.price_change_pct || 0).toFixed(2)}%`, up: (s.price_change_pct || 0) >= 0
+      symbol: s.symbol, price: `₦${Number(s.latest_price || 0).toFixed(2)}`,
+      change: `${Number(s.price_change_pct || 0).toFixed(2)}%`, up: (s.price_change_pct || 0) >= 0
     }));
 
     validStocks.forEach(s => {
@@ -701,7 +701,7 @@ export default function Dashboard() {
             {/* Watchlist */}
             <Panel>
               <PanelHeader icon={Star} title="Watchlist"
-                action={<Link to="/market" style={{fontSize:'0.78rem',fontWeight:700,color:'var(--primary)',display:'flex',alignItems:'center',gap:'3px'}}>Browse Market <ChevronRight size={12}/></Link>}/>
+                action={<Link to="/portfolio#market" style={{fontSize:'0.78rem',fontWeight:700,color:'var(--primary)',display:'flex',alignItems:'center',gap:'3px'}}>Browse Market <ChevronRight size={12}/></Link>}/>
               <div style={{maxHeight:'340px',overflowY:'auto',paddingRight:'3px'}}>
                 {dynamicWatchlist.length > 0 ? dynamicWatchlist.map(s=><WatchlistRow key={s.symbol} stock={s}/>) : (
                   <div style={{padding:'20px 0',textAlign:'center',color:'var(--text-muted)',fontSize:'0.81rem'}}>

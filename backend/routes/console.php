@@ -16,3 +16,4 @@ Schedule::command('news:aggregate')->hourly();
 Schedule::command('news:scrape-stocks')->everyTwoHours();
 Schedule::command('app:snapshot-portfolios')->dailyAt('17:00');
 Schedule::command('alerts:process')->everyMinute();
+Schedule::command('ngx:sync --prices-only')->everyTenMinutes();

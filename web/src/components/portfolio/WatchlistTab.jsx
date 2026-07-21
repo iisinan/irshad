@@ -284,7 +284,7 @@ export default function WatchlistTab() {
             Keep an eye on promising stocks. Add them to your watchlist to track their Shariah compliance status and daily performance.
           </p>
           <button 
-            onClick={() => navigate('/market')} 
+            onClick={() => navigate('/portfolio#market')} 
             style={{ 
               display:'inline-flex', alignItems:'center', gap:'8px', padding:'14px 28px', 
               borderRadius:'14px', background:'var(--gold-grad)', color:'white', border:'none', 

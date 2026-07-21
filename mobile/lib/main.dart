@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
+import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'core/api/api_service.dart';
@@ -17,6 +20,7 @@ import 'features/scanner/ui/user_submission_screen.dart';
 import 'features/stocks/ui/stock_search_screen.dart';
 import 'features/stocks/ui/stock_detail_screen.dart';
 import 'features/stocks/ui/basket_detail_screen.dart';
+import 'features/stocks/ui/edit_basket_screen.dart';
 import 'features/onboarding/ui/onboarding_screen.dart';
 import 'features/profile/ui/favorites_screen.dart';
 import 'features/profile/ui/history_screen.dart';
@@ -29,6 +33,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'core/notifications/notification_service.dart';
 import 'features/stocks/providers/stock_provider.dart';
+import 'features/baskets/providers/basket_provider.dart';
 import 'package:workmanager/workmanager.dart';
 import 'core/providers/app_state_provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -37,7 +42,69 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     debugPrint("Native called background task: $task");
-    // TODO: Reconcile cached halal product data with backend API when online
+    
+    if (task == "backgroundSync") {
+      try {
+        WidgetsFlutterBinding.ensureInitialized();
+        
+        try {
+          await dotenv.load(fileName: ".env");
+        } catch (e) {
+          debugPrint("Failed to load .env in background isolate: $e");
+        }
+
+        final prefs = await SharedPreferences.getInstance();
+        List<String> history = prefs.getStringList('scan_history') ?? [];
+        if (history.isEmpty) return Future.value(true);
+
+        final String baseUrl = dotenv.env['API_BASE_URL'] ?? 'http://10.0.2.2:8000/api/';
+        
+        final dio = Dio(BaseOptions(
+          baseUrl: baseUrl,
+          connectTimeout: const Duration(seconds: 15),
+          receiveTimeout: const Duration(seconds: 30),
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          }
+        ));
+
+        final storage = const FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
+        final token = await storage.read(key: 'access_token');
+        if (token != null) {
+          dio.options.headers['Authorization'] = 'Bearer $token';
+        }
+
+        bool updatedAny = false;
+        List<String> newHistory = [];
+
+        for (String itemStr in history) {
+          try {
+            final Map<String, dynamic> item = jsonDecode(itemStr);
+            final String barcode = item['barcode'];
+            
+            final response = await dio.get('products/$barcode');
+            if (response.statusCode == 200) {
+              newHistory.add(jsonEncode(response.data['data']));
+              updatedAny = true;
+            } else {
+              newHistory.add(itemStr);
+            }
+          } catch (e) {
+            newHistory.add(itemStr);
+          }
+        }
+
+        if (updatedAny) {
+          await prefs.setStringList('scan_history', newHistory);
+          debugPrint("Background sync completed successfully. Updated products in cache.");
+        }
+      } catch (e) {
+        debugPrint("Background sync failed: $e");
+        return Future.value(false);
+      }
+    }
+    
     return Future.value(true);
   });
 }
@@ -71,14 +138,27 @@ void main() async {
   final prefs = await SharedPreferences.getInstance();
   final hasSeenOnboarding = prefs.getBool('hasSeenOnboarding') ?? false;
 
-  // Always go straight to /main after onboarding — guest mode, no forced login
-  final String startRoute = hasSeenOnboarding ? '/main' : '/onboarding';
+  final storage = const FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
+  final token = await storage.read(key: 'access_token');
+  final bool hasToken = token != null && token.isNotEmpty;
+
+  // Lock the app behind registration: go to welcome if onboarding is done but no token
+  final String startRoute = !hasSeenOnboarding 
+      ? '/onboarding' 
+      : (hasToken ? '/main' : '/welcome');
+
+  final appState = AppStateProvider();
+  await appState.loadThemeMode();
+  if (hasToken) {
+    appState.setAuthenticated(true);
+  }
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => StockProvider()),
-        ChangeNotifierProvider(create: (_) => AppStateProvider()),
+        ChangeNotifierProvider(create: (_) => BasketProvider()),
+        ChangeNotifierProvider.value(value: appState),
       ],
       child: IrshadApp(initialRoute: startRoute),
     ),
@@ -91,11 +171,14 @@ class IrshadApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeMode = Provider.of<AppStateProvider>(context).themeMode;
     return MaterialApp(
       title: 'IRSHAD',
       debugShowCheckedModeBanner: false,
       navigatorKey: ApiService.navigatorKey,
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeMode,
       initialRoute: initialRoute,
       onGenerateRoute: (settings) {
         if (settings.name == '/product_details') {
@@ -109,6 +192,10 @@ class IrshadApp extends StatelessWidget {
         if (settings.name == '/basket_details') {
           final basket = settings.arguments;
           return MaterialPageRoute(builder: (context) => BasketDetailScreen(basket: basket));
+        }
+        if (settings.name == '/edit_basket') {
+          final basket = settings.arguments;
+          return MaterialPageRoute(builder: (context) => EditBasketScreen(basket: basket));
         }
         if (settings.name == '/submit_product') {
           final barcode = settings.arguments as String?;
@@ -144,45 +231,7 @@ class IrshadApp extends StatelessWidget {
 // 3 = Portfolio (protected – requires login)
 // 4 = Profile   (protected – requires login)
 
-class AuthTabWrapper extends StatefulWidget {
-  final Widget child;
-  final VoidCallback onBackToExplore;
 
-  const AuthTabWrapper({
-    super.key,
-    required this.child,
-    required this.onBackToExplore,
-  });
-
-  @override
-  State<AuthTabWrapper> createState() => _AuthTabWrapperState();
-}
-
-class _AuthTabWrapperState extends State<AuthTabWrapper> {
-  final _navigatorKey = GlobalKey<NavigatorState>();
-
-  @override
-  Widget build(BuildContext context) {
-    final isAuthenticated = context.watch<AppStateProvider>().isAuthenticated;
-
-    if (isAuthenticated) {
-      return widget.child;
-    }
-
-    return Navigator(
-      key: _navigatorKey,
-      onGenerateRoute: (settings) {
-        Widget page;
-        if (settings.name == '/register') {
-          page = const RegisterScreen();
-        } else {
-          page = LoginScreen(onBack: widget.onBackToExplore);
-        }
-        return MaterialPageRoute(builder: (_) => page);
-      },
-    );
-  }
-}
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -193,7 +242,7 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _selectedIndex = 0;
-  final _storage = const FlutterSecureStorage();
+  final _storage = const FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
 
   @override
   void initState() {
@@ -219,22 +268,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       case 0:
         return const HomeScreen();
       case 1:
-        return const StockSearchScreen();
+        return const FavoritesScreen();
       case 2:
-        return AuthTabWrapper(
-          onBackToExplore: _onBackToExplore,
-          child: const FavoritesScreen(),
-        );
+        return const PortfolioScreen();
       case 3:
-        return AuthTabWrapper(
-          onBackToExplore: _onBackToExplore,
-          child: const PortfolioScreen(),
-        );
-      case 4:
-        return AuthTabWrapper(
-          onBackToExplore: _onBackToExplore,
-          child: const ProfileScreen(),
-        );
+        return const StockSearchScreen();
       default:
         return const HomeScreen();
     }
@@ -243,59 +281,89 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
+      body: Stack(
         children: [
-          _buildScreen(0),
-          _buildScreen(1),
-          _buildScreen(2),
-          _buildScreen(3),
-          _buildScreen(4),
+          IndexedStack(
+            index: _selectedIndex,
+            children: [
+              _buildScreen(0),
+              _buildScreen(1),
+              _buildScreen(2),
+              _buildScreen(3),
+            ],
+          ),
+          // Floating Pill Navigation
+          Positioned(
+            left: 24,
+            right: 24,
+            bottom: 24 + MediaQuery.of(context).padding.bottom, // Dynamic padding for safe areas (like iPhone home indicator)
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(40),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: Container(
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: context.bgAlt.withValues(alpha: 0.8), // Glass effect matching theme
+                    borderRadius: BorderRadius.circular(40),
+                    border: Border.all(color: context.textDark.withValues(alpha: 0.1), width: 1),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 15,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildNavItem(0, Icons.explore_outlined, Icons.explore_rounded, 'Explore'),
+                      _buildNavItem(1, Icons.favorite_outline_rounded, Icons.favorite_rounded, 'Watchlist'),
+                      _buildNavItem(2, Icons.pie_chart_outline_rounded, Icons.pie_chart_rounded, 'Portfolio'),
+                      _buildNavItem(3, Icons.search_rounded, Icons.search_rounded, 'Search'),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          border: Border(top: BorderSide(color: AppTheme.divider, width: 1)),
+    );
+  }
+
+  Widget _buildNavItem(int index, IconData iconOutlined, IconData iconFilled, String label) {
+    final isSelected = _selectedIndex == index;
+    return GestureDetector(
+      onTap: () => setState(() => _selectedIndex = index),
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        decoration: BoxDecoration(
+          color: isSelected ? context.accentSoft : Colors.transparent,
+          borderRadius: BorderRadius.circular(30),
         ),
-        child: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: (index) => setState(() => _selectedIndex = index),
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.white,
-          elevation: 0,
-          selectedItemColor: AppTheme.primary,
-          unselectedItemColor: AppTheme.textMuted,
-          selectedFontSize: 11,
-          unselectedFontSize: 11,
-          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w800),
-          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.explore_outlined),
-              activeIcon: Icon(Icons.explore_rounded),
-              label: 'Explore',
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              isSelected ? iconFilled : iconOutlined,
+              color: isSelected ? context.primary : context.textMuted,
+              size: 22,
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.search_rounded),
-              activeIcon: Icon(Icons.search_rounded),
-              label: 'Search',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.favorite_outline_rounded),
-              activeIcon: Icon(Icons.favorite_rounded),
-              label: 'Watchlist',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.pie_chart_outline_rounded),
-              activeIcon: Icon(Icons.pie_chart_rounded),
-              label: 'Portfolio',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline_rounded),
-              activeIcon: Icon(Icons.person_rounded),
-              label: 'Profile',
-            ),
+            if (isSelected)
+              Text(
+                label,
+                style: TextStyle(
+                  color: context.primary,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  height: 1.2,
+                ),
+              ),
           ],
         ),
       ),

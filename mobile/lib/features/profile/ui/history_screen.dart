@@ -47,13 +47,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.bg,
+      backgroundColor: context.bg,
       appBar: AppBar(
-        title: const Text('Activity History', style: TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5)),
-        backgroundColor: AppTheme.bg,
+        title: Text('Activity History', style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
+        backgroundColor: context.bg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppTheme.textDark, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: context.textDark, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
@@ -71,13 +71,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 const PopupMenuItem(value: 'scan', child: Text('Products Only')),
                 const PopupMenuItem(value: 'check', child: Text('Stocks Only')),
               ],
-              icon: const Icon(Icons.tune_rounded, color: AppTheme.textDark, size: 22),
+              icon: Icon(Icons.tune_rounded, color: context.textDark, size: 22),
             ),
           ),
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppTheme.primary))
+          ? Center(child: CircularProgressIndicator(color: context.primary))
           : _history.isEmpty
               ? _buildEmptyState()
               : _buildTimeline(),
@@ -109,8 +109,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
               padding: const EdgeInsets.only(left: 4, bottom: 12, top: 20),
               child: Text(
                 date.toUpperCase(),
-                style: const TextStyle(
-                  color: AppTheme.textMuted,
+                style: TextStyle(
+                  color: context.textMuted,
                   fontWeight: FontWeight.w800,
                   fontSize: 11,
                   letterSpacing: 0.5,
@@ -132,27 +132,27 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.bgAlt,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.divider),
+        border: Border.all(color: context.divider),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.all(12),
         leading: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: AppTheme.bg,
+            color: context.bg,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(
             isScan ? Icons.qr_code_scanner_rounded : Icons.show_chart_rounded,
             size: 20,
-            color: AppTheme.textMuted,
+            color: context.textMuted,
           ),
         ),
         title: Text(
           isScan ? detail['name'] : detail['symbol'],
-          style: const TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, fontSize: 16),
+          style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, fontSize: 16),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -160,10 +160,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
           padding: const EdgeInsets.only(top: 4),
           child: Text(
             isScan ? 'Product Verification' : 'Market Screening',
-            style: const TextStyle(color: AppTheme.textMuted, fontSize: 13, fontWeight: FontWeight.w500),
+            style: TextStyle(color: context.textMuted, fontSize: 13, fontWeight: FontWeight.w500),
           ),
         ),
-        trailing: const Icon(Icons.chevron_right_rounded, color: AppTheme.divider),
+        trailing: Icon(Icons.chevron_right_rounded, color: context.divider),
         onTap: () {
           if (isScan) {
             Navigator.pushNamed(context, '/product_details', arguments: detail);
@@ -187,15 +187,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppTheme.primary.withOpacity(0.05),
+                color: context.primary.withOpacity(0.05),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.history_rounded, size: 40, color: AppTheme.primary),
+              child: Icon(Icons.history_rounded, size: 40, color: context.primary),
             ),
             const SizedBox(height: 24),
             Text(
               isAuth ? 'No Activity Yet' : 'Login to view History',
-              style: const TextStyle(fontSize: 20, color: AppTheme.textDark, fontWeight: FontWeight.w900),
+              style: TextStyle(fontSize: 20, color: context.textDark, fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 12),
             Text(
@@ -203,7 +203,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   ? 'Your scan and screening history will be\nsaved here for quick access.'
                   : 'You must be logged in to view your scan and screening history.',
               textAlign: TextAlign.center,
-              style: const TextStyle(color: AppTheme.textMuted, height: 1.5, fontSize: 14),
+              style: TextStyle(color: context.textMuted, height: 1.5, fontSize: 14),
             ),
             if (!isAuth) ...[
               const SizedBox(height: 32),
@@ -213,7 +213,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 child: ElevatedButton(
                   onPressed: () => Navigator.pushNamed(context, '/login'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.textDark,
+                    backgroundColor: context.textDark,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     elevation: 0,

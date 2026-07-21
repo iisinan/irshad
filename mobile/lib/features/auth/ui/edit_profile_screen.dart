@@ -73,9 +73,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('Profile updated successfully!'),
-            backgroundColor: AppTheme.textDark,
+            backgroundColor: context.textDark,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -92,7 +92,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: AppTheme.haram,
+        backgroundColor: context.haram,
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -101,13 +101,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.bg,
+      backgroundColor: context.bg,
       appBar: AppBar(
-        title: const Text('Edit Profile', style: TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5)),
-        backgroundColor: AppTheme.bg,
+        title: Text('Edit Profile', style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
+        backgroundColor: context.bg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close_rounded, color: AppTheme.textDark, size: 24),
+          icon: Icon(Icons.close_rounded, color: context.textDark, size: 24),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
@@ -115,10 +115,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             padding: const EdgeInsets.only(right: 8.0),
             child: TextButton(
               onPressed: _isLoading ? null : _updateProfile,
-              child: const Text(
+              child: Text(
                 'Save',
                 style: TextStyle(
-                  color: AppTheme.primary,
+                  color: context.primary,
                   fontWeight: FontWeight.w800,
                   fontSize: 16,
                 ),
@@ -128,7 +128,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ],
       ),
       body: _isLoading && _nameController.text.isEmpty
-          ? const Center(child: CircularProgressIndicator(color: AppTheme.primary))
+          ? Center(child: CircularProgressIndicator(color: context.primary))
           : SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
               child: Column(
@@ -141,22 +141,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         Container(
                           padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: context.bgAlt,
                             shape: BoxShape.circle,
-                            border: Border.all(color: AppTheme.divider),
+                            border: Border.all(color: context.divider),
                           ),
                           child: CircleAvatar(
                             radius: 60,
-                            backgroundColor: AppTheme.bg,
-                            child: const Icon(Icons.person_rounded, size: 60, color: AppTheme.divider),
+                            backgroundColor: context.bg,
+                            child: Icon(Icons.person_rounded, size: 60, color: context.divider),
                           ),
                         ),
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: AppTheme.primary,
+                            color: context.primary,
                             shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 3),
+                            border: Border.all(color: context.divider, width: 3),
                           ),
                           child: const Icon(Icons.camera_alt_rounded, size: 16, color: Colors.white),
                         ),
@@ -176,9 +176,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   const SizedBox(height: 40),
                   _buildSectionLabel('SECURITY'),
                   const SizedBox(height: 4),
-                  const Text(
+                  Text(
                     'Update your password only if necessary.',
-                    style: TextStyle(color: AppTheme.textMuted, fontSize: 13, fontWeight: FontWeight.w500),
+                    style: TextStyle(color: context.textMuted, fontSize: 13, fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 20),
                   _buildTextField(_passwordController, 'New Password', Icons.lock_outline_rounded, obscureText: true),
@@ -192,7 +192,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _updateProfile,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primary,
+                        backgroundColor: context.primary,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                         elevation: 0,
@@ -212,7 +212,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget _buildSectionLabel(String title) {
     return Text(
       title,
-      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppTheme.textMuted, letterSpacing: 1),
+      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: context.textMuted, letterSpacing: 1),
     );
   }
 
@@ -221,20 +221,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       controller: controller,
       obscureText: obscureText,
       keyboardType: keyboardType,
-      style: const TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w600),
+      style: TextStyle(color: context.textDark, fontWeight: FontWeight.w600),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: AppTheme.textMuted, fontWeight: FontWeight.w400),
-        prefixIcon: Icon(icon, color: AppTheme.textMuted, size: 20),
+        hintStyle: TextStyle(color: context.textMuted, fontWeight: FontWeight.w400),
+        prefixIcon: Icon(icon, color: context.textMuted, size: 20),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: context.bgAlt,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppTheme.divider, width: 1),
+          borderSide: BorderSide(color: context.divider, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppTheme.primary, width: 1.5),
+          borderSide: BorderSide(color: context.primary, width: 1.5),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),

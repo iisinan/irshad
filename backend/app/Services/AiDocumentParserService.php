@@ -15,15 +15,23 @@ class AiDocumentParserService
      */
     public function extractFinancialsFromPdf(string $pdfFilePath): ?array
     {
-        $apiKey = config('services.gemini.key');
+        $apiKeysString = config('services.gemini.key');
         
-        if (empty($apiKey)) {
+        if (empty($apiKeysString)) {
             Log::error("GEMINI_API_KEY is not set.");
             return null;
         }
 
+        $apiKeys = array_map('trim', explode(',', $apiKeysString));
+        $currentKeyIndex = \Illuminate\Support\Facades\Cache::get('gemini_key_index', 0);
+        if (!isset($apiKeys[$currentKeyIndex])) {
+            $currentKeyIndex = 0;
+        }
+        $apiKey = $apiKeys[$currentKeyIndex];
+
         // Use the latest flash model
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=" . $apiKey;
+        $baseUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=";
+        $url = $baseUrl . $apiKey;
 
         try {
             $fileData = base64_encode(file_get_contents($pdfFilePath));
@@ -50,7 +58,7 @@ class AiDocumentParserService
                 ]
             ];
 
-            $maxRetries = 5;
+            $maxRetries = 10;
             for ($attempt = 0; $attempt < $maxRetries; $attempt++) {
                 $response = Http::timeout(120)->post($url, $payload);
 
@@ -59,9 +67,24 @@ class AiDocumentParserService
                 }
 
                 if ($response->status() == 429) {
-                    echo "Gemini Rate Limit Hit (429). Sleeping for 60 seconds before retry (Attempt " . ($attempt + 1) . ")...\n";
-                    Log::warning("Gemini Rate Limit Hit (429). Sleeping for 60 seconds before retry...");
-                    sleep(60);
+                    echo "Gemini Rate Limit Hit (429) for key index {$currentKeyIndex}.\n";
+                    $currentKeyIndex++;
+                    
+                    if ($currentKeyIndex >= count($apiKeys)) {
+                        echo "All keys exhausted. Sleeping for 60 seconds before retry (Attempt " . ($attempt + 1) . ")...\n";
+                        Log::warning("Gemini Rate Limit Hit (429). All keys exhausted. Sleeping for 60 seconds...");
+                        sleep(60);
+                        $currentKeyIndex = 0;
+                    } else {
+                        echo "Switching to next key (index {$currentKeyIndex})...\n";
+                    }
+                    
+                    \Illuminate\Support\Facades\Cache::put('gemini_key_index', $currentKeyIndex);
+                    
+                    // Update the URL with the new key
+                    $apiKey = $apiKeys[$currentKeyIndex];
+                    $url = $baseUrl . $apiKey;
+                    
                     continue;
                 }
 

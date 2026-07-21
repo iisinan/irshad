@@ -61,7 +61,7 @@ class _TradeBottomSheetState extends State<TradeBottomSheet> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Successfully purchased $shares shares of ${widget.stock['symbol']}!'),
-            backgroundColor: AppTheme.halal,
+            backgroundColor: context.halal,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -69,7 +69,7 @@ class _TradeBottomSheetState extends State<TradeBottomSheet> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Trade failed: $e'), backgroundColor: AppTheme.haram),
+          SnackBar(content: Text('Trade failed: $e'), backgroundColor: context.haram),
         );
       }
     } finally {
@@ -83,8 +83,8 @@ class _TradeBottomSheetState extends State<TradeBottomSheet> {
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: context.bgAlt,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SafeArea(
@@ -99,10 +99,10 @@ class _TradeBottomSheetState extends State<TradeBottomSheet> {
                 children: [
                   Text(
                     'Buy ${widget.stock['symbol']}',
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppTheme.textDark, letterSpacing: -0.5),
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close_rounded, color: AppTheme.textMuted),
+                    icon: Icon(Icons.close_rounded, color: context.textMuted),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],
@@ -110,7 +110,7 @@ class _TradeBottomSheetState extends State<TradeBottomSheet> {
               const SizedBox(height: 8),
               Text(
                 'Current Price: ₦ ${_currentPrice.toStringAsFixed(2)}',
-                style: const TextStyle(color: AppTheme.textMuted, fontSize: 16),
+                style: TextStyle(color: context.textMuted, fontSize: 16),
               ),
               const SizedBox(height: 24),
               TextField(
@@ -128,10 +128,10 @@ class _TradeBottomSheetState extends State<TradeBottomSheet> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Estimated Cost', style: TextStyle(fontSize: 16, color: AppTheme.textMuted)),
+                  Text('Estimated Cost', style: TextStyle(fontSize: 16, color: context.textMuted)),
                   Text(
                     '₦ ${_totalCost.toStringAsFixed(2)}',
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppTheme.textDark),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: context.textDark),
                   ),
                 ],
               ),
@@ -142,7 +142,7 @@ class _TradeBottomSheetState extends State<TradeBottomSheet> {
                 child: ElevatedButton(
                   onPressed: _isLoading || _totalCost <= 0 ? null : _executeTrade,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primary,
+                    backgroundColor: context.primary,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                     elevation: 0,

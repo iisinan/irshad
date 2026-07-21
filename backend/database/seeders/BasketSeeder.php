@@ -13,7 +13,7 @@ class BasketSeeder extends Seeder
     public function run(): void
     {
         // Re-seeding with Nigerian-focused baskets
-        Basket::truncate();
+        Basket::whereNull('user_id')->delete();
 
         $baskets = [
             [

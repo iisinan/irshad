@@ -12,7 +12,20 @@ class GeminiAiService
 
     public function __construct()
     {
-        $this->apiKey = env('GEMINI_API_KEY', '');
+        $apiKeysString = env('GEMINI_API_KEY', '');
+        $this->apiKey = $apiKeysString; // Will be parsed dynamically
+    }
+
+    private function getNextApiKey(&$currentKeyIndex, $apiKeys)
+    {
+        $currentKeyIndex++;
+        if ($currentKeyIndex >= count($apiKeys)) {
+            Log::warning("Gemini Rate Limit Hit (429). All keys exhausted in GeminiAiService.");
+            sleep(60);
+            $currentKeyIndex = 0;
+        }
+        \Illuminate\Support\Facades\Cache::put('gemini_key_index', $currentKeyIndex);
+        return $apiKeys[$currentKeyIndex];
     }
 
     /**
@@ -23,6 +36,13 @@ class GeminiAiService
         if (empty($this->apiKey)) {
             return "The Halal Assistant is currently unavailable because the API key is not configured.";
         }
+        
+        $apiKeys = array_map('trim', explode(',', $this->apiKey));
+        $currentKeyIndex = \Illuminate\Support\Facades\Cache::get('gemini_key_index', 0);
+        if (!isset($apiKeys[$currentKeyIndex])) {
+            $currentKeyIndex = 0;
+        }
+        $apiKey = $apiKeys[$currentKeyIndex];
 
         $prompt = "You are an expert Islamic Finance Assistant. Analyze the following stock and explain its Shariah compliance status in plain English to a retail investor.\n\n";
         $prompt .= "Company: {$company->name} ({$company->symbol})\n";
@@ -48,31 +68,40 @@ class GeminiAiService
 
         $prompt .= "Based on the above, explain why this stock is classified as '{$status}'. Keep it concise (1-2 paragraphs), friendly, and use markdown for formatting. Do not hallucinate financial numbers not provided.";
 
-        try {
-            $response = Http::withHeaders([
-                'Content-Type' => 'application/json',
-            ])->post("{$this->baseUrl}/gemini-flash-latest:generateContent?key={$this->apiKey}", [
-                'contents' => [
-                    [
-                        'parts' => [
-                            ['text' => $prompt]
+        $maxRetries = 10;
+        for ($attempt = 0; $attempt < $maxRetries; $attempt++) {
+            try {
+                $response = Http::withHeaders([
+                    'Content-Type' => 'application/json',
+                ])->post("{$this->baseUrl}/gemini-flash-latest:generateContent?key={$apiKey}", [
+                    'contents' => [
+                        [
+                            'parts' => [
+                                ['text' => $prompt]
+                            ]
                         ]
                     ]
-                ]
-            ]);
+                ]);
 
-            if ($response->successful()) {
-                $data = $response->json();
-                return $data['candidates'][0]['content']['parts'][0]['text'] ?? "Unable to generate analysis at this time.";
+                if ($response->successful()) {
+                    $data = $response->json();
+                    return $data['candidates'][0]['content']['parts'][0]['text'] ?? "Unable to generate analysis at this time.";
+                }
+
+                if ($response->status() == 429) {
+                    $apiKey = $this->getNextApiKey($currentKeyIndex, $apiKeys);
+                    continue;
+                }
+
+                Log::error('Gemini API Error', ['response' => $response->body()]);
+                return "The Halal Assistant encountered an error analyzing this stock.";
+                
+            } catch (\Exception $e) {
+                Log::error('Gemini API Exception', ['message' => $e->getMessage()]);
+                return "The Halal Assistant encountered an error connecting to the service.";
             }
-
-            Log::error('Gemini API Error', ['response' => $response->body()]);
-            return "The Halal Assistant encountered an error analyzing this stock.";
-            
-        } catch (\Exception $e) {
-            Log::error('Gemini API Exception', ['message' => $e->getMessage()]);
-            return "The Halal Assistant encountered an error connecting to the service.";
         }
+        return "The Halal Assistant encountered an error analyzing this stock after retries.";
     }
 
     /**
@@ -102,11 +131,15 @@ class GeminiAiService
         $prompt .= "Additionally, provide the most recent reliable estimates for the following financial metrics for the exchange. You MUST estimate these numerically based on your deep knowledge of stocks, or use the sources if provided.\n";
         $prompt .= "If you do not know the exact number, provide your best reasonable estimate for a recent trailing 12 month period. DO NOT output null for financials if possible.\n\n";
         
+        $prompt .= "Finally, provide two short qualitative text summaries (1-2 sentences each) based on the financial metrics:\n";
+        $prompt .= "- 'valuation_info': Analyze the valuation (e.g. 'Undervalued with a P/E of X, trading below industry peers').\n";
+        $prompt .= "- 'growth_info': Analyze the growth prospects (e.g. 'Expected strong revenue growth due to recent expansions').\n\n";
+
         $prompt .= "RAW SOURCES:\n";
         $prompt .= json_encode($sourcesData, JSON_PRETTY_PRINT) . "\n\n";
         
         $prompt .= "Output ONLY valid JSON (no markdown block wrap) with exactly these keys:\n";
-        $prompt .= "'sector', 'industry', 'business_type', 'description', 'has_prohibited_activities' (boolean), 'prohibited_activities_reason' (string), 'eps', 'pe_ratio', 'roe', 'dividend_yield', 'profit_margin', 'market_cap', 'total_assets', 'total_debt', 'total_revenue', 'interest_income'.\n";
+        $prompt .= "'sector', 'industry', 'business_type', 'description', 'has_prohibited_activities' (boolean), 'prohibited_activities_reason' (string), 'eps', 'pe_ratio', 'roe', 'dividend_yield', 'profit_margin', 'market_cap', 'total_assets', 'total_debt', 'total_revenue', 'interest_income', 'valuation_info', 'growth_info'.\n";
         $prompt .= "For percentages (roe, dividend_yield, profit_margin), use decimals (e.g. 0.05 for 5%). For absolute values, use raw numbers (e.g. 5000000000).";
 
         try {

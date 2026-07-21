@@ -22,7 +22,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscureConfirm  = true;
 
   // Theme Constants
-static const Color cardBg = Colors.white;
+Color get cardBg => context.bgAlt;
 void _register() async {
     if (_nameController.text.isEmpty || 
         _emailController.text.isEmpty || 
@@ -78,7 +78,7 @@ void _register() async {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: AppTheme.haram,
+        backgroundColor: context.haram,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
@@ -88,12 +88,12 @@ void _register() async {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.bg,
+      backgroundColor: context.bg,
       appBar: AppBar(
-        backgroundColor: AppTheme.bg,
+        backgroundColor: context.bg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppTheme.textDark, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: context.textDark, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -105,19 +105,19 @@ void _register() async {
             children: [
               const SizedBox(height: 10),
               // Header
-              const Text(
+              Text(
                 'Create account',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.w900,
-                  color: AppTheme.textDark,
+                  color: context.textDark,
                   letterSpacing: -1,
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 'Join IRSHAD today and start your journey\ntowards ethical and shariah-compliant investing.',
-                style: TextStyle(color: AppTheme.textMuted, height: 1.5, fontSize: 15),
+                style: TextStyle(color: context.textMuted, height: 1.5, fontSize: 15),
               ),
               const SizedBox(height: 32),
 
@@ -168,7 +168,7 @@ void _register() async {
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _register,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primary,
+                    backgroundColor: context.primary,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                     elevation: 0,
@@ -182,12 +182,12 @@ void _register() async {
               const SizedBox(height: 24),
               Row(
                 children: [
-                  const Expanded(child: Divider(color: AppTheme.divider)),
-                  const Padding(
+                  Expanded(child: Divider(color: context.divider)),
+                  Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: Text('or sign up with', style: TextStyle(color: AppTheme.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
+                    child: Text('or sign up with', style: TextStyle(color: context.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
                   ),
-                  const Expanded(child: Divider(color: AppTheme.divider)),
+                  Expanded(child: Divider(color: context.divider)),
                 ],
               ),
               const SizedBox(height: 24),
@@ -198,10 +198,10 @@ void _register() async {
                 child: OutlinedButton(
                   onPressed: _isLoading ? null : _registerWithGoogle,
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppTheme.divider, width: 1.5),
+                    side: BorderSide(color: context.divider, width: 1.5),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                   ),
-                  child: const Text('Sign up with Google', style: TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w700, fontSize: 16)),
+                  child: Text('Sign up with Google', style: TextStyle(color: context.textDark, fontWeight: FontWeight.w700, fontSize: 16)),
                 ),
               ),
               
@@ -211,12 +211,12 @@ void _register() async {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('Already have an account?', style: TextStyle(color: AppTheme.textMuted)),
+                  Text('Already have an account?', style: TextStyle(color: context.textMuted)),
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text(
+                    child: Text(
                       'Sign In',
-                      style: TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w800),
+                      style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800),
                     ),
                   ),
                 ],
@@ -234,8 +234,8 @@ void _register() async {
       padding: const EdgeInsets.only(bottom: 8, left: 4),
       child: Text(
         label,
-        style: const TextStyle(
-          color: AppTheme.textDark,
+        style: TextStyle(
+          color: context.textDark,
           fontWeight: FontWeight.w700,
           fontSize: 14,
         ),
@@ -256,24 +256,24 @@ void _register() async {
       controller: controller,
       obscureText: obscure ?? false,
       keyboardType: keyboardType,
-      style: const TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w500),
+      style: TextStyle(color: context.textDark, fontWeight: FontWeight.w500),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: AppTheme.textMuted, fontWeight: FontWeight.w400),
-        prefixIcon: Icon(icon, color: AppTheme.textMuted, size: 20),
+        hintStyle: TextStyle(color: context.textMuted, fontWeight: FontWeight.w400),
+        prefixIcon: Icon(icon, color: context.textMuted, size: 20),
         suffixIcon: isPassword ? IconButton(
-          icon: Icon(obscure! ? Icons.visibility_off_rounded : Icons.visibility_rounded, color: AppTheme.textMuted, size: 20),
+          icon: Icon(obscure! ? Icons.visibility_off_rounded : Icons.visibility_rounded, color: context.textMuted, size: 20),
           onPressed: toggleObscure,
         ) : null,
         filled: true,
-        fillColor: Colors.white,
+        fillColor: context.bgAlt,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppTheme.divider, width: 1),
+          borderSide: BorderSide(color: context.divider, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppTheme.primary, width: 1.5),
+          borderSide: BorderSide(color: context.primary, width: 1.5),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   User, Shield, CreditCard, Bell, ChevronRight, LogOut, Settings,
@@ -219,7 +219,18 @@ const SAMPLE_ACTIVITY = [
 export default function Profile() {
   const { user, loading: authLoading, logout } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('overview');
+  const location = useLocation();
+
+  const getTabFromHash = (hash) => {
+    const h = hash.replace('#', '');
+    return ['overview', 'watchlist', 'activity', 'settings'].includes(h) ? h : 'overview';
+  };
+
+  const [activeTab, setActiveTab] = useState(getTabFromHash(location.hash));
+
+  useEffect(() => {
+    setActiveTab(getTabFromHash(location.hash));
+  }, [location.hash]);
   
   // Data States
   const [profileUser, setProfileUser] = useState(null);
@@ -459,7 +470,7 @@ export default function Profile() {
           display: 'flex', alignItems: 'center', gap: '8px',
           transition: 'var(--transition)',
         }}
-          onClick={() => { setActiveTab('settings'); toggleModal('personal', true); }}
+          onClick={() => { setActiveTab('settings'); navigate('/profile#settings', { replace: true }); toggleModal('personal', true); }}
           onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.3)'}
           onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
         >
@@ -480,7 +491,7 @@ export default function Profile() {
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => { setActiveTab(tab.id); navigate(`/profile#${tab.id}`, { replace: true }); }}
               style={{
                 flex: 1, minWidth: '80px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
@@ -550,7 +561,7 @@ export default function Profile() {
           {/* Quick links to market */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
             {[
-              { icon: BarChart2, label: 'Market Overview', desc: 'Browse stocks', href: '/market', color: '#6366F1' },
+              { icon: BarChart2, label: 'Market Overview', desc: 'Browse stocks', href: '/portfolio#market', color: '#6366F1' },
               { icon: BookOpen, label: 'News & Insights', desc: 'Latest halal finance news', href: '/news', color: 'var(--primary)' },
               { icon: Shield, label: 'Shariah Guide', desc: 'Our screening methodology', href: '/shariah', color: 'var(--halal)' },
             ].map(item => (
@@ -592,7 +603,7 @@ export default function Profile() {
               </div>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button
-                  onClick={() => navigate('/market')}
+                  onClick={() => navigate('/portfolio#market')}
                   style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--primary-50)', color: 'var(--primary)', border: '1px solid var(--primary-100)', borderRadius: '8px', padding: '8px 14px', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 700 }}
                 >
                   <Plus size={14} />
