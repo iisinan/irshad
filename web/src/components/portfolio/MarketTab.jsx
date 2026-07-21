@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, TrendingUp, TrendingDown, Star, BarChart2, X, CheckCircle, AlertCircle, HelpCircle } from 'lucide-react';
-import { fetchNgxStocks, fetchWatchlist, addToWatchlist, removeFromWatchlist } from '../../services/api';
+import { fetchNgxStocks, fetchWatchlist, addToWatchlist, removeFromWatchlist, fetchSectors } from '../../services/api';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 
@@ -108,12 +108,9 @@ const StockRow = React.memo(({ stock, idx, isWatched, onToggle }) => {
         {normSector(stock.sector)}
       </td>
 
-      {/* Status */}
-      <td style={{ padding: '13px 16px' }}>
-        <span className={`status-badge ${cfg.cls}`} style={{ fontSize: '0.64rem', padding: '3px 9px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-          <Icon size={9} />
-          {cfg.label}
-        </span>
+      {/* Industry */}
+      <td style={{ padding: '13px 16px', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
+        {stock.business_type || '—'}
       </td>
 
       {/* Price */}
@@ -186,10 +183,17 @@ export default function MarketTab() {
     staleTime: 5 * 60 * 1000,
   });
 
+  const { data: sectorMap = {} } = useQuery({
+    queryKey: ['sectorsMap'],
+    queryFn: async () => await fetchSectors(),
+    staleTime: 24 * 60 * 60 * 1000,
+  });
+
   const [watchlist, setWatchlist] = useState([]);
   const [search,    setSearch]    = useState('');
   const [statusF,   setStatusF]   = useState('all');
   const [sectorF,   setSectorF]   = useState('all');
+  const [industryF, setIndustryF] = useState('all');
   const [sortBy,    setSortBy]    = useState('default');
 
   // Safely extract from potentially stale cache shapes
@@ -210,9 +214,17 @@ export default function MarketTab() {
   };
 
   const uniqueSectors = useMemo(
-    () => [...new Set(actualStocks.map(s => s.sector).filter(Boolean))].sort(),
-    [actualStocks]
+    () => Object.keys(sectorMap).length > 0 ? Object.keys(sectorMap) : [...new Set(actualStocks.map(s => normSector(s.sector)).filter(Boolean))].sort(),
+    [actualStocks, sectorMap]
   );
+
+  const availableIndustries = useMemo(() => {
+    if (sectorF === 'all') {
+      const all = Object.values(sectorMap).flat();
+      return [...new Set(all)].sort();
+    }
+    return sectorMap[sectorF] || [];
+  }, [sectorF, sectorMap]);
 
   const counts = useMemo(() => ({
     halal:    actualStocks.filter(s => getStatus(s) === 'halal').length,
@@ -225,7 +237,8 @@ export default function MarketTab() {
       const q = search.toLowerCase();
       if (q && !s.symbol?.toLowerCase().includes(q) && !s.name?.toLowerCase().includes(q)) return false;
       if (statusF !== 'all' && getStatus(s) !== statusF) return false;
-      if (sectorF !== 'all' && s.sector !== sectorF)      return false;
+      if (sectorF !== 'all' && normSector(s.sector) !== sectorF) return false;
+      if (industryF !== 'all' && s.business_type !== industryF) return false;
       return true;
     });
     if (sortBy === 'gainers')  list = [...list].sort((a, b) => (b.price_change_pct || 0) - (a.price_change_pct || 0));
@@ -233,10 +246,11 @@ export default function MarketTab() {
     if (sortBy === 'cap_high') list = [...list].sort((a, b) => (b.market_cap || 0) - (a.market_cap || 0));
     if (sortBy === 'pe_low')   list = [...list].sort((a, b) => (a.pe_ratio > 0 ? a.pe_ratio : 999) - (b.pe_ratio > 0 ? b.pe_ratio : 999));
     return list;
-  }, [actualStocks, search, statusF, sectorF, sortBy]);
+    return list;
+  }, [actualStocks, search, statusF, sectorF, industryF, sortBy]);
 
-  const hasFilters = search || statusF !== 'all' || sectorF !== 'all';
-  const clearAll   = () => { setSearch(''); setStatusF('all'); setSectorF('all'); setSortBy('default'); };
+  const hasFilters = search || statusF !== 'all' || sectorF !== 'all' || industryF !== 'all';
+  const clearAll   = () => { setSearch(''); setStatusF('all'); setSectorF('all'); setIndustryF('all'); setSortBy('default'); };
 
   const selectStyle = (active) => ({
     padding: '9px 12px', borderRadius: '10px', outline: 'none', cursor: 'pointer',
@@ -266,27 +280,6 @@ export default function MarketTab() {
 
           {actualStocks.length > 0 && (
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              {[
-                { key: 'halal',     label: 'Halal',     count: counts.halal,    cls: 'status-halal' },
-                { key: 'doubtful',  label: 'Doubtful',  count: counts.doubtful, cls: 'status-doubtful' },
-                { key: 'non-halal', label: 'Non-Halal', count: counts.nonHalal, cls: 'status-non-halal' },
-              ].map(({ key, label, count, cls }) => (
-                <button
-                  key={key}
-                  onClick={() => setStatusF(prev => prev === key ? 'all' : key)}
-                  className={cls}
-                  style={{
-                    border: 'none', cursor: 'pointer', borderRadius: '20px',
-                    padding: '5px 13px', fontWeight: 700, fontSize: '0.77rem',
-                    opacity: statusF !== 'all' && statusF !== key ? 0.35 : 1,
-                    transition: 'opacity 0.2s',
-                    outline: statusF === key ? '2px solid currentColor' : 'none',
-                    outlineOffset: '2px',
-                  }}
-                >
-                  {count} {label}
-                </button>
-              ))}
             </div>
           )}
         </div>
@@ -318,17 +311,19 @@ export default function MarketTab() {
             )}
           </div>
 
-          <select value={statusF} onChange={e => setStatusF(e.target.value)} style={selectStyle(statusF !== 'all')}>
-            <option value="all">All Status</option>
-            <option value="halal">Halal</option>
-            <option value="doubtful">Doubtful</option>
-            <option value="non-halal">Non-Halal</option>
-          </select>
 
-          <select value={sectorF} onChange={e => setSectorF(e.target.value)} style={selectStyle(sectorF !== 'all')}>
+
+          <select value={sectorF} onChange={e => { setSectorF(e.target.value); setIndustryF('all'); }} style={selectStyle(sectorF !== 'all')}>
             <option value="all">All Sectors</option>
             {uniqueSectors.map(s => <option key={s} value={s}>{normSector(s)}</option>)}
           </select>
+
+          {availableIndustries.length > 0 && (
+            <select value={industryF} onChange={e => setIndustryF(e.target.value)} style={selectStyle(industryF !== 'all')}>
+              <option value="all">All Industries</option>
+              {availableIndustries.map(i => <option key={i} value={i}>{i}</option>)}
+            </select>
+          )}
 
           <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={selectStyle(false)}>
             <option value="default">Default</option>
@@ -382,14 +377,14 @@ export default function MarketTab() {
             <p style={{ fontSize: '0.87rem' }}>Try adjusting your search or filters.</p>
           </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
+          <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '70vh' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'auto' }}>
               <thead>
                 <tr>
                   <TH>#</TH>
                   <TH>Company</TH>
                   <TH>Sector</TH>
-                  <TH>Status</TH>
+                  <TH>Industry</TH>
                   <TH right>Price</TH>
                   <TH right>Change</TH>
                   <TH right>Mkt Cap</TH>

@@ -15,8 +15,11 @@
     "axios": "^1.18.1",
     "axios-retry": "^4.5.0",
     "lucide-react": "^1.24.0",
+    "posthog-js": "^1.405.3",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
+    "react-ga4": "^3.0.1",
+    "react-joyride": "^3.2.0",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.18.1",
     "recharts": "^3.9.2"

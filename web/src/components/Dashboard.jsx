@@ -552,7 +552,7 @@ export default function Dashboard() {
             <p style={{color:'var(--text-muted)',fontSize:'0.98rem',marginTop:'8px',fontWeight:500}}>Your Islamic investment command centre.</p>
           </div>
           <div style={{display:'flex',gap:'11px',flex:1,minWidth:'260px',maxWidth:'420px'}}>
-            <div style={{position:'relative',flex:1}}>
+            <div id="tour-search" style={{position:'relative',flex:1}}>
               <Search size={15} color="var(--text-muted)" style={{position:'absolute',left:'14px',top:'50%',transform:'translateY(-50%)',pointerEvents:'none'}}/>
               <input ref={searchRef} value={searchVal} onChange={e=>setSearchVal(e.target.value)}
                 onKeyDown={e=>{if(e.key==='Enter'&&searchVal.trim())navigate(`/market/${searchVal.trim().toUpperCase()}`);}}
@@ -574,17 +574,21 @@ export default function Dashboard() {
 
         {/* ═ Stats Grid ═ */}
         <div className="stagger-2" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:'16px',marginBottom:'18px'}}>
-          <StatCard icon={Wallet} label="Portfolio Value" primary={true}
-            value={`₦${fmt(summary.total_balance)}`}
-            sub={<><TrendingUp size={12}/> Active portfolio</>} badge="Market"/>
-          <StatCard icon={Shield} label="Compliance Score" value={`${compliance}%`}
-            sub={compliance>=90?<><CheckCircle size={12} color="var(--halal)"/> Excellent standing</>:<><AlertTriangle size={12} color="var(--doubtful)"/> Needs review</>}/>
+          <div id="tour-portfolio">
+            <StatCard icon={Wallet} label="Portfolio Value" primary={true}
+              value={`₦${fmt(summary.total_balance)}`}
+              sub={<><TrendingUp size={12}/> Active portfolio</>} badge="Market"/>
+          </div>
+          <div id="tour-compliance">
+            <StatCard icon={Shield} label="Compliance Score" value={`${compliance}%`}
+              sub={compliance>=90?<><CheckCircle size={12} color="var(--halal)"/> Excellent standing</>:<><AlertTriangle size={12} color="var(--doubtful)"/> Needs review</>}/>
+          </div>
           <StatCard icon={Activity} label="Total Holdings" value={holdings.length||0}
             sub={<><Zap size={12} color="var(--primary)"/> Across all sectors</>}/>
         </div>
 
         {/* ═ Quick Actions ═ */}
-        <div className="quick-actions-grid stagger-3" style={{ marginBottom: '32px' }}>
+        <div id="tour-quick-actions" className="quick-actions-grid stagger-3" style={{ marginBottom: '32px' }}>
           {QUICK_ACTIONS.map(a => (
             <Link key={a.label} to={a.to} style={{ textDecoration: 'none', background: 'white', border: '1px solid var(--border)', borderRadius: '20px', padding: '20px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px', boxShadow: 'var(--shadow-sm)', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', position: 'relative', overflow: 'hidden' }}
               onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 12px 28px rgba(15,82,87,0.1)'; e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.borderColor = a.color; }}
@@ -748,7 +752,7 @@ export default function Dashboard() {
             </Panel>
 
             {/* Islamic Obligations */}
-            <Panel>
+            <Panel id="tour-obligations">
               <PanelHeader icon={HeartHandshake} title="Islamic Obligations"/>
               {/* Purification */}
               <div style={{padding:'14px',borderRadius:'13px',marginBottom:'12px',background:summary.purification_due>0?'rgba(230,81,0,0.06)':'var(--bg-section)',border:`1px solid ${summary.purification_due>0?'var(--doubtful-border)':'var(--border)'}`}}>

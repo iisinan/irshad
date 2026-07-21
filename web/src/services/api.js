@@ -143,6 +143,11 @@ const getNext3AM = () => {
   return next3AM.getTime();
 };
 
+export const fetchSectors = async () => {
+  const res = await api.get('/sectors');
+  return res.data;
+};
+
 export const fetchNgxStocks = async () => {
   try {
     const cacheKey = 'irshad_stocks_cache_v10';

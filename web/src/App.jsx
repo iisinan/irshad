@@ -35,11 +35,25 @@ const AnimatedRoutes = ({ children }) => {
   );
 };
 
-/* ─── Document Title Updater ──────────────────────────────── */
+import { trackPageView, identifyUser } from './utils/analytics';
+
+/* ─── Document Title Updater & Analytics ──────────────────── */
 const DocumentTitleUpdater = () => {
   const location = useLocation();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      identifyUser(user);
+    }
+  }, [user]);
+
   useEffect(() => {
     const path = location.pathname;
+    
+    // Track Page View
+    trackPageView(path);
+
     let title = 'Irshad - Islamic Finance & Shariah Screening';
     if (path === '/') title = 'Home | Irshad';
     else if (path.startsWith('/market')) title = 'Market Screener | Irshad';
@@ -286,8 +300,6 @@ const StockCard = ({ company }) => {
           {company.name && <div className="stock-name" style={{ fontSize: '0.65rem' }}>{company.name}</div>}
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
-          <span style={{ fontSize: '0.55rem', padding: '3px 8px', background: 'var(--bg-section)', color: 'var(--text-muted)', borderRadius: '12px', fontWeight: 700, whiteSpace: 'nowrap' }}>{sector}</span>
-          {company.industry && <span style={{ fontSize: '0.55rem', padding: '3px 8px', background: 'var(--bg-section)', color: 'var(--text-muted)', borderRadius: '12px', fontWeight: 700, whiteSpace: 'nowrap' }}>{company.industry}</span>}
         </div>
       </div>
       <div className="stock-card-body">
@@ -895,8 +907,6 @@ const MarketPage = () => {
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px', flexShrink: 0 }}>
                       <div style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--text-dark)' }}>₦{price.toFixed(2)}</div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end', maxWidth: '200px' }}>
-                        <span style={{ fontSize: '0.65rem', padding: '3px 8px', background: 'var(--bg-section)', color: 'var(--text-muted)', borderRadius: '12px', fontWeight: 700, whiteSpace: 'nowrap' }}>{sector}</span>
-                        {company.industry && <span style={{ fontSize: '0.65rem', padding: '3px 8px', background: 'var(--bg-section)', color: 'var(--text-muted)', borderRadius: '12px', fontWeight: 700, whiteSpace: 'nowrap' }}>{company.industry}</span>}
                         {change !== 0 && (
                           <div style={{
                             display: 'flex', alignItems: 'center', gap: '2px',

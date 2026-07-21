@@ -3,7 +3,7 @@ import { Menu, X } from 'lucide-react';
 import DashboardSidebar from './DashboardSidebar';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import SetYourIrshad from './SetYourIrshad';
+import DashboardTour from './DashboardTour';
 
 export default function DashboardLayout({ children }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -31,7 +31,7 @@ export default function DashboardLayout({ children }) {
       background: 'var(--bg)',
       backgroundImage: 'radial-gradient(at 0% 0%, rgba(15,82,87,0.03) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(212,175,55,0.04) 0px, transparent 50%)',
     }}>
-      {needsOnboarding && <SetYourIrshad />}
+      {needsOnboarding && <DashboardTour />}
 
       {/* Mobile Overlay */}
       {mobileOpen && (
