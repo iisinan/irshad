@@ -347,6 +347,11 @@ const StockDetails = ({ symbol: propSymbol }) => {
                       boxShadow: parseFloat(interestRatio) <= 5 ? '0 0 10px rgba(74,222,128,0.4)' : '0 0 10px rgba(248,113,113,0.4)'
                     }} />
                   </div>
+                  <p style={{ color: 'var(--text-muted)', lineHeight: 1.5, fontSize: '0.88rem', margin: '16px 0 0 0' }}>
+                    {parseFloat(interestRatio) <= 5 
+                      ? "PASS: The company's impermissible income (like interest) is below the 5% maximum threshold."
+                      : "FAIL: The company's impermissible income exceeds the 5% maximum threshold."}
+                  </p>
                 </div>
 
                 {/* C. Interest Bearing Debt */}
@@ -380,6 +385,11 @@ const StockDetails = ({ symbol: propSymbol }) => {
                       boxShadow: parseFloat(debtRatio) <= 30 ? '0 0 10px rgba(74,222,128,0.4)' : '0 0 10px rgba(248,113,113,0.4)'
                     }} />
                   </div>
+                  <p style={{ color: 'var(--text-muted)', lineHeight: 1.5, fontSize: '0.88rem', margin: '16px 0 0 0' }}>
+                    {parseFloat(debtRatio) <= 30
+                      ? "PASS: The company's interest-bearing debt is within the acceptable 30% limit."
+                      : "FAIL: The company's interest-bearing debt exceeds the 30% limit, showing excessive conventional leverage."}
+                  </p>
                 </div>
 
               </div>
