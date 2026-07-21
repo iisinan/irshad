@@ -49,22 +49,28 @@ class AaoifiComplianceService
             $sws = strtolower($swsIndustry ?? '');
 
             $isBlacklistedSector = false;
-            $matchedKeyword = '';
             
             foreach (self::BLACKLIST_KEYWORDS as $keyword) {
                 if (str_contains($sector, $keyword) || str_contains($businessType, $keyword) || str_contains($sws, $keyword)) {
                     $isBlacklistedSector = true;
-                    $matchedKeyword = $keyword;
                     break;
                 }
             }
 
-            // EXCEPT JAIZBANK
-            if ($isBlacklistedSector && strtoupper($company->symbol) !== 'JAIZBANK' && strtoupper($company->symbol) !== 'JAIZ') {
+            // JAIZ BANK EXEMPTION AND NARRATIVE
+            if (strtoupper($company->symbol) === 'JAIZBANK' || strtoupper($company->symbol) === 'JAIZ') {
+                return $this->saveStatus(
+                    $company, 
+                    'halal', 
+                    "Status is Halal. Jaiz Bank is a fully licensed Islamic bank operating strictly under non-interest banking principles."
+                );
+            }
+
+            if ($isBlacklistedSector) {
                 return $this->saveStatus(
                     $company, 
                     'non-halal', 
-                    "Failed Rule 1: Sector Check. The company's industry or sector involves prohibited elements ('{$matchedKeyword}')."
+                    "Failed Rule 1: Business Activity Check. The stock failed due to conventional banking or financial business activities."
                 );
             }
         }
