@@ -196,7 +196,7 @@ const StockTicker = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchNgxStocks().then(r => { if (r.data) setStocks(r.data); }).catch(() => {});
+    fetchNgxStocks().then(r => { if (r.data) setStocks(r.data.filter(s => parseFloat(s.latest_price) > 0)); }).catch(() => {});
   }, []);
 
   if (stocks.length === 0) return null;
@@ -234,6 +234,35 @@ const StockTicker = () => {
   );
 };
 
+/* ─── Company Avatar ────────────────────────────────────────── */
+const CompanyAvatar = ({ symbol, size = 40, style = {} }) => {
+  const [error, setError] = useState(false);
+  const letter = (symbol || '').substring(0, 2).toUpperCase();
+  const radius = size * 0.25;
+
+  return (
+    <div style={{
+      width: size, height: size, borderRadius: radius,
+      background: 'var(--bg-section)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontWeight: 800, color: 'var(--text-dark)', fontSize: `${size * 0.35}px`,
+      overflow: 'hidden', flexShrink: 0,
+      border: '1px solid var(--border)',
+      ...style
+    }}>
+      {!error ? (
+        <img
+          src={`https://storage.googleapis.com/irshad-images/logos/${(symbol || '').toLowerCase()}.png`}
+          alt={symbol}
+          onError={() => setError(true)}
+          style={{ width: '100%', height: '100%', objectFit: 'contain', background: 'white' }}
+        />
+      ) : (
+        letter
+      )}
+    </div>
+  );
+};
+
 /* ─── Stock Card ─────────────────────────────────────────── */
 const StockCard = ({ company }) => {
   const priceChange = parseFloat(company.price_change ?? 0);
@@ -245,30 +274,18 @@ const StockCard = ({ company }) => {
   }
   
   const isPositive = priceChange >= 0;
-
-  let statusStr = 'REVIEWING';
-  let badgeClass = 'status-doubtful';
-
-  const rawStatus = company.status;
-  if (typeof rawStatus === 'object' && rawStatus !== null) {
-    const s = rawStatus.status?.toLowerCase();
-    if (s === 'halal') { statusStr = 'HALAL'; badgeClass = 'status-halal'; }
-    else if (s === 'non-halal') { statusStr = 'NON-HALAL'; badgeClass = 'status-non-halal'; }
-  } else if (typeof rawStatus === 'string') {
-    const s = rawStatus.toLowerCase();
-    if (s === 'compliant' || s === 'halal') { statusStr = 'HALAL'; badgeClass = 'status-halal'; }
-    else if (s === 'non-halal') { statusStr = 'NON-HALAL'; badgeClass = 'status-non-halal'; }
-  }
+  const sector = company.sector || 'Equities';
 
   const navigate = useNavigate();
   return (
-    <div onClick={() => navigate('/login')} className="stock-card hover-card" style={{ cursor: 'pointer', padding: '16px' }}>
-      <div className="stock-card-header" style={{ marginBottom: '12px' }}>
-        <div className="stock-card-title">
-          <div className="stock-symbol" style={{ fontSize: '0.85rem' }}>{company.symbol}</div>
+    <div onClick={() => navigate(`/login`)} className="stock-card hover-card" style={{ cursor: 'pointer', padding: '16px', display: 'flex', flexDirection: 'column' }}>
+      <div className="stock-card-header" style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <CompanyAvatar symbol={company.symbol} size={36} />
+        <div className="stock-card-title" style={{ flex: 1 }}>
+          <div className="stock-symbol" style={{ fontSize: '0.9rem' }}>{company.symbol}</div>
           {company.name && <div className="stock-name" style={{ fontSize: '0.65rem' }}>{company.name}</div>}
         </div>
-        {statusStr && <span className={`status-badge ${badgeClass}`} style={{ fontSize: '0.55rem', padding: '2px 6px' }}>{statusStr}</span>}
+        <span style={{ fontSize: '0.6rem', padding: '3px 8px', background: 'var(--bg-section)', color: 'var(--text-muted)', borderRadius: '12px', fontWeight: 700 }}>{sector}</span>
       </div>
       <div className="stock-card-body">
         {latestPrice > 0 ? (
@@ -663,7 +680,7 @@ const MarketPage = () => {
   useEffect(() => {
     if (!user) return;
     fetchNgxStocks()
-      .then(r => { if (r.data) setStocks(r.data); })
+      .then(r => { if (r.data) setStocks(r.data.filter(s => parseFloat(s.latest_price) > 0)); })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [user]);
@@ -836,12 +853,12 @@ const MarketPage = () => {
                 {search ? ` for "${search}"` : ''}
               </span>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div className="market-list-container" style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '720px', overflowY: 'auto', paddingRight: '8px' }}>
               {filtered.map((company, i) => {
-                const st = getStatus(company);
                 const price = parseFloat(company.daily_prices?.[0]?.price || company.latest_price || 0);
                 const change = parseFloat(company.price_change_pct || 0);
                 const isPos = change >= 0;
+                const sector = company.sector || 'Equities';
                 return (
                   <div
                     key={company.symbol}
@@ -859,43 +876,36 @@ const MarketPage = () => {
                     onMouseLeave={e => { e.currentTarget.style.boxShadow = 'var(--shadow-sm)'; e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'none'; }}
                   >
                     {/* Logo */}
-                    {company.logo_url ? (
-                      <img src={company.logo_url} alt={company.symbol}
-                        style={{ width: '44px', height: '44px', borderRadius: '12px', objectFit: 'contain', border: '1px solid var(--border)', flexShrink: 0 }} />
-                    ) : (
-                      <div style={{
-                        width: '44px', height: '44px', borderRadius: '12px', flexShrink: 0,
-                        background: 'var(--primary-50)', display: 'flex', alignItems: 'center',
-                        justifyContent: 'center', fontWeight: 800, fontSize: '1rem', color: 'var(--primary)',
-                      }}>{company.symbol?.charAt(0)}</div>
-                    )}
+                    <CompanyAvatar symbol={company.symbol} size={44} />
+                    
                     {/* Name + sector */}
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-dark)', letterSpacing: '-0.2px' }}>
+                      <div style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--text-dark)', marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         {company.symbol}
                       </div>
                       <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {company.name}
                       </div>
                     </div>
-                    {/* Sector pill */}
-                    <span style={{
-                      fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-light)',
-                      background: 'var(--bg-section)', padding: '4px 10px', borderRadius: '20px',
-                      whiteSpace: 'nowrap', display: 'none',
-                    }} className="hide-mobile">{company.sector || 'Equities'}</span>
-                    {/* Status badge removed per user request */}
-                    {/* Price */}
-                    <div style={{ textAlign: 'right', flexShrink: 0, minWidth: '80px' }}>
-                      <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '1rem' }}>
-                        ₦{price.toFixed(2)}
-                      </div>
-                      <div style={{ fontSize: '0.78rem', fontWeight: 700, color: isPos ? 'var(--halal)' : 'var(--non-halal)', display: 'flex', alignItems: 'center', gap: '3px', justifyContent: 'flex-end' }}>
-                        {isPos ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-                        {isPos ? '+' : ''}{change.toFixed(2)}%
+
+                    {/* Price & Change */}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px', flexShrink: 0 }}>
+                      <div style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--text-dark)' }}>₦{price.toFixed(2)}</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '0.65rem', padding: '3px 8px', background: 'var(--bg-section)', color: 'var(--text-muted)', borderRadius: '12px', fontWeight: 700 }}>{sector}</span>
+                        {change !== 0 && (
+                          <div style={{
+                            display: 'flex', alignItems: 'center', gap: '2px',
+                            color: isPos ? 'var(--halal)' : 'var(--non-halal)',
+                            fontSize: '0.75rem', fontWeight: 700
+                          }}>
+                            {isPos ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                            {isPos ? '+' : ''}{change.toFixed(2)}%
+                          </div>
+                        )}
                       </div>
                     </div>
-                    <ChevronRight size={16} color="var(--text-light)" style={{ flexShrink: 0 }} />
+                    <ChevronRight size={16} color="var(--text-light)" style={{ flexShrink: 0, marginLeft: '8px' }} />
                   </div>
                 );
               })}

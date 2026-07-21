@@ -301,18 +301,18 @@ const StockDetails = ({ symbol: propSymbol }) => {
                   cursor: 'default'
                 }} className="hover-card">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '16px' }}>
-                    <div style={{ background: screeningBg, border: `1px solid ${screeningBorder}`, borderRadius: '12px', padding: '10px', display: 'flex', boxShadow: `0 4px 12px ${screeningBg}` }}>
-                      {isHalal ? <CheckCircle size={20} color={screeningColor} /> : isNonHalal ? <XCircle size={20} color={screeningColor} /> : <AlertTriangle size={20} color={screeningColor} />}
+                    <div style={{ background: (stock.status?.reason?.includes('prohibited industry') ? 'var(--non-halal-bg)' : 'var(--halal-bg)'), border: `1px solid ${(stock.status?.reason?.includes('prohibited industry') ? 'rgba(248,113,113,0.2)' : 'rgba(16,185,129,0.2)')}`, borderRadius: '12px', padding: '10px', display: 'flex', boxShadow: `0 4px 12px ${(stock.status?.reason?.includes('prohibited industry') ? 'var(--non-halal-bg)' : 'var(--halal-bg)')}` }}>
+                      {stock.status?.reason?.includes('prohibited industry') ? <XCircle size={20} color="var(--non-halal)" /> : <CheckCircle size={20} color="var(--halal)" />}
                     </div>
                     <h3 style={{ fontSize: '1.1rem', color: 'var(--text-dark)', fontWeight: 800, margin: 0, letterSpacing: '-0.3px' }}>A. Business Activity</h3>
-                    <div style={{ marginLeft: 'auto', background: screeningBg, color: screeningColor, padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>
-                      {isHalal ? 'PASS' : isNonHalal ? 'FAIL' : 'REVIEW'}
+                    <div style={{ marginLeft: 'auto', background: (stock.status?.reason?.includes('prohibited industry') ? 'var(--non-halal-bg)' : 'var(--halal-bg)'), color: (stock.status?.reason?.includes('prohibited industry') ? 'var(--non-halal)' : 'var(--halal)'), padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>
+                      {stock.status?.reason?.includes('prohibited industry') ? 'FAIL' : 'PASS'}
                     </div>
                   </div>
                   <p style={{ color: 'var(--text-muted)', lineHeight: 1.6, fontSize: '0.95rem', margin: 0, paddingLeft: '46px' }}>
-                    {stock.activity_reason || (isHalal 
-                      ? "The core business operations of this company have been verified to be in a Halal industry, with no significant involvement in prohibited activities like conventional finance, alcohol, gambling, or tobacco."
-                      : "We were unable to verify the core business activity or it was flagged as potentially non-compliant. Please review the company's primary operations manually.")}
+                    {stock.status?.reason?.includes('prohibited industry') 
+                      ? stock.status.reason
+                      : "The core business operations of this company have been verified to be in a Halal industry, with no significant involvement in prohibited activities like conventional finance, alcohol, gambling, or tobacco."}
                   </p>
                 </div>
 
@@ -592,9 +592,9 @@ const StockDetails = ({ symbol: propSymbol }) => {
             <div style={{ width: '64px', height: '64px', background: 'var(--primary-50)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', color: 'var(--primary)' }}>
               <Building2 size={32} />
             </div>
-            <h3 style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-dark)', textAlign: 'center', marginBottom: '12px' }}>Brokerage Integration</h3>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-dark)', textAlign: 'center', marginBottom: '12px' }}>Coming Soon</h3>
             <p style={{ color: 'var(--text-muted)', fontSize: '1rem', textAlign: 'center', lineHeight: 1.5, marginBottom: '32px' }}>
-              In-app trading with CSCS and top Nigerian brokerages is coming soon. Connect your account to enable one-click Halal trading.
+              Brokerage integration is currently on hold. We will notify you when trading is available.
             </p>
             <button className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '16px', fontSize: '1rem' }} onClick={() => setShowBrokerageModal(false)}>
               Got it, thanks!
