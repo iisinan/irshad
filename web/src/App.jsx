@@ -4,7 +4,7 @@ import { TrendingUp, TrendingDown, ArrowRight, CheckCircle, Shield, BarChart2, C
 import { fetchNgxStocks } from './services/api';
 import DashboardLayout from './components/DashboardLayout';
 import Footer from './components/Footer';
-import { LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage } from './components/AuthPages';
+import { LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage } from './components/AuthPages';
 import ErrorBoundary from './components/ErrorBoundary';
 import NotFound from './components/NotFound';
 import { useAuth } from './context/AuthContext';
@@ -21,6 +21,7 @@ const Profile = React.lazy(() => import('./components/Profile'));
 const Settings = React.lazy(() => import('./components/Settings'));
 const AdminDashboard = React.lazy(() => import('./components/AdminDashboard'));
 const RoleBasedDashboard = React.lazy(() => import('./components/RoleBasedDashboard'));
+const Pricing = React.lazy(() => import('./components/Pricing'));
 
 const DASHBOARD_ROUTES = ['/dashboard', '/portfolio', '/profile', '/settings'];
 
@@ -979,6 +980,7 @@ function App() {
                 <AnimatedRoutes>
                   <Route path="/" element={<LandingPage />} />
                   <Route path="/about" element={<AboutPage />} />
+                  <Route path="/pricing" element={<Pricing />} />
                   <Route path="/shariah" element={<ShariahPage />} />
                   <Route path="/resources" element={<ResourcesPage />} />
                   <Route path="/market/:symbol" element={
@@ -1004,6 +1006,7 @@ function App() {
                   <Route path="/register" element={<RegisterPage />} />
                   <Route path="/forgot" element={<ForgotPasswordPage />} />
                   <Route path="/reset-password" element={<ResetPasswordPage />} />
+                  <Route path="/verify-email" element={<VerifyEmailPage />} />
                   <Route path="*" element={<NotFound />} />
                 </AnimatedRoutes>
               </Suspense>

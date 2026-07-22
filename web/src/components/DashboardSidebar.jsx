@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import {
   BarChart2, Briefcase, Star, Bell, Activity,
   HeartHandshake, Calculator, BookOpen, Newspaper,
   User, Settings, LogOut, ChevronLeft, ChevronRight,
-  Shield, Globe, X, Search, LayoutDashboard
+  Shield, Globe, X, Search, LayoutDashboard, Moon, Sun
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -27,6 +28,7 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
 
   const isActive = (to) => {
     const toPath = to.split('#')[0];
@@ -227,6 +229,21 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
       }}>
         {!collapsed ? (
           <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+              <button 
+                onClick={toggleTheme}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '8px',
+                  background: 'transparent', border: '1px solid var(--border)',
+                  color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600,
+                  padding: '6px 10px', borderRadius: '8px', cursor: 'pointer',
+                  width: '100%', justifyContent: 'center'
+                }}
+              >
+                {isDark ? <Sun size={14} /> : <Moon size={14} />}
+                <span>{isDark ? 'Light Mode' : 'Dark Mode'}</span>
+              </button>
+            </div>
             <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', marginBottom: '10px' }}>
               <div style={{
                 width: '38px', height: '38px', borderRadius: '50%',
@@ -262,7 +279,19 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
             </button>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+            <button 
+                onClick={toggleTheme}
+                title={isDark ? "Light Mode" : "Dark Mode"}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: 'transparent', border: '1px solid var(--border)',
+                  color: 'var(--text-muted)', width: '38px', height: '38px',
+                  borderRadius: '50%', cursor: 'pointer'
+                }}
+              >
+                {isDark ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
             <Link to="/profile" title="Profile" style={{ textDecoration: 'none' }}>
               <div style={{
                 width: '36px', height: '36px', borderRadius: '50%',

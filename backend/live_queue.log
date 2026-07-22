@@ -1,0 +1,7 @@
+
+Deprecated: Constant PDO::MYSQL_ATTR_SSL_CA is deprecated since 8.5, use Pdo\Mysql::ATTR_SSL_CA instead in /Users/sinan/Herd/irshad/backend/vendor/laravel/framework/config/database.php on line 61
+
+Deprecated: Constant PDO::MYSQL_ATTR_SSL_CA is deprecated since 8.5, use Pdo\Mysql::ATTR_SSL_CA instead in /Users/sinan/Herd/irshad/backend/vendor/laravel/framework/config/database.php on line 81
+  2026-07-22 09:41:43 App\Jobs\NotifyUsersOfAssetChange .............. RUNNING
+  2026-07-22 09:41:48 App\Jobs\NotifyUsersOfAssetChange .............. 5s DONE
+  2026-07-22 09:41:48 App\Jobs\ProcessCompanyFinancialsJob ........... RUNNING

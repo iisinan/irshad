@@ -37,9 +37,15 @@ class ScrapeNgxPrices extends Command
 
         try {
             $url = 'https://ngxpulse.ng/api/ngxdata/stocks';
-            
+            $apiKey = env('NGXPULSE_API_KEY', config('services.ngxpulse.key', ''));
+
+            if (empty($apiKey)) {
+                $this->error("NGXPULSE_API_KEY is not set in .env. The API will likely reject the request.");
+            }
+
             $response = Http::withHeaders([
                 'accept' => 'application/json',
+                'X-API-Key' => $apiKey,
                 'Referer' => 'https://ngxpulse.ng/',
                 'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
             ])->timeout(30)->get($url);
@@ -80,12 +86,19 @@ class ScrapeNgxPrices extends Command
 
             DB::beginTransaction();
 
+            $activeSymbols = [];
+
             foreach ($stocksList as $stock) {
                 $symbol = strtoupper(trim($stock['symbol'] ?? ''));
                 $closePrice = $stock['current_price'];
                 $prevPrice = $stock['previous_close'] ?? $closePrice;
                 $change = $closePrice - $prevPrice;
                 $changePct = $stock['change_percent'] ?? 0;
+                $volume = $stock['volume'] ?? null;
+                $sharesOutstanding = $stock['shares_outstanding'] ?? null;
+                
+                $sector = isset($stock['sector']) ? ucwords(strtolower($stock['sector'])) : 'Unknown';
+                $industry = isset($stock['industry']) ? ucwords(strtolower($stock['industry'])) : null;
                 
                 $logoUrl = null;
                 if (isset($logoMapping[$symbol])) {
@@ -96,6 +109,8 @@ class ScrapeNgxPrices extends Command
 
                 if (empty($symbol) || $closePrice === null) continue;
 
+                $activeSymbols[] = $symbol;
+
                 $company = Company::where('symbol', $symbol)->first();
 
                 if (!$company) {
@@ -103,7 +118,8 @@ class ScrapeNgxPrices extends Command
                     $company = Company::create([
                         'symbol' => $symbol,
                         'name' => trim($stock['name'] ?? $symbol),
-                        'sector' => isset($stock['sector']) ? ucwords(strtolower($stock['sector'])) : 'Unknown',
+                        'sector' => $sector,
+                        'industry' => $industry,
                         'business_type' => 'Unknown',
                         'description' => 'A publicly listed company on the Nigerian Exchange (NGX).',
                         'latest_price' => $closePrice,
@@ -111,17 +127,34 @@ class ScrapeNgxPrices extends Command
                         'price_change_pct' => $changePct,
                         'logo_url' => $logoUrl,
                         'market_cap' => $marketCap,
+                        'shares_outstanding' => $sharesOutstanding,
+                        'volume_today' => $volume,
+                        'is_active' => true,
                     ]);
                     $missingSymbols[] = $symbol; // still keep track to log what was added
                 } else {
-                    // Update denormalized fields
-                    $company->update([
+                    // Update denormalized fields including sector and industry if ngxpulse is the source
+                    $updateData = [
                         'latest_price' => $closePrice,
                         'price_change' => $change,
                         'price_change_pct' => $changePct,
-                        'logo_url' => $logoUrl,
                         'market_cap' => $marketCap,
-                    ]);
+                        'shares_outstanding' => $sharesOutstanding,
+                        'volume_today' => $volume,
+                        'is_active' => true,
+                    ];
+                    
+                    if ($logoUrl) {
+                        $updateData['logo_url'] = $logoUrl;
+                    }
+                    if ($sector !== 'Unknown') {
+                        $updateData['sector'] = $sector;
+                    }
+                    if ($industry) {
+                        $updateData['industry'] = $industry;
+                    }
+                    
+                    $company->update($updateData);
                 }
 
                 // Update or create daily price
@@ -129,12 +162,20 @@ class ScrapeNgxPrices extends Command
                     ['company_id' => $company->id, 'date' => $today],
                     [
                         'price' => $closePrice,
+                        'volume' => $volume,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]
                 );
 
                 $updatesCount++;
+            }
+
+            // Mark companies as inactive if they are not in the active pulse list
+            if (count($activeSymbols) > 0) {
+                DB::table('companies')
+                    ->whereNotIn('symbol', $activeSymbols)
+                    ->update(['is_active' => false]);
             }
 
             DB::commit();

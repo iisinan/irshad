@@ -17,7 +17,7 @@ use Exception;
 
 class SyncNgxData extends Command
 {
-    protected $signature = 'ngx:sync {--batch=20 : Companies per fundamentals batch} {--logos : Also fetch logos} {--prices-only : Only sync prices, skip fundamentals}';
+    protected $signature = 'ngx:sync {--batch=20 : Companies per fundamentals batch} {--logos : Also fetch logos} {--prices-only : Only sync prices, skip fundamentals} {--fundamentals-only : Only sync fundamentals, skip prices}';
 
     protected $description = 'Sync NGX live prices (official API) + fundamentals (Yahoo) for all companies';
 
@@ -27,68 +27,72 @@ class SyncNgxData extends Command
         $fetchLogos  = $this->option('logos');
         $pricesOnly  = $this->option('prices-only');
 
-        // ── STEP 1: Fetch ALL prices in a single API call ──────────────────────
-        $this->info('Fetching all live prices from NGX official API...');
+        $livePrices = [];
+        if (!$this->option('fundamentals-only')) {
+            $this->info('Fetching all live prices from NGX official API...');
+            
+            $livePrices = $ngxService->fetchAllLivePrices();
+            $this->info('Got ' . count($livePrices) . ' live prices from NGX API.');
 
-        $livePrices = $ngxService->fetchAllLivePrices();
-        $this->info('Got ' . count($livePrices) . ' live prices from NGX API.');
-
-        if (empty($livePrices)) {
-            $this->error('NGX price fetch returned empty. Aborting sync.');
-            return Command::FAILURE;
-        }
-
-        // ── STEP 2: Save prices for all companies in one transaction ───────────
-        $this->info('Saving prices to database...');
-        try {
-            DB::reconnect();
-            DB::beginTransaction();
-
-            $today     = now()->toDateString();
-            $yesterday = now()->subDay()->toDateString();
-            $pricesSaved = 0;
-
-            foreach (Company::all() as $company) {
-                $symbol    = trim($company->symbol);
-                $priceData = $livePrices[$symbol] ?? null;
-
-                if (!$priceData || $priceData['price'] <= 0) continue;
-
-                $currentPrice = $priceData['price'];
-
-                // Get yesterday's price from DB to compute prev_price
-                $prevRecord = DailyPrice::where('company_id', $company->id)
-                    ->where('date', '<', $today)
-                    ->latest('date')
-                    ->first();
-
-                DailyPrice::updateOrCreate(
-                    ['company_id' => $company->id, 'date' => $today],
-                    ['price' => $currentPrice, 'volume' => 0, 'change_pct' => $priceData['change_pct']]
-                );
-
-                $change = $currentPrice - ($prevRecord ? $prevRecord->price : $currentPrice);
-                $changePct = $priceData['change_pct'];
-
-                $company->update([
-                    'latest_price' => $currentPrice,
-                    'price_change' => $change,
-                    'price_change_pct' => $changePct,
-                ]);
-
-                $pricesSaved++;
+            if (empty($livePrices)) {
+                $this->error('NGX price fetch returned empty. Aborting sync.');
+                return Command::FAILURE;
             }
-
-            DB::commit();
-            $this->info("✓ Saved prices for {$pricesSaved} companies.");
-        } catch (Exception $e) {
-            DB::rollBack();
-            $this->error('Price save failed: ' . $e->getMessage());
-            Log::error('NGX price save failed: ' . $e->getMessage());
-            return Command::FAILURE;
         }
 
-        if ($pricesOnly) {
+        if (!$this->option('fundamentals-only')) {
+            // ── STEP 2: Save prices for all companies in one transaction ───────────
+            $this->info('Saving prices to database...');
+            try {
+                DB::reconnect();
+                DB::beginTransaction();
+
+                $today     = now()->toDateString();
+                $yesterday = now()->subDay()->toDateString();
+                $pricesSaved = 0;
+
+                foreach (Company::all() as $company) {
+                    $symbol    = trim($company->symbol);
+                    $priceData = $livePrices[$symbol] ?? null;
+
+                    if (!$priceData || $priceData['price'] <= 0) continue;
+
+                    $currentPrice = $priceData['price'];
+
+                    // Get yesterday's price from DB to compute prev_price
+                    $prevRecord = DailyPrice::where('company_id', $company->id)
+                        ->where('date', '<', $today)
+                        ->latest('date')
+                        ->first();
+
+                    DailyPrice::updateOrCreate(
+                        ['company_id' => $company->id, 'date' => $today],
+                        ['price' => $currentPrice, 'volume' => 0, 'change_pct' => $priceData['change_pct']]
+                    );
+
+                    $change = $currentPrice - ($prevRecord ? $prevRecord->price : $currentPrice);
+                    $changePct = $priceData['change_pct'];
+
+                    $company->update([
+                        'latest_price' => $currentPrice,
+                        'price_change' => $change,
+                        'price_change_pct' => $changePct,
+                    ]);
+
+                    $pricesSaved++;
+                }
+
+                DB::commit();
+                $this->info("✓ Saved prices for {$pricesSaved} companies.");
+            } catch (Exception $e) {
+                DB::rollBack();
+                $this->error('Price save failed: ' . $e->getMessage());
+                Log::error('NGX price save failed: ' . $e->getMessage());
+                return Command::FAILURE;
+            }
+        }
+
+        if ($this->option('prices-only')) {
             Cache::flush();
             $this->info('Prices-only sync complete. Cache flushed.');
             return Command::SUCCESS;
@@ -123,7 +127,7 @@ class SyncNgxData extends Command
                     $this->warn("  ✗ {$company->symbol}: " . $e->getMessage());
                     $errors++;
                 }
-                usleep(300000); // 300ms between requests
+                sleep(3); // 3 seconds between requests to avoid rate limits
             }
 
             // Commit this batch
@@ -143,6 +147,9 @@ class SyncNgxData extends Command
                     }
                     if (!empty($data['industry'])) {
                         $companyUpdate['industry'] = $data['industry'];
+                    }
+                    if (!empty($data['overview'])) {
+                        $companyUpdate['overview'] = $data['overview'];
                     }
                     if (!empty($data['analysts_target']) && $data['analysts_target'] > 0) {
                         $companyUpdate['analysts_target'] = $data['analysts_target'];

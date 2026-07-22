@@ -905,8 +905,13 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     final rawRevenue = _parseDouble(latest?['total_revenue']);
     final revenue = rawRevenue > 0.0 ? rawRevenue : safeMarketCap;
     
+    final cashAndEquivalents = _parseDouble(latest?['cash_and_equivalents']);
+    final interestBearingSecurities = _parseDouble(latest?['interest_bearing_securities']);
+    final cash = cashAndEquivalents + interestBearingSecurities;
+
     final debtRatio = marketCap > 0 ? (debt / marketCap) * 100 : 0.0;
     final interestRatio = revenue > 0 ? (interest / revenue) * 100 : 0.0;
+    final cashRatio = marketCap > 0 ? (cash / marketCap) * 100 : 0.0;
 
     String formatAmt(double amt) {
       if (amt == 0) return '0';
@@ -916,6 +921,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
 
     final isDebtFail = debtRatio > 30.0;
     final isInterestFail = interestRatio > 5.0;
+    final isCashFail = cashRatio > 30.0;
 
     Widget buildCalculationCard(String numLabel, String denLabel, String numVal, String denVal) {
       return Column(
@@ -1142,6 +1148,41 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                 Text('Measures the company\'s exposure to interest-bearing debt relative to its market capitalization. A lower ratio indicates less reliance on debt financing. According to AAOIFI standards, this should not exceed 30%.', style: TextStyle(color: context.textMuted, fontSize: 13, height: 1.5)),
                 const SizedBox(height: 24),
                 buildCalculationCard('Total Debt', 'Market Cap', formatAmt(debt), formatAmt(marketCap)),
+              ],
+            ),
+          ),
+          Divider(color: context.divider, height: 1, indent: 24, endIndent: 24),
+
+          // D. Cash & Securities
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Icon(isCashFail ? Icons.cancel : Icons.check_circle, color: isCashFail ? context.haram : context.halal, size: 20),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text('Cash & Securities', style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800, fontSize: 14)),
+                          ),
+                        ]
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text('${cashRatio.toStringAsFixed(2)}%', style: TextStyle(color: isCashFail ? context.haram : context.halal, fontWeight: FontWeight.w900, fontSize: 15)),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                _buildAaoifiProgressBar(cashRatio, 30.0, isCashFail),
+                const SizedBox(height: 16),
+                Text('Measures the company\'s liquid cash and interest-bearing securities relative to its market capitalization. According to AAOIFI standards, this should not exceed 30%.', style: TextStyle(color: context.textMuted, fontSize: 13, height: 1.5)),
+                const SizedBox(height: 24),
+                buildCalculationCard('Cash & Securities', 'Market Cap', formatAmt(cash), formatAmt(marketCap)),
               ],
             ),
           ),

@@ -61,6 +61,7 @@ class NgxService
         $result = [
             'sector'          => null,
             'industry'        => null,
+            'overview'        => null,
             'analysts_target' => null,
             'dividend_yield'  => null,
             'market_cap'      => 0,
@@ -93,6 +94,7 @@ class NgxService
 
                     $result['sector']          = $profile['sector'] ?? null;
                     $result['industry']        = $profile['industry'] ?? null;
+                    $result['overview']        = $profile['longBusinessSummary'] ?? null;
                     $result['analysts_target'] = $financialData['targetMeanPrice']['raw'] ?? null;
                     $result['dividend_yield']  = $summaryDetail['dividendYield']['raw'] ?? null;
 

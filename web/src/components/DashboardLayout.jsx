@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X, AlertCircle } from 'lucide-react';
 import DashboardSidebar from './DashboardSidebar';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import DashboardTour from './DashboardTour';
 
@@ -10,6 +10,10 @@ export default function DashboardLayout({ children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const { user } = useAuth();
+  
+  if (user && !user.email_verified_at) {
+    return <Navigate to="/verify-email" replace />;
+  }
   
   // Initialize tour visibility once per mount. 
   // It won't hide immediately if user context updates to onboarded=true during the tour.

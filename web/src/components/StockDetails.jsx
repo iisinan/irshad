@@ -109,6 +109,8 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const hasFinancialHighlights = marketCap > 0 || debt > 0 || rawRevenue > 0 || interest > 0;
 
   const debtRatio = ((debt / safeMarketCap) * 100).toFixed(1);
+  const cash = (parseFloat(latest?.cash_and_equivalents) || 0) + (parseFloat(latest?.interest_bearing_securities) || 0);
+  const cashRatio = ((cash / safeMarketCap) * 100).toFixed(1);
   const interestRatio = ((interest / revenue) * 100).toFixed(1);
   const purificationRate = latest?.non_compliant_revenue_ratio ? (parseFloat(latest.non_compliant_revenue_ratio) * 100).toFixed(2) : interestRatio;
 
@@ -128,6 +130,93 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const priceChange = latestPrice - previousPrice;
   const priceChangePct = previousPrice > 0 ? (priceChange / previousPrice) * 100 : 0;
   const isPositive = priceChange >= 0;
+
+
+  const renderRatioProgressBar = (title, subtitle, ratio, threshold, isMinimum = false, isCurrency = false, showThreshold = true) => {
+    if (ratio === null || ratio === undefined) {
+      return (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '24px', padding: '24px 0', borderBottom: '1px solid var(--border)' }}>
+          <div style={{ flex: '0 0 220px', paddingLeft: '16px' }}>
+            <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '1rem', marginBottom: '4px' }}>{title}</div>
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{subtitle}</div>
+          </div>
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+            <AlertTriangle size={16} /> Insufficient data
+          </div>
+        </div>
+      );
+    }
+
+    const ratioVal = parseFloat(ratio) || 0;
+    const thresholdNum = parseFloat(threshold);
+    const isPassing = !showThreshold ? true : (isMinimum ? ratioVal >= thresholdNum : ratioVal <= thresholdNum);
+    
+    const diff = Math.abs(thresholdNum - ratioVal);
+    let headroomDisplay = '';
+    if (showThreshold) {
+      if (isCurrency) {
+         headroomDisplay = isPassing ? `₦${diff.toLocaleString()} headroom` : (isMinimum ? `₦${diff.toLocaleString()} shortfall` : `₦${diff.toLocaleString()} excess`);
+      } else {
+         headroomDisplay = isPassing ? `${diff.toFixed(1)}pp headroom` : (isMinimum ? `${diff.toFixed(1)}pp shortfall` : `${diff.toFixed(1)}pp excess`);
+      }
+    }
+    const color = isPassing ? 'var(--halal)' : 'var(--non-halal)';
+    
+    const maxVisual = showThreshold ? Math.max(thresholdNum / 0.7, ratioVal / 0.9, 1) : Math.max(ratioVal * 1.2, 1);
+    const fillPercent = maxVisual > 0 ? (ratioVal / maxVisual) * 100 : 0;
+    const thresholdPercent = (showThreshold && maxVisual > 0) ? (thresholdNum / maxVisual) * 100 : 0;
+    
+    const displayVal = isCurrency ? `₦ ${ratioVal.toLocaleString(undefined, {maximumFractionDigits: 0})}` : `${ratioVal.toFixed(1)}%`;
+    const displayThreshold = isCurrency ? `₦ ${(thresholdNum/1000000000).toFixed(1)}B` : `${thresholdNum}%`;
+
+    return (
+      <div 
+        style={{ 
+          display: 'flex', alignItems: 'center', gap: '24px', padding: '24px 0', 
+          borderBottom: '1px solid var(--border)',
+          transition: 'all 0.2s', position: 'relative'
+        }}
+        onMouseOver={e => { e.currentTarget.style.background = 'var(--bg-section)'; }}
+        onMouseOut={e => { e.currentTarget.style.background = 'transparent'; }}
+      >
+        <div style={{ flex: '0 0 220px', paddingLeft: '16px' }}>
+          <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '1rem', marginBottom: '4px' }}>{title}</div>
+          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{subtitle}</div>
+        </div>
+        
+        <div style={{ flex: 1, position: 'relative', height: '14px', background: 'var(--bg-section)', borderRadius: '10px' }}>
+          <div style={{ 
+            position: 'absolute', top: 0, left: 0, height: '100%', 
+            width: `${Math.min(fillPercent, 100)}%`, 
+            background: color, 
+            borderRadius: '10px',
+            transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)'
+          }} />
+          {showThreshold && (
+            <>
+              <div style={{
+                position: 'absolute', top: '-6px', bottom: '-6px', 
+                left: `${thresholdPercent}%`, width: '2px', 
+                background: 'var(--non-halal)',
+                zIndex: 10
+              }} />
+              <div style={{
+                position: 'absolute', top: '22px', left: `calc(${thresholdPercent}% - 30px)`,
+                fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, width: '60px', textAlign: 'center'
+              }}>
+                limit {displayThreshold}
+              </div>
+            </>
+          )}
+        </div>
+        
+        <div style={{ flex: '0 0 140px', textAlign: 'right', paddingRight: '16px' }}>
+          <div style={{ fontSize: isCurrency ? '1.1rem' : '1.5rem', fontWeight: 900, color }}>{displayVal}</div>
+          {showThreshold && <div style={{ fontSize: '0.75rem', fontWeight: 700, color, marginTop: '4px' }}>{headroomDisplay}</div>}
+        </div>
+      </div>
+    );
+  };
 
   // ─── AI Analysis ───────────────────────────────────
   const handleAskAI = () => {
@@ -301,11 +390,13 @@ const StockDetails = ({ symbol: propSymbol }) => {
               
               <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                 
+                
                 {/* A. Business Activity Screen */}
                 <div style={{ 
                   background: 'linear-gradient(to right, #ffffff, #fcfcfd)', border: '1px solid var(--border)', borderRadius: '16px', padding: '24px',
                   boxShadow: '0 2px 12px rgba(0,0,0,0.02)', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  cursor: 'default'
+                  cursor: 'default',
+                  marginBottom: '24px'
                 }} className="hover-card">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '16px' }}>
                     <div style={{ background: (stock.status?.reason?.includes('Rule 1') ? 'var(--non-halal-bg)' : 'var(--halal-bg)'), border: `1px solid ${(stock.status?.reason?.includes('Rule 1') ? 'rgba(248,113,113,0.2)' : 'rgba(16,185,129,0.2)')}`, borderRadius: '12px', padding: '10px', display: 'flex', boxShadow: `0 4px 12px ${(stock.status?.reason?.includes('Rule 1') ? 'var(--non-halal-bg)' : 'var(--halal-bg)')}` }}>
@@ -323,84 +414,19 @@ const StockDetails = ({ symbol: propSymbol }) => {
                   </p>
                 </div>
 
-                {/* B. Financial Screen */}
                 <div style={{ 
-                  background: 'linear-gradient(to right, #ffffff, #fcfcfd)', border: '1px solid var(--border)', borderRadius: '16px', padding: '24px',
-                  boxShadow: '0 2px 12px rgba(0,0,0,0.02)', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  cursor: 'default'
-                }} className="hover-card">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-                    <div style={{ width: '6px', height: '18px', background: 'var(--primary)', borderRadius: '4px' }} />
-                    <h3 style={{ fontSize: '1.05rem', color: 'var(--text-dark)', fontWeight: 800, margin: 0, letterSpacing: '-0.3px' }}>B. Financial Screen <span style={{ color: 'var(--text-muted)', fontWeight: 600, fontSize: '0.9rem' }}>(Impermissible Income)</span></h3>
+                  background: '#ffffff', border: '1px solid var(--border)', borderRadius: '16px', padding: '0 24px',
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.02)'
+                }}>
+                  {renderRatioProgressBar('Impermissible Income', 'Interest / Revenue', interestRatio, 5, false, false, true)}
+                  {renderRatioProgressBar('Interest Bearing Debt', 'Debt / Market Cap', debtRatio, 30, false, false, true)}
+                  {renderRatioProgressBar('Cash & Securities', 'Cash / Market Cap', cashRatio, 30, false, false, true)}
+                  {renderRatioProgressBar('Purification Rate', 'Dividend Purification', purificationRate, 5, false, false, true)}
+                  <div style={{ borderBottom: 'none', paddingBottom: '24px' }}>
+                    {renderRatioProgressBar('Market Cap', 'Company Valuation', marketCap, 0, false, true, false)}
                   </div>
-                  
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '12px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                      <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Cash & Interest Ratio</span>
-                      <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-                        Interest: <strong style={{ color: 'var(--text-dark)', fontWeight: 700 }}>₦{interest > 0 ? interest.toLocaleString() : '0'}</strong> <span style={{ opacity: 0.5, margin: '0 4px' }}>/</span> Revenue: <strong style={{ color: 'var(--text-dark)', fontWeight: 700 }}>₦{rawRevenue > 0 ? rawRevenue.toLocaleString() : 'N/A'}</strong>
-                      </span>
-                    </div>
-                    <span style={{ fontWeight: 800, color: parseFloat(interestRatio) <= 5 ? 'var(--halal)' : 'var(--non-halal)', fontSize: '1.25rem', letterSpacing: '-0.5px', background: parseFloat(interestRatio) <= 5 ? 'var(--halal-50)' : 'rgba(248,113,113,0.1)', padding: '4px 12px', borderRadius: '8px' }}>
-                      {interestRatio}% <span style={{ fontSize: '0.75rem', color: 'inherit', fontWeight: 700, opacity: 0.8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>/ 5% max</span>
-                    </span>
-                  </div>
-                  <div style={{ height: '8px', background: 'rgba(0,0,0,0.04)', borderRadius: '99px', overflow: 'hidden', border: '1px solid rgba(0,0,0,0.02)', position: 'relative' }}>
-                    <div style={{
-                      position: 'absolute', top: 0, left: 0,
-                      height: '100%', width: `${Math.min((parseFloat(interestRatio) / 7.5) * 100, 100)}%`,
-                      background: parseFloat(interestRatio) <= 5 ? 'linear-gradient(90deg, #4ade80, #16a34a)' : 'linear-gradient(90deg, #f87171, #dc2626)', 
-                      borderRadius: '99px', transition: 'width 1s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                      boxShadow: parseFloat(interestRatio) <= 5 ? '0 0 10px rgba(74,222,128,0.4)' : '0 0 10px rgba(248,113,113,0.4)'
-                    }} />
-                  </div>
-                  <p style={{ color: 'var(--text-muted)', lineHeight: 1.5, fontSize: '0.88rem', margin: '16px 0 0 0' }}>
-                    {parseFloat(interestRatio) <= 5 
-                      ? "PASS: The company's impermissible income (like interest) is below the 5% maximum threshold."
-                      : "FAIL: The company's impermissible income exceeds the 5% maximum threshold."}
-                  </p>
                 </div>
-
-                {/* C. Interest Bearing Debt */}
-                <div style={{ 
-                  background: 'linear-gradient(to right, #ffffff, #fcfcfd)', border: '1px solid var(--border)', borderRadius: '16px', padding: '24px',
-                  boxShadow: '0 2px 12px rgba(0,0,0,0.02)', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  cursor: 'default'
-                }} className="hover-card">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-                    <div style={{ width: '6px', height: '18px', background: 'var(--gold)', borderRadius: '4px' }} />
-                    <h3 style={{ fontSize: '1.05rem', color: 'var(--text-dark)', fontWeight: 800, margin: 0, letterSpacing: '-0.3px' }}>C. Interest Bearing Debt</h3>
-                  </div>
-                  
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '12px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                      <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Debt to Market Cap Ratio</span>
-                      <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-                        Debt: <strong style={{ color: 'var(--text-dark)', fontWeight: 700 }}>₦{debt > 0 ? debt.toLocaleString() : '0'}</strong> <span style={{ opacity: 0.5, margin: '0 4px' }}>/</span> Market Cap: <strong style={{ color: 'var(--text-dark)', fontWeight: 700 }}>₦{marketCap > 0 ? marketCap.toLocaleString() : 'N/A'}</strong>
-                      </span>
-                    </div>
-                    <span style={{ fontWeight: 800, color: parseFloat(debtRatio) <= 30 ? 'var(--halal)' : 'var(--non-halal)', fontSize: '1.25rem', letterSpacing: '-0.5px', background: parseFloat(debtRatio) <= 30 ? 'var(--halal-50)' : 'rgba(248,113,113,0.1)', padding: '4px 12px', borderRadius: '8px' }}>
-                      {debtRatio}% <span style={{ fontSize: '0.75rem', color: 'inherit', fontWeight: 700, opacity: 0.8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>/ 30% max</span>
-                    </span>
-                  </div>
-                  <div style={{ height: '8px', background: 'rgba(0,0,0,0.04)', borderRadius: '99px', overflow: 'hidden', border: '1px solid rgba(0,0,0,0.02)', position: 'relative' }}>
-                    <div style={{
-                      position: 'absolute', top: 0, left: 0,
-                      height: '100%', width: `${Math.min((parseFloat(debtRatio) / 45) * 100, 100)}%`,
-                      background: parseFloat(debtRatio) <= 30 ? 'linear-gradient(90deg, #4ade80, #16a34a)' : 'linear-gradient(90deg, #f87171, #dc2626)', 
-                      borderRadius: '99px', transition: 'width 1s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                      boxShadow: parseFloat(debtRatio) <= 30 ? '0 0 10px rgba(74,222,128,0.4)' : '0 0 10px rgba(248,113,113,0.4)'
-                    }} />
-                  </div>
-                  <p style={{ color: 'var(--text-muted)', lineHeight: 1.5, fontSize: '0.88rem', margin: '16px 0 0 0' }}>
-                    {parseFloat(debtRatio) <= 30
-                      ? "PASS: The company's interest-bearing debt is within the acceptable 30% limit."
-                      : "FAIL: The company's interest-bearing debt exceeds the 30% limit, showing excessive conventional leverage."}
-                  </p>
-                </div>
-
               </div>
-              
               <div style={{ marginTop: '32px', textAlign: 'center' }}>
                 <Link to={`/market/${stock.symbol}/aaoifi`} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', fontSize: '1rem', fontWeight: 600, background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: '100px', textDecoration: 'none', boxShadow: '0 4px 12px rgba(15, 82, 87, 0.2)' }}>
                   <ShieldCheck size={20} />

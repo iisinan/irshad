@@ -11,6 +11,7 @@ use App\Http\Controllers\BrokerageController;
 use App\Http\Controllers\PortfolioController;
 use App\Http\Controllers\TradeController;
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\BillingController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\VerificationController;
 use App\Http\Controllers\PriceAlertController;
@@ -81,6 +82,9 @@ Route::prefix('v1')->group(function () {
         Route::get('/stocks/check/{symbol}',          [StockController::class, 'check']);
         Route::put('/stocks/{symbol}/status',         [StockController::class, 'updateStatus']); // Scholar/Admin only (role checked in controller)
 
+        // Billing
+        Route::post('/billing/upgrade', [BillingController::class, 'upgrade']);
+
         // Brokerage
         Route::post('/brokerage/link',    [BrokerageController::class, 'link']);
         Route::get('/brokerage/accounts', [BrokerageController::class, 'accounts']);
@@ -89,7 +93,10 @@ Route::prefix('v1')->group(function () {
         // Portfolio & Trading
         Route::get('/portfolio', [PortfolioController::class, 'index']);
         Route::post('/broker/link', [TradeController::class, 'linkBroker']);
-        Route::post('/portfolio/trade', [TradeController::class, 'executeTrade']);
+        Route::post('/broker/trade', [TradeController::class, 'executeTrade']);
+
+        // Verification
+        Route::post('/email/resend', [VerificationController::class, 'resend']);
         Route::post('/portfolio',              [PortfolioController::class, 'store']);
         Route::post('/portfolio/bulk',         [PortfolioController::class, 'bulkStore']);
         Route::delete('/portfolio/{id}',       [PortfolioController::class, 'destroy']);
