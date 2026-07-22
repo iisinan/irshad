@@ -232,8 +232,24 @@ class _AaoifiScreeningScreenState extends State<AaoifiScreeningScreen> with Sing
 
         const SizedBox(height: 24),
 
-        // 4. Impermissible Income
-        _buildSectionHeader("4. Impermissible Income", _report!['impermissible_income_status']),
+        // 4. Accounts Receivable
+        _buildSectionHeader("4. Accounts Receivable Screening", _report!['receivables_status']),
+        const SizedBox(height: 8),
+        _buildRatioCard(
+          title: "Accounts Receivable to Total Assets",
+          ratio: _report!['receivables_ratio'],
+          threshold: "≤ 45%",
+          formula: "Accounts Receivable / Total Assets",
+          numeratorLabel: "Accounts Receivable",
+          numeratorValue: _report!['financial_data_used']?['accounts_receivable'],
+          denominatorLabel: "Total Assets",
+          denominatorValue: _report!['financial_data_used']?['total_assets'],
+        ),
+
+        const SizedBox(height: 24),
+
+        // 5. Impermissible Income
+        _buildSectionHeader("5. Impermissible Income", _report!['impermissible_income_status']),
         const SizedBox(height: 8),
         _buildRatioCard(
           title: "Impure Income to Total Revenue",
