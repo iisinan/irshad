@@ -106,10 +106,10 @@ class AaoifiScreeningService
         }
 
         // 4. Final Verdict Engine
-        $finalStatus = 'compliant';
+        $finalStatus = 'halal';
         
         if ($businessStatus === 'fail' || $debtStatus === 'fail' || $cashStatus === 'fail' || $impIncomeStatus === 'fail' || $illiquidStatus === 'fail' || $receivablesStatus === 'fail') {
-            $finalStatus = 'non-compliant';
+            $finalStatus = 'non-halal';
         } elseif ($businessStatus === 'warning' || $debtStatus === 'warning' || $cashStatus === 'warning') {
             $finalStatus = 'doubtful';
         } elseif ($debtStatus === 'insufficient_data' || $cashStatus === 'insufficient_data' || $illiquidStatus === 'insufficient_data' || $receivablesStatus === 'insufficient_data') {

@@ -183,9 +183,9 @@ const AaoifiScreening = () => {
   const businessStatus = report.business_status || 'insufficient_data';
   const impIncomeStatus = report.impermissible_income_status || 'insufficient_data';
 
-  let finalStatus = 'compliant';
+  let finalStatus = 'halal';
   if (businessStatus === 'fail' || debtStatus === 'fail' || cashStatus === 'fail' || impIncomeStatus === 'fail' || illiquidStatus === 'fail' || receivablesStatus === 'fail') {
-    finalStatus = 'non-compliant';
+    finalStatus = 'non-halal';
   } else if (businessStatus === 'warning' || debtStatus === 'warning' || cashStatus === 'warning') {
     finalStatus = 'doubtful';
   } else if (debtStatus === 'insufficient_data' || cashStatus === 'insufficient_data' || illiquidStatus === 'insufficient_data' || receivablesStatus === 'insufficient_data') {
@@ -196,11 +196,11 @@ const AaoifiScreening = () => {
   let StatusIcon = HelpCircle;
   let bgStatus = 'var(--bg-section)';
 
-  if (finalStatus === 'compliant') {
+  if (finalStatus === 'halal') {
     statusColor = 'var(--halal)';
     StatusIcon = CheckCircle;
     bgStatus = 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%)';
-  } else if (finalStatus === 'non-compliant') {
+  } else if (finalStatus === 'non-halal') {
     statusColor = 'var(--non-halal)';
     StatusIcon = XCircle;
     bgStatus = 'linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%)';
