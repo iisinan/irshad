@@ -388,6 +388,60 @@ const AaoifiScreening = () => {
         </div>
       </div>
 
+      <div style={{ marginBottom: '48px' }}>
+        <h2 style={{ fontFamily: 'Fraunces, serif', color: 'var(--halal)', fontSize: '2rem', fontWeight: 700, marginBottom: '24px' }}>
+          The Three AAOIFI Screens
+        </h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          
+          <div style={{ background: 'var(--bg)', borderRadius: '16px', border: '1px solid var(--border)', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--halal)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '1.1rem', flexShrink: 0 }}>
+                1
+              </div>
+              <div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '4px' }}>Debt Ratio ≤ 30%</div>
+                <div style={{ color: 'var(--text-muted)', fontSize: '1.05rem' }}>Interest-bearing debt ÷ Market capitalization</div>
+              </div>
+            </div>
+            <div style={{ background: 'var(--bg-section)', padding: '16px', borderRadius: '12px', fontFamily: 'monospace', fontSize: '0.95rem', color: 'var(--text-dark)', letterSpacing: '0.5px' }}>
+              Formula: Total Debt ÷ Market Cap × 100 &lt; 30%
+            </div>
+          </div>
+
+          <div style={{ background: 'var(--bg)', borderRadius: '16px', border: '1px solid var(--border)', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--halal)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '1.1rem', flexShrink: 0 }}>
+                2
+              </div>
+              <div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '4px' }}>Cash Ratio ≤ 30%</div>
+                <div style={{ color: 'var(--text-muted)', fontSize: '1.05rem' }}>Cash + interest-bearing securities ÷ Market capitalization</div>
+              </div>
+            </div>
+            <div style={{ background: 'var(--bg-section)', padding: '16px', borderRadius: '12px', fontFamily: 'monospace', fontSize: '0.95rem', color: 'var(--text-dark)', letterSpacing: '0.5px' }}>
+              Formula: (Cash + Securities) ÷ Market Cap × 100 &lt; 30%
+            </div>
+          </div>
+
+          <div style={{ background: 'var(--bg)', borderRadius: '16px', border: '1px solid var(--border)', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--halal)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '1.1rem', flexShrink: 0 }}>
+                3
+              </div>
+              <div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '4px' }}>Impure Revenue ≤ 5%</div>
+                <div style={{ color: 'var(--text-muted)', fontSize: '1.05rem' }}>Non-permissible income ÷ Total revenue</div>
+              </div>
+            </div>
+            <div style={{ background: 'var(--bg-section)', padding: '16px', borderRadius: '12px', fontFamily: 'monospace', fontSize: '0.95rem', color: 'var(--text-dark)', letterSpacing: '0.5px' }}>
+              Formula: Impure Income ÷ Total Revenue × 100 &lt; 5%
+            </div>
+          </div>
+          
+        </div>
+      </div>
+
       <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', marginBottom: '48px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '16px' }}>
           <div>
