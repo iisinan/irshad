@@ -227,54 +227,74 @@ const AaoifiScreening = () => {
     );
   };
 
-  const renderRatioCard = (title, ratio, threshold, formula, numLabel, numVal, denLabel, denVal) => {
-    if (ratio === null) {
+  const renderRatioProgressBar = (title, subtitle, ratio, threshold, numLabel, numVal, denLabel, denVal, formula, isMinimum = false) => {
+    if (ratio === null || ratio === undefined) {
       return (
-        <div style={{ padding: '20px', background: 'var(--bg-section)', borderRadius: '16px', border: '1px dashed var(--border)' }}>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <AlertTriangle size={16} /> Insufficient data to calculate this ratio.
-          </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '24px', padding: '24px 0', borderBottom: '1px solid var(--border)' }}>
+          <div style={{ flex: '0 0 220px', paddingLeft: '16px' }}>
+            <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '1rem', marginBottom: '4px' }}>{title}</div>
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{subtitle}</div>
+          </div>
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+            <AlertTriangle size={16} /> Insufficient data
+          </div>
         </div>
       );
     }
+
     const ratioVal = parseFloat(ratio) || 0;
-    const thresholdNum = parseFloat(threshold.replace(/[^0-9.]/g, ''));
-    const isPassing = ratioVal <= thresholdNum;
+    const thresholdNum = parseFloat(threshold);
+    const isPassing = isMinimum ? ratioVal >= thresholdNum : ratioVal <= thresholdNum;
     
+    const diff = Math.abs(thresholdNum - ratioVal).toFixed(1);
+    const headroomDisplay = isPassing ? `${diff}pp headroom` : (isMinimum ? `${diff}pp shortfall` : `${diff}pp excess`);
+    const color = isPassing ? 'var(--halal)' : 'var(--non-halal)';
+    
+    const maxVisual = Math.max(thresholdNum / 0.7, ratioVal / 0.9, 1);
+    const fillPercent = (ratioVal / maxVisual) * 100;
+    const thresholdPercent = (thresholdNum / maxVisual) * 100;
+
     return (
       <div 
-        onClick={() => openModal(title, ratio, threshold, formula, numLabel, numVal, denLabel, denVal)}
+        onClick={() => openModal(title, ratio, isMinimum ? `≥ ${threshold}%` : `≤ ${threshold}%`, formula, numLabel, numVal, denLabel, denVal)}
         style={{ 
-          padding: '24px', background: 'var(--bg)', borderRadius: '16px', 
-          border: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.02)'
+          display: 'flex', alignItems: 'center', gap: '24px', padding: '24px 0', 
+          borderBottom: '1px solid var(--border)', cursor: 'pointer',
+          transition: 'all 0.2s', position: 'relative'
         }}
-        onMouseOver={e => {
-          e.currentTarget.style.borderColor = isPassing ? 'var(--halal)' : 'var(--non-halal)';
-          e.currentTarget.style.transform = 'translateY(-4px)';
-          e.currentTarget.style.boxShadow = '0 12px 24px -8px rgba(0, 0, 0, 0.08)';
-        }}
-        onMouseOut={e => {
-          e.currentTarget.style.borderColor = 'var(--border)';
-          e.currentTarget.style.transform = 'none';
-          e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.02)';
-        }}
+        onMouseOver={e => { e.currentTarget.style.background = 'var(--bg-section)'; }}
+        onMouseOut={e => { e.currentTarget.style.background = 'transparent'; }}
       >
-        <div>
-          <div style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {title}
-          </div>
-          <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '6px', display: 'inline-block', padding: '4px 10px', background: 'var(--bg-section)', borderRadius: '100px', fontWeight: 600 }}>
-            Threshold: {threshold}
+        <div style={{ flex: '0 0 220px', paddingLeft: '16px' }}>
+          <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '1rem', marginBottom: '4px' }}>{title}</div>
+          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{subtitle}</div>
+        </div>
+        
+        <div style={{ flex: 1, position: 'relative', height: '14px', background: 'var(--bg-section)', borderRadius: '10px' }}>
+          <div style={{ 
+            position: 'absolute', top: 0, left: 0, height: '100%', 
+            width: `${Math.min(fillPercent, 100)}%`, 
+            background: color, 
+            borderRadius: '10px',
+            transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)'
+          }} />
+          <div style={{
+            position: 'absolute', top: '-6px', bottom: '-6px', 
+            left: `${thresholdPercent}%`, width: '2px', 
+            background: 'var(--non-halal)',
+            zIndex: 10
+          }} />
+          <div style={{
+            position: 'absolute', top: '22px', left: `calc(${thresholdPercent}% - 30px)`,
+            fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, width: '60px', textAlign: 'center'
+          }}>
+            limit {threshold}%
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ fontSize: '1.5rem', fontWeight: 900, color: isPassing ? 'var(--halal)' : 'var(--non-halal)' }}>
-            {ratioVal.toFixed(2)}%
-          </div>
-          <div style={{ padding: '8px', background: 'var(--bg-section)', borderRadius: '50%', display: 'flex', color: 'var(--text-muted)' }}>
-            <ChevronRight size={20} />
-          </div>
+        
+        <div style={{ flex: '0 0 120px', textAlign: 'right', paddingRight: '16px' }}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 900, color }}>{ratioVal.toFixed(1)}%</div>
+          <div style={{ fontSize: '0.8rem', fontWeight: 700, color, marginTop: '4px' }}>{headroomDisplay}</div>
         </div>
       </div>
     );
@@ -337,37 +357,7 @@ const AaoifiScreening = () => {
         <p style={{ color: 'var(--text-dark)', margin: 0, fontWeight: 600, fontSize: '1.1rem' }}>AAOIFI Compliance Verdict</p>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '12px', marginBottom: '32px', padding: '16px', background: 'var(--bg-section)', borderRadius: '12px', border: '1px solid var(--border)' }}>
-        <span style={{ fontWeight: 600, color: 'var(--text-dark)', fontSize: '0.95rem' }}>Financial Ratio Denominator:</span>
-        <div style={{ display: 'flex', background: 'var(--bg-section)', borderRadius: '12px', padding: '4px', border: '1px solid var(--border)', position: 'relative' }}>
-          <button 
-            onClick={() => setDenominator('market_cap')}
-            style={{ 
-              position: 'relative', zIndex: 1, padding: '8px 20px', 
-              background: denominator === 'market_cap' ? 'var(--bg)' : 'transparent', 
-              color: denominator === 'market_cap' ? 'var(--text-dark)' : 'var(--text-muted)', 
-              border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 700, fontSize: '0.9rem', 
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              boxShadow: denominator === 'market_cap' ? '0 2px 8px rgba(0,0,0,0.06)' : 'none'
-            }}
-          >
-            Market Cap
-          </button>
-          <button 
-            onClick={() => setDenominator('total_assets')}
-            style={{ 
-              position: 'relative', zIndex: 1, padding: '8px 20px', 
-              background: denominator === 'total_assets' ? 'var(--bg)' : 'transparent', 
-              color: denominator === 'total_assets' ? 'var(--text-dark)' : 'var(--text-muted)', 
-              border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 700, fontSize: '0.9rem', 
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              boxShadow: denominator === 'total_assets' ? '0 2px 8px rgba(0,0,0,0.06)' : 'none'
-            }}
-          >
-            Total Assets
-          </button>
-        </div>
-      </div>
+
 
       <div style={{ marginBottom: '40px' }}>
         {renderSectionHeader('1. Business Activity Screening', report.business_status)}
@@ -407,66 +397,52 @@ const AaoifiScreening = () => {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '32px', marginBottom: '48px' }}>
-        {debtRatio !== null && (
+      <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', marginBottom: '48px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            {renderSectionHeader('2. Debt Ratio Screening', debtStatus)}
-            {renderRatioCard(
-              `Debt to ${denLabel}`, debtRatio, '≤ 30%',
-              `Total Interest-Bearing Debt / ${denLabel}`,
-              'Total Debt', totalDebt,
-              denLabel, denVal
-            )}
+            <h2 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#C49852', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>AAOIFI RATIO SCREEN</h2>
+            <p style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-dark)', margin: '8px 0 0 0' }}>Financial ratios</p>
           </div>
-        )}
-
-        {cashRatio !== null && (
-          <div>
-            {renderSectionHeader('3. Cash & Securities Screening', cashStatus)}
-            {renderRatioCard(
-              `Cash to ${denLabel}`, cashRatio, '≤ 30%',
-              `Cash & Interest-bearing Securities / ${denLabel}`,
-              'Cash & Securities', cashAndSecurities,
-              denLabel, denVal
-            )}
+          <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-section)', borderRadius: '100px', border: '1px solid var(--border)', fontSize: '0.85rem', overflow: 'hidden' }}>
+            <span style={{ padding: '6px 12px', color: 'var(--text-muted)' }}>Denominator</span>
+            <select 
+              value={denominator}
+              onChange={e => setDenominator(e.target.value)}
+              style={{ background: 'var(--bg)', border: 'none', borderLeft: '1px solid var(--border)', padding: '6px 12px', fontWeight: 700, cursor: 'pointer', outline: 'none', color: 'var(--text-dark)' }}
+            >
+              <option value="market_cap">Market cap</option>
+              <option value="total_assets">Total Assets</option>
+            </select>
           </div>
-        )}
-
-        {illiquidRatio !== null && (
-          <div>
-            {renderSectionHeader('4. Illiquid Assets Screening', illiquidStatus)}
-            {renderRatioCard(
-              'Illiquid Assets to Total Assets', illiquidRatio, '≥ 30%',
-              'Illiquid Assets / Total Assets',
-              'Illiquid Assets', illiquidAssets,
-              'Total Assets', totalAssets
-            )}
-          </div>
-        )}
-
-        {receivablesRatio !== null && (
-          <div>
-            {renderSectionHeader('5. Accounts Receivable Screening', receivablesStatus)}
-            {renderRatioCard(
-              'Accounts Receivable to Total Assets', receivablesRatio, '≤ 45%',
-              'Accounts Receivable / Total Assets',
-              'Accounts Receivable', accountsReceivable,
-              'Total Assets', totalAssets
-            )}
-          </div>
-        )}
-
-        {report.impermissible_income_ratio !== null && report.impermissible_income_ratio !== undefined && (
-          <div style={{ gridColumn: '1 / -1' }}>
-            {renderSectionHeader('6. Impermissible Income', impIncomeStatus)}
-            {renderRatioCard(
-              'Impure Income to Total Revenue', report.impermissible_income_ratio, '≤ 5%',
-              'Interest Income / Total Revenue',
-              'Interest Income', report.financial_data_used?.interest_income,
-              'Total Revenue', report.financial_data_used?.total_revenue
-            )}
-          </div>
-        )}
+        </div>
+        
+        <div style={{ marginTop: '32px' }}>
+          {renderRatioProgressBar(
+            'Interest-bearing debt', 'incl. commercial papers', 
+            debtRatio, 30, 
+            'Total Debt', totalDebt, denLabel, denVal, `Total Interest-Bearing Debt / ${denLabel}`
+          )}
+          {renderRatioProgressBar(
+            'Impure income', 'interest / total revenue', 
+            report.impermissible_income_ratio, 5, 
+            'Interest Income', report.financial_data_used?.interest_income, 'Total Revenue', report.financial_data_used?.total_revenue, 'Interest Income / Total Revenue'
+          )}
+          {renderRatioProgressBar(
+            'Cash & securities', 'liquid interest-bearing', 
+            cashRatio, 30, 
+            'Cash & Securities', cashAndSecurities, denLabel, denVal, `Cash & Securities / ${denLabel}`
+          )}
+          {renderRatioProgressBar(
+            'Illiquid Assets', 'illiquid / total assets', 
+            illiquidRatio, 30, 
+            'Illiquid Assets', illiquidAssets, 'Total Assets', totalAssets, 'Illiquid Assets / Total Assets', true
+          )}
+          {renderRatioProgressBar(
+            'Receivables', 'supplementary screen', 
+            receivablesRatio, 45, 
+            'Accounts Receivable', accountsReceivable, 'Total Assets', totalAssets, 'Accounts Receivable / Total Assets'
+          )}
+        </div>
       </div>
 
 
