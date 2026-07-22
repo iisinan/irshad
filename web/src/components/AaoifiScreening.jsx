@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { createPortal } from 'react-dom';
 import { useParams, Link } from 'react-router-dom';
 import { 
@@ -21,45 +22,46 @@ const LOADING_STEPS = [
 
 const AaoifiScreening = () => {
   const { symbol } = useParams();
-  const [loading, setLoading] = useState(true);
-  const [report, setReport] = useState(null);
-  const [error, setError] = useState(null);
   
+  const { data: res, isLoading: queryLoading, error: queryError } = useQuery({
+    queryKey: ['aaoifi', symbol],
+    queryFn: () => fetchAaoifiScreening(symbol),
+    staleTime: 1000 * 60 * 60, // Cache for 1 hour
+  });
+
+  const [simulatedLoading, setSimulatedLoading] = useState(true);
   const [stepIndex, setStepIndex] = useState(0);
   const [modalData, setModalData] = useState(null);
   const [evidenceExpanded, setEvidenceExpanded] = useState(false);
   const [denominator, setDenominator] = useState('market_cap');
 
+  // UI theater: simulate loading steps
   useEffect(() => {
     let timer;
-    if (loading) {
+    if (simulatedLoading) {
       timer = setInterval(() => {
         setStepIndex(prev => (prev < LOADING_STEPS.length - 1 ? prev + 1 : prev));
       }, 1500);
     }
     return () => clearInterval(timer);
-  }, [loading]);
+  }, [simulatedLoading]);
 
+  // Synchronize query state with UI theater
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetchAaoifiScreening(symbol);
-        if (res.status === 'success') {
-          setStepIndex(LOADING_STEPS.length - 1);
-          setTimeout(() => {
-            setReport(res.data);
-            setLoading(false);
-          }, 800);
-        } else {
-          throw new Error('Failed to load screening data');
-        }
-      } catch (err) {
-        setError(err.response?.data?.message || err.message || 'An error occurred');
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [symbol]);
+    if (!queryLoading && res?.status === 'success') {
+      setStepIndex(LOADING_STEPS.length - 1);
+      const t = setTimeout(() => {
+        setSimulatedLoading(false);
+      }, 800);
+      return () => clearTimeout(t);
+    } else if (!queryLoading && queryError) {
+      setSimulatedLoading(false);
+    }
+  }, [queryLoading, res, queryError]);
+
+  const loading = queryLoading || simulatedLoading;
+  const report = res?.data;
+  const error = queryError ? (queryError.response?.data?.message || queryError.message || 'An error occurred') : null;
 
   const formatNumber = (val) => {
     if (!val) return '0';

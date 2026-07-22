@@ -38,17 +38,19 @@ Route::prefix('v1')->group(function () {
     });
 
     // ── Public Data (no auth required) ───────────────────────────────────
-    Route::get('/resources',                      [\App\Http\Controllers\ResourceController::class, 'index']);
-    Route::get('/stocks',                         [StockController::class, 'index']);
-    Route::get('/sectors',                        [\App\Http\Controllers\SectorController::class, 'index']);
-    Route::get('/stocks/search',                  [StockController::class, 'search']);
-    Route::get('/stocks/ngx',           [StockController::class, 'ngx']);
-    Route::get('/stocks/baskets',                 [BasketController::class, 'index']);
-    Route::get('/stocks/baskets/{basket}',        [BasketController::class, 'show']);
-    Route::get('/disclosures',          [\App\Http\Controllers\Api\V1\CorporateDisclosureController::class, 'index']);
-    Route::get('/news',                 [\App\Http\Controllers\NewsController::class, 'index']);
-    Route::get('/stocks/{symbol}/analysis',       [StockController::class, 'getAiAnalysis']);
-    Route::get('/stocks/{symbol}/aaoifi-screening', [StockController::class, 'aaoifiScreening']);
+    Route::middleware('throttle:60,1')->group(function () {
+        Route::get('/resources',                      [\App\Http\Controllers\ResourceController::class, 'index']);
+        Route::get('/stocks',                         [StockController::class, 'index']);
+        Route::get('/sectors',                        [\App\Http\Controllers\SectorController::class, 'index']);
+        Route::get('/stocks/search',                  [StockController::class, 'search']);
+        Route::get('/stocks/ngx',           [StockController::class, 'ngx']);
+        Route::get('/stocks/baskets',                 [BasketController::class, 'index']);
+        Route::get('/stocks/baskets/{basket}',        [BasketController::class, 'show']);
+        Route::get('/disclosures',          [\App\Http\Controllers\Api\V1\CorporateDisclosureController::class, 'index']);
+        Route::get('/news',                 [\App\Http\Controllers\NewsController::class, 'index']);
+        Route::get('/stocks/{symbol}/analysis',       [StockController::class, 'getAiAnalysis']);
+        Route::get('/stocks/{symbol}/aaoifi-screening', [StockController::class, 'aaoifiScreening']);
+    });
 
     // ── Protected Routes ─────────────────────────────────────────────────
     Route::middleware('auth:sanctum')->group(function () {

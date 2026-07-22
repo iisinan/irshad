@@ -178,22 +178,8 @@ export const fetchSectors = async () => {
 };
 
 export const fetchNgxStocks = async () => {
-  try {
-    const cacheKey = 'irshad_stocks_cache_v10';
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) {
-      const { data, expiry } = JSON.parse(cached);
-      if (Date.now() < expiry) return data;
-    }
-
-    const response = await api.get('/stocks/ngx');
-    // Cache for 5 minutes instead of until 3AM to allow updates
-    localStorage.setItem(cacheKey, JSON.stringify({ data: response.data, expiry: Date.now() + 5 * 60 * 1000 }));
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching NGX stocks:', error);
-    throw error;
-  }
+  const response = await api.get('/stocks/ngx');
+  return response.data;
 };
 
 export const searchStocks = async (query) => {
@@ -202,39 +188,13 @@ export const searchStocks = async (query) => {
 };
 
 export const fetchBaskets = async () => {
-  try {
-    const cacheKey = 'irshad_baskets_cache_v1';
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) {
-      const { data, expiry } = JSON.parse(cached);
-      if (Date.now() < expiry) return data;
-    }
-
-    const response = await api.get('/stocks/baskets');
-    localStorage.setItem(cacheKey, JSON.stringify({ data: response.data, expiry: Date.now() + 60 * 60 * 1000 }));
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching baskets:', error);
-    throw error;
-  }
+  const response = await api.get('/stocks/baskets');
+  return response.data;
 };
 
 export const fetchBasketDetails = async (id) => {
-  try {
-    const cacheKey = `irshad_basket_${id}_cache_v1`;
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) {
-      const { data, expiry } = JSON.parse(cached);
-      if (Date.now() < expiry) return data;
-    }
-
-    const response = await api.get(`/stocks/baskets/${id}`);
-    localStorage.setItem(cacheKey, JSON.stringify({ data: response.data, expiry: Date.now() + 60 * 60 * 1000 }));
-    return response.data;
-  } catch (error) {
-    console.error(`Error fetching basket ${id}:`, error);
-    throw error;
-  }
+  const response = await api.get(`/stocks/baskets/${id}`);
+  return response.data;
 };
 
 export const createBasket = async (data) => {
@@ -267,40 +227,13 @@ export const investInBasket = async (id, amount) => {
 };
 
 export const fetchStockDetails = async (symbol) => {
-  try {
-    const cacheKey = `irshad_stock_${symbol}_cache_v10`;
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) {
-      const { data, expiry } = JSON.parse(cached);
-      if (Date.now() < expiry) return data;
-    }
-
-    const response = await api.get(`/stocks/${symbol}`);
-    // Cache for 5 minutes to show latest financial highlights
-    localStorage.setItem(cacheKey, JSON.stringify({ data: response.data, expiry: Date.now() + 5 * 60 * 1000 }));
-    return response.data;
-  } catch (error) {
-    console.error(`Error fetching details for ${symbol}:`, error);
-    throw error;
-  }
+  const response = await api.get(`/stocks/${symbol}`);
+  return response.data;
 };
 
 export const fetchAiAnalysis = async (symbol) => {
-  try {
-    const cacheKey = `irshad_ai_${symbol}_cache_v10`;
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) {
-      const { data, expiry } = JSON.parse(cached);
-      if (Date.now() < expiry) return data;
-    }
-
-    const response = await api.get(`/stocks/${symbol}/analysis`);
-    localStorage.setItem(cacheKey, JSON.stringify({ data: response.data, expiry: Date.now() + 60 * 60 * 1000 }));
-    return response.data;
-  } catch (error) {
-    console.error(`Error fetching AI analysis for ${symbol}:`, error);
-    throw error;
-  }
+  const response = await api.get(`/stocks/${symbol}/analysis`);
+  return response.data;
 };
 
 export const fetchAaoifiScreening = async (symbol) => {
@@ -314,22 +247,8 @@ export const fetchAaoifiScreening = async (symbol) => {
 };
 
 export const fetchNews = async () => {
-  try {
-    const cacheKey = 'irshad_news_cache_v9';
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) {
-      const { data, expiry } = JSON.parse(cached);
-      if (Date.now() < expiry) return data;
-    }
-
-    const response = await api.get('/news');
-    // Cache for 30 minutes to stay fresh
-    localStorage.setItem(cacheKey, JSON.stringify({ data: response.data, expiry: Date.now() + 30 * 60 * 1000 }));
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching news:', error);
-    throw error;
-  }
+  const response = await api.get('/news');
+  return response.data;
 };
 
 export const fetchPriceAlerts = async () => {
