@@ -478,7 +478,7 @@ export const ResetPasswordPage = () => {
 
 /* ─── Verify Email Page ────────────────────────────────────── */
 export const VerifyEmailPage = () => {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [message, setMessage] = useState('');
@@ -496,6 +496,17 @@ export const VerifyEmailPage = () => {
           // Send request to the exact URL provided in the parameter
           const res = await api.get(verifyUrl);
           setMessage(res.data?.message || 'Email successfully verified!');
+          
+          // Refresh user profile so the app knows we are verified without a hard reload
+          try {
+            const profile = await api.get('/profile');
+            if (profile.data) {
+              setUser(profile.data);
+            }
+          } catch (e) {
+            console.error("Failed to refresh profile after verification", e);
+          }
+
           setTimeout(() => navigate('/dashboard'), 2000);
         } catch (err) {
           setError(err.response?.data?.message || 'Invalid or expired verification link.');
