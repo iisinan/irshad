@@ -493,8 +493,20 @@ export const VerifyEmailPage = () => {
       const verifyEmail = async () => {
         setVerifying(true);
         try {
-          // Send request to the exact URL provided in the parameter
-          const res = await api.get(verifyUrl);
+          // Handle absolute URLs from the backend if APP_URL doesn't match VITE_API_URL locally
+          let finalUrl = verifyUrl;
+          if (verifyUrl.startsWith('http')) {
+            try {
+              const urlObj = new URL(verifyUrl);
+              const path = urlObj.pathname.replace('/api/v1', '');
+              finalUrl = `${path}${urlObj.search}`;
+            } catch (e) {
+              console.error("Failed to parse verification URL", e);
+            }
+          }
+
+          // Send request to the exact path using our configured Axios instance
+          const res = await api.get(finalUrl);
           setMessage(res.data?.message || 'Email successfully verified!');
           
           // Refresh user profile so the app knows we are verified without a hard reload
