@@ -29,6 +29,102 @@ class GeminiAiService
     }
 
     /**
+     * Analyze a company's business activity using AAOIFI standards.
+     */
+    public function analyzeBusinessActivity($company, $news, $financials): ?array
+    {
+        if (empty($this->apiKey)) {
+            Log::error("Gemini API key is not configured for business analysis.");
+            return null;
+        }
+
+        $apiKeys = array_map('trim', explode(',', $this->apiKey));
+        $currentKeyIndex = \Illuminate\Support\Facades\Cache::get('gemini_key_index', 0);
+        if (!isset($apiKeys[$currentKeyIndex])) {
+            $currentKeyIndex = 0;
+        }
+        $apiKey = $apiKeys[$currentKeyIndex];
+
+        $prompt = "You are an expert Islamic Finance Scholar and Business Analyst applying AAOIFI Standard No. 21.\n\n";
+        $prompt .= "Your task is to analyze the following company and determine if its principal business activities are permissible.\n\n";
+        $prompt .= "Company: {$company->name} ({$company->symbol})\n";
+        $prompt .= "Sector: {$company->sector}\n";
+        $prompt .= "Industry: {$company->industry}\n";
+        $prompt .= "Description: {$company->description}\n\n";
+
+        if (!empty($news) && count($news) > 0) {
+            $prompt .= "Recent News/Disclosures:\n";
+            foreach ($news as $article) {
+                $prompt .= "- {$article['title']}\n";
+            }
+            $prompt .= "\n";
+        }
+
+        $prompt .= "PROHIBITED BUSINESS ACTIVITIES (AAOIFI):\n";
+        $prompt .= "- Conventional banking or lending on interest\n";
+        $prompt .= "- Conventional insurance\n";
+        $prompt .= "- Production or distribution of alcohol, pork, or non-halal meat\n";
+        $prompt .= "- Gambling, casinos, or betting\n";
+        $prompt .= "- Adult entertainment or pornography\n";
+        $prompt .= "- Weapons or defense manufacturing\n";
+        $prompt .= "- Tobacco manufacturing\n\n";
+
+        $prompt .= "Based on ALL available evidence (sector, description, news), determine the company's principal business.\n";
+        $prompt .= "Be careful of false positives (e.g., Islamic banks are halal, payment processors are not necessarily conventional banks, gaming hardware is not gambling).\n\n";
+        
+        $prompt .= "Respond ONLY with a valid JSON object with the following exact keys (no markdown formatting):\n";
+        $prompt .= "- 'principal_business' (string): A short summary of the main business.\n";
+        $prompt .= "- 'secondary_businesses' (array of strings): Any other notable revenue streams.\n";
+        $prompt .= "- 'revenue_sources' (array of strings): Where the money comes from.\n";
+        $prompt .= "- 'prohibited_activities' (array of strings): Any prohibited activities found. Empty array if none.\n";
+        $prompt .= "- 'confidence_score' (number): 0 to 100 based on how certain you are.\n";
+        $prompt .= "- 'evidence' (string): What specific facts led you to this conclusion.\n";
+        $prompt .= "- 'reasoning' (string): Why this does or does not pass AAOIFI rules.\n";
+
+        $maxRetries = 10;
+        for ($attempt = 0; $attempt < $maxRetries; $attempt++) {
+            try {
+                $response = Http::withHeaders([
+                    'Content-Type' => 'application/json',
+                ])->timeout(60)->post("{$this->baseUrl}/gemini-flash-latest:generateContent?key={$apiKey}", [
+                    'contents' => [
+                        [
+                            'parts' => [
+                                ['text' => $prompt]
+                            ]
+                        ]
+                    ]
+                ]);
+
+                if ($response->successful()) {
+                    $data = $response->json();
+                    $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? "";
+                    
+                    $text = str_replace('```json', '', $text);
+                    $text = str_replace('```', '', $text);
+                    $text = trim($text);
+
+                    return json_decode($text, true);
+                }
+
+                if ($response->status() == 429) {
+                    $apiKey = $this->getNextApiKey($currentKeyIndex, $apiKeys);
+                    continue;
+                }
+
+                Log::error('Gemini Business Analysis Error', ['response' => $response->body()]);
+                return null;
+                
+            } catch (\Exception $e) {
+                Log::error('Gemini Business Analysis Exception', ['message' => $e->getMessage()]);
+                return null;
+            }
+        }
+        
+        return null;
+    }
+
+    /**
      * Ask Gemini to analyze a company's financials for Shariah compliance.
      */
     public function analyzeCompliance($company, $financials, $status): ?string

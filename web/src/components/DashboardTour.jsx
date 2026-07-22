@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Joyride, STATUS } from 'react-joyride';
 import { updateProfile } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -69,6 +69,11 @@ const CustomTooltip = ({
         </div>
         
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          {!isLastStep && (
+            <button {...skipProps} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontWeight: 600, cursor: 'pointer', padding: '10px 14px', fontSize: '0.9rem', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = 'var(--text-dark)'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}>
+              Skip
+            </button>
+          )}
           {index > 0 && (
             <button {...backProps} style={{ background: 'var(--bg-section)', border: 'none', color: 'var(--text-dark)', fontWeight: 700, cursor: 'pointer', padding: '10px 14px', fontSize: '0.9rem', borderRadius: '10px', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--border)'} onMouseLeave={e => e.currentTarget.style.background = 'var(--bg-section)'}>
               Back
@@ -83,9 +88,18 @@ const CustomTooltip = ({
   );
 };
 
-export default function DashboardTour() {
+export default function DashboardTour({ onClose }) {
   const { user, setUser } = useAuth();
   const [run, setRun] = useState(true);
+
+  // Immediately mark as onboarded so it doesn't reappear on other pages if they navigate away
+  useEffect(() => {
+    if (!user?.preferences?.onboarded) {
+      const prefs = { ...(user?.preferences || {}), onboarded: true };
+      setUser(prev => ({ ...prev, preferences: prefs }));
+      updateProfile({ preferences: prefs }).catch(err => console.error('Failed to update onboarded status', err));
+    }
+  }, [user, setUser]);
 
   const steps = [
     {
@@ -152,21 +166,12 @@ export default function DashboardTour() {
   ];
 
   const handleJoyrideCallback = async (data) => {
-    const { status } = data;
+    const { status, action } = data;
     const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
 
-    if (finishedStatuses.includes(status)) {
+    if (finishedStatuses.includes(status) || action === 'close') {
       setRun(false);
-      // Update local state
-      const prefs = { ...(user?.preferences || {}), onboarded: true };
-      setUser(prev => ({ ...prev, preferences: prefs }));
-      
-      // Update backend quietly
-      try {
-        await updateProfile({ preferences: prefs });
-      } catch (err) {
-        console.error('Failed to update onboarded status', err);
-      }
+      if (onClose) onClose();
     }
   };
 

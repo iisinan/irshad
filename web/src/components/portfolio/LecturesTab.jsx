@@ -227,6 +227,6 @@ export default function LecturesTab() {
           </div>
         </div>
       , document.body)}
-    </div>
+    </>
   );
 }

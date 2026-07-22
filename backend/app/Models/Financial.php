@@ -21,6 +21,10 @@ class Financial extends Model
         'roe',
         'dividend_yield',
         'profit_margin',
+        'cash_and_equivalents',
+        'interest_bearing_securities',
+        'accounts_receivable',
+        'illiquid_assets',
     ];
 
     protected $appends = ['interest_income_ratio', 'non_compliant_income_ratio'];

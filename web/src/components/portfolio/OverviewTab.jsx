@@ -12,7 +12,7 @@ import {
   AreaChart, Area, YAxis, XAxis, CartesianGrid
 } from 'recharts';
 import { Link } from 'react-router-dom';
-import { updateHolding, fetchHistory, fetchNews, fetchWatchlist } from '../../services/api';
+import { updateHolding, fetchHistory, fetchNews, fetchWatchlist, formatLogoUrl } from '../../services/api';
 import { toastError, toastSuccess } from '../../utils/toast';
 
 /* ─── Helpers ───────────────────────────────────────────────── */
@@ -162,7 +162,7 @@ function HoldingRow({ holding, onDelete, onEdit, rank }) {
       {/* Logo */}
       <div style={{ width:'42px', height:'42px', borderRadius:'11px', flexShrink:0, background:'var(--primary-50)', border:'1px solid var(--primary-100)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.62rem', fontWeight:900, color:'var(--primary)', overflow:'hidden' }}>
         {holding.logo_url
-          ? <img loading="lazy" src={'http://127.0.0.1:8000'+holding.logo_url} alt="" style={{ width:'100%', height:'100%', objectFit:'contain', transition:'transform 0.3s', transform:hov?'scale(1.12)':'scale(1)' }}/>
+          ? <img loading="lazy" src={formatLogoUrl(holding.logo_url)} alt="" style={{ width:'100%', height:'100%', objectFit:'contain', transition:'transform 0.3s', transform:hov?'scale(1.12)':'scale(1)' }}/>
           : <span style={{ transform:hov?'scale(1.1)':'scale(1)', transition:'transform 0.3s' }}>{(holding.symbol||'').slice(0,4)}</span>}
       </div>
 
@@ -650,8 +650,8 @@ export default function OverviewTab({ data, setShowAddModal, handleDelete, chang
                   <div key={i} style={{ display:'flex', alignItems:'center', gap:'10px', padding:'9px 11px', background:'var(--bg-section)', borderRadius:'11px', transition:'all 0.18s', cursor:'default' }}
                     onMouseEnter={e => e.currentTarget.style.background='var(--primary-50)'}
                     onMouseLeave={e => e.currentTarget.style.background='var(--bg-section)'}>
-                    <div style={{ width:'32px', height:'32px', borderRadius:'8px', background:'var(--primary)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.58rem', fontWeight:900, color:'white', flexShrink:0 }}>
-                      {(item.symbol||'').slice(0,4)}
+                    <div style={{ width:'32px', height:'32px', borderRadius:'8px', background:'var(--primary)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.58rem', fontWeight:900, color:'white', flexShrink:0, overflow:'hidden' }}>
+                      {item.logo_url ? <img loading="lazy" src={formatLogoUrl(item.logo_url)} alt={item.symbol} style={{ width:'100%', height:'100%', objectFit:'contain' }}/> : (item.symbol||'').slice(0,4)}
                     </div>
                     <div style={{ flex:1, minWidth:0 }}>
                       <div style={{ fontWeight:800, fontSize:'0.8rem', color:'var(--text-dark)' }}>{item.symbol}</div>

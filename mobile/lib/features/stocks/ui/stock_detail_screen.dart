@@ -5,6 +5,7 @@ import '../../../core/providers/app_state_provider.dart';
 import '../data/stock_repository.dart';
 import '../../profile/data/user_activity_repository.dart';
 import 'ai_analysis_sheet.dart';
+import 'aaoifi_screening_screen.dart';
 import 'trade_bottom_sheet.dart';
 import 'alert_bottom_sheet.dart';
 
@@ -313,9 +314,6 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                   // Company Metadata
                   _buildCompanyInfo(),
                   
-                  // Advanced Metrics (SWS)
-                  _buildAdvancedMetrics(),
-                  
                   // AAOIFI Screening Breakdown
                   if ((_currentStock['financials'] ?? []).isNotEmpty) ...[
                     _buildSectionHeader('AAOIFI Screening Breakdown'),
@@ -323,6 +321,17 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                     _buildAaoifiBreakdown(statusColor, badgeBg, statusLabel, reason, isHalal, isNonHalal),
                     const SizedBox(height: 32),
                   ],
+
+                  // Financial Highlights
+                  if (hasFinancialHighlights) ...[
+                    _buildSectionHeader('Financial Highlights'),
+                    const SizedBox(height: 12),
+                    _buildFinancialHighlights(),
+                    const SizedBox(height: 32),
+                  ],
+
+                  // Advanced Metrics (SWS)
+                  _buildAdvancedMetrics(),
 
                   // AI Halal Assistant Button
                   _buildAiAssistantButton(),
@@ -705,11 +714,9 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
   }
 
   Widget _buildAdvancedMetrics() {
-    final valuation = _currentStock['valuation_info'] ?? '—';
-    final growth = _currentStock['growth_info'] ?? '—';
+    final valuation = _currentStock['valuation_info'] ?? 'N/A';
+    final growth = _currentStock['growth_info'] ?? 'N/A';
     
-    if (valuation == '—' && growth == '—') return const SizedBox.shrink();
-
     Widget buildCard(String title, String value) {
       return Container(
         padding: const EdgeInsets.all(16),
@@ -729,15 +736,10 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     }
     
     List<Widget> cards = [];
-    if (valuation != '—') cards.add(Expanded(child: buildCard('VALUATION', valuation)));
-    if (growth != '—') cards.add(Expanded(child: buildCard('GROWTH FORECAST', growth)));
+    cards.add(Expanded(child: buildCard('VALUATION', valuation)));
+    cards.add(Expanded(child: buildCard('GROWTH FORECAST', growth)));
 
-    Widget metricsRow;
-    if (cards.length == 1) {
-      metricsRow = Row(children: cards);
-    } else {
-      metricsRow = Row(children: [cards[0], const SizedBox(width: 16), cards[1]]);
-    }
+    Widget metricsRow = Row(children: [cards[0], const SizedBox(width: 16), cards[1]]);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -896,14 +898,14 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     final latest = (financials != null && financials is List && financials.isNotEmpty) ? financials[0] : null;
     
     final debt = _parseDouble(latest?['total_debt']);
-    final assets = _parseDouble(latest?['total_assets']);
-    final safeAssets = assets > 0 ? assets : 1.0;
+    final marketCap = _parseDouble(latest?['market_cap']);
+    final safeMarketCap = marketCap > 0 ? marketCap : 1.0;
     
     final interest = _parseDouble(latest?['interest_income']);
     final rawRevenue = _parseDouble(latest?['total_revenue']);
-    final revenue = rawRevenue > 0.0 ? rawRevenue : safeAssets;
+    final revenue = rawRevenue > 0.0 ? rawRevenue : safeMarketCap;
     
-    final debtRatio = assets > 0 ? (debt / assets) * 100 : 0.0;
+    final debtRatio = marketCap > 0 ? (debt / marketCap) * 100 : 0.0;
     final interestRatio = revenue > 0 ? (interest / revenue) * 100 : 0.0;
 
     String formatAmt(double amt) {
@@ -1049,62 +1051,26 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                     Text('A. Business Activity', style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800, fontSize: 15)),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
-                      child: Text(isHalal ? 'PASS' : (isNonHalal ? 'FAIL' : 'REVIEW'), 
-                        style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.w900)),
+                      decoration: BoxDecoration(
+                        color: reason.contains('Rule 1') ? context.haram.withValues(alpha: 0.15) : context.halal.withValues(alpha: 0.15), 
+                        borderRadius: BorderRadius.circular(20)
+                      ),
+                      child: Text(reason.contains('Rule 1') ? 'FAIL' : 'PASS', 
+                        style: TextStyle(
+                          color: reason.contains('Rule 1') ? context.haram : context.halal, 
+                          fontSize: 10, 
+                          fontWeight: FontWeight.w900
+                        )
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Icon(isHalal ? Icons.check_circle : Icons.cancel, color: isHalal ? context.halal : context.haram, size: 20),
-                    const SizedBox(width: 8),
-                    Text('Revenue', style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800, fontSize: 14)),
-                  ]
-                ),
-                const SizedBox(height: 12),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Row(
-                    children: [
-                      if (nonCompliantRev > 0)
-                        Expanded(flex: (nonCompliantRev * 100).toInt() > 0 ? (nonCompliantRev * 100).toInt() : 1, child: Container(height: 8, color: context.haram)),
-                      if (compliantRev > 0)
-                        Expanded(flex: (compliantRev * 100).toInt() > 0 ? (compliantRev * 100).toInt() : 1, child: Container(height: 8, color: context.halal)),
-                    ],
-                  ),
-                ),
                 const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    buildSegmentStat('NON-COMPLIANT', nonCompliantRev, context.haram),
-                    buildSegmentStat('QUESTIONABLE', 0.0, Colors.orangeAccent),
-                    buildSegmentStat('COMPLIANT', compliantRev, context.halal),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Text(reason, style: TextStyle(color: context.textMuted, fontSize: 13, height: 1.5)),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton(
-                    onPressed: () {},
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: context.divider),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('See breakdown by segment', style: TextStyle(color: context.textDark, fontWeight: FontWeight.w700, fontSize: 13)),
-                        const SizedBox(width: 4),
-                        Icon(Icons.chevron_right_rounded, color: context.textMuted, size: 16),
-                      ],
-                    ),
-                  ),
+                Text(
+                  reason.contains('Rule 1')
+                      ? reason
+                      : "The core business operations of this company have been verified to be in a Halal industry, with no significant involvement in prohibited activities like conventional finance, alcohol, gambling, or tobacco.",
+                  style: TextStyle(color: context.textMuted, fontSize: 13, height: 1.5),
                 ),
               ],
             ),
@@ -1173,9 +1139,9 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                 const SizedBox(height: 12),
                 _buildAaoifiProgressBar(debtRatio, 30.0, isDebtFail),
                 const SizedBox(height: 16),
-                Text('Measures the company\'s exposure to interest-bearing debt relative to its total assets. A lower ratio indicates less reliance on debt financing. According to AAOIFI standards, this should not exceed 30%.', style: TextStyle(color: context.textMuted, fontSize: 13, height: 1.5)),
+                Text('Measures the company\'s exposure to interest-bearing debt relative to its market capitalization. A lower ratio indicates less reliance on debt financing. According to AAOIFI standards, this should not exceed 30%.', style: TextStyle(color: context.textMuted, fontSize: 13, height: 1.5)),
                 const SizedBox(height: 24),
-                buildCalculationCard('Total Debt', 'Total Assets', formatAmt(debt), formatAmt(assets)),
+                buildCalculationCard('Total Debt', 'Market Cap', formatAmt(debt), formatAmt(marketCap)),
               ],
             ),
           ),
@@ -1314,7 +1280,14 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
       width: double.infinity,
       height: 56,
       child: ElevatedButton(
-        onPressed: _isLoading ? null : _runScreening,
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AaoifiScreeningScreen(stock: _currentStock),
+            ),
+          );
+        },
         style: ElevatedButton.styleFrom(
           backgroundColor: context.bgAlt,
           foregroundColor: context.textDark,
@@ -1323,9 +1296,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
           ),
           elevation: 0,
         ),
-        child: _isLoading 
-          ? SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2, color: context.textDark))
-          : const Text('REFRESH SCREENING', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
+        child: const Text('VIEW AAOIFI REPORT', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
       ),
     );
   }

@@ -11,6 +11,14 @@ const api = axios.create({
 });
 
 // Configure automatic retries for network resilience
+export const formatLogoUrl = (url) => {
+  if (!url || typeof url !== 'string') return null;
+  if (url.startsWith('http')) return url;
+  // Fallback to prod or local URL
+  const baseUrl = import.meta.env.DEV ? (import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000') : 'https://irshad-z8us.onrender.com';
+  return `${baseUrl.replace(/\/api\/v1$/, '')}${url}`;
+};
+
 axiosRetry(api, {
   retries: 3,
   retryDelay: axiosRetry.exponentialDelay,
@@ -291,6 +299,16 @@ export const fetchAiAnalysis = async (symbol) => {
     return response.data;
   } catch (error) {
     console.error(`Error fetching AI analysis for ${symbol}:`, error);
+    throw error;
+  }
+};
+
+export const fetchAaoifiScreening = async (symbol) => {
+  try {
+    const response = await api.get(`/stocks/${symbol}/aaoifi-screening`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching AAOIFI screening for ${symbol}:`, error);
     throw error;
   }
 };

@@ -82,7 +82,19 @@ class StockRepository {
         return response.data['data']['analysis'];
       }
     } on DioException catch (e) {
-       throw e.response?.data['message'] ?? 'Failed to fetch AI analysis';
+      throw e.response?.data['message'] ?? 'Failed to fetch AI analysis';
+    }
+    return null;
+  }
+
+  Future<Map<String, dynamic>?> fetchAaoifiScreening(String symbol) async {
+    try {
+      final response = await _apiService.get('stocks/$symbol/aaoifi-screening');
+      if (response.statusCode == 200) {
+        return response.data['data'];
+      }
+    } on DioException catch (e) {
+      throw e.response?.data['message'] ?? 'Failed to fetch AAOIFI screening';
     }
     return null;
   }

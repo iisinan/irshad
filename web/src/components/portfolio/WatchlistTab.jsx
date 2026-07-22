@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Eye, BarChart2, Star, TrendingUp, TrendingDown, Trash2, Shield, AlertCircle, HelpCircle, CheckCircle, ChevronRight, Search, Mail, MessageSquare, Filter } from 'lucide-react';
-import { fetchWatchlist, removeFromWatchlist, fetchNgxStocks, addToWatchlist, updateWatchlist } from '../../services/api';
+import { fetchWatchlist, removeFromWatchlist, fetchNgxStocks, addToWatchlist, updateWatchlist, formatLogoUrl } from '../../services/api';
 import { toastError, toastSuccess } from '../../utils/toast';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -238,8 +238,8 @@ export default function WatchlistTab() {
               return (
                 <div key={stock.symbol} onClick={() => !inWatchlist && handleAdd(stock.symbol)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', cursor: inWatchlist ? 'default' : 'pointer', borderBottom: '1px solid var(--border)', opacity: inWatchlist ? 0.6 : 1, transition: 'background 0.2s' }} className="hover-search-row">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--primary-10)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800 }}>
-                      {stock.symbol.charAt(0)}
+                    <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--primary-10)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, overflow: 'hidden' }}>
+                      {stock.logo_url ? <img loading="lazy" src={formatLogoUrl(stock.logo_url)} alt={stock.symbol} style={{ width:'100%', height:'100%', objectFit:'contain' }}/> : stock.symbol.charAt(0)}
                     </div>
                     <div>
                       <div style={{ fontWeight: 800, color: 'var(--text-dark)' }}>{stock.symbol}</div>
@@ -318,7 +318,7 @@ export default function WatchlistTab() {
               >
                 <div style={{ flex: '1 1 200px', display: 'flex', alignItems: 'center', gap: '16px' }}>
                   {stock.logo_url ? (
-                    <img loading="lazy" src={stock.logo_url} alt={stock.symbol} style={{ width: '48px', height: '48px', borderRadius: '14px', objectFit: 'contain', border: '1px solid var(--border)', flexShrink: 0 }} />
+                    <img loading="lazy" src={formatLogoUrl(stock.logo_url)} alt={stock.symbol} style={{ width: '48px', height: '48px', borderRadius: '14px', objectFit: 'contain', border: '1px solid var(--border)', flexShrink: 0 }} />
                   ) : (
                     <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'var(--primary-10)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '1.2rem', flexShrink: 0 }}>
                       {stock.symbol.charAt(0)}

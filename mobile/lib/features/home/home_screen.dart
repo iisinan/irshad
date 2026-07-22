@@ -37,7 +37,34 @@ class _HomeScreenState extends State<HomeScreen> {
           bottom: false,
           child: Column(
             children: [
-              _buildTopDashboard(context),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Explore',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => Navigator.pushNamed(context, '/settings'),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: context.bgAlt,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.settings_outlined, color: Colors.white, size: 20),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 16),
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -93,147 +120,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildTopDashboard(BuildContext context) {
-    return Consumer2<AppStateProvider, PortfolioProvider>(
-      builder: (context, appState, portfolio, child) {
-        final userName = appState.userProfile?['first_name'] ?? 'Investor';
-        final isGuest = portfolio.isGuest || !appState.isAuthenticated;
-        
-        return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                context.primary,
-                Color.lerp(context.primary, Colors.black, 0.3) ?? context.primary,
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(30),
-            boxShadow: [
-              BoxShadow(
-                color: context.primary.withValues(alpha: 0.4),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        isGuest ? 'Welcome to irshad' : 'Good Morning, $userName',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.8),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        isGuest ? 'Start Halal Investing' : 'Your Portfolio',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                  GestureDetector(
-                    onTap: () => Navigator.pushNamed(context, '/settings'),
-                    child: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.15),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.settings_outlined, color: Colors.white, size: 20),
-                    ),
-                  ),
-                ],
-              ),
-              if (!isGuest) ...[
-                const SizedBox(height: 24),
-                Text(
-                  '₦ ${portfolio.summary['total_balance'].toStringAsFixed(2)}',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 36,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -1,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.trending_up_rounded, color: context.halal, size: 14),
-                          const SizedBox(width: 4),
-                          const Text(
-                            '+0.00%', // Mock daily return
-                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 12),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.check_circle_rounded, color: context.halal, size: 14),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${portfolio.summary['health_percentage']}% Halal',
-                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 12),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-              if (isGuest) ...[
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: () => Navigator.pushNamed(context, '/login'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: context.primary,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    elevation: 0,
-                  ),
-                  child: const Text('Sign In or Register', style: TextStyle(fontWeight: FontWeight.w800)),
-                ),
-              ],
-            ],
-          ),
-        );
-      },
-    );
-  }
 
   Widget _buildComingSoonState(BuildContext context, IconData icon, String title, String description) {
     return Center(

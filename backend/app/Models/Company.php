@@ -35,6 +35,13 @@ class Company extends Model
         'valuation_info',
         'growth_info',
         'div_yield',
+        'current_status',
+        'market_cap',
+        'eps',
+        'pe_ratio',
+        'activity_reason',
+        'latest_price',
+        'price_change_pct',
     ];
 
     public function financials(): HasMany

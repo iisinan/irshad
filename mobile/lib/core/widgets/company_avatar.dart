@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../theme/app_theme.dart';
 
 class CompanyAvatar extends StatelessWidget {
@@ -20,6 +21,8 @@ class CompanyAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (logoUrl != null && logoUrl!.isNotEmpty) {
+      final isSvg = logoUrl!.toLowerCase().endsWith('.svg');
+      
       return Container(
         width: size,
         height: size,
@@ -27,11 +30,24 @@ class CompanyAvatar extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(borderRadius),
           border: Border.all(color: context.divider, width: 1),
-          image: DecorationImage(
+          image: isSvg ? null : DecorationImage(
             image: NetworkImage(logoUrl!),
             fit: BoxFit.contain,
           ),
         ),
+        child: isSvg 
+            ? ClipRRect(
+                borderRadius: BorderRadius.circular(borderRadius - 1),
+                child: Padding(
+                  padding: const EdgeInsets.all(2.0),
+                  child: SvgPicture.network(
+                    logoUrl!,
+                    fit: BoxFit.contain,
+                    placeholderBuilder: (context) => const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                  ),
+                ),
+              )
+            : null,
       );
     }
 

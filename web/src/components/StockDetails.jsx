@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2, Brain, Globe, Newspaper, Bell, X, ShieldCheck, XCircle, AlertTriangle } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import api, { fetchStockDetails, fetchAiAnalysis, setPriceAlert } from '../services/api';
+import api, { fetchStockDetails, fetchAiAnalysis, setPriceAlert, formatLogoUrl } from '../services/api';
 import ReactMarkdown from 'react-markdown';
 import { useAuth } from '../context/AuthContext';
 const StockDetails = ({ symbol: propSymbol }) => {
@@ -99,15 +99,16 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const financials = stock.financials;
   const latest = Array.isArray(financials) && financials.length > 0 ? financials[0] : null;
   const debt = parseFloat(latest?.total_debt) || 0;
-  const assets = parseFloat(latest?.total_assets) || 0;
-  const safeAssets = assets > 0 ? assets : 1;
+  const marketCap = parseFloat(latest?.market_cap) || 0;
+  const safeMarketCap = marketCap > 0 ? marketCap : 1;
   const interest = parseFloat(latest?.interest_income) || 0;
   const rawRevenue = parseFloat(latest?.total_revenue) || 0;
-  const revenue = rawRevenue > 0 ? rawRevenue : safeAssets;
+  const assets = parseFloat(latest?.total_assets) || 0;
+  const revenue = rawRevenue > 0 ? rawRevenue : safeMarketCap;
   
-  const hasFinancialHighlights = assets > 0 || debt > 0 || rawRevenue > 0 || interest > 0;
+  const hasFinancialHighlights = marketCap > 0 || debt > 0 || rawRevenue > 0 || interest > 0;
 
-  const debtRatio = ((debt / safeAssets) * 100).toFixed(1);
+  const debtRatio = ((debt / safeMarketCap) * 100).toFixed(1);
   const interestRatio = ((interest / revenue) * 100).toFixed(1);
   const purificationRate = latest?.non_compliant_revenue_ratio ? (parseFloat(latest.non_compliant_revenue_ratio) * 100).toFixed(2) : interestRatio;
 
@@ -170,9 +171,9 @@ const StockDetails = ({ symbol: propSymbol }) => {
         <div style={{ position: 'absolute', bottom: '-80px', left: '-40px', width: '180px', height: '180px', background: 'rgba(255,255,255,0.03)', borderRadius: '50%' }} />
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '10px' }}>
-            {stock.logo_url ? (
-              <img 
-                src={stock.logo_url} 
+              {stock.logo_url ? (
+                <img 
+                src={formatLogoUrl(stock.logo_url)} 
                 alt={`${stock.symbol} logo`}
                 style={{
                   width: '56px', height: '56px', borderRadius: '14px',
@@ -373,9 +374,9 @@ const StockDetails = ({ symbol: propSymbol }) => {
                   
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '12px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                      <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Debt to Asset Ratio</span>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Debt to Market Cap Ratio</span>
                       <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-                        Debt: <strong style={{ color: 'var(--text-dark)', fontWeight: 700 }}>₦{debt > 0 ? debt.toLocaleString() : '0'}</strong> <span style={{ opacity: 0.5, margin: '0 4px' }}>/</span> Assets: <strong style={{ color: 'var(--text-dark)', fontWeight: 700 }}>₦{assets > 0 ? assets.toLocaleString() : 'N/A'}</strong>
+                        Debt: <strong style={{ color: 'var(--text-dark)', fontWeight: 700 }}>₦{debt > 0 ? debt.toLocaleString() : '0'}</strong> <span style={{ opacity: 0.5, margin: '0 4px' }}>/</span> Market Cap: <strong style={{ color: 'var(--text-dark)', fontWeight: 700 }}>₦{marketCap > 0 ? marketCap.toLocaleString() : 'N/A'}</strong>
                       </span>
                     </div>
                     <span style={{ fontWeight: 800, color: parseFloat(debtRatio) <= 30 ? 'var(--halal)' : 'var(--non-halal)', fontSize: '1.25rem', letterSpacing: '-0.5px', background: parseFloat(debtRatio) <= 30 ? 'var(--halal-50)' : 'rgba(248,113,113,0.1)', padding: '4px 12px', borderRadius: '8px' }}>
@@ -398,6 +399,13 @@ const StockDetails = ({ symbol: propSymbol }) => {
                   </p>
                 </div>
 
+              </div>
+              
+              <div style={{ marginTop: '32px', textAlign: 'center' }}>
+                <Link to={`/market/${stock.symbol}/aaoifi`} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', fontSize: '1rem', fontWeight: 600, background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: '100px', textDecoration: 'none', boxShadow: '0 4px 12px rgba(15, 82, 87, 0.2)' }}>
+                  <ShieldCheck size={20} />
+                  View Full AAOIFI Report
+                </Link>
               </div>
             </div>
           </div>

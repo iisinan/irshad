@@ -98,7 +98,7 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
           setState(() {
             _results = data;
             // Filter out 0 prices just in case
-            _results = _results.where((s) => ((s['latest_price'] ?? 0) as num).toDouble() > 0).toList();
+            _results = _results.where((s) => (double.tryParse(s['latest_price']?.toString() ?? '0') ?? 0.0) > 0).toList();
             _hasMore = data.length >= 10;
           });
         }
@@ -544,7 +544,7 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      '₦${((stock['latest_price'] ?? 0) as num).toStringAsFixed(2)}',
+                      '₦${(double.tryParse(stock['latest_price']?.toString() ?? '0') ?? 0.0).toStringAsFixed(2)}',
                       style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16, color: context.textDark),
                     ),
                     const SizedBox(height: 4),

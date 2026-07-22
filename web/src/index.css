@@ -3410,5 +3410,32 @@ img[src="/logo.svg"] {
 @keyframes iconPop {
   0% { transform: scale(0); }
   70% { transform: scale(1.1); }
-  100% { transform: scale(1); }
+}
+
+@media print {
+  body {
+    background-color: white !important;
+    color: black !important;
+  }
+  
+  /* Hide UI navigation, buttons, toggles, sidebars */
+  .top-navbar,
+  .dashboard-sidebar,
+  .mobile-overlay,
+  .ticker-wrapper,
+  a[href^="/market/"],
+  button {
+    display: none !important;
+  }
+
+  /* Make sure background colors for cards show in print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Ensure cards break nicely */
+  .card, div[style*="background"] {
+    page-break-inside: avoid;
+  }
 }

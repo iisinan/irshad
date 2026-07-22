@@ -28,8 +28,10 @@ class AiDocumentParserService
             $currentKeyIndex = 0;
         }
         $apiKey = $apiKeys[$currentKeyIndex];
-
-        // Use the latest flash model
+        
+        // Actively alternate for the next request
+        $nextKeyIndex = ($currentKeyIndex + 1) % count($apiKeys);
+        \Illuminate\Support\Facades\Cache::put('gemini_key_index', $nextKeyIndex);
         $baseUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=";
         $url = $baseUrl . $apiKey;
 
@@ -41,7 +43,7 @@ class AiDocumentParserService
                     [
                         'parts' => [
                             [
-                                'text' => "You are an expert financial analyst. Please read this financial statement and extract the following exact numbers for the most recent period. If a number is missing, try to infer it from related fields (e.g. Finance Income = Interest Income). Return the result ONLY as a raw JSON object with the keys: total_assets, total_debt, total_revenue, interest_income, eps, pe_ratio, roe, dividend_yield, profit_margin. Do NOT wrap the JSON in markdown formatting blocks like ```json."
+                                'text' => "You are an expert financial analyst. Please read this financial statement and extract the following exact numbers for the most recent period. If a number is missing, try to infer it from related fields (e.g. Finance Income = Interest Income). Return the result ONLY as a raw JSON object with the keys: total_assets, total_debt, total_revenue, interest_income, eps, pe_ratio, roe, dividend_yield, profit_margin, cash_and_equivalents, interest_bearing_securities, accounts_receivable, illiquid_assets. Do NOT wrap the JSON in markdown formatting blocks like ```json."
                             ],
                             [
                                 'inlineData' => [
@@ -116,6 +118,10 @@ class AiDocumentParserService
                         'roe' => $parsed['roe'] ?? null,
                         'dividend_yield' => $parsed['dividend_yield'] ?? null,
                         'profit_margin' => $parsed['profit_margin'] ?? null,
+                        'cash_and_equivalents' => $parsed['cash_and_equivalents'] ?? 0,
+                        'interest_bearing_securities' => $parsed['interest_bearing_securities'] ?? 0,
+                        'accounts_receivable' => $parsed['accounts_receivable'] ?? 0,
+                        'illiquid_assets' => $parsed['illiquid_assets'] ?? 0,
                     ];
                 }
             }

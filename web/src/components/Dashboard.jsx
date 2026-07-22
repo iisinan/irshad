@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { fetchPortfolio, fetchNgxStocks, fetchNews, fetchWatchlist, fetchHistory, fetchPriceAlerts } from '../services/api';
+import { fetchPortfolio, fetchNgxStocks, fetchNews, fetchWatchlist, fetchHistory, fetchPriceAlerts, formatLogoUrl } from '../services/api';
 import {
   Search, Bell, Star, Wallet, TrendingUp, TrendingDown,
   ShieldAlert, CheckCircle, AlertTriangle, ArrowUpRight,
@@ -167,8 +167,8 @@ function WatchlistRow({stock}) {
       onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
       style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 12px',borderRadius:'12px',margin:'2px 0',background:hov?'var(--primary-50)':'transparent',textDecoration:'none',transition:'background 0.2s'}}>
       <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
-        <div style={{width:'34px',height:'34px',borderRadius:'8px',background:hov?'var(--primary-100)':'var(--bg-section)',border:'1px solid var(--border)',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:'0.6rem',color:'var(--primary)',flexShrink:0}}>
-          {stock.symbol.slice(0,5)}
+        <div style={{width:'34px',height:'34px',borderRadius:'8px',background:hov?'var(--primary-100)':'var(--bg-section)',border:'1px solid var(--border)',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:'0.6rem',color:'var(--primary)',flexShrink:0,overflow:'hidden'}}>
+          {stock.logo_url ? <img loading="lazy" src={formatLogoUrl(stock.logo_url)} alt={stock.symbol} style={{ width:'100%', height:'100%', objectFit:'contain' }}/> : stock.symbol.slice(0,5)}
         </div>
         <div>
           <div style={{fontWeight:700,color:'var(--text-dark)',fontSize:'0.75rem'}}>{stock.symbol}</div>
@@ -222,8 +222,8 @@ function HoldingRow({holding}) {
     <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
       style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 12px',borderRadius:'12px',margin:'2px 0',background:hov?'var(--primary-50)':'transparent',transition:'background 0.2s',cursor:'pointer'}}>
       <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
-        <div style={{width:'34px',height:'34px',borderRadius:'8px',background:'var(--bg-section)',border:'1px solid var(--border)',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:'0.6rem',color:'var(--primary)',flexShrink:0}}>
-          {(holding.symbol||holding.stock_code||'N/A').slice(0,5)}
+        <div style={{width:'34px',height:'34px',borderRadius:'8px',background:'var(--bg-section)',border:'1px solid var(--border)',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:'0.6rem',color:'var(--primary)',flexShrink:0,overflow:'hidden'}}>
+          {holding.logo_url ? <img loading="lazy" src={formatLogoUrl(holding.logo_url)} alt={holding.symbol||holding.stock_code} style={{ width:'100%', height:'100%', objectFit:'contain' }}/> : (holding.symbol||holding.stock_code||'N/A').slice(0,5)}
         </div>
         <div>
           <div style={{fontWeight:700,color:'var(--text-dark)',fontSize:'0.75rem'}}>{holding.symbol||holding.stock_code}</div>

@@ -11,6 +11,7 @@ import { useAuth } from './context/AuthContext';
 import './index.css';
 
 const StockDetails = React.lazy(() => import('./components/StockDetails'));
+const AaoifiScreening = React.lazy(() => import('./components/AaoifiScreening'));
 const Portfolio = React.lazy(() => import('./components/Portfolio'));
 const Dashboard = React.lazy(() => import('./components/Dashboard'));
 const AboutPage = React.lazy(() => import('./components/About'));
@@ -982,6 +983,9 @@ function App() {
                   <Route path="/resources" element={<ResourcesPage />} />
                   <Route path="/market/:symbol" element={
                     <DashboardLayout><StockDetails /></DashboardLayout>
+                  } />
+                  <Route path="/market/:symbol/aaoifi" element={
+                    <DashboardLayout><AaoifiScreening /></DashboardLayout>
                   } />
                   <Route path="/dashboard" element={
                     <DashboardLayout><RoleBasedDashboard /></DashboardLayout>

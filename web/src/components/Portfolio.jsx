@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { fetchPortfolio, addHolding, removeHolding, fetchNgxStocks } from '../services/api';
+import { fetchPortfolio, addHolding, removeHolding, fetchNgxStocks, formatLogoUrl } from '../services/api';
 import { toastError, toastSuccess } from '../utils/toast';
 import { useAuth } from '../context/AuthContext';
 import { X, Search, LayoutDashboard, BarChart2, Star, Calculator, ShieldCheck, BookOpen, Info, Landmark, Briefcase, Bell, Activity, Lock, CheckCircle2 } from 'lucide-react';
@@ -159,9 +159,14 @@ function AddModal({ onClose, onAdd, isAdding, onBrokerLinked }) {
                             onMouseEnter={e => e.currentTarget.style.background = 'var(--primary-50)'}
                             onMouseLeave={e => e.currentTarget.style.background = 'white'}
                           >
-                            <div>
-                              <div style={{ fontWeight:800, color:'var(--text-dark)' }}>{stock.symbol}</div>
-                              <div style={{ fontSize:'0.75rem', color:'var(--text-muted)' }}>{stock.name}</div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--primary-10)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, overflow: 'hidden' }}>
+                                {stock.logo_url ? <img loading="lazy" src={formatLogoUrl(stock.logo_url)} alt={stock.symbol} style={{ width:'100%', height:'100%', objectFit:'contain' }}/> : stock.symbol.charAt(0)}
+                              </div>
+                              <div>
+                                <div style={{ fontWeight:800, color:'var(--text-dark)' }}>{stock.symbol}</div>
+                                <div style={{ fontSize:'0.75rem', color:'var(--text-muted)' }}>{stock.name}</div>
+                              </div>
                             </div>
                             <div style={{ fontSize:'0.8rem', fontWeight:700, color:'var(--primary)' }}>
                               ₦{Number(stock.daily_prices?.[0]?.price || stock.latest_price || 0).toFixed(2)}

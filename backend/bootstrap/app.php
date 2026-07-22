@@ -13,7 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->api(prepend: [
-            'throttle:60,1',
+            'throttle:1000,1',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

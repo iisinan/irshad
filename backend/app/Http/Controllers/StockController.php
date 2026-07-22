@@ -211,4 +211,27 @@ class StockController extends Controller
 
         return $this->success(['analysis' => $analysis]);
     }
+
+    /**
+     * Execute or retrieve the AAOIFI detailed screening for a stock.
+     */
+    public function aaoifiScreening(string $symbol, \App\Services\AaoifiScreeningService $screeningService): JsonResponse
+    {
+        $company = Company::where('symbol', $symbol)->firstOrFail();
+        
+        // Return cached screening if less than 7 days old
+        $existingScreening = \App\Models\AaoifiScreening::where('company_id', $company->id)
+            ->where('created_at', '>=', now()->subDays(7))
+            ->latest()
+            ->first();
+            
+        if ($existingScreening) {
+            return $this->success($existingScreening);
+        }
+        
+        // Otherwise, run a new screening synchronously
+        $screening = $screeningService->screenCompany($company);
+        
+        return $this->success($screening);
+    }
 }

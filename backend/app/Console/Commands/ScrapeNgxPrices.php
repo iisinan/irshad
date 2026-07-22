@@ -36,66 +36,105 @@ class ScrapeNgxPrices extends Command
         $adminEmail = env('ADMIN_EMAIL', 'admin@irshad.com');
 
         try {
-            $url = 'https://doclib.ngxgroup.com/REST/api/statistics/equities/?market=&sector=&orderby=&pageSize=300&pageNo=0';
+            $url = 'https://ngxpulse.ng/api/ngxdata/stocks';
             
             $response = Http::withHeaders([
-                'accept' => 'application/json;odata=verbose',
+                'accept' => 'application/json',
+                'Referer' => 'https://ngxpulse.ng/',
+                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
             ])->timeout(30)->get($url);
 
             if (!$response->successful()) {
-                throw new \Exception("NGX Endpoint returned status code: " . $response->status());
+                throw new \Exception("NGX Pulse Endpoint returned status code: " . $response->status());
             }
 
             $data = $response->json();
+            $stocksList = $data['stocks'] ?? null;
 
-            if (!is_array($data) || empty($data)) {
-                throw new \Exception("NGX Endpoint returned empty or invalid JSON array.");
+            if (!is_array($stocksList) || empty($stocksList)) {
+                throw new \Exception("NGX Pulse Endpoint returned empty or invalid JSON array.");
             }
 
             // Structure check
-            $firstItem = $data[0] ?? null;
-            if (!$firstItem || !isset($firstItem['Symbol']) || !array_key_exists('ClosePrice', $firstItem) || !array_key_exists('Volume', $firstItem)) {
-                throw new \Exception("NGX JSON Structure has changed! The required keys (Symbol, ClosePrice, Volume) were not found.");
+            $firstItem = $stocksList[0] ?? null;
+            if (!$firstItem || !isset($firstItem['symbol']) || !array_key_exists('current_price', $firstItem) || !array_key_exists('volume', $firstItem)) {
+                throw new \Exception("NGX JSON Structure has changed! The required keys (symbol, current_price, volume) were not found.");
             }
 
             $updatesCount = 0;
             $missingSymbols = [];
             $today = now()->format('Y-m-d');
 
+            // Fetch the HTML to extract the exact logoMapping object
+            $htmlResponse = Http::withHeaders([
+                'Referer' => 'https://ngxpulse.ng/',
+                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+            ])->timeout(30)->get('https://ngxpulse.ng/');
+
+            $logoMapping = [];
+            if ($htmlResponse->successful()) {
+                if (preg_match('/let logoMapping=(\{.*?\});/', $htmlResponse->body(), $matches)) {
+                    $logoMapping = json_decode($matches[1], true) ?? [];
+                }
+            }
+
             DB::beginTransaction();
 
-            foreach ($data as $stock) {
-                $symbol = strtoupper(trim($stock['Symbol'] ?? ''));
-                $closePrice = $stock['ClosePrice'];
-                $change = $stock['Change'];
-                $changePct = $stock['CalculateChangePercent'];
+            foreach ($stocksList as $stock) {
+                $symbol = strtoupper(trim($stock['symbol'] ?? ''));
+                $closePrice = $stock['current_price'];
+                $prevPrice = $stock['previous_close'] ?? $closePrice;
+                $change = $closePrice - $prevPrice;
+                $changePct = $stock['change_percent'] ?? 0;
+                
+                $logoUrl = null;
+                if (isset($logoMapping[$symbol])) {
+                    $logoUrl = "https://ngxpulse.ng/logos_small/" . $logoMapping[$symbol];
+                }
+                
+                $marketCap = $stock['market_cap'] ?? null;
 
                 if (empty($symbol) || $closePrice === null) continue;
 
                 $company = Company::where('symbol', $symbol)->first();
 
-                if ($company) {
+                if (!$company) {
+                    // Create the company if it's missing using NGX data
+                    $company = Company::create([
+                        'symbol' => $symbol,
+                        'name' => trim($stock['name'] ?? $symbol),
+                        'sector' => isset($stock['sector']) ? ucwords(strtolower($stock['sector'])) : 'Unknown',
+                        'business_type' => 'Unknown',
+                        'description' => 'A publicly listed company on the Nigerian Exchange (NGX).',
+                        'latest_price' => $closePrice,
+                        'price_change' => $change,
+                        'price_change_pct' => $changePct,
+                        'logo_url' => $logoUrl,
+                        'market_cap' => $marketCap,
+                    ]);
+                    $missingSymbols[] = $symbol; // still keep track to log what was added
+                } else {
                     // Update denormalized fields
                     $company->update([
                         'latest_price' => $closePrice,
                         'price_change' => $change,
                         'price_change_pct' => $changePct,
+                        'logo_url' => $logoUrl,
+                        'market_cap' => $marketCap,
                     ]);
-
-                    // Update or create daily price
-                    DB::table('daily_prices')->updateOrInsert(
-                        ['company_id' => $company->id, 'date' => $today],
-                        [
-                            'price' => $closePrice,
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ]
-                    );
-
-                    $updatesCount++;
-                } else {
-                    $missingSymbols[] = $symbol;
                 }
+
+                // Update or create daily price
+                DB::table('daily_prices')->updateOrInsert(
+                    ['company_id' => $company->id, 'date' => $today],
+                    [
+                        'price' => $closePrice,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]
+                );
+
+                $updatesCount++;
             }
 
             DB::commit();

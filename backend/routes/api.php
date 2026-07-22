@@ -48,6 +48,7 @@ Route::prefix('v1')->group(function () {
     Route::get('/disclosures',          [\App\Http\Controllers\Api\V1\CorporateDisclosureController::class, 'index']);
     Route::get('/news',                 [\App\Http\Controllers\NewsController::class, 'index']);
     Route::get('/stocks/{symbol}/analysis',       [StockController::class, 'getAiAnalysis']);
+    Route::get('/stocks/{symbol}/aaoifi-screening', [StockController::class, 'aaoifiScreening']);
 
     // ── Protected Routes ─────────────────────────────────────────────────
     Route::middleware('auth:sanctum')->group(function () {

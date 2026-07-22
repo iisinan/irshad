@@ -60,7 +60,12 @@ class FetchNgxFinancialsCommand extends Command
         }
         
         if ($skipExisting) {
-            $query->doesntHave('financials');
+            $query->where(function ($q) {
+                $q->doesntHave('financials')
+                  ->orWhereHas('financials', function ($q2) {
+                      $q2->whereNull('cash_and_equivalents');
+                  });
+            });
         }
 
         $companies = $query->get();
@@ -120,6 +125,10 @@ class FetchNgxFinancialsCommand extends Command
                     'roe' => $this->cleanNumber($extractedData['roe']),
                     'dividend_yield' => $this->cleanNumber($extractedData['dividend_yield']),
                     'profit_margin' => $this->cleanNumber($extractedData['profit_margin']),
+                    'cash_and_equivalents' => $this->cleanNumber($extractedData['cash_and_equivalents']),
+                    'interest_bearing_securities' => $this->cleanNumber($extractedData['interest_bearing_securities']),
+                    'accounts_receivable' => $this->cleanNumber($extractedData['accounts_receivable']),
+                    'illiquid_assets' => $this->cleanNumber($extractedData['illiquid_assets']),
                 ]
             );
 
@@ -132,9 +141,9 @@ class FetchNgxFinancialsCommand extends Command
 
             $this->info("Completed {$company->symbol} successfully.");
             
-            // Add a delay to avoid hitting rate limits (15 RPM free tier limit)
-            $this->info('Sleeping for 120 seconds to respect Gemini API free tier limits...');
-            sleep(120);
+            // Add a delay to avoid hitting rate limits (Tokens Per Minute)
+            $this->info('Sleeping for 20 seconds to respect Gemini API TPM limits...');
+            sleep(20);
         }
 
         $this->info("All done!");

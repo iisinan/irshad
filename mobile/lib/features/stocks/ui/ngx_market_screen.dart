@@ -50,7 +50,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
   List<Map<String, dynamic>> _getFilteredAndSortedStocks(List<dynamic> allStocks) {
     List<Map<String, dynamic>> list = allStocks
         .cast<Map<String, dynamic>>()
-        .where((s) => ((s['latest_price'] ?? 0) as num).toDouble() > 0)
+        .where((s) => (double.tryParse(s['latest_price']?.toString() ?? '0') ?? 0.0) > 0)
         .toList();
     
     if (_selectedSector != 'All') {
@@ -62,9 +62,9 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
     } else if (_sortBy == 'Symbol (Z-A)') {
       list.sort((a, b) => (b['symbol'] ?? '').compareTo(a['symbol'] ?? ''));
     } else if (_sortBy == 'Price (High-Low)') {
-      list.sort((a, b) => ((b['latest_price'] ?? 0) as num).compareTo((a['latest_price'] ?? 0) as num));
+      list.sort((a, b) => (double.tryParse(b['latest_price']?.toString() ?? '0') ?? 0.0).compareTo(double.tryParse(a['latest_price']?.toString() ?? '0') ?? 0.0));
     } else if (_sortBy == 'Price (Low-High)') {
-      list.sort((a, b) => ((a['latest_price'] ?? 0) as num).compareTo((b['latest_price'] ?? 0) as num));
+      list.sort((a, b) => (double.tryParse(a['latest_price']?.toString() ?? '0') ?? 0.0).compareTo(double.tryParse(b['latest_price']?.toString() ?? '0') ?? 0.0));
     }
     
     return list;
@@ -340,7 +340,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    '₦${((stock['latest_price'] ?? 0) as num).toStringAsFixed(2)}',
+                    '₦${(double.tryParse(stock['latest_price']?.toString() ?? '0') ?? 0.0).toStringAsFixed(2)}',
                     style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: context.textDark),
                   ),
                 ],
