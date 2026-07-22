@@ -40,24 +40,40 @@ class AiDocumentParserService
             
             // 1. Upload File to Gemini using stream to save memory
             $uploadUrl = "https://generativelanguage.googleapis.com/upload/v1beta/files?key=" . $apiKey;
+            
+            $fileSize = filesize($pdfFilePath);
             $fileResource = fopen($pdfFilePath, 'r');
             
-            $uploadResponse = Http::withHeaders([
-                'X-Goog-Upload-Command' => 'start, upload, finalize',
-                'X-Goog-Upload-Header-Content-Length' => filesize($pdfFilePath),
-                'X-Goog-Upload-Header-Content-Type' => $mimeType,
-                'Content-Type' => $mimeType,
-            ])->timeout(300)->send('POST', $uploadUrl, [
-                'body' => $fileResource
+            $ch = curl_init($uploadUrl);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 300);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'X-Goog-Upload-Command: start, upload, finalize',
+                'X-Goog-Upload-Header-Content-Length: ' . $fileSize,
+                'X-Goog-Upload-Header-Content-Type: ' . $mimeType,
+                'Content-Type: ' . $mimeType,
             ]);
+            // Use INFILE for streaming the upload directly from disk to network
+            curl_setopt($ch, CURLOPT_PUT, true); // Required for CURLOPT_INFILE
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST'); // Override back to POST
+            curl_setopt($ch, CURLOPT_INFILE, $fileResource);
+            curl_setopt($ch, CURLOPT_INFILESIZE, $fileSize);
 
-            if (!$uploadResponse->successful()) {
-                Log::error("Gemini File Upload Failed: " . $uploadResponse->body());
+            $responseBody = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $curlError = curl_error($ch);
+            curl_close($ch);
+            fclose($fileResource);
+
+            if ($httpCode >= 400 || $responseBody === false) {
+                Log::error("Gemini File Upload Failed. HTTP {$httpCode}. Error: {$curlError}. Body: " . $responseBody);
                 return null;
             }
 
-            $fileUri = $uploadResponse->json('file.uri');
-            $fileName = $uploadResponse->json('file.name'); // To delete later
+            $uploadData = json_decode($responseBody, true);
+            $fileUri = $uploadData['file']['uri'] ?? null;
+            $fileName = $uploadData['file']['name'] ?? null; // To delete later
 
             if (!$fileUri) {
                 Log::error("Gemini File Upload did not return a URI.");

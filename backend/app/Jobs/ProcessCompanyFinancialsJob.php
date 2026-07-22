@@ -66,12 +66,19 @@ class ProcessCompanyFinancialsJob implements ShouldQueue
         // 2. Download the PDF locally
         $tempPath = storage_path('app/temp_financials_' . $symbol . '_' . time() . '.pdf');
         try {
-            $response = Http::timeout(300)->withOptions([
-                'sink' => $tempPath
-            ])->get($pdfUrl);
+            $fp = fopen($tempPath, 'w+');
+            $ch = curl_init(str_replace(" ", "%20", $pdfUrl));
+            curl_setopt($ch, CURLOPT_TIMEOUT, 300);
+            curl_setopt($ch, CURLOPT_FILE, $fp);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($ch, CURLOPT_FAILONERROR, true);
+            $success = curl_exec($ch);
+            $error = curl_error($ch);
+            curl_close($ch);
+            fclose($fp);
 
-            if (!$response->successful()) {
-                Log::warning("Failed to download PDF for {$symbol}");
+            if (!$success) {
+                Log::warning("Failed to download PDF for {$symbol}. cURL Error: " . $error);
                 if (file_exists($tempPath)) {
                     unlink($tempPath);
                 }
