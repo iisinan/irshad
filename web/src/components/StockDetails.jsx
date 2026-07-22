@@ -393,7 +393,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
                   display: 'flex', alignItems: 'center', gap: '6px'
                 }}>
                   <StatusIcon size={14} />
-                  {isHalal ? '100% Compliant' : isNonHalal ? 'Non-Compliant' : 'Under Review'}
+                  {isHalal ? 'Halal' : isNonHalal ? 'Non-Halal' : 'Doubtful'}
                 </div>
               </div>
               
