@@ -210,22 +210,6 @@ const AaoifiScreening = () => {
     bgStatus = 'linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%)';
   }
 
-  const renderSectionHeader = (title, status) => {
-    let color = 'var(--text-muted)';
-    let bg = 'var(--bg-section)';
-    if (status === 'pass') { color = 'var(--halal)'; bg = 'var(--halal-bg)'; }
-    if (status === 'fail') { color = 'var(--non-halal)'; bg = 'var(--non-halal-bg)'; }
-    if (status === 'warning') { color = 'var(--questionable)'; bg = 'var(--questionable-bg)'; }
-
-    return (
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid var(--border)' }}>
-        <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, color: 'var(--text-dark)' }}>{title}</h3>
-        <div style={{ padding: '6px 14px', borderRadius: '100px', background: bg, color: color, fontSize: '0.75rem', fontWeight: 800, letterSpacing: '0.5px', boxShadow: `0 2px 4px ${color}20` }}>
-          {(status || 'UNKNOWN').toUpperCase()}
-        </div>
-      </div>
-    );
-  };
 
   const renderRatioProgressBar = (title, subtitle, ratio, threshold, numLabel, numVal, denLabel, denVal, formula, isMinimum = false) => {
     if (ratio === null || ratio === undefined) {
@@ -359,40 +343,47 @@ const AaoifiScreening = () => {
 
 
 
-      <div style={{ marginBottom: '40px' }}>
-        {renderSectionHeader('1. Business Activity Screening', report.business_status)}
-        <div style={{ padding: '32px', background: 'linear-gradient(180deg, var(--bg-section) 0%, var(--bg) 100%)', borderRadius: '24px', border: '1px solid var(--border)', boxShadow: '0 8px 16px -8px rgba(0,0,0,0.02)' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: '24px', alignItems: 'start' }}>
-              <span style={{ fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <CheckCircle size={16} color="var(--primary)" /> Principal
-              </span>
-              <span style={{ fontWeight: 600, fontSize: '1.05rem', color: 'var(--text-dark)', lineHeight: 1.5 }}>
-                {report.business_reasoning?.principal_business || 'N/A'}
-              </span>
-            </div>
-            
-            {report.business_reasoning?.prohibited_activities?.length > 0 && (
-              <div style={{ background: 'var(--non-halal-bg)', padding: '20px', borderRadius: '16px', border: '1px solid var(--non-halal)' }}>
-                <div style={{ fontWeight: 800, color: 'var(--non-halal)', fontSize: '0.95rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <AlertTriangle size={18} /> Prohibited Activities Found:
-                </div>
-                <ul style={{ margin: 0, paddingLeft: '24px', color: 'var(--non-halal)', fontWeight: 500, lineHeight: 1.6 }}>
-                  {report.business_reasoning.prohibited_activities.map((act, i) => (
-                    <li key={i} style={{ marginBottom: '8px' }}>{act}</li>
-                  ))}
-                </ul>
+      <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', marginBottom: '48px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
+          <div>
+            <h2 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#C49852', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>BUSINESS ACTIVITY SCREEN</h2>
+            <p style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-dark)', margin: '8px 0 0 0' }}>Core operations</p>
+          </div>
+          <div style={{ padding: '6px 14px', borderRadius: '100px', background: report.business_status === 'pass' ? 'var(--halal-bg)' : (report.business_status === 'fail' ? 'var(--non-halal-bg)' : 'var(--questionable-bg)'), color: report.business_status === 'pass' ? 'var(--halal)' : (report.business_status === 'fail' ? 'var(--non-halal)' : 'var(--questionable)'), fontSize: '0.75rem', fontWeight: 800, letterSpacing: '0.5px' }}>
+            {(report.business_status || 'UNKNOWN').toUpperCase()}
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: '24px', alignItems: 'start' }}>
+            <span style={{ fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <CheckCircle size={16} color="var(--primary)" /> Principal
+            </span>
+            <span style={{ fontWeight: 600, fontSize: '1.05rem', color: 'var(--text-dark)', lineHeight: 1.5 }}>
+              {report.business_reasoning?.principal_business || 'N/A'}
+            </span>
+          </div>
+          
+          {report.business_reasoning?.prohibited_activities?.length > 0 && (
+            <div style={{ background: 'var(--non-halal-bg)', padding: '20px', borderRadius: '16px', border: '1px solid var(--non-halal)' }}>
+              <div style={{ fontWeight: 800, color: 'var(--non-halal)', fontSize: '0.95rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <AlertTriangle size={18} /> Prohibited Activities Found:
               </div>
-            )}
-            
-            <div style={{ paddingTop: '24px', borderTop: '1px dashed var(--border)' }}>
-              <div style={{ fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Brain size={16} color="var(--primary)" /> AI Analysis Reasoning
-              </div>
-              <p style={{ margin: 0, fontSize: '1.05rem', lineHeight: 1.7, color: 'var(--text-dark)', padding: '20px', background: 'var(--bg)', borderRadius: '16px', border: '1px solid var(--border)' }}>
-                {report.business_reasoning?.reasoning || 'N/A'}
-              </p>
+              <ul style={{ margin: 0, paddingLeft: '24px', color: 'var(--non-halal)', fontWeight: 500, lineHeight: 1.6 }}>
+                {report.business_reasoning.prohibited_activities.map((act, i) => (
+                  <li key={i} style={{ marginBottom: '8px' }}>{act}</li>
+                ))}
+              </ul>
             </div>
+          )}
+          
+          <div style={{ paddingTop: '24px', borderTop: '1px dashed var(--border)' }}>
+            <div style={{ fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Brain size={16} color="var(--primary)" /> AI Analysis Reasoning
+            </div>
+            <p style={{ margin: 0, fontSize: '1.05rem', lineHeight: 1.7, color: 'var(--text-dark)', padding: '20px', background: 'var(--bg-section)', borderRadius: '16px', border: '1px solid var(--border)' }}>
+              {report.business_reasoning?.reasoning || 'N/A'}
+            </p>
           </div>
         </div>
       </div>
@@ -447,24 +438,24 @@ const AaoifiScreening = () => {
 
 
 
-      <div style={{ borderTop: '1px solid var(--border)', paddingTop: '32px' }}>
+      <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', marginBottom: '48px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)' }}>
         <button 
           onClick={() => setEvidenceExpanded(!evidenceExpanded)}
-          style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'none', border: 'none', padding: '16px 0', cursor: 'pointer' }}
+          style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <FileText color="var(--primary)" />
-            <div style={{ textAlign: 'left' }}>
-              <div style={{ fontWeight: 700, fontSize: '1.1rem', color: 'var(--text-dark)' }}>Evidence & Traceability</div>
-              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>View data sources and AI confidence</div>
-            </div>
+          <div style={{ textAlign: 'left' }}>
+            <h2 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#C49852', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>TRANSPARENCY & EVIDENCE</h2>
+            <p style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-dark)', margin: '8px 0 0 0' }}>Data sources & AI Confidence</p>
           </div>
-          <ChevronRight size={24} color="var(--text-muted)" style={{ transform: evidenceExpanded ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>
+            {evidenceExpanded ? 'Hide details' : 'View details'}
+            <ChevronRight size={24} color="var(--text-muted)" style={{ transform: evidenceExpanded ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
+          </div>
         </button>
 
         {evidenceExpanded && (
-          <div className="animate-fade-in" style={{ padding: '32px', background: 'linear-gradient(135deg, var(--bg-section) 0%, var(--bg) 100%)', borderRadius: '24px', marginTop: '20px', border: '1px solid var(--border)' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', marginBottom: '32px', padding: '12px 24px', background: 'var(--bg)', borderRadius: '100px', border: '1px solid var(--border)', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
+          <div className="animate-fade-in" style={{ marginTop: '32px', paddingTop: '32px', borderTop: '1px solid var(--border)' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', marginBottom: '32px', padding: '12px 24px', background: 'var(--bg-section)', borderRadius: '100px', border: '1px solid var(--border)' }}>
               <Brain size={20} color="var(--primary)" /> 
               <span style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '1rem' }}>AI Confidence Score</span>
               <div style={{ width: '1px', height: '24px', background: 'var(--border)', margin: '0 8px' }} />
