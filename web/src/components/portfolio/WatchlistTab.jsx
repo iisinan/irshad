@@ -27,11 +27,15 @@ const StockTicker = ({ stocks }) => {
           }
           const displayPrice = Number(stock.latest_price || stock.daily_prices?.[0]?.price || 0).toFixed(2);
           return (
-            <div key={`${stock.symbol}-${i}`} className="ticker-item" onClick={() => navigate(`/market/${stock.symbol}`, { state: { stock } })}>
-              <span className="ticker-item-symbol">{stock.symbol}</span>
-              <span className="ticker-item-price">₦{displayPrice}</span>
-              <span style={{ fontWeight: 800, fontSize: '0.7rem', color, padding: '2px 6px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)' }}>{statusStr}</span>
-              <div className="ticker-separator" />
+            <div key={`${stock.symbol}-${i}`} className="hover-card" style={{display:'inline-flex',alignItems:'center',gap:'12px',whiteSpace:'nowrap', background: '#ffffff', padding: '6px 16px 6px 8px', borderRadius: '100px', border: '1px solid var(--border)', boxShadow: '0 2px 12px rgba(0,0,0,0.03)', cursor: 'pointer', margin: '0 12px'}} onClick={() => navigate(`/market/${stock.symbol}`, { state: { stock } })}>
+              <div style={{ width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-alt)', borderRadius: '50%', overflow: 'hidden', border: '1px solid var(--border)' }}>
+                {stock.logo_url ? <img src={formatLogoUrl(stock.logo_url)} alt={stock.symbol} style={{ width: '100%', height: '100%', objectFit: 'contain', background: 'white' }} /> : <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-muted)' }}>{stock.symbol.charAt(0)}</span>}
+              </div>
+              <span style={{fontSize:'0.85rem',fontWeight:800,color:'var(--text-dark)'}}>{stock.symbol}</span>
+              <span style={{fontSize:'0.85rem',fontWeight:600,color:'var(--text-muted)'}}>₦{displayPrice}</span>
+              <div style={{ padding: '4px 8px', borderRadius: '20px', background: color === 'var(--halal)' ? 'rgba(74, 222, 128, 0.15)' : color === 'var(--non-halal)' ? 'rgba(248, 113, 113, 0.15)' : 'rgba(250, 204, 21, 0.15)' }}>
+                <span style={{ fontWeight: 800, fontSize: '0.7rem', color }}>{statusStr}</span>
+              </div>
             </div>
           );
         })}

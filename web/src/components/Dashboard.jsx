@@ -59,19 +59,23 @@ const NGX_STATUS = {
 function Ticker({ tickerItems = [] }) {
   const items=[...tickerItems,...tickerItems];
   return (
-    <div style={{background:'linear-gradient(90deg, #F5F7FA 0%, #FFFFFF 50%, #F5F7FA 100%)', borderBottom:'1px solid var(--border)',overflow:'hidden',paddingLeft:'8px', position:'relative'}}>
+    <div style={{background:'linear-gradient(90deg, #F5F7FA 0%, #FFFFFF 50%, #F5F7FA 100%)', borderBottom:'1px solid var(--border)',overflow:'hidden', position:'relative'}}>
       {/* Edge Gradients for smooth fade */}
-      <div style={{position:'absolute',left:0,top:0,bottom:0,width:'40px',background:'linear-gradient(90deg, #F5F7FA 0%, transparent 100%)',zIndex:2,pointerEvents:'none'}}/>
-      <div style={{position:'absolute',right:0,top:0,bottom:0,width:'40px',background:'linear-gradient(-90deg, #F5F7FA 0%, transparent 100%)',zIndex:2,pointerEvents:'none'}}/>
-      <div style={{display:'flex',gap:'48px',animation:'scrollTicker 40s linear infinite',width:'max-content',padding:'12px 0'}}>
+      <div style={{position:'absolute',left:0,top:0,bottom:0,width:'60px',background:'linear-gradient(90deg, #F5F7FA 0%, transparent 100%)',zIndex:2,pointerEvents:'none'}}/>
+      <div style={{position:'absolute',right:0,top:0,bottom:0,width:'60px',background:'linear-gradient(-90deg, #F5F7FA 0%, transparent 100%)',zIndex:2,pointerEvents:'none'}}/>
+      <div style={{display:'flex',gap:'24px',animation:'scrollTicker 50s linear infinite',width:'max-content',padding:'12px 24px'}}>
         {items.map((item,i)=>(
-          <div key={i} style={{display:'flex',alignItems:'center',gap:'8px',whiteSpace:'nowrap'}}>
-            <span style={{fontSize:'0.77rem',fontWeight:800,color:'var(--text-dark)'}}>{item.symbol}</span>
-            <span style={{fontSize:'0.77rem',fontWeight:500,color:'var(--text-muted)'}}>{item.price}</span>
-            <span style={{fontSize:'0.74rem',fontWeight:700,color:item.up?'var(--halal)':'var(--non-halal)',display:'flex',alignItems:'center',gap:'1px'}}>
-              {item.up?<ArrowUpRight size={11}/>:<ArrowDownRight size={11}/>}{item.change}
-            </span>
-            <span style={{color:'var(--border-strong)',fontSize:'0.6rem'}}>•</span>
+          <div key={i} className="hover-card" style={{display:'flex',alignItems:'center',gap:'12px',whiteSpace:'nowrap', background: '#ffffff', padding: '6px 16px 6px 8px', borderRadius: '100px', border: '1px solid var(--border)', boxShadow: '0 2px 12px rgba(0,0,0,0.03)', cursor: 'default'}}>
+            <div style={{ width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-alt)', borderRadius: '50%', overflow: 'hidden', border: '1px solid var(--border)' }}>
+              {item.logo_url ? <img src={formatLogoUrl(item.logo_url)} alt={item.symbol} style={{ width: '100%', height: '100%', objectFit: 'contain', background: 'white' }} /> : <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-muted)' }}>{item.symbol.charAt(0)}</span>}
+            </div>
+            <span style={{fontSize:'0.85rem',fontWeight:800,color:'var(--text-dark)'}}>{item.symbol}</span>
+            <span style={{fontSize:'0.85rem',fontWeight:600,color:'var(--text-muted)'}}>{item.price}</span>
+            <div style={{ padding: '4px 8px', borderRadius: '20px', background: item.up ? 'rgba(74, 222, 128, 0.15)' : 'rgba(248, 113, 113, 0.15)' }}>
+              <span style={{fontSize:'0.75rem',fontWeight:800,color:item.up?'var(--halal)':'var(--non-halal)',display:'flex',alignItems:'center',gap:'2px'}}>
+                {item.up?<ArrowUpRight size={12}/>:<ArrowDownRight size={12}/>}{item.change}
+              </span>
+            </div>
           </div>
         ))}
       </div>
@@ -406,7 +410,8 @@ export default function Dashboard() {
     const shuffled = [...validStocks].sort(() => 0.5 - Math.random());
     dynamicTicker = shuffled.slice(0, 15).map(s => ({
       symbol: s.symbol, price: `₦${Number(s.latest_price || 0).toFixed(2)}`,
-      change: `${Number(s.price_change_pct || 0).toFixed(2)}%`, up: (s.price_change_pct || 0) >= 0
+      change: `${Number(s.price_change_pct || 0).toFixed(2)}%`, up: (s.price_change_pct || 0) >= 0,
+      logo_url: s.logo_url
     }));
 
     validStocks.forEach(s => {
