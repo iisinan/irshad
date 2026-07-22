@@ -31,6 +31,8 @@ class AuthController extends Controller
             'preferences' => [],
         ]);
 
+        event(new \Illuminate\Auth\Events\Registered($user));
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return $this->success([
@@ -95,6 +97,8 @@ class AuthController extends Controller
                 'role' => 'user',
                 'preferences' => [],
             ]);
+            // Mark Google-authenticated users as immediately verified
+            $user->markEmailAsVerified();
         } else {
             // Update google_id and avatar if missing
             $user->update([
