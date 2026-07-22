@@ -11,10 +11,6 @@ export default function DashboardLayout({ children }) {
   const location = useLocation();
   const { user } = useAuth();
   
-  if (user && !user.email_verified_at) {
-    return <Navigate to="/verify-email" replace />;
-  }
-  
   // Initialize tour visibility once per mount. 
   // It won't hide immediately if user context updates to onboarded=true during the tour.
   const [showTour, setShowTour] = useState(() => !user?.preferences?.onboarded);
@@ -29,6 +25,10 @@ export default function DashboardLayout({ children }) {
     document.body.style.overflow = mobileOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [mobileOpen]);
+
+  if (user && !user.email_verified_at) {
+    return <Navigate to="/verify-email" replace />;
+  }
 
   return (
     <div style={{
