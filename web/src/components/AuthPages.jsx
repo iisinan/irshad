@@ -475,3 +475,88 @@ export const ResetPasswordPage = () => {
     </div>
   );
 };
+
+/* ─── Verify Email Page ────────────────────────────────────── */
+export const VerifyEmailPage = () => {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  React.useEffect(() => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const verifyUrl = queryParams.get('url');
+
+    if (verifyUrl) {
+      const verifyEmail = async () => {
+        setVerifying(true);
+        try {
+          // Send request to the exact URL provided in the parameter
+          const res = await api.get(verifyUrl);
+          setMessage(res.data?.message || 'Email successfully verified!');
+          setTimeout(() => navigate('/dashboard'), 2000);
+        } catch (err) {
+          setError(err.response?.data?.message || 'Invalid or expired verification link.');
+        }
+        setVerifying(false);
+      };
+      verifyEmail();
+    }
+  }, [navigate]);
+
+  const handleResend = async () => {
+    setLoading(true);
+    setError('');
+    setMessage('');
+    try {
+      const res = await api.post('/email/resend');
+      setMessage(res.data?.message || 'Verification link sent! Check your inbox.');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to resend. Please try again.');
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="auth-wrapper">
+      <div className="auth-card animate-fade-in" style={{ textAlign: 'center' }}>
+        <img
+          src="/logo.svg"
+          alt="Irshad"
+          style={{
+            height: '72px', width: 'auto', objectFit: 'contain', margin: '0 auto 24px', display: 'block',
+            filter: 'drop-shadow(0 4px 20px rgba(201,168,76,0.14))',
+          }}
+        />
+        <h1 style={{ fontSize: '1.9rem', fontWeight: '800', marginBottom: '12px', color: 'var(--text-dark)' }}>
+          {verifying ? 'Verifying email...' : 'Verify your email'}
+        </h1>
+        
+        {!verifying && !message && !error && (
+          <p style={{ color: 'var(--text-muted)', marginBottom: '32px', lineHeight: '1.6' }}>
+            Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? 
+            <br /><br />
+            If you didn't receive the email, we will gladly send you another.
+          </p>
+        )}
+
+        {error && <div style={{ background: 'var(--non-halal-bg)', color: 'var(--non-halal)', padding: '12px', borderRadius: '8px', marginBottom: '24px', fontWeight: 600 }}>{error}</div>}
+        {message && <div style={{ background: 'var(--halal-bg)', color: 'var(--halal)', padding: '12px', borderRadius: '8px', marginBottom: '24px', fontWeight: 600 }}>{message}</div>}
+
+        {!verifying && (
+          <button 
+            onClick={handleResend} 
+            disabled={loading} 
+            className="btn-primary" 
+            style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '1rem', opacity: loading ? 0.7 : 1 }}
+          >
+            {loading ? 'Sending...' : 'Resend Verification Email'}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
