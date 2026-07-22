@@ -90,6 +90,14 @@ class AaoifiScreeningService
             $illiquidStatus = $illiquidRatio >= 30 ? 'pass' : 'fail';
         }
 
+        $receivablesRatio = null;
+        $receivablesStatus = 'insufficient_data';
+        if ($totalAssets > 0) {
+            // AAOIFI / DJIM: Accounts Receivable / Total Assets <= 45%
+            $receivablesRatio = ($accountsReceivable / $totalAssets) * 100;
+            $receivablesStatus = $receivablesRatio <= 45 ? 'pass' : 'fail';
+        }
+
         $impermissibleIncomeRatio = null;
         $impIncomeStatus = 'insufficient_data';
         if ($totalRevenue > 0) {
@@ -100,11 +108,11 @@ class AaoifiScreeningService
         // 4. Final Verdict Engine
         $finalStatus = 'compliant';
         
-        if ($businessStatus === 'fail' || $debtStatus === 'fail' || $cashStatus === 'fail' || $impIncomeStatus === 'fail' || $illiquidStatus === 'fail') {
+        if ($businessStatus === 'fail' || $debtStatus === 'fail' || $cashStatus === 'fail' || $impIncomeStatus === 'fail' || $illiquidStatus === 'fail' || $receivablesStatus === 'fail') {
             $finalStatus = 'non-compliant';
         } elseif ($businessStatus === 'warning' || $debtStatus === 'warning' || $cashStatus === 'warning') {
             $finalStatus = 'doubtful';
-        } elseif ($debtStatus === 'insufficient_data' || $cashStatus === 'insufficient_data' || $illiquidStatus === 'insufficient_data') {
+        } elseif ($debtStatus === 'insufficient_data' || $cashStatus === 'insufficient_data' || $illiquidStatus === 'insufficient_data' || $receivablesStatus === 'insufficient_data') {
             $finalStatus = 'doubtful';
         }
 
@@ -121,6 +129,8 @@ class AaoifiScreeningService
             'impermissible_income_status' => $impIncomeStatus,
             'illiquid_ratio' => $illiquidRatio,
             'illiquid_status' => $illiquidStatus,
+            'receivables_ratio' => $receivablesRatio,
+            'receivables_status' => $receivablesStatus,
             'final_status' => $finalStatus,
             'news_sources' => $combinedNews,
             'financial_data_used' => [

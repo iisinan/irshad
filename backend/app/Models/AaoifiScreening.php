@@ -25,6 +25,8 @@ class AaoifiScreening extends Model
         'financial_data_used',
         'illiquid_ratio',
         'illiquid_status',
+        'receivables_ratio',
+        'receivables_status',
     ];
 
     protected $casts = [
@@ -33,6 +35,7 @@ class AaoifiScreening extends Model
         'cash_ratio' => 'decimal:4',
         'impermissible_income_ratio' => 'decimal:4',
         'illiquid_ratio' => 'decimal:4',
+        'receivables_ratio' => 'decimal:4',
         'news_sources' => 'array',
         'financial_data_used' => 'array',
     ];
