@@ -36,8 +36,35 @@ class AiDocumentParserService
         $url = $baseUrl . $apiKey;
 
         try {
-            $fileData = base64_encode(file_get_contents($pdfFilePath));
+            $mimeType = str_ends_with($pdfFilePath, '.txt') ? 'text/plain' : 'application/pdf';
             
+            // 1. Upload File to Gemini using stream to save memory
+            $uploadUrl = "https://generativelanguage.googleapis.com/upload/v1beta/files?key=" . $apiKey;
+            $fileResource = fopen($pdfFilePath, 'r');
+            
+            $uploadResponse = Http::withHeaders([
+                'X-Goog-Upload-Command' => 'start, upload, finalize',
+                'X-Goog-Upload-Header-Content-Length' => filesize($pdfFilePath),
+                'X-Goog-Upload-Header-Content-Type' => $mimeType,
+                'Content-Type' => $mimeType,
+            ])->timeout(300)->send('POST', $uploadUrl, [
+                'body' => $fileResource
+            ]);
+
+            if (!$uploadResponse->successful()) {
+                Log::error("Gemini File Upload Failed: " . $uploadResponse->body());
+                return null;
+            }
+
+            $fileUri = $uploadResponse->json('file.uri');
+            $fileName = $uploadResponse->json('file.name'); // To delete later
+
+            if (!$fileUri) {
+                Log::error("Gemini File Upload did not return a URI.");
+                return null;
+            }
+
+            // 2. Generate Content using the File URI
             $payload = [
                 'contents' => [
                     [
@@ -46,9 +73,9 @@ class AiDocumentParserService
                                 'text' => "You are an expert financial analyst. Please read this financial statement and extract the exact financial metrics for the most recent period. If a number is missing, try to infer it from related fields (e.g. Finance Income = Interest Income). Return the result as JSON."
                             ],
                             [
-                                'inlineData' => [
-                                    'mimeType' => str_ends_with($pdfFilePath, '.txt') ? 'text/plain' : 'application/pdf',
-                                    'data' => $fileData
+                                'fileData' => [
+                                    'mimeType' => $mimeType,
+                                    'fileUri' => $fileUri
                                 ]
                             ]
                         ]
@@ -79,47 +106,45 @@ class AiDocumentParserService
             ];
 
             $maxRetries = 10;
+            $generateSuccess = false;
+            $generateResponse = null;
+
             for ($attempt = 0; $attempt < $maxRetries; $attempt++) {
-                $response = Http::timeout(120)->post($url, $payload);
+                $response = Http::timeout(300)->post($url, $payload);
 
                 if ($response->successful()) {
+                    $generateSuccess = true;
+                    $generateResponse = $response;
                     break;
                 }
 
                 if ($response->status() == 429) {
-                    echo "Gemini Rate Limit Hit (429) for key index {$currentKeyIndex}.\n";
-                    $currentKeyIndex++;
-                    
-                    if ($currentKeyIndex >= count($apiKeys)) {
-                        echo "All keys exhausted. Sleeping for 60 seconds before retry (Attempt " . ($attempt + 1) . ")...\n";
-                        Log::warning("Gemini Rate Limit Hit (429). All keys exhausted. Sleeping for 60 seconds...");
-                        sleep(60);
-                        $currentKeyIndex = 0;
-                    } else {
-                        echo "Switching to next key (index {$currentKeyIndex})...\n";
-                    }
-                    
-                    \Illuminate\Support\Facades\Cache::put('gemini_key_index', $currentKeyIndex);
-                    
-                    // Update the URL with the new key
-                    $apiKey = $apiKeys[$currentKeyIndex];
-                    $url = $baseUrl . $apiKey;
-                    
+                    Log::warning("Gemini Rate Limit Hit (429). Attempt " . ($attempt + 1));
+                    sleep(20);
                     continue;
                 }
 
                 if ($response->status() >= 500) {
-                    $sleepTime = min(60, pow(2, $attempt) * 5);
-                    echo "Gemini API Error ({$response->status()}). High Demand. Sleeping for {$sleepTime} seconds (Attempt " . ($attempt + 1) . ")...\n";
-                    Log::warning("Gemini API Error ({$response->status()}). Sleeping for {$sleepTime} seconds...");
-                    sleep($sleepTime);
+                    Log::warning("Gemini API Error ({$response->status()}). Attempt " . ($attempt + 1));
+                    sleep(10);
                     continue;
                 }
 
-                echo "Gemini API Error: " . $response->body() . "\n";
                 Log::error("Gemini API Error: " . $response->body());
+                break;
+            }
+
+            // 3. Clean up the file from Gemini servers
+            if ($fileName) {
+                Http::delete("https://generativelanguage.googleapis.com/v1beta/{$fileName}?key={$apiKey}");
+            }
+
+            if (!$generateSuccess) {
+                Log::error("Gemini API failed after retries.");
                 return null;
             }
+
+            $response = $generateResponse;
 
             if (!$response->successful()) {
                 echo "Gemini API failed after retries: " . $response->body() . "\n";
