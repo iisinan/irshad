@@ -176,6 +176,24 @@ async def generate_explanation(state: GraphState) -> GraphState:
         state["ai_explanation"] = explanation
     return state
 
+from app.tools.business_intelligence import BusinessIntelligenceAgent
+
+async def perform_business_screening(state: GraphState) -> GraphState:
+    # 10. Business Screening (Qualitative/Non-Financial)
+    pdf_data = state.get("raw_pdf_extraction", {})
+    principal_activities = pdf_data.get("principal_activities", "")
+    business_segments = pdf_data.get("business_segments", [])
+    
+    agent = BusinessIntelligenceAgent()
+    result = await agent.run_business_screening(
+        ticker=state["ticker"],
+        company_name=state.get("company_name", state["ticker"]),
+        principal_activities=principal_activities,
+        business_segments=business_segments
+    )
+    state["business_screening_result"] = result
+    return state
+
 async def store_results(state: GraphState) -> GraphState:
-    # 10. Store to PostgreSQL
+    # 11. Store to PostgreSQL (moved to endpoint for now)
     return state

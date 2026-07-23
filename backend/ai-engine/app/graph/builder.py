@@ -10,6 +10,7 @@ from app.graph.nodes import (
     validate_and_resolve,
     calculate_aaoifi,
     generate_explanation,
+    perform_business_screening,
     store_results
 )
 
@@ -26,6 +27,7 @@ def build_graph():
     workflow.add_node("validate_and_resolve", validate_and_resolve)
     workflow.add_node("calculate_aaoifi", calculate_aaoifi)
     workflow.add_node("generate_explanation", generate_explanation)
+    workflow.add_node("perform_business_screening", perform_business_screening)
     workflow.add_node("store_results", store_results)
 
     # Build Edges (Linear workflow for MVP, can add conditional edges for retries later)
@@ -38,7 +40,8 @@ def build_graph():
     workflow.add_edge("normalize_data", "validate_and_resolve")
     workflow.add_edge("validate_and_resolve", "calculate_aaoifi")
     workflow.add_edge("calculate_aaoifi", "generate_explanation")
-    workflow.add_edge("generate_explanation", "store_results")
+    workflow.add_edge("generate_explanation", "perform_business_screening")
+    workflow.add_edge("perform_business_screening", "store_results")
     workflow.add_edge("store_results", END)
 
     # Compile the graph

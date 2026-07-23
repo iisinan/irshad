@@ -38,7 +38,9 @@ class PDFExtractor:
             "interest_income": 12750000000.0,
             "total_assets": 5500000000000.0, # Made up for test, we will use market cap anyway
             "published_date": "2025-05-01T00:00:00Z", # New metadata
-            "reporting_period": "FY" # New metadata
+            "reporting_period": "FY", # New metadata
+            "principal_activities": "Exploration, production, and refining of petroleum products.",
+            "business_segments": ["Oil & Gas Production", "Refining", "Exploration"]
         }
         
         return mock_data

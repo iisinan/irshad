@@ -8,6 +8,7 @@ from app.models.companies import Company
 from app.models.financial_documents import FinancialDocument
 from app.models.financial_statements_raw import FinancialStatementRaw
 from app.models.financial_statements_normalized import FinancialStatementNormalized
+from app.models.business_screening import BusinessScreening
 
 app = FastAPI(
     title="Irshad AI Financial Data Collection Engine",

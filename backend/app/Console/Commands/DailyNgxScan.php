@@ -2,7 +2,14 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\ProcessCompanyScreening;
+use App\Jobs\UpdateMarketData;
+use App\Mail\BatchCompletedEmail;
+use App\Models\Company;
+use Illuminate\Bus\Batch;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Mail;
 
 class DailyNgxScan extends Command
 {
@@ -25,18 +32,35 @@ class DailyNgxScan extends Command
      */
     public function handle()
     {
-        $this->info('Pinging AI Engine for daily NGX scan...');
+        $this->info('Daily financial scan started.');
 
-        try {
-            $response = \Illuminate\Support\Facades\Http::timeout(10)->post('http://localhost:8000/cron/daily-ngx-scan');
-            
-            if ($response->successful()) {
-                $this->info('Success: ' . $response->json('message', 'Scan initiated'));
-            } else {
-                $this->error('Failed: ' . $response->body());
-            }
-        } catch (\Exception $e) {
-            $this->error('Connection to AI Engine failed: ' . $e->getMessage());
+        $companies = Company::where('is_active', true)->get();
+        $totalCompanies = $companies->count();
+
+        $this->info("{$totalCompanies} companies queued.");
+
+        $jobs = [];
+        foreach ($companies as $company) {
+            $jobs[] = new ProcessCompanyScreening($company->ticker);
+            $jobs[] = new UpdateMarketData($company->ticker);
         }
+
+        // Dispatch in batches of 10 conceptually, but we can put them all in one batch 
+        // and Laravel queue workers will process them concurrently up to the worker limit.
+        Bus::batch($jobs)->then(function (Batch $batch) {
+            // All jobs completed successfully...
+            Mail::to('iirshad2026@gmail.com')->send(new BatchCompletedEmail(
+                $batch->id,
+                $batch->totalJobs,
+                $batch->processedJobs(),
+                $batch->failedJobs
+            ));
+        })->catch(function (Batch $batch, \Throwable $e) {
+            // First batch job failure detected...
+        })->finally(function (Batch $batch) {
+            // The batch has finished executing (whether successful or not)...
+        })->name('Daily NGX Screening')->dispatch();
+
+        $this->info('Background extraction has started.');
     }
 }

@@ -27,4 +27,5 @@ class GraphState(TypedDict):
     
     # 6. Output
     ai_explanation: Optional[str]
+    business_screening_result: Optional[Dict[str, Any]]
     error: Optional[str]
