@@ -41,7 +41,8 @@ class ProcessCompanyScreening implements ShouldQueue
 
         Log::info("Starting background screening for {$this->ticker}");
 
-        $response = Http::timeout(900)->post("http://localhost:8000/api/screen-company/{$this->ticker}");
+        $aiUrl = env('AI_ENGINE_URL', 'http://localhost:8000');
+        $response = Http::timeout(900)->post("{$aiUrl}/api/screen-company/{$this->ticker}");
 
         if ($response->failed()) {
             $error = $response->json('detail') ?? $response->body();

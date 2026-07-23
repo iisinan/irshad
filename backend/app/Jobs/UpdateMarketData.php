@@ -41,7 +41,8 @@ class UpdateMarketData implements ShouldQueue
 
         Log::info("Updating market data for {$this->ticker}");
 
-        $response = Http::timeout(120)->post("http://localhost:8000/api/update-market-data/{$this->ticker}");
+        $aiUrl = env('AI_ENGINE_URL', 'http://localhost:8000');
+        $response = Http::timeout(120)->post("{$aiUrl}/api/update-market-data/{$this->ticker}");
 
         if ($response->failed()) {
             $error = $response->json('detail') ?? $response->body();
