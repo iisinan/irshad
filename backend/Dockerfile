@@ -14,7 +14,12 @@ RUN apk add --no-cache \
     postgresql-dev \
     oniguruma-dev \
     libzip-dev \
-    linux-headers
+    linux-headers \
+    python3 \
+    py3-pip \
+    python3-dev \
+    gcc \
+    musl-dev
 
 # Install PHP extensions
 RUN docker-php-ext-install pdo_pgsql mbstring exif pcntl bcmath gd xml zip sockets
@@ -27,6 +32,11 @@ WORKDIR /var/www
 
 # Copy existing application directory contents
 COPY . /var/www
+
+# Install Python dependencies for AI Engine
+# We use a virtual environment as recommended by modern pip
+RUN python3 -m venv /var/www/ai-engine/venv && \
+    /var/www/ai-engine/venv/bin/pip install --no-cache-dir -r /var/www/ai-engine/requirements.txt
 
 # Install dependencies
 ENV COMPOSER_MEMORY_LIMIT=-1

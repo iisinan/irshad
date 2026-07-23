@@ -24,3 +24,8 @@ yarn-error.log
 rr
 .rr.yaml
 venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.db
+temp.pdf
