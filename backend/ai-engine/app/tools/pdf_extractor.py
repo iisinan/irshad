@@ -23,24 +23,45 @@ class PDFExtractor:
         if not os.path.exists(pdf_path):
             raise FileNotFoundError(f"PDF not found at {pdf_path}")
 
-        print(f"Mocking upload of {pdf_path} to Gemini...")
-        time.sleep(1)
-        
-        print("Mocking extraction of data...")
-        time.sleep(2)
-        
-        # Hardcoded mock data based on the user's earlier prompt for Aradel
-        mock_data = {
-            "total_revenue": 728500000000.0,
-            "total_debt": 1780000000000.0,
-            "cash_and_equivalents": 1659370000000.0, # Cash + Short term investments
-            "interest_expense": 15000000000.0, # Made up for test
-            "interest_income": 12750000000.0,
-            "total_assets": 5500000000000.0, # Made up for test, we will use market cap anyway
-            "published_date": "2025-05-01T00:00:00Z", # New metadata
-            "reporting_period": "FY", # New metadata
-            "principal_activities": "Exploration, production, and refining of petroleum products.",
-            "business_segments": ["Oil & Gas Production", "Refining", "Exploration"]
+        print(f"Uploading {pdf_path} to Gemini...")
+        # Upload the file to Gemini
+        gemini_file = self.client.files.upload(file=pdf_path)
+
+        schema = {
+            "type": "OBJECT",
+            "properties": {
+                "total_revenue": {"type": "NUMBER", "description": "Total revenue for the year."},
+                "total_debt": {"type": "NUMBER", "description": "Total interest-bearing debt (short term + long term)."},
+                "cash_and_equivalents": {"type": "NUMBER", "description": "Cash and cash equivalents plus short-term investments."},
+                "interest_expense": {"type": "NUMBER", "description": "Interest expense on debt."},
+                "interest_income": {"type": "NUMBER", "description": "Interest income or non-permissible income."},
+                "total_assets": {"type": "NUMBER", "description": "Total assets."},
+                "published_date": {"type": "STRING", "description": "The date the report was published (ISO 8601)."},
+                "reporting_period": {"type": "STRING", "description": "The reporting period (e.g. FY, Q1, Q2, Q3, Q4)."},
+                "principal_activities": {"type": "STRING", "description": "A description of the company's principal activities."},
+                "business_segments": {
+                    "type": "ARRAY",
+                    "items": {"type": "STRING"},
+                    "description": "List of the company's business segments."
+                }
+            },
+            "required": ["total_revenue", "total_debt", "cash_and_equivalents", "interest_expense", "interest_income", "total_assets", "principal_activities"]
         }
+
+        prompt = f"Extract the financial data and business activities for the financial year {financial_year} from the attached annual report. Return the exact values requested in the schema."
         
-        return mock_data
+        print("Extracting data with Gemini...")
+        response = self.client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=[gemini_file, prompt],
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                response_schema=schema,
+            ),
+        )
+        
+        try:
+            return json.loads(response.text)
+        except Exception as e:
+            print(f"Failed to parse Gemini response: {e}")
+            return {}
