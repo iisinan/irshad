@@ -2,6 +2,7 @@ from langgraph.graph import StateGraph, END
 from app.graph.state import GraphState
 from app.graph.nodes import (
     search_company,
+    check_financial_cache,
     locate_annual_report,
     download_report,
     extract_financial_statements,
@@ -19,7 +20,7 @@ def build_graph():
 
     # Add Nodes
     workflow.add_node("search_company", search_company)
-    workflow.add_node("check_financial_cache", nodes.check_financial_cache)
+    workflow.add_node("check_financial_cache", check_financial_cache)
     workflow.add_node("locate_annual_report", locate_annual_report)
     workflow.add_node("download_report", download_report)
     workflow.add_node("extract_financial_statements", extract_financial_statements)

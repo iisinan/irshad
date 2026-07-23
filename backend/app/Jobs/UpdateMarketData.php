@@ -47,12 +47,17 @@ class UpdateMarketData implements ShouldQueue
         if ($response->failed()) {
             $error = $response->json('detail') ?? $response->body();
             Log::error("Failed to update market data for {$this->ticker}: {$error}");
+            
+            // If it's a 404 Not Found, just return gracefully to prevent endless retries
+            if ($response->status() === 404) {
+                return;
+            }
             throw new \Exception("AI Engine Market Data Error: " . $error);
         }
 
         $data = $response->json();
         
-        $company = \App\Models\Company::where('ticker', $this->ticker)->first();
+        $company = \App\Models\Company::where('symbol', $this->ticker)->first();
         if ($company) {
             \App\Models\MarketData::create([
                 'company_id' => $company->id,

@@ -6,7 +6,7 @@ class Company(Base):
     __tablename__ = "companies"
 
     id = Column(Integer, primary_key=True, index=True)
-    ticker = Column(String, unique=True, index=True, nullable=False)
+    ticker = Column("symbol", String, unique=True, index=True, nullable=False)
     name = Column(String, nullable=False)
     sector = Column(String, nullable=True)
     industry = Column(String, nullable=True)

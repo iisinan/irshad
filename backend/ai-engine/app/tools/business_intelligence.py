@@ -9,7 +9,11 @@ class BusinessIntelligenceAgent:
         self.apify = ApifyClient(apify_token) if apify_token else None
         
         api_key = os.getenv("GEMINI_API_KEY")
-        self.gemini = genai.Client(api_key=api_key) if api_key else None
+        if api_key:
+            from google.genai import types as genai_types
+            self.gemini = genai.Client(api_key=api_key, http_options=genai_types.HttpOptions(api_version='v1'))
+        else:
+            self.gemini = None
 
     async def run_business_screening(self, ticker: str, company_name: str, principal_activities: str, business_segments: list) -> Dict[str, Any]:
         """
@@ -78,7 +82,7 @@ class BusinessIntelligenceAgent:
         try:
             def _generate():
                 return self.gemini.models.generate_content(
-                    model='gemini-2.5-flash',
+                    model='models/gemini-3.1-flash-lite',
                     contents=prompt,
                     config=types.GenerateContentConfig(
                         response_mime_type="application/json",
@@ -92,7 +96,7 @@ class BusinessIntelligenceAgent:
             result["source_urls"] = source_urls
             result["source_publication_dates"] = [] # Can extract if needed
             from datetime import datetime, timezone
-            result["last_analysed_timestamp"] = datetime.now(timezone.utc).isoformat()
+            result["last_analysed_timestamp"] = datetime.now(timezone.utc)
             return result
         except Exception as e:
             print(f"Failed to parse Gemini business intelligence response: {e}")

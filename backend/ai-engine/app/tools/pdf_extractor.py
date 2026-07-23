@@ -13,7 +13,9 @@ class PDFExtractor:
             raise ValueError("GEMINI_API_KEY is not set")
             
         # Initialize the official google-genai client
-        self.client = genai.Client(api_key=api_key)
+        # Use v1 API (not v1beta) to access latest stable models
+        from google.genai import types as genai_types
+        self.client = genai.Client(api_key=api_key, http_options=genai_types.HttpOptions(api_version='v1'))
 
     async def extract_financials(self, pdf_path: str, financial_year: int) -> Dict[str, Any]:
         """
@@ -55,7 +57,7 @@ class PDFExtractor:
             print("Extracting data with Gemini...")
             def _generate():
                 return self.client.models.generate_content(
-                    model='gemini-2.5-flash',
+                    model='models/gemini-3.1-flash-lite',
                     contents=[gemini_file, prompt],
                     config=types.GenerateContentConfig(
                         response_mime_type="application/json",

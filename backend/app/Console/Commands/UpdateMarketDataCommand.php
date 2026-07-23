@@ -38,7 +38,7 @@ class UpdateMarketDataCommand extends Command
 
         $jobs = [];
         foreach ($companies as $company) {
-            $jobs[] = new UpdateMarketData($company->ticker);
+            $jobs[] = new UpdateMarketData($company->symbol);
         }
 
         Bus::batch($jobs)->name('Market Data Update')->allowFailures()->dispatch();

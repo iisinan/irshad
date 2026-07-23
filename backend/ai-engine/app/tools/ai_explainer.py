@@ -6,7 +6,8 @@ class AIExplainer:
     def __init__(self):
         self.api_key = os.getenv("GEMINI_API_KEY")
         if self.api_key:
-            self.client = genai.Client(api_key=self.api_key)
+            from google.genai import types as genai_types
+            self.client = genai.Client(api_key=self.api_key, http_options=genai_types.HttpOptions(api_version='v1'))
         else:
             self.client = None
 
@@ -48,7 +49,7 @@ class AIExplainer:
 
         try:
             response = self.client.models.generate_content(
-                model='gemini-2.5-flash',
+                model='models/gemini-3.1-flash-lite',
                 contents=prompt,
             )
             return response.text.strip()

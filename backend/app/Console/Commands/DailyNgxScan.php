@@ -41,7 +41,7 @@ class DailyNgxScan extends Command
 
         $jobs = [];
         foreach ($companies as $company) {
-            $jobs[] = new ProcessCompanyScreening($company->ticker);
+            $jobs[] = new ProcessCompanyScreening($company->symbol);
         }
 
         // Dispatch in batches, allowing failures so one bad company doesn't stop the whole sweep
