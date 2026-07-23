@@ -24,18 +24,67 @@ async def search_company(state: GraphState) -> GraphState:
             
     return state
 
-async def locate_annual_report(state: GraphState) -> GraphState:
-    # 2. Locate Annual Report Node
-    if not state.get("annual_report_url") or state["annual_report_url"] == "local_file":
-        if state.get("pdf_path") and os.path.exists(state["pdf_path"]):
-            state["annual_report_url"] = "local_file"
+from app.models.financial_screening import FinancialScreening
+from sqlalchemy import select, func
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.database import AsyncSessionLocal
+
+async def check_financial_cache(state: GraphState) -> GraphState:
+    """
+    Checks the database to see the most recent financial year we have processed.
+    Sets the target year to the next logical year.
+    If we are up to date, it doesn't skip yet, it just sets the target year to search for.
+    """
+    async with AsyncSessionLocal() as db:
+        result = await db.execute(
+            select(FinancialScreening)
+            .where(FinancialScreening.company_ticker == state["ticker"])
+            .order_by(FinancialScreening.financial_year.desc())
+            .limit(1)
+        )
+        recent_fin = result.scalars().first()
+        
+        if recent_fin:
+            # We have historical data. Let's search for the NEXT year.
+            target_year = recent_fin.financial_year + 1
+            state["financial_year"] = target_year
+            
+            # Store the existing business info in case we don't find a new PDF
+            existing_activities = recent_fin.chosen_values.get("principal_activities", "")
+            existing_segments = recent_fin.chosen_values.get("business_segments", [])
+            state["raw_pdf_extraction"] = {
+                "principal_activities": existing_activities,
+                "business_segments": existing_segments
+            }
+            # We flag that we have a fallback
+            state["has_fallback_business_info"] = True
         else:
-            scraper = FinancialScraper()
-            urls = await scraper.search_annual_report_pdfs(state["company_name"], state["financial_year"])
-            # Prefer NGX url as primary source of truth
-            chosen_url = urls.get("ngx") or urls.get("official")
-            if chosen_url:
-                state["annual_report_url"] = chosen_url
+            # No historical data, fallback to the requested year (e.g. 2024)
+            state["has_fallback_business_info"] = False
+            
+    return state
+
+async def locate_annual_report(state: GraphState) -> GraphState:
+    # 2. Web Search Node
+    # Search the web for the target financial year PDF
+    if "source_urls" not in state:
+        state["source_urls"] = {}
+    scraper = FinancialScraper()
+    urls = await scraper.search_annual_report_pdfs(state["company_name"] or state["ticker"], state["financial_year"])
+    
+    chosen_url = urls.get("ngx") or urls.get("official")
+    if chosen_url:
+        state["annual_report_url"] = chosen_url
+        state["source_urls"]["annual_report"] = chosen_url
+    else:
+        print(f"No PDF found for {state['ticker']} year {state['financial_year']}.")
+        if state.get("has_fallback_business_info"):
+            print(f"Skipping financial extraction, utilizing existing business info.")
+            state["skip_financials"] = True
+        else:
+            # If we don't have fallback info, we can't do business screening properly
+            pass
+            
     return state
 
 async def download_report(state: GraphState) -> GraphState:
@@ -127,6 +176,8 @@ from app.tools.aaoifi_calculator import AAOIFICalculator
 
 async def normalize_data(state: GraphState) -> GraphState:
     # 6. Deterministic Normalization
+    if state.get("skip_financials"):
+        return state
     raw_pdf_data = state.get("raw_pdf_extraction", {})
     if raw_pdf_data:
         state["normalized_data"] = {
@@ -136,6 +187,8 @@ async def normalize_data(state: GraphState) -> GraphState:
 
 async def validate_and_resolve(state: GraphState) -> GraphState:
     # 7. Compare sources, resolve conflicts, calculate confidence
+    if state.get("skip_financials"):
+        return state
     pdf_normalized = state.get("normalized_data", {}).get("pdf_source", {})
     if pdf_normalized:
         state["final_chosen_values"] = pdf_normalized
@@ -157,6 +210,8 @@ async def validate_and_resolve(state: GraphState) -> GraphState:
 
 async def calculate_aaoifi(state: GraphState) -> GraphState:
     # 8. Deterministic AAOIFI Math Engine
+    if state.get("skip_financials"):
+        return state
     final_values = state.get("final_chosen_values", {})
     if final_values:
         # Aradel market cap from previous user prompt was 6,630 Billion
@@ -169,6 +224,8 @@ from app.tools.ai_explainer import AIExplainer
 
 async def generate_explanation(state: GraphState) -> GraphState:
     # 9. LLM Explanation of deterministic results
+    if state.get("skip_financials"):
+        return state
     calc_results = state.get("calculation_results", {})
     if calc_results:
         explainer = AIExplainer()
@@ -186,35 +243,7 @@ async def perform_business_screening(state: GraphState) -> GraphState:
     principal_activities = pdf_data.get("principal_activities", "")
     business_segments = pdf_data.get("business_segments", [])
     
-    # Check if we screened this company recently (last 30 days) to save API costs
-    async with AsyncSessionLocal() as db:
-        result = await db.execute(
-            select(BusinessScreening)
-            .where(BusinessScreening.ticker == state["ticker"])
-            .order_by(BusinessScreening.created_at.desc())
-            .limit(1)
-        )
-        recent = result.scalars().first()
-        if recent and recent.created_at:
-            # We assume created_at is UTC datetime
-            if recent.created_at.replace(tzinfo=timezone.utc) > datetime.now(timezone.utc) - timedelta(days=30):
-                print(f"Skipping business intelligence for {state['ticker']}, found recent cache.")
-                state["business_screening_result"] = {
-                    "business_summary": recent.business_summary,
-                    "current_core_business": recent.current_core_business,
-                    "detected_business_activities": recent.detected_business_activities,
-                    "detected_prohibited_activities": recent.detected_prohibited_activities,
-                    "supporting_evidence": recent.supporting_evidence,
-                    "source_urls": recent.source_urls,
-                    "source_publication_dates": recent.source_publication_dates,
-                    "ai_explanation": recent.ai_explanation,
-                    "confidence_score": float(recent.confidence_score) if recent.confidence_score else 0.0,
-                    "business_compliance_status": recent.business_compliance_status,
-                    "last_analysed_timestamp": recent.last_analysed_timestamp
-                }
-                return state
-
-    # If no recent cache, run the AI Agent
+    # Always run business screening to check for fresh news
     agent = BusinessIntelligenceAgent()
     result = await agent.run_business_screening(
         ticker=state["ticker"],

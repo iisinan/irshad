@@ -42,7 +42,6 @@ class DailyNgxScan extends Command
         $jobs = [];
         foreach ($companies as $company) {
             $jobs[] = new ProcessCompanyScreening($company->ticker);
-            $jobs[] = new UpdateMarketData($company->ticker);
         }
 
         // Dispatch in batches of 10 conceptually, but we can put them all in one batch 

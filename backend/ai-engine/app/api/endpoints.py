@@ -62,20 +62,21 @@ async def screen_company(ticker: str, financial_year: int = 2024, db: AsyncSessi
         company = comp_result.scalars().first()
         company_id = company.id if company else 0
 
-        screening = FinancialScreening(
-            company_ticker=ticker.upper(),
-            financial_year=financial_year,
-            published_date=result_state.get("raw_pdf_extraction", {}).get("published_date"),
-            report_quarter=result_state.get("raw_pdf_extraction", {}).get("report_quarter"),
-            raw_source_values=result_state.get("secondary_sources_data", {}),
-            normalized_values=result_state.get("normalized_data", {}),
-            chosen_values=final_values,
-            confidence_score=result_state.get("confidence_score", 0.0),
-            source_urls=result_state.get("source_urls", {}),
-            calculation_results=calc_results,
-            ai_explanation=result_state.get("ai_explanation", "")
-        )
-        db.add(screening)
+        if not result_state.get("skip_financials"):
+            screening = FinancialScreening(
+                company_ticker=ticker.upper(),
+                financial_year=financial_year,
+                published_date=result_state.get("raw_pdf_extraction", {}).get("published_date"),
+                report_quarter=result_state.get("raw_pdf_extraction", {}).get("report_quarter"),
+                raw_source_values=result_state.get("secondary_sources_data", {}),
+                normalized_values=result_state.get("normalized_data", {}),
+                chosen_values=final_values,
+                confidence_score=result_state.get("confidence_score", 0.0),
+                source_urls=result_state.get("source_urls", {}),
+                calculation_results=calc_results,
+                ai_explanation=result_state.get("ai_explanation", "")
+            )
+            db.add(screening)
         
         bus_result = result_state.get("business_screening_result", {})
         if bus_result:
@@ -97,7 +98,8 @@ async def screen_company(ticker: str, financial_year: int = 2024, db: AsyncSessi
             db.add(bus_screening)
 
         await db.commit()
-        await db.refresh(screening)
+        if not result_state.get("skip_financials"):
+            await db.refresh(screening)
         
         # Format exact JSON structure requested
         return {

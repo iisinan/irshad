@@ -19,6 +19,7 @@ def build_graph():
 
     # Add Nodes
     workflow.add_node("search_company", search_company)
+    workflow.add_node("check_financial_cache", nodes.check_financial_cache)
     workflow.add_node("locate_annual_report", locate_annual_report)
     workflow.add_node("download_report", download_report)
     workflow.add_node("extract_financial_statements", extract_financial_statements)
@@ -32,7 +33,8 @@ def build_graph():
 
     # Build Edges (Linear workflow for MVP, can add conditional edges for retries later)
     workflow.set_entry_point("search_company")
-    workflow.add_edge("search_company", "locate_annual_report")
+    workflow.add_edge("search_company", "check_financial_cache")
+    workflow.add_edge("check_financial_cache", "locate_annual_report")
     workflow.add_edge("locate_annual_report", "download_report")
     workflow.add_edge("download_report", "extract_financial_statements")
     workflow.add_edge("extract_financial_statements", "collect_multiple_sources")
