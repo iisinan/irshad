@@ -44,9 +44,8 @@ class DailyNgxScan extends Command
             $jobs[] = new ProcessCompanyScreening($company->ticker);
         }
 
-        // Dispatch in batches of 10 conceptually, but we can put them all in one batch 
-        // and Laravel queue workers will process them concurrently up to the worker limit.
-        Bus::batch($jobs)->then(function (Batch $batch) {
+        // Dispatch in batches, allowing failures so one bad company doesn't stop the whole sweep
+        Bus::batch($jobs)->allowFailures()->then(function (Batch $batch) {
             // All jobs completed successfully...
             Mail::to('iirshad2026@gmail.com')->send(new BatchCompletedEmail(
                 $batch->id,

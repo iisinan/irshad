@@ -41,7 +41,7 @@ class UpdateMarketDataCommand extends Command
             $jobs[] = new UpdateMarketData($company->ticker);
         }
 
-        Bus::batch($jobs)->name('Market Data Update')->dispatch();
+        Bus::batch($jobs)->name('Market Data Update')->allowFailures()->dispatch();
 
         $this->info('Background market data extraction has started.');
     }
