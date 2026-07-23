@@ -31,7 +31,8 @@ class PDFExtractor:
             schema = {
                 "type": "OBJECT",
                 "properties": {
-                    "total_revenue": {"type": "NUMBER", "description": "Total revenue for the year."},
+                    "financial_year": {"type": "INTEGER", "description": "The financial year this report corresponds to (e.g. 2024, 2025, 2026)."},
+                    "total_revenue": {"type": "NUMBER", "description": "Total revenue for the period."},
                     "total_debt": {"type": "NUMBER", "description": "Total interest-bearing debt (short term + long term)."},
                     "cash_and_equivalents": {"type": "NUMBER", "description": "Cash and cash equivalents plus short-term investments."},
                     "interest_expense": {"type": "NUMBER", "description": "Interest expense on debt."},
@@ -46,10 +47,10 @@ class PDFExtractor:
                         "description": "List of the company's business segments."
                     }
                 },
-                "required": ["total_revenue", "total_debt", "cash_and_equivalents", "interest_expense", "interest_income", "total_assets", "principal_activities"]
+                "required": ["financial_year", "total_revenue", "total_debt", "cash_and_equivalents", "interest_expense", "interest_income", "total_assets", "principal_activities"]
             }
 
-            prompt = f"Extract the financial data and business activities for the financial year {financial_year} from the attached annual report. Return the exact values requested in the schema."
+            prompt = f"Extract the financial data and business activities from the attached financial report (which could be an Annual Report, Interim, Q1, Q2, Q3, etc.). Return the exact values requested in the schema, accurately identifying the financial year and reporting period."
             
             print("Extracting data with Gemini...")
             def _generate():

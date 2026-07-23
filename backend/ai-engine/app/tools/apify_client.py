@@ -9,7 +9,7 @@ class FinancialScraper:
 
     async def search_annual_report_pdfs(self, company_name: str, financial_year: int) -> dict:
         """
-        Uses Apify to find a direct PDF link to the Annual Report.
+        Uses Apify to find a direct PDF link to the latest financial report (Quarterly or Annual).
         Searches both NGX and general web to compare.
         """
         import asyncio
@@ -17,10 +17,10 @@ class FinancialScraper:
             print("Apify token not provided. Skipping web scraping.")
             return {"ngx": None, "official": None}
             
-        print(f"Searching web for {company_name} {financial_year} Annual Report PDFs...")
+        print(f"Searching web for {company_name} latest financial statements...")
         
         # Prepare two queries: one targeted at NGX, one general
-        queries = f"{company_name} {financial_year} Annual Report filetype:pdf site:ngxgroup.com\n{company_name} {financial_year} Annual Report filetype:pdf"
+        queries = f"{company_name} latest financial statements OR interim report filetype:pdf site:ngxgroup.com\n{company_name} latest financial statements OR interim report filetype:pdf"
         
         run_input = {
             "queries": queries,

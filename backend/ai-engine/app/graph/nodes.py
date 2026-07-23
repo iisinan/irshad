@@ -45,10 +45,6 @@ async def check_financial_cache(state: GraphState) -> GraphState:
         recent_fin = result.scalars().first()
         
         if recent_fin:
-            # We have historical data. Let's search for the NEXT year.
-            target_year = recent_fin.financial_year + 1
-            state["financial_year"] = target_year
-            
             # Store the existing business info in case we don't find a new PDF
             existing_activities = recent_fin.chosen_values.get("principal_activities", "")
             existing_segments = recent_fin.chosen_values.get("business_segments", [])
@@ -76,8 +72,16 @@ async def locate_annual_report(state: GraphState) -> GraphState:
     if chosen_url:
         state["annual_report_url"] = chosen_url
         state["source_urls"]["annual_report"] = chosen_url
+        
+        # Deduplication Step 1: Check if this exact URL was already processed
+        async with AsyncSessionLocal() as db:
+            from app.models.financial_documents import FinancialDocument
+            existing_url_doc = await db.execute(select(FinancialDocument).where(FinancialDocument.source_url == chosen_url))
+            if existing_url_doc.scalars().first():
+                print(f"URL {chosen_url} already exists in database. Skipping PDF extraction.")
+                state["skip_financials"] = True
     else:
-        print(f"No PDF found for {state['ticker']} year {state['financial_year']}.")
+        print(f"No PDF found for {state['ticker']}.")
         if state.get("has_fallback_business_info"):
             print(f"Skipping financial extraction, utilizing existing business info.")
             state["skip_financials"] = True
@@ -129,16 +133,16 @@ async def download_report(state: GraphState) -> GraphState:
                     file_hash = storage.calculate_checksum(local_path)
                     result = await db.execute(
                         select(FinancialDocument)
-                        .where(FinancialDocument.s3_key == s3_key)
+                        .where(FinancialDocument.checksum == file_hash)
                     )
                     existing_doc = result.scalars().first()
                     
                     if not existing_doc:
                         new_doc = FinancialDocument(
                             company_id=company.id,
-                            document_type="Annual Report",
+                            document_type="Financial Report",
                             financial_year=state["financial_year"],
-                            reporting_period="FY", # Defaulting to FY for now
+                            reporting_period="Latest", # Will be updated by Gemini
                             source_url=state["annual_report_url"],
                             s3_key=s3_key,
                             checksum=file_hash
@@ -147,7 +151,8 @@ async def download_report(state: GraphState) -> GraphState:
                         await db.commit()
                         print(f"Document record saved to DB with S3 Key: {s3_key}")
                     else:
-                        print(f"Document already exists in DB with S3 Key: {s3_key}")
+                        print(f"Document hash {file_hash} already exists in DB. Skipping extraction.")
+                        state["skip_financials"] = True
                 
     return state
 

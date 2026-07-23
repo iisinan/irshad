@@ -63,11 +63,14 @@ async def screen_company(ticker: str, financial_year: int = 2024, db: AsyncSessi
         company_id = company.id if company else 0
 
         if not result_state.get("skip_financials"):
+            extracted_year = result_state.get("raw_pdf_extraction", {}).get("financial_year")
+            final_financial_year = extracted_year if extracted_year else financial_year
+            
             screening = FinancialScreening(
                 company_ticker=ticker.upper(),
-                financial_year=financial_year,
+                financial_year=final_financial_year,
                 published_date=result_state.get("raw_pdf_extraction", {}).get("published_date"),
-                report_quarter=result_state.get("raw_pdf_extraction", {}).get("report_quarter"),
+                report_quarter=result_state.get("raw_pdf_extraction", {}).get("reporting_period"),
                 raw_source_values=result_state.get("secondary_sources_data", {}),
                 normalized_values=result_state.get("normalized_data", {}),
                 chosen_values=final_values,
