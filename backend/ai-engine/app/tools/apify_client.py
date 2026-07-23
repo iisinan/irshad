@@ -7,11 +7,12 @@ class FinancialScraper:
         self.token = os.getenv("APIFY_TOKEN")
         self.client = ApifyClient(self.token) if self.token else None
 
-    def search_annual_report_pdfs(self, company_name: str, financial_year: int) -> dict:
+    async def search_annual_report_pdfs(self, company_name: str, financial_year: int) -> dict:
         """
         Uses Apify to find a direct PDF link to the Annual Report.
         Searches both NGX and general web to compare.
         """
+        import asyncio
         if not self.client:
             print("Apify token not provided. Skipping web scraping.")
             return {"ngx": None, "official": None}
@@ -31,7 +32,10 @@ class FinancialScraper:
 
         results = {"ngx": None, "official": None}
         try:
-            run = self.client.actor("apify/google-search-scraper").call(run_input=run_input)
+            def _run():
+                return self.client.actor("apify/google-search-scraper").call(run_input=run_input)
+            
+            run = await asyncio.to_thread(_run)
             
             for item in self.client.dataset(run["defaultDatasetId"]).iterate_items():
                 query = item.get("searchQuery", {}).get("term", "")
@@ -51,11 +55,12 @@ class FinancialScraper:
             print(f"Apify Scraper failed: {str(e)}")
             return results
 
-    def fetch_validation_data(self, ticker: str) -> Optional[dict]:
+    async def fetch_validation_data(self, ticker: str) -> Optional[dict]:
         """
         Uses Apify to scrape financial validation data (e.g. Yahoo Finance).
         We will use a basic Google search to extract the summary for validation.
         """
+        import asyncio
         if not self.client:
             return None
             
@@ -66,7 +71,10 @@ class FinancialScraper:
             "maxPagesPerQuery": 1
         }
         try:
-            run = self.client.actor("apify/google-search-scraper").call(run_input=run_input)
+            def _run():
+                return self.client.actor("apify/google-search-scraper").call(run_input=run_input)
+            
+            run = await asyncio.to_thread(_run)
             for item in self.client.dataset(run["defaultDatasetId"]).iterate_items():
                 for organic_result in item.get("organicResults", []):
                     # For MVP, just return the snippet which we can feed to Gemini for validation

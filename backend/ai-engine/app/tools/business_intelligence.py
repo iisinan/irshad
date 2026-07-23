@@ -16,6 +16,7 @@ class BusinessIntelligenceAgent:
         Uses Apify to find recent news about the company's activities, then uses Gemini to determine 
         if any non-compliant activities exist according to AAOIFI standards.
         """
+        import asyncio
         # Fetch recent news and validation via Apify
         supporting_evidence = []
         source_urls = []
@@ -28,7 +29,11 @@ class BusinessIntelligenceAgent:
                     "resultsPerPage": 3,
                     "maxPagesPerQuery": 1
                 }
-                run = self.apify.actor("apify/google-search-scraper").call(run_input=run_input)
+                
+                def _run_apify():
+                    return self.apify.actor("apify/google-search-scraper").call(run_input=run_input)
+                    
+                run = await asyncio.to_thread(_run_apify)
                 for item in self.apify.dataset(run["defaultDatasetId"]).iterate_items():
                     for organic_result in item.get("organicResults", []):
                         supporting_evidence.append(organic_result.get("description", ""))
@@ -71,14 +76,17 @@ class BusinessIntelligenceAgent:
                  
         print("Analyzing business compliance with Gemini...")
         try:
-            response = self.gemini.models.generate_content(
-                model='gemini-2.5-flash',
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    response_schema=schema,
-                ),
-            )
+            def _generate():
+                return self.gemini.models.generate_content(
+                    model='gemini-2.5-flash',
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        response_schema=schema,
+                    ),
+                )
+            response = await asyncio.to_thread(_generate)
+            
             result = json.loads(response.text)
             result["supporting_evidence"] = supporting_evidence
             result["source_urls"] = source_urls

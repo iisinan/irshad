@@ -117,7 +117,11 @@ async def screen_company(ticker: str, financial_year: int = 2024, db: AsyncSessi
             "explanation": result_state.get("ai_explanation", "")
         }
         
+    except FileNotFoundError as e:
+        # Return 200 so Laravel does not retry infinitely for missing files
+        return {"error": "File Not Found", "detail": str(e), "retry": False}
     except Exception as e:
+        # 500 triggers Laravel to retry the job (e.g., for API rate limits)
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/company/{ticker}")

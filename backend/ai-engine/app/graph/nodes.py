@@ -31,7 +31,7 @@ async def locate_annual_report(state: GraphState) -> GraphState:
             state["annual_report_url"] = "local_file"
         else:
             scraper = FinancialScraper()
-            urls = scraper.search_annual_report_pdfs(state["company_name"], state["financial_year"])
+            urls = await scraper.search_annual_report_pdfs(state["company_name"], state["financial_year"])
             # Prefer NGX url as primary source of truth
             chosen_url = urls.get("ngx") or urls.get("official")
             if chosen_url:
@@ -109,7 +109,7 @@ async def extract_financial_statements(state: GraphState) -> GraphState:
     
     if pdf_path:
         extractor = PDFExtractor()
-        extracted_data = extractor.extract_financials(pdf_path, year)
+        extracted_data = await extractor.extract_financials(pdf_path, year)
         state["raw_pdf_extraction"] = extracted_data
     
     return state
@@ -117,7 +117,7 @@ async def extract_financial_statements(state: GraphState) -> GraphState:
 async def collect_multiple_sources(state: GraphState) -> GraphState:
     # 5. Fetch from secondary APIs/websites for Validation
     scraper = FinancialScraper()
-    validation_data = scraper.fetch_validation_data(state["ticker"])
+    validation_data = await scraper.fetch_validation_data(state["ticker"])
     if validation_data:
         state["secondary_source_data"] = validation_data
     return state
@@ -177,6 +177,8 @@ async def generate_explanation(state: GraphState) -> GraphState:
     return state
 
 from app.tools.business_intelligence import BusinessIntelligenceAgent
+from app.models.business_screening import BusinessScreening
+from datetime import datetime, timezone, timedelta
 
 async def perform_business_screening(state: GraphState) -> GraphState:
     # 10. Business Screening (Qualitative/Non-Financial)
@@ -184,6 +186,35 @@ async def perform_business_screening(state: GraphState) -> GraphState:
     principal_activities = pdf_data.get("principal_activities", "")
     business_segments = pdf_data.get("business_segments", [])
     
+    # Check if we screened this company recently (last 30 days) to save API costs
+    async with AsyncSessionLocal() as db:
+        result = await db.execute(
+            select(BusinessScreening)
+            .where(BusinessScreening.ticker == state["ticker"])
+            .order_by(BusinessScreening.created_at.desc())
+            .limit(1)
+        )
+        recent = result.scalars().first()
+        if recent and recent.created_at:
+            # We assume created_at is UTC datetime
+            if recent.created_at.replace(tzinfo=timezone.utc) > datetime.now(timezone.utc) - timedelta(days=30):
+                print(f"Skipping business intelligence for {state['ticker']}, found recent cache.")
+                state["business_screening_result"] = {
+                    "business_summary": recent.business_summary,
+                    "current_core_business": recent.current_core_business,
+                    "detected_business_activities": recent.detected_business_activities,
+                    "detected_prohibited_activities": recent.detected_prohibited_activities,
+                    "supporting_evidence": recent.supporting_evidence,
+                    "source_urls": recent.source_urls,
+                    "source_publication_dates": recent.source_publication_dates,
+                    "ai_explanation": recent.ai_explanation,
+                    "confidence_score": float(recent.confidence_score) if recent.confidence_score else 0.0,
+                    "business_compliance_status": recent.business_compliance_status,
+                    "last_analysed_timestamp": recent.last_analysed_timestamp
+                }
+                return state
+
+    # If no recent cache, run the AI Agent
     agent = BusinessIntelligenceAgent()
     result = await agent.run_business_screening(
         ticker=state["ticker"],
