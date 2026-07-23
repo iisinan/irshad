@@ -4,10 +4,10 @@ import Footer from './Footer';
 
 /* Ratio gauge bar component */
 const RatioGauge = ({ threshold, label, note }) => (
-  <div style={{ background: 'white', borderRadius: '14px', padding: '18px 20px', border: '1px solid var(--border)' }}>
+  <div style={{ background: 'var(--bg)', borderRadius: '14px', padding: '18px 20px', border: '1px solid var(--border)' }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-      <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-dark)' }}>{label}</span>
-      <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--primary)', background: 'var(--primary-50)', padding: '3px 10px', borderRadius: '20px', border: '1px solid var(--primary-100)' }}>
+      <span style={{ fontSize: '0.77rem', fontWeight: 700, color: 'var(--text-dark)' }}>{label}</span>
+      <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--primary)', background: 'var(--primary-50)', padding: '3px 10px', borderRadius: '20px', border: '1px solid var(--primary-100)' }}>
         &lt; {threshold}%
       </span>
     </div>
@@ -19,11 +19,11 @@ const RatioGauge = ({ threshold, label, note }) => (
       }} />
       <div style={{
         position: 'absolute', top: '50%', left: `${threshold}%`, transform: 'translateX(-50%) translateY(-50%)',
-        width: '14px', height: '14px', background: 'white', border: '2px solid var(--primary)', borderRadius: '50%',
+        width: '14px', height: '14px', background: 'var(--bg)', border: '2px solid var(--primary)', borderRadius: '50%',
         boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
       }} />
     </div>
-    {note && <p style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginTop: '8px', fontWeight: 500 }}>{note}</p>}
+    {note && <p style={{ fontSize: '0.67rem', color: 'var(--text-muted)', marginTop: '8px', fontWeight: 500 }}>{note}</p>}
   </div>
 );
 
@@ -45,7 +45,7 @@ const ShariahPage = () => (
         <div style={{ position: 'relative', zIndex: 1 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.3)', padding: '6px 18px', borderRadius: '40px', marginBottom: '24px' }}>
             <BookOpen size={14} color="var(--gold)" />
-            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--gold)', letterSpacing: '1px', textTransform: 'uppercase' }}>Our Methodology</span>
+            <span style={{ fontSize: '0.69rem', fontWeight: 700, color: 'var(--gold)', letterSpacing: '1px', textTransform: 'uppercase' }}>Our Methodology</span>
           </div>
           <h1 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 900, letterSpacing: '-1px', color: 'white', lineHeight: 1.1, marginBottom: '20px' }}>
             AAOIFI Screening<br />
@@ -53,7 +53,7 @@ const ShariahPage = () => (
               Standards
             </span>
           </h1>
-          <p style={{ fontSize: '1.05rem', lineHeight: 1.8, color: 'rgba(255,255,255,0.75)', maxWidth: '600px', margin: '0 auto' }}>
+          <p style={{ fontSize: '0.92rem', lineHeight: 1.8, color: 'rgba(255,255,255,0.75)', maxWidth: '600px', margin: '0 auto' }}>
             Irshad employs the globally recognized standards set by the <strong style={{ color: 'white' }}>AAOIFI</strong> to ensure your investments remain 100% halal — automatically, without guesswork.
           </p>
         </div>
@@ -62,27 +62,27 @@ const ShariahPage = () => (
         <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginTop: '36px', flexWrap: 'wrap', position: 'relative', zIndex: 1 }}>
           {['Business Screen', 'Financial Ratios', 'Purification'].map((phase, i) => (
             <div key={phase} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', padding: '8px 16px', borderRadius: '40px' }}>
-              <div style={{ width: '22px', height: '22px', background: 'var(--gold)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 900, color: '#1A1208' }}>{i + 1}</div>
-              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'white' }}>{phase}</span>
+              <div style={{ width: '22px', height: '22px', background: 'var(--gold)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.62rem', fontWeight: 900, color: '#1A1208' }}>{i + 1}</div>
+              <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'white' }}>{phase}</span>
             </div>
           ))}
         </div>
       </div>
 
       {/* ─── Phase 1: Business Activity ─── */}
-      <div style={{ background: 'white', borderRadius: '24px', padding: '40px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-md)', marginBottom: '24px', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ background: 'var(--bg)', borderRadius: '24px', padding: '40px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-md)', marginBottom: '24px', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: 'var(--non-halal)', borderRadius: '4px 0 0 4px' }} />
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
           <div style={{ width: '52px', height: '52px', background: '#fee2e2', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: '1px solid #fecaca' }}>
             <XCircle size={26} color="var(--non-halal)" />
           </div>
           <div>
-            <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--non-halal)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Phase 1</div>
-            <h2 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-0.5px' }}>Business Activity Screen</h2>
+            <div style={{ fontSize: '0.63rem', fontWeight: 700, color: 'var(--non-halal)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Phase 1</div>
+            <h2 style={{ fontSize: '1.41rem', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-0.5px' }}>Business Activity Screen</h2>
           </div>
         </div>
 
-        <p style={{ color: 'var(--text-muted)', lineHeight: 1.8, fontSize: '1rem', marginBottom: '28px' }}>
+        <p style={{ color: 'var(--text-muted)', lineHeight: 1.8, fontSize: '0.88rem', marginBottom: '28px' }}>
           Before looking at any financial metrics, we analyze a company's core business activities. A company is immediately marked as <strong style={{ color: 'var(--non-halal)' }}>NON-HALAL</strong> if its primary business involves any of the following:
         </p>
 
@@ -103,26 +103,26 @@ const ShariahPage = () => (
               borderRadius: '12px', padding: '12px 16px',
             }}>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--non-halal)', flexShrink: 0 }} />
-              <span style={{ color: 'var(--text-dark)', fontWeight: 600, fontSize: '0.88rem' }}>{item}</span>
+              <span style={{ color: 'var(--text-dark)', fontWeight: 600, fontSize: '0.77rem' }}>{item}</span>
             </div>
           ))}
         </div>
       </div>
 
       {/* ─── Phase 2: Financial Ratio Screen ─── */}
-      <div style={{ background: 'white', borderRadius: '24px', padding: '40px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-md)', marginBottom: '24px', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ background: 'var(--bg)', borderRadius: '24px', padding: '40px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-md)', marginBottom: '24px', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: 'var(--primary)', borderRadius: '4px 0 0 4px' }} />
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
           <div style={{ width: '52px', height: '52px', background: 'var(--primary-50)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: '1px solid var(--primary-100)' }}>
             <Scale size={26} color="var(--primary)" />
           </div>
           <div>
-            <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Phase 2</div>
-            <h2 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-0.5px' }}>Financial Ratio Screen</h2>
+            <div style={{ fontSize: '0.63rem', fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Phase 2</div>
+            <h2 style={{ fontSize: '1.41rem', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-0.5px' }}>Financial Ratio Screen</h2>
           </div>
         </div>
 
-        <p style={{ color: 'var(--text-muted)', lineHeight: 1.8, fontSize: '1rem', marginBottom: '28px' }}>
+        <p style={{ color: 'var(--text-muted)', lineHeight: 1.8, fontSize: '0.88rem', marginBottom: '28px' }}>
           If a company passes the business screen, we analyze its balance sheet. Per <strong>AAOIFI Rule 21</strong>, companies must pass three strict financial thresholds. The compliance threshold is shown on each bar below.
         </p>
 
@@ -158,15 +158,15 @@ const ShariahPage = () => (
             <Sparkles size={26} color="var(--gold)" />
           </div>
           <div>
-            <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--gold)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Phase 3</div>
-            <h2 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'white', letterSpacing: '-0.5px' }}>Dividend Purification</h2>
+            <div style={{ fontSize: '0.63rem', fontWeight: 700, color: 'var(--gold)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Phase 3</div>
+            <h2 style={{ fontSize: '1.41rem', fontWeight: 900, color: 'white', letterSpacing: '-0.5px' }}>Dividend Purification</h2>
           </div>
         </div>
 
-        <p style={{ lineHeight: 1.8, fontSize: '1rem', color: 'rgba(255,255,255,0.8)', marginBottom: '20px', position: 'relative', zIndex: 1 }}>
+        <p style={{ lineHeight: 1.8, fontSize: '0.88rem', color: 'rgba(255,255,255,0.8)', marginBottom: '20px', position: 'relative', zIndex: 1 }}>
           Even fully Halal companies often have trace amounts of interest income from cash stored in conventional banks. AAOIFI requires investors to <strong style={{ color: 'white' }}>"purify"</strong> their earnings by calculating the exact percentage of impermissible income and donating it to charity.
         </p>
-        <p style={{ lineHeight: 1.8, fontSize: '1rem', color: 'rgba(255,255,255,0.8)', position: 'relative', zIndex: 1, marginBottom: '28px' }}>
+        <p style={{ lineHeight: 1.8, fontSize: '0.88rem', color: 'rgba(255,255,255,0.8)', position: 'relative', zIndex: 1, marginBottom: '28px' }}>
           Irshad automatically calculates the <strong style={{ color: 'white' }}>Purification Rate</strong> for every stock on the market — removing the guesswork so your dividends remain 100% clean.
         </p>
 
@@ -178,8 +178,8 @@ const ShariahPage = () => (
           ].map(({ icon: Icon, label, sub }) => (
             <div key={label} style={{ flex: '1 1 180px', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '18px 20px', backdropFilter: 'blur(4px)' }}>
               <Icon size={20} color="var(--gold)" style={{ marginBottom: '10px' }} />
-              <div style={{ fontWeight: 800, color: 'white', fontSize: '0.92rem', marginBottom: '4px' }}>{label}</div>
-              <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>{sub}</div>
+              <div style={{ fontWeight: 800, color: 'white', fontSize: '0.81rem', marginBottom: '4px' }}>{label}</div>
+              <div style={{ fontSize: '0.69rem', color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>{sub}</div>
             </div>
           ))}
         </div>

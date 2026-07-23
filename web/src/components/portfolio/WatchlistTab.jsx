@@ -1,48 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Eye, BarChart2, Star, TrendingUp, TrendingDown, Trash2, Shield, AlertCircle, HelpCircle, CheckCircle, ChevronRight, Search, Mail, MessageSquare, Filter } from 'lucide-react';
+import { Eye, BarChart2, Star, TrendingUp, TrendingDown, Trash2, Shield, AlertCircle, HelpCircle, CheckCircle, ChevronRight, Search, Mail, MessageSquare, Filter, Plus } from 'lucide-react';
 import { fetchWatchlist, removeFromWatchlist, fetchNgxStocks, addToWatchlist, updateWatchlist, formatLogoUrl } from '../../services/api';
 import { toastError, toastSuccess } from '../../utils/toast';
 import { Link, useNavigate } from 'react-router-dom';
-
-/* ─── Ticker Component ─── */
-const StockTicker = ({ stocks }) => {
-  const navigate = useNavigate();
-  if (!stocks || stocks.length === 0) return null;
-
-  return (
-    <div className="ticker-wrap" style={{ margin: '0 0 32px 0', borderRadius: '24px 24px 0 0', overflow: 'hidden', borderBottom: '1px solid var(--border)' }}>
-      <div className="ticker">
-        {stocks.slice(0, 20).concat(stocks.slice(0, 20)).map((stock, i) => {
-          let statusStr = 'QUESTIONABLE';
-          let color = 'var(--doubtful)';
-          const rawStatus = stock.status;
-          if (typeof rawStatus === 'object' && rawStatus !== null) {
-            const s = rawStatus.status?.toLowerCase();
-            if (s === 'halal') { statusStr = 'HALAL'; color = 'var(--halal)'; }
-            else if (s === 'non-halal') { statusStr = 'NON-HALAL'; color = 'var(--non-halal)'; }
-          } else if (typeof rawStatus === 'string') {
-            const s = rawStatus.toLowerCase();
-            if (s === 'compliant' || s === 'halal') { statusStr = 'HALAL'; color = 'var(--halal)'; }
-            else if (s === 'non-halal') { statusStr = 'NON-HALAL'; color = 'var(--non-halal)'; }
-          }
-          const displayPrice = Number(stock.latest_price || stock.daily_prices?.[0]?.price || 0).toFixed(2);
-          return (
-            <div key={`${stock.symbol}-${i}`} className="hover-card" style={{display:'inline-flex',alignItems:'center',gap:'12px',whiteSpace:'nowrap', background: '#ffffff', padding: '6px 16px 6px 8px', borderRadius: '100px', border: '1px solid var(--border)', boxShadow: '0 2px 12px rgba(0,0,0,0.03)', cursor: 'pointer', margin: '0 12px'}} onClick={() => navigate(`/market/${stock.symbol}`, { state: { stock } })}>
-              <div style={{ width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-alt)', borderRadius: '50%', overflow: 'hidden', border: '1px solid var(--border)' }}>
-                {stock.logo_url ? <img src={formatLogoUrl(stock.logo_url)} alt={stock.symbol} style={{ width: '100%', height: '100%', objectFit: 'contain', background: 'white' }} /> : <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-muted)' }}>{stock.symbol.charAt(0)}</span>}
-              </div>
-              <span style={{fontSize:'0.85rem',fontWeight:800,color:'var(--text-dark)'}}>{stock.symbol}</span>
-              <span style={{fontSize:'0.85rem',fontWeight:600,color:'var(--text-muted)'}}>₦{displayPrice}</span>
-              <div style={{ padding: '4px 8px', borderRadius: '20px', background: color === 'var(--halal)' ? 'rgba(74, 222, 128, 0.15)' : color === 'var(--non-halal)' ? 'rgba(248, 113, 113, 0.15)' : 'rgba(250, 204, 21, 0.15)' }}>
-                <span style={{ fontWeight: 800, fontSize: '0.7rem', color }}>{statusStr}</span>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
+import AddWatchlistModal from './AddWatchlistModal';
 
 export default function WatchlistTab() {
   const [watchlistItems, setWatchlistItems] = useState(() => {
@@ -53,8 +14,7 @@ export default function WatchlistTab() {
     return [];
   });
   const [watchlistSymbols, setWatchlistSymbols] = useState(() => watchlistItems.map(i => i.symbol));
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [filter, setFilter] = useState('all'); // all, halal, non-halal
   
   const navigate = useNavigate();
@@ -141,9 +101,7 @@ export default function WatchlistTab() {
     }
   };
 
-  const searchResults = searchQuery 
-    ? allStocks.filter(s => s.symbol.toLowerCase().includes(searchQuery.toLowerCase()) || s.name?.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 5)
-    : [];
+
 
   const getStatusConfig = (company) => {
     let statusStr = 'DOUBTFUL';
@@ -178,38 +136,34 @@ export default function WatchlistTab() {
   }, [allStocks, watchlistSymbols, filter]);
 
   return (
-    <div className="animate-fade-in stagger-1" style={{ background:'white', borderRadius:'24px', padding:'40px 32px', boxShadow:'var(--shadow-sm)', border:'1px solid var(--border)' }}>
-      <StockTicker stocks={allStocks} />
+    <div className="animate-fade-in stagger-1" style={{ background: 'var(--bg)', borderRadius:'24px', padding:'40px 32px', boxShadow:'var(--shadow-sm)', border:'1px solid var(--border)' }}>
       
-      <div style={{ background: 'linear-gradient(135deg, #0D1B2A 0%, #0F5257 65%, #0B6B71 100%)', borderRadius:'24px', padding:'32px', boxShadow:'0 12px 32px rgba(13,27,42,0.15)', border:'none', marginBottom: '32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ background: 'linear-gradient(135deg, #0D1B2A 0%, #0F5257 65%, #0B6B71 100%)', borderRadius:'24px', padding:'32px', boxShadow:'0 12px 32px rgba(13,27,42,0.15)', border:'none', marginBottom: '32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', overflow: 'hidden', flexWrap: 'wrap', gap: '24px' }}>
         <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(201,168,76,0.08)', borderRadius: '50%' }} />
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', zIndex: 1 }}>
           <div style={{ width: '56px', height: '56px', background: 'rgba(255,255,255,0.1)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gold)', border: '1px solid rgba(255,255,255,0.2)' }}>
-            <Star size={28} fill="currentColor" />
+            <Eye size={28} fill="currentColor" />
           </div>
           <div>
-            <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'white', letterSpacing: '-0.5px' }}>Watchlist</h2>
-            <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.9rem', marginTop: '4px' }}>Tracked stocks and compliance alerts</p>
+            <h2 style={{ fontSize: '1.23rem', fontWeight: 800, color: 'white', letterSpacing: '-0.5px', margin: 0 }}>Watchlist</h2>
+            <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.79rem', marginTop: '4px', margin: 0 }}>Track assets & receive instant status alerts</p>
           </div>
         </div>
-        <div style={{ color: 'white', fontSize: '0.9rem', fontWeight: 800, background: 'rgba(255,255,255,0.1)', padding: '8px 16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.2)', position: 'relative', zIndex: 1, backdropFilter: 'blur(10px)' }}>
-          {watchlistSymbols.length} {watchlistSymbols.length === 1 ? 'Asset' : 'Assets'}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', zIndex: 1 }}>
+          <div style={{ color: 'white', fontSize: '0.79rem', fontWeight: 800, background: 'rgba(255,255,255,0.1)', padding: '10px 16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)' }}>
+            {watchlistSymbols.length} {watchlistSymbols.length === 1 ? 'Asset' : 'Assets'}
+          </div>
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '16px', marginBottom: '32px', position: 'relative', zIndex: 10, flexWrap: 'wrap' }}>
-        <div style={{ flex: 1, minWidth: '300px', display: 'flex', alignItems: 'center', background: 'var(--bg-section)', borderRadius: '16px', padding: '0 16px', border: '2px solid transparent', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', boxShadow: isSearching ? '0 8px 24px rgba(201,168,76,0.15)' : 'none', ...(isSearching ? { borderColor: 'var(--primary)', background: 'white' } : { border: '1px solid var(--border)' }) }}>
-          <Search size={20} color={isSearching ? 'var(--primary)' : 'var(--text-muted)'} style={{ transition: 'color 0.3s' }} />
-          <input 
-            type="text" 
-            placeholder="Search stocks to add..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onFocus={() => setIsSearching(true)}
-            onBlur={() => setTimeout(() => setIsSearching(false), 200)}
-            style={{ border: 'none', background: 'transparent', padding: '16px', width: '100%', fontSize: '1rem', color: 'var(--text-dark)', outline: 'none', fontWeight: 500 }}
-          />
-        </div>
+      <div style={{ display: 'flex', gap: '16px', marginBottom: '32px', position: 'relative', zIndex: 10, flexWrap: 'wrap', justifyContent: 'space-between' }}>
+        <button 
+          onClick={() => setShowAddModal(true)}
+          style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '14px 24px', borderRadius: '16px', background: 'var(--primary)', color: 'var(--bg)', border: 'none', fontWeight: 800, fontSize: '0.84rem', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 8px 24px rgba(15,82,87,0.25)' }}
+          className="hover-lift"
+        >
+          <Plus size={18} /> Add Assets
+        </button>
         
         <div style={{ display: 'flex', background: 'var(--bg-section)', borderRadius: '16px', padding: '6px', border: '1px solid var(--border)' }}>
           {['all', 'halal', 'non-halal'].map((f) => (
@@ -220,10 +174,10 @@ export default function WatchlistTab() {
                 padding: '10px 16px',
                 borderRadius: '10px',
                 border: 'none',
-                background: filter === f ? 'white' : 'transparent',
+                background: filter === f ? 'var(--bg)' : 'transparent',
                 color: filter === f ? 'var(--text-dark)' : 'var(--text-muted)',
                 fontWeight: filter === f ? 800 : 600,
-                fontSize: '0.85rem',
+                fontSize: '0.75rem',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
                 boxShadow: filter === f ? '0 2px 8px rgba(0,0,0,0.05)' : 'none',
@@ -234,38 +188,12 @@ export default function WatchlistTab() {
             </button>
           ))}
         </div>
-        
-        {isSearching && searchQuery && searchResults.length > 0 && (
-          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', borderRadius: '16px', marginTop: '12px', boxShadow: '0 20px 40px rgba(0,0,0,0.15)', border: '1px solid var(--border)', overflow: 'hidden', zIndex: 20 }}>
-            {searchResults.map(stock => {
-              const inWatchlist = watchlistSymbols.includes(stock.symbol);
-              return (
-                <div key={stock.symbol} onClick={() => !inWatchlist && handleAdd(stock.symbol)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', cursor: inWatchlist ? 'default' : 'pointer', borderBottom: '1px solid var(--border)', opacity: inWatchlist ? 0.6 : 1, transition: 'background 0.2s' }} className="hover-search-row">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--primary-10)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, overflow: 'hidden' }}>
-                      {stock.logo_url ? <img loading="lazy" src={formatLogoUrl(stock.logo_url)} alt={stock.symbol} style={{ width:'100%', height:'100%', objectFit:'contain' }}/> : stock.symbol.charAt(0)}
-                    </div>
-                    <div>
-                      <div style={{ fontWeight: 800, color: 'var(--text-dark)' }}>{stock.symbol}</div>
-                      <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{stock.name}</div>
-                    </div>
-                  </div>
-                  {inWatchlist ? (
-                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)', background: 'var(--bg-section)', padding: '6px 12px', borderRadius: '8px' }}>Tracking</span>
-                  ) : (
-                    <button style={{ padding: '8px 16px', borderRadius: '10px', background: 'var(--primary)', color: 'white', border: 'none', fontWeight: 700, cursor: 'pointer', transition: 'transform 0.2s, boxShadow 0.2s' }} className="hover-lift">Add</button>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
       </div>
 
       {loading ? (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '60px 0', gap: '16px' }}>
           <div className="spinner" />
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>Loading watchlist...</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.79rem', fontWeight: 600 }}>Loading watchlist...</p>
         </div>
       ) : watchedStocks.length === 0 ? (
         <div style={{ 
@@ -280,18 +208,18 @@ export default function WatchlistTab() {
           }}>
             <Star size={36} color="var(--primary)" fill="var(--primary)" opacity={0.8} />
           </div>
-          <div style={{ fontSize:'1.4rem', fontWeight:900, color:'var(--text-dark)', marginBottom:'12px', letterSpacing:'-0.5px' }}>
+          <div style={{ fontSize: '1.23rem', fontWeight:900, color:'var(--text-dark)', marginBottom:'12px', letterSpacing:'-0.5px' }}>
             {filter !== 'all' ? `No ${filter} assets found` : 'Your Watchlist is Empty'}
           </div>
-          <p style={{ color:'var(--text-muted)', fontSize:'1rem', marginBottom:'32px', maxWidth:'400px', lineHeight:1.6 }}>
+          <p style={{ color:'var(--text-muted)', fontSize: '0.88rem', marginBottom:'32px', maxWidth:'400px', lineHeight:1.6 }}>
             Keep an eye on promising stocks. Add them to your watchlist to track their Shariah compliance status and daily performance.
           </p>
           <button 
             onClick={() => navigate('/portfolio#market')} 
             style={{ 
               display:'inline-flex', alignItems:'center', gap:'8px', padding:'14px 28px', 
-              borderRadius:'14px', background:'var(--gold-grad)', color:'white', border:'none', 
-              fontWeight:800, fontSize:'0.95rem', cursor:'pointer', textDecoration:'none',
+              borderRadius:'14px', background:'var(--gold-grad)', color:'var(--bg)', border:'none', 
+              fontWeight:800, fontSize: '0.84rem', cursor:'pointer', textDecoration:'none',
               boxShadow:'0 8px 24px rgba(201,168,76,0.3)', transition:'transform 0.2s, boxShadow 0.2s' 
             }}
             className="hover-lift"
@@ -313,7 +241,7 @@ export default function WatchlistTab() {
                 key={stock.symbol}
                 className="watchlist-card hover-lift"
                 style={{ 
-                  display: 'flex', alignItems: 'center', padding: '20px 24px', background: 'white', 
+                  display: 'flex', alignItems: 'center', padding: '20px 24px', background: 'var(--bg)', 
                   borderRadius: '20px', border: '1px solid var(--border)', boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
                   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', cursor: 'pointer',
                   animationDelay: `${(i % 10) * 0.04}s`, flexWrap: 'wrap', gap: '16px'
@@ -324,24 +252,24 @@ export default function WatchlistTab() {
                   {stock.logo_url ? (
                     <img loading="lazy" src={formatLogoUrl(stock.logo_url)} alt={stock.symbol} style={{ width: '48px', height: '48px', borderRadius: '14px', objectFit: 'contain', border: '1px solid var(--border)', flexShrink: 0 }} />
                   ) : (
-                    <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'var(--primary-10)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '1.2rem', flexShrink: 0 }}>
+                    <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'var(--primary-10)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '1.06rem', flexShrink: 0 }}>
                       {stock.symbol.charAt(0)}
                     </div>
                   )}
                   <div>
-                    <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '1.15rem', letterSpacing: '-0.3px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '1.01rem', letterSpacing: '-0.3px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                       {stock.symbol}
-                      <span className={`status-badge ${cfg.cls}`} style={{ display: 'inline-flex', padding: '4px 8px', fontSize: '0.65rem' }}>
+                      <span className={`status-badge ${cfg.cls}`} style={{ display: 'inline-flex', padding: '4px 8px', fontSize: '0.57rem' }}>
                         {cfg.icon} {cfg.label}
                       </span>
                     </div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '2px', fontWeight: 500 }}>{stock.name}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px', fontWeight: 500 }}>{stock.name}</div>
                   </div>
                 </div>
 
                 <div className="watchlist-price-col" style={{ flex: '1 1 120px', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', paddingRight: '24px' }}>
-                  <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '1.2rem' }}>₦{price.toFixed(2)}</div>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', fontWeight: 700, color: isPos ? 'var(--halal)' : 'var(--non-halal)', marginTop: '4px' }}>
+                  <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '1.06rem' }}>₦{price.toFixed(2)}</div>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', fontWeight: 700, color: isPos ? 'var(--halal)' : 'var(--non-halal)', marginTop: '4px' }}>
                     {isPos ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
                     {isPos ? '+' : ''}{change.toFixed(2)}%
                   </div>
@@ -350,10 +278,10 @@ export default function WatchlistTab() {
                 <div style={{ flex: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }} onClick={(e) => e.stopPropagation()}>
                   <button 
                     onClick={() => toggleAlert(stock.symbol, 'email')}
-                    className={`alert-btn ${wlItem.alert_email ? 'active-email' : ''}`}
-                    title={wlItem.alert_email ? "Email Alerts Enabled" : "Enable Email Alerts"}
+                    className={`alert-btn-wide ${wlItem.alert_email ? 'active-email' : ''}`}
                   >
                     <Mail size={16} />
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700 }}>Email Alerts</span>
                   </button>
                 </div>
 
@@ -372,6 +300,17 @@ export default function WatchlistTab() {
           })}
         </div>
       )}
+
+      {showAddModal && (
+        <AddWatchlistModal 
+          allStocks={allStocks} 
+          watchlistSymbols={watchlistSymbols} 
+          onClose={() => setShowAddModal(false)}
+          onAdded={(symbols) => {
+            loadData(); // reload watchlist items from backend
+          }}
+        />
+      )}
       
       <style dangerouslySetInnerHTML={{__html: `
         .hover-search-row:hover { background: var(--bg-section) !important; }
@@ -382,8 +321,14 @@ export default function WatchlistTab() {
           display: flex; align-items: center; justify-content: center; color: var(--text-muted); cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .alert-btn:hover { background: white; border-color: var(--primary); color: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .alert-btn.active-email { background: var(--primary); border-color: var(--primary); color: white; }
-        .alert-btn.active-email:hover { background: var(--primary-hover); }
+        .alert-btn-wide {
+          padding: 8px 16px; border-radius: 12px; background: var(--bg-section); border: 1px solid var(--border);
+          display: flex; align-items: center; gap: 8px; color: var(--text-muted); cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .alert-btn-wide:hover { background: white; border-color: var(--primary); color: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        
+        .active-email { background: var(--primary) !important; border-color: var(--primary) !important; color: white !important; }
+        .active-email:hover { background: var(--primary-hover) !important; }
         .alert-btn.active-wa { background: #25D366; border-color: #25D366; color: white; }
         .alert-btn.active-wa:hover { background: #128C7E; }
 

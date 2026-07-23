@@ -27,6 +27,7 @@ const AaoifiScreening = () => {
     queryKey: ['aaoifi', symbol],
     queryFn: () => fetchAaoifiScreening(symbol),
     staleTime: 1000 * 60 * 60, // Cache for 1 hour
+    refetchInterval: (query) => query.state.data?.status === 'processing' ? 10000 : false,
   });
 
   const [simulatedLoading, setSimulatedLoading] = useState(true);
@@ -96,9 +97,9 @@ const AaoifiScreening = () => {
             <ShieldCheck size={32} color="var(--primary)" />
           </div>
         </div>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '16px' }}>Institutional AAOIFI Analysis</h2>
+        <h2 style={{ fontSize: '1.32rem', fontWeight: 800, marginBottom: '16px' }}>Institutional AAOIFI Analysis</h2>
         <div style={{ height: '30px', position: 'relative', overflow: 'hidden' }}>
-          <p key={stepIndex} className="animate-fade-in" style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>
+          <p key={stepIndex} className="animate-fade-in" style={{ color: 'var(--text-muted)', fontSize: '0.97rem', fontWeight: 500 }}>
             {LOADING_STEPS[stepIndex]}
           </p>
         </div>
@@ -126,8 +127,8 @@ const AaoifiScreening = () => {
         <div style={{ width: '80px', height: '80px', margin: '0 auto 24px', background: 'var(--non-halal-bg)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <AlertTriangle size={40} color="var(--non-halal)" />
         </div>
-        <h2 style={{ fontSize: '1.75rem', fontWeight: 900, marginBottom: '12px', color: 'var(--text-dark)' }}>Screening Error</h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', lineHeight: 1.6, marginBottom: '32px' }}>{error}</p>
+        <h2 style={{ fontSize: '1.54rem', fontWeight: 900, marginBottom: '12px', color: 'var(--text-dark)' }}>Screening Error</h2>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', lineHeight: 1.6, marginBottom: '32px' }}>{error}</p>
         <Link 
           to={`/market/${symbol}`} 
           style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', background: 'var(--bg)', color: 'var(--text-dark)', fontWeight: 700, textDecoration: 'none', borderRadius: '100px', border: '1px solid var(--border)', transition: 'all 0.2s', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
@@ -216,10 +217,10 @@ const AaoifiScreening = () => {
       return (
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px', padding: '24px 0', borderBottom: '1px solid var(--border)' }}>
           <div style={{ flex: '0 0 220px', paddingLeft: '16px' }}>
-            <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '1rem', marginBottom: '4px' }}>{title}</div>
-            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{subtitle}</div>
+            <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.88rem', marginBottom: '4px' }}>{title}</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{subtitle}</div>
           </div>
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '0.79rem' }}>
             <AlertTriangle size={16} /> Insufficient data
           </div>
         </div>
@@ -250,8 +251,8 @@ const AaoifiScreening = () => {
         onMouseOut={e => { e.currentTarget.style.background = 'transparent'; }}
       >
         <div style={{ flex: '0 0 220px', paddingLeft: '16px' }}>
-          <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '1rem', marginBottom: '4px' }}>{title}</div>
-          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{subtitle}</div>
+          <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.88rem', marginBottom: '4px' }}>{title}</div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{subtitle}</div>
         </div>
         
         <div style={{ flex: 1, position: 'relative', height: '14px', background: 'var(--bg-section)', borderRadius: '10px' }}>
@@ -270,15 +271,15 @@ const AaoifiScreening = () => {
           }} />
           <div style={{
             position: 'absolute', top: '22px', left: `calc(${thresholdPercent}% - 30px)`,
-            fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, width: '60px', textAlign: 'center'
+            fontSize: '0.66rem', color: 'var(--text-muted)', fontWeight: 600, width: '60px', textAlign: 'center'
           }}>
             limit {threshold}%
           </div>
         </div>
         
         <div style={{ flex: '0 0 120px', textAlign: 'right', paddingRight: '16px' }}>
-          <div style={{ fontSize: '1.5rem', fontWeight: 900, color }}>{ratioVal.toFixed(1)}%</div>
-          <div style={{ fontSize: '0.8rem', fontWeight: 700, color, marginTop: '4px' }}>{headroomDisplay}</div>
+          <div style={{ fontSize: '1.32rem', fontWeight: 900, color }}>{ratioVal.toFixed(1)}%</div>
+          <div style={{ fontSize: '0.7rem', fontWeight: 700, color, marginTop: '4px' }}>{headroomDisplay}</div>
         </div>
       </div>
     );
@@ -297,8 +298,8 @@ const AaoifiScreening = () => {
             <ArrowLeft size={20} />
           </Link>
           <div>
-            <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-dark)' }}>{symbol} Screening</h1>
-            <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+            <h1 style={{ margin: 0, fontSize: '1.32rem', fontWeight: 900, color: 'var(--text-dark)' }}>{symbol} Screening</h1>
+            <p style={{ margin: 0, fontSize: '0.79rem', color: 'var(--text-muted)', fontWeight: 500 }}>
               AAOIFI Standard • Updated {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
             </p>
           </div>
@@ -335,10 +336,10 @@ const AaoifiScreening = () => {
       }}>
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: statusColor }} />
         <StatusIcon size={80} color={statusColor} style={{ margin: '0 auto 20px', filter: `drop-shadow(0 8px 16px ${statusColor}40)` }} />
-        <h1 style={{ fontSize: '2.5rem', fontWeight: 900, color: statusColor, margin: '0 0 12px 0', letterSpacing: '-0.5px' }}>
+        <h1 style={{ fontSize: '2.2rem', fontWeight: 900, color: statusColor, margin: '0 0 12px 0', letterSpacing: '-0.5px' }}>
           {finalStatus.toUpperCase()}
         </h1>
-        <p style={{ color: 'var(--text-dark)', margin: 0, fontWeight: 600, fontSize: '1.1rem' }}>AAOIFI Compliance Verdict</p>
+        <p style={{ color: 'var(--text-dark)', margin: 0, fontWeight: 600, fontSize: '0.97rem' }}>AAOIFI Compliance Verdict</p>
       </div>
 
 
@@ -346,27 +347,27 @@ const AaoifiScreening = () => {
       <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', marginBottom: '48px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <h2 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#C49852', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>BUSINESS ACTIVITY SCREEN</h2>
-            <p style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-dark)', margin: '8px 0 0 0' }}>Core operations</p>
+            <h2 style={{ fontSize: '0.79rem', fontWeight: 800, color: '#C49852', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>BUSINESS ACTIVITY SCREEN</h2>
+            <p style={{ fontSize: '1.32rem', fontWeight: 900, color: 'var(--text-dark)', margin: '8px 0 0 0' }}>Core operations</p>
           </div>
-          <div style={{ padding: '6px 14px', borderRadius: '100px', background: report.business_status === 'pass' ? 'var(--halal-bg)' : (report.business_status === 'fail' ? 'var(--non-halal-bg)' : 'var(--questionable-bg)'), color: report.business_status === 'pass' ? 'var(--halal)' : (report.business_status === 'fail' ? 'var(--non-halal)' : 'var(--questionable)'), fontSize: '0.75rem', fontWeight: 800, letterSpacing: '0.5px' }}>
+          <div style={{ padding: '6px 14px', borderRadius: '100px', background: report.business_status === 'pass' ? 'var(--halal-bg)' : (report.business_status === 'fail' ? 'var(--non-halal-bg)' : 'var(--questionable-bg)'), color: report.business_status === 'pass' ? 'var(--halal)' : (report.business_status === 'fail' ? 'var(--non-halal)' : 'var(--questionable)'), fontSize: '0.66rem', fontWeight: 800, letterSpacing: '0.5px' }}>
             {(report.business_status || 'UNKNOWN').toUpperCase()}
           </div>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: '24px', alignItems: 'start' }}>
-            <span style={{ fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.84rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <CheckCircle size={16} color="var(--primary)" /> Principal
             </span>
-            <span style={{ fontWeight: 600, fontSize: '1.05rem', color: 'var(--text-dark)', lineHeight: 1.5 }}>
+            <span style={{ fontWeight: 600, fontSize: '0.92rem', color: 'var(--text-dark)', lineHeight: 1.5 }}>
               {report.business_reasoning?.principal_business || 'N/A'}
             </span>
           </div>
           
           {report.business_reasoning?.prohibited_activities?.length > 0 && (
             <div style={{ background: 'var(--non-halal-bg)', padding: '20px', borderRadius: '16px', border: '1px solid var(--non-halal)' }}>
-              <div style={{ fontWeight: 800, color: 'var(--non-halal)', fontSize: '0.95rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ fontWeight: 800, color: 'var(--non-halal)', fontSize: '0.84rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <AlertTriangle size={18} /> Prohibited Activities Found:
               </div>
               <ul style={{ margin: 0, paddingLeft: '24px', color: 'var(--non-halal)', fontWeight: 500, lineHeight: 1.6 }}>
@@ -378,10 +379,10 @@ const AaoifiScreening = () => {
           )}
           
           <div style={{ paddingTop: '24px', borderTop: '1px dashed var(--border)' }}>
-            <div style={{ fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.84rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Brain size={16} color="var(--primary)" /> AI Analysis Reasoning
             </div>
-            <p style={{ margin: 0, fontSize: '1.05rem', lineHeight: 1.7, color: 'var(--text-dark)', padding: '20px', background: 'var(--bg-section)', borderRadius: '16px', border: '1px solid var(--border)' }}>
+            <p style={{ margin: 0, fontSize: '0.92rem', lineHeight: 1.7, color: 'var(--text-dark)', padding: '20px', background: 'var(--bg-section)', borderRadius: '16px', border: '1px solid var(--border)' }}>
               {report.business_reasoning?.reasoning || 'N/A'}
             </p>
           </div>
@@ -389,52 +390,52 @@ const AaoifiScreening = () => {
       </div>
 
       <div style={{ marginBottom: '48px' }}>
-        <h2 style={{ fontFamily: 'Fraunces, serif', color: 'var(--halal)', fontSize: '2rem', fontWeight: 700, marginBottom: '24px' }}>
+        <h2 style={{ fontFamily: 'Fraunces, serif', color: 'var(--halal)', fontSize: '1.76rem', fontWeight: 700, marginBottom: '24px' }}>
           The Three AAOIFI Screens
         </h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           
           <div style={{ background: 'var(--bg)', borderRadius: '16px', border: '1px solid var(--border)', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
-              <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--halal)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '1.1rem', flexShrink: 0 }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--halal)', color: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.97rem', flexShrink: 0 }}>
                 1
               </div>
               <div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '4px' }}>Debt Ratio ≤ 30%</div>
-                <div style={{ color: 'var(--text-muted)', fontSize: '1.05rem' }}>Interest-bearing debt ÷ Market capitalization</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '4px' }}>Debt Ratio ≤ 30%</div>
+                <div style={{ color: 'var(--text-muted)', fontSize: '0.92rem' }}>Interest-bearing debt ÷ Market capitalization</div>
               </div>
             </div>
-            <div style={{ background: 'var(--bg-section)', padding: '16px', borderRadius: '12px', fontFamily: 'monospace', fontSize: '0.95rem', color: 'var(--text-dark)', letterSpacing: '0.5px' }}>
+            <div style={{ background: 'var(--bg-section)', padding: '16px', borderRadius: '12px', fontFamily: 'monospace', fontSize: '0.84rem', color: 'var(--text-dark)', letterSpacing: '0.5px' }}>
               Formula: Total Debt ÷ Market Cap × 100 &lt; 30%
             </div>
           </div>
 
           <div style={{ background: 'var(--bg)', borderRadius: '16px', border: '1px solid var(--border)', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
-              <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--halal)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '1.1rem', flexShrink: 0 }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--halal)', color: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.97rem', flexShrink: 0 }}>
                 2
               </div>
               <div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '4px' }}>Cash Ratio ≤ 30%</div>
-                <div style={{ color: 'var(--text-muted)', fontSize: '1.05rem' }}>Cash + interest-bearing securities ÷ Market capitalization</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '4px' }}>Cash Ratio ≤ 30%</div>
+                <div style={{ color: 'var(--text-muted)', fontSize: '0.92rem' }}>Cash + interest-bearing securities ÷ Market capitalization</div>
               </div>
             </div>
-            <div style={{ background: 'var(--bg-section)', padding: '16px', borderRadius: '12px', fontFamily: 'monospace', fontSize: '0.95rem', color: 'var(--text-dark)', letterSpacing: '0.5px' }}>
+            <div style={{ background: 'var(--bg-section)', padding: '16px', borderRadius: '12px', fontFamily: 'monospace', fontSize: '0.84rem', color: 'var(--text-dark)', letterSpacing: '0.5px' }}>
               Formula: (Cash + Securities) ÷ Market Cap × 100 &lt; 30%
             </div>
           </div>
 
           <div style={{ background: 'var(--bg)', borderRadius: '16px', border: '1px solid var(--border)', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
-              <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--halal)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '1.1rem', flexShrink: 0 }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--halal)', color: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.97rem', flexShrink: 0 }}>
                 3
               </div>
               <div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '4px' }}>Impure Revenue ≤ 5%</div>
-                <div style={{ color: 'var(--text-muted)', fontSize: '1.05rem' }}>Non-permissible income ÷ Total revenue</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '4px' }}>Impure Revenue ≤ 5%</div>
+                <div style={{ color: 'var(--text-muted)', fontSize: '0.92rem' }}>Non-permissible income ÷ Total revenue</div>
               </div>
             </div>
-            <div style={{ background: 'var(--bg-section)', padding: '16px', borderRadius: '12px', fontFamily: 'monospace', fontSize: '0.95rem', color: 'var(--text-dark)', letterSpacing: '0.5px' }}>
+            <div style={{ background: 'var(--bg-section)', padding: '16px', borderRadius: '12px', fontFamily: 'monospace', fontSize: '0.84rem', color: 'var(--text-dark)', letterSpacing: '0.5px' }}>
               Formula: Impure Income ÷ Total Revenue × 100 &lt; 5%
             </div>
           </div>
@@ -445,10 +446,10 @@ const AaoifiScreening = () => {
       <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', marginBottom: '48px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <h2 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#C49852', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>AAOIFI RATIO SCREEN</h2>
-            <p style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-dark)', margin: '8px 0 0 0' }}>Financial ratios</p>
+            <h2 style={{ fontSize: '0.79rem', fontWeight: 800, color: '#C49852', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>AAOIFI RATIO SCREEN</h2>
+            <p style={{ fontSize: '1.32rem', fontWeight: 900, color: 'var(--text-dark)', margin: '8px 0 0 0' }}>Financial ratios</p>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-section)', borderRadius: '100px', border: '1px solid var(--border)', fontSize: '0.85rem', overflow: 'hidden' }}>
+          <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-section)', borderRadius: '100px', border: '1px solid var(--border)', fontSize: '0.75rem', overflow: 'hidden' }}>
             <span style={{ padding: '6px 12px', color: 'var(--text-muted)' }}>Denominator</span>
             <select 
               value={denominator}
@@ -498,10 +499,10 @@ const AaoifiScreening = () => {
           style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
         >
           <div style={{ textAlign: 'left' }}>
-            <h2 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#C49852', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>TRANSPARENCY & EVIDENCE</h2>
-            <p style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-dark)', margin: '8px 0 0 0' }}>Data sources & AI Confidence</p>
+            <h2 style={{ fontSize: '0.79rem', fontWeight: 800, color: '#C49852', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>TRANSPARENCY & EVIDENCE</h2>
+            <p style={{ fontSize: '1.32rem', fontWeight: 900, color: 'var(--text-dark)', margin: '8px 0 0 0' }}>Data sources & AI Confidence</p>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '0.79rem', fontWeight: 600 }}>
             {evidenceExpanded ? 'Hide details' : 'View details'}
             <ChevronRight size={24} color="var(--text-muted)" style={{ transform: evidenceExpanded ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
           </div>
@@ -511,12 +512,12 @@ const AaoifiScreening = () => {
           <div className="animate-fade-in" style={{ marginTop: '32px', paddingTop: '32px', borderTop: '1px solid var(--border)' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', marginBottom: '32px', padding: '12px 24px', background: 'var(--bg-section)', borderRadius: '100px', border: '1px solid var(--border)' }}>
               <Brain size={20} color="var(--primary)" /> 
-              <span style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '1rem' }}>AI Confidence Score</span>
+              <span style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.88rem' }}>AI Confidence Score</span>
               <div style={{ width: '1px', height: '24px', background: 'var(--border)', margin: '0 8px' }} />
-              <span style={{ fontWeight: 900, color: 'var(--primary)', fontSize: '1.25rem' }}>{report.business_reasoning?.confidence_score || 'N/A'}%</span>
+              <span style={{ fontWeight: 900, color: 'var(--primary)', fontSize: '1.1rem' }}>{report.business_reasoning?.confidence_score || 'N/A'}%</span>
             </div>
 
-            <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '1.1rem', marginBottom: '20px' }}>News Sources Analyzed</div>
+            <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.97rem', marginBottom: '20px' }}>News Sources Analyzed</div>
             {report.news_sources?.length > 0 ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
                 {report.news_sources.map((news, i) => (
@@ -524,10 +525,10 @@ const AaoifiScreening = () => {
                     <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                       <div style={{ color: 'var(--primary)', background: 'var(--primary-bg)', padding: '8px', borderRadius: '10px' }}><FileText size={18} /></div>
                       <div>
-                        <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-dark)', lineHeight: 1.4, marginBottom: '8px' }}>
+                        <div style={{ fontSize: '0.84rem', fontWeight: 600, color: 'var(--text-dark)', lineHeight: 1.4, marginBottom: '8px' }}>
                           {news.title || 'Unknown Source'}
                         </div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 500 }}>
                           {news.source || 'News'} • {new Date(news.published_at).toLocaleDateString()}
                         </div>
                       </div>
@@ -537,7 +538,7 @@ const AaoifiScreening = () => {
               </div>
             ) : (
               <div style={{ padding: '32px', textAlign: 'center', background: 'var(--bg)', borderRadius: '16px', border: '1px dashed var(--border)' }}>
-                <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', margin: 0 }}>No recent news sources found for this analysis.</p>
+                <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', margin: 0 }}>No recent news sources found for this analysis.</p>
               </div>
             )}
           </div>
@@ -550,7 +551,7 @@ const AaoifiScreening = () => {
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000, padding: '24px', opacity: 1, transition: 'opacity 0.3s' }}>
           <div className="animate-fade-in" style={{ background: 'var(--bg)', borderRadius: '32px', width: '100%', maxWidth: '500px', overflow: 'hidden', boxShadow: '0 32px 64px rgba(0,0,0,0.15), 0 0 0 1px var(--border)' }}>
             <div style={{ padding: '24px 32px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-section)' }}>
-              <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800 }}>Calculation Details</h3>
+              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800 }}>Calculation Details</h3>
               <button 
                 onClick={() => setModalData(null)} 
                 style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)', transition: 'all 0.2s' }}
@@ -563,29 +564,29 @@ const AaoifiScreening = () => {
             
             <div style={{ padding: '32px' }}>
               <div style={{ marginBottom: '32px', textAlign: 'center' }}>
-                <div style={{ fontWeight: 800, fontSize: '1.25rem', marginBottom: '8px', color: 'var(--text-dark)' }}>{modalData.title}</div>
-                <div style={{ display: 'inline-block', padding: '6px 16px', background: 'var(--bg-section)', borderRadius: '100px', color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>
+                <div style={{ fontWeight: 800, fontSize: '1.1rem', marginBottom: '8px', color: 'var(--text-dark)' }}>{modalData.title}</div>
+                <div style={{ display: 'inline-block', padding: '6px 16px', background: 'var(--bg-section)', borderRadius: '100px', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600 }}>
                   Threshold: {modalData.threshold}
                 </div>
               </div>
 
               <div style={{ background: 'var(--bg-section)', padding: '16px', borderRadius: '12px', border: '1px dashed var(--border)', marginBottom: '24px', textAlign: 'center' }}>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '8px' }}>Formula</span>
-                <span style={{ fontSize: '0.95rem', color: 'var(--text-dark)', fontWeight: 600, fontFamily: 'monospace' }}>{modalData.formula}</span>
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '8px' }}>Formula</span>
+                <span style={{ fontSize: '0.84rem', color: 'var(--text-dark)', fontWeight: 600, fontFamily: 'monospace' }}>{modalData.formula}</span>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '16px 0', borderBottom: '1px dashed var(--border)' }}>
                 <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>{modalData.numLabel}</span>
-                <span style={{ fontWeight: 800, fontSize: '1.1rem' }}>₦{formatNumber(modalData.numVal)}</span>
+                <span style={{ fontWeight: 800, fontSize: '0.97rem' }}>₦{formatNumber(modalData.numVal)}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '16px 0' }}>
                 <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>{modalData.denLabel}</span>
-                <span style={{ fontWeight: 800, fontSize: '1.1rem' }}>₦{formatNumber(modalData.denVal)}</span>
+                <span style={{ fontWeight: 800, fontSize: '0.97rem' }}>₦{formatNumber(modalData.denVal)}</span>
               </div>
 
               <div style={{ marginTop: '32px', background: 'var(--bg-section)', padding: '24px', borderRadius: '24px', textAlign: 'center', border: '1px solid var(--border)' }}>
-                <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px' }}>Result</div>
-                <div style={{ fontSize: '3rem', fontWeight: 900, color: modalData.ratio <= parseFloat(modalData.threshold.replace(/[^0-9.]/g, '')) ? 'var(--halal)' : 'var(--non-halal)', lineHeight: 1 }}>
+                <div style={{ fontWeight: 700, fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px' }}>Result</div>
+                <div style={{ fontSize: '2.64rem', fontWeight: 900, color: modalData.ratio <= parseFloat(modalData.threshold.replace(/[^0-9.]/g, '')) ? 'var(--halal)' : 'var(--non-halal)', lineHeight: 1 }}>
                   {modalData.ratio.toFixed(2)}%
                 </div>
               </div>

@@ -215,23 +215,65 @@ class StockController extends Controller
     /**
      * Execute or retrieve the AAOIFI detailed screening for a stock.
      */
-    public function aaoifiScreening(string $symbol, \App\Services\AaoifiScreeningService $screeningService): JsonResponse
+    public function aaoifiScreening(string $symbol): JsonResponse
     {
         $company = Company::where('symbol', $symbol)->firstOrFail();
         
-        // Return cached screening if less than 7 days old
-        $existingScreening = \App\Models\AaoifiScreening::where('company_id', $company->id)
+        // 1. Check if we have a fresh FinancialScreening from the new AI Engine
+        $existingScreening = \App\Models\FinancialScreening::where('company_ticker', $symbol)
             ->where('created_at', '>=', now()->subDays(7))
-            ->latest()
+            ->orderBy('created_at', 'desc')
             ->first();
             
         if ($existingScreening) {
-            return $this->success($existingScreening);
+            $busScreening = \App\Models\BusinessScreening::where('ticker', $symbol)->orderBy('created_at', 'desc')->first();
+            
+            $calc = $existingScreening->calculation_results ?? [];
+            $ratios = $calc['ratios'] ?? [];
+            $status = $calc['status'] ?? [];
+            $chosen = $existingScreening->chosen_values ?? [];
+            
+            // Map the Python Engine output to the legacy frontend format
+            $mapped = [
+                'company_id' => $company->id,
+                'business_status' => $busScreening && $busScreening->business_compliance_status === 'Non-Compliant' ? 'fail' : 'pass',
+                'business_reasoning' => $busScreening ? $busScreening->ai_explanation : null,
+                'debt_ratio' => $ratios['interest_bearing_debt_ratio'] ?? null,
+                'debt_status' => ($status['debt_pass'] ?? true) ? 'pass' : 'fail',
+                'cash_ratio' => $ratios['cash_and_equivalents_ratio'] ?? null,
+                'cash_status' => ($status['cash_pass'] ?? true) ? 'pass' : 'fail',
+                'impermissible_income_ratio' => $ratios['non_permissible_income_ratio'] ?? null,
+                'impermissible_income_status' => ($status['income_pass'] ?? true) ? 'pass' : 'fail',
+                'illiquid_ratio' => null, // Python engine currently doesn't compute this
+                'illiquid_status' => 'pass',
+                'receivables_ratio' => null, // Python engine currently doesn't compute this
+                'receivables_status' => 'pass',
+                'final_status' => ($calc['overall_financial_pass'] ?? true) && ($busScreening ? $busScreening->business_compliance_status !== 'Non-Compliant' : true) ? 'halal' : 'non-halal',
+                'news_sources' => $busScreening ? $busScreening->supporting_evidence : [],
+                'financial_data_used' => [
+                    'market_cap' => $company->market_cap,
+                    'total_assets' => $chosen['total_assets'] ?? 0,
+                    'total_debt' => $chosen['total_debt'] ?? 0,
+                    'cash' => $chosen['cash_and_equivalents'] ?? 0,
+                    'interest_bearing_securities' => 0,
+                    'accounts_receivable' => 0,
+                    'illiquid_assets' => 0,
+                    'interest_income' => $chosen['interest_income'] ?? 0,
+                    'total_revenue' => $chosen['total_revenue'] ?? 0,
+                ],
+                'ai_explanation' => $existingScreening->ai_explanation,
+            ];
+            
+            return $this->success($mapped);
         }
         
-        // Otherwise, run a new screening synchronously
-        $screening = $screeningService->screenCompany($company);
+        // 2. If no fresh data exists, trigger the background job
+        \App\Jobs\ProcessCompanyScreening::dispatch($symbol);
         
-        return $this->success($screening);
+        // 3. Return 202 Accepted so the frontend knows to poll
+        return response()->json([
+            'status' => 'processing',
+            'message' => 'Screening is currently running in the background. Please check back in a few minutes.'
+        ], 202);
     }
 }

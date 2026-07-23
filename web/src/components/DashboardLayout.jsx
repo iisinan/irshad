@@ -58,12 +58,7 @@ export default function DashboardLayout({ children }) {
         setMobileOpen={setMobileOpen}
       />
       
-      <main style={{
-        flex: 1,
-        overflowX: 'hidden',
-        minWidth: 0,
-        transition: 'all 0.3s cubic-bezier(0.16,1,0.3,1)',
-      }}>
+      <main className="dashboard-main-content">
         {/* Mobile Header (Hidden on Desktop) */}
         <header className="mobile-dashboard-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -71,9 +66,9 @@ export default function DashboardLayout({ children }) {
               width: '32px', height: '32px', borderRadius: '8px',
               background: 'var(--gold-grad)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontWeight: 900, fontSize: '0.8rem', color: 'white',
+              fontWeight: 900, fontSize: '0.7rem', color: 'white',
             }}>إ</div>
-            <span style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--text-dark)', letterSpacing: '-0.3px' }}>
+            <span style={{ fontWeight: 800, fontSize: '0.92rem', color: 'var(--text-dark)', letterSpacing: '-0.3px' }}>
               Irshad
             </span>
           </div>
@@ -93,7 +88,7 @@ export default function DashboardLayout({ children }) {
             background: 'var(--non-halal-bg)',
             color: 'var(--non-halal)',
             padding: '12px 24px',
-            fontSize: '0.9rem',
+            fontSize: '0.79rem',
             fontWeight: 600,
             display: 'flex',
             alignItems: 'center',
@@ -121,12 +116,12 @@ export default function DashboardLayout({ children }) {
                 }
               }}
               style={{
-                background: 'white',
+                background: 'var(--bg)',
                 color: 'var(--non-halal)',
                 border: '1px solid var(--non-halal)',
                 padding: '6px 12px',
                 borderRadius: '8px',
-                fontSize: '0.8rem',
+                fontSize: '0.7rem',
                 fontWeight: 700,
                 cursor: 'pointer'
               }}

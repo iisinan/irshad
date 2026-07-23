@@ -27,7 +27,7 @@ const AboutPage = () => (
           Empowering Muslim Investors<br />
           <span style={{ color: 'var(--primary)' }}>in Nigeria</span>
         </h1>
-        <p style={{ fontSize: '1.1rem', lineHeight: 1.85, color: 'var(--text-muted)', maxWidth: '640px', margin: '0 auto' }}>
+        <p style={{ fontSize: '0.97rem', lineHeight: 1.85, color: 'var(--text-muted)', maxWidth: '640px', margin: '0 auto' }}>
           Irshad was founded to solve a critical problem: the complete lack of transparent, accessible, and automated Shariah compliance data for the local stock market.
         </p>
       </div>
@@ -35,7 +35,7 @@ const AboutPage = () => (
       {/* ─── Stats Strip ─── */}
       <div style={{
         display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
-        background: 'white', borderRadius: '24px', border: '1px solid var(--border)',
+        background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)',
         boxShadow: 'var(--shadow-md)', overflow: 'hidden', marginBottom: '48px',
       }}>
         {STATS.map((s, i) => (
@@ -43,9 +43,9 @@ const AboutPage = () => (
             padding: '36px', textAlign: 'center',
             borderRight: i < STATS.length - 1 ? '1px solid var(--border)' : 'none',
           }}>
-            <div style={{ fontSize: '2rem', marginBottom: '8px' }}>{s.icon}</div>
-            <div style={{ fontSize: '2.2rem', fontWeight: 900, color: 'var(--primary)', letterSpacing: '-1px', lineHeight: 1 }}>{s.num}</div>
-            <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginTop: '6px' }}>{s.label}</div>
+            <div style={{ fontSize: '1.76rem', marginBottom: '8px' }}>{s.icon}</div>
+            <div style={{ fontSize: '1.94rem', fontWeight: 900, color: 'var(--primary)', letterSpacing: '-1px', lineHeight: 1 }}>{s.num}</div>
+            <div style={{ fontSize: '0.69rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginTop: '6px' }}>{s.label}</div>
           </div>
         ))}
       </div>
@@ -62,13 +62,13 @@ const AboutPage = () => (
           <div style={{ position: 'relative', zIndex: 1 }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.3)', padding: '5px 14px', borderRadius: '40px', marginBottom: '24px' }}>
               <Globe size={13} color="var(--gold)" />
-              <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--gold)', letterSpacing: '1px', textTransform: 'uppercase' }}>Our Vision</span>
+              <span style={{ fontSize: '0.63rem', fontWeight: 700, color: 'var(--gold)', letterSpacing: '1px', textTransform: 'uppercase' }}>Our Vision</span>
             </div>
-            <h3 style={{ fontSize: '1.5rem', fontWeight: 900, color: 'white', marginBottom: '16px', letterSpacing: '-0.5px' }}>Africa's Most Trusted Islamic FinTech</h3>
-            <p style={{ color: 'rgba(255,255,255,0.75)', lineHeight: 1.75, marginBottom: '16px', fontSize: '0.97rem' }}>
+            <h3 style={{ fontSize: '1.32rem', fontWeight: 900, color: 'white', marginBottom: '16px', letterSpacing: '-0.5px' }}>Africa's Most Trusted Islamic FinTech</h3>
+            <p style={{ color: 'rgba(255,255,255,0.75)', lineHeight: 1.75, marginBottom: '16px', fontSize: '0.85rem' }}>
               To become the most trusted Islamic financial technology platform in Africa, starting with the Nigerian equities market.
             </p>
-            <p style={{ color: 'rgba(255,255,255,0.6)', lineHeight: 1.75, fontSize: '0.92rem' }}>
+            <p style={{ color: 'rgba(255,255,255,0.6)', lineHeight: 1.75, fontSize: '0.81rem' }}>
               We believe growing wealth and adhering to one's faith should not be mutually exclusive. Our platform provides the clarity needed to invest confidently.
             </p>
           </div>
@@ -78,7 +78,7 @@ const AboutPage = () => (
         <div className="about-values-grid">
           {VALUES.map(v => (
             <div key={v.title} style={{
-              background: 'white', padding: '24px', borderRadius: '18px',
+              background: 'var(--bg)', padding: '24px', borderRadius: '18px',
               border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)',
               transition: 'transform 0.2s, box-shadow 0.2s',
             }}
@@ -88,8 +88,8 @@ const AboutPage = () => (
               <div style={{ width: '44px', height: '44px', background: v.bg, borderRadius: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', border: `1px solid ${v.border}` }}>
                 <v.icon size={22} color={v.color} />
               </div>
-              <h4 style={{ fontWeight: 800, marginBottom: '8px', color: 'var(--text-dark)', fontSize: '1rem' }}>{v.title}</h4>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', lineHeight: 1.65 }}>{v.desc}</p>
+              <h4 style={{ fontWeight: 800, marginBottom: '8px', color: 'var(--text-dark)', fontSize: '0.88rem' }}>{v.title}</h4>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', lineHeight: 1.65 }}>{v.desc}</p>
             </div>
           ))}
         </div>
@@ -107,12 +107,12 @@ const AboutPage = () => (
         <div style={{ position: 'relative', zIndex: 1 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.3)', padding: '6px 18px', borderRadius: '40px', marginBottom: '24px' }}>
             <Sparkles size={14} color="var(--gold)" />
-            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--gold)', letterSpacing: '1px', textTransform: 'uppercase' }}>Our Mission</span>
+            <span style={{ fontSize: '0.69rem', fontWeight: 700, color: 'var(--gold)', letterSpacing: '1px', textTransform: 'uppercase' }}>Our Mission</span>
           </div>
           <h2 style={{ color: 'white', fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', fontWeight: 900, marginBottom: '20px', letterSpacing: '-0.5px', lineHeight: 1.2 }}>
             Shariah-Compliant Investing,<br />Made Effortless
           </h2>
-          <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '1.05rem', lineHeight: 1.8, maxWidth: '600px', margin: '0 auto' }}>
+          <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.92rem', lineHeight: 1.8, maxWidth: '600px', margin: '0 auto' }}>
             To make Shariah-compliant investing accessible, transparent, and effortless for every Muslim on the Nigerian Exchange — so you can grow your wealth without compromising your faith.
           </p>
         </div>

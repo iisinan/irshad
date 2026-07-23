@@ -32,10 +32,25 @@ def build_graph():
     workflow.add_node("perform_business_screening", perform_business_screening)
     workflow.add_node("store_results", store_results)
 
-    # Build Edges (Linear workflow for MVP, can add conditional edges for retries later)
+    def should_continue_financials(state: GraphState):
+        if state.get("skip_financials"):
+            return "store_results"
+        return "locate_annual_report"
+
+    # Build Edges (Short-circuit if business fails)
     workflow.set_entry_point("search_company")
     workflow.add_edge("search_company", "check_financial_cache")
-    workflow.add_edge("check_financial_cache", "locate_annual_report")
+    workflow.add_edge("check_financial_cache", "perform_business_screening")
+    
+    workflow.add_conditional_edges(
+        "perform_business_screening",
+        should_continue_financials,
+        {
+            "locate_annual_report": "locate_annual_report",
+            "store_results": "store_results"
+        }
+    )
+    
     workflow.add_edge("locate_annual_report", "download_report")
     workflow.add_edge("download_report", "extract_financial_statements")
     workflow.add_edge("extract_financial_statements", "collect_multiple_sources")
@@ -43,8 +58,7 @@ def build_graph():
     workflow.add_edge("normalize_data", "validate_and_resolve")
     workflow.add_edge("validate_and_resolve", "calculate_aaoifi")
     workflow.add_edge("calculate_aaoifi", "generate_explanation")
-    workflow.add_edge("generate_explanation", "perform_business_screening")
-    workflow.add_edge("perform_business_screening", "store_results")
+    workflow.add_edge("generate_explanation", "store_results")
     workflow.add_edge("store_results", END)
 
     # Compile the graph

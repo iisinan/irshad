@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { ShieldAlert, ArrowRight, X, Heart, CheckCircle } from 'lucide-react';
 
 /* ─── Purify Modal ─────────────────────────────────────────── */
@@ -14,15 +15,15 @@ function PurifyModal({ holding, onClose, onSuccess }) {
     }, 1500);
   };
 
-  return (
-    <div className="animate-fade-in" style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.4)', backdropFilter:'blur(4px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:999, padding:'20px' }}>
-      <div style={{ background:'white', borderRadius:'24px', width:'100%', maxWidth:'420px', boxShadow:'0 24px 64px rgba(0,0,0,0.1)', overflow:'hidden', animation:'slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+  return createPortal(
+    <div className="animate-fade-in" style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.4)', backdropFilter:'blur(4px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:100000, padding:'20px' }}>
+      <div style={{ background: 'var(--bg)', borderRadius:'24px', width:'100%', maxWidth:'420px', boxShadow:'0 24px 64px rgba(0,0,0,0.1)', overflow:'hidden', animation:'slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>
         <div style={{ padding:'32px', textAlign: 'center' }}>
           <div style={{ width: '64px', height: '64px', background: 'var(--gold-50)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', color: 'var(--gold)' }}>
             <Heart size={32} />
           </div>
-          <h3 style={{ fontSize:'1.4rem', fontWeight:800, color:'var(--text-dark)', marginBottom: '8px' }}>Purify {holding.symbol}</h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '24px' }}>
+          <h3 style={{ fontSize: '1.23rem', fontWeight:800, color:'var(--text-dark)', marginBottom: '8px' }}>Purify {holding.symbol}</h3>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.84rem', lineHeight: 1.6, marginBottom: '24px' }}>
             You are about to donate <strong>₦{Number(holding.purification_due).toLocaleString()}</strong> to charity. This amount cleanses your dividend income from non-compliant sources.
           </p>
 
@@ -30,21 +31,22 @@ function PurifyModal({ holding, onClose, onSuccess }) {
             <button 
               onClick={handlePay} 
               disabled={loading} 
-              style={{ width:'100%', padding:'16px', borderRadius:'14px', background:'var(--primary)', border:'none', color:'white', fontWeight:800, fontSize:'1rem', cursor: loading ? 'not-allowed' : 'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', boxShadow:'0 8px 24px rgba(34,197,94,0.25)' }}
+              style={{ width:'100%', padding:'16px', borderRadius:'14px', background:'var(--primary)', border:'none', color:'var(--bg)', fontWeight:800, fontSize: '0.88rem', cursor: loading ? 'not-allowed' : 'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', boxShadow:'0 8px 24px rgba(34,197,94,0.25)' }}
             >
               {loading ? <div className="spinner" style={{ width:'18px', height:'18px', borderTopColor:'white' }}/> : 'Donate Securely'}
             </button>
             <button 
               onClick={onClose} 
               disabled={loading}
-              style={{ width:'100%', padding:'16px', borderRadius:'14px', background:'white', border:'none', color:'var(--text-muted)', fontWeight:700, fontSize:'0.95rem', cursor: loading ? 'not-allowed' : 'pointer' }}
+              style={{ width:'100%', padding:'16px', borderRadius:'14px', background: 'var(--bg)', border:'none', color:'var(--text-muted)', fontWeight:700, fontSize: '0.84rem', cursor: loading ? 'not-allowed' : 'pointer' }}
             >
               Cancel
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -80,18 +82,18 @@ export default function PurificationTab({ data }) {
         <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(201,168,76,0.08)', borderRadius: '50%' }} />
         <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{ width: '56px', height: '56px', background: 'rgba(255,255,255,0.1)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', border: '1px solid rgba(255,255,255,0.2)' }}>
+            <div style={{ width: '56px', height: '56px', background: 'rgba(255,255,255,0.1)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--bg)', border: '1px solid rgba(255,255,255,0.2)' }}>
               {purificationDue > 0 ? <ShieldAlert size={28} color="var(--gold)" /> : <CheckCircle size={28} color="var(--halal)" />}
             </div>
             <div>
-              <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'white', letterSpacing: '-0.5px' }}>Dividend Purification</h2>
-              <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.9rem', marginTop: '4px' }}>Cleanse your portfolio of non-compliant income</p>
+              <h2 style={{ fontSize: '1.23rem', fontWeight: 800, color: 'white', letterSpacing: '-0.5px' }}>Dividend Purification</h2>
+              <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.79rem', marginTop: '4px' }}>Cleanse your portfolio of non-compliant income</p>
             </div>
           </div>
           
           <div style={{ textAlign: 'right', background: 'rgba(255,255,255,0.05)', padding: '16px 24px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)', backdropFilter: 'blur(10px)' }}>
-            <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700, color: 'rgba(255,255,255,0.5)', marginBottom: '4px' }}>Total Due</div>
-            <div style={{ fontSize: '2rem', fontWeight: 900, color: purificationDue > 0 ? '#f87171' : 'white', letterSpacing: '-1px', transition: 'color 0.3s', lineHeight: 1 }}>
+            <div style={{ fontSize: '0.66rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700, color: 'rgba(255,255,255,0.5)', marginBottom: '4px' }}>Total Due</div>
+            <div style={{ fontSize: '1.76rem', fontWeight: 900, color: purificationDue > 0 ? '#f87171' : 'white', letterSpacing: '-1px', transition: 'color 0.3s', lineHeight: 1 }}>
               ₦{purificationDue.toLocaleString()}
             </div>
           </div>
@@ -99,8 +101,8 @@ export default function PurificationTab({ data }) {
       </div>
 
       {/* List */}
-      <div style={{ background:'white', borderRadius:'24px', padding:'32px', boxShadow:'var(--shadow-sm)', border:'1px solid var(--border)' }}>
-        <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '24px' }}>Pending Purifications</h3>
+      <div style={{ background: 'var(--bg)', borderRadius:'24px', padding:'32px', boxShadow:'var(--shadow-sm)', border:'1px solid var(--border)' }}>
+        <h3 style={{ fontSize: '0.97rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '24px' }}>Pending Purifications</h3>
         
         {needsPurification.length === 0 ? (
           <div style={{ 
@@ -115,10 +117,10 @@ export default function PurificationTab({ data }) {
             }}>
               <CheckCircle size={36} color="var(--halal)" fill="rgba(34,197,94,0.2)" />
             </div>
-            <div style={{ fontSize:'1.4rem', fontWeight:900, color:'var(--text-dark)', marginBottom:'12px', letterSpacing:'-0.5px' }}>
+            <div style={{ fontSize: '1.23rem', fontWeight:900, color:'var(--text-dark)', marginBottom:'12px', letterSpacing:'-0.5px' }}>
               Your Portfolio is Clean!
             </div>
-            <p style={{ color:'var(--text-muted)', fontSize:'1rem', maxWidth:'400px', lineHeight:1.6 }}>
+            <p style={{ color:'var(--text-muted)', fontSize: '0.88rem', maxWidth:'400px', lineHeight:1.6 }}>
               Alhamdulillah. All your dividend income is derived from Shariah-compliant sources. There are no pending purifications at this time.
             </p>
           </div>
@@ -131,7 +133,7 @@ export default function PurificationTab({ data }) {
                 gap: '16px',
                 alignItems: 'center',
                 padding: '20px 24px',
-                background: 'white',
+                background: 'var(--bg)',
                 borderRadius: '18px',
                 border: '1px solid var(--doubtful-border)',
                 boxShadow: '0 2px 8px rgba(245, 158, 11, 0.05)',
@@ -142,30 +144,30 @@ export default function PurificationTab({ data }) {
               >
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                    <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'var(--doubtful-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.7rem', color: 'var(--doubtful)' }}>
+                    <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'var(--doubtful-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.62rem', color: 'var(--doubtful)' }}>
                       {(h.symbol || '').slice(0, 4)}
                     </div>
                     <div>
-                      <div style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--text-dark)' }}>{h.symbol}</div>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '1px' }}>{h.shares} shares</div>
+                      <div style={{ fontWeight: 800, fontSize: '0.92rem', color: 'var(--text-dark)' }}>{h.symbol}</div>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '1px' }}>{h.shares} shares</div>
                     </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <div style={{ flex: 1, height: '5px', background: 'var(--bg-section)', borderRadius: '3px', overflow: 'hidden' }}>
                       <div style={{ width: `${Math.min(100, (h.purification_due / h.total_value) * 100 * 5)}%`, height: '100%', background: 'var(--doubtful)', borderRadius: '3px' }} />
                     </div>
-                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                    <span style={{ fontSize: '0.63rem', fontWeight: 700, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
                       {((h.purification_due / h.total_value) * 100).toFixed(2)}% of value
                     </span>
                   </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--doubtful)', marginBottom: '8px' }}>₦{Number(h.purification_due).toLocaleString()}</div>
+                  <div style={{ fontSize: '1.06rem', fontWeight: 900, color: 'var(--doubtful)', marginBottom: '8px' }}>₦{Number(h.purification_due).toLocaleString()}</div>
                   <button 
                     onClick={() => setSelectedHolding(h)}
                     style={{ 
-                      background: 'var(--doubtful)', color: 'white', border: 'none', 
-                      fontWeight: 800, fontSize: '0.82rem', cursor: 'pointer', 
+                      background: 'var(--doubtful)', color: 'var(--bg)', border: 'none', 
+                      fontWeight: 800, fontSize: '0.72rem', cursor: 'pointer', 
                       display: 'inline-flex', alignItems: 'center', gap: '6px',
                       padding: '8px 16px', borderRadius: '10px',
                       boxShadow: '0 4px 12px rgba(245,158,11,0.25)',

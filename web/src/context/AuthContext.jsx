@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { loginUser, registerUser, fetchProfile, googleLoginUser, updateProfile } from '../services/api';
 
 const AuthContext = createContext();
@@ -8,6 +9,19 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    // Listen for global unauthorized events
+    const handleUnauthorized = () => {
+      setUser(null);
+      localStorage.removeItem('auth_token');
+      navigate('/login');
+    };
+    window.addEventListener('auth:unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
+  }, [navigate]);
 
   useEffect(() => {
     // Check if user is logged in on mount
@@ -17,18 +31,18 @@ export const AuthProvider = ({ children }) => {
         try {
           const profile = await fetchProfile();
           setUser(profile.data);
-          if (window.location.pathname === '/login' || window.location.pathname === '/register') {
-            window.location.href = '/portfolio';
+          if (location.pathname === '/login' || location.pathname === '/register') {
+            navigate('/portfolio');
           }
         } catch (error) {
           console.error("Failed to load profile", error);
-          localStorage.removeItem('auth_token');
+          // Let the API interceptor handle unauthorized by dispatching the event
         }
       }
       setLoading(false);
     };
     loadUser();
-  }, []);
+  }, [location.pathname, navigate]);
 
   const login = async (credentials) => {
     try {

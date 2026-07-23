@@ -7,24 +7,54 @@ class FinancialScraper:
         self.token = os.getenv("APIFY_TOKEN")
         self.client = ApifyClient(self.token) if self.token else None
 
-    async def search_annual_report_pdfs(self, company_name: str, financial_year: int) -> dict:
+    async def search_annual_report_pdfs(
+        self, company_name: str, financial_year: int, annual_only: bool = True
+    ) -> dict:
         """
-        Uses Apify to find a direct PDF link to the latest financial report (Quarterly or Annual).
-        Searches both NGX and general web to compare.
+        Uses Apify to find a direct PDF link to the company's FULL YEAR annual report.
+        When annual_only=True (default), restricts search to annual reports only (not interim/H1/Q reports).
         """
         import asyncio
         if not self.client:
             print("Apify token not provided. Skipping web scraping.")
             return {"ngx": None, "official": None}
-            
-        print(f"Searching web for {company_name} latest financial statements...")
-        
-        # Prepare two queries: one targeted at NGX, one general
-        queries = f"{company_name} latest financial statements OR interim report filetype:pdf site:ngxgroup.com\n{company_name} latest financial statements OR interim report filetype:pdf"
-        
+
+        print(f"Searching for {company_name} FY{financial_year} annual report PDF...")
+
+        # Build targeted queries for full-year annual reports
+        if annual_only:
+            # Prefer 'annual report', 'commercial paper', or 'financial statement' explicitly
+            african_fin_query = (
+                f"{company_name} (\"annual report\" OR \"financial statement\" OR \"commercial paper\") {financial_year} filetype:pdf site:africanfinancials.com"
+            )
+            ngx_query = (
+                f"{company_name} (\"annual report\" OR \"financial statement\" OR \"commercial paper\") {financial_year} filetype:pdf site:ngxgroup.com"
+            )
+            sec_query = (
+                f"{company_name} (\"10-K\" OR \"annual report\") {financial_year} filetype:pdf site:sec.gov"
+            )
+            general_query = (
+                f"{company_name} (\"annual report\" OR \"financial statement\" OR \"commercial paper\") {financial_year} filetype:pdf"
+            )
+        else:
+            african_fin_query = (
+                f"{company_name} financial statements {financial_year} filetype:pdf site:africanfinancials.com"
+            )
+            ngx_query = (
+                f"{company_name} financial statements {financial_year} filetype:pdf site:ngxgroup.com"
+            )
+            sec_query = (
+                f"{company_name} financial statements {financial_year} filetype:pdf site:sec.gov"
+            )
+            general_query = (
+                f"{company_name} financial statements {financial_year} filetype:pdf"
+            )
+
+        queries = f"{african_fin_query}\n{ngx_query}\n{sec_query}\n{general_query}"
+
         run_input = {
             "queries": queries,
-            "resultsPerPage": 3,
+            "resultsPerPage": 5,
             "maxPagesPerQuery": 1,
             "languageCode": "en",
             "mobileResults": False,
@@ -34,21 +64,36 @@ class FinancialScraper:
         try:
             def _run():
                 return self.client.actor("apify/google-search-scraper").call(run_input=run_input)
-            
+
             run = await asyncio.to_thread(_run)
-            
+
+            # Keywords that indicate an interim / partial-year report — skip these if annual_only
+            INTERIM_KEYWORDS = ["interim", "half-year", "half year", "h1", "q1", "q2", "q3", "quarter"]
+
             for item in self.client.dataset(run["defaultDatasetId"]).iterate_items():
                 query = item.get("searchQuery", {}).get("term", "")
                 is_ngx_query = "site:ngxgroup.com" in query
-                
+
                 for organic_result in item.get("organicResults", []):
-                    url = organic_result.get("url", "")
-                    if url.lower().endswith(".pdf"):
-                        if is_ngx_query and not results["ngx"]:
-                            results["ngx"] = url
-                        elif not is_ngx_query and not results["official"]:
-                            results["official"] = url
-            
+                    url   = organic_result.get("url", "").lower()
+                    title = organic_result.get("title", "").lower()
+                    snippet = organic_result.get("description", "").lower()
+
+                    if not url.endswith(".pdf"):
+                        continue
+
+                    # Skip interim reports when annual_only is requested
+                    if annual_only:
+                        combined = url + title + snippet
+                        if any(kw in combined for kw in INTERIM_KEYWORDS):
+                            print(f"  Skipping interim report: {url}")
+                            continue
+
+                    if is_ngx_query and not results["ngx"]:
+                        results["ngx"] = organic_result.get("url", "")
+                    elif not is_ngx_query and not results["official"]:
+                        results["official"] = organic_result.get("url", "")
+
             return results
 
         except Exception as e:
@@ -83,3 +128,43 @@ class FinancialScraper:
         except Exception as e:
             print(f"Apify Validation Scraper failed: {str(e)}")
             return None
+
+import httpx
+
+class AlphaVantageClient:
+    def __init__(self):
+        self.api_key = os.getenv("ALPHA_VANTAGE_API_KEY")
+
+    async def fetch_financials(self, ticker: str) -> Optional[dict]:
+        if not self.api_key:
+            return None
+            
+        print(f"Fetching Alpha Vantage data for {ticker}...")
+        url = f"https://www.alphavantage.co/query?function=INCOME_STATEMENT&symbol={ticker}&apikey={self.api_key}"
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(url)
+                if response.status_code == 200:
+                    return response.json()
+        except Exception as e:
+            print(f"Alpha Vantage fetch failed: {e}")
+        return None
+
+class FMPClient:
+    def __init__(self):
+        self.api_key = os.getenv("FMP_API_KEY")
+
+    async def fetch_financials(self, ticker: str) -> Optional[dict]:
+        if not self.api_key:
+            return None
+            
+        print(f"Fetching FMP data for {ticker}...")
+        url = f"https://financialmodelingprep.com/api/v3/income-statement/{ticker}?limit=1&apikey={self.api_key}"
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(url)
+                if response.status_code == 200:
+                    return {"income_statement": response.json()}
+        except Exception as e:
+            print(f"FMP fetch failed: {e}")
+        return None

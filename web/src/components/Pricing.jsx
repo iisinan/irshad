@@ -18,7 +18,7 @@ const Pricing = () => {
       // Mock Paystack/Flutterwave integration
       const res = await api.post('/billing/upgrade');
       setMessage(res.data?.message || 'Successfully upgraded to Irshad Pro!');
-      setTimeout(() => window.location.href = '/dashboard', 2000);
+      setTimeout(() => navigate('/dashboard'), 2000);
     } catch (err) {
       setError(err.response?.data?.message || 'Payment failed. Please try again.');
     }
@@ -28,10 +28,10 @@ const Pricing = () => {
   return (
     <div style={{ padding: '60px 20px', maxWidth: '1000px', margin: '0 auto' }}>
       <div style={{ textAlign: 'center', marginBottom: '60px' }}>
-        <h1 style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '16px' }}>
+        <h1 style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '16px' }}>
           Invest with <span style={{ color: 'var(--primary)' }}>Confidence</span>
         </h1>
-        <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)', maxWidth: '600px', margin: '0 auto' }}>
+        <p style={{ fontSize: '0.97rem', color: 'var(--text-muted)', maxWidth: '600px', margin: '0 auto' }}>
           Choose the plan that fits your halal investment journey. Cancel anytime.
         </p>
       </div>
@@ -55,9 +55,9 @@ const Pricing = () => {
           background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '24px', padding: '40px 32px',
           display: 'flex', flexDirection: 'column'
         }}>
-          <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '8px' }}>Basic</h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '24px' }}>For beginners exploring halal markets.</p>
-          <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '32px' }}>
+          <h3 style={{ fontSize: '1.32rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '8px' }}>Basic</h3>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.84rem', marginBottom: '24px' }}>For beginners exploring halal markets.</p>
+          <div style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '32px' }}>
             Free
           </div>
           
@@ -76,7 +76,7 @@ const Pricing = () => {
           
           <button onClick={() => navigate('/dashboard')} style={{ 
             width: '100%', padding: '16px', borderRadius: '14px', background: 'var(--bg-section)', 
-            border: '2px solid var(--border)', color: 'var(--text-dark)', fontWeight: 800, fontSize: '1rem', cursor: 'pointer' 
+            border: '2px solid var(--border)', color: 'var(--text-dark)', fontWeight: 800, fontSize: '0.88rem', cursor: 'pointer' 
           }}>
             Current Plan
           </button>
@@ -89,16 +89,16 @@ const Pricing = () => {
         }}>
           <div style={{ 
             position: 'absolute', top: '-16px', left: '50%', transform: 'translateX(-50%)', 
-            background: 'var(--primary)', color: 'white', padding: '6px 16px', borderRadius: '20px', 
-            fontSize: '0.8rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', letterSpacing: '1px', textTransform: 'uppercase'
+            background: 'var(--primary)', color: 'var(--bg)', padding: '6px 16px', borderRadius: '20px', 
+            fontSize: '0.7rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', letterSpacing: '1px', textTransform: 'uppercase'
           }}>
             <Star size={14} fill="currentColor" /> Most Popular
           </div>
           
-          <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '8px' }}>Irshad Pro</h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '24px' }}>For serious investors demanding deep insights.</p>
+          <h3 style={{ fontSize: '1.32rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '8px' }}>Irshad Pro</h3>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.84rem', marginBottom: '24px' }}>For serious investors demanding deep insights.</p>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '32px' }}>
-            <span style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--text-dark)' }}>₦2,500</span>
+            <span style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--text-dark)' }}>₦2,500</span>
             <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>/ month</span>
           </div>
           
@@ -121,7 +121,7 @@ const Pricing = () => {
             disabled={loading}
             style={{ 
               width: '100%', padding: '16px', borderRadius: '14px', background: 'var(--primary)', 
-              border: 'none', color: 'white', fontWeight: 800, fontSize: '1rem', cursor: loading ? 'not-allowed' : 'pointer',
+              border: 'none', color: 'white', fontWeight: 800, fontSize: '0.88rem', cursor: loading ? 'not-allowed' : 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', opacity: loading ? 0.7 : 1,
               boxShadow: '0 8px 24px rgba(15, 82, 87, 0.25)'
             }}
@@ -131,7 +131,7 @@ const Pricing = () => {
             )}
           </button>
           
-          <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '0.75rem', color: 'var(--text-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+          <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '0.66rem', color: 'var(--text-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
             <ShieldCheck size={14} /> Secure Payment via Paystack
           </div>
         </div>

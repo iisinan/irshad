@@ -15,7 +15,7 @@ export const formatLogoUrl = (url) => {
   if (!url || typeof url !== 'string') return null;
   if (url.startsWith('http')) return url;
   // Fallback to prod or local URL
-  const baseUrl = import.meta.env.DEV ? (import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000') : 'https://irshad-z8us.onrender.com';
+  const baseUrl = import.meta.env.DEV ? (import.meta.env.VITE_API_URL || 'http://irshad.test') : 'https://irshad-z8us.onrender.com';
   return `${baseUrl.replace(/\/api\/v1$/, '')}${url}`;
 };
 
@@ -46,7 +46,14 @@ api.interceptors.response.use(
       const isAuthPage = window.location.pathname === '/login' || window.location.pathname === '/register';
       if (!isAuthPage) {
         localStorage.removeItem('auth_token');
-        window.location.href = '/login';
+        window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+        
+        // Fallback for non-React contexts or before React handles it
+        setTimeout(() => {
+          if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+            window.location.href = '/login';
+          }
+        }, 1000);
       }
     }
     return Promise.reject(error);
@@ -137,6 +144,12 @@ export const fetchWatchlist = async () => {
 export const addToWatchlist = async (symbol, alert_whatsapp = false, alert_email = false) => {
   const response = await api.post('/watchlist', { symbol, alert_whatsapp, alert_email });
   localStorage.removeItem('irshad_portfolio_cache_v10'); // Invalidate portfolio cache to reflect new watchlist state
+  return response.data;
+};
+
+export const addMultipleToWatchlist = async (symbols, alert_whatsapp = false, alert_email = false) => {
+  const response = await api.post('/watchlist/bulk', { symbols, alert_whatsapp, alert_email });
+  localStorage.removeItem('irshad_portfolio_cache_v10');
   return response.data;
 };
 

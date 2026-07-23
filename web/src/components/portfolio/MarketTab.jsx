@@ -46,7 +46,7 @@ const STATUS_CFG = {
 const TH = ({ children, right }) => (
   <th style={{
     padding: '11px 16px',
-    fontSize: '0.71rem', fontWeight: 700,
+    fontSize: '0.62rem', fontWeight: 700,
     textTransform: 'uppercase', letterSpacing: '0.5px',
     color: 'var(--text-muted)',
     textAlign: right ? 'right' : 'left',
@@ -73,7 +73,7 @@ const StockRow = React.memo(({ stock, idx, isWatched, onToggle }) => {
       style={{ borderBottom: '1px solid var(--border)', transition: 'background 0.15s' }}
     >
       {/* Rank */}
-      <td style={{ padding: '13px 8px 13px 20px', color: 'var(--text-light)', fontSize: '0.77rem', fontWeight: 700 }}>
+      <td style={{ padding: '13px 8px 13px 20px', color: 'var(--text-light)', fontSize: '0.68rem', fontWeight: 700 }}>
         {idx + 1}
       </td>
 
@@ -88,7 +88,7 @@ const StockRow = React.memo(({ stock, idx, isWatched, onToggle }) => {
             width: '36px', height: '36px', borderRadius: '9px', flexShrink: 0,
             background: 'var(--primary-50)', border: '1px solid var(--border)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: 800, fontSize: '0.68rem', color: 'var(--primary)',
+            fontWeight: 800, fontSize: '0.6rem', color: 'var(--primary)',
             overflow: 'hidden'
           }}>
             {stock.logo_url ? (
@@ -98,10 +98,10 @@ const StockRow = React.memo(({ stock, idx, isWatched, onToggle }) => {
             )}
           </div>
           <div>
-            <div style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.88rem', lineHeight: 1.2 }}>
+            <div style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.77rem', lineHeight: 1.2 }}>
               {stock.symbol}
             </div>
-            <div style={{ fontSize: '0.73rem', color: 'var(--text-muted)', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <div style={{ fontSize: '0.64rem', color: 'var(--text-muted)', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {stock.name}
             </div>
           </div>
@@ -110,7 +110,7 @@ const StockRow = React.memo(({ stock, idx, isWatched, onToggle }) => {
 
 
       {/* Price */}
-      <td style={{ padding: '13px 16px', textAlign: 'right', fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.88rem', fontVariantNumeric: 'tabular-nums' }}>
+      <td style={{ padding: '13px 16px', textAlign: 'right', fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.77rem', fontVariantNumeric: 'tabular-nums' }}>
         ₦{fmtPrice(stock.latest_price)}
       </td>
 
@@ -118,7 +118,7 @@ const StockRow = React.memo(({ stock, idx, isWatched, onToggle }) => {
       <td style={{ padding: '13px 16px', textAlign: 'right' }}>
         <span style={{
           display: 'inline-flex', alignItems: 'center', gap: '3px',
-          fontSize: '0.8rem', fontWeight: 700,
+          fontSize: '0.7rem', fontWeight: 700,
           color: isPos ? 'var(--halal)' : 'var(--non-halal)',
           background: isPos ? 'var(--halal-bg)' : 'var(--non-halal-bg)',
           padding: '3px 8px', borderRadius: '6px',
@@ -129,12 +129,12 @@ const StockRow = React.memo(({ stock, idx, isWatched, onToggle }) => {
       </td>
 
       {/* Mkt Cap */}
-      <td style={{ padding: '13px 16px', textAlign: 'right', color: 'var(--text-muted)', fontSize: '0.82rem', fontWeight: 600 }}>
+      <td style={{ padding: '13px 16px', textAlign: 'right', color: 'var(--text-muted)', fontSize: '0.72rem', fontWeight: 600 }}>
         {fmtCap(stock.market_cap)}
       </td>
 
       {/* P/E */}
-      <td style={{ padding: '13px 16px', textAlign: 'right', color: 'var(--text-muted)', fontSize: '0.82rem', fontWeight: 600 }}>
+      <td style={{ padding: '13px 16px', textAlign: 'right', color: 'var(--text-muted)', fontSize: '0.72rem', fontWeight: 600 }}>
         {stock.pe_ratio ? Number(stock.pe_ratio).toFixed(1) : '—'}
       </td>
 
@@ -250,7 +250,7 @@ export default function MarketTab() {
 
   const selectStyle = (active) => ({
     padding: '9px 12px', borderRadius: '10px', outline: 'none', cursor: 'pointer',
-    fontSize: '0.84rem', fontWeight: 600, color: 'var(--text-dark)', fontFamily: 'inherit',
+    fontSize: '0.74rem', fontWeight: 600, color: 'var(--text-dark)', fontFamily: 'inherit',
     border: active ? '1.5px solid var(--primary)' : '1.5px solid var(--border)',
     background: active ? 'var(--primary-50)' : 'var(--bg-section)',
   });
@@ -260,16 +260,16 @@ export default function MarketTab() {
 
       {/* ── Header card ─────────────────────────────────────── */}
       <div style={{
-        background: 'white', padding: '22px 24px 0',
+        background: 'var(--bg)', padding: '22px 24px 0',
         borderRadius: '20px 20px 0 0', border: '1px solid var(--border)', borderBottom: 'none',
       }}>
         {/* Title + summary pills */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '18px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
-            <h2 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-dark)', letterSpacing: '-0.3px', margin: 0 }}>
+            <h2 style={{ fontSize: '1.14rem', fontWeight: 800, color: 'var(--text-dark)', letterSpacing: '-0.3px', margin: 0 }}>
               Market Screener
             </h2>
-            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '3px' }}>
+            <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '3px' }}>
               Nigerian Exchange · {actualStocks.length} companies
             </p>
           </div>
@@ -293,7 +293,7 @@ export default function MarketTab() {
                 width: '100%', paddingLeft: '34px', paddingRight: search ? '32px' : '12px',
                 paddingTop: '9px', paddingBottom: '9px',
                 borderRadius: '10px', border: '1.5px solid var(--border)',
-                background: 'var(--bg-section)', fontSize: '0.84rem',
+                background: 'var(--bg-section)', fontSize: '0.74rem',
                 color: 'var(--text-dark)', outline: 'none', fontFamily: 'inherit',
                 boxSizing: 'border-box', transition: 'border-color 0.2s',
               }}
@@ -334,7 +334,7 @@ export default function MarketTab() {
               onClick={clearAll}
               style={{
                 padding: '9px 12px', borderRadius: '10px', border: '1.5px solid var(--border)',
-                background: 'white', fontSize: '0.82rem', fontWeight: 700,
+                background: 'var(--bg)', fontSize: '0.72rem', fontWeight: 700,
                 color: 'var(--text-muted)', cursor: 'pointer',
                 display: 'flex', alignItems: 'center', gap: '5px',
               }}
@@ -343,7 +343,7 @@ export default function MarketTab() {
             </button>
           )}
 
-          <span style={{ marginLeft: 'auto', fontSize: '0.81rem', fontWeight: 700, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+          <span style={{ marginLeft: 'auto', fontSize: '0.71rem', fontWeight: 700, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
             {filtered.length} result{filtered.length !== 1 ? 's' : ''}
           </span>
         </div>
@@ -351,26 +351,26 @@ export default function MarketTab() {
 
       {/* ── Table ─────────────────────────────────────────────── */}
       <div style={{
-        background: 'white', border: '1px solid var(--border)',
+        background: 'var(--bg)', border: '1px solid var(--border)',
         borderTop: 'none', borderRadius: '0 0 20px 20px', overflow: 'hidden',
       }}>
         {isLoading ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '80px 0', gap: '14px' }}>
             <div className="spinner" />
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.87rem' }}>Loading market data…</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.77rem' }}>Loading market data…</p>
           </div>
         ) : error ? (
           <div style={{ textAlign: 'center', padding: '80px 24px', color: 'var(--text-muted)' }}>
             <BarChart2 size={42} strokeWidth={1} style={{ margin: '0 auto 14px', color: 'var(--non-halal)' }} />
             <h3 style={{ marginBottom: '8px', color: 'var(--non-halal)' }}>Could not load market data</h3>
-            <p style={{ marginBottom: '20px', fontSize: '0.87rem' }}>{error?.message || String(error)}</p>
+            <p style={{ marginBottom: '20px', fontSize: '0.77rem' }}>{error?.message || String(error)}</p>
             <button onClick={() => refetch()} className="btn-primary" style={{ padding: '10px 24px' }}>Try Again</button>
           </div>
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '80px 24px', color: 'var(--text-muted)' }}>
             <BarChart2 size={42} strokeWidth={1} style={{ margin: '0 auto 14px' }} />
             <h3 style={{ marginBottom: '8px' }}>No stocks found</h3>
-            <p style={{ fontSize: '0.87rem' }}>Try adjusting your search or filters.</p>
+            <p style={{ fontSize: '0.77rem' }}>Try adjusting your search or filters.</p>
           </div>
         ) : (
           <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '70vh' }}>

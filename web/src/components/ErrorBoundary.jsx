@@ -39,7 +39,7 @@ class ErrorBoundary extends React.Component {
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px', color: '#DC2626' }}>
               <AlertTriangle size={48} />
             </div>
-            <h2 style={{ fontSize: '1.5rem', color: '#991B1B', margin: '0 0 12px 0' }}>Something went wrong</h2>
+            <h2 style={{ fontSize: '1.32rem', color: '#991B1B', margin: '0 0 12px 0' }}>Something went wrong</h2>
             <p style={{ color: '#B91C1C', marginBottom: '24px', lineHeight: 1.5 }}>
               We've encountered an unexpected error. Our team has been notified.
             </p>

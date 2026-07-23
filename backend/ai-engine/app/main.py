@@ -1,4 +1,7 @@
 from fastapi import FastAPI
+from dotenv import load_dotenv
+load_dotenv() # Load environment variables before initializing db
+
 from app.api.endpoints import router
 from app.core.database import engine, Base
 

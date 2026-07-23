@@ -113,7 +113,7 @@ const AdminDashboard = () => {
     <div style={{ padding: '40px', maxWidth: '1200px', margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
         <div>
-          <h1 style={{ fontSize: '28px', color: 'var(--text-dark)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <h1 style={{ fontSize: '26px', color: 'var(--text-dark)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
             <Shield color="var(--primary-green)" />
             Scholar & Admin Panel
           </h1>
@@ -127,7 +127,7 @@ const AdminDashboard = () => {
               style={{
                   display: 'flex', alignItems: 'center', gap: '8px',
                   padding: '10px 20px', borderRadius: '10px',
-                  backgroundColor: activeTab === 'stocks' ? 'white' : 'transparent',
+                  backgroundColor: activeTab === 'stocks' ? 'var(--bg)' : 'transparent',
                   color: activeTab === 'stocks' ? 'var(--text-dark)' : 'var(--text-muted)',
                   border: 'none', cursor: 'pointer', fontWeight: '700',
                   boxShadow: activeTab === 'stocks' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none'
@@ -140,7 +140,7 @@ const AdminDashboard = () => {
               style={{
                   display: 'flex', alignItems: 'center', gap: '8px',
                   padding: '10px 20px', borderRadius: '10px',
-                  backgroundColor: activeTab === 'products' ? 'white' : 'transparent',
+                  backgroundColor: activeTab === 'products' ? 'var(--bg)' : 'transparent',
                   color: activeTab === 'products' ? 'var(--text-dark)' : 'var(--text-muted)',
                   border: 'none', cursor: 'pointer', fontWeight: '700',
                   boxShadow: activeTab === 'products' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none'
@@ -164,24 +164,24 @@ const AdminDashboard = () => {
               padding: '12px 16px 12px 42px',
               borderRadius: '8px',
               border: '1px solid var(--border-color)',
-              fontSize: '15px'
+              fontSize: '13px'
             }}
           />
         </div>
       </div>
 
-      <div style={{ backgroundColor: 'white', borderRadius: '12px', border: '1px solid var(--border-color)', overflowX: 'auto' }}>
+      <div style={{ backgroundColor: 'var(--bg)', borderRadius: '12px', border: '1px solid var(--border-color)', overflowX: 'auto' }}>
         <table style={{ width: '100%', minWidth: '800px', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead style={{ backgroundColor: '#F9FAFB', borderBottom: '1px solid var(--border-color)' }}>
             <tr>
-              <th style={{ padding: '16px 24px', fontSize: '12px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+              <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
                   {activeTab === 'stocks' ? 'Company' : 'Product'}
               </th>
-              <th style={{ padding: '16px 24px', fontSize: '12px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+              <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
                   {activeTab === 'stocks' ? 'Sector' : 'Brand / Barcode'}
               </th>
-              <th style={{ padding: '16px 24px', fontSize: '12px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Current Status</th>
-              <th style={{ padding: '16px 24px', fontSize: '12px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Actions</th>
+              <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Current Status</th>
+              <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -202,15 +202,15 @@ const AdminDashboard = () => {
                     <div style={{ fontWeight: '700', color: 'var(--text-dark)' }}>
                         {activeTab === 'stocks' ? item.symbol : item.name}
                     </div>
-                    <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+                    <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                         {activeTab === 'stocks' ? item.name : ''}
                     </div>
                   </td>
-                  <td style={{ padding: '16px 24px', color: 'var(--text-muted)', fontSize: '14px' }}>
+                  <td style={{ padding: '16px 24px', color: 'var(--text-muted)', fontSize: '13px' }}>
                     {activeTab === 'stocks' ? item.sector : (
                         <div>
                             <div>{item.brand || 'Unknown Brand'}</div>
-                            <div style={{ fontSize: '12px', color: '#9CA3AF' }}>{item.barcode}</div>
+                            <div style={{ fontSize: '11px', color: '#9CA3AF' }}>{item.barcode}</div>
                         </div>
                     )}
                   </td>
@@ -235,7 +235,7 @@ const AdminDashboard = () => {
                         display: 'flex', alignItems: 'center', gap: '6px',
                         padding: '8px 12px', borderRadius: '6px',
                         backgroundColor: '#F3F4F6', color: 'var(--text-dark)',
-                        border: 'none', cursor: 'pointer', fontWeight: '600', fontSize: '13px'
+                        border: 'none', cursor: 'pointer', fontWeight: '600', fontSize: '12px'
                       }}
                     >
                       <Edit2 size={14} /> Override
@@ -254,9 +254,9 @@ const AdminDashboard = () => {
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
           backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
         }}>
-          <div style={{ backgroundColor: 'white', padding: '32px', borderRadius: '16px', width: '100%', maxWidth: '500px' }}>
+          <div style={{ backgroundColor: 'var(--bg)', padding: '32px', borderRadius: '16px', width: '100%', maxWidth: '500px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-              <h2 style={{ margin: 0, fontSize: '20px' }}>
+              <h2 style={{ margin: 0, fontSize: '18px' }}>
                   Override {selectedItem.type === 'stocks' ? selectedItem.data.symbol : selectedItem.data.name}
               </h2>
               <button onClick={() => setSelectedItem(null)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
@@ -266,13 +266,13 @@ const AdminDashboard = () => {
             
             <form onSubmit={handleUpdateStatus}>
               <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: 'var(--text-muted)' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '8px', color: 'var(--text-muted)' }}>
                   NEW STATUS
                 </label>
                 <select 
                   value={newStatus}
                   onChange={(e) => setNewStatus(e.target.value)}
-                  style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '15px' }}
+                  style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px' }}
                 >
                   <option value="halal">Halal</option>
                   <option value="doubtful">Doubtful</option>
@@ -281,7 +281,7 @@ const AdminDashboard = () => {
               </div>
 
               <div style={{ marginBottom: '32px' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: 'var(--text-muted)' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '8px', color: 'var(--text-muted)' }}>
                   REASON FOR OVERRIDE (REQUIRED)
                 </label>
                 <textarea 
@@ -289,7 +289,7 @@ const AdminDashboard = () => {
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="Explain why the algorithmic status is being overridden..."
-                  style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '15px', minHeight: '100px' }}
+                  style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px', minHeight: '100px' }}
                 />
               </div>
 
@@ -304,7 +304,7 @@ const AdminDashboard = () => {
                 <button 
                   type="submit" 
                   disabled={updating || !reason}
-                  style={{ padding: '12px 24px', borderRadius: '8px', backgroundColor: 'var(--primary-green)', color: 'white', border: 'none', fontWeight: '600', cursor: 'pointer', opacity: (updating || !reason) ? 0.5 : 1 }}
+                  style={{ padding: '12px 24px', borderRadius: '8px', backgroundColor: 'var(--primary-green)', color: 'var(--bg)', border: 'none', fontWeight: '600', cursor: 'pointer', opacity: (updating || !reason) ? 0.5 : 1 }}
                 >
                   {updating ? 'Saving...' : 'Confirm Override'}
                 </button>

@@ -11,14 +11,14 @@ graph_app = build_graph()
 
 class ScreenRequest(BaseModel):
     ticker: str
-    financial_year: int = 2024
+    financial_year: int = 2026
 
 @router.get("/health")
 async def health_check():
     return {"status": "ok"}
 
 @router.post("/api/screen-company/{ticker}")
-async def screen_company(ticker: str, financial_year: int = 2024, db: AsyncSession = Depends(get_db)):
+async def screen_company(ticker: str, financial_year: int = 2026, db: AsyncSession = Depends(get_db)):
     """
     Triggers the LangGraph AI workflow to collect, validate, and screen a single company.
     Called by Laravel Queue Worker.
@@ -56,6 +56,17 @@ async def screen_company(ticker: str, financial_year: int = 2024, db: AsyncSessi
         from app.models.business_screening import BusinessScreening
         from app.models.companies import Company
         from datetime import datetime
+        import math
+
+        def sanitize_json(data):
+            if isinstance(data, dict):
+                return {k: sanitize_json(v) for k, v in data.items()}
+            elif isinstance(data, list):
+                return [sanitize_json(v) for v in data]
+            elif isinstance(data, float):
+                if math.isinf(data) or math.isnan(data):
+                    return None
+            return data
 
         # Get company_id
         comp_result = await db.execute(select(Company).where(Company.ticker == ticker.upper()))
@@ -66,37 +77,55 @@ async def screen_company(ticker: str, financial_year: int = 2024, db: AsyncSessi
             extracted_year = result_state.get("raw_pdf_extraction", {}).get("financial_year")
             final_financial_year = extracted_year if extracted_year else financial_year
             
+            pub_date_str = result_state.get("raw_pdf_extraction", {}).get("published_date")
+            pub_date_obj = None
+            if pub_date_str:
+                try:
+                    from dateutil.parser import parse
+                    pub_date_obj = parse(pub_date_str)
+                except Exception:
+                    pass
+
             screening = FinancialScreening(
                 company_ticker=ticker.upper(),
                 financial_year=final_financial_year,
-                published_date=result_state.get("raw_pdf_extraction", {}).get("published_date"),
+                published_date=pub_date_obj,
                 report_quarter=result_state.get("raw_pdf_extraction", {}).get("reporting_period"),
-                raw_source_values=result_state.get("secondary_sources_data", {}),
-                normalized_values=result_state.get("normalized_data", {}),
-                chosen_values=final_values,
+                raw_source_values=sanitize_json(result_state.get("secondary_sources_data", {})),
+                normalized_values=sanitize_json(result_state.get("normalized_data", {})),
+                chosen_values=sanitize_json(final_values),
                 confidence_score=result_state.get("confidence_score", 0.0),
-                source_urls=result_state.get("source_urls", {}),
-                calculation_results=calc_results,
+                source_urls=sanitize_json(result_state.get("source_urls", {})),
+                calculation_results=sanitize_json(calc_results),
                 ai_explanation=result_state.get("ai_explanation", "")
             )
             db.add(screening)
         
         bus_result = result_state.get("business_screening_result", {})
         if bus_result:
+            timestamp_str = bus_result.get("last_analysed_timestamp")
+            timestamp_obj = None
+            if timestamp_str:
+                try:
+                    from dateutil.parser import parse
+                    timestamp_obj = parse(timestamp_str)
+                except Exception:
+                    pass
+
             bus_screening = BusinessScreening(
                 company_id=company_id,
                 ticker=ticker.upper(),
                 business_summary=bus_result.get("business_summary"),
                 current_core_business=bus_result.get("current_core_business"),
-                detected_business_activities=bus_result.get("detected_business_activities"),
-                detected_prohibited_activities=bus_result.get("detected_prohibited_activities"),
-                supporting_evidence=bus_result.get("supporting_evidence"),
-                source_urls=bus_result.get("source_urls"),
-                source_publication_dates=bus_result.get("source_publication_dates"),
+                detected_business_activities=sanitize_json(bus_result.get("detected_business_activities")),
+                detected_prohibited_activities=sanitize_json(bus_result.get("detected_prohibited_activities")),
+                supporting_evidence=sanitize_json(bus_result.get("supporting_evidence")),
+                source_urls=sanitize_json(bus_result.get("source_urls")),
+                source_publication_dates=sanitize_json(bus_result.get("source_publication_dates")),
                 ai_explanation=bus_result.get("ai_explanation"),
                 confidence_score=bus_result.get("confidence_score", 0.0),
                 business_compliance_status=bus_result.get("business_compliance_status"),
-                last_analysed_timestamp=bus_result.get("last_analysed_timestamp")
+                last_analysed_timestamp=timestamp_obj
             )
             db.add(bus_screening)
 

@@ -99,7 +99,7 @@
                                 <td class="px-6 py-4 text-center">
                                     @if($stock->ai_explanation)
                                         <button 
-                                            onclick="alert('{{ addslashes(str_replace(\"\n\", ' ', $stock->ai_explanation)) }}')"
+                                            onclick="alert('{{ addslashes(str_replace(PHP_EOL, ' ', $stock->ai_explanation)) }}')"
                                             class="inline-flex items-center justify-center p-2 rounded-lg bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 hover:text-indigo-300 border border-indigo-500/20 transition-all"
                                             title="View AI Analysis"
                                         >

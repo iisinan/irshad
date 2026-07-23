@@ -134,12 +134,12 @@ export default function Settings() {
         <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '160px', height: '160px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
         <div style={{ position: 'absolute', bottom: '-20px', right: '80px', width: '100px', height: '100px', borderRadius: '50%', background: 'rgba(255,255,255,0.03)' }} />
         
-        <div style={{ width: '72px', height: '72px', borderRadius: '20px', background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '1.8rem', fontWeight: 800, border: '2px solid rgba(255,255,255,0.4)' }}>
+        <div style={{ width: '72px', height: '72px', borderRadius: '20px', background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '1.58rem', fontWeight: 800, border: '2px solid rgba(255,255,255,0.4)' }}>
           {initials}
         </div>
         <div style={{ zIndex: 1 }}>
-          <h1 style={{ margin: 0, fontSize: '1.8rem', fontWeight: 800, color: 'white', letterSpacing: '-0.5px' }}>Account Settings</h1>
-          <p style={{ margin: '4px 0 0', color: 'rgba(255,255,255,0.7)', fontSize: '0.95rem' }}>Manage your profile, security, and preferences.</p>
+          <h1 style={{ margin: 0, fontSize: '1.58rem', fontWeight: 800, color: 'white', letterSpacing: '-0.5px' }}>Account Settings</h1>
+          <p style={{ margin: '4px 0 0', color: 'rgba(255,255,255,0.7)', fontSize: '0.84rem' }}>Manage your profile, security, and preferences.</p>
         </div>
       </div>
 
@@ -154,10 +154,10 @@ export default function Settings() {
               onClick={() => { setActiveSection(sec.id); setMessage({ type: '', text: '' }); }}
               style={{
                 display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', borderRadius: '12px',
-                border: 'none', background: activeSection === sec.id ? (sec.danger ? 'var(--non-halal-bg)' : 'white') : 'transparent',
+                border: 'none', background: activeSection === sec.id ? (sec.danger ? 'var(--non-halal-bg)' : 'var(--bg)') : 'transparent',
                 color: activeSection === sec.id ? (sec.danger ? 'var(--non-halal)' : 'var(--primary)') : 'var(--text-muted)',
                 fontWeight: activeSection === sec.id ? 800 : 600,
-                fontSize: '0.9rem', cursor: 'pointer', transition: 'all 0.2s ease', textAlign: 'left',
+                fontSize: '0.79rem', cursor: 'pointer', transition: 'all 0.2s ease', textAlign: 'left',
                 boxShadow: activeSection === sec.id && !sec.danger ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
               }}
             >
@@ -173,7 +173,7 @@ export default function Settings() {
             style={{
               display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', borderRadius: '12px',
               border: 'none', background: 'transparent', color: 'var(--text-muted)',
-              fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer', transition: 'all 0.2s ease', textAlign: 'left',
+              fontWeight: 600, fontSize: '0.79rem', cursor: 'pointer', transition: 'all 0.2s ease', textAlign: 'left',
             }}
           >
             <LogOut size={18} />
@@ -183,10 +183,10 @@ export default function Settings() {
         </div>
 
         {/* Main Content Area */}
-        <div className="animate-slide-up stagger-3" style={{ flex: 1, minWidth: '300px', background: 'white', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)' }}>
+        <div className="animate-slide-up stagger-3" style={{ flex: 1, minWidth: '300px', background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)' }}>
           
           {message.text && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 18px', borderRadius: '12px', marginBottom: '24px', background: message.type === 'success' ? 'var(--halal-bg)' : 'var(--non-halal-bg)', color: message.type === 'success' ? 'var(--halal)' : 'var(--non-halal)', fontSize: '0.9rem', fontWeight: 600 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 18px', borderRadius: '12px', marginBottom: '24px', background: message.type === 'success' ? 'var(--halal-bg)' : 'var(--non-halal-bg)', color: message.type === 'success' ? 'var(--halal)' : 'var(--non-halal)', fontSize: '0.79rem', fontWeight: 600 }}>
               {message.type === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
               {message.text}
             </div>
@@ -195,30 +195,30 @@ export default function Settings() {
           {activeSection === 'profile' && (
             <form onSubmit={e => handleUpdate(e, 'profile')} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
-                <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 4px' }}>Personal Information</h2>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', margin: 0 }}>Update your basic profile details.</p>
+                <h2 style={{ fontSize: '1.06rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 4px' }}>Personal Information</h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', margin: 0 }}>Update your basic profile details.</p>
               </div>
               <div style={{ height: '1px', background: 'var(--border)' }} />
               
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '8px' }}>Full Name</label>
-                  <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--border)', fontSize: '0.95rem', outline: 'none' }} />
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '8px' }}>Full Name</label>
+                  <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--border)', fontSize: '0.84rem', outline: 'none' }} />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '8px' }}>Phone Number</label>
-                  <input type="tel" value={formData.phone_number} onChange={e => setFormData({...formData, phone_number: e.target.value})} style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--border)', fontSize: '0.95rem', outline: 'none' }} />
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '8px' }}>Phone Number</label>
+                  <input type="tel" value={formData.phone_number} onChange={e => setFormData({...formData, phone_number: e.target.value})} style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--border)', fontSize: '0.84rem', outline: 'none' }} />
                 </div>
               </div>
               
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '8px' }}>Email Address</label>
-                <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--border)', fontSize: '0.95rem', outline: 'none', transition: 'border 0.2s', background: 'var(--bg)' }} readOnly />
-                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>Email cannot be changed.</p>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '8px' }}>Email Address</label>
+                <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--border)', fontSize: '0.84rem', outline: 'none', transition: 'border 0.2s', background: 'var(--bg)' }} readOnly />
+                <p style={{ fontSize: '0.66rem', color: 'var(--text-muted)', marginTop: '6px' }}>Email cannot be changed.</p>
               </div>
               
               <div style={{ marginTop: '12px' }}>
-                <button type="submit" disabled={isSubmitting} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '14px 24px', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '12px', fontWeight: 800, fontSize: '0.95rem', cursor: isSubmitting ? 'not-allowed' : 'pointer', opacity: isSubmitting ? 0.7 : 1 }}>
+                <button type="submit" disabled={isSubmitting} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '14px 24px', background: 'var(--primary)', color: 'var(--bg)', border: 'none', borderRadius: '12px', fontWeight: 800, fontSize: '0.84rem', cursor: isSubmitting ? 'not-allowed' : 'pointer', opacity: isSubmitting ? 0.7 : 1 }}>
                   <Save size={18} /> {isSubmitting ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
@@ -228,22 +228,22 @@ export default function Settings() {
           {activeSection === 'security' && (
             <form onSubmit={e => handleUpdate(e, 'security')} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
-                <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 4px' }}>Security</h2>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', margin: 0 }}>Update your password to keep your account secure.</p>
+                <h2 style={{ fontSize: '1.06rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 4px' }}>Security</h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', margin: 0 }}>Update your password to keep your account secure.</p>
               </div>
               <div style={{ height: '1px', background: 'var(--border)' }} />
               
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '8px' }}>New Password</label>
-                <input type="password" placeholder="••••••••" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--border)', fontSize: '0.95rem', outline: 'none' }} minLength={8} required />
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '8px' }}>New Password</label>
+                <input type="password" placeholder="••••••••" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--border)', fontSize: '0.84rem', outline: 'none' }} minLength={8} required />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '8px' }}>Confirm Password</label>
-                <input type="password" placeholder="••••••••" value={formData.password_confirmation} onChange={e => setFormData({...formData, password_confirmation: e.target.value})} style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--border)', fontSize: '0.95rem', outline: 'none' }} minLength={8} required />
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '8px' }}>Confirm Password</label>
+                <input type="password" placeholder="••••••••" value={formData.password_confirmation} onChange={e => setFormData({...formData, password_confirmation: e.target.value})} style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--border)', fontSize: '0.84rem', outline: 'none' }} minLength={8} required />
               </div>
               
               <div style={{ marginTop: '12px' }}>
-                <button type="submit" disabled={isSubmitting} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '14px 24px', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '12px', fontWeight: 800, fontSize: '0.95rem', cursor: isSubmitting ? 'not-allowed' : 'pointer', opacity: isSubmitting ? 0.7 : 1 }}>
+                <button type="submit" disabled={isSubmitting} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '14px 24px', background: 'var(--primary)', color: 'var(--bg)', border: 'none', borderRadius: '12px', fontWeight: 800, fontSize: '0.84rem', cursor: isSubmitting ? 'not-allowed' : 'pointer', opacity: isSubmitting ? 0.7 : 1 }}>
                   <Save size={18} /> {isSubmitting ? 'Updating...' : 'Update Password'}
                 </button>
               </div>
@@ -253,18 +253,18 @@ export default function Settings() {
           {activeSection === 'preferences' && (
             <form onSubmit={e => handleUpdate(e, 'preferences')} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
-                <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 4px' }}>Shariah Screening Strictness</h2>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', margin: 0 }}>Choose how strictly you want the AI to evaluate companies based on the AAOIFI standard.</p>
+                <h2 style={{ fontSize: '1.06rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 4px' }}>Shariah Screening Strictness</h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', margin: 0 }}>Choose how strictly you want the AI to evaluate companies based on the AAOIFI standard.</p>
               </div>
               <div style={{ height: '1px', background: 'var(--border)' }} />
               
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {['relaxed', 'moderate', 'strict'].map(level => (
-                  <label key={level} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', borderRadius: '16px', border: `2px solid ${formData.strictness === level ? 'var(--primary)' : 'var(--border)'}`, background: formData.strictness === level ? 'var(--primary-50)' : 'white', cursor: 'pointer', transition: 'all 0.2s' }}>
+                  <label key={level} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', borderRadius: '16px', border: `2px solid ${formData.strictness === level ? 'var(--primary)' : 'var(--border)'}`, background: formData.strictness === level ? 'var(--primary-50)' : 'var(--bg)', cursor: 'pointer', transition: 'all 0.2s' }}>
                     <input type="radio" name="strictness" value={level} checked={formData.strictness === level} onChange={e => setFormData({...formData, strictness: e.target.value})} style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }} />
                     <div>
-                      <div style={{ fontWeight: 800, color: formData.strictness === level ? 'var(--primary)' : 'var(--text-dark)', fontSize: '1rem', textTransform: 'capitalize', marginBottom: '4px' }}>{level} Screening</div>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                      <div style={{ fontWeight: 800, color: formData.strictness === level ? 'var(--primary)' : 'var(--text-dark)', fontSize: '0.88rem', textTransform: 'capitalize', marginBottom: '4px' }}>{level} Screening</div>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
                         {level === 'relaxed' && "Focuses only on core business activities. Ignores minor financial ratios."}
                         {level === 'moderate' && "Standard AAOIFI compliance. Checks 30% debt limits and 5% impure income."}
                         {level === 'strict' && "Zero-tolerance policy. Any non-compliant debt or income flags the stock as non-halal."}
@@ -275,7 +275,7 @@ export default function Settings() {
               </div>
               
               <div style={{ marginTop: '12px' }}>
-                <button type="submit" disabled={isSubmitting} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '14px 24px', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '12px', fontWeight: 800, fontSize: '0.95rem', cursor: isSubmitting ? 'not-allowed' : 'pointer', opacity: isSubmitting ? 0.7 : 1 }}>
+                <button type="submit" disabled={isSubmitting} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '14px 24px', background: 'var(--primary)', color: 'var(--bg)', border: 'none', borderRadius: '12px', fontWeight: 800, fontSize: '0.84rem', cursor: isSubmitting ? 'not-allowed' : 'pointer', opacity: isSubmitting ? 0.7 : 1 }}>
                   <Save size={18} /> {isSubmitting ? 'Saving...' : 'Save Preferences'}
                 </button>
               </div>
@@ -285,15 +285,15 @@ export default function Settings() {
           {activeSection === 'appearance' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
-                <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 4px' }}>Appearance Settings</h2>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', margin: 0 }}>Customize the look and feel of Irshad.</p>
+                <h2 style={{ fontSize: '1.06rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 4px' }}>Appearance Settings</h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', margin: 0 }}>Customize the look and feel of Irshad.</p>
               </div>
               <div style={{ height: '1px', background: 'var(--border)' }} />
               
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', background: 'var(--bg-section)', borderRadius: '12px', border: '1px solid var(--border)' }}>
                 <div>
-                  <h3 style={{ margin: '0 0 4px', fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-dark)' }}>Theme</h3>
-                  <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)' }}>Choose between Light and Dark mode.</p>
+                  <h3 style={{ margin: '0 0 4px', fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-dark)' }}>Theme</h3>
+                  <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--text-muted)' }}>Choose between Light and Dark mode.</p>
                 </div>
                 <select 
                   value={theme}
@@ -322,17 +322,17 @@ export default function Settings() {
           {activeSection === 'danger' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
-                <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--non-halal)', margin: '0 0 4px' }}>Danger Zone</h2>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', margin: 0 }}>Irreversible and destructive actions.</p>
+                <h2 style={{ fontSize: '1.06rem', fontWeight: 800, color: 'var(--non-halal)', margin: '0 0 4px' }}>Danger Zone</h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', margin: 0 }}>Irreversible and destructive actions.</p>
               </div>
               <div style={{ height: '1px', background: 'var(--border)' }} />
               
               <div style={{ background: 'var(--non-halal-bg)', border: '1px solid rgba(220, 38, 38, 0.2)', borderRadius: '16px', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' }}>
                 <div>
-                  <h3 style={{ margin: '0 0 4px', fontSize: '1rem', fontWeight: 800, color: 'var(--non-halal)' }}>Delete Account</h3>
-                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-dark)' }}>Once you delete your account, there is no going back. Please be certain.</p>
+                  <h3 style={{ margin: '0 0 4px', fontSize: '0.88rem', fontWeight: 800, color: 'var(--non-halal)' }}>Delete Account</h3>
+                  <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-dark)' }}>Once you delete your account, there is no going back. Please be certain.</p>
                 </div>
-                <button onClick={handleDeleteAccount} disabled={isSubmitting} style={{ padding: '12px 24px', background: 'var(--non-halal)', color: 'white', border: 'none', borderRadius: '10px', fontWeight: 800, fontSize: '0.9rem', cursor: isSubmitting ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap' }}>
+                <button onClick={handleDeleteAccount} disabled={isSubmitting} style={{ padding: '12px 24px', background: 'var(--non-halal)', color: 'var(--bg)', border: 'none', borderRadius: '10px', fontWeight: 800, fontSize: '0.79rem', cursor: isSubmitting ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap' }}>
                   {isSubmitting ? 'Deleting...' : 'Delete Account'}
                 </button>
               </div>

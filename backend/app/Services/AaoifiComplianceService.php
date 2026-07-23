@@ -21,6 +21,9 @@ class AaoifiComplianceService
     /**
      * STAGE 1: RULE 1 (Simply Wall St Industry Check)
      */
+    /**
+     * STAGE 1: RULE 1 (Simply Wall St Industry Check)
+     */
     const BLACKLIST_KEYWORDS = [
         "bank", 
         "financial services",
@@ -36,10 +39,16 @@ class AaoifiComplianceService
         "winery",
         "vintner",
         "brewery",
+        "breweries",
+        "brewer",
+        "guinness",
         "gambling",
+        "casino",
         "conventional lending",
         "alcohol production",
-        "alcohol distribution"
+        "alcohol distribution",
+        "liquor",
+        "spirits"
     ];
 
     public function evaluateCompliance(Company $company, Financial $financials, ?string $swsIndustry = null, ?array $aiSectorEval = null)
@@ -54,12 +63,18 @@ class AaoifiComplianceService
             // Robust fallback check
             $sector = strtolower($company->sector ?? '');
             $businessType = strtolower($company->business_type ?? '');
+            $name = strtolower($company->name ?? '');
+            $symbol = strtolower($company->symbol ?? '');
             $sws = strtolower($swsIndustry ?? '');
 
             $isBlacklistedSector = false;
             
             foreach (self::BLACKLIST_KEYWORDS as $keyword) {
-                if (str_contains($sector, $keyword) || str_contains($businessType, $keyword) || str_contains($sws, $keyword)) {
+                if (str_contains($sector, $keyword) || 
+                    str_contains($businessType, $keyword) || 
+                    str_contains($name, $keyword) || 
+                    str_contains($symbol, $keyword) || 
+                    str_contains($sws, $keyword)) {
                     $isBlacklistedSector = true;
                     break;
                 }
@@ -78,7 +93,7 @@ class AaoifiComplianceService
                 return $this->saveStatus(
                     $company, 
                     'non-halal', 
-                    "Failed Rule 1: Business Activity Check. The stock failed due to conventional banking or financial business activities."
+                    "Failed Rule 1: Business Activity Check. The stock failed due to non-compliant business activities (e.g., alcohol, conventional finance/banking, gambling, tobacco)."
                 );
             }
         }
@@ -158,6 +173,12 @@ class AaoifiComplianceService
         );
 
         $company->update(['current_status' => $status]);
+
+        // Keep aaoifi_screenings table in sync
+        $aaoifiScreening = \App\Models\AaoifiScreening::where('company_id', $company->id)->latest()->first();
+        if ($aaoifiScreening) {
+            $aaoifiScreening->update(['final_status' => $status]);
+        }
 
         if ($oldStatus === 'halal' && $status === 'non-halal') {
             $this->notifyUsersOfDowngrade($company);

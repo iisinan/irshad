@@ -20,3 +20,6 @@ Schedule::command('alerts:process')->everyMinute();
 // Our new AI Engine sweep for Annual Reports
 Schedule::command('irshad:daily-scan')->dailyAt('00:00');
 Schedule::command('irshad:market-data')->twiceDaily(0, 12);
+
+// New AI Engine sweep exclusively for Business Intelligence (News)
+Schedule::command('irshad:update-business')->twiceDaily(0, 12);

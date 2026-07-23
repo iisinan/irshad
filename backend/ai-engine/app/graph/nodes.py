@@ -1,10 +1,11 @@
 import os
 import tempfile
+import time
 import httpx
 from sqlalchemy.future import select
 from app.graph.state import GraphState
 from app.tools.pdf_extractor import PDFExtractor
-from app.tools.apify_client import FinancialScraper
+from app.tools.apify_client import FinancialScraper, AlphaVantageClient, FMPClient
 from app.core.storage_client import StorageClient
 from app.core.database import AsyncSessionLocal
 from app.models.companies import Company
@@ -61,34 +62,41 @@ async def check_financial_cache(state: GraphState) -> GraphState:
     return state
 
 async def locate_annual_report(state: GraphState) -> GraphState:
-    # 2. Web Search Node
-    # Search the web for the target financial year PDF
+    # 2. Web Search Node — always targets FULL YEAR annual reports
     if "source_urls" not in state:
         state["source_urls"] = {}
     scraper = FinancialScraper()
-    urls = await scraper.search_annual_report_pdfs(state["company_name"] or state["ticker"], state["financial_year"])
-    
+
+    start_time = time.perf_counter()
+    # Pass annual_report=True so the scraper searches for full-year reports only
+    urls = await scraper.search_annual_report_pdfs(
+        state["company_name"] or state["ticker"],
+        state["financial_year"],
+        annual_only=True
+    )
+    elapsed = time.perf_counter() - start_time
+    print(f"[Observability] locate_annual_report took {elapsed:.2f} seconds")
+
     chosen_url = urls.get("ngx") or urls.get("official")
     if chosen_url:
         state["annual_report_url"] = chosen_url
         state["source_urls"]["annual_report"] = chosen_url
-        
-        # Deduplication Step 1: Check if this exact URL was already processed
+
+        # Deduplication: Check if this exact URL was already processed
         async with AsyncSessionLocal() as db:
             from app.models.financial_documents import FinancialDocument
-            existing_url_doc = await db.execute(select(FinancialDocument).where(FinancialDocument.source_url == chosen_url))
+            existing_url_doc = await db.execute(
+                select(FinancialDocument).where(FinancialDocument.source_url == chosen_url)
+            )
             if existing_url_doc.scalars().first():
                 print(f"URL {chosen_url} already exists in database. Skipping PDF extraction.")
                 state["skip_financials"] = True
     else:
-        print(f"No PDF found for {state['ticker']}.")
+        print(f"No annual report PDF found for {state['ticker']}.")
         if state.get("has_fallback_business_info"):
-            print(f"Skipping financial extraction, utilizing existing business info.")
+            print("Skipping financial extraction — using existing business info.")
             state["skip_financials"] = True
-        else:
-            # If we don't have fallback info, we can't do business screening properly
-            pass
-            
+
     return state
 
 async def download_report(state: GraphState) -> GraphState:
@@ -101,6 +109,7 @@ async def download_report(state: GraphState) -> GraphState:
     
     if url.startswith("http"):
         print(f"Downloading PDF from {url}...")
+        start_time = time.perf_counter()
         try:
             headers = {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -113,6 +122,8 @@ async def download_report(state: GraphState) -> GraphState:
                     f.write(response.content)
                 local_path = temp_path
                 state["pdf_path"] = local_path
+                elapsed = time.perf_counter() - start_time
+                print(f"[Observability] download_report (HTTP) took {elapsed:.2f} seconds")
         except Exception as e:
             print(f"Failed to download PDF: {e}")
             return state
@@ -159,19 +170,50 @@ async def download_report(state: GraphState) -> GraphState:
 async def extract_financial_statements(state: GraphState) -> GraphState:
     # 4. LLM PDF Extraction Node
     pdf_path = state.get("pdf_path")
-    year = state.get("financial_year", 2024)
-    
+    year = state.get("financial_year", 2026)
+
     if pdf_path:
         extractor = PDFExtractor()
+        start_time = time.perf_counter()
         extracted_data = await extractor.extract_financials(pdf_path, year)
+        elapsed = time.perf_counter() - start_time
+        print(f"[Observability] extract_financial_statements (Gemini) took {elapsed:.2f} seconds")
         state["raw_pdf_extraction"] = extracted_data
-    
+
+        # Warn if Gemini returned an interim/partial-year report
+        period = extracted_data.get("reporting_period", "").upper()
+        if any(p in period for p in ["H1", "H2", "Q1", "Q2", "Q3", "INTERIM", "HALF"]):
+            print(f"⚠️  WARNING: Extracted report for {state['ticker']} is interim ({period}). "
+                  f"Financial ratios may be understated. Full-year report preferred.")
+            state["interim_report_warning"] = True
+
+        # Store company type flag for downstream AAOIFI calculation
+        state["is_bank"] = extracted_data.get("is_bank_or_financial", False)
+
     return state
 
 async def collect_multiple_sources(state: GraphState) -> GraphState:
     # 5. Fetch from secondary APIs/websites for Validation
+    validation_data = {}
+    
+    # Try Alpha Vantage
+    av_client = AlphaVantageClient()
+    av_data = await av_client.fetch_financials(state["ticker"])
+    if av_data:
+        validation_data["alpha_vantage"] = av_data
+
+    # Try FMP
+    fmp_client = FMPClient()
+    fmp_data = await fmp_client.fetch_financials(state["ticker"])
+    if fmp_data:
+        validation_data["fmp"] = fmp_data
+
+    # Fallback to Yahoo Finance Snippet via Apify Scraper
     scraper = FinancialScraper()
-    validation_data = await scraper.fetch_validation_data(state["ticker"])
+    scraper_data = await scraper.fetch_validation_data(state["ticker"])
+    if scraper_data:
+        validation_data["yahoo_finance"] = scraper_data
+
     if validation_data:
         state["secondary_source_data"] = validation_data
     return state
@@ -219,10 +261,14 @@ async def calculate_aaoifi(state: GraphState) -> GraphState:
         return state
     final_values = state.get("final_chosen_values", {})
     if final_values:
-        # Aradel market cap from previous user prompt was 6,630 Billion
-        # For this test, we pass 0 so it falls back to Total Assets, or we can hardcode for the test script
-        # We will let the test script pass market_cap via state or we fallback to assets
-        state["calculation_results"] = AAOIFICalculator.calculate(final_values, market_cap=0.0)
+        market_cap   = state.get("market_cap", 0.0) or 0.0
+        company_type = "bank" if state.get("is_bank", False) else "standard"
+        print(f"[AAOIFI] company_type={company_type}, market_cap={market_cap:,.0f}")
+        state["calculation_results"] = AAOIFICalculator.calculate(
+            final_values,
+            market_cap=market_cap,
+            company_type=company_type
+        )
     return state
 
 from app.tools.ai_explainer import AIExplainer
@@ -250,13 +296,21 @@ async def perform_business_screening(state: GraphState) -> GraphState:
     
     # Always run business screening to check for fresh news
     agent = BusinessIntelligenceAgent()
+    start_time = time.perf_counter()
     result = await agent.run_business_screening(
         ticker=state["ticker"],
         company_name=state.get("company_name", state["ticker"]),
         principal_activities=principal_activities,
         business_segments=business_segments
     )
+    elapsed = time.perf_counter() - start_time
+    print(f"[Observability] perform_business_screening took {elapsed:.2f} seconds")
     state["business_screening_result"] = result
+    
+    if result.get("business_compliance_status") == "Non-Compliant":
+        print(f"[{state['ticker']}] Business screening failed. Skipping financial extraction.")
+        state["skip_financials"] = True
+        
     return state
 
 async def store_results(state: GraphState) -> GraphState:

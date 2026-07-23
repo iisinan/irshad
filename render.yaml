@@ -1,5 +1,5 @@
 services:
-  # The Laravel Backend
+  # 1. The Laravel Backend
   - type: web
     name: irshad-backend
     env: docker
@@ -17,12 +17,57 @@ services:
         value: pgsql
       - key: DB_URL
         sync: false # Render will ask you to fill this in manually with your Neon DB string
+      - key: QUEUE_CONNECTION
+        value: database
       - key: LOG_CHANNEL
         value: stderr
       - key: PORT
         value: 8080
+      - key: AI_ENGINE_URL
+        sync: false # Set to the Render URL of your irshad-ai-engine service
 
-  # The Flutter Mobile Web Preview
+  # 2. The Laravel Queue Worker
+  - type: worker
+    name: irshad-queue-worker
+    env: docker
+    dockerContext: backend
+    dockerfilePath: backend/Dockerfile
+    dockerCommand: "php artisan queue:work --timeout=3600"
+    plan: free
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_KEY
+        sync: false
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_URL
+        sync: false
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: AI_ENGINE_URL
+        sync: false
+
+  # 3. The Python AI Engine
+  - type: web
+    name: irshad-ai-engine
+    env: docker
+    dockerContext: backend/ai-engine
+    dockerfilePath: backend/ai-engine/Dockerfile
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        sync: false # Neon DB connection string
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: APIFY_API_TOKEN
+        sync: false
+      - key: PORT
+        value: 8000
+
+  # 4. The Flutter Mobile Web Preview
   - type: web
     name: irshad-mobile-web
     env: docker
@@ -32,4 +77,3 @@ services:
     envVars:
       - key: PORT
         value: 80 # Nginx default in the Dockerfile
-

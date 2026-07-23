@@ -40,7 +40,7 @@ export const toast = (message, type = 'success') => {
 
   root.render(
     <div style={{
-      background: 'white',
+      background: 'var(--bg)',
       border: '1px solid var(--border)',
       boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
       borderRadius: '16px',
@@ -52,7 +52,7 @@ export const toast = (message, type = 'success') => {
       animation: 'toastSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards'
     }}>
       <div style={{ flexShrink: 0, display: 'flex' }}>{icons[type]}</div>
-      <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-dark)', lineHeight: 1.3 }}>{message}</span>
+      <span style={{ fontWeight: 700, fontSize: '0.79rem', color: 'var(--text-dark)', lineHeight: 1.3 }}>{message}</span>
     </div>
   );
 

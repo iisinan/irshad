@@ -37,7 +37,7 @@ const FormField = ({ label, name, type = 'text', placeholder, value, onChange, h
           </button>
         )}
       </div>
-      {hint && <p style={{ color: 'var(--text-light)', fontSize: '0.8rem' }}>{hint}</p>}
+      {hint && <p style={{ color: 'var(--text-light)', fontSize: '0.7rem' }}>{hint}</p>}
     </div>
   );
 };
@@ -46,7 +46,7 @@ const FormField = ({ label, name, type = 'text', placeholder, value, onChange, h
 const Divider = ({ label }) => (
   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
     <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
-    <span style={{ color: 'var(--text-light)', fontSize: '0.82rem', fontWeight: 600 }}>{label}</span>
+    <span style={{ color: 'var(--text-light)', fontSize: '0.72rem', fontWeight: 600 }}>{label}</span>
     <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
   </div>
 );
@@ -104,8 +104,8 @@ export const LoginPage = () => {
               filter: 'drop-shadow(0 4px 20px rgba(201,168,76,0.14))',
             }}
           />
-          <h1 style={{ fontSize: '1.9rem', fontWeight: '800', marginBottom: '6px' }}>Welcome back</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.97rem' }}>Log in to your Irshad account.</p>
+          <h1 style={{ fontSize: '1.67rem', fontWeight: '800', marginBottom: '6px' }}>Welcome back</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Log in to your Irshad account.</p>
         </div>
 
         {/* Form */}
@@ -125,10 +125,10 @@ export const LoginPage = () => {
             onChange={e => setPassword(e.target.value)}
           />
 
-          {error && <div style={{ background: '#fef2f2', color: '#dc2626', padding: '12px', borderRadius: '8px', fontSize: '0.9rem', border: '1px solid #f87171' }}>{error}</div>}
+          {error && <div style={{ background: '#fef2f2', color: '#dc2626', padding: '12px', borderRadius: '8px', fontSize: '0.79rem', border: '1px solid #f87171' }}>{error}</div>}
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.79rem', color: 'var(--text-muted)' }}>
               <input
                 type="checkbox"
                 checked={remember}
@@ -137,12 +137,12 @@ export const LoginPage = () => {
               />
               Remember me
             </label>
-            <Link to="/forgot" style={{ color: 'var(--primary)', fontSize: '0.9rem', fontWeight: 600, textDecoration: 'none' }}>
+            <Link to="/forgot" style={{ color: 'var(--primary)', fontSize: '0.79rem', fontWeight: 600, textDecoration: 'none' }}>
               Forgot password?
             </Link>
           </div>
 
-          <button onClick={handleLogin} disabled={loading} className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '14px', marginTop: '4px', fontSize: '1rem', opacity: loading ? 0.7 : 1 }}>
+          <button onClick={handleLogin} disabled={loading} className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '14px', marginTop: '4px', fontSize: '0.88rem', opacity: loading ? 0.7 : 1 }}>
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
 
@@ -160,7 +160,7 @@ export const LoginPage = () => {
           </div>
         </div>
 
-        <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '24px' }}>
+        <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.79rem', marginTop: '24px' }}>
           Don't have an account?{' '}
           <Link to="/register" style={{ color: 'var(--primary)', fontWeight: 700, textDecoration: 'none' }}>
             Sign up free
@@ -232,8 +232,8 @@ export const RegisterPage = () => {
             alt="Irshad"
             style={{ height: '80px', width: 'auto', margin: '0 auto 20px', display: 'block' }}
           />
-          <h1 style={{ fontSize: '1.9rem', fontWeight: '800', marginBottom: '6px' }}>Create account</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.97rem' }}>Start investing the halal way — it's free.</p>
+          <h1 style={{ fontSize: '1.67rem', fontWeight: '800', marginBottom: '6px' }}>Create account</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Start investing the halal way — it's free.</p>
         </div>
 
         {/* Form */}
@@ -269,7 +269,7 @@ export const RegisterPage = () => {
               onChange={e => setAgreed(e.target.checked)}
               style={{ marginTop: '3px', accentColor: 'var(--primary)', flexShrink: 0 }}
             />
-            <span style={{ fontSize: '0.87rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>
+            <span style={{ fontSize: '0.77rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>
               I agree to the{' '}
               <Link to="/terms" style={{ color: 'var(--primary)', fontWeight: 600 }}>Terms of Service</Link>,{' '}
               <Link to="/privacy" style={{ color: 'var(--primary)', fontWeight: 600 }}>Privacy Policy</Link>, and
@@ -278,9 +278,9 @@ export const RegisterPage = () => {
             </span>
           </label>
 
-          {error && <div style={{ background: '#fef2f2', color: '#dc2626', padding: '12px', borderRadius: '8px', fontSize: '0.9rem', border: '1px solid #f87171' }}>{error}</div>}
+          {error && <div style={{ background: '#fef2f2', color: '#dc2626', padding: '12px', borderRadius: '8px', fontSize: '0.79rem', border: '1px solid #f87171' }}>{error}</div>}
 
-          <button type="submit" disabled={!agreed || loading} className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '14px', marginTop: '4px', fontSize: '1rem', opacity: (agreed && !loading) ? 1 : 0.55 }}>
+          <button type="submit" disabled={!agreed || loading} className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '14px', marginTop: '4px', fontSize: '0.88rem', opacity: (agreed && !loading) ? 1 : 0.55 }}>
             {loading ? 'Creating Account...' : 'Create My Account'}
           </button>
 
@@ -298,7 +298,7 @@ export const RegisterPage = () => {
           </div>
         </form>
 
-        <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '24px' }}>
+        <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.79rem', marginTop: '24px' }}>
           Already have an account?{' '}
           <Link to="/login" style={{ color: 'var(--primary)', fontWeight: 700, textDecoration: 'none' }}>
             Log in
@@ -349,8 +349,8 @@ export const ForgotPasswordPage = () => {
               filter: 'drop-shadow(0 4px 20px rgba(201,168,76,0.14))',
             }}
           />
-          <h1 style={{ fontSize: '1.9rem', fontWeight: '800', marginBottom: '6px' }}>Reset Password</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.97rem' }}>Enter your email to receive a reset link.</p>
+          <h1 style={{ fontSize: '1.67rem', fontWeight: '800', marginBottom: '6px' }}>Reset Password</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Enter your email to receive a reset link.</p>
         </div>
 
         {/* Form */}
@@ -363,15 +363,15 @@ export const ForgotPasswordPage = () => {
             onChange={e => setEmail(e.target.value)}
           />
 
-          {error && <div style={{ background: '#fef2f2', color: '#dc2626', padding: '12px', borderRadius: '8px', fontSize: '0.9rem', border: '1px solid #f87171' }}>{error}</div>}
-          {message && <div style={{ background: '#ecfdf5', color: '#059669', padding: '12px', borderRadius: '8px', fontSize: '0.9rem', border: '1px solid #6ee7b7' }}>{message}</div>}
+          {error && <div style={{ background: '#fef2f2', color: '#dc2626', padding: '12px', borderRadius: '8px', fontSize: '0.79rem', border: '1px solid #f87171' }}>{error}</div>}
+          {message && <div style={{ background: '#ecfdf5', color: '#059669', padding: '12px', borderRadius: '8px', fontSize: '0.79rem', border: '1px solid #6ee7b7' }}>{message}</div>}
 
-          <button onClick={handleSubmit} disabled={loading || !email} className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '14px', marginTop: '4px', fontSize: '1rem', opacity: (loading || !email) ? 0.7 : 1 }}>
+          <button onClick={handleSubmit} disabled={loading || !email} className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '14px', marginTop: '4px', fontSize: '0.88rem', opacity: (loading || !email) ? 0.7 : 1 }}>
             {loading ? 'Sending...' : 'Send Reset Link'}
           </button>
         </div>
 
-        <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '24px' }}>
+        <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.79rem', marginTop: '24px' }}>
           Remember your password?{' '}
           <Link to="/login" style={{ color: 'var(--primary)', fontWeight: 700, textDecoration: 'none' }}>
             Back to login
@@ -420,7 +420,7 @@ export const ResetPasswordPage = () => {
     return (
       <div className="auth-wrapper">
         <div className="auth-card animate-fade-in" style={{ textAlign: 'center' }}>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: '800', color: '#dc2626', marginBottom: '12px' }}>Invalid Link</h1>
+          <h1 style={{ fontSize: '1.32rem', fontWeight: '800', color: '#dc2626', marginBottom: '12px' }}>Invalid Link</h1>
           <p style={{ color: 'var(--text-muted)', marginBottom: '24px' }}>The password reset link is invalid or missing required parameters.</p>
           <Link to="/forgot" className="btn-primary" style={{ display: 'inline-flex', padding: '12px 24px' }}>Request New Link</Link>
         </div>
@@ -444,8 +444,8 @@ export const ResetPasswordPage = () => {
               filter: 'drop-shadow(0 4px 20px rgba(201,168,76,0.14))',
             }}
           />
-          <h1 style={{ fontSize: '1.9rem', fontWeight: '800', marginBottom: '6px' }}>Create New Password</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.97rem' }}>Please enter your new password below.</p>
+          <h1 style={{ fontSize: '1.67rem', fontWeight: '800', marginBottom: '6px' }}>Create New Password</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Please enter your new password below.</p>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
@@ -464,10 +464,10 @@ export const ResetPasswordPage = () => {
             onChange={e => setPasswordConfirmation(e.target.value)}
           />
 
-          {error && <div style={{ background: '#fef2f2', color: '#dc2626', padding: '12px', borderRadius: '8px', fontSize: '0.9rem', border: '1px solid #f87171' }}>{error}</div>}
-          {message && <div style={{ background: '#ecfdf5', color: '#059669', padding: '12px', borderRadius: '8px', fontSize: '0.9rem', border: '1px solid #6ee7b7' }}>{message}</div>}
+          {error && <div style={{ background: '#fef2f2', color: '#dc2626', padding: '12px', borderRadius: '8px', fontSize: '0.79rem', border: '1px solid #f87171' }}>{error}</div>}
+          {message && <div style={{ background: '#ecfdf5', color: '#059669', padding: '12px', borderRadius: '8px', fontSize: '0.79rem', border: '1px solid #6ee7b7' }}>{message}</div>}
 
-          <button onClick={handleSubmit} disabled={loading || !password} className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '14px', marginTop: '4px', fontSize: '1rem', opacity: (loading || !password) ? 0.7 : 1 }}>
+          <button onClick={handleSubmit} disabled={loading || !password} className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '14px', marginTop: '4px', fontSize: '0.88rem', opacity: (loading || !password) ? 0.7 : 1 }}>
             {loading ? 'Resetting...' : 'Reset Password'}
           </button>
         </div>
@@ -553,7 +553,7 @@ export const VerifyEmailPage = () => {
             filter: 'drop-shadow(0 4px 20px rgba(201,168,76,0.14))',
           }}
         />
-        <h1 style={{ fontSize: '1.9rem', fontWeight: '800', marginBottom: '12px', color: 'var(--text-dark)' }}>
+        <h1 style={{ fontSize: '1.67rem', fontWeight: '800', marginBottom: '12px', color: 'var(--text-dark)' }}>
           {verifying ? 'Verifying email...' : 'Verify your email'}
         </h1>
         
@@ -573,7 +573,7 @@ export const VerifyEmailPage = () => {
             onClick={handleResend} 
             disabled={loading} 
             className="btn-primary" 
-            style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '1rem', opacity: loading ? 0.7 : 1 }}
+            style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '0.88rem', opacity: loading ? 0.7 : 1 }}
           >
             {loading ? 'Sending...' : 'Resend Verification Email'}
           </button>

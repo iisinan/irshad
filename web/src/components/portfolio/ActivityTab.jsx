@@ -54,7 +54,7 @@ export default function ActivityTab() {
   };
 
   return (
-    <div className="animate-fade-in stagger-1" style={{ background:'white', borderRadius:'24px', padding:'0', boxShadow:'var(--shadow-sm)', border:'1px solid var(--border)', overflow:'hidden' }}>
+    <div className="animate-fade-in stagger-1" style={{ background: 'var(--bg)', borderRadius:'24px', padding:'0', boxShadow:'var(--shadow-sm)', border:'1px solid var(--border)', overflow:'hidden' }}>
       
       {/* Header */}
       <div style={{ background: 'linear-gradient(135deg, #0D1B2A 0%, #0F5257 65%, #0B6B71 100%)', padding: '32px', position: 'relative', overflow: 'hidden' }}>
@@ -64,8 +64,8 @@ export default function ActivityTab() {
             <Activity size={28} />
           </div>
           <div>
-            <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'white', letterSpacing: '-0.5px' }}>Activity Log</h2>
-            <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.9rem', marginTop: '4px' }}>Your recent screening and scan history</p>
+            <h2 style={{ fontSize: '1.23rem', fontWeight: 800, color: 'white', letterSpacing: '-0.5px' }}>Activity Log</h2>
+            <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.79rem', marginTop: '4px' }}>Your recent screening and scan history</p>
           </div>
         </div>
       </div>
@@ -74,7 +74,7 @@ export default function ActivityTab() {
         {loading ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '60px 0', gap: '16px' }}>
             <div className="spinner" style={{ width: '40px', height: '40px', border: '3px solid var(--border)', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading activity...</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.79rem' }}>Loading activity...</p>
           </div>
         ) : history.length === 0 ? (
           <div style={{ 
@@ -89,18 +89,18 @@ export default function ActivityTab() {
             }}>
               <Clock size={36} color="var(--primary)" opacity={0.8} />
             </div>
-            <div style={{ fontSize:'1.4rem', fontWeight:900, color:'var(--text-dark)', marginBottom:'12px', letterSpacing:'-0.5px' }}>
+            <div style={{ fontSize: '1.23rem', fontWeight:900, color:'var(--text-dark)', marginBottom:'12px', letterSpacing:'-0.5px' }}>
               No Recent Activity
             </div>
-            <p style={{ color:'var(--text-muted)', fontSize:'1rem', marginBottom:'32px', maxWidth:'400px', lineHeight:1.6 }}>
+            <p style={{ color:'var(--text-muted)', fontSize: '0.88rem', marginBottom:'32px', maxWidth:'400px', lineHeight:1.6 }}>
               Your stock screening and product scan history will appear here. Start exploring the market to build your activity log.
             </p>
             <button 
               onClick={() => navigate('/portfolio#market')} 
               style={{ 
                 display:'inline-flex', alignItems:'center', gap:'8px', padding:'14px 28px', 
-                borderRadius:'14px', background:'var(--gold-grad)', color:'white', border:'none', 
-                fontWeight:800, fontSize:'0.95rem', cursor:'pointer', textDecoration:'none',
+                borderRadius:'14px', background:'var(--gold-grad)', color:'var(--bg)', border:'none', 
+                fontWeight:800, fontSize: '0.84rem', cursor:'pointer', textDecoration:'none',
                 boxShadow:'0 8px 24px rgba(201,168,76,0.3)', transition:'transform 0.2s, boxShadow 0.2s' 
               }}
             >
@@ -120,7 +120,7 @@ export default function ActivityTab() {
                 className={`roll-in-anim ${item.action === 'check' ? 'hover-lift' : ''}`}
                 style={{ 
                   animationDelay: `${i * 0.03}s`,
-                  background: 'white', borderRadius: '16px', padding: '20px', border: '1px solid var(--border)',
+                  background: 'var(--bg)', borderRadius: '16px', padding: '20px', border: '1px solid var(--border)',
                   cursor: item.action === 'check' ? 'pointer' : 'default', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'space-between'
                 }}
               >
@@ -129,13 +129,13 @@ export default function ActivityTab() {
                     {getActionIcon(item.action)}
                   </div>
                   <div>
-                    <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-dark)' }}>{getActionText(item)}</h4>
-                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                    <h4 style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--text-dark)' }}>{getActionText(item)}</h4>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
                       {item.detail?.name || 'Manual Action'}
                     </p>
                   </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-light)', fontSize: '0.8rem', fontWeight: 600 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-light)', fontSize: '0.7rem', fontWeight: 600 }}>
                   <Clock size={12} />
                   {formatDate(item.created_at)}
                 </div>

@@ -1,0 +1,938 @@
+{
+    "AUSTINLAZ": {
+        "name": "AUSTIN LAZ & COMPANY PLC",
+        "sector": "Industrials"
+    },
+    "ETI": {
+        "name": "ECOBANK TRANSNATIONAL INCORPORATED",
+        "sector": "Financials"
+    },
+    "UNIONDAC": {
+        "name": "UNION DIAGNOSTIC & CLINICAL SERVICES PLC",
+        "sector": "Consumer Staples"
+    },
+    "UNILEVER": {
+        "name": "UNILEVER NIGERIA PLC.",
+        "sector": "Consumer Staples"
+    },
+    "ETRANZACT": {
+        "name": "E-TRANZACT INTERNATIONAL PLC",
+        "sector": "Ict"
+    },
+    "DIAMONDBNK": {
+        "name": "DIAMOND BANK PLC",
+        "sector": "Delisted"
+    },
+    "NIGROPES": {
+        "name": "NIGERIAN ROPES PLC",
+        "sector": "Delisted"
+    },
+    "AIICO": {
+        "name": "AIICO INSURANCE PLC.",
+        "sector": "Financial Services"
+    },
+    "DAARCOMM": {
+        "name": "DAAR COMMUNICATIONS PLC",
+        "sector": "Telecommunications"
+    },
+    "COURTVILLE": {
+        "name": "COURTEVILLE BUSINESS SOLUTIONS PLC",
+        "sector": "Delisted"
+    },
+    "HMCALL": {
+        "name": "HMCALL",
+        "sector": "Construction\/real Estate"
+    },
+    "JULI": {
+        "name": "JULI PLC.",
+        "sector": "SERVICES"
+    },
+    "BETAGLAS": {
+        "name": "BETA GLASS CO PLC.",
+        "sector": "Industrial Goods"
+    },
+    "OANDO": {
+        "name": "OANDO PLC",
+        "sector": "OIL AND GAS"
+    },
+    "MULTIVERSE": {
+        "name": "MULTIVERSE PLC",
+        "sector": "NATURAL RESOURCES"
+    },
+    "PAINTCOM": {
+        "name": "PAINTS AND COATINGS MANUFACTURES PLC",
+        "sector": "Delisted"
+    },
+    "BERGER": {
+        "name": "BERGER PAINTS PLC",
+        "sector": "Industrial Goods"
+    },
+    "ROYALEX": {
+        "name": "ROYAL EXCHANGE PLC.",
+        "sector": "FINANCIAL SERVICES"
+    },
+    "MOBIL": {
+        "name": "MOBIL OIL NIG PLC.",
+        "sector": "Delisted"
+    },
+    "NEWGOLD": {
+        "name": "NEWGOLD EXCHANGE TRADED FUND",
+        "sector": "Delisted"
+    },
+    "\tCILEASING": {
+        "name": "C & I LEASING PLC",
+        "sector": "Industrials"
+    },
+    "TOTAL": {
+        "name": "TOTAL NIGERIA PLC.",
+        "sector": "Energy"
+    },
+    "IKEJAHOTEL": {
+        "name": "IKEJA HOTEL PLC",
+        "sector": "Services"
+    },
+    "MOFIREIF": {
+        "name": "MOFIREIF",
+        "sector": "Construction\/real Estate"
+    },
+    "UPDC": {
+        "name": "UPDC [BLS]",
+        "sector": "Construction\/real Estate"
+    },
+    "NIG-GERMAN": {
+        "name": "NIGERIA-GERMAN CHEMICALS PLC.",
+        "sector": "Delisted"
+    },
+    "CAPHOTEL": {
+        "name": "CAPITAL HOTEL PLC",
+        "sector": "Consumer Discretionary"
+    },
+    "MBENEFIT": {
+        "name": "MUTUAL BENEFITS ASSURANCE PLC.",
+        "sector": "FINANCIAL SERVICES"
+    },
+    "CHAMPION": {
+        "name": "CHAMPION BREW. PLC.",
+        "sector": "Consumer Staples"
+    },
+    "UBN": {
+        "name": "UNION BANK NIG.PLC.",
+        "sector": "Unknown"
+    },
+    "FTNCOCOA": {
+        "name": "FTN COCOA PROCESSORS PLC",
+        "sector": "Agriculture"
+    },
+    "GUINEAINS": {
+        "name": "GUINEA INSURANCE PLC.",
+        "sector": "Financial Services"
+    },
+    "GOLDBREW": {
+        "name": "GOLDEN GUINEA BREW. PLC.",
+        "sector": "Consumer Goods"
+    },
+    "MCNICHOLS": {
+        "name": "MCNICHOLS PLC",
+        "sector": "CONSUMER GOODS"
+    },
+    "UNIONDICON": {
+        "name": "UNION DICON SALT PLC.",
+        "sector": "CONSUMER GOODS"
+    },
+    "INTENEGINS": {
+        "name": "INTERNATIONAL ENERGY INSURANCE PLC",
+        "sector": "FINANCIAL SERVICES"
+    },
+    "STACO": {
+        "name": "STACO INSURANCE PLC",
+        "sector": "FINANCIAL SERVICES"
+    },
+    "AFRINSURE": {
+        "name": "AFRICAN ALLIANCE INSURANCE PLC",
+        "sector": "Financials"
+    },
+    "FLOURMILL": {
+        "name": "FLOUR MILLS NIG. PLC.",
+        "sector": "Delisted"
+    },
+    "CONOIL": {
+        "name": "CONOIL PLC",
+        "sector": "Energy"
+    },
+    "MANSARD": {
+        "name": "MANSARD INSURANCE PLC",
+        "sector": "FINANCIAL SERVICES"
+    },
+    "JAPAULGOLD": {
+        "name": "JAPAULGOLD [MRF]",
+        "sector": "Oil And Gas"
+    },
+    "EKOCORP": {
+        "name": "EKOCORP PLC",
+        "sector": "Healthcare"
+    },
+    "ETERNA": {
+        "name": "ETERNA PLC.",
+        "sector": "OIL AND GAS"
+    },
+    "CONHALLPLC": {
+        "name": "CONHALLPLC",
+        "sector": "Financial Services"
+    },
+    "MULTITREX": {
+        "name": "MULTI-TREX INTEGRATED FOODS PLC",
+        "sector": "CONSUMER GOODS"
+    },
+    "ALEX": {
+        "name": "ALUMINIUM EXTRUSION IND. PLC.",
+        "sector": "Natural Resources"
+    },
+    "SMURFIT": {
+        "name": "SMART PRODUCTS NIGERIA PLC",
+        "sector": "Delisted"
+    },
+    "ANINO": {
+        "name": "ANINO INTERNATIONAL PLC.",
+        "sector": "Delisted"
+    },
+    "ABBEYBANK": {
+        "name": "ABBEYBANK",
+        "sector": "Financial Services"
+    },
+    "EQUITYASUR": {
+        "name": "EQUITY ASSURANCE PLC.",
+        "sector": "Delisted"
+    },
+    "CMFC": {
+        "name": "CMFC [DWL]",
+        "sector": "Financial Services"
+    },
+    "UBA": {
+        "name": "U B A PLC",
+        "sector": "Financial Services"
+    },
+    "TRANSPOWER": {
+        "name": "TRANSPOWER",
+        "sector": "Utilities"
+    },
+    "CHAMS": {
+        "name": "CHAMS PLC",
+        "sector": "Information Technology"
+    },
+    "EVANSMED": {
+        "name": "EVANS MEDICAL PLC.",
+        "sector": "Delisted"
+    },
+    "LIVINGTRUST": {
+        "name": "LIVINGTRUST [MRF]",
+        "sector": "Financial Services"
+    },
+    "PRESTIGE": {
+        "name": "PRESTIGE ASSURANCE CO. PLC.",
+        "sector": "Financials"
+    },
+    "VERITASKAP": {
+        "name": "VERITASKAP",
+        "sector": "Financial Services"
+    },
+    "UBCAP": {
+        "name": "UBA CAPITAL PLC",
+        "sector": "Delisted"
+    },
+    "LASACO": {
+        "name": "LASACO ASSURANCE PLC.",
+        "sector": "Financial Services"
+    },
+    "DNMEYER": {
+        "name": "DN MEYER PLC.",
+        "sector": "Delisted"
+    },
+    "TRANSEXPR": {
+        "name": "TRANS-NATIONWIDE EXPRESS PLC.",
+        "sector": "Industrials"
+    },
+    "SOVRENINS": {
+        "name": "SOVEREIGN TRUST INSURANCE PLC",
+        "sector": "FINANCIAL SERVICES"
+    },
+    "TIP": {
+        "name": "TIP",
+        "sector": "Services"
+    },
+    "PORTPAINT": {
+        "name": "PORTLAND PAINTS & PRODUCTS NIGERIA PLC",
+        "sector": "Delisted"
+    },
+    "AFROMEDIA": {
+        "name": "AFROMEDIA PLC",
+        "sector": "Services"
+    },
+    "ARBICO": {
+        "name": "ARBICO PLC.",
+        "sector": "Industrials"
+    },
+    "NCR": {
+        "name": "NCR (NIGERIA) PLC.",
+        "sector": "ICT"
+    },
+    "ZICHIS": {
+        "name": "ZICHIS",
+        "sector": "Agriculture"
+    },
+    "MTNN": {
+        "name": "MTN Nigeria Communications PLC",
+        "sector": "Telecommunications"
+    },
+    "DANGCEM": {
+        "name": "DANGOTE CEMENT PLC",
+        "sector": "Industrial Goods"
+    },
+    "SCOA": {
+        "name": "S C O A  NIG. PLC.",
+        "sector": "Industrials"
+    },
+    "UHOMREIT": {
+        "name": "UNION HOMES REAL ESTATE INVESTMENT TRUST (REIT)",
+        "sector": "CONSTRUCTION\/REAL ESTATE"
+    },
+    "AGLEVENT": {
+        "name": "A.G. LEVENTIS NIGERIA PLC.",
+        "sector": "Delisted"
+    },
+    "DANGFLOUR": {
+        "name": "DANGOTE FLOUR MILLS PLC",
+        "sector": "Delisted"
+    },
+    "NB": {
+        "name": "NIGERIAN BREWERIES PLC.",
+        "sector": "Consumer Staples"
+    },
+    "ACCESSCORP": {
+        "name": "Access Holdings PLC",
+        "sector": "Financial Services"
+    },
+    "BUACEMENT": {
+        "name": "BUA Cement PLC",
+        "sector": "Industrial Goods"
+    },
+    "BOCGAS": {
+        "name": "B.O.C. GASES PLC.",
+        "sector": "Delisted"
+    },
+    "VONO": {
+        "name": "VONO PRODUCTS PLC.",
+        "sector": "Delisted"
+    },
+    "GTCO": {
+        "name": "Guaranty Trust Holding Company PLC",
+        "sector": "Financials"
+    },
+    "UNITYBNK": {
+        "name": "UNITY BANK PLC",
+        "sector": "FINANCIAL SERVICES"
+    },
+    "MEYER": {
+        "name": "MEYER PLC",
+        "sector": "Industrials"
+    },
+    "GOLDINSURE": {
+        "name": "GOLDLINK INSURANCE PLC",
+        "sector": "Delisted"
+    },
+    "OKOMUOIL": {
+        "name": "OKOMU OIL PALM PLC.",
+        "sector": "Agriculture"
+    },
+    "CCNN": {
+        "name": "CEMENT CO. OF NORTH.NIG. PLC",
+        "sector": "Delisted"
+    },
+    "DANGSUGAR": {
+        "name": "DANGOTE SUGAR REFINERY PLC",
+        "sector": "Consumer Staples"
+    },
+    "JBERGER": {
+        "name": "JULIUS BERGER NIG. PLC.",
+        "sector": "CONSTRUCTION\/REAL ESTATE"
+    },
+    "FCMB": {
+        "name": "FIRST CITY MONUMENT BANK PLC.",
+        "sector": "Financial Services"
+    },
+    "Caverton": {
+        "name": "Caverton Offshore Support Group Plc",
+        "sector": "Delisted"
+    },
+    "ACCESS": {
+        "name": "ACCESS BANK PLC.",
+        "sector": "Delisted"
+    },
+    "STERLINGNG": {
+        "name": "Sterling Financial Holdings Company PLC",
+        "sector": "Financial Services"
+    },
+    "UCAP": {
+        "name": "UNITED CAPITAL PLC",
+        "sector": "Financials"
+    },
+    "CADBURY": {
+        "name": "CADBURY NIGERIA PLC.",
+        "sector": "Consumer Staples"
+    },
+    "WAPIC": {
+        "name": "WAPIC INSURANCE PLC",
+        "sector": "Financials"
+    },
+    "GSPECPLC": {
+        "name": "Global Spectrum Energy Services Plc",
+        "sector": "Delisted"
+    },
+    "LINKASSURE": {
+        "name": "LINKAGE ASSURANCE PLC",
+        "sector": "Financials"
+    },
+    "PHARMDEKO": {
+        "name": "PHARMA-DEKO PLC.",
+        "sector": "HEALTHCARE"
+    },
+    "RTBRISCOE": {
+        "name": "R T BRISCOE PLC.",
+        "sector": "Consumer Discretionary"
+    },
+    "BAPLC": {
+        "name": "BAPLC",
+        "sector": "Ict"
+    },
+    "CUSTODYINS": {
+        "name": "CUSTODIAN AND ALLIED INSURANCE PLC",
+        "sector": "Delisted"
+    },
+    "INTERLINK": {
+        "name": "INTERLINKED TECHNOLOGIES PLC",
+        "sector": "Delisted"
+    },
+    "LAWUNION": {
+        "name": "LAW UNION AND ROCK INS. PLC.",
+        "sector": "Delisted"
+    },
+    "UNITYKAP": {
+        "name": "UNITY KAPITAL ASSURANCE PLC",
+        "sector": "Delisted"
+    },
+    "RAKUNITY": {
+        "name": "RAK UNITY PET. COMP. PLC.",
+        "sector": "Delisted"
+    },
+    "CUSTODIAN": {
+        "name": "CUSTODIAN AND ALLIED INSURANCE PLC",
+        "sector": "Conglomerates"
+    },
+    "JAPAULOIL": {
+        "name": "JAPAUL OIL & MARITIME SERVICES PLC",
+        "sector": "Delisted"
+    },
+    "EUNISELL": {
+        "name": "EUNISELL",
+        "sector": "Services"
+    },
+    "CAPOIL": {
+        "name": "CAPITAL OIL PLC",
+        "sector": "Delisted"
+    },
+    "FO": {
+        "name": "FORTE OIL PLC.",
+        "sector": "Delisted"
+    },
+    "WAPCO": {
+        "name": "LAFARGE WAPCO PLC.",
+        "sector": "Delisted"
+    },
+    "MEDVIEWAIR": {
+        "name": "MEDVIEW AIRLINE PLC",
+        "sector": "Delisted"
+    },
+    "HMARKINS": {
+        "name": "CONSOLIDATED HALLMARK INSURANCE PLC",
+        "sector": "Delisted"
+    },
+    "GEREGU": {
+        "name": "GEREGU",
+        "sector": "Utilities"
+    },
+    "SKYESHELT": {
+        "name": "SKYE SHELTER FUND PLC ",
+        "sector": "Delisted"
+    },
+    "ASHAKACEM": {
+        "name": "ASHAKA CEM PLC",
+        "sector": "Delisted"
+    },
+    "NESF": {
+        "name": "NIGERIA ENERYGY SECTOR FUND",
+        "sector": "Delisted"
+    },
+    "FIRSTALUM": {
+        "name": "FIRST ALUMINIUM NIGERIA PLC",
+        "sector": "Delisted"
+    },
+    "SKYEBANK": {
+        "name": "SKYE BANK PLC",
+        "sector": "Delisted"
+    },
+    "UPDC REIT": {
+        "name": " UPDC Real Estate Investment Trust",
+        "sector": "Delisted"
+    },
+    "GNI": {
+        "name": "GREAT NIGERIA INSURANCE PLC",
+        "sector": "Delisted"
+    },
+    "STDINSURE": {
+        "name": "STANDARD ALLIANCE INSURANCE PLC.",
+        "sector": "Delisted"
+    },
+    "NIGERINS": {
+        "name": "NIGER INSURANCE PLC.",
+        "sector": "Delisted"
+    },
+    "FIRSTHOLDCO": {
+        "name": "FIRSTHOLDCO",
+        "sector": "Financial Services"
+    },
+    "IHS": {
+        "name": "IHS PLC",
+        "sector": "Delisted"
+    },
+    "INITSPLC": {
+        "name": "THE INITIATES PLC",
+        "sector": "Delisted"
+    },
+    "ROKANA": {
+        "name": "ROKANA INDUSTRIES PLC",
+        "sector": "Delisted"
+    },
+    "VALUEFUND": {
+        "name": "VALUALLIANCE VALUE FUND",
+        "sector": "Delisted"
+    },
+    "MECURE": {
+        "name": "MECURE",
+        "sector": "Healthcare"
+    },
+    "7UP": {
+        "name": "7-UP BOTTLING COMP. PLC.",
+        "sector": "Delisted"
+    },
+    "HONYFLOUR": {
+        "name": "HONEYWELL FLOUR MILL PLC",
+        "sector": "CONSUMER GOODS"
+    },
+    "STERLNBANK": {
+        "name": "STERLING BANK PLC.",
+        "sector": "Delisted"
+    },
+    "DEAPCAP": {
+        "name": "DEAP CAPITAL MANAGEMENT & TRUST PLC",
+        "sector": "Delisted"
+    },
+    "MAYBAKER": {
+        "name": "MAY & BAKER NIGERIA PLC",
+        "sector": "Healthcare"
+    },
+    "IPWA": {
+        "name": "IPWA PLC",
+        "sector": "Delisted"
+    },
+    "RESORTSAL": {
+        "name": "RESORT SAVINGS & LOANS PLC",
+        "sector": "Delisted"
+    },
+    "AFRIPRUD": {
+        "name": "AFRICA PRUDENTIAL REGISTRARS PLC",
+        "sector": "Financial Services"
+    },
+    "STUDPRESS": {
+        "name": "STUDIO PRESS (NIG) PLC.",
+        "sector": "Delisted"
+    },
+    "DUNLOP": {
+        "name": "DN TYRE & RUBBER PLC",
+        "sector": "Delisted"
+    },
+    "ROADS": {
+        "name": "ROADS NIG PLC.",
+        "sector": "Delisted"
+    },
+    "AFRPAINTS": {
+        "name": "AFRICAN PAINTS (NIGERIA) PLC.",
+        "sector": "Delisted"
+    },
+    "OASISINS": {
+        "name": "OASIS INSURANCE PLC",
+        "sector": "Delisted"
+    },
+    "FORTISMFB": {
+        "name": "FORTIS MICROFINANCE BANK PLC",
+        "sector": "Delisted"
+    },
+    "UNHOMES": {
+        "name": "UNION HOMES SAVINGS AND LOANS PLC.",
+        "sector": "Delisted"
+    },
+    "MRS": {
+        "name": "MRS OIL NIGERIA PLC.",
+        "sector": "Delisted"
+    },
+    "FBNH": {
+        "name": "FBN HOLDINGS PLC",
+        "sector": "Delisted"
+    },
+    "INTBREW": {
+        "name": "INTERNATIONAL BREWERIES PLC.",
+        "sector": "Consumer Staples"
+    },
+    "TOURIST": {
+        "name": "TOURIST COMPANY OF NIGERIA PLC",
+        "sector": "Delisted"
+    },
+    "CNIF": {
+        "name": "CNIF",
+        "sector": "Construction\/real Estate"
+    },
+    "LIVESTOCK": {
+        "name": "LIVESTOCK FEEDS PLC.",
+        "sector": "Consumer Staples"
+    },
+    "AIRSERVICE": {
+        "name": "AIRLINE SERVICES AND LOGISTICS PLC",
+        "sector": "Delisted"
+    },
+    "AIRTELAFRI": {
+        "name": "Airtel Africa PLC",
+        "sector": "Telecommunications"
+    },
+    "FTGINSURE": {
+        "name": "FTGINSURE [DWL]",
+        "sector": "Financial Services"
+    },
+    "TRANSCORP": {
+        "name": "TRANSNATIONAL CORPORATION OF NIGERIA PLC",
+        "sector": "Industrials"
+    },
+    "GLAXOSMITH": {
+        "name": "GLAXO SMITHKLINE CONSUMER NIG. PLC.",
+        "sector": "Delisted"
+    },
+    "GUARANTY": {
+        "name": "GUARANTY TRUST BANK PLC.",
+        "sector": "Delisted"
+    },
+    "UAC-PROP": {
+        "name": "UACN PROPERTY DEVELOPMENT CO. PLC",
+        "sector": "Delisted"
+    },
+    "TANTALIZER": {
+        "name": "TANTALIZERS PLC",
+        "sector": "SERVICES"
+    },
+    "CONTINSURE": {
+        "name": "CONTINENTAL REINSURANCE PLC",
+        "sector": "Delisted"
+    },
+    "PRESCO": {
+        "name": "PRESCO PLC",
+        "sector": "Agriculture"
+    },
+    "PZ": {
+        "name": "P Z CUSSONS NIGERIA PLC.",
+        "sector": "Consumer Goods"
+    },
+    "DANFLOUR": {
+        "name": "DANGOTE FLOUR MILLS PLC",
+        "sector": "Delisted"
+    },
+    "UNIC": {
+        "name": "UNIC INSURANCE  PLC.",
+        "sector": "Delisted"
+    },
+    "ASOSAVINGS": {
+        "name": "ASO SAVINGS AND LOANS PLC",
+        "sector": "Delisted"
+    },
+    "OMOMORBNK": {
+        "name": "OMOLUABI MORTGAGE BANK PLC",
+        "sector": "Delisted"
+    },
+    "VANLEER": {
+        "name": "GREIF NIGERIA PLC",
+        "sector": "Delisted"
+    },
+    "AVONCROWN": {
+        "name": "AVON CROWNCAPS & CONTAINERS",
+        "sector": "Delisted"
+    },
+    "TIGERBRANDS": {
+        "name": "TIGER BRANDED CONSUMER GOODS PLC",
+        "sector": "Delisted"
+    },
+    "BECOPETRO": {
+        "name": "BECO PETROLEUM PRODUCT PLC",
+        "sector": "Delisted"
+    },
+    "UTC": {
+        "name": "U T C NIG. PLC.",
+        "sector": "Delisted"
+    },
+    "OMOSAVBNK": {
+        "name": "Omoluabi Savings and Loans Plc",
+        "sector": "Delisted"
+    },
+    "SEPLAT": {
+        "name": "SEPLAT PETROLEUM DEVELOPMENT COMPANY",
+        "sector": "Energy"
+    },
+    "JAIZBANK": {
+        "name": "JAIZ BANK PLC",
+        "sector": "Financial Services"
+    },
+    "VFDGROUP": {
+        "name": "VFDGROUP",
+        "sector": "Investment"
+    },
+    "SIMCAPVAL": {
+        "name": "SIM CAPITAL ALLIANCE VALUE FUND",
+        "sector": "Delisted"
+    },
+    "ABBEYBDS": {
+        "name": "ABBEY BUILDING SOCIETY PLC",
+        "sector": "Delisted"
+    },
+    "NOTORE": {
+        "name": "Notore Chemical Industries Plc",
+        "sector": "Delisted"
+    },
+    "MANDRID": {
+        "name": "P S MANDRIDES & CO PLC",
+        "sector": "Delisted"
+    },
+    "UNIONVENT": {
+        "name": "UNION VENTURES & PET. PLC",
+        "sector": "Delisted"
+    },
+    "NEIMETH": {
+        "name": "NEIMETH INTERNATIONAL PHARMACEUTICALS PLC",
+        "sector": "Healthcare"
+    },
+    "LEGENDINT": {
+        "name": "LEGENDINT [MRF]",
+        "sector": "Ict"
+    },
+    "CUTIX": {
+        "name": "CUTIX PLC.",
+        "sector": "Industrial Goods"
+    },
+    "SUNUASSUR": {
+        "name": "SUNUASSUR [BLS]",
+        "sector": "Financial Services"
+    },
+    "BUAFOODS": {
+        "name": "BUAFOODS",
+        "sector": "Consumer Goods"
+    },
+    "ARADEL": {
+        "name": "ARADEL",
+        "sector": "Oil And Gas"
+    },
+    "SFSREIT": {
+        "name": "SFSREIT",
+        "sector": "Construction\/real Estate"
+    },
+    "TRANSCOHOT": {
+        "name": "TRANSCORP HOTELS PLC",
+        "sector": "Consumer Discretionary"
+    },
+    "GUINNESS": {
+        "name": "GUINNESS NIG PLC",
+        "sector": "CONSUMER GOODS"
+    },
+    "FIDELITYBK": {
+        "name": "FIDELITY BANK PLC",
+        "sector": "Financials"
+    },
+    "UACN": {
+        "name": "U A C N  OF NIGERIA PLC.",
+        "sector": "Conglomerates"
+    },
+    "NASCON": {
+        "name": "NATIONAL SALT CO. NIG. PLC",
+        "sector": "CONSUMER GOODS"
+    },
+    "NAHCO": {
+        "name": "NIGERIAN AVIATION HANDLING COMPANY PLC",
+        "sector": "SERVICES"
+    },
+    "NGXGROUP": {
+        "name": "NGXGROUP",
+        "sector": "Financial Services"
+    },
+    "NIDF": {
+        "name": "NIDF",
+        "sector": "Construction\/real Estate"
+    },
+    "NREIT": {
+        "name": "NREIT",
+        "sector": "Construction\/real Estate"
+    },
+    "FIDSON": {
+        "name": "FIDSON HEALTHCARE PLC",
+        "sector": "Healthcare"
+    },
+    "NEM": {
+        "name": "NEM INSURANCE PLC.",
+        "sector": "Financials"
+    },
+    "CAVERTON": {
+        "name": "CAVERTON",
+        "sector": "Services"
+    },
+    "HBMNG": {
+        "name": "HBMNG",
+        "sector": "Industrial Goods"
+    },
+    "UPL": {
+        "name": "UNIVERSITY PRESS PLC.",
+        "sector": "SERVICES"
+    },
+    "THOMASWY": {
+        "name": "THOMAS WYATT NIG. PLC.",
+        "sector": "Natural Resources"
+    },
+    "CAP": {
+        "name": "CAP PLC",
+        "sector": "Materials"
+    },
+    "CWG": {
+        "name": "Computer Warehouse Group Plc",
+        "sector": "Ict"
+    },
+    "CORNERST": {
+        "name": "CORNERSTONE INSURANCE PLC",
+        "sector": "Financial Services"
+    },
+    "INFINITY": {
+        "name": "Infinity Trust Mortgage Bank Plc",
+        "sector": "FINANCIAL SERVICES"
+    },
+    "NESTLE": {
+        "name": "NESTLE NIGERIA PLC.",
+        "sector": "Consumer Staples"
+    },
+    "ELLAHLAKES": {
+        "name": "ELLAH LAKES PLC.",
+        "sector": "Consumer Staples"
+    },
+    "UPDCREIT": {
+        "name": "UPDCREIT",
+        "sector": "Construction\/real Estate"
+    },
+    "IMG": {
+        "name": "IMG",
+        "sector": "Natural Resources"
+    },
+    "STANBIC": {
+        "name": "STANBIC IBTC  HOLDINGS PLC",
+        "sector": "Financial Services"
+    },
+    "SKYAVN": {
+        "name": "SKYAVN",
+        "sector": "Services"
+    },
+    "NPFMCRFBK": {
+        "name": "NPF MICROFINANCE BANK PLC",
+        "sector": "FINANCIAL SERVICES"
+    },
+    "ZENITHBANK": {
+        "name": "ZENITH BANK PLC",
+        "sector": "Financials"
+    },
+    "WEMABANK": {
+        "name": "WEMA BANK PLC.",
+        "sector": "Financial Services"
+    },
+    "VITAFOAM": {
+        "name": "VITAFOAM NIG PLC.",
+        "sector": "Consumer Goods"
+    },
+    "REDSTAREX": {
+        "name": "RED STAR EXPRESS PLC",
+        "sector": "SERVICES"
+    },
+    "ABCTRANS": {
+        "name": "ABC TRANSPORT PLC",
+        "sector": "Services"
+    },
+    "CILEASING": {
+        "name": "C & I LEASING PLC.",
+        "sector": "Services"
+    },
+    "UNIVINSURE": {
+        "name": "UNIVERSAL INSURANCE COMPANY PLC",
+        "sector": "FINANCIAL SERVICES"
+    },
+    "NNFM": {
+        "name": "N NIG. FLOUR MILLS PLC.",
+        "sector": "CONSUMER GOODS"
+    },
+    "REGALINS": {
+        "name": "REGENCY ALLIANCE INSURANCE PLC",
+        "sector": "FINANCIAL SERVICES"
+    },
+    "MORISON": {
+        "name": "MORISON INDUSTRIES PLC.",
+        "sector": "Healthcare"
+    },
+    "CHELLARAM": {
+        "name": "CHELLARAMS PLC.",
+        "sector": "Consumer Staples"
+    },
+    "RONCHESS": {
+        "name": "RONCHESS",
+        "sector": "Construction\/real Estate"
+    },
+    "OMATEK": {
+        "name": "OMATEK VENTURES PLC",
+        "sector": "ICT"
+    },
+    "ACADEMY": {
+        "name": "ACADEMY PRESS PLC.",
+        "sector": "Services"
+    },
+    "NSLTECH": {
+        "name": "SECURE ELECTRONIC TECHNOLOGY PLC",
+        "sector": "SERVICES"
+    },
+    "JOHNHOLT": {
+        "name": "JOHN HOLT PLC.",
+        "sector": "CONGLOMERATES"
+    },
+    "LEARNAFRCA": {
+        "name": "LEARN AFRICA PLC",
+        "sector": "Consumer Discretionary"
+    },
+    "AVAIF": {
+        "name": "AVAIF",
+        "sector": "Construction\/real Estate"
+    },
+    "PREMPAINTS": {
+        "name": "PREMIER PAINTS PLC.",
+        "sector": "Materials"
+    },
+    "TRIPPLEG": {
+        "name": "TRIPPLE GEE AND COMPANY PLC.",
+        "sector": "INDUSTRIAL GOODS"
+    },
+    "ENAMELWA": {
+        "name": "NIGERIAN ENAMELWARE PLC.",
+        "sector": "Consumer Goods"
+    }
+}

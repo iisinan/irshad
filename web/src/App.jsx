@@ -1,6 +1,6 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
-import { TrendingUp, TrendingDown, ArrowRight, CheckCircle, Shield, BarChart2, ChevronRight, Smartphone, Apple, Play, AlertCircle, HelpCircle } from 'lucide-react';
+import { TrendingUp, TrendingDown, ArrowRight, CheckCircle, Shield, BarChart2, ChevronRight, Smartphone, Apple, Play, AlertCircle, HelpCircle, Home, Scale, Info, BookOpen, Settings, LayoutDashboard, User } from 'lucide-react';
 import { fetchNgxStocks } from './services/api';
 import DashboardLayout from './components/DashboardLayout';
 import Footer from './components/Footer';
@@ -18,12 +18,11 @@ const AboutPage = React.lazy(() => import('./components/About'));
 const ShariahPage = React.lazy(() => import('./components/Shariah'));
 const ResourcesPage = React.lazy(() => import('./components/Resources'));
 const Profile = React.lazy(() => import('./components/Profile'));
-const Settings = React.lazy(() => import('./components/Settings'));
 const AdminDashboard = React.lazy(() => import('./components/AdminDashboard'));
 const RoleBasedDashboard = React.lazy(() => import('./components/RoleBasedDashboard'));
 const Pricing = React.lazy(() => import('./components/Pricing'));
 
-const DASHBOARD_ROUTES = ['/dashboard', '/portfolio', '/profile', '/settings'];
+const DASHBOARD_ROUTES = ['/dashboard', '/portfolio', '/profile'];
 
 /* ─── Animated Routes Wrapper ─────────────────────────────── */
 const AnimatedRoutes = ({ children }) => {
@@ -61,8 +60,7 @@ const DocumentTitleUpdater = () => {
     if (path === '/') title = 'Home | Irshad';
     else if (path.startsWith('/market')) title = 'Market Screener | Irshad';
     else if (path.startsWith('/portfolio')) title = 'My Portfolio | Irshad';
-    else if (path.startsWith('/profile')) title = 'My Profile | Irshad';
-    else if (path.startsWith('/settings')) title = 'Settings | Irshad';
+    else if (path.startsWith('/profile')) title = 'Profile & Settings | Irshad';
     else if (path.startsWith('/login')) title = 'Login | Irshad';
     else if (path.startsWith('/register')) title = 'Register | Irshad';
     else if (path.startsWith('/shariah')) title = 'Shariah Framework | Irshad';
@@ -110,7 +108,7 @@ const TopNavbar = () => {
             alt="Irshad Logo"
             style={{ height: '46px', width: 'auto', objectFit: 'contain' }}
           />
-          <span style={{ fontWeight: 800, fontSize: '1.3rem', color: 'var(--text-dark)', letterSpacing: '-0.5px' }}>
+          <span style={{ fontWeight: 800, fontSize: '1.14rem', color: 'var(--text-dark)', letterSpacing: '-0.5px' }}>
             Irshad
           </span>
         </Link>
@@ -135,7 +133,7 @@ const TopNavbar = () => {
                   <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--primary-50)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, border: '1px solid var(--primary-100)' }}>
                     {(user.first_name || user.name || 'U').charAt(0).toUpperCase()}
                   </div>
-                  <span style={{ fontSize: '0.9rem', color: 'var(--text-dark)', fontWeight: 600 }}>
+                  <span style={{ fontSize: '0.79rem', color: 'var(--text-dark)', fontWeight: 600 }}>
                     {user.first_name || user.name || 'Profile'}
                   </span>
                 </Link>
@@ -146,7 +144,7 @@ const TopNavbar = () => {
             ) : (
               <>
                 <Link to="/login" className="nav-link">Log In</Link>
-                <Link to="/register" className="btn-primary" style={{ padding: '9px 20px', fontSize: '0.9rem' }}>
+                <Link to="/register" className="btn-primary" style={{ padding: '9px 20px', fontSize: '0.79rem' }}>
                   Get Started
                 </Link>
               </>
@@ -168,35 +166,50 @@ const TopNavbar = () => {
 
       {/* Mobile drawer — also hidden on dashboard */}
       {!isDashboard && (<div className={`mobile-nav-drawer ${menuOpen ? 'open' : ''}`}>
-        <Link to="/" className={navLinkClass('/')}>🏠 Home</Link>
-        <Link to="/shariah" className={navLinkClass('/shariah')}>⚖️ Shariah Framework</Link>
-        <Link to="/about" className={navLinkClass('/about')}>ℹ️ About Us</Link>
+        <Link to="/" className={navLinkClass('/')} onClick={() => setMenuOpen(false)}>
+          <Home size={18} /> Home
+        </Link>
+        <Link to="/shariah" className={navLinkClass('/shariah')} onClick={() => setMenuOpen(false)}>
+          <Scale size={18} /> Shariah Framework
+        </Link>
+        <Link to="/about" className={navLinkClass('/about')} onClick={() => setMenuOpen(false)}>
+          <Info size={18} /> About Us
+        </Link>
+        <Link to="/resources" className={navLinkClass('/resources')} onClick={() => setMenuOpen(false)}>
+          <BookOpen size={18} /> Resources
+        </Link>
+
         {user && (
-          <Link to="/portfolio" className={navLinkClass('/portfolio')}>📊 Dashboard</Link>
+          <Link to="/portfolio" className={navLinkClass('/portfolio')} onClick={() => setMenuOpen(false)}>
+            <LayoutDashboard size={18} /> Dashboard
+          </Link>
         )}
         {(user?.role === 'admin' || user?.role === 'scholar') && (
-          <Link to="/admin" className={navLinkClass('/admin')}>⚙️ Admin</Link>
+          <Link to="/admin" className={navLinkClass('/admin')} onClick={() => setMenuOpen(false)}>
+            <Settings size={18} /> Admin
+          </Link>
         )}
+        
         <div className="mobile-nav-auth">
           {!loading && (
             user ? (
               <>
-                <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', padding: '12px 16px', background: 'var(--bg-section)', borderRadius: '10px' }}>
-                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--primary-50)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
+                <Link to="/profile" onClick={() => setMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', padding: '14px 16px', background: 'var(--bg-section)', borderRadius: '12px' }}>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--primary-50)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800 }}>
                     {(user.first_name || user.name || 'U').charAt(0).toUpperCase()}
                   </div>
-                  <span style={{ fontWeight: 700, color: 'var(--text-dark)' }}>
+                  <span style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.95rem' }}>
                     {user.first_name || user.name || 'Profile'}
                   </span>
                 </Link>
-                <button onClick={logout} className="btn-secondary" style={{ justifyContent: 'center', padding: '13px' }}>
+                <button onClick={() => { logout(); setMenuOpen(false); }} className="btn-secondary" style={{ justifyContent: 'center', padding: '14px', borderRadius: '12px', fontSize: '0.9rem' }}>
                   Log Out
                 </button>
               </>
             ) : (
               <>
-                <Link to="/login" className="btn-secondary" style={{ justifyContent: 'center', padding: '13px' }}>Log In</Link>
-                <Link to="/register" className="btn-primary">Get Started →</Link>
+                <Link to="/login" onClick={() => setMenuOpen(false)} className="btn-secondary" style={{ justifyContent: 'center', padding: '14px', borderRadius: '12px', fontSize: '0.9rem' }}>Log In</Link>
+                <Link to="/register" onClick={() => setMenuOpen(false)} className="btn-primary" style={{ padding: '14px', borderRadius: '12px', fontSize: '0.9rem' }}>Get Started →</Link>
               </>
             )
           )}
@@ -242,7 +255,7 @@ const StockTicker = () => {
             <div key={`${stock.symbol}-${i}`} className="ticker-item" onClick={() => navigate('/login')}>
               <span className="ticker-item-symbol">{stock.symbol}</span>
               <span className="ticker-item-price">₦{displayPrice}</span>
-              <span style={{ fontWeight: 800, fontSize: '0.7rem', color, padding: '2px 6px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)' }}>{statusStr}</span>
+              <span style={{ fontWeight: 800, fontSize: '0.62rem', color, padding: '2px 6px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)' }}>{statusStr}</span>
               <div className="ticker-separator" />
             </div>
           );
@@ -272,7 +285,7 @@ const CompanyAvatar = ({ symbol, size = 40, style = {} }) => {
           src={`https://storage.googleapis.com/irshad-images/logos/${(symbol || '').toLowerCase()}.png`}
           alt={symbol}
           onError={() => setError(true)}
-          style={{ width: '100%', height: '100%', objectFit: 'contain', background: 'white' }}
+          style={{ width: '100%', height: '100%', objectFit: 'contain', background: 'var(--bg)' }}
         />
       ) : (
         letter
@@ -300,8 +313,8 @@ const StockCard = ({ company }) => {
       <div className="stock-card-header" style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
         <CompanyAvatar symbol={company.symbol} size={36} />
         <div className="stock-card-title" style={{ flex: 1 }}>
-          <div className="stock-symbol" style={{ fontSize: '0.9rem' }}>{company.symbol}</div>
-          {company.name && <div className="stock-name" style={{ fontSize: '0.65rem' }}>{company.name}</div>}
+          <div className="stock-symbol" style={{ fontSize: '0.79rem' }}>{company.symbol}</div>
+          {company.name && <div className="stock-name" style={{ fontSize: '0.57rem' }}>{company.name}</div>}
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
         </div>
@@ -310,18 +323,18 @@ const StockCard = ({ company }) => {
         {latestPrice > 0 ? (
           <>
             <div className="stock-price-wrapper">
-              <span className="stock-price-currency" style={{ fontSize: '0.75rem' }}>₦</span>
-              <span className="stock-price" style={{ fontSize: '1.05rem' }}>{latestPrice.toFixed(2)}</span>
+              <span className="stock-price-currency" style={{ fontSize: '0.66rem' }}>₦</span>
+              <span className="stock-price" style={{ fontSize: '0.92rem' }}>{latestPrice.toFixed(2)}</span>
             </div>
             {pct !== 0 && (
-              <div className={`stock-change-pill ${isPositive ? 'pos' : 'neg'}`} style={{ fontSize: '0.65rem', padding: '2px 6px' }}>
+              <div className={`stock-change-pill ${isPositive ? 'pos' : 'neg'}`} style={{ fontSize: '0.57rem', padding: '2px 6px' }}>
                 {isPositive ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
                 {isPositive ? '+' : ''}{pct.toFixed(2)}%
               </div>
             )}
           </>
         ) : (
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Data unavailable</div>
+          <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', fontWeight: 600 }}>Data unavailable</div>
         )}
       </div>
     </div>
@@ -347,7 +360,7 @@ const LandingPage = () => {
         <div style={{ position: 'absolute', top: '-20%', left: '50%', transform: 'translateX(-50%)', width: '80vw', height: '80vw', background: 'radial-gradient(circle, rgba(201,168,76,0.08) 0%, rgba(245,240,232,0) 70%)', zIndex: -1, pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', top: '10%', right: '-10%', width: '40vw', height: '40vw', background: 'radial-gradient(circle, rgba(201,168,76,0.05) 0%, rgba(245,240,232,0) 70%)', zIndex: -1, pointerEvents: 'none' }} />
 
-        <div className="hero-tag" style={{ background: 'white', border: '1px solid var(--gold-100)', boxShadow: '0 4px 16px rgba(201,168,76,0.08)', color: 'var(--gold)' }}>
+        <div className="hero-tag" style={{ background: 'var(--bg)', border: '1px solid var(--gold-100)', boxShadow: '0 4px 16px rgba(201,168,76,0.08)', color: 'var(--gold)' }}>
           <Shield size={14} fill="currentColor" style={{ opacity: 0.8 }} />
           Nigeria's #1 Shariah Stock Screener
         </div>
@@ -361,12 +374,12 @@ const LandingPage = () => {
           </span>
         </h1>
         
-        <p style={{ color: 'var(--text-muted)', fontSize: '1.25rem', maxWidth: '640px', margin: '0 auto 40px', lineHeight: 1.7, fontWeight: 500 }}>
+        <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', maxWidth: '640px', margin: '0 auto 40px', lineHeight: 1.7, fontWeight: 500 }}>
           Real-time halal screening for every stock on the Nigerian Exchange. Make confident, compliant investment decisions in seconds.
         </p>
 
         <div className="hero-cta" style={{ display: 'flex', gap: '16px', alignItems: 'center', justifyContent: 'center' }}>
-          <Link to="/login" className="btn-primary" style={{ padding: '16px 36px', fontSize: '1.05rem', boxShadow: '0 8px 24px rgba(201,168,76,0.25)', borderRadius: '40px' }}>
+          <Link to="/login" className="btn-primary" style={{ padding: '16px 36px', fontSize: '0.92rem', boxShadow: '0 8px 24px rgba(201,168,76,0.25)', borderRadius: '40px' }}>
             Start Screening <ArrowRight size={18} />
           </Link>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: '12px' }}>
@@ -374,7 +387,7 @@ const LandingPage = () => {
               <div style={{ display: 'flex', gap: '2px' }}>
                 {[1,2,3,4,5].map(i => <svg key={i} width="16" height="16" viewBox="0 0 24 24" fill="var(--gold)" color="var(--gold)"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>)}
               </div>
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>Trusted by 10k+ investors</span>
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>Trusted by 10k+ investors</span>
             </div>
           </div>
         </div>
@@ -382,30 +395,30 @@ const LandingPage = () => {
         {/* Floating Abstract UI Elements */}
         <div style={{ position: 'relative', width: '100%', maxWidth: '1000px', height: '140px', marginTop: '60px' }}>
           {/* Mock Pill 1 */}
-          <div style={{ position: 'absolute', top: '20px', left: '10%', background: 'white', padding: '12px 20px', borderRadius: '16px', boxShadow: '0 12px 32px rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', gap: '12px', border: '1px solid var(--border)', animation: 'float 6s ease-in-out infinite' }}>
+          <div style={{ position: 'absolute', top: '20px', left: '10%', background: 'var(--bg)', padding: '12px 20px', borderRadius: '16px', boxShadow: '0 12px 32px rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', gap: '12px', border: '1px solid var(--border)', animation: 'float 6s ease-in-out infinite' }}>
             <div style={{ width: '32px', height: '32px', background: 'var(--primary-50)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ color: 'var(--primary)', fontWeight: 800, fontSize: '0.8rem' }}>MTN</span>
+              <span style={{ color: 'var(--primary)', fontWeight: 800, fontSize: '0.7rem' }}>MTN</span>
             </div>
             <div>
-              <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-dark)' }}>MTNN</div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--halal)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '2px' }}><CheckCircle size={10} /> Halal</div>
+              <div style={{ fontSize: '0.79rem', fontWeight: 700, color: 'var(--text-dark)' }}>MTNN</div>
+              <div style={{ fontSize: '0.66rem', color: 'var(--halal)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '2px' }}><CheckCircle size={10} /> Halal</div>
             </div>
           </div>
           
           {/* Mock Pill 2 */}
-          <div style={{ position: 'absolute', top: '-10px', right: '15%', background: 'white', padding: '12px 20px', borderRadius: '16px', boxShadow: '0 12px 32px rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', gap: '12px', border: '1px solid var(--border)', animation: 'float 7s ease-in-out infinite reverse' }}>
+          <div style={{ position: 'absolute', top: '-10px', right: '15%', background: 'var(--bg)', padding: '12px 20px', borderRadius: '16px', boxShadow: '0 12px 32px rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', gap: '12px', border: '1px solid var(--border)', animation: 'float 7s ease-in-out infinite reverse' }}>
             <div style={{ width: '32px', height: '32px', background: 'var(--non-halal-bg)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ color: 'var(--non-halal)', fontWeight: 800, fontSize: '0.8rem' }}>NB</span>
+              <span style={{ color: 'var(--non-halal)', fontWeight: 800, fontSize: '0.7rem' }}>NB</span>
             </div>
             <div>
-              <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-dark)' }}>NB</div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--non-halal)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '2px' }}><AlertCircle size={10} /> Non-Halal</div>
+              <div style={{ fontSize: '0.79rem', fontWeight: 700, color: 'var(--text-dark)' }}>NB</div>
+              <div style={{ fontSize: '0.66rem', color: 'var(--non-halal)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '2px' }}><AlertCircle size={10} /> Non-Halal</div>
             </div>
           </div>
 
           {/* Main Mockup Strip */}
           <div style={{ width: '100%', height: '100%', background: 'linear-gradient(180deg, transparent 0%, var(--bg) 100%)', position: 'absolute', bottom: 0, left: 0, zIndex: 2 }} />
-          <div style={{ width: '80%', height: '100%', margin: '0 auto', background: 'white', borderTopLeftRadius: '24px', borderTopRightRadius: '24px', border: '1px solid var(--border)', borderBottom: 'none', boxShadow: '0 -12px 48px rgba(0,0,0,0.04)', padding: '24px', display: 'flex', gap: '16px', overflow: 'hidden' }}>
+          <div style={{ width: '80%', height: '100%', margin: '0 auto', background: 'var(--bg)', borderTopLeftRadius: '24px', borderTopRightRadius: '24px', border: '1px solid var(--border)', borderBottom: 'none', boxShadow: '0 -12px 48px rgba(0,0,0,0.04)', padding: '24px', display: 'flex', gap: '16px', overflow: 'hidden' }}>
             {[1,2,3].map(i => (
               <div key={i} style={{ flex: 1, background: 'var(--bg)', borderRadius: '12px', padding: '16px', border: '1px solid var(--border)', opacity: 1 - (i*0.15) }}>
                 <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--border)', marginBottom: '16px' }} />
@@ -440,8 +453,8 @@ const LandingPage = () => {
         <div className="main-content">
           <div style={{ textAlign: 'center', marginBottom: '64px' }}>
             <div className="section-label">Our Process</div>
-            <h2 style={{ fontSize: '2.4rem', fontWeight: '800', letterSpacing: '-0.5px' }}>How Irshad Works</h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', maxWidth: '560px', margin: '16px auto 0', lineHeight: 1.7 }}>
+            <h2 style={{ fontSize: '2.11rem', fontWeight: '800', letterSpacing: '-0.5px' }}>How Irshad Works</h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.97rem', maxWidth: '560px', margin: '16px auto 0', lineHeight: 1.7 }}>
               Our proprietary 3-stage algorithm ensures your investments align completely with Islamic financial principles.
             </p>
           </div>
@@ -484,7 +497,7 @@ const LandingPage = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px', flexWrap: 'wrap', gap: '12px' }}>
               <div>
                 <div className="section-label">Live Market</div>
-                <h2 style={{ fontSize: '2.2rem', fontWeight: '800', letterSpacing: '-0.5px' }}>Market Snapshot</h2>
+                <h2 style={{ fontSize: '1.94rem', fontWeight: '800', letterSpacing: '-0.5px' }}>Market Snapshot</h2>
               </div>
               <Link to="/login" className="btn-ghost">View All Stocks <ChevronRight size={16} /></Link>
             </div>
@@ -501,13 +514,13 @@ const LandingPage = () => {
           <div className="about-strip-grid">
             <div>
               <div className="section-label">Our Story</div>
-              <h2 style={{ fontSize: '2.4rem', fontWeight: '800', letterSpacing: '-0.5px', margin: '16px 0 24px' }}>
+              <h2 style={{ fontSize: '2.11rem', fontWeight: '800', letterSpacing: '-0.5px', margin: '16px 0 24px' }}>
                 Built for Muslim Investors in Nigeria
               </h2>
-              <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', lineHeight: 1.85, marginBottom: '20px' }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', lineHeight: 1.85, marginBottom: '20px' }}>
                 Irshad was founded to solve a critical gap: Muslim investors in Nigeria had no transparent, automated tool to verify that their stock holdings complied with Islamic principles.
               </p>
-              <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', lineHeight: 1.85, marginBottom: '32px' }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', lineHeight: 1.85, marginBottom: '32px' }}>
                 By strictly adhering to AAOIFI standards and building deep integrations with market data, we empower you to grow your wealth without compromising your faith.
               </p>
               <Link to="/about" className="btn-ghost">
@@ -516,7 +529,7 @@ const LandingPage = () => {
             </div>
 
             <div style={{
-              background: 'white',
+              background: 'var(--bg)',
               borderRadius: 'var(--radius-xl)',
               padding: '48px',
               border: '1px solid var(--border)',
@@ -546,10 +559,10 @@ const LandingPage = () => {
                   background: row.bg, borderRadius: 'var(--radius-md)', padding: '16px 20px'
                 }}>
                   <span style={{ fontWeight: 600, color: 'var(--text-dark)' }}>{row.label}</span>
-                  <span style={{ fontWeight: 800, color: row.color, fontSize: '1.4rem' }}>{row.value}</span>
+                  <span style={{ fontWeight: 800, color: row.color, fontSize: '1.23rem' }}>{row.value}</span>
                 </div>
               ))}
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-light)', textAlign: 'center', marginTop: 4 }}>
+              <p style={{ fontSize: '0.7rem', color: 'var(--text-light)', textAlign: 'center', marginTop: 4 }}>
                 Based on AAOIFI screening of listed companies
               </p>
             </div>
@@ -564,37 +577,37 @@ const LandingPage = () => {
           <div className="app-section-grid">
             <div>
               <div className="section-label">Get the App</div>
-              <h2 style={{ fontSize: '2.6rem', fontWeight: '900', letterSpacing: '-1px', margin: '16px 0 24px', color: 'var(--text-dark)' }}>
+              <h2 style={{ fontSize: '2.29rem', fontWeight: '900', letterSpacing: '-1px', margin: '16px 0 24px', color: 'var(--text-dark)' }}>
                 Your Halal Portfolio in Your Pocket
               </h2>
-              <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', lineHeight: 1.8, marginBottom: '32px' }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.97rem', lineHeight: 1.8, marginBottom: '32px' }}>
                 Download the Irshad mobile app for iOS and Android to track your investments, calculate your Zakat, and receive real-time halal screening alerts directly on your phone.
               </p>
               
               <div className="app-store-btns">
                 <a href="#" style={{
                   display: 'flex', alignItems: 'center', gap: '12px',
-                  background: '#000', color: 'white',
+                  background: '#000', color: 'var(--bg)',
                   padding: '12px 24px', borderRadius: '12px',
                   textDecoration: 'none'
                 }}>
                   <Apple size={28} />
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', opacity: 0.8 }}>Download on the</span>
-                    <span style={{ fontSize: '1.1rem', fontWeight: 600, letterSpacing: '-0.3px', marginTop: '-2px' }}>App Store</span>
+                    <span style={{ fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '0.5px', opacity: 0.8 }}>Download on the</span>
+                    <span style={{ fontSize: '0.97rem', fontWeight: 600, letterSpacing: '-0.3px', marginTop: '-2px' }}>App Store</span>
                   </div>
                 </a>
 
                 <a href="#" style={{
                   display: 'flex', alignItems: 'center', gap: '12px',
-                  background: '#000', color: 'white',
+                  background: '#000', color: 'var(--bg)',
                   padding: '12px 24px', borderRadius: '12px',
                   textDecoration: 'none'
                 }}>
                   <Play size={28} fill="currentColor" />
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', opacity: 0.8 }}>Get it on</span>
-                    <span style={{ fontSize: '1.1rem', fontWeight: 600, letterSpacing: '-0.3px', marginTop: '-2px' }}>Google Play</span>
+                    <span style={{ fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '0.5px', opacity: 0.8 }}>Get it on</span>
+                    <span style={{ fontSize: '0.97rem', fontWeight: 600, letterSpacing: '-0.3px', marginTop: '-2px' }}>Google Play</span>
                   </div>
                 </a>
               </div>
@@ -633,16 +646,16 @@ const LandingPage = () => {
             }}
           />
           <div>
-            <h2 style={{ color: 'white', fontSize: '2.2rem', fontWeight: '800', letterSpacing: '-0.5px', marginBottom: '12px' }}>
+            <h2 style={{ color: 'white', fontSize: '1.94rem', fontWeight: '800', letterSpacing: '-0.5px', marginBottom: '12px' }}>
               Ready to invest the halal way?
             </h2>
-            <p style={{ color: 'rgba(255,255,255,0.78)', fontSize: '1.05rem', maxWidth: '520px', lineHeight: 1.7 }}>
+            <p style={{ color: 'rgba(255,255,255,0.78)', fontSize: '0.92rem', maxWidth: '520px', lineHeight: 1.7 }}>
               Join thousands of Nigerian Muslims who trust Irshad to screen their investments. Get started free today.
             </p>
           </div>
           <div className="cta-banner-btns">
             <Link to="/register" style={{
-              background: 'white',
+              background: 'var(--bg)',
               color: 'var(--primary)',
               fontWeight: 700,
               padding: '14px 28px',
@@ -651,7 +664,7 @@ const LandingPage = () => {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '8px',
-              fontSize: '0.97rem',
+              fontSize: '0.85rem',
               whiteSpace: 'nowrap',
             }}>
               Create Free Account <ArrowRight size={18} />
@@ -666,7 +679,7 @@ const LandingPage = () => {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '8px',
-              fontSize: '0.97rem',
+              fontSize: '0.85rem',
               whiteSpace: 'nowrap',
               border: '1.5px solid rgba(255,255,255,0.3)',
             }}>
@@ -760,7 +773,7 @@ const MarketPage = () => {
           display: 'inline-flex', alignItems: 'center', gap: '8px',
           background: 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.3)',
           borderRadius: '40px', padding: '6px 16px', marginBottom: '24px',
-          color: 'var(--gold)', fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.5px',
+          color: 'var(--gold)', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.5px',
         }}>
           <Shield size={13} /> AAOIFI Shariah Screening
         </div>
@@ -771,7 +784,7 @@ const MarketPage = () => {
         }}>
           Search for Stock
         </h1>
-        <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '1.05rem', marginBottom: '40px', maxWidth: '480px', margin: '0 auto 40px' }}>
+        <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.92rem', marginBottom: '40px', maxWidth: '480px', margin: '0 auto 40px' }}>
           Search any company on the Nigerian Exchange and instantly see its Shariah compliance status.
         </p>
 
@@ -782,7 +795,7 @@ const MarketPage = () => {
         }}>
           <div style={{
             display: 'flex', alignItems: 'center', gap: '12px',
-            background: 'white',
+            background: 'var(--bg)',
             borderRadius: '16px',
             padding: '6px 6px 6px 20px',
             boxShadow: focused ? '0 0 0 3px rgba(201,168,76,0.4), 0 20px 60px rgba(0,0,0,0.3)' : '0 20px 60px rgba(0,0,0,0.25)',
@@ -798,7 +811,7 @@ const MarketPage = () => {
               placeholder="Search by company name or stock symbol…"
               style={{
                 flex: 1, border: 'none', outline: 'none', background: 'transparent',
-                fontSize: '1.05rem', color: 'var(--text-dark)', fontFamily: 'inherit',
+                fontSize: '0.92rem', color: 'var(--text-dark)', fontFamily: 'inherit',
                 padding: '10px 0',
               }}
             />
@@ -806,14 +819,14 @@ const MarketPage = () => {
               <button onClick={() => setSearch('')} style={{
                 background: 'var(--bg-section)', border: 'none', borderRadius: '8px',
                 padding: '6px 10px', cursor: 'pointer', color: 'var(--text-muted)',
-                fontSize: '0.78rem', fontWeight: 600,
+                fontSize: '0.69rem', fontWeight: 600,
               }}>Clear</button>
             )}
             <button
               onClick={() => { if (filtered.length === 1) navigate(`/market/${filtered[0].symbol}`, { state: { stock: filtered[0] } }); }}
               style={{
                 background: 'var(--gold-grad)', border: 'none', borderRadius: '12px',
-                padding: '12px 24px', color: 'white', fontWeight: 700, fontSize: '0.95rem',
+                padding: '12px 24px', color: 'white', fontWeight: 700, fontSize: '0.84rem',
                 cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
                 boxShadow: '0 4px 16px rgba(201,168,76,0.35)',
               }}>
@@ -831,7 +844,7 @@ const MarketPage = () => {
         {loading ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '80px 0', gap: '16px' }}>
             <div className="spinner" />
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading stocks…</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.79rem' }}>Loading stocks…</p>
           </div>
         ) : !showResults ? (
           /* ── Idle State: show stats + tip ── */
@@ -844,17 +857,17 @@ const MarketPage = () => {
                 { label: 'Doubtful', value: stocks.filter(s => getStatus(s) === 'doubtful').length, color: 'var(--doubtful)' },
               ].map(stat => (
                 <div key={stat.label} style={{
-                  background: 'white', border: '1px solid var(--border)',
+                  background: 'var(--bg)', border: '1px solid var(--border)',
                   borderRadius: '16px', padding: '24px 32px', textAlign: 'center',
                   boxShadow: 'var(--shadow-sm)',
                 }}>
-                  <div style={{ fontSize: '2.2rem', fontWeight: 900, color: stat.color }}>{stat.value}</div>
-                  <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600, marginTop: '4px' }}>{stat.label}</div>
+                  <div style={{ fontSize: '1.94rem', fontWeight: 900, color: stat.color }}>{stat.value}</div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600, marginTop: '4px' }}>{stat.label}</div>
                 </div>
               ))}
             </div>
             <BarChart2 size={40} strokeWidth={1} style={{ color: 'var(--border)', margin: '0 auto 16px' }} />
-            <p style={{ color: 'var(--text-light)', fontSize: '1rem', fontWeight: 500 }}>
+            <p style={{ color: 'var(--text-light)', fontSize: '0.88rem', fontWeight: 500 }}>
               Start typing to search for a stock above
             </p>
           </div>
@@ -867,7 +880,7 @@ const MarketPage = () => {
         ) : (
           <>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.79rem', fontWeight: 600 }}>
                 {filtered.length} {filtered.length === 1 ? 'result' : 'results'}
                 {search ? ` for "${search}"` : ''}
               </span>
@@ -886,7 +899,7 @@ const MarketPage = () => {
                     style={{
                       animationDelay: `${(i % 10) * 0.04}s`,
                       display: 'flex', alignItems: 'center', gap: '16px',
-                      background: 'white', border: '1px solid var(--border)',
+                      background: 'var(--bg)', border: '1px solid var(--border)',
                       borderRadius: '16px', padding: '16px 20px',
                       cursor: 'pointer', transition: 'all 0.18s',
                       boxShadow: 'var(--shadow-sm)',
@@ -899,23 +912,23 @@ const MarketPage = () => {
                     
                     {/* Name + sector */}
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--text-dark)', marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{ fontWeight: 800, fontSize: '0.97rem', color: 'var(--text-dark)', marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         {company.symbol}
                       </div>
-                      <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {company.name}
                       </div>
                     </div>
 
                     {/* Price & Change */}
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px', flexShrink: 0 }}>
-                      <div style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--text-dark)' }}>₦{price.toFixed(2)}</div>
+                      <div style={{ fontWeight: 800, fontSize: '0.92rem', color: 'var(--text-dark)' }}>₦{price.toFixed(2)}</div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end', maxWidth: '200px' }}>
                         {change !== 0 && (
                           <div style={{
                             display: 'flex', alignItems: 'center', gap: '2px',
                             color: isPos ? 'var(--halal)' : 'var(--non-halal)',
-                            fontSize: '0.75rem', fontWeight: 700, marginLeft: '4px'
+                            fontSize: '0.66rem', fontWeight: 700, marginLeft: '4px'
                           }}>
                             {isPos ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                             {isPos ? '+' : ''}{change.toFixed(2)}%
@@ -961,9 +974,8 @@ function App() {
   return (
     <>
       <ErrorBoundary>
-        <Router>
-          <DocumentTitleUpdater />
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+          <DocumentTitleUpdater />
             <TopNavbar />
             <StockTicker />
             <main style={{ flex: 1 }}>
@@ -974,7 +986,7 @@ function App() {
                     <div style={{ position: 'absolute', inset: 0, border: '3px solid var(--primary)', borderRadius: '50%', borderTopColor: 'transparent', animation: 'spin 1s linear infinite' }} />
                     <Shield size={24} color="var(--primary)" style={{ animation: 'pulse 2s infinite' }} />
                   </div>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', fontWeight: 700, letterSpacing: '0.5px' }}>Loading Irshad...</p>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.84rem', fontWeight: 700, letterSpacing: '0.5px' }}>Loading Irshad...</p>
                 </div>
               }>
                 <AnimatedRoutes>
@@ -998,9 +1010,6 @@ function App() {
                   <Route path="/profile" element={
                     <DashboardLayout><Profile /></DashboardLayout>
                   } />
-                  <Route path="/settings" element={
-                    <DashboardLayout><Settings /></DashboardLayout>
-                  } />
                   <Route path="/admin" element={<AdminDashboard />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/register" element={<RegisterPage />} />
@@ -1012,7 +1021,6 @@ function App() {
               </Suspense>
             </main>
           </div>
-        </Router>
       </ErrorBoundary>
     </>
   );

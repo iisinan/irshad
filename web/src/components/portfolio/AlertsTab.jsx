@@ -44,7 +44,7 @@ export default function AlertsTab() {
   };
 
   return (
-    <div className="animate-fade-in stagger-1" style={{ background:'white', borderRadius:'24px', padding:'0', boxShadow:'var(--shadow-sm)', border:'1px solid var(--border)', overflow:'hidden' }}>
+    <div className="animate-fade-in stagger-1" style={{ background: 'var(--bg)', borderRadius:'24px', padding:'0', boxShadow:'var(--shadow-sm)', border:'1px solid var(--border)', overflow:'hidden' }}>
       
       {/* Header */}
       <div style={{ background: 'linear-gradient(135deg, #0D1B2A 0%, #0F5257 65%, #0B6B71 100%)', padding: '32px', position: 'relative', overflow: 'hidden' }}>
@@ -54,8 +54,8 @@ export default function AlertsTab() {
             <Bell size={28} />
           </div>
           <div>
-            <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'white', letterSpacing: '-0.5px' }}>Price Alerts</h2>
-            <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.9rem', marginTop: '4px' }}>Never miss a price movement</p>
+            <h2 style={{ fontSize: '1.23rem', fontWeight: 800, color: 'white', letterSpacing: '-0.5px' }}>Price Alerts</h2>
+            <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.79rem', marginTop: '4px' }}>Never miss a price movement</p>
           </div>
         </div>
       </div>
@@ -64,7 +64,7 @@ export default function AlertsTab() {
         {loading ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '60px 0', gap: '16px' }}>
             <div className="spinner" style={{ width: '40px', height: '40px', border: '3px solid var(--border)', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading alerts...</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.79rem' }}>Loading alerts...</p>
           </div>
         ) : alerts.length === 0 ? (
           <div style={{ 
@@ -79,18 +79,18 @@ export default function AlertsTab() {
             }}>
               <BellRing size={36} color="var(--primary)" fill="var(--primary)" opacity={0.8} />
             </div>
-            <div style={{ fontSize:'1.4rem', fontWeight:900, color:'var(--text-dark)', marginBottom:'12px', letterSpacing:'-0.5px' }}>
+            <div style={{ fontSize: '1.23rem', fontWeight:900, color:'var(--text-dark)', marginBottom:'12px', letterSpacing:'-0.5px' }}>
               No Active Price Alerts
             </div>
-            <p style={{ color:'var(--text-muted)', fontSize:'1rem', marginBottom:'32px', maxWidth:'400px', lineHeight:1.6 }}>
+            <p style={{ color:'var(--text-muted)', fontSize: '0.88rem', marginBottom:'32px', maxWidth:'400px', lineHeight:1.6 }}>
               Set up price alerts for your favorite stocks to be notified immediately when they hit your target price.
             </p>
             <button 
               onClick={() => navigate('/portfolio#market')} 
               style={{ 
                 display:'inline-flex', alignItems:'center', gap:'8px', padding:'14px 28px', 
-                borderRadius:'14px', background:'var(--gold-grad)', color:'white', border:'none', 
-                fontWeight:800, fontSize:'0.95rem', cursor:'pointer', textDecoration:'none',
+                borderRadius:'14px', background:'var(--gold-grad)', color:'var(--bg)', border:'none', 
+                fontWeight:800, fontSize: '0.84rem', cursor:'pointer', textDecoration:'none',
                 boxShadow:'0 8px 24px rgba(201,168,76,0.3)', transition:'transform 0.2s, boxShadow 0.2s' 
               }}
             >
@@ -106,7 +106,7 @@ export default function AlertsTab() {
                 className="roll-in-anim hover-lift"
                 style={{ 
                   animationDelay: `${i * 0.05}s`,
-                  background: 'white', borderRadius: '16px', padding: '20px', border: '1px solid var(--border)',
+                  background: 'var(--bg)', borderRadius: '16px', padding: '20px', border: '1px solid var(--border)',
                   cursor: 'pointer', transition: 'all 0.2s', display: 'flex', flexDirection: 'column'
                 }}
               >
@@ -116,8 +116,8 @@ export default function AlertsTab() {
                       {alert.symbol.substring(0, 2)}
                     </div>
                     <div>
-                      <h4 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)' }}>{alert.symbol}</h4>
-                      <div style={{ fontSize: '0.75rem', fontWeight: 700, color: alert.is_active ? 'var(--primary)' : 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+                      <h4 style={{ fontSize: '0.97rem', fontWeight: 800, color: 'var(--text-dark)' }}>{alert.symbol}</h4>
+                      <div style={{ fontSize: '0.66rem', fontWeight: 700, color: alert.is_active ? 'var(--primary)' : 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
                         <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: alert.is_active ? 'var(--primary)' : 'var(--text-light)' }} />
                         {alert.is_active ? 'Active' : 'Triggered'}
                       </div>
@@ -136,9 +136,9 @@ export default function AlertsTab() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-section)', padding: '16px', borderRadius: '12px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     {alert.condition === 'above' ? <ArrowUpRight size={20} color="var(--halal)" /> : <ArrowDownRight size={20} color="var(--non-halal)" />}
-                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>Target</span>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>Target</span>
                   </div>
-                  <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-dark)' }}>
+                  <div style={{ fontSize: '1.06rem', fontWeight: 800, color: 'var(--text-dark)' }}>
                     ₦{Number(alert.target_price).toFixed(2)}
                   </div>
                 </div>

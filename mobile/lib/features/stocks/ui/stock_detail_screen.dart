@@ -919,9 +919,23 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
       return s.replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},');
     }
 
-    final isDebtFail = debtRatio > 30.0;
-    final isInterestFail = interestRatio > 5.0;
-    final isCashFail = cashRatio > 30.0;
+    final rawDebtFail = debtRatio > 30.0;
+    final rawInterestFail = interestRatio > 5.0;
+    final rawCashFail = cashRatio > 30.0;
+
+    final lowerReason = reason.toLowerCase();
+    final isDebtFail = rawDebtFail || lowerReason.contains('rule 2') || lowerReason.contains('debt limit');
+    final isInterestFail = rawInterestFail || lowerReason.contains('rule 4') || lowerReason.contains('interest income');
+    final isCashFail = rawCashFail || lowerReason.contains('rule 3') || lowerReason.contains('cash & securities');
+
+    final isBusinessFail = lowerReason.contains('rule 1') ||
+        lowerReason.contains('business activity') ||
+        lowerReason.contains('sector check') ||
+        lowerReason.contains('prohibited') ||
+        lowerReason.contains('banking') ||
+        lowerReason.contains('financial business') ||
+        lowerReason.contains('alcohol') ||
+        (isNonHalal && !isDebtFail && !isInterestFail && !isCashFail);
 
     Widget buildCalculationCard(String numLabel, String denLabel, String numVal, String denVal) {
       return Column(
@@ -1026,9 +1040,9 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: bg.withValues(alpha: 0.15),
+                    color: badgeBg.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(30),
-                    border: Border.all(color: bg.withValues(alpha: 0.3)),
+                    border: Border.all(color: badgeBg.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -1058,12 +1072,12 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: reason.contains('Rule 1') ? context.haram.withValues(alpha: 0.15) : context.halal.withValues(alpha: 0.15), 
+                        color: isBusinessFail ? context.haram.withValues(alpha: 0.15) : context.halal.withValues(alpha: 0.15), 
                         borderRadius: BorderRadius.circular(20)
                       ),
-                      child: Text(reason.contains('Rule 1') ? 'FAIL' : 'PASS', 
+                      child: Text(isBusinessFail ? 'FAIL' : 'PASS', 
                         style: TextStyle(
-                          color: reason.contains('Rule 1') ? context.haram : context.halal, 
+                          color: isBusinessFail ? context.haram : context.halal, 
                           fontSize: 10, 
                           fontWeight: FontWeight.w900
                         )
@@ -1073,7 +1087,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  reason.contains('Rule 1')
+                  isBusinessFail
                       ? reason
                       : "The core business operations of this company have been verified to be in a Halal industry, with no significant involvement in prohibited activities like conventional finance, alcohol, gambling, or tobacco.",
                   style: TextStyle(color: context.textMuted, fontSize: 13, height: 1.5),

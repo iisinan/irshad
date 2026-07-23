@@ -29,7 +29,7 @@ class BusinessIntelligenceAgent:
             try:
                 print(f"Fetching business intelligence for {company_name}...")
                 run_input = {
-                    "queries": f"{company_name} business activities OR operations OR controversy",
+                    "queries": f"{company_name} (business activities OR operations OR controversy) site:businessday.ng",
                     "resultsPerPage": 3,
                     "maxPagesPerQuery": 1
                 }

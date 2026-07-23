@@ -42,11 +42,11 @@ const CustomTooltip = ({
           <div style={{ background: 'var(--primary-10)', padding: '8px', borderRadius: '10px', color: 'var(--primary)' }}>
             <Sparkles size={18} />
           </div>
-          <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-dark)', margin: 0, letterSpacing: '-0.3px' }}>{step.title}</h3>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)', margin: 0, letterSpacing: '-0.3px' }}>{step.title}</h3>
         </div>
       )}
       
-      <div style={{ fontSize: '1rem', color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: '28px' }}>
+      <div style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: '28px' }}>
         {step.content}
       </div>
       
@@ -64,22 +64,22 @@ const CustomTooltip = ({
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
-        <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-light)', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
+        <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-light)', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
           Step {index + 1} of {size}
         </div>
         
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           {!isLastStep && (
-            <button {...skipProps} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontWeight: 600, cursor: 'pointer', padding: '10px 14px', fontSize: '0.9rem', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = 'var(--text-dark)'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}>
+            <button {...skipProps} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontWeight: 600, cursor: 'pointer', padding: '10px 14px', fontSize: '0.79rem', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = 'var(--text-dark)'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}>
               Skip
             </button>
           )}
           {index > 0 && (
-            <button {...backProps} style={{ background: 'var(--bg-section)', border: 'none', color: 'var(--text-dark)', fontWeight: 700, cursor: 'pointer', padding: '10px 14px', fontSize: '0.9rem', borderRadius: '10px', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--border)'} onMouseLeave={e => e.currentTarget.style.background = 'var(--bg-section)'}>
+            <button {...backProps} style={{ background: 'var(--bg-section)', border: 'none', color: 'var(--text-dark)', fontWeight: 700, cursor: 'pointer', padding: '10px 14px', fontSize: '0.79rem', borderRadius: '10px', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--border)'} onMouseLeave={e => e.currentTarget.style.background = 'var(--bg-section)'}>
               Back
             </button>
           )}
-          <button {...primaryProps} className="btn-primary" style={{ padding: '10px 24px', fontSize: '0.95rem', borderRadius: '10px', boxShadow: '0 8px 16px rgba(15,82,87,0.25)', fontWeight: 800, transition: 'transform 0.2s, box-shadow 0.2s' }} onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 20px rgba(15,82,87,0.3)'; }} onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 8px 16px rgba(15,82,87,0.25)'; }}>
+          <button {...primaryProps} className="btn-primary" style={{ padding: '10px 24px', fontSize: '0.84rem', borderRadius: '10px', boxShadow: '0 8px 16px rgba(15,82,87,0.25)', fontWeight: 800, transition: 'transform 0.2s, box-shadow 0.2s' }} onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 20px rgba(15,82,87,0.3)'; }} onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 8px 16px rgba(15,82,87,0.25)'; }}>
             {continuous && !isLastStep ? 'Next' : 'Finish Tour'}
           </button>
         </div>

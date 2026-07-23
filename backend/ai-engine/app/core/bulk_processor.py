@@ -12,7 +12,7 @@ class BulkProcessor:
         # We look for the JSON file containing all NGX companies
         self.tickers_file = os.path.join(os.path.dirname(__file__), "../../../backend/database/data/ngx_companies.json")
     
-    async def process_all_tickers(self, financial_year: int = 2024):
+    async def process_all_tickers(self, financial_year: int = 2026):
         """
         Iterates over all tickers and triggers the LangGraph pipeline for each.
         """

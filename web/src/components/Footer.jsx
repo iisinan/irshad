@@ -25,7 +25,7 @@ const Footer = () => (
         <div style={{ display: 'flex', gap: '16px', marginTop: '32px' }}>
           <a href="mailto:hello@irshad.com" style={{ color: '#9CA3AF', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '8px' }} onMouseEnter={e => e.currentTarget.style.color = 'white'} onMouseLeave={e => e.currentTarget.style.color = '#9CA3AF'}>
             <Mail size={18} />
-            <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Contact Us</span>
+            <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Contact Us</span>
           </a>
         </div>
       </div>
@@ -61,12 +61,12 @@ const Footer = () => (
     </div>
 
     <div className="footer-bottom" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-      <span style={{ fontSize: '0.85rem' }}>© {new Date().getFullYear()} Irshad Financial Services Ltd. All rights reserved.</span>
+      <span style={{ fontSize: '0.75rem' }}>© {new Date().getFullYear()} Irshad Financial Services Ltd. All rights reserved.</span>
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <span style={{ padding: '6px 12px', background: 'rgba(255,255,255,0.05)', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700, color: 'var(--gold)' }}>
+        <span style={{ padding: '6px 12px', background: 'rgba(255,255,255,0.05)', borderRadius: '20px', fontSize: '0.66rem', fontWeight: 700, color: 'var(--gold)' }}>
           AAOIFI Compliant
         </span>
-        <span style={{ padding: '6px 12px', background: 'rgba(255,255,255,0.05)', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700 }}>
+        <span style={{ padding: '6px 12px', background: 'rgba(255,255,255,0.05)', borderRadius: '20px', fontSize: '0.66rem', fontWeight: 700 }}>
           Nigeria
         </span>
       </div>

@@ -17,7 +17,7 @@ class PortfolioController extends Controller
      */
     public function index(): JsonResponse
     {
-        $holdings = Holding::with(['company.financials:id,company_id,non_compliant_income_ratio'])
+        $holdings = Holding::with(['company.financials:id,company_id,total_revenue,interest_income'])
             ->where('user_id', Auth::id())
             ->get();
 
