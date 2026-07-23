@@ -23,19 +23,18 @@ class FinancialScraper:
 
         # Build targeted queries for full-year annual reports
         if annual_only:
-            # Prefer 'annual report', 'commercial paper', or 'financial statement' explicitly
-            african_fin_query = (
-                f"{company_name} (\"annual report\" OR \"financial statement\" OR \"commercial paper\") {financial_year} filetype:pdf site:africanfinancials.com"
+            # New improved query logic for finding exactly the right audited annual documents
+            base_query = (
+                f'"{company_name}" ("annual report" OR "annual report and accounts" OR '
+                f'"audited financial statements" OR "annual financial statements" OR '
+                f'"integrated report" OR "consolidated financial statements") '
+                f'"{financial_year}" filetype:pdf '
+                f'-Q1 -Q2 -Q3 -"Half Year" -H1 -Interim -Unaudited -"Investor Presentation" -"Earnings Call" -Factsheet'
             )
-            ngx_query = (
-                f"{company_name} (\"annual report\" OR \"financial statement\" OR \"commercial paper\") {financial_year} filetype:pdf site:ngxgroup.com"
-            )
-            sec_query = (
-                f"{company_name} (\"10-K\" OR \"annual report\") {financial_year} filetype:pdf site:sec.gov"
-            )
-            general_query = (
-                f"{company_name} (\"annual report\" OR \"financial statement\" OR \"commercial paper\") {financial_year} filetype:pdf"
-            )
+            african_fin_query = f'{base_query} site:africanfinancials.com'
+            ngx_query = f'{base_query} site:ngxgroup.com'
+            sec_query = f'{base_query} site:sec.gov'
+            general_query = base_query
         else:
             african_fin_query = (
                 f"{company_name} financial statements {financial_year} filetype:pdf site:africanfinancials.com"
