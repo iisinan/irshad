@@ -29,7 +29,7 @@ class FinancialScraper:
         base_query = (
             f'"{company_name}" ("financial statements" OR "quarterly report" OR '
             f'"audited financial statements" OR "unaudited financial statements" OR '
-            f'"interim financial statements" OR "annual report") '
+            f'"interim financial statements" OR "annual report" OR "commercial papers") '
             f'"{financial_year}" '
             f'-"Investor Presentation" -"Earnings Call" -Factsheet -ESG -Sustainability'
         )
@@ -37,6 +37,7 @@ class FinancialScraper:
         queries = [
             f'{base_query} inurl:africanfinancials.com',
             f'{base_query} inurl:ngxgroup.com',
+            f'{base_query} inurl:sec.gov.ng',
             base_query # Official sites usually surface here
         ]
         
@@ -47,13 +48,13 @@ class FinancialScraper:
             "languageCode": "en",
         }
 
-        results = {"ngx": None, "official": None, "african_financials": None}
+        results = {"ngx": None, "official": None, "african_financials": None, "sec": None}
         html_pages_to_crawl = []
-        found_pdfs = []
+        found_docs = [] # Will store both PDFs and HTML fallbacks
         
         EXCLUDE_KEYWORDS = ["sustainability", "esg", "proxy", "notice", "agenda", "dividend", "presentation"]
 
-        def is_valid_pdf(url_str, text_str=""):
+        def is_valid_document(url_str, text_str=""):
             # Check year
             if str(financial_year) not in text_str and str(financial_year) not in url_str:
                 return False
@@ -80,6 +81,7 @@ class FinancialScraper:
                 query = item.get("searchQuery", {}).get("term", "")
                 is_ngx = "inurl:ngxgroup.com" in query
                 is_af = "inurl:africanfinancials.com" in query
+                is_sec = "inurl:sec.gov.ng" in query
                 
                 # First word of company name to check for official domain match
                 company_first_word = company_name.split()[0].lower().replace(",", "").replace(".", "")
@@ -93,7 +95,9 @@ class FinancialScraper:
                         continue # Skip news sites
                         
                     source_type = "other"
-                    if is_ngx or "ngxgroup.com" in url.lower():
+                    if is_sec or "sec.gov.ng" in url.lower():
+                        source_type = "sec"
+                    elif is_ngx or "ngxgroup.com" in url.lower():
                         source_type = "ngx"
                     elif is_af or "africanfinancials.com" in url.lower():
                         source_type = "african_financials"
@@ -103,12 +107,13 @@ class FinancialScraper:
                     if source_type == "other":
                         continue # Skip random domains that don't match any criteria
                     
-                    if url.lower().endswith(".pdf"):
-                        if is_valid_pdf(url, title + snippet):
-                            found_pdfs.append({"url": url, "source_type": source_type, "text": title + snippet})
-                    else:
-                        # Collect HTML links for deep crawling
-                        html_pages_to_crawl.append({"url": url, "source_type": source_type})
+                    if is_valid_document(url, title + snippet):
+                        if url.lower().endswith(".pdf"):
+                            found_docs.append({"url": url, "source_type": source_type, "text": title + snippet, "is_pdf": True})
+                        else:
+                            # Collect HTML links for deep crawling and as potential fallback documents
+                            html_pages_to_crawl.append({"url": url, "source_type": source_type})
+                            found_docs.append({"url": url, "source_type": source_type, "text": title + snippet, "is_pdf": False})
 
             # 2. Deep Crawl HTML Pages using Cheerio Scraper if necessary
             if html_pages_to_crawl:
@@ -150,17 +155,17 @@ class FinancialScraper:
                         if not full_url.lower().endswith('.pdf'):
                             continue
                             
-                        if is_valid_pdf(full_url, text):
-                            found_pdfs.append({"url": full_url, "source_type": source_type, "text": text})
+                        if is_valid_document(full_url, text):
+                            found_docs.append({"url": full_url, "source_type": source_type, "text": text, "is_pdf": True})
 
-            # 3. Filter and Sort the most recent/best PDFs
-            if found_pdfs:
-                print(f"Found {len(found_pdfs)} valid PDFs. Selecting best..."); 
+            # 3. Filter and Sort the most recent/best PDFs and HTML fallbacks
+            if found_docs:
+                print(f"Found {len(found_docs)} valid documents. Selecting best..."); 
                 
-                # We prioritize Official > African Financials > NGX
-                priority = {"official": 3, "african_financials": 2, "ngx": 1}
+                # Priority: Official (4) > NGX (3) > African Financials (2) > SEC (1)
+                priority = {"official": 4, "ngx": 3, "african_financials": 2, "sec": 1}
                 
-                def extract_recency_score(url_str, text_str):
+                def extract_recency_score(url_str, text_str, is_pdf):
                     # Base score from year-month if available
                     score = 0
                     match = re.search(r'(20\d{2})[-/](0[1-9]|1[0-2])', url_str)
@@ -177,22 +182,29 @@ class FinancialScraper:
                         score += 2
                     elif "q1" in combined or "first quarter" in combined or "3m" in combined:
                         score += 1
+                    
+                    # Massive bonus for PDF so they always outrank HTML pages if they exist
+                    if is_pdf:
+                        score += 10000
                         
                     return score
 
-                found_pdfs.sort(key=lambda x: (priority.get(x["source_type"], 0), extract_recency_score(x["url"], x["text"])), reverse=True)
+                found_docs.sort(key=lambda x: (priority.get(x["source_type"], 0), extract_recency_score(x["url"], x["text"], x["is_pdf"])), reverse=True)
                 
                 # Assign to results
-                for pdf in found_pdfs:
-                    stype = pdf["source_type"]
+                for doc in found_docs:
+                    stype = doc["source_type"]
                     if stype in results and not results[stype]:
-                        results[stype] = pdf["url"]
+                        results[stype] = doc["url"]
                         
-                # If official is missing but we have african_financials, we can use it as official fallback
-                if not results["official"] and results["african_financials"]:
-                    results["official"] = results["african_financials"]
-                elif not results["official"] and results["ngx"]:
-                    results["official"] = results["ngx"]
+                # Priority Fallback if Official is missing
+                if not results["official"]:
+                    if results["ngx"]:
+                        results["official"] = results["ngx"]
+                    elif results["african_financials"]:
+                        results["official"] = results["african_financials"]
+                    elif results["sec"]:
+                        results["official"] = results["sec"]
                     
             return results
 

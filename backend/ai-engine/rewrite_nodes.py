@@ -1,67 +1,10 @@
-import os
-import tempfile
-import time
-import httpx
-from sqlalchemy.future import select
-from app.graph.state import GraphState
-from app.tools.pdf_extractor import PDFExtractor
-from app.tools.apify_client import FinancialScraper, AlphaVantageClient, FMPClient
-from app.core.storage_client import StorageClient
-from app.core.database import AsyncSessionLocal
-from app.models.companies import Company
-from app.models.financial_documents import FinancialDocument
+import re
 
-async def search_company(state: GraphState) -> GraphState:
-    # 1. Search Company Node
-    ticker = state["ticker"]
-    async with AsyncSessionLocal() as db:
-        result = await db.execute(select(Company).where(Company.ticker == ticker))
-        company = result.scalars().first()
-        if company:
-            state["company_name"] = company.name
-        else:
-            print(f"Company {ticker} not found in DB. Falling back to ticker as name.")
-            state["company_name"] = ticker
-            
-    return state
+with open('app/graph/nodes.py', 'r') as f:
+    content = f.read()
 
-from app.models.financial_screening import FinancialScreening
-from sqlalchemy import select, func
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.core.database import AsyncSessionLocal
-
-async def check_financial_cache(state: GraphState) -> GraphState:
-    """
-    Checks the database to see the most recent financial year we have processed.
-    Sets the target year to the next logical year.
-    If we are up to date, it doesn't skip yet, it just sets the target year to search for.
-    """
-    async with AsyncSessionLocal() as db:
-        result = await db.execute(
-            select(FinancialScreening)
-            .where(FinancialScreening.company_ticker == state["ticker"])
-            .order_by(FinancialScreening.financial_year.desc())
-            .limit(1)
-        )
-        recent_fin = result.scalars().first()
-        
-        if recent_fin:
-            # Store the existing business info in case we don't find a new PDF
-            existing_activities = recent_fin.chosen_values.get("principal_activities", "")
-            existing_segments = recent_fin.chosen_values.get("business_segments", [])
-            state["raw_pdf_extraction"] = {
-                "principal_activities": existing_activities,
-                "business_segments": existing_segments
-            }
-            # We flag that we have a fallback
-            state["has_fallback_business_info"] = True
-        else:
-            # No historical data, fallback to the requested year (e.g. 2024)
-            state["has_fallback_business_info"] = False
-            
-    return state
-
-async def fetch_perplexity_data(state: GraphState) -> GraphState:
+# Define the new content
+new_content = """async def fetch_perplexity_data(state: GraphState) -> GraphState:
     from app.tools.perplexity_client import PerplexityClient
     import time
     
@@ -188,6 +131,22 @@ async def generate_explanation(state: GraphState) -> GraphState:
         state["ai_explanation"] = explanation
     return state
 
-async def store_results(state: GraphState) -> GraphState:
-    # 11. Store to PostgreSQL (moved to endpoint for now)
-    return state
+"""
+
+# Regex to replace everything from locate_annual_report to the end of perform_business_screening
+pattern = r"async def locate_annual_report.*?async def store_results"
+# We want to match up to the definition of store_results
+
+# Let's do a robust split instead.
+parts = content.split("async def locate_annual_report(state: GraphState) -> GraphState:")
+part1 = parts[0]
+
+parts2 = parts[1].split("async def store_results(state: GraphState) -> GraphState:")
+part2 = "async def store_results(state: GraphState) -> GraphState:" + parts2[1]
+
+final_content = part1 + new_content + part2
+
+with open('app/graph/nodes.py', 'w') as f:
+    f.write(final_content)
+
+print("nodes.py rewritten successfully")

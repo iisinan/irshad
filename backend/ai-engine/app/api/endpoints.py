@@ -138,7 +138,7 @@ async def screen_company(ticker: str, financial_year: int = 2025, db: AsyncSessi
             return {"error": "File Not Found", "detail": "No annual report could be located.", "retry": False}
 
         # Format exact JSON structure requested
-        return {
+        response_data = {
             "company": result_state.get("company_name", ticker),
             "ticker": ticker.upper(),
             "financial_year": financial_year,
@@ -154,6 +154,7 @@ async def screen_company(ticker: str, financial_year: int = 2025, db: AsyncSessi
             },
             "explanation": result_state.get("ai_explanation", "")
         }
+        return sanitize_json(response_data)
         
     except FileNotFoundError as e:
         # Return 200 so Laravel does not retry infinitely for missing files
