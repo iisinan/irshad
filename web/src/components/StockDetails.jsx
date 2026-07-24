@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2, Brain, Globe, Newspaper, Bell, X, ShieldCheck, XCircle, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2, Brain, Globe, Newspaper, Bell, X, ShieldCheck, XCircle, AlertTriangle, Star } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import api, { fetchStockDetails, fetchAiAnalysis, setPriceAlert, formatLogoUrl } from '../services/api';
+import api, { fetchStockDetails, fetchAiAnalysis, setPriceAlert, formatLogoUrl, fetchWatchlist, addToWatchlist, removeFromWatchlist } from '../services/api';
 import ReactMarkdown from 'react-markdown';
 import { useAuth } from '../context/AuthContext';
 const StockDetails = ({ symbol: propSymbol }) => {
@@ -28,6 +28,8 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const [showAlertDialog, setShowAlertDialog] = useState(false);
   const [alertPrice, setAlertPrice] = useState('');
   const [alertSaving, setAlertSaving] = useState(false);
+  const [inWatchlist, setInWatchlist] = useState(false);
+  const [watchlistLoading, setWatchlistLoading] = useState(false);
 
   useEffect(() => {
     // Always fetch full data in background; merge so we add financials & chart
@@ -46,6 +48,10 @@ const StockDetails = ({ symbol: propSymbol }) => {
     // Log history
     if (user) {
       api.post('/history', { action: 'check', reference_id: symbol }).catch(() => {});
+      fetchWatchlist().then(res => {
+        const list = res?.data || res || [];
+        setInWatchlist(list.some(item => item.symbol === symbol));
+      }).catch(console.error);
     }
   }, [symbol, user]);
 
@@ -228,7 +234,25 @@ const StockDetails = ({ symbol: propSymbol }) => {
     );
   };
 
-  // ─── AI Analysis ───────────────────────────────────
+  // ─── AI Analysis & Actions ─────────────────────────
+  const toggleWatchlist = async () => {
+    if (!user) { navigate('/login'); return; }
+    setWatchlistLoading(true);
+    try {
+      if (inWatchlist) {
+        await removeFromWatchlist(symbol);
+        setInWatchlist(false);
+      } else {
+        await addToWatchlist(symbol);
+        setInWatchlist(true);
+      }
+    } catch (err) {
+      console.error("Watchlist error", err);
+    } finally {
+      setWatchlistLoading(false);
+    }
+  };
+
   const handleAskAI = () => {
     setAiLoading(true);
     setAiError(null);
@@ -311,19 +335,36 @@ const StockDetails = ({ symbol: propSymbol }) => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: isPositive ? '#4ade80' : '#f87171', fontWeight: 700, justifyContent: 'flex-end', marginTop: '4px' }}>
             {isPositive ? <TrendingUp size={14} /> : <TrendingDown size={14} />} {priceChangePct.toFixed(2)}%
           </div>
-          <button 
-            onClick={() => setShowAlertDialog(true)}
-            style={{ 
-              marginTop: '16px', display: 'flex', alignItems: 'center', gap: '8px', 
-              background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', 
-              color: 'white', padding: '8px 16px', borderRadius: '12px', fontSize: '0.75rem', 
-              fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s', float: 'right'
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.25)' }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.15)' }}
-          >
-            <Bell size={14} /> Set Alert
-          </button>
+          <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+            <button
+               onClick={toggleWatchlist}
+               disabled={watchlistLoading}
+               style={{ 
+                 display: 'flex', alignItems: 'center', gap: '6px', 
+                 background: inWatchlist ? 'var(--gold)' : 'rgba(255,255,255,0.15)', 
+                 border: `1px solid ${inWatchlist ? 'var(--gold)' : 'rgba(255,255,255,0.3)'}`, 
+                 color: inWatchlist ? '#1A1208' : 'white', 
+                 padding: '8px 16px', borderRadius: '12px', fontSize: '0.75rem', 
+                 fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s'
+               }}
+            >
+               {watchlistLoading ? <div className="spinner" style={{width:'14px', height:'14px', borderTopColor: inWatchlist?'#1A1208':'white', borderWidth: '2px'}}/> : <Star size={14} fill={inWatchlist ? '#1A1208' : 'none'} />}
+               {inWatchlist ? 'Saved' : 'Watchlist'}
+            </button>
+            <button 
+              onClick={() => setShowAlertDialog(true)}
+              style={{ 
+                display: 'flex', alignItems: 'center', gap: '6px', 
+                background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', 
+                color: 'white', padding: '8px 16px', borderRadius: '12px', fontSize: '0.75rem', 
+                fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s'
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.25)' }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.15)' }}
+            >
+              <Bell size={14} /> Alert
+            </button>
+          </div>
         </div>
       </div>
 
@@ -515,50 +556,67 @@ const StockDetails = ({ symbol: propSymbol }) => {
           </div>
 
           {/* Purification Calculator */}
-          <div className="purification-card">
-            <h3 style={{ color: 'white', fontWeight: 700, marginBottom: '6px', fontSize: '0.88rem' }}>
-              🌿 Purification Calculator
-            </h3>
-            <p style={{ color: 'rgba(255,255,255,0.72)', fontSize: '0.77rem', marginBottom: '20px', lineHeight: 1.6 }}>
-              Received dividends from this holding? Calculate your purification obligation instantly.
-            </p>
-
-            <div style={{ marginBottom: '12px' }}>
-              <label style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.69rem', fontWeight: 700, letterSpacing: '0.5px', display: 'block', marginBottom: '8px' }}>
-                DIVIDEND AMOUNT (₦)
-              </label>
-              <input
-                type="number"
-                placeholder="0.00"
-                value={dividendInput}
-                onChange={e => setDividendInput(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  borderRadius: '10px',
-                  border: '1.5px solid rgba(255,255,255,0.25)',
-                  background: 'rgba(255,255,255,0.12)',
-                  color: 'white',
-                  fontSize: '0.88rem',
-                  fontFamily: 'inherit',
-                  outline: 'none',
-                }}
-              />
+          <div className="detail-panel" style={{ background: 'linear-gradient(135deg, #0A2E36 0%, #0F5257 100%)', border: 'none', color: 'white' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+              <div style={{ paddingRight: '12px' }}>
+                <h3 style={{ color: 'white', fontWeight: 800, margin: '0 0 6px', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <ShieldCheck size={18} color="var(--gold)" /> Dividend Purification
+                </h3>
+                <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem', margin: 0, lineHeight: 1.5 }}>
+                  Cleanse your dividend earnings from non-compliant income based on AAOIFI standards.
+                </p>
+              </div>
+              <div style={{ flexShrink: 0, textAlign: 'right', background: 'rgba(201,168,76,0.15)', padding: '8px 12px', borderRadius: '12px', border: '1px solid rgba(201,168,76,0.3)' }}>
+                <div style={{ fontSize: '0.66rem', color: 'var(--gold)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '2px' }}>Purification Rate</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 900, color: 'white' }}>{purificationRate}%</div>
+              </div>
             </div>
 
-            {purificationAmount !== null && (
-              <div style={{
-                background: 'rgba(255,255,255,0.12)',
-                borderRadius: '10px',
-                padding: '16px',
-                textAlign: 'center',
-                marginTop: '16px',
-              }}>
-                <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.63rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase' }}>Purification Due</div>
-                <div style={{ color: 'white', fontSize: '1.76rem', fontWeight: '800', marginTop: '4px' }}>₦ {purificationAmount}</div>
-                <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.69rem', marginTop: '4px' }}>Rate: {purificationRate}% of dividends</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
+              <div style={{ background: 'rgba(255,255,255,0.06)', padding: '12px', borderRadius: '10px' }}>
+                <div style={{ fontSize: '0.66rem', color: 'rgba(255,255,255,0.5)', fontWeight: 600, marginBottom: '4px' }}>Non-Compliant Revenue</div>
+                <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'white' }}>
+                  {latest?.non_compliant_revenue_ratio ? `${(parseFloat(latest.non_compliant_revenue_ratio) * 100).toFixed(2)}%` : 'N/A'}
+                </div>
               </div>
-            )}
+              <div style={{ background: 'rgba(255,255,255,0.06)', padding: '12px', borderRadius: '10px' }}>
+                <div style={{ fontSize: '0.66rem', color: 'rgba(255,255,255,0.5)', fontWeight: 600, marginBottom: '4px' }}>Interest Income Ratio</div>
+                <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'white' }}>
+                  {interestRatio}%
+                </div>
+              </div>
+            </div>
+
+            <div style={{ background: 'rgba(0,0,0,0.2)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'rgba(255,255,255,0.8)', marginBottom: '10px' }}>Calculate Purification Due</label>
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <div style={{ position: 'relative', flex: 1 }}>
+                  <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.5)', fontWeight: 700 }}>₦</span>
+                  <input
+                    type="number"
+                    placeholder="Enter dividend"
+                    value={dividendInput}
+                    onChange={e => setDividendInput(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '12px 12px 12px 28px',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      background: 'rgba(255,255,255,0.1)',
+                      color: 'white',
+                      fontSize: '0.88rem',
+                      outline: 'none',
+                    }}
+                  />
+                </div>
+                {purificationAmount !== null && dividendInput !== '' && (
+                  <div style={{ flex: '0 0 auto', background: 'var(--gold)', padding: '10px 16px', borderRadius: '8px', color: '#1A1208', textAlign: 'center', minWidth: '90px' }}>
+                    <div style={{ fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase', marginBottom: '2px', opacity: 0.8 }}>Amount Due</div>
+                    <div style={{ fontSize: '0.94rem', fontWeight: 900 }}>₦ {purificationAmount}</div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Buy Now */}
