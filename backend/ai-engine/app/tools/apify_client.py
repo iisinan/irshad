@@ -7,11 +7,11 @@ class FinancialScraper:
         self.token = os.getenv("APIFY_TOKEN")
         self.client = ApifyClient(self.token) if self.token else None
 
-    async def search_annual_report_pdfs(
-        self, company_name: str, financial_year: int, annual_only: bool = True
+    async def search_latest_financial_report_pdfs(
+        self, company_name: str, financial_year: int
     ) -> dict:
         """
-        Uses Apify to find a direct PDF link to the company's FULL YEAR annual report.
+        Uses Apify to find a direct PDF link to the company's latest financial report (Q1, Q2, H1, or Annual).
         If direct PDF links are not found, deep-crawls the HTML pages returned by Google
         (e.g., Company Website, NGX, African Financials) to extract PDF links.
         """
@@ -23,15 +23,15 @@ class FinancialScraper:
             print("Apify token not provided. Skipping web scraping.")
             return {"ngx": None, "official": None}
 
-        print(f"Searching for {company_name} FY{financial_year} annual report PDF...")
+        print(f"Searching for {company_name} FY{financial_year} latest financial report PDF...")
 
         # Stage 1: Broad search queries to find both direct PDFs and HTML pages
         base_query = (
-            f'"{company_name}" ("annual report" OR "annual report and accounts" OR '
-            f'"audited financial statements" OR "annual financial statements" OR '
-            f'"integrated report" OR "consolidated financial statements") '
+            f'"{company_name}" ("financial statements" OR "quarterly report" OR '
+            f'"audited financial statements" OR "unaudited financial statements" OR '
+            f'"interim financial statements" OR "annual report") '
             f'"{financial_year}" '
-            f'-Q1 -Q2 -Q3 -"Half Year" -H1 -Interim -Unaudited -"Investor Presentation" -"Earnings Call" -Factsheet'
+            f'-"Investor Presentation" -"Earnings Call" -Factsheet -ESG -Sustainability'
         )
         
         queries = [
@@ -51,7 +51,7 @@ class FinancialScraper:
         html_pages_to_crawl = []
         found_pdfs = []
         
-        EXCLUDE_KEYWORDS = ["interim", "half-year", "half year", "h1", "q1", "q2", "q3", "quarter", "sustainability", "esg", "proxy", "notice", "agenda", "dividend", "presentation"]
+        EXCLUDE_KEYWORDS = ["sustainability", "esg", "proxy", "notice", "agenda", "dividend", "presentation"]
 
         def is_valid_pdf(url_str, text_str=""):
             # Check year
@@ -63,11 +63,10 @@ class FinancialScraper:
             if company_first not in url_str.lower() and company_first not in text_str.lower():
                 return False
                 
-            # Check for interim or non-financial reports
-            if annual_only:
-                combined = (url_str + text_str).lower()
-                if any(kw in combined for kw in EXCLUDE_KEYWORDS):
-                    return False
+            # Check for non-financial reports
+            combined = (url_str + text_str).lower()
+            if any(kw in combined for kw in EXCLUDE_KEYWORDS):
+                return False
             return True
 
         try:
@@ -161,15 +160,27 @@ class FinancialScraper:
                 # We prioritize Official > African Financials > NGX
                 priority = {"official": 3, "african_financials": 2, "ngx": 1}
                 
-                # Sort by Priority (Descending) and then attempt to extract dates from URL to get most recent
-                def extract_year_month(url_str):
-                    # Basic extraction for YYYY/MM or YYYY-MM
+                def extract_recency_score(url_str, text_str):
+                    # Base score from year-month if available
+                    score = 0
                     match = re.search(r'(20\d{2})[-/](0[1-9]|1[0-2])', url_str)
                     if match:
-                        return int(match.group(1)) * 100 + int(match.group(2))
-                    return 0
+                        score += int(match.group(1)) * 1000 + int(match.group(2)) * 10
+                        
+                    # Add bonus for later periods (Q4/Annual > Q3 > Q2/H1 > Q1)
+                    combined = (url_str + text_str).lower()
+                    if "q4" in combined or "annual" in combined or "full year" in combined:
+                        score += 4
+                    elif "q3" in combined or "nine month" in combined or "9m" in combined:
+                        score += 3
+                    elif "q2" in combined or "h1" in combined or "half year" in combined or "six month" in combined or "6m" in combined:
+                        score += 2
+                    elif "q1" in combined or "first quarter" in combined or "3m" in combined:
+                        score += 1
+                        
+                    return score
 
-                found_pdfs.sort(key=lambda x: (priority.get(x["source_type"], 0), extract_year_month(x["url"])), reverse=True)
+                found_pdfs.sort(key=lambda x: (priority.get(x["source_type"], 0), extract_recency_score(x["url"], x["text"])), reverse=True)
                 
                 # Assign to results
                 for pdf in found_pdfs:

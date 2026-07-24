@@ -68,11 +68,9 @@ async def locate_annual_report(state: GraphState) -> GraphState:
     scraper = FinancialScraper()
 
     start_time = time.perf_counter()
-    # Pass annual_report=True so the scraper searches for full-year reports only
-    urls = await scraper.search_annual_report_pdfs(
+    urls = await scraper.search_latest_financial_report_pdfs(
         state["company_name"] or state["ticker"],
-        state["financial_year"],
-        annual_only=True
+        state["financial_year"]
     )
     elapsed = time.perf_counter() - start_time
     print(f"[Observability] locate_annual_report took {elapsed:.2f} seconds")
