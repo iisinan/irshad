@@ -41,8 +41,8 @@ class FinancialScraper:
         ]
         
         run_input = {
-            "queries": "\\n".join(queries),
-            "resultsPerPage": 5,
+            "queries": "\n".join(queries),
+            "resultsPerPage": 10,
             "maxPagesPerQuery": 1,
             "languageCode": "en",
         }
@@ -57,6 +57,12 @@ class FinancialScraper:
             # Check year
             if str(financial_year) not in text_str and str(financial_year) not in url_str:
                 return False
+                
+            # Check company name (first word)
+            company_first = company_name.split()[0].lower().replace(",", "").replace(".", "")
+            if company_first not in url_str.lower() and company_first not in text_str.lower():
+                return False
+                
             # Check for interim or non-financial reports
             if annual_only:
                 combined = (url_str + text_str).lower()
@@ -150,7 +156,7 @@ class FinancialScraper:
 
             # 3. Filter and Sort the most recent/best PDFs
             if found_pdfs:
-                print(f"Found {len(found_pdfs)} valid PDFs. Selecting best..."); print("All PDFs:", found_pdfs)
+                print(f"Found {len(found_pdfs)} valid PDFs. Selecting best..."); 
                 
                 # We prioritize Official > African Financials > NGX
                 priority = {"official": 3, "african_financials": 2, "ngx": 1}
