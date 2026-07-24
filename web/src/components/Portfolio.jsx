@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { fetchPortfolio, addHolding, removeHolding, fetchNgxStocks, formatLogoUrl } from '../services/api';
 import { toastError, toastSuccess } from '../utils/toast';
 import { useAuth } from '../context/AuthContext';
-import { X, Search, LayoutDashboard, BarChart2, Star, Calculator, ShieldCheck, BookOpen, Info, Landmark, Briefcase, Bell, Activity, Lock, CheckCircle2 } from 'lucide-react';
+import { X, Search, LayoutDashboard, BarChart2, Star, Calculator, ShieldCheck, BookOpen, Info, Landmark, Briefcase, Bell, Activity, Lock, CheckCircle2, FileText } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
 import PortfolioTab from './portfolio/PortfolioTab';
