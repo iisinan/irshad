@@ -12,7 +12,16 @@ elif DATABASE_URL.startswith("postgres://"):
 if "?sslmode=require" in DATABASE_URL:
     DATABASE_URL = DATABASE_URL.replace("?sslmode=require", "")
 
-engine = create_async_engine(DATABASE_URL, echo=False)
+engine_kwargs = {"echo": False}
+if DATABASE_URL.startswith("postgresql"):
+    # Neon requires SSL. We must explicitly enable it for asyncpg.
+    import ssl
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
+    engine_kwargs["connect_args"] = {"ssl": ssl_context}
+
+engine = create_async_engine(DATABASE_URL, **engine_kwargs)
 AsyncSessionLocal = async_sessionmaker(
     bind=engine,
     class_=AsyncSession,
