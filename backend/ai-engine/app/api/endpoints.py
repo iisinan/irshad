@@ -133,6 +133,10 @@ async def screen_company(ticker: str, financial_year: int = 2026, db: AsyncSessi
         if not result_state.get("skip_financials"):
             await db.refresh(screening)
         
+        # If no report was found, we should notify the queue worker
+        if not result_state.get("annual_report_url") and not final_values:
+            return {"error": "File Not Found", "detail": "No annual report could be located.", "retry": False}
+
         # Format exact JSON structure requested
         return {
             "company": result_state.get("company_name", ticker),
