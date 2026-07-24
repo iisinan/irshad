@@ -283,9 +283,7 @@ export default function Profile() {
 
 
           {/* SETTINGS FORMS */}
-          {true && (
-            <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)' }}>
-              
+          <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)' }}>
               {activeSection === 'profile' && (
                 <form onSubmit={e => handleUpdate(e, 'profile')} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                   <div><h2 style={{ fontSize: '1.06rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 4px' }}>Personal Information</h2><p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', margin: 0 }}>Update your basic profile details.</p></div>
@@ -361,7 +359,7 @@ export default function Profile() {
                 </div>
               )}
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>

@@ -1,0 +1,1759 @@
+
+  ! eslint(no-unused-vars): Identifier 'X' is imported but never used.
+   ,-[src/components/portfolio/PurificationTab.jsx:3:35]
+ 2 | import { createPortal } from 'react-dom';
+ 3 | import { ShieldAlert, ArrowRight, X, Heart, CheckCircle } from 'lucide-react';
+   :                                   |
+   :                                   `-- 'X' is imported here
+ 4 | 
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Parameter 'idx' is declared but never used. Unused parameters should start with a '_'.
+     ,-[src/components/portfolio/PurificationTab.jsx:129:40]
+ 128 |           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+ 129 |             {needsPurification.map((h, idx) => (
+     :                                        ^|^
+     :                                         `-- 'idx' is declared here
+ 130 |               <div key={h.id} style={{
+     `----
+  help: Consider removing this parameter.
+
+  ! eslint(no-unused-vars): Variable 'getNext3AM' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/services/api.js:178:7]
+ 177 | 
+ 178 | const getNext3AM = () => {
+     :       ^^^^^|^^^^
+     :            `-- 'getNext3AM' is declared here
+ 179 |   const now = new Date();
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Identifier 'ChevronDown' is imported but never used.
+   ,-[src/components/portfolio/AddHoldingModal.jsx:3:60]
+ 2 | import { createPortal } from 'react-dom';
+ 3 | import { X, Search, Plus, CheckCircle2, Lock, ShieldCheck, ChevronDown, Trash2, FileText, UploadCloud, RefreshCw } from 'lucide-react';
+   :                                                            ^^^^^|^^^^^
+   :                                                                 `-- 'ChevronDown' is imported here
+ 4 | import { fetchNgxStocks, formatLogoUrl, linkBroker } from '../../services/api';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'RefreshCw' is imported but never used.
+   ,-[src/components/portfolio/AddHoldingModal.jsx:3:104]
+ 2 | import { createPortal } from 'react-dom';
+ 3 | import { X, Search, Plus, CheckCircle2, Lock, ShieldCheck, ChevronDown, Trash2, FileText, UploadCloud, RefreshCw } from 'lucide-react';
+   :                                                                                                        ^^^^|^^^^
+   :                                                                                                            `-- 'RefreshCw' is imported here
+ 4 | import { fetchNgxStocks, formatLogoUrl, linkBroker } from '../../services/api';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-dupe-keys): Duplicate key 'margin'
+     ,-[src/components/portfolio/AddHoldingModal.jsx:240:76]
+ 239 |               </h4>
+ 240 |               <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: 0, lineHeight: 1.6, maxWidth:'320px', margin:'0 auto' }}>
+     :                                                                            ^^^|^^                                        ^^^|^^
+     :                                                                               |                                             `-- and duplicated here
+     :                                                                               `-- Key is first defined here
+ 241 |                 Connect your brokerage account to Irshad to seamlessly track your Shariah-compliant investments.
+     `----
+  help: Consider removing the duplicated key
+
+  ! eslint(no-dupe-keys): Duplicate key 'margin'
+     ,-[src/components/portfolio/AddHoldingModal.jsx:302:76]
+ 301 |               </h4>
+ 302 |               <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: 0, lineHeight: 1.6, maxWidth:'320px', margin:'0 auto' }}>
+     :                                                                            ^^^|^^                                        ^^^|^^
+     :                                                                               |                                             `-- and duplicated here
+     :                                                                               `-- Key is first defined here
+ 303 |                 Upload your trade log or portfolio statement (PDF/CSV) to automatically extract your holdings.
+     `----
+  help: Consider removing the duplicated key
+
+  ! eslint(no-unused-vars): Identifier 'ExternalLink' is imported but never used.
+   ,-[src/components/Resources.jsx:3:36]
+ 2 | import { createPortal } from 'react-dom';
+ 3 | import { Play, FileText, Download, ExternalLink, BookOpen, Search, X } from 'lucide-react';
+   :                                    ^^^^^^|^^^^^
+   :                                          `-- 'ExternalLink' is imported here
+ 4 | import api from '../services/api';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Parameter 'closeProps' is declared but never used. Unused parameters should start with a '_'.
+    ,-[src/components/DashboardTour.jsx:13:3]
+ 12 |   backProps,
+ 13 |   closeProps,
+    :   ^^^^^|^^^^
+    :        `-- 'closeProps' is declared here
+ 14 |   primaryProps,
+    `----
+  help: Consider removing this parameter.
+
+  ! eslint(no-unused-vars): Identifier 'AlertTriangle' is imported but never used.
+   ,-[src/components/Shariah.jsx:2:62]
+ 1 | import React from 'react';
+ 2 | import { ShieldCheck, FileText, CheckCircle, Scale, XCircle, AlertTriangle, Sparkles, BookOpen } from 'lucide-react';
+   :                                                              ^^^^^^|^^^^^^
+   :                                                                    `-- 'AlertTriangle' is imported here
+ 3 | import Footer from './Footer';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Variable 'res' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/components/AuthPages.jsx:410:13]
+ 409 |     try {
+ 410 |       const res = await api.post('/reset-password', { email, token, password, password_confirmation: passwordConfirmation });
+     :             ^|^
+     :              `-- 'res' is declared here
+ 411 |       setMessage('Password successfully reset! Redirecting to login...');
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'user' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/components/AuthPages.jsx:481:11]
+ 480 | export const VerifyEmailPage = () => {
+ 481 |   const { user, setUser } = useAuth();
+     :           ^^|^
+     :             `-- 'user' is declared here
+ 482 |   const [loading, setLoading] = useState(false);
+     `----
+  help: Consider removing this declaration.
+
+  ! react-hooks(exhaustive-deps): React Hook useEffect has a missing dependency: 'setUser'
+     ,-[src/components/AuthPages.jsx:530:6]
+ 515 |             if (profile.data) {
+ 516 |               setUser(profile.data);
+     :               ^^^|^^^
+     :                  `-- useEffect uses `setUser` here
+ 517 |             }
+ 518 |           } catch (e) {
+ 519 |             console.error("Failed to refresh profile after verification", e);
+ 520 |           }
+ 521 | 
+ 522 |           setTimeout(() => navigate('/dashboard'), 2000);
+ 523 |         } catch (err) {
+ 524 |           setError(err.response?.data?.message || 'Invalid or expired verification link.');
+ 525 |         }
+ 526 |         setVerifying(false);
+ 527 |       };
+ 528 |       verifyEmail();
+ 529 |     }
+ 530 |   }, [navigate]);
+     :      ^^^^^^^^^^
+ 531 | 
+     `----
+  help: Either include it or remove the dependency array.
+
+  ! eslint(no-unused-vars): Identifier 'Filter' is imported but never used.
+   ,-[src/components/AdminDashboard.jsx:2:26]
+ 1 | import React, { useState, useEffect } from 'react';
+ 2 | import { Shield, Search, Filter, AlertTriangle, CheckCircle, Edit2, X, Package, TrendingUp } from 'lucide-react';
+   :                          ^^^|^^
+   :                             `-- 'Filter' is imported here
+ 3 | import api, { fetchNgxStocks, fetchProducts } from '../services/api';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'AlertTriangle' is imported but never used.
+   ,-[src/components/AdminDashboard.jsx:2:34]
+ 1 | import React, { useState, useEffect } from 'react';
+ 2 | import { Shield, Search, Filter, AlertTriangle, CheckCircle, Edit2, X, Package, TrendingUp } from 'lucide-react';
+   :                                  ^^^^^^|^^^^^^
+   :                                        `-- 'AlertTriangle' is imported here
+ 3 | import api, { fetchNgxStocks, fetchProducts } from '../services/api';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'CheckCircle' is imported but never used.
+   ,-[src/components/AdminDashboard.jsx:2:49]
+ 1 | import React, { useState, useEffect } from 'react';
+ 2 | import { Shield, Search, Filter, AlertTriangle, CheckCircle, Edit2, X, Package, TrendingUp } from 'lucide-react';
+   :                                                 ^^^^^|^^^^^
+   :                                                      `-- 'CheckCircle' is imported here
+ 3 | import api, { fetchNgxStocks, fetchProducts } from '../services/api';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Variable 'error' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/components/AdminDashboard.jsx:16:10]
+ 15 |   const [loading, setLoading] = useState(true);
+ 16 |   const [error, setError] = useState(null);
+    :          ^^|^^
+    :            `-- 'error' is declared here
+ 17 |   const [searchTerm, setSearchTerm] = useState('');
+    `----
+  help: Consider removing this declaration.
+
+  ! react-hooks(exhaustive-deps): React Hook useEffect has a missing dependency: 'loadData'
+    ,-[src/components/AdminDashboard.jsx:27:6]
+ 25 |   useEffect(() => {
+ 26 |     loadData();
+    :     ^^^^|^^^
+    :         `-- useEffect uses `loadData` here
+ 27 |   }, [activeTab]);
+    :      ^^^^^^^^^^^
+ 28 | 
+    `----
+  help: Either include it or remove the dependency array.
+
+  ! eslint(no-unused-vars): Identifier 'Router' is imported but never used.
+   ,-[src/App.jsx:2:27]
+ 1 | import React, { useEffect, useState, Suspense } from 'react';
+ 2 | import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
+   :                           ^^^|^^
+   :                              `-- 'Router' is imported here
+ 3 | import { TrendingUp, TrendingDown, ArrowRight, CheckCircle, Shield, BarChart2, ChevronRight, Smartphone, Apple, Play, AlertCircle, HelpCircle, Home, Scale, Info, BookOpen, Settings, LayoutDashboard, User, Moon, Sun } from 'lucide-react';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Navigate' is imported but never used.
+   ,-[src/App.jsx:2:82]
+ 1 | import React, { useEffect, useState, Suspense } from 'react';
+ 2 | import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
+   :                                                                                  ^^^^|^^^
+   :                                                                                      `-- 'Navigate' is imported here
+ 3 | import { TrendingUp, TrendingDown, ArrowRight, CheckCircle, Shield, BarChart2, ChevronRight, Smartphone, Apple, Play, AlertCircle, HelpCircle, Home, Scale, Info, BookOpen, Settings, LayoutDashboard, User, Moon, Sun } from 'lucide-react';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'ArrowRight' is imported but never used.
+   ,-[src/App.jsx:3:36]
+ 2 | import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
+ 3 | import { TrendingUp, TrendingDown, ArrowRight, CheckCircle, Shield, BarChart2, ChevronRight, Smartphone, Apple, Play, AlertCircle, HelpCircle, Home, Scale, Info, BookOpen, Settings, LayoutDashboard, User, Moon, Sun } from 'lucide-react';
+   :                                    ^^^^^|^^^^
+   :                                         `-- 'ArrowRight' is imported here
+ 4 | import { fetchNgxStocks } from './services/api';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Smartphone' is imported but never used.
+   ,-[src/App.jsx:3:94]
+ 2 | import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
+ 3 | import { TrendingUp, TrendingDown, ArrowRight, CheckCircle, Shield, BarChart2, ChevronRight, Smartphone, Apple, Play, AlertCircle, HelpCircle, Home, Scale, Info, BookOpen, Settings, LayoutDashboard, User, Moon, Sun } from 'lucide-react';
+   :                                                                                              ^^^^^|^^^^
+   :                                                                                                   `-- 'Smartphone' is imported here
+ 4 | import { fetchNgxStocks } from './services/api';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Apple' is imported but never used.
+   ,-[src/App.jsx:3:106]
+ 2 | import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
+ 3 | import { TrendingUp, TrendingDown, ArrowRight, CheckCircle, Shield, BarChart2, ChevronRight, Smartphone, Apple, Play, AlertCircle, HelpCircle, Home, Scale, Info, BookOpen, Settings, LayoutDashboard, User, Moon, Sun } from 'lucide-react';
+   :                                                                                                          ^^|^^
+   :                                                                                                            `-- 'Apple' is imported here
+ 4 | import { fetchNgxStocks } from './services/api';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Play' is imported but never used.
+   ,-[src/App.jsx:3:113]
+ 2 | import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
+ 3 | import { TrendingUp, TrendingDown, ArrowRight, CheckCircle, Shield, BarChart2, ChevronRight, Smartphone, Apple, Play, AlertCircle, HelpCircle, Home, Scale, Info, BookOpen, Settings, LayoutDashboard, User, Moon, Sun } from 'lucide-react';
+   :                                                                                                                 ^^|^
+   :                                                                                                                   `-- 'Play' is imported here
+ 4 | import { fetchNgxStocks } from './services/api';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'User' is imported but never used.
+   ,-[src/App.jsx:3:200]
+ 2 | import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
+ 3 | import { TrendingUp, TrendingDown, ArrowRight, CheckCircle, Shield, BarChart2, ChevronRight, Smartphone, Apple, Play, AlertCircle, HelpCircle, Home, Scale, Info, BookOpen, Settings, LayoutDashboard, User, Moon, Sun } from 'lucide-react';
+   :                                                                                                                                                                                                        ^^|^
+   :                                                                                                                                                                                                          `-- 'User' is imported here
+ 4 | import { fetchNgxStocks } from './services/api';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Footer' is imported but never used.
+   ,-[src/App.jsx:6:8]
+ 5 | import DashboardLayout from './components/DashboardLayout';
+ 6 | import Footer from './components/Footer';
+   :        ^^^|^^
+   :           `-- 'Footer' is imported here
+ 7 | import { LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage } from './components/AuthPages';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Variable 'Dashboard' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/App.jsx:16:7]
+ 15 | const Portfolio = React.lazy(() => import('./components/Portfolio'));
+ 16 | const Dashboard = React.lazy(() => import('./components/Dashboard'));
+    :       ^^^^|^^^^
+    :           `-- 'Dashboard' is declared here
+ 17 | const AboutPage = React.lazy(() => import('./components/About'));
+    `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'StockCard' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/App.jsx:326:7]
+ 325 | /* ─── Stock Card ─────────────────────────────────────────── */
+ 326 | const StockCard = ({ company }) => {
+     :       ^^^^|^^^^
+     :           `-- 'StockCard' is declared here
+ 327 |   const priceChange = parseFloat(company.price_change ?? 0);
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'sector' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/App.jsx:336:9]
+ 335 |   const isPositive = priceChange >= 0;
+ 336 |   const sector = company.sector || 'Equities';
+     :         ^^^|^^
+     :            `-- 'sector' is declared here
+ 337 | 
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'MarketPage' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/App.jsx:373:7]
+ 372 | /* ─── Screen a Stock Page ──────────────────────────────────── */
+ 373 | const MarketPage = () => {
+     :       ^^^^^|^^^^
+     :            `-- 'MarketPage' is declared here
+ 374 |   const navigate = useNavigate();
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'setFilter' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/App.jsx:379:18]
+ 378 |   const [search, setSearch] = useState('');
+ 379 |   const [filter, setFilter] = useState('all');
+     :                  ^^^^|^^^^
+     :                      `-- 'setFilter' is declared here
+ 380 |   const [sectorFilter, setSectorFilter] = useState('all');
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'setSectorFilter' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/App.jsx:380:24]
+ 379 |   const [filter, setFilter] = useState('all');
+ 380 |   const [sectorFilter, setSectorFilter] = useState('all');
+     :                        ^^^^^^^|^^^^^^^
+     :                               `-- 'setSectorFilter' is declared here
+ 381 |   const [focused, setFocused] = useState(false);
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'uniqueSectors' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/App.jsx:418:9]
+ 417 |   // Extract unique sectors from loaded stocks
+ 418 |   const uniqueSectors = Array.from(new Set(stocks.map(s => (s.sector || 'Other').trim()))).filter(Boolean).sort();
+     :         ^^^^^^|^^^^^^
+     :               `-- 'uniqueSectors' is declared here
+ 419 | 
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'statusConfig' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/App.jsx:420:9]
+ 419 | 
+ 420 |   const statusConfig = {
+     :         ^^^^^^|^^^^^
+     :               `-- 'statusConfig' is declared here
+ 421 |     halal:    { label: 'HALAL',    cls: 'status-halal',     icon: <CheckCircle size={11} /> },
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'sector' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/App.jsx:568:23]
+ 567 |                 const isPos = change >= 0;
+ 568 |                 const sector = company.sector || 'Equities';
+     :                       ^^^|^^
+     :                          `-- 'sector' is declared here
+ 569 |                 return (
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unreachable): Unreachable code.
+     ,-[src/components/portfolio/MarketTab.jsx:245:5]
+ 244 |     return list;
+ 245 |     return list;
+     :     ^^^^^^^^^^^^
+ 246 |   }, [actualStocks, search, statusF, sectorF, industryF, sortBy]);
+     `----
+  help: Remove the unreachable code or fix the control flow to make it reachable.
+
+  ! eslint(no-unused-vars): Variable 'Icon' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/components/portfolio/MarketTab.jsx:67:9]
+ 66 |   const isPos  = Number(stock.price_change_pct ?? 0) >= 0;
+ 67 |   const Icon   = cfg.Icon;
+    :         ^^|^
+    :           `-- 'Icon' is declared here
+ 68 | 
+    `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'counts' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/components/portfolio/MarketTab.jsx:225:9]
+ 224 | 
+ 225 |   const counts = useMemo(() => ({
+     :         ^^^|^^
+     :            `-- 'counts' is declared here
+ 226 |     halal:    actualStocks.filter(s => getStatus(s) === 'halal').length,
+     `----
+  help: Consider removing this declaration.
+
+  ! react-hooks(exhaustive-deps): React Hook useEffect has a missing dependency: 'watchlist.length'
+     ,-[src/components/portfolio/MarketTab.jsx:203:6]
+ 199 |   useEffect(() => {
+ 200 |     if (actualInitialWatchlist.length > 0 && watchlist.length === 0) {
+     :                                              ^^^^|^^^^
+     :                                                  `-- useEffect uses `watchlist.length` here
+ 201 |       setWatchlist(actualInitialWatchlist);
+ 202 |     }
+ 203 |   }, [actualInitialWatchlist]);
+     :      ^^^^^^^^^^^^^^^^^^^^^^^^
+ 204 | 
+     `----
+  help: Either include it or remove the dependency array.
+
+  ! react-hooks(exhaustive-deps): React hook useEffect depends on `actualInitialWatchlist`, which changes every render
+     ,-[src/components/portfolio/MarketTab.jsx:203:7]
+ 196 |   const actualStocks = Array.isArray(stocks) ? stocks : (stocks?.data || []);
+ 197 |   const actualInitialWatchlist = Array.isArray(initialWatchlist) ? initialWatchlist : (initialWatchlist?.data ? initialWatchlist.data.map(w => w.symbol) : []);
+     :         ^^^^^^^^^^^|^^^^^^^^^^
+     :                    `-- `actualInitialWatchlist` is declared here
+ 198 | 
+ 199 |   useEffect(() => {
+ 200 |     if (actualInitialWatchlist.length > 0 && watchlist.length === 0) {
+ 201 |       setWatchlist(actualInitialWatchlist);
+ 202 |     }
+ 203 |   }, [actualInitialWatchlist]);
+     :       ^^^^^^^^^^^|^^^^^^^^^^
+     :                  `-- it will always cause this hook to re-evaluate
+ 204 | 
+     `----
+  help: Try memoizing this variable with `useRef` or `useCallback`.
+
+  ! react-hooks(exhaustive-deps): React hook useMemo depends on `actualStocks`, which changes every render
+     ,-[src/components/portfolio/MarketTab.jsx:214:6]
+ 195 |   // Safely extract from potentially stale cache shapes
+ 196 |   const actualStocks = Array.isArray(stocks) ? stocks : (stocks?.data || []);
+     :         ^^^^^^|^^^^^
+     :               `-- `actualStocks` is declared here
+ 197 |   const actualInitialWatchlist = Array.isArray(initialWatchlist) ? initialWatchlist : (initialWatchlist?.data ? initialWatchlist.data.map(w => w.symbol) : []);
+ 198 | 
+ 199 |   useEffect(() => {
+ 200 |     if (actualInitialWatchlist.length > 0 && watchlist.length === 0) {
+ 201 |       setWatchlist(actualInitialWatchlist);
+ 202 |     }
+ 203 |   }, [actualInitialWatchlist]);
+ 204 | 
+ 205 |   const handleToggle = async (symbol, isWatched) => {
+ 206 |     try {
+ 207 |       if (isWatched) { await removeFromWatchlist(symbol); setWatchlist(p => p.filter(s => s !== symbol)); }
+ 208 |       else           { await addToWatchlist(symbol);      setWatchlist(p => [...p, symbol]); }
+ 209 |     } catch { /* silent */ }
+ 210 |   };
+ 211 | 
+ 212 |   const uniqueSectors = useMemo(
+ 213 |     () => Object.keys(sectorMap).length > 0 ? Object.keys(sectorMap) : [...new Set(actualStocks.map(s => normSector(s.sector)).filter(Boolean))].sort(),
+ 214 |     [actualStocks, sectorMap]
+     :      ^^^^^^|^^^^^
+     :            `-- it will always cause this hook to re-evaluate
+ 215 |   );
+     `----
+  help: Try memoizing this variable with `useRef` or `useCallback`.
+
+  ! react-hooks(exhaustive-deps): React hook useMemo depends on `actualStocks`, which changes every render
+     ,-[src/components/portfolio/MarketTab.jsx:229:8]
+ 195 |   // Safely extract from potentially stale cache shapes
+ 196 |   const actualStocks = Array.isArray(stocks) ? stocks : (stocks?.data || []);
+     :         ^^^^^^|^^^^^
+     :               `-- `actualStocks` is declared here
+ 197 |   const actualInitialWatchlist = Array.isArray(initialWatchlist) ? initialWatchlist : (initialWatchlist?.data ? initialWatchlist.data.map(w => w.symbol) : []);
+ 198 | 
+ 199 |   useEffect(() => {
+ 200 |     if (actualInitialWatchlist.length > 0 && watchlist.length === 0) {
+ 201 |       setWatchlist(actualInitialWatchlist);
+ 202 |     }
+ 203 |   }, [actualInitialWatchlist]);
+ 204 | 
+ 205 |   const handleToggle = async (symbol, isWatched) => {
+ 206 |     try {
+ 207 |       if (isWatched) { await removeFromWatchlist(symbol); setWatchlist(p => p.filter(s => s !== symbol)); }
+ 208 |       else           { await addToWatchlist(symbol);      setWatchlist(p => [...p, symbol]); }
+ 209 |     } catch { /* silent */ }
+ 210 |   };
+ 211 | 
+ 212 |   const uniqueSectors = useMemo(
+ 213 |     () => Object.keys(sectorMap).length > 0 ? Object.keys(sectorMap) : [...new Set(actualStocks.map(s => normSector(s.sector)).filter(Boolean))].sort(),
+ 214 |     [actualStocks, sectorMap]
+ 215 |   );
+ 216 | 
+ 217 |   const availableIndustries = useMemo(() => {
+ 218 |     if (sectorF === 'all') {
+ 219 |       const all = Object.values(sectorMap).flat();
+ 220 |       return [...new Set(all)].sort();
+ 221 |     }
+ 222 |     return sectorMap[sectorF] || [];
+ 223 |   }, [sectorF, sectorMap]);
+ 224 | 
+ 225 |   const counts = useMemo(() => ({
+ 226 |     halal:    actualStocks.filter(s => getStatus(s) === 'halal').length,
+ 227 |     nonHalal: actualStocks.filter(s => getStatus(s) === 'non-halal').length,
+ 228 |     doubtful: actualStocks.filter(s => !['halal', 'non-halal'].includes(getStatus(s))).length,
+ 229 |   }), [actualStocks]);
+     :        ^^^^^^|^^^^^
+     :              `-- it will always cause this hook to re-evaluate
+ 230 | 
+     `----
+  help: Try memoizing this variable with `useRef` or `useCallback`.
+
+  ! react-hooks(exhaustive-deps): React hook useMemo depends on `actualStocks`, which changes every render
+     ,-[src/components/portfolio/MarketTab.jsx:246:7]
+ 195 |   // Safely extract from potentially stale cache shapes
+ 196 |   const actualStocks = Array.isArray(stocks) ? stocks : (stocks?.data || []);
+     :         ^^^^^^|^^^^^
+     :               `-- `actualStocks` is declared here
+ 197 |   const actualInitialWatchlist = Array.isArray(initialWatchlist) ? initialWatchlist : (initialWatchlist?.data ? initialWatchlist.data.map(w => w.symbol) : []);
+ 198 | 
+ 199 |   useEffect(() => {
+ 200 |     if (actualInitialWatchlist.length > 0 && watchlist.length === 0) {
+ 201 |       setWatchlist(actualInitialWatchlist);
+ 202 |     }
+ 203 |   }, [actualInitialWatchlist]);
+ 204 | 
+ 205 |   const handleToggle = async (symbol, isWatched) => {
+ 206 |     try {
+ 207 |       if (isWatched) { await removeFromWatchlist(symbol); setWatchlist(p => p.filter(s => s !== symbol)); }
+ 208 |       else           { await addToWatchlist(symbol);      setWatchlist(p => [...p, symbol]); }
+ 209 |     } catch { /* silent */ }
+ 210 |   };
+ 211 | 
+ 212 |   const uniqueSectors = useMemo(
+ 213 |     () => Object.keys(sectorMap).length > 0 ? Object.keys(sectorMap) : [...new Set(actualStocks.map(s => normSector(s.sector)).filter(Boolean))].sort(),
+ 214 |     [actualStocks, sectorMap]
+ 215 |   );
+ 216 | 
+ 217 |   const availableIndustries = useMemo(() => {
+ 218 |     if (sectorF === 'all') {
+ 219 |       const all = Object.values(sectorMap).flat();
+ 220 |       return [...new Set(all)].sort();
+ 221 |     }
+ 222 |     return sectorMap[sectorF] || [];
+ 223 |   }, [sectorF, sectorMap]);
+ 224 | 
+ 225 |   const counts = useMemo(() => ({
+ 226 |     halal:    actualStocks.filter(s => getStatus(s) === 'halal').length,
+ 227 |     nonHalal: actualStocks.filter(s => getStatus(s) === 'non-halal').length,
+ 228 |     doubtful: actualStocks.filter(s => !['halal', 'non-halal'].includes(getStatus(s))).length,
+ 229 |   }), [actualStocks]);
+ 230 | 
+ 231 |   const filtered = useMemo(() => {
+ 232 |     let list = actualStocks.filter(s => {
+ 233 |       const q = search.toLowerCase();
+ 234 |       if (q && !s.symbol?.toLowerCase().includes(q) && !s.name?.toLowerCase().includes(q)) return false;
+ 235 |       if (statusF !== 'all' && getStatus(s) !== statusF) return false;
+ 236 |       if (sectorF !== 'all' && normSector(s.sector) !== sectorF) return false;
+ 237 |       if (industryF !== 'all' && s.business_type !== industryF) return false;
+ 238 |       return true;
+ 239 |     });
+ 240 |     if (sortBy === 'gainers')  list = [...list].sort((a, b) => (b.price_change_pct || 0) - (a.price_change_pct || 0));
+ 241 |     if (sortBy === 'losers')   list = [...list].sort((a, b) => (a.price_change_pct || 0) - (b.price_change_pct || 0));
+ 242 |     if (sortBy === 'cap_high') list = [...list].sort((a, b) => (b.market_cap || 0) - (a.market_cap || 0));
+ 243 |     if (sortBy === 'pe_low')   list = [...list].sort((a, b) => (a.pe_ratio > 0 ? a.pe_ratio : 999) - (b.pe_ratio > 0 ? b.pe_ratio : 999));
+ 244 |     return list;
+ 245 |     return list;
+ 246 |   }, [actualStocks, search, statusF, sectorF, industryF, sortBy]);
+     :       ^^^^^^|^^^^^
+     :             `-- it will always cause this hook to re-evaluate
+ 247 | 
+     `----
+  help: Try memoizing this variable with `useRef` or `useCallback`.
+
+  ! eslint(no-unused-vars): Identifier 'Award' is imported but never used.
+   ,-[src/components/About.jsx:2:60]
+ 1 | import React from 'react';
+ 2 | import { Shield, Target, Users, BookOpen, Sparkles, Globe, Award } from 'lucide-react';
+   :                                                            ^^|^^
+   :                                                              `-- 'Award' is imported here
+ 3 | import Footer from './Footer';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Bell' is imported but never used.
+   ,-[src/components/Settings.jsx:4:34]
+ 3 | import { useNavigate } from 'react-router-dom';
+ 4 | import { User, Shield, BookOpen, Bell, Trash2, LogOut, CheckCircle, AlertCircle, Save, Monitor } from 'lucide-react';
+   :                                  ^^|^
+   :                                    `-- 'Bell' is imported here
+ 5 | import { fetchProfile, updateProfile, deleteAccount } from '../services/api';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Catch parameter 'err' is caught but never used.
+     ,-[src/components/Settings.jsx:102:14]
+ 101 |       logout();
+ 102 |     } catch (err) {
+     :              ^|^
+     :               `-- 'err' is declared here
+ 103 |       setMessage({ type: 'error', text: 'Failed to delete account. Please contact support.' });
+     `----
+  help: Consider handling this error.
+
+  ! eslint(no-unused-vars): Identifier 'Link' is imported but never used.
+   ,-[src/components/Profile.jsx:2:10]
+ 1 | import React, { useState, useEffect } from 'react';
+ 2 | import { Link, useNavigate } from 'react-router-dom';
+   :          ^^|^
+   :            `-- 'Link' is imported here
+ 3 | import { useAuth } from '../context/AuthContext';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Bell' is imported but never used.
+   ,-[src/components/Profile.jsx:5:11]
+ 4 | import {
+ 5 |   Shield, Bell, Star, TrendingUp, TrendingDown, Eye, BarChart2,
+   :           ^^|^
+   :             `-- 'Bell' is imported here
+ 6 |   BookOpen, Award, CheckCircle, AlertTriangle, XCircle, 
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Star' is imported but never used.
+   ,-[src/components/Profile.jsx:5:17]
+ 4 | import {
+ 5 |   Shield, Bell, Star, TrendingUp, TrendingDown, Eye, BarChart2,
+   :                 ^^|^
+   :                   `-- 'Star' is imported here
+ 6 |   BookOpen, Award, CheckCircle, AlertTriangle, XCircle, 
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'TrendingDown' is imported but never used.
+   ,-[src/components/Profile.jsx:5:35]
+ 4 | import {
+ 5 |   Shield, Bell, Star, TrendingUp, TrendingDown, Eye, BarChart2,
+   :                                   ^^^^^^|^^^^^
+   :                                         `-- 'TrendingDown' is imported here
+ 6 |   BookOpen, Award, CheckCircle, AlertTriangle, XCircle, 
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'BarChart2' is imported but never used.
+   ,-[src/components/Profile.jsx:5:54]
+ 4 | import {
+ 5 |   Shield, Bell, Star, TrendingUp, TrendingDown, Eye, BarChart2,
+   :                                                      ^^^^|^^^^
+   :                                                          `-- 'BarChart2' is imported here
+ 6 |   BookOpen, Award, CheckCircle, AlertTriangle, XCircle, 
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Activity' is imported but never used.
+   ,-[src/components/Profile.jsx:7:33]
+ 6 |   BookOpen, Award, CheckCircle, AlertTriangle, XCircle, 
+ 7 |   ArrowUpRight, ArrowDownRight, Activity, Trash2, Settings, Search, Sparkles, User, Monitor, LogOut, Save, AlertCircle, LayoutDashboard
+   :                                 ^^^^|^^^
+   :                                     `-- 'Activity' is imported here
+ 8 | } from 'lucide-react';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Settings' is imported but never used.
+   ,-[src/components/Profile.jsx:7:51]
+ 6 |   BookOpen, Award, CheckCircle, AlertTriangle, XCircle, 
+ 7 |   ArrowUpRight, ArrowDownRight, Activity, Trash2, Settings, Search, Sparkles, User, Monitor, LogOut, Save, AlertCircle, LayoutDashboard
+   :                                                   ^^^^|^^^
+   :                                                       `-- 'Settings' is imported here
+ 8 | } from 'lucide-react';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Search' is imported but never used.
+   ,-[src/components/Profile.jsx:7:61]
+ 6 |   BookOpen, Award, CheckCircle, AlertTriangle, XCircle, 
+ 7 |   ArrowUpRight, ArrowDownRight, Activity, Trash2, Settings, Search, Sparkles, User, Monitor, LogOut, Save, AlertCircle, LayoutDashboard
+   :                                                             ^^^|^^
+   :                                                                `-- 'Search' is imported here
+ 8 | } from 'lucide-react';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'LayoutDashboard' is imported but never used.
+   ,-[src/components/Profile.jsx:7:121]
+ 6 |   BookOpen, Award, CheckCircle, AlertTriangle, XCircle, 
+ 7 |   ArrowUpRight, ArrowDownRight, Activity, Trash2, Settings, Search, Sparkles, User, Monitor, LogOut, Save, AlertCircle, LayoutDashboard
+   :                                                                                                                         ^^^^^^^|^^^^^^^
+   :                                                                                                                                `-- 'LayoutDashboard' is imported here
+ 8 | } from 'lucide-react';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Variable 'fmt' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/components/Profile.jsx:12:7]
+ 11 | /* ─── Helpers ──────────────────────────────────────── */
+ 12 | const fmt = (n) => Number(n).toLocaleString('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 });
+    :       ^|^
+    :        `-- 'fmt' is declared here
+ 13 | 
+    `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'StatCard' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/components/Profile.jsx:21:7]
+ 20 | /* ─── Sub-components ────────────────────────────────── */
+ 21 | const StatCard = ({ label, value, subValue, icon: Icon, iconColor, trend }) => (
+    :       ^^^^|^^^
+    :           `-- 'StatCard' is declared here
+ 22 |   <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)', padding: '24px', display: 'flex', flexDirection: 'column', gap: '12px', flex: 1, minWidth: '160px', transition: 'all 0.3s cubic-bezier(0.16,1,0.3,1)', cursor: 'default', position: 'relative', overflow: 'hidden' }}
+    `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'WatchlistRow' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/components/Profile.jsx:43:7]
+ 42 | 
+ 43 | const WatchlistRow = ({ stock, onRemove }) => {
+    :       ^^^^^^|^^^^^
+    :             `-- 'WatchlistRow' is declared here
+ 44 |   const navigate = useNavigate();
+    `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'ActivityRow' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/components/Profile.jsx:74:7]
+ 73 | 
+ 74 | const ActivityRow = ({ item }) => (
+    :       ^^^^^|^^^^^
+    :            `-- 'ActivityRow' is declared here
+ 75 |   <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '12px 20px', borderBottom: '1px solid var(--border)', transition: 'background 0.2s', cursor: 'default' }}
+    `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'portfolio' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/components/Profile.jsx:97:10]
+ 96 |   const [watchlist, setWatchlist] = useState([]);
+ 97 |   const [portfolio, setPortfolio] = useState(null);
+    :          ^^^^|^^^^
+    :              `-- 'portfolio' is declared here
+ 98 |   const [history, setHistory] = useState([]);
+    `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'removeFromWatchlistUI' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/components/Profile.jsx:153:9]
+ 152 | 
+ 153 |   const removeFromWatchlistUI = async (symbol) => {
+     :         ^^^^^^^^^^|^^^^^^^^^^
+     :                   `-- 'removeFromWatchlistUI' is declared here
+ 154 |     try {
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Catch parameter 'err' is caught but never used.
+     ,-[src/components/Profile.jsx:198:14]
+ 197 |       logout();
+ 198 |     } catch (err) {
+     :              ^|^
+     :               `-- 'err' is declared here
+ 199 |       setMessage({ type: 'error', text: 'Failed to delete account. Please contact support.' });
+     `----
+  help: Consider handling this error.
+
+  ! eslint(no-unused-vars): Variable 'nonHalalCount' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/components/Profile.jsx:213:9]
+ 212 |   const halalCount = safeWatchlist.filter(s => s.status === 'Halal').length;
+ 213 |   const nonHalalCount = safeWatchlist.filter(s => s.status === 'Non-Halal').length;
+     :         ^^^^^^|^^^^^^
+     :               `-- 'nonHalalCount' is declared here
+ 214 |   const doubtfulCount = safeWatchlist.filter(s => s.status === 'Doubtful').length;
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'doubtfulCount' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/components/Profile.jsx:214:9]
+ 213 |   const nonHalalCount = safeWatchlist.filter(s => s.status === 'Non-Halal').length;
+ 214 |   const doubtfulCount = safeWatchlist.filter(s => s.status === 'Doubtful').length;
+     :         ^^^^^^|^^^^^^
+     :               `-- 'doubtfulCount' is declared here
+ 215 |   const halalPercentage = safeWatchlist.length > 0 ? Math.round((halalCount / safeWatchlist.length) * 100) : 0;
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'halalPercentage' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/components/Profile.jsx:215:9]
+ 214 |   const doubtfulCount = safeWatchlist.filter(s => s.status === 'Doubtful').length;
+ 215 |   const halalPercentage = safeWatchlist.length > 0 ? Math.round((halalCount / safeWatchlist.length) * 100) : 0;
+     :         ^^^^^^^|^^^^^^^
+     :                `-- 'halalPercentage' is declared here
+ 216 |   const displayHistory = Array.isArray(history) && history.length > 0 ? history : [
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'displayHistory' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/components/Profile.jsx:216:9]
+ 215 |   const halalPercentage = safeWatchlist.length > 0 ? Math.round((halalCount / safeWatchlist.length) * 100) : 0;
+ 216 |   const displayHistory = Array.isArray(history) && history.length > 0 ? history : [
+     :         ^^^^^^^|^^^^^^
+     :                `-- 'displayHistory' is declared here
+ 217 |     { type: 'screening', label: 'GTCO screened as Halal', time: '2 hours ago' },
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-constant-binary-expression): Unexpected constant truthiness on the left-hand side of a "&&" expression
+     ,-[src/components/Profile.jsx:286:12]
+ 285 |               {/* SETTINGS FORMS */}
+ 286 | ,->           {true && (
+ 287 | |               <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)' }}>
+ 288 | |                 
+ 289 | |                 {activeSection === 'profile' && (
+ 290 | |                   <form onSubmit={e => handleUpdate(e, 'profile')} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+ 291 | |                     <div><h2 style={{ fontSize: '1.06rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 4px' }}>Personal Information</h2><p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', margin: 0 }}>Update your basic profile details.</p></div>
+ 292 | |                     <div style={{ height: '1px', background: 'var(--border)' }} />
+ 293 | |                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+ 294 | |                       <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '8px' }}>Full Name</label><input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--border)', fontSize: '0.84rem', outline: 'none' }} /></div>
+ 295 | |                       <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '8px' }}>Phone Number</label><input type="tel" value={formData.phone_number} onChange={e => setFormData({...formData, phone_number: e.target.value})} style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--border)', fontSize: '0.84rem', outline: 'none' }} /></div>
+ 296 | |                     </div>
+ 297 | |                     <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '8px' }}>Email Address</label><input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--border)', fontSize: '0.84rem', outline: 'none', background: 'var(--bg)' }} readOnly /><p style={{ fontSize: '0.66rem', color: 'var(--text-muted)', marginTop: '6px' }}>Email cannot be changed.</p></div>
+ 298 | |                     <div style={{ marginTop: '12px' }}><button type="submit" disabled={isSubmitting} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '14px 24px', background: 'var(--primary)', color: 'var(--bg)', border: 'none', borderRadius: '12px', fontWeight: 800, cursor: isSubmitting ? 'not-allowed' : 'pointer', opacity: isSubmitting ? 0.7 : 1 }}><Save size={18} /> {isSubmitting ? 'Saving...' : 'Save Changes'}</button></div>
+ 299 | |                   </form>
+ 300 | |                 )}
+ 301 | |   
+ 302 | |                 {activeSection === 'security' && (
+ 303 | |                   <form onSubmit={e => handleUpdate(e, 'security')} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+ 304 | |                     <div><h2 style={{ fontSize: '1.06rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 4px' }}>Security</h2><p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', margin: 0 }}>Update your password to keep your account secure.</p></div>
+ 305 | |                     <div style={{ height: '1px', background: 'var(--border)' }} />
+ 306 | |                     <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '8px' }}>New Password</label><input type="password" placeholder="••••••••" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--border)', fontSize: '0.84rem', outline: 'none' }} minLength={8} required /></div>
+ 307 | |                     <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '8px' }}>Confirm Password</label><input type="password" placeholder="••••••••" value={formData.password_confirmation} onChange={e => setFormData({...formData, password_confirmation: e.target.value})} style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--border)', fontSize: '0.84rem', outline: 'none' }} minLength={8} required /></div>
+ 308 | |                     <div style={{ marginTop: '12px' }}><button type="submit" disabled={isSubmitting} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '14px 24px', background: 'var(--primary)', color: 'var(--bg)', border: 'none', borderRadius: '12px', fontWeight: 800, cursor: isSubmitting ? 'not-allowed' : 'pointer', opacity: isSubmitting ? 0.7 : 1 }}><Save size={18} /> {isSubmitting ? 'Updating...' : 'Update Password'}</button></div>
+ 309 | |                   </form>
+ 310 | |                 )}
+ 311 | |   
+ 312 | |                 {activeSection === 'preferences' && (
+ 313 | |                   <form onSubmit={e => handleUpdate(e, 'preferences')} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+ 314 | |                     <div><h2 style={{ fontSize: '1.06rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 4px' }}>Shariah Screening Strictness</h2><p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', margin: 0 }}>Choose how strictly you want the AI to evaluate companies based on the AAOIFI standard.</p></div>
+ 315 | |                     <div style={{ height: '1px', background: 'var(--border)' }} />
+ 316 | |                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+ 317 | |                       {['relaxed', 'moderate', 'strict'].map(level => (
+ 318 | |                         <label key={level} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', borderRadius: '16px', border: `2px solid ${formData.strictness === level ? 'var(--primary)' : 'var(--border)'}`, background: formData.strictness === level ? 'var(--primary-50)' : 'var(--bg)', cursor: 'pointer', transition: 'all 0.2s' }}>
+ 319 | |                           <input type="radio" name="strictness" value={level} checked={formData.strictness === level} onChange={e => setFormData({...formData, strictness: e.target.value})} style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }} />
+ 320 | |                           <div>
+ 321 | |                             <div style={{ fontWeight: 800, color: formData.strictness === level ? 'var(--primary)' : 'var(--text-dark)', fontSize: '0.88rem', textTransform: 'capitalize', marginBottom: '4px' }}>{level} Screening</div>
+ 322 | |                             <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+ 323 | |                               {level === 'relaxed' && "Focuses only on core business activities. Ignores minor financial ratios."}
+ 324 | |                               {level === 'moderate' && "Standard AAOIFI compliance. Checks 30% debt limits and 5% impure income."}
+ 325 | |                               {level === 'strict' && "Zero-tolerance policy. Any non-compliant debt or income flags the stock as non-halal."}
+ 326 | |                             </div>
+ 327 | |                           </div>
+ 328 | |                         </label>
+ 329 | |                       ))}
+ 330 | |                     </div>
+ 331 | |                     <div style={{ marginTop: '12px' }}><button type="submit" disabled={isSubmitting} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '14px 24px', background: 'var(--primary)', color: 'var(--bg)', border: 'none', borderRadius: '12px', fontWeight: 800, cursor: isSubmitting ? 'not-allowed' : 'pointer', opacity: isSubmitting ? 0.7 : 1 }}><Save size={18} /> {isSubmitting ? 'Saving...' : 'Save Preferences'}</button></div>
+ 332 | |                   </form>
+ 333 | |                 )}
+ 334 | |   
+ 335 | |                 {activeSection === 'appearance' && (
+ 336 | |                   <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+ 337 | |                     <div><h2 style={{ fontSize: '1.06rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 4px' }}>Appearance Settings</h2><p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', margin: 0 }}>Customize the look and feel of Irshad.</p></div>
+ 338 | |                     <div style={{ height: '1px', background: 'var(--border)' }} />
+ 339 | |                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', background: 'var(--bg-section)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+ 340 | |                       <div><h3 style={{ margin: '0 0 4px', fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-dark)' }}>Theme</h3><p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--text-muted)' }}>Choose between Light and Dark mode.</p></div>
+ 341 | |                       <select value={theme} onChange={(e) => {
+ 342 | |                           const newTheme = e.target.value; setTheme(newTheme); localStorage.setItem('irshad_theme', newTheme);
+ 343 | |                           if (newTheme === 'dark') { document.documentElement.setAttribute('data-theme', 'dark'); } else { document.documentElement.removeAttribute('data-theme'); }
+ 344 | |                           setMessage({ type: 'success', text: 'Theme updated successfully!' }); setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+ 345 | |                         }} style={{ padding: '10px 16px', borderRadius: '8px', border: '1px solid var(--border)', outline: 'none' }}>
+ 346 | |                         <option value="light">Light Mode</option>
+ 347 | |                         <option value="dark">Dark Mode</option>
+ 348 | |                       </select>
+ 349 | |                     </div>
+ 350 | |                   </div>
+ 351 | |                 )}
+ 352 | |   
+ 353 | |                 {activeSection === 'danger' && (
+ 354 | |                   <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+ 355 | |                     <div><h2 style={{ fontSize: '1.06rem', fontWeight: 800, color: 'var(--non-halal)', margin: '0 0 4px' }}>Danger Zone</h2><p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', margin: 0 }}>Irreversible and destructive actions.</p></div>
+ 356 | |                     <div style={{ height: '1px', background: 'var(--border)' }} />
+ 357 | |                     <div style={{ background: 'var(--non-halal-bg)', border: '1px solid rgba(220, 38, 38, 0.2)', borderRadius: '16px', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' }}>
+ 358 | |                       <div><h3 style={{ margin: '0 0 4px', fontSize: '0.88rem', fontWeight: 800, color: 'var(--non-halal)' }}>Delete Account</h3><p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-dark)' }}>Once you delete your account, there is no going back. Please be certain.</p></div>
+ 359 | |                       <button onClick={handleDeleteAccount} disabled={isSubmitting} style={{ padding: '12px 24px', background: 'var(--non-halal)', color: 'var(--bg)', border: 'none', borderRadius: '10px', fontWeight: 800, cursor: isSubmitting ? 'not-allowed' : 'pointer' }}>{isSubmitting ? 'Deleting...' : 'Delete Account'}</button>
+ 360 | |                     </div>
+ 361 | |                   </div>
+ 362 | |                 )}
+ 363 | |               </div>
+ 364 | `->           )}
+ 365 |             </div>
+     `----
+  help: This expression always evaluates to the constant on the left-hand side
+
+  ! eslint(no-unused-vars): Identifier 'Calendar' is imported but never used.
+   ,-[src/components/portfolio/StatementTab.jsx:2:30]
+ 1 | import React, { useState } from 'react';
+ 2 | import { FileText, Download, Calendar, Filter, FileSpreadsheet, FileDigit, Clock, CheckCircle2 } from 'lucide-react';
+   :                              ^^^^|^^^
+   :                                  `-- 'Calendar' is imported here
+ 3 | import { toastSuccess, toastInfo } from '../../utils/toast';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Parameter 'data' is declared but never used. Unused parameters should start with a '_'.
+   ,-[src/components/portfolio/StatementTab.jsx:5:40]
+ 4 | 
+ 5 | export default function StatementTab({ data }) {
+   :                                        ^^|^
+   :                                          `-- 'data' is declared here
+ 6 |   const [dateRange, setDateRange] = useState('30days'); // 7days, 30days, thisMonth, thisYear, custom
+   `----
+  help: Consider removing this parameter.
+
+  ! eslint(no-unused-vars): Identifier 'ShieldAlert' is imported but never used.
+   ,-[src/components/portfolio/PortfolioTab.jsx:4:24]
+ 3 | import {
+ 4 |   Wallet, AlertCircle, ShieldAlert,
+   :                        ^^^^^|^^^^^
+   :                             `-- 'ShieldAlert' is imported here
+ 5 |   Plus, X, Trash2, CheckCircle, ArrowUpRight, ArrowDownRight,
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'CheckCircle' is imported but never used.
+   ,-[src/components/portfolio/PortfolioTab.jsx:5:20]
+ 4 |   Wallet, AlertCircle, ShieldAlert,
+ 5 |   Plus, X, Trash2, CheckCircle, ArrowUpRight, ArrowDownRight,
+   :                    ^^^^^|^^^^^
+   :                         `-- 'CheckCircle' is imported here
+ 6 |   RefreshCw, Edit2, MoreVertical
+   `----
+  help: Consider removing this import.
+
+  ! react-hooks(exhaustive-deps): React Hook useEffect has a missing dependency: 'loadHistory'
+    ,-[src/components/portfolio/ActivityTab.jsx:19:6]
+ 17 |   useEffect(() => {
+ 18 |     loadHistory();
+    :     ^^^^^|^^^^^
+    :          `-- useEffect uses `loadHistory` here
+ 19 |   }, []);
+    :      ^^
+ 20 | 
+    `----
+  help: Either include it or remove the dependency array.
+
+  ! eslint(no-unused-vars): Identifier 'X' is imported but never used.
+   ,-[src/components/DashboardLayout.jsx:2:16]
+ 1 | import React, { useState, useEffect } from 'react';
+ 2 | import { Menu, X, AlertCircle } from 'lucide-react';
+   :                |
+   :                `-- 'X' is imported here
+ 3 | import DashboardSidebar from './DashboardSidebar';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Catch parameter 'err' is caught but never used.
+     ,-[src/components/DashboardLayout.jsx:113:25]
+ 112 |                   btn.textContent = 'Verification Link Sent!';
+ 113 |                 } catch(err) {
+     :                         ^|^
+     :                          `-- 'err' is declared here
+ 114 |                   btn.textContent = 'Failed. Try Again';
+     `----
+  help: Consider handling this error.
+
+  ! eslint(no-unused-vars): Identifier 'addHolding' is imported but never used.
+   ,-[src/components/Portfolio.jsx:3:26]
+ 2 | import { useLocation } from 'react-router-dom';
+ 3 | import { fetchPortfolio, addHolding, removeHolding, fetchNgxStocks, formatLogoUrl } from '../services/api';
+   :                          ^^^^^|^^^^
+   :                               `-- 'addHolding' is imported here
+ 4 | import { toastError, toastSuccess } from '../utils/toast';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'fetchNgxStocks' is imported but never used.
+   ,-[src/components/Portfolio.jsx:3:53]
+ 2 | import { useLocation } from 'react-router-dom';
+ 3 | import { fetchPortfolio, addHolding, removeHolding, fetchNgxStocks, formatLogoUrl } from '../services/api';
+   :                                                     ^^^^^^^|^^^^^^
+   :                                                            `-- 'fetchNgxStocks' is imported here
+ 4 | import { toastError, toastSuccess } from '../utils/toast';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'formatLogoUrl' is imported but never used.
+   ,-[src/components/Portfolio.jsx:3:69]
+ 2 | import { useLocation } from 'react-router-dom';
+ 3 | import { fetchPortfolio, addHolding, removeHolding, fetchNgxStocks, formatLogoUrl } from '../services/api';
+   :                                                                     ^^^^^^|^^^^^^
+   :                                                                           `-- 'formatLogoUrl' is imported here
+ 4 | import { toastError, toastSuccess } from '../utils/toast';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'X' is imported but never used.
+   ,-[src/components/Portfolio.jsx:6:10]
+ 5 | import { useAuth } from '../context/AuthContext';
+ 6 | import { X, Search, LayoutDashboard, BarChart2, Star, Calculator, ShieldCheck, BookOpen, Info, Landmark, Briefcase, Bell, Activity, Lock, CheckCircle2, FileText } from 'lucide-react';
+   :          |
+   :          `-- 'X' is imported here
+ 7 | import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'LayoutDashboard' is imported but never used.
+   ,-[src/components/Portfolio.jsx:6:21]
+ 5 | import { useAuth } from '../context/AuthContext';
+ 6 | import { X, Search, LayoutDashboard, BarChart2, Star, Calculator, ShieldCheck, BookOpen, Info, Landmark, Briefcase, Bell, Activity, Lock, CheckCircle2, FileText } from 'lucide-react';
+   :                     ^^^^^^^|^^^^^^^
+   :                            `-- 'LayoutDashboard' is imported here
+ 7 | import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Info' is imported but never used.
+   ,-[src/components/Portfolio.jsx:6:90]
+ 5 | import { useAuth } from '../context/AuthContext';
+ 6 | import { X, Search, LayoutDashboard, BarChart2, Star, Calculator, ShieldCheck, BookOpen, Info, Landmark, Briefcase, Bell, Activity, Lock, CheckCircle2, FileText } from 'lucide-react';
+   :                                                                                          ^^|^
+   :                                                                                            `-- 'Info' is imported here
+ 7 | import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Landmark' is imported but never used.
+   ,-[src/components/Portfolio.jsx:6:96]
+ 5 | import { useAuth } from '../context/AuthContext';
+ 6 | import { X, Search, LayoutDashboard, BarChart2, Star, Calculator, ShieldCheck, BookOpen, Info, Landmark, Briefcase, Bell, Activity, Lock, CheckCircle2, FileText } from 'lucide-react';
+   :                                                                                                ^^^^|^^^
+   :                                                                                                    `-- 'Landmark' is imported here
+ 7 | import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Bell' is imported but never used.
+   ,-[src/components/Portfolio.jsx:6:117]
+ 5 | import { useAuth } from '../context/AuthContext';
+ 6 | import { X, Search, LayoutDashboard, BarChart2, Star, Calculator, ShieldCheck, BookOpen, Info, Landmark, Briefcase, Bell, Activity, Lock, CheckCircle2, FileText } from 'lucide-react';
+   :                                                                                                                     ^^|^
+   :                                                                                                                       `-- 'Bell' is imported here
+ 7 | import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Lock' is imported but never used.
+   ,-[src/components/Portfolio.jsx:6:133]
+ 5 | import { useAuth } from '../context/AuthContext';
+ 6 | import { X, Search, LayoutDashboard, BarChart2, Star, Calculator, ShieldCheck, BookOpen, Info, Landmark, Briefcase, Bell, Activity, Lock, CheckCircle2, FileText } from 'lucide-react';
+   :                                                                                                                                     ^^|^
+   :                                                                                                                                       `-- 'Lock' is imported here
+ 7 | import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'CheckCircle2' is imported but never used.
+   ,-[src/components/Portfolio.jsx:6:139]
+ 5 | import { useAuth } from '../context/AuthContext';
+ 6 | import { X, Search, LayoutDashboard, BarChart2, Star, Calculator, ShieldCheck, BookOpen, Info, Landmark, Briefcase, Bell, Activity, Lock, CheckCircle2, FileText } from 'lucide-react';
+   :                                                                                                                                           ^^^^^^|^^^^^
+   :                                                                                                                                                 `-- 'CheckCircle2' is imported here
+ 7 | import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Variable 'user' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/components/Portfolio.jsx:54:11]
+ 53 | export default function Portfolio() {
+ 54 |   const { user } = useAuth();
+    :           ^^|^
+    :             `-- 'user' is declared here
+ 55 |   
+    `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'MOCK_PERF' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/components/Portfolio.jsx:174:9]
+ 173 | 
+ 174 |   const MOCK_PERF = [];
+     :         ^^^^|^^^^
+     :             `-- 'MOCK_PERF' is declared here
+ 175 | 
+     `----
+  help: Consider removing this declaration.
+
+  ! react-hooks(exhaustive-deps): React Hook useEffect has a missing dependency: 'loadData'
+     ,-[src/components/Portfolio.jsx:112:6]
+ 105 |   useEffect(() => { 
+ 106 |     loadData(); 
+     :     ^^^^|^^^
+     :         `-- useEffect uses `loadData` here
+ 107 |     // Poll for real-time updates every 30 seconds
+ 108 |     const interval = setInterval(() => {
+ 109 |       loadData(true);
+ 110 |     }, 30000);
+ 111 |     return () => clearInterval(interval);
+ 112 |   }, []);
+     :      ^^
+ 113 | 
+     `----
+  help: Either include it or remove the dependency array.
+
+  ! eslint(no-unused-vars): Catch parameter 'err' is caught but never used.
+    ,-[src/components/portfolio/WatchlistAlertModal.jsx:70:14]
+ 69 |       onClose();
+ 70 |     } catch (err) {
+    :              ^|^
+    :               `-- 'err' is declared here
+ 71 |       toastError('Failed to save alert preferences');
+    `----
+  help: Consider handling this error.
+
+  ! eslint(no-unused-vars): Identifier 'TrendingDown' is imported but never used.
+   ,-[src/components/portfolio/AlertsTab.jsx:2:76]
+ 1 | import React, { useState, useEffect } from 'react';
+ 2 | import { Bell, BellRing, Trash2, ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown } from 'lucide-react';
+   :                                                                            ^^^^^^|^^^^^
+   :                                                                                  `-- 'TrendingDown' is imported here
+ 3 | import { fetchPriceAlerts, deletePriceAlert } from '../../services/api';
+   `----
+  help: Consider removing this import.
+
+  ! react-hooks(exhaustive-deps): React Hook useEffect has a missing dependency: 'loadAlerts'
+    ,-[src/components/portfolio/AlertsTab.jsx:19:6]
+ 17 |   useEffect(() => {
+ 18 |     loadAlerts();
+    :     ^^^^^|^^^^
+    :          `-- useEffect uses `loadAlerts` here
+ 19 |   }, []);
+    :      ^^
+ 20 | 
+    `----
+  help: Either include it or remove the dependency array.
+
+  ! eslint(no-unused-vars): Identifier 'Activity' is imported but never used.
+   ,-[src/components/portfolio/BasketsTab.jsx:3:46]
+ 2 | import { createPortal } from 'react-dom';
+ 3 | import { Briefcase, ArrowLeft, ChevronRight, Activity, TrendingUp, TrendingDown, Star, Plus, X, Trash2, Check, Wallet, Edit2 } from 'lucide-react';
+   :                                              ^^^^|^^^
+   :                                                  `-- 'Activity' is imported here
+ 4 | import { fetchBaskets, fetchBasketDetails, fetchNgxStocks, createBasket, deleteBasket, investInBasket, updateBasket } from '../../services/api';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Star' is imported but never used.
+   ,-[src/components/portfolio/BasketsTab.jsx:3:82]
+ 2 | import { createPortal } from 'react-dom';
+ 3 | import { Briefcase, ArrowLeft, ChevronRight, Activity, TrendingUp, TrendingDown, Star, Plus, X, Trash2, Check, Wallet, Edit2 } from 'lucide-react';
+   :                                                                                  ^^|^
+   :                                                                                    `-- 'Star' is imported here
+ 4 | import { fetchBaskets, fetchBasketDetails, fetchNgxStocks, createBasket, deleteBasket, investInBasket, updateBasket } from '../../services/api';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Variable 'investMessage' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/components/portfolio/BasketsTab.jsx:64:10]
+ 63 |   const [investing, setInvesting] = useState(false);
+ 64 |   const [investMessage, setInvestMessage] = useState('');
+    :          ^^^^^^|^^^^^^
+    :                `-- 'investMessage' is declared here
+ 65 | 
+    `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'setInvestMessage' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/components/portfolio/BasketsTab.jsx:64:25]
+ 63 |   const [investing, setInvesting] = useState(false);
+ 64 |   const [investMessage, setInvestMessage] = useState('');
+    :                         ^^^^^^^^|^^^^^^^
+    :                                 `-- 'setInvestMessage' is declared here
+ 65 | 
+    `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Catch parameter 'e' is caught but never used.
+     ,-[src/components/portfolio/BasketsTab.jsx:167:13]
+ 166 |       else if (Array.isArray(selectedBasket.symbols)) syms = selectedBasket.symbols;
+ 167 |     } catch(e) {}
+     :             |
+     :             `-- 'e' is declared here
+ 168 |     setEditingBasket({
+     `----
+  help: Consider handling this error.
+
+  ! react-hooks(exhaustive-deps): React Hook useEffect has a missing dependency: 'loadBaskets'
+    ,-[src/components/portfolio/BasketsTab.jsx:86:6]
+ 82 |   useEffect(() => {
+ 83 |     loadBaskets();
+    :     ^^^^^|^^^^^
+    :          `-- useEffect uses `loadBaskets` here
+ 84 |     // Pre-load stocks for the custom basket modal
+ 85 |     fetchNgxStocks().then(res => setAllStocks(res.data || [])).catch(console.error);
+ 86 |   }, []);
+    :      ^^
+ 87 | 
+    `----
+  help: Either include it or remove the dependency array.
+
+  ! eslint(no-unused-vars): Catch parameter 'err' is caught but never used.
+    ,-[src/components/portfolio/AddWatchlistModal.jsx:56:14]
+ 55 |       onClose();
+ 56 |     } catch (err) {
+    :              ^|^
+    :               `-- 'err' is declared here
+ 57 |       alert('Failed to add assets. Please try again.');
+    `----
+  help: Consider handling this error.
+
+  ! eslint(no-unused-vars): Identifier 'ExternalLink' is imported but never used.
+   ,-[src/components/portfolio/LecturesTab.jsx:3:36]
+ 2 | import { createPortal } from 'react-dom';
+ 3 | import { Play, FileText, Download, ExternalLink, BookOpen, Search, X } from 'lucide-react';
+   :                                    ^^^^^^|^^^^^
+   :                                          `-- 'ExternalLink' is imported here
+ 4 | import api from '../../services/api';
+   `----
+  help: Consider removing this import.
+
+  ! react(only-export-components): Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+    ,-[src/context/ThemeContext.jsx:33:14]
+ 32 | 
+ 33 | export const useTheme = () => useContext(ThemeContext);
+    :              ^^^^^^^^
+    `----
+
+  ! react(only-export-components): Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+   ,-[src/context/AuthContext.jsx:7:14]
+ 6 | 
+ 7 | export const useAuth = () => useContext(AuthContext);
+   :              ^^^^^^^
+ 8 | 
+   `----
+
+  ! eslint(no-unused-vars): Catch parameter 'err' is caught but never used.
+    ,-[src/components/portfolio/ZakatTab.jsx:92:14]
+ 91 |       setGoldPrice(Math.round(pricePerGramNgn));
+ 92 |     } catch (err) {
+    :              ^|^
+    :               `-- 'err' is declared here
+ 93 |       setFetchError('Could not fetch live price. Please enter manually.');
+    `----
+  help: Consider handling this error.
+
+  ! eslint(no-unused-vars): Identifier 'Star' is imported but never used.
+   ,-[src/components/Dashboard.jsx:6:17]
+ 5 | import {
+ 6 |   Search, Bell, Star, Wallet, TrendingUp, TrendingDown,
+   :                 ^^|^
+   :                   `-- 'Star' is imported here
+ 7 |   ShieldAlert, CheckCircle, AlertTriangle, ArrowUpRight,
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'TrendingUp' is imported but never used.
+   ,-[src/components/Dashboard.jsx:6:31]
+ 5 | import {
+ 6 |   Search, Bell, Star, Wallet, TrendingUp, TrendingDown,
+   :                               ^^^^^|^^^^
+   :                                    `-- 'TrendingUp' is imported here
+ 7 |   ShieldAlert, CheckCircle, AlertTriangle, ArrowUpRight,
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'TrendingDown' is imported but never used.
+   ,-[src/components/Dashboard.jsx:6:43]
+ 5 | import {
+ 6 |   Search, Bell, Star, Wallet, TrendingUp, TrendingDown,
+   :                                           ^^^^^^|^^^^^
+   :                                                 `-- 'TrendingDown' is imported here
+ 7 |   ShieldAlert, CheckCircle, AlertTriangle, ArrowUpRight,
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'ShieldAlert' is imported but never used.
+   ,-[src/components/Dashboard.jsx:7:3]
+ 6 |   Search, Bell, Star, Wallet, TrendingUp, TrendingDown,
+ 7 |   ShieldAlert, CheckCircle, AlertTriangle, ArrowUpRight,
+   :   ^^^^^|^^^^^
+   :        `-- 'ShieldAlert' is imported here
+ 8 |   ArrowDownRight, ChevronRight, Calculator, HeartHandshake,
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'X' is imported but never used.
+    ,-[src/components/Dashboard.jsx:9:58]
+  8 |   ArrowDownRight, ChevronRight, Calculator, HeartHandshake,
+  9 |   Shield, PlusCircle, BarChart2, Sparkles, Globe, Clock, X,
+    :                                                          |
+    :                                                          `-- 'X' is imported here
+ 10 |   Zap, Activity, Trash2
+    `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'YAxis' is imported but never used.
+    ,-[src/components/Dashboard.jsx:14:50]
+ 13 | import {
+ 14 |   AreaChart, Area, ResponsiveContainer, Tooltip, YAxis,
+    :                                                  ^^|^^
+    :                                                    `-- 'YAxis' is imported here
+ 15 |   BarChart, Bar, XAxis, PieChart, Pie, Cell
+    `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Variable 'getGreeting' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/components/Dashboard.jsx:27:7]
+ 26 | };
+ 27 | const getGreeting = () => {
+    :       ^^^^^|^^^^^
+    :            `-- 'getGreeting' is declared here
+ 28 |   const h = new Date().getHours();
+    `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'NGX_STATUS' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/components/Dashboard.jsx:73:7]
+ 72 | 
+ 73 | const NGX_STATUS = {
+    :       ^^^^^|^^^^
+    :            `-- 'NGX_STATUS' is declared here
+ 74 |   isOpen: false,
+    `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Function 'StatCard' is declared but never used.
+     ,-[src/components/Dashboard.jsx:111:10]
+ 110 | /* ─── Stat Card ───────────────────────────────────────────── */
+ 111 | function StatCard({icon:Icon,label,value,sub,primary,badge}) {
+     :          ^^^^|^^^
+     :              `-- 'StatCard' is declared here
+ 112 |   return (
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Function 'WatchlistRow' is declared but never used.
+     ,-[src/components/Dashboard.jsx:184:10]
+ 183 | /* ─── Watchlist Row ───────────────────────────────────────── */
+ 184 | function WatchlistRow({stock}) {
+     :          ^^^^^^|^^^^^
+     :                `-- 'WatchlistRow' is declared here
+ 185 |   const change = stock.change ?? 0;
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Function 'HoldingRow' is declared but never used.
+     ,-[src/components/Dashboard.jsx:242:10]
+ 241 | /* ─── Holding Row ─────────────────────────────────────────── */
+ 242 | function HoldingRow({holding}) {
+     :          ^^^^^|^^^^
+     :               `-- 'HoldingRow' is declared here
+ 243 |   const gainLoss = holding.gain_loss ?? 0;
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'showAlert' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/components/Dashboard.jsx:352:10]
+ 351 |   const [insightIdx,setInsightIdx]=useState(0);
+ 352 |   const [showAlert,setShowAlert]=useState(true);
+     :          ^^^^|^^^^
+     :              `-- 'showAlert' is declared here
+ 353 |   const [zakatManual,setZakatManual]=useState('');
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'setShowAlert' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/components/Dashboard.jsx:352:20]
+ 351 |   const [insightIdx,setInsightIdx]=useState(0);
+ 352 |   const [showAlert,setShowAlert]=useState(true);
+     :                    ^^^^^^|^^^^^
+     :                          `-- 'setShowAlert' is declared here
+ 353 |   const [zakatManual,setZakatManual]=useState('');
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'setZakatManual' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/components/Dashboard.jsx:353:22]
+ 352 |   const [showAlert,setShowAlert]=useState(true);
+ 353 |   const [zakatManual,setZakatManual]=useState('');
+     :                      ^^^^^^^|^^^^^^
+     :                             `-- 'setZakatManual' is declared here
+ 354 |   const [searchVal,setSearchVal]=useState('');
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'perfRange' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/components/Dashboard.jsx:356:10]
+ 355 |   const [liveTime,setLiveTime]=useState(getTime());
+ 356 |   const [perfRange,setPerfRange]=useState(1);
+     :          ^^^^|^^^^
+     :              `-- 'perfRange' is declared here
+ 357 |   const [moversTab,setMoversTab]=useState('gainers');
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'setPerfRange' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/components/Dashboard.jsx:356:20]
+ 355 |   const [liveTime,setLiveTime]=useState(getTime());
+ 356 |   const [perfRange,setPerfRange]=useState(1);
+     :                    ^^^^^^|^^^^^
+     :                          `-- 'setPerfRange' is declared here
+ 357 |   const [moversTab,setMoversTab]=useState('gainers');
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'history' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/components/Dashboard.jsx:361:10]
+ 360 |   const [watchlist, setWatchlist] = useState([]);
+ 361 |   const [history, setHistory] = useState([]);
+     :          ^^^|^^^
+     :             `-- 'history' is declared here
+ 362 |   const [alerts, setAlerts] = useState([]);
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Catch parameter 'err' is caught but never used.
+     ,-[src/components/Dashboard.jsx:371:14]
+ 370 |       toastSuccess('Alert deleted successfully');
+ 371 |     } catch (err) {
+     :              ^|^
+     :               `-- 'err' is declared here
+ 372 |       toastError('Failed to delete alert');
+     `----
+  help: Consider handling this error.
+
+  ! eslint(no-unused-vars): Variable 'zakatAmt' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/components/Dashboard.jsx:416:9]
+ 415 |   const zakatBase=zakatManual?parseFloat(zakatManual):(summary.total_balance||0);
+ 416 |   const zakatAmt=(zakatBase*0.025).toFixed(2);
+     :         ^^^^|^^^
+     :             `-- 'zakatAmt' is declared here
+ 417 |   const compliance=summary.health_percentage??100;
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'dynamicWatchlist' is assigned a value but never used. Unused variables should start with a '_'.
+     ,-[src/components/Dashboard.jsx:436:7]
+ 435 |   let topLosers = [];
+ 436 |   let dynamicWatchlist = [];
+     :       ^^^^^^^^|^^^^^^^
+     :               `-- 'dynamicWatchlist' is declared here
+ 437 |   let adv = 0; let dec = 0;
+ 438 |   
+ 439 |   if (ngxStocks && ngxStocks.length > 0) {
+ 440 |     const validStocks = ngxStocks.filter(s => s.price_change_pct != null);
+ 441 |     const sorted = [...validStocks].sort((a, b) => b.price_change_pct - a.price_change_pct);
+ 442 |     topGainers = sorted.slice(0, 5).map(s => ({
+ 443 |       symbol: s.symbol, name: s.name, price: `₦${Number(s.latest_price || 0).toFixed(2)}`,
+ 444 |       change: `+${Number(s.price_change_pct || 0).toFixed(2)}%`, up: true
+ 445 |     }));
+ 446 |     topLosers = [...validStocks].sort((a, b) => a.price_change_pct - b.price_change_pct).slice(0, 5).map(s => ({
+ 447 |       symbol: s.symbol, name: s.name, price: `₦${Number(s.latest_price || 0).toFixed(2)}`,
+ 448 |       change: `${Number(s.price_change_pct || 0).toFixed(2)}%`, up: false
+ 449 |     }));
+ 450 |     
+ 451 |     // Pick 15 random active stocks for the ticker
+ 452 |     const shuffled = [...validStocks].sort(() => 0.5 - Math.random());
+ 453 |     dynamicTicker = shuffled.slice(0, 15).map(s => ({
+ 454 |       symbol: s.symbol, price: `₦${Number(s.latest_price || 0).toFixed(2)}`,
+ 455 |       change: `${Number(s.price_change_pct || 0).toFixed(2)}%`, up: (s.price_change_pct || 0) >= 0,
+ 456 |       logo_url: s.logo_url
+ 457 |     }));
+ 458 | 
+ 459 |     validStocks.forEach(s => {
+ 460 |       if ((s.price_change_pct || 0) > 0) adv++;
+ 461 |       else if ((s.price_change_pct || 0) < 0) dec++;
+ 462 |     });
+ 463 | 
+ 464 |     if (watchlist && watchlist.length > 0) {
+ 465 |       dynamicWatchlist = (watchlist || []).map(w => {
+     :       ^^^^^^^^|^^^^^^^
+     :               `-- it was last assigned here
+ 466 |         const s = validStocks.find(ns => ns.symbol === w.symbol);
+     `----
+  help: Did you mean to use this variable?
+
+  ! eslint(no-unused-vars): Variable 'PERF_META' is assigned a value but never used. Unused variables should start with a '_'.
+     ,-[src/components/Dashboard.jsx:482:7]
+ 481 |   const PERF_RANGES = { 0:[], 1:[], 2:[], 3:[] };
+ 482 |   let PERF_META = [
+     :       ^^^^|^^^^
+     :           `-- 'PERF_META' is declared here
+ 483 |     {label:'1W',gain:'+0.0%',abs:'₦0'},
+ 484 |     {label:'1M',gain:'+0.0%',abs:'₦0'},
+ 485 |     {label:'3M',gain:'+0.0%',abs:'₦0'},
+ 486 |     {label:'ALL',gain:'+0.0%',abs:'₦0'},
+ 487 |   ];
+ 488 |   if ((chartHistory || []).length > 0) {
+ 489 |     const formatted = (chartHistory || []).map(h => ({
+ 490 |       t: new Date(h.date).toLocaleDateString('en-NG', {day:'numeric', month:'short'}),
+ 491 |       v: h.total_balance
+ 492 |     }));
+ 493 |     // Just use same history for all ranges for now, could be sliced by date
+ 494 |     PERF_RANGES[0] = formatted.slice(-7);
+ 495 |     PERF_RANGES[1] = formatted.slice(-30);
+ 496 |     PERF_RANGES[2] = formatted.slice(-90);
+ 497 |     PERF_RANGES[3] = formatted;
+ 498 | 
+ 499 |     const calcMeta = (rangeData) => {
+ 500 |       if (rangeData.length < 2) return {gain:'+0.0%',abs:'₦0'};
+ 501 |       const start = rangeData[0].v;
+ 502 |       const end = rangeData[rangeData.length-1].v;
+ 503 |       const diff = end - start;
+ 504 |       const pct = start > 0 ? (diff/start)*100 : 0;
+ 505 |       return {
+ 506 |         gain: `${pct>=0?'+':''}${pct.toFixed(2)}%`,
+ 507 |         abs: `₦${fmt(Math.abs(diff))}`
+ 508 |       };
+ 509 |     };
+ 510 |     PERF_META = [
+     :     ^^^^|^^^^
+     :         `-- it was last assigned here
+ 511 |       {label:'1W', ...calcMeta(PERF_RANGES[0])},
+     `----
+  help: Did you mean to use this variable?
+
+  ! eslint(no-unused-vars): Identifier 'XCircle' is imported but never used.
+   ,-[src/components/StockDetails.jsx:4:154]
+ 3 | import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
+ 4 | import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2, Brain, Globe, Newspaper, Bell, X, ShieldCheck, XCircle, AlertTriangle, Star } from 'lucide-react';
+   :                                                                                                                                                          ^^^|^^^
+   :                                                                                                                                                             `-- 'XCircle' is imported here
+ 5 | import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Variable 'reason' is assigned a value but never used. Unused variables should start with a '_'.
+     ,-[src/components/StockDetails.jsx:86:7]
+  85 |   let badgeClass = 'status-doubtful';
+  86 |   let reason = 'This stock has not been fully screened yet. Its Shariah compliance status is currently under review.';
+     :       ^^^|^^
+     :          `-- 'reason' is declared here
+  87 |   let StatusIcon = HelpCircle;
+  88 |   let isHalal = false;
+  89 |   let isNonHalal = false;
+  90 |   let isDoubtful = true;
+  91 | 
+  92 |   const rawStatus = stock.status;
+  93 |   if (typeof rawStatus === 'object' && rawStatus !== null) {
+  94 |     const s = rawStatus.status?.toLowerCase();
+  95 |     if (s === 'halal' || s === 'compliant') {
+  96 |       statusStr = 'HALAL'; badgeClass = 'status-halal'; StatusIcon = CheckCircle; isHalal = true; isNonHalal = false; isDoubtful = false;
+  97 |     } else if (s === 'non-halal' || s === 'non-compliant') {
+  98 |       statusStr = 'NON-HALAL'; badgeClass = 'status-non-halal'; StatusIcon = AlertCircle; isNonHalal = true; isHalal = false; isDoubtful = false;
+  99 |     } else if (s === 'doubtful') {
+ 100 |       statusStr = 'DOUBTFUL'; badgeClass = 'status-doubtful'; StatusIcon = AlertCircle; isDoubtful = true; isHalal = false; isNonHalal = false;
+ 101 |     }
+ 102 |     reason = rawStatus.reason ?? reason;
+     :     ^^^|^^
+     :        `-- it was last assigned here
+ 103 |   } else if (typeof rawStatus === 'string') {
+     `----
+  help: Did you mean to use this variable?
+
+  ! eslint(no-unused-vars): Variable 'isDoubtful' is assigned a value but never used. Unused variables should start with a '_'.
+     ,-[src/components/StockDetails.jsx:90:7]
+  89 |   let isNonHalal = false;
+  90 |   let isDoubtful = true;
+     :       ^^^^^|^^^^
+     :            `-- 'isDoubtful' is declared here
+  91 | 
+  92 |   const rawStatus = stock.status;
+  93 |   if (typeof rawStatus === 'object' && rawStatus !== null) {
+  94 |     const s = rawStatus.status?.toLowerCase();
+  95 |     if (s === 'halal' || s === 'compliant') {
+  96 |       statusStr = 'HALAL'; badgeClass = 'status-halal'; StatusIcon = CheckCircle; isHalal = true; isNonHalal = false; isDoubtful = false;
+  97 |     } else if (s === 'non-halal' || s === 'non-compliant') {
+  98 |       statusStr = 'NON-HALAL'; badgeClass = 'status-non-halal'; StatusIcon = AlertCircle; isNonHalal = true; isHalal = false; isDoubtful = false;
+  99 |     } else if (s === 'doubtful') {
+ 100 |       statusStr = 'DOUBTFUL'; badgeClass = 'status-doubtful'; StatusIcon = AlertCircle; isDoubtful = true; isHalal = false; isNonHalal = false;
+ 101 |     }
+ 102 |     reason = rawStatus.reason ?? reason;
+ 103 |   } else if (typeof rawStatus === 'string') {
+ 104 |     const s = rawStatus.toLowerCase();
+ 105 |     if (s === 'halal' || s === 'compliant') {
+ 106 |       statusStr = 'HALAL'; badgeClass = 'status-halal'; StatusIcon = CheckCircle; isHalal = true; isNonHalal = false; isDoubtful = false;
+ 107 |     } else if (s === 'non-halal' || s === 'non-compliant') {
+ 108 |       statusStr = 'NON-HALAL'; badgeClass = 'status-non-halal'; StatusIcon = AlertCircle; isNonHalal = true; isHalal = false; isDoubtful = false;
+ 109 |     } else if (s === 'doubtful') {
+ 110 |       statusStr = 'DOUBTFUL'; badgeClass = 'status-doubtful'; StatusIcon = AlertCircle; isDoubtful = true; isHalal = false; isNonHalal = false;
+     :                                                                                         ^^^^^|^^^^
+     :                                                                                              `-- it was last assigned here
+ 111 |     }
+     `----
+  help: Did you mean to use this variable?
+
+  ! eslint(no-unused-vars): Variable 'assets' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/components/StockDetails.jsx:122:9]
+ 121 |   const rawRevenue = parseFloat(latest?.total_revenue) || 0;
+ 122 |   const assets = parseFloat(latest?.total_assets) || 0;
+     :         ^^^|^^
+     :            `-- 'assets' is declared here
+ 123 |   const revenue = rawRevenue > 0 ? rawRevenue : safeMarketCap;
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'hasFinancialHighlights' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/components/StockDetails.jsx:125:9]
+ 124 |   
+ 125 |   const hasFinancialHighlights = marketCap > 0 || debt > 0 || rawRevenue > 0 || interest > 0;
+     :         ^^^^^^^^^^^|^^^^^^^^^^
+     :                    `-- 'hasFinancialHighlights' is declared here
+ 126 | 
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'debtRatio' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/components/StockDetails.jsx:127:9]
+ 126 | 
+ 127 |   const debtRatio = ((debt / safeMarketCap) * 100).toFixed(1);
+     :         ^^^^|^^^^
+     :             `-- 'debtRatio' is declared here
+ 128 |   const cash = (parseFloat(latest?.cash_and_equivalents) || 0) + (parseFloat(latest?.interest_bearing_securities) || 0);
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'cashRatio' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/components/StockDetails.jsx:129:9]
+ 128 |   const cash = (parseFloat(latest?.cash_and_equivalents) || 0) + (parseFloat(latest?.interest_bearing_securities) || 0);
+ 129 |   const cashRatio = ((cash / safeMarketCap) * 100).toFixed(1);
+     :         ^^^^|^^^^
+     :             `-- 'cashRatio' is declared here
+ 130 |   const interestRatio = ((interest / revenue) * 100).toFixed(1);
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'screeningBorder' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/components/StockDetails.jsx:139:9]
+ 138 |   const screeningBg = isHalal ? 'var(--halal-bg)' : isNonHalal ? 'var(--non-halal-bg)' : 'var(--doubtful-bg)';
+ 139 |   const screeningBorder = isHalal ? 'var(--halal-border)' : isNonHalal ? 'var(--non-halal-border)' : 'var(--doubtful-border)';
+     :         ^^^^^^^|^^^^^^^
+     :                `-- 'screeningBorder' is declared here
+ 140 | 
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'renderRatioProgressBar' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/components/StockDetails.jsx:151:9]
+ 150 | 
+ 151 |   const renderRatioProgressBar = (title, subtitle, ratio, threshold, isMinimum = false, isCurrency = false, showThreshold = true) => {
+     :         ^^^^^^^^^^^|^^^^^^^^^^
+     :                    `-- 'renderRatioProgressBar' is declared here
+ 152 |     if (ratio === null || ratio === undefined) {
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Identifier 'Shield' is imported but never used.
+   ,-[src/components/portfolio/WatchlistTab.jsx:2:66]
+ 1 | import React, { useState, useEffect, useMemo, Component } from 'react';
+ 2 | import { Eye, BarChart2, Star, TrendingUp, TrendingDown, Trash2, Shield, AlertCircle, HelpCircle, CheckCircle, ChevronRight, Search, Mail, MessageSquare, Filter, Plus, Bell } from 'lucide-react';
+   :                                                                  ^^^|^^
+   :                                                                     `-- 'Shield' is imported here
+ 3 | import { fetchWatchlist, removeFromWatchlist, fetchNgxStocks, addToWatchlist, updateWatchlist, formatLogoUrl } from '../../services/api';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Search' is imported but never used.
+   ,-[src/components/portfolio/WatchlistTab.jsx:2:126]
+ 1 | import React, { useState, useEffect, useMemo, Component } from 'react';
+ 2 | import { Eye, BarChart2, Star, TrendingUp, TrendingDown, Trash2, Shield, AlertCircle, HelpCircle, CheckCircle, ChevronRight, Search, Mail, MessageSquare, Filter, Plus, Bell } from 'lucide-react';
+   :                                                                                                                              ^^^|^^
+   :                                                                                                                                 `-- 'Search' is imported here
+ 3 | import { fetchWatchlist, removeFromWatchlist, fetchNgxStocks, addToWatchlist, updateWatchlist, formatLogoUrl } from '../../services/api';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Mail' is imported but never used.
+   ,-[src/components/portfolio/WatchlistTab.jsx:2:134]
+ 1 | import React, { useState, useEffect, useMemo, Component } from 'react';
+ 2 | import { Eye, BarChart2, Star, TrendingUp, TrendingDown, Trash2, Shield, AlertCircle, HelpCircle, CheckCircle, ChevronRight, Search, Mail, MessageSquare, Filter, Plus, Bell } from 'lucide-react';
+   :                                                                                                                                      ^^|^
+   :                                                                                                                                        `-- 'Mail' is imported here
+ 3 | import { fetchWatchlist, removeFromWatchlist, fetchNgxStocks, addToWatchlist, updateWatchlist, formatLogoUrl } from '../../services/api';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'MessageSquare' is imported but never used.
+   ,-[src/components/portfolio/WatchlistTab.jsx:2:140]
+ 1 | import React, { useState, useEffect, useMemo, Component } from 'react';
+ 2 | import { Eye, BarChart2, Star, TrendingUp, TrendingDown, Trash2, Shield, AlertCircle, HelpCircle, CheckCircle, ChevronRight, Search, Mail, MessageSquare, Filter, Plus, Bell } from 'lucide-react';
+   :                                                                                                                                            ^^^^^^|^^^^^^
+   :                                                                                                                                                  `-- 'MessageSquare' is imported here
+ 3 | import { fetchWatchlist, removeFromWatchlist, fetchNgxStocks, addToWatchlist, updateWatchlist, formatLogoUrl } from '../../services/api';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Filter' is imported but never used.
+   ,-[src/components/portfolio/WatchlistTab.jsx:2:155]
+ 1 | import React, { useState, useEffect, useMemo, Component } from 'react';
+ 2 | import { Eye, BarChart2, Star, TrendingUp, TrendingDown, Trash2, Shield, AlertCircle, HelpCircle, CheckCircle, ChevronRight, Search, Mail, MessageSquare, Filter, Plus, Bell } from 'lucide-react';
+   :                                                                                                                                                           ^^^|^^
+   :                                                                                                                                                              `-- 'Filter' is imported here
+ 3 | import { fetchWatchlist, removeFromWatchlist, fetchNgxStocks, addToWatchlist, updateWatchlist, formatLogoUrl } from '../../services/api';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'updateWatchlist' is imported but never used.
+   ,-[src/components/portfolio/WatchlistTab.jsx:3:79]
+ 2 | import { Eye, BarChart2, Star, TrendingUp, TrendingDown, Trash2, Shield, AlertCircle, HelpCircle, CheckCircle, ChevronRight, Search, Mail, MessageSquare, Filter, Plus, Bell } from 'lucide-react';
+ 3 | import { fetchWatchlist, removeFromWatchlist, fetchNgxStocks, addToWatchlist, updateWatchlist, formatLogoUrl } from '../../services/api';
+   :                                                                               ^^^^^^^|^^^^^^^
+   :                                                                                      `-- 'updateWatchlist' is imported here
+ 4 | import { toastError, toastSuccess } from '../../utils/toast';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Link' is imported but never used.
+   ,-[src/components/portfolio/WatchlistTab.jsx:5:10]
+ 4 | import { toastError, toastSuccess } from '../../utils/toast';
+ 5 | import { Link, useNavigate } from 'react-router-dom';
+   :          ^^|^
+   :            `-- 'Link' is imported here
+ 6 | import AddWatchlistModal from './AddWatchlistModal';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Catch parameter 'err' is caught but never used.
+    ,-[src/components/portfolio/WatchlistTab.jsx:98:14]
+ 97 |       toastSuccess(`Removed ${symbol} from watchlist`);
+ 98 |     } catch (err) {
+    :              ^|^
+    :               `-- 'err' is declared here
+ 99 |       toastError('Failed to remove from watchlist');
+    `----
+  help: Consider handling this error.
+
+  ! eslint(no-unused-vars): Variable 'handleAdd' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/components/portfolio/WatchlistTab.jsx:103:9]
+ 102 | 
+ 103 |   const handleAdd = async (symbol) => {
+     :         ^^^^|^^^^
+     :             `-- 'handleAdd' is declared here
+ 104 |     try {
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Catch parameter 'err' is caught but never used.
+     ,-[src/components/portfolio/WatchlistTab.jsx:112:14]
+ 111 |       toastSuccess('Added to watchlist');
+ 112 |     } catch (err) {
+     :              ^|^
+     :               `-- 'err' is declared here
+ 113 |       toastError('Failed to add to watchlist');
+     `----
+  help: Consider handling this error.
+
+  ! eslint(no-unused-vars): Parameter 'symbols' is declared but never used. Unused parameters should start with a '_'.
+     ,-[src/components/portfolio/WatchlistTab.jsx:333:21]
+ 332 |           onClose={() => setShowAddModal(false)}
+ 333 |           onAdded={(symbols) => {
+     :                     ^^^|^^^
+     :                        `-- 'symbols' is declared here
+ 334 |             loadData(); // reload watchlist items from backend
+     `----
+  help: Consider removing this parameter.
+
+  ! react-hooks(exhaustive-deps): React Hook useEffect has a missing dependency: 'loadData'
+    ,-[src/components/portfolio/WatchlistTab.jsx:87:6]
+ 85 |   useEffect(() => {
+ 86 |     loadData();
+    :     ^^^^|^^^
+    :         `-- useEffect uses `loadData` here
+ 87 |   }, []);
+    :      ^^
+ 88 | 
+    `----
+  help: Either include it or remove the dependency array.
+
+Found 143 warnings and 0 errors.
+Finished in 47ms on 42 files with 91 rules using 8 threads.

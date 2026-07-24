@@ -137,6 +137,11 @@ async def screen_company(ticker: str, financial_year: int = 2025, db: AsyncSessi
         if not result_state.get("annual_report_url") and not final_values:
             return {"error": "File Not Found", "detail": "No annual report could be located.", "retry": False}
 
+        # Extract ratios safely in case the LLM hallucinates a string instead of a dictionary
+        raw_ratios = calc_results.get("ratios", {})
+        if not isinstance(raw_ratios, dict):
+            raw_ratios = {}
+
         # Format exact JSON structure requested
         response_data = {
             "company": result_state.get("company_name", ticker),
@@ -147,9 +152,9 @@ async def screen_company(ticker: str, financial_year: int = 2025, db: AsyncSessi
             "financials": final_values,
             "aaoifi": {
                 "business_activity": bus_result.get("business_compliance_status", "PASS") if bus_result else "PASS", 
-                "interest_debt_ratio": calc_results.get("ratios", {}).get("interest_bearing_debt_ratio", 0),
-                "interest_income_ratio": calc_results.get("ratios", {}).get("non_permissible_income_ratio", 0),
-                "cash_ratio": calc_results.get("ratios", {}).get("cash_and_equivalents_ratio", 0),
+                "interest_debt_ratio": raw_ratios.get("interest_bearing_debt_ratio", 0),
+                "interest_income_ratio": raw_ratios.get("non_permissible_income_ratio", 0),
+                "cash_ratio": raw_ratios.get("cash_and_equivalents_ratio", 0),
                 "overall": "SHARIAH COMPLIANT" if calc_results.get("overall_financial_pass") else "NON COMPLIANT"
             },
             "explanation": result_state.get("ai_explanation", "")

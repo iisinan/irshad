@@ -32,7 +32,7 @@ services:
     env: docker
     dockerContext: backend
     dockerfilePath: backend/Dockerfile
-    dockerCommand: "php artisan queue:work --timeout=3600"
+    dockerCommand: 'bash -c "php artisan queue:work --timeout=3600 & php artisan queue:work --timeout=3600 & php artisan queue:work --timeout=3600 & wait"'
     plan: free
     envVars:
       - key: APP_ENV

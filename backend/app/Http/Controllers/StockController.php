@@ -44,8 +44,36 @@ class StockController extends Controller
      */
     public function show(string $symbol): JsonResponse
     {
-        $stock = \Illuminate\Support\Facades\Cache::remember("stocks.show.{$symbol}", 300, function () use ($symbol) {
-            return Company::with(['status', 'financials' => fn($q) => $q->latest(), 'dailyPrices' => fn($q) => $q->latest('date')])->where('symbol', $symbol)->firstOrFail();
+        $stock = \Illuminate\Support\Facades\Cache::remember("stocks.show.{$symbol}_v2", 300, function () use ($symbol) {
+            $company = Company::with(['status', 'financials' => fn($q) => $q->latest(), 'dailyPrices' => fn($q) => $q->latest('date')])->where('symbol', $symbol)->firstOrFail();
+            
+            // Map the FinancialScreening into financials for legacy mobile app compatibility
+            $existingScreening = \App\Models\FinancialScreening::where('company_ticker', $symbol)
+                ->orderBy('created_at', 'desc')
+                ->first();
+                
+            if ($existingScreening) {
+                $calc = $existingScreening->calculation_results ?? [];
+                $ratios = $calc['ratios'] ?? [];
+                
+                $simulatedFinancial = [
+                    'overall_financial_pass' => $calc['overall_financial_pass'] ?? true,
+                    'interest_income_ratio' => $ratios['non_permissible_income_ratio'] ?? 0,
+                    'interest_bearing_debt_ratio' => $ratios['interest_bearing_debt_ratio'] ?? 0,
+                    'cash_and_equivalents_ratio' => $ratios['cash_and_equivalents_ratio'] ?? 0,
+                    'non_compliant_income_ratio' => $ratios['non_permissible_income_ratio'] ?? 0,
+                ];
+                
+                if ($company->financials && $company->financials->count() > 0) {
+                    $fin = $company->financials->first();
+                    foreach($simulatedFinancial as $key => $val) {
+                        $fin->$key = $val;
+                    }
+                } else {
+                    $company->setRelation('financials', collect([new \App\Models\Financial($simulatedFinancial)]));
+                }
+            }
+            return $company;
         });
 
         return $this->success($stock);
