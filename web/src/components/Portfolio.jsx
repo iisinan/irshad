@@ -66,7 +66,7 @@ export default function Portfolio() {
   const location = useLocation();
   const getTabFromHash = (hash) => {
     const h = hash.replace('#', '');
-    return ['portfolio', 'market', 'watchlist', 'zakat', 'purification', 'lectures', 'baskets'].includes(h) ? h : 'portfolio';
+    return ['holdings', 'market', 'watchlist', 'zakat', 'purification', 'lectures', 'baskets'].includes(h) ? h : 'holdings';
   };
   
   const [activeTab, setActiveTab] = useState(() => getTabFromHash(location.hash));
@@ -145,7 +145,7 @@ export default function Portfolio() {
   );
 
   const tabs = [
-    { id: 'portfolio',    label: 'Portfolio',       icon: Briefcase },
+    { id: 'holdings',     label: 'Holdings',        icon: Briefcase },
     { id: 'market',       label: 'Market Screener', icon: BarChart2 },
     { id: 'watchlist',    label: 'Watchlist',       icon: Star },
     { id: 'zakat',        label: 'Zakat',           icon: Calculator },
@@ -265,13 +265,13 @@ export default function Portfolio() {
         </div>
       </div>
 
-      {/* ═ Two-column layout ═ */}
-      <div className="portfolio-layout-grid">
+      {/* ═ Layout ═ */}
+      <div className={`portfolio-layout-grid ${activeTab !== 'holdings' ? 'single-column' : ''}`}>
         
         {/* Tab Content Rendering (Left Side) */}
         <div style={{ minWidth: 0 }}>
-          {mountedTabs.includes('portfolio') && (
-            <div style={{ display: activeTab === 'portfolio' ? 'block' : 'none' }}>
+          {mountedTabs.includes('holdings') && (
+            <div style={{ display: activeTab === 'holdings' ? 'block' : 'none' }}>
               <PortfolioTab data={data} setShowAddModal={setShowAddModal} handleDelete={handleDelete} changeTab={handleTabChange} refreshData={loadData} />
             </div>
           )}
@@ -308,9 +308,10 @@ export default function Portfolio() {
 
         </div>
 
-        {/* ── Right Sidebar (Always Visible) ── */}
-        <div className="stagger-3" style={{ display:'flex', flexDirection:'column', gap:'18px' }}>
-          {/* Pie Chart */}
+        {/* ── Right Sidebar (Only Visible on Holdings) ── */}
+        {activeTab === 'holdings' && (
+          <div className="stagger-3" style={{ display:'flex', flexDirection:'column', gap:'18px' }}>
+            {/* Pie Chart */}
           <div style={{ background: 'var(--bg)', border:'1px solid var(--border)', borderRadius:'24px', padding:'26px', boxShadow:'var(--shadow-sm)', transition:'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', position:'relative', overflow:'hidden' }}
             onMouseEnter={e => { e.currentTarget.style.boxShadow='var(--shadow-md)'; e.currentTarget.style.transform='translateY(-2px)'; }}
             onMouseLeave={e => { e.currentTarget.style.boxShadow='var(--shadow-sm)'; e.currentTarget.style.transform='none'; }}>
@@ -410,8 +411,8 @@ export default function Portfolio() {
               </button>
             )}
           </div>
-
         </div>
+        )}
       </div>
       
     </div>

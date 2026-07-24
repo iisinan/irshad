@@ -1849,6 +1849,10 @@ textarea::placeholder {
   align-items: start;
 }
 
+.portfolio-layout-grid.single-column {
+  grid-template-columns: 1fr;
+}
+
 .holding-card {
   display: flex;
   align-items: center;
