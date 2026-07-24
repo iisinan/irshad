@@ -11,14 +11,14 @@ graph_app = build_graph()
 
 class ScreenRequest(BaseModel):
     ticker: str
-    financial_year: int = 2026
+    financial_year: int = 2025
 
 @router.get("/health")
 async def health_check():
     return {"status": "ok"}
 
 @router.post("/api/screen-company/{ticker}")
-async def screen_company(ticker: str, financial_year: int = 2026, db: AsyncSession = Depends(get_db)):
+async def screen_company(ticker: str, financial_year: int = 2025, db: AsyncSession = Depends(get_db)):
     """
     Triggers the LangGraph AI workflow to collect, validate, and screen a single company.
     Called by Laravel Queue Worker.

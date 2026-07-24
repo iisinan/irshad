@@ -39,7 +39,7 @@ class ProcessCompanyScreening implements ShouldQueue
             return;
         }
 
-        $targetYear = date('Y'); // The AI defaults to 2026 or the current year logic
+        $targetYear = date('Y') - 1; // Default to previous year since current year reports aren't out yet
         
         $status = \App\Models\FinancialStatementStatus::firstOrCreate(
             ['company_ticker' => $this->ticker, 'financial_year' => $targetYear],
