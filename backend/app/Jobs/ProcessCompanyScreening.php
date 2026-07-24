@@ -54,7 +54,7 @@ class ProcessCompanyScreening implements ShouldQueue
         // Hardcoding to 127.0.0.1:8000 because they run in the same Docker container
         // and the Render dashboard has an incorrect env variable (localhost:8001) that causes curl error 52
         $aiUrl = 'http://127.0.0.1:8000';
-        $response = Http::timeout(900)->post("{$aiUrl}/api/screen-company/{$this->ticker}");
+        $response = Http::timeout(900)->post("{$aiUrl}/api/screen-company/{$this->ticker}?financial_year={$targetYear}");
 
         if ($response->failed()) {
             $error = $response->json('detail') ?? $response->body();
