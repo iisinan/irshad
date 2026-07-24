@@ -76,7 +76,15 @@ class BusinessIntelligenceAgent:
                  f"Principal Activities (from Annual Report): {principal_activities}\n" \
                  f"Business Segments (from Annual Report): {business_segments}\n" \
                  f"Web Snippets (Recent): {supporting_evidence}\n\n" \
-                 f"Based on AAOIFI Shariah standards, determine if this company engages in any non-permissible (haram) core business activities (e.g., conventional finance, alcohol, pork, gambling, adult entertainment, weapons). Return structured JSON."
+                 f"Based on AAOIFI Shariah standards, determine if this company engages in any non-permissible (haram) core business activities. Look carefully for any of the following categories and their synonyms:\n" \
+                 f"1. Conventional Finance (interest-based banking, riba, conventional insurance, commercial banking, lending, microfinance, credit)\n" \
+                 f"2. Alcohol (breweries, liquor, spirits, wine, distilling, intoxicating drinks)\n" \
+                 f"3. Pork (swine, non-halal meat processing, porcine products)\n" \
+                 f"4. Gambling (casinos, betting, lottery, games of chance, sports betting, bookmaking)\n" \
+                 f"5. Adult Entertainment (pornography, obscenity, adult content, escort services)\n" \
+                 f"6. Weapons & Defense (arms manufacturing, firearms, military equipment, munitions)\n" \
+                 f"7. Tobacco (cigarettes, smoking, nicotine, vaping)\n" \
+                 f"Return structured JSON."
                  
         print("Analyzing business compliance with Gemini...")
         try:
