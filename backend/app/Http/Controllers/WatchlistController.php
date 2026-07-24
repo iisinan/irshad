@@ -56,8 +56,13 @@ class WatchlistController extends Controller
                 'id' => $item->id,
                 'symbol' => strtoupper($item->symbol),
                 'name' => $company->name ?? $item->symbol,
-                'alert_whatsapp' => $item->alert_whatsapp,
+                'alert_inapp' => $item->alert_inapp,
+                'alert_push' => $item->alert_push,
                 'alert_email' => $item->alert_email,
+                'alert_verdict_change' => $item->alert_verdict_change,
+                'alert_compliance_risk' => $item->alert_compliance_risk,
+                'alert_weekly_digest' => $item->alert_weekly_digest,
+                'alert_price_change' => $item->alert_price_change,
                 'price' => $currentPrice,
                 'change' => round($changePct, 2),
                 'status' => $statusString,
@@ -72,8 +77,13 @@ class WatchlistController extends Controller
     {
         $request->validate([
             'symbol'         => 'required|string',
-            'alert_whatsapp' => 'sometimes|boolean',
+            'alert_inapp'    => 'sometimes|boolean',
+            'alert_push'     => 'sometimes|boolean',
             'alert_email'    => 'sometimes|boolean',
+            'alert_verdict_change' => 'sometimes|boolean',
+            'alert_compliance_risk' => 'sometimes|boolean',
+            'alert_weekly_digest' => 'sometimes|boolean',
+            'alert_price_change' => 'sometimes|boolean',
         ]);
 
         $user = $request->user();
@@ -84,14 +94,19 @@ class WatchlistController extends Controller
                 'symbol'  => strtoupper($request->symbol),
             ],
             [
-                'alert_whatsapp' => $request->input('alert_whatsapp', false),
+                'alert_inapp'    => $request->input('alert_inapp', false),
+                'alert_push'     => $request->input('alert_push', false),
                 'alert_email'    => $request->input('alert_email', false),
+                'alert_verdict_change' => $request->input('alert_verdict_change', false),
+                'alert_compliance_risk' => $request->input('alert_compliance_risk', false),
+                'alert_weekly_digest' => $request->input('alert_weekly_digest', false),
+                'alert_price_change' => $request->input('alert_price_change', false),
             ]
         );
 
         // If it already existed but alerts were passed, update them.
-        if (!$watchlist->wasRecentlyCreated && ($request->has('alert_whatsapp') || $request->has('alert_email'))) {
-            $watchlist->update($request->only(['alert_whatsapp', 'alert_email']));
+        if (!$watchlist->wasRecentlyCreated) {
+            $watchlist->update($request->only(['alert_inapp', 'alert_push', 'alert_email', 'alert_verdict_change', 'alert_compliance_risk', 'alert_weekly_digest', 'alert_price_change']));
         }
 
         return response()->json(['message' => 'Added to watchlist', 'data' => $watchlist], 201);
@@ -106,20 +121,35 @@ class WatchlistController extends Controller
         $request->validate([
             'symbols'        => 'required|array|min:1',
             'symbols.*'      => 'required|string',
-            'alert_whatsapp' => 'sometimes|boolean',
+            'alert_inapp'    => 'sometimes|boolean',
+            'alert_push'     => 'sometimes|boolean',
             'alert_email'    => 'sometimes|boolean',
+            'alert_verdict_change' => 'sometimes|boolean',
+            'alert_compliance_risk' => 'sometimes|boolean',
+            'alert_weekly_digest' => 'sometimes|boolean',
+            'alert_price_change' => 'sometimes|boolean',
         ]);
 
         $user          = $request->user();
         $alertEmail    = $request->boolean('alert_email', false);
-        $alertWhatsapp = $request->boolean('alert_whatsapp', false);
+        $alertInapp    = $request->boolean('alert_inapp', false);
+        $alertPush     = $request->boolean('alert_push', false);
+        $alertVerdict  = $request->boolean('alert_verdict_change', false);
+        $alertRisk     = $request->boolean('alert_compliance_risk', false);
+        $alertWeekly   = $request->boolean('alert_weekly_digest', false);
+        $alertPrice    = $request->boolean('alert_price_change', false);
         $now           = now();
 
         $rows = collect($request->symbols)->map(fn($sym) => [
             'user_id'        => $user->id,
             'symbol'         => strtoupper($sym),
             'alert_email'    => $alertEmail,
-            'alert_whatsapp' => $alertWhatsapp,
+            'alert_inapp'    => $alertInapp,
+            'alert_push'     => $alertPush,
+            'alert_verdict_change' => $alertVerdict,
+            'alert_compliance_risk' => $alertRisk,
+            'alert_weekly_digest' => $alertWeekly,
+            'alert_price_change' => $alertPrice,
             'created_at'     => $now,
             'updated_at'     => $now,
         ])->toArray();
@@ -127,7 +157,7 @@ class WatchlistController extends Controller
         Watchlist::upsert(
             $rows,
             ['user_id', 'symbol'],
-            ['alert_email', 'alert_whatsapp', 'updated_at']
+            ['alert_email', 'alert_inapp', 'alert_push', 'alert_verdict_change', 'alert_compliance_risk', 'alert_weekly_digest', 'alert_price_change', 'updated_at']
         );
 
         $watchlist = Watchlist::where('user_id', $user->id)
@@ -147,7 +177,8 @@ class WatchlistController extends Controller
         $request->validate([
             'symbols'        => 'required|array|min:1',
             'symbols.*'      => 'required|string',
-            'alert_whatsapp' => 'sometimes|boolean',
+            'alert_inapp'    => 'sometimes|boolean',
+            'alert_push'     => 'sometimes|boolean',
             'alert_email'    => 'sometimes|boolean',
             'phone_number'   => 'sometimes|string|nullable|max:20',
             'risk_profile'   => 'sometimes|string|in:conservative,moderate,aggressive',
@@ -155,7 +186,8 @@ class WatchlistController extends Controller
 
         $user          = $request->user();
         $alertEmail    = $request->boolean('alert_email', false);
-        $alertWhatsapp = $request->boolean('alert_whatsapp', false);
+        $alertInapp    = $request->boolean('alert_inapp', false);
+        $alertPush     = $request->boolean('alert_push', false);
         $phoneNumber   = $request->input('phone_number');
         $riskProfile   = $request->input('risk_profile', 'moderate');
         $now           = now();
@@ -164,17 +196,18 @@ class WatchlistController extends Controller
             'user_id'        => $user->id,
             'symbol'         => strtoupper($sym),
             'alert_email'    => $alertEmail,
-            'alert_whatsapp' => $alertWhatsapp,
+            'alert_inapp'    => $alertInapp,
+            'alert_push'     => $alertPush,
             'created_at'     => $now,
             'updated_at'     => $now,
         ])->toArray();
 
-        DB::transaction(function () use ($user, $rows, $alertWhatsapp, $phoneNumber, $riskProfile) {
+        DB::transaction(function () use ($user, $rows, $phoneNumber, $riskProfile) {
             // 1. Bulk-upsert watchlist (single INSERT ... ON CONFLICT DO UPDATE)
             Watchlist::upsert(
                 $rows,
                 ['user_id', 'symbol'],
-                ['alert_email', 'alert_whatsapp', 'updated_at']
+                ['alert_email', 'alert_inapp', 'alert_push', 'updated_at']
             );
 
             // 2. Mark the user as onboarded inside the same transaction
@@ -183,7 +216,7 @@ class WatchlistController extends Controller
             $prefs['risk_profile'] = $riskProfile;
             
             $updates = ['preferences' => $prefs];
-            if ($alertWhatsapp && $phoneNumber) {
+            if ($phoneNumber) {
                 $updates['phone_number'] = $phoneNumber;
             }
             $user->update($updates);
@@ -200,8 +233,13 @@ class WatchlistController extends Controller
     public function update(Request $request, $symbol)
     {
         $request->validate([
-            'alert_whatsapp' => 'sometimes|boolean',
+            'alert_inapp'    => 'sometimes|boolean',
+            'alert_push'     => 'sometimes|boolean',
             'alert_email'    => 'sometimes|boolean',
+            'alert_verdict_change' => 'sometimes|boolean',
+            'alert_compliance_risk' => 'sometimes|boolean',
+            'alert_weekly_digest' => 'sometimes|boolean',
+            'alert_price_change' => 'sometimes|boolean',
         ]);
 
         $user = $request->user();
@@ -210,7 +248,7 @@ class WatchlistController extends Controller
             ->where('symbol', strtoupper($symbol))
             ->firstOrFail();
 
-        $watchlist->update($request->only(['alert_whatsapp', 'alert_email']));
+        $watchlist->update($request->only(['alert_inapp', 'alert_push', 'alert_email', 'alert_verdict_change', 'alert_compliance_risk', 'alert_weekly_digest', 'alert_price_change']));
 
         return response()->json(['message' => 'Watchlist alerts updated', 'data' => $watchlist]);
     }

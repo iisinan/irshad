@@ -1,9 +1,38 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Eye, BarChart2, Star, TrendingUp, TrendingDown, Trash2, Shield, AlertCircle, HelpCircle, CheckCircle, ChevronRight, Search, Mail, MessageSquare, Filter, Plus } from 'lucide-react';
+import React, { useState, useEffect, useMemo, Component } from 'react';
+import { Eye, BarChart2, Star, TrendingUp, TrendingDown, Trash2, Shield, AlertCircle, HelpCircle, CheckCircle, ChevronRight, Search, Mail, MessageSquare, Filter, Plus, Bell } from 'lucide-react';
 import { fetchWatchlist, removeFromWatchlist, fetchNgxStocks, addToWatchlist, updateWatchlist, formatLogoUrl } from '../../services/api';
 import { toastError, toastSuccess } from '../../utils/toast';
 import { Link, useNavigate } from 'react-router-dom';
 import AddWatchlistModal from './AddWatchlistModal';
+import WatchlistAlertModal from './WatchlistAlertModal';
+
+class ModalErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error("Modal crashed:", error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 99999, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+          <div style={{ background: 'white', padding: '24px', borderRadius: '12px', maxWidth: '500px', width: '100%', wordBreak: 'break-word' }}>
+            <h2 style={{ color: 'red', marginTop: 0 }}>Modal Error</h2>
+            <p><strong>Message:</strong> {this.state.error?.message}</p>
+            <pre style={{ fontSize: '11px', overflowX: 'auto', background: '#f5f5f5', padding: '10px' }}>{this.state.error?.stack}</pre>
+            <button onClick={() => { this.setState({hasError:false}); this.props.onClose(); }} style={{ marginTop: '16px', padding: '8px 16px', background: 'black', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Close</button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 export default function WatchlistTab() {
   const [watchlistItems, setWatchlistItems] = useState(() => {
@@ -15,6 +44,7 @@ export default function WatchlistTab() {
   });
   const [watchlistSymbols, setWatchlistSymbols] = useState(() => watchlistItems.map(i => i.symbol));
   const [showAddModal, setShowAddModal] = useState(false);
+  const [activeAlertStock, setActiveAlertStock] = useState(null); // holds the stock object for alerts
   const [filter, setFilter] = useState('all'); // all, halal, non-halal
   
   const navigate = useNavigate();
@@ -57,12 +87,16 @@ export default function WatchlistTab() {
   }, []);
 
   const handleRemove = async (symbol) => {
+    if (!window.confirm(`Are you sure you want to remove ${symbol} from your watchlist?`)) {
+      return;
+    }
     try {
       await removeFromWatchlist(symbol);
       setWatchlistItems(prev => prev.filter(i => i.symbol !== symbol));
       setWatchlistSymbols(prev => prev.filter(s => s !== symbol));
+      toastSuccess(`Removed ${symbol} from watchlist`);
     } catch (err) {
-      alert('Failed to remove from watchlist');
+      toastError('Failed to remove from watchlist');
     }
   };
 
@@ -80,25 +114,8 @@ export default function WatchlistTab() {
     }
   };
 
-  const toggleAlert = async (symbol, type) => {
-    const item = watchlistItems.find(i => i.symbol === symbol);
-    if (!item) return;
-
-    const data = {
-      alert_email: type === 'email' ? !item.alert_email : item.alert_email,
-    };
-
-    // Optimistic update
-    setWatchlistItems(prev => prev.map(i => i.symbol === symbol ? { ...i, ...data } : i));
-
-    try {
-      await updateWatchlist(symbol, data);
-      toastSuccess('Alert preferences updated');
-    } catch (err) {
-      // Revert on error
-      setWatchlistItems(prev => prev.map(i => i.symbol === symbol ? item : i));
-      toastError('Failed to update alert preferences');
-    }
+  const handleAlertUpdate = (updatedItem) => {
+    setWatchlistItems(prev => prev.map(i => i.symbol === updatedItem.symbol ? { ...i, ...updatedItem } : i));
   };
 
 
@@ -235,6 +252,7 @@ export default function WatchlistTab() {
             const change = parseFloat(stock.price_change_pct ?? 0);
             const isPos = change >= 0;
             const wlItem = watchlistItems.find(w => w.symbol === stock.symbol) || {};
+            const hasAlerts = wlItem.alert_email || wlItem.alert_inapp || wlItem.alert_push || wlItem.alert_verdict_change || wlItem.alert_compliance_risk || wlItem.alert_price_change || wlItem.alert_weekly_digest;
 
             return (
               <div 
@@ -242,58 +260,64 @@ export default function WatchlistTab() {
                 className="watchlist-card hover-lift"
                 style={{ 
                   display: 'flex', alignItems: 'center', padding: '20px 24px', background: 'var(--bg)', 
-                  borderRadius: '20px', border: '1px solid var(--border)', boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', cursor: 'pointer',
-                  animationDelay: `${(i % 10) * 0.04}s`, flexWrap: 'wrap', gap: '16px'
+                  borderRadius: '20px', border: '1px solid var(--border)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)',
+                  transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', cursor: 'pointer',
+                  animationDelay: `${(i % 10) * 0.04}s`, flexWrap: 'wrap', gap: '20px'
                 }}
                 onClick={() => navigate(`/market/${stock.symbol}`, { state: { stock } })}
               >
-                <div style={{ flex: '1 1 200px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '16px', minWidth: '220px' }}>
                   {stock.logo_url ? (
-                    <img loading="lazy" src={formatLogoUrl(stock.logo_url)} alt={stock.symbol} style={{ width: '48px', height: '48px', borderRadius: '14px', objectFit: 'contain', border: '1px solid var(--border)', flexShrink: 0 }} />
+                    <img loading="lazy" src={formatLogoUrl(stock.logo_url)} alt={stock.symbol} style={{ width: '48px', height: '48px', borderRadius: '14px', objectFit: 'contain', border: '1px solid var(--border)', flexShrink: 0, background: 'var(--bg-section)' }} />
                   ) : (
-                    <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'var(--primary-10)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '1.06rem', flexShrink: 0 }}>
+                    <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'var(--primary-50)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '1.1rem', flexShrink: 0 }}>
                       {stock.symbol.charAt(0)}
                     </div>
                   )}
                   <div>
-                    <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '1.01rem', letterSpacing: '-0.3px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '1.05rem', letterSpacing: '-0.2px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                       {stock.symbol}
-                      <span className={`status-badge ${cfg.cls}`} style={{ display: 'inline-flex', padding: '4px 8px', fontSize: '0.57rem' }}>
+                      <span className={`status-badge ${cfg.cls}`} style={{ display: 'inline-flex', padding: '4px 8px', fontSize: '0.6rem' }}>
                         {cfg.icon} {cfg.label}
                       </span>
                     </div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px', fontWeight: 500 }}>{stock.name}</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px', fontWeight: 500 }}>{stock.name}</div>
                   </div>
                 </div>
 
-                <div className="watchlist-price-col" style={{ flex: '1 1 120px', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', paddingRight: '24px' }}>
-                  <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '1.06rem' }}>₦{price.toFixed(2)}</div>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', fontWeight: 700, color: isPos ? 'var(--halal)' : 'var(--non-halal)', marginTop: '4px' }}>
+                <div className="watchlist-price-col" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: '120px' }}>
+                  <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '1.1rem' }}>₦{price.toFixed(2)}</div>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', fontWeight: 700, color: isPos ? 'var(--halal)' : 'var(--non-halal)', marginTop: '6px', background: isPos ? 'var(--halal-bg)' : 'var(--non-halal-bg)', padding: '4px 8px', borderRadius: '12px' }}>
                     {isPos ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
                     {isPos ? '+' : ''}{change.toFixed(2)}%
                   </div>
                 </div>
 
-                <div style={{ flex: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }} onClick={(e) => e.stopPropagation()}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginLeft: 'auto' }} onClick={(e) => e.stopPropagation()}>
                   <button 
-                    onClick={() => toggleAlert(stock.symbol, 'email')}
-                    className={`alert-btn-wide ${wlItem.alert_email ? 'active-email' : ''}`}
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setActiveAlertStock(stock);
+                    }}
+                    className={`alert-btn-wide ${hasAlerts ? 'active-alert' : ''}`}
+                    title={hasAlerts ? 'Alerts Active' : 'Set Alerts'}
                   >
-                    <Mail size={16} />
-                    <span style={{ fontSize: '0.75rem', fontWeight: 700 }}>Email Alerts</span>
+                    <Bell size={16} fill={hasAlerts ? "currentColor" : "none"} />
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700 }}>{hasAlerts ? 'Alerts On' : 'Alerts'}</span>
                   </button>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  
+                  <div style={{ width: '1px', height: '32px', background: 'var(--border)' }}></div>
+                  
                   <button 
-                    onClick={(e) => { e.stopPropagation(); handleRemove(stock.symbol); }}
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleRemove(stock.symbol); }}
                     className="remove-btn"
                     title="Remove from Watchlist"
                   >
                     <Trash2 size={18} />
                   </button>
-                  <ChevronRight size={20} color="var(--text-muted)" style={{ opacity: 0.5 }} />
+                  <ChevronRight size={20} color="var(--text-light)" style={{ marginLeft: '4px' }} />
                 </div>
               </div>
             );
@@ -311,6 +335,17 @@ export default function WatchlistTab() {
           }}
         />
       )}
+
+      {activeAlertStock && (
+        <ModalErrorBoundary onClose={() => setActiveAlertStock(null)}>
+          <WatchlistAlertModal
+            stock={activeAlertStock}
+            watchlistData={watchlistItems.find(w => w.symbol === activeAlertStock.symbol) || {}}
+            onClose={() => setActiveAlertStock(null)}
+            onUpdated={handleAlertUpdate}
+          />
+        </ModalErrorBoundary>
+      )}
       
       <style dangerouslySetInnerHTML={{__html: `
         .hover-search-row:hover { background: var(--bg-section) !important; }
@@ -327,10 +362,11 @@ export default function WatchlistTab() {
         }
         .alert-btn-wide:hover { background: white; border-color: var(--primary); color: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         
+        .active-alert { background: var(--primary-50) !important; border-color: var(--primary) !important; color: var(--primary) !important; }
+        .active-alert:hover { background: var(--primary-100) !important; transform: translateY(-2px); box-shadow: 0 4px 12px var(--primary-50) !important; }
+        
         .active-email { background: var(--primary) !important; border-color: var(--primary) !important; color: white !important; }
         .active-email:hover { background: var(--primary-hover) !important; }
-        .alert-btn.active-wa { background: #25D366; border-color: #25D366; color: white; }
-        .alert-btn.active-wa:hover { background: #128C7E; }
 
         .remove-btn {
           width: 44px; height: 44px; border-radius: 12px; background: transparent; border: none;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
-import Portfolio from './Portfolio';
+import Dashboard from './Dashboard';
 import ConsumerDashboard from './ConsumerDashboard';
 
 export default function RoleBasedDashboard() {
@@ -10,7 +10,7 @@ export default function RoleBasedDashboard() {
     if (user?.role === 'consumer') {
       return <ConsumerDashboard />;
     }
-    return <Portfolio />;
+    return <Dashboard />;
   };
 
   return (

@@ -37,7 +37,6 @@ class FinancialScraper:
         queries = [
             f'{base_query} inurl:africanfinancials.com',
             f'{base_query} inurl:ngxgroup.com',
-            f'{base_query} inurl:proshare.co',
             base_query # Official sites usually surface here
         ]
         
@@ -52,16 +51,16 @@ class FinancialScraper:
         html_pages_to_crawl = []
         found_pdfs = []
         
-        INTERIM_KEYWORDS = ["interim", "half-year", "half year", "h1", "q1", "q2", "q3", "quarter"]
+        EXCLUDE_KEYWORDS = ["interim", "half-year", "half year", "h1", "q1", "q2", "q3", "quarter", "sustainability", "esg", "proxy", "notice", "agenda", "dividend", "presentation"]
 
         def is_valid_pdf(url_str, text_str=""):
             # Check year
             if str(financial_year) not in text_str and str(financial_year) not in url_str:
                 return False
-            # Check for interim
+            # Check for interim or non-financial reports
             if annual_only:
                 combined = (url_str + text_str).lower()
-                if any(kw in combined for kw in INTERIM_KEYWORDS):
+                if any(kw in combined for kw in EXCLUDE_KEYWORDS):
                     return False
             return True
 
@@ -74,20 +73,37 @@ class FinancialScraper:
 
             for item in self.client.dataset(run["defaultDatasetId"]).iterate_items():
                 query = item.get("searchQuery", {}).get("term", "")
-                is_ngx = "site:ngxgroup.com" in query
-                is_af = "site:africanfinancials.com" in query
+                is_ngx = "inurl:ngxgroup.com" in query
+                is_af = "inurl:africanfinancials.com" in query
+                
+                # First word of company name to check for official domain match
+                company_first_word = company_name.split()[0].lower().replace(",", "").replace(".", "")
 
                 for organic_result in item.get("organicResults", []):
                     url = organic_result.get("url", "")
                     title = organic_result.get("title", "")
                     snippet = organic_result.get("description", "")
                     
+                    if "proshare" in url.lower() or "nairametrics" in url.lower() or "businessday" in url.lower():
+                        continue # Skip news sites
+                        
+                    source_type = "other"
+                    if is_ngx or "ngxgroup.com" in url.lower():
+                        source_type = "ngx"
+                    elif is_af or "africanfinancials.com" in url.lower():
+                        source_type = "african_financials"
+                    elif company_first_word in url.lower():
+                        source_type = "official"
+                        
+                    if source_type == "other":
+                        continue # Skip random domains that don't match any criteria
+                    
                     if url.lower().endswith(".pdf"):
                         if is_valid_pdf(url, title + snippet):
-                            found_pdfs.append({"url": url, "source_type": "ngx" if is_ngx else ("african_financials" if is_af else "official"), "text": title + snippet})
+                            found_pdfs.append({"url": url, "source_type": source_type, "text": title + snippet})
                     else:
                         # Collect HTML links for deep crawling
-                        html_pages_to_crawl.append({"url": url, "source_type": "ngx" if is_ngx else ("african_financials" if is_af else "official")})
+                        html_pages_to_crawl.append({"url": url, "source_type": source_type})
 
             # 2. Deep Crawl HTML Pages using Cheerio Scraper if necessary
             if html_pages_to_crawl:
@@ -134,7 +150,7 @@ class FinancialScraper:
 
             # 3. Filter and Sort the most recent/best PDFs
             if found_pdfs:
-                print(f"Found {len(found_pdfs)} valid PDFs. Selecting best...")
+                print(f"Found {len(found_pdfs)} valid PDFs. Selecting best..."); print("All PDFs:", found_pdfs)
                 
                 # We prioritize Official > African Financials > NGX
                 priority = {"official": 3, "african_financials": 2, "ngx": 1}
@@ -158,6 +174,8 @@ class FinancialScraper:
                 # If official is missing but we have african_financials, we can use it as official fallback
                 if not results["official"] and results["african_financials"]:
                     results["official"] = results["african_financials"]
+                elif not results["official"] and results["ngx"]:
+                    results["official"] = results["ngx"]
                     
             return results
 

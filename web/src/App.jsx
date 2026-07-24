@@ -1,6 +1,6 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
-import { TrendingUp, TrendingDown, ArrowRight, CheckCircle, Shield, BarChart2, ChevronRight, Smartphone, Apple, Play, AlertCircle, HelpCircle, Home, Scale, Info, BookOpen, Settings, LayoutDashboard, User } from 'lucide-react';
+import { TrendingUp, TrendingDown, ArrowRight, CheckCircle, Shield, BarChart2, ChevronRight, Smartphone, Apple, Play, AlertCircle, HelpCircle, Home, Scale, Info, BookOpen, Settings, LayoutDashboard, User, Moon, Sun } from 'lucide-react';
 import { fetchNgxStocks } from './services/api';
 import DashboardLayout from './components/DashboardLayout';
 import Footer from './components/Footer';
@@ -21,6 +21,7 @@ const Profile = React.lazy(() => import('./components/Profile'));
 const AdminDashboard = React.lazy(() => import('./components/AdminDashboard'));
 const RoleBasedDashboard = React.lazy(() => import('./components/RoleBasedDashboard'));
 const Pricing = React.lazy(() => import('./components/Pricing'));
+const LandingPage = React.lazy(() => import('./components/LandingPage'));
 
 const DASHBOARD_ROUTES = ['/dashboard', '/portfolio', '/profile'];
 
@@ -69,6 +70,28 @@ const DocumentTitleUpdater = () => {
     document.title = title;
   }, [location]);
   return null;
+};
+
+/* ─── Theme Toggle ────────────────────────────────────────── */
+const ThemeToggle = () => {
+  const [theme, setTheme] = useState(() => localStorage.getItem('irshad_theme') || 'light');
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+    localStorage.setItem('irshad_theme', theme);
+  }, [theme]);
+
+  const toggle = () => setTheme(t => (t === 'light' ? 'dark' : 'light'));
+
+  return (
+    <button onClick={toggle} className="nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Toggle Theme">
+      {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+    </button>
+  );
 };
 
 /* ─── Navbar ──────────────────────────────────────────────── */
@@ -126,6 +149,8 @@ const TopNavbar = () => {
             <Link to="/admin" className={navLinkClass('/admin')} style={{ color: 'var(--primary)' }}>Admin</Link>
           )}
           <div className="nav-divider" />
+          <ThemeToggle />
+          <div className="nav-divider" />
           {!loading && (
             user ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -178,6 +203,9 @@ const TopNavbar = () => {
         <Link to="/resources" className={navLinkClass('/resources')} onClick={() => setMenuOpen(false)}>
           <BookOpen size={18} /> Resources
         </Link>
+        <div style={{ padding: '16px 24px' }}>
+          <ThemeToggle />
+        </div>
 
         {user && (
           <Link to="/portfolio" className={navLinkClass('/portfolio')} onClick={() => setMenuOpen(false)}>
@@ -337,359 +365,6 @@ const StockCard = ({ company }) => {
           <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', fontWeight: 600 }}>Data unavailable</div>
         )}
       </div>
-    </div>
-  );
-};
-
-
-// Footer moved to components/Footer.jsx
-
-/* ─── Landing Page ───────────────────────────────────────── */
-const LandingPage = () => {
-  const [stocks, setStocks] = useState([]);
-
-  useEffect(() => {
-    fetchNgxStocks().then(r => { if (r.data) setStocks(r.data.slice(0, 6)); }).catch(() => {});
-  }, []);
-
-  return (
-    <div>
-      {/* Hero */}
-      <section className="hero animate-fade-in" style={{ position: 'relative', overflow: 'hidden', padding: '120px 20px 100px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        {/* Background Gradients */}
-        <div style={{ position: 'absolute', top: '-20%', left: '50%', transform: 'translateX(-50%)', width: '80vw', height: '80vw', background: 'radial-gradient(circle, rgba(201,168,76,0.08) 0%, rgba(245,240,232,0) 70%)', zIndex: -1, pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', top: '10%', right: '-10%', width: '40vw', height: '40vw', background: 'radial-gradient(circle, rgba(201,168,76,0.05) 0%, rgba(245,240,232,0) 70%)', zIndex: -1, pointerEvents: 'none' }} />
-
-        <div className="hero-tag" style={{ background: 'var(--bg)', border: '1px solid var(--gold-100)', boxShadow: '0 4px 16px rgba(201,168,76,0.08)', color: 'var(--gold)' }}>
-          <Shield size={14} fill="currentColor" style={{ opacity: 0.8 }} />
-          Nigeria's #1 Shariah Stock Screener
-        </div>
-
-        <h1 style={{ fontSize: 'clamp(2.8rem, 6vw, 4.8rem)', fontWeight: '900', letterSpacing: '-1.5px', lineHeight: 1.05, maxWidth: '840px', margin: '0 auto 24px', color: 'var(--text-dark)', textShadow: '0 12px 32px rgba(0,0,0,0.03)' }}>
-          Align Your Wealth With Your <span style={{ color: 'var(--primary)', position: 'relative' }}>
-            Values
-            <svg width="100%" height="12" viewBox="0 0 100 12" preserveAspectRatio="none" style={{ position: 'absolute', bottom: '-4px', left: 0, zIndex: -1, opacity: 0.3 }}>
-              <path d="M0,10 Q50,-5 100,10" stroke="var(--primary)" strokeWidth="6" fill="none" strokeLinecap="round" />
-            </svg>
-          </span>
-        </h1>
-        
-        <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', maxWidth: '640px', margin: '0 auto 40px', lineHeight: 1.7, fontWeight: 500 }}>
-          Real-time halal screening for every stock on the Nigerian Exchange. Make confident, compliant investment decisions in seconds.
-        </p>
-
-        <div className="hero-cta" style={{ display: 'flex', gap: '16px', alignItems: 'center', justifyContent: 'center' }}>
-          <Link to="/login" className="btn-primary" style={{ padding: '16px 36px', fontSize: '0.92rem', boxShadow: '0 8px 24px rgba(201,168,76,0.25)', borderRadius: '40px' }}>
-            Start Screening <ArrowRight size={18} />
-          </Link>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: '12px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <div style={{ display: 'flex', gap: '2px' }}>
-                {[1,2,3,4,5].map(i => <svg key={i} width="16" height="16" viewBox="0 0 24 24" fill="var(--gold)" color="var(--gold)"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>)}
-              </div>
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>Trusted by 10k+ investors</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Floating Abstract UI Elements */}
-        <div style={{ position: 'relative', width: '100%', maxWidth: '1000px', height: '140px', marginTop: '60px' }}>
-          {/* Mock Pill 1 */}
-          <div style={{ position: 'absolute', top: '20px', left: '10%', background: 'var(--bg)', padding: '12px 20px', borderRadius: '16px', boxShadow: '0 12px 32px rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', gap: '12px', border: '1px solid var(--border)', animation: 'float 6s ease-in-out infinite' }}>
-            <div style={{ width: '32px', height: '32px', background: 'var(--primary-50)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ color: 'var(--primary)', fontWeight: 800, fontSize: '0.7rem' }}>MTN</span>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.79rem', fontWeight: 700, color: 'var(--text-dark)' }}>MTNN</div>
-              <div style={{ fontSize: '0.66rem', color: 'var(--halal)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '2px' }}><CheckCircle size={10} /> Halal</div>
-            </div>
-          </div>
-          
-          {/* Mock Pill 2 */}
-          <div style={{ position: 'absolute', top: '-10px', right: '15%', background: 'var(--bg)', padding: '12px 20px', borderRadius: '16px', boxShadow: '0 12px 32px rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', gap: '12px', border: '1px solid var(--border)', animation: 'float 7s ease-in-out infinite reverse' }}>
-            <div style={{ width: '32px', height: '32px', background: 'var(--non-halal-bg)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ color: 'var(--non-halal)', fontWeight: 800, fontSize: '0.7rem' }}>NB</span>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.79rem', fontWeight: 700, color: 'var(--text-dark)' }}>NB</div>
-              <div style={{ fontSize: '0.66rem', color: 'var(--non-halal)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '2px' }}><AlertCircle size={10} /> Non-Halal</div>
-            </div>
-          </div>
-
-          {/* Main Mockup Strip */}
-          <div style={{ width: '100%', height: '100%', background: 'linear-gradient(180deg, transparent 0%, var(--bg) 100%)', position: 'absolute', bottom: 0, left: 0, zIndex: 2 }} />
-          <div style={{ width: '80%', height: '100%', margin: '0 auto', background: 'var(--bg)', borderTopLeftRadius: '24px', borderTopRightRadius: '24px', border: '1px solid var(--border)', borderBottom: 'none', boxShadow: '0 -12px 48px rgba(0,0,0,0.04)', padding: '24px', display: 'flex', gap: '16px', overflow: 'hidden' }}>
-            {[1,2,3].map(i => (
-              <div key={i} style={{ flex: 1, background: 'var(--bg)', borderRadius: '12px', padding: '16px', border: '1px solid var(--border)', opacity: 1 - (i*0.15) }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--border)', marginBottom: '16px' }} />
-                <div style={{ width: '60%', height: '12px', borderRadius: '4px', background: 'var(--border)', marginBottom: '8px' }} />
-                <div style={{ width: '40%', height: '12px', borderRadius: '4px', background: 'var(--border)' }} />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Strip */}
-      <div className="main-content">
-        <div className="stats-strip animate-fade-in delay-1">
-          <div className="stat-item">
-            <div className="stat-number green">150+</div>
-            <div className="stat-label">Stocks Screened</div>
-          </div>
-          <div className="stat-item">
-            <div className="stat-number">Real-time</div>
-            <div className="stat-label">Market Data</div>
-          </div>
-          <div className="stat-item">
-            <div className="stat-number green">100%</div>
-            <div className="stat-label">AAOIFI Compliant</div>
-          </div>
-        </div>
-      </div>
-
-      {/* How It Works */}
-      <section style={{ padding: '100px 0', background: 'var(--bg-section)' }}>
-        <div className="main-content">
-          <div style={{ textAlign: 'center', marginBottom: '64px' }}>
-            <div className="section-label">Our Process</div>
-            <h2 style={{ fontSize: '2.11rem', fontWeight: '800', letterSpacing: '-0.5px' }}>How Irshad Works</h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.97rem', maxWidth: '560px', margin: '16px auto 0', lineHeight: 1.7 }}>
-              Our proprietary 3-stage algorithm ensures your investments align completely with Islamic financial principles.
-            </p>
-          </div>
-
-          <div className="feature-grid">
-            {[
-              {
-                step: '01',
-                icon: <Shield size={20} />,
-                title: 'Business Screening',
-                desc: 'We analyze every company\'s core operations to ensure they don\'t participate in prohibited activities like gambling, alcohol, pork, weapons, or conventional banking.',
-              },
-              {
-                step: '02',
-                icon: <BarChart2 size={20} />,
-                title: 'Financial Ratios',
-                desc: 'Corporate balance sheets are evaluated against AAOIFI standards — checking debt-to-market-cap ratios and interest-bearing investments for strict financial compliance.',
-              },
-              {
-                step: '03',
-                icon: <CheckCircle size={20} />,
-                title: 'Purification Calc',
-                desc: 'For companies with minor non-compliant streams, our built-in calculator instantly tells you the exact amount to purify (donate) from your dividends or capital gains.',
-              },
-            ].map((f, i) => (
-              <div className="feature-card animate-fade-in" key={i} style={{ animationDelay: `${i * 0.1}s` }}>
-                <div className="feature-step">{f.step}</div>
-                <h3>{f.title}</h3>
-                <p>{f.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Live Market Preview */}
-      {stocks.length > 0 && (
-        <section style={{ padding: '80px 0' }}>
-          <div className="main-content">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px', flexWrap: 'wrap', gap: '12px' }}>
-              <div>
-                <div className="section-label">Live Market</div>
-                <h2 style={{ fontSize: '1.94rem', fontWeight: '800', letterSpacing: '-0.5px' }}>Market Snapshot</h2>
-              </div>
-              <Link to="/login" className="btn-ghost">View All Stocks <ChevronRight size={16} /></Link>
-            </div>
-            <div className="stock-grid-home">
-              {stocks.map(s => <StockCard key={s.symbol} company={s} />)}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* About Strip */}
-      <section style={{ padding: '80px 0', background: 'var(--bg-section)' }}>
-        <div className="main-content">
-          <div className="about-strip-grid">
-            <div>
-              <div className="section-label">Our Story</div>
-              <h2 style={{ fontSize: '2.11rem', fontWeight: '800', letterSpacing: '-0.5px', margin: '16px 0 24px' }}>
-                Built for Muslim Investors in Nigeria
-              </h2>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', lineHeight: 1.85, marginBottom: '20px' }}>
-                Irshad was founded to solve a critical gap: Muslim investors in Nigeria had no transparent, automated tool to verify that their stock holdings complied with Islamic principles.
-              </p>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', lineHeight: 1.85, marginBottom: '32px' }}>
-                By strictly adhering to AAOIFI standards and building deep integrations with market data, we empower you to grow your wealth without compromising your faith.
-              </p>
-              <Link to="/about" className="btn-ghost">
-                Read our full story <ArrowRight size={16} />
-              </Link>
-            </div>
-
-            <div style={{
-              background: 'var(--bg)',
-              borderRadius: 'var(--radius-xl)',
-              padding: '48px',
-              border: '1px solid var(--border)',
-              boxShadow: 'var(--shadow-md)',
-              display: 'flex', flexDirection: 'column', gap: '20px',
-              position: 'relative', overflow: 'hidden'
-            }}>
-              {/* Watermark logo */}
-              <img
-                src="/logo.svg"
-                alt=""
-                aria-hidden="true"
-                style={{
-                  position: 'absolute', bottom: '-24px', right: '-24px',
-                  width: '140px', opacity: 0.06,
-                  pointerEvents: 'none', userSelect: 'none',
-                  filter: 'saturate(0)',
-                }}
-              />
-              {[
-                { label: 'Halal Stocks', value: '87', color: 'var(--halal)', bg: 'var(--halal-bg)' },
-                { label: 'Questionable Stocks', value: '34', color: 'var(--doubtful)', bg: 'var(--doubtful-bg)' },
-                { label: 'Non-Halal Stocks', value: '29', color: 'var(--non-halal)', bg: 'var(--non-halal-bg)' },
-              ].map(row => (
-                <div key={row.label} style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  background: row.bg, borderRadius: 'var(--radius-md)', padding: '16px 20px'
-                }}>
-                  <span style={{ fontWeight: 600, color: 'var(--text-dark)' }}>{row.label}</span>
-                  <span style={{ fontWeight: 800, color: row.color, fontSize: '1.23rem' }}>{row.value}</span>
-                </div>
-              ))}
-              <p style={{ fontSize: '0.7rem', color: 'var(--text-light)', textAlign: 'center', marginTop: 4 }}>
-                Based on AAOIFI screening of listed companies
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-
-      {/* Mobile App Section */}
-      <section style={{ padding: '80px 0', background: 'var(--primary-50)' }}>
-        <div className="main-content">
-          <div className="app-section-grid">
-            <div>
-              <div className="section-label">Get the App</div>
-              <h2 style={{ fontSize: '2.29rem', fontWeight: '900', letterSpacing: '-1px', margin: '16px 0 24px', color: 'var(--text-dark)' }}>
-                Your Halal Portfolio in Your Pocket
-              </h2>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.97rem', lineHeight: 1.8, marginBottom: '32px' }}>
-                Download the Irshad mobile app for iOS and Android to track your investments, calculate your Zakat, and receive real-time halal screening alerts directly on your phone.
-              </p>
-              
-              <div className="app-store-btns">
-                <a href="#" style={{
-                  display: 'flex', alignItems: 'center', gap: '12px',
-                  background: '#000', color: 'var(--bg)',
-                  padding: '12px 24px', borderRadius: '12px',
-                  textDecoration: 'none'
-                }}>
-                  <Apple size={28} />
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={{ fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '0.5px', opacity: 0.8 }}>Download on the</span>
-                    <span style={{ fontSize: '0.97rem', fontWeight: 600, letterSpacing: '-0.3px', marginTop: '-2px' }}>App Store</span>
-                  </div>
-                </a>
-
-                <a href="#" style={{
-                  display: 'flex', alignItems: 'center', gap: '12px',
-                  background: '#000', color: 'var(--bg)',
-                  padding: '12px 24px', borderRadius: '12px',
-                  textDecoration: 'none'
-                }}>
-                  <Play size={28} fill="currentColor" />
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={{ fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '0.5px', opacity: 0.8 }}>Get it on</span>
-                    <span style={{ fontSize: '0.97rem', fontWeight: 600, letterSpacing: '-0.3px', marginTop: '-2px' }}>Google Play</span>
-                  </div>
-                </a>
-              </div>
-            </div>
-
-            <div style={{ position: 'relative' }}>
-              <img 
-                src="/app_mockup.jpg" 
-                alt="Irshad Mobile App" 
-                style={{ 
-                  width: '100%', 
-                  height: 'auto', 
-                  borderRadius: 'var(--radius-xl)',
-                  boxShadow: '0 24px 64px rgba(201,168,76,0.15)',
-                  transform: 'perspective(1000px) rotateY(-8deg) rotateX(4deg)'
-                }} 
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Banner */}
-      <section style={{ padding: '60px 20px' }}>
-        <div className="cta-banner">
-          {/* Background logo watermark */}
-          <img
-            src="/logo.svg"
-            alt=""
-            aria-hidden="true"
-            style={{
-              position: 'absolute', right: '220px', top: '50%', transform: 'translateY(-50%)',
-              height: '220px', opacity: 0.06,
-              pointerEvents: 'none', userSelect: 'none',
-              filter: 'brightness(10)',
-            }}
-          />
-          <div>
-            <h2 style={{ color: 'white', fontSize: '1.94rem', fontWeight: '800', letterSpacing: '-0.5px', marginBottom: '12px' }}>
-              Ready to invest the halal way?
-            </h2>
-            <p style={{ color: 'rgba(255,255,255,0.78)', fontSize: '0.92rem', maxWidth: '520px', lineHeight: 1.7 }}>
-              Join thousands of Nigerian Muslims who trust Irshad to screen their investments. Get started free today.
-            </p>
-          </div>
-          <div className="cta-banner-btns">
-            <Link to="/register" style={{
-              background: 'var(--bg)',
-              color: 'var(--primary)',
-              fontWeight: 700,
-              padding: '14px 28px',
-              borderRadius: 'var(--radius-md)',
-              textDecoration: 'none',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              fontSize: '0.85rem',
-              whiteSpace: 'nowrap',
-            }}>
-              Create Free Account <ArrowRight size={18} />
-            </Link>
-            <Link to="/market" style={{
-              background: 'rgba(255,255,255,0.15)',
-              color: 'white',
-              fontWeight: 600,
-              padding: '14px 28px',
-              borderRadius: 'var(--radius-md)',
-              textDecoration: 'none',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              fontSize: '0.85rem',
-              whiteSpace: 'nowrap',
-              border: '1.5px solid rgba(255,255,255,0.3)',
-            }}>
-              Browse Market
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <Footer />
     </div>
   );
 };

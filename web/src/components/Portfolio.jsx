@@ -13,6 +13,7 @@ import ZakatTab from './portfolio/ZakatTab';
 import PurificationTab from './portfolio/PurificationTab';
 import LecturesTab from './portfolio/LecturesTab';
 import BasketsTab from './portfolio/BasketsTab';
+import StatementTab from './portfolio/StatementTab';
 
 import AddHoldingModal from "./portfolio/AddHoldingModal";
 
@@ -148,6 +149,7 @@ export default function Portfolio() {
     { id: 'holdings',     label: 'Holdings',        icon: Briefcase },
     { id: 'market',       label: 'Market Screener', icon: BarChart2 },
     { id: 'watchlist',    label: 'Watchlist',       icon: Star },
+    { id: 'statement',    label: 'Statement',       icon: FileText },
     { id: 'zakat',        label: 'Zakat',           icon: Calculator },
     { id: 'purification', label: 'Purification',    icon: ShieldCheck },
     { id: 'lectures',     label: 'Resources',       icon: BookOpen },
@@ -303,6 +305,11 @@ export default function Portfolio() {
           {mountedTabs.includes('baskets') && (
             <div style={{ display: activeTab === 'baskets' ? 'block' : 'none' }}>
               <BasketsTab />
+            </div>
+          )}
+          {mountedTabs.includes('statement') && (
+            <div style={{ display: activeTab === 'statement' ? 'block' : 'none' }}>
+              <StatementTab data={data} />
             </div>
           )}
 

@@ -147,8 +147,8 @@ export const addToWatchlist = async (symbol, alert_whatsapp = false, alert_email
   return response.data;
 };
 
-export const addMultipleToWatchlist = async (symbols, alert_whatsapp = false, alert_email = false) => {
-  const response = await api.post('/watchlist/bulk', { symbols, alert_whatsapp, alert_email });
+export const addMultipleToWatchlist = async (symbols, alert_inapp = false, alert_push = false, alert_email = false) => {
+  const response = await api.post('/watchlist/bulk', { symbols, alert_inapp, alert_push, alert_email });
   localStorage.removeItem('irshad_portfolio_cache_v10');
   return response.data;
 };
@@ -157,8 +157,8 @@ export const addMultipleToWatchlist = async (symbols, alert_whatsapp = false, al
  * Single-request onboarding: bulk-adds all stocks to watchlist AND marks user onboarded.
  * Much faster than N separate addToWatchlist() + updateProfile() calls.
  */
-export const onboardUser = async ({ symbols, alert_email, alert_whatsapp, phone_number, risk_profile }) => {
-  const response = await api.post('/onboard', { symbols, alert_email, alert_whatsapp, phone_number, risk_profile });
+export const onboardUser = async ({ symbols, alert_email, alert_inapp, alert_push, phone_number, risk_profile }) => {
+  const response = await api.post('/onboard', { symbols, alert_email, alert_inapp, alert_push, phone_number, risk_profile });
   localStorage.removeItem('irshad_portfolio_cache_v10'); // Invalidate portfolio/watchlist cache on onboarding
   return response.data; // { message, user }
 };
@@ -287,6 +287,57 @@ export const fetchHistory = async () => {
 export const fetchProducts = async () => {
   const response = await api.get('/products');
   return response.data;
+};
+
+// ==========================================
+// MOCK ENDPOINTS FOR PUBLIC OVERVIEW DASHBOARD
+// ==========================================
+export const fetchOverviewStats = async () => {
+  return new Promise(resolve => setTimeout(() => resolve({
+    data: {
+      totalTracked: 156,
+      shariahCompliant: 89,
+      nonCompliant: 48,
+      underReview: 19,
+      annualReportsProcessed: 142,
+      newsAnalyzed: 384,
+      lastUpdated: new Date().toISOString()
+    }
+  }), 800));
+};
+
+export const fetchRecentScreenings = async () => {
+  return new Promise(resolve => setTimeout(() => resolve({
+    data: [
+      { id: 1, symbol: 'MTNN', name: 'MTN Nigeria Communications Plc', status: 'halal', date: '2026-07-24T10:30:00Z' },
+      { id: 2, symbol: 'DANGSUGAR', name: 'Dangote Sugar Refinery Plc', status: 'halal', date: '2026-07-23T15:45:00Z' },
+      { id: 3, symbol: 'NB', name: 'Nigerian Breweries Plc', status: 'non-halal', date: '2026-07-22T09:15:00Z' },
+      { id: 4, symbol: 'OANDO', name: 'Oando Plc', status: 'doubtful', date: '2026-07-21T14:20:00Z' },
+      { id: 5, symbol: 'ZENITHBANK', name: 'Zenith Bank Plc', status: 'non-halal', date: '2026-07-20T11:10:00Z' },
+      { id: 6, symbol: 'BUACEMENT', name: 'BUA Cement Plc', status: 'halal', date: '2026-07-19T16:05:00Z' },
+    ]
+  }), 800));
+};
+
+export const fetchLatestReports = async () => {
+  return new Promise(resolve => setTimeout(() => resolve({
+    data: [
+      { id: 101, symbol: 'MTNN', name: 'MTN Nigeria', year: 2025, date: '2026-07-15', type: 'Audited Financial Statements' },
+      { id: 102, symbol: 'NESTLE', name: 'Nestle Nigeria Plc', year: 2025, date: '2026-07-10', type: 'Annual Report' },
+      { id: 103, symbol: 'GTCO', name: 'Guaranty Trust Holding', year: 2025, date: '2026-07-08', type: 'Audited Financial Statements' },
+      { id: 104, symbol: 'AIRTELAFRI', name: 'Airtel Africa Plc', year: 2025, date: '2026-07-02', type: 'Annual Report' }
+    ]
+  }), 800));
+};
+
+export const fetchBusinessNewsOverview = async () => {
+  return new Promise(resolve => setTimeout(() => resolve({
+    data: [
+      { id: 201, symbol: 'DANGCEM', headline: 'Dangote Cement announces successful completion of ₦100bn Series 1 Bond', date: '2026-07-20', source: 'NGX Announcements', summary: 'This new debt issuance will impact the interest-bearing debt ratio in their next AAOIFI screening.' },
+      { id: 202, symbol: 'NB', headline: 'Nigerian Breweries secures new credit facility to manage FX losses', date: '2026-07-18', source: 'BusinessDay Nigeria', summary: 'Increased debt burden continues to negatively affect AAOIFI compliance standing.' },
+      { id: 203, symbol: 'PRESCO', headline: 'Presco Plc expands agricultural operations into new states', date: '2026-07-12', source: 'Reuters', summary: 'Core business activity remains fundamentally halal with expansion in pure agricultural sectors.' }
+    ]
+  }), 800));
 };
 
 export default api;

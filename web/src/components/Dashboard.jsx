@@ -1,17 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { fetchPortfolio, fetchNgxStocks, fetchNews, fetchWatchlist, fetchHistory, fetchPriceAlerts, formatLogoUrl } from '../services/api';
+import { fetchPortfolio, fetchNgxStocks, fetchNews, fetchWatchlist, fetchHistory, fetchPriceAlerts, formatLogoUrl, deletePriceAlert } from '../services/api';
 import {
   Search, Bell, Star, Wallet, TrendingUp, TrendingDown,
   ShieldAlert, CheckCircle, AlertTriangle, ArrowUpRight,
   ArrowDownRight, ChevronRight, Calculator, HeartHandshake,
   Shield, PlusCircle, BarChart2, Sparkles, Globe, Clock, X,
-  Zap, Activity
+  Zap, Activity, Trash2
 } from 'lucide-react';
+import { toastSuccess, toastError } from '../utils/toast';
 import {
   AreaChart, Area, ResponsiveContainer, Tooltip, YAxis,
-  BarChart, Bar, XAxis
+  BarChart, Bar, XAxis, PieChart, Pie, Cell
 } from 'recharts';
 
 /* ─── Helpers ────────────────────────────────────────────── */
@@ -44,6 +45,29 @@ const INSIGHTS=[
   "Zakat on stocks is calculated on the current market value of the shares, not the purchase price.",
   "AAOIFI standards require that interest income should be below 5% of total revenue to be Shariah compliant.",
   "The market has over 150 listed companies — always screen each one individually before investing.",
+];
+
+const RIZQ_DUAS = [
+  { text: "O Allah, I ask You for beneficial knowledge, goodly provision and acceptable deeds.", source: "Ibn Majah 925", type: "Du'a for Rizq" },
+  { text: "Charity does not in any way decrease the wealth.", source: "Sahih Muslim 2588", type: "Encouragement for Sadaqah" },
+  { text: "O Allah, bless us in our provision, and grant us better than it.", source: "Tirmidhi 3455", type: "Du'a for Barakah" },
+  { text: "If you are grateful, I will surely increase you [in favor].", source: "Qur'an (Ibrahim 14:7)", type: "Divine Promise" },
+  { text: "Whoever desires an expansion in his sustenance and age, should keep good relations with his kith and kin.", source: "Sahih Bukhari 2067", type: "Hadith on Rizq" },
+  { text: "O Allah, suffice me with what You have allowed instead of what You have forbidden, and make me independent of all others besides You.", source: "Tirmidhi 3563", type: "Du'a for Debt/Wealth" },
+  { text: "And whoever fears Allah - He will make for him a way out and will provide for him from where he does not expect.", source: "Qur'an (At-Talaq 65:2-3)", type: "Divine Promise" },
+  { text: "There is no day on which the servants wake up except that two angels descend. One says, 'O Allah, give compensation to the one who spends [in charity].'", source: "Sahih Bukhari 1442", type: "Encouragement for Sadaqah" },
+  { text: "Sadaqah extinguishes sin as water extinguishes fire.", source: "Tirmidhi 2616", type: "Encouragement for Sadaqah" },
+  { text: "The upper hand (that gives) is better than the lower hand (that receives).", source: "Sahih Muslim 1033", type: "Encouragement for Sadaqah" },
+  { text: "O Allah, I seek refuge in You from poverty, and I seek refuge in You from want and humiliation.", source: "Abu Dawud 1544", type: "Du'a for Protection" },
+  { text: "Give charity without delay, for it stands in the way of calamity.", source: "Tirmidhi 1887", type: "Encouragement for Sadaqah" },
+  { text: "Verily, the believers who do good works and establish prayer and give Zakah will have their reward with their Lord.", source: "Qur'an (Al-Baqarah 2:277)", type: "Quranic Reminder" },
+  { text: "O Allah, I ask You for Your grace and Your mercy, for no one possesses them but You.", source: "Tabarani", type: "Du'a for Rizq" },
+  { text: "Whatever you spend of good is [to be for] parents and relatives and orphans and the needy and the traveler.", source: "Qur'an (Al-Baqarah 2:215)", type: "Quranic Reminder" },
+  { text: "Allah says: 'O son of Adam, spend (in charity), and I shall spend on you.'", source: "Sahih Bukhari 5352", type: "Hadith Qudsi" },
+  { text: "There is no wealth like intelligence, no poverty like ignorance, and no inheritance like good manners.", source: "Ali ibn Abi Talib (RA)", type: "Wisdom on Wealth" },
+  { text: "O Allah, grant me Halal and blessed provision, and distance me from the Haram.", source: "General Du'a", type: "Du'a for Purification" },
+  { text: "Rizq (provision) is not just money. Peace of mind, a righteous spouse, and good health are all forms of Rizq.", source: "Islamic Reflection", type: "Wisdom on Rizq" },
+  { text: "No wealth is ever diminished by giving in the path of Allah.", source: "Wisdom on Sadaqah", type: "Wisdom on Sadaqah" },
 ];
 
 const NGX_STATUS = {
@@ -336,7 +360,18 @@ export default function Dashboard() {
   const [watchlist, setWatchlist] = useState([]);
   const [history, setHistory] = useState([]);
   const [alerts, setAlerts] = useState([]);
+  const [duaIndex] = useState(() => Math.floor(Math.random() * RIZQ_DUAS.length));
   const searchRef=useRef(null);
+
+  const handleDeleteAlert = async (id) => {
+    try {
+      await deletePriceAlert(id);
+      setAlerts(prev => prev.filter(a => a.id !== id));
+      toastSuccess('Alert deleted successfully');
+    } catch (err) {
+      toastError('Failed to delete alert');
+    }
+  };
 
   useEffect(()=>{
     if(!authLoading&&!user){navigate('/login');return;}
@@ -380,6 +415,13 @@ export default function Dashboard() {
   const zakatBase=zakatManual?parseFloat(zakatManual):(summary.total_balance||0);
   const zakatAmt=(zakatBase*0.025).toFixed(2);
   const compliance=summary.health_percentage??100;
+  
+  const totalBalance = summary.total_balance || 0;
+  const PIE_COLORS = ['#C9B89C','#2A6F73','#3B82F6','#8b5cf6','#0F5257','#06b6d4'];
+  const pieData = (holdings || []).slice(0,6).map((h,i) => ({
+    name: h.symbol, value: h.total_value || 0, color: PIE_COLORS[i % PIE_COLORS.length],
+  }));
+  if (pieData.length === 0) pieData.push({ name: 'No Holdings', value: 1, color: '#e5e7eb' });
 
   const QUICK_ACTIONS=[
     {icon:PlusCircle,label:'Add Trade', color:'var(--primary)',bg:'var(--primary-50)',to:'/portfolio'},
@@ -525,21 +567,26 @@ export default function Dashboard() {
       </div>
       <div style={{maxWidth:'1280px',margin:'0 auto',padding:'28px 22px 80px'}}>
 
-        {/* ═ Purification Banner ═ */}
-        {showAlert&&summary.purification_due>0&&(
-          <div className="stagger-1" style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:'16px',padding:'13px 18px',marginBottom:'24px',borderRadius:'13px',background:'rgba(230,81,0,0.07)',border:'1px solid var(--doubtful-border)'}}>
-            <div style={{display:'flex',alignItems:'center',gap:'11px'}}>
-              <ShieldAlert size={19} color="var(--doubtful)"/>
-              <span style={{fontSize: '0.77rem',fontWeight:600,color:'var(--doubtful)'}}>
-                Purification required — ₦{fmt(summary.purification_due)} pending from non-compliant income.
-              </span>
-            </div>
-            <div style={{display:'flex',gap:'10px',alignItems:'center',flexShrink:0}}>
-              <button style={{padding:'8px 16px',background:'var(--doubtful)',color:'var(--bg)',border:'none',borderRadius:'8px',fontWeight:700,fontSize: '0.73rem',cursor:'pointer'}}>Purify Now</button>
-              <button onClick={()=>setShowAlert(false)} style={{background:'none',border:'none',color:'var(--text-muted)',cursor:'pointer',display:'flex',padding:'4px'}}><X size={15}/></button>
-            </div>
+        {/* ═ Barakah/Rizq Banner ═ */}
+        <div className="stagger-1" style={{background:'linear-gradient(135deg, rgba(201,168,76,0.15) 0%, rgba(201,168,76,0.05) 100%)', border:'1px solid rgba(201,168,76,0.2)', borderRadius:'20px', padding:'24px', marginBottom:'32px', display:'flex', gap:'20px', alignItems:'center', position:'relative', overflow:'hidden'}}>
+          <div style={{position:'absolute', right:'-20px', top:'-20px', opacity:0.05, transform: 'rotate(15deg)'}}>
+            <Sparkles size={140} color="var(--gold)" />
           </div>
-        )}
+          <div style={{width:'52px', height:'52px', borderRadius:'16px', background:'var(--gold-grad)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, boxShadow:'0 8px 16px rgba(201,168,76,0.3)'}}>
+            <HeartHandshake size={24} color="var(--bg)" />
+          </div>
+          <div style={{position:'relative', zIndex:1, flex:1}}>
+            <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'6px'}}>
+              <h3 style={{fontSize:'0.7rem', fontWeight:800, color:'var(--gold)', textTransform:'uppercase', letterSpacing:'1px', margin:0}}>
+                {RIZQ_DUAS[duaIndex].type}
+              </h3>
+            </div>
+            <p style={{fontSize:'1.05rem', fontWeight:700, color:'var(--text-dark)', lineHeight:1.4, margin:0}}>
+              "{RIZQ_DUAS[duaIndex].text}"
+            </p>
+            <span style={{fontSize:'0.72rem', fontWeight:700, color:'var(--text-muted)', display:'block', marginTop:'6px'}}>— {RIZQ_DUAS[duaIndex].source}</span>
+          </div>
+        </div>
 
         {/* ═ Header ═ */}
         <div className="stagger-1" style={{display:'flex',flexWrap:'wrap',alignItems:'flex-start',justifyContent:'space-between',gap:'24px',marginBottom:'32px'}}>
@@ -577,20 +624,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* ═ Stats Grid ═ */}
-        <div className="stagger-2" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:'16px',marginBottom:'18px'}}>
-          <div id="tour-portfolio">
-            <StatCard icon={Wallet} label="Portfolio Value" primary={true}
-              value={`₦${fmt(summary.total_balance)}`}
-              sub={<><TrendingUp size={12}/> Active portfolio</>} badge="Market"/>
-          </div>
-          <div id="tour-compliance">
-            <StatCard icon={Shield} label="Compliance Score" value={`${compliance}%`}
-              sub={compliance>=90?<><CheckCircle size={12} color="var(--halal)"/> Excellent standing</>:<><AlertTriangle size={12} color="var(--doubtful)"/> Needs review</>}/>
-          </div>
-          <StatCard icon={Activity} label="Total Holdings" value={holdings.length||0}
-            sub={<><Zap size={12} color="var(--primary)"/> Across all sectors</>}/>
-        </div>
+
 
         {/* ═ Quick Actions ═ */}
         <div id="tour-quick-actions" className="quick-actions-grid stagger-3" style={{ marginBottom: '32px' }}>
@@ -609,116 +643,79 @@ export default function Dashboard() {
 
           {/* ── Left Column ── */}
           <div className="stagger-4" style={{display:'flex',flexDirection:'column',gap:'20px'}}>
-
-            {/* Performance Chart */}
+            
+            {/* Inbox / Alerts */}
             <Panel>
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:'18px',flexWrap:'wrap',gap:'10px'}}>
-                <div>
-                  <h2 style={{fontSize: '0.92rem',fontWeight:800,color:'var(--text-dark)',display:'flex',alignItems:'center',gap:'7px',margin:'0 0 4px'}}>
-                    <TrendingUp size={16} color="var(--primary)"/> Portfolio Performance
-                  </h2>
-                  <div style={{fontSize: '0.71rem',color:'var(--text-muted)',fontWeight:500}}>
-                    {PERF_META[perfRange].label}&nbsp;
-                    <span style={{color:'var(--halal)',fontWeight:800}}>{PERF_META[perfRange].gain} ▲</span>
-                    <span style={{color:'var(--text-muted)',fontWeight:600}}>&nbsp;({PERF_META[perfRange].abs})</span>
-                  </div>
-                </div>
-                <div style={{display:'flex',gap:'5px'}}>
-                  {PERF_META.map((m,i)=>(
-                    <button key={m.label} onClick={()=>setPerfRange(i)} style={{padding:'5px 12px',borderRadius:'8px',fontSize: '0.62rem',fontWeight:700,background:perfRange===i?'var(--primary)':'var(--bg-section)',color:perfRange===i?'var(--bg)':'var(--text-muted)',border:'none',cursor:'pointer',transition:'all 0.2s'}}>
-                      {m.label}
+              <PanelHeader icon={Bell} title="Inbox"/>
+              <div style={{display:'flex',flexDirection:'column',gap:'10px',maxHeight:'340px',overflowY:'auto',paddingRight:'3px'}}>
+                {alerts.length > 0 ? alerts.map(alert => (
+                  <div key={alert.id} style={{padding:'14px',borderRadius:'12px',background:'var(--bg-section)',border:'1px solid var(--border)',display:'flex',gap:'12px'}}>
+                    <div style={{width:'36px',height:'36px',borderRadius:'10px',background:'var(--primary-50)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+                      <Bell size={16} color="var(--primary)"/>
+                    </div>
+                    <div style={{flex:1}}>
+                      <div style={{fontWeight:800,fontSize:'0.82rem',color:'var(--text-dark)'}}>{alert.symbol} Price Alert</div>
+                      <div style={{fontSize:'0.71rem',color:'var(--text-muted)',marginTop:'4px',lineHeight:1.4}}>
+                        You will be notified when {alert.symbol} goes <strong>{alert.condition} ₦{alert.target_price}</strong>.
+                      </div>
+                      <div style={{fontSize:'0.6rem',color:'var(--text-light)',marginTop:'6px'}}>{new Date(alert.created_at).toLocaleDateString()}</div>
+                    </div>
+                    <button onClick={() => handleDeleteAlert(alert.id)} style={{background:'none',border:'none',color:'var(--text-muted)',cursor:'pointer',padding:'6px',display:'flex',alignItems:'center',justifyContent:'center',borderRadius:'8px',transition:'all 0.2s'}} onMouseEnter={e=>{e.currentTarget.style.background='#fee2e2';e.currentTarget.style.color='var(--non-halal)';}} onMouseLeave={e=>{e.currentTarget.style.background='none';e.currentTarget.style.color='var(--text-muted)';}}>
+                      <Trash2 size={15}/>
                     </button>
-                  ))}
-                </div>
-              </div>
-              <div style={{height:'230px',marginLeft:'-10px'}}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={PERF_RANGES[perfRange]}>
-                    <defs>
-                      <linearGradient id="perfGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%"  stopColor="var(--primary)" stopOpacity={0.22}/>
-                        <stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="t" tick={{fontSize:9,fill:'var(--text-muted)',fontWeight:600}} axisLine={false} tickLine={false}/>
-                    <YAxis domain={['dataMin - 80000','dataMax + 80000']} hide/>
-                    <Tooltip contentStyle={{borderRadius:'11px',border:'1px solid var(--border)',boxShadow:'var(--shadow-md)',fontWeight:700,fontSize: '0.71rem',background: 'var(--bg)'}}
-                      formatter={v=>[`₦${fmt(v)}`,'Portfolio Value']} labelStyle={{display:'none'}}/>
-                    <Area type="monotone" dataKey="v" stroke="var(--primary)" strokeWidth={2.5} fillOpacity={1} fill="url(#perfGrad)" dot={false} activeDot={{r:5,fill:'var(--primary)',stroke:'white',strokeWidth:2}}/>
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </Panel>
-
-            {/* Holdings */}
-            <Panel>
-              <PanelHeader icon={Wallet} title="My Holdings"
-                action={<Link to="/portfolio" style={{fontSize: '0.69rem',fontWeight:700,color:'var(--primary)',display:'flex',alignItems:'center',gap:'3px'}}>Manage <ChevronRight size={12}/></Link>}/>
-              <div style={{maxHeight:'360px',overflowY:'auto',paddingRight:'3px'}}>
-                {(holdings || []).length>0?(holdings || []).map(h=><HoldingRow key={h.id} holding={h}/>):(
-                  <div style={{padding:'34px 0',textAlign:'center',color:'var(--text-muted)'}}>
-                    <BarChart2 size={34} strokeWidth={1.2} style={{margin:'0 auto 10px',color:'var(--text-light)'}}/>
-                    <div style={{fontWeight:700,fontSize: '0.82rem',marginBottom:'4px'}}>No holdings yet</div>
-                    <div style={{fontSize: '0.71rem'}}>Add your first trade to start tracking</div>
-                    <Link to="/portfolio" style={{display:'inline-flex',alignItems:'center',gap:'5px',marginTop:'13px',padding:'9px 17px',borderRadius:'10px',background:'var(--primary-50)',color:'var(--primary)',fontWeight:700,fontSize: '0.71rem'}}>
-                      <PlusCircle size={13}/> Add Trade
-                    </Link>
+                  </div>
+                )) : (
+                  <div style={{padding:'30px 0',textAlign:'center',color:'var(--text-muted)'}}>
+                    <Bell size={34} strokeWidth={1.2} style={{margin:'0 auto 10px',color:'var(--text-light)'}}/>
+                    <div style={{fontWeight:700,fontSize:'0.82rem',marginBottom:'4px'}}>Inbox is empty</div>
+                    <div style={{fontSize:'0.71rem'}}>Set price alerts from your watchlist to get notified here.</div>
                   </div>
                 )}
               </div>
             </Panel>
 
-            {/* Recent Transactions */}
+            {/* Allocation */}
             <Panel>
-              <PanelHeader icon={Activity} title="Recent Transactions"
-                action={<Link to="/portfolio" style={{fontSize: '0.69rem',fontWeight:700,color:'var(--primary)',display:'flex',alignItems:'center',gap:'3px'}}>View All <ChevronRight size={12}/></Link>}/>
-              <div style={{display:'flex',flexDirection:'column',gap:'2px'}}>
-                {(history || []).slice(0,5).map((tx,i)=>{
-                  const isBuy=tx.type==='buy';
-                  const isDiv=tx.type==='div';
-                  const txColor=isDiv?'#8b5cf6':isBuy?'var(--halal)':'var(--non-halal)';
-                  const txBg=isDiv?'#ede9fe':isBuy?'#dcfce7':'#fee2e2';
-                  const txLabel=isDiv?'DIV':isBuy?'BUY':'SELL';
-                  return (
-                    <div key={tx.id} style={{display:'flex',alignItems:'center',gap:'13px',padding:'11px 10px',borderRadius:'12px',transition:'background 0.2s',cursor:'default'}}
-                      onMouseEnter={e=>e.currentTarget.style.background='var(--bg-section)'}
-                      onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
-                      <div style={{width:'36px',height:'36px',borderRadius:'10px',background:txBg,display:'flex',alignItems:'center',justifyContent:'center',fontSize: '0.53rem',fontWeight:800,color:txColor,flexShrink:0,letterSpacing:'0.3px'}}>
-                        {txLabel}
-                      </div>
-                      <div style={{flex:1,minWidth:0}}>
-                        <div style={{fontWeight:700,fontSize: '0.77rem',color:'var(--text-dark)'}}>{tx.symbol}</div>
-                        <div style={{fontSize: '0.62rem',color:'var(--text-muted)',fontWeight:500,marginTop:'1px'}}>
-                          {isDiv?`Dividend received`:(`${tx.quantity} shares @ ₦${tx.price}`)}
+              <PanelHeader icon={Wallet} title="Allocation"/>
+              {holdings.length === 0 ? (
+                <div style={{ height:'180px', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', color:'var(--text-muted)', fontSize: '0.79rem', fontWeight:600, background:'linear-gradient(180deg, var(--bg-section) 0%, #ffffff 100%)', borderRadius:'16px', border:'1.5px dashed var(--border)' }}>
+                  <Activity size={28} style={{ marginBottom:'12px', opacity:0.3, color:'var(--primary)' }} />
+                  <span>No allocation data</span>
+                </div>
+              ) : (
+                <>
+                  <div style={{ height:'160px', position:'relative' }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={pieData} dataKey="value" cx="50%" cy="50%" innerRadius={48} outerRadius={72} paddingAngle={3}>
+                          {pieData.map((entry,i) => <Cell key={i} fill={entry.color}/>)}
+                        </Pie>
+                        <Tooltip formatter={(v) => [fmtK(v),'Value']} contentStyle={{ borderRadius:'10px', border:'1px solid var(--border)', fontSize: '0.69rem', fontWeight:700 }}/>
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div style={{ display:'flex', flexDirection:'column', gap:'7px', marginTop:'18px' }}>
+                    {pieData.map((d,i) => (
+                      <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                        <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+                          <div style={{ width:'10px', height:'10px', borderRadius:'3px', background:d.color, flexShrink:0 }}/>
+                          <span style={{ fontSize: '0.7rem', fontWeight:700, color:'var(--text-dark)' }}>{d.name}</span>
+                        </div>
+                        <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+                          <div style={{ width:'50px', height:'4px', borderRadius:'2px', background:'var(--bg-section)', overflow:'hidden' }}>
+                            <div style={{ width:`${totalBalance > 0 ? ((d.value / totalBalance)*100) : 0}%`, height:'100%', background:d.color, borderRadius:'2px' }}/>
+                          </div>
+                          <span style={{ fontSize: '0.69rem', fontWeight:800, color:'var(--text-muted)', minWidth:'32px', textAlign:'right' }}>
+                            {totalBalance > 0 ? `${((d.value / totalBalance)*100).toFixed(0)}%` : '—'}
+                          </span>
                         </div>
                       </div>
-                      <div style={{textAlign:'right',flexShrink:0}}>
-                        <div style={{fontWeight:800,fontSize: '0.77rem',color:txColor}}>₦{Number(tx.total).toLocaleString()}</div>
-                        <div style={{fontSize: '0.61rem',color:'var(--text-muted)',fontWeight:500,marginTop:'1px'}}>{new Date(tx.date).toLocaleDateString('en-NG')}</div>
-                      </div>
-                    </div>
-                  );
-                })}
-                {history.length===0 && (
-                  <div style={{padding:'20px 0',textAlign:'center',color:'var(--text-muted)',fontSize: '0.71rem'}}>
-                    No recent transactions
+                    ))}
                   </div>
-                )}
-              </div>
+                </>
+              )}
             </Panel>
-
-            {/* Watchlist */}
-            <Panel>
-              <PanelHeader icon={Star} title="Watchlist"
-                action={<Link to="/portfolio#market" style={{fontSize: '0.69rem',fontWeight:700,color:'var(--primary)',display:'flex',alignItems:'center',gap:'3px'}}>Browse Market <ChevronRight size={12}/></Link>}/>
-              <div style={{maxHeight:'340px',overflowY:'auto',paddingRight:'3px'}}>
-                {(dynamicWatchlist || []).length > 0 ? (dynamicWatchlist || []).map(s=><WatchlistRow key={s.symbol} stock={s}/>) : (
-                  <div style={{padding:'20px 0',textAlign:'center',color:'var(--text-muted)',fontSize: '0.71rem'}}>
-                    Your watchlist is empty
-                  </div>
-                )}
-              </div>
-            </Panel>
+            
           </div>
 
           {/* ── Right Column ── */}
@@ -753,43 +750,6 @@ export default function Dashboard() {
                     <span style={{fontSize: '0.71rem',fontWeight:800,color:moverColor}}>{m.change}</span>
                   </div>
                 ))}
-              </div>
-            </Panel>
-
-            {/* Islamic Obligations */}
-            <Panel id="tour-obligations">
-              <PanelHeader icon={HeartHandshake} title="Islamic Obligations"/>
-              {/* Purification */}
-              <div style={{padding:'14px',borderRadius:'13px',marginBottom:'12px',background:summary.purification_due>0?'rgba(230,81,0,0.06)':'var(--bg-section)',border:`1px solid ${summary.purification_due>0?'var(--doubtful-border)':'var(--border)'}`}}>
-                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'5px'}}>
-                  <span style={{fontSize: '0.61rem',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.8px',color:summary.purification_due>0?'var(--doubtful)':'var(--text-muted)'}}>Purification Due</span>
-                  <ShieldAlert size={13} color={summary.purification_due>0?'var(--doubtful)':'var(--text-light)'}/>
-                </div>
-                <div style={{fontSize: '1.58rem',fontWeight:900,color:summary.purification_due>0?'var(--doubtful)':'var(--text-dark)',letterSpacing:'-0.5px'}}>₦{fmt(summary.purification_due)}</div>
-                {summary.purification_due>0&&(
-                  <button style={{width:'100%',marginTop:'11px',padding:'9px',background:'var(--doubtful)',color:'var(--bg)',border:'none',borderRadius:'9px',fontWeight:700,fontSize: '0.74rem',cursor:'pointer'}}
-                    onMouseEnter={e=>e.target.style.opacity='0.88'} onMouseLeave={e=>e.target.style.opacity='1'}>
-                    Purify Now →
-                  </button>
-                )}
-              </div>
-              {/* Zakat */}
-              <div style={{padding:'14px',borderRadius:'13px',background:'var(--bg-section)',border:'1px solid var(--border)'}}>
-                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'10px'}}>
-                  <span style={{fontSize: '0.61rem',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.8px',color:'var(--text-muted)'}}>Zakat Calculator (2.5%)</span>
-                  <Calculator size={12} color="var(--text-muted)"/>
-                </div>
-                <input type="number" placeholder="Enter custom amount…" value={zakatManual}
-                  onChange={e=>setZakatManual(e.target.value)}
-                  style={{width:'100%',padding:'8px 12px',borderRadius:'9px',border:'1.5px solid var(--border)',background: 'var(--bg)',fontSize: '0.75rem',outline:'none',color:'var(--text-dark)',marginBottom:'10px',boxSizing:'border-box'}}
-                  onFocus={e=>e.target.style.borderColor='var(--primary)'} onBlur={e=>e.target.style.borderColor='var(--border)'}/>
-                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-                  <span style={{fontSize: '0.69rem',color:'var(--text-muted)',fontWeight:500}}>Estimated Zakat:</span>
-                  <span style={{fontSize: '1.1rem',fontWeight:900,color:'var(--text-dark)',letterSpacing:'-0.5px'}}>₦{fmt(parseFloat(zakatAmt)||0)}</span>
-                </div>
-                <p style={{fontSize: '0.6rem',color:'var(--text-light)',marginTop:'6px',lineHeight:1.5}}>
-                  Based on {zakatManual?'your input':'portfolio value'} of ₦{fmt(zakatBase)}
-                </p>
               </div>
             </Panel>
 
@@ -835,34 +795,7 @@ export default function Dashboard() {
               </div>
             </Panel>
 
-            {/* Alerts */}
-            <Panel>
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'16px'}}>
-                <h2 style={{fontSize: '0.92rem',fontWeight:800,color:'var(--text-dark)',display:'flex',alignItems:'center',gap:'7px',margin:0}}>
-                  <Bell size={16} color="var(--primary)"/> Alerts
-                </h2>
-                {alerts.length > 0 && <span style={{fontSize: '0.61rem',fontWeight:800,padding:'3px 9px',borderRadius:'20px',background:'var(--non-halal-bg)',color:'var(--non-halal)'}}>{alerts.length} active</span>}
-              </div>
-              <div style={{display:'flex',flexDirection:'column',maxHeight:'300px',overflowY:'auto',paddingRight:'3px'}}>
-                {(alerts || []).length > 0 ? (alerts || []).map((alert,i)=>(
-                  <div key={alert.id} style={{display:'flex',gap:'12px',alignItems:'flex-start',padding:'12px 0',borderBottom:i<alerts.length-1?'1px solid var(--border)':'none'}}>
-                    <div style={{width:'34px',height:'34px',flexShrink:0,borderRadius:'9px',background:'var(--bg-section)',display:'flex',alignItems:'center',justifyContent:'center',fontSize: '0.84rem',position:'relative'}}>
-                      <Bell size={14} color="var(--primary)"/>
-                    </div>
-                    <div>
-                      <div style={{fontSize: '0.74rem',color:'var(--text-dark)',fontWeight:600,lineHeight:1.5}}>
-                        {alert.symbol} alert set at ₦{alert.target_price}
-                      </div>
-                      <div style={{fontSize: '0.62rem',color:'var(--text-muted)',marginTop:'3px',fontWeight:500}}>{new Date(alert.created_at).toLocaleDateString()}</div>
-                    </div>
-                  </div>
-                )) : (
-                  <div style={{padding:'20px 0',textAlign:'center',color:'var(--text-muted)',fontSize: '0.71rem'}}>
-                    No active price alerts
-                  </div>
-                )}
-              </div>
-            </Panel>
+
 
             {/* Daily Insight */}
             <div style={{background:'var(--gold-grad)',borderRadius:'20px',padding:'24px',color:'var(--bg)',position:'relative',overflow:'hidden',boxShadow:'0 8px 32px rgba(201,168,76,0.3)'}}>

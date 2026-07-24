@@ -59,8 +59,12 @@ const Footer = () => (
         </ul>
       </div>
     </div>
+    
+    <div style={{ marginTop: '30px', padding: '16px 0', borderTop: '1px solid rgba(255,255,255,0.05)', fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', lineHeight: 1.6, textAlign: 'center' }}>
+      Disclaimer: Irshad provides AI-assisted AAOIFI screening based on publicly available information and audited financial statements. It is intended for informational purposes only and does not constitute financial or investment advice.
+    </div>
 
-    <div className="footer-bottom" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+    <div className="footer-bottom" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', borderTop: 'none', paddingTop: '10px' }}>
       <span style={{ fontSize: '0.75rem' }}>© {new Date().getFullYear()} Irshad Financial Services Ltd. All rights reserved.</span>
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <span style={{ padding: '6px 12px', background: 'rgba(255,255,255,0.05)', borderRadius: '20px', fontSize: '0.66rem', fontWeight: 700, color: 'var(--gold)' }}>

@@ -6,12 +6,13 @@ import {
   BarChart2, Briefcase, Star, Activity,
   HeartHandshake, Calculator, BookOpen,
   User, LogOut, ChevronLeft, ChevronRight,
-  X, Moon, Sun
+  X, Moon, Sun, LayoutDashboard
 } from 'lucide-react';
 
 const NAV_ITEMS = [
   { section: 'Main' },
-  { label: 'Portfolio',      icon: Activity,         to: '/portfolio#portfolio', id: 'tour-nav-portfolio' },
+  { label: 'Overview',       icon: LayoutDashboard,  to: '/dashboard',           id: 'tour-nav-overview' },
+  { label: 'Holdings',       icon: Activity,         to: '/portfolio#holdings',  id: 'tour-nav-holdings' },
   { label: 'Market Screener', icon: BarChart2,        to: '/portfolio#market', id: 'tour-nav-market' },
   { label: 'Watchlist',      icon: Star,             to: '/portfolio#watchlist', id: 'tour-nav-watchlist' },
   { label: 'Thematic Baskets',icon: Briefcase,       to: '/portfolio#baskets', id: 'tour-nav-baskets' },
@@ -38,7 +39,7 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
 
     if (toPath === '/portfolio' || toPath === '/profile') {
       if (location.pathname !== toPath) return false;
-      const currentHash = location.hash || (toPath === '/portfolio' ? '#portfolio' : '');
+      const currentHash = location.hash || (toPath === '/portfolio' ? '#holdings' : '');
       if (toHash) return currentHash === toHash;
       return currentHash === '';
     }

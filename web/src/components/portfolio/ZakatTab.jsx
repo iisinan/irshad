@@ -46,7 +46,7 @@ export default function ZakatTab({ data }) {
 
   // Financial State
   const [cash, setCash] = useState('');
-  const [goldValue, setGoldValue] = useState('');
+  const [goldGrams, setGoldGrams] = useState('');
   const portfolioValue = data?.summary?.total_balance || 0;
 
   // Livestock State
@@ -60,7 +60,7 @@ export default function ZakatTab({ data }) {
   // Financial Calculations
   const financialNisab = goldPrice * 85;
   const cashNum = Number(cash) || 0;
-  const goldNum = Number(goldValue) || 0;
+  const goldNum = (Number(goldGrams) || 0) * goldPrice;
   const totalWealth = portfolioValue + cashNum + goldNum;
   const financialEligible = totalWealth >= financialNisab;
   const financialZakatDue = financialEligible ? totalWealth * 0.025 : 0;
@@ -197,11 +197,16 @@ export default function ZakatTab({ data }) {
                 </div>
               </div>
               <div className="input-group">
-                <label style={{ display:'block', fontSize: '0.79rem', fontWeight:600, color:'var(--text-dark)', marginBottom:'8px' }}>Other Gold/Silver</label>
+                <label style={{ display:'block', fontSize: '0.79rem', fontWeight:600, color:'var(--text-dark)', marginBottom:'8px' }}>Gold Held (Grams)</label>
                 <div style={{ position:'relative' }}>
-                  <span style={{ position:'absolute', left:'16px', top:'14px', color:'var(--text-muted)', fontWeight:700 }}>₦</span>
-                  <input type="number" value={goldValue} onChange={e => setGoldValue(e.target.value)} placeholder="0.00" style={{ width:'100%', padding:'14px 16px 14px 36px', borderRadius:'12px', border:'1px solid var(--border)', fontSize: '0.97rem', fontWeight:700, color:'var(--text-dark)', outline:'none' }} />
+                  <input type="number" value={goldGrams} onChange={e => setGoldGrams(e.target.value)} placeholder="0" style={{ width:'100%', padding:'14px 48px 14px 16px', borderRadius:'12px', border:'1px solid var(--border)', fontSize: '0.97rem', fontWeight:700, color:'var(--text-dark)', outline:'none' }} />
+                  <span style={{ position:'absolute', right:'16px', top:'14px', color:'var(--text-muted)', fontWeight:700 }}>g</span>
                 </div>
+                {goldNum > 0 && (
+                  <span style={{ fontSize: '0.7rem', color:'var(--primary)', marginTop:'6px', display:'block', fontWeight: 600 }}>
+                    ≈ ₦{goldNum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
+                )}
               </div>
             </div>
             
