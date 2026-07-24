@@ -34,14 +34,41 @@ class DailyNgxScan extends Command
     {
         $this->info('Daily financial scan started.');
 
+        $targetYear = date('Y'); // or hardcode 2026 based on your logic
         $companies = Company::where('is_active', true)->get();
-        $totalCompanies = $companies->count();
-
-        $this->info("{$totalCompanies} companies queued.");
-
+        
         $jobs = [];
+        $queuedCount = 0;
+
         foreach ($companies as $company) {
-            $jobs[] = new ProcessCompanyScreening($company->symbol);
+            $status = \App\Models\FinancialStatementStatus::where('company_ticker', $company->symbol)
+                ->where('financial_year', $targetYear)
+                ->first();
+
+            $shouldQueue = false;
+
+            if (!$status) {
+                // Never checked before
+                $shouldQueue = true;
+            } elseif ($status->status === 'awaiting_report' && (!$status->next_retry_at || $status->next_retry_at->isPast())) {
+                // Waiting for report and it's time to retry
+                $shouldQueue = true;
+            } elseif ($status->status === 'failed') {
+                // Failed previously, might want to retry. Optional logic.
+                $shouldQueue = true;
+            }
+
+            if ($shouldQueue) {
+                $jobs[] = new ProcessCompanyScreening($company->symbol);
+                $queuedCount++;
+            }
+        }
+
+        $this->info("{$queuedCount} companies queued (out of {$companies->count()} active).");
+
+        if (empty($jobs)) {
+            $this->info('No companies need screening today.');
+            return;
         }
 
         // Dispatch in batches, allowing failures so one bad company doesn't stop the whole sweep
