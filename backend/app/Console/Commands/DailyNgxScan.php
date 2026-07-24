@@ -34,7 +34,7 @@ class DailyNgxScan extends Command
     {
         $this->info('Daily financial scan started.');
 
-        $targetYear = date('Y') - 1; // 2025 based on current year
+        $targetYear = date('Y'); // Current year
         $companies = Company::where('is_active', true)->get();
         
         $jobs = [];
