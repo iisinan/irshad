@@ -41,7 +41,9 @@ class ProcessCompanyScreening implements ShouldQueue
 
         Log::info("Starting background screening for {$this->ticker}");
 
-        $aiUrl = env('AI_ENGINE_URL', 'http://127.0.0.1:8000');
+        // Hardcoding to 127.0.0.1:8000 because they run in the same Docker container
+        // and the Render dashboard has an incorrect env variable (localhost:8001) that causes curl error 52
+        $aiUrl = 'http://127.0.0.1:8000';
         $response = Http::timeout(900)->post("{$aiUrl}/api/screen-company/{$this->ticker}");
 
         if ($response->failed()) {
