@@ -165,7 +165,12 @@ async def calculate_aaoifi(state: GraphState) -> GraphState:
         return state
     final_values = state.get("final_chosen_values", {})
     if final_values:
-        market_cap   = state.get("market_cap", 0.0) or 0.0
+        market_cap_dict = final_values.get("market_cap", {})
+        if isinstance(market_cap_dict, dict) and market_cap_dict.get("value"):
+            market_cap = float(market_cap_dict.get("value", 0.0))
+        else:
+            market_cap = state.get("market_cap", 0.0) or 0.0
+            
         company_type = "bank" if state.get("is_bank", False) else "standard"
         print(f"[AAOIFI] company_type={company_type}, market_cap={market_cap:,.0f}")
         state["calculation_results"] = AAOIFICalculator.calculate(

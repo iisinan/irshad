@@ -12,7 +12,7 @@ MONETARY_FIELDS = {
     "total_revenue", "total_debt", "cash_and_equivalents",
     "interest_income", "total_assets", "net_income",
     "interest_expense", "accounts_receivable", "illiquid_assets",
-    "interest_bearing_securities",
+    "interest_bearing_securities", "market_cap",
 }
 
 class Normalizer:

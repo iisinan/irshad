@@ -47,9 +47,27 @@ async def screen_company(ticker: str, financial_year: int = 2025, db: AsyncSessi
         
         if result_state.get("error"):
             raise HTTPException(status_code=500, detail=result_state["error"])
+
+        # Determine if we need to fallback to 2025
+        final_values = result_state.get("final_chosen_values", {})
+        bus_result = result_state.get("business_screening_result", {})
+        business_failed = bus_result and bus_result.get("business_compliance_status") == "Non-Compliant"
+        
+        # Did it fail to find financials, but the business isn't non-compliant?
+        if not final_values and not business_failed:
+            if initial_state["financial_year"] == 2026:
+                print(f"Fallback to 2025 triggered for {ticker}")
+                initial_state["financial_year"] = 2025
+                result_state = await graph_app.ainvoke(initial_state)
+                
+                if result_state.get("error"):
+                    raise HTTPException(status_code=500, detail=result_state["error"])
+                    
+                final_values = result_state.get("final_chosen_values", {})
+                bus_result = result_state.get("business_screening_result", {})
+                business_failed = bus_result and bus_result.get("business_compliance_status") == "Non-Compliant"
             
         # Extract results
-        final_values = result_state.get("final_chosen_values", {})
         calc_results = result_state.get("calculation_results", {})
         
         # Save to DB
@@ -134,7 +152,7 @@ async def screen_company(ticker: str, financial_year: int = 2025, db: AsyncSessi
             await db.refresh(screening)
         
         # If no report was found, we should notify the queue worker
-        if not result_state.get("annual_report_url") and not final_values:
+        if not final_values and not business_failed:
             return {"error": "File Not Found", "detail": "No annual report could be located.", "retry": False}
 
         # Extract ratios safely in case the LLM hallucinates a string instead of a dictionary
