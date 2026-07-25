@@ -337,6 +337,7 @@ const AaoifiScreening = () => {
           </div>
         </div>
 
+        <div style={{ display: 'flex', gap: '12px' }}>
         {user?.role === 'admin' && (
           <button 
             onClick={handleOpenOverrideModal}
