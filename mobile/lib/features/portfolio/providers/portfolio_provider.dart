@@ -114,4 +114,16 @@ class PortfolioProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  void clear() {
+    _summary = {
+      'total_balance': 0.0,
+      'purification_due': 0.0,
+      'health_percentage': 100.0,
+    };
+    _holdings = [];
+    _error = null;
+    _isGuest = true;
+    notifyListeners();
+  }
 }

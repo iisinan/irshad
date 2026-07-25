@@ -376,6 +376,8 @@ export default function Dashboard() {
   useEffect(()=>{
     if(!authLoading&&!user){navigate('/login');return;}
     if(user){
+      // Reset state if switching user accounts
+      setData(prev => (!prev?.summary ? {summary:{},holdings:[]} : prev));
       Promise.all([
         fetchPortfolio().catch(()=>({ data: { summary: {}, holdings: [], history: [] } })), 
         fetchNgxStocks().catch(()=>({ data: [] })), 

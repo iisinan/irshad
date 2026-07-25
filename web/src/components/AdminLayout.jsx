@@ -19,10 +19,6 @@ export default function AdminLayout({ children }) {
     return () => { document.body.style.overflow = ''; };
   }, [mobileOpen]);
 
-  if (user && !user.email_verified_at) {
-    return <Navigate to="/verify-email" replace />;
-  }
-
   return (
     <div style={{
       display: 'flex',

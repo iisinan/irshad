@@ -595,10 +595,10 @@ export const VerifyEmailPage = () => {
           }}
         />
         <h1 style={{ fontSize: '1.67rem', fontWeight: '800', marginBottom: '12px', color: 'var(--text-dark)' }}>
-          {verifying ? 'Verifying email...' : 'Verify your email'}
+          {verifying ? 'Verifying email...' : (user?.email_verified_at || message) ? 'Email Verified' : 'Verify your email'}
         </h1>
         
-        {!verifying && !message && !error && (
+        {!verifying && !message && !error && !user?.email_verified_at && (
           <p style={{ color: 'var(--text-muted)', marginBottom: '32px', lineHeight: '1.6' }}>
             Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? 
             <br /><br />
@@ -607,9 +607,14 @@ export const VerifyEmailPage = () => {
         )}
 
         {error && <div style={{ background: 'var(--non-halal-bg)', color: 'var(--non-halal)', padding: '12px', borderRadius: '8px', marginBottom: '24px', fontWeight: 600 }}>{error}</div>}
-        {message && <div style={{ background: 'var(--halal-bg)', color: 'var(--halal)', padding: '12px', borderRadius: '8px', marginBottom: '24px', fontWeight: 600 }}>{message}</div>}
+        
+        {(user?.email_verified_at || message) && (
+          <div style={{ background: 'var(--halal-bg)', color: 'var(--halal)', padding: '16px', borderRadius: '12px', marginBottom: '24px', fontWeight: 700, fontSize: '0.95rem', border: '1px solid var(--halal-border)' }}>
+            ✓ {message || 'Your email address is verified! You now have full access to Irshad.'}
+          </div>
+        )}
 
-        {!verifying && (
+        {!verifying && !message && !user?.email_verified_at && (
           <button 
             onClick={handleResend} 
             disabled={loading} 
@@ -617,6 +622,16 @@ export const VerifyEmailPage = () => {
             style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '0.88rem', opacity: loading ? 0.7 : 1 }}
           >
             {loading ? 'Sending...' : 'Resend Verification Email'}
+          </button>
+        )}
+
+        {(user?.email_verified_at || message) && (
+          <button 
+            onClick={() => navigate('/dashboard')} 
+            className="btn-primary" 
+            style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '0.88rem' }}
+          >
+            Go to Dashboard
           </button>
         )}
       </div>

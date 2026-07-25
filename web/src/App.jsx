@@ -387,18 +387,14 @@ const MarketPage = () => {
   const [focused, setFocused] = useState(false);
 
   useEffect(() => {
-    if (!authLoading && !user) navigate('/login', { replace: true });
-  }, [user, authLoading, navigate]);
-
-  useEffect(() => {
-    if (!user) return;
     fetchNgxStocks()
-      .then(r => { if (r.data) setStocks(r.data.filter(s => parseFloat(s.latest_price) > 0)); })
+      .then(r => { 
+        if (r && r.data) setStocks(r.data.filter(s => parseFloat(s.latest_price) > 0)); 
+        else if (Array.isArray(r)) setStocks(r.filter(s => parseFloat(s.latest_price) > 0)); 
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [user]);
-
-  if (!user) return null;
+  }, []);
 
   const getStatus = (company) => {
     const raw = company.status;
@@ -677,6 +673,9 @@ function App() {
                   <Route path="/pricing" element={<Pricing />} />
                   <Route path="/shariah" element={<ShariahPage />} />
                   <Route path="/resources" element={<ResourcesPage />} />
+                  <Route path="/market" element={
+                    <DashboardLayout><MarketPage /></DashboardLayout>
+                  } />
                   <Route path="/market/:symbol" element={
                     <DashboardLayout><StockDetails /></DashboardLayout>
                   } />

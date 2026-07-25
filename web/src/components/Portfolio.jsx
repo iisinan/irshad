@@ -103,13 +103,15 @@ export default function Portfolio() {
   };
 
   useEffect(() => { 
+    setData(null);
+    setLoading(true);
     loadData(); 
     // Poll for real-time updates every 30 seconds
     const interval = setInterval(() => {
       loadData(true);
     }, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [user?.id]);
 
   const handleAdd = async (payload) => {
     try {

@@ -48,6 +48,8 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await loginUser(credentials);
       if (res.data && res.data.access_token) {
+        localStorage.removeItem('irshad_portfolio_cache_v10');
+        localStorage.removeItem('irshad_baskets_cache_v1');
         localStorage.setItem('auth_token', res.data.access_token);
         setUser(res.data.user);
         return { success: true };
@@ -65,6 +67,8 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await registerUser(data);
       if (res.data && res.data.access_token) {
+        localStorage.removeItem('irshad_portfolio_cache_v10');
+        localStorage.removeItem('irshad_baskets_cache_v1');
         localStorage.setItem('auth_token', res.data.access_token);
         setUser(res.data.user);
         return { success: true };
@@ -82,6 +86,8 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await googleLoginUser(credential);
       if (res.data && res.data.access_token) {
+        localStorage.removeItem('irshad_portfolio_cache_v10');
+        localStorage.removeItem('irshad_baskets_cache_v1');
         localStorage.setItem('auth_token', res.data.access_token);
         setUser(res.data.user);
         return { success: true };
@@ -115,6 +121,8 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('auth_token');
+    localStorage.removeItem('irshad_portfolio_cache_v10');
+    localStorage.removeItem('irshad_baskets_cache_v1');
     setUser(null);
   };
 

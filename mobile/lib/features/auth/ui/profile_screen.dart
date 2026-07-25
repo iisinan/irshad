@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../core/providers/app_state_provider.dart';
 import '../data/auth_repository.dart';
 import '../../portfolio/ui/zakat_calculator_screen.dart';
+import '../../portfolio/providers/portfolio_provider.dart';
 
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 class ProfileScreen extends StatefulWidget {
@@ -40,6 +41,9 @@ Color get cardBg => context.bgAlt;
 
   void _logout() async {
     await _authRepository.logout();
+    if (mounted) {
+      Provider.of<PortfolioProvider>(context, listen: false).clear();
+    }
     Navigator.pushReplacementNamed(context, '/login');
   }
 
