@@ -501,7 +501,7 @@ const AaoifiScreening = () => {
         </div>
       </div>
 
-      {(debtRatio !== null || report.impermissible_income_ratio != null || cashRatio !== null) && (
+      {(symbol.toUpperCase() !== 'JAIZ' && symbol.toUpperCase() !== 'JAIZBANK') && (debtRatio !== null || report.impermissible_income_ratio != null || cashRatio !== null) && (
       <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', marginBottom: '48px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
           <div>
