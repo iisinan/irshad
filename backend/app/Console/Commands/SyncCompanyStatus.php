@@ -26,12 +26,6 @@ class SyncCompanyStatus extends Command
                 ->orderBy('created_at', 'desc')
                 ->first();
                 
-            // Get latest business screening
-            $bus = DB::table('business_screenings')
-                ->where('ticker', $symbol)
-                ->orderBy('created_at', 'desc')
-                ->first();
-                
             if (!$fin) {
                 // No financial data yet -> Doubtful
                 if ($company->current_status !== 'doubtful') {
@@ -47,11 +41,17 @@ class SyncCompanyStatus extends Command
             $ratios = $calc['ratios'] ?? [];
             
             // 1. Business Status
+            // Use the same Perplexity AI logic as StockController so they match perfectly
+            $stage1 = cache()->remember("aaoifi_stage1_{$company->symbol}", now()->addDays(7), function () use ($company) {
+                $perplexity = new \App\Services\PerplexityAiService();
+                return $perplexity->runBusinessActivityScreening($company);
+            });
+            
             $businessStatus = 'insufficient_data';
-            if ($bus) {
-                if ($bus->business_compliance_status === 'Compliant') {
+            if ($stage1) {
+                if (($stage1['compliance_status'] ?? 'PASS') === 'PASS') {
                     $businessStatus = 'pass';
-                } elseif ($bus->business_compliance_status === 'Non-Compliant') {
+                } elseif (($stage1['compliance_status'] ?? '') === 'FAIL') {
                     $businessStatus = 'fail';
                 } else {
                     $businessStatus = 'warning';
