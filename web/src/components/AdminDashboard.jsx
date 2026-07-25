@@ -212,7 +212,6 @@ const AdminDashboard = () => {
         <StatCard label="Halal" value={halalCount} icon={CheckCircle} color="var(--halal)" bg="var(--halal-bg)" />
         <StatCard label="Non-Halal" value={nonHalalCount} icon={AlertTriangle} color="var(--non-halal)" bg="var(--non-halal-bg)" />
         <StatCard label="Doubtful" value={doubtfulCount} icon={AlertCircle} color="var(--doubtful)" bg="var(--doubtful-bg)" />
-        <StatCard label="Products" value={products.length} icon={Package} color="#7C3AED" bg="rgba(124,58,237,0.08)" />
       </div>
 
       {/* ── Alerts Section ───────────────────────── */}
@@ -262,8 +261,6 @@ const AdminDashboard = () => {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', gap: '16px', flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', background: 'var(--bg-section)', padding: '4px', borderRadius: '14px', gap: '2px' }}>
           <TabBtn active={activeTab === 'stocks'} onClick={() => setActiveTab('stocks')} icon={TrendingUp} label="Stocks" />
-          <TabBtn active={activeTab === 'products'} onClick={() => setActiveTab('products')} icon={Package} label="Products" />
-          <TabBtn active={activeTab === 'zakat'} onClick={() => setActiveTab('zakat')} icon={Calculator} label="Zakat Settings" />
         </div>
 
         {activeTab !== 'zakat' && (

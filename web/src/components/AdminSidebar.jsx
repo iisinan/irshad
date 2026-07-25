@@ -19,7 +19,7 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
     { section: 'Admin' },
     { label: 'Dashboard / Alerts', icon: LayoutDashboard, to: '/admin' },
     { label: 'Registered Users', icon: Users, to: '/admin/users' },
-    { label: 'Tickers & Products', icon: Database, to: '/admin?tab=stocks' },
+    { label: 'Tickers', icon: Database, to: '/admin?tab=stocks' },
     { label: 'Resources', icon: BookOpen, to: '/admin/resources' },
     { label: 'Zakat (User View)', icon: Calculator, to: '/portfolio#zakat' },
     { section: 'Exit' },
