@@ -229,7 +229,8 @@ async def daily_ngx_scan(background_tasks: BackgroundTasks):
     Triggered by Laravel Task Scheduler every midnight.
     Kicks off a background job to scan all NGX companies for new filings.
     """
-    current_year = datetime.now().year
+    # Force the scanner to search for stable FY 2025 data to prevent AI hallucinations with Q1 2026
+    current_year = 2025
     
     # We use a background task so the API responds immediately to Laravel
     processor = BulkProcessor()
