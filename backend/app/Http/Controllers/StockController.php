@@ -372,7 +372,14 @@ class StockController extends Controller
             }
 
             $debtRatio = isset($ratios['interest_bearing_debt_ratio']) ? $ratios['interest_bearing_debt_ratio'] * 100 : null;
+            if ($debtRatio === null && $marketCap > 0) {
+                $debtRatio = ($totalDebt / $marketCap) * 100;
+            }
+            
             $cashRatio = isset($ratios['cash_and_equivalents_ratio']) ? $ratios['cash_and_equivalents_ratio'] * 100 : null;
+            if ($cashRatio === null && $marketCap > 0) {
+                $cashRatio = ($cash / $marketCap) * 100;
+            }
 
             // Run Stage 1 (Qualitative) using Perplexity AI (Cached for 7 days)
             $stage1 = cache()->remember("aaoifi_stage1_{$company->symbol}", now()->addDays(7), function () use ($company) {
@@ -381,7 +388,14 @@ class StockController extends Controller
             });
 
             $stage1Pass = ($stage1['compliance_status'] ?? 'PASS') === 'PASS';
-            $stage2Pass = ($calc['overall_financial_pass'] ?? true);
+            
+            // Recalculate Stage 2 Pass dynamically instead of trusting the AI script, 
+            // since the AI script frequently fails due to missing denominators.
+            $debtPass = $debtRatio !== null ? ($debtRatio <= 30) : true;
+            $cashPass = $cashRatio !== null ? ($cashRatio <= 30) : true;
+            $impurePass = $impureRatio !== null ? ($impureRatio <= 5) : true;
+            
+            $stage2Pass = $debtPass && $cashPass && $impurePass;
             
             // The ground truth is the status in the database ONLY IF it was manually overridden by a scholar.
             // Otherwise, we use our freshly calculated dynamic status.
@@ -409,11 +423,11 @@ class StockController extends Controller
                 'business_status' => $stage1Pass ? 'pass' : 'fail',
                 'business_reasoning' => $stage1['reason'] ?? $company->activity_reason,
                 'debt_ratio' => $debtRatio,
-                'debt_status' => ($status['debt_pass'] ?? true) ? 'pass' : 'fail',
+                'debt_status' => $debtPass ? 'pass' : 'fail',
                 'cash_ratio' => $cashRatio,
-                'cash_status' => ($status['cash_pass'] ?? true) ? 'pass' : 'fail',
+                'cash_status' => $cashPass ? 'pass' : 'fail',
                 'impermissible_income_ratio' => $impureRatio,
-                'impermissible_income_status' => ($status['income_pass'] ?? true) ? 'pass' : 'fail',
+                'impermissible_income_status' => $impurePass ? 'pass' : 'fail',
                 'illiquid_ratio' => null, // Python engine currently doesn't compute this
                 'illiquid_status' => 'pass',
                 'receivables_ratio' => null, // Python engine currently doesn't compute this
