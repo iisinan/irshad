@@ -367,7 +367,12 @@ class StockController extends Controller
             $impureRatio = $ratios['non_permissible_income_ratio'] ?? null;
             if ($impureRatio === null && $totalRevenue > 0) {
                 $impureRatio = ($interestIncome / $totalRevenue) * 100;
+            } else if ($impureRatio !== null) {
+                $impureRatio = $impureRatio * 100;
             }
+
+            $debtRatio = isset($ratios['interest_bearing_debt_ratio']) ? $ratios['interest_bearing_debt_ratio'] * 100 : null;
+            $cashRatio = isset($ratios['cash_and_equivalents_ratio']) ? $ratios['cash_and_equivalents_ratio'] * 100 : null;
 
             // Run Stage 1 (Qualitative) using Perplexity AI (Cached for 7 days)
             $stage1 = cache()->remember("aaoifi_stage1_{$company->symbol}", now()->addDays(7), function () use ($company) {
@@ -377,8 +382,10 @@ class StockController extends Controller
 
             $stage1Pass = ($stage1['compliance_status'] ?? 'PASS') === 'PASS';
             $stage2Pass = ($calc['overall_financial_pass'] ?? true);
-            $finalStatus = ($stage1Pass && $stage2Pass) ? 'halal' : 'non-halal';
-
+            
+            // The ground truth is the status in the database (which respects Admin manual overrides).
+            // If the DB says halal/non-halal/doubtful, we must be consistent.
+            $finalStatus = $company->status ? $company->status->status : (($stage1Pass && $stage2Pass) ? 'halal' : 'non-halal');
             $mapped = [
                 'company_id' => $company->id,
                 'stage1' => [
@@ -389,9 +396,9 @@ class StockController extends Controller
                 ],
                 'business_status' => $stage1Pass ? 'pass' : 'fail',
                 'business_reasoning' => $stage1['reason'] ?? $company->activity_reason,
-                'debt_ratio' => $ratios['interest_bearing_debt_ratio'] ?? null,
+                'debt_ratio' => $debtRatio,
                 'debt_status' => ($status['debt_pass'] ?? true) ? 'pass' : 'fail',
-                'cash_ratio' => $ratios['cash_and_equivalents_ratio'] ?? null,
+                'cash_ratio' => $cashRatio,
                 'cash_status' => ($status['cash_pass'] ?? true) ? 'pass' : 'fail',
                 'impermissible_income_ratio' => $impureRatio,
                 'impermissible_income_status' => ($status['income_pass'] ?? true) ? 'pass' : 'fail',

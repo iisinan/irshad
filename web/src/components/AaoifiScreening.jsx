@@ -240,14 +240,9 @@ const AaoifiScreening = () => {
   const businessStatus = report.business_status || 'insufficient_data';
   const impIncomeStatus = report.impermissible_income_status || 'insufficient_data';
 
-  let finalStatus = 'halal';
-  if (businessStatus === 'fail' || debtStatus === 'fail' || cashStatus === 'fail' || impIncomeStatus === 'fail') {
-    finalStatus = 'non-halal';
-  } else if (businessStatus === 'warning' || debtStatus === 'warning' || cashStatus === 'warning') {
-    finalStatus = 'doubtful';
-  } else if (debtStatus === 'insufficient_data' || cashStatus === 'insufficient_data' || impIncomeStatus === 'insufficient_data') {
-    finalStatus = 'doubtful';
-  }
+  // Ensure we use the exact final status calculated by the backend which respects the database ground truth
+  // and admin manual overrides, instead of re-calculating it blindly on the frontend.
+  let finalStatus = report.final_status || 'doubtful';
 
   let statusColor = 'var(--text-muted)';
   let StatusIcon = HelpCircle;
