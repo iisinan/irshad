@@ -52,4 +52,20 @@ class FinancialScreening extends Model
         $val = $this->calculation_results['ratios']['non_permissible_income_ratio'] ?? null;
         return $val !== null ? $val * 100 : null;
     }
+
+    public function getEvidenceLinksAttribute()
+    {
+        if (empty($this->evidence_link)) return [];
+        $decoded = json_decode($this->evidence_link, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            return $decoded;
+        }
+        // Fallback for old single string
+        return [$this->evidence_link];
+    }
+
+    public function setEvidenceLinksAttribute($value)
+    {
+        $this->attributes['evidence_link'] = json_encode(is_array($value) ? array_values($value) : []);
+    }
 }

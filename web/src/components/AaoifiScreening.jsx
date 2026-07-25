@@ -44,8 +44,9 @@ const AaoifiScreening = () => {
     cash: '',
     interest_income: '',
     total_assets: '',
+    total_assets: '',
     total_revenue: '',
-    evidence_link: ''
+    evidence_links: ['']
   });
   const [overrideLoading, setOverrideLoading] = useState(false);
   const [overrideError, setOverrideError] = useState('');
@@ -102,13 +103,26 @@ const AaoifiScreening = () => {
 
   const handleOpenOverrideModal = () => {
     const fd = report?.financial_data_used || {};
+    let evLinks = report?.evidence_link ? report.evidence_link : [];
+    if (typeof evLinks === 'string') {
+      try {
+        const parsed = JSON.parse(evLinks);
+        evLinks = Array.isArray(parsed) ? parsed : [evLinks];
+      } catch(e) {
+        evLinks = [evLinks];
+      }
+    }
+    if (!Array.isArray(evLinks) || evLinks.length === 0) {
+      evLinks = [''];
+    }
+
     setOverrideData({
       total_debt: fd.total_debt || '',
-      cash: fd.cash || '',
+      cash: fd.cash_and_equivalents || fd.cash || '',
       interest_income: fd.interest_income || '',
       total_assets: fd.total_assets || '',
       total_revenue: fd.total_revenue || '',
-      evidence_link: report?.evidence_link || ''
+      evidence_links: evLinks
     });
     setShowOverrideModal(true);
   };
@@ -711,9 +725,28 @@ const AaoifiScreening = () => {
               </div>
 
               <div style={{ marginBottom: '32px' }}>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Evidence / Reference Link (Required)</label>
-                <input required type="url" placeholder="https://..." value={overrideData.evidence_link} onChange={e => setOverrideData({...overrideData, evidence_link: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.88rem', outline: 'none' }} />
-                <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '6px' }}>Provide a link to the financial report or announcement justifying this override.</p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>Evidence / Reference Links (Required)</label>
+                  <button type="button" onClick={() => setOverrideData({...overrideData, evidence_links: [...overrideData.evidence_links, '']})} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 700 }}>+ Add Link</button>
+                </div>
+                {overrideData.evidence_links.map((link, idx) => (
+                  <div key={idx} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                    <input required type="url" placeholder="https://..." value={link} onChange={e => {
+                      const newLinks = [...overrideData.evidence_links];
+                      newLinks[idx] = e.target.value;
+                      setOverrideData({...overrideData, evidence_links: newLinks});
+                    }} style={{ flex: 1, padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.88rem', outline: 'none' }} />
+                    {overrideData.evidence_links.length > 1 && (
+                      <button type="button" onClick={() => {
+                        const newLinks = overrideData.evidence_links.filter((_, i) => i !== idx);
+                        setOverrideData({...overrideData, evidence_links: newLinks});
+                      }} style={{ padding: '0 16px', background: 'var(--non-halal-bg)', color: 'var(--non-halal)', border: 'none', borderRadius: '12px', cursor: 'pointer' }}>
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '6px' }}>Provide links to the financial report or announcement justifying this override.</p>
               </div>
 
               <div style={{ display: 'flex', gap: '12px' }}>

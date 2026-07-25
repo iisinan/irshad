@@ -20,10 +20,10 @@ export default function AdminTickerEditor() {
   // Form states
   const [verdictForm, setVerdictForm] = useState({ status: 'halal', reason: '' });
   const [aboutForm, setAboutForm] = useState({ name: '', sector: '', industry: '', description: '', overview: '' });
-  const [financialsForm, setFinancialsForm] = useState({ total_assets: 0, total_debt: 0, cash: 0, interest_income: 0, total_revenue: 0, evidence_link: '' });
+  const [financialsForm, setFinancialsForm] = useState({ total_assets: 0, total_debt: 0, cash: 0, interest_income: 0, total_revenue: 0, evidence_links: [''] });
   
   // News state
-  const [newsForm, setNewsForm] = useState({ title: '', url: '', source: '' });
+  const [newsForm, setNewsForm] = useState({ title: '', url: '', source: '', thumbnail_url: '', excerpt: '' });
   const [showNewsModal, setShowNewsModal] = useState(false);
 
   useEffect(() => {
@@ -46,13 +46,25 @@ export default function AdminTickerEditor() {
       setAboutForm({ name: data.name || '', sector: data.sector || '', industry: data.industry || '', description: data.description || '', overview: data.overview || '' });
       
       const fin = data.financials?.[0];
+      let evLinks = fin?.evidence_link ? fin.evidence_link : [];
+      if (typeof evLinks === 'string') {
+        try {
+          const parsed = JSON.parse(evLinks);
+          evLinks = Array.isArray(parsed) ? parsed : [evLinks];
+        } catch(e) {
+          evLinks = [evLinks];
+        }
+      }
+      if (!Array.isArray(evLinks) || evLinks.length === 0) {
+        evLinks = [''];
+      }
       setFinancialsForm({
         total_assets: fin?.total_assets || 0,
         total_debt: fin?.total_debt || 0,
         cash: fin?.cash_and_equivalents || 0,
         interest_income: fin?.interest_income || 0,
         total_revenue: fin?.total_revenue || 0,
-        evidence_link: fin?.evidence_link || ''
+        evidence_links: evLinks
       });
       
     } catch (err) {
@@ -111,7 +123,7 @@ export default function AdminTickerEditor() {
     try {
       await addTickerNews(symbol, newsForm);
       toast.success('News article added');
-      setNewsForm({ title: '', url: '', source: '' });
+      setNewsForm({ title: '', url: '', source: '', thumbnail_url: '', excerpt: '' });
       setShowNewsModal(false);
       loadData();
     } catch (err) {
@@ -287,8 +299,25 @@ export default function AdminTickerEditor() {
               </div>
 
               <div style={{ marginBottom: '32px' }}>
-                <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Evidence Link / Source (URL)</label>
-                <input type="url" value={financialsForm.evidence_link} onChange={e => setFinancialsForm({...financialsForm, evidence_link: e.target.value})} placeholder="https://..." style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', color: 'var(--text-dark)', outline: 'none' }} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-muted)' }}>Evidence Links / Sources (URL)</label>
+                  <button type="button" onClick={() => setFinancialsForm({...financialsForm, evidence_links: [...financialsForm.evidence_links, '']})} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: '0.88rem', fontWeight: 600 }}>+ Add Link</button>
+                </div>
+                {financialsForm.evidence_links.map((link, idx) => (
+                  <div key={idx} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                    <input type="url" value={link} onChange={e => {
+                      const newLinks = [...financialsForm.evidence_links];
+                      newLinks[idx] = e.target.value;
+                      setFinancialsForm({...financialsForm, evidence_links: newLinks});
+                    }} placeholder="https://..." style={{ flex: 1, padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', color: 'var(--text-dark)', outline: 'none' }} />
+                    {financialsForm.evidence_links.length > 1 && (
+                      <button type="button" onClick={() => {
+                        const newLinks = financialsForm.evidence_links.filter((_, i) => i !== idx);
+                        setFinancialsForm({...financialsForm, evidence_links: newLinks});
+                      }} style={{ padding: '0 16px', background: 'var(--non-halal-bg)', color: 'var(--non-halal)', border: 'none', borderRadius: '12px', cursor: 'pointer' }}><Trash2 size={16} /></button>
+                    )}
+                  </div>
+                ))}
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -355,8 +384,16 @@ export default function AdminTickerEditor() {
                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Source (e.g., Bloomberg, Reuters)</label>
                 <input required type="text" value={newsForm.source} onChange={e => setNewsForm({...newsForm, source: e.target.value})} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.88rem', outline: 'none' }} />
               </div>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Thumbnail Image URL (Optional)</label>
+                <input type="url" value={newsForm.thumbnail_url} onChange={e => setNewsForm({...newsForm, thumbnail_url: e.target.value})} placeholder="https://..." style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.88rem', outline: 'none' }} />
+              </div>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Excerpt / Summary (Optional)</label>
+                <textarea rows={3} value={newsForm.excerpt} onChange={e => setNewsForm({...newsForm, excerpt: e.target.value})} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.88rem', outline: 'none', resize: 'vertical' }} />
+              </div>
               <div style={{ marginBottom: '32px' }}>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>URL</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Article URL</label>
                 <input required type="url" value={newsForm.url} onChange={e => setNewsForm({...newsForm, url: e.target.value})} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.88rem', outline: 'none' }} />
               </div>
 

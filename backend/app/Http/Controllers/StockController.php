@@ -234,7 +234,8 @@ class StockController extends Controller
             'total_debt' => 'required|numeric',
             'cash' => 'required|numeric',
             'interest_income' => 'required|numeric',
-            'evidence_link' => 'nullable|url'
+            'evidence_links' => 'nullable|array',
+            'evidence_links.*' => 'url'
         ]);
 
         $company = Company::where('symbol', $symbol)->firstOrFail();
@@ -283,8 +284,8 @@ class StockController extends Controller
 
         $screening->calculation_results = $calc;
         $screening->is_manual_override = true;
-        if ($request->filled('evidence_link')) {
-            $screening->evidence_link = $request->evidence_link;
+        if ($request->has('evidence_links')) {
+            $screening->evidence_links = $request->evidence_links;
         }
         $screening->save();
 

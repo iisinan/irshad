@@ -22,8 +22,6 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState(null);
   
-  const [stockNews, setStockNews] = useState([]);
-  const [newsLoading, setNewsLoading] = useState(true);
   const [showBrokerageModal, setShowBrokerageModal] = useState(false);
   const [showAlertDialog, setShowAlertDialog] = useState(false);
   const [alertPrice, setAlertPrice] = useState('');
@@ -46,13 +44,6 @@ const StockDetails = ({ symbol: propSymbol }) => {
       .catch(console.error)
       .finally(() => { setLoading(false); setEnriching(false); });
       
-    // Fetch related news (limit to 5 latest)
-    setNewsLoading(true);
-    api.get(`/news?symbol=${symbol}&limit=5`)
-      .then(res => setStockNews(res.data?.data || []))
-      .catch(console.error)
-      .finally(() => setNewsLoading(false));
-
     // Log history
     if (user) {
       api.post('/history', { action: 'check', reference_id: symbol }).catch(() => {});
@@ -479,16 +470,20 @@ const StockDetails = ({ symbol: propSymbol }) => {
           </div>
 
           {/* Advanced Metrics (Market Data) */}
-          <div className="detail-panel">
+          <div className="detail-panel" style={{ padding: '24px', background: 'var(--bg-section)', border: '1px solid var(--border)' }}>
             <div className="detail-section-label">Advanced Metrics</div>
             <div className="detail-metrics-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-              <div style={{ background: 'var(--bg)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)' }}>
-                <span style={{ display: 'block', fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Valuation</span>
-                <span style={{ fontSize: '0.88rem', color: 'var(--text-dark)', fontWeight: 700 }}>{stock.valuation_info || 'N/A'}</span>
+              <div style={{ background: 'var(--bg)', padding: '20px', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <TrendingUp size={14} color="var(--primary)" /> Valuation
+                </span>
+                <span style={{ fontSize: '1rem', color: 'var(--text-dark)', fontWeight: 800 }}>{stock.valuation_info || 'N/A'}</span>
               </div>
-              <div style={{ background: 'var(--bg)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)' }}>
-                <span style={{ display: 'block', fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Growth Forecast</span>
-                <span style={{ fontSize: '0.88rem', color: 'var(--text-dark)', fontWeight: 700 }}>{stock.growth_info || 'N/A'}</span>
+              <div style={{ background: 'var(--bg)', padding: '20px', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <TrendingUp size={14} color="var(--halal)" /> Growth Forecast
+                </span>
+                <span style={{ fontSize: '1rem', color: 'var(--text-dark)', fontWeight: 800 }}>{stock.growth_info || 'N/A'}</span>
               </div>
             </div>
           </div>
@@ -691,33 +686,48 @@ const StockDetails = ({ symbol: propSymbol }) => {
       {/* ─── News Section ─── */}
       <div style={{ marginTop: '32px' }}>
         <div className="detail-panel">
-          <div className="detail-section-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Newspaper size={18} /> {stock.symbol} News
+          <div className="detail-section-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px' }}>
+            <Newspaper size={18} /> Latest News for {stock.symbol}
           </div>
           
-          {newsLoading ? (
+          {enriching ? (
             <div style={{ padding: '40px 0', textAlign: 'center', color: 'var(--text-muted)' }}>
               <div className="spinner" style={{ margin: '0 auto 12px' }} />
               Loading latest news...
             </div>
-          ) : stockNews.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              {stockNews.map((article, i) => (
-                <a key={i} href={article.url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '16px 0', borderBottom: i < stockNews.length - 1 ? '1px solid var(--border)' : 'none', textDecoration: 'none', transition: 'opacity 0.2s' }} onMouseEnter={e => e.currentTarget.style.opacity = 0.8} onMouseLeave={e => e.currentTarget.style.opacity = 1}>
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.66rem', color: 'var(--text-light)', fontWeight: 500 }}>{new Date(article.published_at).toLocaleDateString()}</span>
-                  </div>
-                  <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-dark)', lineHeight: 1.4 }}>{article.title}</div>
-                  {article.excerpt && (
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{article.excerpt}</div>
+          ) : stock.news && stock.news.length > 0 ? (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
+              {stock.news.map((article, i) => (
+                <a key={i} href={article.url} target="_blank" rel="noopener noreferrer" className="hover-card" style={{ display: 'flex', flexDirection: 'column', padding: '0', border: '1px solid var(--border)', borderRadius: '16px', textDecoration: 'none', background: 'var(--bg)', overflow: 'hidden', transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+                  {article.thumbnail_url && (
+                    <div style={{ height: '140px', width: '100%', overflow: 'hidden', background: 'var(--bg-section)' }}>
+                      <img src={article.thumbnail_url} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
                   )}
+                  <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      {article.source && (
+                        <span style={{ fontSize: '0.7rem', color: 'var(--primary)', fontWeight: 700, background: 'var(--primary-50)', padding: '4px 10px', borderRadius: '100px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{article.source}</span>
+                      )}
+                      <span style={{ fontSize: '0.66rem', color: 'var(--text-light)', fontWeight: 600 }}>{article.published_at ? new Date(article.published_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : ''}</span>
+                    </div>
+                    <h4 style={{ fontSize: '0.94rem', fontWeight: 800, color: 'var(--text-dark)', lineHeight: 1.4, margin: '0 0 8px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      {article.title}
+                    </h4>
+                    {article.excerpt && (
+                      <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', margin: 0, marginTop: 'auto' }}>
+                        {article.excerpt}
+                      </p>
+                    )}
+                  </div>
                 </a>
               ))}
             </div>
           ) : (
-            <div style={{ padding: '40px 0', textAlign: 'center', color: 'var(--text-light)' }}>
-              <Globe size={32} style={{ margin: '0 auto 12px', opacity: 0.5 }} />
-              <p>No recent news found for {stock.symbol}</p>
+            <div style={{ padding: '60px 0', textAlign: 'center', color: 'var(--text-light)', background: 'var(--bg-section)', borderRadius: '16px', border: '1px dashed var(--border)' }}>
+              <Globe size={40} style={{ margin: '0 auto 16px', opacity: 0.4, color: 'var(--text-muted)' }} />
+              <h4 style={{ margin: '0 0 8px', color: 'var(--text-dark)', fontSize: '0.95rem' }}>No recent news</h4>
+              <p style={{ fontSize: '0.84rem' }}>There are currently no news updates for {stock.symbol}.</p>
             </div>
           )}
         </div>

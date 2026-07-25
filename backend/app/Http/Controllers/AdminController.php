@@ -144,10 +144,12 @@ class AdminController extends Controller
             'title' => 'required|string|max:255',
             'url' => 'required|url',
             'source' => 'required|string|max:255',
+            'thumbnail_url' => 'nullable|url',
+            'excerpt' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return response()->json(['message' => 'Validation error', 'errors' => $validator->errors()], 422);
         }
 
         $news = \App\Models\News::create([
@@ -155,12 +157,14 @@ class AdminController extends Controller
             'title' => $request->title,
             'url' => $request->url,
             'source' => $request->source,
+            'thumbnail_url' => $request->thumbnail_url,
+            'excerpt' => $request->excerpt,
             'published_at' => now(),
         ]);
 
-        \Illuminate\Support\Facades\Cache::forget("stocks.show.{$symbol}");
+        \Illuminate\Support\Facades\Cache::forget("stocks.show.{$symbol}_v2");
 
-        return $this->success($news, 'News added successfully');
+        return response()->json(['message' => 'News added successfully', 'data' => $news]);
     }
 
     /**
