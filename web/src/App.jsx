@@ -717,7 +717,14 @@ function App() {
                     <DashboardLayout><Profile /></DashboardLayout>
                   } />
                   <Route path="/admin/tickers/:symbol" element={
-                    <DashboardLayout><AdminTickerEditor /></DashboardLayout>
+                    <ProtectedRoute adminOnly={true}>
+                      <AdminLayout><AdminTickerEditor /></AdminLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/admin/tickers/:symbol/view" element={
+                    <ProtectedRoute adminOnly={true}>
+                      <AdminLayout><StockDetails /></AdminLayout>
+                    </ProtectedRoute>
                   } />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/register" element={<RegisterPage />} />

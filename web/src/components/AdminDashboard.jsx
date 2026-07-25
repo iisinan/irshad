@@ -449,8 +449,8 @@ const AdminDashboard = () => {
                           {activeTab === 'stocks' ? (
                             <div 
                               style={{ display: 'flex', alignItems: 'center', gap: '11px', cursor: 'pointer' }}
-                              onClick={() => navigate(`/admin/tickers/${item.symbol}`)}
-                              title="Edit Stock Information"
+                              onClick={() => navigate(`/admin/tickers/${item.symbol}/view`)}
+                              title="View Stock Information"
                             >
                               <div style={{
                                 width: '36px', height: '36px', borderRadius: '9px', flexShrink: 0,
