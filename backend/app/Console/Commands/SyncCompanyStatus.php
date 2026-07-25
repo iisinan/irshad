@@ -19,136 +19,120 @@ class SyncCompanyStatus extends Command
 
         foreach ($companies as $company) {
             $symbol = $company->symbol;
-            
+
             // Get latest financial screening
             $fin = DB::table('financial_screenings')
                 ->where('company_ticker', $symbol)
                 ->orderBy('created_at', 'desc')
                 ->first();
-                
+
             if (!$fin) {
-                // No financial data yet -> Doubtful
-                if ($company->current_status !== 'doubtful') {
+                // No financial data yet -> mark doubtful only if not scholar-verified
+                $stockStatus = DB::table('stock_statuses')->where('company_id', $company->id)->first();
+                if (!$stockStatus || !$stockStatus->verified_by_scholar) {
                     DB::table('companies')->where('id', $company->id)->update(['current_status' => 'doubtful']);
+                    DB::table('stock_statuses')->updateOrInsert(
+                        ['company_id' => $company->id],
+                        [
+                            'status'       => 'doubtful',
+                            'reason'       => 'Insufficient financial data to assess Shariah compliance.',
+                            'last_updated' => now(),
+                            'updated_at'   => now(),
+                        ]
+                    );
+                    $this->info("  {$symbol}: no financial data -> doubtful");
                     $updatedCount++;
                 }
                 continue;
             }
 
-            // Decode chosen values and calculation results
+            // Decode chosen values and calculation results  (mirrors StockController logic exactly)
             $chosen = json_decode($fin->chosen_values ?? '{}', true);
-            $calc = json_decode($fin->calculation_results ?? '{}', true);
+            $calc   = json_decode($fin->calculation_results ?? '{}', true);
             $ratios = $calc['ratios'] ?? [];
-            
-            // 1. Business Status
-            // Use the same Perplexity AI logic as StockController so they match perfectly
-            $stage1 = cache()->remember("aaoifi_stage1_{$company->symbol}", now()->addDays(7), function () use ($company) {
+
+            $totalAssets  = floatval($chosen['total_assets']['value'] ?? 0);
+            $marketCap    = floatval($calc['denominator_value'] ?? $company->market_cap ?? 0);
+            $totalDebt    = floatval($chosen['total_debt']['value'] ?? 0);
+            $cash         = floatval($chosen['cash_and_equivalents']['value'] ?? 0);
+            $totalRevenue = floatval($chosen['total_revenue']['value'] ?? 0);
+            $interestIncome = floatval($chosen['interest_income']['value'] ?? $chosen['non_permissible_income']['value'] ?? 0);
+
+            // Impure ratio (same preference order as StockController)
+            $impureRatio = isset($ratios['non_permissible_income_ratio']) ? $ratios['non_permissible_income_ratio'] * 100 : null;
+            if ($impureRatio === null && $totalRevenue > 0) {
+                $impureRatio = ($interestIncome / $totalRevenue) * 100;
+            } elseif ($impureRatio !== null) {
+                // already multiplied above
+            }
+
+            // Debt ratio
+            $debtRatio = isset($ratios['interest_bearing_debt_ratio']) ? $ratios['interest_bearing_debt_ratio'] * 100 : null;
+            if ($debtRatio === null && $marketCap > 0) {
+                $debtRatio = ($totalDebt / $marketCap) * 100;
+            }
+
+            // Cash ratio
+            $cashRatio = isset($ratios['cash_and_equivalents_ratio']) ? $ratios['cash_and_equivalents_ratio'] * 100 : null;
+            if ($cashRatio === null && $marketCap > 0) {
+                $cashRatio = ($cash / $marketCap) * 100;
+            }
+
+            // --- Stage 1: Business Activity ---
+            // Use the SAME Perplexity cache key as StockController (7-day cache)
+            $stage1 = cache()->remember("aaoifi_stage1_{$symbol}", now()->addDays(7), function () use ($company) {
                 $perplexity = new \App\Services\PerplexityAiService();
                 return $perplexity->runBusinessActivityScreening($company);
             });
-            
-            $businessStatus = 'insufficient_data';
-            if ($stage1) {
-                if (($stage1['compliance_status'] ?? 'PASS') === 'PASS') {
-                    $businessStatus = 'pass';
-                } elseif (($stage1['compliance_status'] ?? '') === 'FAIL') {
-                    $businessStatus = 'fail';
-                } else {
-                    $businessStatus = 'warning';
-                }
-            }
 
-            // 2. Financial Metrics
-            $totalAssets = floatval($chosen['total_assets']['value'] ?? 0);
-            $marketCap = floatval($calc['denominator_value'] ?? $company->market_cap ?? 0);
-            $totalDebt = floatval($chosen['total_debt']['value'] ?? 0);
-            $cash = floatval($chosen['cash_and_equivalents']['value'] ?? 0);
-            
-            $denVal = $marketCap > 0 ? $marketCap : 0; // The frontend defaults to market cap
+            // compliance_status is PASS or FAIL (from Perplexity cache)
+            $stage1Pass = ($stage1['compliance_status'] ?? 'PASS') === 'PASS';
 
-            // 3. Debt Status
-            $debtRatio = isset($ratios['interest_bearing_debt_ratio']) ? $ratios['interest_bearing_debt_ratio'] * 100 : null;
-            if ($debtRatio === null && $denVal > 0) {
-                $debtRatio = ($totalDebt / $denVal) * 100;
-            }
-            
-            $debtStatus = 'insufficient_data';
-            if ($debtRatio !== null) {
-                $debtStatus = $debtRatio <= 30 ? 'pass' : ($debtRatio <= 33 ? 'warning' : 'fail');
-            }
+            // --- Stage 2: Financial Ratios ---
+            // If ratio data is missing, assume pass (same as StockController line 394-396)
+            $debtPass   = $debtRatio   !== null ? ($debtRatio   <= 30) : true;
+            $cashPass   = $cashRatio   !== null ? ($cashRatio   <= 30) : true;
+            $impurePass = $impureRatio !== null ? ($impureRatio <= 5)  : true;
 
-            // 4. Cash Status
-            $cashRatio = isset($ratios['cash_and_equivalents_ratio']) ? $ratios['cash_and_equivalents_ratio'] * 100 : null;
-            if ($cashRatio === null && $denVal > 0) {
-                $cashRatio = ($cash / $denVal) * 100;
-            }
-            
-            $cashStatus = 'insufficient_data';
-            if ($cashRatio !== null) {
-                $cashStatus = $cashRatio <= 30 ? 'pass' : ($cashRatio <= 33 ? 'warning' : 'fail');
-            }
-            
-            // 5. Impermissible Income
-            $impRatio = $ratios['non_permissible_income_ratio'] ?? null;
-            $impIncomeStatus = 'insufficient_data';
-            if ($impRatio !== null) {
-                $impIncomeStatus = floatval($impRatio) <= 5 ? 'pass' : 'fail';
-            }
+            $stage2Pass = $debtPass && $cashPass && $impurePass;
 
-            // 6. Illiquid / Receivables (Default pass since python doesn't explicitly compute them yet, unless frontend sets it)
-            // The frontend pulls these from report.illiquid_status which defaults to 'pass' in StockController@aaoifiScreening
-            $illiquidStatus = 'pass';
-            $receivablesStatus = 'pass';
+            // --- Final Status ---
+            // Scholar-verified override takes precedence (same as StockController line 402-403)
+            $stockStatus     = DB::table('stock_statuses')->where('company_id', $company->id)->first();
+            $isVerified      = $stockStatus && $stockStatus->verified_by_scholar;
+            $calculatedStatus = ($stage1Pass && $stage2Pass) ? 'halal' : 'non-halal';
+            $finalStatus     = $isVerified ? $stockStatus->status : $calculatedStatus;
 
-            // 7. Calculate Final Status (Mirroring AaoifiScreening.jsx)
-            $finalStatus = 'halal';
-            
-            if ($businessStatus === 'fail' || $debtStatus === 'fail' || $cashStatus === 'fail' || $impIncomeStatus === 'fail' || $illiquidStatus === 'fail' || $receivablesStatus === 'fail') {
-                $finalStatus = 'non-halal';
-            } elseif ($businessStatus === 'warning' || $debtStatus === 'warning' || $cashStatus === 'warning') {
-                $finalStatus = 'doubtful';
-            } elseif ($businessStatus === 'insufficient_data' || $debtStatus === 'insufficient_data' || $cashStatus === 'insufficient_data' || $impIncomeStatus === 'insufficient_data' || $illiquidStatus === 'insufficient_data' || $receivablesStatus === 'insufficient_data') {
-                $finalStatus = 'doubtful';
-            }
+            $statusReason = $isVerified
+                ? $stockStatus->reason
+                : ($finalStatus === 'halal'
+                    ? 'Passes both qualitative business and quantitative financial Shariah compliance checks.'
+                    : 'Fails Shariah compliance based on current financial disclosures or business activities.');
 
-            // 8. Respect Admin Override for Final Status
-            $stockStatus = DB::table('stock_statuses')->where('company_id', $company->id)->first();
-            if ($stockStatus && $stockStatus->verified_by_scholar) {
-                $finalStatus = $stockStatus->status; // Override with admin decision
-            }
-
-            // 9. Update companies table
+            // Update companies table
             if ($company->current_status !== $finalStatus) {
-                DB::table('companies')->where('id', $company->id)->update([
-                    'current_status' => $finalStatus
-                ]);
+                DB::table('companies')->where('id', $company->id)->update(['current_status' => $finalStatus]);
             }
-            
-            // 9. Sync stock_statuses table
-            $stockStatus = DB::table('stock_statuses')->where('company_id', $company->id)->first();
-            
-            if (!$stockStatus || !$stockStatus->verified_by_scholar) {
-                $statusReason = ($finalStatus === 'halal') 
-                    ? 'Passes both qualitative business and quantitative financial Shariah compliance checks.' 
-                    : 'Fails Shariah compliance based on current financial disclosures or business activities.';
-                
+
+            // Sync stock_statuses table (only if not scholar-verified)
+            if (!$isVerified) {
                 DB::table('stock_statuses')->updateOrInsert(
                     ['company_id' => $company->id],
                     [
-                        'status' => $finalStatus,
-                        'reason' => $statusReason,
+                        'status'       => $finalStatus,
+                        'reason'       => $statusReason,
                         'last_updated' => now(),
-                        'updated_at' => now(),
+                        'updated_at'   => now(),
                     ]
                 );
             }
 
-            $this->info("Synced {$symbol} to {$finalStatus}");
+            $this->info("  {$symbol}: stage1=" . ($stage1Pass ? 'PASS' : 'FAIL') . " stage2=" . ($stage2Pass ? 'PASS' : 'FAIL') . " -> {$finalStatus}" . ($isVerified ? ' (scholar override)' : ''));
             $updatedCount++;
         }
-        
-        // Clear caches
+
+        // Clear all stock-related caches
         Cache::forget('stocks.index_v6');
-        $this->info("Synced {$updatedCount} companies successfully. Cache cleared.");
+        $this->info("Done. Synced {$updatedCount} companies. Cache cleared.");
     }
 }
