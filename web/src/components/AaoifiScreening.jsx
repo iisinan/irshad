@@ -6,7 +6,8 @@ import {
   ArrowLeft, CheckCircle, XCircle, AlertTriangle, 
   HelpCircle, ShieldCheck, ChevronRight, FileText, Brain, Download
 } from 'lucide-react';
-import { fetchAaoifiScreening } from '../services/api';
+import { fetchAaoifiScreening, updateAaoifiData } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const LOADING_STEPS = [
   "Initializing AAOIFI Screening...",
@@ -35,6 +36,19 @@ const AaoifiScreening = () => {
   const [modalData, setModalData] = useState(null);
   const [evidenceExpanded, setEvidenceExpanded] = useState(false);
   const [denominator, setDenominator] = useState('market_cap');
+  const { user } = useAuth();
+  
+  const [showOverrideModal, setShowOverrideModal] = useState(false);
+  const [overrideData, setOverrideData] = useState({
+    total_debt: '',
+    cash: '',
+    interest_income: '',
+    total_assets: '',
+    total_revenue: '',
+    evidence_link: ''
+  });
+  const [overrideLoading, setOverrideLoading] = useState(false);
+  const [overrideError, setOverrideError] = useState('');
 
   // UI theater: simulate loading steps
   useEffect(() => {
@@ -84,6 +98,34 @@ const AaoifiScreening = () => {
       denLabel,
       denVal
     });
+  };
+
+  const handleOpenOverrideModal = () => {
+    const fd = report?.financial_data_used || {};
+    setOverrideData({
+      total_debt: fd.total_debt || '',
+      cash: fd.cash || '',
+      interest_income: fd.interest_income || '',
+      total_assets: fd.total_assets || '',
+      total_revenue: fd.total_revenue || '',
+      evidence_link: report?.evidence_link || ''
+    });
+    setShowOverrideModal(true);
+  };
+
+  const submitOverride = async (e) => {
+    e.preventDefault();
+    setOverrideLoading(true);
+    setOverrideError('');
+    try {
+      await updateAaoifiData(symbol, overrideData);
+      setShowOverrideModal(false);
+      window.location.reload();
+    } catch (err) {
+      setOverrideError(err.response?.data?.message || 'Failed to update AAOIFI data');
+    } finally {
+      setOverrideLoading(false);
+    }
   };
 
   if (loading) {
@@ -295,6 +337,19 @@ const AaoifiScreening = () => {
           </div>
         </div>
 
+        {user?.role === 'admin' && (
+          <button 
+            onClick={handleOpenOverrideModal}
+            style={{ 
+              display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', 
+              background: 'var(--primary)', border: 'none', borderRadius: '12px', 
+              cursor: 'pointer', fontWeight: 700, color: 'white', transition: 'all 0.2s',
+              boxShadow: '0 4px 12px rgba(45, 212, 191, 0.2)'
+            }}
+          >
+            <ShieldCheck size={18} /> Edit Data
+          </button>
+        )}
         <button 
           onClick={() => window.print()}
           style={{ 
@@ -316,6 +371,7 @@ const AaoifiScreening = () => {
         >
           <Download size={18} /> Export Report
         </button>
+        </div>
       </div>
 
       <div style={{ 
@@ -583,6 +639,68 @@ const AaoifiScreening = () => {
                 </div>
               </div>
             </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Admin Override Modal */}
+      {showOverrideModal && createPortal(
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000, padding: '24px' }}>
+          <div className="animate-fade-in" style={{ background: 'var(--bg)', borderRadius: '24px', width: '100%', maxWidth: '600px', overflow: 'hidden', boxShadow: '0 32px 64px rgba(0,0,0,0.2)', border: '1px solid var(--border)', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800 }}>Admin Data Override</h3>
+              <button 
+                onClick={() => setShowOverrideModal(false)} 
+                style={{ background: 'var(--bg-section)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)' }}
+              >
+                <XCircle size={18} />
+              </button>
+            </div>
+            
+            <form onSubmit={submitOverride} style={{ padding: '24px', overflowY: 'auto' }}>
+              {overrideError && <div style={{ background: 'var(--non-halal-bg)', color: 'var(--non-halal)', padding: '12px', borderRadius: '8px', fontSize: '0.88rem', marginBottom: '20px' }}>{overrideError}</div>}
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Total Assets</label>
+                  <input required type="number" step="any" value={overrideData.total_assets} onChange={e => setOverrideData({...overrideData, total_assets: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.88rem', outline: 'none' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Total Revenue</label>
+                  <input required type="number" step="any" value={overrideData.total_revenue} onChange={e => setOverrideData({...overrideData, total_revenue: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.88rem', outline: 'none' }} />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Total Debt</label>
+                  <input required type="number" step="any" value={overrideData.total_debt} onChange={e => setOverrideData({...overrideData, total_debt: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.88rem', outline: 'none' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Cash & Equivalents</label>
+                  <input required type="number" step="any" value={overrideData.cash} onChange={e => setOverrideData({...overrideData, cash: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.88rem', outline: 'none' }} />
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Interest / Non-Permissible Income</label>
+                <input required type="number" step="any" value={overrideData.interest_income} onChange={e => setOverrideData({...overrideData, interest_income: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.88rem', outline: 'none' }} />
+              </div>
+
+              <div style={{ marginBottom: '32px' }}>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Evidence / Reference Link (Required)</label>
+                <input required type="url" placeholder="https://..." value={overrideData.evidence_link} onChange={e => setOverrideData({...overrideData, evidence_link: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.88rem', outline: 'none' }} />
+                <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '6px' }}>Provide a link to the financial report or announcement justifying this override.</p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button type="button" onClick={() => setShowOverrideModal(false)} style={{ flex: 1, padding: '14px', borderRadius: '12px', background: 'var(--bg-section)', border: 'none', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer' }}>Cancel</button>
+                <button type="submit" disabled={overrideLoading} style={{ flex: 1.5, padding: '14px', borderRadius: '12px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 700, cursor: overrideLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {overrideLoading ? <div className="spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', borderColor: 'rgba(255,255,255,0.3)', borderTopColor: 'white' }} /> : 'Save & Recalculate'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>,
         document.body

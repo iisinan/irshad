@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Play, FileText, Download, ExternalLink, BookOpen, Search, X } from 'lucide-react';
-import api from '../services/api';
+import { Play, FileText, Download, ExternalLink, BookOpen, Search, X, Plus, Edit2, Trash2, CheckCircle } from 'lucide-react';
+import api, { createResource, updateResource, deleteResource } from '../services/api';
 import Footer from './Footer';
+import { useAuth } from '../context/AuthContext';
 
 export default function ResourcesPage() {
   const [search, setSearch] = useState('');
@@ -12,6 +13,12 @@ export default function ResourcesPage() {
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
   const firstRender = useRef(true);
+  const { user } = useAuth();
+  
+  const [showManageModal, setShowManageModal] = useState(false);
+  const [manageData, setManageData] = useState({ id: null, title: '', type: 'video', url: '', thumbnail: '', duration: '', category: '', scholar: '' });
+  const [manageLoading, setManageLoading] = useState(false);
+  const [manageError, setManageError] = useState('');
 
   useEffect(() => {
     const fetchResources = async () => {
@@ -40,6 +47,46 @@ export default function ResourcesPage() {
 
     return () => clearTimeout(timeoutId);
   }, [search, filter]);
+
+  const handleOpenManageModal = (item = null) => {
+    if (item) {
+      setManageData(item);
+    } else {
+      setManageData({ id: null, title: '', type: 'video', url: '', thumbnail: '', duration: '', category: '', scholar: '' });
+    }
+    setShowManageModal(true);
+  };
+
+  const handleSaveResource = async (e) => {
+    e.preventDefault();
+    setManageLoading(true);
+    setManageError('');
+    try {
+      if (manageData.id) {
+        await updateResource(manageData.id, manageData);
+      } else {
+        await createResource(manageData);
+      }
+      setShowManageModal(false);
+      window.location.reload();
+    } catch (err) {
+      setManageError(err.response?.data?.message || 'Failed to save resource');
+    } finally {
+      setManageLoading(false);
+    }
+  };
+
+  const handleDeleteResource = async (id, e) => {
+    e.stopPropagation();
+    if (window.confirm('Are you sure you want to delete this resource?')) {
+      try {
+        await deleteResource(id);
+        setResources(resources.filter(r => r.id !== id));
+      } catch (err) {
+        alert(err.response?.data?.message || 'Failed to delete resource');
+      }
+    }
+  };
 
   return (
     <>
@@ -107,6 +154,21 @@ export default function ResourcesPage() {
                     ))}
                   </div>
                 </div>
+                {user?.role === 'admin' && (
+                  <button 
+                    onClick={() => handleOpenManageModal()}
+                    style={{ 
+                      display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', 
+                      background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.3)', 
+                      borderRadius: '12px', cursor: 'pointer', fontWeight: 700, color: 'white', 
+                      transition: 'all 0.2s', marginTop: '10px'
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.3)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.2)'; }}
+                  >
+                    <Plus size={16} /> Add Resource
+                  </button>
+                )}
               </div>
             </div>
 
@@ -177,6 +239,17 @@ export default function ResourcesPage() {
                         </div>
                         {item.scholar}
                       </div>
+                      
+                      {user?.role === 'admin' && (
+                        <div style={{ display: 'flex', gap: '8px', marginTop: '16px', borderTop: '1px solid var(--border)', paddingTop: '16px' }} onClick={e => e.stopPropagation()}>
+                          <button onClick={() => handleOpenManageModal(item)} style={{ flex: 1, padding: '8px', borderRadius: '8px', background: 'var(--bg-section)', border: '1px solid var(--border)', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}>
+                            <Edit2 size={14} /> Edit
+                          </button>
+                          <button onClick={(e) => handleDeleteResource(item.id, e)} style={{ flex: 1, padding: '8px', borderRadius: '8px', background: 'var(--non-halal-bg)', border: '1px solid var(--non-halal)', color: 'var(--non-halal)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}>
+                            <Trash2 size={14} /> Delete
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -246,6 +319,77 @@ export default function ResourcesPage() {
           </div>
         </div>
       , document.body)}
+
+      {/* Admin Manage Resource Modal */}
+      {showManageModal && createPortal(
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000, padding: '24px' }}>
+          <div className="animate-fade-in" style={{ background: 'var(--bg)', borderRadius: '24px', width: '100%', maxWidth: '600px', overflow: 'hidden', boxShadow: '0 32px 64px rgba(0,0,0,0.2)', border: '1px solid var(--border)', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800 }}>{manageData.id ? 'Edit Resource' : 'Add Resource'}</h3>
+              <button 
+                onClick={() => setShowManageModal(false)} 
+                style={{ background: 'var(--bg-section)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)' }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleSaveResource} style={{ padding: '24px', overflowY: 'auto' }}>
+              {manageError && <div style={{ background: 'var(--non-halal-bg)', color: 'var(--non-halal)', padding: '12px', borderRadius: '8px', fontSize: '0.88rem', marginBottom: '20px' }}>{manageError}</div>}
+              
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Title</label>
+                <input required type="text" value={manageData.title} onChange={e => setManageData({...manageData, title: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.88rem', outline: 'none' }} />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Type</label>
+                  <select value={manageData.type} onChange={e => setManageData({...manageData, type: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.88rem', outline: 'none' }}>
+                    <option value="video">Video</option>
+                    <option value="document">Document</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Category</label>
+                  <input required type="text" value={manageData.category} onChange={e => setManageData({...manageData, category: e.target.value})} placeholder="e.g. Fiqh, Zakat" style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.88rem', outline: 'none' }} />
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>URL (Video / PDF Link)</label>
+                <input required type="url" value={manageData.url} onChange={e => setManageData({...manageData, url: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.88rem', outline: 'none' }} />
+              </div>
+
+              {manageData.type === 'video' && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Thumbnail URL</label>
+                    <input type="url" value={manageData.thumbnail || ''} onChange={e => setManageData({...manageData, thumbnail: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.88rem', outline: 'none' }} />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Duration</label>
+                    <input type="text" value={manageData.duration || ''} onChange={e => setManageData({...manageData, duration: e.target.value})} placeholder="e.g. 10:45" style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.88rem', outline: 'none' }} />
+                  </div>
+                </div>
+              )}
+
+              <div style={{ marginBottom: '32px' }}>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Scholar / Author</label>
+                <input required type="text" value={manageData.scholar} onChange={e => setManageData({...manageData, scholar: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.88rem', outline: 'none' }} />
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button type="button" onClick={() => setShowManageModal(false)} style={{ flex: 1, padding: '14px', borderRadius: '12px', background: 'var(--bg-section)', border: 'none', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer' }}>Cancel</button>
+                <button type="submit" disabled={manageLoading} style={{ flex: 1.5, padding: '14px', borderRadius: '12px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 700, cursor: manageLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {manageLoading ? <div className="spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', borderColor: 'rgba(255,255,255,0.3)', borderTopColor: 'white' }} /> : 'Save Resource'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>,
+        document.body
+      )}
     </>
   );
 }

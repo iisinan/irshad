@@ -136,6 +136,21 @@ Route::prefix('v1')->group(function () {
         Route::get('/notifications', function () {
             return response()->json(['data' => []]);
         });
+        
+        // ── Admin Routes ─────────────────────────────────────────────────────
+        Route::middleware(\App\Http\Middleware\AdminMiddleware::class)->group(function () {
+            // User Management
+            Route::get('/admin/users', [\App\Http\Controllers\AdminController::class, 'getUsers']);
+            Route::post('/admin/users', [\App\Http\Controllers\AdminController::class, 'createAdmin']);
+            
+            // AAOIFI Override
+            Route::put('/stocks/{symbol}/aaoifi', [StockController::class, 'updateAaoifi']);
+            
+            // Resource Management
+            Route::post('/resources', [\App\Http\Controllers\ResourceController::class, 'store']);
+            Route::put('/resources/{id}', [\App\Http\Controllers\ResourceController::class, 'update']);
+            Route::delete('/resources/{id}', [\App\Http\Controllers\ResourceController::class, 'destroy']);
+        });
     });
 
     // Public wildcard route placed after all other specific protected routes

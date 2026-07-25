@@ -290,6 +290,45 @@ export const fetchProducts = async () => {
 };
 
 // ==========================================
+// ADMIN ENDPOINTS
+// ==========================================
+
+export const fetchAdminUsers = async () => {
+  const response = await api.get('/admin/users');
+  return response.data;
+};
+
+export const createAdminUser = async (data) => {
+  const response = await api.post('/admin/users', data);
+  return response.data;
+};
+
+export const overrideStockStatus = async (symbol, data) => {
+  const response = await api.put(`/stocks/${symbol}/status`, data);
+  return response.data;
+};
+
+export const updateAaoifiData = async (symbol, data) => {
+  const response = await api.put(`/stocks/${symbol}/aaoifi`, data);
+  return response.data;
+};
+
+export const createResource = async (data) => {
+  const response = await api.post('/resources', data);
+  return response.data;
+};
+
+export const updateResource = async (id, data) => {
+  const response = await api.put(`/resources/${id}`, data);
+  return response.data;
+};
+
+export const deleteResource = async (id) => {
+  const response = await api.delete(`/resources/${id}`);
+  return response.data;
+};
+
+// ==========================================
 // MOCK ENDPOINTS FOR PUBLIC OVERVIEW DASHBOARD
 // ==========================================
 export const fetchOverviewStats = async () => {

@@ -19,6 +19,7 @@ const ShariahPage = React.lazy(() => import('./components/Shariah'));
 const ResourcesPage = React.lazy(() => import('./components/Resources'));
 const Profile = React.lazy(() => import('./components/Profile'));
 const AdminDashboard = React.lazy(() => import('./components/AdminDashboard'));
+const AdminUsers = React.lazy(() => import('./components/AdminUsers'));
 const RoleBasedDashboard = React.lazy(() => import('./components/RoleBasedDashboard'));
 const Pricing = React.lazy(() => import('./components/Pricing'));
 const LandingPage = React.lazy(() => import('./components/LandingPage'));
@@ -676,6 +677,9 @@ function App() {
                   <Route path="/market/:symbol/aaoifi" element={
                     <DashboardLayout><AaoifiScreening /></DashboardLayout>
                   } />
+                  <Route path="/admin/users" element={
+                    <DashboardLayout><AdminUsers /></DashboardLayout>
+                  } />
                   <Route path="/dashboard" element={
                     <DashboardLayout><RoleBasedDashboard /></DashboardLayout>
                   } />
@@ -685,7 +689,9 @@ function App() {
                   <Route path="/profile" element={
                     <DashboardLayout><Profile /></DashboardLayout>
                   } />
-                  <Route path="/admin" element={<AdminDashboard />} />
+                  <Route path="/admin" element={
+                    <DashboardLayout><AdminDashboard /></DashboardLayout>
+                  } />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/register" element={<RegisterPage />} />
                   <Route path="/forgot" element={<ForgotPasswordPage />} />

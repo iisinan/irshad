@@ -121,7 +121,7 @@ const AdminDashboard = () => {
         </div>
         
         {/* Tabs */}
-        <div style={{ display: 'flex', backgroundColor: '#F3F4F6', padding: '4px', borderRadius: '12px' }}>
+        <div style={{ display: 'flex', backgroundColor: 'var(--bg-section)', padding: '4px', borderRadius: '12px' }}>
             <button
               onClick={() => setActiveTab('stocks')}
               style={{
@@ -162,17 +162,20 @@ const AdminDashboard = () => {
             style={{
               width: '100%',
               padding: '12px 16px 12px 42px',
-              borderRadius: '8px',
-              border: '1px solid var(--border-color)',
-              fontSize: '13px'
+              borderRadius: '12px',
+              border: '1px solid var(--border)',
+              backgroundColor: 'var(--bg-section)',
+              color: 'var(--text-dark)',
+              fontSize: '13px',
+              outline: 'none'
             }}
           />
         </div>
       </div>
 
-      <div style={{ backgroundColor: 'var(--bg)', borderRadius: '12px', border: '1px solid var(--border-color)', overflowX: 'auto' }}>
+      <div style={{ backgroundColor: 'var(--bg)', borderRadius: '16px', border: '1px solid var(--border)', overflowX: 'auto', boxShadow: 'var(--shadow-sm)' }}>
         <table style={{ width: '100%', minWidth: '800px', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead style={{ backgroundColor: '#F9FAFB', borderBottom: '1px solid var(--border-color)' }}>
+          <thead style={{ backgroundColor: 'var(--bg-section)', borderBottom: '1px solid var(--border)' }}>
             <tr>
               <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
                   {activeTab === 'stocks' ? 'Company' : 'Product'}
@@ -197,7 +200,7 @@ const AdminDashboard = () => {
                                  status === 'non-halal' ? 'var(--non-halal)' : '#F59E0B';
               
               return (
-                <tr key={activeTab === 'stocks' ? item.symbol : item.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                <tr key={activeTab === 'stocks' ? item.symbol : item.id} style={{ borderBottom: '1px solid var(--border)' }}>
                   <td style={{ padding: '16px 24px' }}>
                     <div style={{ fontWeight: '700', color: 'var(--text-dark)' }}>
                         {activeTab === 'stocks' ? item.symbol : item.name}
@@ -233,10 +236,13 @@ const AdminDashboard = () => {
                       }}
                       style={{
                         display: 'flex', alignItems: 'center', gap: '6px',
-                        padding: '8px 12px', borderRadius: '6px',
-                        backgroundColor: '#F3F4F6', color: 'var(--text-dark)',
-                        border: 'none', cursor: 'pointer', fontWeight: '600', fontSize: '12px'
+                        padding: '8px 12px', borderRadius: '8px',
+                        backgroundColor: 'var(--bg-section)', color: 'var(--text-dark)',
+                        border: '1px solid var(--border)', cursor: 'pointer', fontWeight: '600', fontSize: '12px',
+                        transition: 'all 0.2s'
                       }}
+                      onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--bg)'; e.currentTarget.style.borderColor = 'var(--primary)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'var(--bg-section)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
                     >
                       <Edit2 size={14} /> Override
                     </button>
@@ -254,7 +260,7 @@ const AdminDashboard = () => {
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
           backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
         }}>
-          <div style={{ backgroundColor: 'var(--bg)', padding: '32px', borderRadius: '16px', width: '100%', maxWidth: '500px' }}>
+          <div className="animate-fade-in" style={{ backgroundColor: 'var(--bg)', padding: '32px', borderRadius: '24px', width: '100%', maxWidth: '500px', border: '1px solid var(--border)', boxShadow: '0 32px 64px rgba(0,0,0,0.2)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h2 style={{ margin: 0, fontSize: '18px' }}>
                   Override {selectedItem.type === 'stocks' ? selectedItem.data.symbol : selectedItem.data.name}
@@ -272,7 +278,7 @@ const AdminDashboard = () => {
                 <select 
                   value={newStatus}
                   onChange={(e) => setNewStatus(e.target.value)}
-                  style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px' }}
+                  style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', backgroundColor: 'var(--bg-section)', color: 'var(--text-dark)', fontSize: '13px', outline: 'none' }}
                 >
                   <option value="halal">Halal</option>
                   <option value="doubtful">Doubtful</option>
@@ -289,7 +295,7 @@ const AdminDashboard = () => {
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="Explain why the algorithmic status is being overridden..."
-                  style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px', minHeight: '100px' }}
+                  style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', backgroundColor: 'var(--bg-section)', color: 'var(--text-dark)', fontSize: '13px', minHeight: '100px', outline: 'none' }}
                 />
               </div>
 
@@ -297,14 +303,14 @@ const AdminDashboard = () => {
                 <button 
                   type="button" 
                   onClick={() => setSelectedItem(null)}
-                  style={{ padding: '12px 24px', borderRadius: '8px', backgroundColor: '#F3F4F6', color: 'var(--text-dark)', border: 'none', fontWeight: '600', cursor: 'pointer' }}
+                  style={{ padding: '12px 24px', borderRadius: '12px', backgroundColor: 'var(--bg-section)', color: 'var(--text-muted)', border: 'none', fontWeight: '700', cursor: 'pointer' }}
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
                   disabled={updating || !reason}
-                  style={{ padding: '12px 24px', borderRadius: '8px', backgroundColor: 'var(--primary-green)', color: 'var(--bg)', border: 'none', fontWeight: '600', cursor: 'pointer', opacity: (updating || !reason) ? 0.5 : 1 }}
+                  style={{ padding: '12px 24px', borderRadius: '12px', backgroundColor: 'var(--primary)', color: 'white', border: 'none', fontWeight: '700', cursor: 'pointer', opacity: (updating || !reason) ? 0.5 : 1 }}
                 >
                   {updating ? 'Saving...' : 'Confirm Override'}
                 </button>

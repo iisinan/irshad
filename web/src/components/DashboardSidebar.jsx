@@ -6,7 +6,7 @@ import {
   BarChart2, Briefcase, Star, Activity,
   HeartHandshake, Calculator, BookOpen,
   User, LogOut, ChevronLeft, ChevronRight,
-  X, Moon, Sun, LayoutDashboard
+  X, Moon, Sun, LayoutDashboard, Shield
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -15,20 +15,30 @@ const NAV_ITEMS = [
   { label: 'Holdings',       icon: Activity,         to: '/portfolio#holdings',  id: 'tour-nav-holdings' },
   { label: 'Market Screener', icon: BarChart2,        to: '/portfolio#market', id: 'tour-nav-market' },
   { label: 'Watchlist',      icon: Star,             to: '/portfolio#watchlist', id: 'tour-nav-watchlist' },
-  { label: 'Thematic Baskets',icon: Briefcase,       to: '/portfolio#baskets', id: 'tour-nav-baskets' },
-  { section: 'Islamic Finance' },
-  { label: 'Purification',   icon: HeartHandshake,   to: '/portfolio#purification', id: 'tour-nav-purification' },
-  { label: 'Zakat',          icon: Calculator,        to: '/portfolio#zakat', id: 'tour-nav-zakat' },
-  { label: 'Resources',      icon: BookOpen,          to: '/portfolio#lectures', id: 'tour-nav-resources' },
-  { section: 'Account' },
-  { label: 'Profile & Settings', icon: User,              to: '/profile', id: 'tour-nav-profile' },
-];
-
 export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
+
+  const NAV_ITEMS = [
+    { section: 'Main' },
+    { label: 'Overview',       icon: LayoutDashboard,  to: '/dashboard',           id: 'tour-nav-overview' },
+    { label: 'Holdings',       icon: Activity,         to: '/portfolio#holdings',  id: 'tour-nav-holdings' },
+    { label: 'Market Screener', icon: BarChart2,        to: '/portfolio#market', id: 'tour-nav-market' },
+    { label: 'Watchlist',      icon: Star,             to: '/portfolio#watchlist', id: 'tour-nav-watchlist' },
+    { label: 'Thematic Baskets',icon: Briefcase,       to: '/portfolio#baskets', id: 'tour-nav-baskets' },
+    { section: 'Islamic Finance' },
+    { label: 'Purification',   icon: HeartHandshake,   to: '/portfolio#purification', id: 'tour-nav-purification' },
+    { label: 'Zakat',          icon: Calculator,        to: '/portfolio#zakat', id: 'tour-nav-zakat' },
+    { label: 'Resources',      icon: BookOpen,          to: '/portfolio#lectures', id: 'tour-nav-resources' },
+    { section: 'Account' },
+    ...(user?.role === 'admin' ? [
+      { label: 'Admin Dashboard', icon: Shield, to: '/admin', id: 'tour-nav-admin-dashboard' },
+      { label: 'Users', icon: User, to: '/admin/users', id: 'tour-nav-users' }
+    ] : []),
+    { label: 'Profile & Settings', icon: User,              to: '/profile', id: 'tour-nav-profile' },
+  ];
 
   // On mobile, the drawer is ALWAYS fully expanded (text visible).
   const isCollapsed = collapsed && !mobileOpen;

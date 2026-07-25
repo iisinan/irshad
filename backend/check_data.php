@@ -1,19 +1,19 @@
 <?php
-require __DIR__.'/vendor/autoload.php';
-$app = require_once __DIR__.'/bootstrap/app.php';
-$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+$screenings = DB::table('financial_screenings')->get();
+$missing_count = 0;
+$found_count = 0;
+$zero_revenue_count = 0;
 
-$total = App\Models\Company::count();
-$withData = App\Models\Company::has('financials')->count();
-$missing = $total - $withData;
-$missingCompanies = App\Models\Company::doesntHave('financials')->pluck('symbol')->toArray();
-
-echo "Total Companies: $total\n";
-echo "Successfully Extracted: $withData\n";
-echo "Missing Data: $missing\n";
-
-if ($missing > 0 && $missing <= 150) {
-    echo "Missing symbols: " . implode(', ', $missingCompanies) . "\n";
-} elseif ($missing > 150) {
-    echo "First 150 missing: " . implode(', ', array_slice($missingCompanies, 0, 150)) . "\n";
+foreach ($screenings as $s) {
+    if (!$s->chosen_values) continue;
+    $data = json_decode($s->chosen_values, true);
+    if (!isset($data['total_revenue'])) continue;
+    
+    if (isset($data['total_revenue']['value']) && $data['total_revenue']['value'] > 0) {
+        $found_count++;
+    } else {
+        $zero_revenue_count++;
+    }
 }
+echo "Total with data: $found_count\n";
+echo "Total with zero revenue: $zero_revenue_count\n";

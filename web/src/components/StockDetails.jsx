@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2, Brain, Globe, Newspaper, Bell, X, ShieldCheck, XCircle, AlertTriangle, Star } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import api, { fetchStockDetails, fetchAiAnalysis, setPriceAlert, formatLogoUrl, fetchWatchlist, addToWatchlist, removeFromWatchlist } from '../services/api';
+import api, { fetchStockDetails, fetchAiAnalysis, setPriceAlert, formatLogoUrl, fetchWatchlist, addToWatchlist, removeFromWatchlist, overrideStockStatus } from '../services/api';
 import ReactMarkdown from 'react-markdown';
 import { useAuth } from '../context/AuthContext';
 const StockDetails = ({ symbol: propSymbol }) => {
@@ -30,6 +30,14 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const [alertSaving, setAlertSaving] = useState(false);
   const [inWatchlist, setInWatchlist] = useState(false);
   const [watchlistLoading, setWatchlistLoading] = useState(false);
+
+  // Admin Override State
+  const [showStatusOverrideModal, setShowStatusOverrideModal] = useState(false);
+  const [overrideStatus, setOverrideStatus] = useState('');
+  const [overrideReason, setOverrideReason] = useState('');
+  const [overrideEvidence, setOverrideEvidence] = useState('');
+  const [overrideSaving, setOverrideSaving] = useState(false);
+  const [overrideError, setOverrideError] = useState('');
 
   useEffect(() => {
     // Always fetch full data in background; merge so we add financials & chart
@@ -322,6 +330,26 @@ const StockDetails = ({ symbol: propSymbol }) => {
                 <span className={`status-badge ${badgeClass}`} style={{ fontSize: '0.66rem', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
                   <StatusIcon size={12} /> {statusStr}
                 </span>
+                {user?.role === 'admin' && (
+                  <button 
+                    onClick={() => {
+                      setOverrideStatus(rawStatus?.status?.toLowerCase() || (typeof rawStatus === 'string' ? rawStatus.toLowerCase() : 'doubtful'));
+                      setOverrideReason(rawStatus?.reason || '');
+                      setOverrideEvidence(stock.evidence_link || '');
+                      setShowStatusOverrideModal(true);
+                    }}
+                    style={{
+                      background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)',
+                      color: 'white', padding: '4px 8px', borderRadius: '8px', fontSize: '0.66rem',
+                      fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s',
+                      display: 'flex', alignItems: 'center', gap: '4px'
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.25)' }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.15)' }}
+                  >
+                    <ShieldCheck size={12} /> Edit Status
+                  </button>
+                )}
               </div>
               <p style={{ color: 'rgba(255,255,255,0.65)', fontWeight: 600, marginTop: '6px', letterSpacing: '0.5px' }}>
                 {stock.symbol} · {stock.sector ?? 'Market Listed'} · Stock Exchange
@@ -738,6 +766,84 @@ const StockDetails = ({ symbol: propSymbol }) => {
                 <button type="button" onClick={() => setShowAlertDialog(false)} style={{ flex:1, padding:'14px', borderRadius:'12px', background:'var(--bg-alt)', border:'1px solid var(--border)', color:'var(--text-muted)', fontWeight:700, fontSize: '0.79rem', cursor:'pointer' }}>Cancel</button>
                 <button type="submit" disabled={alertSaving} style={{ flex:1.5, padding:'14px', borderRadius:'12px', background:'var(--primary)', border:'none', color:'var(--bg)', fontWeight:700, fontSize: '0.79rem', cursor:alertSaving ? 'not-allowed' : 'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', boxShadow:'0 8px 20px rgba(15, 82, 87, 0.2)' }}>
                   {alertSaving ? <div className="spinner" style={{ width:'16px', height:'16px', borderTopColor:'white' }}/> : 'Save Alert'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ─── Admin Status Override Modal ─── */}
+      {showStatusOverrideModal && createPortal(
+        <div className="animate-fade-in" style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.6)', backdropFilter:'blur(8px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:100000, padding:'24px' }}>
+          <div style={{ background: 'var(--bg)', borderRadius:'24px', width:'100%', maxWidth:'500px', boxShadow:'0 32px 64px rgba(0,0,0,0.2)', border: '1px solid var(--border)', overflow:'hidden', animation:'slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'24px', borderBottom:'1px solid var(--border)', background: 'var(--bg-section)' }}>
+              <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight:800, color:'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <ShieldCheck size={20} color="var(--primary)" /> Admin Override Status
+              </h3>
+              <button onClick={() => setShowStatusOverrideModal(false)} style={{ background:'var(--bg)', border:'none', width:'32px', height:'32px', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--text-muted)', cursor:'pointer' }}><X size={16}/></button>
+            </div>
+            
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              setOverrideSaving(true);
+              setOverrideError('');
+              try {
+                await overrideStockStatus(symbol, {
+                  status: overrideStatus,
+                  reason: overrideReason,
+                  evidence_link: overrideEvidence
+                });
+                setShowStatusOverrideModal(false);
+                window.location.reload();
+              } catch (err) {
+                setOverrideError(err.response?.data?.message || 'Failed to override status');
+              } finally {
+                setOverrideSaving(false);
+              }
+            }} style={{ padding: '24px', maxHeight: '70vh', overflowY: 'auto' }}>
+              {overrideError && <div style={{ background: 'var(--non-halal-bg)', color: 'var(--non-halal)', padding: '12px', borderRadius: '8px', fontSize: '0.88rem', marginBottom: '20px' }}>{overrideError}</div>}
+              
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display:'block', fontSize:'0.75rem', fontWeight:700, color:'var(--text-muted)', marginBottom:'8px', textTransform:'uppercase', letterSpacing:'0.5px' }}>Shariah Status</label>
+                <select 
+                  value={overrideStatus}
+                  onChange={e => setOverrideStatus(e.target.value)}
+                  style={{ width:'100%', padding:'12px', borderRadius:'12px', border:'1px solid var(--border)', background:'var(--bg-section)', fontSize:'0.88rem', fontWeight:600, outline:'none' }}
+                >
+                  <option value="halal">Halal</option>
+                  <option value="doubtful">Doubtful</option>
+                  <option value="non-halal">Non-Halal</option>
+                </select>
+              </div>
+
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display:'block', fontSize:'0.75rem', fontWeight:700, color:'var(--text-muted)', marginBottom:'8px', textTransform:'uppercase', letterSpacing:'0.5px' }}>Reasoning / Notes</label>
+                <textarea 
+                  value={overrideReason}
+                  onChange={e => setOverrideReason(e.target.value)}
+                  placeholder="Explain why this status is being overridden..."
+                  rows={4}
+                  style={{ width:'100%', padding:'12px', borderRadius:'12px', border:'1px solid var(--border)', background:'var(--bg-section)', fontSize:'0.88rem', outline:'none', resize: 'vertical' }}
+                />
+              </div>
+
+              <div style={{ marginBottom: '32px' }}>
+                <label style={{ display:'block', fontSize:'0.75rem', fontWeight:700, color:'var(--text-muted)', marginBottom:'8px', textTransform:'uppercase', letterSpacing:'0.5px' }}>Evidence / Reference Link</label>
+                <input 
+                  type="url"
+                  value={overrideEvidence}
+                  onChange={e => setOverrideEvidence(e.target.value)}
+                  placeholder="https://..."
+                  style={{ width:'100%', padding:'12px', borderRadius:'12px', border:'1px solid var(--border)', background:'var(--bg-section)', fontSize:'0.88rem', outline:'none' }}
+                />
+              </div>
+
+              <div style={{ display:'flex', gap:'12px' }}>
+                <button type="button" onClick={() => setShowStatusOverrideModal(false)} style={{ flex:1, padding:'14px', borderRadius:'12px', background:'var(--bg-section)', border:'none', color:'var(--text-muted)', fontWeight:700, cursor:'pointer' }}>Cancel</button>
+                <button type="submit" disabled={overrideSaving} style={{ flex:1.5, padding:'14px', borderRadius:'12px', background:'var(--primary)', border:'none', color:'white', fontWeight:700, cursor:overrideSaving ? 'not-allowed' : 'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                  {overrideSaving ? <div className="spinner" style={{ width:'16px', height:'16px', borderWidth: '2px', borderColor: 'rgba(255,255,255,0.3)', borderTopColor: 'white' }}/> : 'Save Override'}
                 </button>
               </div>
             </form>

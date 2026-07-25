@@ -51,6 +51,12 @@ class ProcessCompanyScreening implements ShouldQueue
 
         Log::info("Starting background screening for {$this->ticker}");
 
+        // Get the latest manual override before the AI runs
+        $manualOverride = \App\Models\FinancialScreening::where('company_ticker', $this->ticker)
+            ->where('is_manual_override', true)
+            ->latest()
+            ->first();
+
         // Use env var so it works locally and on Render (defaults to 8000)
         $aiUrl = env('AI_ENGINE_URL', 'http://127.0.0.1:8000');
         $response = Http::timeout(900)->post("{$aiUrl}/api/screen-company/{$this->ticker}?financial_year={$targetYear}");
@@ -69,6 +75,42 @@ class ProcessCompanyScreening implements ShouldQueue
             ]);
             Log::info("Report not found for {$this->ticker}. Set to awaiting_report.");
             return;
+        }
+
+        // AI Engine inserted a new row. Let's get the latest row.
+        $newScreening = \App\Models\FinancialScreening::where('company_ticker', $this->ticker)
+            ->latest()
+            ->first();
+
+        if ($manualOverride && $newScreening && $newScreening->id !== $manualOverride->id) {
+            // A manual override existed, and the AI just inserted a new row.
+            // We should flag the new row for review and keep the manual override active.
+            $newScreening->requires_manual_review = true;
+            $newScreening->save();
+
+            // We must update the manual override's created_at so it remains the "latest" active one
+            // OR we can just rely on the controller logic to prioritize `is_manual_override`.
+            // Let's just update the manual override's created_at to now + 1 second so it stays on top!
+            $manualOverride->created_at = now()->addSeconds(5);
+            $manualOverride->save();
+
+            // Send notification to Admins
+            $admins = \App\Models\User::where('role', 'admin')->get();
+            foreach ($admins as $admin) {
+                // Laravel Notification or raw mail (we'll just use basic mail logic here, assuming a Mailable exists or raw)
+                try {
+                    \Illuminate\Support\Facades\Mail::raw(
+                        "New financial data was automatically pulled for {$this->ticker}. However, because this stock has a manual admin override, the new data has been flagged for review. Please log in to the admin panel to review and approve the new data.",
+                        function ($message) use ($admin, $this) {
+                            $message->to($admin->email)
+                                ->subject("Review Required: New Data for {$this->ticker}");
+                        }
+                    );
+                } catch (\Exception $e) {
+                    Log::error("Failed to send override review email to {$admin->email}: " . $e->getMessage());
+                }
+            }
+            Log::info("Flagged new data for {$this->ticker} for manual review because an admin override exists.");
         }
 
         $status->update(['status' => 'available']);

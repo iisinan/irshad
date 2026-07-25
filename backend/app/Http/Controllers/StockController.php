@@ -226,6 +226,91 @@ class StockController extends Controller
     }
 
     /**
+     * Admin override for stock AAOIFI financial data.
+     */
+    public function updateAaoifi(Request $request, string $symbol): JsonResponse
+    {
+        $request->validate([
+            'total_debt' => 'required|numeric',
+            'cash' => 'required|numeric',
+            'interest_income' => 'required|numeric',
+            'evidence_link' => 'nullable|url'
+        ]);
+
+        $company = Company::where('symbol', $symbol)->firstOrFail();
+        
+        $screening = \App\Models\FinancialScreening::where('company_ticker', $symbol)
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        if (!$screening) {
+            return $this->error('No existing screening found to override. Please run a screening first.', 404);
+        }
+
+        $chosen = $screening->chosen_values ?? [];
+        $chosen['total_debt'] = ['value' => $request->total_debt, 'source' => 'Manual Admin Override'];
+        $chosen['cash_and_equivalents'] = ['value' => $request->cash, 'source' => 'Manual Admin Override'];
+        $chosen['interest_income'] = ['value' => $request->interest_income, 'source' => 'Manual Admin Override'];
+        // Default some optional values if provided, else keep existing
+        if ($request->has('total_assets')) {
+            $chosen['total_assets'] = ['value' => $request->total_assets, 'source' => 'Manual Admin Override'];
+        }
+        if ($request->has('total_revenue')) {
+            $chosen['total_revenue'] = ['value' => $request->total_revenue, 'source' => 'Manual Admin Override'];
+        }
+
+        $screening->chosen_values = $chosen;
+
+        // Recalculate Ratios
+        $calc = $screening->calculation_results ?? [];
+        $ratios = $calc['ratios'] ?? [];
+        $status = $calc['status'] ?? [];
+
+        $marketCap = $company->market_cap > 0 ? $company->market_cap : 1;
+        $revenue = ($chosen['total_revenue']['value'] ?? 0) > 0 ? $chosen['total_revenue']['value'] : $marketCap;
+
+        $ratios['interest_bearing_debt_ratio'] = ($request->total_debt / $marketCap);
+        $ratios['cash_and_equivalents_ratio'] = ($request->cash / $marketCap);
+        $ratios['non_permissible_income_ratio'] = ($request->interest_income / $revenue);
+
+        $status['debt_pass'] = $ratios['interest_bearing_debt_ratio'] < 0.30;
+        $status['cash_pass'] = $ratios['cash_and_equivalents_ratio'] < 0.30;
+        $status['income_pass'] = $ratios['non_permissible_income_ratio'] < 0.05;
+
+        $calc['ratios'] = $ratios;
+        $calc['status'] = $status;
+        $calc['overall_financial_pass'] = $status['debt_pass'] && $status['cash_pass'] && $status['income_pass'];
+
+        $screening->calculation_results = $calc;
+        $screening->is_manual_override = true;
+        if ($request->filled('evidence_link')) {
+            $screening->evidence_link = $request->evidence_link;
+        }
+        $screening->save();
+
+        // Also update the financials table so normal checks see it
+        $financial = \App\Models\Financial::where('company_id', $company->id)->latest()->first();
+        if ($financial) {
+            $financial->update([
+                'total_debt' => $request->total_debt,
+                'cash_and_equivalents' => $request->cash,
+                'interest_income' => $request->interest_income,
+            ]);
+        }
+
+        // Trigger compliance re-eval (which updates the stock status on the dashboard)
+        if ($financial) {
+            $this->complianceService->evaluateCompliance($company, $financial, $company->sector);
+        }
+
+        \Illuminate\Support\Facades\Cache::forget('stocks.index');
+        \Illuminate\Support\Facades\Cache::forget('stocks.ngx');
+        \Illuminate\Support\Facades\Cache::forget("stocks.show.{$symbol}");
+
+        return $this->success($screening, 'Financial data updated manually.');
+    }
+
+    /**
      * Ask Gemini AI for a plain-English explanation of the stock's compliance status.
      */
     public function getAiAnalysis(string $symbol, \App\Services\GeminiAiService $aiService): JsonResponse
