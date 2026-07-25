@@ -31,13 +31,15 @@ async def screen_company(ticker: str, financial_year: int = 2025, db: AsyncSessi
         "annual_report_url": None,
         "pdf_path": None,
         "raw_pdf_extraction": {},
-        "secondary_sources_data": {},
+        "business_intelligence": {},
+        "cross_verified_data": {},
         "normalized_data": {},
-        "final_chosen_values": {},
-        "confidence_score": 0.0,
+        "confidence_score": 0,
+        "confidence_breakdown": {},
         "source_urls": {},
         "calculation_results": {},
         "ai_explanation": None,
+        "skip_financials": False,
         "error": None
     }
     
@@ -49,9 +51,9 @@ async def screen_company(ticker: str, financial_year: int = 2025, db: AsyncSessi
             raise HTTPException(status_code=500, detail=result_state["error"])
 
         # Determine if we need to fallback to 2025
-        final_values = result_state.get("final_chosen_values", {})
-        bus_result = result_state.get("business_screening_result", {})
-        business_failed = bus_result and bus_result.get("business_compliance_status") == "Non-Compliant"
+        final_values = result_state.get("cross_verified_data", {})
+        bus_result = result_state.get("business_intelligence", {})
+        business_failed = bus_result and bus_result.get("verdict") == "Non-Compliant"
         
         # Did it fail to find financials, but the business isn't non-compliant?
         if not final_values and not business_failed:
@@ -63,9 +65,9 @@ async def screen_company(ticker: str, financial_year: int = 2025, db: AsyncSessi
                 if result_state.get("error"):
                     raise HTTPException(status_code=500, detail=result_state["error"])
                     
-                final_values = result_state.get("final_chosen_values", {})
-                bus_result = result_state.get("business_screening_result", {})
-                business_failed = bus_result and bus_result.get("business_compliance_status") == "Non-Compliant"
+                final_values = result_state.get("cross_verified_data", {})
+                bus_result = result_state.get("business_intelligence", {})
+                business_failed = bus_result and bus_result.get("verdict") == "Non-Compliant"
             
         # Extract results
         calc_results = result_state.get("calculation_results", {})
@@ -109,17 +111,17 @@ async def screen_company(ticker: str, financial_year: int = 2025, db: AsyncSessi
                 financial_year=final_financial_year,
                 published_date=pub_date_obj,
                 report_quarter=result_state.get("raw_pdf_extraction", {}).get("reporting_period"),
-                raw_source_values=sanitize_json(result_state.get("secondary_sources_data", {})),
+                raw_source_values=sanitize_json(result_state.get("raw_pdf_extraction", {})),
                 normalized_values=sanitize_json(result_state.get("normalized_data", {})),
                 chosen_values=sanitize_json(final_values),
-                confidence_score=result_state.get("confidence_score", 0.0),
+                confidence_score=result_state.get("confidence_score", 0),
                 source_urls=sanitize_json(result_state.get("source_urls", {})),
                 calculation_results=sanitize_json(calc_results),
                 ai_explanation=result_state.get("ai_explanation", "")
             )
             db.add(screening)
         
-        bus_result = result_state.get("business_screening_result", {})
+        bus_result = result_state.get("business_intelligence", {})
         if bus_result:
             timestamp_str = bus_result.get("last_analysed_timestamp")
             timestamp_obj = None
@@ -141,8 +143,8 @@ async def screen_company(ticker: str, financial_year: int = 2025, db: AsyncSessi
                 source_urls=sanitize_json(bus_result.get("source_urls")),
                 source_publication_dates=sanitize_json(bus_result.get("source_publication_dates")),
                 ai_explanation=bus_result.get("ai_explanation"),
-                confidence_score=bus_result.get("confidence_score", 0.0),
-                business_compliance_status=bus_result.get("business_compliance_status"),
+                confidence_score=bus_result.get("confidence_score", 0),
+                business_compliance_status=bus_result.get("verdict"),
                 last_analysed_timestamp=timestamp_obj
             )
             db.add(bus_screening)
@@ -165,11 +167,11 @@ async def screen_company(ticker: str, financial_year: int = 2025, db: AsyncSessi
             "company": result_state.get("company_name", ticker),
             "ticker": ticker.upper(),
             "financial_year": financial_year,
-            "confidence": result_state.get("confidence_score", 0.0),
+            "confidence": result_state.get("confidence_score", 0),
             "sources": result_state.get("source_urls", {}),
             "financials": final_values,
             "aaoifi": {
-                "business_activity": bus_result.get("business_compliance_status", "PASS") if bus_result else "PASS", 
+                "business_activity": bus_result.get("verdict", "PASS") if bus_result else "PASS", 
                 "interest_debt_ratio": raw_ratios.get("interest_bearing_debt_ratio", 0),
                 "interest_income_ratio": raw_ratios.get("non_permissible_income_ratio", 0),
                 "cash_ratio": raw_ratios.get("cash_and_equivalents_ratio", 0),

@@ -1,198 +1,186 @@
 import os
-import tempfile
-import time
 import httpx
+import tempfile
 from sqlalchemy.future import select
 from app.graph.state import GraphState
-from app.tools.pdf_extractor import PDFExtractor
-from app.tools.apify_client import FinancialScraper, AlphaVantageClient, FMPClient
-from app.core.storage_client import StorageClient
-from app.core.database import AsyncSessionLocal
-from app.models.companies import Company
-from app.models.financial_documents import FinancialDocument
-
-async def search_company(state: GraphState) -> GraphState:
-    # 1. Search Company Node
-    ticker = state["ticker"]
-    async with AsyncSessionLocal() as db:
-        result = await db.execute(select(Company).where(Company.ticker == ticker))
-        company = result.scalars().first()
-        if company:
-            state["company_name"] = company.name
-        else:
-            print(f"Company {ticker} not found in DB. Falling back to ticker as name.")
-            state["company_name"] = ticker
-            
-    return state
-
-from app.models.financial_screening import FinancialScreening
-from sqlalchemy import select, func
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.core.database import AsyncSessionLocal
-
-async def check_financial_cache(state: GraphState) -> GraphState:
-    """
-    Checks the database to see the most recent financial year we have processed.
-    Sets the target year to the next logical year.
-    If we are up to date, it doesn't skip yet, it just sets the target year to search for.
-    """
-    async with AsyncSessionLocal() as db:
-        result = await db.execute(
-            select(FinancialScreening)
-            .where(FinancialScreening.company_ticker == state["ticker"])
-            .order_by(FinancialScreening.financial_year.desc())
-            .limit(1)
-        )
-        recent_fin = result.scalars().first()
-        
-        if recent_fin:
-            # Store the existing business info in case we don't find a new PDF
-            existing_activities = recent_fin.chosen_values.get("principal_activities", "")
-            existing_segments = recent_fin.chosen_values.get("business_segments", [])
-            state["raw_pdf_extraction"] = {
-                "principal_activities": existing_activities,
-                "business_segments": existing_segments
-            }
-            # We flag that we have a fallback
-            state["has_fallback_business_info"] = True
-        else:
-            # No historical data, fallback to the requested year (e.g. 2024)
-            state["has_fallback_business_info"] = False
-            
-    return state
-
-async def fetch_perplexity_data(state: GraphState) -> GraphState:
-    from app.tools.perplexity_client import PerplexityClient
-    import time
-    
-    client = PerplexityClient()
-    start_time = time.perf_counter()
-    extracted_data = await client.fetch_comprehensive_data(
-        state.get("company_name", state["ticker"]), 
-        state.get("financial_year", 2026)
-    )
-    elapsed = time.perf_counter() - start_time
-    print(f"[Observability] fetch_perplexity_data took {elapsed:.2f} seconds")
-    
-    if extracted_data:
-        # Populate financials
-        if "financials" in extracted_data:
-            state["raw_pdf_extraction"] = extracted_data["financials"]
-            state["is_bank"] = extracted_data.get("business_activities", {}).get("is_bank_or_financial", False)
-            
-        # Populate business screening
-        if "business_activities" in extracted_data or "latest_news" in extracted_data:
-            state["business_screening_result"] = {
-                "business_compliance_status": extracted_data.get("business_activities", {}).get("verdict", "Questionable"),
-                "business_compliance_reasoning": extracted_data.get("business_activities", {}).get("verdict_reasoning", "No reasoning provided"),
-                "latest_news": extracted_data.get("latest_news", [])
-            }
-            
-            # If strictly non-compliant based on business, we skip financials downstream
-            if state["business_screening_result"]["business_compliance_status"] == "Non-Compliant":
-                print(f"[{state['ticker']}] Business screening failed via Perplexity. Skipping financial math.")
-                state["skip_financials"] = True
-
-        # Populate sources
-        if "source_urls" not in state:
-            state["source_urls"] = {}
-        if "source_urls" in extracted_data:
-            state["source_urls"].update(extracted_data["source_urls"])
-            
-    else:
-        print("Perplexity failed to fetch data.")
-        state["skip_financials"] = True
-
-    return state
-
-async def collect_multiple_sources(state: GraphState) -> GraphState:
-    # 5. Fetch from secondary APIs/websites for Validation (Stock Prices/AlphaVantage etc)
-    validation_data = {}
-    
-    from app.tools.apify_client import AlphaVantageClient, FMPClient
-    
-    # Try Alpha Vantage
-    av_client = AlphaVantageClient()
-    av_data = await av_client.fetch_financials(state["ticker"])
-    if av_data:
-        validation_data["alpha_vantage"] = av_data
-
-    # Try FMP
-    fmp_client = FMPClient()
-    fmp_data = await fmp_client.fetch_financials(state["ticker"])
-    if fmp_data:
-        validation_data["fmp"] = fmp_data
-
-    if validation_data:
-        state["secondary_source_data"] = validation_data
-    return state
-
+from app.tools.apify_client import FinancialScraper
+from app.tools.perplexity_client import PerplexityClient
+from app.tools.gemini_client import GeminiClient
+from app.tools.storage_r2 import CloudflareR2Client
+from app.core.cross_verifier import CrossVerifier
 from app.tools.normalizer import Normalizer
 from app.tools.aaoifi_calculator import AAOIFICalculator
-
-async def normalize_data(state: GraphState) -> GraphState:
-    # 6. Deterministic Normalization
-    if state.get("skip_financials"):
-        return state
-    raw_pdf_data = state.get("raw_pdf_extraction", {})
-    if raw_pdf_data:
-        state["normalized_data"] = {
-            "pdf_source": Normalizer.normalize(raw_pdf_data)
-        }
-    return state
-
-async def validate_and_resolve(state: GraphState) -> GraphState:
-    # 7. Compare sources, resolve conflicts, calculate confidence
-    if state.get("skip_financials"):
-        return state
-    pdf_normalized = state.get("normalized_data", {}).get("pdf_source", {})
-    if pdf_normalized:
-        state["final_chosen_values"] = pdf_normalized
-        
-        # Check if we have secondary validation data
-        secondary_data = state.get("secondary_source_data", {})
-        if secondary_data:
-            print("Validation secondary data present. Cross-referencing...")
-            state["confidence_score"] = 92.0 # Adjusted after validation
-        else:
-            state["confidence_score"] = 99.0 # We trust the Perplexity output solely
-            
-    return state
-
-async def calculate_aaoifi(state: GraphState) -> GraphState:
-    # 8. Deterministic AAOIFI Math Engine
-    if state.get("skip_financials"):
-        return state
-    final_values = state.get("final_chosen_values", {})
-    if final_values:
-        market_cap_dict = final_values.get("market_cap", {})
-        if isinstance(market_cap_dict, dict) and market_cap_dict.get("value"):
-            market_cap = float(market_cap_dict.get("value", 0.0))
-        else:
-            market_cap = state.get("market_cap", 0.0) or 0.0
-            
-        company_type = "bank" if state.get("is_bank", False) else "standard"
-        print(f"[AAOIFI] company_type={company_type}, market_cap={market_cap:,.0f}")
-        state["calculation_results"] = AAOIFICalculator.calculate(
-            final_values,
-            market_cap=market_cap,
-            company_type=company_type
-        )
-    return state
-
+from app.core.database import AsyncSessionLocal
+from app.models.companies import Company
+from app.models.financial_screening import FinancialScreening
 from app.tools.ai_explainer import AIExplainer
 
-async def generate_explanation(state: GraphState) -> GraphState:
-    # 9. LLM Explanation of deterministic results
-    if state.get("skip_financials"):
-        return state
-    calc_results = state.get("calculation_results", {})
-    if calc_results:
-        explainer = AIExplainer()
-        explanation = explainer.generate_explanation(state.get("company_name", state["ticker"]), calc_results)
-        state["ai_explanation"] = explanation
+# 1. Initialise & 2. Check Cache
+async def initialise_and_check_cache(state: GraphState) -> GraphState:
+    ticker = state["ticker"]
+    financial_year = state.get("financial_year", 2026)
+    
+    async with AsyncSessionLocal() as db:
+        # Get Company
+        result = await db.execute(select(Company).where(Company.ticker == ticker))
+        company = result.scalars().first()
+        state["company_name"] = company.name if company else ticker
+        state["company_id"] = company.id if company else None
+        
+        # Check Cache for the given financial year
+        result_fin = await db.execute(
+            select(FinancialScreening)
+            .where(FinancialScreening.company_ticker == ticker, FinancialScreening.financial_year == financial_year)
+            .order_by(FinancialScreening.id.desc())
+            .limit(1)
+        )
+        recent_fin = result_fin.scalars().first()
+        if recent_fin and recent_fin.chosen_values:
+            state["existing_financial_data"] = recent_fin.chosen_values
+        else:
+            state["existing_financial_data"] = None
+            
     return state
 
-async def store_results(state: GraphState) -> GraphState:
-    # 11. Store to PostgreSQL (moved to endpoint for now)
+# 3. Collect Business Intelligence & 12. Business News (Combined for efficiency using Perplexity)
+async def collect_business_intelligence(state: GraphState) -> GraphState:
+    client = PerplexityClient()
+    # We will adjust the perplexity client later to only return business info/news
+    extracted_data = await client.fetch_comprehensive_data(
+        state["company_name"], state.get("financial_year", 2026)
+    )
+    if extracted_data:
+        state["business_intelligence"] = extracted_data.get("business_activities", {})
+        state["business_news"] = extracted_data.get("latest_news", [])
+        
+        if state["business_intelligence"].get("verdict") == "Non-Compliant":
+            state["skip_financials"] = True
+    return state
+
+# 4. Search Financial Statements
+async def search_financial_statements(state: GraphState) -> GraphState:
+    if state.get("skip_financials"):
+        return state
+        
+    scraper = FinancialScraper()
+    results = await scraper.search_latest_financial_report_pdfs(state["company_name"], state.get("financial_year", 2026))
+    state["search_results"] = results
+    state["annual_report_url"] = results.get("official") or results.get("ngx") or results.get("african_financials")
+    
+    return state
+
+# 5 & 6. Verify & Download PDF
+async def download_pdf(state: GraphState) -> GraphState:
+    if state.get("skip_financials") or not state.get("annual_report_url"):
+        return state
+        
+    url = state["annual_report_url"]
+    try:
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            resp = await client.get(url, follow_redirects=True)
+            if resp.status_code == 200:
+                fd, path = tempfile.mkstemp(suffix=".pdf")
+                with os.fdopen(fd, 'wb') as f:
+                    f.write(resp.content)
+                state["pdf_path"] = path
+                import hashlib
+                state["sha256_hash"] = hashlib.sha256(resp.content).hexdigest()
+    except Exception as e:
+        state["error"] = f"Failed to download PDF: {str(e)}"
+    return state
+
+# 7. Store PDF
+async def store_pdf(state: GraphState) -> GraphState:
+    if state.get("skip_financials") or not state.get("pdf_path"):
+        return state
+        
+    r2 = CloudflareR2Client()
+    object_name = f"reports/{state['ticker']}_{state.get('financial_year', 2026)}.pdf"
+    url = r2.upload_file(state["pdf_path"], object_name)
+    if url:
+        state["r2_storage_url"] = url
+    return state
+
+# 8. Extract Financial Data
+async def extract_financial_data(state: GraphState) -> GraphState:
+    if state.get("skip_financials") or not state.get("pdf_path"):
+        return state
+        
+    import fitz # PyMuPDF
+    try:
+        doc = fitz.open(state["pdf_path"])
+        # Extract first 50 pages (where financials usually are) to save tokens
+        text = ""
+        for i in range(min(50, len(doc))):
+            text += doc[i].get_text()
+            
+        gemini = GeminiClient()
+        data = await gemini.extract_financial_data(text, state["company_name"], state.get("financial_year", 2026))
+        state["raw_pdf_extraction"] = data
+        state["is_extraction_valid"] = True if data else False
+    except Exception as e:
+        state["error"] = f"Gemini Extraction error: {str(e)}"
+        state["is_extraction_valid"] = False
+        
+    return state
+
+# 10. Cross Verify
+async def cross_verify_data(state: GraphState) -> GraphState:
+    if state.get("skip_financials"):
+        return state
+        
+    verifier = CrossVerifier()
+    new_data = state.get("raw_pdf_extraction", {})
+    old_data = state.get("existing_financial_data", {})
+    
+    merged = verifier.merge_financials(old_data, new_data)
+    state["cross_verified_data"] = merged
+    
+    return state
+
+# 11. Collect Market Data
+async def collect_market_data(state: GraphState) -> GraphState:
+    # Use Yahoo Finance or similar here for live market cap
+    # For now, placeholder or use perplexity data if it fetched it
+    state["market_data"] = {"market_cap": 0} 
+    return state
+
+# 13 & 14. Normalise & Currency
+async def normalise_financials(state: GraphState) -> GraphState:
+    if state.get("skip_financials"):
+        return state
+        
+    raw = state.get("cross_verified_data", {})
+    state["normalized_data"] = Normalizer.normalize(raw)
+    state["currency_conversion_applied"] = True # It handles inside Normalizer
+    return state
+
+# 15. Calculate AAOIFI
+async def calculate_aaoifi(state: GraphState) -> GraphState:
+    if state.get("skip_financials"):
+        return state
+        
+    normalized = state.get("normalized_data", {})
+    is_bank = state.get("business_intelligence", {}).get("is_bank_or_financial", False)
+    market_cap = state.get("market_data", {}).get("market_cap", 0)
+    
+    calc = AAOIFICalculator.calculate(normalized, market_cap, "bank" if is_bank else "standard")
+    state["calculation_results"] = calc
+    return state
+
+# 17. Generate Explanation
+async def generate_explanation(state: GraphState) -> GraphState:
+    if state.get("skip_financials"):
+        return state
+        
+    calc = state.get("calculation_results", {})
+    explainer = AIExplainer()
+    state["ai_explanation"] = explainer.generate_explanation(state["company_name"], calc)
+    return state
+
+# 18. Confidence Scoring
+async def confidence_scoring(state: GraphState) -> GraphState:
+    # Mock confidence for now
+    state["confidence_score"] = 90
+    state["confidence_breakdown"] = {"source": 90, "ai": 90, "cross_verify": 90}
     return state

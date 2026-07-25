@@ -1,43 +1,50 @@
 from langgraph.graph import StateGraph, END
 from app.graph.state import GraphState
 from app.graph.nodes import (
-    search_company,
-    check_financial_cache,
-    fetch_perplexity_data,
-    collect_multiple_sources,
-    normalize_data,
-    validate_and_resolve,
+    initialise_and_check_cache,
+    collect_business_intelligence,
+    search_financial_statements,
+    download_pdf,
+    store_pdf,
+    extract_financial_data,
+    cross_verify_data,
+    collect_market_data,
+    normalise_financials,
     calculate_aaoifi,
     generate_explanation,
-    store_results
+    confidence_scoring
 )
 
-def build_graph():
+def build_graph() -> StateGraph:
     workflow = StateGraph(GraphState)
-
+    
     # Add Nodes
-    workflow.add_node("search_company", search_company)
-    workflow.add_node("check_financial_cache", check_financial_cache)
-    workflow.add_node("fetch_perplexity_data", fetch_perplexity_data)
-    workflow.add_node("collect_multiple_sources", collect_multiple_sources)
-    workflow.add_node("normalize_data", normalize_data)
-    workflow.add_node("validate_and_resolve", validate_and_resolve)
+    workflow.add_node("init_and_cache", initialise_and_check_cache)
+    workflow.add_node("business_intel", collect_business_intelligence)
+    workflow.add_node("search_financials", search_financial_statements)
+    workflow.add_node("download_pdf", download_pdf)
+    workflow.add_node("store_pdf", store_pdf)
+    workflow.add_node("extract_financials", extract_financial_data)
+    workflow.add_node("cross_verify", cross_verify_data)
+    workflow.add_node("market_data", collect_market_data)
+    workflow.add_node("normalise", normalise_financials)
     workflow.add_node("calculate_aaoifi", calculate_aaoifi)
-    workflow.add_node("generate_explanation", generate_explanation)
-    workflow.add_node("store_results", store_results)
-
-    # Build Edges
-    workflow.set_entry_point("search_company")
-    workflow.add_edge("search_company", "check_financial_cache")
-    workflow.add_edge("check_financial_cache", "fetch_perplexity_data")
-    workflow.add_edge("fetch_perplexity_data", "collect_multiple_sources")
-    workflow.add_edge("collect_multiple_sources", "normalize_data")
-    workflow.add_edge("normalize_data", "validate_and_resolve")
-    workflow.add_edge("validate_and_resolve", "calculate_aaoifi")
-    workflow.add_edge("calculate_aaoifi", "generate_explanation")
-    workflow.add_edge("generate_explanation", "store_results")
-    workflow.add_edge("store_results", END)
-
-    # Compile the graph
-    app = workflow.compile()
-    return app
+    workflow.add_node("explain", generate_explanation)
+    workflow.add_node("score_confidence", confidence_scoring)
+    
+    # Define Edges
+    workflow.set_entry_point("init_and_cache")
+    workflow.add_edge("init_and_cache", "business_intel")
+    workflow.add_edge("business_intel", "search_financials")
+    workflow.add_edge("search_financials", "download_pdf")
+    workflow.add_edge("download_pdf", "store_pdf")
+    workflow.add_edge("store_pdf", "extract_financials")
+    workflow.add_edge("extract_financials", "cross_verify")
+    workflow.add_edge("cross_verify", "market_data")
+    workflow.add_edge("market_data", "normalise")
+    workflow.add_edge("normalise", "calculate_aaoifi")
+    workflow.add_edge("calculate_aaoifi", "explain")
+    workflow.add_edge("explain", "score_confidence")
+    workflow.add_edge("score_confidence", END)
+    
+    return workflow.compile()
