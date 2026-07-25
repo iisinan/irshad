@@ -17,10 +17,9 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
 
   const NAV_ITEMS = [
     { section: 'Main' },
-    { label: 'Overview',       icon: LayoutDashboard,  to: '/dashboard',           id: 'tour-nav-overview' },
     { label: 'Holdings',       icon: Activity,         to: '/portfolio#holdings',  id: 'tour-nav-holdings' },
     { label: 'Market Screener', icon: BarChart2,        to: '/portfolio#market', id: 'tour-nav-market' },
-    { label: 'Watchlist',      icon: Star,             to: '/portfolio#watchlist', id: 'tour-nav-watchlist' },
+    { label: 'Alert',          icon: Star,             to: '/portfolio#watchlist', id: 'tour-nav-watchlist' },
     { label: 'Thematic Baskets',icon: Briefcase,       to: '/portfolio#baskets', id: 'tour-nav-baskets' },
     { section: 'Islamic Finance' },
     { label: 'Purification',   icon: HeartHandshake,   to: '/portfolio#purification', id: 'tour-nav-purification' },

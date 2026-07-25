@@ -150,7 +150,7 @@ export default function Portfolio() {
   const tabs = [
     { id: 'holdings',     label: 'Holdings',        icon: Briefcase },
     { id: 'market',       label: 'Market Screener', icon: BarChart2 },
-    { id: 'watchlist',    label: 'Watchlist',       icon: Star },
+    { id: 'watchlist',    label: 'Alert',           icon: Star },
     { id: 'statement',    label: 'Statement',       icon: FileText },
     { id: 'zakat',        label: 'Zakat',           icon: Calculator },
     { id: 'purification', label: 'Purification',    icon: ShieldCheck },

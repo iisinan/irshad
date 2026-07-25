@@ -46,6 +46,7 @@ export default function WatchlistTab() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [activeAlertStock, setActiveAlertStock] = useState(null); // holds the stock object for alerts
   const [filter, setFilter] = useState('all'); // all, halal, non-halal
+  const [activeView, setActiveView] = useState('assets'); // 'assets' | 'inbox'
   
   const navigate = useNavigate();
   
@@ -162,7 +163,7 @@ export default function WatchlistTab() {
             <Eye size={28} fill="currentColor" />
           </div>
           <div>
-            <h2 style={{ fontSize: '1.23rem', fontWeight: 800, color: 'white', letterSpacing: '-0.5px', margin: 0 }}>Watchlist</h2>
+            <h2 style={{ fontSize: '1.23rem', fontWeight: 800, color: 'white', letterSpacing: '-0.5px', margin: 0 }}>Alerts</h2>
             <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.79rem', marginTop: '4px', margin: 0 }}>Track assets & receive instant status alerts</p>
           </div>
         </div>
@@ -174,40 +175,91 @@ export default function WatchlistTab() {
       </div>
 
       <div style={{ display: 'flex', gap: '16px', marginBottom: '32px', position: 'relative', zIndex: 10, flexWrap: 'wrap', justifyContent: 'space-between' }}>
-        <button 
-          onClick={() => setShowAddModal(true)}
-          style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '14px 24px', borderRadius: '16px', background: 'var(--primary)', color: 'var(--bg)', border: 'none', fontWeight: 800, fontSize: '0.84rem', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 8px 24px rgba(15,82,87,0.25)' }}
-          className="hover-lift"
-        >
-          <Plus size={18} /> Add Assets
-        </button>
-        
-        <div style={{ display: 'flex', background: 'var(--bg-section)', borderRadius: '16px', padding: '6px', border: '1px solid var(--border)' }}>
-          {['all', 'halal', 'non-halal'].map((f) => (
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <div style={{ display: 'flex', background: 'var(--bg-section)', borderRadius: '16px', padding: '6px', border: '1px solid var(--border)' }}>
             <button
-              key={f}
-              onClick={() => setFilter(f)}
+              onClick={() => setActiveView('assets')}
               style={{
-                padding: '10px 16px',
-                borderRadius: '10px',
-                border: 'none',
-                background: filter === f ? 'var(--bg)' : 'transparent',
-                color: filter === f ? 'var(--text-dark)' : 'var(--text-muted)',
-                fontWeight: filter === f ? 800 : 600,
-                fontSize: '0.75rem',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-                boxShadow: filter === f ? '0 2px 8px rgba(0,0,0,0.05)' : 'none',
-                textTransform: 'capitalize'
+                padding: '10px 16px', borderRadius: '10px', border: 'none',
+                background: activeView === 'assets' ? 'var(--bg)' : 'transparent',
+                color: activeView === 'assets' ? 'var(--text-dark)' : 'var(--text-muted)',
+                fontWeight: activeView === 'assets' ? 800 : 600, fontSize: '0.75rem', cursor: 'pointer',
+                transition: 'all 0.2s', boxShadow: activeView === 'assets' ? '0 2px 8px rgba(0,0,0,0.05)' : 'none'
               }}
             >
-              {f.replace('-', ' ')}
+              My Assets
             </button>
-          ))}
+            <button
+              onClick={() => setActiveView('inbox')}
+              style={{
+                padding: '10px 16px', borderRadius: '10px', border: 'none',
+                background: activeView === 'inbox' ? 'var(--bg)' : 'transparent',
+                color: activeView === 'inbox' ? 'var(--text-dark)' : 'var(--text-muted)',
+                fontWeight: activeView === 'inbox' ? 800 : 600, fontSize: '0.75rem', cursor: 'pointer',
+                transition: 'all 0.2s', boxShadow: activeView === 'inbox' ? '0 2px 8px rgba(0,0,0,0.05)' : 'none'
+              }}
+            >
+              Inbox
+            </button>
+          </div>
+          {activeView === 'assets' && (
+            <button 
+              onClick={() => setShowAddModal(true)}
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '14px 24px', borderRadius: '16px', background: 'var(--primary)', color: 'var(--bg)', border: 'none', fontWeight: 800, fontSize: '0.84rem', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 8px 24px rgba(15,82,87,0.25)' }}
+              className="hover-lift"
+            >
+              <Plus size={18} /> Add Assets
+            </button>
+          )}
         </div>
+        
+        {activeView === 'assets' && (
+          <div style={{ display: 'flex', background: 'var(--bg-section)', borderRadius: '16px', padding: '6px', border: '1px solid var(--border)' }}>
+            {['all', 'halal', 'non-halal'].map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                style={{
+                  padding: '10px 16px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: filter === f ? 'var(--bg)' : 'transparent',
+                  color: filter === f ? 'var(--text-dark)' : 'var(--text-muted)',
+                  fontWeight: filter === f ? 800 : 600,
+                  fontSize: '0.75rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  boxShadow: filter === f ? '0 2px 8px rgba(0,0,0,0.05)' : 'none',
+                  textTransform: 'capitalize'
+                }}
+              >
+                {f.replace('-', ' ')}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      {loading ? (
+      {activeView === 'inbox' ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {[
+            { id: 1, title: 'Compliance Status Changed', message: 'DANGSUGAR is now classified as NON-HALAL.', time: '2 hours ago', type: 'danger', icon: <AlertCircle size={20} /> },
+            { id: 2, title: 'Price Alert Triggered', message: 'MTNN has dropped below ₦250.00.', time: '5 hours ago', type: 'warning', icon: <TrendingDown size={20} /> },
+            { id: 3, title: 'Weekly Digest Available', message: 'Your weekly Shariah compliance digest is ready to view.', time: '1 day ago', type: 'info', icon: <Mail size={20} /> }
+          ].map(alert => (
+            <div key={alert.id} className="hover-lift" style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', padding: '20px', background: 'var(--bg)', borderRadius: '16px', border: `1px solid var(--border)`, boxShadow: 'var(--shadow-sm)', cursor: 'pointer', transition: 'all 0.2s' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: alert.type === 'danger' ? 'var(--non-halal-bg)' : alert.type === 'warning' ? 'var(--doubtful-bg)' : 'var(--primary-50)', color: alert.type === 'danger' ? 'var(--non-halal)' : alert.type === 'warning' ? 'var(--doubtful)' : 'var(--primary)', flexShrink: 0 }}>
+                {alert.icon}
+              </div>
+              <div>
+                <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-dark)', marginBottom: '4px' }}>{alert.title}</div>
+                <div style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginBottom: '8px' }}>{alert.message}</div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-light)', fontWeight: 600 }}>{alert.time}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : loading ? (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '60px 0', gap: '16px' }}>
           <div className="spinner" />
           <p style={{ color: 'var(--text-muted)', fontSize: '0.79rem', fontWeight: 600 }}>Loading watchlist...</p>
@@ -226,10 +278,10 @@ export default function WatchlistTab() {
             <Star size={36} color="var(--primary)" fill="var(--primary)" opacity={0.8} />
           </div>
           <div style={{ fontSize: '1.23rem', fontWeight:900, color:'var(--text-dark)', marginBottom:'12px', letterSpacing:'-0.5px' }}>
-            {filter !== 'all' ? `No ${filter} assets found` : 'Your Watchlist is Empty'}
+            {filter !== 'all' ? `No ${filter} assets found` : 'No Alerts Set'}
           </div>
           <p style={{ color:'var(--text-muted)', fontSize: '0.88rem', marginBottom:'32px', maxWidth:'400px', lineHeight:1.6 }}>
-            Keep an eye on promising stocks. Add them to your watchlist to track their Shariah compliance status and daily performance.
+            Keep an eye on promising stocks. Set an alert to track their Shariah compliance status and daily performance.
           </p>
           <button 
             onClick={() => navigate('/portfolio#market')} 

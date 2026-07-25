@@ -17,7 +17,6 @@ const StockDetails = React.lazy(() => import('./components/StockDetails'));
 const AdminTickerEditor = React.lazy(() => import('./components/AdminTickerEditor'));
 const AaoifiScreening = React.lazy(() => import('./components/AaoifiScreening'));
 const Portfolio = React.lazy(() => import('./components/Portfolio'));
-const Dashboard = React.lazy(() => import('./components/Dashboard'));
 const AboutPage = React.lazy(() => import('./components/About'));
 const ShariahPage = React.lazy(() => import('./components/Shariah'));
 const ResourcesPage = React.lazy(() => import('./components/Resources'));
@@ -25,11 +24,9 @@ const Profile = React.lazy(() => import('./components/Profile'));
 const AdminDashboard = React.lazy(() => import('./components/AdminDashboard'));
 const AdminUsers = React.lazy(() => import('./components/AdminUsers'));
 const ZakatSettingsAdmin = React.lazy(() => import('./components/ZakatSettingsAdmin'));
-const RoleBasedDashboard = React.lazy(() => import('./components/RoleBasedDashboard'));
 const Pricing = React.lazy(() => import('./components/Pricing'));
 const LandingPage = React.lazy(() => import('./components/LandingPage'));
-
-const DASHBOARD_ROUTES = ['/dashboard', '/portfolio', '/profile', '/admin'];
+const DASHBOARD_ROUTES = ['/portfolio', '/profile', '/admin'];
 
 /* ─── Animated Routes Wrapper ─────────────────────────────── */
 const AnimatedRoutes = ({ children }) => {
@@ -706,9 +703,6 @@ function App() {
                         <ZakatSettingsAdmin />
                       </AdminLayout>
                     </ProtectedRoute>
-                  } />
-                  <Route path="/dashboard" element={
-                    <DashboardLayout><RoleBasedDashboard /></DashboardLayout>
                   } />
                   <Route path="/portfolio" element={
                     <DashboardLayout><Portfolio /></DashboardLayout>
