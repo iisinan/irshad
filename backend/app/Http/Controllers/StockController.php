@@ -400,10 +400,13 @@ class StockController extends Controller
             
             $stage2Pass = $debtPass && $cashPass && $impurePass;
             
-            // The ground truth is the status in the database ONLY IF it was manually overridden by a scholar.
-            // Otherwise, we use our freshly calculated dynamic status.
+            // FINAL STATUS — always use the DB as ground truth (kept accurate by irshad:sync-status).
+            // Only fall back to live computation if no DB record exists yet for this stock.
+            // This ensures the analysis page verdict always matches the listing page verdict.
+            $dbStatus = $company->status ? $company->status->status : null;
             $isScholarVerified = $company->status && $company->status->verified_by_scholar;
-            $finalStatus = $isScholarVerified ? $company->status->status : (($stage1Pass && $stage2Pass) ? 'halal' : 'non-halal');
+            $computedStatus = ($stage1Pass && $stage2Pass) ? 'halal' : 'non-halal';
+            $finalStatus = $dbStatus ?? $computedStatus;
             
             $statusReason = null;
             if ($isScholarVerified) {
