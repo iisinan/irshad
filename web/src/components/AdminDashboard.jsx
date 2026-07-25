@@ -153,14 +153,28 @@ const AdminDashboard = () => {
   const handleExport = async () => {
     try {
       toastSuccess('Generating export...');
-      const response = await api.get('/admin/stocks/export', { responseType: 'blob' });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      // Use fetch directly with auth token so the CSV blob downloads correctly
+      const token = localStorage.getItem('auth_token');
+      const baseUrl = import.meta.env.DEV
+        ? (import.meta.env.VITE_API_URL || 'https://irshad-z8us.onrender.com/api/v1')
+        : 'https://irshad-z8us.onrender.com/api/v1';
+      const response = await fetch(`${baseUrl}/admin/stocks/export`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'text/csv',
+        },
+      });
+      if (!response.ok) throw new Error('Export failed');
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', 'stocks_export.csv');
+      link.setAttribute('download', `irshad_stocks_${new Date().toISOString().slice(0,10)}.csv`);
       document.body.appendChild(link);
       link.click();
       link.remove();
+      window.URL.revokeObjectURL(url);
+      toastSuccess('Download started!');
     } catch (err) {
       toastError('Failed to export stocks');
     }
@@ -440,8 +454,8 @@ const AdminDashboard = () => {
                           {activeTab === 'stocks' ? (
                             <div 
                               style={{ display: 'flex', alignItems: 'center', gap: '11px', cursor: 'pointer' }}
-                              onClick={() => window.open(`/stocks/${item.symbol}`, '_blank')}
-                              title="View Public Information Page"
+                              onClick={() => window.open(`/market/${item.symbol}`, '_blank')}
+                              title="Open Stock Information Page"
                             >
                               <div style={{
                                 width: '36px', height: '36px', borderRadius: '9px', flexShrink: 0,

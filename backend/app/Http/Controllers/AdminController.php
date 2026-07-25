@@ -200,7 +200,29 @@ class AdminController extends Controller
      */
     public function exportStocks()
     {
-        $companies = \App\Models\Company::with(['status', 'latestFinancialScreening', 'latestBusinessScreening'])->get();
+        // financial_screenings uses company_ticker (a symbol string, not company_id)
+        // business_screenings uses company_id
+        $companies = DB::table('companies')
+            ->leftJoin('stock_statuses', 'companies.id', '=', 'stock_statuses.company_id')
+            ->leftJoin('financial_screenings', function ($join) {
+                $join->on('companies.symbol', '=', 'financial_screenings.company_ticker')
+                    ->whereRaw('financial_screenings.id = (select max(id) from financial_screenings where company_ticker = companies.symbol)');
+            })
+            ->leftJoin('business_screenings', function ($join) {
+                $join->on('companies.id', '=', 'business_screenings.company_id')
+                    ->whereRaw('business_screenings.id = (select max(id) from business_screenings where company_id = companies.id)');
+            })
+            ->select(
+                'companies.symbol',
+                'companies.name',
+                'stock_statuses.status as verdict',
+                'stock_statuses.reason',
+                'stock_statuses.verified_by_scholar',
+                'business_screenings.business_compliance_status',
+                'financial_screenings.calculation_results'
+            )
+            ->orderBy('companies.symbol')
+            ->get();
         
         $headers = [
             "Content-type"        => "text/csv",
@@ -220,26 +242,30 @@ class AdminController extends Controller
             fputcsv($file, $columns);
             
             foreach ($companies as $company) {
-                $status = $company->status;
-                $fin = $company->latestFinancialScreening;
-                $bus = $company->latestBusinessScreening;
-                
                 $calc = [];
-                if ($fin) {
-                    $calc = is_string($fin->calculation_results) ? json_decode($fin->calculation_results, true) : $fin->calculation_results;
+                if ($company->calculation_results) {
+                    $calc = json_decode($company->calculation_results, true) ?? [];
                 }
                 $ratios = $calc['ratios'] ?? [];
+                
+                // Format ratios as readable percentages (stored as decimals e.g. 0.003 = 0.3%)
+                $debtRatio = isset($ratios['interest_bearing_debt_ratio'])
+                    ? round(floatval($ratios['interest_bearing_debt_ratio']) * 100, 4) : '';
+                $cashRatio = isset($ratios['cash_and_equivalents_ratio'])
+                    ? round(floatval($ratios['cash_and_equivalents_ratio']) * 100, 4) : '';
+                $impureRatio = isset($ratios['non_permissible_income_ratio'])
+                    ? round(floatval($ratios['non_permissible_income_ratio']) * 100, 4) : '';
                 
                 fputcsv($file, [
                     $company->symbol,
                     $company->name,
-                    $status ? $status->status : 'unknown',
-                    $status ? $status->reason : '',
-                    $bus ? $bus->business_compliance_status : '',
-                    $ratios['interest_bearing_debt_ratio'] ?? '',
-                    $ratios['cash_and_equivalents_ratio'] ?? '',
-                    $ratios['non_permissible_income_ratio'] ?? '',
-                    ($status && $status->verified_by_scholar) ? 'TRUE' : 'FALSE'
+                    $company->verdict ?? 'unknown',
+                    $company->reason ?? '',
+                    $company->business_compliance_status ?? '',
+                    $debtRatio,
+                    $cashRatio,
+                    $impureRatio,
+                    $company->verified_by_scholar ? 'TRUE' : 'FALSE'
                 ]);
             }
             fclose($file);
