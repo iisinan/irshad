@@ -438,7 +438,11 @@ const AdminDashboard = () => {
                       >
                         <td style={{ padding: '16px 20px' }}>
                           {activeTab === 'stocks' ? (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '11px' }}>
+                            <div 
+                              style={{ display: 'flex', alignItems: 'center', gap: '11px', cursor: 'pointer' }}
+                              onClick={() => window.open(`/stocks/${item.symbol}`, '_blank')}
+                              title="View Public Information Page"
+                            >
                               <div style={{
                                 width: '36px', height: '36px', borderRadius: '9px', flexShrink: 0,
                                 background: 'var(--primary-50)', border: '1px solid var(--border)',
@@ -452,7 +456,10 @@ const AdminDashboard = () => {
                                   (item.symbol || '').slice(0, 4)
                                 )}
                               </div>
-                              <div>
+                              <div style={{ transition: 'all 0.2s' }}
+                                   onMouseEnter={e => e.currentTarget.style.opacity = '0.7'}
+                                   onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                              >
                                 <div style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.88rem', lineHeight: 1.2 }}>
                                   {item.symbol}
                                 </div>
