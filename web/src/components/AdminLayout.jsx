@@ -8,7 +8,7 @@ export default function AdminLayout({ children }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
   useEffect(() => {
     setMobileOpen(false);
@@ -18,6 +18,9 @@ export default function AdminLayout({ children }) {
     document.body.style.overflow = mobileOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [mobileOpen]);
+
+  if (loading) return null;
+  if (!user) return <Navigate to="/login" replace />;
 
   return (
     <div style={{

@@ -9,7 +9,7 @@ export default function DashboardLayout({ children }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   
   // Initialize tour visibility once per mount. 
   // It won't hide immediately if user context updates to onboarded=true during the tour.
@@ -25,6 +25,14 @@ export default function DashboardLayout({ children }) {
     document.body.style.overflow = mobileOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [mobileOpen]);
+
+  // Wait for auth to resolve before making routing decisions
+  if (loading) return null;
+
+  // Unauthenticated users must log in first
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
 
   return (
     <div style={{
