@@ -13,6 +13,7 @@ class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     console.error("ErrorBoundary caught an error:", error, errorInfo);
+    this.setState({ errorMessage: error?.message || String(error) });
   }
 
   render() {
@@ -40,9 +41,14 @@ class ErrorBoundary extends React.Component {
               <AlertTriangle size={48} />
             </div>
             <h2 style={{ fontSize: '1.32rem', color: '#991B1B', margin: '0 0 12px 0' }}>Something went wrong</h2>
-            <p style={{ color: '#B91C1C', marginBottom: '24px', lineHeight: 1.5 }}>
+            <p style={{ color: '#B91C1C', marginBottom: '12px', lineHeight: 1.5 }}>
               We've encountered an unexpected error. Our team has been notified.
             </p>
+            {this.state.errorMessage && (
+              <p style={{ fontFamily: 'monospace', fontSize: '0.72rem', background: '#FEE2E2', color: '#7F1D1D', padding: '8px 12px', borderRadius: '6px', marginBottom: '16px', wordBreak: 'break-word', textAlign: 'left' }}>
+                {this.state.errorMessage}
+              </p>
+            )}
             <button
               onClick={() => window.location.reload()}
               style={{
