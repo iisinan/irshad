@@ -383,9 +383,21 @@ class StockController extends Controller
             $stage1Pass = ($stage1['compliance_status'] ?? 'PASS') === 'PASS';
             $stage2Pass = ($calc['overall_financial_pass'] ?? true);
             
-            // The ground truth is the status in the database (which respects Admin manual overrides).
-            // If the DB says halal/non-halal/doubtful, we must be consistent.
-            $finalStatus = $company->status ? $company->status->status : (($stage1Pass && $stage2Pass) ? 'halal' : 'non-halal');
+            // The ground truth is the status in the database ONLY IF it was manually overridden by a scholar.
+            // Otherwise, we use our freshly calculated dynamic status.
+            $isScholarVerified = $company->status && $company->status->verified_by_scholar;
+            $finalStatus = $isScholarVerified ? $company->status->status : (($stage1Pass && $stage2Pass) ? 'halal' : 'non-halal');
+            
+            $statusReason = null;
+            if ($isScholarVerified) {
+                $statusReason = $company->status->reason;
+            } else {
+                if ($finalStatus === 'halal') {
+                    $statusReason = 'Passes both qualitative business and quantitative financial Shariah compliance checks.';
+                } else {
+                    $statusReason = 'Fails Shariah compliance based on current financial disclosures or business activities.';
+                }
+            }
             $mapped = [
                 'company_id' => $company->id,
                 'stage1' => [
@@ -420,7 +432,7 @@ class StockController extends Controller
                     'total_revenue' => $totalRevenue,
                 ],
                 'ai_explanation' => !empty($existingScreening->ai_explanation) ? $existingScreening->ai_explanation : $company->activity_reason,
-                'status_reason' => $company->status ? $company->status->reason : null,
+                'status_reason' => $statusReason,
             ];
             
             return $this->success($mapped);

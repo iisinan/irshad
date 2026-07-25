@@ -108,9 +108,29 @@ class SyncCompanyStatus extends Command
                 DB::table('companies')->where('id', $company->id)->update([
                     'current_status' => $finalStatus
                 ]);
-                $this->info("Updated {$symbol} to {$finalStatus}");
-                $updatedCount++;
             }
+            
+            // 9. Sync stock_statuses table
+            $stockStatus = DB::table('stock_statuses')->where('company_id', $company->id)->first();
+            
+            if (!$stockStatus || !$stockStatus->verified_by_scholar) {
+                $statusReason = ($finalStatus === 'halal') 
+                    ? 'Passes both qualitative business and quantitative financial Shariah compliance checks.' 
+                    : 'Fails Shariah compliance based on current financial disclosures or business activities.';
+                
+                DB::table('stock_statuses')->updateOrInsert(
+                    ['company_id' => $company->id],
+                    [
+                        'status' => $finalStatus,
+                        'reason' => $statusReason,
+                        'last_updated' => now(),
+                        'updated_at' => now(),
+                    ]
+                );
+            }
+
+            $this->info("Synced {$symbol} to {$finalStatus}");
+            $updatedCount++;
         }
         
         // Clear caches
