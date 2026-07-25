@@ -6,6 +6,8 @@ use App\Models\User;
 use App\Models\AdminAlert;
 use App\Traits\ApiResponder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -206,11 +208,11 @@ class AdminController extends Controller
             ->leftJoin('stock_statuses', 'companies.id', '=', 'stock_statuses.company_id')
             ->leftJoin('financial_screenings', function ($join) {
                 $join->on('companies.symbol', '=', 'financial_screenings.company_ticker')
-                    ->whereRaw('financial_screenings.id = (select max(id) from financial_screenings where company_ticker = companies.symbol)');
+                    ->whereRaw('financial_screenings.created_at = (select max(fs2.created_at) from financial_screenings fs2 where fs2.company_ticker = companies.symbol)');
             })
             ->leftJoin('business_screenings', function ($join) {
                 $join->on('companies.id', '=', 'business_screenings.company_id')
-                    ->whereRaw('business_screenings.id = (select max(id) from business_screenings where company_id = companies.id)');
+                    ->whereRaw('business_screenings.created_at = (select max(bs2.created_at) from business_screenings bs2 where bs2.company_id = companies.id)');
             })
             ->select(
                 'companies.symbol',
@@ -239,7 +241,7 @@ class AdminController extends Controller
         
         $callback = function() use($companies, $columns) {
             $file = fopen('php://output', 'w');
-            fputcsv($file, $columns);
+            fputcsv($file, $columns, ',', '"', '\\');
             
             foreach ($companies as $company) {
                 $calc = [];

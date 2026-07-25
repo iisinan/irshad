@@ -153,30 +153,25 @@ const AdminDashboard = () => {
   const handleExport = async () => {
     try {
       toastSuccess('Generating export...');
-      // Use fetch directly with auth token so the CSV blob downloads correctly
-      const token = localStorage.getItem('auth_token');
-      const baseUrl = import.meta.env.DEV
-        ? (import.meta.env.VITE_API_URL || 'https://irshad-z8us.onrender.com/api/v1')
-        : 'https://irshad-z8us.onrender.com/api/v1';
-      const response = await fetch(`${baseUrl}/admin/stocks/export`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'text/csv',
-        },
+      // Use axios with responseType blob - auth interceptor is applied automatically
+      const response = await api.get('/admin/stocks/export', {
+        responseType: 'blob',
+        headers: { 'Accept': 'text/csv' },
       });
-      if (!response.ok) throw new Error('Export failed');
-      const blob = await response.blob();
+      
+      const blob = new Blob([response.data], { type: 'text/csv' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `irshad_stocks_${new Date().toISOString().slice(0,10)}.csv`);
+      link.setAttribute('download', `irshad_stocks_${new Date().toISOString().slice(0, 10)}.csv`);
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
       toastSuccess('Download started!');
     } catch (err) {
-      toastError('Failed to export stocks');
+      console.error('Export error:', err);
+      toastError('Failed to export stocks. Please try again.');
     }
   };
 
