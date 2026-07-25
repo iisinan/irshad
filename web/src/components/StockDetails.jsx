@@ -38,6 +38,27 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const [overrideSaving, setOverrideSaving] = useState(false);
   const [overrideError, setOverrideError] = useState('');
 
+  const handleAskAI = () => {
+    setAiLoading(true);
+    setAiError(null);
+    fetchAiAnalysis(symbol)
+      .then(r => {
+        const payload = r.data || r;
+        setAiData(payload);
+        const analysisText = payload?.reasoning || payload?.analysis || "No analysis returned.";
+        setAiAnalysis(analysisText);
+      })
+      .catch(e => {
+        console.error(e);
+        if (e.response?.status === 401) {
+          setAiError('Unauthorized. Please log in or wait for the backend to update public access.');
+        } else {
+          setAiError(e.response?.data?.message || 'Failed to get analysis. Ensure the backend is updated.');
+        }
+      })
+      .finally(() => setAiLoading(false));
+  };
+
   useEffect(() => {
     // Always fetch full data in background; merge so we add financials & chart
     fetchStockDetails(symbol)
@@ -53,6 +74,9 @@ const StockDetails = ({ symbol: propSymbol }) => {
         setInWatchlist(list.some(item => item.symbol === symbol));
       }).catch(console.error);
     }
+
+    // Automatically fetch AI analysis
+    handleAskAI();
   }, [symbol, user]);
 
   useEffect(() => {
@@ -251,27 +275,6 @@ const StockDetails = ({ symbol: propSymbol }) => {
     } finally {
       setWatchlistLoading(false);
     }
-  };
-
-  const handleAskAI = () => {
-    setAiLoading(true);
-    setAiError(null);
-    fetchAiAnalysis(symbol)
-      .then(r => {
-        const payload = r.data || r;
-        setAiData(payload);
-        const analysisText = payload?.reasoning || payload?.analysis || "No analysis returned.";
-        setAiAnalysis(analysisText);
-      })
-      .catch(e => {
-        console.error(e);
-        if (e.response?.status === 401) {
-          setAiError('Unauthorized. Please log in or wait for the backend to update public access.');
-        } else {
-          setAiError(e.response?.data?.message || 'Failed to get analysis. Ensure the backend is updated.');
-        }
-      })
-      .finally(() => setAiLoading(false));
   };
 
   return (
@@ -491,7 +494,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
                     {isHalal ? 'Shariah Compliant (Halal)' : isNonHalal ? 'Non-Compliant (Haram)' : 'Status Doubtful / Under Review'}
                   </h3>
                   <p style={{ margin: '6px 0 0', fontSize: '0.92rem', color: 'var(--text-muted)' }}>
-                    Screened strictly according to AAOIFI Standard No. 21 methodology
+                    {reason || 'Screened strictly according to AAOIFI Standard No. 21 methodology'}
                   </p>
                 </div>
               </div>
@@ -531,23 +534,30 @@ const StockDetails = ({ symbol: propSymbol }) => {
           </div>
 
           {/* Advanced Metrics (Market Data) */}
-          <div className="detail-panel" style={{ padding: '24px', background: 'var(--bg-section)', border: '1px solid var(--border)' }}>
-            <div className="detail-section-label">Advanced Metrics</div>
-            <div className="detail-metrics-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-              <div style={{ background: 'var(--bg)', padding: '20px', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <TrendingUp size={14} color="var(--primary)" /> Valuation
-                </span>
-                <span style={{ fontSize: '1rem', color: 'var(--text-dark)', fontWeight: 800 }}>{stock.valuation_info || 'N/A'}</span>
-              </div>
-              <div style={{ background: 'var(--bg)', padding: '20px', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <TrendingUp size={14} color="var(--halal)" /> Growth Forecast
-                </span>
-                <span style={{ fontSize: '1rem', color: 'var(--text-dark)', fontWeight: 800 }}>{stock.growth_info || 'N/A'}</span>
+          {(stock.valuation_info && stock.valuation_info !== 'N/A' && stock.valuation_info !== 'O' || 
+            stock.growth_info && stock.growth_info !== 'N/A' && stock.growth_info !== 'O') && (
+            <div className="detail-panel" style={{ padding: '24px', background: 'var(--bg-section)', border: '1px solid var(--border)' }}>
+              <div className="detail-section-label">Advanced Metrics</div>
+              <div className="detail-metrics-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                {stock.valuation_info && stock.valuation_info !== 'N/A' && stock.valuation_info !== 'O' && (
+                  <div style={{ background: 'var(--bg)', padding: '20px', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <TrendingUp size={14} color="var(--primary)" /> Valuation
+                    </span>
+                    <span style={{ fontSize: '1rem', color: 'var(--text-dark)', fontWeight: 800 }}>{stock.valuation_info}</span>
+                  </div>
+                )}
+                {stock.growth_info && stock.growth_info !== 'N/A' && stock.growth_info !== 'O' && (
+                  <div style={{ background: 'var(--bg)', padding: '20px', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <TrendingUp size={14} color="var(--halal)" /> Growth Forecast
+                    </span>
+                    <span style={{ fontSize: '1rem', color: 'var(--text-dark)', fontWeight: 800 }}>{stock.growth_info}</span>
+                  </div>
+                )}
               </div>
             </div>
-          </div>
+          )}
 
           {/* Price Chart */}
           <div className="detail-panel">
