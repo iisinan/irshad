@@ -433,9 +433,9 @@ const AaoifiScreening = () => {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px' }}>
             <div style={{ background: 'var(--bg)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Business Activity Result</span>
-              <span style={{ fontSize: '1.15rem', color: report.business_status === 'pass' ? 'var(--halal)' : (report.business_status === 'fail' ? 'var(--non-halal)' : 'var(--questionable)'), fontWeight: 800, marginTop: '4px' }}>
-                {(report.business_status || 'UNKNOWN').toUpperCase()}
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Stage 1 Verdict</span>
+              <span style={{ fontSize: '1.15rem', color: report.stage1?.status === 'halal' ? 'var(--halal)' : 'var(--non-halal)', fontWeight: 800, marginTop: '4px', textTransform: 'uppercase' }}>
+                {report.stage1?.status || 'UNKNOWN'}
               </span>
             </div>
             <div style={{ background: 'var(--bg)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
@@ -463,43 +463,44 @@ const AaoifiScreening = () => {
       <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', marginBottom: '48px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <h2 style={{ fontSize: '0.79rem', fontWeight: 800, color: '#C49852', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>SECTION A: BUSINESS ACTIVITY SCREENING</h2>
-            <p style={{ fontSize: '1.32rem', fontWeight: 900, color: 'var(--text-dark)', margin: '8px 0 0 0' }}>Core operations</p>
+            <h2 style={{ fontSize: '0.79rem', fontWeight: 800, color: '#C49852', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>STAGE 1: BUSINESS ACTIVITY SCREENING</h2>
+            <p style={{ fontSize: '1.32rem', fontWeight: 900, color: 'var(--text-dark)', margin: '8px 0 0 0' }}>Core operations & Revenue</p>
           </div>
-          <div style={{ padding: '6px 14px', borderRadius: '100px', background: report.business_status === 'pass' ? 'var(--halal-bg)' : (report.business_status === 'fail' ? 'var(--non-halal-bg)' : 'var(--questionable-bg)'), color: report.business_status === 'pass' ? 'var(--halal)' : (report.business_status === 'fail' ? 'var(--non-halal)' : 'var(--questionable)'), fontSize: '0.66rem', fontWeight: 800, letterSpacing: '0.5px' }}>
-            {(report.business_status || 'UNKNOWN').toUpperCase()}
+          <div style={{ padding: '6px 14px', borderRadius: '100px', background: report.stage1?.status === 'halal' ? 'var(--halal-bg)' : 'var(--non-halal-bg)', color: report.stage1?.status === 'halal' ? 'var(--halal)' : 'var(--non-halal)', fontSize: '0.66rem', fontWeight: 800, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+            {report.stage1?.status || 'UNKNOWN'}
           </div>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: '24px', alignItems: 'start' }}>
-            <span style={{ fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.84rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <CheckCircle size={16} color="var(--primary)" /> Principal
-            </span>
-            <span style={{ fontWeight: 600, fontSize: '0.92rem', color: 'var(--text-dark)', lineHeight: 1.5 }}>
-              {typeof report.business_reasoning === 'string' ? 'Core business operations screened' : (report.business_reasoning?.principal_business || 'N/A')}
-            </span>
-          </div>
           
-          {report.business_reasoning?.prohibited_activities?.length > 0 && (
-            <div style={{ background: 'var(--non-halal-bg)', padding: '20px', borderRadius: '16px', border: '1px solid var(--non-halal)' }}>
-              <div style={{ fontWeight: 800, color: 'var(--non-halal)', fontSize: '0.84rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <AlertTriangle size={18} /> Prohibited Activities Found:
+          {report.stage1?.purification_required && (
+            <div style={{ background: 'var(--questionable-bg)', padding: '20px', borderRadius: '16px', border: '1px solid var(--questionable)' }}>
+              <div style={{ fontWeight: 800, color: 'var(--questionable)', fontSize: '0.84rem', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <AlertTriangle size={18} /> Dividend Purification Required
               </div>
-              <ul style={{ margin: 0, paddingLeft: '24px', color: 'var(--non-halal)', fontWeight: 500, lineHeight: 1.6 }}>
-                {report.business_reasoning.prohibited_activities.map((act, i) => (
-                  <li key={i} style={{ marginBottom: '8px' }}>{act}</li>
-                ))}
-              </ul>
+              <p style={{ margin: 0, color: 'var(--text-dark)', fontWeight: 500, fontSize: '0.9rem', lineHeight: 1.6 }}>
+                This company passes Stage 1, but has <strong>{report.stage1?.haram_revenue_percent}%</strong> revenue from non-compliant sources. You must purify this portion of your dividends.
+              </p>
+            </div>
+          )}
+
+          {report.stage1?.status === 'non-halal' && (
+            <div style={{ background: 'var(--non-halal-bg)', padding: '20px', borderRadius: '16px', border: '1px solid var(--non-halal)' }}>
+              <div style={{ fontWeight: 800, color: 'var(--non-halal)', fontSize: '0.84rem', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <AlertTriangle size={18} /> Prohibited Activities Exceed Limits
+              </div>
+              <p style={{ margin: 0, color: 'var(--text-dark)', fontWeight: 500, fontSize: '0.9rem', lineHeight: 1.6 }}>
+                This company fails Stage 1 because its non-compliant revenue ({report.stage1?.haram_revenue_percent}%) exceeds the 5% tolerance, or it is primarily engaged in prohibited activities.
+              </p>
             </div>
           )}
           
-          <div style={{ paddingTop: '24px', borderTop: '1px dashed var(--border)' }}>
+          <div style={{ paddingTop: '24px' }}>
             <div style={{ fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.84rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Brain size={16} color="var(--primary)" /> Irshad Analysis Reasoning
+              <Brain size={16} color="var(--primary)" /> Perplexity AI Stage 1 Reasoning
             </div>
             <p style={{ margin: 0, fontSize: '0.92rem', lineHeight: 1.7, color: 'var(--text-dark)', padding: '20px', background: 'var(--bg-section)', borderRadius: '16px', border: '1px solid var(--border)' }}>
-              {typeof report.business_reasoning === 'string' ? report.business_reasoning : (report.business_reasoning?.reasoning || report.ai_explanation || 'N/A')}
+              {report.stage1?.reason || report.business_reasoning || 'N/A'}
             </p>
           </div>
         </div>
@@ -509,7 +510,7 @@ const AaoifiScreening = () => {
       <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', marginBottom: '48px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <h2 style={{ fontSize: '0.79rem', fontWeight: 800, color: '#C49852', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>SECTION B: FINANCIAL RATIO SCREENING</h2>
+            <h2 style={{ fontSize: '0.79rem', fontWeight: 800, color: '#C49852', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>STAGE 2: QUANTITATIVE FINANCIAL RATIO SCREENING</h2>
             <p style={{ fontSize: '1.32rem', fontWeight: 900, color: 'var(--text-dark)', margin: '8px 0 0 0' }}>The Three AAOIFI Financial Metrics</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-section)', borderRadius: '100px', border: '1px solid var(--border)', fontSize: '0.75rem', overflow: 'hidden' }}>

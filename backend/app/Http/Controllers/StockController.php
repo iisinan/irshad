@@ -369,10 +369,26 @@ class StockController extends Controller
                 $impureRatio = ($interestIncome / $totalRevenue) * 100;
             }
 
+            // Run Stage 1 (Qualitative) using Perplexity AI (Cached for 7 days)
+            $stage1 = cache()->remember("aaoifi_stage1_{$company->symbol}", now()->addDays(7), function () use ($company) {
+                $perplexity = new \App\Services\PerplexityAiService();
+                return $perplexity->runBusinessActivityScreening($company);
+            });
+
+            $stage1Pass = ($stage1['compliance_status'] ?? 'PASS') === 'PASS';
+            $stage2Pass = ($calc['overall_financial_pass'] ?? true);
+            $finalStatus = ($stage1Pass && $stage2Pass) ? 'halal' : 'non-halal';
+
             $mapped = [
                 'company_id' => $company->id,
-                'business_status' => $busScreening && $busScreening->business_compliance_status === 'Non-Compliant' ? 'fail' : 'pass',
-                'business_reasoning' => ($busScreening && !empty($busScreening->ai_explanation)) ? $busScreening->ai_explanation : $company->activity_reason,
+                'stage1' => [
+                    'status' => $stage1Pass ? 'halal' : 'non-halal',
+                    'haram_revenue_percent' => $stage1['haram_revenue_percent'] ?? 0,
+                    'purification_required' => $stage1['purification_required'] ?? false,
+                    'reason' => $stage1['reason'] ?? '',
+                ],
+                'business_status' => $stage1Pass ? 'pass' : 'fail',
+                'business_reasoning' => $stage1['reason'] ?? $company->activity_reason,
                 'debt_ratio' => $ratios['interest_bearing_debt_ratio'] ?? null,
                 'debt_status' => ($status['debt_pass'] ?? true) ? 'pass' : 'fail',
                 'cash_ratio' => $ratios['cash_and_equivalents_ratio'] ?? null,
@@ -383,7 +399,7 @@ class StockController extends Controller
                 'illiquid_status' => 'pass',
                 'receivables_ratio' => null, // Python engine currently doesn't compute this
                 'receivables_status' => 'pass',
-                'final_status' => ($calc['overall_financial_pass'] ?? true) && ($busScreening ? $busScreening->business_compliance_status !== 'Non-Compliant' : true) ? 'halal' : 'non-halal',
+                'final_status' => $finalStatus,
                 'news_sources' => $busScreening ? $busScreening->supporting_evidence : [],
                 'financial_data_used' => [
                     'market_cap' => $marketCap,

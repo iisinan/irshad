@@ -134,4 +134,85 @@ class PerplexityAiService
             ]
         ];
     }
+    public function runBusinessActivityScreening($company)
+    {
+        $prompt = "You are building a Shariah-compliance screening module for the IRSHD app (targeting Nigerian stocks on the NGX). Implement Stage 1 – Qualitative Business Activity Screen based on AAOIFI Shariah Standard No. 21.\n\n";
+        $prompt .= "Company: {$company->name} ({$company->symbol})\n";
+        $prompt .= "Sector: {$company->sector}, Industry: {$company->industry}\n";
+        $prompt .= "Description: {$company->description}\n\n";
+        $prompt .= "Determine the company's primary business activity from its sector classification, description, and revenue breakdown.\n\n";
+        $prompt .= "Immediately mark the stock as non-compliant (FAIL) if the company is primarily engaged in any of these prohibited activities:\n";
+        $prompt .= "- Conventional banking / interest-based financial services\n";
+        $prompt .= "- Conventional insurance (with riba/gharar)\n";
+        $prompt .= "- Alcohol production or distribution\n";
+        $prompt .= "- Pork or pork-related products\n";
+        $prompt .= "- Gambling, casinos, betting, lotteries\n";
+        $prompt .= "- Tobacco production\n";
+        $prompt .= "- Adult entertainment / pornography\n";
+        $prompt .= "- Weapons/arms manufacturing (where prohibited by scholars)\n";
+        $prompt .= "- Any other clearly haram activity under mainstream Islamic finance.\n\n";
+        $prompt .= "If the company has mixed activities, calculate Haram Revenue % = (Revenue from prohibited activities / Total revenue) * 100. If Haram Revenue % >= 5%, mark as FAIL. If Haram Revenue % < 5%, allow it to proceed (PASS), but flag that dividend purification will be required.\n\n";
+        $prompt .= "You MUST return a JSON object with EXACTLY these keys (no markdown blocks, no extra text):\n";
+        $prompt .= "{\n";
+        $prompt .= "  \"compliance_status\": \"PASS\" or \"FAIL\",\n";
+        $prompt .= "  \"haram_revenue_percent\": <float or null>,\n";
+        $prompt .= "  \"purification_required\": <boolean>,\n";
+        $prompt .= "  \"reason\": \"<Short human-readable explanation of the decision>\"\n";
+        $prompt .= "}";
+
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Content-Type' => 'application/json',
+            ])->timeout(60)->post($this->baseUrl, [
+                'model' => $this->model,
+                'messages' => [
+                    [
+                        'role' => 'system',
+                        'content' => 'You are an expert Islamic finance AI assistant powered by Perplexity. Your task is to perform Stage 1 of AAOIFI Shariah screening. Output ONLY valid JSON.'
+                    ],
+                    [
+                        'role' => 'user',
+                        'content' => $prompt
+                    ]
+                ],
+                'temperature' => 0.1,
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                $content = $data['choices'][0]['message']['content'] ?? '';
+                
+                $content = trim($content);
+                if (str_starts_with($content, '```json')) {
+                    $content = substr($content, 7);
+                } elseif (str_starts_with($content, '```')) {
+                    $content = substr($content, 3);
+                }
+                if (str_ends_with($content, '```')) {
+                    $content = substr($content, 0, -3);
+                }
+                $content = trim($content);
+
+                $parsed = json_decode($content, true);
+
+                if (is_array($parsed) && isset($parsed['compliance_status'])) {
+                    return $parsed;
+                }
+            }
+            Log::error('Perplexity AI Stage 1 failed or returned invalid JSON', [
+                'status' => $response->status(),
+                'body' => $response->body()
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Exception in Perplexity Stage 1 screening: ' . $e->getMessage());
+        }
+
+        return [
+            'compliance_status' => 'PASS', // Fallback to pass to allow Stage 2 to proceed if AI fails
+            'haram_revenue_percent' => 0,
+            'purification_required' => false,
+            'reason' => 'AI screening failed to complete. Business activity assumed compliant for further analysis.'
+        ];
+    }
 }
