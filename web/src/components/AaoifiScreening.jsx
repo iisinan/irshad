@@ -214,17 +214,7 @@ const AaoifiScreening = () => {
 
   const renderRatioProgressBar = (title, subtitle, ratio, threshold, numLabel, numVal, denLabel, denVal, formula, isMinimum = false) => {
     if (ratio === null || ratio === undefined) {
-      return (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '24px', padding: '24px 0', borderBottom: '1px solid var(--border)' }}>
-          <div style={{ flex: '0 0 220px', paddingLeft: '16px' }}>
-            <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.88rem', marginBottom: '4px' }}>{title}</div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{subtitle}</div>
-          </div>
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '0.79rem' }}>
-            <AlertTriangle size={16} /> Insufficient data
-          </div>
-        </div>
-      );
+      return null;
     }
 
     const ratioVal = parseFloat(ratio) || 0;
@@ -344,6 +334,7 @@ const AaoifiScreening = () => {
 
 
 
+      {businessStatus !== 'insufficient_data' && (
       <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', marginBottom: '48px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
           <div>
@@ -388,6 +379,7 @@ const AaoifiScreening = () => {
           </div>
         </div>
       </div>
+      )}
 
       <div style={{ marginBottom: '48px' }}>
         <h2 style={{ fontFamily: 'Fraunces, serif', color: 'var(--halal)', fontSize: '1.76rem', fontWeight: 700, marginBottom: '24px' }}>
@@ -443,6 +435,7 @@ const AaoifiScreening = () => {
         </div>
       </div>
 
+      {(debtRatio !== null || report.impermissible_income_ratio != null || cashRatio !== null || illiquidRatio !== null || receivablesRatio !== null) && (
       <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', marginBottom: '48px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '16px' }}>
           <div>
@@ -490,8 +483,7 @@ const AaoifiScreening = () => {
           )}
         </div>
       </div>
-
-
+      )}
 
       <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', marginBottom: '48px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)' }}>
         <button 
