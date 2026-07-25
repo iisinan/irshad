@@ -62,6 +62,7 @@ class StockController extends Controller
                     'interest_bearing_debt_ratio' => $ratios['interest_bearing_debt_ratio'] ?? 0,
                     'cash_and_equivalents_ratio' => $ratios['cash_and_equivalents_ratio'] ?? 0,
                     'non_compliant_income_ratio' => $ratios['non_permissible_income_ratio'] ?? 0,
+                    'evidence_link' => $existingScreening->evidence_links,
                 ];
                 
                 if ($company->financials && $company->financials->count() > 0) {

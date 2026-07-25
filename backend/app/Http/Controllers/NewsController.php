@@ -13,7 +13,7 @@ class NewsController extends Controller
         $limit = $request->query('limit', 20);
         $symbol = $request->query('symbol');
 
-        $query = News::orderBy('published_at', 'desc');
+        $query = News::with('company')->orderBy('published_at', 'desc');
 
         if ($symbol) {
             $company = \App\Models\Company::where('symbol', $symbol)->first();

@@ -762,7 +762,10 @@ export default function Dashboard() {
                     <a href={item.url} target="_blank" rel="noopener noreferrer" style={{fontSize: '0.75rem',color:'var(--text-dark)',fontWeight:700,textDecoration:'none',lineHeight:1.4}} onMouseEnter={e=>e.target.style.color='var(--primary)'} onMouseLeave={e=>e.target.style.color='var(--text-dark)'}>
                       {item.title}
                     </a>
-                    <div style={{display:'flex',justifyContent:'flex-end',alignItems:'center'}}>
+                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginTop:'4px'}}>
+                      {item.symbol ? (
+                        <span style={{fontSize: '0.6rem',fontWeight:800,color:'var(--primary)',background:'var(--primary-50)',padding:'2px 6px',borderRadius:'4px',letterSpacing:'0.5px'}}>{item.symbol}</span>
+                      ) : <span />}
                       <span style={{fontSize: '0.57rem',color:'var(--text-muted)'}}>{item.published_human}</span>
                     </div>
                   </div>

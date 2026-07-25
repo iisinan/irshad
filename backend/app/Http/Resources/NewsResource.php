@@ -23,6 +23,7 @@ class NewsResource extends JsonResource
             'excerpt' => $this->excerpt,
             'published_at' => $this->published_at?->toIso8601String(),
             'published_human' => $this->published_at?->diffForHumans(),
+            'symbol' => $this->company?->symbol,
         ];
     }
 }

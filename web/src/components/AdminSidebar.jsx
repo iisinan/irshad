@@ -266,9 +266,14 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
               }}>
                 {(user?.first_name || user?.name || 'U').charAt(0).toUpperCase()}
               </div>
-              <div style={{ overflow: 'hidden' }}>
-                <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-dark)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontFamily: 'var(--sans)' }}>
-                  {user?.first_name || user?.name || 'User'}
+              <div style={{ overflow: 'hidden', flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-dark)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontFamily: 'var(--sans)' }}>
+                    {user?.first_name || user?.name || 'User'}
+                  </div>
+                  {user?.role === 'admin' && (
+                    <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--primary)', background: 'var(--primary-50)', padding: '2px 6px', borderRadius: '4px', letterSpacing: '0.5px' }}>ADMIN</span>
+                  )}
                 </div>
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '2px' }}>
                   {user?.email || 'user@irshad.com'}
