@@ -30,8 +30,10 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
   const isCollapsed = collapsed && !mobileOpen;
 
   const isActive = (to) => {
-    const toPath = to.split('#')[0];
-    const toHash = to.split('#')[1] ? '#' + to.split('#')[1] : '';
+    const url = new URL(to, window.location.origin);
+    const toPath = url.pathname;
+    const toHash = url.hash;
+    const toSearch = url.search;
 
     if (toPath === '/portfolio' || toPath === '/profile') {
       if (location.pathname !== toPath) return false;
@@ -40,7 +42,20 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
       return currentHash === '';
     }
 
-    return location.pathname === toPath || (toPath !== '/' && location.pathname.startsWith(toPath));
+    if (location.pathname !== toPath) {
+      if (toPath === '/admin') return false; // Strict match for base /admin
+      return location.pathname.startsWith(toPath);
+    }
+
+    if (toSearch) {
+      return location.search.includes(toSearch.replace('?', ''));
+    }
+
+    if (toPath === '/admin' && location.search.includes('tab=')) {
+      return false; // Don't highlight base admin if we're in a specific tab
+    }
+
+    return true;
   };
 
   const handleLogout = () => {

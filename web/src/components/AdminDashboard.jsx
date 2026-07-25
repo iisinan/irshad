@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Shield, Search, AlertTriangle, CheckCircle, Edit2, X, Package, TrendingUp, AlertCircle, Calculator, RefreshCw, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
-import api from '../services/api';
+import api, { formatLogoUrl } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { toastError, toastSuccess } from '../utils/toast';
 import ZakatSettingsAdmin from './ZakatSettingsAdmin';
@@ -294,12 +294,12 @@ const AdminDashboard = () => {
               <button onClick={loadData} style={{ marginTop: '12px', padding: '8px 20px', borderRadius: '10px', background: 'var(--primary)', color: 'white', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '0.82rem' }}>Retry</button>
             </div>
           ) : (
-            <div style={{ overflowX: 'auto' }}>
+            <div style={{ overflowX: 'auto', maxHeight: '600px', overflowY: 'auto' }}>
               <table style={{ width: '100%', minWidth: '700px', borderCollapse: 'collapse', textAlign: 'left' }}>
-                <thead>
+                <thead style={{ position: 'sticky', top: 0, zIndex: 10 }}>
                   <tr style={{ background: 'var(--bg-section)', borderBottom: '1px solid var(--border)' }}>
                     {[activeTab === 'stocks' ? 'Company' : 'Product', activeTab === 'stocks' ? 'Sector' : 'Brand', 'Status', 'Action'].map((h, i) => (
-                      <th key={h} style={{ padding: '14px 20px', fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: i === 3 ? 'right' : 'left' }}>{h}</th>
+                      <th key={h} style={{ padding: '14px 20px', fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: i === 3 ? 'right' : 'left', background: 'var(--bg-section)' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -330,11 +330,34 @@ const AdminDashboard = () => {
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                       >
                         <td style={{ padding: '16px 20px' }}>
-                          <div style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.88rem' }}>
-                            {activeTab === 'stocks' ? item.symbol : item.name}
-                          </div>
-                          {activeTab === 'stocks' && (
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>{item.name}</div>
+                          {activeTab === 'stocks' ? (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '11px' }}>
+                              <div style={{
+                                width: '36px', height: '36px', borderRadius: '9px', flexShrink: 0,
+                                background: 'var(--primary-50)', border: '1px solid var(--border)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontWeight: 800, fontSize: '0.6rem', color: 'var(--primary)',
+                                overflow: 'hidden'
+                              }}>
+                                {item.logo_url ? (
+                                  <img loading="lazy" src={formatLogoUrl(item.logo_url)} alt={item.symbol} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                ) : (
+                                  (item.symbol || '').slice(0, 4)
+                                )}
+                              </div>
+                              <div>
+                                <div style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.88rem', lineHeight: 1.2 }}>
+                                  {item.symbol}
+                                </div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>
+                                  {item.name}
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <div>
+                              <div style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.88rem' }}>{item.name}</div>
+                            </div>
                           )}
                         </td>
                         <td style={{ padding: '16px 20px', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
