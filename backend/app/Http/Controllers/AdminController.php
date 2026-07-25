@@ -253,11 +253,18 @@ class AdminController extends Controller
      */
     public function previewImport(Request $request)
     {
-        $request->validate(['file' => 'required|mimes:csv,txt']);
+        $request->validate(['file' => 'required|mimes:csv,txt,xlsx,xls']);
         
         $file = $request->file('file');
-        $csvData = file_get_contents($file);
-        $rows = array_map('str_getcsv', explode("\n", $csvData));
+        
+        $rows = [];
+        if (($handle = fopen($file->getRealPath(), "r")) !== FALSE) {
+            while (($data = fgetcsv($handle, 10000, ",")) !== FALSE) {
+                $rows[] = $data;
+            }
+            fclose($handle);
+        }
+        
         $header = array_shift($rows); // Remove header
         
         $changes = [];
