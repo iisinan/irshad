@@ -354,6 +354,17 @@ export const deleteResource = async (id) => {
   return response.data;
 };
 
+// Global Settings
+export const getSettings = async () => {
+  const response = await api.get('/settings');
+  return response.data;
+};
+
+export const updateSettings = async (settings) => {
+  const response = await api.put('/admin/settings', { settings });
+  return response.data;
+};
+
 // ==========================================
 // MOCK ENDPOINTS FOR PUBLIC OVERVIEW DASHBOARD
 // ==========================================

@@ -1,43 +1,110 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Search, Filter, AlertTriangle, CheckCircle, Edit2, X, Package, TrendingUp, AlertCircle } from 'lucide-react';
+import { Shield, Search, AlertTriangle, CheckCircle, Edit2, X, Package, TrendingUp, AlertCircle, Calculator, RefreshCw, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
-import api, { fetchNgxStocks, fetchProducts } from '../services/api';
+import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { toastError, toastSuccess } from '../utils/toast';
+import ZakatSettingsAdmin from './ZakatSettingsAdmin';
+
+// ─── Stat Card ────────────────────────────────────────────
+function StatCard({ label, value, icon: Icon, color = 'var(--primary)', bg = 'var(--primary-50)' }) {
+  return (
+    <div style={{
+      background: 'var(--bg)',
+      borderRadius: '16px',
+      border: '1px solid var(--border)',
+      padding: '20px 24px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '16px',
+      boxShadow: 'var(--shadow-sm)',
+      flex: 1,
+      minWidth: 0,
+    }}>
+      <div style={{
+        width: '44px', height: '44px', borderRadius: '12px',
+        background: bg, color: color,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        flexShrink: 0,
+      }}>
+        <Icon size={20} />
+      </div>
+      <div>
+        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-dark)', lineHeight: 1 }}>{value}</div>
+        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px', fontWeight: 600 }}>{label}</div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Status Badge ────────────────────────────────────────
+function StatusBadge({ status }) {
+  const map = {
+    halal:     { color: 'var(--halal)',     bg: 'var(--halal-bg)',     label: 'Halal' },
+    'non-halal': { color: 'var(--non-halal)', bg: 'var(--non-halal-bg)', label: 'Non-Halal' },
+    doubtful:  { color: 'var(--doubtful)',  bg: 'var(--doubtful-bg)',  label: 'Doubtful' },
+    review:    { color: 'var(--review)',    bg: 'var(--review-bg)',    label: 'Under Review' },
+  };
+  const s = map[status] || { color: 'var(--text-muted)', bg: 'var(--bg-section)', label: status || 'Unknown' };
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', gap: '5px',
+      padding: '4px 12px', borderRadius: '100px',
+      fontSize: '0.72rem', fontWeight: 700,
+      background: s.bg, color: s.color,
+    }}>
+      <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: s.color, flexShrink: 0 }} />
+      {s.label}
+    </span>
+  );
+}
+
+// ─── Tab Button ──────────────────────────────────────────
+function TabBtn({ active, onClick, icon: Icon, label }) {
+  return (
+    <button onClick={onClick} style={{
+      display: 'flex', alignItems: 'center', gap: '7px',
+      padding: '9px 18px', borderRadius: '10px', border: 'none',
+      background: active ? 'var(--bg)' : 'transparent',
+      color: active ? 'var(--text-dark)' : 'var(--text-muted)',
+      fontWeight: active ? 700 : 600,
+      fontSize: '0.82rem', cursor: 'pointer',
+      boxShadow: active ? '0 2px 8px rgba(0,0,0,0.06)' : 'none',
+      transition: 'all 0.2s',
+    }}>
+      <Icon size={15} style={{ opacity: active ? 1 : 0.7 }} />
+      {label}
+    </button>
+  );
+}
 
 const AdminDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  
-  const [activeTab, setActiveTab] = useState('stocks'); // 'stocks' | 'products'
-  
+
+  const [activeTab, setActiveTab] = useState('stocks');
   const [stocks, setStocks] = useState([]);
   const [products, setProducts] = useState([]);
   const [alerts, setAlerts] = useState([]);
-  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  
-  // Modal state
-  const [selectedItem, setSelectedItem] = useState(null); // { type: 'stocks' | 'products', data: {} }
+
+  const [selectedItem, setSelectedItem] = useState(null);
   const [newStatus, setNewStatus] = useState('');
   const [reason, setReason] = useState('');
   const [updating, setUpdating] = useState(false);
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  useEffect(() => { loadData(); }, []);
 
   const loadData = async () => {
     try {
-      setLoading(true);
-      setError(null);
+      setLoading(true); setError(null);
       const [stocksRes, productsRes, alertsRes] = await Promise.all([
         api.get('/stocks'),
         api.get('/products'),
-        api.get('/admin/alerts')
+        api.get('/admin/alerts'),
       ]);
       setStocks(stocksRes.data?.data || []);
       setProducts(productsRes.data?.data || []);
@@ -52,30 +119,17 @@ const AdminDashboard = () => {
   const handleUpdateStatus = async (e) => {
     e.preventDefault();
     if (!selectedItem || !newStatus || !reason) return;
-    
     setUpdating(true);
     try {
       if (selectedItem.type === 'stocks') {
-        const response = await api.put(`/stocks/${selectedItem.data.symbol}/status`, {
-          status: newStatus,
-          reason: reason
-        });
-        const result = response.data;
-        setStocks(stocks.map(s => s.symbol === selectedItem.data.symbol ? result.data : s));
+        const res = await api.put(`/stocks/${selectedItem.data.symbol}/status`, { status: newStatus, reason });
+        setStocks(stocks.map(s => s.symbol === selectedItem.data.symbol ? res.data.data : s));
       } else {
-        const response = await api.put(`/products/${selectedItem.data.id}/status`, {
-          status: newStatus,
-          status_reason: reason
-        });
-        const result = response.data;
-        setProducts(products.map(p => p.id === selectedItem.data.id ? result.data : p));
+        const res = await api.put(`/products/${selectedItem.data.id}/status`, { status: newStatus, status_reason: reason });
+        setProducts(products.map(p => p.id === selectedItem.data.id ? res.data.data : p));
       }
-      
-      setSelectedItem(null);
-      setNewStatus('');
-      setReason('');
+      setSelectedItem(null); setNewStatus(''); setReason('');
       toastSuccess('Status updated successfully');
-      
     } catch (err) {
       toastError(err.message || 'Failed to update status');
     } finally {
@@ -87,290 +141,315 @@ const AdminDashboard = () => {
     try {
       await api.post(`/admin/alerts/${id}/resolve`);
       setAlerts(prev => prev.filter(a => a.id !== id));
-    } catch (err) {
-      toastError('Failed to resolve alert');
-    }
+      toastSuccess('Alert resolved');
+    } catch { toastError('Failed to resolve alert'); }
   };
 
-  const getFilteredData = () => {
-    if (activeTab === 'stocks') {
-      return stocks.filter(s => 
-        s.symbol?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        s.name?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    } else {
-      return products.filter(p => 
-        p.barcode?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        p.name?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-  };
+  const filteredData = activeTab === 'stocks'
+    ? stocks.filter(s => s.symbol?.toLowerCase().includes(searchTerm.toLowerCase()) || s.name?.toLowerCase().includes(searchTerm.toLowerCase()))
+    : products.filter(p => p.barcode?.toLowerCase().includes(searchTerm.toLowerCase()) || p.name?.toLowerCase().includes(searchTerm.toLowerCase()));
+
+  const halalCount = stocks.filter(s => s.status?.status === 'halal').length;
+  const nonHalalCount = stocks.filter(s => s.status?.status === 'non-halal').length;
+  const doubtfulCount = stocks.filter(s => s.status?.status === 'doubtful').length;
 
   if (user?.role !== 'admin' && user?.role !== 'scholar') {
     return (
-      <div style={{ padding: '40px', textAlign: 'center' }}>
-        <Shield size={48} color="red" style={{ margin: '0 auto 20px' }} />
-        <h2>Access Denied</h2>
-        <p>You do not have permission to view the Admin Dashboard.</p>
+      <div style={{ padding: '80px', textAlign: 'center' }}>
+        <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: 'var(--non-halal-bg)', color: 'var(--non-halal)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+          <Shield size={36} />
+        </div>
+        <h2 style={{ color: 'var(--text-dark)', marginBottom: '8px' }}>Access Denied</h2>
+        <p style={{ color: 'var(--text-muted)' }}>You do not have permission to view the Admin Dashboard.</p>
       </div>
     );
   }
 
-  const filteredData = getFilteredData();
-
   return (
-    <div style={{ padding: '40px', maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
-        <div>
-          <h1 style={{ fontSize: '26px', color: 'var(--text-dark)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <Shield color="var(--primary-green)" />
-            Scholar & Admin Panel
-          </h1>
-          <p style={{ color: 'var(--text-muted)' }}>Override and manage compliance statuses manually.</p>
+    <div style={{ padding: '32px 40px', maxWidth: '1400px', margin: '0 auto', minHeight: '100vh' }}>
+
+      {/* ── Page Header ───────────────────────────── */}
+      <div style={{ marginBottom: '32px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>Admin</span>
+          <ChevronRight size={12} color="var(--text-light)" />
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '1px' }}>Dashboard</span>
         </div>
-        
-        {/* Tabs */}
-        <div style={{ display: 'flex', backgroundColor: 'var(--bg-section)', padding: '4px', borderRadius: '12px' }}>
-            <button
-              onClick={() => setActiveTab('stocks')}
-              style={{
-                  display: 'flex', alignItems: 'center', gap: '8px',
-                  padding: '10px 20px', borderRadius: '10px',
-                  backgroundColor: activeTab === 'stocks' ? 'var(--bg)' : 'transparent',
-                  color: activeTab === 'stocks' ? 'var(--text-dark)' : 'var(--text-muted)',
-                  border: 'none', cursor: 'pointer', fontWeight: '700',
-                  boxShadow: activeTab === 'stocks' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none'
-              }}
-            >
-                <TrendingUp size={16} /> Stocks
-            </button>
-            <button
-              onClick={() => setActiveTab('products')}
-              style={{
-                  display: 'flex', alignItems: 'center', gap: '8px',
-                  padding: '10px 20px', borderRadius: '10px',
-                  backgroundColor: activeTab === 'products' ? 'var(--bg)' : 'transparent',
-                  color: activeTab === 'products' ? 'var(--text-dark)' : 'var(--text-muted)',
-                  border: 'none', cursor: 'pointer', fontWeight: '700',
-                  boxShadow: activeTab === 'products' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none'
-              }}
-            >
-                <Package size={16} /> Products
-            </button>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '16px' }}>
+          <div>
+            <h1 style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--text-dark)', margin: 0, letterSpacing: '-0.5px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--primary-50)', color: 'var(--primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Shield size={20} />
+              </span>
+              Scholar & Admin Panel
+            </h1>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: '6px 0 0', lineHeight: 1.5 }}>
+              Manage compliance statuses, products, and global settings.
+            </p>
+          </div>
+          <button
+            onClick={loadData}
+            disabled={loading}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '8px',
+              padding: '10px 18px', borderRadius: '12px',
+              border: '1px solid var(--border)', background: 'var(--bg)',
+              color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600,
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--primary)'}
+            onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
+          >
+            <RefreshCw size={15} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />
+            Refresh
+          </button>
         </div>
       </div>
 
-      {/* Alerts Section */}
+      {/* ── Stat Cards ────────────────────────────── */}
+      <div style={{ display: 'flex', gap: '16px', marginBottom: '32px', flexWrap: 'wrap' }}>
+        <StatCard label="Total Stocks" value={stocks.length} icon={TrendingUp} />
+        <StatCard label="Halal" value={halalCount} icon={CheckCircle} color="var(--halal)" bg="var(--halal-bg)" />
+        <StatCard label="Non-Halal" value={nonHalalCount} icon={AlertTriangle} color="var(--non-halal)" bg="var(--non-halal-bg)" />
+        <StatCard label="Doubtful" value={doubtfulCount} icon={AlertCircle} color="var(--doubtful)" bg="var(--doubtful-bg)" />
+        <StatCard label="Products" value={products.length} icon={Package} color="#7C3AED" bg="rgba(124,58,237,0.08)" />
+      </div>
+
+      {/* ── Alerts Section ───────────────────────── */}
       {alerts.length > 0 && (
-        <div style={{ marginBottom: '32px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <h2 style={{ margin: 0, fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px', color: '#B91C1C' }}>
-            <AlertCircle size={20} /> Action Required
+        <div style={{ marginBottom: '32px' }}>
+          <h2 style={{ margin: '0 0 12px', fontSize: '0.88rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--non-halal)' }}>
+            <AlertCircle size={16} /> {alerts.length} Action{alerts.length !== 1 ? 's' : ''} Required
           </h2>
-          {alerts.map(alert => (
-            <div key={alert.id} style={{ 
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
-              padding: '16px 24px', backgroundColor: '#FEF2F2', 
-              border: '1px solid #FECACA', borderRadius: '12px' 
-            }}>
-              <div>
-                <div style={{ fontWeight: '700', color: '#991B1B', marginBottom: '4px' }}>
-                  Conflict Detected for {alert.company?.symbol || 'Unknown'}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {alerts.map(alert => (
+              <div key={alert.id} style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                padding: '16px 20px', background: 'var(--non-halal-bg)',
+                border: '1px solid var(--non-halal-border)', borderRadius: '14px',
+                gap: '12px', flexWrap: 'wrap'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--non-halal)', marginTop: '6px', flexShrink: 0 }} />
+                  <div>
+                    <div style={{ fontWeight: 700, color: 'var(--non-halal)', fontSize: '0.88rem', marginBottom: '2px' }}>
+                      Conflict: {alert.company?.symbol || 'Unknown'}
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-body)' }}>{alert.message}</div>
+                  </div>
                 </div>
-                <div style={{ fontSize: '13px', color: 'var(--text-dark)' }}>{alert.message}</div>
+                <div style={{ display: 'flex', gap: '10px', flexShrink: 0 }}>
+                  <button
+                    onClick={() => { setSelectedItem({ type: 'stocks', data: alert.company }); setNewStatus('non-halal'); setReason('Overriding based on Excel screening failure'); }}
+                    style={{ padding: '8px 16px', borderRadius: '10px', background: 'var(--non-halal)', color: 'white', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '0.78rem' }}
+                  >
+                    Override to Fail
+                  </button>
+                  <button
+                    onClick={() => resolveAlert(alert.id)}
+                    style={{ padding: '8px 14px', borderRadius: '10px', background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)', fontWeight: 600, cursor: 'pointer', fontSize: '0.78rem' }}
+                  >
+                    Dismiss
+                  </button>
+                </div>
               </div>
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <button 
-                  onClick={() => {
-                    setSelectedItem({ type: 'stocks', data: alert.company });
-                    setNewStatus('non-halal');
-                    setReason('Overriding based on Excel screening failure');
-                  }}
-                  style={{ padding: '8px 16px', borderRadius: '8px', backgroundColor: '#B91C1C', color: 'white', border: 'none', fontWeight: '600', cursor: 'pointer', fontSize: '13px' }}
-                >
-                  Resolve (Override to Fail)
-                </button>
-                <button 
-                  onClick={() => resolveAlert(alert.id)}
-                  style={{ padding: '8px 16px', borderRadius: '8px', backgroundColor: 'var(--bg)', color: 'var(--text-dark)', border: '1px solid var(--border)', fontWeight: '600', cursor: 'pointer', fontSize: '13px' }}
-                >
-                  Dismiss
-                </button>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
 
-      <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
-        <div style={{ flex: 1, position: 'relative' }}>
-          <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-          <input 
-            type="text" 
-            placeholder={`Search ${activeTab} by name or ID...`}
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '12px 16px 12px 42px',
-              borderRadius: '12px',
-              border: '1px solid var(--border)',
-              backgroundColor: 'var(--bg-section)',
-              color: 'var(--text-dark)',
-              fontSize: '13px',
-              outline: 'none'
-            }}
-          />
+      {/* ── Tabs + Search ─────────────────────────── */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', gap: '16px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', background: 'var(--bg-section)', padding: '4px', borderRadius: '14px', gap: '2px' }}>
+          <TabBtn active={activeTab === 'stocks'} onClick={() => setActiveTab('stocks')} icon={TrendingUp} label="Stocks" />
+          <TabBtn active={activeTab === 'products'} onClick={() => setActiveTab('products')} icon={Package} label="Products" />
+          <TabBtn active={activeTab === 'zakat'} onClick={() => setActiveTab('zakat')} icon={Calculator} label="Zakat Settings" />
         </div>
+
+        {activeTab !== 'zakat' && (
+          <div style={{ position: 'relative', flex: '0 1 320px' }}>
+            <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+            <input
+              type="text"
+              placeholder={`Search ${activeTab}…`}
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              style={{
+                width: '100%', padding: '10px 14px 10px 38px',
+                borderRadius: '12px', border: '1px solid var(--border)',
+                background: 'var(--bg)', color: 'var(--text-dark)',
+                fontSize: '0.85rem', outline: 'none',
+              }}
+            />
+          </div>
+        )}
       </div>
 
-      <div style={{ backgroundColor: 'var(--bg)', borderRadius: '16px', border: '1px solid var(--border)', overflowX: 'auto', boxShadow: 'var(--shadow-sm)' }}>
-        <table style={{ width: '100%', minWidth: '800px', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead style={{ backgroundColor: 'var(--bg-section)', borderBottom: '1px solid var(--border)' }}>
-            <tr>
-              <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                  {activeTab === 'stocks' ? 'Company' : 'Product'}
-              </th>
-              <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                  {activeTab === 'stocks' ? 'Sector' : 'Brand / Barcode'}
-              </th>
-              <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Current Status</th>
-              <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr><td colSpan="4" style={{ padding: '40px', textAlign: 'center' }}>Loading...</td></tr>
-            ) : filteredData.length === 0 ? (
-                <tr><td colSpan="4" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>No {activeTab} found.</td></tr>
-            ) : filteredData.map(item => {
-              
-              const status = activeTab === 'stocks' ? item.status?.status : item.status;
-              const isVerified = activeTab === 'stocks' ? item.status?.verified_by_scholar === 1 : item.verified_by_scholar === 1;
-              const statusColor = status === 'halal' ? 'var(--primary-green)' : 
-                                 status === 'non-halal' ? 'var(--non-halal)' : '#F59E0B';
-              
-              return (
-                <tr key={activeTab === 'stocks' ? item.symbol : item.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                  <td style={{ padding: '16px 24px' }}>
-                    <div style={{ fontWeight: '700', color: 'var(--text-dark)' }}>
-                        {activeTab === 'stocks' ? item.symbol : item.name}
-                    </div>
-                    <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                        {activeTab === 'stocks' ? item.name : ''}
-                    </div>
-                  </td>
-                  <td style={{ padding: '16px 24px', color: 'var(--text-muted)', fontSize: '13px' }}>
-                    {activeTab === 'stocks' ? item.sector : (
-                        <div>
-                            <div>{item.brand || 'Unknown Brand'}</div>
-                            <div style={{ fontSize: '11px', color: '#9CA3AF' }}>{item.barcode}</div>
-                        </div>
-                    )}
-                  </td>
-                  <td style={{ padding: '16px 24px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: statusColor }} />
-                      <span style={{ fontWeight: '600', textTransform: 'capitalize', color: statusColor }}>
-                        {status || 'Unknown'}
-                      </span>
-                      {isVerified && (
-                        <Shield size={14} color="var(--primary-green)" title="Scholar Verified" />
-                      )}
-                    </div>
-                  </td>
-                  <td style={{ padding: '16px 24px' }}>
-                    <button 
-                      onClick={() => {
-                        if (activeTab === 'stocks') {
-                          navigate(`/admin/tickers/${item.symbol}`);
-                        } else {
-                          setSelectedItem({ type: activeTab, data: item });
-                          setNewStatus(status || 'halal');
-                        }
-                      }}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: '6px',
-                        padding: '8px 12px', borderRadius: '8px',
-                        backgroundColor: 'var(--bg-section)', color: 'var(--text-dark)',
-                        border: '1px solid var(--border)', cursor: 'pointer', fontWeight: '600', fontSize: '12px',
-                        transition: 'all 0.2s'
-                      }}
-                      onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--bg)'; e.currentTarget.style.borderColor = 'var(--primary)'; }}
-                      onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'var(--bg-section)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
-                    >
-                      <Edit2 size={14} /> Override
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+      {/* ── Main Content ─────────────────────────── */}
+      {activeTab === 'zakat' ? (
+        <ZakatSettingsAdmin />
+      ) : (
+        <div style={{ background: 'var(--bg)', borderRadius: '20px', border: '1px solid var(--border)', overflow: 'hidden', boxShadow: 'var(--shadow-sm)' }}>
+          {error ? (
+            <div style={{ padding: '48px', textAlign: 'center' }}>
+              <AlertCircle size={32} color="var(--non-halal)" style={{ margin: '0 auto 12px' }} />
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>{error}</p>
+              <button onClick={loadData} style={{ marginTop: '12px', padding: '8px 20px', borderRadius: '10px', background: 'var(--primary)', color: 'white', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '0.82rem' }}>Retry</button>
+            </div>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', minWidth: '700px', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <thead>
+                  <tr style={{ background: 'var(--bg-section)', borderBottom: '1px solid var(--border)' }}>
+                    {[activeTab === 'stocks' ? 'Company' : 'Product', activeTab === 'stocks' ? 'Sector' : 'Brand', 'Status', 'Action'].map((h, i) => (
+                      <th key={h} style={{ padding: '14px 20px', fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: i === 3 ? 'right' : 'left' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    Array.from({ length: 6 }).map((_, i) => (
+                      <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
+                        {[1,2,3,4].map(j => (
+                          <td key={j} style={{ padding: '18px 20px' }}>
+                            <div style={{ height: '14px', borderRadius: '6px', background: 'var(--bg-section)', animation: 'pulse 1.5s ease-in-out infinite', width: j === 4 ? '60px' : '80%' }} />
+                          </td>
+                        ))}
+                      </tr>
+                    ))
+                  ) : filteredData.length === 0 ? (
+                    <tr>
+                      <td colSpan="4" style={{ padding: '56px', textAlign: 'center' }}>
+                        <div style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>No {activeTab} match your search.</div>
+                      </td>
+                    </tr>
+                  ) : filteredData.map(item => {
+                    const status = activeTab === 'stocks' ? item.status?.status : item.status;
+                    const isVerified = activeTab === 'stocks' ? item.status?.verified_by_scholar === 1 : item.verified_by_scholar === 1;
+                    return (
+                      <tr key={activeTab === 'stocks' ? item.symbol : item.id}
+                        style={{ borderBottom: '1px solid var(--border)', transition: 'background 0.15s' }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-section)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <td style={{ padding: '16px 20px' }}>
+                          <div style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.88rem' }}>
+                            {activeTab === 'stocks' ? item.symbol : item.name}
+                          </div>
+                          {activeTab === 'stocks' && (
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>{item.name}</div>
+                          )}
+                        </td>
+                        <td style={{ padding: '16px 20px', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
+                          {activeTab === 'stocks' ? (item.sector || '—') : (
+                            <div>
+                              <div style={{ fontWeight: 600, color: 'var(--text-dark)', fontSize: '0.82rem' }}>{item.brand || 'Unknown'}</div>
+                              <div style={{ fontSize: '0.72rem', color: 'var(--text-light)' }}>{item.barcode}</div>
+                            </div>
+                          )}
+                        </td>
+                        <td style={{ padding: '16px 20px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <StatusBadge status={status} />
+                            {isVerified && <Shield size={13} color="var(--halal)" title="Scholar Verified" />}
+                          </div>
+                        </td>
+                        <td style={{ padding: '16px 20px', textAlign: 'right' }}>
+                          <button
+                            onClick={() => {
+                              if (activeTab === 'stocks') {
+                                navigate(`/admin/tickers/${item.symbol}`);
+                              } else {
+                                setSelectedItem({ type: activeTab, data: item });
+                                setNewStatus(status || 'halal');
+                              }
+                            }}
+                            style={{
+                              display: 'inline-flex', alignItems: 'center', gap: '6px',
+                              padding: '7px 14px', borderRadius: '10px',
+                              background: 'var(--primary-50)', color: 'var(--primary)',
+                              border: '1px solid var(--primary-100)', cursor: 'pointer',
+                              fontWeight: 700, fontSize: '0.75rem',
+                              transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.background = 'var(--primary)'; e.currentTarget.style.color = '#fff'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = 'var(--primary-50)'; e.currentTarget.style.color = 'var(--primary)'; }}
+                          >
+                            <Edit2 size={13} />
+                            {activeTab === 'stocks' ? 'Edit' : 'Override'}
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
 
-      {/* Override Modal */}
+      {/* ── Override Modal ──────────────────────── */}
       {selectedItem && createPortal(
         <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000
+          position: 'fixed', inset: 0,
+          background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 100000, padding: '20px'
         }}>
-          <div className="animate-fade-in" style={{ backgroundColor: 'var(--bg)', padding: '32px', borderRadius: '24px', width: '100%', maxWidth: '500px', border: '1px solid var(--border)', boxShadow: '0 32px 64px rgba(0,0,0,0.2)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-              <h2 style={{ margin: 0, fontSize: '18px' }}>
-                  Override {selectedItem.type === 'stocks' ? selectedItem.data.symbol : selectedItem.data.name}
-              </h2>
-              <button 
-                onClick={() => setSelectedItem(null)}
-                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
-              >
-                <X size={20} />
+          <div className="animate-fade-in" style={{
+            background: 'var(--bg)', padding: '0', borderRadius: '24px',
+            width: '100%', maxWidth: '480px',
+            border: '1px solid var(--border)',
+            boxShadow: '0 32px 64px rgba(0,0,0,0.2)',
+            overflow: 'hidden'
+          }}>
+            {/* Modal Header */}
+            <div style={{ padding: '24px 28px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-section)' }}>
+              <div>
+                <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Override Status</div>
+                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)' }}>
+                  {selectedItem.type === 'stocks' ? selectedItem.data?.symbol : selectedItem.data?.name}
+                </h3>
+              </div>
+              <button onClick={() => setSelectedItem(null)} style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--bg)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)' }}>
+                <X size={16} />
               </button>
             </div>
-            
-            <form onSubmit={handleUpdateStatus}>
-              <div style={{ marginBottom: '24px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '8px', color: 'var(--text-muted)' }}>
-                  NEW STATUS
+
+            <form onSubmit={handleUpdateStatus} style={{ padding: '28px' }}>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' }}>
+                  New Status
                 </label>
-                <select 
-                  value={newStatus}
-                  onChange={(e) => setNewStatus(e.target.value)}
-                  style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', backgroundColor: 'var(--bg-section)', color: 'var(--text-dark)', fontSize: '14px', fontWeight: '600', outline: 'none' }}
-                >
-                  <option value="">Select status...</option>
-                  <option value="halal">Halal</option>
-                  <option value="doubtful">Doubtful</option>
-                  <option value="non-halal">Non-Halal</option>
+                <select value={newStatus} onChange={e => setNewStatus(e.target.value)}
+                  style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', color: 'var(--text-dark)', fontSize: '0.88rem', fontWeight: 600, outline: 'none', cursor: 'pointer' }}>
+                  <option value="">Select new status…</option>
+                  <option value="halal">✅ Halal</option>
+                  <option value="doubtful">⚠️ Doubtful</option>
+                  <option value="non-halal">❌ Non-Halal</option>
                 </select>
               </div>
 
-              <div style={{ marginBottom: '32px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '8px', color: 'var(--text-muted)' }}>
-                  REASON FOR OVERRIDE (REQUIRED)
+              <div style={{ marginBottom: '28px' }}>
+                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' }}>
+                  Reason for Override *
                 </label>
-                <textarea 
-                  required
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                  placeholder="Explain why the algorithmic status is being overridden..."
-                  style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', backgroundColor: 'var(--bg-section)', color: 'var(--text-dark)', fontSize: '13px', minHeight: '100px', outline: 'none' }}
+                <textarea required value={reason} onChange={e => setReason(e.target.value)}
+                  placeholder="Explain why the algorithmic status is being overridden…"
+                  rows={4}
+                  style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', color: 'var(--text-dark)', fontSize: '0.85rem', outline: 'none', resize: 'vertical', fontFamily: 'inherit' }}
                 />
               </div>
 
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-                <button 
-                  type="button" 
-                  onClick={() => setSelectedItem(null)}
-                  style={{ padding: '12px 24px', borderRadius: '12px', backgroundColor: 'var(--bg-section)', color: 'var(--text-muted)', border: 'none', fontWeight: '700', cursor: 'pointer' }}
-                >
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button type="button" onClick={() => setSelectedItem(null)}
+                  style={{ flex: 1, padding: '13px', borderRadius: '12px', background: 'var(--bg-section)', border: 'none', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer' }}>
                   Cancel
                 </button>
-                <button 
-                  type="submit" 
-                  disabled={updating || !reason}
-                  style={{ padding: '12px 24px', borderRadius: '12px', backgroundColor: 'var(--primary)', color: 'white', border: 'none', fontWeight: '700', cursor: 'pointer', opacity: (updating || !reason) ? 0.5 : 1 }}
-                >
-                  {updating ? 'Saving...' : 'Confirm Override'}
+                <button type="submit" disabled={updating || !reason || !newStatus}
+                  style={{ flex: 2, padding: '13px', borderRadius: '12px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 700, cursor: (updating || !reason || !newStatus) ? 'not-allowed' : 'pointer', opacity: (updating || !reason || !newStatus) ? 0.5 : 1, transition: 'opacity 0.2s' }}>
+                  {updating ? 'Saving…' : 'Confirm Override'}
                 </button>
               </div>
             </form>
@@ -378,6 +457,7 @@ const AdminDashboard = () => {
         </div>,
         document.body
       )}
+
     </div>
   );
 };

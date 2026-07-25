@@ -15,6 +15,7 @@ use App\Http\Controllers\BillingController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\VerificationController;
 use App\Http\Controllers\PriceAlertController;
+use App\Http\Controllers\SettingsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -41,6 +42,7 @@ Route::prefix('v1')->group(function () {
     // ── Public Data (no auth required) ───────────────────────────────────
     Route::middleware('throttle:60,1')->group(function () {
         Route::get('/resources',                      [\App\Http\Controllers\ResourceController::class, 'index']);
+        Route::get('/settings',                       [SettingsController::class, 'index']);
         Route::get('/stocks',                         [StockController::class, 'index']);
         Route::get('/sectors',                        [\App\Http\Controllers\SectorController::class, 'index']);
         Route::get('/stocks/search',                  [StockController::class, 'search']);
@@ -161,6 +163,9 @@ Route::prefix('v1')->group(function () {
             Route::post('/resources', [\App\Http\Controllers\ResourceController::class, 'store']);
             Route::put('/resources/{id}', [\App\Http\Controllers\ResourceController::class, 'update']);
             Route::delete('/resources/{id}', [\App\Http\Controllers\ResourceController::class, 'destroy']);
+            
+            // Zakat Settings Management
+            Route::put('/admin/settings', [SettingsController::class, 'update']);
         });
     });
 

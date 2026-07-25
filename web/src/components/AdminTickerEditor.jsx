@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { ArrowLeft, Save, Plus, Trash2, Activity, Info, FileText, Newspaper, X } from 'lucide-react';
+import { ArrowLeft, Save, Plus, Trash2, Activity, Info, FileText, Newspaper, X, ChevronRight } from 'lucide-react';
 import api, { updateTickerAbout, addTickerNews, deleteTickerNews, overrideStockStatus } from '../services/api';
 import toast from 'react-hot-toast';
 
@@ -146,47 +146,102 @@ export default function AdminTickerEditor() {
   };
 
   if (loading) {
-    return <div style={{ padding: '40px', display: 'flex', justifyContent: 'center' }}><div className="spinner" /></div>;
+    return (
+      <div style={{ padding: '32px 40px', maxWidth: '1200px', margin: '0 auto' }}>
+        {/* Breadcrumb skeleton */}
+        <div style={{ height: '14px', borderRadius: '6px', background: 'var(--bg-section)', width: '200px', marginBottom: '20px', animation: 'pulse 1.5s ease-in-out infinite' }} />
+        {/* Header skeleton */}
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center', marginBottom: '32px' }}>
+          <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'var(--bg-section)', animation: 'pulse 1.5s ease-in-out infinite' }} />
+          <div>
+            <div style={{ height: '22px', borderRadius: '6px', background: 'var(--bg-section)', width: '280px', marginBottom: '10px', animation: 'pulse 1.5s ease-in-out infinite' }} />
+            <div style={{ height: '13px', borderRadius: '6px', background: 'var(--bg-section)', width: '200px', animation: 'pulse 1.5s ease-in-out infinite' }} />
+          </div>
+        </div>
+        {/* Tabs skeleton */}
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>
+          {[1,2,3,4].map(i => <div key={i} style={{ height: '42px', borderRadius: '12px', background: 'var(--bg-section)', width: '150px', animation: 'pulse 1.5s ease-in-out infinite' }} />)}
+        </div>
+        <div style={{ background: 'var(--bg)', borderRadius: '20px', border: '1px solid var(--border)', padding: '40px' }}>
+          {[1,2,3].map(i => <div key={i} style={{ height: '14px', borderRadius: '6px', background: 'var(--bg-section)', marginBottom: '16px', width: i === 3 ? '50%' : '100%', animation: 'pulse 1.5s ease-in-out infinite' }} />)}
+        </div>
+      </div>
+    );
   }
 
   if (!stock) return null;
 
+  const currentStatus = stock.status?.status || 'review';
+  const statusColors = {
+    halal: { color: 'var(--halal)', bg: 'var(--halal-bg)' },
+    'non-halal': { color: 'var(--non-halal)', bg: 'var(--non-halal-bg)' },
+    doubtful: { color: 'var(--doubtful)', bg: 'var(--doubtful-bg)' },
+    review: { color: 'var(--review)', bg: 'var(--review-bg)' },
+  };
+  const sc = statusColors[currentStatus] || statusColors.review;
+
   return (
-    <div className="animate-fade-in" style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
-        <Link to="/admin?tab=stocks" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '40px', height: '40px', borderRadius: '12px', background: 'var(--bg-section)', color: 'var(--text-dark)', textDecoration: 'none' }}>
-          <ArrowLeft size={20} />
-        </Link>
-        <div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-dark)', margin: 0 }}>
-            {stock.symbol} <span style={{ color: 'var(--text-muted)', fontWeight: 500, fontSize: '1.25rem' }}>{stock.name}</span>
-          </h1>
-          <p style={{ color: 'var(--text-muted)', margin: '4px 0 0 0' }}>Manage ticker data, financials, news, and compliance status.</p>
+    <div className="animate-fade-in" style={{ padding: '32px 40px', maxWidth: '1200px', margin: '0 auto' }}>
+
+      {/* ── Breadcrumb ───────────────────────────── */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>Admin</span>
+        <ChevronRight size={12} color="var(--text-light)" />
+        <Link to="/admin" style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', textDecoration: 'none' }}>Dashboard</Link>
+        <ChevronRight size={12} color="var(--text-light)" />
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '1px' }}>{symbol}</span>
+      </div>
+
+      {/* ── Page Header ───────────────────────────── */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <Link to="/admin" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '44px', height: '44px', borderRadius: '14px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text-dark)', textDecoration: 'none', flexShrink: 0, transition: 'all 0.2s' }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--primary)'}
+            onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
+          >
+            <ArrowLeft size={18} />
+          </Link>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '4px' }}>
+              <h1 style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--text-dark)', margin: 0, letterSpacing: '-0.5px' }}>
+                {stock.symbol}
+              </h1>
+              <span style={{ color: 'var(--text-muted)', fontWeight: 500, fontSize: '1.1rem' }}>{stock.name}</span>
+              <span style={{ padding: '3px 12px', borderRadius: '100px', fontSize: '0.72rem', fontWeight: 700, background: sc.bg, color: sc.color }}>
+                {currentStatus.replace('-', ' ').toUpperCase()}
+              </span>
+            </div>
+            <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '0.83rem' }}>
+              {stock.sector || 'No sector'} • Manage ticker data, financials, news, and compliance status.
+            </p>
+          </div>
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '24px', flexDirection: 'column' }}>
-        
+      <div style={{ display: 'flex', gap: '16px', flexDirection: 'column' }}>
+
         {/* TABS */}
-        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '8px' }}>
+        <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '4px', background: 'var(--bg-section)', padding: '5px', borderRadius: '16px', width: 'fit-content' }}>
           {[
-            { id: 'verdict', label: 'Compliance Verdict', icon: Activity },
-            { id: 'financials', label: 'Financial Data', icon: Calculator },
-            { id: 'about', label: 'About Information', icon: Info },
-            { id: 'news', label: 'News & Updates', icon: Newspaper }
+            { id: 'verdict', label: 'Verdict', icon: Activity },
+            { id: 'financials', label: 'Financials', icon: Calculator },
+            { id: 'about', label: 'About', icon: Info },
+            { id: 'news', label: 'News', icon: Newspaper }
           ].map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               style={{
-                display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', borderRadius: '12px',
-                background: activeTab === tab.id ? 'var(--primary)' : 'var(--bg-section)',
-                color: activeTab === tab.id ? 'white' : 'var(--text-muted)',
-                border: 'none', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s',
-                whiteSpace: 'nowrap'
+                display: 'flex', alignItems: 'center', gap: '7px', padding: '10px 18px', borderRadius: '12px',
+                background: activeTab === tab.id ? 'var(--bg)' : 'transparent',
+                color: activeTab === tab.id ? 'var(--text-dark)' : 'var(--text-muted)',
+                border: 'none', fontWeight: activeTab === tab.id ? 700 : 600,
+                cursor: 'pointer', transition: 'all 0.2s',
+                whiteSpace: 'nowrap', fontSize: '0.83rem',
+                boxShadow: activeTab === tab.id ? '0 2px 8px rgba(0,0,0,0.06)' : 'none',
               }}
             >
-              <tab.icon size={16} /> {tab.label}
+              <tab.icon size={15} style={{ opacity: activeTab === tab.id ? 1 : 0.7 }} /> {tab.label}
             </button>
           ))}
         </div>

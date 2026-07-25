@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calculator, Download, Coins, Wheat, Bug as Cow, Scale, CheckCircle2, RefreshCw, AlertCircle } from 'lucide-react';
+import { getSettings } from '../../services/api';
 
 function getCowZakat(n) {
   if (n < 30) return 'None (Below Nisab)';
@@ -39,10 +40,41 @@ function getSheepZakat(n) {
 
 export default function ZakatTab({ data }) {
   // Settings & Live Fetch
-  const [exchangeRate, setExchangeRate] = useState(1500); // USD to NGN
-  const [goldPrice, setGoldPrice] = useState(150000); // NGN per gram
+  const [exchangeRate, setExchangeRate] = useState(1600); // USD to NGN default
+  const [goldPrice, setGoldPrice] = useState(150000); // NGN per gram default
   const [isFetchingNisab, setIsFetchingNisab] = useState(false);
   const [fetchError, setFetchError] = useState('');
+  const [overrideActive, setOverrideActive] = useState(false);
+
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = async () => {
+    try {
+      const res = await getSettings();
+      if (res?.data) {
+        let currentRate = 1600;
+        if (res.data.zakat_exchange_rate) {
+          currentRate = Number(res.data.zakat_exchange_rate);
+          setExchangeRate(currentRate);
+        }
+        
+        if (res.data.zakat_gold_price_override) {
+          setGoldPrice(Number(res.data.zakat_gold_price_override));
+          setOverrideActive(true);
+        } else {
+          setOverrideActive(false);
+          await fetchLiveNisab(currentRate);
+        }
+      } else {
+        await fetchLiveNisab(exchangeRate);
+      }
+    } catch (err) {
+      console.error('Failed to load Zakat settings:', err);
+      await fetchLiveNisab(exchangeRate);
+    }
+  };
 
   // Financial State
   const [cash, setCash] = useState('');
@@ -78,7 +110,8 @@ export default function ZakatTab({ data }) {
   const agriRate = irrigation === 'natural' ? 0.1 : 0.05;
   const agriZakatDue = agriEligible ? harvestNum * agriRate : 0;
 
-  const fetchLiveNisab = async () => {
+  const fetchLiveNisab = async (rateToUse = exchangeRate) => {
+    if (overrideActive) return; // Don't fetch if override is active
     setIsFetchingNisab(true);
     setFetchError('');
     try {
@@ -87,7 +120,7 @@ export default function ZakatTab({ data }) {
       const apiData = await res.json();
       const pricePerOunceUsd = apiData.price;
       const pricePerGramUsd = pricePerOunceUsd / 31.1035; // Troy Ounce to Gram
-      const pricePerGramNgn = pricePerGramUsd * exchangeRate;
+      const pricePerGramNgn = pricePerGramUsd * rateToUse;
       setGoldPrice(Math.round(pricePerGramNgn));
     } catch (err) {
       setFetchError('Could not fetch live price. Please enter manually.');
