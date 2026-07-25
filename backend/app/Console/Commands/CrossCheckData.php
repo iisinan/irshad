@@ -13,14 +13,13 @@ class CrossCheckData extends Command
 
     public function handle()
     {
-        $csvFile = '/tmp/ngx_screen.csv';
-        if (!file_exists($csvFile)) {
-            $this->error("CSV file not found.");
+        $jsonFile = base_path('excel_dump.json');
+        if (!file_exists($jsonFile)) {
+            $this->error("JSON dump file not found.");
             return;
         }
 
-        $csvData = array_map('str_getcsv', file($csvFile));
-        $headers = array_shift($csvData);
+        $jsonData = json_decode(file_get_contents($jsonFile), true);
 
         $report = "# Data Comparison Report: Excel vs DB\n\n";
         $report .= "This report compares the Business Activity status from your uploaded Excel file against the AI Engine's extraction in our database.\n\n";
@@ -41,13 +40,20 @@ class CrossCheckData extends Command
             ->get()
             ->groupBy('ticker');
 
-        foreach ($csvData as $row) {
-            if (count($row) < 4) continue;
-            $ticker = trim($row[0]);
-            $excelStatus = strtoupper(trim($row[2]));
-            $rationale = trim($row[3]);
+        foreach ($jsonData as $row) {
+            // Find the keys dynamically or use the known ones
+            $tickerKey = "NGX Listed Companies — Shariah (Halal) Business-Activity Screen";
+            if (!isset($row[$tickerKey])) {
+                // Try fallback keys if Pandas changed something
+                $keys = array_keys($row);
+                $tickerKey = $keys[0];
+            }
+            
+            $ticker = isset($row[$tickerKey]) ? trim($row[$tickerKey]) : null;
+            $excelStatus = isset($row['Unnamed: 2']) ? strtoupper(trim($row['Unnamed: 2'])) : null;
+            $rationale = isset($row['Unnamed: 3']) ? trim($row['Unnamed: 3']) : null;
 
-            if (empty($ticker)) continue;
+            if (empty($ticker) || $ticker === 'Ticker' || $excelStatus === null) continue;
 
             $company = $companies->get($ticker);
             if (!$company) {
