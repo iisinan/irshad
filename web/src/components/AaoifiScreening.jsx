@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { useParams, Link } from 'react-router-dom';
 import { 
   ArrowLeft, CheckCircle, XCircle, AlertTriangle, 
-  HelpCircle, ShieldCheck, ChevronRight, FileText, Brain, Download
+  HelpCircle, ShieldCheck, ChevronRight, FileText, Brain, Download, Activity
 } from 'lucide-react';
 import { fetchAaoifiScreening, updateAaoifiData } from '../services/api';
 import { useAuth } from '../context/AuthContext';
