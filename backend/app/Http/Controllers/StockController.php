@@ -353,16 +353,31 @@ class StockController extends Controller
             $status = $calc['status'] ?? [];
             $chosen = $existingScreening->chosen_values ?? [];
             
+            $financial = $company->financials()->latest()->first();
+
             // Map the Python Engine output to the legacy frontend format
+            // Fallback to database financials if Python AI extraction failed (returned 0 or empty)
+            $totalAssets = !empty($chosen['total_assets']['value']) ? $chosen['total_assets']['value'] : ($financial->total_assets ?? 0);
+            $totalDebt = !empty($chosen['total_debt']['value']) ? $chosen['total_debt']['value'] : ($financial->total_debt ?? 0);
+            $cash = !empty($chosen['cash_and_equivalents']['value']) ? $chosen['cash_and_equivalents']['value'] : ($financial->cash_and_equivalents ?? 0);
+            $interestIncome = !empty($chosen['interest_income']['value']) ? $chosen['interest_income']['value'] : ($financial->interest_income ?? 0);
+            $totalRevenue = !empty($chosen['total_revenue']['value']) ? $chosen['total_revenue']['value'] : ($financial->total_revenue ?? 0);
+            $marketCap = ($calc['denominator_used'] ?? null) === 'Market Capitalization' && !empty($calc['denominator_value']) ? $calc['denominator_value'] : $company->market_cap;
+            
+            $impureRatio = $ratios['non_permissible_income_ratio'] ?? null;
+            if ($impureRatio === null && $totalRevenue > 0) {
+                $impureRatio = ($interestIncome / $totalRevenue) * 100;
+            }
+
             $mapped = [
                 'company_id' => $company->id,
                 'business_status' => $busScreening && $busScreening->business_compliance_status === 'Non-Compliant' ? 'fail' : 'pass',
-                'business_reasoning' => $busScreening ? $busScreening->ai_explanation : null,
+                'business_reasoning' => ($busScreening && !empty($busScreening->ai_explanation)) ? $busScreening->ai_explanation : $company->activity_reason,
                 'debt_ratio' => $ratios['interest_bearing_debt_ratio'] ?? null,
                 'debt_status' => ($status['debt_pass'] ?? true) ? 'pass' : 'fail',
                 'cash_ratio' => $ratios['cash_and_equivalents_ratio'] ?? null,
                 'cash_status' => ($status['cash_pass'] ?? true) ? 'pass' : 'fail',
-                'impermissible_income_ratio' => $ratios['non_permissible_income_ratio'] ?? null,
+                'impermissible_income_ratio' => $impureRatio,
                 'impermissible_income_status' => ($status['income_pass'] ?? true) ? 'pass' : 'fail',
                 'illiquid_ratio' => null, // Python engine currently doesn't compute this
                 'illiquid_status' => 'pass',
@@ -371,17 +386,17 @@ class StockController extends Controller
                 'final_status' => ($calc['overall_financial_pass'] ?? true) && ($busScreening ? $busScreening->business_compliance_status !== 'Non-Compliant' : true) ? 'halal' : 'non-halal',
                 'news_sources' => $busScreening ? $busScreening->supporting_evidence : [],
                 'financial_data_used' => [
-                    'market_cap' => ($calc['denominator_used'] ?? null) === 'Market Capitalization' ? ($calc['denominator_value'] ?? $company->market_cap) : $company->market_cap,
-                    'total_assets' => $chosen['total_assets']['value'] ?? 0,
-                    'total_debt' => $chosen['total_debt']['value'] ?? 0,
-                    'cash' => $chosen['cash_and_equivalents']['value'] ?? 0,
+                    'market_cap' => $marketCap,
+                    'total_assets' => $totalAssets,
+                    'total_debt' => $totalDebt,
+                    'cash' => $cash,
                     'interest_bearing_securities' => 0,
                     'accounts_receivable' => 0,
                     'illiquid_assets' => 0,
-                    'interest_income' => $chosen['interest_income']['value'] ?? 0,
-                    'total_revenue' => $chosen['total_revenue']['value'] ?? 0,
+                    'interest_income' => $interestIncome,
+                    'total_revenue' => $totalRevenue,
                 ],
-                'ai_explanation' => $existingScreening->ai_explanation,
+                'ai_explanation' => !empty($existingScreening->ai_explanation) ? $existingScreening->ai_explanation : $company->activity_reason,
                 'status_reason' => $company->status ? $company->status->reason : null,
             ];
             
