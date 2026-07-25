@@ -3,11 +3,13 @@ import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate,
 import { TrendingUp, TrendingDown, ArrowRight, CheckCircle, Shield, BarChart2, ChevronRight, Smartphone, Apple, Play, AlertCircle, HelpCircle, Home, Scale, Info, BookOpen, Settings, LayoutDashboard, User, Moon, Sun } from 'lucide-react';
 import { fetchNgxStocks } from './services/api';
 import DashboardLayout from './components/DashboardLayout';
+import AdminLayout from './components/AdminLayout';
 import Footer from './components/Footer';
 import { LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage } from './components/AuthPages';
 import ErrorBoundary from './components/ErrorBoundary';
 import NotFound from './components/NotFound';
 import { useAuth } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import './index.css';
 
 const StockDetails = React.lazy(() => import('./components/StockDetails'));
@@ -24,7 +26,7 @@ const RoleBasedDashboard = React.lazy(() => import('./components/RoleBasedDashbo
 const Pricing = React.lazy(() => import('./components/Pricing'));
 const LandingPage = React.lazy(() => import('./components/LandingPage'));
 
-const DASHBOARD_ROUTES = ['/dashboard', '/portfolio', '/profile'];
+const DASHBOARD_ROUTES = ['/dashboard', '/portfolio', '/profile', '/admin'];
 
 /* ─── Animated Routes Wrapper ─────────────────────────────── */
 const AnimatedRoutes = ({ children }) => {
@@ -677,8 +679,19 @@ function App() {
                   <Route path="/market/:symbol/aaoifi" element={
                     <DashboardLayout><AaoifiScreening /></DashboardLayout>
                   } />
+                  <Route path="/admin" element={
+                    <ProtectedRoute adminOnly={true}>
+                      <AdminLayout>
+                        <AdminDashboard />
+                      </AdminLayout>
+                    </ProtectedRoute>
+                  } />
                   <Route path="/admin/users" element={
-                    <DashboardLayout><AdminUsers /></DashboardLayout>
+                    <ProtectedRoute adminOnly={true}>
+                      <AdminLayout>
+                        <AdminUsers />
+                      </AdminLayout>
+                    </ProtectedRoute>
                   } />
                   <Route path="/dashboard" element={
                     <DashboardLayout><RoleBasedDashboard /></DashboardLayout>
