@@ -491,7 +491,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
                 <div>
                   <div style={{ fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: screeningColor, marginBottom: '6px' }}>AAOIFI COMPLIANCE VERDICT</div>
                   <h3 style={{ margin: 0, fontSize: '1.85rem', fontWeight: 900, color: 'var(--text-dark)' }}>
-                    {isHalal ? 'Shariah Compliant (Halal)' : isNonHalal ? 'Non-Compliant (Haram)' : 'Status Doubtful / Under Review'}
+                    {isHalal ? 'HALAL' : isNonHalal ? 'NON-HALAL' : 'DOUBTFUL'}
                   </h3>
                   <p style={{ margin: '6px 0 0', fontSize: '0.92rem', color: 'var(--text-muted)' }}>
                     {reason || 'Screened strictly according to AAOIFI Standard No. 21 methodology'}

@@ -420,7 +420,7 @@ const AaoifiScreening = () => {
         <StatusIcon size={96} color={statusColor} style={{ margin: '0 auto 24px', filter: `drop-shadow(0 12px 24px ${statusColor}50)` }} />
         <div style={{ fontSize: '0.82rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', color: statusColor, marginBottom: '8px' }}>AAOIFI COMPLIANCE VERDICT</div>
         <h1 style={{ fontSize: '2.75rem', fontWeight: 900, color: statusColor, margin: '0 0 16px 0', letterSpacing: '-1px' }}>
-          {finalStatus === 'halal' ? 'SHARIAH COMPLIANT (HALAL)' : finalStatus === 'non-halal' ? 'NON-COMPLIANT (HARAM)' : 'STATUS DOUBTFUL'}
+          {finalStatus === 'halal' ? 'HALAL' : finalStatus === 'non-halal' ? 'NON-HALAL' : 'DOUBTFUL'}
         </h1>
         <p style={{ color: 'var(--text-dark)', margin: '0 auto 32px', fontWeight: 600, fontSize: '1.05rem', maxWidth: '600px' }}>
           {report.status_reason || 'Screened in accordance with AAOIFI Shariah Standard No. 21 (Financial & Business Activity Rules).'}
