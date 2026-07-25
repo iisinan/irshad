@@ -148,6 +148,11 @@ Route::prefix('v1')->group(function () {
             // Admin Alerts
             Route::get('/admin/alerts', [\App\Http\Controllers\AdminController::class, 'getAlerts']);
             Route::post('/admin/alerts/{id}/resolve', [\App\Http\Controllers\AdminController::class, 'resolveAlert']);
+
+            // Admin Stock/Ticker Management
+            Route::put('/admin/stocks/{symbol}', [\App\Http\Controllers\AdminController::class, 'updateTickerAbout']);
+            Route::post('/admin/stocks/{symbol}/news', [\App\Http\Controllers\AdminController::class, 'addTickerNews']);
+            Route::delete('/admin/stocks/{symbol}/news/{newsId}', [\App\Http\Controllers\AdminController::class, 'deleteTickerNews']);
             
             // AAOIFI Override
             Route::put('/stocks/{symbol}/aaoifi', [StockController::class, 'updateAaoifi']);

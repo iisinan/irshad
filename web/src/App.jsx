@@ -14,6 +14,7 @@ import { Toaster } from 'react-hot-toast';
 import './index.css';
 
 const StockDetails = React.lazy(() => import('./components/StockDetails'));
+const AdminTickerEditor = React.lazy(() => import('./components/AdminTickerEditor'));
 const AaoifiScreening = React.lazy(() => import('./components/AaoifiScreening'));
 const Portfolio = React.lazy(() => import('./components/Portfolio'));
 const Dashboard = React.lazy(() => import('./components/Dashboard'));
@@ -706,6 +707,9 @@ function App() {
                   } />
                   <Route path="/admin" element={
                     <DashboardLayout><AdminDashboard /></DashboardLayout>
+                  } />
+                  <Route path="/admin/tickers/:symbol" element={
+                    <DashboardLayout><AdminTickerEditor /></DashboardLayout>
                   } />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/register" element={<RegisterPage />} />

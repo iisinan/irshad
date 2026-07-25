@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, Search, Filter, AlertTriangle, CheckCircle, Edit2, X, Package, TrendingUp, AlertCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import api, { fetchNgxStocks, fetchProducts } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { toastError, toastSuccess } from '../utils/toast';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   
   const [activeTab, setActiveTab] = useState('stocks'); // 'stocks' | 'products'
   
@@ -278,8 +280,12 @@ const AdminDashboard = () => {
                   <td style={{ padding: '16px 24px' }}>
                     <button 
                       onClick={() => {
-                        setSelectedItem({ type: activeTab, data: item });
-                        setNewStatus(status || 'halal');
+                        if (activeTab === 'stocks') {
+                          navigate(`/admin/tickers/${item.symbol}`);
+                        } else {
+                          setSelectedItem({ type: activeTab, data: item });
+                          setNewStatus(status || 'halal');
+                        }
                       }}
                       style={{
                         display: 'flex', alignItems: 'center', gap: '6px',

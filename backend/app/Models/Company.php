@@ -68,4 +68,9 @@ class Company extends Model
     {
         return $this->hasMany(DailyPrice::class);
     }
+
+    public function news(): HasMany
+    {
+        return $this->hasMany(News::class)->orderBy('published_at', 'desc');
+    }
 }

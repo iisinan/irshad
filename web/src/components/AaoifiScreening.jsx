@@ -255,8 +255,29 @@ const AaoifiScreening = () => {
 
 
   const renderRatioProgressBar = (title, subtitle, ratio, threshold, numLabel, numVal, denLabel, denVal, formula, isMinimum = false) => {
-    if (ratio === null || ratio === undefined) {
-      return null;
+    if (ratio === null || ratio === undefined || isNaN(ratio)) {
+      return (
+        <div 
+          style={{ 
+            display: 'flex', alignItems: 'center', gap: '24px', padding: '24px 0', 
+            borderBottom: '1px solid var(--border)', position: 'relative', opacity: 0.6
+          }}
+        >
+          <div style={{ flex: '0 0 220px', paddingLeft: '16px' }}>
+            <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.88rem', marginBottom: '4px' }}>{title}</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{subtitle}</div>
+          </div>
+          
+          <div style={{ flex: 1, position: 'relative', height: '14px', background: 'var(--bg-section)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700, letterSpacing: '0.5px' }}>DATA UNAVAILABLE</span>
+          </div>
+          
+          <div style={{ flex: '0 0 120px', textAlign: 'right', paddingRight: '16px' }}>
+            <div style={{ fontSize: '1.32rem', fontWeight: 900, color: 'var(--text-muted)' }}>N/A</div>
+            <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', marginTop: '4px' }}>Insufficient data</div>
+          </div>
+        </div>
+      );
     }
 
     const ratioVal = parseFloat(ratio) || 0;

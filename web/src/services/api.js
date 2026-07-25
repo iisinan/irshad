@@ -313,6 +313,22 @@ export const deleteAdminUser = async (id) => {
   return response.data;
 };
 
+// Admin Ticker Management
+export const updateTickerAbout = async (symbol, data) => {
+  const response = await api.put(`/admin/stocks/${symbol}`, data);
+  return response.data;
+};
+
+export const addTickerNews = async (symbol, data) => {
+  const response = await api.post(`/admin/stocks/${symbol}/news`, data);
+  return response.data;
+};
+
+export const deleteTickerNews = async (symbol, newsId) => {
+  const response = await api.delete(`/admin/stocks/${symbol}/news/${newsId}`);
+  return response.data;
+};
+
 export const overrideStockStatus = async (symbol, data) => {
   const response = await api.put(`/stocks/${symbol}/status`, data);
   return response.data;

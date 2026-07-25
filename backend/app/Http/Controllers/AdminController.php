@@ -106,4 +106,75 @@ class AdminController extends Controller
         $user->delete();
         return $this->success(null, 'User deleted successfully');
     }
+
+    /**
+     * Update Ticker About Info (admin only).
+     */
+    public function updateTickerAbout(Request $request, $symbol)
+    {
+        $company = \App\Models\Company::where('symbol', $symbol)->firstOrFail();
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'sometimes|string|max:255',
+            'sector' => 'sometimes|string|max:255',
+            'industry' => 'sometimes|string|max:255',
+            'description' => 'sometimes|nullable|string',
+            'overview' => 'sometimes|nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $company->update($request->only(['name', 'sector', 'industry', 'description', 'overview']));
+
+        \Illuminate\Support\Facades\Cache::forget("stocks.show.{$symbol}");
+
+        return $this->success($company, 'Company details updated successfully');
+    }
+
+    /**
+     * Add News to a Ticker (admin only).
+     */
+    public function addTickerNews(Request $request, $symbol)
+    {
+        $company = \App\Models\Company::where('symbol', $symbol)->firstOrFail();
+
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|string|max:255',
+            'url' => 'required|url',
+            'source' => 'required|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $news = \App\Models\News::create([
+            'company_id' => $company->id,
+            'title' => $request->title,
+            'url' => $request->url,
+            'source' => $request->source,
+            'published_at' => now(),
+        ]);
+
+        \Illuminate\Support\Facades\Cache::forget("stocks.show.{$symbol}");
+
+        return $this->success($news, 'News added successfully');
+    }
+
+    /**
+     * Delete News from a Ticker (admin only).
+     */
+    public function deleteTickerNews($symbol, $newsId)
+    {
+        $company = \App\Models\Company::where('symbol', $symbol)->firstOrFail();
+        $news = \App\Models\News::where('id', $newsId)->where('company_id', $company->id)->firstOrFail();
+        
+        $news->delete();
+
+        \Illuminate\Support\Facades\Cache::forget("stocks.show.{$symbol}");
+
+        return $this->success(null, 'News deleted successfully');
+    }
 }
