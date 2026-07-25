@@ -382,6 +382,7 @@ class StockController extends Controller
                     'total_revenue' => $chosen['total_revenue']['value'] ?? 0,
                 ],
                 'ai_explanation' => $existingScreening->ai_explanation,
+                'status_reason' => $company->status ? $company->status->reason : null,
             ];
             
             return $this->success($mapped);
