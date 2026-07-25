@@ -696,6 +696,13 @@ function App() {
                       </AdminLayout>
                     </ProtectedRoute>
                   } />
+                  <Route path="/admin/resources" element={
+                    <ProtectedRoute adminOnly={true}>
+                      <AdminLayout>
+                        <ResourcesPage />
+                      </AdminLayout>
+                    </ProtectedRoute>
+                  } />
                   <Route path="/dashboard" element={
                     <DashboardLayout><RoleBasedDashboard /></DashboardLayout>
                   } />
@@ -704,9 +711,6 @@ function App() {
                   } />
                   <Route path="/profile" element={
                     <DashboardLayout><Profile /></DashboardLayout>
-                  } />
-                  <Route path="/admin" element={
-                    <DashboardLayout><AdminDashboard /></DashboardLayout>
                   } />
                   <Route path="/admin/tickers/:symbol" element={
                     <DashboardLayout><AdminTickerEditor /></DashboardLayout>
