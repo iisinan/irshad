@@ -39,7 +39,7 @@ class ProcessCompanyScreening implements ShouldQueue
             return;
         }
 
-        $targetYear = date('Y'); // Default to current year to get latest quarterly/interim reports
+        $targetYear = 2025; // Force FY 2025 instead of date('Y') to avoid Q1 2026 hallucinations
         
         $status = \App\Models\FinancialStatementStatus::firstOrCreate(
             ['company_ticker' => $this->ticker, 'financial_year' => $targetYear],
