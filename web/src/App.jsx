@@ -673,9 +673,6 @@ function App() {
                   <Route path="/pricing" element={<Pricing />} />
                   <Route path="/shariah" element={<ShariahPage />} />
                   <Route path="/resources" element={<ResourcesPage />} />
-                  <Route path="/market" element={
-                    <DashboardLayout><MarketPage /></DashboardLayout>
-                  } />
                   <Route path="/market/:symbol" element={
                     <DashboardLayout><StockDetails /></DashboardLayout>
                   } />

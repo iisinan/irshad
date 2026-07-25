@@ -19,7 +19,7 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
     { section: 'Main' },
     { label: 'Overview',       icon: LayoutDashboard,  to: '/dashboard',           id: 'tour-nav-overview' },
     { label: 'Holdings',       icon: Activity,         to: '/portfolio#holdings',  id: 'tour-nav-holdings' },
-    { label: 'Market Screener', icon: BarChart2,        to: '/market', id: 'tour-nav-market' },
+    { label: 'Market Screener', icon: BarChart2,        to: '/portfolio#market', id: 'tour-nav-market' },
     { label: 'Watchlist',      icon: Star,             to: '/portfolio#watchlist', id: 'tour-nav-watchlist' },
     { label: 'Thematic Baskets',icon: Briefcase,       to: '/portfolio#baskets', id: 'tour-nav-baskets' },
     { section: 'Islamic Finance' },
@@ -186,6 +186,16 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
               id={item.id}
               to={item.to}
               title={isCollapsed ? item.label : undefined}
+              onClick={(e) => {
+                // For hash-based routes (e.g. /portfolio#market), if we're already on the same
+                // pathname, React Router won't fire a hash change. Force it manually.
+                const [toPath, toHash] = item.to.split('#');
+                if (toHash && location.pathname === toPath) {
+                  e.preventDefault();
+                  window.location.hash = toHash;
+                }
+                if (mobileOpen) setMobileOpen(false);
+              }}
               style={{
                 display: 'flex',
                 alignItems: 'center',
