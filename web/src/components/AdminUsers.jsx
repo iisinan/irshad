@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { fetchAdminUsers, createAdminUser, updateAdminUser, deleteAdminUser } from '../services/api';
 import { Users, Shield, Plus, X, Search, Edit2, Trash2, Crown } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -237,7 +238,7 @@ const AdminUsers = () => {
       </div>
 
       {/* CREATE ADMIN MODAL */}
-      {showCreateModal && (
+      {showCreateModal && createPortal(
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
           <div className="animate-fade-in" style={{ background: 'var(--bg)', width: '100%', maxWidth: '420px', borderRadius: '24px', boxShadow: '0 24px 48px rgba(0,0,0,0.1)' }}>
             <div style={{ padding: '24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -270,11 +271,11 @@ const AdminUsers = () => {
               </div>
             </form>
           </div>
-        </div>
+        </div>, document.body
       )}
 
       {/* EDIT USER MODAL */}
-      {showEditModal && (
+      {showEditModal && createPortal(
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
           <div className="animate-fade-in" style={{ background: 'var(--bg)', width: '100%', maxWidth: '420px', borderRadius: '24px', boxShadow: '0 24px 48px rgba(0,0,0,0.1)' }}>
             <div style={{ padding: '24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -320,11 +321,11 @@ const AdminUsers = () => {
               </div>
             </form>
           </div>
-        </div>
+        </div>, document.body
       )}
 
       {/* DELETE CONFIRMATION MODAL */}
-      {showDeleteModal && (
+      {showDeleteModal && createPortal(
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
           <div className="animate-fade-in" style={{ background: 'var(--bg)', width: '100%', maxWidth: '400px', borderRadius: '24px', boxShadow: '0 24px 48px rgba(0,0,0,0.1)' }}>
             <div style={{ padding: '32px 24px', textAlign: 'center' }}>
@@ -343,7 +344,7 @@ const AdminUsers = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div>, document.body
       )}
 
     </div>

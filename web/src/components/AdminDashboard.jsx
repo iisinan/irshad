@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, Search, Filter, AlertTriangle, CheckCircle, Edit2, X, Package, TrendingUp, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 import api, { fetchNgxStocks, fetchProducts } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { toastError, toastSuccess } from '../utils/toast';
@@ -308,31 +309,35 @@ const AdminDashboard = () => {
       </div>
 
       {/* Override Modal */}
-      {selectedItem && (
+      {selectedItem && createPortal(
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+          backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000
         }}>
           <div className="animate-fade-in" style={{ backgroundColor: 'var(--bg)', padding: '32px', borderRadius: '24px', width: '100%', maxWidth: '500px', border: '1px solid var(--border)', boxShadow: '0 32px 64px rgba(0,0,0,0.2)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h2 style={{ margin: 0, fontSize: '18px' }}>
                   Override {selectedItem.type === 'stocks' ? selectedItem.data.symbol : selectedItem.data.name}
               </h2>
-              <button onClick={() => setSelectedItem(null)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-                <X size={20} color="var(--text-muted)" />
+              <button 
+                onClick={() => setSelectedItem(null)}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+              >
+                <X size={20} />
               </button>
             </div>
             
             <form onSubmit={handleUpdateStatus}>
-              <div style={{ marginBottom: '16px' }}>
+              <div style={{ marginBottom: '24px' }}>
                 <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '8px', color: 'var(--text-muted)' }}>
                   NEW STATUS
                 </label>
                 <select 
                   value={newStatus}
                   onChange={(e) => setNewStatus(e.target.value)}
-                  style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', backgroundColor: 'var(--bg-section)', color: 'var(--text-dark)', fontSize: '13px', outline: 'none' }}
+                  style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', backgroundColor: 'var(--bg-section)', color: 'var(--text-dark)', fontSize: '14px', fontWeight: '600', outline: 'none' }}
                 >
+                  <option value="">Select status...</option>
                   <option value="halal">Halal</option>
                   <option value="doubtful">Doubtful</option>
                   <option value="non-halal">Non-Halal</option>
@@ -370,7 +375,8 @@ const AdminDashboard = () => {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
