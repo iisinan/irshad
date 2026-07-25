@@ -67,16 +67,24 @@ class SyncCompanyStatus extends Command
             $denVal = $marketCap > 0 ? $marketCap : 0; // The frontend defaults to market cap
 
             // 3. Debt Status
-            $debtStatus = 'insufficient_data';
-            if ($denVal > 0) {
+            $debtRatio = isset($ratios['interest_bearing_debt_ratio']) ? $ratios['interest_bearing_debt_ratio'] * 100 : null;
+            if ($debtRatio === null && $denVal > 0) {
                 $debtRatio = ($totalDebt / $denVal) * 100;
+            }
+            
+            $debtStatus = 'insufficient_data';
+            if ($debtRatio !== null) {
                 $debtStatus = $debtRatio <= 30 ? 'pass' : ($debtRatio <= 33 ? 'warning' : 'fail');
             }
 
             // 4. Cash Status
-            $cashStatus = 'insufficient_data';
-            if ($denVal > 0) {
+            $cashRatio = isset($ratios['cash_and_equivalents_ratio']) ? $ratios['cash_and_equivalents_ratio'] * 100 : null;
+            if ($cashRatio === null && $denVal > 0) {
                 $cashRatio = ($cash / $denVal) * 100;
+            }
+            
+            $cashStatus = 'insufficient_data';
+            if ($cashRatio !== null) {
                 $cashStatus = $cashRatio <= 30 ? 'pass' : ($cashRatio <= 33 ? 'warning' : 'fail');
             }
             
@@ -103,7 +111,13 @@ class SyncCompanyStatus extends Command
                 $finalStatus = 'doubtful';
             }
 
-            // 8. Update database
+            // 8. Respect Admin Override for Final Status
+            $stockStatus = DB::table('stock_statuses')->where('company_id', $company->id)->first();
+            if ($stockStatus && $stockStatus->verified_by_scholar) {
+                $finalStatus = $stockStatus->status; // Override with admin decision
+            }
+
+            // 9. Update companies table
             if ($company->current_status !== $finalStatus) {
                 DB::table('companies')->where('id', $company->id)->update([
                     'current_status' => $finalStatus
