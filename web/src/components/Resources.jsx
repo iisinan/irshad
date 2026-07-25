@@ -323,66 +323,91 @@ export default function ResourcesPage() {
       {/* Admin Manage Resource Modal */}
       {showManageModal && createPortal(
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000, padding: '24px' }}>
-          <div className="animate-fade-in" style={{ background: 'var(--bg)', borderRadius: '24px', width: '100%', maxWidth: '600px', overflow: 'hidden', boxShadow: '0 32px 64px rgba(0,0,0,0.2)', border: '1px solid var(--border)', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ padding: '24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800 }}>{manageData.id ? 'Edit Resource' : 'Add Resource'}</h3>
-              <button 
-                onClick={() => setShowManageModal(false)} 
-                style={{ background: 'var(--bg-section)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)' }}
-              >
-                <X size={18} />
+          <div className="animate-fade-in" style={{ background: 'var(--bg)', borderRadius: '24px', width: '100%', maxWidth: '600px', overflow: 'hidden', boxShadow: '0 32px 64px rgba(0,0,0,0.25)', border: '1px solid var(--border)', maxHeight: '92vh', display: 'flex', flexDirection: 'column' }}>
+            
+            {/* Modal Header */}
+            <div style={{ padding: '24px 28px', borderBottom: '1px solid var(--border)', background: 'var(--bg-section)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+              <div>
+                <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Resource Library</div>
+                <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-dark)' }}>{manageData.id ? 'Edit Resource' : 'Add New Resource'}</h3>
+              </div>
+              <button onClick={() => setShowManageModal(false)} style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--bg)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)' }}>
+                <X size={16} />
               </button>
             </div>
-            
-            <form onSubmit={handleSaveResource} style={{ padding: '24px', overflowY: 'auto' }}>
-              {manageError && <div style={{ background: 'var(--non-halal-bg)', color: 'var(--non-halal)', padding: '12px', borderRadius: '8px', fontSize: '0.88rem', marginBottom: '20px' }}>{manageError}</div>}
-              
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Title</label>
-                <input required type="text" value={manageData.title} onChange={e => setManageData({...manageData, title: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.88rem', outline: 'none' }} />
+
+            <form onSubmit={handleSaveResource} style={{ padding: '28px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {manageError && (
+                <div style={{ background: 'var(--non-halal-bg)', color: 'var(--non-halal)', padding: '12px 16px', borderRadius: '12px', fontSize: '0.82rem', fontWeight: 600, border: '1px solid var(--non-halal-border)' }}>{manageError}</div>
+              )}
+
+              {/* Title */}
+              <div>
+                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' }}>Title</label>
+                <input required type="text" value={manageData.title} onChange={e => setManageData({...manageData, title: e.target.value})} placeholder="e.g. Introduction to Islamic Finance" style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', color: 'var(--text-dark)', fontSize: '0.88rem', outline: 'none', fontFamily: 'inherit' }} />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+              {/* Type + Category row */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Type</label>
-                  <select value={manageData.type} onChange={e => setManageData({...manageData, type: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.88rem', outline: 'none' }}>
-                    <option value="video">Video</option>
-                    <option value="document">Document</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Category</label>
-                  <input required type="text" value={manageData.category} onChange={e => setManageData({...manageData, category: e.target.value})} placeholder="e.g. Fiqh, Zakat" style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.88rem', outline: 'none' }} />
-                </div>
-              </div>
-
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>URL (Video / PDF Link)</label>
-                <input required type="url" value={manageData.url} onChange={e => setManageData({...manageData, url: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.88rem', outline: 'none' }} />
-              </div>
-
-              {manageData.type === 'video' && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Thumbnail URL</label>
-                    <input type="url" value={manageData.thumbnail || ''} onChange={e => setManageData({...manageData, thumbnail: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.88rem', outline: 'none' }} />
+                  <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' }}>Type</label>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    {['video', 'document'].map(t => (
+                      <button
+                        key={t} type="button"
+                        onClick={() => setManageData({...manageData, type: t})}
+                        style={{
+                          flex: 1, padding: '10px', borderRadius: '10px', border: '1.5px solid',
+                          borderColor: manageData.type === t ? 'var(--primary)' : 'var(--border)',
+                          background: manageData.type === t ? 'var(--primary-50)' : 'var(--bg-section)',
+                          color: manageData.type === t ? 'var(--primary)' : 'var(--text-muted)',
+                          fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', transition: 'all 0.2s',
+                          textTransform: 'capitalize',
+                        }}
+                      >{t === 'video' ? '▶ Video' : '📄 Document'}</button>
+                    ))}
                   </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Duration</label>
-                    <input type="text" value={manageData.duration || ''} onChange={e => setManageData({...manageData, duration: e.target.value})} placeholder="e.g. 10:45" style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.88rem', outline: 'none' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' }}>Category</label>
+                  <input required type="text" value={manageData.category} onChange={e => setManageData({...manageData, category: e.target.value})} placeholder="e.g. Fiqh, Zakat" style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', color: 'var(--text-dark)', fontSize: '0.88rem', outline: 'none', fontFamily: 'inherit' }} />
+                </div>
+              </div>
+
+              {/* URL */}
+              <div>
+                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' }}>Resource URL</label>
+                <input required type="url" value={manageData.url} onChange={e => setManageData({...manageData, url: e.target.value})} placeholder="https://youtube.com/... or /storage/file.pdf" style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', color: 'var(--text-dark)', fontSize: '0.88rem', outline: 'none', fontFamily: 'inherit' }} />
+              </div>
+
+              {/* Video fields */}
+              {manageData.type === 'video' && (
+                <div style={{ padding: '20px', background: 'var(--primary-50)', borderRadius: '14px', border: '1px solid var(--primary-100)' }}>
+                  <div style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '16px' }}>Video Details</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: 'var(--primary)', marginBottom: '8px' }}>Thumbnail URL</label>
+                      <input type="url" value={manageData.thumbnail || ''} onChange={e => setManageData({...manageData, thumbnail: e.target.value})} placeholder="https://img.youtube.com/..." style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--primary-100)', background: 'var(--bg)', color: 'var(--text-dark)', fontSize: '0.85rem', outline: 'none', fontFamily: 'inherit' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: 'var(--primary)', marginBottom: '8px' }}>Duration</label>
+                      <input type="text" value={manageData.duration || ''} onChange={e => setManageData({...manageData, duration: e.target.value})} placeholder="e.g. 10:45" style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--primary-100)', background: 'var(--bg)', color: 'var(--text-dark)', fontSize: '0.85rem', outline: 'none', fontFamily: 'inherit' }} />
+                    </div>
                   </div>
                 </div>
               )}
 
-              <div style={{ marginBottom: '32px' }}>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Scholar / Author</label>
-                <input required type="text" value={manageData.scholar} onChange={e => setManageData({...manageData, scholar: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.88rem', outline: 'none' }} />
+              {/* Scholar */}
+              <div>
+                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' }}>Scholar / Author</label>
+                <input required type="text" value={manageData.scholar} onChange={e => setManageData({...manageData, scholar: e.target.value})} placeholder="e.g. Sheikh Musa Furber" style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', color: 'var(--text-dark)', fontSize: '0.88rem', outline: 'none', fontFamily: 'inherit' }} />
               </div>
 
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <button type="button" onClick={() => setShowManageModal(false)} style={{ flex: 1, padding: '14px', borderRadius: '12px', background: 'var(--bg-section)', border: 'none', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer' }}>Cancel</button>
-                <button type="submit" disabled={manageLoading} style={{ flex: 1.5, padding: '14px', borderRadius: '12px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 700, cursor: manageLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {manageLoading ? <div className="spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', borderColor: 'rgba(255,255,255,0.3)', borderTopColor: 'white' }} /> : 'Save Resource'}
+              {/* Actions */}
+              <div style={{ display: 'flex', gap: '12px', paddingTop: '8px', borderTop: '1px solid var(--border)', marginTop: '8px' }}>
+                <button type="button" onClick={() => setShowManageModal(false)} style={{ flex: 1, padding: '13px', borderRadius: '12px', background: 'var(--bg-section)', border: 'none', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer', fontSize: '0.88rem' }}>Cancel</button>
+                <button type="submit" disabled={manageLoading} style={{ flex: 2, padding: '13px', borderRadius: '12px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 700, cursor: manageLoading ? 'not-allowed' : 'pointer', fontSize: '0.88rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(15,82,87,0.2)' }}>
+                  {manageLoading ? <div className="spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', borderColor: 'rgba(255,255,255,0.3)', borderTopColor: 'white' }} /> : (manageData.id ? 'Save Changes' : 'Add Resource')}
                 </button>
               </div>
             </form>

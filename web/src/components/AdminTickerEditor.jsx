@@ -246,41 +246,60 @@ export default function AdminTickerEditor() {
           ))}
         </div>
 
-        <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px' }}>
+        <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)', overflow: 'hidden' }}>
+          {/* Tab Panel top label */}
+          <div style={{ padding: '20px 28px', borderBottom: '1px solid var(--border)', background: 'var(--bg-section)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>
+              {activeTab === 'verdict' ? 'Compliance Verdict' : activeTab === 'financials' ? 'AAOIFI Financial Data' : activeTab === 'about' ? 'Company Profile' : 'News & Updates'}
+            </span>
+          </div>
+
+          <div style={{ padding: '32px' }}>
           
           {/* VERDICT TAB */}
           {activeTab === 'verdict' && (
             <form onSubmit={handleSaveVerdict} className="animate-fade-in">
-              <h2 style={{ fontSize: '1.25rem', marginBottom: '24px', color: 'var(--text-dark)' }}>Override Compliance Verdict</h2>
-              
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>New Status</label>
-                <select 
-                  value={verdictForm.status} 
-                  onChange={e => setVerdictForm({...verdictForm, status: e.target.value})}
-                  style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', color: 'var(--text-dark)', fontSize: '1rem', outline: 'none' }}
-                >
-                  <option value="halal">Halal</option>
-                  <option value="doubtful">Doubtful</option>
-                  <option value="non-halal">Non-Halal</option>
-                </select>
+              {/* Status Pill Selector */}
+              <div style={{ marginBottom: '28px' }}>
+                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '12px' }}>New Compliance Status</label>
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                  {[
+                    { val: 'halal', label: '✅ Halal', color: 'var(--halal)', bg: 'var(--halal-bg)', border: 'var(--halal-border)' },
+                    { val: 'doubtful', label: '⚠️ Doubtful', color: 'var(--doubtful)', bg: 'var(--doubtful-bg)', border: 'rgba(245,158,11,0.25)' },
+                    { val: 'non-halal', label: '❌ Non-Halal', color: 'var(--non-halal)', bg: 'var(--non-halal-bg)', border: 'var(--non-halal-border)' },
+                  ].map(s => (
+                    <button key={s.val} type="button"
+                      onClick={() => setVerdictForm({...verdictForm, status: s.val})}
+                      style={{
+                        flex: 1, minWidth: '120px', padding: '16px', borderRadius: '14px',
+                        border: `2px solid ${verdictForm.status === s.val ? s.color : 'var(--border)'}`,
+                        background: verdictForm.status === s.val ? s.bg : 'var(--bg-section)',
+                        color: verdictForm.status === s.val ? s.color : 'var(--text-muted)',
+                        fontWeight: 800, fontSize: '0.88rem', cursor: 'pointer', transition: 'all 0.2s',
+                        transform: verdictForm.status === s.val ? 'scale(1.02)' : 'scale(1)',
+                      }}
+                    >{s.label}</button>
+                  ))}
+                </div>
               </div>
 
-              <div style={{ marginBottom: '32px' }}>
-                <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Reason for Override (Required)</label>
-                <textarea 
-                  required
-                  rows={4}
-                  value={verdictForm.reason} 
+              <div style={{ marginBottom: '28px' }}>
+                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' }}>Scholar Reason / Justification *</label>
+                <textarea
+                  required rows={5}
+                  value={verdictForm.reason}
                   onChange={e => setVerdictForm({...verdictForm, reason: e.target.value})}
-                  placeholder="Explain why this status is being manually set..."
-                  style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', color: 'var(--text-dark)', fontSize: '1rem', outline: 'none', resize: 'vertical' }}
+                  placeholder="Explain why this compliance status is being manually set. Reference Quran, Hadith, or AAOIFI standards where applicable..."
+                  style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: '1px solid var(--border)', background: 'var(--bg-section)', color: 'var(--text-dark)', fontSize: '0.9rem', outline: 'none', resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.6 }}
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <button type="submit" disabled={saving || !verdictForm.reason} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px' }}>
-                  {saving ? <div className="spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', borderTopColor: 'white' }} /> : <><Save size={16} /> Save Verdict</>}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', justifyContent: 'flex-end' }}>
+                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                  This override will be logged with your name and timestamp.
+                </span>
+                <button type="submit" disabled={saving || !verdictForm.reason} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 28px', opacity: (saving || !verdictForm.reason) ? 0.5 : 1 }}>
+                  {saving ? <div className="spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', borderTopColor: 'white' }} /> : <><Save size={15} /> Save Verdict</>}
                 </button>
               </div>
             </form>
@@ -289,37 +308,41 @@ export default function AdminTickerEditor() {
           {/* ABOUT TAB */}
           {activeTab === 'about' && (
             <form onSubmit={handleSaveAbout} className="animate-fade-in">
-              <h2 style={{ fontSize: '1.25rem', marginBottom: '24px', color: 'var(--text-dark)' }}>Company Profile & Info</h2>
               
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Company Name</label>
-                  <input type="text" value={aboutForm.name} onChange={e => setAboutForm({...aboutForm, name: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', color: 'var(--text-dark)', outline: 'none' }} />
+              {/* Basic identity */}
+              <div style={{ background: 'var(--bg-section)', borderRadius: '16px', padding: '24px', marginBottom: '20px', border: '1px solid var(--border)' }}>
+                <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px' }}>Basic Identity</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  {[
+                    { label: 'Company Name', key: 'name', placeholder: 'e.g. Access Bank Plc' },
+                    { label: 'Sector', key: 'sector', placeholder: 'e.g. Financial Services' },
+                    { label: 'Industry', key: 'industry', placeholder: 'e.g. Commercial Banking' },
+                  ].map(f => (
+                    <div key={f.key} style={f.key === 'industry' ? { gridColumn: '1/-1' } : {}}>
+                      <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' }}>{f.label}</label>
+                      <input type="text" value={aboutForm[f.key] || ''} onChange={e => setAboutForm({...aboutForm, [f.key]: e.target.value})} placeholder={f.placeholder}
+                        style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-dark)', outline: 'none', fontSize: '0.88rem', fontFamily: 'inherit' }} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Description */}
+              <div style={{ background: 'var(--bg-section)', borderRadius: '16px', padding: '24px', marginBottom: '24px', border: '1px solid var(--border)' }}>
+                <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px' }}>Description</div>
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' }}>Short Description</label>
+                  <textarea rows={2} value={aboutForm.description || ''} onChange={e => setAboutForm({...aboutForm, description: e.target.value})} placeholder="One-liner displayed on ticker cards..." style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-dark)', outline: 'none', fontFamily: 'inherit', fontSize: '0.88rem', resize: 'vertical' }} />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Sector</label>
-                  <input type="text" value={aboutForm.sector} onChange={e => setAboutForm({...aboutForm, sector: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', color: 'var(--text-dark)', outline: 'none' }} />
+                  <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' }}>Detailed Overview</label>
+                  <textarea rows={5} value={aboutForm.overview || ''} onChange={e => setAboutForm({...aboutForm, overview: e.target.value})} placeholder="Full company overview displayed on the stock detail page..." style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-dark)', outline: 'none', fontFamily: 'inherit', fontSize: '0.88rem', resize: 'vertical', lineHeight: 1.6 }} />
                 </div>
-              </div>
-
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Industry</label>
-                <input type="text" value={aboutForm.industry} onChange={e => setAboutForm({...aboutForm, industry: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', color: 'var(--text-dark)', outline: 'none' }} />
-              </div>
-
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Short Description</label>
-                <textarea rows={2} value={aboutForm.description || ''} onChange={e => setAboutForm({...aboutForm, description: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', color: 'var(--text-dark)', outline: 'none' }} />
-              </div>
-
-              <div style={{ marginBottom: '32px' }}>
-                <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Detailed Overview</label>
-                <textarea rows={5} value={aboutForm.overview || ''} onChange={e => setAboutForm({...aboutForm, overview: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', color: 'var(--text-dark)', outline: 'none' }} />
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <button type="submit" disabled={saving} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px' }}>
-                  {saving ? <div className="spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', borderTopColor: 'white' }} /> : <><Save size={16} /> Save Information</>}
+                <button type="submit" disabled={saving} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 28px' }}>
+                  {saving ? <div className="spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', borderTopColor: 'white' }} /> : <><Save size={15} /> Save Company Info</>}
                 </button>
               </div>
             </form>
@@ -328,57 +351,117 @@ export default function AdminTickerEditor() {
           {/* FINANCIALS TAB */}
           {activeTab === 'financials' && (
             <form onSubmit={handleSaveFinancials} className="animate-fade-in">
-              <h2 style={{ fontSize: '1.25rem', marginBottom: '12px', color: 'var(--text-dark)' }}>Financial Data Overrides</h2>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '24px' }}>Updating these values will automatically trigger a recalculation of the AAOIFI compliance screening.</p>
-              
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Total Assets</label>
-                  <input type="number" step="0.01" value={financialsForm.total_assets} onChange={e => setFinancialsForm({...financialsForm, total_assets: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', color: 'var(--text-dark)', outline: 'none' }} />
+              {/* Info callout */}
+              <div style={{ padding: '14px 18px', background: 'var(--primary-50)', borderRadius: '12px', border: '1px solid var(--primary-100)', marginBottom: '24px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                <span style={{ fontSize: '1rem', flexShrink: 0 }}>ℹ️</span>
+                <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 600, lineHeight: 1.5 }}>
+                  Updating these values will automatically recalculate the AAOIFI screening ratios. The Debt/Assets and Interest-Income/Revenue ratios must both be below 33.33% for a Halal result.
+                </p>
+              </div>
+
+              {/* AAOIFI Ratio Preview */}
+              {(financialsForm.total_assets > 0 || financialsForm.total_revenue > 0) && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
+                  {[
+                    {
+                      label: 'Debt / Assets',
+                      value: financialsForm.total_assets > 0 ? ((financialsForm.total_debt / financialsForm.total_assets) * 100).toFixed(1) : 0,
+                      threshold: 33.33,
+                    },
+                    {
+                      label: 'Interest Income / Revenue',
+                      value: financialsForm.total_revenue > 0 ? ((financialsForm.interest_income / financialsForm.total_revenue) * 100).toFixed(1) : 0,
+                      threshold: 33.33,
+                    },
+                  ].map(r => {
+                    const pct = parseFloat(r.value);
+                    const pass = pct <= r.threshold;
+                    return (
+                      <div key={r.label} style={{ padding: '16px 20px', borderRadius: '14px', border: `1px solid ${pass ? 'var(--halal-border)' : 'var(--non-halal-border)'}`, background: pass ? 'var(--halal-bg)' : 'var(--non-halal-bg)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                          <div style={{ fontSize: '0.7rem', fontWeight: 700, color: pass ? 'var(--halal)' : 'var(--non-halal)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{r.label}</div>
+                          <div style={{ fontSize: '1.5rem', fontWeight: 900, color: pass ? 'var(--halal)' : 'var(--non-halal)', lineHeight: 1.1, marginTop: '4px' }}>{r.value}%</div>
+                        </div>
+                        <div style={{ fontSize: '1.5rem' }}>{pass ? '✅' : '❌'}</div>
+                      </div>
+                    );
+                  })}
                 </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Total Debt (Interest Bearing)</label>
-                  <input type="number" step="0.01" value={financialsForm.total_debt} onChange={e => setFinancialsForm({...financialsForm, total_debt: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', color: 'var(--text-dark)', outline: 'none' }} />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Cash & Equivalents</label>
-                  <input type="number" step="0.01" value={financialsForm.cash} onChange={e => setFinancialsForm({...financialsForm, cash: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', color: 'var(--text-dark)', outline: 'none' }} />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Interest / Non-permissible Income</label>
-                  <input type="number" step="0.01" value={financialsForm.interest_income} onChange={e => setFinancialsForm({...financialsForm, interest_income: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', color: 'var(--text-dark)', outline: 'none' }} />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Total Revenue</label>
-                  <input type="number" step="0.01" value={financialsForm.total_revenue} onChange={e => setFinancialsForm({...financialsForm, total_revenue: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', color: 'var(--text-dark)', outline: 'none' }} />
+              )}
+
+              {/* Financial inputs */}
+              <div style={{ background: 'var(--bg-section)', borderRadius: '16px', padding: '24px', marginBottom: '20px', border: '1px solid var(--border)' }}>
+                <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px' }}>Balance Sheet</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  {[
+                    { label: 'Total Assets', key: 'total_assets' },
+                    { label: 'Total Debt (Interest Bearing)', key: 'total_debt' },
+                    { label: 'Cash & Equivalents', key: 'cash' },
+                  ].map(f => (
+                    <div key={f.key}>
+                      <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' }}>{f.label}</label>
+                      <input type="number" step="0.01" value={financialsForm[f.key]}
+                        onChange={e => setFinancialsForm({...financialsForm, [f.key]: e.target.value})}
+                        style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-dark)', outline: 'none', fontSize: '0.9rem', fontFamily: 'inherit' }} />
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              <div style={{ marginBottom: '32px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-muted)' }}>Evidence Links / Sources (URL)</label>
-                  <button type="button" onClick={() => setFinancialsForm({...financialsForm, evidence_links: [...financialsForm.evidence_links, '']})} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: '0.88rem', fontWeight: 600 }}>+ Add Link</button>
+              <div style={{ background: 'var(--bg-section)', borderRadius: '16px', padding: '24px', marginBottom: '20px', border: '1px solid var(--border)' }}>
+                <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px' }}>Income Statement</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  {[
+                    { label: 'Total Revenue', key: 'total_revenue' },
+                    { label: 'Interest / Non-Permissible Income', key: 'interest_income' },
+                  ].map(f => (
+                    <div key={f.key}>
+                      <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' }}>{f.label}</label>
+                      <input type="number" step="0.01" value={financialsForm[f.key]}
+                        onChange={e => setFinancialsForm({...financialsForm, [f.key]: e.target.value})}
+                        style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-dark)', outline: 'none', fontSize: '0.9rem', fontFamily: 'inherit' }} />
+                    </div>
+                  ))}
                 </div>
-                {financialsForm.evidence_links.map((link, idx) => (
-                  <div key={idx} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
-                    <input type="url" value={link} onChange={e => {
-                      const newLinks = [...financialsForm.evidence_links];
-                      newLinks[idx] = e.target.value;
-                      setFinancialsForm({...financialsForm, evidence_links: newLinks});
-                    }} placeholder="https://..." style={{ flex: 1, padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', color: 'var(--text-dark)', outline: 'none' }} />
-                    {financialsForm.evidence_links.length > 1 && (
-                      <button type="button" onClick={() => {
-                        const newLinks = financialsForm.evidence_links.filter((_, i) => i !== idx);
-                        setFinancialsForm({...financialsForm, evidence_links: newLinks});
-                      }} style={{ padding: '0 16px', background: 'var(--non-halal-bg)', color: 'var(--non-halal)', border: 'none', borderRadius: '12px', cursor: 'pointer' }}><Trash2 size={16} /></button>
-                    )}
-                  </div>
-                ))}
+              </div>
+
+              {/* Evidence links */}
+              <div style={{ marginBottom: '28px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px' }}>Evidence / Source Links</label>
+                  <button type="button"
+                    onClick={() => setFinancialsForm({...financialsForm, evidence_links: [...financialsForm.evidence_links, '']})}
+                    style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'var(--primary-50)', border: '1px solid var(--primary-100)', color: 'var(--primary)', borderRadius: '8px', padding: '6px 12px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}
+                  ><Plus size={13} /> Add Source</button>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {financialsForm.evidence_links.map((link, idx) => (
+                    <div key={idx} style={{ display: 'flex', gap: '8px' }}>
+                      <div style={{ position: 'relative', flex: 1 }}>
+                        <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: 700 }}>🔗</span>
+                        <input type="url" value={link}
+                          onChange={e => {
+                            const newLinks = [...financialsForm.evidence_links];
+                            newLinks[idx] = e.target.value;
+                            setFinancialsForm({...financialsForm, evidence_links: newLinks});
+                          }}
+                          placeholder="https://..."
+                          style={{ width: '100%', padding: '11px 14px 11px 36px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', color: 'var(--text-dark)', outline: 'none', fontSize: '0.85rem', fontFamily: 'inherit' }} />
+                      </div>
+                      {financialsForm.evidence_links.length > 1 && (
+                        <button type="button"
+                          onClick={() => setFinancialsForm({...financialsForm, evidence_links: financialsForm.evidence_links.filter((_, i) => i !== idx)})}
+                          style={{ width: '42px', height: '42px', borderRadius: '10px', background: 'var(--non-halal-bg)', color: 'var(--non-halal)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                        ><Trash2 size={15} /></button>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <button type="submit" disabled={saving} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px' }}>
-                  {saving ? <div className="spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', borderTopColor: 'white' }} /> : <><Save size={16} /> Save & Recalculate</>}
+                <button type="submit" disabled={saving} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 28px' }}>
+                  {saving ? <div className="spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', borderTopColor: 'white' }} /> : <><Save size={15} /> Save & Recalculate</>}
                 </button>
               </div>
             </form>
@@ -388,49 +471,75 @@ export default function AdminTickerEditor() {
           {activeTab === 'news' && (
             <div className="animate-fade-in">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                <h2 style={{ fontSize: '1.25rem', margin: 0, color: 'var(--text-dark)' }}>Company News</h2>
-                <button onClick={() => setShowNewsModal(true)} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', fontSize: '0.88rem' }}>
-                  <Plus size={16} /> Add Article
+                <div>
+                  <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-dark)' }}>Company News</div>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>{stock.news?.length || 0} article{(stock.news?.length || 0) !== 1 ? 's' : ''} attached</div>
+                </div>
+                <button onClick={() => setShowNewsModal(true)} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px', fontSize: '0.82rem' }}>
+                  <Plus size={15} /> Add Article
                 </button>
               </div>
 
               {stock.news && stock.news.length > 0 ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {stock.news.map(n => (
-                    <div key={n.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', border: '1px solid var(--border)', borderRadius: '12px', background: 'var(--bg-section)' }}>
-                      <div>
-                        <div style={{ fontWeight: 700, color: 'var(--text-dark)', marginBottom: '4px' }}>{n.title}</div>
-                        <div style={{ fontSize: '0.88rem', color: 'var(--text-muted)' }}>{n.source} • {new Date(n.published_at).toLocaleDateString()}</div>
-                        <a href={n.url} target="_blank" rel="noreferrer" style={{ fontSize: '0.88rem', color: 'var(--primary)', textDecoration: 'none', display: 'inline-block', marginTop: '8px' }}>Read Article</a>
+                    <div key={n.id} style={{ display: 'flex', gap: '16px', alignItems: 'flex-start', padding: '16px 20px', border: '1px solid var(--border)', borderRadius: '16px', background: 'var(--bg-section)', transition: 'border-color 0.2s' }}
+                      onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--primary)'}
+                      onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
+                    >
+                      {n.thumbnail_url && (
+                        <img src={n.thumbnail_url} alt={n.title}
+                          style={{ width: '64px', height: '64px', borderRadius: '10px', objectFit: 'cover', flexShrink: 0 }}
+                          onError={e => e.target.style.display = 'none'}
+                        />
+                      )}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.9rem', marginBottom: '4px', lineHeight: 1.4 }}>{n.title}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '8px' }}>
+                          <span style={{ fontWeight: 600 }}>{n.source}</span> · {new Date(n.published_at || n.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </div>
+                        <a href={n.url} target="_blank" rel="noreferrer"
+                          style={{ fontSize: '0.78rem', color: 'var(--primary)', textDecoration: 'none', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                        >Read Article →</a>
                       </div>
-                      <button onClick={() => handleDeleteNews(n.id)} style={{ background: 'var(--non-halal-bg)', color: 'var(--non-halal)', border: 'none', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-                        <Trash2 size={16} />
+                      <button onClick={() => handleDeleteNews(n.id)}
+                        style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, transition: 'all 0.2s' }}
+                        onMouseEnter={e => { e.currentTarget.style.background = 'var(--non-halal-bg)'; e.currentTarget.style.color = 'var(--non-halal)'; e.currentTarget.style.borderColor = 'var(--non-halal)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg)'; e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
+                      >
+                        <Trash2 size={14} />
                       </button>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)', border: '1px dashed var(--border)', borderRadius: '12px' }}>
-                  No news articles found for this ticker.
+                <div style={{ padding: '56px 40px', textAlign: 'center', border: '1.5px dashed var(--border)', borderRadius: '16px' }}>
+                  <div style={{ fontSize: '2rem', marginBottom: '12px' }}>📰</div>
+                  <div style={{ fontWeight: 700, color: 'var(--text-dark)', marginBottom: '4px' }}>No news articles yet</div>
+                  <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Add curated news to display on this ticker's detail page.</div>
                 </div>
               )}
             </div>
           )}
 
+          </div>
         </div>
       </div>
 
       {/* ADD NEWS MODAL */}
       {showNewsModal && createPortal(
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000, padding: '20px' }}>
-          <div className="animate-fade-in" style={{ background: 'var(--bg)', width: '100%', maxWidth: '420px', borderRadius: '24px', boxShadow: '0 24px 48px rgba(0,0,0,0.1)' }}>
-            <div style={{ padding: '24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-dark)', margin: 0 }}>Add News Article</h3>
-              <button onClick={() => setShowNewsModal(false)} style={{ background: 'var(--bg-section)', border: 'none', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000, padding: '20px' }}>
+          <div className="animate-fade-in" style={{ background: 'var(--bg)', width: '100%', maxWidth: '480px', borderRadius: '24px', boxShadow: '0 32px 64px rgba(0,0,0,0.2)', overflow: 'hidden', border: '1px solid var(--border)', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '24px 28px', borderBottom: '1px solid var(--border)', background: 'var(--bg-section)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+              <div>
+                <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>{stock.symbol} · News</div>
+                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)' }}>Add News Article</h3>
+              </div>
+              <button onClick={() => setShowNewsModal(false)} style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--bg)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)' }}>
                 <X size={16} />
               </button>
             </div>
-            <form onSubmit={handleAddNews} style={{ padding: '24px' }}>
+            <form onSubmit={handleAddNews} style={{ padding: '28px', overflowY: 'auto' }}>
               
               <div style={{ marginBottom: '20px' }}>
                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Article Title</label>
