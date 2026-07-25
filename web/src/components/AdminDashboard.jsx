@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Search, Filter, AlertTriangle, CheckCircle, Edit2, X, Package, TrendingUp } from 'lucide-react';
+import { Shield, Search, Filter, AlertTriangle, CheckCircle, Edit2, X, Package, TrendingUp, AlertCircle } from 'lucide-react';
 import api, { fetchNgxStocks, fetchProducts } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { toastError, toastSuccess } from '../utils/toast';
@@ -11,6 +11,7 @@ const AdminDashboard = () => {
   
   const [stocks, setStocks] = useState([]);
   const [products, setProducts] = useState([]);
+  const [alerts, setAlerts] = useState([]);
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -24,24 +25,20 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     loadData();
-  }, [activeTab]);
+  }, []);
 
   const loadData = async () => {
     try {
       setLoading(true);
       setError(null);
-      if (activeTab === 'stocks') {
-        if (stocks.length === 0) {
-            const res = await fetchNgxStocks();
-            if (res && res.data) setStocks(res.data);
-        }
-      } else {
-        if (products.length === 0) {
-            const res = await fetchProducts();
-            if (res && res.data?.data) setProducts(res.data.data); // Laravel paginate returns data.data
-            else if (res && res.data) setProducts(res.data);
-        }
-      }
+      const [stocksRes, productsRes, alertsRes] = await Promise.all([
+        api.get('/stocks'),
+        api.get('/products'),
+        api.get('/admin/alerts')
+      ]);
+      setStocks(stocksRes.data?.data || []);
+      setProducts(productsRes.data?.data || []);
+      setAlerts(alertsRes.data?.data || alertsRes.data || []);
     } catch (err) {
       setError(err.message || 'Failed to load data');
     } finally {
@@ -80,6 +77,15 @@ const AdminDashboard = () => {
       toastError(err.message || 'Failed to update status');
     } finally {
       setUpdating(false);
+    }
+  };
+
+  const resolveAlert = async (id) => {
+    try {
+      await api.post(`/admin/alerts/${id}/resolve`);
+      setAlerts(prev => prev.filter(a => a.id !== id));
+    } catch (err) {
+      toastError('Failed to resolve alert');
     }
   };
 
@@ -150,6 +156,47 @@ const AdminDashboard = () => {
             </button>
         </div>
       </div>
+
+      {/* Alerts Section */}
+      {alerts.length > 0 && (
+        <div style={{ marginBottom: '32px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <h2 style={{ margin: 0, fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px', color: '#B91C1C' }}>
+            <AlertCircle size={20} /> Action Required
+          </h2>
+          {alerts.map(alert => (
+            <div key={alert.id} style={{ 
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
+              padding: '16px 24px', backgroundColor: '#FEF2F2', 
+              border: '1px solid #FECACA', borderRadius: '12px' 
+            }}>
+              <div>
+                <div style={{ fontWeight: '700', color: '#991B1B', marginBottom: '4px' }}>
+                  Conflict Detected for {alert.company?.symbol || 'Unknown'}
+                </div>
+                <div style={{ fontSize: '13px', color: 'var(--text-dark)' }}>{alert.message}</div>
+              </div>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button 
+                  onClick={() => {
+                    setSelectedItem({ type: 'stocks', data: alert.company });
+                    setNewStatus('non-halal');
+                    setReason('Overriding based on Excel screening failure');
+                  }}
+                  style={{ padding: '8px 16px', borderRadius: '8px', backgroundColor: '#B91C1C', color: 'white', border: 'none', fontWeight: '600', cursor: 'pointer', fontSize: '13px' }}
+                >
+                  Resolve (Override to Fail)
+                </button>
+                <button 
+                  onClick={() => resolveAlert(alert.id)}
+                  style={{ padding: '8px 16px', borderRadius: '8px', backgroundColor: 'var(--bg)', color: 'var(--text-dark)', border: '1px solid var(--border)', fontWeight: '600', cursor: 'pointer', fontSize: '13px' }}
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
         <div style={{ flex: 1, position: 'relative' }}>

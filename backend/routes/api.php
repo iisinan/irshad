@@ -143,6 +143,10 @@ Route::prefix('v1')->group(function () {
             Route::get('/admin/users', [\App\Http\Controllers\AdminController::class, 'getUsers']);
             Route::post('/admin/users', [\App\Http\Controllers\AdminController::class, 'createAdmin']);
             
+            // Admin Alerts
+            Route::get('/admin/alerts', [\App\Http\Controllers\AdminController::class, 'getAlerts']);
+            Route::post('/admin/alerts/{id}/resolve', [\App\Http\Controllers\AdminController::class, 'resolveAlert']);
+            
             // AAOIFI Override
             Route::put('/stocks/{symbol}/aaoifi', [StockController::class, 'updateAaoifi']);
             
