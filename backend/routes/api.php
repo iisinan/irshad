@@ -152,6 +152,9 @@ Route::prefix('v1')->group(function () {
             Route::post('/admin/alerts/{id}/resolve', [\App\Http\Controllers\AdminController::class, 'resolveAlert']);
 
             // Admin Stock/Ticker Management
+            Route::get('/admin/stocks/export', [\App\Http\Controllers\AdminController::class, 'exportStocks']);
+            Route::post('/admin/stocks/import/preview', [\App\Http\Controllers\AdminController::class, 'previewImport']);
+            Route::post('/admin/stocks/import/confirm', [\App\Http\Controllers\AdminController::class, 'confirmImport']);
             Route::put('/admin/stocks/{symbol}', [\App\Http\Controllers\AdminController::class, 'updateTickerAbout']);
             Route::post('/admin/stocks/{symbol}/news', [\App\Http\Controllers\AdminController::class, 'addTickerNews']);
             Route::delete('/admin/stocks/{symbol}/news/{newsId}', [\App\Http\Controllers\AdminController::class, 'deleteTickerNews']);

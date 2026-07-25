@@ -90,11 +90,16 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
 
   const [selectedItem, setSelectedItem] = useState(null);
   const [newStatus, setNewStatus] = useState('');
   const [reason, setReason] = useState('');
   const [updating, setUpdating] = useState(false);
+  
+  const [importPreview, setImportPreview] = useState(null);
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = React.useRef(null);
 
   useEffect(() => { loadData(); }, []);
 
@@ -145,9 +150,65 @@ const AdminDashboard = () => {
     } catch { toastError('Failed to resolve alert'); }
   };
 
-  const filteredData = activeTab === 'stocks'
+  const handleExport = async () => {
+    try {
+      toastSuccess('Generating export...');
+      const response = await api.get('/admin/stocks/export', { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'stocks_export.csv');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      toastError('Failed to export stocks');
+    }
+  };
+
+  const handleImportPreview = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    setImporting(true);
+    try {
+      const res = await api.post('/admin/stocks/import/preview', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setImportPreview(res.data.data);
+    } catch (err) {
+      toastError(err.response?.data?.message || 'Failed to parse CSV');
+    } finally {
+      setImporting(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleConfirmImport = async () => {
+    if (!importPreview) return;
+    setImporting(true);
+    try {
+      const res = await api.post('/admin/stocks/import/confirm', { changes: importPreview });
+      toastSuccess(res.data.message || 'Import successful');
+      setImportPreview(null);
+      loadData();
+    } catch (err) {
+      toastError('Failed to apply import');
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  let filteredData = activeTab === 'stocks'
     ? stocks.filter(s => s.symbol?.toLowerCase().includes(searchTerm.toLowerCase()) || s.name?.toLowerCase().includes(searchTerm.toLowerCase()))
     : products.filter(p => p.barcode?.toLowerCase().includes(searchTerm.toLowerCase()) || p.name?.toLowerCase().includes(searchTerm.toLowerCase()));
+
+  if (activeTab === 'stocks' && statusFilter !== 'all') {
+    filteredData = filteredData.filter(s => s.status?.status === statusFilter);
+  }
 
   const halalCount = stocks.filter(s => s.status?.status === 'halal').length;
   const nonHalalCount = stocks.filter(s => s.status?.status === 'non-halal').length;
@@ -203,6 +264,33 @@ const AdminDashboard = () => {
             <RefreshCw size={15} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />
             Refresh
           </button>
+          
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              onClick={handleExport}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '8px',
+                padding: '10px 18px', borderRadius: '12px',
+                border: '1px solid var(--border)', background: 'var(--bg)',
+                color: 'var(--text-dark)', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600,
+              }}
+            >
+              Export CSV
+            </button>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={importing}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '8px',
+                padding: '10px 18px', borderRadius: '12px',
+                border: 'none', background: 'var(--primary)',
+                color: '#fff', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600,
+              }}
+            >
+              {importing && !importPreview ? 'Parsing...' : 'Import CSV'}
+            </button>
+            <input type="file" accept=".csv" ref={fileInputRef} onChange={handleImportPreview} style={{ display: 'none' }} />
+          </div>
         </div>
       </div>
 
@@ -264,20 +352,39 @@ const AdminDashboard = () => {
         </div>
 
         {activeTab !== 'zakat' && (
-          <div style={{ position: 'relative', flex: '0 1 320px' }}>
-            <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-            <input
-              type="text"
-              placeholder={`Search ${activeTab}…`}
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              style={{
-                width: '100%', padding: '10px 14px 10px 38px',
-                borderRadius: '12px', border: '1px solid var(--border)',
-                background: 'var(--bg)', color: 'var(--text-dark)',
-                fontSize: '0.85rem', outline: 'none',
-              }}
-            />
+          <div style={{ display: 'flex', gap: '12px', flex: '1', minWidth: '320px', alignItems: 'center', justifyContent: 'flex-end' }}>
+            {activeTab === 'stocks' && (
+              <select 
+                value={statusFilter} 
+                onChange={e => setStatusFilter(e.target.value)}
+                style={{
+                  padding: '10px 14px', borderRadius: '12px', border: '1px solid var(--border)',
+                  background: 'var(--bg)', color: 'var(--text-dark)', fontSize: '0.85rem', outline: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="all">All Verdicts</option>
+                <option value="halal">Halal</option>
+                <option value="doubtful">Doubtful</option>
+                <option value="non-halal">Non-Halal</option>
+              </select>
+            )}
+            
+            <div style={{ position: 'relative', flex: '0 1 320px' }}>
+              <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+              <input
+                type="text"
+                placeholder={`Search ${activeTab}…`}
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                style={{
+                  width: '100%', padding: '10px 14px 10px 38px',
+                  borderRadius: '12px', border: '1px solid var(--border)',
+                  background: 'var(--bg)', color: 'var(--text-dark)',
+                  fontSize: '0.85rem', outline: 'none',
+                }}
+              />
+            </div>
           </div>
         )}
       </div>
@@ -473,6 +580,97 @@ const AdminDashboard = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ── Import Preview Modal ──────────────────────── */}
+      {importPreview && createPortal(
+        <div style={{
+          position: 'fixed', inset: 0,
+          background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 100000, padding: '20px'
+        }}>
+          <div className="animate-fade-in" style={{
+            background: 'var(--bg)', padding: '0', borderRadius: '24px',
+            width: '100%', maxWidth: '700px', maxHeight: '90vh',
+            border: '1px solid var(--border)',
+            boxShadow: '0 32px 64px rgba(0,0,0,0.2)',
+            display: 'flex', flexDirection: 'column',
+            overflow: 'hidden'
+          }}>
+            {/* Modal Header */}
+            <div style={{ padding: '24px 28px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-section)' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-dark)' }}>Review Import Changes</h3>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                  {importPreview.length} {importPreview.length === 1 ? 'ticker' : 'tickers'} will be updated. Unchanged rows from the CSV will be ignored.
+                </div>
+              </div>
+              <button onClick={() => setImportPreview(null)} style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--bg)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)' }}>
+                <X size={16} />
+              </button>
+            </div>
+
+            <div style={{ padding: '20px', overflowY: 'auto', flex: 1 }}>
+              {importPreview.length === 0 ? (
+                <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                  <CheckCircle size={48} color="var(--halal)" style={{ margin: '0 auto 16px' }} />
+                  No changes detected. The CSV perfectly matches the current database.
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {importPreview.map((change, i) => (
+                    <div key={i} style={{ padding: '16px', border: '1px solid var(--border)', borderRadius: '12px', background: 'var(--bg-section)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                        <div style={{ fontWeight: 800, color: 'var(--text-dark)' }}>{change.ticker} - {change.name}</div>
+                      </div>
+                      
+                      {change.new_verdict !== change.old_verdict && (
+                        <div style={{ display: 'flex', gap: '8px', fontSize: '0.85rem', marginBottom: '6px' }}>
+                          <span style={{ color: 'var(--text-muted)', width: '80px' }}>Verdict:</span>
+                          <del style={{ color: 'var(--text-light)', opacity: 0.6 }}>{change.old_verdict}</del>
+                          <span style={{ color: 'var(--text-muted)' }}>→</span>
+                          <span style={{ color: 'var(--primary)', fontWeight: 600 }}>{change.new_verdict}</span>
+                        </div>
+                      )}
+                      
+                      {change.new_override !== change.old_override && (
+                        <div style={{ display: 'flex', gap: '8px', fontSize: '0.85rem', marginBottom: '6px' }}>
+                          <span style={{ color: 'var(--text-muted)', width: '80px' }}>Override:</span>
+                          <del style={{ color: 'var(--text-light)', opacity: 0.6 }}>{change.old_override ? 'TRUE' : 'FALSE'}</del>
+                          <span style={{ color: 'var(--text-muted)' }}>→</span>
+                          <span style={{ color: 'var(--primary)', fontWeight: 600 }}>{change.new_override ? 'TRUE' : 'FALSE'}</span>
+                        </div>
+                      )}
+
+                      {change.new_reason !== change.old_reason && (
+                        <div style={{ display: 'flex', gap: '8px', fontSize: '0.85rem' }}>
+                          <span style={{ color: 'var(--text-muted)', width: '80px' }}>Reason:</span>
+                          <div style={{ flex: 1 }}>
+                            <del style={{ display: 'block', color: 'var(--text-light)', opacity: 0.6, marginBottom: '2px' }}>{change.old_reason || '(empty)'}</del>
+                            <span style={{ display: 'block', color: 'var(--primary)', fontWeight: 600 }}>{change.new_reason || '(empty)'}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div style={{ padding: '20px 28px', borderTop: '1px solid var(--border)', display: 'flex', gap: '12px', background: 'var(--bg-section)' }}>
+              <button type="button" onClick={() => setImportPreview(null)}
+                style={{ flex: 1, padding: '13px', borderRadius: '12px', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer' }}>
+                Cancel
+              </button>
+              <button type="button" onClick={handleConfirmImport} disabled={importing || importPreview.length === 0}
+                style={{ flex: 2, padding: '13px', borderRadius: '12px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 700, cursor: (importing || importPreview.length === 0) ? 'not-allowed' : 'pointer', opacity: (importing || importPreview.length === 0) ? 0.5 : 1 }}>
+                {importing ? 'Applying Changes...' : `Confirm & Update ${importPreview.length} Tickers`}
+              </button>
+            </div>
           </div>
         </div>,
         document.body

@@ -194,4 +194,141 @@ class AdminController extends Controller
 
         return $this->success(null, 'News deleted successfully');
     }
+
+    /**
+     * Export all tickers to CSV.
+     */
+    public function exportStocks()
+    {
+        $companies = \App\Models\Company::with(['status', 'latestFinancialScreening', 'latestBusinessScreening'])->get();
+        
+        $headers = [
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=stocks.csv",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+        
+        $columns = [
+            'Ticker', 'Name', 'Verdict', 'Reason', 'Business Activity',
+            'Debt Ratio', 'Cash Ratio', 'Impermissible Income Ratio', 'Scholar Override'
+        ];
+        
+        $callback = function() use($companies, $columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+            
+            foreach ($companies as $company) {
+                $status = $company->status;
+                $fin = $company->latestFinancialScreening;
+                $bus = $company->latestBusinessScreening;
+                
+                $calc = [];
+                if ($fin) {
+                    $calc = is_string($fin->calculation_results) ? json_decode($fin->calculation_results, true) : $fin->calculation_results;
+                }
+                $ratios = $calc['ratios'] ?? [];
+                
+                fputcsv($file, [
+                    $company->symbol,
+                    $company->name,
+                    $status ? $status->status : 'unknown',
+                    $status ? $status->reason : '',
+                    $bus ? $bus->business_compliance_status : '',
+                    $ratios['interest_bearing_debt_ratio'] ?? '',
+                    $ratios['cash_and_equivalents_ratio'] ?? '',
+                    $ratios['non_permissible_income_ratio'] ?? '',
+                    ($status && $status->verified_by_scholar) ? 'TRUE' : 'FALSE'
+                ]);
+            }
+            fclose($file);
+        };
+        
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Preview CSV Import.
+     */
+    public function previewImport(Request $request)
+    {
+        $request->validate(['file' => 'required|mimes:csv,txt']);
+        
+        $file = $request->file('file');
+        $csvData = file_get_contents($file);
+        $rows = array_map('str_getcsv', explode("\n", $csvData));
+        $header = array_shift($rows); // Remove header
+        
+        $changes = [];
+        foreach ($rows as $row) {
+            if (count($row) < 9) continue; // Skip invalid rows
+            
+            $symbol = $row[0];
+            $newVerdict = strtolower(trim($row[2]));
+            $newReason = trim($row[3]);
+            $newOverrideStr = strtoupper(trim($row[8]));
+            $newOverride = ($newOverrideStr === 'TRUE' || $newOverrideStr === '1' || $newOverrideStr === 'YES');
+            
+            $company = \App\Models\Company::where('symbol', $symbol)->with('status')->first();
+            if (!$company) continue; // Skip if ticker not found
+            
+            $currentVerdict = $company->status ? strtolower($company->status->status) : 'unknown';
+            $currentReason = $company->status ? trim($company->status->reason) : '';
+            $currentOverride = $company->status ? (bool)$company->status->verified_by_scholar : false;
+            
+            // Only flag if something important changed
+            if ($newVerdict !== $currentVerdict || $newOverride !== $currentOverride || $newReason !== $currentReason) {
+                $changes[] = [
+                    'ticker' => $symbol,
+                    'name' => $company->name,
+                    'old_verdict' => $currentVerdict,
+                    'new_verdict' => $newVerdict,
+                    'old_override' => $currentOverride,
+                    'new_override' => $newOverride,
+                    'old_reason' => $currentReason,
+                    'new_reason' => $newReason
+                ];
+            }
+        }
+        
+        return response()->json(['data' => $changes]);
+    }
+
+    /**
+     * Confirm CSV Import changes.
+     */
+    public function confirmImport(Request $request)
+    {
+        $changes = $request->input('changes', []);
+        $updatedCount = 0;
+        
+        foreach ($changes as $change) {
+            $company = \App\Models\Company::where('symbol', $change['ticker'])->first();
+            if (!$company) continue;
+            
+            \Illuminate\Support\Facades\DB::table('stock_statuses')->updateOrInsert(
+                ['company_id' => $company->id],
+                [
+                    'status' => $change['new_verdict'],
+                    'reason' => $change['new_reason'] ?? '',
+                    'verified_by_scholar' => $change['new_override'],
+                    'last_updated' => now(),
+                    'updated_at' => now(),
+                ]
+            );
+            
+            \Illuminate\Support\Facades\DB::table('companies')->where('id', $company->id)->update([
+                'current_status' => $change['new_verdict']
+            ]);
+            
+            \Illuminate\Support\Facades\Cache::forget("stocks.show.{$company->symbol}");
+            \Illuminate\Support\Facades\Cache::forget("stocks.show.{$company->symbol}_v2");
+            $updatedCount++;
+        }
+        
+        \Illuminate\Support\Facades\Cache::forget('stocks.index_v6');
+        
+        return response()->json(['message' => "Successfully updated $updatedCount tickers."]);
+    }
 }
