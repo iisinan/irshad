@@ -142,6 +142,8 @@ Route::prefix('v1')->group(function () {
             // User Management
             Route::get('/admin/users', [\App\Http\Controllers\AdminController::class, 'getUsers']);
             Route::post('/admin/users', [\App\Http\Controllers\AdminController::class, 'createAdmin']);
+            Route::put('/admin/users/{id}', [\App\Http\Controllers\AdminController::class, 'updateUser']);
+            Route::delete('/admin/users/{id}', [\App\Http\Controllers\AdminController::class, 'deleteUser']);
             
             // Admin Alerts
             Route::get('/admin/alerts', [\App\Http\Controllers\AdminController::class, 'getAlerts']);

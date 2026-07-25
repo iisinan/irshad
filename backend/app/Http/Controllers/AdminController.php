@@ -68,4 +68,42 @@ class AdminController extends Controller
         $alert->update(['resolved' => true]);
         return $this->success(null, 'Alert resolved successfully');
     }
+    /**
+     * Update user details (admin only).
+     */
+    public function updateUser(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'sometimes|string|max:255',
+            'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
+            'role' => 'sometimes|string|in:admin,user',
+            'plan' => 'sometimes|string|in:free,paid',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $user->update($request->only(['name', 'email', 'role', 'plan']));
+
+        return $this->success($user, 'User updated successfully');
+    }
+
+    /**
+     * Delete a user (admin only).
+     */
+    public function deleteUser($id)
+    {
+        $user = User::findOrFail($id);
+        
+        // Prevent deleting yourself
+        if (auth()->id() === $user->id) {
+            return response()->json(['message' => 'Cannot delete your own account'], 403);
+        }
+
+        $user->delete();
+        return $this->success(null, 'User deleted successfully');
+    }
 }

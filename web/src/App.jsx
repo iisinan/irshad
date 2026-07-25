@@ -10,6 +10,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import NotFound from './components/NotFound';
 import { useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import { Toaster } from 'react-hot-toast';
 import './index.css';
 
 const StockDetails = React.lazy(() => import('./components/StockDetails'));
@@ -651,6 +652,7 @@ function App() {
 
   return (
     <>
+      <Toaster position="top-right" />
       <ErrorBoundary>
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
           <DocumentTitleUpdater />

@@ -303,6 +303,16 @@ export const createAdminUser = async (data) => {
   return response.data;
 };
 
+export const updateAdminUser = async (id, data) => {
+  const response = await api.put(`/admin/users/${id}`, data);
+  return response.data;
+};
+
+export const deleteAdminUser = async (id) => {
+  const response = await api.delete(`/admin/users/${id}`);
+  return response.data;
+};
+
 export const overrideStockStatus = async (symbol, data) => {
   const response = await api.put(`/stocks/${symbol}/status`, data);
   return response.data;
