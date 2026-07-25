@@ -528,10 +528,14 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
             ),
           const SizedBox(height: 24),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
             decoration: BoxDecoration(
               color: bg,
-              borderRadius: BorderRadius.circular(100), // Pill badge
+              borderRadius: BorderRadius.circular(100), // Large Pill badge
+              border: Border.all(color: color.withValues(alpha: 0.4), width: 2),
+              boxShadow: [
+                BoxShadow(color: color.withValues(alpha: 0.15), blurRadius: 16, offset: const Offset(0, 8)),
+              ],
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -540,10 +544,10 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                   label == 'SHARIAH COMPLIANT' ? Icons.check_circle_rounded : 
                   label == 'NOT COMPLIANT' ? Icons.cancel_rounded : Icons.help_rounded,
                   color: color, 
-                  size: 16
+                  size: 26
                 ),
-                const SizedBox(width: 8),
-                Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: color, letterSpacing: 0.5)),
+                const SizedBox(width: 10),
+                Text(label, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: color, letterSpacing: 0.8)),
               ],
             ),
           ),
@@ -1059,6 +1063,80 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
           ),
           Divider(color: context.divider, height: 1),
 
+          // Referenced Financial Data Used
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: context.bg,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: context.divider),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.analytics_outlined, color: context.primary, size: 16),
+                    const SizedBox(width: 6),
+                    Text('REFERENCED FINANCIAL DATA USED', style: TextStyle(color: context.textMuted, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.8)),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Market Cap', style: TextStyle(color: context.textMuted, fontSize: 11, fontWeight: FontWeight.w600)),
+                          const SizedBox(height: 2),
+                          Text(marketCap > 0 ? '₦${(marketCap/1000000000).toStringAsFixed(2)}B' : 'N/A', style: TextStyle(color: context.textDark, fontSize: 13, fontWeight: FontWeight.w800)),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Total Debt', style: TextStyle(color: context.textMuted, fontSize: 11, fontWeight: FontWeight.w600)),
+                          const SizedBox(height: 2),
+                          Text(debt > 0 ? '₦${(debt/1000000000).toStringAsFixed(2)}B' : '₦0', style: TextStyle(color: context.textDark, fontSize: 13, fontWeight: FontWeight.w800)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Cash & Sec.', style: TextStyle(color: context.textMuted, fontSize: 11, fontWeight: FontWeight.w600)),
+                          const SizedBox(height: 2),
+                          Text(cash > 0 ? '₦${(cash/1000000000).toStringAsFixed(2)}B' : '₦0', style: TextStyle(color: context.textDark, fontSize: 13, fontWeight: FontWeight.w800)),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Total Revenue', style: TextStyle(color: context.textMuted, fontSize: 11, fontWeight: FontWeight.w600)),
+                          const SizedBox(height: 2),
+                          Text(rawRevenue > 0 ? '₦${(rawRevenue/1000000000).toStringAsFixed(2)}B' : 'N/A', style: TextStyle(color: context.textDark, fontSize: 13, fontWeight: FontWeight.w800)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
           // A. Business Activity
           Padding(
             padding: const EdgeInsets.all(24),
@@ -1323,7 +1401,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
           children: [
             Text('✨', style: TextStyle(fontSize: 18)),
             SizedBox(width: 8),
-            Text('Ask AI Assistant', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: context.textDark)),
+            Text('Ask Irshad', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: context.textDark)),
           ],
         ),
       ),

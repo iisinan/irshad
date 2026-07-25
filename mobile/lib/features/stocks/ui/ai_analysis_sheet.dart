@@ -25,6 +25,8 @@ class _AiAnalysisSheetState extends State<AiAnalysisSheet> {
   final StockRepository _repository = StockRepository();
   bool _isLoading = true;
   String? _analysis;
+  int? _confidenceScore;
+  List<String> _sources = [];
   String? _error;
 
   @override
@@ -35,10 +37,16 @@ class _AiAnalysisSheetState extends State<AiAnalysisSheet> {
 
   Future<void> _fetchAnalysis() async {
     try {
-      final analysis = await _repository.fetchAiAnalysis(widget.symbol);
+      final res = await _repository.fetchAiAnalysis(widget.symbol);
       if (mounted) {
         setState(() {
-          _analysis = analysis;
+          if (res != null) {
+            _analysis = res['reasoning'] ?? res['analysis'] ?? 'No analysis available.';
+            _confidenceScore = res['confidence_score'];
+            if (res['sources'] != null) {
+              _sources = List<String>.from(res['sources'].map((s) => s.toString()));
+            }
+          }
           _isLoading = false;
         });
       }
@@ -94,16 +102,16 @@ class _AiAnalysisSheetState extends State<AiAnalysisSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'AI Halal Assistant',
+                        'Irshad Analysis Reasoning',
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 18,
                           fontWeight: FontWeight.w800,
                           color: context.textDark,
                           letterSpacing: -0.5,
                         ),
                       ),
                       Text(
-                        'Powered by Gemini',
+                        'Powered by Irshad Shariah Engine',
                         style: TextStyle(color: Colors.amber, fontWeight: FontWeight.w600, fontSize: 13),
                       ),
                     ],
@@ -128,7 +136,7 @@ class _AiAnalysisSheetState extends State<AiAnalysisSheet> {
                       children: [
                         CircularProgressIndicator(color: Colors.blue),
                         SizedBox(height: 16),
-                        Text('Gemini is analyzing the financials...', style: TextStyle(color: context.textMuted)),
+                        Text('Irshad is analyzing corporate disclosures...', style: TextStyle(color: context.textMuted)),
                       ],
                     ),
                   )
@@ -143,13 +151,66 @@ class _AiAnalysisSheetState extends State<AiAnalysisSheet> {
                           ),
                         ),
                       )
-                    : Markdown(
-                        data: _analysis ?? 'No analysis available.',
-                        styleSheet: MarkdownStyleSheet(
-                          p: TextStyle(fontSize: 16, height: 1.6, color: context.textMuted),
-                          h1: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: context.textDark),
-                          h2: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: context.textDark),
-                          listBullet: const TextStyle(color: Colors.amber, fontSize: 18),
+                    : SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (_confidenceScore != null)
+                              Container(
+                                margin: const EdgeInsets.only(bottom: 16),
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: Colors.amber.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(color: Colors.amber.withOpacity(0.5)),
+                                ),
+                                child: Text(
+                                  '✨ Irshad Confidence Score: $_confidenceScore%',
+                                  style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 13),
+                                ),
+                              ),
+                            MarkdownBody(
+                              data: _analysis ?? 'No analysis available.',
+                              styleSheet: MarkdownStyleSheet(
+                                p: TextStyle(fontSize: 15, height: 1.6, color: context.textMuted),
+                                h1: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: context.textDark),
+                                h2: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: context.textDark),
+                                listBullet: const TextStyle(color: Colors.amber, fontSize: 16),
+                              ),
+                            ),
+                            if (_sources.isNotEmpty) ...[
+                              const SizedBox(height: 24),
+                              const Divider(),
+                              const SizedBox(height: 12),
+                              Text(
+                                'DATA SOURCES ANALYSED:',
+                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: context.textMuted, letterSpacing: 0.8),
+                              ),
+                              const SizedBox(height: 12),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: _sources.map((src) {
+                                  final isUrl = src.startsWith('http');
+                                  final display = isUrl ? src.replaceAll(RegExp(r'^https?://(www\.)?'), '').split('/')[0] : src;
+                                  return Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: context.bg,
+                                      borderRadius: BorderRadius.circular(14),
+                                      border: Border.all(color: context.divider),
+                                    ),
+                                    child: Text(
+                                      '📰 $display',
+                                      style: TextStyle(fontSize: 12, color: context.textDark, fontWeight: FontWeight.w600),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                              const SizedBox(height: 32),
+                            ],
+                          ],
                         ),
                       ),
           ),

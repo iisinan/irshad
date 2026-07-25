@@ -28,7 +28,11 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
             'location' => $request->location,
             'role' => 'user', // Default role
-            'preferences' => [],
+            'preferences' => [
+                'occupation' => $request->occupation,
+                'investment_goal' => $request->investment_goal,
+                'dob' => $request->dob,
+            ],
         ]);
 
         event(new \Illuminate\Auth\Events\Registered($user));

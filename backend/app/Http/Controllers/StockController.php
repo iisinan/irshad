@@ -313,18 +313,23 @@ class StockController extends Controller
     }
 
     /**
-     * Ask Gemini AI for a plain-English explanation of the stock's compliance status.
+     * Ask Perplexity AI for a Shariah analysis of the stock with confidence score and sources.
      */
-    public function getAiAnalysis(string $symbol, \App\Services\GeminiAiService $aiService): JsonResponse
+    public function getAiAnalysis(string $symbol, \App\Services\PerplexityAiService $aiService): JsonResponse
     {
         $company = Company::with(['status', 'financials' => fn($q) => $q->latest()])->where('symbol', $symbol)->firstOrFail();
         
         $statusStr = $company->status ? $company->status->status : 'unknown';
         $financials = $company->financials->first();
 
-        $analysis = $aiService->analyzeCompliance($company, $financials, $statusStr);
+        $result = $aiService->analyzeCompliance($company, $financials, $statusStr);
 
-        return $this->success(['analysis' => $analysis]);
+        return $this->success([
+            'reasoning' => $result['reasoning'],
+            'confidence_score' => $result['confidence_score'],
+            'sources' => $result['sources'],
+            'analysis' => $result['reasoning']
+        ]);
     }
 
     /**

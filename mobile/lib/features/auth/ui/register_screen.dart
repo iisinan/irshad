@@ -14,6 +14,11 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _countryController = TextEditingController(text: 'Nigeria');
+  final _occupationController = TextEditingController();
+  final _dobController = TextEditingController();
+  final _goalController = TextEditingController(text: 'Halal Long-Term Wealth');
   final _passwordController = TextEditingController();
   final _passwordConfirmationController = TextEditingController();
   final _authRepository = AuthRepository();
@@ -43,6 +48,11 @@ void _register() async {
         _emailController.text,
         _passwordController.text,
         _passwordConfirmationController.text,
+        location: _countryController.text,
+        phoneNumber: _phoneController.text,
+        occupation: _occupationController.text,
+        dob: _dobController.text,
+        investmentGoal: _goalController.text,
       );
       if (user != null) {
         if (mounted) {
@@ -136,6 +146,48 @@ void _register() async {
                 hint: 'name@example.com',
                 icon: Icons.alternate_email_rounded,
                 keyboardType: TextInputType.emailAddress,
+              ),
+              const SizedBox(height: 20),
+
+              _buildLabel('Phone Number (Optional)'),
+              _buildTextField(
+                controller: _phoneController,
+                hint: '+234 800 000 0000',
+                icon: Icons.phone_outlined,
+                keyboardType: TextInputType.phone,
+              ),
+              const SizedBox(height: 20),
+
+              _buildLabel('Country of Residence'),
+              _buildTextField(
+                controller: _countryController,
+                hint: 'Nigeria',
+                icon: Icons.location_on_outlined,
+              ),
+              const SizedBox(height: 20),
+
+              _buildLabel('Occupation / Profession'),
+              _buildTextField(
+                controller: _occupationController,
+                hint: 'e.g. Engineer, Analyst',
+                icon: Icons.work_outline_rounded,
+              ),
+              const SizedBox(height: 20),
+
+              _buildLabel('Date of Birth (YYYY-MM-DD)'),
+              _buildTextField(
+                controller: _dobController,
+                hint: '1990-01-01',
+                icon: Icons.calendar_today_outlined,
+                keyboardType: TextInputType.datetime,
+              ),
+              const SizedBox(height: 20),
+
+              _buildLabel('Primary Investment Goal'),
+              _buildTextField(
+                controller: _goalController,
+                hint: 'Halal Long-Term Wealth',
+                icon: Icons.trending_up_rounded,
               ),
               const SizedBox(height: 20),
               

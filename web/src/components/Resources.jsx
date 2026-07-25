@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext';
 export default function ResourcesPage() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('All');
   const [selectedItem, setSelectedItem] = useState(null);
   
   const [resources, setResources] = useState([]);
@@ -186,8 +187,21 @@ export default function ResourcesPage() {
                 <p>No resources found matching your search.</p>
               </div>
             ) : (
-              <div className="lectures-grid">
-                {resources.map((item, i) => (
+              (() => {
+                const uniqueCategories = ['All', ...new Set(resources.map(r => r.category).filter(Boolean))];
+                const filteredResources = resources.filter(item => {
+                  if (categoryFilter === 'All') return true;
+                  return item.category === categoryFilter;
+                });
+                
+                const groupedResources = filteredResources.reduce((acc, item) => {
+                  const cat = item.category || 'General';
+                  if (!acc[cat]) acc[cat] = [];
+                  acc[cat].push(item);
+                  return acc;
+                }, {});
+
+                const renderCard = (item, i) => (
                   <div 
                     key={item.id} 
                     onClick={() => setSelectedItem(item)}
@@ -252,8 +266,46 @@ export default function ResourcesPage() {
                       )}
                     </div>
                   </div>
-                ))}
-              </div>
+                );
+
+                return (
+                  <div>
+                    {/* Category Tabs */}
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '32px', paddingBottom: '20px', borderBottom: '1px solid var(--border)' }}>
+                      {uniqueCategories.map(cat => (
+                        <button
+                          key={cat}
+                          onClick={() => setCategoryFilter(cat)}
+                          style={{
+                            padding: '8px 18px', borderRadius: '100px', border: '1.5px solid',
+                            borderColor: categoryFilter === cat ? 'var(--primary)' : 'var(--border)',
+                            background: categoryFilter === cat ? 'var(--primary)' : 'var(--bg-section)',
+                            color: categoryFilter === cat ? 'white' : 'var(--text-dark)',
+                            fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s',
+                            boxShadow: categoryFilter === cat ? '0 4px 12px rgba(15,82,87,0.2)' : 'none'
+                          }}
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Grouped Layout */}
+                    {Object.entries(groupedResources).map(([cat, items]) => (
+                      <div key={cat} style={{ marginBottom: '40px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px', borderBottom: '2px solid var(--primary-50)', paddingBottom: '10px' }}>
+                          <div style={{ width: '6px', height: '22px', background: 'var(--primary)', borderRadius: '4px' }} />
+                          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-dark)', margin: 0 }}>{cat}</h2>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', background: 'var(--bg-section)', padding: '2px 10px', borderRadius: '12px', border: '1px solid var(--border)' }}>{items.length} {items.length === 1 ? 'Resource' : 'Resources'}</span>
+                        </div>
+                        <div className="lectures-grid">
+                          {items.map((item, i) => renderCard(item, i))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()
             )}
             </div>
           </div>

@@ -129,18 +129,18 @@ const ShariahPage = () => (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <RatioGauge
             threshold={30}
-            label="1. Debt Ratio — Interest-bearing debt vs. Market Cap"
-            note="Total interest-bearing debt must not exceed 30% of the 12-month trailing average market capitalization."
+            label="1. Debt ratio — Total debt / Market cap × 100"
+            note="Total interest-bearing debt divided by market cap multiplied by 100 must be less than 30% to be halal."
           />
           <RatioGauge
             threshold={30}
-            label="2. Liquidity Ratio — Cash & Interest Investments vs. Market Cap"
-            note="Interest-bearing securities and deposits must not exceed 30% of the trailing market capitalization."
+            label="2. Cash ratio — (Cash + security) / Market cap × 100"
+            note="Cash and interest-bearing securities divided by market cap multiplied by 100 must be less than 30% to be halal."
           />
           <RatioGauge
             threshold={5}
-            label="3. Impermissible Income Ratio — Non-compliant income vs. Total Revenue"
-            note="Income from impermissible activities (e.g. interest on cash reserves) must not exceed 5% of total gross revenue."
+            label="3. Impure revenue — Impure income / Total revenue × 100"
+            note="Impure income divided by total revenue multiplied by 100 must be less than 5% to be halal."
           />
         </div>
       </div>

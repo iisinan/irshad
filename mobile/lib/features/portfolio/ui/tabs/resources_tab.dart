@@ -14,6 +14,7 @@ class _ResourcesTabState extends State<ResourcesTab> {
   bool _isLoading = true;
   String? _error;
   List<dynamic> _resources = [];
+  String _selectedCategory = 'All';
 
   @override
   void initState() {
@@ -156,8 +157,17 @@ class _ResourcesTabState extends State<ResourcesTab> {
       );
     }
 
-    final videos = _resources.where((r) => r['type'] == 'video').toList();
-    final documents = _resources.where((r) => r['type'] == 'document').toList();
+    final categories = ['All', ...{..._resources.map((r) => r['category']?.toString()).where((c) => c != null && c.isNotEmpty)}];
+    final filtered = _resources.where((r) {
+      if (_selectedCategory == 'All') return true;
+      return r['category'] == _selectedCategory;
+    }).toList();
+
+    final Map<String, List<dynamic>> grouped = {};
+    for (var r in filtered) {
+      final cat = (r['category'] != null && r['category'].toString().isNotEmpty) ? r['category'].toString() : 'General';
+      grouped.putIfAbsent(cat, () => []).add(r);
+    }
 
     return SingleChildScrollView(
       padding: const EdgeInsets.only(left: 24.0, right: 24.0, top: 24.0, bottom: 100.0),
@@ -173,38 +183,100 @@ class _ResourcesTabState extends State<ResourcesTab> {
             'Learn the fundamentals of halal investing, shariah compliance, and how to purify your wealth.',
             style: TextStyle(fontSize: 15, color: context.textMuted, height: 1.5),
           ),
-          const SizedBox(height: 32),
-          if (videos.isNotEmpty) ...[
-            Text(
-              'Featured Videos',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: context.textDark),
+          const SizedBox(height: 24),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: categories.map((cat) {
+                final isSelected = _selectedCategory == cat;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: FilterChip(
+                    label: Text(
+                      cat,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: isSelected ? Colors.white : context.textDark,
+                      ),
+                    ),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      setState(() {
+                        _selectedCategory = cat;
+                      });
+                    },
+                    backgroundColor: context.bgAlt,
+                    selectedColor: context.primary,
+                    checkmarkColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      side: BorderSide(
+                        color: isSelected ? context.primary : context.divider,
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
-            const SizedBox(height: 16),
-            ...videos.map((v) => _buildResourceCard(
-                  context,
-                  title: v['title'] ?? 'Untitled Video',
-                  subtitle: v['description'] ?? 'Video',
-                  icon: Icons.play_circle_fill_rounded,
-                  color: context.primary,
-                  url: v['url'],
-                )),
-            const SizedBox(height: 16),
-          ],
-          if (documents.isNotEmpty) ...[
-            Text(
-              'Essential Documents',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: context.textDark),
-            ),
-            const SizedBox(height: 16),
-            ...documents.map((d) => _buildResourceCard(
-                  context,
-                  title: d['title'] ?? 'Untitled Document',
-                  subtitle: d['description'] ?? 'Document',
-                  icon: Icons.picture_as_pdf_rounded,
-                  color: context.haram,
-                  url: d['url'],
-                )),
-          ],
+          ),
+          const SizedBox(height: 28),
+          if (grouped.isEmpty)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(40.0),
+                child: Text('No resources found.', style: TextStyle(color: context.textMuted)),
+              ),
+            )
+          else
+            ...grouped.entries.map((entry) {
+              final catName = entry.key;
+              final items = entry.value;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 4,
+                        height: 18,
+                        decoration: BoxDecoration(
+                          color: context.primary,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        catName,
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: context.textDark),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: context.bgAlt,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: context.divider),
+                        ),
+                        child: Text(
+                          '${items.length}',
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: context.textMuted),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  ...items.map((r) => _buildResourceCard(
+                        context,
+                        title: r['title'] ?? 'Untitled',
+                        subtitle: r['scholar'] ?? r['description'] ?? r['category'] ?? (r['type'] == 'video' ? 'Video' : 'Document'),
+                        icon: r['type'] == 'video' ? Icons.play_circle_fill_rounded : Icons.picture_as_pdf_rounded,
+                        color: r['type'] == 'video' ? context.primary : context.haram,
+                        url: r['url'],
+                      )),
+                  const SizedBox(height: 24),
+                ],
+              );
+            }),
         ],
       ),
     );

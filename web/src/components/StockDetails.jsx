@@ -19,6 +19,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const [enriching, setEnriching] = useState(!!optimisticStock); // silent background fetch
   const [dividendInput, setDividendInput] = useState('');
   const [aiAnalysis, setAiAnalysis] = useState(null);
+  const [aiData, setAiData] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState(null);
   
@@ -257,7 +258,9 @@ const StockDetails = ({ symbol: propSymbol }) => {
     setAiError(null);
     fetchAiAnalysis(symbol)
       .then(r => {
-        const analysisText = r.data?.analysis || r.analysis || "No analysis returned.";
+        const payload = r.data || r;
+        setAiData(payload);
+        const analysisText = payload?.reasoning || payload?.analysis || "No analysis returned.";
         setAiAnalysis(analysisText);
       })
       .catch(e => {
@@ -401,71 +404,129 @@ const StockDetails = ({ symbol: propSymbol }) => {
             </p>
           </div>
 
-          {/* Irshad AI */}
+          {/* Irshad Shariah Analysis */}
           <div className="detail-panel" style={{ background: 'var(--bg-section)', border: '1px solid var(--border-strong)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <div className="detail-section-label" style={{ marginBottom: 0, color: 'var(--gold)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Brain size={16} /> Irshad AI
+                <Brain size={16} /> Irshad Analysis Reasoning
               </div>
               {!aiAnalysis && !aiLoading && (
-                <button onClick={handleAskAI} className="btn-primary" style={{ padding: '8px 16px', fontSize: '0.75rem', background: 'var(--gold)', color: '#1A1208', border: 'none' }}>
-                  Ask Halal Assistant
+                <button onClick={handleAskAI} className="btn-primary" style={{ padding: '8px 16px', fontSize: '0.75rem', background: 'var(--gold)', color: '#1A1208', border: 'none', fontWeight: 700 }}>
+                  Ask Irshad
                 </button>
               )}
             </div>
             
-            {aiLoading && <div style={{ color: 'var(--text-muted)', fontSize: '0.79rem', fontStyle: 'italic' }}>Analyzing the financials...</div>}
+            {aiLoading && <div style={{ color: 'var(--text-muted)', fontSize: '0.79rem', fontStyle: 'italic' }}>Irshad is searching corporate disclosures & analyzing financials...</div>}
             {aiError && <div style={{ color: 'var(--non-halal)', fontSize: '0.79rem' }}>{aiError}</div>}
             {aiAnalysis && (
-              <div style={{ color: 'var(--text-body)', lineHeight: 1.7, fontSize: '0.84rem' }}>
-                <ReactMarkdown>{aiAnalysis}</ReactMarkdown>
+              <div>
+                {aiData?.confidence_score && (
+                  <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ background: 'var(--gold-bg, rgba(212, 175, 55, 0.15))', color: 'var(--gold)', padding: '4px 12px', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 800, border: '1px solid var(--gold)' }}>
+                      ✨ Irshad Confidence Score: {aiData.confidence_score}%
+                    </span>
+                  </div>
+                )}
+                <div style={{ color: 'var(--text-body)', lineHeight: 1.7, fontSize: '0.84rem' }}>
+                  <ReactMarkdown>{aiAnalysis}</ReactMarkdown>
+                </div>
+                {aiData?.sources && aiData.sources.length > 0 && (
+                  <div style={{ marginTop: '16px', paddingTop: '14px', borderTop: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Globe size={13} /> Data Sources & Disclosures Analysed:
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                      {aiData.sources.map((src, idx) => {
+                        const isUrl = typeof src === 'string' && src.startsWith('http');
+                        return isUrl ? (
+                          <a key={idx} href={src} target="_blank" rel="noopener noreferrer" style={{ background: 'var(--bg)', border: '1px solid var(--border)', padding: '4px 10px', borderRadius: '14px', fontSize: '0.72rem', color: 'var(--primary)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            🔗 {src.replace(/^https?:\/\/(www\.)?/, '').split('/')[0]}
+                          </a>
+                        ) : (
+                          <span key={idx} style={{ background: 'var(--bg)', border: '1px solid var(--border)', padding: '4px 10px', borderRadius: '14px', fontSize: '0.72rem', color: 'var(--text-body)' }}>
+                            📰 {src}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
             {!aiAnalysis && !aiLoading && !aiError && (
               <p style={{ color: 'var(--text-muted)', fontSize: '0.84rem', margin: 0 }}>
-                Get a plain-English explanation of why {stock.symbol} is classified as {statusStr}.
+                Get a real-time Shariah assessment powered by Irshad with confidence scoring and source citations.
               </p>
             )}
           </div>
 
-          {/* AAOIFI Screening Result Banner */}
+          {/* AAOIFI Screening Result Banner (Large & Prominent) */}
           <div className="detail-panel" style={{ 
-            borderLeft: `4px solid ${screeningColor}`, 
+            borderLeft: `8px solid ${screeningColor}`, 
             background: 'linear-gradient(145deg, #ffffff, #f8fafc)',
-            padding: '24px 32px',
+            padding: '36px 40px',
             position: 'relative',
             overflow: 'hidden',
-            boxShadow: '0 8px 30px rgba(0,0,0,0.04)',
+            boxShadow: '0 12px 40px rgba(0,0,0,0.06)',
             display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
+            flexDirection: 'column',
+            gap: '28px'
           }}>
-            <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: '200px', height: '200px', background: screeningBg, borderRadius: '50%', filter: 'blur(50px)', opacity: 0.6, zIndex: 0 }} />
+            <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: '260px', height: '260px', background: screeningBg, borderRadius: '50%', filter: 'blur(60px)', opacity: 0.6, zIndex: 0 }} />
 
-            <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <div style={{ 
-                background: isHalal ? 'rgba(74, 222, 128, 0.15)' : isNonHalal ? 'rgba(248, 113, 113, 0.15)' : 'rgba(250, 204, 21, 0.15)', 
-                border: `1px solid ${isHalal ? 'rgba(74, 222, 128, 0.3)' : isNonHalal ? 'rgba(248, 113, 113, 0.3)' : 'rgba(250, 204, 21, 0.3)'}`,
-                color: isHalal ? '#16a34a' : isNonHalal ? '#dc2626' : '#ca8a04',
-                padding: '12px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center'
-              }}>
-                <StatusIcon size={24} />
+            <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                <div style={{ 
+                  background: isHalal ? 'rgba(74, 222, 128, 0.2)' : isNonHalal ? 'rgba(248, 113, 113, 0.2)' : 'rgba(250, 204, 21, 0.2)', 
+                  border: `2px solid ${isHalal ? 'rgba(74, 222, 128, 0.4)' : isNonHalal ? 'rgba(248, 113, 113, 0.4)' : 'rgba(250, 204, 21, 0.4)'}`,
+                  color: isHalal ? '#16a34a' : isNonHalal ? '#dc2626' : '#ca8a04',
+                  padding: '16px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                  <StatusIcon size={36} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: screeningColor, marginBottom: '6px' }}>AAOIFI COMPLIANCE VERDICT</div>
+                  <h3 style={{ margin: 0, fontSize: '1.85rem', fontWeight: 900, color: 'var(--text-dark)' }}>
+                    {isHalal ? 'Shariah Compliant (Halal)' : isNonHalal ? 'Non-Compliant (Haram)' : 'Status Doubtful / Under Review'}
+                  </h3>
+                  <p style={{ margin: '6px 0 0', fontSize: '0.92rem', color: 'var(--text-muted)' }}>
+                    Screened strictly according to AAOIFI Standard No. 21 methodology
+                  </p>
+                </div>
               </div>
+
               <div>
-                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)' }}>
-                  {isHalal ? 'Shariah Compliant' : isNonHalal ? 'Non-Compliant' : 'Status Doubtful'}
-                </h3>
-                <p style={{ margin: '4px 0 0', fontSize: '0.84rem', color: 'var(--text-muted)' }}>
-                  Screened according to AAOIFI standards
-                </p>
+                <Link to={`/market/${stock.symbol}/aaoifi`} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '14px 28px', fontSize: '0.92rem', fontWeight: 800, background: 'var(--primary)', color: 'var(--bg)', border: 'none', borderRadius: '100px', textDecoration: 'none', boxShadow: '0 6px 16px rgba(15, 82, 87, 0.25)' }}>
+                  <ShieldCheck size={20} />
+                  View Full AAOIFI Result & Audit
+                </Link>
               </div>
             </div>
 
-            <div style={{ position: 'relative', zIndex: 1 }}>
-              <Link to={`/market/${stock.symbol}/aaoifi`} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 20px', fontSize: '0.84rem', fontWeight: 700, background: 'var(--primary)', color: 'var(--bg)', border: 'none', borderRadius: '100px', textDecoration: 'none', boxShadow: '0 4px 12px rgba(15, 82, 87, 0.2)' }}>
-                <ShieldCheck size={18} />
-                View Full AAOIFI Result
-              </Link>
+            {/* Referenced Financial Data Used for Screening */}
+            <div style={{ position: 'relative', zIndex: 1, borderTop: '1px solid var(--border)', paddingTop: '24px' }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Activity size={14} color="var(--primary)" /> Referenced Financial Data Used For Screening
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
+                <div style={{ background: 'var(--bg)', padding: '14px 18px', borderRadius: '14px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>Market Capitalization</span>
+                  <span style={{ fontSize: '1.05rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{marketCap ? `₦${(marketCap/1000000000).toFixed(2)}B` : 'N/A'}</span>
+                </div>
+                <div style={{ background: 'var(--bg)', padding: '14px 18px', borderRadius: '14px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>Total Interest Debt</span>
+                  <span style={{ fontSize: '1.05rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{debt ? `₦${(debt/1000000000).toFixed(2)}B` : '₦0'}</span>
+                </div>
+                <div style={{ background: 'var(--bg)', padding: '14px 18px', borderRadius: '14px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>Cash & Securities</span>
+                  <span style={{ fontSize: '1.05rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{cash ? `₦${(cash/1000000000).toFixed(2)}B` : '₦0'}</span>
+                </div>
+                <div style={{ background: 'var(--bg)', padding: '14px 18px', borderRadius: '14px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>Total Revenue</span>
+                  <span style={{ fontSize: '1.05rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{rawRevenue ? `₦${(rawRevenue/1000000000).toFixed(2)}B` : 'N/A'}</span>
+                </div>
+              </div>
             </div>
           </div>
 

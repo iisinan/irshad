@@ -177,6 +177,11 @@ export const RegisterPage = () => {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [country, setCountry] = useState('Nigeria');
+  const [occupation, setOccupation] = useState('');
+  const [dob, setDob] = useState('');
+  const [investmentGoal, setInvestmentGoal] = useState('Halal Long-Term Wealth');
   const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -211,7 +216,12 @@ export const RegisterPage = () => {
       name: `${fname} ${lname}`.trim(),
       email: em, 
       password: pass,
-      password_confirmation: pass // Laravel expects this
+      password_confirmation: pass, // Laravel expects this
+      phone_number: phoneNumber,
+      location: country,
+      occupation: occupation,
+      dob: dob,
+      investment_goal: investmentGoal,
     });
     
     if (res.success) {
@@ -224,7 +234,7 @@ export const RegisterPage = () => {
 
   return (
     <div className="auth-wrapper">
-      <div className="auth-card animate-fade-in" style={{ maxWidth: '520px' }}>
+      <div className="auth-card animate-fade-in" style={{ maxWidth: '560px' }}>
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <img
@@ -237,14 +247,14 @@ export const RegisterPage = () => {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+        <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-            <FormField label="First Name" name="firstName" placeholder="Omar" value={firstName} onChange={e => setFirstName(e.target.value)} />
-            <FormField label="Last Name" name="lastName" placeholder="Bello" value={lastName} onChange={e => setLastName(e.target.value)} />
+            <FormField label="First Name *" name="firstName" placeholder="Omar" value={firstName} onChange={e => setFirstName(e.target.value)} />
+            <FormField label="Last Name *" name="lastName" placeholder="Bello" value={lastName} onChange={e => setLastName(e.target.value)} />
           </div>
 
           <FormField
-            label="Email Address"
+            label="Email Address *"
             name="email"
             type="email"
             placeholder="you@example.com"
@@ -252,8 +262,39 @@ export const RegisterPage = () => {
             onChange={e => setEmail(e.target.value)}
           />
 
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+            <FormField label="Phone Number" name="phoneNumber" placeholder="+234 800 000 0000" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
+              <label className="auth-label">Country of Residence</label>
+              <select className="auth-input" value={country} onChange={e => setCountry(e.target.value)}>
+                <option value="Nigeria">Nigeria 🇳🇬</option>
+                <option value="United Kingdom">United Kingdom 🇬🇧</option>
+                <option value="United States">United States 🇺🇸</option>
+                <option value="United Arab Emirates">United Arab Emirates 🇦🇪</option>
+                <option value="Saudi Arabia">Saudi Arabia 🇸🇦</option>
+                <option value="Canada">Canada 🇨🇦</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+            <FormField label="Occupation / Profession" name="occupation" placeholder="e.g. Engineer, Analyst" value={occupation} onChange={e => setOccupation(e.target.value)} />
+            <FormField label="Date of Birth" name="dob" type="date" value={dob} onChange={e => setDob(e.target.value)} />
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
+            <label className="auth-label">Primary Investment Goal</label>
+            <select className="auth-input" value={investmentGoal} onChange={e => setInvestmentGoal(e.target.value)}>
+              <option value="Halal Long-Term Wealth">Halal Long-Term Wealth Building</option>
+              <option value="Zakat & Purification Management">Zakat & Purification Management</option>
+              <option value="Shariah-Compliant Dividends">Shariah-Compliant Dividends & Passive Income</option>
+              <option value="Active Stock Trading">Active Stock Trading & Analysis</option>
+            </select>
+          </div>
+
           <FormField
-            label="Password"
+            label="Password *"
             name="password"
             type="password"
             placeholder="Create a strong password"

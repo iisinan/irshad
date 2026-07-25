@@ -11,7 +11,7 @@ class AuthRepository {
   final FlutterSecureStorage _storage = const FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
   final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
 
-  Future<Map<String, dynamic>?> register(String name, String email, String password, String passwordConfirmation, {String? location}) async {
+  Future<Map<String, dynamic>?> register(String name, String email, String password, String passwordConfirmation, {String? location, String? phoneNumber, String? occupation, String? dob, String? investmentGoal}) async {
     try {
       final response = await _apiService.post('register', {
         'name': name,
@@ -19,6 +19,10 @@ class AuthRepository {
         'password': password,
         'password_confirmation': passwordConfirmation,
         'location': location,
+        'phone_number': phoneNumber,
+        'occupation': occupation,
+        'dob': dob,
+        'investment_goal': investmentGoal,
       });
 
       if (response.statusCode == 201) {

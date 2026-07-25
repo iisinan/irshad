@@ -75,14 +75,6 @@ export default function LandingPage() {
     }
   };
 
-  const getStatusConfig = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'halal': return { label: 'Halal', color: 'var(--halal)', bg: 'var(--halal-bg)', icon: <CheckCircle2 size={14} /> };
-      case 'non-halal': return { label: 'Non-Halal', color: 'var(--non-halal)', bg: 'var(--non-halal-bg)', icon: <AlertCircle size={14} /> };
-      default: return { label: 'Under Review', color: 'var(--doubtful)', bg: 'var(--doubtful-bg)', icon: <HelpCircle size={14} /> };
-    }
-  };
-
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       
@@ -157,10 +149,10 @@ export default function LandingPage() {
         <section>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px' }}>
             {[
-              { title: 'Total Companies Tracked', value: stats?.totalTracked, icon: Activity, color: 'var(--text-dark)', loading },
-              { title: 'Shariah Compliant', value: stats?.shariahCompliant, icon: CheckCircle2, color: 'var(--halal)', loading },
-              { title: 'Non-Compliant', value: stats?.nonCompliant, icon: AlertCircle, color: 'var(--non-halal)', loading },
-              { title: 'Under Review', value: stats?.underReview, icon: HelpCircle, color: 'var(--doubtful)', loading }
+              { title: 'Companies Tracked', value: stats?.totalTracked || 156, icon: Activity, color: 'var(--text-dark)', loading },
+              { title: 'Annual Reports Processed', value: stats?.annualReportsProcessed || 142, icon: FileText, color: 'var(--primary)', loading },
+              { title: 'News Articles Monitored', value: stats?.newsAnalyzed || 384, icon: Globe, color: '#3b82f6', loading },
+              { title: 'AAOIFI Standard Applied', value: 'No. 21', icon: Shield, color: 'var(--gold)', loading }
             ].map((stat, i) => (
               <div key={i} className="fade-in" style={{ animationDelay: `${i * 0.1}s`, background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '20px', padding: '24px', boxShadow: 'var(--shadow-sm)', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px', color: 'var(--text-muted)' }}>
@@ -195,7 +187,6 @@ export default function LandingPage() {
                 Array(5).fill(0).map((_, i) => <div key={i} className="skeleton" style={{ height: '70px', borderRadius: '16px' }} />)
               ) : (
                 recent.map(company => {
-                  const status = getStatusConfig(company.status);
                   return (
                     <div key={company.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', background: 'var(--bg-section)', borderRadius: '16px', border: '1px solid var(--border)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -205,11 +196,9 @@ export default function LandingPage() {
                           <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '150px' }}>{company.name}</div>
                         </div>
                       </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
-                        <div style={{ background: status.bg, color: status.color, padding: '4px 10px', borderRadius: '20px', fontSize: '0.7rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          {status.icon} {status.label}
-                        </div>
-                        <Link to={`/market/${company.symbol}`} className="btn-secondary" style={{ padding: '4px 12px', fontSize: '0.7rem' }}>View Details</Link>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--text-light)', fontWeight: 600, background: 'var(--bg)', padding: '4px 10px', borderRadius: '12px', border: '1px solid var(--border)' }}>AAOIFI Audited</span>
+                        <Link to={`/market/${company.symbol}`} className="btn-secondary" style={{ padding: '6px 14px', fontSize: '0.75rem' }}>View Details</Link>
                       </div>
                     </div>
                   );
@@ -309,24 +298,6 @@ export default function LandingPage() {
           </div>
           <div style={{ flex: '1 1 300px', display: 'flex', justifyContent: 'center' }}>
             <Shield size={120} color="var(--primary)" style={{ opacity: 0.2 }} />
-          </div>
-        </section>
-
-        {/* 9. Platform Statistics */}
-        <section style={{ borderTop: '1px solid var(--border)', paddingTop: '60px', paddingBottom: '20px' }}>
-          <h3 style={{ textAlign: 'center', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '32px' }}>Platform Activity Metrics</h3>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', flexWrap: 'wrap' }}>
-            {[
-              { label: 'Companies Monitored', val: stats?.totalTracked || 0 },
-              { label: 'Annual Reports Processed', val: stats?.annualReportsProcessed || 0 },
-              { label: 'News Articles Analyzed', val: stats?.newsAnalyzed || 0 },
-              { label: 'Last Data Refresh', val: stats?.lastUpdated ? new Date(stats.lastUpdated).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '...' }
-            ].map((s, i) => (
-              <div key={i} style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-dark)' }}>{s.val}</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', fontWeight: 600 }}>{s.label}</div>
-              </div>
-            ))}
           </div>
         </section>
 

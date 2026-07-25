@@ -25,7 +25,7 @@ class _AaoifiScreeningScreenState extends State<AaoifiScreeningScreen> with Sing
     "Fetching regulatory filings...",
     "Searching latest company news...",
     "Analyzing business activities...",
-    "Consulting Gemini AI...",
+    "Consulting Irshad Engine...",
     "Calculating AAOIFI financial ratios...",
     "Running compliance engine...",
     "Generating transparent report..."
@@ -149,10 +149,10 @@ class _AaoifiScreeningScreenState extends State<AaoifiScreeningScreen> with Sing
     Color statusColor = Colors.grey;
     IconData statusIcon = Icons.help_outline;
     
-    if (finalStatus == 'compliant') {
+    if (finalStatus == 'compliant' || finalStatus == 'halal') {
       statusColor = Colors.green;
       statusIcon = Icons.check_circle;
-    } else if (finalStatus == 'non-compliant') {
+    } else if (finalStatus == 'non-compliant' || finalStatus == 'non-halal') {
       statusColor = Colors.red;
       statusIcon = Icons.cancel;
     } else if (finalStatus == 'doubtful') {
@@ -160,103 +160,179 @@ class _AaoifiScreeningScreenState extends State<AaoifiScreeningScreen> with Sing
       statusIcon = Icons.warning;
     }
 
+    final fd = _report!['financial_data_used'] ?? {};
+    final marketCap = double.tryParse(fd['market_cap']?.toString() ?? '0') ?? 0.0;
+    final totalDebt = double.tryParse(fd['total_debt']?.toString() ?? '0') ?? 0.0;
+    final cash = double.tryParse(fd['cash']?.toString() ?? '0') ?? 0.0;
+    final totalAssets = double.tryParse(fd['total_assets']?.toString() ?? '0') ?? 0.0;
+
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        // Header
+        // Huge Header
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(28),
           decoration: BoxDecoration(
-            color: statusColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: statusColor.withOpacity(0.5)),
+            color: statusColor.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: statusColor.withValues(alpha: 0.5), width: 2),
+            boxShadow: [
+              BoxShadow(color: statusColor.withValues(alpha: 0.15), blurRadius: 20, offset: const Offset(0, 10)),
+            ],
           ),
           child: Column(
             children: [
-              Icon(statusIcon, color: statusColor, size: 48),
-              const SizedBox(height: 8),
+              Icon(statusIcon, color: statusColor, size: 72),
+              const SizedBox(height: 12),
               Text(
                 finalStatus.toString().toUpperCase(),
                 style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
                   color: statusColor,
+                  letterSpacing: -0.5,
                 ),
+                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               const Text(
                 "AAOIFI Compliance Verdict",
-                style: TextStyle(color: Colors.grey),
+                style: TextStyle(color: Colors.grey, fontSize: 14, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 20),
+              Container(height: 1, color: statusColor.withValues(alpha: 0.3)),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.analytics_outlined, color: statusColor, size: 16),
+                  const SizedBox(width: 6),
+                  Text('REFERENCED FINANCIAL DATA USED', style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.8)),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(color: context.bg, borderRadius: BorderRadius.circular(12), border: Border.all(color: context.divider)),
+                      child: Column(
+                        children: [
+                          Text('Market Cap', style: TextStyle(color: context.textMuted, fontSize: 11, fontWeight: FontWeight.w600)),
+                          const SizedBox(height: 4),
+                          Text(marketCap > 0 ? '₦${(marketCap/1000000000).toStringAsFixed(2)}B' : 'N/A', style: TextStyle(color: context.textDark, fontSize: 14, fontWeight: FontWeight.w800)),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(color: context.bg, borderRadius: BorderRadius.circular(12), border: Border.all(color: context.divider)),
+                      child: Column(
+                        children: [
+                          Text('Total Debt', style: TextStyle(color: context.textMuted, fontSize: 11, fontWeight: FontWeight.w600)),
+                          const SizedBox(height: 4),
+                          Text(totalDebt > 0 ? '₦${(totalDebt/1000000000).toStringAsFixed(2)}B' : '₦0', style: TextStyle(color: context.textDark, fontSize: 14, fontWeight: FontWeight.w800)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(color: context.bg, borderRadius: BorderRadius.circular(12), border: Border.all(color: context.divider)),
+                      child: Column(
+                        children: [
+                          Text('Cash & Sec.', style: TextStyle(color: context.textMuted, fontSize: 11, fontWeight: FontWeight.w600)),
+                          const SizedBox(height: 4),
+                          Text(cash > 0 ? '₦${(cash/1000000000).toStringAsFixed(2)}B' : '₦0', style: TextStyle(color: context.textDark, fontSize: 14, fontWeight: FontWeight.w800)),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(color: context.bg, borderRadius: BorderRadius.circular(12), border: Border.all(color: context.divider)),
+                      child: Column(
+                        children: [
+                          Text('Total Assets', style: TextStyle(color: context.textMuted, fontSize: 11, fontWeight: FontWeight.w600)),
+                          const SizedBox(height: 4),
+                          Text(totalAssets > 0 ? '₦${(totalAssets/1000000000).toStringAsFixed(2)}B' : 'N/A', style: TextStyle(color: context.textDark, fontSize: 14, fontWeight: FontWeight.w800)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
         ),
         const SizedBox(height: 24),
 
-        // 1. Business Activity
-        _buildSectionHeader("1. Business Activity Screening", _report!['business_status']),
+        // SECTION A: Business Activity
+        _buildSectionHeader("SECTION A: BUSINESS ACTIVITY SCREENING", _report!['business_status']),
         const SizedBox(height: 8),
         _buildBusinessAnalysis(),
 
-        const SizedBox(height: 24),
+        const SizedBox(height: 32),
 
-        // 2. Debt Ratio
-        _buildSectionHeader("2. Debt Ratio Screening", _report!['debt_status']),
+        // SECTION B: Financial Ratio Screening (The 3 AAOIFI Metrics)
+        _buildSectionHeader("SECTION B: FINANCIAL RATIO SCREENING", null),
+        const SizedBox(height: 4),
+        Text("The Three AAOIFI Primary Financial Metrics", style: TextStyle(color: context.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
+        const SizedBox(height: 16),
+
+        // 1. Debt Ratio
+        Text("1. Debt Ratio", style: TextStyle(color: context.textDark, fontSize: 14, fontWeight: FontWeight.w800)),
         const SizedBox(height: 8),
         _buildRatioCard(
           title: "Debt to Market Cap",
           ratio: _report!['debt_ratio'],
-          threshold: "≤ 30%",
-          formula: "Total Interest-Bearing Debt / Market Cap",
+          threshold: "< 30%",
+          formula: "Total Debt / Market Cap × 100",
           numeratorLabel: "Total Debt",
           numeratorValue: _report!['financial_data_used']?['total_debt'],
           denominatorLabel: "Market Cap",
           denominatorValue: _report!['financial_data_used']?['market_cap'],
         ),
 
-        const SizedBox(height: 24),
+        const SizedBox(height: 20),
 
-        // 3. Cash Ratio
-        _buildSectionHeader("3. Cash & Securities Screening", _report!['cash_status']),
+        // 2. Cash Ratio
+        Text("2. Cash Ratio", style: TextStyle(color: context.textDark, fontSize: 14, fontWeight: FontWeight.w800)),
         const SizedBox(height: 8),
         _buildRatioCard(
           title: "Cash to Market Cap",
           ratio: _report!['cash_ratio'],
-          threshold: "≤ 30%",
-          formula: "Cash & Interest-bearing Securities / Market Cap",
+          threshold: "< 30%",
+          formula: "(Cash + Security) / Market Cap × 100",
           numeratorLabel: "Cash & Securities",
           numeratorValue: _report!['financial_data_used']?['cash'],
           denominatorLabel: "Market Cap",
           denominatorValue: _report!['financial_data_used']?['market_cap'],
         ),
 
-        const SizedBox(height: 24),
+        const SizedBox(height: 20),
 
-        // 4. Accounts Receivable
-        _buildSectionHeader("4. Accounts Receivable Screening", _report!['receivables_status']),
-        const SizedBox(height: 8),
-        _buildRatioCard(
-          title: "Accounts Receivable to Total Assets",
-          ratio: _report!['receivables_ratio'],
-          threshold: "≤ 45%",
-          formula: "Accounts Receivable / Total Assets",
-          numeratorLabel: "Accounts Receivable",
-          numeratorValue: _report!['financial_data_used']?['accounts_receivable'],
-          denominatorLabel: "Total Assets",
-          denominatorValue: _report!['financial_data_used']?['total_assets'],
-        ),
-
-        const SizedBox(height: 24),
-
-        // 5. Impermissible Income
-        _buildSectionHeader("5. Impermissible Income", _report!['impermissible_income_status']),
+        // 3. Impermissible Income
+        Text("3. Impure Revenue Ratio", style: TextStyle(color: context.textDark, fontSize: 14, fontWeight: FontWeight.w800)),
         const SizedBox(height: 8),
         _buildRatioCard(
           title: "Impure Income to Total Revenue",
           ratio: _report!['impermissible_income_ratio'],
-          threshold: "≤ 5%",
-          formula: "Interest Income / Total Revenue",
-          numeratorLabel: "Interest Income",
+          threshold: "< 5%",
+          formula: "Impure Income / Total Revenue × 100",
+          numeratorLabel: "Impure Income",
           numeratorValue: _report!['financial_data_used']?['interest_income'],
           denominatorLabel: "Total Revenue",
           denominatorValue: _report!['financial_data_used']?['total_revenue'],
@@ -305,7 +381,7 @@ class _AaoifiScreeningScreenState extends State<AaoifiScreeningScreen> with Sing
 
   Widget _buildBusinessAnalysis() {
     final aiData = _report!['business_reasoning'];
-    if (aiData == null) return const Text("No AI analysis available.");
+    if (aiData == null) return const Text("No Irshad analysis available.");
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -504,11 +580,11 @@ class _AaoifiScreeningScreenState extends State<AaoifiScreeningScreen> with Sing
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(
         title: const Text("Evidence & Traceability", style: TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: const Text("View data sources and AI confidence"),
+        subtitle: const Text("View data sources and Irshad confidence"),
         leading: Icon(Icons.plagiarism_outlined, color: context.primary),
         tilePadding: EdgeInsets.zero,
         children: [
-          _buildDetailRow("AI Confidence Score", "${_report!['business_reasoning']?['confidence_score'] ?? 'N/A'}%"),
+          _buildDetailRow("Irshad Confidence Score", "${_report!['business_reasoning']?['confidence_score'] ?? 'N/A'}%"),
           const SizedBox(height: 16),
           const Align(
             alignment: Alignment.centerLeft,

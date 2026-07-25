@@ -15,7 +15,7 @@ const LOADING_STEPS = [
   "Fetching regulatory filings...",
   "Searching latest company news...",
   "Analyzing business activities...",
-  "Consulting Gemini AI...",
+  "Consulting Irshad Engine...",
   "Calculating AAOIFI financial ratios...",
   "Running compliance engine...",
   "Generating transparent report..."
@@ -241,11 +241,11 @@ const AaoifiScreening = () => {
   const impIncomeStatus = report.impermissible_income_status || 'insufficient_data';
 
   let finalStatus = 'halal';
-  if (businessStatus === 'fail' || debtStatus === 'fail' || cashStatus === 'fail' || impIncomeStatus === 'fail' || illiquidStatus === 'fail' || receivablesStatus === 'fail') {
+  if (businessStatus === 'fail' || debtStatus === 'fail' || cashStatus === 'fail' || impIncomeStatus === 'fail') {
     finalStatus = 'non-halal';
   } else if (businessStatus === 'warning' || debtStatus === 'warning' || cashStatus === 'warning') {
     finalStatus = 'doubtful';
-  } else if (debtStatus === 'insufficient_data' || cashStatus === 'insufficient_data' || illiquidStatus === 'insufficient_data' || receivablesStatus === 'insufficient_data') {
+  } else if (debtStatus === 'insufficient_data' || cashStatus === 'insufficient_data' || impIncomeStatus === 'insufficient_data') {
     finalStatus = 'doubtful';
   }
 
@@ -411,17 +411,45 @@ const AaoifiScreening = () => {
       </div>
 
       <div style={{ 
-        padding: '48px 24px', borderRadius: '32px', background: bgStatus, 
-        border: `1px solid ${statusColor}40`, textAlign: 'center', marginBottom: '32px',
-        boxShadow: `0 24px 48px -12px ${statusColor}20`,
+        padding: '56px 36px', borderRadius: '32px', background: bgStatus, 
+        border: `2px solid ${statusColor}60`, textAlign: 'center', marginBottom: '40px',
+        boxShadow: `0 32px 64px -16px ${statusColor}25`,
         position: 'relative', overflow: 'hidden'
       }}>
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: statusColor }} />
-        <StatusIcon size={80} color={statusColor} style={{ margin: '0 auto 20px', filter: `drop-shadow(0 8px 16px ${statusColor}40)` }} />
-        <h1 style={{ fontSize: '2.2rem', fontWeight: 900, color: statusColor, margin: '0 0 12px 0', letterSpacing: '-0.5px' }}>
-          {finalStatus.toUpperCase()}
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '8px', background: statusColor }} />
+        <StatusIcon size={96} color={statusColor} style={{ margin: '0 auto 24px', filter: `drop-shadow(0 12px 24px ${statusColor}50)` }} />
+        <div style={{ fontSize: '0.82rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', color: statusColor, marginBottom: '8px' }}>AAOIFI COMPLIANCE VERDICT</div>
+        <h1 style={{ fontSize: '2.75rem', fontWeight: 900, color: statusColor, margin: '0 0 16px 0', letterSpacing: '-1px' }}>
+          {finalStatus === 'halal' ? 'SHARIAH COMPLIANT (HALAL)' : finalStatus === 'non-halal' ? 'NON-COMPLIANT (HARAM)' : 'STATUS DOUBTFUL'}
         </h1>
-        <p style={{ color: 'var(--text-dark)', margin: 0, fontWeight: 600, fontSize: '0.97rem' }}>AAOIFI Compliance Verdict</p>
+        <p style={{ color: 'var(--text-dark)', margin: '0 auto 32px', fontWeight: 600, fontSize: '1.05rem', maxWidth: '600px' }}>
+          Screened in accordance with AAOIFI Shariah Standard No. 21 (Financial & Business Activity Rules).
+        </p>
+
+        {/* Referenced Financial Data Used for Screening */}
+        <div style={{ borderTop: `1px solid ${statusColor}30`, paddingTop: '28px', maxWidth: '850px', margin: '0 auto', textAlign: 'left' }}>
+          <div style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+            <Activity size={16} color="var(--primary)" /> Referenced Financial Data Used For AAOIFI Screening
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
+            <div style={{ background: 'var(--bg)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Market Capitalization</span>
+              <span style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{marketCap ? `₦${(marketCap/1000000000).toFixed(2)}B` : 'N/A'}</span>
+            </div>
+            <div style={{ background: 'var(--bg)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Total Interest Debt</span>
+              <span style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{totalDebt ? `₦${(totalDebt/1000000000).toFixed(2)}B` : '₦0'}</span>
+            </div>
+            <div style={{ background: 'var(--bg)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Cash & Securities</span>
+              <span style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{cashAndSecurities ? `₦${(cashAndSecurities/1000000000).toFixed(2)}B` : '₦0'}</span>
+            </div>
+            <div style={{ background: 'var(--bg)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Total Assets</span>
+              <span style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{totalAssets ? `₦${(totalAssets/1000000000).toFixed(2)}B` : 'N/A'}</span>
+            </div>
+          </div>
+        </div>
       </div>
 
 
@@ -430,7 +458,7 @@ const AaoifiScreening = () => {
       <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', marginBottom: '48px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <h2 style={{ fontSize: '0.79rem', fontWeight: 800, color: '#C49852', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>BUSINESS ACTIVITY SCREEN</h2>
+            <h2 style={{ fontSize: '0.79rem', fontWeight: 800, color: '#C49852', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>SECTION A: BUSINESS ACTIVITY SCREENING</h2>
             <p style={{ fontSize: '1.32rem', fontWeight: 900, color: 'var(--text-dark)', margin: '8px 0 0 0' }}>Core operations</p>
           </div>
           <div style={{ padding: '6px 14px', borderRadius: '100px', background: report.business_status === 'pass' ? 'var(--halal-bg)' : (report.business_status === 'fail' ? 'var(--non-halal-bg)' : 'var(--questionable-bg)'), color: report.business_status === 'pass' ? 'var(--halal)' : (report.business_status === 'fail' ? 'var(--non-halal)' : 'var(--questionable)'), fontSize: '0.66rem', fontWeight: 800, letterSpacing: '0.5px' }}>
@@ -463,7 +491,7 @@ const AaoifiScreening = () => {
           
           <div style={{ paddingTop: '24px', borderTop: '1px dashed var(--border)' }}>
             <div style={{ fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.84rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Brain size={16} color="var(--primary)" /> AI Analysis Reasoning
+              <Brain size={16} color="var(--primary)" /> Irshad Analysis Reasoning
             </div>
             <p style={{ margin: 0, fontSize: '0.92rem', lineHeight: 1.7, color: 'var(--text-dark)', padding: '20px', background: 'var(--bg-section)', borderRadius: '16px', border: '1px solid var(--border)' }}>
               {report.business_reasoning?.reasoning || 'N/A'}
@@ -473,66 +501,12 @@ const AaoifiScreening = () => {
       </div>
       )}
 
-      <div style={{ marginBottom: '48px' }}>
-        <h2 style={{ fontFamily: 'Fraunces, serif', color: 'var(--halal)', fontSize: '1.76rem', fontWeight: 700, marginBottom: '24px' }}>
-          The Three AAOIFI Screens
-        </h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          
-          <div style={{ background: 'var(--bg)', borderRadius: '16px', border: '1px solid var(--border)', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
-              <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--halal)', color: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.97rem', flexShrink: 0 }}>
-                1
-              </div>
-              <div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '4px' }}>Debt Ratio ≤ 30%</div>
-                <div style={{ color: 'var(--text-muted)', fontSize: '0.92rem' }}>Interest-bearing debt ÷ Market capitalization</div>
-              </div>
-            </div>
-            <div style={{ background: 'var(--bg-section)', padding: '16px', borderRadius: '12px', fontFamily: 'monospace', fontSize: '0.84rem', color: 'var(--text-dark)', letterSpacing: '0.5px' }}>
-              Formula: Total Debt ÷ Market Cap × 100 &lt; 30%
-            </div>
-          </div>
-
-          <div style={{ background: 'var(--bg)', borderRadius: '16px', border: '1px solid var(--border)', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
-              <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--halal)', color: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.97rem', flexShrink: 0 }}>
-                2
-              </div>
-              <div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '4px' }}>Cash Ratio ≤ 30%</div>
-                <div style={{ color: 'var(--text-muted)', fontSize: '0.92rem' }}>Cash + interest-bearing securities ÷ Market capitalization</div>
-              </div>
-            </div>
-            <div style={{ background: 'var(--bg-section)', padding: '16px', borderRadius: '12px', fontFamily: 'monospace', fontSize: '0.84rem', color: 'var(--text-dark)', letterSpacing: '0.5px' }}>
-              Formula: (Cash + Securities) ÷ Market Cap × 100 &lt; 30%
-            </div>
-          </div>
-
-          <div style={{ background: 'var(--bg)', borderRadius: '16px', border: '1px solid var(--border)', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
-              <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--halal)', color: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.97rem', flexShrink: 0 }}>
-                3
-              </div>
-              <div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '4px' }}>Impure Revenue ≤ 5%</div>
-                <div style={{ color: 'var(--text-muted)', fontSize: '0.92rem' }}>Non-permissible income ÷ Total revenue</div>
-              </div>
-            </div>
-            <div style={{ background: 'var(--bg-section)', padding: '16px', borderRadius: '12px', fontFamily: 'monospace', fontSize: '0.84rem', color: 'var(--text-dark)', letterSpacing: '0.5px' }}>
-              Formula: Impure Income ÷ Total Revenue × 100 &lt; 5%
-            </div>
-          </div>
-          
-        </div>
-      </div>
-
-      {(debtRatio !== null || report.impermissible_income_ratio != null || cashRatio !== null || illiquidRatio !== null || receivablesRatio !== null) && (
+      {(debtRatio !== null || report.impermissible_income_ratio != null || cashRatio !== null) && (
       <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', marginBottom: '48px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <h2 style={{ fontSize: '0.79rem', fontWeight: 800, color: '#C49852', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>AAOIFI RATIO SCREEN</h2>
-            <p style={{ fontSize: '1.32rem', fontWeight: 900, color: 'var(--text-dark)', margin: '8px 0 0 0' }}>Financial ratios</p>
+            <h2 style={{ fontSize: '0.79rem', fontWeight: 800, color: '#C49852', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>SECTION B: FINANCIAL RATIO SCREENING</h2>
+            <p style={{ fontSize: '1.32rem', fontWeight: 900, color: 'var(--text-dark)', margin: '8px 0 0 0' }}>The Three AAOIFI Financial Metrics</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-section)', borderRadius: '100px', border: '1px solid var(--border)', fontSize: '0.75rem', overflow: 'hidden' }}>
             <span style={{ padding: '6px 12px', color: 'var(--text-muted)' }}>Denominator</span>
@@ -546,32 +520,52 @@ const AaoifiScreening = () => {
             </select>
           </div>
         </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '32px' }}>
+          <div style={{ background: 'var(--bg-section)', borderRadius: '16px', border: '1px solid var(--border)', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--halal)', color: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.9rem', flexShrink: 0 }}>1</div>
+              <div>
+                <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-dark)' }}>Debt Ratio &lt; 30%</div>
+                <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Total debt / {denLabel} × 100</div>
+              </div>
+            </div>
+          </div>
+          <div style={{ background: 'var(--bg-section)', borderRadius: '16px', border: '1px solid var(--border)', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--halal)', color: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.9rem', flexShrink: 0 }}>2</div>
+              <div>
+                <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-dark)' }}>Cash Ratio &lt; 30%</div>
+                <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>(Cash + security) / {denLabel} × 100</div>
+              </div>
+            </div>
+          </div>
+          <div style={{ background: 'var(--bg-section)', borderRadius: '16px', border: '1px solid var(--border)', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--halal)', color: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.9rem', flexShrink: 0 }}>3</div>
+              <div>
+                <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-dark)' }}>Impure Revenue &lt; 5%</div>
+                <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Impure income / Total revenue × 100</div>
+              </div>
+            </div>
+          </div>
+        </div>
         
-        <div style={{ marginTop: '32px' }}>
+        <div style={{ marginTop: '16px' }}>
           {renderRatioProgressBar(
-            'Interest-bearing debt', 'incl. commercial papers', 
+            '1. Debt ratio', 'Total debt / Market cap × 100', 
             debtRatio, 30, 
-            'Total Debt', totalDebt, denLabel, denVal, `Total Interest-Bearing Debt / ${denLabel}`
+            'Total Debt', totalDebt, denLabel, denVal, `Total Debt / ${denLabel} × 100`
           )}
           {renderRatioProgressBar(
-            'Impure income', 'interest / total revenue', 
-            report.impermissible_income_ratio, 5, 
-            'Interest Income', report.financial_data_used?.interest_income, 'Total Revenue', report.financial_data_used?.total_revenue, 'Interest Income / Total Revenue'
-          )}
-          {renderRatioProgressBar(
-            'Cash & securities', 'liquid interest-bearing', 
+            '2. Cash ratio', '(Cash + security) / Market cap × 100', 
             cashRatio, 30, 
-            'Cash & Securities', cashAndSecurities, denLabel, denVal, `Cash & Securities / ${denLabel}`
+            'Cash & Securities', cashAndSecurities, denLabel, denVal, `(Cash + Security) / ${denLabel} × 100`
           )}
           {renderRatioProgressBar(
-            'Illiquid Assets', 'illiquid / total assets', 
-            illiquidRatio, 30, 
-            'Illiquid Assets', illiquidAssets, 'Total Assets', totalAssets, 'Illiquid Assets / Total Assets', true
-          )}
-          {renderRatioProgressBar(
-            'Receivables', 'supplementary screen', 
-            receivablesRatio, 45, 
-            'Accounts Receivable', accountsReceivable, 'Total Assets', totalAssets, 'Accounts Receivable / Total Assets'
+            '3. Impure revenue', 'Impure income / Total revenue × 100', 
+            report.impermissible_income_ratio, 5, 
+            'Impure Income', report.financial_data_used?.interest_income, 'Total Revenue', report.financial_data_used?.total_revenue, 'Impure Income / Total Revenue × 100'
           )}
         </div>
       </div>
@@ -584,7 +578,7 @@ const AaoifiScreening = () => {
         >
           <div style={{ textAlign: 'left' }}>
             <h2 style={{ fontSize: '0.79rem', fontWeight: 800, color: '#C49852', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>TRANSPARENCY & EVIDENCE</h2>
-            <p style={{ fontSize: '1.32rem', fontWeight: 900, color: 'var(--text-dark)', margin: '8px 0 0 0' }}>Data sources & AI Confidence</p>
+            <p style={{ fontSize: '1.32rem', fontWeight: 900, color: 'var(--text-dark)', margin: '8px 0 0 0' }}>Data sources & Irshad Confidence</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '0.79rem', fontWeight: 600 }}>
             {evidenceExpanded ? 'Hide details' : 'View details'}
@@ -596,7 +590,7 @@ const AaoifiScreening = () => {
           <div className="animate-fade-in" style={{ marginTop: '32px', paddingTop: '32px', borderTop: '1px solid var(--border)' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', marginBottom: '32px', padding: '12px 24px', background: 'var(--bg-section)', borderRadius: '100px', border: '1px solid var(--border)' }}>
               <Brain size={20} color="var(--primary)" /> 
-              <span style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.88rem' }}>AI Confidence Score</span>
+              <span style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.88rem' }}>Irshad Confidence Score</span>
               <div style={{ width: '1px', height: '24px', background: 'var(--border)', margin: '0 8px' }} />
               <span style={{ fontWeight: 900, color: 'var(--primary)', fontSize: '1.1rem' }}>{report.business_reasoning?.confidence_score || 'N/A'}%</span>
             </div>
