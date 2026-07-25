@@ -21,7 +21,7 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
     { label: 'Registered Users', icon: Users, to: '/admin/users' },
     { label: 'Tickers', icon: Database, to: '/admin?tab=stocks' },
     { label: 'Resources', icon: BookOpen, to: '/admin/resources' },
-    { label: 'Zakat (User View)', icon: Calculator, to: '/portfolio#zakat' },
+    { label: 'Zakat Settings', icon: HeartHandshake, to: '/admin/zakat-settings' },
     { section: 'Exit' },
     { label: 'Back to App', icon: ArrowLeft, to: '/dashboard' }
   ];

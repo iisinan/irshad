@@ -293,8 +293,8 @@ export const fetchProducts = async () => {
 // ADMIN ENDPOINTS
 // ==========================================
 
-export const fetchAdminUsers = async () => {
-  const response = await api.get('/admin/users');
+export const fetchAdminUsers = async (page = 1, search = '') => {
+  const response = await api.get(`/admin/users?page=${page}&search=${encodeURIComponent(search)}`);
   return response.data;
 };
 

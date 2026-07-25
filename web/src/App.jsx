@@ -24,6 +24,7 @@ const ResourcesPage = React.lazy(() => import('./components/Resources'));
 const Profile = React.lazy(() => import('./components/Profile'));
 const AdminDashboard = React.lazy(() => import('./components/AdminDashboard'));
 const AdminUsers = React.lazy(() => import('./components/AdminUsers'));
+const ZakatSettingsAdmin = React.lazy(() => import('./components/ZakatSettingsAdmin'));
 const RoleBasedDashboard = React.lazy(() => import('./components/RoleBasedDashboard'));
 const Pricing = React.lazy(() => import('./components/Pricing'));
 const LandingPage = React.lazy(() => import('./components/LandingPage'));
@@ -700,6 +701,13 @@ function App() {
                     <ProtectedRoute adminOnly={true}>
                       <AdminLayout>
                         <ResourcesPage />
+                      </AdminLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/admin/zakat-settings" element={
+                    <ProtectedRoute adminOnly={true}>
+                      <AdminLayout>
+                        <ZakatSettingsAdmin />
                       </AdminLayout>
                     </ProtectedRoute>
                   } />

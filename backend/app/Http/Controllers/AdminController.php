@@ -18,12 +18,22 @@ class AdminController extends Controller
      */
     public function getUsers(Request $request)
     {
-        $users = User::latest()->paginate(20);
+        $query = User::latest();
+
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $users = $query->paginate(20);
         return response()->json($users);
     }
 
     /**
-     * Create a new admin user.
+     * Create a new user (admin or standard).
      */
     public function createAdmin(Request $request)
     {
@@ -31,6 +41,8 @@ class AdminController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
+            'role' => 'nullable|string|in:admin,user',
+            'plan' => 'nullable|string'
         ]);
 
         if ($validator->fails()) {
@@ -41,7 +53,8 @@ class AdminController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'admin',
+            'role' => $request->input('role', 'admin'),
+            'plan' => $request->input('plan', 'free'),
         ]);
 
         return response()->json([
