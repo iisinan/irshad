@@ -171,4 +171,34 @@ class PortfolioController extends Controller
 
         return $this->success(null, 'Holdings added to portfolio successfully.');
     }
+
+    /**
+     * Get portfolio movers (gainers and losers) based on holdings and watchlist.
+     */
+    public function movers(): JsonResponse
+    {
+        $userId = Auth::id();
+        
+        $holdingSymbols = Holding::where('user_id', $userId)->pluck('symbol')->toArray();
+        $watchlistSymbols = \App\Models\Watchlist::where('user_id', $userId)->pluck('symbol')->toArray();
+        
+        $allSymbols = array_unique(array_merge($holdingSymbols, $watchlistSymbols));
+        
+        if (empty($allSymbols)) {
+            return $this->success(['gainers' => [], 'losers' => []]);
+        }
+        
+        $companies = \App\Models\Company::select(['id', 'symbol', 'name', 'latest_price', 'price_change_pct', 'logo_url'])
+            ->whereIn('symbol', $allSymbols)
+            ->whereNotNull('price_change_pct')
+            ->get();
+            
+        $gainers = $companies->where('price_change_pct', '>', 0)->sortByDesc('price_change_pct')->take(3)->values();
+        $losers = $companies->where('price_change_pct', '<', 0)->sortBy('price_change_pct')->take(3)->values();
+        
+        return $this->success([
+            'gainers' => $gainers,
+            'losers' => $losers
+        ]);
+    }
 }

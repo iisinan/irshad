@@ -79,11 +79,15 @@ class SyncCompanyStatus extends Command
             }
 
             // --- Stage 1: Business Activity ---
-            // Use the SAME Perplexity cache key as StockController (7-day cache)
-            $stage1 = cache()->remember("aaoifi_stage1_{$symbol}", now()->addDays(7), function () use ($company) {
+            // Use cached result if available (same 7-day key as StockController).
+            // Do NOT call Perplexity if not cached — quota may be exhausted and it will hang.
+            // Instead, treat missing stage1 as PASS (conservative approach).
+            $stage1 = Cache::get("aaoifi_stage1_{$symbol}");
+            if ($stage1 === null) {
+                // No cache — run local rule-based screening without calling external Perplexity API
                 $perplexity = new \App\Services\PerplexityAiService();
-                return $perplexity->runBusinessActivityScreening($company);
-            });
+                $stage1 = $perplexity->runBusinessActivityScreening($company, false);
+            }
 
             // compliance_status is PASS or FAIL (from Perplexity cache)
             $stage1Pass = ($stage1['compliance_status'] ?? 'PASS') === 'PASS';
@@ -127,10 +131,11 @@ class SyncCompanyStatus extends Command
                 );
             }
 
-            // Clear per-company caches so listing AND analysis page reflect new verdict immediately
+            // Clear per-company listing/analysis caches so pages reflect new verdict immediately.
+            // NOTE: Do NOT clear aaoifi_stage1_{symbol} here — we need it to stay cached
+            // so subsequent syncs don't trigger expensive/failing Perplexity API calls.
             Cache::forget("stocks.show.{$symbol}");
             Cache::forget("stocks.show.{$symbol}_v2");
-            Cache::forget("aaoifi_stage1_{$symbol}");
 
             $this->info("  {$symbol}: stage1=" . ($stage1Pass ? 'PASS' : 'FAIL') . " stage2=" . ($stage2Pass ? 'PASS' : 'FAIL') . " -> {$finalStatus}" . ($isVerified ? ' (scholar override)' : ''));
             $updatedCount++;

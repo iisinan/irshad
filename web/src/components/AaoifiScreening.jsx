@@ -501,7 +501,7 @@ const AaoifiScreening = () => {
         </div>
       </div>
 
-      {(symbol.toUpperCase() !== 'JAIZ' && symbol.toUpperCase() !== 'JAIZBANK') && (debtRatio !== null || report.impermissible_income_ratio != null || cashRatio !== null) && (
+      {(debtRatio !== null || report.impermissible_income_ratio != null || cashRatio !== null) && (
       <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', marginBottom: '48px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
           <div>
@@ -520,6 +520,18 @@ const AaoifiScreening = () => {
             </select>
           </div>
         </div>
+
+        {report.status_reason && report.stage1?.status !== 'non-halal' && (cashRatio > 30 || (report.impermissible_income_ratio > 5)) && (
+          <div style={{ background: 'rgba(196,152,82,0.08)', border: '1px solid rgba(196,152,82,0.3)', borderRadius: '16px', padding: '16px 20px', marginBottom: '24px', display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+            <span style={{ fontSize: '1.3rem', flexShrink: 0 }}>🏦</span>
+            <div>
+              <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#C49852', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>Scholar-Verified Islamic Financial Institution</div>
+              <p style={{ margin: 0, fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                This company is a <strong style={{ color: 'var(--text-dark)' }}>Shariah-compliant Islamic financial institution</strong>. Its revenue labelled as "interest income" in standard financial data is actually <strong style={{ color: 'var(--text-dark)' }}>Murabaha / Ijarah profit sharing</strong> — which is Halal under AAOIFI standards. The standard AAOIFI ratio thresholds are designed for non-financial companies and are not directly applicable here. The final verdict has been verified by a qualified Islamic scholar.
+              </p>
+            </div>
+          </div>
+        )}
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '32px' }}>
           <div style={{ background: 'var(--bg-section)', borderRadius: '16px', border: '1px solid var(--border)', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>

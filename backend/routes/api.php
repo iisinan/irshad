@@ -44,6 +44,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/resources',                      [\App\Http\Controllers\ResourceController::class, 'index']);
         Route::get('/settings',                       [SettingsController::class, 'index']);
         Route::get('/stocks',                         [StockController::class, 'index']);
+        Route::get('/stocks/compliance-changes',      [StockController::class, 'complianceChanges']);
         Route::get('/sectors',                        [\App\Http\Controllers\SectorController::class, 'index']);
         Route::get('/stocks/search',                  [StockController::class, 'search']);
         Route::get('/stocks/ngx',           [StockController::class, 'ngx']);
@@ -94,6 +95,7 @@ Route::prefix('v1')->group(function () {
 
         // Portfolio & Trading
         Route::get('/portfolio', [PortfolioController::class, 'index']);
+        Route::get('/portfolio/movers', [PortfolioController::class, 'movers']);
         Route::post('/broker/link', [TradeController::class, 'linkBroker']);
         Route::post('/broker/trade', [TradeController::class, 'executeTrade']);
 

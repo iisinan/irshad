@@ -40,6 +40,31 @@ class StockController extends Controller
     }
 
     /**
+     * Fetch recent compliance changes for the dashboard feed.
+     */
+    public function complianceChanges(): JsonResponse
+    {
+        $changes = \App\Models\ComplianceHistory::with('company:id,symbol,name')
+            ->orderBy('changed_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function ($change) {
+                return [
+                    'id' => $change->id,
+                    'symbol' => $change->company->symbol,
+                    'name' => $change->company->name,
+                    'old_status' => $change->old_status,
+                    'new_status' => $change->new_status,
+                    'reason' => $change->reason,
+                    'changed_at' => $change->changed_at,
+                    'time_ago' => $change->changed_at->diffForHumans(),
+                ];
+            });
+
+        return $this->success($changes);
+    }
+
+    /**
      * Fetch stock details by symbol.
      */
     public function show(string $symbol): JsonResponse

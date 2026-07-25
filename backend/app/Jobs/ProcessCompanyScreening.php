@@ -99,11 +99,12 @@ class ProcessCompanyScreening implements ShouldQueue
             foreach ($admins as $admin) {
                 // Laravel Notification or raw mail (we'll just use basic mail logic here, assuming a Mailable exists or raw)
                 try {
+                    $ticker = $this->ticker;
                     \Illuminate\Support\Facades\Mail::raw(
-                        "New financial data was automatically pulled for {$this->ticker}. However, because this stock has a manual admin override, the new data has been flagged for review. Please log in to the admin panel to review and approve the new data.",
-                        function ($message) use ($admin, $this) {
+                        "New financial data was automatically pulled for {$ticker}. However, because this stock has a manual admin override, the new data has been flagged for review. Please log in to the admin panel to review and approve the new data.",
+                        function ($message) use ($admin, $ticker) {
                             $message->to($admin->email)
-                                ->subject("Review Required: New Data for {$this->ticker}");
+                                ->subject("Review Required: New Data for {$ticker}");
                         }
                     );
                 } catch (\Exception $e) {

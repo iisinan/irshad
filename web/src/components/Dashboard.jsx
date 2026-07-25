@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { fetchPortfolio, fetchNgxStocks, fetchNews, fetchWatchlist, fetchHistory, fetchPriceAlerts, formatLogoUrl, deletePriceAlert } from '../services/api';
+import { fetchPortfolio, fetchNgxStocks, fetchNews, fetchWatchlist, fetchHistory, fetchPriceAlerts, formatLogoUrl, deletePriceAlert, fetchComplianceChanges, fetchPortfolioMovers } from '../services/api';
 import {
   Search, Bell, Star, Wallet, TrendingUp, TrendingDown,
   ShieldAlert, CheckCircle, AlertTriangle, ArrowUpRight,
   ArrowDownRight, ChevronRight, Calculator, HeartHandshake,
   Shield, PlusCircle, BarChart2, Sparkles, Globe, Clock, X,
-  Zap, Activity, Trash2
+  Zap, Activity, Trash2, LayoutList, Eye, ArrowRightLeft
 } from 'lucide-react';
 import { toastSuccess, toastError } from '../utils/toast';
 import {
@@ -360,6 +360,8 @@ export default function Dashboard() {
   const [watchlist, setWatchlist] = useState([]);
   const [history, setHistory] = useState([]);
   const [alerts, setAlerts] = useState([]);
+  const [complianceChanges, setComplianceChanges] = useState([]);
+  const [portfolioMovers, setPortfolioMovers] = useState({ gainers: [], losers: [] });
   const [duaIndex] = useState(() => Math.floor(Math.random() * RIZQ_DUAS.length));
   const searchRef=useRef(null);
 
@@ -384,9 +386,11 @@ export default function Dashboard() {
         fetchNews().catch(()=>({ data: [] })),
         fetchWatchlist().catch(()=>({ data: [] })),
         fetchHistory().catch(()=>({ data: [] })),
-        fetchPriceAlerts().catch(()=>({ data: [] }))
+        fetchPriceAlerts().catch(()=>({ data: [] })),
+        fetchComplianceChanges().catch(()=>({ data: [] })),
+        fetchPortfolioMovers().catch(()=>({ data: { gainers: [], losers: [] } }))
       ])
-        .then(([portRes, ngxRes, newsRes, watchRes, histRes, alertRes]) => {
+        .then(([portRes, ngxRes, newsRes, watchRes, histRes, alertRes, compRes, movRes]) => {
           if (portRes && portRes.data) setData(portRes.data);
           else if (portRes && !portRes.data) setData(portRes);
           if (ngxRes && ngxRes.data) setNgxStocks(ngxRes.data);
@@ -394,6 +398,8 @@ export default function Dashboard() {
           if (watchRes && watchRes.data) setWatchlist(watchRes.data);
           if (histRes && histRes.data) setHistory(histRes.data);
           if (alertRes && alertRes.data) setAlerts(alertRes.data);
+          if (compRes && compRes.data) setComplianceChanges(compRes.data);
+          if (movRes && movRes.data) setPortfolioMovers(movRes.data);
         })
         .catch(()=>{})
         .finally(()=>setLoading(false));
@@ -428,8 +434,8 @@ export default function Dashboard() {
   const QUICK_ACTIONS=[
     {icon:PlusCircle,label:'Add Trade', color:'var(--primary)',bg:'var(--primary-50)',to:'/portfolio'},
     {icon:BarChart2, label:'Market',    color:'#3b82f6',       bg:'#dbeafe',         to:'/portfolio#market'},
-
     {icon:Calculator,label:'Zakat',     color:'#8b5cf6',       bg:'#ede9fe',         to:'/portfolio#zakat'},
+    {icon:ShieldAlert,label:'Purify',    color:'#f59e0b',       bg:'#fef3c7',         to:'/portfolio#purification'},
   ];
 
   let dynamicTicker = [];
@@ -605,6 +611,47 @@ export default function Dashboard() {
             </h1>
             <p style={{color:'var(--text-muted)',fontSize: '0.86rem',marginTop:'8px',fontWeight:500}}>Your Islamic investment command centre.</p>
           </div>
+
+        {/* ═ KPIs (StatCards) ═ */}
+        <div className="stagger-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginBottom: '32px' }}>
+          <StatCard
+            primary
+            icon={Wallet}
+            label="Total Balance"
+            value={fmtK(totalBalance)}
+            sub={<><ArrowUpRight size={14}/> {PERF_META[0].gain} (1W)</>}
+            badge="PORTFOLIO"
+          />
+          <StatCard
+            icon={Calculator}
+            label="Est. Zakat Due"
+            value={`₦${fmt(zakatAmt)}`}
+            sub={zakatAmt > 0 ? "2.5% of total wealth" : "Below Nisab threshold"}
+          />
+          <StatCard
+            icon={ShieldAlert}
+            label="Purification Due"
+            value={`₦${fmt(summary.purification_due || 0)}`}
+            sub="From non-permissible income"
+          />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+             <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '16px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px', flex: 1, boxShadow: 'var(--shadow-sm)' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'var(--primary-50)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LayoutList size={20}/></div>
+                <div>
+                  <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>Holdings</div>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-dark)' }}>{holdings.length}</div>
+                </div>
+             </div>
+             <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '16px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px', flex: 1, boxShadow: 'var(--shadow-sm)' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#dbeafe', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Eye size={20}/></div>
+                <div>
+                  <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>Watchlist</div>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-dark)' }}>{dynamicWatchlist.length}</div>
+                </div>
+             </div>
+          </div>
+        </div>
+
           <div style={{display:'flex',gap:'11px',flex:1,minWidth:'260px',maxWidth:'420px'}}>
             <div id="tour-search" style={{position:'relative',flex:1}}>
               <Search size={15} color="var(--text-muted)" style={{position:'absolute',left:'14px',top:'50%',transform:'translateY(-50%)',pointerEvents:'none'}}/>
@@ -645,6 +692,61 @@ export default function Dashboard() {
 
           {/* ── Left Column ── */}
           <div className="stagger-4" style={{display:'flex',flexDirection:'column',gap:'20px'}}>
+            
+            {/* Performance Chart */}
+            <Panel>
+              <PanelHeader icon={TrendingUp} title="Portfolio Growth"/>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>
+                {PERF_META.map((meta, i) => (
+                  <button key={meta.label} onClick={() => setPerfRange(i)} style={{ padding: '6px 12px', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 700, background: perfRange === i ? 'var(--primary)' : 'var(--bg-section)', color: perfRange === i ? 'white' : 'var(--text-muted)', border: 'none', cursor: 'pointer', transition: 'all 0.2s' }}>
+                    {meta.label}
+                  </button>
+                ))}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px', marginBottom: '20px' }}>
+                <div style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-dark)', lineHeight: 1 }}>{fmtK(PERF_RANGES[perfRange]?.[PERF_RANGES[perfRange].length - 1]?.v || totalBalance)}</div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: PERF_META[perfRange].gain.startsWith('+') ? 'var(--halal)' : 'var(--non-halal)', display: 'flex', alignItems: 'center', gap: '2px', paddingBottom: '4px' }}>
+                  {PERF_META[perfRange].gain.startsWith('+') ? <ArrowUpRight size={14}/> : <ArrowDownRight size={14}/>}
+                  {PERF_META[perfRange].gain}
+                </div>
+              </div>
+              <div style={{ height: '240px', marginLeft: '-15px' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={PERF_RANGES[perfRange]}>
+                    <defs>
+                      <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <Tooltip
+                      formatter={(val) => [fmtK(val), 'Value']}
+                      labelFormatter={(l) => l}
+                      contentStyle={{ borderRadius: '12px', border: '1px solid var(--border)', fontSize: '0.75rem', fontWeight: 700, boxShadow: 'var(--shadow-md)' }}
+                    />
+                    <YAxis domain={['auto', 'auto']} hide />
+                    <Area type="monotone" dataKey="v" stroke="var(--primary)" strokeWidth={3} fillOpacity={1} fill="url(#colorValue)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </Panel>
+            
+            {/* Watchlist */}
+            <Panel>
+              <PanelHeader icon={Eye} title="Your Watchlist"/>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '400px', overflowY: 'auto', paddingRight: '4px' }}>
+                {dynamicWatchlist.length > 0 ? dynamicWatchlist.map(w => (
+                  <WatchlistRow key={w.symbol} stock={w} />
+                )) : (
+                  <div style={{ padding: '30px 0', textAlign: 'center', color: 'var(--text-muted)' }}>
+                    <Eye size={34} strokeWidth={1.2} style={{ margin: '0 auto 10px', color: 'var(--text-light)' }}/>
+                    <div style={{ fontWeight: 700, fontSize: '0.82rem', marginBottom: '4px' }}>Watchlist is empty</div>
+                    <div style={{ fontSize: '0.71rem' }}>Add stocks from the Market page to track them here.</div>
+                  </div>
+                )}
+              </div>
+            </Panel>
+
             
             {/* Inbox / Alerts */}
             <Panel>
@@ -723,15 +825,44 @@ export default function Dashboard() {
           {/* ── Right Column ── */}
           <div className="stagger-5" style={{display:'flex',flexDirection:'column',gap:'20px'}}>
 
+            {/* Compliance Changes */}
+            <Panel style={{ background: 'linear-gradient(135deg, #fff 0%, #fafafa 100%)' }}>
+              <PanelHeader icon={ArrowRightLeft} title="Compliance Changes"/>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '16px', lineHeight: 1.5 }}>
+                Recent updates to Shariah compliance status for stocks in the market.
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {complianceChanges.length > 0 ? complianceChanges.map(change => (
+                  <div key={change.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', background: 'var(--bg)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--bg-section)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.65rem', color: 'var(--text-dark)' }}>{change.symbol.substring(0, 4)}</div>
+                      <div>
+                        <div style={{ fontWeight: 800, fontSize: '0.75rem', color: 'var(--text-dark)' }}>{change.symbol}</div>
+                        <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 500 }}>{change.time_ago}</div>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '0.65rem', fontWeight: 800, color: change.old_status === 'halal' ? 'var(--halal)' : 'var(--non-halal)', background: change.old_status === 'halal' ? 'var(--halal-bg)' : 'var(--non-halal-bg)', padding: '4px 8px', borderRadius: '6px', textTransform: 'capitalize' }}>{change.old_status || 'Unknown'}</span>
+                      <ArrowRightLeft size={12} color="var(--text-muted)" />
+                      <span style={{ fontSize: '0.65rem', fontWeight: 800, color: change.new_status === 'halal' ? 'var(--halal)' : 'var(--non-halal)', background: change.new_status === 'halal' ? 'var(--halal-bg)' : 'var(--non-halal-bg)', padding: '4px 8px', borderRadius: '6px', textTransform: 'capitalize' }}>{change.new_status}</span>
+                    </div>
+                  </div>
+                )) : (
+                  <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.75rem' }}>No recent compliance changes.</div>
+                )}
+              </div>
+            </Panel>
+
+
             {/* Compliance Ring */}
             <Panel>
               <PanelHeader icon={Shield} title="Shariah Compliance"/>
               <ComplianceRing score={compliance}/>
             </Panel>
 
-            {/* Market Movers */}
+            {/* Portfolio Movers */}
             <Panel>
-              <PanelHeader icon={Zap} title="Market Movers"/>
+              <PanelHeader icon={Zap} title="Portfolio Movers"/>
               <div style={{display:'flex',gap:'6px',marginBottom:'16px'}}>
                 {[['gainers','Top Gainers'],['losers','Top Losers']].map(([tab,lbl])=>(
                   <button key={tab} onClick={()=>setMoversTab(tab)} style={{flex:1,padding:'7px',borderRadius:'9px',fontSize: '0.67rem',fontWeight:700,background:moversTab===tab?(tab==='gainers'?'#dcfce7':'#fee2e2'):'var(--bg-section)',color:moversTab===tab?(tab==='gainers'?'var(--halal)':'var(--non-halal)'):'var(--text-muted)',border:'none',cursor:'pointer',transition:'all 0.2s'}}>
@@ -740,18 +871,20 @@ export default function Dashboard() {
                 ))}
               </div>
               <div style={{display:'flex',flexDirection:'column',gap:'2px'}}>
-                {(movers || []).map((m,i)=>(
+                {(portfolioMovers[moversTab] || []).length > 0 ? (portfolioMovers[moversTab] || []).map((m,i)=>(
                   <div key={m.symbol} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 11px',borderRadius:'11px',background:i%2===0?'var(--bg-section)':'transparent'}}>
                     <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
                       <div style={{width:'26px',height:'26px',borderRadius:'7px',background:moverBg,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize: '0.51rem',color:moverColor}}>{i+1}</div>
                       <div>
                         <div style={{fontWeight:700,fontSize: '0.73rem',color:'var(--text-dark)'}}>{m.symbol}</div>
-                        <div style={{fontSize: '0.62rem',color:'var(--text-muted)',fontWeight:500}}>{m.price}</div>
+                        <div style={{fontSize: '0.62rem',color:'var(--text-muted)',fontWeight:500}}>₦{Number(m.latest_price || 0).toFixed(2)}</div>
                       </div>
                     </div>
-                    <span style={{fontSize: '0.71rem',fontWeight:800,color:moverColor}}>{m.change}</span>
+                    <span style={{fontSize: '0.71rem',fontWeight:800,color:moverColor}}>{m.price_change_pct > 0 ? '+' : ''}{Number(m.price_change_pct || 0).toFixed(2)}%</span>
                   </div>
-                ))}
+                )) : (
+                  <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.75rem' }}>No movers to display. Add stocks to your portfolio or watchlist.</div>
+                )}
               </div>
             </Panel>
 

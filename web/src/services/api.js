@@ -249,6 +249,16 @@ export const fetchAiAnalysis = async (symbol) => {
   return response.data;
 };
 
+export const fetchComplianceChanges = async () => {
+  const response = await api.get('/stocks/compliance-changes');
+  return response.data;
+};
+
+export const fetchPortfolioMovers = async () => {
+  const response = await api.get('/portfolio/movers');
+  return response.data;
+};
+
 export const fetchAaoifiScreening = async (symbol) => {
   try {
     const response = await api.get(`/stocks/${symbol}/aaoifi-screening`);

@@ -180,6 +180,16 @@ class AaoifiComplianceService
             $aaoifiScreening->update(['final_status' => $status]);
         }
 
+        if ($oldStatus !== $status && $oldStatus !== null) {
+            \App\Models\ComplianceHistory::create([
+                'company_id' => $company->id,
+                'old_status' => $oldStatus,
+                'new_status' => $status,
+                'reason' => $reasonText,
+                'changed_at' => now(),
+            ]);
+        }
+
         if ($oldStatus === 'halal' && $status === 'non-halal') {
             $this->notifyUsersOfDowngrade($company);
         }

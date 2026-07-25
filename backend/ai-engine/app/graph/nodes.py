@@ -52,6 +52,7 @@ async def collect_business_intelligence(state: GraphState) -> GraphState:
     if extracted_data:
         state["business_intelligence"] = extracted_data.get("business_activities", {})
         state["business_news"] = extracted_data.get("latest_news", [])
+        state["perplexity_financials"] = extracted_data.get("financials", {})
         
         if state["business_intelligence"].get("verdict") == "Non-Compliant":
             state["skip_financials"] = True
@@ -133,6 +134,11 @@ async def cross_verify_data(state: GraphState) -> GraphState:
     new_data = state.get("raw_pdf_extraction", {})
     old_data = state.get("existing_financial_data", {})
     
+    # Fallback to perplexity financials if PDF extraction was empty/failed
+    if not new_data and state.get("perplexity_financials"):
+        print(f"Fallback to Perplexity financials for {state['ticker']}")
+        new_data = state["perplexity_financials"]
+        
     merged = verifier.merge_financials(old_data, new_data)
     state["cross_verified_data"] = merged
     
@@ -140,9 +146,27 @@ async def cross_verify_data(state: GraphState) -> GraphState:
 
 # 11. Collect Market Data
 async def collect_market_data(state: GraphState) -> GraphState:
-    # Use Yahoo Finance or similar here for live market cap
-    # For now, placeholder or use perplexity data if it fetched it
-    state["market_data"] = {"market_cap": 0} 
+    ticker = state["ticker"]
+    market_cap = 0.0
+    
+    try:
+        async with AsyncSessionLocal() as db:
+            result = await db.execute(select(Company).where(Company.ticker == ticker))
+            company = result.scalars().first()
+            if company and company.market_cap:
+                market_cap = float(company.market_cap)
+    except Exception as e:
+        print(f"Failed to query market cap from DB for {ticker}: {str(e)}")
+        
+    # Fallback to perplexity market cap if DB is 0
+    if market_cap == 0 and state.get("perplexity_financials"):
+        mc_data = state["perplexity_financials"].get("market_cap", {})
+        if isinstance(mc_data, dict):
+            market_cap = float(mc_data.get("value", 0) or 0)
+        else:
+            market_cap = float(mc_data or 0)
+            
+    state["market_data"] = {"market_cap": market_cap} 
     return state
 
 # 13 & 14. Normalise & Currency

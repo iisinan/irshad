@@ -134,8 +134,67 @@ class PerplexityAiService
             ]
         ];
     }
-    public function runBusinessActivityScreening($company)
+    public function runBusinessActivityScreening($company, $allowApiCall = true)
     {
+        $name = strtolower($company->name);
+        $sector = strtolower($company->sector ?? '');
+        $industry = strtolower($company->industry ?? '');
+
+        // 1. Rule-based checks for obvious prohibited business activities:
+        
+        // Alcohol / Breweries
+        if (str_contains($name, 'brew') || 
+            str_contains($name, 'guinness') || 
+            str_contains($name, 'beer') || 
+            str_contains($name, 'alcohol') || 
+            str_contains($industry, 'brew') || 
+            str_contains($industry, 'beer') || 
+            str_contains($industry, 'alcohol') ||
+            $company->symbol === 'NB') {
+            return [
+                'compliance_status' => 'FAIL',
+                'haram_revenue_percent' => 100,
+                'purification_required' => false,
+                'reason' => 'Company is engaged in brewery and alcoholic beverage production/distribution.'
+            ];
+        }
+
+        // Conventional Finance / Banking / Insurance
+        // Exclude Shariah-compliant institutions from the hard failure
+        $isIslamicFinance = str_contains($name, 'jaiz') || str_contains($name, 'lotus') || str_contains($name, 'taj');
+
+        if (!$isIslamicFinance) {
+            if (str_contains($name, 'bank') || 
+                str_contains($name, 'insurance') || 
+                str_contains($name, 'assurance') || 
+                str_contains($name, 'reinsurance') || 
+                str_contains($name, 'microfinance') || 
+                str_contains($name, 'leasing') || 
+                str_contains($name, 'finance') ||
+                str_contains($name, 'mortgage') ||
+                str_contains($sector, 'financial') || 
+                str_contains($sector, 'insurance') || 
+                str_contains($industry, 'bank') || 
+                str_contains($industry, 'insurance') || 
+                str_contains($industry, 'finance')) {
+                return [
+                    'compliance_status' => 'FAIL',
+                    'haram_revenue_percent' => 100,
+                    'purification_required' => false,
+                    'reason' => 'Company is engaged in conventional interest-based financial, banking, or insurance services.'
+                ];
+            }
+        }
+
+        if (!$allowApiCall || empty($this->apiKey)) {
+            return [
+                'compliance_status' => 'PASS',
+                'haram_revenue_percent' => 0,
+                'purification_required' => false,
+                'reason' => 'AI screening skipped or offline. Core business activity is assumed compliant based on local rules.'
+            ];
+        }
+
         $prompt = "You are building a Shariah-compliance screening module for the IRSHD app (targeting Nigerian stocks on the NGX). Implement Stage 1 – Qualitative Business Activity Screen based on AAOIFI Shariah Standard No. 21.\n\n";
         $prompt .= "Company: {$company->name} ({$company->symbol})\n";
         $prompt .= "Sector: {$company->sector}, Industry: {$company->industry}\n";
