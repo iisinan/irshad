@@ -127,12 +127,19 @@ class SyncCompanyStatus extends Command
                 );
             }
 
+            // Clear per-company caches so listing AND analysis page reflect new verdict immediately
+            Cache::forget("stocks.show.{$symbol}");
+            Cache::forget("stocks.show.{$symbol}_v2");
+            Cache::forget("aaoifi_stage1_{$symbol}");
+
             $this->info("  {$symbol}: stage1=" . ($stage1Pass ? 'PASS' : 'FAIL') . " stage2=" . ($stage2Pass ? 'PASS' : 'FAIL') . " -> {$finalStatus}" . ($isVerified ? ' (scholar override)' : ''));
             $updatedCount++;
         }
 
-        // Clear all stock-related caches
+        // Clear global stock listing caches
         Cache::forget('stocks.index_v6');
-        $this->info("Done. Synced {$updatedCount} companies. Cache cleared.");
+        Cache::forget('stocks.index_v5');
+        Cache::forget('stocks.index_v4');
+        $this->info("Done. Synced {$updatedCount} companies. All caches cleared.");
     }
 }

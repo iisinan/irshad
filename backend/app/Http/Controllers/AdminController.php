@@ -357,8 +357,9 @@ class AdminController extends Controller
                 'current_status' => $change['new_verdict']
             ]);
             
-            \Illuminate\Support\Facades\Cache::forget("stocks.show.{$company->symbol}");
-            \Illuminate\Support\Facades\Cache::forget("stocks.show.{$company->symbol}_v2");
+            Cache::forget("stocks.show.{$company->symbol}");
+            Cache::forget("stocks.show.{$company->symbol}_v2");
+            Cache::forget("aaoifi_stage1_{$company->symbol}"); // Clear analysis page cache too
             $updatedCount++;
         }
         

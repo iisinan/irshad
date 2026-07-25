@@ -217,11 +217,14 @@ class StockController extends Controller
 
         event(new \App\Events\StockStatusChanged($company, $status));
 
-        // Clear caches so the new status reflects immediately
+        // Clear all caches so the new status reflects immediately everywhere
         \Illuminate\Support\Facades\Cache::forget('stocks.index');
+        \Illuminate\Support\Facades\Cache::forget('stocks.index_v6');
         \Illuminate\Support\Facades\Cache::forget('stocks.ngx');
         \Illuminate\Support\Facades\Cache::forget('stocks.ngx_v3');
         \Illuminate\Support\Facades\Cache::forget("stocks.show.{$symbol}");
+        \Illuminate\Support\Facades\Cache::forget("stocks.show.{$symbol}_v2");
+        \Illuminate\Support\Facades\Cache::forget("aaoifi_stage1_{$symbol}"); // Bust analysis page cache
 
         return $this->success($company->load('status'), 'Stock status updated successfully by scholar.');
     }
