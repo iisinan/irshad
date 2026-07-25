@@ -207,10 +207,23 @@ class _AaoifiScreeningScreenState extends State<AaoifiScreeningScreen> with Sing
                 children: [
                   Icon(Icons.analytics_outlined, color: statusColor, size: 16),
                   const SizedBox(width: 6),
-                  Text('REFERENCED FINANCIAL DATA USED', style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.8)),
+                  Text('BUSINESS ACTIVITY & REFERENCED DATA', style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.8)),
                 ],
               ),
               const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(color: context.bg, borderRadius: BorderRadius.circular(12), border: Border.all(color: context.divider)),
+                child: Column(
+                  children: [
+                    Text('Business Activity Result', style: TextStyle(color: context.textMuted, fontSize: 11, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 4),
+                    Text((_report!['business_status'] ?? 'UNKNOWN').toString().toUpperCase(), style: TextStyle(color: statusColor, fontSize: 14, fontWeight: FontWeight.w800)),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
               Row(
                 children: [
                   Expanded(

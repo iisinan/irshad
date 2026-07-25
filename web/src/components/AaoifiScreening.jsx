@@ -429,9 +429,15 @@ const AaoifiScreening = () => {
         {/* Referenced Financial Data Used for Screening */}
         <div style={{ borderTop: `1px solid ${statusColor}30`, paddingTop: '28px', maxWidth: '850px', margin: '0 auto', textAlign: 'left' }}>
           <div style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
-            <Activity size={16} color="var(--primary)" /> Referenced Financial Data Used For AAOIFI Screening
+            <Activity size={16} color="var(--primary)" /> Business Activity & Referenced Financial Data For AAOIFI Screening
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px' }}>
+            <div style={{ background: 'var(--bg)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Business Activity Result</span>
+              <span style={{ fontSize: '1.15rem', color: report.business_status === 'pass' ? 'var(--halal)' : (report.business_status === 'fail' ? 'var(--non-halal)' : 'var(--questionable)'), fontWeight: 800, marginTop: '4px' }}>
+                {(report.business_status || 'UNKNOWN').toUpperCase()}
+              </span>
+            </div>
             <div style={{ background: 'var(--bg)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Market Capitalization</span>
               <span style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{marketCap ? `₦${(marketCap/1000000000).toFixed(2)}B` : 'N/A'}</span>
@@ -454,7 +460,6 @@ const AaoifiScreening = () => {
 
 
 
-      {businessStatus !== 'insufficient_data' && (
       <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', marginBottom: '48px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
           <div>
@@ -499,7 +504,6 @@ const AaoifiScreening = () => {
           </div>
         </div>
       </div>
-      )}
 
       {(debtRatio !== null || report.impermissible_income_ratio != null || cashRatio !== null) && (
       <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', marginBottom: '48px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)' }}>

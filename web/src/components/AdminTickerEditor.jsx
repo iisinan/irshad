@@ -355,23 +355,28 @@ export default function AdminTickerEditor() {
               <div style={{ padding: '14px 18px', background: 'var(--primary-50)', borderRadius: '12px', border: '1px solid var(--primary-100)', marginBottom: '24px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
                 <span style={{ fontSize: '1rem', flexShrink: 0 }}>ℹ️</span>
                 <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 600, lineHeight: 1.5 }}>
-                  Updating these values will automatically recalculate the AAOIFI screening ratios. The Debt/Assets and Interest-Income/Revenue ratios must both be below 33.33% for a Halal result.
+                  Updating these values will automatically recalculate the AAOIFI screening ratios. The Debt/Market Cap, Cash/Market Cap (&lt; 30%), and Impure Income/Revenue (&lt; 5%) ratios must all pass for a Halal result.
                 </p>
               </div>
 
               {/* AAOIFI Ratio Preview */}
-              {(financialsForm.total_assets > 0 || financialsForm.total_revenue > 0) && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
+              {(financialsForm.market_cap > 0 || financialsForm.total_assets > 0 || financialsForm.total_revenue > 0) && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginBottom: '24px' }}>
                   {[
                     {
-                      label: 'Debt / Assets',
-                      value: financialsForm.total_assets > 0 ? ((financialsForm.total_debt / financialsForm.total_assets) * 100).toFixed(1) : 0,
-                      threshold: 33.33,
+                      label: 'Debt / Market Cap',
+                      value: financialsForm.market_cap > 0 ? ((financialsForm.total_debt / financialsForm.market_cap) * 100).toFixed(1) : 0,
+                      threshold: 30,
                     },
                     {
-                      label: 'Interest Income / Revenue',
+                      label: 'Cash / Market Cap',
+                      value: financialsForm.market_cap > 0 ? ((financialsForm.cash / financialsForm.market_cap) * 100).toFixed(1) : 0,
+                      threshold: 30,
+                    },
+                    {
+                      label: 'Impure Income / Revenue',
                       value: financialsForm.total_revenue > 0 ? ((financialsForm.interest_income / financialsForm.total_revenue) * 100).toFixed(1) : 0,
-                      threshold: 33.33,
+                      threshold: 5,
                     },
                   ].map(r => {
                     const pct = parseFloat(r.value);
@@ -394,13 +399,14 @@ export default function AdminTickerEditor() {
                 <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px' }}>Balance Sheet</div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                   {[
+                    { label: 'Market Cap', key: 'market_cap' },
                     { label: 'Total Assets', key: 'total_assets' },
                     { label: 'Total Debt (Interest Bearing)', key: 'total_debt' },
                     { label: 'Cash & Equivalents', key: 'cash' },
                   ].map(f => (
                     <div key={f.key}>
                       <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' }}>{f.label}</label>
-                      <input type="number" step="0.01" value={financialsForm[f.key]}
+                      <input type="number" step="0.01" value={financialsForm[f.key] || 0}
                         onChange={e => setFinancialsForm({...financialsForm, [f.key]: e.target.value})}
                         style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-dark)', outline: 'none', fontSize: '0.9rem', fontFamily: 'inherit' }} />
                     </div>
