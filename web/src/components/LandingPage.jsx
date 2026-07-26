@@ -179,7 +179,7 @@ export default function LandingPage() {
 
           {/* CTAs */}
           <div className="animate-slide-up stagger-3" style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 48 }}>
-            <Link to="/market" className="btn-primary hover-lift" style={{ padding: '15px 36px', fontSize: '0.95rem', borderRadius: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 8px 28px rgba(15,82,87,0.22)', textDecoration: 'none' }}>
+            <Link to="/portfolio" className="btn-primary hover-lift" style={{ padding: '15px 36px', fontSize: '0.95rem', borderRadius: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 8px 28px rgba(15,82,87,0.22)', textDecoration: 'none' }}>
               Explore Equities <ArrowRight size={17} />
             </Link>
             <Link to="/shariah" style={{ padding: '15px 36px', fontSize: '0.95rem', borderRadius: 13, fontWeight: 600, color: 'var(--text-body)', border: '1px solid var(--border-strong)', background: 'transparent', display: 'flex', alignItems: 'center', gap: 8, transition: 'border-color 0.25s, color 0.25s', textDecoration: 'none' }}
@@ -277,7 +277,7 @@ export default function LandingPage() {
                   <div style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--halal)', boxShadow: '0 0 0 3px var(--halal-bg)', animation: 'pulse 3s infinite' }} />
                   <span style={{ fontWeight: 700, fontSize: '0.84rem', color: 'var(--text-dark)', letterSpacing: '-0.2px' }}>Live Screenings</span>
                 </div>
-                <Link to="/market" style={{ fontSize: '0.73rem', fontWeight: 700, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: 3, textDecoration: 'none', transition: 'gap 0.2s' }}
+                <Link to="/portfolio" style={{ fontSize: '0.73rem', fontWeight: 700, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: 3, textDecoration: 'none', transition: 'gap 0.2s' }}
                   onMouseEnter={e => e.currentTarget.style.gap = '6px'}
                   onMouseLeave={e => e.currentTarget.style.gap = '3px'}>
                   View all <ArrowUpRight size={12} />
@@ -362,7 +362,7 @@ export default function LandingPage() {
                   Built for the serious<br />Muslim investor
                 </h2>
               </div>
-              <Link to="/market" style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap', textDecoration: 'none', transition: 'gap 0.2s' }}
+              <Link to="/portfolio" style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap', textDecoration: 'none', transition: 'gap 0.2s' }}
                 onMouseEnter={e => e.currentTarget.style.gap = '8px'}
                 onMouseLeave={e => e.currentTarget.style.gap = '5px'}>
                 Start for free <ArrowRight size={13} />
@@ -587,7 +587,7 @@ export default function LandingPage() {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, position: 'relative', minWidth: 200 }}>
-              <Link to="/market" className="hover-lift" style={{ padding: '14px 32px', background: 'white', color: 'var(--primary)', fontWeight: 800, fontSize: '0.92rem', borderRadius: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: '0 8px 24px rgba(0,0,0,0.2)', textDecoration: 'none' }}>
+              <Link to="/portfolio" className="hover-lift" style={{ padding: '14px 32px', background: 'white', color: 'var(--primary)', fontWeight: 800, fontSize: '0.92rem', borderRadius: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: '0 8px 24px rgba(0,0,0,0.2)', textDecoration: 'none' }}>
                 Start Screening <ArrowRight size={15} />
               </Link>
               <Link to="/shariah" style={{ padding: '13px 32px', border: '1px solid rgba(255,255,255,0.16)', color: 'rgba(255,255,255,0.82)', fontWeight: 600, fontSize: '0.9rem', borderRadius: 13, textDecoration: 'none', transition: 'border-color 0.2s, color 0.2s', textAlign: 'center', display: 'block' }}
