@@ -7,36 +7,6 @@ import { useAuth } from '../context/AuthContext';
 import { toastError, toastSuccess } from '../utils/toast';
 import ZakatSettingsAdmin from './ZakatSettingsAdmin';
 
-// ─── Stat Card ────────────────────────────────────────────
-function StatCard({ label, value, icon: Icon, color = 'var(--primary)', bg = 'var(--primary-50)' }) {
-  return (
-    <div style={{
-      background: 'var(--bg)',
-      borderRadius: '16px',
-      border: '1px solid var(--border)',
-      padding: '20px 24px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '16px',
-      boxShadow: 'var(--shadow-sm)',
-      flex: 1,
-      minWidth: 0,
-    }}>
-      <div style={{
-        width: '44px', height: '44px', borderRadius: '12px',
-        background: bg, color: color,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        flexShrink: 0,
-      }}>
-        <Icon size={20} />
-      </div>
-      <div>
-        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-dark)', lineHeight: 1 }}>{value}</div>
-        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px', fontWeight: 600 }}>{label}</div>
-      </div>
-    </div>
-  );
-}
 
 // ─── Status Badge ────────────────────────────────────────
 function StatusBadge({ status }) {
@@ -237,9 +207,7 @@ const AdminDashboard = () => {
     filteredData = filteredData.filter(s => s.status?.status === statusFilter);
   }
 
-  const halalCount = stocks.filter(s => s.status?.status === 'halal').length;
-  const nonHalalCount = stocks.filter(s => s.status?.status === 'non-halal').length;
-  const doubtfulCount = stocks.filter(s => s.status?.status === 'doubtful').length;
+
 
   if (user?.role !== 'admin' && user?.role !== 'scholar') {
     return (
@@ -321,13 +289,7 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* ── Stat Cards ────────────────────────────── */}
-      <div style={{ display: 'flex', gap: '16px', marginBottom: '32px', flexWrap: 'wrap' }}>
-        <StatCard label="Total Stocks" value={stocks.length} icon={TrendingUp} />
-        <StatCard label="Halal" value={halalCount} icon={CheckCircle} color="var(--halal)" bg="var(--halal-bg)" />
-        <StatCard label="Non-Halal" value={nonHalalCount} icon={AlertTriangle} color="var(--non-halal)" bg="var(--non-halal-bg)" />
-        <StatCard label="Doubtful" value={doubtfulCount} icon={AlertCircle} color="var(--doubtful)" bg="var(--doubtful-bg)" />
-      </div>
+
 
       {/* ── Alerts Section ───────────────────────── */}
       {alerts.length > 0 && (
