@@ -12,7 +12,6 @@ import WatchlistTab from './portfolio/WatchlistTab';
 import ZakatTab from './portfolio/ZakatTab';
 import PurificationTab from './portfolio/PurificationTab';
 import LecturesTab from './portfolio/LecturesTab';
-import BasketsTab from './portfolio/BasketsTab';
 import StatementTab from './portfolio/StatementTab';
 
 import AddHoldingModal from "./portfolio/AddHoldingModal";
@@ -67,7 +66,7 @@ export default function Portfolio() {
   const location = useLocation();
   const getTabFromHash = (hash) => {
     const h = hash.replace('#', '');
-    return ['holdings', 'market', 'watchlist', 'zakat', 'purification', 'lectures', 'baskets'].includes(h) ? h : 'holdings';
+    return ['holdings', 'market', 'watchlist', 'zakat', 'purification', 'lectures'].includes(h) ? h : 'holdings';
   };
   
   const [activeTab, setActiveTab] = useState(() => getTabFromHash(location.hash));
@@ -154,8 +153,7 @@ export default function Portfolio() {
     { id: 'statement',    label: 'Statement',       icon: FileText },
     { id: 'zakat',        label: 'Zakat',           icon: Calculator },
     { id: 'purification', label: 'Purification',    icon: ShieldCheck },
-    { id: 'lectures',     label: 'Resources',       icon: BookOpen },
-    { id: 'baskets',      label: 'Thematic Baskets',icon: Briefcase }
+    { id: 'lectures',     label: 'Resources',       icon: BookOpen }
   ];
 
   // Compute sidebar data
@@ -302,11 +300,6 @@ export default function Portfolio() {
           {mountedTabs.includes('lectures') && (
             <div style={{ display: activeTab === 'lectures' ? 'block' : 'none' }}>
               <LecturesTab />
-            </div>
-          )}
-          {mountedTabs.includes('baskets') && (
-            <div style={{ display: activeTab === 'baskets' ? 'block' : 'none' }}>
-              <BasketsTab />
             </div>
           )}
           {mountedTabs.includes('statement') && (

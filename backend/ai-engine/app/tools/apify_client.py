@@ -61,9 +61,9 @@ class FinancialScraper:
             
             for item in self.client.dataset(run["defaultDatasetId"]).iterate_items():
                 for doc in item.get("data", []):
-                    url = doc.get("url", "")
-                    text = doc.get("text", "")
-                    parent_text = doc.get("parentText", "")
+                    url = str(doc.get("url") or "")
+                    text = str(doc.get("text") or "")
+                    parent_text = str(doc.get("parentText") or "")
                     
                     # Ensure it's for the requested financial year
                     if str(financial_year) not in url and str(financial_year) not in text and str(financial_year) not in parent_text:

@@ -152,12 +152,6 @@ export default function DashboardTour({ onClose }) {
       placement: 'right',
     },
     {
-      target: '#tour-nav-baskets',
-      title: 'Thematic Baskets',
-      content: 'Don\'t want to pick individual stocks? Invest in expertly curated collections of Halal stocks with a single click.',
-      placement: 'right',
-    },
-    {
       target: '#tour-nav-resources',
       title: 'Islamic Finance Hub',
       content: 'Access premium lectures and educational resources to deepen your understanding of Halal investing.',
