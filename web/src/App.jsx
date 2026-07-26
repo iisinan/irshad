@@ -147,7 +147,11 @@ const TopNavbar = () => {
   return (
     <>
       {isDashboard ? null : (
-      <nav className="top-navbar" style={{ boxShadow: scrolled ? '0 2px 16px rgba(0,0,0,0.07)' : 'none' }}>
+      <nav className="top-navbar" style={{ 
+        background: scrolled ? 'rgba(255, 255, 255, 0.95)' : 'transparent',
+        borderBottomColor: scrolled ? 'rgba(0, 109, 100, 0.1)' : 'transparent',
+        boxShadow: scrolled ? '0 4px 24px rgba(0, 109, 100, 0.06)' : 'none'
+      }}>
         <Link to="/" className="nav-logo" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}>
           <img
             src="/logo.svg"
