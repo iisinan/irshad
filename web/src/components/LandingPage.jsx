@@ -156,52 +156,64 @@ export default function LandingPage() {
         <div style={{ position: 'absolute', top: '20%', left: '-5%', width: 340, height: 340, borderRadius: '50%', background: 'radial-gradient(circle, rgba(15,82,87,0.05) 0%, transparent 70%)', pointerEvents: 'none', filter: 'blur(24px)' }} />
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, transparent 0%, var(--border-strong) 25%, var(--border-strong) 75%, transparent 100%)' }} />
 
-        <div style={{ position: 'relative', maxWidth: 860, margin: '0 auto', textAlign: 'center' }}>
-          {/* Eyebrow badge */}
-          <div className="animate-slide-up" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(212,175,55,0.07)', border: '1px solid rgba(212,175,55,0.22)', padding: '5px 16px', borderRadius: 40, color: 'var(--gold)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '1.1px', textTransform: 'uppercase', marginBottom: 28 }}>
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--gold)', animation: 'pulse 2.5s infinite' }} />
-            AAOIFI-Certified Shariah Screening
+        <div style={{ position: 'relative', maxWidth: 1260, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 480px), 1fr))', gap: 'clamp(40px, 8vw, 80px)', alignItems: 'center' }}>
+          
+          {/* Left: Copy */}
+          <div>
+            {/* Eyebrow badge */}
+            <div className="animate-slide-up" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(212,175,55,0.07)', border: '1px solid rgba(212,175,55,0.22)', padding: '5px 16px', borderRadius: 40, color: 'var(--gold)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '1.1px', textTransform: 'uppercase', marginBottom: 28 }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--gold)', animation: 'pulse 2.5s infinite' }} />
+              AAOIFI-Certified Shariah Screening
+            </div>
+
+            {/* Headline */}
+            <h1 className="animate-slide-up stagger-1" style={{ fontSize: 'clamp(2.5rem, 5vw, 4.4rem)', fontWeight: 900, lineHeight: 1.05, letterSpacing: '-2px', color: 'var(--text-dark)', marginBottom: 24 }}>
+              The Intelligent Platform<br />
+              for{' '}
+              <span style={{ background: 'linear-gradient(120deg, var(--primary) 10%, #22c5b0 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                Islamic Investing
+              </span>
+            </h1>
+
+            {/* Subheading */}
+            <p className="animate-slide-up stagger-2" style={{ fontSize: 'clamp(1rem, 1.4vw, 1.15rem)', color: 'var(--text-muted)', lineHeight: 1.75, maxWidth: 540, marginBottom: 44, fontWeight: 400 }}>
+              Irshad screens Nigerian equities against rigorous AAOIFI standards using AI — so you know exactly what you own, and whether it is permissible.
+            </p>
+
+            {/* CTAs */}
+            <div className="animate-slide-up stagger-3" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 48 }}>
+              <Link to="/portfolio" className="btn-primary hover-lift" style={{ padding: '15px 36px', fontSize: '0.95rem', borderRadius: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 8px 28px rgba(15,82,87,0.22)', textDecoration: 'none' }}>
+                Explore Equities <ArrowRight size={17} />
+              </Link>
+              <Link to="/shariah" style={{ padding: '15px 36px', fontSize: '0.95rem', borderRadius: 13, fontWeight: 600, color: 'var(--text-body)', border: '1px solid var(--border-strong)', background: 'transparent', display: 'flex', alignItems: 'center', gap: 8, transition: 'border-color 0.25s, color 0.25s', textDecoration: 'none' }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.color = 'var(--primary)'; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-strong)'; e.currentTarget.style.color = 'var(--text-body)'; }}>
+                Our Methodology
+              </Link>
+            </div>
+
+            {/* Trust badges */}
+            <div className="animate-slide-up stagger-4" style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
+              {[
+                { icon: Shield,      text: 'AAOIFI Std. 21' },
+                { icon: CheckCircle, text: 'Halal Verified'  },
+                { icon: Lock,        text: 'Fully Auditable'  },
+              ].map((b, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                  <b.icon size={13} color="var(--primary)" />
+                  {b.text}
+                  {i < 2 && <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--border-strong)', marginLeft: 24 }} />}
+                </div>
+              ))}
+            </div>
           </div>
-
-          {/* Headline */}
-          <h1 className="animate-slide-up stagger-1" style={{ fontSize: 'clamp(2.5rem, 6.5vw, 5.2rem)', fontWeight: 900, lineHeight: 1.05, letterSpacing: '-2.5px', color: 'var(--text-dark)', marginBottom: 24 }}>
-            The Intelligent Platform<br />
-            for{' '}
-            <span style={{ background: 'linear-gradient(120deg, var(--primary) 10%, #22c5b0 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-              Islamic Investing
-            </span>
-          </h1>
-
-          {/* Subheading */}
-          <p className="animate-slide-up stagger-2" style={{ fontSize: 'clamp(1rem, 1.9vw, 1.18rem)', color: 'var(--text-muted)', lineHeight: 1.75, maxWidth: 580, margin: '0 auto 48px', fontWeight: 400 }}>
-            Irshad screens Nigerian equities against rigorous AAOIFI standards using AI — so you know exactly what you own, and whether it is permissible.
-          </p>
-
-          {/* CTAs */}
-          <div className="animate-slide-up stagger-3" style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 48 }}>
-            <Link to="/portfolio" className="btn-primary hover-lift" style={{ padding: '15px 36px', fontSize: '0.95rem', borderRadius: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 8px 28px rgba(15,82,87,0.22)', textDecoration: 'none' }}>
-              Explore Equities <ArrowRight size={17} />
-            </Link>
-            <Link to="/shariah" style={{ padding: '15px 36px', fontSize: '0.95rem', borderRadius: 13, fontWeight: 600, color: 'var(--text-body)', border: '1px solid var(--border-strong)', background: 'transparent', display: 'flex', alignItems: 'center', gap: 8, transition: 'border-color 0.25s, color 0.25s', textDecoration: 'none' }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.color = 'var(--primary)'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-strong)'; e.currentTarget.style.color = 'var(--text-body)'; }}>
-              Our Methodology
-            </Link>
-          </div>
-
-          {/* Trust badges */}
-          <div className="animate-slide-up stagger-4" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 24, flexWrap: 'wrap' }}>
-            {[
-              { icon: Shield,      text: 'AAOIFI Std. 21' },
-              { icon: CheckCircle, text: 'Halal Verified'  },
-              { icon: Lock,        text: 'Fully Auditable'  },
-            ].map((b, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                <b.icon size={13} color="var(--primary)" />
-                {b.text}
-                {i < 2 && <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--border-strong)', marginLeft: 24 }} />}
-              </div>
-            ))}
+          
+          {/* Right: Visual */}
+          <div className="animate-slide-up stagger-2" style={{ position: 'relative', display: 'flex', justifyContent: 'center' }}>
+            <div style={{ position: 'relative', width: '100%', maxWidth: 640, borderRadius: 28, overflow: 'hidden', border: '1px solid var(--border-strong)', boxShadow: '0 32px 64px rgba(15,82,87,0.15)' }}>
+              <img src="/hero-visual.jpg" alt="Irshad Fintech Platform" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'cover' }} />
+              <div style={{ position: 'absolute', inset: 0, boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.1)', borderRadius: 28, pointerEvents: 'none' }} />
+            </div>
           </div>
         </div>
       </section>
