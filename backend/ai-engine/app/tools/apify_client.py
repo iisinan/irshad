@@ -65,9 +65,9 @@ class FinancialScraper:
                     text = str(doc.get("text") or "")
                     parent_text = str(doc.get("parentText") or "")
                     
-                    # Ensure it's for the requested financial year
-                    if str(financial_year) not in url and str(financial_year) not in text and str(financial_year) not in parent_text:
-                        continue
+                    # We will no longer strictly filter by financial_year
+                    # so that we can fall back to the most recent report (e.g. 2025) 
+                    # if the requested year is not yet published.
                         
                     # Ensure it's a financial report document
                     combined = (url + text + parent_text).lower()

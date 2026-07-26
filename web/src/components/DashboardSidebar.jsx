@@ -6,7 +6,7 @@ import {
   BarChart2, Briefcase, Star, Activity,
   HeartHandshake, Calculator, BookOpen,
   User, LogOut, ChevronLeft, ChevronRight,
-  X, Moon, Sun, LayoutDashboard, Shield
+  X, Moon, Sun, LayoutDashboard, Shield, FileText
 } from 'lucide-react';
 
 export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
@@ -29,6 +29,7 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
       { label: 'Admin Dashboard', icon: Shield, to: '/admin', id: 'tour-nav-admin-dashboard' },
       { label: 'Users', icon: User, to: '/admin/users', id: 'tour-nav-users' }
     ] : []),
+    { label: 'Statements',      icon: FileText,         to: '/portfolio#statement', id: 'tour-nav-statements' },
     { label: 'Profile & Settings', icon: User,              to: '/profile', id: 'tour-nav-profile' },
   ];
 
