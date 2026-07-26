@@ -1233,7 +1233,7 @@ textarea::placeholder {
   border-radius: var(--radius-xl);
   padding: 36px 40px;
   border: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
   margin-bottom: 32px;
 }
 
@@ -1252,6 +1252,13 @@ textarea::placeholder {
   padding: 28px 32px;
   border: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.detail-panel:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .purification-card {
