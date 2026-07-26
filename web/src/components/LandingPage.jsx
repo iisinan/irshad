@@ -1,58 +1,60 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield, ArrowRight, Search, FileText, Globe, Activity, FileDigit, BarChart, ChevronRight, Sparkles, TrendingUp, Search as SearchIcon, ArrowUpRight } from 'lucide-react';
+import { Shield, ArrowRight, Search as SearchIcon, FileText, Globe, FileDigit, ChevronRight, Sparkles, TrendingUp, ArrowUpRight, CheckCircle, Lock, Zap, BarChart2 } from 'lucide-react';
 import { fetchOverviewStats, fetchRecentScreenings, fetchLatestReports, fetchBusinessNewsOverview } from '../services/api';
 import Footer from './Footer';
 
-// Company Avatar helper
+// ─── Helpers ─────────────────────────────────────────────────
+
 const CompanyAvatar = ({ symbol, size = 40 }) => {
   const [error, setError] = useState(false);
   const letter = (symbol || '').substring(0, 2).toUpperCase();
-  const radius = size * 0.25;
-
+  const radius = size * 0.22;
   if (error || !symbol) {
     return (
       <div style={{
         width: size, height: size, borderRadius: radius,
         background: 'var(--primary-50)', color: 'var(--primary)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontWeight: 800, fontSize: size * 0.4, border: '1px solid var(--primary-100)'
+        fontWeight: 800, fontSize: size * 0.38, border: '1px solid var(--primary-100)',
+        flexShrink: 0,
       }}>
         {letter}
       </div>
     );
   }
-
   return (
     <img
       src={`https://s3-symbol-logo.tradingview.com/${symbol.toLowerCase()}--big.svg`}
       alt={symbol}
       onError={() => setError(true)}
-      style={{
-        width: size, height: size, borderRadius: radius,
-        objectFit: 'contain', background: 'white', border: '1px solid var(--border)'
-      }}
+      style={{ width: size, height: size, borderRadius: radius, objectFit: 'contain', background: 'white', border: '1px solid var(--border)', flexShrink: 0 }}
     />
   );
 };
 
-const RevealOnScroll = ({ children, delay = 0, style = {} }) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const domRef = useRef();
-
+const useReveal = (threshold = 0.1) => {
+  const [visible, setVisible] = useState(false);
+  const ref = useRef();
   useEffect(() => {
-    const observer = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting) {
-        setIsVisible(true);
-        if (domRef.current) observer.unobserve(domRef.current);
-      }
-    }, { threshold: 0.1 });
-    if (domRef.current) observer.observe(domRef.current);
-    return () => observer.disconnect();
-  }, []);
+    const obs = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { setVisible(true); obs.disconnect(); }
+    }, { threshold });
+    if (ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return [ref, visible];
+};
 
+const Reveal = ({ children, delay = 0, y = 22, style: sx = {} }) => {
+  const [ref, visible] = useReveal();
   return (
-    <div ref={domRef} style={{ opacity: isVisible ? 1 : 0, transform: isVisible ? 'translateY(0)' : 'translateY(30px)', transition: `opacity 0.8s cubic-bezier(0.16,1,0.3,1) ${delay}s, transform 0.8s cubic-bezier(0.16,1,0.3,1) ${delay}s`, ...style }}>
+    <div ref={ref} style={{
+      opacity: visible ? 1 : 0,
+      transform: visible ? 'none' : `translateY(${y}px)`,
+      transition: `opacity 0.65s cubic-bezier(0.22,1,0.36,1) ${delay}s, transform 0.65s cubic-bezier(0.22,1,0.36,1) ${delay}s`,
+      ...sx,
+    }}>
       {children}
     </div>
   );
@@ -60,350 +62,352 @@ const RevealOnScroll = ({ children, delay = 0, style = {} }) => {
 
 const AnimatedNumber = ({ value }) => {
   const [count, setCount] = useState(0);
-  const [isVisible, setIsVisible] = useState(false);
-  const domRef = useRef();
-
+  const [ref, visible] = useReveal();
   useEffect(() => {
-    const observer = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting) {
-        setIsVisible(true);
-        if (domRef.current) observer.unobserve(domRef.current);
-      }
-    }, { threshold: 0.1 });
-    if (domRef.current) observer.observe(domRef.current);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!isVisible) return;
-    let startTimestamp = null;
-    const endValue = typeof value === 'string' && !isNaN(parseInt(value)) ? parseInt(value) : (typeof value === 'number' ? value : null);
-    if (endValue === null) {
-      setCount(value);
-      return;
-    }
-    const duration = 1500;
-    const step = (timestamp) => {
-      if (!startTimestamp) startTimestamp = timestamp;
-      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-      const easeProgress = 1 - Math.pow(1 - progress, 3);
-      setCount(Math.floor(easeProgress * endValue));
-      if (progress < 1) window.requestAnimationFrame(step);
+    if (!visible) return;
+    const end = parseInt(value) || 0;
+    if (!end) { setCount(value); return; }
+    let start = null;
+    const run = ts => {
+      if (!start) start = ts;
+      const p = Math.min((ts - start) / 1200, 1);
+      setCount(Math.floor((1 - Math.pow(1 - p, 3)) * end));
+      if (p < 1) requestAnimationFrame(run);
       else setCount(value);
     };
-    window.requestAnimationFrame(step);
-  }, [value, isVisible]);
-
-  return <span ref={domRef}>{count}</span>;
+    requestAnimationFrame(run);
+  }, [value, visible]);
+  return <span ref={ref}>{count}</span>;
 };
+
+const StatusPill = ({ verdict }) => {
+  const map = {
+    halal:     { label: 'Halal',     bg: 'var(--halal-bg)',     color: 'var(--halal)',     border: 'var(--halal-border)'     },
+    non_halal: { label: 'Non-Halal', bg: 'var(--non-halal-bg)', color: 'var(--non-halal)', border: 'var(--non-halal-border)' },
+    doubtful:  { label: 'Doubtful',  bg: 'var(--doubtful-bg)',  color: 'var(--doubtful)',  border: 'var(--doubtful-border)'  },
+  };
+  const s = map[verdict?.toLowerCase()] || map.doubtful;
+  return (
+    <span style={{ fontSize: '0.7rem', fontWeight: 700, padding: '3px 10px', borderRadius: 20, background: s.bg, color: s.color, border: `1px solid ${s.border}`, whiteSpace: 'nowrap', flexShrink: 0 }}>
+      {s.label}
+    </span>
+  );
+};
+
+// ─── Main ─────────────────────────────────────────────────────
 
 export default function LandingPage() {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
-  
-  const [stats, setStats] = useState(null);
-  const [recent, setRecent] = useState([]);
+  const [stats, setStats]     = useState(null);
+  const [recent, setRecent]   = useState([]);
   const [reports, setReports] = useState([]);
-  const [news, setNews] = useState([]);
+  const [news, setNews]       = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadData = async () => {
+    (async () => {
       try {
-        const [statsRes, recentRes, reportsRes, newsRes] = await Promise.all([
-          fetchOverviewStats(),
-          fetchRecentScreenings(),
-          fetchLatestReports(),
-          fetchBusinessNewsOverview()
+        const [s, r, rep, n] = await Promise.all([
+          fetchOverviewStats(), fetchRecentScreenings(), fetchLatestReports(), fetchBusinessNewsOverview()
         ]);
-        setStats(statsRes.data);
-        setRecent(recentRes.data);
-        setReports(reportsRes.data);
-        setNews(newsRes.data);
-      } catch (error) {
-        console.error("Failed to load dashboard data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadData();
+        setStats(s.data);
+        setRecent(r.data);
+        setReports(rep.data);
+        setNews(n.data);
+      } catch (e) { console.error(e); }
+      finally { setLoading(false); }
+    })();
   }, []);
 
-  const handleSearch = (e) => {
+  const handleSearch = e => {
     e.preventDefault();
-    if (search.trim()) {
-      navigate('/market', { state: { query: search.trim() } });
-    }
+    if (search.trim()) navigate('/market', { state: { query: search.trim() } });
   };
+
+  const statItems = stats ? [
+    { label: 'Equities Screened',    value: stats.total_companies ?? stats.companies ?? 'Many', icon: BarChart2  },
+    { label: 'Annual Reports Parsed', value: stats.total_reports  ?? stats.reports   ?? 'Many', icon: FileText   },
+    { label: 'News Articles',         value: stats.total_news     ?? stats.news      ?? 'Many', icon: Globe      },
+  ] : [];
+
+  const features = [
+    { icon: Shield,      title: 'AAOIFI Std. 21',  desc: 'Every screening strictly follows the globally recognised Islamic finance standard — no shortcuts, no approximations.' },
+    { icon: Zap,         title: 'AI-Powered',       desc: 'Deep-learning models extract financial ratios from raw annual report PDFs in seconds, fully automatically.' },
+    { icon: Lock,        title: 'Audit-Ready',      desc: 'Full methodology transparency with downloadable compliance records for institutional and retail investors alike.' },
+    { icon: CheckCircle, title: 'Live Coverage',    desc: 'Nigerian equity market covered in real time, with re-screening triggered on every new regulatory filing.' },
+  ];
+
+  const pipeline = [
+    { n: '01', title: 'Data Ingestion',    desc: 'Audited financial statements fetched from regulatory filings',        icon: Globe      },
+    { n: '02', title: 'AI Extraction',     desc: 'Machine learning parses balance sheets and income statements',        icon: FileDigit  },
+    { n: '03', title: 'AAOIFI Rules',      desc: 'Three-ratio test applied per AAOIFI Shariah Standard No. 21',        icon: Shield     },
+    { n: '04', title: 'Verdict Published', desc: 'Halal / Doubtful / Non-Halal with a full, auditable trail',           icon: Sparkles   },
+  ];
 
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh', display: 'flex', flexDirection: 'column', overflowX: 'hidden' }}>
-      
-      {/* 1. Hero Section - Deep Rich Aesthetics */}
-      <section style={{ 
-        position: 'relative', 
-        padding: '160px 20px 140px', 
-        textAlign: 'center',
-        background: 'radial-gradient(100% 120% at 50% 0%, rgba(15,82,87,0.08) 0%, var(--bg) 100%)',
-        overflow: 'hidden'
-      }}>
-        {/* Animated Background Elements */}
-        <div style={{
-          position: 'absolute', top: '-10%', left: '50%', transform: 'translateX(-50%)',
-          width: '800px', height: '800px', background: 'radial-gradient(circle, rgba(212,175,55,0.12) 0%, transparent 60%)',
-          pointerEvents: 'none', zIndex: 0, filter: 'blur(40px)', animation: 'pulse 8s infinite alternate'
-        }} />
-        <div style={{
-          position: 'absolute', top: '20%', left: '20%',
-          width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(45,212,191,0.08) 0%, transparent 60%)',
-          pointerEvents: 'none', zIndex: 0, filter: 'blur(30px)', animation: 'float 12s infinite ease-in-out'
-        }} />
-        <div style={{
-          position: 'absolute', inset: 0, opacity: 0.05,
-          backgroundImage: 'linear-gradient(var(--text-dark) 1px, transparent 1px), linear-gradient(90deg, var(--text-dark) 1px, transparent 1px)',
-          backgroundSize: '40px 40px',
-          pointerEvents: 'none', zIndex: 0
-        }} />
 
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: '1000px', margin: '0 auto' }}>
-          <div className="animate-slide-up" style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', background: 'rgba(212,175,55,0.1)', backdropFilter: 'blur(10px)', border: '1px solid rgba(212,175,55,0.3)', padding: '8px 20px', borderRadius: '40px', color: 'var(--gold)', fontSize: '0.85rem', fontWeight: 800, marginBottom: '24px', letterSpacing: '0.5px' }}>
-            <Sparkles size={16} /> The Gold Standard in Islamic Finance
+      {/* ── HERO ────────────────────────────────── */}
+      <section style={{ position: 'relative', padding: 'clamp(96px,14vw,152px) 20px clamp(72px,10vw,120px)', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 90% 70% at 50% -5%, rgba(15,82,87,0.07) 0%, transparent 65%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: '10%', right: '5%', width: 480, height: 480, borderRadius: '50%', background: 'radial-gradient(circle, rgba(212,175,55,0.06) 0%, transparent 70%)', pointerEvents: 'none', filter: 'blur(24px)' }} />
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, transparent 0%, var(--border-strong) 25%, var(--border-strong) 75%, transparent 100%)' }} />
+
+        <div style={{ position: 'relative', maxWidth: 860, margin: '0 auto', textAlign: 'center' }}>
+          <div className="animate-slide-up" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(212,175,55,0.07)', border: '1px solid rgba(212,175,55,0.22)', padding: '5px 16px', borderRadius: 40, color: 'var(--gold)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '1.1px', textTransform: 'uppercase', marginBottom: 28 }}>
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--gold)', animation: 'pulse 2.5s infinite' }} />
+            AAOIFI-Certified Shariah Screening
           </div>
-          
-          <h1 className="animate-slide-up stagger-1" style={{ fontSize: 'clamp(3rem, 7vw, 5.5rem)', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-2px', lineHeight: 1.05, marginBottom: '28px' }}>
-            Wealth Creation, <br />
-            <span style={{ 
-              background: 'linear-gradient(135deg, var(--primary) 0%, #2DD4BF 100%)',
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-              fontStyle: 'italic', paddingRight: '8px'
-            }}>Purified.</span>
+
+          <h1 className="animate-slide-up stagger-1" style={{ fontSize: 'clamp(2.4rem, 6vw, 4.8rem)', fontWeight: 900, lineHeight: 1.07, letterSpacing: '-2px', color: 'var(--text-dark)', marginBottom: 22 }}>
+            The Intelligent Platform<br />
+            for{' '}
+            <span style={{ background: 'linear-gradient(120deg, var(--primary) 0%, #22c5b0 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              Islamic Investing
+            </span>
           </h1>
-          
-          <p className="animate-slide-up stagger-2" style={{ fontSize: 'clamp(1.1rem, 2vw, 1.25rem)', color: 'var(--text-muted)', lineHeight: 1.6, maxWidth: '750px', margin: '0 auto 48px', fontWeight: 500 }}>
-            Harness the power of AI to screen Nigerian equities against rigorous AAOIFI Shariah standards. Precision analytics for the discerning Muslim investor.
+
+          <p className="animate-slide-up stagger-2" style={{ fontSize: 'clamp(0.95rem, 1.8vw, 1.15rem)', color: 'var(--text-muted)', lineHeight: 1.75, maxWidth: 600, margin: '0 auto 44px', fontWeight: 400 }}>
+            Irshad screens Nigerian equities against rigorous AAOIFI standards using AI. Know exactly what you own and whether it is permissible.
           </p>
-          
-          <div className="animate-slide-up stagger-3" style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link to="/market" className="btn-primary hover-lift" style={{ padding: '18px 40px', fontSize: '1.1rem', borderRadius: '16px', boxShadow: '0 8px 32px rgba(15,82,87,0.25)' }}>
-              Explore the Market <ArrowRight size={20} />
+
+          <div className="animate-slide-up stagger-3" style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link to="/market" className="btn-primary hover-lift" style={{ padding: '14px 34px', fontSize: '0.95rem', borderRadius: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 8px 24px rgba(15,82,87,0.2)', textDecoration: 'none' }}>
+              Explore Equities <ArrowRight size={17} />
             </Link>
-            <Link to="/shariah" className="btn-secondary hover-lift" style={{ padding: '18px 40px', fontSize: '1.1rem', borderRadius: '16px', background: 'rgba(255,255,255,0.5)', backdropFilter: 'blur(10px)', border: '1px solid var(--border-strong)' }}>
+            <Link to="/shariah" style={{ padding: '14px 34px', fontSize: '0.95rem', borderRadius: 13, fontWeight: 600, color: 'var(--text-body)', border: '1px solid var(--border-strong)', background: 'transparent', display: 'flex', alignItems: 'center', gap: 8, transition: 'border-color 0.2s, color 0.2s', textDecoration: 'none' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.color = 'var(--primary)'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-strong)'; e.currentTarget.style.color = 'var(--text-body)'; }}>
               Our Methodology
             </Link>
           </div>
         </div>
       </section>
 
-      {/* 2. Glassmorphic Search Section */}
-      <section className="animate-slide-up stagger-4" style={{ padding: '0 20px', transform: 'translateY(-50px)', position: 'relative', zIndex: 10 }}>
-        <div className="glass-panel" style={{ maxWidth: '850px', margin: '0 auto', borderRadius: '24px', padding: '12px 12px 12px 28px', display: 'flex', alignItems: 'center', border: '1px solid var(--border-strong)', boxShadow: '0 20px 40px rgba(0,0,0,0.05)', transition: 'box-shadow 0.3s ease' }} onMouseEnter={e => e.currentTarget.style.boxShadow = '0 20px 60px rgba(15,82,87,0.15)'} onMouseLeave={e => e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.05)'}>
-          <SearchIcon size={28} color="var(--primary)" style={{ marginRight: '16px', opacity: 0.8 }} />
-          <form onSubmit={handleSearch} style={{ flex: 1, display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center' }}>
-            <input 
-              type="text" 
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Search by company name or ticker symbol..."
-              style={{ flex: 1, minWidth: '200px', border: 'none', background: 'transparent', outline: 'none', fontSize: 'clamp(1rem, 2vw, 1.2rem)', color: 'var(--text-dark)', fontWeight: 500, padding: '10px 0' }}
+      {/* ── SEARCH ────────────────────────────── */}
+      <div className="animate-slide-up stagger-4" style={{ padding: '0 20px' }}>
+        <div style={{ maxWidth: 740, margin: '0 auto', background: 'var(--bg)', border: '1px solid var(--border-strong)', borderRadius: 16, padding: '7px 7px 7px 22px', display: 'flex', alignItems: 'center', gap: 12, boxShadow: '0 4px 20px rgba(0,0,0,0.05)', transition: 'box-shadow 0.3s, border-color 0.3s' }}
+          onFocusCapture={e => { e.currentTarget.style.boxShadow = '0 0 0 3px rgba(15,82,87,0.1), 0 4px 20px rgba(0,0,0,0.05)'; e.currentTarget.style.borderColor = 'var(--primary)'; }}
+          onBlurCapture={e => { e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.05)'; e.currentTarget.style.borderColor = 'var(--border-strong)'; }}>
+          <SearchIcon size={18} color="var(--text-muted)" style={{ flexShrink: 0 }} />
+          <form onSubmit={handleSearch} style={{ flex: 1, display: 'flex', gap: 8, alignItems: 'center' }}>
+            <input
+              type="text" value={search} onChange={e => setSearch(e.target.value)}
+              placeholder="Search by ticker or company name (e.g. DANGCEM, ZENITHBANK)"
+              style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: '0.9rem', color: 'var(--text-dark)', fontWeight: 500, padding: '9px 0', minWidth: 0 }}
             />
-            <button type="submit" className="btn-primary hover-lift" style={{ padding: '14px 32px', borderRadius: '16px', fontSize: '1rem', background: 'var(--text-dark)', whiteSpace: 'nowrap' }}>
-              Analyze
+            <button type="submit" className="btn-primary" style={{ padding: '10px 26px', borderRadius: 11, fontSize: '0.88rem', fontWeight: 700, whiteSpace: 'nowrap', flexShrink: 0 }}>
+              Analyse
             </button>
           </form>
         </div>
-      </section>
+      </div>
 
-      {/* Main Content Area */}
-      <div style={{ maxWidth: '1300px', margin: '0 auto', padding: '40px 20px 100px', width: '100%', display: 'flex', flexDirection: 'column', gap: '80px' }}>
-        
-        {/* 3. Market Overview Cards */}
-        <RevealOnScroll>
-        <section>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
-            {[
-              { title: 'Equities Tracked', value: stats?.totalTracked || 156, icon: Activity, gradient: 'linear-gradient(135deg, #0F5257 0%, #14B8A6 100%)' },
-              { title: 'Financials Audited', value: stats?.annualReportsProcessed || 142, icon: FileText, gradient: 'linear-gradient(135deg, #D4AF37 0%, #F0DB9A 100%)' },
-              { title: 'News Signals', value: stats?.newsAnalyzed || 384, icon: Globe, gradient: 'linear-gradient(135deg, #2563EB 0%, #60A5FA 100%)' },
-              { title: 'Compliance Standard', value: 'AAOIFI 21', icon: Shield, gradient: 'linear-gradient(135deg, #0B1521 0%, #334155 100%)' }
-            ].map((stat, i) => (
-              <div key={i} className="glass-panel hover-card" style={{ padding: '32px', borderRadius: '24px', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
-                <div style={{ position: 'absolute', top: 0, right: 0, width: '150px', height: '150px', background: stat.gradient, opacity: 0.05, borderRadius: '50%', transform: 'translate(30%, -30%)' }} />
-                
-                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '24px' }}>
-                  <div style={{ background: stat.gradient, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                    <stat.icon size={24} />
+      {/* ── STATS STRIP ───────────────────────── */}
+      <div style={{ padding: 'clamp(40px,7vw,72px) 20px 0' }}>
+        <div style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', borderRadius: 18, overflow: 'hidden', border: '1px solid var(--border-strong)' }}>
+          {loading
+            ? [0,1,2].map(i => <div key={i} className="skeleton" style={{ height: 96 }} />)
+            : statItems.map((s, i) => (
+              <Reveal key={i} delay={i * 0.07}>
+                <div style={{ padding: '26px 30px', background: 'var(--bg)', borderRight: i < statItems.length - 1 ? '1px solid var(--border-strong)' : 'none' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 7, color: 'var(--text-muted)', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.9px', marginBottom: 8 }}>
+                    <s.icon size={13} /> {s.label}
                   </div>
-                  <span style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>{stat.title}</span>
+                  <div style={{ fontSize: 'clamp(1.8rem, 4vw, 2.6rem)', fontWeight: 900, color: 'var(--text-dark)', lineHeight: 1, letterSpacing: '-1px' }}>
+                    <AnimatedNumber value={s.value} />
+                    <span style={{ fontSize: '1.1rem', color: 'var(--primary)', marginLeft: 1 }}>+</span>
+                  </div>
                 </div>
-                {loading ? (
-                  <div className="skeleton" style={{ height: '48px', width: '60%', borderRadius: '12px' }} />
-                ) : (
-                  <div style={{ fontSize: '3rem', fontWeight: 900, color: 'var(--text-dark)', lineHeight: 1, letterSpacing: '-1px' }}>
-                    <AnimatedNumber value={stat.value} />
-                  </div>
-                )}
-              </div>
+              </Reveal>
             ))}
-          </div>
-        </section>
-        </RevealOnScroll>
+        </div>
+      </div>
 
-        {/* 4. Dashboard Grid: Recent & Reports */}
-        <RevealOnScroll delay={0.1}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))', gap: '40px' }}>
-          
-          {/* Recently Screened */}
-          <section className="glass-panel" style={{ borderRadius: '32px', padding: '40px', border: '1px solid var(--border-strong)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ background: 'var(--primary-50)', padding: '12px', borderRadius: '16px', color: 'var(--primary)' }}><TrendingUp size={24} /></div>
-                <h2 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text-dark)' }}>Live Screenings</h2>
+      {/* ── MAIN ──────────────────────────────── */}
+      <div style={{ maxWidth: 1260, margin: '0 auto', padding: 'clamp(56px,9vw,96px) 20px clamp(72px,12vw,120px)', width: '100%', display: 'flex', flexDirection: 'column', gap: 'clamp(56px,9vw,96px)' }}>
+
+        {/* Live Data Grid */}
+        <Reveal>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))', gap: 20 }}>
+
+            {/* Live Screenings */}
+            <div style={{ background: 'var(--bg)', border: '1px solid var(--border-strong)', borderRadius: 22 }}>
+              <div style={{ padding: '20px 26px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+                  <div style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--halal)', boxShadow: '0 0 0 3px var(--halal-bg)' }} />
+                  <span style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-dark)' }}>Live Screenings</span>
+                </div>
+                <Link to="/market" style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: 4, opacity: 0.8, transition: 'opacity 0.2s', textDecoration: 'none' }}
+                  onMouseEnter={e => e.currentTarget.style.opacity = 1}
+                  onMouseLeave={e => e.currentTarget.style.opacity = 0.8}>
+                  View all <ArrowUpRight size={12} />
+                </Link>
               </div>
-              <Link to="/market" className="hover-link" style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                View Market <ArrowUpRight size={16} />
+              <div>
+                {loading
+                  ? [0,1,2,3,4].map(i => <div key={i} className="skeleton" style={{ height: 60, margin: '8px 14px', borderRadius: 9 }} />)
+                  : recent.slice(0, 6).map((co, i) => (
+                    <Link key={co.id} to={`/market/${co.symbol}`} style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '13px 26px', borderBottom: i < Math.min(recent.length, 6) - 1 ? '1px solid var(--border)' : 'none', textDecoration: 'none', transition: 'background 0.18s' }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-section)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                      <CompanyAvatar symbol={co.symbol} size={36} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 700, fontSize: '0.84rem', color: 'var(--text-dark)' }}>{co.symbol}</div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 2 }}>{co.name}</div>
+                      </div>
+                      <StatusPill verdict={co.verdict} />
+                      <ChevronRight size={13} color="var(--text-light)" style={{ flexShrink: 0 }} />
+                    </Link>
+                  ))}
+              </div>
+            </div>
+
+            {/* Right column */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+              {/* Reports */}
+              <div style={{ background: 'var(--bg)', border: '1px solid var(--border-strong)', borderRadius: 22 }}>
+                <div style={{ padding: '20px 26px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 9 }}>
+                  <FileText size={15} color="var(--gold)" />
+                  <span style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-dark)' }}>Audited Reports</span>
+                </div>
+                <div>
+                  {loading
+                    ? [0,1,2].map(i => <div key={i} className="skeleton" style={{ height: 54, margin: '8px 14px', borderRadius: 9 }} />)
+                    : reports.slice(0, 4).map((rep, i) => (
+                      <div key={rep.id} style={{ padding: '13px 26px', borderBottom: i < Math.min(reports.length, 4) - 1 ? '1px solid var(--border)' : 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--text-dark)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rep.name}</div>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 2 }}>{rep.type}</div>
+                        </div>
+                        <span style={{ fontSize: '0.69rem', fontWeight: 800, color: 'var(--gold)', background: 'var(--gold-50)', border: '1px solid var(--gold-border)', padding: '3px 9px', borderRadius: 7, whiteSpace: 'nowrap', flexShrink: 0 }}>
+                          FY {rep.year}
+                        </span>
+                      </div>
+                    ))}
+                </div>
+              </div>
+
+              {/* News */}
+              <div style={{ background: 'var(--bg)', border: '1px solid var(--border-strong)', borderRadius: 22 }}>
+                <div style={{ padding: '20px 26px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 9 }}>
+                  <TrendingUp size={15} color="var(--review)" />
+                  <span style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-dark)' }}>Market Intelligence</span>
+                </div>
+                <div>
+                  {loading
+                    ? [0,1].map(i => <div key={i} className="skeleton" style={{ height: 78, margin: '8px 14px', borderRadius: 9 }} />)
+                    : news.slice(0, 3).map((item, i) => (
+                      <div key={item.id} style={{ padding: '14px 26px', borderBottom: i < Math.min(news.length, 3) - 1 ? '1px solid var(--border)' : 'none' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                          <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--primary)', background: 'var(--primary-50)', padding: '2px 8px', borderRadius: 5 }}>{item.symbol}</span>
+                          <span style={{ fontSize: '0.68rem', color: 'var(--text-light)' }}>{new Date(item.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>
+                        </div>
+                        <p style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-dark)', lineHeight: 1.45, margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{item.headline}</p>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </Reveal>
+
+        {/* Features Grid */}
+        <Reveal delay={0.05}>
+          <div style={{ borderTop: '1px solid var(--border)', paddingTop: 'clamp(48px,8vw,72px)' }}>
+            <div style={{ marginBottom: 44 }}>
+              <div style={{ fontSize: '0.7rem', fontWeight: 700, letterSpacing: '1.2px', textTransform: 'uppercase', color: 'var(--primary)', marginBottom: 12 }}>Why Irshad</div>
+              <h2 style={{ fontSize: 'clamp(1.6rem, 3.5vw, 2.4rem)', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-0.8px', lineHeight: 1.15, maxWidth: 500, margin: 0 }}>
+                Built for the serious Muslim investor
+              </h2>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', border: '1px solid var(--border-strong)', borderRadius: 20, overflow: 'hidden' }}>
+              {features.map((f, i) => (
+                <div key={i} style={{
+                  padding: '34px 30px',
+                  background: 'var(--bg)',
+                  borderRight: i % 2 === 0 ? '1px solid var(--border-strong)' : 'none',
+                  borderBottom: i < 2 ? '1px solid var(--border-strong)' : 'none',
+                  transition: 'background 0.22s',
+                }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--primary-50)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'var(--bg)'}>
+                  <div style={{ width: 40, height: 40, borderRadius: 11, background: 'var(--primary-50)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', marginBottom: 18 }}>
+                    <f.icon size={19} />
+                  </div>
+                  <div style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--text-dark)', marginBottom: 8 }}>{f.title}</div>
+                  <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.6, margin: 0 }}>{f.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Reveal>
+
+        {/* Pipeline */}
+        <Reveal delay={0.05}>
+          <div style={{ background: 'var(--bg-section)', borderRadius: 26, padding: 'clamp(36px,6vw,60px)', border: '1px solid var(--border)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 16, marginBottom: 44 }}>
+              <div>
+                <div style={{ fontSize: '0.7rem', fontWeight: 700, letterSpacing: '1.2px', textTransform: 'uppercase', color: 'var(--primary)', marginBottom: 10 }}>Methodology</div>
+                <h2 style={{ fontSize: 'clamp(1.5rem, 3vw, 2.1rem)', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-0.7px', lineHeight: 1.2, margin: 0 }}>
+                  How the screening works
+                </h2>
+              </div>
+              <Link to="/shariah" style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap', textDecoration: 'none' }}>
+                Full methodology <ArrowRight size={13} />
               </Link>
             </div>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {loading ? (
-                Array(5).fill(0).map((_, i) => <div key={i} className="skeleton" style={{ height: '80px', borderRadius: '20px' }} />)
-              ) : (
-                recent.map(company => (
-                  <Link key={company.id} to={`/market/${company.symbol}`} className="hover-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px', background: 'var(--bg)', borderRadius: '20px', border: '1px solid var(--border)', textDecoration: 'none' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                      <CompanyAvatar symbol={company.symbol} size={50} />
-                      <div>
-                        <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '1.1rem', marginBottom: '4px' }}>{company.symbol}</div>
-                        <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px', fontWeight: 500 }}>{company.name}</div>
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', fontWeight: 700, background: 'var(--bg-alt)', padding: '6px 12px', borderRadius: '20px', letterSpacing: '0.5px' }}>AAOIFI</span>
-                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--primary-50)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <ChevronRight size={16} />
-                      </div>
-                    </div>
-                  </Link>
-                ))
-              )}
-            </div>
-          </section>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
-            {/* Latest Annual Reports */}
-            <section className="glass-panel" style={{ borderRadius: '32px', padding: '40px', border: '1px solid var(--border-strong)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
-                <div style={{ background: 'rgba(212,175,55,0.1)', padding: '12px', borderRadius: '16px', color: 'var(--gold)' }}><FileText size={24} /></div>
-                <h2 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text-dark)' }}>Audited Reports</h2>
-              </div>
-              
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                {loading ? (
-                  Array(3).fill(0).map((_, i) => <div key={i} className="skeleton" style={{ height: '90px', borderRadius: '20px' }} />)
-                ) : (
-                  reports.map(report => (
-                    <div key={report.id} className="hover-lift" style={{ padding: '20px', background: 'var(--bg)', borderRadius: '20px', border: '1px solid var(--border)', cursor: 'pointer' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-                        <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '1.05rem' }}>{report.name}</div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--gold)', fontWeight: 800, background: 'rgba(212,175,55,0.1)', padding: '4px 10px', borderRadius: '8px' }}>FY {report.year}</div>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 600 }}>{report.type}</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Analyzed {new Date(report.date).toLocaleDateString()}</div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </section>
-
-            {/* Impactful News */}
-            <section className="glass-panel" style={{ borderRadius: '32px', padding: '40px', border: '1px solid var(--border-strong)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
-                <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '12px', borderRadius: '16px', color: '#3b82f6' }}><Globe size={24} /></div>
-                <h2 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text-dark)' }}>Market Intelligence</h2>
-              </div>
-              
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                {loading ? (
-                  Array(2).fill(0).map((_, i) => <div key={i} className="skeleton" style={{ height: '110px', borderRadius: '20px' }} />)
-                ) : (
-                  news.map(item => (
-                    <div key={item.id} className="hover-lift" style={{ background: 'var(--bg)', padding: '24px', borderRadius: '20px', border: '1px solid var(--border)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-                        <span style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--primary)', background: 'var(--primary-50)', padding: '4px 12px', borderRadius: '8px' }}>{item.symbol}</span>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}>{item.source} • {new Date(item.date).toLocaleDateString()}</span>
-                      </div>
-                      <h4 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '10px', lineHeight: 1.4 }}>{item.headline}</h4>
-                      <p style={{ fontSize: '0.9rem', color: 'var(--text-light)', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{item.summary}</p>
-                    </div>
-                  ))
-                )}
-              </div>
-            </section>
-          </div>
-        </div>
-        </RevealOnScroll>
-
-        {/* 5. Process Section */}
-        <RevealOnScroll delay={0.2}>
-        <section style={{ textAlign: 'center', padding: '100px 0' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', background: 'rgba(15,82,87,0.1)', color: 'var(--primary)', padding: '6px 16px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', marginBottom: '20px', letterSpacing: '1px' }}>
-            How It Works
-          </div>
-          <h2 style={{ fontSize: 'clamp(2rem, 5vw, 2.8rem)', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '16px', letterSpacing: '-1px' }}>The Intelligence Pipeline</h2>
-          <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)', maxWidth: '650px', margin: '0 auto 60px', lineHeight: 1.6 }}>From raw financial data to verified Shariah compliance, fully automated and strictly adhering to AAOIFI guidelines.</p>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: '24px' }}>
-            {[
-              { step: '1', title: 'Data Ingestion', desc: 'Fetching audited statements & activities', icon: Globe },
-              { step: '2', title: 'AI Extraction', desc: 'Deep parsing of debt & assets', icon: FileDigit },
-              { step: '3', title: 'AAOIFI Rules', desc: 'Applying strict compliance ratios', icon: Shield },
-              { step: '4', title: 'Final Verdict', desc: 'Publishing actionable insights', icon: Sparkles }
-            ].map((s, i) => (
-              <div key={s.step} className="glass-panel hover-lift" style={{ borderRadius: '24px', padding: '40px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', border: '1px solid var(--border)', position: 'relative', overflow: 'hidden' }}>
-                <div style={{ position: 'absolute', top: '16px', right: '20px', fontSize: '4rem', fontWeight: 900, color: 'var(--bg-section)', opacity: 0.5, lineHeight: 1, zIndex: 0 }}>
-                  {s.step}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 190px), 1fr))', gap: 14 }}>
+              {pipeline.map((s, i) => (
+                <div key={i} style={{ background: 'var(--bg)', borderRadius: 17, padding: '26px 22px', border: '1px solid var(--border-strong)' }}>
+                  <div style={{ fontSize: '0.66rem', fontWeight: 800, color: 'var(--text-light)', letterSpacing: '1px', marginBottom: 14 }}>{s.n}</div>
+                  <div style={{ width: 38, height: 38, borderRadius: 10, background: 'linear-gradient(135deg, var(--primary) 0%, #22c5b0 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', marginBottom: 14, boxShadow: '0 5px 14px rgba(15,82,87,0.22)' }}>
+                    <s.icon size={17} />
+                  </div>
+                  <div style={{ fontWeight: 800, fontSize: '0.86rem', color: 'var(--text-dark)', marginBottom: 7 }}>{s.title}</div>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.55, margin: 0 }}>{s.desc}</p>
                 </div>
-                <div style={{ position: 'relative', zIndex: 1, width: '64px', height: '64px', borderRadius: '20px', background: 'linear-gradient(135deg, var(--primary) 0%, #2DD4BF 100%)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', boxShadow: '0 12px 24px rgba(15,82,87,0.25)' }}>
-                  <s.icon size={28} />
-                </div>
-                <h4 style={{ position: 'relative', zIndex: 1, fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '12px' }}>{s.title}</h4>
-                <p style={{ position: 'relative', zIndex: 1, fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>{s.desc}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </section>
-        </RevealOnScroll>
+        </Reveal>
 
-        {/* 6. AAOIFI Banner */}
-        <RevealOnScroll delay={0.3}>
-        <section className="glass-panel hover-lift" style={{ 
-          background: 'linear-gradient(135deg, rgba(15,82,87,0.95) 0%, rgba(10,63,67,0.95) 100%)', 
-          borderRadius: '32px', padding: 'clamp(32px, 6vw, 64px)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '40px',
-          boxShadow: '0 24px 48px rgba(15,82,87,0.2)', position: 'relative', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)'
-        }}>
-          <div style={{ position: 'absolute', right: '-5%', top: '-30%', opacity: 0.08, transform: 'scale(1.5)', pointerEvents: 'none' }}>
-            <Shield size={500} color="white" />
-          </div>
-          
-          <div style={{ flex: '1 1 500px', position: 'relative', zIndex: 1 }}>
-            <div style={{ display: 'inline-block', background: 'rgba(212,175,55,0.2)', color: '#F0DB9A', padding: '6px 16px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '20px' }}>
-              AAOIFI Standard No. 21
+        {/* CTA Banner */}
+        <Reveal delay={0.04}>
+          <div style={{ position: 'relative', borderRadius: 26, overflow: 'hidden', background: 'linear-gradient(130deg, #0B3A3E 0%, #0F5257 45%, #0D4A4F 100%)', padding: 'clamp(40px,6vw,70px)', display: 'flex', flexWrap: 'wrap', gap: 36, alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ position: 'absolute', right: -60, top: -60, width: 340, height: 340, borderRadius: '50%', background: 'rgba(212,175,55,0.06)', pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', left: -40, bottom: -80, width: 220, height: 220, borderRadius: '50%', background: 'rgba(45,212,191,0.05)', pointerEvents: 'none' }} />
+
+            <div style={{ position: 'relative', maxWidth: 520 }}>
+              <div style={{ display: 'inline-block', fontSize: '0.68rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: 'rgba(212,175,55,0.9)', border: '1px solid rgba(212,175,55,0.22)', padding: '4px 13px', borderRadius: 20, marginBottom: 16 }}>
+                AAOIFI Standard No. 21
+              </div>
+              <h2 style={{ fontSize: 'clamp(1.6rem, 3.8vw, 2.6rem)', fontWeight: 900, color: 'white', letterSpacing: '-1px', lineHeight: 1.15, marginBottom: 14 }}>
+                Invest with conviction.<br />Screen with precision.
+              </h2>
+              <p style={{ fontSize: '0.95rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.7, margin: 0 }}>
+                Every ratio. Every ruling. Every company — rigorously checked so you do not have to.
+              </p>
             </div>
-            <h2 style={{ fontSize: '2.5rem', fontWeight: 900, color: 'white', marginBottom: '24px', letterSpacing: '-1px', lineHeight: 1.2 }}>Uncompromising Integrity.</h2>
-            <p style={{ fontSize: '1.15rem', color: 'rgba(255,255,255,0.8)', lineHeight: 1.7, marginBottom: '40px' }}>
-              The Accounting and Auditing Organization for Islamic Financial Institutions (AAOIFI) sets the global standard. Irshad ensures every equity analysis strictly abides by these rules.
-            </p>
-            <div style={{ display: 'flex', gap: '16px' }}>
-              <Link to="/shariah" className="btn-primary hover-lift" style={{ background: 'white', color: 'var(--primary)', padding: '16px 32px', fontSize: '1.05rem', borderRadius: '16px' }}>Explore Standards</Link>
+
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', position: 'relative' }}>
+              <Link to="/market" className="hover-lift" style={{ padding: '13px 30px', background: 'white', color: 'var(--primary)', fontWeight: 800, fontSize: '0.9rem', borderRadius: 13, display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 8px 24px rgba(0,0,0,0.18)', textDecoration: 'none' }}>
+                Start Screening <ArrowRight size={15} />
+              </Link>
+              <Link to="/shariah" style={{ padding: '13px 30px', border: '1px solid rgba(255,255,255,0.18)', color: 'rgba(255,255,255,0.88)', fontWeight: 600, fontSize: '0.9rem', borderRadius: 13, textDecoration: 'none', transition: 'border-color 0.2s' }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.45)'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.18)'}>
+                Learn More
+              </Link>
             </div>
           </div>
-        </section>
-        </RevealOnScroll>
+        </Reveal>
 
       </div>
-      
       <Footer />
     </div>
   );

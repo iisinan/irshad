@@ -55,9 +55,22 @@ class BulkProcessor:
             print(f"Processing batch {i//batch_size + 1} ({batch})...")
             # We use gather with return_exceptions to prevent one failure from stopping the whole batch
             results = await asyncio.gather(*tasks, return_exceptions=True)
-            for res in results:
-                if isinstance(res, Exception):
-                    print(f"Error processing ticker: {res}")
+            
+            # Save results to DB
+            from app.core.database import AsyncSessionLocal
+            from app.core.db_saver import save_graph_result_to_db
+            
+            async with AsyncSessionLocal() as db:
+                for idx, res in enumerate(results):
+                    ticker = batch[idx]
+                    if isinstance(res, Exception):
+                        print(f"Error processing ticker {ticker}: {res}")
+                    elif isinstance(res, dict):
+                        try:
+                            await save_graph_result_to_db(db, ticker, financial_year, res)
+                            print(f"Successfully saved {ticker} to database.")
+                        except Exception as db_e:
+                            print(f"Error saving {ticker} to database: {db_e}")
             
             # Sleep between batches to respect rate limits
             await asyncio.sleep(5)

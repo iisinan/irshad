@@ -43,6 +43,8 @@ SCHEMA:
   "reporting_currency": "NGN",
   "unit_multiplier": 1000000,
   "financial_year_end_date": "YYYY-MM-DD",
+  "reporting_period": "FY",
+  "published_date": "YYYY-MM-DD",
   "auditor": "string"
 }}
 
