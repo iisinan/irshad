@@ -443,6 +443,11 @@ class StockController extends Controller
                     $statusReason = 'Fails Shariah compliance based on current financial disclosures or business activities.';
                 }
             }
+            $aaoifiDB = \App\Models\AaoifiScreening::where('company_id', $company->id)->first();
+            $dbSource = $aaoifiDB && isset($aaoifiDB->financial_data_used['source']) 
+                ? $aaoifiDB->financial_data_used['source'] 
+                : "Data aggregated from Nigerian Exchange Group (NGX), AfricanFinancials, and Yahoo Finance.";
+
             $mapped = [
                 'company_id' => $company->id,
                 'stage1' => [
@@ -475,6 +480,7 @@ class StockController extends Controller
                     'illiquid_assets' => 0,
                     'interest_income' => $interestIncome,
                     'total_revenue' => $totalRevenue,
+                    'source' => $dbSource,
                 ],
                 'ai_explanation' => !empty($existingScreening->ai_explanation) ? $existingScreening->ai_explanation : $company->activity_reason,
                 'status_reason' => $statusReason,

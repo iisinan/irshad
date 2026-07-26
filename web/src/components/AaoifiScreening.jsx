@@ -607,6 +607,18 @@ const AaoifiScreening = () => {
               <span style={{ fontWeight: 900, color: 'var(--primary)', fontSize: '1.1rem' }}>{report.business_reasoning?.confidence_score || '88'}%</span>
             </div>
 
+            {report.financial_data_used?.source && (
+              <>
+                <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.97rem', marginBottom: '12px' }}>Financial Data Source</div>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', background: 'var(--bg-section)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', marginBottom: '32px' }}>
+                  <div style={{ color: 'var(--primary)', background: 'var(--primary-bg)', padding: '8px', borderRadius: '10px' }}><Activity size={18} /></div>
+                  <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-dark)', lineHeight: 1.5 }}>
+                    {report.financial_data_used.source}
+                  </span>
+                </div>
+              </>
+            )}
+
             <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.97rem', marginBottom: '20px' }}>News Sources Analyzed</div>
             {report.news_sources?.length > 0 ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>

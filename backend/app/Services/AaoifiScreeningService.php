@@ -92,14 +92,14 @@ class AaoifiScreeningService
         $debtStatus = 'insufficient_data';
         if ($marketCap > 0) {
             $debtRatio = ($totalDebt / $marketCap) * 100;
-            $debtStatus = $debtRatio <= 30 ? 'pass' : ($debtRatio <= 33 ? 'warning' : 'fail');
+            $debtStatus = $debtRatio <= 30 ? 'pass' : 'fail';
         }
 
         $cashRatio = null;
         $cashStatus = 'insufficient_data';
         if ($marketCap > 0) {
             $cashRatio = (($cash + $interestBearingSecurities) / $marketCap) * 100;
-            $cashStatus = $cashRatio <= 30 ? 'pass' : ($cashRatio <= 33 ? 'warning' : 'fail');
+            $cashStatus = $cashRatio <= 30 ? 'pass' : 'fail';
         }
 
         $illiquidRatio = null;
@@ -128,11 +128,9 @@ class AaoifiScreeningService
         // 4. Final Verdict Engine
         $finalStatus = 'halal';
         
-        if ($businessStatus === 'fail' || $debtStatus === 'fail' || $cashStatus === 'fail' || $impIncomeStatus === 'fail' || ($illiquidAssets > 0 && $illiquidStatus === 'fail') || ($accountsReceivable > 0 && $receivablesStatus === 'fail')) {
+        if ($businessStatus === 'fail' || $debtStatus === 'fail' || $cashStatus === 'fail') {
             $finalStatus = 'non-halal';
-        } elseif ($businessStatus === 'warning' || $debtStatus === 'warning' || $cashStatus === 'warning') {
-            $finalStatus = 'doubtful';
-        } elseif ($debtStatus === 'insufficient_data' || $cashStatus === 'insufficient_data') {
+        } elseif ($businessStatus === 'warning' || $debtStatus === 'insufficient_data' || $cashStatus === 'insufficient_data') {
             $finalStatus = 'doubtful';
         }
 
@@ -154,6 +152,7 @@ class AaoifiScreeningService
             'final_status' => $finalStatus,
             'news_sources' => $combinedNews,
             'financial_data_used' => [
+                'source' => 'Data aggregated from Nigerian Exchange Group (NGX), AfricanFinancials, and Yahoo Finance.',
                 'market_cap' => $marketCap,
                 'total_assets' => $totalAssets,
                 'total_debt' => $totalDebt,

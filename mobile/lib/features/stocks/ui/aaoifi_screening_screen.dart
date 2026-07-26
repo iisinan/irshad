@@ -599,6 +599,10 @@ class _AaoifiScreeningScreenState extends State<AaoifiScreeningScreen> with Sing
         children: [
           _buildDetailRow("Irshad Confidence Score", "${_report!['business_reasoning']?['confidence_score'] ?? 'N/A'}%"),
           const SizedBox(height: 16),
+          if (_report!['financial_data_used']?['source'] != null) ...[
+            _buildDetailRow("Financial Data Source", _report!['financial_data_used']['source'].toString()),
+            const SizedBox(height: 16),
+          ],
           const Align(
             alignment: Alignment.centerLeft,
             child: Text("News Sources Analyzed:", style: TextStyle(fontWeight: FontWeight.bold)),

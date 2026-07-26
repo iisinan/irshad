@@ -109,7 +109,7 @@ class AaoifiComplianceService
         $purificationFactor = $financials->interest_income / $totalRevenue;
 
         // STAGE 2: RULE 2 (NGX Debt Limit Check)
-        if ($debtToMarketCap >= self::MAX_DEBT_RATIO) {
+        if ($debtToMarketCap > self::MAX_DEBT_RATIO) {
             return $this->saveStatus(
                 $company, 
                 'non-halal', 
@@ -119,20 +119,11 @@ class AaoifiComplianceService
 
         // STAGE 3: RULE 3 (NGX Cash & Securities Limit Check)
         // Using MAX_DEBT_RATIO here because AAOIFI dictates 30% for both.
-        if ($cashRatioToMarketCap >= self::MAX_DEBT_RATIO) {
+        if ($cashRatioToMarketCap > self::MAX_DEBT_RATIO) {
             return $this->saveStatus(
                 $company, 
                 'non-halal', 
                 "Failed Rule 3: Cash & Securities Check based on recent financial disclosure. Liquid cash and interest-bearing securities-to-market-cap ratio is " . round($cashRatioToMarketCap * 100, 2) . "% (Max permitted threshold is 30.00%)."
-            );
-        }
-
-        // STAGE 4: RULE 4 (NGX Interest Income Limit Check)
-        if ($purificationFactor >= self::MAX_INTEREST_INCOME_RATIO) {
-            return $this->saveStatus(
-                $company, 
-                'non-halal', 
-                "Failed Rule 4: Interest Income Limit Check based on recent financial disclosure. Passive interest income represents " . round($purificationFactor * 100, 2) . "% of gross revenue (Max permitted threshold is 5.00%)."
             );
         }
 

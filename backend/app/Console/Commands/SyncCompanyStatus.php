@@ -51,29 +51,28 @@ class SyncCompanyStatus extends Command
             $calc   = json_decode($fin->calculation_results ?? '{}', true);
             $ratios = $calc['ratios'] ?? [];
 
-            $totalAssets  = floatval($chosen['total_assets']['value'] ?? 0);
+            $financial = DB::table('financials')->where('company_id', $company->id)->orderBy('created_at', 'desc')->first();
+            $totalAssets  = !empty($chosen['total_assets']['value']) ? floatval($chosen['total_assets']['value']) : floatval($financial->total_assets ?? 0);
             $marketCap    = floatval($calc['denominator_value'] ?? $company->market_cap ?? 0);
-            $totalDebt    = floatval($chosen['total_debt']['value'] ?? 0);
-            $cash         = floatval($chosen['cash_and_equivalents']['value'] ?? 0);
-            $totalRevenue = floatval($chosen['total_revenue']['value'] ?? 0);
-            $interestIncome = floatval($chosen['interest_income']['value'] ?? $chosen['non_permissible_income']['value'] ?? 0);
+            $totalDebt    = !empty($chosen['total_debt']['value']) ? floatval($chosen['total_debt']['value']) : floatval($financial->total_debt ?? 0);
+            $cash         = !empty($chosen['cash_and_equivalents']['value']) ? floatval($chosen['cash_and_equivalents']['value']) : floatval($financial->cash_and_equivalents ?? 0);
+            $totalRevenue = !empty($chosen['total_revenue']['value']) ? floatval($chosen['total_revenue']['value']) : floatval($financial->total_revenue ?? 0);
+            $interestIncome = !empty($chosen['interest_income']['value']) ? floatval($chosen['interest_income']['value']) : (!empty($chosen['non_permissible_income']['value']) ? floatval($chosen['non_permissible_income']['value']) : floatval($financial->interest_income ?? 0));
 
-            // Impure ratio (same preference order as StockController)
-            $impureRatio = isset($ratios['non_permissible_income_ratio']) ? $ratios['non_permissible_income_ratio'] * 100 : null;
+            // Impure ratio (recalculate if 0 or missing to ensure accurate decision)
+            $impureRatio = !empty($ratios['non_permissible_income_ratio']) ? $ratios['non_permissible_income_ratio'] * 100 : null;
             if ($impureRatio === null && $totalRevenue > 0) {
                 $impureRatio = ($interestIncome / $totalRevenue) * 100;
-            } elseif ($impureRatio !== null) {
-                // already multiplied above
             }
 
             // Debt ratio
-            $debtRatio = isset($ratios['interest_bearing_debt_ratio']) ? $ratios['interest_bearing_debt_ratio'] * 100 : null;
+            $debtRatio = !empty($ratios['interest_bearing_debt_ratio']) ? $ratios['interest_bearing_debt_ratio'] * 100 : null;
             if ($debtRatio === null && $marketCap > 0) {
                 $debtRatio = ($totalDebt / $marketCap) * 100;
             }
 
             // Cash ratio
-            $cashRatio = isset($ratios['cash_and_equivalents_ratio']) ? $ratios['cash_and_equivalents_ratio'] * 100 : null;
+            $cashRatio = !empty($ratios['cash_and_equivalents_ratio']) ? $ratios['cash_and_equivalents_ratio'] * 100 : null;
             if ($cashRatio === null && $marketCap > 0) {
                 $cashRatio = ($cash / $marketCap) * 100;
             }
