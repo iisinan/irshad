@@ -448,6 +448,24 @@ class StockController extends Controller
                 ? $aaoifiDB->financial_data_used['source'] 
                 : "Data aggregated from Nigerian Exchange Group (NGX), AfricanFinancials, and Yahoo Finance.";
 
+            $sourceLinks = [
+                [
+                    'name' => 'Yahoo Finance',
+                    'description' => 'Market Cap, Cash & Debt metrics',
+                    'url' => 'https://finance.yahoo.com/quote/' . $company->symbol . '.LG/financials'
+                ],
+                [
+                    'name' => 'AfricanFinancials',
+                    'description' => 'Secondary financial data and overview',
+                    'url' => 'https://africanfinancials.com/company/ng-' . strtolower($company->symbol) . '/'
+                ],
+                [
+                    'name' => 'Nigerian Exchange Group (NGX)',
+                    'description' => 'Official corporate filings and pricing',
+                    'url' => 'https://ngxgroup.com/exchange/data/company-profile/?symbol=' . $company->symbol
+                ]
+            ];
+
             $mapped = [
                 'company_id' => $company->id,
                 'stage1' => [
@@ -481,6 +499,7 @@ class StockController extends Controller
                     'interest_income' => $interestIncome,
                     'total_revenue' => $totalRevenue,
                     'source' => $dbSource,
+                    'source_links' => $sourceLinks,
                 ],
                 'ai_explanation' => !empty($existingScreening->ai_explanation) ? $existingScreening->ai_explanation : $company->activity_reason,
                 'status_reason' => $statusReason,

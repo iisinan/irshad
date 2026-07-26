@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 import '../data/stock_repository.dart';
 import 'dart:async';
+import 'package:url_launcher/url_launcher.dart';
 
 class AaoifiScreeningScreen extends StatefulWidget {
   final Map<String, dynamic> stock;
@@ -599,7 +600,51 @@ class _AaoifiScreeningScreenState extends State<AaoifiScreeningScreen> with Sing
         children: [
           _buildDetailRow("Irshad Confidence Score", "${_report!['business_reasoning']?['confidence_score'] ?? 'N/A'}%"),
           const SizedBox(height: 16),
-          if (_report!['financial_data_used']?['source'] != null) ...[
+          if (_report!['financial_data_used']?['source_links'] != null && 
+              (_report!['financial_data_used']['source_links'] as List).isNotEmpty) ...[
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Text("Financial Data Sources:", style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+            const SizedBox(height: 8),
+            ...((_report!['financial_data_used']['source_links'] as List).map((link) {
+              return InkWell(
+                onTap: () async {
+                  final url = Uri.parse(link['url']);
+                  if (await canLaunchUrl(url)) {
+                    await launchUrl(url, mode: LaunchMode.externalApplication);
+                  }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.open_in_new, size: 16, color: context.primary),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              link['name'] ?? 'Unknown Source',
+                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: context.primary),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              link['description'] ?? '',
+                              style: const TextStyle(fontSize: 11, color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList()),
+            const SizedBox(height: 16),
+          ] else if (_report!['financial_data_used']?['source'] != null) ...[
             _buildDetailRow("Financial Data Source", _report!['financial_data_used']['source'].toString()),
             const SizedBox(height: 16),
           ],
