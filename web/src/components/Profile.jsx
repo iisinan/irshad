@@ -104,10 +104,7 @@ export default function Profile() {
   const [message, setMessage] = useState({ type: '', text: '' });
   const [theme, setTheme] = useState(() => localStorage.getItem('irshad_theme') || 'light');
 
-  const handleReplayTour = () => {
-    // If we had a context update function for user preferences
-    navigate('/');
-  };
+
 
   useEffect(() => {
     if (!authLoading && !user) navigate('/login');
@@ -249,7 +246,6 @@ export default function Profile() {
           </div>
         </div>
         <div style={{ zIndex: 1, display: 'flex', gap: '12px' }}>
-          <button onClick={handleReplayTour} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.3)', color: 'var(--bg)', borderRadius: '12px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.16,1,0.3,1)', backdropFilter: 'blur(10px)' }} onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.3)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.1)'; }} onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.2)'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; }}><Sparkles size={18} /> Replay Tour</button>
         </div>
       </div>
 

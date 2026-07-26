@@ -3,17 +3,12 @@ import { Menu, X, AlertCircle } from 'lucide-react';
 import DashboardSidebar from './DashboardSidebar';
 import { useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import DashboardTour from './DashboardTour';
 
 export default function DashboardLayout({ children }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const { user, loading } = useAuth();
-  
-  // Initialize tour visibility once per mount. 
-  // It won't hide immediately if user context updates to onboarded=true during the tour.
-  const [showTour, setShowTour] = useState(() => !user?.preferences?.onboarded);
 
   // Close mobile menu on navigation
   useEffect(() => {
@@ -41,8 +36,6 @@ export default function DashboardLayout({ children }) {
       background: 'var(--bg)',
       backgroundImage: 'radial-gradient(at 0% 0%, rgba(15,82,87,0.03) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(212,175,55,0.04) 0px, transparent 50%)',
     }}>
-      {showTour && <DashboardTour onClose={() => setShowTour(false)} />}
-
       {/* Mobile Overlay */}
       {mobileOpen && (
         <div 

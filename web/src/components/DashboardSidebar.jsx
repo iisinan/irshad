@@ -17,19 +17,19 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
 
   const NAV_ITEMS = [
     { section: 'Main' },
-    { label: 'Holdings',       icon: Activity,         to: '/portfolio#holdings',  id: 'tour-nav-holdings' },
-    { label: 'Market Screener', icon: BarChart2,        to: '/portfolio#market', id: 'tour-nav-market' },
-    { label: 'Alert',          icon: Star,             to: '/portfolio#watchlist', id: 'tour-nav-watchlist' },
+    { label: 'Holdings',       icon: Activity,         to: '/portfolio#holdings' },
+    { label: 'Market Screener', icon: BarChart2,        to: '/portfolio#market' },
+    { label: 'Alert',          icon: Star,             to: '/portfolio#watchlist' },
     { section: 'Islamic Finance' },
-    { label: 'Purification',   icon: HeartHandshake,   to: '/portfolio#purification', id: 'tour-nav-purification' },
-    { label: 'Zakat',          icon: Calculator,        to: '/portfolio#zakat', id: 'tour-nav-zakat' },
-    { label: 'Resources',      icon: BookOpen,          to: '/portfolio#lectures', id: 'tour-nav-resources' },
+    { label: 'Purification',   icon: HeartHandshake,   to: '/portfolio#purification' },
+    { label: 'Zakat',          icon: Calculator,        to: '/portfolio#zakat' },
+    { label: 'Resources',      icon: BookOpen,          to: '/portfolio#lectures' },
     { section: 'Account' },
-    { label: 'Statements',      icon: FileText,         to: '/portfolio#statement', id: 'tour-nav-statements' },
-    { label: 'Profile & Settings', icon: User,              to: '/profile', id: 'tour-nav-profile' },
+    { label: 'Statements',      icon: FileText,         to: '/portfolio#statement' },
+    { label: 'Profile & Settings', icon: User,              to: '/profile' },
     ...(user?.role === 'admin' ? [
-      { label: 'Admin Dashboard', icon: Shield, to: '/admin', id: 'tour-nav-admin-dashboard' },
-      { label: 'Users', icon: User, to: '/admin/users', id: 'tour-nav-users' }
+      { label: 'Admin Dashboard', icon: Shield, to: '/admin' },
+      { label: 'Users', icon: User, to: '/admin/users' }
     ] : []),
   ];
 
