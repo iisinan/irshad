@@ -29,9 +29,20 @@ export const AuthProvider = ({ children }) => {
       const token = localStorage.getItem('auth_token');
       if (token) {
         try {
+          // Pre-load from cache for instant render
+          const cachedUser = localStorage.getItem('auth_user');
+          if (cachedUser) {
+            setUser(JSON.parse(cachedUser));
+            setLoading(false);
+          }
+
           const profile = await fetchProfile();
-          setUser(profile.data);
-          if (location.pathname === '/login' || location.pathname === '/register') {
+          const userData = profile.data || profile;
+          setUser(userData);
+          localStorage.setItem('auth_user', JSON.stringify(userData));
+
+          const currentPath = window.location.pathname;
+          if (currentPath === '/login' || currentPath === '/register') {
             navigate('/portfolio');
           }
         } catch (error) {
@@ -41,8 +52,9 @@ export const AuthProvider = ({ children }) => {
       }
       setLoading(false);
     };
+
     loadUser();
-  }, [location.pathname, navigate]);
+  }, [navigate]);
 
   const login = async (credentials) => {
     try {
@@ -50,6 +62,7 @@ export const AuthProvider = ({ children }) => {
       if (res.data && res.data.access_token) {
         localStorage.removeItem('irshad_portfolio_cache_v10');
         localStorage.setItem('auth_token', res.data.access_token);
+        localStorage.setItem('auth_user', JSON.stringify(res.data.user));
         setUser(res.data.user);
         return { success: true };
       }
@@ -68,6 +81,7 @@ export const AuthProvider = ({ children }) => {
       if (res.data && res.data.access_token) {
         localStorage.removeItem('irshad_portfolio_cache_v10');
         localStorage.setItem('auth_token', res.data.access_token);
+        localStorage.setItem('auth_user', JSON.stringify(res.data.user));
         setUser(res.data.user);
         return { success: true };
       }
@@ -86,6 +100,7 @@ export const AuthProvider = ({ children }) => {
       if (res.data && res.data.access_token) {
         localStorage.removeItem('irshad_portfolio_cache_v10');
         localStorage.setItem('auth_token', res.data.access_token);
+        localStorage.setItem('auth_user', JSON.stringify(res.data.user));
         setUser(res.data.user);
         return { success: true };
       }
@@ -104,6 +119,7 @@ export const AuthProvider = ({ children }) => {
       // ProfileController wraps in ApiResponder: { data: user, message }
       const updatedUser = res?.data ?? res?.user;
       if (updatedUser) {
+        localStorage.setItem('auth_user', JSON.stringify(updatedUser));
         setUser(updatedUser);
         return { success: true };
       }
@@ -118,6 +134,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_user');
     localStorage.removeItem('irshad_portfolio_cache_v10');
     localStorage.removeItem('irshad_admin_stocks_v1');
     localStorage.removeItem('irshad_admin_products_v1');
