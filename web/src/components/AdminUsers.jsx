@@ -58,7 +58,7 @@ const AdminUsers = () => {
   }, [debouncedSearch]);
 
   useEffect(() => {
-    if (user?.role !== 'admin') { navigate('/dashboard'); return; }
+    if (user?.role !== 'admin') { navigate('/portfolio'); return; }
     loadUsers(page, debouncedSearch);
   }, [user, page, debouncedSearch]);
 

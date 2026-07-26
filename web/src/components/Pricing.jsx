@@ -18,7 +18,7 @@ const Pricing = () => {
       // Mock Paystack/Flutterwave integration
       const res = await api.post('/billing/upgrade');
       setMessage(res.data?.message || 'Successfully upgraded to Irshad Pro!');
-      setTimeout(() => navigate('/dashboard'), 2000);
+      setTimeout(() => navigate('/portfolio'), 2000);
     } catch (err) {
       setError(err.response?.data?.message || 'Payment failed. Please try again.');
     }
@@ -74,7 +74,7 @@ const Pricing = () => {
             ))}
           </ul>
           
-          <button onClick={() => navigate('/dashboard')} style={{ 
+          <button onClick={() => navigate('/portfolio')} style={{ 
             width: '100%', padding: '16px', borderRadius: '14px', background: 'var(--bg-section)', 
             border: '2px solid var(--border)', color: 'var(--text-dark)', fontWeight: 800, fontSize: '0.88rem', cursor: 'pointer' 
           }}>

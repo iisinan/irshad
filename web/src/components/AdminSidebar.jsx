@@ -23,7 +23,7 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
     { label: 'Resources', icon: BookOpen, to: '/admin/resources' },
     { label: 'Zakat Settings', icon: HeartHandshake, to: '/admin/zakat-settings' },
     { section: 'Exit' },
-    { label: 'Back to App', icon: ArrowLeft, to: '/dashboard' }
+    { label: 'Back to App', icon: ArrowLeft, to: '/portfolio' }
   ];
 
   // On mobile, the drawer is ALWAYS fully expanded (text visible).

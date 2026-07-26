@@ -29,7 +29,7 @@ export default function AdminTickerEditor() {
 
   useEffect(() => {
     if (user?.role !== 'admin' && user?.role !== 'scholar') {
-      navigate('/dashboard');
+      navigate('/portfolio');
       return;
     }
     loadData();

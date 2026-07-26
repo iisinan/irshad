@@ -560,7 +560,7 @@ export const VerifyEmailPage = () => {
             console.error("Failed to refresh profile after verification", e);
           }
 
-          setTimeout(() => navigate('/dashboard'), 2000);
+          setTimeout(() => navigate('/portfolio'), 2000);
         } catch (err) {
           setError(err.response?.data?.message || 'Invalid or expired verification link.');
         }
@@ -627,7 +627,7 @@ export const VerifyEmailPage = () => {
 
         {(user?.email_verified_at || message) && (
           <button 
-            onClick={() => navigate('/dashboard')} 
+            onClick={() => navigate('/portfolio')} 
             className="btn-primary" 
             style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '0.88rem' }}
           >
