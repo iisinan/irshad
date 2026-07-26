@@ -266,22 +266,17 @@ const AaoifiScreening = () => {
   const renderRatioProgressBar = (title, subtitle, ratio, threshold, numLabel, numVal, denLabel, denVal, formula, isMinimum = false) => {
     if (ratio === null || ratio === undefined || isNaN(ratio)) {
       return (
-        <div 
-          style={{ 
-            display: 'flex', alignItems: 'center', gap: '24px', padding: '24px 0', 
-            borderBottom: '1px solid var(--border)', position: 'relative', opacity: 0.6
-          }}
-        >
-          <div style={{ flex: '0 0 220px', paddingLeft: '16px' }}>
+        <div className="ratio-progress-row unavailable">
+          <div className="ratio-col-label">
             <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.88rem', marginBottom: '4px' }}>{title}</div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{subtitle}</div>
           </div>
           
-          <div style={{ flex: 1, position: 'relative', height: '14px', background: 'var(--bg-section)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="ratio-col-bar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700, letterSpacing: '0.5px' }}>DATA UNAVAILABLE</span>
           </div>
           
-          <div style={{ flex: '0 0 120px', textAlign: 'right', paddingRight: '16px' }}>
+          <div className="ratio-col-value">
             <div style={{ fontSize: '1.32rem', fontWeight: 900, color: 'var(--text-muted)' }}>N/A</div>
             <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', marginTop: '4px' }}>Insufficient data</div>
           </div>
@@ -304,20 +299,14 @@ const AaoifiScreening = () => {
     return (
       <div 
         onClick={() => openModal(title, ratio, isMinimum ? `≥ ${threshold}%` : `≤ ${threshold}%`, formula, numLabel, numVal, denLabel, denVal)}
-        style={{ 
-          display: 'flex', alignItems: 'center', gap: '24px', padding: '24px 0', 
-          borderBottom: '1px solid var(--border)', cursor: 'pointer',
-          transition: 'all 0.2s', position: 'relative'
-        }}
-        onMouseOver={e => { e.currentTarget.style.background = 'var(--bg-section)'; }}
-        onMouseOut={e => { e.currentTarget.style.background = 'transparent'; }}
+        className="ratio-progress-row"
       >
-        <div style={{ flex: '0 0 220px', paddingLeft: '16px' }}>
+        <div className="ratio-col-label">
           <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.88rem', marginBottom: '4px' }}>{title}</div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{subtitle}</div>
         </div>
         
-        <div style={{ flex: 1, position: 'relative', height: '14px', background: 'var(--bg-section)', borderRadius: '10px' }}>
+        <div className="ratio-col-bar">
           <div style={{ 
             position: 'absolute', top: 0, left: 0, height: '100%', 
             width: `${Math.min(fillPercent, 100)}%`, 
@@ -339,7 +328,7 @@ const AaoifiScreening = () => {
           </div>
         </div>
         
-        <div style={{ flex: '0 0 120px', textAlign: 'right', paddingRight: '16px' }}>
+        <div className="ratio-col-value">
           <div style={{ fontSize: '1.32rem', fontWeight: 900, color }}>{ratioVal.toFixed(1)}%</div>
           <div style={{ fontSize: '0.7rem', fontWeight: 700, color, marginTop: '4px' }}>{headroomDisplay}</div>
         </div>

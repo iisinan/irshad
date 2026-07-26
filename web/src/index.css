@@ -3594,3 +3594,73 @@ img[src="/logo.svg"] {
     box-shadow: 0 0 50px rgba(0,0,0,0.5);
   }
 }
+
+/* AAOIFI Stage 2 Mobile Friendly Styles */
+.ratio-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+.ratio-progress-row:hover {
+  background: var(--bg-section);
+}
+.ratio-progress-row.unavailable {
+  opacity: 0.6;
+  cursor: default;
+}
+.ratio-progress-row.unavailable:hover {
+  background: transparent;
+}
+.ratio-col-label {
+  flex: 0 0 220px;
+  padding-left: 16px;
+}
+.ratio-col-bar {
+  flex: 1;
+  position: relative;
+  height: 14px;
+  background: var(--bg-section);
+  border-radius: 10px;
+}
+.ratio-col-value {
+  flex: 0 0 120px;
+  text-align: right;
+  padding-right: 16px;
+}
+
+@media (max-width: 600px) {
+  .ratio-progress-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    padding: 20px 12px;
+  }
+  .ratio-col-label {
+    flex: auto;
+    padding-left: 0;
+  }
+  .ratio-col-bar {
+    margin-bottom: 12px;
+  }
+  .ratio-col-value {
+    flex: auto;
+    text-align: left;
+    padding-right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px dashed var(--border);
+    padding-top: 12px;
+  }
+  .ratio-col-value > div:first-child {
+    font-size: 1.5rem !important;
+  }
+  .ratio-col-value > div:last-child {
+    margin-top: 0 !important;
+  }
+}

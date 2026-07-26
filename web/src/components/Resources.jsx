@@ -123,7 +123,7 @@ export default function ResourcesPage() {
                 </div>
 
                 {/* Filters & Search */}
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
                   <div style={{ position: 'relative' }}>
                     <Search size={14} color="rgba(255,255,255,0.6)" style={{ position: 'absolute', left: '12px', top: '11px' }} />
                     <input 
@@ -134,12 +134,13 @@ export default function ResourcesPage() {
                         padding: '10px 14px 10px 34px', borderRadius: '12px',
                         border: '1.5px solid rgba(255,255,255,0.2)',
                         background: 'rgba(255,255,255,0.12)',
-                        color: 'white', fontSize: '0.79rem', outline: 'none', width: '210px',
+                        color: 'white', fontSize: '0.79rem', outline: 'none', 
+                        width: '100%', minWidth: '210px',
                         backdropFilter: 'blur(4px)',
                       }}
                     />
                   </div>
-                  <div style={{ display: 'flex', background: 'rgba(255,255,255,0.12)', borderRadius: '10px', padding: '3px', gap: '2px', border: '1px solid rgba(255,255,255,0.15)' }}>
+                  <div style={{ display: 'flex', background: 'rgba(255,255,255,0.12)', borderRadius: '10px', padding: '3px', gap: '2px', border: '1px solid rgba(255,255,255,0.15)', flexWrap: 'wrap' }}>
                     {[['all','All'],['video','Videos'],['document','Docs']].map(([val, lbl]) => (
                       <button
                         key={val}
@@ -320,7 +321,7 @@ export default function ResourcesPage() {
           <div style={{ background: 'var(--bg)', borderRadius: '24px', width: '100%', maxWidth: '900px', height: '80vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 24px 64px rgba(0,0,0,0.2)', animation: 'slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }} onClick={e => e.stopPropagation()}>
             
             {/* Header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid var(--border)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', padding: '20px 24px', borderBottom: '1px solid var(--border)' }}>
               <div>
                 <h3 style={{ fontSize: '1.06rem', fontWeight: 800, color: 'var(--text-dark)' }}>{selectedItem.title}</h3>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.79rem', marginTop: '4px', fontWeight: 600 }}>By {selectedItem.scholar}</p>
@@ -400,7 +401,7 @@ export default function ResourcesPage() {
               </div>
 
               {/* Type + Category row */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' }}>Type</label>
                   <div style={{ display: 'flex', gap: '8px' }}>
@@ -436,7 +437,7 @@ export default function ResourcesPage() {
               {manageData.type === 'video' && (
                 <div style={{ padding: '20px', background: 'var(--primary-50)', borderRadius: '14px', border: '1px solid var(--primary-100)' }}>
                   <div style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '16px' }}>Video Details</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
                     <div>
                       <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: 'var(--primary)', marginBottom: '8px' }}>Thumbnail URL</label>
                       <input type="url" value={manageData.thumbnail || ''} onChange={e => setManageData({...manageData, thumbnail: e.target.value})} placeholder="https://img.youtube.com/..." style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--primary-100)', background: 'var(--bg)', color: 'var(--text-dark)', fontSize: '0.85rem', outline: 'none', fontFamily: 'inherit' }} />

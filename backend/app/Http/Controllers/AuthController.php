@@ -84,7 +84,7 @@ class AuthController extends Controller
 
         $googleId = $payload['sub'];
         $email = $payload['email'];
-        $name = $payload['name'];
+        $name = $payload['name'] ?? 'Google User';
         $avatar = $payload['picture'] ?? null;
 
         // Find user by google_id or email

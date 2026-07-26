@@ -359,14 +359,6 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
         {/* Actions */}
         <div style={{ display: 'flex', gap: '10px' }}>
           <button
-            onClick={() => setShowAddModal('import')}
-            style={{ display:'flex', alignItems:'center', gap:'8px', padding:'10px 18px', borderRadius:'12px', background: 'var(--bg)', color:'var(--text-dark)', border:'1px solid var(--border)', fontWeight:700, fontSize: '0.75rem', cursor:'pointer', transition:'all 0.2s', boxShadow:'0 2px 4px rgba(0,0,0,0.02)' }}
-            onMouseEnter={e => e.currentTarget.style.background='var(--bg-section)'}
-            onMouseLeave={e => e.currentTarget.style.background='var(--bg)'}
-          >
-            <RefreshCw size={14} color="var(--text-muted)"/> Import Statement
-          </button>
-          <button
             onClick={() => setShowAddModal('manual')}
             style={{ display:'flex', alignItems:'center', gap:'8px', padding:'10px 20px', borderRadius:'12px', background:'var(--gold-grad)', color:'var(--bg)', border:'none', fontWeight:800, fontSize: '0.75rem', cursor:'pointer', boxShadow:'0 8px 20px rgba(212,175,55,0.3)', transition:'all 0.2s' }}
             onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 12px 24px rgba(212,175,55,0.4)'; }}
