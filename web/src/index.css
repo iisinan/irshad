@@ -4,57 +4,64 @@
    IRSHAD — Modern Premium Color Palette
    =================================================== */
 :root {
-  /* Core Palette */
-  --bg:           rgba(255, 255, 255, 0.95); /* Slight transparency for glassmorphism */
-  --bg-alt:       #F0F4F8; 
-  --body-bg:      radial-gradient(circle at top left, #FFFFFF 0%, #F0F4F8 60%, #E6EDF2 100%);
-  --bg-section:   rgba(233, 238, 244, 0.6); 
-
-  --primary:      #0F5257;
-  --primary-hover:#0A3F43;
-  --primary-50:   rgba(15, 82, 87, 0.06);
-  --primary-100:  rgba(15, 82, 87, 0.12);
+  /* Core Palette - Vibrant Light Theme */
+  --bg:           rgba(255, 255, 255, 0.85); /* Glassmorphism transparency */
+  --bg-alt:       rgba(250, 250, 250, 0.6); 
   
-  --accent:       #D4AF37;
-  --accent-soft:  rgba(212, 175, 55, 0.1);
+  /* Stunning Colorful Mesh Background */
+  --body-bg:      radial-gradient(at 0% 0%, rgba(212, 175, 55, 0.15) 0px, transparent 50%),
+                  radial-gradient(at 100% 0%, rgba(0, 118, 108, 0.12) 0px, transparent 50%),
+                  radial-gradient(at 100% 100%, rgba(212, 175, 55, 0.12) 0px, transparent 50%),
+                  radial-gradient(at 0% 100%, rgba(0, 118, 108, 0.15) 0px, transparent 50%),
+                  #F7F9FA;
+
+  --bg-section:   rgba(255, 255, 255, 0.4); 
+
+  --primary:      #006D64; /* Vibrant deep emerald/teal */
+  --primary-hover:#00554E;
+  --primary-50:   rgba(0, 109, 100, 0.08);
+  --primary-100:  rgba(0, 109, 100, 0.15);
   
-  --gold:         #D4AF37;
-  --gold-50:      rgba(212, 175, 55, 0.08);
-  --gold-100:     rgba(212, 175, 55, 0.15);
-  --gold-border:  rgba(212, 175, 55, 0.3);
-  --gold-grad:    linear-gradient(135deg, #F0DB9A 0%, #D4AF37 100%);
+  --accent:       #D4A017; /* Richer, warmer gold */
+  --accent-soft:  rgba(212, 160, 23, 0.1);
+  
+  --gold:         #D4A017;
+  --gold-50:      rgba(212, 160, 23, 0.1);
+  --gold-100:     rgba(212, 160, 23, 0.18);
+  --gold-border:  rgba(212, 160, 23, 0.35);
+  --gold-grad:    linear-gradient(135deg, #F3DE8A 0%, #D4A017 100%);
 
-  --text-dark:    #0B1521;
-  --text-body:    #334155;
-  --text-muted:   #64748B;
-  --text-light:   #94A3B8;
+  --text-dark:    #09131C;
+  --text-body:    #2C3E50;
+  --text-muted:   #5C7080;
+  --text-light:   #8A9BA8;
 
-  /* FinTech Tinted Borders (replaces flat gray) */
-  --border:       rgba(15, 82, 87, 0.08);
-  --border-strong:rgba(15, 82, 87, 0.16);
+  /* FinTech Tinted Borders */
+  --border:       rgba(0, 109, 100, 0.12);
+  --border-strong:rgba(0, 109, 100, 0.22);
 
-  /* Status (Darkened for WCAG AA contrast) */
+  /* Status */
   --halal:        #059669;
-  --halal-bg:     rgba(5, 150, 105, 0.08);
-  --halal-border: rgba(5, 150, 105, 0.2);
+  --halal-bg:     rgba(5, 150, 105, 0.12);
+  --halal-border: rgba(5, 150, 105, 0.25);
 
   --non-halal:    #DC2626;
-  --non-halal-bg: rgba(220, 38, 38, 0.08);
-  --non-halal-border: rgba(220, 38, 38, 0.2);
+  --non-halal-bg: rgba(220, 38, 38, 0.12);
+  --non-halal-border: rgba(220, 38, 38, 0.25);
 
   --doubtful:     #D97706;
-  --doubtful-bg:  rgba(217, 119, 6, 0.08);
-  --doubtful-border: rgba(217, 119, 6, 0.2);
+  --doubtful-bg:  rgba(217, 119, 6, 0.12);
+  --doubtful-border: rgba(217, 119, 6, 0.25);
 
   --review:       #2563EB;
-  --review-bg:    rgba(37, 99, 235, 0.08);
-  --review-border:rgba(37, 99, 235, 0.2);
+  --review-bg:    rgba(37, 99, 235, 0.12);
+  --review-border:rgba(37, 99, 235, 0.25);
   
-  /* Modern FinTech Shadows (Teal-tinted) */
-  --shadow-sm: 0 4px 12px rgba(15, 82, 87, 0.03);
-  --shadow-md: 0 12px 32px rgba(15, 82, 87, 0.06);
-  --shadow-lg: 0 24px 48px rgba(15, 82, 87, 0.09);
-  --shadow-green: 0 8px 24px rgba(15, 82, 87, 0.15);
+  /* Modern FinTech Shadows */
+  --shadow-sm: 0 4px 16px rgba(0, 109, 100, 0.05);
+  --shadow-md: 0 12px 32px rgba(0, 109, 100, 0.08);
+  --shadow-lg: 0 24px 64px rgba(0, 109, 100, 0.12);
+  --shadow-green: 0 8px 32px rgba(0, 109, 100, 0.18);
 
   --radius-sm:  8px;
   --radius-md:  12px;
@@ -63,52 +70,59 @@
 
   --transition: all 0.35s cubic-bezier(0.16,1,0.3,1);
   /* Typography */
-  --sans:       'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  --serif:      'Fraunces', serif; /* Modern chunky serif for headings */
+  --sans:       'Outfit', system-ui, -apple-system, sans-serif;
+  --serif:      'Fraunces', serif;
 }
 
 [data-theme="dark"] {
-  --bg:           #061214;
-  --bg-alt:       #0A191C;
-  --body-bg:      radial-gradient(circle at top left, #0A191C 0%, #061214 100%);
-  --bg-section:   #0F2226;
+  --bg:           rgba(8, 16, 20, 0.85); /* Deep space transparent background */
+  --bg-alt:       rgba(12, 24, 28, 0.6);
+  
+  /* Rich, immersive dark mode mesh gradient */
+  --body-bg:      radial-gradient(at 0% 0%, rgba(45, 212, 191, 0.2) 0px, transparent 50%),
+                  radial-gradient(at 100% 0%, rgba(230, 200, 117, 0.15) 0px, transparent 50%),
+                  radial-gradient(at 100% 100%, rgba(45, 212, 191, 0.15) 0px, transparent 50%),
+                  radial-gradient(at 0% 100%, rgba(230, 200, 117, 0.2) 0px, transparent 50%),
+                  #050B0E; /* Pitch black-teal base */
+                  
+  --bg-section:   rgba(14, 30, 34, 0.5);
 
-  --primary:      #2DD4BF;
+  --primary:      #2DD4BF; /* Neon bright teal */
   --primary-hover:#14B8A6;
-  --primary-50:   rgba(45, 212, 191, 0.1);
-  --primary-100:  rgba(45, 212, 191, 0.2);
+  --primary-50:   rgba(45, 212, 191, 0.15);
+  --primary-100:  rgba(45, 212, 191, 0.25);
 
   --accent:       #E6C875;
-  --accent-soft:  rgba(230, 200, 117, 0.1);
+  --accent-soft:  rgba(230, 200, 117, 0.15);
 
   --gold:         #E6C875;
-  --gold-50:      rgba(230, 200, 117, 0.1);
-  --gold-100:     rgba(230, 200, 117, 0.2);
-  --gold-border:  rgba(230, 200, 117, 0.3);
+  --gold-50:      rgba(230, 200, 117, 0.15);
+  --gold-100:     rgba(230, 200, 117, 0.25);
+  --gold-border:  rgba(230, 200, 117, 0.4);
 
   --text-dark:    #F8FAFC;
-  --text-body:    #CBD5E1;
+  --text-body:    #E2E8F0;
   --text-muted:   #94A3B8;
   --text-light:   #64748B;
 
-  --border:       rgba(255, 255, 255, 0.06);
-  --border-strong:rgba(255, 255, 255, 0.12);
+  --border:       rgba(255, 255, 255, 0.1);
+  --border-strong:rgba(255, 255, 255, 0.18);
 
   --halal:        #34D399;
-  --halal-bg:     rgba(52, 211, 153, 0.12);
-  --halal-border: rgba(52, 211, 153, 0.25);
+  --halal-bg:     rgba(52, 211, 153, 0.15);
+  --halal-border: rgba(52, 211, 153, 0.3);
 
   --non-halal:    #F87171;
-  --non-halal-bg: rgba(248, 113, 113, 0.12);
-  --non-halal-border: rgba(248, 113, 113, 0.25);
+  --non-halal-bg: rgba(248, 113, 113, 0.15);
+  --non-halal-border: rgba(248, 113, 113, 0.3);
 
   --doubtful:     #FBBF24;
-  --doubtful-bg:  rgba(251, 191, 36, 0.12);
-  --doubtful-border: rgba(251, 191, 36, 0.25);
+  --doubtful-bg:  rgba(251, 191, 36, 0.15);
+  --doubtful-border: rgba(251, 191, 36, 0.3);
   
-  --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.7);
+  --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.8);
 }
 
 /* ===================================================
