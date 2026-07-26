@@ -58,7 +58,7 @@ Here is the document text (this might be truncated, do your best):
             import asyncio
             def _generate():
                 return self.client.models.generate_content(
-                    model='models/gemini-3.1-flash-lite',
+                    model='gemini-1.5-flash',
                     contents=prompt,
                     config=genai_types.GenerateContentConfig(
                         temperature=0.1,
