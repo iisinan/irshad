@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Shield, ArrowRight, Search, FileText, Globe, Activity, FileDigit, BarChart, ChevronRight, Sparkles, TrendingUp, Search as SearchIcon, ArrowUpRight } from 'lucide-react';
 import { fetchOverviewStats, fetchRecentScreenings, fetchLatestReports, fetchBusinessNewsOverview } from '../services/api';
@@ -34,6 +34,67 @@ const CompanyAvatar = ({ symbol, size = 40 }) => {
       }}
     />
   );
+};
+
+const RevealOnScroll = ({ children, delay = 0, style = {} }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const domRef = useRef();
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) {
+        setIsVisible(true);
+        if (domRef.current) observer.unobserve(domRef.current);
+      }
+    }, { threshold: 0.1 });
+    if (domRef.current) observer.observe(domRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={domRef} style={{ opacity: isVisible ? 1 : 0, transform: isVisible ? 'translateY(0)' : 'translateY(30px)', transition: `opacity 0.8s cubic-bezier(0.16,1,0.3,1) ${delay}s, transform 0.8s cubic-bezier(0.16,1,0.3,1) ${delay}s`, ...style }}>
+      {children}
+    </div>
+  );
+};
+
+const AnimatedNumber = ({ value }) => {
+  const [count, setCount] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const domRef = useRef();
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) {
+        setIsVisible(true);
+        if (domRef.current) observer.unobserve(domRef.current);
+      }
+    }, { threshold: 0.1 });
+    if (domRef.current) observer.observe(domRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible) return;
+    let startTimestamp = null;
+    const endValue = typeof value === 'string' && !isNaN(parseInt(value)) ? parseInt(value) : (typeof value === 'number' ? value : null);
+    if (endValue === null) {
+      setCount(value);
+      return;
+    }
+    const duration = 1500;
+    const step = (timestamp) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      const easeProgress = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.floor(easeProgress * endValue));
+      if (progress < 1) window.requestAnimationFrame(step);
+      else setCount(value);
+    };
+    window.requestAnimationFrame(step);
+  }, [value, isVisible]);
+
+  return <span ref={domRef}>{count}</span>;
 };
 
 export default function LandingPage() {
@@ -156,6 +217,7 @@ export default function LandingPage() {
       <div style={{ maxWidth: '1300px', margin: '0 auto', padding: '40px 20px 100px', width: '100%', display: 'flex', flexDirection: 'column', gap: '80px' }}>
         
         {/* 3. Market Overview Cards */}
+        <RevealOnScroll>
         <section>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
             {[
@@ -177,15 +239,17 @@ export default function LandingPage() {
                   <div className="skeleton" style={{ height: '48px', width: '60%', borderRadius: '12px' }} />
                 ) : (
                   <div style={{ fontSize: '3rem', fontWeight: 900, color: 'var(--text-dark)', lineHeight: 1, letterSpacing: '-1px' }}>
-                    {stat.value}
+                    <AnimatedNumber value={stat.value} />
                   </div>
                 )}
               </div>
             ))}
           </div>
         </section>
+        </RevealOnScroll>
 
         {/* 4. Dashboard Grid: Recent & Reports */}
+        <RevealOnScroll delay={0.1}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))', gap: '40px' }}>
           
           {/* Recently Screened */}
@@ -279,8 +343,10 @@ export default function LandingPage() {
             </section>
           </div>
         </div>
+        </RevealOnScroll>
 
         {/* 5. Process Section */}
+        <RevealOnScroll delay={0.2}>
         <section style={{ textAlign: 'center', padding: '100px 0' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', background: 'rgba(15,82,87,0.1)', color: 'var(--primary)', padding: '6px 16px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', marginBottom: '20px', letterSpacing: '1px' }}>
             How It Works
@@ -308,8 +374,10 @@ export default function LandingPage() {
             ))}
           </div>
         </section>
+        </RevealOnScroll>
 
         {/* 6. AAOIFI Banner */}
+        <RevealOnScroll delay={0.3}>
         <section className="glass-panel hover-lift" style={{ 
           background: 'linear-gradient(135deg, rgba(15,82,87,0.95) 0%, rgba(10,63,67,0.95) 100%)', 
           borderRadius: '32px', padding: 'clamp(32px, 6vw, 64px)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '40px',
@@ -332,6 +400,7 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+        </RevealOnScroll>
 
       </div>
       
