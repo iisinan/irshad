@@ -124,6 +124,14 @@ async def extract_financial_data(state: GraphState) -> GraphState:
             
         gemini = GeminiClient()
         data = await gemini.extract_financial_data(text, state["company_name"], state.get("financial_year", 2026))
+        
+        # Inject the parsed NGX uploaded date if available
+        ngx_date = state.get("search_results", {}).get("ngx_date")
+        if ngx_date:
+            if not data:
+                data = {}
+            data["published_date"] = ngx_date
+
         state["raw_pdf_extraction"] = data
         state["is_extraction_valid"] = True if data else False
     except Exception as e:

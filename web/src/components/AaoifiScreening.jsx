@@ -613,12 +613,6 @@ const AaoifiScreening = () => {
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px' }}>
                 <div style={{ background: 'var(--bg-section)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Stage 1 Verdict</span>
-                  <span style={{ fontSize: '1.15rem', color: report.stage1?.status === 'halal' ? 'var(--halal)' : 'var(--non-halal)', fontWeight: 800, marginTop: '4px', textTransform: 'uppercase' }}>
-                    {report.stage1?.status || 'UNKNOWN'}
-                  </span>
-                </div>
-                <div style={{ background: 'var(--bg-section)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Market Capitalization</span>
                   <span style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{marketCap ? `₦${(marketCap/1000000000).toFixed(2)}B` : 'N/A'}</span>
                 </div>

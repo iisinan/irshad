@@ -107,6 +107,12 @@ class FinancialScraper:
                 results["official"] = best_doc["url"]
                 results["ngx"] = best_doc["url"]
                 
+                # Format the date as string if it was successfully parsed
+                if best_doc["date"].year > 1900:
+                    results["ngx_date"] = best_doc["date"].strftime("%B %d, %Y")
+                else:
+                    results["ngx_date"] = None
+                
         except Exception as e:
             print(f"NGX Direct Scraper failed: {str(e)}")
             
