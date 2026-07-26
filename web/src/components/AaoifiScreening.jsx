@@ -607,56 +607,7 @@ const AaoifiScreening = () => {
               <span style={{ fontWeight: 900, color: 'var(--primary)', fontSize: '1.1rem' }}>{report.business_reasoning?.confidence_score || '88'}%</span>
             </div>
 
-            {(report.financial_data_used?.source_links?.length > 0 || report.financial_data_used?.source) && (
-              <>
-                <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.97rem', marginBottom: '12px' }}>Financial Data Sources</div>
-                {report.financial_data_used?.source_links?.length > 0 ? (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px', marginBottom: '32px' }}>
-                    {report.financial_data_used.source_links.map((link, i) => (
-                      <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '16px', background: 'var(--bg-section)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border)', textDecoration: 'none', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.transform = 'translateY(-2px)'; }} onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'none'; }}>
-                        <div style={{ color: 'var(--primary)', background: 'var(--primary-bg)', padding: '10px', borderRadius: '12px' }}><Activity size={20} /></div>
-                        <div>
-                          <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '4px' }}>{link.name}</div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{link.description}</div>
-                        </div>
-                      </a>
-                    ))}
-                  </div>
-                ) : (
-                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center', background: 'var(--bg-section)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', marginBottom: '32px' }}>
-                    <div style={{ color: 'var(--primary)', background: 'var(--primary-bg)', padding: '8px', borderRadius: '10px' }}><Activity size={18} /></div>
-                    <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-dark)', lineHeight: 1.5 }}>
-                      {report.financial_data_used.source}
-                    </span>
-                  </div>
-                )}
-              </>
-            )}
 
-            <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.97rem', marginBottom: '20px' }}>News Sources Analyzed</div>
-            {report.news_sources?.length > 0 ? (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
-                {report.news_sources.map((news, i) => (
-                  <a key={i} href={news.url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '16px', padding: '20px', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.transform = 'translateY(-2px)'; }} onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'none'; }}>
-                    <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                      <div style={{ color: 'var(--primary)', background: 'var(--primary-bg)', padding: '8px', borderRadius: '10px' }}><FileText size={18} /></div>
-                      <div>
-                        <div style={{ fontSize: '0.84rem', fontWeight: 600, color: 'var(--text-dark)', lineHeight: 1.4, marginBottom: '8px' }}>
-                          {news.title || 'Unknown Source'}
-                        </div>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-                          {news.source || 'News'} • {new Date(news.published_at).toLocaleDateString()}
-                        </div>
-                      </div>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            ) : (
-              <div style={{ padding: '32px', textAlign: 'center', background: 'var(--bg)', borderRadius: '16px', border: '1px dashed var(--border)' }}>
-                <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', margin: 0 }}>No recent news sources found for this analysis.</p>
-              </div>
-            )}
           </div>
         )}
       </div>

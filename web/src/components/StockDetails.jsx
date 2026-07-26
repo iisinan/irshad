@@ -435,54 +435,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
                   <ReactMarkdown>{aiAnalysis}</ReactMarkdown>
                 </div>
                 
-                {/* ─── Data Source Details ─── */}
-                <div style={{ marginTop: '24px', padding: '16px', background: 'var(--bg)', borderRadius: '12px', border: '1px solid var(--border)' }}>
-                  <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dark)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <BookOpen size={14} /> Data Source Details
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
-                    <div>
-                      <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Financial Year</div>
-                      <div style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-dark)' }}>{latest?.financial_year || 'N/A'}</div>
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Reporting Quarter</div>
-                      <div style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-dark)' }}>{latest?.report_quarter || 'N/A'}</div>
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Published Date</div>
-                      <div style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-dark)' }}>{latest?.published_date || 'N/A'}</div>
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Overall Verdict</div>
-                      <div style={{ fontSize: '0.9rem', fontWeight: 800, color: latest?.overall_financial_pass ? 'var(--halal)' : 'var(--non-halal)' }}>
-                        {latest?.overall_financial_pass ? '✅ Shariah Compliant' : '❌ Non-Compliant'}
-                      </div>
-                    </div>
-                  </div>
-                </div>
 
-                {aiData?.sources && aiData.sources.length > 0 && (
-                  <div style={{ marginTop: '16px', paddingTop: '14px', borderTop: '1px solid var(--border)' }}>
-                    <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Globe size={13} /> Data Sources & Disclosures Analysed:
-                    </div>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                      {aiData.sources.map((src, idx) => {
-                        const isUrl = typeof src === 'string' && src.startsWith('http');
-                        return isUrl ? (
-                          <a key={idx} href={src} target="_blank" rel="noopener noreferrer" style={{ background: 'var(--bg)', border: '1px solid var(--border)', padding: '4px 10px', borderRadius: '14px', fontSize: '0.72rem', color: 'var(--primary)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                            🔗 {src.replace(/^https?:\/\/(www\.)?/, '').split('/')[0]}
-                          </a>
-                        ) : (
-                          <span key={idx} style={{ background: 'var(--bg)', border: '1px solid var(--border)', padding: '4px 10px', borderRadius: '14px', fontSize: '0.72rem', color: 'var(--text-body)' }}>
-                            📰 {src}
-                          </span>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
               </div>
             )}
             {!aiAnalysis && !aiLoading && !aiError && (
