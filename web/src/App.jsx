@@ -645,7 +645,7 @@ const MarketPage = () => {
 
 /* ─── App Shell ──────────────────────────────────────────── */
 function App() {
-  const { loading: authLoading } = useAuth();
+  const { loading: authLoading, user } = useAuth();
 
   // Handle the seamless handoff from the native HTML splash screen
   useEffect(() => {
@@ -672,7 +672,7 @@ function App() {
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
           <DocumentTitleUpdater />
             <TopNavbar />
-            <StockTicker />
+            {user && <StockTicker />}
             <main style={{ flex: 1 }}>
               <Suspense fallback={
                 <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: '20px' }}>
