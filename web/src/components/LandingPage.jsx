@@ -135,17 +135,17 @@ export default function LandingPage() {
 
       {/* 2. Glassmorphic Search Section */}
       <section className="animate-slide-up stagger-4" style={{ padding: '0 20px', transform: 'translateY(-50px)', position: 'relative', zIndex: 10 }}>
-        <div className="glass-panel" style={{ maxWidth: '850px', margin: '0 auto', borderRadius: '24px', padding: '12px 12px 12px 28px', display: 'flex', alignItems: 'center', border: '1px solid var(--border-strong)' }}>
+        <div className="glass-panel" style={{ maxWidth: '850px', margin: '0 auto', borderRadius: '24px', padding: '12px 12px 12px 28px', display: 'flex', alignItems: 'center', border: '1px solid var(--border-strong)', boxShadow: '0 20px 40px rgba(0,0,0,0.05)', transition: 'box-shadow 0.3s ease' }} onMouseEnter={e => e.currentTarget.style.boxShadow = '0 20px 60px rgba(15,82,87,0.15)'} onMouseLeave={e => e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.05)'}>
           <SearchIcon size={28} color="var(--primary)" style={{ marginRight: '16px', opacity: 0.8 }} />
-          <form onSubmit={handleSearch} style={{ flex: 1, display: 'flex' }}>
+          <form onSubmit={handleSearch} style={{ flex: 1, display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center' }}>
             <input 
               type="text" 
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search by company name or ticker symbol..."
-              style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: '1.2rem', color: 'var(--text-dark)', fontWeight: 500, padding: '10px 0' }}
+              style={{ flex: 1, minWidth: '200px', border: 'none', background: 'transparent', outline: 'none', fontSize: 'clamp(1rem, 2vw, 1.2rem)', color: 'var(--text-dark)', fontWeight: 500, padding: '10px 0' }}
             />
-            <button type="submit" className="btn-primary" style={{ padding: '14px 32px', borderRadius: '16px', marginLeft: '12px', fontSize: '1rem', background: 'var(--text-dark)' }}>
+            <button type="submit" className="btn-primary hover-lift" style={{ padding: '14px 32px', borderRadius: '16px', fontSize: '1rem', background: 'var(--text-dark)', whiteSpace: 'nowrap' }}>
               Analyze
             </button>
           </form>
@@ -186,7 +186,7 @@ export default function LandingPage() {
         </section>
 
         {/* 4. Dashboard Grid: Recent & Reports */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '40px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))', gap: '40px' }}>
           
           {/* Recently Screened */}
           <section className="glass-panel" style={{ borderRadius: '32px', padding: '40px', border: '1px solid var(--border-strong)' }}>
@@ -281,39 +281,42 @@ export default function LandingPage() {
         </div>
 
         {/* 5. Process Section */}
-        <section style={{ textAlign: 'center', padding: '80px 0' }}>
-          <h2 style={{ fontSize: '2.5rem', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '16px', letterSpacing: '-1px' }}>The Intelligence Pipeline</h2>
-          <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)', maxWidth: '600px', margin: '0 auto 60px', lineHeight: 1.6 }}>From raw financial data to verified Shariah compliance, fully automated and strictly adhering to AAOIFI guidelines.</p>
+        <section style={{ textAlign: 'center', padding: '100px 0' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', background: 'rgba(15,82,87,0.1)', color: 'var(--primary)', padding: '6px 16px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', marginBottom: '20px', letterSpacing: '1px' }}>
+            How It Works
+          </div>
+          <h2 style={{ fontSize: 'clamp(2rem, 5vw, 2.8rem)', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '16px', letterSpacing: '-1px' }}>The Intelligence Pipeline</h2>
+          <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)', maxWidth: '650px', margin: '0 auto 60px', lineHeight: 1.6 }}>From raw financial data to verified Shariah compliance, fully automated and strictly adhering to AAOIFI guidelines.</p>
           
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: '20px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: '24px' }}>
             {[
               { step: '1', title: 'Data Ingestion', desc: 'Fetching audited statements & activities', icon: Globe },
               { step: '2', title: 'AI Extraction', desc: 'Deep parsing of debt & assets', icon: FileDigit },
               { step: '3', title: 'AAOIFI Rules', desc: 'Applying strict compliance ratios', icon: Shield },
               { step: '4', title: 'Final Verdict', desc: 'Publishing actionable insights', icon: Sparkles }
-            ].map((s, i, arr) => (
-              <React.Fragment key={s.step}>
-                <div className="glass-panel hover-card" style={{ width: '220px', borderRadius: '24px', padding: '32px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', border: '1px solid var(--border-strong)' }}>
-                  <div style={{ width: '64px', height: '64px', borderRadius: '16px', background: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px', boxShadow: '0 12px 24px rgba(15,82,87,0.3)' }}>
-                    <s.icon size={28} />
-                  </div>
-                  <h4 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '10px' }}>{s.title}</h4>
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>{s.desc}</p>
+            ].map((s, i) => (
+              <div key={s.step} className="glass-panel hover-lift" style={{ borderRadius: '24px', padding: '40px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', border: '1px solid var(--border)', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ position: 'absolute', top: '16px', right: '20px', fontSize: '4rem', fontWeight: 900, color: 'var(--bg-section)', opacity: 0.5, lineHeight: 1, zIndex: 0 }}>
+                  {s.step}
                 </div>
-                {i < arr.length - 1 && <ChevronRight size={32} color="var(--border-strong)" style={{ opacity: 0.6 }} />}
-              </React.Fragment>
+                <div style={{ position: 'relative', zIndex: 1, width: '64px', height: '64px', borderRadius: '20px', background: 'linear-gradient(135deg, var(--primary) 0%, #2DD4BF 100%)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', boxShadow: '0 12px 24px rgba(15,82,87,0.25)' }}>
+                  <s.icon size={28} />
+                </div>
+                <h4 style={{ position: 'relative', zIndex: 1, fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '12px' }}>{s.title}</h4>
+                <p style={{ position: 'relative', zIndex: 1, fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>{s.desc}</p>
+              </div>
             ))}
           </div>
         </section>
 
         {/* 6. AAOIFI Banner */}
-        <section className="glass-panel" style={{ 
+        <section className="glass-panel hover-lift" style={{ 
           background: 'linear-gradient(135deg, rgba(15,82,87,0.95) 0%, rgba(10,63,67,0.95) 100%)', 
-          borderRadius: '32px', padding: '60px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '60px',
-          boxShadow: '0 24px 48px rgba(15,82,87,0.2)', position: 'relative', overflow: 'hidden'
+          borderRadius: '32px', padding: 'clamp(32px, 6vw, 64px)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '40px',
+          boxShadow: '0 24px 48px rgba(15,82,87,0.2)', position: 'relative', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)'
         }}>
-          <div style={{ position: 'absolute', right: '-10%', top: '-20%', opacity: 0.1, transform: 'scale(2)' }}>
-            <Shield size={400} color="white" />
+          <div style={{ position: 'absolute', right: '-5%', top: '-30%', opacity: 0.08, transform: 'scale(1.5)', pointerEvents: 'none' }}>
+            <Shield size={500} color="white" />
           </div>
           
           <div style={{ flex: '1 1 500px', position: 'relative', zIndex: 1 }}>
