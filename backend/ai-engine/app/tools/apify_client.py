@@ -11,230 +11,106 @@ class FinancialScraper:
         self, ticker: str, company_name: str, financial_year: int
     ) -> dict:
         """
-        Uses Apify to find a direct PDF link to the company's latest financial report (Q1, Q2, H1, or Annual).
-        If direct PDF links are not found, deep-crawls the HTML pages returned by Google
-        (e.g., Company Website, NGX, African Financials) to extract PDF links.
+        Uses Apify to navigate directly to the NGX stock profile page,
+        extracts the financial report PDFs, and selects the most recent one
+        based on the uploaded date.
         """
         import asyncio
-        from urllib.parse import urljoin
         import re
-
+        from datetime import datetime
+        
         if not self.client:
             print("Apify token not provided. Skipping web scraping.")
             return {"ngx": None, "official": None}
-
-        print(f"Searching for {company_name} FY{financial_year} latest financial report PDF...")
-
-        # Stage 1: Broad search queries to find both direct PDFs and HTML pages
-        base_query = (
-            f'"{company_name}" ("financial statements" OR "quarterly report" OR '
-            f'"audited financial statements" OR "unaudited financial statements" OR '
-            f'"interim financial statements" OR "annual report" OR "commercial papers") '
-            f'"{financial_year}" '
-            f'-"Investor Presentation" -"Earnings Call" -Factsheet -ESG -Sustainability'
-        )
-        
-        queries = [
-            f'{base_query} inurl:africanfinancials.com',
-            f'{base_query} inurl:ngxgroup.com',
-            f'{base_query} inurl:sec.gov.ng',
-            base_query # Official sites usually surface here
-        ]
-        
-        run_input = {
-            "queries": "\n".join(queries),
-            "resultsPerPage": 10,
-            "maxPagesPerQuery": 1,
-            "languageCode": "en",
-        }
-
-        results = {"ngx": None, "official": None, "african_financials": None, "sec": None}
-        html_pages_to_crawl = []
-        found_docs = [] # Will store both PDFs and HTML fallbacks
-        
-        EXCLUDE_KEYWORDS = ["sustainability", "esg", "proxy", "notice", "agenda", "dividend", "presentation"]
-
-        def is_valid_document(url_str, text_str=""):
-            # Check year
-            if str(financial_year) not in text_str and str(financial_year) not in url_str:
-                return False
-                
-            # Check company name (first word)
-            company_first = company_name.split()[0].lower().replace(",", "").replace(".", "")
-            if company_first not in url_str.lower() and company_first not in text_str.lower():
-                return False
-                
-            # Check for non-financial reports
-            combined = (url_str + text_str).lower()
-            if any(kw in combined for kw in EXCLUDE_KEYWORDS):
-                return False
-            return True
-
-        try:
-            # 1. Fetch Google Search Results
-            def _run_google():
-                return self.client.actor("apify/google-search-scraper").call(run_input=run_input)
-
-            run = await asyncio.to_thread(_run_google)
-
-            for item in self.client.dataset(run["defaultDatasetId"]).iterate_items():
-                query = item.get("searchQuery", {}).get("term", "")
-                is_ngx = "inurl:ngxgroup.com" in query
-                is_af = "inurl:africanfinancials.com" in query
-                is_sec = "inurl:sec.gov.ng" in query
-                
-                # First word of company name to check for official domain match
-                company_first_word = company_name.split()[0].lower().replace(",", "").replace(".", "")
-
-                for organic_result in item.get("organicResults", []):
-                    url = organic_result.get("url", "")
-                    title = organic_result.get("title", "")
-                    snippet = organic_result.get("description", "")
-                    
-                    if "proshare" in url.lower() or "nairametrics" in url.lower() or "businessday" in url.lower():
-                        continue # Skip news sites
-                        
-                    source_type = "other"
-                    if is_sec or "sec.gov.ng" in url.lower():
-                        source_type = "sec"
-                    elif is_ngx or "ngxgroup.com" in url.lower():
-                        source_type = "ngx"
-                    elif is_af or "africanfinancials.com" in url.lower():
-                        source_type = "african_financials"
-                    elif company_first_word in url.lower():
-                        source_type = "official"
-                        
-                    if source_type == "other":
-                        continue # Skip random domains that don't match any criteria
-                    
-                    if is_valid_document(url, title + snippet):
-                        if url.lower().endswith(".pdf"):
-                            found_docs.append({"url": url, "source_type": source_type, "text": title + snippet, "is_pdf": True})
-                        else:
-                            # Collect HTML links for deep crawling and as potential fallback documents
-                            html_pages_to_crawl.append({"url": url, "source_type": source_type})
-                            found_docs.append({"url": url, "source_type": source_type, "text": title + snippet, "is_pdf": False})
-
-            # 2. Deep Crawl HTML Pages using Puppeteer Scraper if necessary
             
-            # Always add NGX profile as a guaranteed fallback source
-            ngx_profile_url = f"https://ngxgroup.com/exchange/data/company-profile/?symbol={ticker}&directory=companydirectory"
-            if not any(page["url"] == ngx_profile_url for page in html_pages_to_crawl):
-                html_pages_to_crawl.append({"url": ngx_profile_url, "source_type": "ngx"})
-
-            if html_pages_to_crawl:
-                print(f"Deep crawling {len(html_pages_to_crawl)} HTML pages for hidden PDFs using Puppeteer...")
+        print(f"Direct NGX Scraping for {ticker} FY{financial_year} latest financial report PDF...")
+        
+        ngx_profile_url = f"https://ngxgroup.com/exchange/data/company-profile/?symbol={ticker}&directory=companydirectory"
+        
+        puppeteer_input = {
+            "startUrls": [{"url": ngx_profile_url}],
+            "pageFunction": """async ({ page, request }) => {
+                try {
+                    await new Promise(r => setTimeout(r, 5000)); // wait for ajax to load table
+                } catch (e) {}
                 
-                puppeteer_input = {
-                    "startUrls": [{"url": page["url"], "userData": {"source_type": page["source_type"]}} for page in html_pages_to_crawl[:10]], # Limit to top 10
-                    "pageFunction": """async ({ page, request }) => {
-                        try {
-                            await new Promise(r => setTimeout(r, 3000)); // Wait for dynamic content/AJAX
-                        } catch (e) {
-                            console.log("Wait timeout", e);
-                        }
-                        const links = await page.$$eval('a', els => 
-                            els.filter(a => a.href && (a.href.toLowerCase().endsWith('.pdf') || (a.innerText && a.innerText.toLowerCase().includes('pdf'))))
-                               .map(a => ({ text: a.innerText.trim(), url: a.href }))
-                        );
-                        return { links: links, sourceType: request.userData.source_type, sourceUrl: request.url };
-                    }""",
-                    "proxyConfiguration": { "useApifyProxy": True }
-                }
+                const data = await page.$$eval('a', els => {
+                    return els.filter(a => a.href && a.href.toLowerCase().endsWith('.pdf'))
+                              .map(a => {
+                                  return {
+                                      text: a.innerText.trim(),
+                                      url: a.href,
+                                      parentText: a.parentElement ? a.parentElement.innerText.trim() : ''
+                                  };
+                              });
+                });
+                return { data: data };
+            }""",
+            "proxyConfiguration": { "useApifyProxy": True }
+        }
+        
+        results = {"ngx": None, "official": None}
+        
+        try:
+            def _run_puppeteer():
+                return self.client.actor("apify/puppeteer-scraper").call(run_input=puppeteer_input)
                 
-                def _run_puppeteer():
-                    return self.client.actor("apify/puppeteer-scraper").call(run_input=puppeteer_input)
+            run = await asyncio.to_thread(_run_puppeteer)
+            
+            extracted_docs = []
+            
+            for item in self.client.dataset(run["defaultDatasetId"]).iterate_items():
+                for doc in item.get("data", []):
+                    url = doc.get("url", "")
+                    text = doc.get("text", "")
+                    parent_text = doc.get("parentText", "")
                     
-                scraper_run = await asyncio.to_thread(_run_puppeteer)
-                
-                for item in self.client.dataset(scraper_run["defaultDatasetId"]).iterate_items():
-                    base_url = item.get("sourceUrl", "")
-                    source_type = item.get("sourceType", "official")
-                    for link in item.get("links", []):
-                        raw_href = link.get("url", "")
-                        text = link.get("text", "")
+                    # Ensure it's for the requested financial year
+                    if str(financial_year) not in url and str(financial_year) not in text and str(financial_year) not in parent_text:
+                        continue
                         
-                        # Resolve relative URLs
+                    # Ensure it's a financial report document
+                    combined = (url + text + parent_text).lower()
+                    if not any(kw in combined for kw in ["financial statement", "audited", "quarter", "earnings", "annual report", "financial"]):
+                        continue
+                        
+                    # Skip irrelevant documents
+                    if any(kw in combined for kw in ["insider", "dividend", "notice", "agenda", "proxy", "agm", "dealings", "resolution"]):
+                        # Unless it explicitly says financial statement
+                        if "financial statement" not in combined and "audited" not in combined and "earnings" not in combined:
+                            continue
+                    
+                    # Parse the date e.g. "[Uploaded on: April 29th 2026]"
+                    date_match = re.search(r'\[Uploaded on:\s+([a-zA-Z]+)\s+(\d+)[a-z]{2}\s+(\d{4})\]', parent_text, re.IGNORECASE)
+                    
+                    doc_date = datetime.min
+                    if date_match:
+                        month_str, day_str, year_str = date_match.groups()
                         try:
-                            full_url = urljoin(base_url, raw_href)
-                        except:
-                            continue
+                            date_str_clean = f"{month_str} {day_str} {year_str}"
+                            doc_date = datetime.strptime(date_str_clean, "%B %d %Y")
+                        except ValueError:
+                            pass
                             
-                        if not full_url.lower().endswith('.pdf'):
-                            continue
-                            
-                        if is_valid_document(full_url, text):
-                            found_docs.append({"url": full_url, "source_type": source_type, "text": text, "is_pdf": True})
-
-            # 3. Filter and Sort the most recent/best PDFs and HTML fallbacks
-            if found_docs:
-                print(f"DEBUG found_docs: {found_docs}")
-                print(f"Found {len(found_docs)} valid documents. Selecting best..."); 
+                    extracted_docs.append({
+                        "url": url,
+                        "date": doc_date,
+                        "text": text
+                    })
+                    
+            if extracted_docs:
+                # Sort by newest date first
+                extracted_docs.sort(key=lambda x: x["date"], reverse=True)
                 
-                # Priority: Official (4) > NGX (3) > African Financials (2) > SEC (1)
-                priority = {"official": 4, "ngx": 3, "african_financials": 2, "sec": 1}
+                print(f"DEBUG: Found {len(extracted_docs)} PDFs for {ticker}. Newest: {extracted_docs[0]['date']} -> {extracted_docs[0]['url']}")
+                best_doc = extracted_docs[0]
+                results["official"] = best_doc["url"]
+                results["ngx"] = best_doc["url"]
                 
-                def extract_recency_score(url_str, text_str, is_pdf):
-                    score = 0
-                    combined = (url_str + text_str).lower()
-                    
-                    # 1. Extract years
-                    # Prioritize year from URL, take the minimum year as it's usually the report year 
-                    # (e.g. 2025 report published in 2026 -> min is 2025).
-                    url_years = [int(y) for y in set(re.findall(r'(20\d{2})', url_str))]
-                    text_years = [int(y) for y in set(re.findall(r'(20\d{2})', text_str))]
-                    
-                    primary_year = 0
-                    if url_years:
-                        primary_year = min(url_years)
-                    elif text_years:
-                        primary_year = min(text_years)
-                    else:
-                        primary_year = financial_year
-                        
-                    score += primary_year * 100
-                        
-                    # 2. Add bonus for later periods within the same year (Q4 > Q3 > Q2 > Q1)
-                    if "q4" in combined or "annual" in combined or "full year" in combined or "year end" in combined or "yearend" in combined:
-                        score += 40
-                    elif "q3" in combined or "nine month" in combined or "9m" in combined or "third quarter" in combined:
-                        score += 30
-                    elif "q2" in combined or "h1" in combined or "half year" in combined or "six month" in combined or "6m" in combined or "second quarter" in combined:
-                        score += 20
-                    elif "q1" in combined or "first quarter" in combined or "3m" in combined or "quarter 1" in combined:
-                        score += 10
-                    
-                    # 3. Massive bonus for PDF so they always outrank HTML pages if they exist
-                    if is_pdf:
-                        score += 10000000
-                        
-                    return score
-
-                found_docs.sort(key=lambda x: (priority.get(x["source_type"], 0), extract_recency_score(x["url"], x["text"], x["is_pdf"])), reverse=True)
-                
-                # Assign to results
-                for doc in found_docs:
-                    stype = doc["source_type"]
-                    if stype in results and not results[stype]:
-                        results[stype] = doc["url"]
-                        
-                # Priority Fallback if Official is missing
-                if not results["official"]:
-                    if results["ngx"]:
-                        results["official"] = results["ngx"]
-                    elif results["african_financials"]:
-                        results["official"] = results["african_financials"]
-                    elif results["sec"]:
-                        results["official"] = results["sec"]
-                    
-            return results
-
         except Exception as e:
-            error_msg = str(e)
-            print(f"Apify Scraper failed: {error_msg}")
-            if "approvePermissions=true" in error_msg:
-                print(f"⚠️ ACTION REQUIRED: You must approve Apify Puppeteer Scraper permissions here: https://console.apify.com/actors/YJCnS9qogi9XxDgLB?approvePermissions=true")
-            return results
+            print(f"NGX Direct Scraper failed: {str(e)}")
+            
+        return results
 
     async def fetch_validation_data(self, ticker: str) -> Optional[dict]:
         """

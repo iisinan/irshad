@@ -218,151 +218,60 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── SEARCH ────────────────────────────── */}
-      <div style={{ padding: '0 20px', marginTop: 'clamp(32px,5vw,48px)' }}>
-        <div style={{ maxWidth: 740, margin: '0 auto' }}>
-          <div style={{ background: 'var(--bg)', border: '1px solid var(--border-strong)', borderRadius: 16, padding: '7px 7px 7px 22px', display: 'flex', alignItems: 'center', gap: 12, boxShadow: '0 4px 20px rgba(0,0,0,0.05)', transition: 'box-shadow 0.3s, border-color 0.3s' }}
-            onFocusCapture={e => { e.currentTarget.style.boxShadow = '0 0 0 3px rgba(15,82,87,0.1), 0 4px 20px rgba(0,0,0,0.05)'; e.currentTarget.style.borderColor = 'var(--primary)'; }}
-            onBlurCapture={e => { e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.05)'; e.currentTarget.style.borderColor = 'var(--border-strong)'; }}>
-            <SearchIcon size={18} color="var(--text-muted)" style={{ flexShrink: 0 }} />
-            <form onSubmit={handleSearch} style={{ flex: 1, display: 'flex', gap: 8, alignItems: 'center' }}>
-              <input
-                type="text" value={search} onChange={e => setSearch(e.target.value)}
-                placeholder="Search ticker or company name…"
-                style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: '0.9rem', color: 'var(--text-dark)', fontWeight: 500, padding: '10px 0', minWidth: 0 }}
-              />
-              <button type="submit" className="btn-primary" style={{ padding: '10px 26px', borderRadius: 11, fontSize: '0.88rem', fontWeight: 700, whiteSpace: 'nowrap', flexShrink: 0 }}>
-                Analyse
-              </button>
-            </form>
-          </div>
-          {/* Quick picks */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '0.7rem', color: 'var(--text-light)', fontWeight: 600, letterSpacing: '0.5px' }}>Popular:</span>
-            {['DANGCEM', 'ZENITHBANK', 'MTNN', 'GTCO', 'AIRTELAFRI'].map(t => (
-              <button key={t} onClick={() => navigate(`/market/${t}`)} style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', background: 'var(--bg-section)', border: '1px solid var(--border)', borderRadius: 8, padding: '3px 10px', cursor: 'pointer', transition: 'all 0.18s' }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.color = 'var(--primary)'; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-muted)'; }}>
-                {t}
-              </button>
-            ))}
-          </div>
+      {/* ── SEARCH & LIVE DATA ────────────────────────────── */}
+      <div style={{ maxWidth: 860, margin: '0 auto', padding: 'clamp(32px,6vw,56px) 20px clamp(56px,9vw,96px)', display: 'flex', flexDirection: 'column', gap: 'clamp(40px,7vw,64px)', width: '100%' }}>
+        
+        {/* Sleek Search */}
+        <div style={{ background: 'var(--bg)', border: '1px solid var(--border-strong)', borderRadius: 100, padding: '8px 8px 8px 24px', display: 'flex', alignItems: 'center', gap: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.04)', transition: 'box-shadow 0.3s, border-color 0.3s' }}
+          onFocusCapture={e => { e.currentTarget.style.boxShadow = '0 0 0 4px rgba(15,82,87,0.08), 0 8px 32px rgba(0,0,0,0.06)'; e.currentTarget.style.borderColor = 'var(--primary)'; }}
+          onBlurCapture={e => { e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.04)'; e.currentTarget.style.borderColor = 'var(--border-strong)'; }}>
+          <SearchIcon size={18} color="var(--text-muted)" style={{ flexShrink: 0 }} />
+          <form onSubmit={handleSearch} style={{ flex: 1, display: 'flex', gap: 8, alignItems: 'center' }}>
+            <input
+              type="text" value={search} onChange={e => setSearch(e.target.value)}
+              placeholder="Search ticker or company name…"
+              style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: '0.95rem', color: 'var(--text-dark)', fontWeight: 500, padding: '10px 0', minWidth: 0 }}
+            />
+            <button type="submit" className="btn-primary" style={{ padding: '12px 28px', borderRadius: 100, fontSize: '0.88rem', fontWeight: 700, whiteSpace: 'nowrap', flexShrink: 0 }}>
+              Analyse
+            </button>
+          </form>
         </div>
-      </div>
 
-      {/* ── STATS STRIP ───────────────────────── */}
-      <div style={{ padding: 'clamp(40px,7vw,72px) 20px 0' }}>
-        <div style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', borderRadius: 18, overflow: 'hidden', border: '1px solid var(--border-strong)', boxShadow: 'var(--shadow-sm)' }}>
-          {loading
-            ? [0,1,2].map(i => <div key={i} className="skeleton" style={{ height: 108 }} />)
-            : statItems.map((s, i) => (
-              <Reveal key={i} delay={i * 0.08}>
-                <div style={{ padding: '28px 32px', background: 'var(--bg)', borderRight: i < statItems.length - 1 ? '1px solid var(--border-strong)' : 'none', transition: 'background 0.2s' }}
-                  onMouseEnter={e => e.currentTarget.style.background = 'var(--primary-50)'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'var(--bg)'}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 7, color: 'var(--text-muted)', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.9px', marginBottom: 10 }}>
-                    <s.icon size={13} /> {s.label}
-                  </div>
-                  <div style={{ fontSize: 'clamp(2rem, 4vw, 2.8rem)', fontWeight: 900, color: 'var(--text-dark)', lineHeight: 1, letterSpacing: '-1.5px' }}>
-                    <AnimatedNumber value={s.value} />
-                    <span style={{ fontSize: '1.2rem', color: 'var(--primary)', marginLeft: 2, fontWeight: 700 }}>+</span>
-                  </div>
-                </div>
-              </Reveal>
-            ))}
-        </div>
-      </div>
-
-      {/* ── MAIN ──────────────────────────────── */}
-      <div style={{ maxWidth: 1260, margin: '0 auto', padding: 'clamp(56px,9vw,96px) 20px clamp(72px,12vw,120px)', width: '100%', display: 'flex', flexDirection: 'column', gap: 'clamp(56px,9vw,96px)' }}>
-
-        {/* Live Data Grid */}
-        <Reveal>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))', gap: 20 }}>
-
-            {/* Live Screenings */}
-            <div style={{ background: 'var(--bg)', border: '1px solid var(--border-strong)', borderRadius: 22, overflow: 'hidden', boxShadow: 'var(--shadow-sm)', transition: 'box-shadow 0.25s, border-color 0.25s' }}
-              onMouseEnter={e => { e.currentTarget.style.boxShadow = 'var(--shadow-md)'; e.currentTarget.style.borderColor = 'rgba(15,82,87,0.22)'; }}
-              onMouseLeave={e => { e.currentTarget.style.boxShadow = 'var(--shadow-sm)'; e.currentTarget.style.borderColor = 'var(--border-strong)'; }}>
-              <div style={{ padding: '18px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-section)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-                  <div style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--halal)', boxShadow: '0 0 0 3px var(--halal-bg)', animation: 'pulse 3s infinite' }} />
-                  <span style={{ fontWeight: 700, fontSize: '0.84rem', color: 'var(--text-dark)', letterSpacing: '-0.2px' }}>Live Screenings</span>
-                </div>
-                <Link to="/portfolio" style={{ fontSize: '0.73rem', fontWeight: 700, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: 3, textDecoration: 'none', transition: 'gap 0.2s' }}
-                  onMouseEnter={e => e.currentTarget.style.gap = '6px'}
-                  onMouseLeave={e => e.currentTarget.style.gap = '3px'}>
-                  View all <ArrowUpRight size={12} />
-                </Link>
+        {/* Minimal Live Screenings Row */}
+        <Reveal delay={0.05}>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, padding: '0 12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--halal)', animation: 'pulse 3s infinite' }} />
+                <span style={{ fontWeight: 700, fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px' }}>Live Screenings</span>
               </div>
-              <div>
-                {loading
-                  ? [0,1,2,3,4].map(i => <div key={i} className="skeleton" style={{ height: 60, margin: '8px 14px', borderRadius: 9 }} />)
-                  : recent.slice(0, 6).map((co, i) => (
-                    <Link key={co.id} to={`/market/${co.symbol}`} style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '12px 24px', borderBottom: i < Math.min(recent.length, 6) - 1 ? '1px solid var(--border)' : 'none', textDecoration: 'none', transition: 'background 0.15s', background: 'transparent' }}
-                      onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-section)'}
-                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                      <CompanyAvatar symbol={co.symbol} size={36} />
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: 700, fontSize: '0.84rem', color: 'var(--text-dark)', letterSpacing: '-0.1px' }}>{co.symbol}</div>
-                        <div style={{ fontSize: '0.71rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 1 }}>{co.name}</div>
-                      </div>
-                      <StatusPill verdict={co.verdict} />
-                      <ChevronRight size={12} color="var(--text-light)" style={{ flexShrink: 0, marginLeft: 4 }} />
-                    </Link>
-                  ))}
-              </div>
+              <Link to="/portfolio" style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary)', textDecoration: 'none' }}>
+                View all →
+              </Link>
             </div>
-
-            {/* Right column */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-
-              {/* Reports */}
-              <div style={{ background: 'var(--bg)', border: '1px solid var(--border-strong)', borderRadius: 22 }}>
-                <div style={{ padding: '20px 26px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 9 }}>
-                  <FileText size={15} color="var(--gold)" />
-                  <span style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-dark)' }}>Audited Reports</span>
-                </div>
-                <div>
-                  {loading
-                    ? [0,1,2].map(i => <div key={i} className="skeleton" style={{ height: 54, margin: '8px 14px', borderRadius: 9 }} />)
-                    : reports.slice(0, 4).map((rep, i) => (
-                      <div key={rep.id} style={{ padding: '13px 26px', borderBottom: i < Math.min(reports.length, 4) - 1 ? '1px solid var(--border)' : 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-                        <div style={{ minWidth: 0 }}>
-                          <div style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--text-dark)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rep.name}</div>
-                          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 2 }}>{rep.type}</div>
-                        </div>
-                        <span style={{ fontSize: '0.69rem', fontWeight: 800, color: 'var(--gold)', background: 'var(--gold-50)', border: '1px solid var(--gold-border)', padding: '3px 9px', borderRadius: 7, whiteSpace: 'nowrap', flexShrink: 0 }}>
-                          FY {rep.year}
-                        </span>
-                      </div>
-                    ))}
-                </div>
-              </div>
-
-              {/* News */}
-              <div style={{ background: 'var(--bg)', border: '1px solid var(--border-strong)', borderRadius: 22 }}>
-                <div style={{ padding: '20px 26px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 9 }}>
-                  <TrendingUp size={15} color="var(--review)" />
-                  <span style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-dark)' }}>Market Intelligence</span>
-                </div>
-                <div>
-                  {loading
-                    ? [0,1].map(i => <div key={i} className="skeleton" style={{ height: 78, margin: '8px 14px', borderRadius: 9 }} />)
-                    : news.slice(0, 3).map((item, i) => (
-                      <div key={item.id} style={{ padding: '14px 26px', borderBottom: i < Math.min(news.length, 3) - 1 ? '1px solid var(--border)' : 'none' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                          <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--primary)', background: 'var(--primary-50)', padding: '2px 8px', borderRadius: 5 }}>{item.symbol}</span>
-                          <span style={{ fontSize: '0.68rem', color: 'var(--text-light)' }}>{new Date(item.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>
-                        </div>
-                        <p style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-dark)', lineHeight: 1.45, margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{item.headline}</p>
-                      </div>
-                    ))}
-                </div>
-              </div>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
+              {loading
+                ? [0,1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 72, borderRadius: 16 }} />)
+                : recent.slice(0, 4).map((co) => (
+                  <Link key={co.id} to={`/market/${co.symbol}`} style={{ padding: '16px', background: 'var(--bg)', border: '1px solid var(--border-strong)', borderRadius: 16, display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', transition: 'border-color 0.2s, box-shadow 0.2s' }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(15,82,87,0.3)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.04)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-strong)'; e.currentTarget.style.boxShadow = 'none'; }}>
+                    <CompanyAvatar symbol={co.symbol} size={32} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-dark)' }}>{co.symbol}</div>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{co.name}</div>
+                    </div>
+                  </Link>
+                ))}
             </div>
           </div>
         </Reveal>
+      </div>
+
+      {/* ── MAIN ──────────────────────────────── */}
+      <div style={{ maxWidth: 1260, margin: '0 auto', padding: '0 20px clamp(72px,12vw,120px)', width: '100%', display: 'flex', flexDirection: 'column', gap: 'clamp(56px,9vw,96px)' }}>
 
         {/* Features Grid */}
         <Reveal delay={0.05}>
