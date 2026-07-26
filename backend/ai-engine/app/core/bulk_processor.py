@@ -38,7 +38,8 @@ class BulkProcessor:
             tickers = tickers[start_idx:end_idx]
             print(f"Running Phase {phase}: processing {len(tickers)} tickers from index {start_idx} to {end_idx}.")
         
-        batch_size = 5
+        # Reduce batch size from 5 to 1 to prevent Out-Of-Memory (OOM) errors on small cloud instances (like Render)
+        batch_size = 1
         for i in range(0, len(tickers), batch_size):
             batch = tickers[i:i+batch_size]
             tasks = []
