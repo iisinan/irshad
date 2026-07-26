@@ -162,13 +162,18 @@ async def screen_company(ticker: str, financial_year: int = 2025, db: AsyncSessi
         if not isinstance(raw_ratios, dict):
             raw_ratios = {}
 
+        # Merge sources
+        sources = result_state.get("source_urls", {})
+        if bus_result and bus_result.get("source_urls"):
+            sources["business_news"] = bus_result.get("source_urls")
+
         # Format exact JSON structure requested
         response_data = {
             "company": result_state.get("company_name", ticker),
             "ticker": ticker.upper(),
             "financial_year": financial_year,
             "confidence": result_state.get("confidence_score", 0),
-            "sources": result_state.get("source_urls", {}),
+            "sources": sources,
             "financials": final_values,
             "aaoifi": {
                 "business_activity": bus_result.get("verdict", "PASS") if bus_result else "PASS", 
