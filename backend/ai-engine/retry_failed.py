@@ -1,28 +1,10 @@
 import asyncio
-from app.graph.state import GraphState
-from app.graph.builder import build_graph
-from app.core.database import AsyncSessionLocal
-from app.core.db_saver import save_graph_result_to_db
-import traceback
-
-graph_app = build_graph()
+from app.core.bulk_processor import BulkProcessor
 
 async def main():
-    failed = ['BERGER']
-    financial_year = 2026
-    
-    for ticker in failed:
-        print(f"Retrying ticker {ticker}...")
-        initial_state = GraphState(ticker=ticker, financial_year=financial_year)
-        
-        try:
-            res = await graph_app.ainvoke(initial_state)
-            async with AsyncSessionLocal() as db:
-                await save_graph_result_to_db(db, ticker, financial_year, res)
-            print(f"Successfully saved {ticker} to database.")
-        except Exception as e:
-            print(f"Error processing/saving {ticker}: {e}")
-            traceback.print_exc()
+    processor = BulkProcessor()
+    print("Re-running Phase 1 to catch any missed companies...")
+    await processor.process_all_tickers(financial_year=2026, phase=1)
 
 if __name__ == "__main__":
     asyncio.run(main())

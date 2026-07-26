@@ -22,6 +22,10 @@ class CloudflareR2Client:
         """
         Uploads a file to R2 and returns the object path.
         """
+        if not self.bucket_name or not self.access_key:
+            print("R2 storage not configured. Skipping upload.")
+            return None
+            
         try:
             self.s3_client.upload_file(file_path, self.bucket_name, object_name)
             return object_name

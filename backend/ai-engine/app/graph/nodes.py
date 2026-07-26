@@ -37,6 +37,8 @@ async def initialise_and_check_cache(state: GraphState) -> GraphState:
         recent_fin = result_fin.scalars().first()
         if recent_fin and recent_fin.chosen_values:
             state["existing_financial_data"] = recent_fin.chosen_values
+            state["skip_financials"] = True
+            print(f"[{ticker}] Found existing financial data, skipping financials.")
         else:
             state["existing_financial_data"] = None
             
