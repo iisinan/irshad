@@ -3664,3 +3664,41 @@ img[src="/logo.svg"] {
     margin-top: 0 !important;
   }
 }
+
+/* ─── Admin Responsive Utilities ─── */
+.admin-page-padding {
+  padding: 32px 40px;
+}
+.admin-modal-overlay {
+  padding: 20px;
+}
+@media (max-width: 768px) {
+  .admin-page-padding {
+    padding: 16px 20px;
+  }
+  .admin-dashboard-header-flex {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 12px;
+  }
+  .admin-dashboard-header-flex > div:last-child {
+    width: 100%;
+    flex-direction: column;
+  }
+  .admin-dashboard-header-flex > div:last-child > button {
+    width: 100%;
+    justify-content: center;
+  }
+  .admin-modal-overlay {
+    padding: 12px;
+  }
+  .admin-modal-body {
+    max-height: 85vh;
+  }
+  .admin-modal-actions {
+    flex-direction: column;
+  }
+  .admin-modal-actions > button {
+    width: 100%;
+  }
+}

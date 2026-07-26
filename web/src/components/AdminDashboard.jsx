@@ -235,7 +235,7 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div style={{ padding: '32px 40px', maxWidth: '1400px', margin: '0 auto', minHeight: '100vh' }}>
+    <div className="admin-page-padding" style={{ maxWidth: '1400px', margin: '0 auto', minHeight: '100vh' }}>
 
       {/* ── Page Header ───────────────────────────── */}
       <div style={{ marginBottom: '32px' }}>
@@ -244,7 +244,7 @@ const AdminDashboard = () => {
           <ChevronRight size={12} color="var(--text-light)" />
           <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '1px' }}>Alerts</span>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '16px' }}>
+        <div className="admin-dashboard-header-flex" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '16px' }}>
           <div>
             <h1 style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--text-dark)', margin: 0, letterSpacing: '-0.5px', display: 'flex', alignItems: 'center', gap: '12px' }}>
               <span style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--primary-50)', color: 'var(--primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -277,7 +277,7 @@ const AdminDashboard = () => {
             <button
               onClick={handleExport}
               style={{
-                display: 'flex', alignItems: 'center', gap: '8px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                 padding: '10px 18px', borderRadius: '12px',
                 border: '1px solid var(--border)', background: 'var(--bg)',
                 color: 'var(--text-dark)', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600,
@@ -289,7 +289,7 @@ const AdminDashboard = () => {
               onClick={() => fileInputRef.current?.click()}
               disabled={importing}
               style={{
-                display: 'flex', alignItems: 'center', gap: '8px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                 padding: '10px 18px', borderRadius: '12px',
                 border: 'none', background: 'var(--primary)',
                 color: '#fff', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600,
@@ -515,18 +515,18 @@ const AdminDashboard = () => {
 
       {/* ── Override Modal ──────────────────────── */}
       {selectedItem && createPortal(
-        <div style={{
+        <div className="admin-modal-overlay" style={{
           position: 'fixed', inset: 0,
           background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          zIndex: 100000, padding: '20px'
+          zIndex: 100000
         }}>
-          <div className="animate-fade-in" style={{
+          <div className="animate-fade-in admin-modal-body" style={{
             background: 'var(--bg)', padding: '0', borderRadius: '24px',
             width: '100%', maxWidth: '480px',
             border: '1px solid var(--border)',
             boxShadow: '0 32px 64px rgba(0,0,0,0.2)',
-            overflow: 'hidden'
+            overflow: 'auto'
           }}>
             {/* Modal Header */}
             <div style={{ padding: '24px 28px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-section)' }}>
@@ -566,7 +566,7 @@ const AdminDashboard = () => {
                 />
               </div>
 
-              <div style={{ display: 'flex', gap: '12px' }}>
+              <div className="admin-modal-actions" style={{ display: 'flex', gap: '12px' }}>
                 <button type="button" onClick={() => setSelectedItem(null)}
                   style={{ flex: 1, padding: '13px', borderRadius: '12px', background: 'var(--bg-section)', border: 'none', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer' }}>
                   Cancel
@@ -584,15 +584,15 @@ const AdminDashboard = () => {
 
       {/* ── Import Preview Modal ──────────────────────── */}
       {importPreview && createPortal(
-        <div style={{
+        <div className="admin-modal-overlay" style={{
           position: 'fixed', inset: 0,
           background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          zIndex: 100000, padding: '20px'
+          zIndex: 100000
         }}>
-          <div className="animate-fade-in" style={{
+          <div className="animate-fade-in admin-modal-body" style={{
             background: 'var(--bg)', padding: '0', borderRadius: '24px',
-            width: '100%', maxWidth: '700px', maxHeight: '90vh',
+            width: '100%', maxWidth: '700px',
             border: '1px solid var(--border)',
             boxShadow: '0 32px 64px rgba(0,0,0,0.2)',
             display: 'flex', flexDirection: 'column',
@@ -658,7 +658,7 @@ const AdminDashboard = () => {
               )}
             </div>
 
-            <div style={{ padding: '20px 28px', borderTop: '1px solid var(--border)', display: 'flex', gap: '12px', background: 'var(--bg-section)' }}>
+            <div className="admin-modal-actions" style={{ padding: '20px 28px', borderTop: '1px solid var(--border)', display: 'flex', gap: '12px', background: 'var(--bg-section)' }}>
               <button type="button" onClick={() => setImportPreview(null)}
                 style={{ flex: 1, padding: '13px', borderRadius: '12px', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer' }}>
                 Cancel

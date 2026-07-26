@@ -147,7 +147,7 @@ export default function AdminTickerEditor() {
 
   if (loading) {
     return (
-      <div style={{ padding: '32px 40px', maxWidth: '1200px', margin: '0 auto' }}>
+      <div className="admin-page-padding" style={{ maxWidth: '1200px', margin: '0 auto' }}>
         {/* Breadcrumb skeleton */}
         <div style={{ height: '14px', borderRadius: '6px', background: 'var(--bg-section)', width: '200px', marginBottom: '20px', animation: 'pulse 1.5s ease-in-out infinite' }} />
         {/* Header skeleton */}
@@ -181,7 +181,7 @@ export default function AdminTickerEditor() {
   const sc = statusColors[currentStatus] || statusColors.review;
 
   return (
-    <div className="animate-fade-in" style={{ padding: '32px 40px', maxWidth: '1200px', margin: '0 auto' }}>
+    <div className="animate-fade-in admin-page-padding" style={{ maxWidth: '1200px', margin: '0 auto' }}>
 
       {/* ── Breadcrumb ───────────────────────────── */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
@@ -312,7 +312,7 @@ export default function AdminTickerEditor() {
               {/* Basic identity */}
               <div style={{ background: 'var(--bg-section)', borderRadius: '16px', padding: '24px', marginBottom: '20px', border: '1px solid var(--border)' }}>
                 <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px' }}>Basic Identity</div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
                   {[
                     { label: 'Company Name', key: 'name', placeholder: 'e.g. Access Bank Plc' },
                     { label: 'Sector', key: 'sector', placeholder: 'e.g. Financial Services' },
@@ -397,7 +397,7 @@ export default function AdminTickerEditor() {
               {/* Financial inputs */}
               <div style={{ background: 'var(--bg-section)', borderRadius: '16px', padding: '24px', marginBottom: '20px', border: '1px solid var(--border)' }}>
                 <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px' }}>Balance Sheet</div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
                   {[
                     { label: 'Market Cap', key: 'market_cap' },
                     { label: 'Total Assets', key: 'total_assets' },
@@ -416,7 +416,7 @@ export default function AdminTickerEditor() {
 
               <div style={{ background: 'var(--bg-section)', borderRadius: '16px', padding: '24px', marginBottom: '20px', border: '1px solid var(--border)' }}>
                 <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px' }}>Income Statement</div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
                   {[
                     { label: 'Total Revenue', key: 'total_revenue' },
                     { label: 'Interest / Non-Permissible Income', key: 'interest_income' },
@@ -534,8 +534,8 @@ export default function AdminTickerEditor() {
 
       {/* ADD NEWS MODAL */}
       {showNewsModal && createPortal(
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000, padding: '20px' }}>
-          <div className="animate-fade-in" style={{ background: 'var(--bg)', width: '100%', maxWidth: '480px', borderRadius: '24px', boxShadow: '0 32px 64px rgba(0,0,0,0.2)', overflow: 'hidden', border: '1px solid var(--border)', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+        <div className="admin-modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000 }}>
+          <div className="animate-fade-in admin-modal-body" style={{ background: 'var(--bg)', width: '100%', maxWidth: '480px', borderRadius: '24px', boxShadow: '0 32px 64px rgba(0,0,0,0.2)', overflow: 'hidden', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column' }}>
             <div style={{ padding: '24px 28px', borderBottom: '1px solid var(--border)', background: 'var(--bg-section)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
               <div>
                 <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>{stock.symbol} · News</div>
@@ -568,7 +568,7 @@ export default function AdminTickerEditor() {
                 <input required type="url" value={newsForm.url} onChange={e => setNewsForm({...newsForm, url: e.target.value})} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.88rem', outline: 'none' }} />
               </div>
 
-              <div style={{ display: 'flex', gap: '12px' }}>
+              <div className="admin-modal-actions" style={{ display: 'flex', gap: '12px' }}>
                 <button type="button" onClick={() => setShowNewsModal(false)} style={{ flex: 1, padding: '14px', borderRadius: '12px', background: 'var(--bg-section)', border: 'none', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer' }}>Cancel</button>
                 <button type="submit" disabled={saving} style={{ flex: 1.5, padding: '14px', borderRadius: '12px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {saving ? <div className="spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', borderColor: 'rgba(255,255,255,0.3)', borderTopColor: 'white' }} /> : 'Add Article'}
