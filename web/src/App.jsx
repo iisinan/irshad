@@ -13,19 +13,39 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { Toaster } from 'react-hot-toast';
 import './index.css';
 
-const StockDetails = React.lazy(() => import('./components/StockDetails'));
-const AdminTickerEditor = React.lazy(() => import('./components/AdminTickerEditor'));
-const AaoifiScreening = React.lazy(() => import('./components/AaoifiScreening'));
-const Portfolio = React.lazy(() => import('./components/Portfolio'));
-const AboutPage = React.lazy(() => import('./components/About'));
-const ShariahPage = React.lazy(() => import('./components/Shariah'));
-const ResourcesPage = React.lazy(() => import('./components/Resources'));
-const Profile = React.lazy(() => import('./components/Profile'));
-const AdminDashboard = React.lazy(() => import('./components/AdminDashboard'));
-const AdminUsers = React.lazy(() => import('./components/AdminUsers'));
-const ZakatSettingsAdmin = React.lazy(() => import('./components/ZakatSettingsAdmin'));
-const Pricing = React.lazy(() => import('./components/Pricing'));
-const LandingPage = React.lazy(() => import('./components/LandingPage'));
+const lazyWithRetry = (componentImport) =>
+  React.lazy(async () => {
+    const pageHasAlreadyBeenForceRefreshed = JSON.parse(
+      window.sessionStorage.getItem('page-has-been-force-refreshed') || 'false'
+    );
+    try {
+      const component = await componentImport();
+      window.sessionStorage.setItem('page-has-been-force-refreshed', 'false');
+      return component;
+    } catch (error) {
+      if (!pageHasAlreadyBeenForceRefreshed) {
+        window.sessionStorage.setItem('page-has-been-force-refreshed', 'true');
+        window.location.reload();
+        // Return a promise that never resolves so React Suspense stays active during reload
+        return new Promise(() => {});
+      }
+      throw error;
+    }
+  });
+
+const StockDetails = lazyWithRetry(() => import('./components/StockDetails'));
+const AdminTickerEditor = lazyWithRetry(() => import('./components/AdminTickerEditor'));
+const AaoifiScreening = lazyWithRetry(() => import('./components/AaoifiScreening'));
+const Portfolio = lazyWithRetry(() => import('./components/Portfolio'));
+const AboutPage = lazyWithRetry(() => import('./components/About'));
+const ShariahPage = lazyWithRetry(() => import('./components/Shariah'));
+const ResourcesPage = lazyWithRetry(() => import('./components/Resources'));
+const Profile = lazyWithRetry(() => import('./components/Profile'));
+const AdminDashboard = lazyWithRetry(() => import('./components/AdminDashboard'));
+const AdminUsers = lazyWithRetry(() => import('./components/AdminUsers'));
+const ZakatSettingsAdmin = lazyWithRetry(() => import('./components/ZakatSettingsAdmin'));
+const Pricing = lazyWithRetry(() => import('./components/Pricing'));
+const LandingPage = lazyWithRetry(() => import('./components/LandingPage'));
 const DASHBOARD_ROUTES = ['/portfolio', '/profile', '/admin'];
 
 /* ─── Animated Routes Wrapper ─────────────────────────────── */
