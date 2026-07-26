@@ -64,9 +64,12 @@ async def search_financial_statements(state: GraphState) -> GraphState:
         return state
         
     scraper = FinancialScraper()
-    results = await scraper.search_latest_financial_report_pdfs(state["company_name"], state.get("financial_year", 2026))
+    results = await scraper.search_latest_financial_report_pdfs(state["ticker"], state["company_name"], state.get("financial_year", 2026))
     state["search_results"] = results
     state["annual_report_url"] = results.get("official") or results.get("ngx") or results.get("african_financials")
+    
+    if state["annual_report_url"]:
+        state["source_urls"]["annual_report"] = state["annual_report_url"]
     
     return state
 
