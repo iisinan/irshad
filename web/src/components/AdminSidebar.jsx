@@ -17,7 +17,7 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
 
   const ADMIN_NAV_ITEMS = [
     { section: 'Admin' },
-    { label: 'Dashboard / Alerts', icon: LayoutDashboard, to: '/admin' },
+    { label: 'Alerts', icon: LayoutDashboard, to: '/admin' },
     { label: 'Registered Users', icon: Users, to: '/admin/users' },
     { label: 'Tickers', icon: Database, to: '/admin?tab=stocks' },
     { label: 'Resources', icon: BookOpen, to: '/admin/resources' },
