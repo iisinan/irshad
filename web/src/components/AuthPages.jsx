@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 
 /* ─── Input Component ────────────────────────────────────── */
-const FormField = ({ label, name, type = 'text', placeholder, value, onChange, hint }) => {
+const FormField = ({ label, name, type = 'text', placeholder, value, onChange, hint, required, minLength }) => {
   const [show, setShow] = useState(false);
   const isPassword = type === 'password';
   const inputType = isPassword ? (show ? 'text' : 'password') : type;
@@ -21,6 +21,8 @@ const FormField = ({ label, name, type = 'text', placeholder, value, onChange, h
           placeholder={placeholder}
           value={value}
           onChange={onChange}
+          required={required}
+          minLength={minLength}
           className="auth-input"
         />
         {isPassword && (
@@ -177,10 +179,10 @@ export const RegisterPage = () => {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [passwordConfirmation, setPasswordConfirmation] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [country, setCountry] = useState('Nigeria');
   const [occupation, setOccupation] = useState('');
-  const [dob, setDob] = useState('');
   const [investmentGoal, setInvestmentGoal] = useState('Halal Long-Term Wealth');
   const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState('');
@@ -203,6 +205,12 @@ export const RegisterPage = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     if (!agreed) return;
+    
+    if (password !== passwordConfirmation) {
+      setError('Passwords do not match.');
+      return;
+    }
+
     setError('');
     setLoading(true);
     
@@ -211,16 +219,16 @@ export const RegisterPage = () => {
     const lname = formData.get('lastName') || lastName;
     const em = formData.get('email') || email;
     const pass = formData.get('password') || password;
+    const passConfirm = formData.get('passwordConfirmation') || passwordConfirmation;
 
     const res = await register({ 
       name: `${fname} ${lname}`.trim(),
       email: em, 
       password: pass,
-      password_confirmation: pass, // Laravel expects this
+      password_confirmation: passConfirm,
       phone_number: phoneNumber,
       location: country,
       occupation: occupation,
-      dob: dob,
       investment_goal: investmentGoal,
     });
     
@@ -249,8 +257,8 @@ export const RegisterPage = () => {
         {/* Form */}
         <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-            <FormField label="First Name *" name="firstName" placeholder="Omar" value={firstName} onChange={e => setFirstName(e.target.value)} />
-            <FormField label="Last Name *" name="lastName" placeholder="Bello" value={lastName} onChange={e => setLastName(e.target.value)} />
+            <FormField label="First Name *" name="firstName" placeholder="Omar" value={firstName} onChange={e => setFirstName(e.target.value)} required />
+            <FormField label="Last Name *" name="lastName" placeholder="Bello" value={lastName} onChange={e => setLastName(e.target.value)} required />
           </div>
 
           <FormField
@@ -260,13 +268,14 @@ export const RegisterPage = () => {
             placeholder="you@example.com"
             value={email}
             onChange={e => setEmail(e.target.value)}
+            required
           />
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
             <FormField label="Phone Number" name="phoneNumber" placeholder="+234 800 000 0000" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} />
             <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
               <label className="auth-label">Country of Residence</label>
-              <select className="auth-input" value={country} onChange={e => setCountry(e.target.value)}>
+              <select name="country" className="auth-input" value={country} onChange={e => setCountry(e.target.value)}>
                 <option value="Nigeria">Nigeria 🇳🇬</option>
                 <option value="United Kingdom">United Kingdom 🇬🇧</option>
                 <option value="United States">United States 🇺🇸</option>
@@ -278,14 +287,11 @@ export const RegisterPage = () => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-            <FormField label="Occupation / Profession" name="occupation" placeholder="e.g. Engineer, Analyst" value={occupation} onChange={e => setOccupation(e.target.value)} />
-            <FormField label="Date of Birth" name="dob" type="date" value={dob} onChange={e => setDob(e.target.value)} />
-          </div>
+          <FormField label="Occupation / Profession" name="occupation" placeholder="e.g. Engineer, Analyst" value={occupation} onChange={e => setOccupation(e.target.value)} />
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
             <label className="auth-label">Primary Investment Goal</label>
-            <select className="auth-input" value={investmentGoal} onChange={e => setInvestmentGoal(e.target.value)}>
+            <select name="investmentGoal" className="auth-input" value={investmentGoal} onChange={e => setInvestmentGoal(e.target.value)}>
               <option value="Halal Long-Term Wealth">Halal Long-Term Wealth Building</option>
               <option value="Zakat & Purification Management">Zakat & Purification Management</option>
               <option value="Shariah-Compliant Dividends">Shariah-Compliant Dividends & Passive Income</option>
@@ -293,15 +299,29 @@ export const RegisterPage = () => {
             </select>
           </div>
 
-          <FormField
-            label="Password *"
-            name="password"
-            type="password"
-            placeholder="Create a strong password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            hint="At least 8 characters with a number and a symbol."
-          />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+            <FormField
+              label="Password *"
+              name="password"
+              type="password"
+              placeholder="Strong password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              hint="At least 8 characters."
+              required
+              minLength={8}
+            />
+            <FormField
+              label="Confirm Password *"
+              name="passwordConfirmation"
+              type="password"
+              placeholder="Confirm password"
+              value={passwordConfirmation}
+              onChange={e => setPasswordConfirmation(e.target.value)}
+              required
+              minLength={8}
+            />
+          </div>
 
           <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
             <input
