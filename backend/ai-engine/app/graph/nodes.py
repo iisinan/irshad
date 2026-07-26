@@ -156,7 +156,7 @@ async def collect_market_data(state: GraphState) -> GraphState:
         async with AsyncSessionLocal() as db:
             result = await db.execute(select(Company).where(Company.ticker == ticker))
             company = result.scalars().first()
-            if company and company.market_cap:
+            if company and hasattr(company, 'market_cap') and company.market_cap:
                 market_cap = float(company.market_cap)
     except Exception as e:
         print(f"Failed to query market cap from DB for {ticker}: {str(e)}")
