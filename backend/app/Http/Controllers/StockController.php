@@ -88,6 +88,9 @@ class StockController extends Controller
                     'cash_and_equivalents_ratio' => $ratios['cash_and_equivalents_ratio'] ?? 0,
                     'non_compliant_income_ratio' => $ratios['non_permissible_income_ratio'] ?? 0,
                     'evidence_link' => $existingScreening->evidence_links,
+                    'report_quarter' => $existingScreening->report_quarter,
+                    'published_date' => $existingScreening->published_date,
+                    'financial_year' => $existingScreening->financial_year,
                 ];
                 
                 if ($company->financials && $company->financials->count() > 0) {
