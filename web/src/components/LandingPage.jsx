@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield, ArrowRight, Search as SearchIcon, FileText, Globe, FileDigit, ChevronRight, Sparkles, TrendingUp, ArrowUpRight, CheckCircle, Lock, Zap, BarChart2 } from 'lucide-react';
+import { Shield, ArrowRight, Search as SearchIcon, FileText, Globe, FileDigit, ChevronRight, Sparkles, TrendingUp, ArrowUpRight, CheckCircle, Lock, Zap, BarChart2, Smartphone } from 'lucide-react';
 import { fetchOverviewStats, fetchRecentScreenings, fetchLatestReports, fetchBusinessNewsOverview } from '../services/api';
 import Footer from './Footer';
 
@@ -421,6 +421,145 @@ export default function LandingPage() {
                   <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.55, margin: 0 }}>{s.desc}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </Reveal>
+
+        {/* Mobile App */}
+        <Reveal delay={0.04}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 440px), 1fr))', gap: 48, alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: 'clamp(48px,8vw,72px)' }}>
+
+            {/* Left — copy */}
+            <div>
+              <div style={{ fontSize: '0.7rem', fontWeight: 700, letterSpacing: '1.2px', textTransform: 'uppercase', color: 'var(--primary)', marginBottom: 12 }}>Mobile App</div>
+              <h2 style={{ fontSize: 'clamp(1.6rem, 3.5vw, 2.4rem)', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-0.8px', lineHeight: 1.15, marginBottom: 16, margin: '0 0 16px' }}>
+                Shariah screening<br />in your pocket
+              </h2>
+              <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', lineHeight: 1.75, marginBottom: 32, maxWidth: 420 }}>
+                The full power of Irshad — live verdicts, company reports, market news, and your portfolio — available on Android and iOS.
+              </p>
+
+              {/* Feature bullets */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 13, marginBottom: 36 }}>
+                {[
+                  { icon: Shield,      text: 'Instant halal verdict for any Nigerian equity'     },
+                  { icon: Zap,         text: 'Push alerts when a stock changes screening status'  },
+                  { icon: BarChart2,   text: 'Live prices, ratios and full company reports'       },
+                  { icon: CheckCircle, text: 'Works offline with cached screening data'            },
+                ].map((f, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: 9, background: 'var(--primary-50)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', flexShrink: 0, border: '1px solid var(--primary-100)' }}>
+                      <f.icon size={15} />
+                    </div>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--text-body)', fontWeight: 500 }}>{f.text}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Store badges */}
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                {/* App Store */}
+                <a
+                  href="https://apps.apple.com"
+                  target="_blank" rel="noopener noreferrer"
+                  style={{ display: 'flex', alignItems: 'center', gap: 11, background: 'var(--text-dark)', color: 'white', padding: '11px 22px', borderRadius: 13, textDecoration: 'none', transition: 'transform 0.2s, box-shadow 0.2s', boxShadow: '0 4px 14px rgba(0,0,0,0.15)' }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.2)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,0,0,0.15)'; }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+                  <div>
+                    <div style={{ fontSize: '0.6rem', opacity: 0.75, lineHeight: 1, marginBottom: 2, fontWeight: 500 }}>Download on the</div>
+                    <div style={{ fontSize: '0.88rem', fontWeight: 800, lineHeight: 1 }}>App Store</div>
+                  </div>
+                </a>
+
+                {/* Google Play */}
+                <a
+                  href="https://play.google.com"
+                  target="_blank" rel="noopener noreferrer"
+                  style={{ display: 'flex', alignItems: 'center', gap: 11, background: 'var(--text-dark)', color: 'white', padding: '11px 22px', borderRadius: 13, textDecoration: 'none', transition: 'transform 0.2s, box-shadow 0.2s', boxShadow: '0 4px 14px rgba(0,0,0,0.15)' }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.2)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,0,0,0.15)'; }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                    <path d="M3.18 23.76c.3.17.64.24.99.19L14.54 12 3.18.05C2.83.0 2.49.07 2.19.24 1.6.57 1.25 1.22 1.25 2v20c0 .78.35 1.43.93 1.76z" fill="#EA4335"/>
+                    <path d="M22.45 10.29l-3.23-1.85L15.72 12l3.5 3.56 3.24-1.86c.93-.53.93-2.88-.01-3.41z" fill="#FBBC04"/>
+                    <path d="M3.18.05l11.36 11.96L18.1 8.44 5.11.34A2.04 2.04 0 003.18.05z" fill="#4285F4"/>
+                    <path d="M3.18 23.95c.6.36 1.35.32 1.93-.04l13-8.1-3.57-3.81L3.18 23.95z" fill="#34A853"/>
+                  </svg>
+                  <div>
+                    <div style={{ fontSize: '0.6rem', opacity: 0.75, lineHeight: 1, marginBottom: 2, fontWeight: 500 }}>Get it on</div>
+                    <div style={{ fontSize: '0.88rem', fontWeight: 800, lineHeight: 1 }}>Google Play</div>
+                  </div>
+                </a>
+              </div>
+            </div>
+
+            {/* Right — decorative phone card */}
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <div style={{ position: 'relative', width: 'min(320px, 100%)', aspectRatio: '9/16', maxHeight: 520 }}>
+                {/* Phone frame */}
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(160deg, var(--bg) 0%, var(--bg-section) 100%)', borderRadius: 44, border: '1.5px solid var(--border-strong)', boxShadow: '0 32px 64px rgba(0,0,0,0.12), 0 0 0 6px var(--bg), 0 0 0 7.5px var(--border-strong)', overflow: 'hidden' }}>
+
+                  {/* Status bar */}
+                  <div style={{ padding: '16px 22px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-dark)' }}>9:41</span>
+                    <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
+                      {[3,4,4].map((h, i) => <div key={i} style={{ width: 3, height: `${h * 2}px`, background: 'var(--text-dark)', borderRadius: 1, opacity: 0.6 + i * 0.2 }} />)}
+                      <Smartphone size={10} color="var(--text-dark)" style={{ marginLeft: 4 }} />
+                    </div>
+                  </div>
+
+                  {/* App header */}
+                  <div style={{ padding: '20px 22px 14px', borderBottom: '1px solid var(--border)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                      <span style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-0.5px' }}>Irshad</span>
+                      <div style={{ width: 28, height: 28, borderRadius: 8, background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Shield size={13} color="white" />
+                      </div>
+                    </div>
+                    {/* Mini search */}
+                    <div style={{ background: 'var(--bg-section)', border: '1px solid var(--border)', borderRadius: 9, padding: '7px 11px', display: 'flex', alignItems: 'center', gap: 7 }}>
+                      <SearchIcon size={11} color="var(--text-muted)" />
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-light)', fontWeight: 500 }}>Search equities…</span>
+                    </div>
+                  </div>
+
+                  {/* Stock rows */}
+                  <div style={{ padding: '8px 0' }}>
+                    {[
+                      { sym: 'DANGCEM', name: 'Dangote Cement', verdict: 'halal'     },
+                      { sym: 'ZENITHBANK', name: 'Zenith Bank',  verdict: 'doubtful' },
+                      { sym: 'MTNN',    name: 'MTN Nigeria',    verdict: 'halal'     },
+                      { sym: 'GTCO',    name: 'Guaranty Trust', verdict: 'halal'     },
+                    ].map((co, i) => (
+                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 22px', borderBottom: i < 3 ? '1px solid var(--border)' : 'none' }}>
+                        <div style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--primary-50)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.6rem', color: 'var(--primary)', flexShrink: 0 }}>
+                          {co.sym.substring(0, 2)}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-dark)' }}>{co.sym}</div>
+                          <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{co.name}</div>
+                        </div>
+                        <StatusPill verdict={co.verdict} />
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Bottom nav */}
+                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '12px 0 20px', borderTop: '1px solid var(--border)', background: 'var(--bg)', display: 'flex', justifyContent: 'space-around' }}>
+                    {[
+                      { icon: BarChart2, label: 'Market',    active: true  },
+                      { icon: FileText,  label: 'Reports',   active: false },
+                      { icon: Shield,    label: 'Screening', active: false },
+                      { icon: Globe,     label: 'News',      active: false },
+                    ].map((tab, i) => (
+                      <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                        <tab.icon size={16} color={tab.active ? 'var(--primary)' : 'var(--text-light)'} />
+                        <span style={{ fontSize: '0.55rem', fontWeight: 600, color: tab.active ? 'var(--primary)' : 'var(--text-light)' }}>{tab.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </Reveal>
