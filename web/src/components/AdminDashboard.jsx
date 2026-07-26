@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Shield, Search, AlertTriangle, CheckCircle, Edit2, X, Package, TrendingUp, AlertCircle, Calculator, RefreshCw, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '../services/api';
 import CompanyLogo from './CompanyLogo';
 import { useAuth } from '../context/AuthContext';
@@ -54,21 +55,54 @@ const AdminDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState('stocks');
-  const [stocks, setStocks] = useState(() => {
-    const cached = localStorage.getItem('irshad_admin_stocks_v1');
-    return cached ? JSON.parse(cached) : [];
+  const queryClient = useQueryClient();
+
+  // ── React Query fetchers (cache-first, background refresh) ──
+  const { data: stocks = [], isFetching: stocksFetching, refetch: refetchStocks } = useQuery({
+    queryKey: ['admin-stocks'],
+    queryFn: async () => {
+      const res = await api.get('/stocks');
+      const data = res.data?.data || [];
+      localStorage.setItem('irshad_admin_stocks_v1', JSON.stringify(data));
+      return data;
+    },
+    initialData: () => {
+      try {
+        const cached = localStorage.getItem('irshad_admin_stocks_v1');
+        return cached ? JSON.parse(cached) : undefined;
+      } catch { return undefined; }
+    },
+    staleTime: 1000 * 60 * 5, // 5 min — serve cache instantly, revalidate after
+    gcTime: 1000 * 60 * 60,
   });
-  const [products, setProducts] = useState(() => {
-    const cached = localStorage.getItem('irshad_admin_products_v1');
-    return cached ? JSON.parse(cached) : [];
+
+  const { data: alerts = [], isFetching: alertsFetching, refetch: refetchAlerts } = useQuery({
+    queryKey: ['admin-alerts'],
+    queryFn: async () => {
+      const res = await api.get('/admin/alerts');
+      const data = res.data?.data || res.data || [];
+      localStorage.setItem('irshad_admin_alerts_v1', JSON.stringify(data));
+      return data;
+    },
+    initialData: () => {
+      try {
+        const cached = localStorage.getItem('irshad_admin_alerts_v1');
+        return cached ? JSON.parse(cached) : undefined;
+      } catch { return undefined; }
+    },
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 30,
   });
-  const [alerts, setAlerts] = useState(() => {
-    const cached = localStorage.getItem('irshad_admin_alerts_v1');
-    return cached ? JSON.parse(cached) : [];
-  });
-  const [loading, setLoading] = useState(() => stocks.length === 0);
+
+  const loading = stocksFetching && stocks.length === 0;
   const [error, setError] = useState(null);
+
+  const loadData = () => {
+    refetchStocks();
+    refetchAlerts();
+  };
+
+  const [activeTab, setActiveTab] = useState('stocks');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
@@ -76,38 +110,16 @@ const AdminDashboard = () => {
   const [newStatus, setNewStatus] = useState('');
   const [reason, setReason] = useState('');
   const [updating, setUpdating] = useState(false);
-  
+
   const [importPreview, setImportPreview] = useState(null);
   const [importing, setImporting] = useState(false);
   const fileInputRef = React.useRef(null);
 
-  useEffect(() => { loadData(); }, []);
-
-  const loadData = async () => {
-    try {
-      if (stocks.length === 0) setLoading(true);
-      setError(null);
-      const [stocksRes, productsRes, alertsRes] = await Promise.all([
-        api.get('/stocks'),
-        api.get('/products'),
-        api.get('/admin/alerts'),
-      ]);
-      const s = stocksRes.data?.data || [];
-      const p = productsRes.data?.data || [];
-      const a = alertsRes.data?.data || alertsRes.data || [];
-      
-      setStocks(s);
-      setProducts(p);
-      setAlerts(a);
-      
-      localStorage.setItem('irshad_admin_stocks_v1', JSON.stringify(s));
-      localStorage.setItem('irshad_admin_products_v1', JSON.stringify(p));
-      localStorage.setItem('irshad_admin_alerts_v1', JSON.stringify(a));
-    } catch (err) {
-      setError(err.message || 'Failed to load data');
-    } finally {
-      setLoading(false);
-    }
+  // When status is updated locally, also invalidate the query cache
+  const patchStock = (symbol, updatedStock) => {
+    queryClient.setQueryData(['admin-stocks'], (old = []) =>
+      old.map(s => s.symbol === symbol ? updatedStock : s)
+    );
   };
 
   const handleUpdateStatus = async (e) => {
@@ -117,10 +129,7 @@ const AdminDashboard = () => {
     try {
       if (selectedItem.type === 'stocks') {
         const res = await api.put(`/stocks/${selectedItem.data.symbol}/status`, { status: newStatus, reason });
-        setStocks(stocks.map(s => s.symbol === selectedItem.data.symbol ? res.data.data : s));
-      } else {
-        const res = await api.put(`/products/${selectedItem.data.id}/status`, { status: newStatus, status_reason: reason });
-        setProducts(products.map(p => p.id === selectedItem.data.id ? res.data.data : p));
+        patchStock(selectedItem.data.symbol, res.data.data);
       }
       setSelectedItem(null); setNewStatus(''); setReason('');
       toastSuccess('Status updated successfully');
@@ -134,7 +143,7 @@ const AdminDashboard = () => {
   const resolveAlert = async (id) => {
     try {
       await api.post(`/admin/alerts/${id}/resolve`);
-      setAlerts(prev => prev.filter(a => a.id !== id));
+      queryClient.setQueryData(['admin-alerts'], (old = []) => old.filter(a => a.id !== id));
       toastSuccess('Alert resolved');
     } catch { toastError('Failed to resolve alert'); }
   };
@@ -200,13 +209,16 @@ const AdminDashboard = () => {
     }
   };
 
-  let filteredData = activeTab === 'stocks'
-    ? stocks.filter(s => s.symbol?.toLowerCase().includes(searchTerm.toLowerCase()) || s.name?.toLowerCase().includes(searchTerm.toLowerCase()))
-    : products.filter(p => p.barcode?.toLowerCase().includes(searchTerm.toLowerCase()) || p.name?.toLowerCase().includes(searchTerm.toLowerCase()));
+  let filteredData = stocks.filter(s =>
+    s.symbol?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    s.name?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  if (activeTab === 'stocks' && statusFilter !== 'all') {
+  if (statusFilter !== 'all') {
     filteredData = filteredData.filter(s => s.status?.status === statusFilter);
   }
+
+
 
 
 

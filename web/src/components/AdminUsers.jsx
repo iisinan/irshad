@@ -29,10 +29,28 @@ const AdminUsers = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [users, setUsers] = useState([]);
-  const [meta, setMeta] = useState(null);
+  const [users, setUsers] = useState(() => {
+    try {
+      const cached = localStorage.getItem('irshad_admin_users_cache_v1');
+      if (cached) { const { data } = JSON.parse(cached); return data || []; }
+    } catch {}
+    return [];
+  });
+  const [meta, setMeta] = useState(() => {
+    try {
+      const cached = localStorage.getItem('irshad_admin_users_cache_v1');
+      if (cached) { const { meta } = JSON.parse(cached); return meta || null; }
+    } catch {}
+    return null;
+  });
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => {
+    try {
+      const cached = localStorage.getItem('irshad_admin_users_cache_v1');
+      return !cached;
+    } catch {}
+    return true;
+  });
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
@@ -68,6 +86,10 @@ const AdminUsers = () => {
       const res = await fetchAdminUsers(currentPage, currentSearch);
       setUsers(res.data || []);
       setMeta(res);
+      // Cache page 1 with no search for instant next visit
+      if (currentPage === 1 && !currentSearch) {
+        localStorage.setItem('irshad_admin_users_cache_v1', JSON.stringify({ data: res.data || [], meta: res }));
+      }
     } catch (err) {
       toast.error('Failed to load users');
     } finally {
