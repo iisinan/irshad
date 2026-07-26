@@ -277,11 +277,20 @@ export const RegisterPage = () => {
               <label className="auth-label">Country of Residence</label>
               <select name="country" className="auth-input" value={country} onChange={e => setCountry(e.target.value)}>
                 <option value="Nigeria">Nigeria 🇳🇬</option>
-                <option value="United Kingdom">United Kingdom 🇬🇧</option>
-                <option value="United States">United States 🇺🇸</option>
-                <option value="United Arab Emirates">United Arab Emirates 🇦🇪</option>
-                <option value="Saudi Arabia">Saudi Arabia 🇸🇦</option>
-                <option value="Canada">Canada 🇨🇦</option>
+                <option value="Benin">Benin 🇧🇯</option>
+                <option value="Burkina Faso">Burkina Faso 🇧🇫</option>
+                <option value="Cape Verde">Cape Verde 🇨🇻</option>
+                <option value="Côte d'Ivoire">Côte d'Ivoire 🇨🇮</option>
+                <option value="Gambia">Gambia 🇬🇲</option>
+                <option value="Ghana">Ghana 🇬🇭</option>
+                <option value="Guinea">Guinea 🇬🇳</option>
+                <option value="Guinea-Bissau">Guinea-Bissau 🇬🇼</option>
+                <option value="Liberia">Liberia 🇱🇷</option>
+                <option value="Mali">Mali 🇲🇱</option>
+                <option value="Niger">Niger 🇳🇪</option>
+                <option value="Senegal">Senegal 🇸🇳</option>
+                <option value="Sierra Leone">Sierra Leone 🇸🇱</option>
+                <option value="Togo">Togo 🇹🇬</option>
                 <option value="Other">Other</option>
               </select>
             </div>
