@@ -289,19 +289,19 @@ textarea::placeholder {
   justify-content: space-between;
   align-items: center;
   padding: 0 32px;
-  height: 64px;
+  height: 72px;
   background: var(--bg-section);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
   position: sticky;
-  top: 16px;
+  top: 24px;
   margin: 16px auto;
-  max-width: 1200px;
+  max-width: 1240px;
   border-radius: 100px;
   z-index: 200;
-  border: 1px solid var(--border-strong);
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.3s;
+  border: 1px solid rgba(0, 109, 100, 0.15);
+  box-shadow: 0 16px 48px rgba(0, 109, 100, 0.08);
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @media (max-width: 1240px) {
@@ -340,24 +340,32 @@ textarea::placeholder {
 
 .nav-links {
   display: flex;
-  gap: 4px;
+  gap: 8px;
   align-items: center;
 }
 
 .nav-link {
   color: var(--text-muted);
-  font-weight: 600;
-  font-size: 0.84rem;
-  padding: 8px 14px;
-  border-radius: var(--radius-sm);
-  transition: var(--transition);
+  font-weight: 700;
+  font-size: 0.88rem;
+  padding: 10px 18px;
+  border-radius: 100px;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   text-decoration: none;
 }
 
-.nav-link:hover { color: var(--text-dark); background: rgba(0,0,0,0.04); }
-.nav-link.active { color: var(--primary); background: var(--primary-50); }
+.nav-link:hover { 
+  color: var(--primary); 
+  background: var(--primary-50); 
+  transform: translateY(-1px);
+}
+.nav-link.active { 
+  color: var(--primary); 
+  background: var(--primary-50); 
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+}
 
-.nav-divider { width: 1px; height: 24px; background: var(--border); margin: 0 8px; }
+.nav-divider { width: 1px; height: 24px; background: rgba(0, 109, 100, 0.15); margin: 0 12px; }
 
 /* ===================================================
    TICKER

@@ -191,8 +191,8 @@ const TopNavbar = () => {
               </div>
             ) : (
               <>
-                <Link to="/login" className="nav-link">Log In</Link>
-                <Link to="/register" className="btn-primary" style={{ padding: '9px 20px', fontSize: '0.79rem' }}>
+                <Link to="/login" className="nav-link hover-lift">Log In</Link>
+                <Link to="/register" className="btn-primary hover-lift" style={{ padding: '12px 24px', fontSize: '0.85rem', borderRadius: '100px' }}>
                   Get Started
                 </Link>
               </>
