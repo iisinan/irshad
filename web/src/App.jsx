@@ -307,7 +307,7 @@ const StockTicker = () => {
           const displayPrice = Number(stock.latest_price || stock.daily_prices?.[0]?.price || 0).toFixed(2);
 
           return (
-            <div key={`${stock.symbol}-${i}`} className="ticker-item" onClick={() => navigate('/login')}>
+            <div key={`${stock.symbol}-${i}`} className="ticker-item" onClick={() => navigate(`/market/${stock.symbol}`)}>
               <span className="ticker-item-symbol">{stock.symbol}</span>
               <span className="ticker-item-price">₦{displayPrice}</span>
               <span style={{ fontWeight: 800, fontSize: '0.62rem', color, padding: '2px 6px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)' }}>{statusStr}</span>
