@@ -25,12 +25,12 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
     { label: 'Zakat',          icon: Calculator,        to: '/portfolio#zakat', id: 'tour-nav-zakat' },
     { label: 'Resources',      icon: BookOpen,          to: '/portfolio#lectures', id: 'tour-nav-resources' },
     { section: 'Account' },
+    { label: 'Statements',      icon: FileText,         to: '/portfolio#statement', id: 'tour-nav-statements' },
+    { label: 'Profile & Settings', icon: User,              to: '/profile', id: 'tour-nav-profile' },
     ...(user?.role === 'admin' ? [
       { label: 'Admin Dashboard', icon: Shield, to: '/admin', id: 'tour-nav-admin-dashboard' },
       { label: 'Users', icon: User, to: '/admin/users', id: 'tour-nav-users' }
     ] : []),
-    { label: 'Statements',      icon: FileText,         to: '/portfolio#statement', id: 'tour-nav-statements' },
-    { label: 'Profile & Settings', icon: User,              to: '/profile', id: 'tour-nav-profile' },
   ];
 
   // On mobile, the drawer is ALWAYS fully expanded (text visible).
