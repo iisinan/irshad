@@ -311,8 +311,8 @@ export default function WatchlistTab() {
                 key={stock.symbol}
                 className="watchlist-card hover-lift"
                 style={{ 
-                  display: 'flex', alignItems: 'center', padding: '20px 24px', background: 'var(--bg)', 
-                  borderRadius: '20px', border: '1px solid var(--border)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)',
+                  display: 'flex', alignItems: 'center', padding: '16px 20px', background: 'var(--bg)', 
+                  borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
                   transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', cursor: 'pointer',
                   animationDelay: `${(i % 10) * 0.04}s`, flexWrap: 'wrap', gap: '20px'
                 }}
@@ -320,26 +320,26 @@ export default function WatchlistTab() {
               >
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '16px', minWidth: '220px' }}>
                   {stock.logo_url ? (
-                    <img loading="lazy" src={formatLogoUrl(stock.logo_url)} alt={stock.symbol} style={{ width: '48px', height: '48px', borderRadius: '14px', objectFit: 'contain', border: '1px solid var(--border)', flexShrink: 0, background: 'var(--bg-section)' }} />
+                    <img loading="lazy" src={formatLogoUrl(stock.logo_url)} alt={stock.symbol} style={{ width: '40px', height: '40px', borderRadius: '12px', objectFit: 'contain', border: '1px solid var(--border)', flexShrink: 0, background: 'var(--bg-section)' }} />
                   ) : (
-                    <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'var(--primary-50)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '1.1rem', flexShrink: 0 }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--primary-50)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.95rem', flexShrink: 0 }}>
                       {stock.symbol.charAt(0)}
                     </div>
                   )}
                   <div>
-                    <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '1.05rem', letterSpacing: '-0.2px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.95rem', letterSpacing: '-0.2px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                       {stock.symbol}
                       <span className={`status-badge ${cfg.cls}`} style={{ display: 'inline-flex', padding: '4px 8px', fontSize: '0.6rem' }}>
                         {cfg.icon} {cfg.label}
                       </span>
                     </div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px', fontWeight: 500 }}>{stock.name}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px', fontWeight: 500 }}>{stock.name}</div>
                   </div>
                 </div>
 
                 <div className="watchlist-price-col" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: '120px' }}>
-                  <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '1.1rem' }}>₦{price.toFixed(2)}</div>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', fontWeight: 700, color: isPos ? 'var(--halal)' : 'var(--non-halal)', marginTop: '6px', background: isPos ? 'var(--halal-bg)' : 'var(--non-halal-bg)', padding: '4px 8px', borderRadius: '12px' }}>
+                  <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '1.0rem' }}>₦{price.toFixed(2)}</div>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.7rem', fontWeight: 700, color: isPos ? 'var(--halal)' : 'var(--non-halal)', marginTop: '4px', background: isPos ? 'var(--halal-bg)' : 'var(--non-halal-bg)', padding: '4px 8px', borderRadius: '10px' }}>
                     {isPos ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
                     {isPos ? '+' : ''}{change.toFixed(2)}%
                   </div>
@@ -356,8 +356,8 @@ export default function WatchlistTab() {
                     className={`alert-btn-wide ${hasAlerts ? 'active-alert' : ''}`}
                     title={hasAlerts ? 'Alerts Active' : 'Set Alerts'}
                   >
-                    <Bell size={16} fill={hasAlerts ? "currentColor" : "none"} />
-                    <span style={{ fontSize: '0.75rem', fontWeight: 700 }}>{hasAlerts ? 'Alerts On' : 'Alerts'}</span>
+                    <Bell size={14} fill={hasAlerts ? "currentColor" : "none"} />
+                    <span style={{ fontSize: '0.7rem', fontWeight: 700 }}>{hasAlerts ? 'Alerts On' : 'Alerts'}</span>
                   </button>
                   
                   <div style={{ width: '1px', height: '32px', background: 'var(--border)' }}></div>
