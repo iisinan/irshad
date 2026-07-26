@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { fetchPortfolio, addHolding, removeHolding, fetchNgxStocks, formatLogoUrl } from '../services/api';
 import { toastError, toastSuccess } from '../utils/toast';
 import { useAuth } from '../context/AuthContext';
+import localforage from 'localforage';
 import { X, Search, LayoutDashboard, BarChart2, Star, Calculator, ShieldCheck, BookOpen, Info, Landmark, Briefcase, Bell, Activity, Lock, CheckCircle2, FileText } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -52,15 +53,18 @@ function Skeleton() {
 export default function Portfolio() {
   const { user } = useAuth();
   
-  // Try to hydrate from localStorage cache for instant render
-  const [data, setData] = useState(() => {
-    try {
-      const cached = localStorage.getItem('irshad_portfolio_cache_v10');
-      if (cached) return JSON.parse(cached)?.data || null;
-    } catch {}
-    return null;
-  });
-  const [loading, setLoading] = useState(!data); // Only show skeleton if no cached data
+  // Try to hydrate from localforage cache for instant render
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    localforage.getItem('irshad_portfolio_cache_v10').then(cached => {
+      if (cached && !data) {
+        setData(cached.data || null);
+        setLoading(false);
+      }
+    }).catch(() => {});
+  }, []);
   const [error, setError] = useState(null);
 
   const location = useLocation();

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
+import localforage from 'localforage';
 
 const PROD_API = 'https://irshad-z8us.onrender.com/api/v1';
 const api = axios.create({
@@ -82,8 +83,7 @@ export const fetchProfile = async () => {
 
 export const updateProfile = async (data) => {
   const response = await api.put('/profile', data);
-  // Clear any cached profile/portfolio if needed (currently we don't aggressively cache the profile API itself, but if we do in the future this is where we clear it)
-  localStorage.removeItem('irshad_portfolio_cache_v10');
+  localforage.removeItem('irshad_portfolio_cache_v10');
   return response.data;
 };
 
@@ -101,12 +101,12 @@ export const fetchPortfolio = async () => {
   const cacheKey = 'irshad_portfolio_cache_v10';
   try {
     const response = await api.get('/portfolio');
-    localStorage.setItem(cacheKey, JSON.stringify(response.data));
+    await localforage.setItem(cacheKey, response.data);
     return response.data;
   } catch (error) {
     // On failure, return cached data if available
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) return JSON.parse(cached);
+    const cached = await localforage.getItem(cacheKey);
+    if (cached) return cached;
     throw error;
   }
 };
@@ -143,13 +143,13 @@ export const fetchWatchlist = async () => {
 
 export const addToWatchlist = async (symbol, alert_whatsapp = false, alert_email = false) => {
   const response = await api.post('/watchlist', { symbol, alert_whatsapp, alert_email });
-  localStorage.removeItem('irshad_portfolio_cache_v10'); // Invalidate portfolio cache to reflect new watchlist state
+  localforage.removeItem('irshad_portfolio_cache_v10'); // Invalidate portfolio cache to reflect new watchlist state
   return response.data;
 };
 
 export const addMultipleToWatchlist = async (symbols, alert_inapp = false, alert_push = false, alert_email = false) => {
   const response = await api.post('/watchlist/bulk', { symbols, alert_inapp, alert_push, alert_email });
-  localStorage.removeItem('irshad_portfolio_cache_v10');
+  localforage.removeItem('irshad_portfolio_cache_v10');
   return response.data;
 };
 
@@ -159,19 +159,19 @@ export const addMultipleToWatchlist = async (symbols, alert_inapp = false, alert
  */
 export const onboardUser = async ({ symbols, alert_email, alert_inapp, alert_push, phone_number, risk_profile }) => {
   const response = await api.post('/onboard', { symbols, alert_email, alert_inapp, alert_push, phone_number, risk_profile });
-  localStorage.removeItem('irshad_portfolio_cache_v10'); // Invalidate portfolio/watchlist cache on onboarding
+  localforage.removeItem('irshad_portfolio_cache_v10'); // Invalidate portfolio/watchlist cache on onboarding
   return response.data; // { message, user }
 };
 
 export const updateWatchlist = async (symbol, data) => {
   const response = await api.put(`/watchlist/${symbol}`, data);
-  localStorage.removeItem('irshad_portfolio_cache_v10');
+  localforage.removeItem('irshad_portfolio_cache_v10');
   return response.data;
 };
 
 export const removeFromWatchlist = async (symbol) => {
   const response = await api.delete(`/watchlist/${symbol}`);
-  localStorage.removeItem('irshad_portfolio_cache_v10');
+  localforage.removeItem('irshad_portfolio_cache_v10');
   return response.data;
 };
 

@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { loginUser, registerUser, fetchProfile, googleLoginUser, updateProfile } from '../services/api';
+import localforage from 'localforage';
 
 const AuthContext = createContext();
 
@@ -60,7 +61,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await loginUser(credentials);
       if (res.data && res.data.access_token) {
-        localStorage.removeItem('irshad_portfolio_cache_v10');
+        localforage.removeItem('irshad_portfolio_cache_v10');
         localStorage.setItem('auth_token', res.data.access_token);
         localStorage.setItem('auth_user', JSON.stringify(res.data.user));
         setUser(res.data.user);
@@ -79,7 +80,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await registerUser(data);
       if (res.data && res.data.access_token) {
-        localStorage.removeItem('irshad_portfolio_cache_v10');
+        localforage.removeItem('irshad_portfolio_cache_v10');
         localStorage.setItem('auth_token', res.data.access_token);
         localStorage.setItem('auth_user', JSON.stringify(res.data.user));
         setUser(res.data.user);
@@ -98,7 +99,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await googleLoginUser(credential);
       if (res.data && res.data.access_token) {
-        localStorage.removeItem('irshad_portfolio_cache_v10');
+        localforage.removeItem('irshad_portfolio_cache_v10');
         localStorage.setItem('auth_token', res.data.access_token);
         localStorage.setItem('auth_user', JSON.stringify(res.data.user));
         setUser(res.data.user);
@@ -135,7 +136,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_user');
-    localStorage.removeItem('irshad_portfolio_cache_v10');
+    localforage.removeItem('irshad_portfolio_cache_v10');
     localStorage.removeItem('irshad_admin_stocks_v1');
     localStorage.removeItem('irshad_admin_products_v1');
     localStorage.removeItem('irshad_admin_alerts_v1');

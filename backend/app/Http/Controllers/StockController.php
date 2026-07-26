@@ -23,6 +23,19 @@ class StockController extends Controller
         $this->complianceService = $complianceService;
     }
 
+    private function clearStockCaches(?string $symbol = null): void
+    {
+        \Illuminate\Support\Facades\Cache::forget('stocks.index');
+        \Illuminate\Support\Facades\Cache::forget('stocks.index_v6');
+        \Illuminate\Support\Facades\Cache::forget('stocks.ngx');
+        \Illuminate\Support\Facades\Cache::forget('stocks.ngx_v3');
+        if ($symbol) {
+            \Illuminate\Support\Facades\Cache::forget("stocks.show.{$symbol}");
+            \Illuminate\Support\Facades\Cache::forget("stocks.show.{$symbol}_v2");
+            \Illuminate\Support\Facades\Cache::forget("aaoifi_stage1_{$symbol}");
+        }
+    }
+
     public function index(): JsonResponse
     {
         $stocks = \Illuminate\Support\Facades\Cache::remember('stocks.index_v6', 300, function () {
@@ -130,7 +143,8 @@ class StockController extends Controller
 
     public function ngx(Request $request): JsonResponse
     {
-        $cacheKey = 'stocks.ngx_v6_' . md5(json_encode($request->all()));
+        $allowedParams = $request->only(['status', 'sector', 'min_market_cap', 'pe_max', 'per_page', 'page']);
+        $cacheKey = 'stocks.ngx_v6_' . md5(json_encode($allowedParams));
         
         $stocks = \Illuminate\Support\Facades\Cache::remember($cacheKey, 300, function () use ($request) {
             $query = Company::select([
@@ -192,10 +206,7 @@ class StockController extends Controller
         // Use the authoritative 3-stage compliance engine
         $status = $this->complianceService->evaluateCompliance($company, $financials, $company->sector);
 
-        // Clear relevant caches since status might have changed
-        \Illuminate\Support\Facades\Cache::forget('stocks.index');
-        \Illuminate\Support\Facades\Cache::forget('stocks.ngx');
-        \Illuminate\Support\Facades\Cache::forget("stocks.show.{$symbol}");
+        $this->clearStockCaches($symbol);
 
         return $this->success($company->load(['status', 'financials', 'dailyPrices' => fn($q) => $q->latest('date')->limit(1)]), 'Screening completed.');
     }
@@ -245,14 +256,7 @@ class StockController extends Controller
 
         event(new \App\Events\StockStatusChanged($company, $status));
 
-        // Clear all caches so the new status reflects immediately everywhere
-        \Illuminate\Support\Facades\Cache::forget('stocks.index');
-        \Illuminate\Support\Facades\Cache::forget('stocks.index_v6');
-        \Illuminate\Support\Facades\Cache::forget('stocks.ngx');
-        \Illuminate\Support\Facades\Cache::forget('stocks.ngx_v3');
-        \Illuminate\Support\Facades\Cache::forget("stocks.show.{$symbol}");
-        \Illuminate\Support\Facades\Cache::forget("stocks.show.{$symbol}_v2");
-        \Illuminate\Support\Facades\Cache::forget("aaoifi_stage1_{$symbol}"); // Bust analysis page cache
+        $this->clearStockCaches($symbol);
 
         return $this->success($company->load('status'), 'Stock status updated successfully by scholar.');
     }
@@ -336,9 +340,7 @@ class StockController extends Controller
             $this->complianceService->evaluateCompliance($company, $financial, $company->sector);
         }
 
-        \Illuminate\Support\Facades\Cache::forget('stocks.index');
-        \Illuminate\Support\Facades\Cache::forget('stocks.ngx');
-        \Illuminate\Support\Facades\Cache::forget("stocks.show.{$symbol}");
+        $this->clearStockCaches($symbol);
 
         return $this->success($screening, 'Financial data updated manually.');
     }

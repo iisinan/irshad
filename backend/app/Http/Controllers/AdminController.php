@@ -66,14 +66,16 @@ class AdminController extends Controller
     }
 
     /**
-     * Get all unresolved admin alerts.
+     * Get a paginated list of unresolved admin alerts.
      */
-    public function getAlerts()
+    public function getAlerts(Request $request)
     {
-        $alerts = \Illuminate\Support\Facades\Cache::remember('admin.alerts', 300, function () {
-            return AdminAlert::with('company')->where('resolved', false)->latest()->get();
-        });
-        return $this->success($alerts);
+        $alerts = AdminAlert::with('company')
+            ->where('resolved', false)
+            ->latest()
+            ->paginate(20);
+            
+        return response()->json($alerts);
     }
 
     /**
@@ -83,7 +85,6 @@ class AdminController extends Controller
     {
         $alert = AdminAlert::findOrFail($id);
         $alert->update(['resolved' => true]);
-        \Illuminate\Support\Facades\Cache::forget('admin.alerts');
         return $this->success(null, 'Alert resolved successfully');
     }
     /**
