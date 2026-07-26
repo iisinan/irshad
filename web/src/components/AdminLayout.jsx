@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 export default function AdminLayout({ children }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [linkSent, setLinkSent] = useState(false);
   const location = useLocation();
   const { user, loading } = useAuth();
 
@@ -91,33 +92,37 @@ export default function AdminLayout({ children }) {
               <AlertCircle size={18} />
               <span>Please verify your email address to unlock all features.</span>
             </div>
-            <button
-              onClick={async (e) => {
-                const btn = e.currentTarget;
-                btn.disabled = true;
-                btn.textContent = 'Sending...';
-                try {
-                  const { resendVerification } = await import('../services/api');
-                  await resendVerification();
-                  btn.textContent = 'Verification Link Sent!';
-                } catch(err) {
-                  btn.textContent = 'Failed. Try Again';
-                  btn.disabled = false;
-                }
-              }}
-              style={{
-                background: 'var(--bg)',
-                color: 'var(--non-halal)',
-                border: '1px solid var(--non-halal)',
-                padding: '6px 12px',
-                borderRadius: '8px',
-                fontSize: '0.7rem',
-                fontWeight: 700,
-                cursor: 'pointer'
-              }}
-            >
-              Resend Link
-            </button>
+            {!linkSent ? (
+              <button
+                onClick={async (e) => {
+                  const btn = e.currentTarget;
+                  btn.disabled = true;
+                  btn.textContent = 'Sending...';
+                  try {
+                    const { resendVerification } = await import('../services/api');
+                    await resendVerification();
+                    setLinkSent(true);
+                  } catch(err) {
+                    btn.textContent = 'Failed. Try Again';
+                    btn.disabled = false;
+                  }
+                }}
+                style={{
+                  background: 'var(--bg)',
+                  color: 'var(--non-halal)',
+                  border: '1px solid var(--non-halal)',
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  fontSize: '0.7rem',
+                  fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+              >
+                Resend Link
+              </button>
+            ) : (
+              <span style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 700 }}>Verification Link Sent!</span>
+            )}
           </div>
         )}
 
