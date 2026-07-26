@@ -488,30 +488,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
               </div>
             </div>
 
-            {/* Referenced Financial Data Used for Screening */}
-            <div style={{ position: 'relative', zIndex: 1, borderTop: '1px solid var(--border)', paddingTop: '24px' }}>
-              <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Activity size={14} color="var(--primary)" /> Referenced Financial Data Used For Screening
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
-                <div style={{ background: 'var(--bg)', padding: '14px 18px', borderRadius: '14px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>Market Capitalization</span>
-                  <span style={{ fontSize: '1.05rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{marketCap ? `₦${(marketCap/1000000000).toFixed(2)}B` : 'N/A'}</span>
-                </div>
-                <div style={{ background: 'var(--bg)', padding: '14px 18px', borderRadius: '14px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>Total Interest Debt</span>
-                  <span style={{ fontSize: '1.05rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{debt ? `₦${(debt/1000000000).toFixed(2)}B` : '₦0'}</span>
-                </div>
-                <div style={{ background: 'var(--bg)', padding: '14px 18px', borderRadius: '14px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>Cash & Securities</span>
-                  <span style={{ fontSize: '1.05rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{cash ? `₦${(cash/1000000000).toFixed(2)}B` : '₦0'}</span>
-                </div>
-                <div style={{ background: 'var(--bg)', padding: '14px 18px', borderRadius: '14px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>Total Revenue</span>
-                  <span style={{ fontSize: '1.05rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{rawRevenue ? `₦${(rawRevenue/1000000000).toFixed(2)}B` : 'N/A'}</span>
-                </div>
-              </div>
-            </div>
+
           </div>
 
           {/* Advanced Metrics (Market Data) */}
