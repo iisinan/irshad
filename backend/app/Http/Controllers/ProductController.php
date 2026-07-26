@@ -23,10 +23,12 @@ class ProductController extends Controller
             return $this->unauthorized('Only scholars or admins can view all products list.');
         }
 
-        // Prioritize doubtful products
-        $products = Product::orderByRaw("CASE WHEN status = 'doubtful' THEN 1 ELSE 2 END")
-            ->orderBy('created_at', 'desc')
-            ->paginate(50);
+        $page = $request->get('page', 1);
+        $products = \Illuminate\Support\Facades\Cache::tags(['products'])->remember('products.admin.index.page_' . $page, 300, function () {
+            return Product::orderByRaw("CASE WHEN status = 'doubtful' THEN 1 ELSE 2 END")
+                ->orderBy('created_at', 'desc')
+                ->paginate(50);
+        });
 
         return $this->success($products);
     }
@@ -186,6 +188,8 @@ class ProductController extends Controller
             'status_reason' => $validated['status_reason'],
             'verified_by_scholar' => true,
         ]);
+
+        \Illuminate\Support\Facades\Cache::tags(['products'])->flush();
 
         // Audit log
         \App\Models\AuditLog::create([

@@ -169,7 +169,7 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
       )}
 
       {/* ── Nav Items ── */}
-      <nav style={{ flex: 1, padding: '8px 12px', overflowY: 'auto' }} className="hide-scrollbar">
+      <nav style={{ flex: 1, padding: isCollapsed ? '16px 0' : '20px 16px', overflowY: 'auto' }} className="hide-scrollbar">
         {ADMIN_NAV_ITEMS.map((item, index) => {
           if (item.section) {
             if (isCollapsed) return null;

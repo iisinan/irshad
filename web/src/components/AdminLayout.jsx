@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, AlertCircle } from 'lucide-react';
+import { Menu, AlertCircle } from 'lucide-react';
 import AdminSidebar from './AdminSidebar';
 import { useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -10,10 +10,12 @@ export default function AdminLayout({ children }) {
   const location = useLocation();
   const { user, loading } = useAuth();
 
+  // Close mobile menu on navigation
   useEffect(() => {
     setMobileOpen(false);
   }, [location.pathname]);
 
+  // Lock body scroll when mobile menu is open
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
@@ -26,7 +28,8 @@ export default function AdminLayout({ children }) {
     <div style={{
       display: 'flex',
       minHeight: '100vh',
-      background: 'var(--body-bg)',
+      background: 'var(--bg)',
+      backgroundImage: 'radial-gradient(at 0% 0%, rgba(15,82,87,0.03) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(212,175,55,0.04) 0px, transparent 50%)',
     }}>
       {/* Mobile Overlay */}
       {mobileOpen && (
@@ -35,7 +38,7 @@ export default function AdminLayout({ children }) {
           style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
             background: 'rgba(0,0,0,0.5)', zIndex: 990,
-            backdropFilter: 'blur(4px)'
+            backdropFilter: 'blur(2px)'
           }}
         />
       )}
@@ -47,8 +50,8 @@ export default function AdminLayout({ children }) {
         setMobileOpen={setMobileOpen}
       />
 
-      <main className="dashboard-main-content" style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-        {/* Mobile Header */}
+      <main className="dashboard-main-content">
+        {/* Mobile Header (Hidden on Desktop) */}
         <header className="mobile-dashboard-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{
@@ -82,7 +85,7 @@ export default function AdminLayout({ children }) {
             justifyContent: 'space-between',
             flexWrap: 'wrap',
             gap: '12px',
-            borderBottom: '1px solid var(--non-halal-border)'
+            borderBottom: '1px solid #fecaca'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <AlertCircle size={18} />
@@ -118,9 +121,7 @@ export default function AdminLayout({ children }) {
           </div>
         )}
 
-        <div style={{ flex: 1 }}>
-          {children}
-        </div>
+        {children}
       </main>
     </div>
   );

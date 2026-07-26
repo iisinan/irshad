@@ -70,7 +70,9 @@ class AdminController extends Controller
      */
     public function getAlerts()
     {
-        $alerts = AdminAlert::with('company')->where('resolved', false)->latest()->get();
+        $alerts = \Illuminate\Support\Facades\Cache::remember('admin.alerts', 300, function () {
+            return AdminAlert::with('company')->where('resolved', false)->latest()->get();
+        });
         return $this->success($alerts);
     }
 
@@ -81,6 +83,7 @@ class AdminController extends Controller
     {
         $alert = AdminAlert::findOrFail($id);
         $alert->update(['resolved' => true]);
+        \Illuminate\Support\Facades\Cache::forget('admin.alerts');
         return $this->success(null, 'Alert resolved successfully');
     }
     /**

@@ -17,11 +17,16 @@ class ProfileController extends Controller
      */
     public function show(Request $request): JsonResponse
     {
-        $user = $request->user();
-        $user->screened_count = \App\Models\History::where('user_id', $user->id)
-            ->whereIn('action', ['scan', 'check'])
-            ->distinct('reference_id')
-            ->count('reference_id');
+        $userId = $request->user()->id;
+        
+        $user = \Illuminate\Support\Facades\Cache::tags(['users'])->remember("user.profile.{$userId}", 3600, function () use ($userId) {
+            $u = \App\Models\User::find($userId);
+            $u->screened_count = \App\Models\History::where('user_id', $userId)
+                ->whereIn('action', ['scan', 'check'])
+                ->distinct('reference_id')
+                ->count('reference_id');
+            return $u;
+        });
             
         return $this->success($user, 'Profile retrieved successfully');
     }
@@ -48,6 +53,8 @@ class ProfileController extends Controller
         }
 
         $user->update($validated);
+        
+        \Illuminate\Support\Facades\Cache::tags(['users'])->forget("user.profile.{$user->id}");
 
         return $this->success($user, 'Profile updated successfully');
     }
