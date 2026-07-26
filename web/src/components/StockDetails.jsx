@@ -3,7 +3,8 @@ import { createPortal } from 'react-dom';
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2, Brain, Globe, Newspaper, Bell, X, ShieldCheck, XCircle, AlertTriangle, Star, Activity, BookOpen } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import api, { fetchStockDetails, fetchAiAnalysis, setPriceAlert, formatLogoUrl, fetchWatchlist, addToWatchlist, removeFromWatchlist, overrideStockStatus } from '../services/api';
+import api, { fetchStockDetails, fetchAiAnalysis, setPriceAlert, fetchWatchlist, addToWatchlist, removeFromWatchlist, overrideStockStatus } from '../services/api';
+import CompanyLogo from './CompanyLogo';
 import ReactMarkdown from 'react-markdown';
 import { useAuth } from '../context/AuthContext';
 const StockDetails = ({ symbol: propSymbol }) => {
@@ -299,28 +300,13 @@ const StockDetails = ({ symbol: propSymbol }) => {
         <div style={{ position: 'absolute', bottom: '-80px', left: '-40px', width: '180px', height: '180px', background: 'rgba(255,255,255,0.03)', borderRadius: '50%' }} />
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '10px' }}>
-              {stock.logo_url ? (
-                <img 
-                src={formatLogoUrl(stock.logo_url)} 
-                alt={`${stock.symbol} logo`}
-                style={{
-                  width: '56px', height: '56px', borderRadius: '14px',
-                  objectFit: 'contain', background: 'var(--bg)',
-                  border: '1px solid var(--border)',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
-                }}
-              />
-            ) : (
-              <div style={{
-                width: '56px', height: '56px', borderRadius: '14px',
-                background: 'linear-gradient(135deg, var(--gold), #D4AF37)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#1A1208', fontSize: '1.23rem', fontWeight: 800,
-                boxShadow: '0 4px 12px rgba(212,175,55,0.3)'
-              }}>
-                {stock.symbol?.charAt(0) || 'S'}
-              </div>
-            )}
+            <CompanyLogo
+              symbol={stock.symbol}
+              logoUrl={stock.logo_url}
+              size={56}
+              radius={14}
+              style={{ background: 'var(--bg)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
+            />
             <div style={{ position: 'relative', zIndex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <h1 style={{ fontSize: '1.67rem', fontWeight: '800', letterSpacing: '-0.5px', color: 'white' }}>{stock.name}</h1>

@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Shield, Search, AlertTriangle, CheckCircle, Edit2, X, Package, TrendingUp, AlertCircle, Calculator, RefreshCw, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
-import api, { formatLogoUrl } from '../services/api';
+import api from '../services/api';
+import CompanyLogo from './CompanyLogo';
 import { useAuth } from '../context/AuthContext';
 import { toastError, toastSuccess } from '../utils/toast';
 import ZakatSettingsAdmin from './ZakatSettingsAdmin';
@@ -432,19 +433,7 @@ const AdminDashboard = () => {
                               onClick={() => navigate(`/admin/tickers/${item.symbol}/view`)}
                               title="View Stock Information"
                             >
-                              <div style={{
-                                width: '36px', height: '36px', borderRadius: '9px', flexShrink: 0,
-                                background: 'var(--primary-50)', border: '1px solid var(--border)',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                fontWeight: 800, fontSize: '0.6rem', color: 'var(--primary)',
-                                overflow: 'hidden'
-                              }}>
-                                {item.logo_url ? (
-                                  <img loading="lazy" src={formatLogoUrl(item.logo_url)} alt={item.symbol} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                                ) : (
-                                  (item.symbol || '').slice(0, 4)
-                                )}
-                              </div>
+                              <CompanyLogo symbol={item.symbol} logoUrl={item.logo_url} size={36} radius={9} />
                               <div style={{ transition: 'all 0.2s' }}
                                    onMouseEnter={e => e.currentTarget.style.opacity = '0.7'}
                                    onMouseLeave={e => e.currentTarget.style.opacity = '1'}

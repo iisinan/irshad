@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Search, Plus, CheckCircle2, Lock, ShieldCheck, ChevronDown, Trash2, FileText, UploadCloud, RefreshCw } from 'lucide-react';
-import { fetchNgxStocks, formatLogoUrl, linkBroker } from '../../services/api';
+import { fetchNgxStocks, linkBroker } from '../../services/api';
+import CompanyLogo from '../CompanyLogo';
 
 export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLinked, initialTab }) {
   const [tab, setTab] = useState(initialTab || 'manual');
@@ -175,9 +176,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
                                 onMouseLeave={e => e.currentTarget.style.background = 'var(--bg)'}
                               >
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                  <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'var(--primary-10)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, overflow: 'hidden' }}>
-                                    {stock.logo_url ? <img loading="lazy" src={formatLogoUrl(stock.logo_url)} alt={stock.symbol} style={{ width:'100%', height:'100%', objectFit:'contain' }}/> : stock.symbol.charAt(0)}
-                                  </div>
+                                  <CompanyLogo symbol={stock.symbol} logoUrl={stock.logo_url} size={36} radius={10} />
                                   <div>
                                     <div style={{ fontWeight:800, color:'var(--text-dark)', fontSize: '0.84rem' }}>{stock.symbol}</div>
                                     <div style={{ fontSize: '0.7rem', color:'var(--text-muted)', maxWidth:'120px', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{stock.name}</div>

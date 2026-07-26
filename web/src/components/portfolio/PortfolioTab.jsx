@@ -8,7 +8,8 @@ import {
 import {
   AreaChart, Area, YAxis, ResponsiveContainer
 } from 'recharts';
-import { updateHolding, formatLogoUrl } from '../../services/api';
+import { updateHolding } from '../../services/api';
+import CompanyLogo from '../CompanyLogo';
 import { toastError, toastSuccess } from '../../utils/toast';
 
 /* ─── Helpers ───────────────────────────────────────────────── */
@@ -139,11 +140,7 @@ function HoldingRow({ holding, onDelete, onEdit }) {
 
       {/* Logo & Symbol */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1.5, minWidth: 0 }}>
-        <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'var(--primary-50)', border: '1px solid var(--primary-100)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.57rem', fontWeight: 900, color: 'var(--primary)', overflow: 'hidden', flexShrink: 0 }}>
-          {holding.logo_url
-            ? <img loading="lazy" src={formatLogoUrl(holding.logo_url)} alt="" style={{ width:'100%', height:'100%', objectFit:'contain' }}/>
-            : <span>{(holding.symbol||'').slice(0,4)}</span>}
-        </div>
+        <CompanyLogo symbol={holding.symbol} logoUrl={holding.logo_url} size={44} radius={12} />
         <div style={{ minWidth: 0 }}>
           <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.79rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
             {holding.symbol}

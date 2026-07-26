@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, Component } from 'react';
 import { Eye, BarChart2, Star, TrendingUp, TrendingDown, Trash2, Shield, AlertCircle, HelpCircle, CheckCircle, ChevronRight, Search, Mail, MessageSquare, Filter, Plus, Bell } from 'lucide-react';
-import { fetchWatchlist, removeFromWatchlist, fetchNgxStocks, addToWatchlist, updateWatchlist, formatLogoUrl } from '../../services/api';
+import { fetchWatchlist, removeFromWatchlist, fetchNgxStocks, addToWatchlist, updateWatchlist } from '../../services/api';
+import CompanyLogo from '../CompanyLogo';
 import { toastError, toastSuccess } from '../../utils/toast';
 import { Link, useNavigate } from 'react-router-dom';
 import AddWatchlistModal from './AddWatchlistModal';
@@ -319,13 +320,7 @@ export default function WatchlistTab() {
                 onClick={() => navigate(`/market/${stock.symbol}`, { state: { stock } })}
               >
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '16px', minWidth: '220px' }}>
-                  {stock.logo_url ? (
-                    <img loading="lazy" src={formatLogoUrl(stock.logo_url)} alt={stock.symbol} style={{ width: '40px', height: '40px', borderRadius: '12px', objectFit: 'contain', border: '1px solid var(--border)', flexShrink: 0, background: 'var(--bg-section)' }} />
-                  ) : (
-                    <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--primary-50)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.95rem', flexShrink: 0 }}>
-                      {stock.symbol.charAt(0)}
-                    </div>
-                  )}
+                  <CompanyLogo symbol={stock.symbol} logoUrl={stock.logo_url} size={40} radius={12} />
                   <div>
                     <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.95rem', letterSpacing: '-0.2px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                       {stock.symbol}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, TrendingUp, TrendingDown, Star, BarChart2, X, CheckCircle, AlertCircle, HelpCircle } from 'lucide-react';
-import { fetchNgxStocks, fetchWatchlist, addToWatchlist, removeFromWatchlist, fetchSectors, formatLogoUrl } from '../../services/api';
+import { fetchNgxStocks, fetchWatchlist, addToWatchlist, removeFromWatchlist, fetchSectors } from '../../services/api';
+import CompanyLogo from '../CompanyLogo';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 
@@ -84,19 +85,7 @@ const StockRow = React.memo(({ stock, idx, isWatched, onToggle }) => {
           state={{ stock }}
           style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '11px' }}
         >
-          <div style={{
-            width: '36px', height: '36px', borderRadius: '9px', flexShrink: 0,
-            background: 'var(--primary-50)', border: '1px solid var(--border)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: 800, fontSize: '0.6rem', color: 'var(--primary)',
-            overflow: 'hidden'
-          }}>
-            {stock.logo_url ? (
-              <img loading="lazy" src={formatLogoUrl(stock.logo_url)} alt={stock.symbol} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-            ) : (
-              (stock.symbol || '').slice(0, 4)
-            )}
-          </div>
+            <CompanyLogo symbol={stock.symbol} logoUrl={stock.logo_url} size={36} radius={9} />
           <div>
             <div style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.77rem', lineHeight: 1.2 }}>
               {stock.symbol}

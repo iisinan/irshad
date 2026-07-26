@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { X, Search, CheckCircle2, AlertCircle, HelpCircle } from 'lucide-react';
-import { addMultipleToWatchlist, formatLogoUrl } from '../../services/api';
+import { addMultipleToWatchlist } from '../../services/api';
+import CompanyLogo from '../CompanyLogo';
 
 export default function AddWatchlistModal({ onClose, onAdded, allStocks, watchlistSymbols }) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -115,9 +116,7 @@ export default function AddWatchlistModal({ onClose, onAdded, allStocks, watchli
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                      <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'var(--bg-section)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: 'var(--primary)', overflow: 'hidden', border: '1px solid var(--border)' }}>
-                        {stock.logo_url ? <img loading="lazy" src={formatLogoUrl(stock.logo_url)} alt={stock.symbol} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : stock.symbol.charAt(0)}
-                      </div>
+                      <CompanyLogo symbol={stock.symbol} logoUrl={stock.logo_url} size={44} radius={12} />
                       <div>
                         <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.92rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                           {stock.symbol}
