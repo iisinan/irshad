@@ -591,6 +591,11 @@ const AaoifiScreening = () => {
                           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
                             <span style={{ fontWeight: 700 }}>Published:</span> {link.published_date || report.published_date || 'Unknown Date'}
                           </div>
+                          {(link.financial_year || report.financial_year || link.report_quarter) && (
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                              <span style={{ fontWeight: 700 }}>Reporting Period:</span> {link.report_quarter || 'Annual Report'} (FY {link.financial_year || report.financial_year || 'Unknown'})
+                            </div>
+                          )}
                         </div>
                       </a>
                     ))}

@@ -461,12 +461,17 @@ class StockController extends Controller
                 $publishedDate = $existingScreening->published_date->format('F j, Y');
             }
 
+            $financialYear = $existingScreening ? $existingScreening->financial_year : $company->financials()->latest()->first()?->financial_year;
+            $reportQuarter = ($existingScreening && $existingScreening->report_quarter) ? $existingScreening->report_quarter : 'Annual Report';
+
             $sourceLinks = [
                 [
                     'name' => 'Nigerian Exchange Group (NGX)',
                     'description' => 'Official corporate filings and pricing',
                     'url' => $ngxUrl,
-                    'published_date' => $publishedDate
+                    'published_date' => $publishedDate,
+                    'financial_year' => $financialYear,
+                    'report_quarter' => $reportQuarter
                 ]
             ];
 
