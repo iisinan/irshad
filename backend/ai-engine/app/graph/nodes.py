@@ -69,6 +69,8 @@ async def search_financial_statements(state: GraphState) -> GraphState:
     state["annual_report_url"] = results.get("official") or results.get("ngx") or results.get("african_financials")
     
     if state["annual_report_url"]:
+        if "source_urls" not in state:
+            state["source_urls"] = {}
         state["source_urls"]["annual_report"] = state["annual_report_url"]
     
     return state
