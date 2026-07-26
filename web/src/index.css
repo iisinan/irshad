@@ -288,15 +288,26 @@ textarea::placeholder {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 56px;
-  height: 68px;
-  background: rgba(245,240,232,0.92);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  padding: 0 32px;
+  height: 64px;
+  background: var(--bg-section);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   position: sticky;
-  top: 0;
+  top: 16px;
+  margin: 16px auto;
+  max-width: 1200px;
+  border-radius: 100px;
   z-index: 200;
-  border-bottom: 1px solid var(--border);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.3s;
+}
+
+@media (max-width: 1240px) {
+  .top-navbar {
+    margin: 16px 20px;
+  }
 }
 
 .nav-logo {
@@ -1050,7 +1061,8 @@ textarea::placeholder {
    FOOTER
    =================================================== */
 .site-footer {
-  background: linear-gradient(180deg, #071E22 0%, #030D0F 100%);
+  background: linear-gradient(180deg, var(--bg-section) 0%, rgba(20, 30, 32, 0.02) 100%);
+  background-color: #051416; /* Deep teal base */
   color: #9CA3AF;
   padding: 80px 40px 40px;
   margin-top: 0;
@@ -1062,18 +1074,18 @@ textarea::placeholder {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(201,168,76,0.4), transparent);
+  background: linear-gradient(90deg, transparent, rgba(45, 212, 191, 0.4), rgba(201, 168, 76, 0.3), transparent);
 }
 
 /* Subtle glow effect behind logo area */
 .site-footer::after {
   content: '';
   position: absolute;
-  top: -100px;
-  left: 10%;
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, rgba(201,168,76,0.03) 0%, transparent 70%);
+  top: -150px;
+  left: 5%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(45, 212, 191, 0.05) 0%, transparent 60%);
   pointer-events: none;
 }
 
@@ -1109,17 +1121,19 @@ textarea::placeholder {
 .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 14px; }
 
 .footer-col a {
-  color: #9CA3AF;
+  color: #8C96A3;
   font-size: 0.84rem;
-  font-weight: 600;
+  font-weight: 500;
   text-decoration: none;
-  transition: all 0.2s ease;
-  display: inline-block;
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
 }
 
-.footer-col a:hover { 
-  color: white; 
+.footer-col a:hover {
+  color: #FFFFFF;
   transform: translateX(4px);
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.2);
 }
 
 .footer-bottom {
