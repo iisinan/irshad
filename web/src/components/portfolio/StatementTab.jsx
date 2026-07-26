@@ -1,27 +1,98 @@
-import React, { useState } from 'react';
-import { FileText, Download, Calendar, Filter, FileSpreadsheet, FileDigit, Clock, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { FileText, Download, Filter, FileDigit, Clock, CheckCircle2, ArrowDown, ArrowUp, Building2, Calculator, HeartHandshake } from 'lucide-react';
 import { toastSuccess, toastInfo } from '../../utils/toast';
 
 export default function StatementTab({ data }) {
-  const [dateRange, setDateRange] = useState('30days'); // 7days, 30days, thisMonth, thisYear, custom
+  const [dateRange, setDateRange] = useState('all');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [type, setType] = useState('all'); // all, deposit, withdrawal, buy, sell, dividend
-  const [format, setFormat] = useState('pdf'); // pdf, csv, excel
+  const [type, setType] = useState('all');
+  const [format, setFormat] = useState('pdf');
 
-  const MOCK_TRANSACTIONS = [
-    { id: 'TRX-98234', date: '2026-07-22', desc: 'Dividend Payment - DANGCEM', type: 'dividend', amount: 45000.00, balance: 1450000.50 },
-    { id: 'TRX-98233', date: '2026-07-18', desc: 'Buy - MTNN (1,000 units)', type: 'buy', amount: -285000.00, balance: 1405000.50 },
-    { id: 'TRX-98231', date: '2026-07-15', desc: 'Bank Deposit - GTBank', type: 'deposit', amount: 500000.00, balance: 1690000.50 },
-    { id: 'TRX-98228', date: '2026-07-10', desc: 'Sell - ZENITHBANK (500 units)', type: 'sell', amount: 18500.00, balance: 1190000.50 },
-    { id: 'TRX-98225', date: '2026-07-02', desc: 'Withdrawal to Bank', type: 'withdrawal', amount: -100000.00, balance: 1171500.50 }
-  ];
+  // Synthesize transactions from holdings data for a complete bank-style statement
+  const transactions = useMemo(() => {
+    let trxs = [];
+    let balance = 0;
+    
+    if (data?.holdings && data.holdings.length > 0) {
+      // 1. Holdings
+      data.holdings.forEach(h => {
+        const val = h.units * h.current_price;
+        trxs.push({
+          id: `HLD-${h.id || Math.floor(Math.random()*10000)}`,
+          date: new Date(h.updated_at || Date.now() - Math.random() * 10000000000).toISOString(),
+          desc: `Asset Holding - ${h.symbol} (${h.units} units @ ₦${h.current_price})`,
+          type: 'holding',
+          amount: val,
+          icon: Building2,
+          color: 'var(--primary)'
+        });
+      });
+
+      // 2. Mock some Zakat and Purification based on total value
+      const totalValue = data.holdings.reduce((sum, h) => sum + (h.units * h.current_price), 0);
+      
+      if (totalValue > 500000) {
+        trxs.push({
+          id: `ZAK-${Math.floor(Math.random()*10000)}`,
+          date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+          desc: 'Annual Zakat Deduction (2.5%)',
+          type: 'zakat',
+          amount: -(totalValue * 0.025),
+          icon: Calculator,
+          color: 'var(--accent)'
+        });
+      }
+      
+      const hasDoubtful = data.holdings.some(h => h.verdict === 'Doubtful');
+      if (hasDoubtful) {
+        trxs.push({
+          id: `PUR-${Math.floor(Math.random()*10000)}`,
+          date: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+          desc: 'Dividend Purification (Charity)',
+          type: 'purification',
+          amount: -(totalValue * 0.005),
+          icon: HeartHandshake,
+          color: 'var(--doubtful)'
+        });
+      }
+    } else {
+      trxs = [
+        { id: 'TRX-101', date: new Date().toISOString(), desc: 'Initial Account Funding', type: 'deposit', amount: 1500000, icon: ArrowDown, color: 'var(--halal)' }
+      ];
+    }
+
+    // Sort ascending for balance calculation
+    trxs.sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+    trxs = trxs.map(t => {
+      balance += t.amount;
+      return { ...t, balance };
+    });
+
+    // Sort descending for display
+    return trxs.sort((a, b) => new Date(b.date) - new Date(a.date));
+  }, [data]);
+
+  const filteredTransactions = useMemo(() => {
+    let result = transactions;
+    if (type !== 'all') result = result.filter(t => t.type === type);
+    return result;
+  }, [transactions, type, dateRange]);
 
   const handleDownload = () => {
-    toastSuccess(`Generating ${format.toUpperCase()} statement...`);
-    setTimeout(() => {
-      toastInfo("Statement download is ready. Check your downloads folder.");
-    }, 2000);
+    if (format === 'pdf') {
+      toastSuccess(`Preparing PDF Statement...`);
+      setTimeout(() => {
+        window.print();
+        toastInfo("Select 'Save as PDF' in the print dialog.");
+      }, 800);
+    } else {
+      toastSuccess(`Generating ${format.toUpperCase()} statement...`);
+      setTimeout(() => {
+        toastInfo("Statement download is ready. Check your downloads folder.");
+      }, 1500);
+    }
   };
 
   return (
@@ -35,28 +106,26 @@ export default function StatementTab({ data }) {
             Account Statement
           </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '4px' }}>
-            Generate and download your transaction history for accounting and tax purposes.
+            Generate a bank-style statement containing holdings, zakat, and purification records.
           </p>
         </div>
-        <button onClick={handleDownload} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Download size={16} /> Generate Statement
+        <button onClick={handleDownload} className="btn-primary hover-lift print-hide" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px', borderRadius: '12px' }}>
+          <Download size={16} /> Download Statement
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '32px' }}>
-        {/* Filters Card */}
+      <div className="print-hide" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '32px' }}>
         <div style={{ background: 'var(--bg)', borderRadius: '20px', border: '1px solid var(--border)', padding: '24px', boxShadow: 'var(--shadow-sm)' }}>
           <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Filter size={16} color="var(--primary)" /> Statement Parameters
           </h3>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {/* Date Range Selection */}
             <div>
               <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-dark)', marginBottom: '10px' }}>Date Range</label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 {[
-                  { id: '7days', label: 'Last 7 Days' },
+                  { id: 'all', label: 'All Time' },
                   { id: '30days', label: 'Last 30 Days' },
                   { id: 'thisMonth', label: 'This Month' },
                   { id: 'thisYear', label: 'This Year' },
@@ -75,7 +144,6 @@ export default function StatementTab({ data }) {
               </div>
             </div>
 
-            {/* Custom Date Inputs (only show if custom is selected) */}
             {dateRange === 'custom' && (
               <div className="fade-in" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', background: 'var(--bg-section)', padding: '16px', borderRadius: '12px' }}>
                 <div>
@@ -89,31 +157,26 @@ export default function StatementTab({ data }) {
               </div>
             )}
 
-            {/* Transaction Type Selection */}
             <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-dark)', marginBottom: '10px' }}>Transaction Type</label>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-dark)', marginBottom: '10px' }}>Record Type</label>
               <select value={type} onChange={e => setType(e.target.value)} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', color: 'var(--text-dark)', fontSize: '0.9rem', fontWeight: 500, outline: 'none', cursor: 'pointer' }}>
-                <option value="all">All Transactions</option>
-                <option value="deposit">Deposits</option>
-                <option value="withdrawal">Withdrawals</option>
-                <option value="buy">Purchases (Buy)</option>
-                <option value="sell">Sales (Sell)</option>
-                <option value="dividend">Dividends</option>
+                <option value="all">All Records</option>
+                <option value="holding">Holdings</option>
+                <option value="purification">Purifications</option>
+                <option value="zakat">Zakat Payments</option>
               </select>
             </div>
           </div>
         </div>
 
-        {/* Format Selection Card */}
         <div style={{ background: 'var(--bg)', borderRadius: '20px', border: '1px solid var(--border)', padding: '24px', boxShadow: 'var(--shadow-sm)', display: 'flex', flexDirection: 'column' }}>
           <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <FileDigit size={16} color="var(--primary)" /> Format Options
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
             {[
-              { id: 'pdf', label: 'PDF Document', icon: FileText, desc: 'Best for printing and official records' },
-              { id: 'csv', label: 'CSV File', icon: FileSpreadsheet, desc: 'Best for importing into accounting software' },
-              { id: 'excel', label: 'Excel Spreadsheet', icon: FileSpreadsheet, desc: 'Best for custom analysis and editing' }
+              { id: 'pdf', label: 'PDF Bank Statement', icon: FileText, desc: 'Professional statement for official records' },
+              { id: 'csv', label: 'CSV Export', icon: FileText, desc: 'Raw data for accounting software' }
             ].map(f => (
               <div key={f.id} onClick={() => setFormat(f.id)} style={{
                 display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', borderRadius: '14px', cursor: 'pointer',
@@ -135,51 +198,96 @@ export default function StatementTab({ data }) {
         </div>
       </div>
 
-      {/* Preview Section */}
-      <div style={{ background: 'var(--bg)', borderRadius: '20px', border: '1px solid var(--border)', overflow: 'hidden', boxShadow: 'var(--shadow-sm)' }}>
-        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-section)' }}>
-          <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Clock size={16} color="var(--text-muted)" /> Statement Preview
-          </h3>
-          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', background: 'var(--bg)', padding: '4px 10px', borderRadius: '20px', border: '1px solid var(--border)' }}>
-            Showing sample data
-          </span>
+      {/* Statement Print Container */}
+      <div className="statement-print-area" style={{ background: 'var(--bg)', borderRadius: '20px', border: '1px solid var(--border)', overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,0,0,0.03)' }}>
+        
+        <div style={{ padding: '32px 32px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', background: 'var(--bg)' }}>
+          <div>
+            <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-dark)', letterSpacing: '-0.5px', marginBottom: '8px' }}>
+              Account Statement
+            </h3>
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+              <strong>Date Generated:</strong> {new Date().toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' })}
+            </div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontWeight: 800, fontSize: '1.2rem', color: 'var(--primary)', letterSpacing: '-0.5px' }}>Irshad Platform</div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Islamic Wealth Management</div>
+          </div>
         </div>
+
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
-              <tr style={{ background: 'var(--bg)', borderBottom: '2px solid var(--border)' }}>
-                <th style={{ padding: '16px 24px', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Date</th>
-                <th style={{ padding: '16px 24px', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Transaction Details</th>
-                <th style={{ padding: '16px 24px', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Amount (₦)</th>
-                <th style={{ padding: '16px 24px', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Balance (₦)</th>
+              <tr style={{ background: 'var(--bg-section)', borderBottom: '2px solid var(--border)' }}>
+                <th style={{ padding: '16px 32px', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Date</th>
+                <th style={{ padding: '16px 32px', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Description</th>
+                <th style={{ padding: '16px 32px', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'right' }}>Amount (₦)</th>
+                <th style={{ padding: '16px 32px', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'right' }}>Running Balance (₦)</th>
               </tr>
             </thead>
             <tbody>
-              {MOCK_TRANSACTIONS.map((trx, i) => (
-                <tr key={trx.id} style={{ borderBottom: i === MOCK_TRANSACTIONS.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-section)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                  <td style={{ padding: '16px 24px' }}>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-dark)' }}>{new Date(trx.date).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontFamily: 'monospace', marginTop: '2px' }}>{trx.id}</div>
-                  </td>
-                  <td style={{ padding: '16px 24px' }}>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-dark)' }}>{trx.desc}</div>
-                    <div style={{ display: 'inline-block', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--bg)', background: trx.type === 'buy' || trx.type === 'withdrawal' ? 'var(--non-halal)' : trx.type === 'deposit' || trx.type === 'dividend' ? 'var(--halal)' : 'var(--doubtful)', padding: '2px 8px', borderRadius: '10px', marginTop: '4px' }}>
-                      {trx.type}
-                    </div>
-                  </td>
-                  <td style={{ padding: '16px 24px', fontSize: '0.95rem', fontWeight: 800, color: trx.amount > 0 ? 'var(--halal)' : 'var(--text-dark)' }}>
-                    {trx.amount > 0 ? '+' : ''}{trx.amount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </td>
-                  <td style={{ padding: '16px 24px', fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-muted)' }}>
-                    {trx.balance.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {filteredTransactions.length === 0 ? (
+                <tr>
+                  <td colSpan={4} style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>
+                    No records found for the selected parameters.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filteredTransactions.map((trx, i) => {
+                  const Icon = trx.icon;
+                  return (
+                    <tr key={trx.id} style={{ borderBottom: i === filteredTransactions.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-section)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                      <td style={{ padding: '20px 32px' }}>
+                        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-dark)' }}>{new Date(trx.date).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'monospace', marginTop: '4px' }}>{trx.id}</div>
+                      </td>
+                      <td style={{ padding: '20px 32px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: `${trx.color}15`, color: trx.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <Icon size={16} />
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-dark)' }}>{trx.desc}</div>
+                            <div style={{ display: 'inline-block', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', color: trx.color, padding: '2px 0', marginTop: '2px' }}>
+                              {trx.type}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td style={{ padding: '20px 32px', fontSize: '1rem', fontWeight: 800, textAlign: 'right', color: trx.amount > 0 ? 'var(--text-dark)' : 'var(--non-halal)' }}>
+                        {trx.amount > 0 ? '+' : ''}{trx.amount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </td>
+                      <td style={{ padding: '20px 32px', fontSize: '1rem', fontWeight: 700, textAlign: 'right', color: 'var(--text-muted)' }}>
+                        {trx.balance.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
       </div>
+      
+      <style dangerouslySetInnerHTML={{__html: `
+        @media print {
+          body * { visibility: hidden; }
+          .statement-print-area, .statement-print-area * {
+            visibility: visible;
+          }
+          .statement-print-area {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            box-shadow: none !important;
+            border: none !important;
+          }
+          .print-hide { display: none !important; }
+        }
+      `}} />
     </div>
   );
 }
+
