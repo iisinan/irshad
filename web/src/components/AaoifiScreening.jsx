@@ -421,36 +421,6 @@ const AaoifiScreening = () => {
           {report.status_reason || 'Screened in accordance with AAOIFI Shariah Standard No. 21 (Financial & Business Activity Rules).'}
         </p>
 
-        {/* Referenced Financial Data Used for Screening */}
-        <div style={{ borderTop: `1px solid ${statusColor}30`, paddingTop: '28px', maxWidth: '850px', margin: '0 auto', textAlign: 'left' }}>
-          <div style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
-            <Activity size={16} color="var(--primary)" /> Business Activity & Referenced Financial Data For AAOIFI Screening
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px' }}>
-            <div style={{ background: 'var(--bg)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Stage 1 Verdict</span>
-              <span style={{ fontSize: '1.15rem', color: report.stage1?.status === 'halal' ? 'var(--halal)' : 'var(--non-halal)', fontWeight: 800, marginTop: '4px', textTransform: 'uppercase' }}>
-                {report.stage1?.status || 'UNKNOWN'}
-              </span>
-            </div>
-            <div style={{ background: 'var(--bg)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Market Capitalization</span>
-              <span style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{marketCap ? `₦${(marketCap/1000000000).toFixed(2)}B` : 'N/A'}</span>
-            </div>
-            <div style={{ background: 'var(--bg)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Total Interest Debt</span>
-              <span style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{totalDebt ? `₦${(totalDebt/1000000000).toFixed(2)}B` : '₦0'}</span>
-            </div>
-            <div style={{ background: 'var(--bg)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Cash & Securities</span>
-              <span style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{cashAndSecurities ? `₦${(cashAndSecurities/1000000000).toFixed(2)}B` : '₦0'}</span>
-            </div>
-            <div style={{ background: 'var(--bg)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Total Assets</span>
-              <span style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{totalAssets ? `₦${(totalAssets/1000000000).toFixed(2)}B` : 'N/A'}</span>
-            </div>
-          </div>
-        </div>
       </div>
 
 
@@ -607,7 +577,36 @@ const AaoifiScreening = () => {
               <span style={{ fontWeight: 900, color: 'var(--primary)', fontSize: '1.1rem' }}>{report.business_reasoning?.confidence_score || '88'}%</span>
             </div>
 
-
+            {/* Referenced Financial Data Used for Screening */}
+            <div style={{ borderTop: `1px solid var(--border)`, paddingTop: '28px', margin: '32px 0 0 0', textAlign: 'left' }}>
+              <div style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'flex-start' }}>
+                <Activity size={16} color="var(--primary)" /> Business Activity & Referenced Financial Data For AAOIFI Screening
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px' }}>
+                <div style={{ background: 'var(--bg-section)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Stage 1 Verdict</span>
+                  <span style={{ fontSize: '1.15rem', color: report.stage1?.status === 'halal' ? 'var(--halal)' : 'var(--non-halal)', fontWeight: 800, marginTop: '4px', textTransform: 'uppercase' }}>
+                    {report.stage1?.status || 'UNKNOWN'}
+                  </span>
+                </div>
+                <div style={{ background: 'var(--bg-section)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Market Capitalization</span>
+                  <span style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{marketCap ? `₦${(marketCap/1000000000).toFixed(2)}B` : 'N/A'}</span>
+                </div>
+                <div style={{ background: 'var(--bg-section)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Total Interest Debt</span>
+                  <span style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{totalDebt ? `₦${(totalDebt/1000000000).toFixed(2)}B` : '₦0'}</span>
+                </div>
+                <div style={{ background: 'var(--bg-section)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Cash & Securities</span>
+                  <span style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{cashAndSecurities ? `₦${(cashAndSecurities/1000000000).toFixed(2)}B` : '₦0'}</span>
+                </div>
+                <div style={{ background: 'var(--bg-section)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Total Assets</span>
+                  <span style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{totalAssets ? `₦${(totalAssets/1000000000).toFixed(2)}B` : 'N/A'}</span>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>
