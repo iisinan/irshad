@@ -416,8 +416,8 @@ textarea::placeholder {
 
 .btn-primary:hover {
   background: var(--primary-hover);
-  box-shadow: 0 8px 24px rgba(15, 82, 87, 0.25);
-  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(0, 109, 100, 0.28);
+  transform: translateY(-3px);
 }
 
 .btn-secondary {
@@ -471,13 +471,15 @@ textarea::placeholder {
   background: var(--bg);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
-  box-shadow: none;
-  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
 }
 
 .card:hover {
   border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-3px);
 }
 
 .card-flat {
