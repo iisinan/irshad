@@ -3,11 +3,12 @@ from app.graph.state import GraphState
 from app.graph.builder import build_graph
 from app.core.database import AsyncSessionLocal
 from app.core.db_saver import save_graph_result_to_db
+import traceback
 
 graph_app = build_graph()
 
 async def main():
-    failed = ['BERGER', 'UNILEVER', 'NAHCO', 'OKOMUOIL', 'LINKASSURE', 'ELLAHLAKES', 'TRANSEXPR', 'TANTALIZER', 'PZ', 'DANGSUGAR', 'LIVESTOCK']
+    failed = ['BERGER']
     financial_year = 2026
     
     for ticker in failed:
@@ -21,6 +22,7 @@ async def main():
             print(f"Successfully saved {ticker} to database.")
         except Exception as e:
             print(f"Error processing/saving {ticker}: {e}")
+            traceback.print_exc()
 
 if __name__ == "__main__":
     asyncio.run(main())

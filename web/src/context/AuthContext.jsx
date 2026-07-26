@@ -119,6 +119,9 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('irshad_portfolio_cache_v10');
+    localStorage.removeItem('irshad_admin_stocks_v1');
+    localStorage.removeItem('irshad_admin_products_v1');
+    localStorage.removeItem('irshad_admin_alerts_v1');
     setUser(null);
   };
 

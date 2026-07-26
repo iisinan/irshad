@@ -84,10 +84,19 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('stocks');
-  const [stocks, setStocks] = useState([]);
-  const [products, setProducts] = useState([]);
-  const [alerts, setAlerts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [stocks, setStocks] = useState(() => {
+    const cached = localStorage.getItem('irshad_admin_stocks_v1');
+    return cached ? JSON.parse(cached) : [];
+  });
+  const [products, setProducts] = useState(() => {
+    const cached = localStorage.getItem('irshad_admin_products_v1');
+    return cached ? JSON.parse(cached) : [];
+  });
+  const [alerts, setAlerts] = useState(() => {
+    const cached = localStorage.getItem('irshad_admin_alerts_v1');
+    return cached ? JSON.parse(cached) : [];
+  });
+  const [loading, setLoading] = useState(() => stocks.length === 0);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -105,15 +114,24 @@ const AdminDashboard = () => {
 
   const loadData = async () => {
     try {
-      setLoading(true); setError(null);
+      if (stocks.length === 0) setLoading(true);
+      setError(null);
       const [stocksRes, productsRes, alertsRes] = await Promise.all([
         api.get('/stocks'),
         api.get('/products'),
         api.get('/admin/alerts'),
       ]);
-      setStocks(stocksRes.data?.data || []);
-      setProducts(productsRes.data?.data || []);
-      setAlerts(alertsRes.data?.data || alertsRes.data || []);
+      const s = stocksRes.data?.data || [];
+      const p = productsRes.data?.data || [];
+      const a = alertsRes.data?.data || alertsRes.data || [];
+      
+      setStocks(s);
+      setProducts(p);
+      setAlerts(a);
+      
+      localStorage.setItem('irshad_admin_stocks_v1', JSON.stringify(s));
+      localStorage.setItem('irshad_admin_products_v1', JSON.stringify(p));
+      localStorage.setItem('irshad_admin_alerts_v1', JSON.stringify(a));
     } catch (err) {
       setError(err.message || 'Failed to load data');
     } finally {
