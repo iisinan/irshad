@@ -676,7 +676,7 @@ function App() {
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
           <DocumentTitleUpdater />
             <TopNavbar />
-            {user && <StockTicker />}
+            {/* {user && <StockTicker />} */}
             <main style={{ flex: 1 }}>
               <Suspense fallback={
                 <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: '20px' }}>
