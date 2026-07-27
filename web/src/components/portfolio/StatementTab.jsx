@@ -7,7 +7,6 @@ export default function StatementTab({ data }) {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [type, setType] = useState('all');
-  const [format, setFormat] = useState('pdf');
 
   // Synthesize transactions from holdings data for a complete bank-style statement
   const transactions = useMemo(() => {
@@ -81,18 +80,11 @@ export default function StatementTab({ data }) {
   }, [transactions, type, dateRange]);
 
   const handleDownload = () => {
-    if (format === 'pdf') {
-      toastSuccess(`Preparing PDF Statement...`);
-      setTimeout(() => {
-        window.print();
-        toastInfo("Select 'Save as PDF' in the print dialog.");
-      }, 800);
-    } else {
-      toastSuccess(`Generating ${format.toUpperCase()} statement...`);
-      setTimeout(() => {
-        toastInfo("Statement download is ready. Check your downloads folder.");
-      }, 1500);
-    }
+    toastSuccess(`Preparing PDF Statement...`);
+    setTimeout(() => {
+      window.print();
+      toastInfo("Select 'Save as PDF' in the print dialog.");
+    }, 800);
   };
 
   return (
@@ -169,33 +161,7 @@ export default function StatementTab({ data }) {
           </div>
         </div>
 
-        <div style={{ background: 'var(--bg)', borderRadius: '20px', border: '1px solid var(--border)', padding: '24px', boxShadow: 'var(--shadow-sm)', display: 'flex', flexDirection: 'column' }}>
-          <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <FileDigit size={16} color="var(--primary)" /> Format Options
-          </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
-            {[
-              { id: 'pdf', label: 'PDF Bank Statement', icon: FileText, desc: 'Professional statement for official records' },
-              { id: 'csv', label: 'CSV Export', icon: FileText, desc: 'Raw data for accounting software' }
-            ].map(f => (
-              <div key={f.id} onClick={() => setFormat(f.id)} style={{
-                display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', borderRadius: '14px', cursor: 'pointer',
-                background: format === f.id ? 'var(--primary-10)' : 'var(--bg-section)',
-                border: `1.5px solid ${format === f.id ? 'var(--primary)' : 'transparent'}`,
-                transition: 'all 0.2s'
-              }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: format === f.id ? 'var(--primary)' : 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: format === f.id ? 'white' : 'var(--text-muted)' }}>
-                  <f.icon size={20} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: format === f.id ? 'var(--primary)' : 'var(--text-dark)', marginBottom: '2px' }}>{f.label}</h4>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{f.desc}</p>
-                </div>
-                {format === f.id && <CheckCircle2 size={20} color="var(--primary)" />}
-              </div>
-            ))}
-          </div>
-        </div>
+
       </div>
 
       {/* Statement Print Container */}
