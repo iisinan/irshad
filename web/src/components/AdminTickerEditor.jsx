@@ -284,9 +284,9 @@ export default function AdminTickerEditor() {
               </div>
 
               <div style={{ marginBottom: '28px' }}>
-                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' }}>Scholar Reason / Justification *</label>
+                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' }}>Scholar Reason / Justification</label>
                 <textarea
-                  required rows={5}
+                  rows={5}
                   value={verdictForm.reason}
                   onChange={e => setVerdictForm({...verdictForm, reason: e.target.value})}
                   placeholder="Explain why this compliance status is being manually set. Reference Quran, Hadith, or AAOIFI standards where applicable..."
