@@ -225,7 +225,7 @@ class StockController extends Controller
 
         $request->validate([
             'status' => 'required|in:halal,non-halal,doubtful',
-            'reason' => 'required|string|max:500',
+            'reason' => 'nullable|string|max:500',
         ]);
 
         $company = Company::where('symbol', $symbol)->firstOrFail();
@@ -235,7 +235,7 @@ class StockController extends Controller
             ['company_id' => $company->id],
             [
                 'status'             => $request->status,
-                'reason'             => 'Scholar Override: ' . $request->reason,
+                'reason'             => 'Scholar Override' . ($request->reason ? ': ' . $request->reason : ''),
                 'verified_by_scholar' => true,
                 'last_updated'       => now(),
             ]
@@ -267,9 +267,9 @@ class StockController extends Controller
     public function updateAaoifi(Request $request, string $symbol): JsonResponse
     {
         $request->validate([
-            'total_debt' => 'required|numeric',
-            'cash' => 'required|numeric',
-            'interest_income' => 'required|numeric',
+            'total_debt' => 'nullable|numeric',
+            'cash' => 'nullable|numeric',
+            'interest_income' => 'nullable|numeric',
             'evidence_links' => 'nullable|array',
             'evidence_links.*' => 'url'
         ]);
