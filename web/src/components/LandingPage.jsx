@@ -133,14 +133,14 @@ export default function LandingPage() {
 
   const features = [
     { icon: Shield,      title: 'AAOIFI Std. 21',  desc: 'Every screening strictly follows the globally recognised Islamic finance standard — no shortcuts, no approximations.' },
-    { icon: Zap,         title: 'AI-Powered',       desc: 'Deep-learning models extract financial ratios from raw annual report PDFs in seconds, fully automatically.' },
+    { icon: Zap,         title: 'Automated',        desc: 'Proprietary models extract financial ratios from raw annual report PDFs in seconds, fully automatically.' },
     { icon: Lock,        title: 'Audit-Ready',      desc: 'Full methodology transparency with downloadable compliance records for institutional and retail investors alike.' },
     { icon: CheckCircle, title: 'Live Coverage',    desc: 'Nigerian equity market covered in real time, with re-screening triggered on every new regulatory filing.' },
   ];
 
   const pipeline = [
     { n: '01', title: 'Data Ingestion',    desc: 'Audited financial statements fetched from regulatory filings',        icon: Globe      },
-    { n: '02', title: 'AI Extraction',     desc: 'Machine learning parses balance sheets and income statements',        icon: FileDigit  },
+    { n: '02', title: 'Data Extraction',   desc: 'Automated parsing of balance sheets and income statements',           icon: FileDigit  },
     { n: '03', title: 'AAOIFI Rules',      desc: 'Three-ratio test applied per AAOIFI Shariah Standard No. 21',        icon: Shield     },
     { n: '04', title: 'Verdict Published', desc: 'Halal / Doubtful / Non-Halal with a full, auditable trail',           icon: Sparkles   },
   ];
@@ -177,7 +177,7 @@ export default function LandingPage() {
 
             {/* Subheading */}
             <p className="animate-slide-up stagger-2" style={{ fontSize: 'clamp(1rem, 1.4vw, 1.15rem)', color: 'var(--text-muted)', lineHeight: 1.75, maxWidth: 540, marginBottom: 44, fontWeight: 400 }}>
-              Irshad screens Nigerian equities against rigorous AAOIFI standards using AI — so you know exactly what you own, and whether it is permissible.
+              Irshad screens Nigerian equities against rigorous AAOIFI standards — so you know exactly what you own, and whether it is permissible.
             </p>
 
             {/* CTAs */}
