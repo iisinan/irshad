@@ -160,10 +160,10 @@ class AdminController extends Controller
         $company = \App\Models\Company::where('symbol', $symbol)->firstOrFail();
 
         $validator = Validator::make($request->all(), [
-            'title' => 'required|string|max:255',
-            'url' => 'required|url',
-            'source' => 'required|string|max:255',
-            'thumbnail_url' => 'nullable|url',
+            'title' => 'nullable|string|max:255',
+            'url' => 'nullable|string',
+            'source' => 'nullable|string|max:255',
+            'thumbnail_url' => 'nullable|string',
             'excerpt' => 'nullable|string',
         ]);
 
@@ -171,15 +171,15 @@ class AdminController extends Controller
             return response()->json(['message' => 'Validation error', 'errors' => $validator->errors()], 422);
         }
 
-        $news = \App\Models\News::create([
-            'company_id' => $company->id,
-            'title' => $request->title,
-            'url' => $request->url,
-            'source' => $request->source,
-            'thumbnail_url' => $request->thumbnail_url,
-            'excerpt' => $request->excerpt,
-            'published_at' => now(),
-        ]);
+        $news = new \App\Models\News();
+        $news->company_id = $company->id;
+        $news->title = $request->title ?? 'Untitled News';
+        $news->url = $request->url ?? '#';
+        $news->source = $request->source ?? 'Manual Entry';
+        $news->thumbnail_url = $request->thumbnail_url;
+        $news->excerpt = $request->excerpt;
+        $news->published_at = now();
+        $news->save();
 
         \Illuminate\Support\Facades\Cache::forget("stocks.show.{$symbol}_v2");
 
