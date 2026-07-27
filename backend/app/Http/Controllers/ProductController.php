@@ -24,7 +24,7 @@ class ProductController extends Controller
         }
 
         $page = $request->get('page', 1);
-        $products = \Illuminate\Support\Facades\Cache::tags(['products'])->remember('products.admin.index.page_' . $page, 300, function () {
+        $products = \Illuminate\Support\Facades\Cache::remember('products.admin.index.page_' . $page, 300, function () {
             return Product::orderByRaw("CASE WHEN status = 'doubtful' THEN 1 ELSE 2 END")
                 ->orderBy('created_at', 'desc')
                 ->paginate(50);
@@ -189,7 +189,7 @@ class ProductController extends Controller
             'verified_by_scholar' => true,
         ]);
 
-        \Illuminate\Support\Facades\Cache::tags(['products'])->flush();
+        \Illuminate\Support\Facades\Cache::flush();
 
         // Audit log
         \App\Models\AuditLog::create([
