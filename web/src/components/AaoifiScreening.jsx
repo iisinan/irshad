@@ -451,7 +451,7 @@ const AaoifiScreening = () => {
           
           <div style={{ paddingTop: '24px' }}>
             <div style={{ fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.84rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Brain size={16} color="var(--primary)" /> Perplexity AI Stage 1 Reasoning
+              <Brain size={16} color="var(--primary)" /> Stage 1 Screening Reasoning
             </div>
             <p style={{ margin: 0, fontSize: '0.92rem', lineHeight: 1.7, color: 'var(--text-dark)', padding: '20px', background: 'var(--bg-section)', borderRadius: '16px', border: '1px solid var(--border)' }}>
               {report.stage1?.reason || report.business_reasoning || 'N/A'}
