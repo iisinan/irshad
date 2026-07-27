@@ -153,7 +153,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const cash = (parseFloat(latest?.cash_and_equivalents) || 0) + (parseFloat(latest?.interest_bearing_securities) || 0);
   const cashRatio = ((cash / safeMarketCap) * 100).toFixed(1);
   const interestRatio = ((interest / revenue) * 100).toFixed(1);
-  const purificationRate = latest?.non_compliant_revenue_ratio ? (parseFloat(latest.non_compliant_revenue_ratio) * 100).toFixed(2) : interestRatio;
+  const purificationRate = latest?.non_compliant_income_ratio ? (parseFloat(latest.non_compliant_income_ratio) * 100).toFixed(2) : interestRatio;
 
   const purificationAmount = dividendInput
     ? ((parseFloat(dividendInput) || 0) * (parseFloat(purificationRate) / 100)).toFixed(2)
@@ -576,7 +576,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
                 { label: 'Industry', value: stock.business_type || 'Equities' },
                 { label: 'Exchange', value: 'Stock Exchange' },
                 { label: 'Analyst Target', value: stock.analysts_target ? `₦ ${stock.analysts_target}` : 'N/A' },
-                { label: 'Dividend Yield', value: stock.div_yield ? `${stock.div_yield}%` : 'N/A' },
+                { label: 'Dividend Yield', value: stock.div_yield ? `${(parseFloat(stock.div_yield) * 100).toFixed(2)}%` : 'N/A' },
               ].map(row => (
                 <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ color: 'var(--text-muted)', fontSize: '0.77rem', fontWeight: 500 }}>{row.label}</span>
@@ -614,7 +614,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
               <div style={{ background: 'rgba(255,255,255,0.06)', padding: '12px', borderRadius: '10px' }}>
                 <div style={{ fontSize: '0.66rem', color: 'rgba(255,255,255,0.5)', fontWeight: 600, marginBottom: '4px' }}>Non-Compliant Revenue</div>
                 <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'white' }}>
-                  {latest?.non_compliant_revenue_ratio ? `${(parseFloat(latest.non_compliant_revenue_ratio) * 100).toFixed(2)}%` : 'N/A'}
+                  {latest?.non_compliant_income_ratio ? `${(parseFloat(latest.non_compliant_income_ratio) * 100).toFixed(2)}%` : 'N/A'}
                 </div>
               </div>
               <div style={{ background: 'rgba(255,255,255,0.06)', padding: '12px', borderRadius: '10px' }}>
