@@ -99,7 +99,12 @@ export default function Profile() {
   const [isLoading, setIsLoading] = useState(true);
 
   // Settings Forms State
-  const [formData, setFormData] = useState({ name: '', email: '', phone_number: '', password: '', password_confirmation: '', strictness: 'moderate' });
+  const [formData, setFormData] = useState({ 
+    name: '', email: '', phone_number: '', 
+    password: '', password_confirmation: '', 
+    strictness: 'moderate',
+    investor_type: '', primary_use_case: '', investment_experience: ''
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [theme, setTheme] = useState(() => localStorage.getItem('irshad_theme') || 'light');
@@ -142,7 +147,10 @@ export default function Profile() {
         name: u.name || `${u.first_name || ''} ${u.last_name || ''}`.trim(),
         email: u.email || '',
         phone_number: u.phone_number || '',
-        strictness: u.preferences?.strictness || 'moderate'
+        strictness: u.preferences?.strictness || 'moderate',
+        investor_type: u.preferences?.investor_type || 'Retail Investor',
+        primary_use_case: u.preferences?.primary_use_case || 'Personal Wealth Growth',
+        investment_experience: u.preferences?.investment_experience || 'Novice (Just Starting)'
       }));
     }
   }, [profileUser, user]);
@@ -164,6 +172,12 @@ export default function Profile() {
         payload.name = formData.name;
         payload.email = formData.email;
         payload.phone_number = formData.phone_number;
+        payload.preferences = {
+          ...((profileUser || user).preferences || {}),
+          investor_type: formData.investor_type,
+          primary_use_case: formData.primary_use_case,
+          investment_experience: formData.investment_experience,
+        };
       } else if (section === 'security') {
         if (formData.password !== formData.password_confirmation) {
           setMessage({ type: 'error', text: 'Passwords do not match' });
@@ -219,7 +233,7 @@ export default function Profile() {
   const sections = [
     { id: 'profile', icon: User, label: 'Personal Info' },
     { id: 'security', icon: Shield, label: 'Security' },
-    { id: 'preferences', icon: BookOpen, label: 'Shariah Preferences' },
+    // { id: 'preferences', icon: BookOpen, label: 'Shariah Preferences' },
     { id: 'appearance', icon: Monitor, label: 'Appearance' },
     { id: 'danger', icon: Trash2, label: 'Danger Zone', danger: true },
   ];
@@ -289,6 +303,44 @@ export default function Profile() {
                     <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '8px' }}>Phone Number</label><input type="tel" value={formData.phone_number} onChange={e => setFormData({...formData, phone_number: e.target.value})} style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--border)', fontSize: '0.84rem', outline: 'none' }} /></div>
                   </div>
                   <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '8px' }}>Email Address</label><input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--border)', fontSize: '0.84rem', outline: 'none', background: 'var(--bg)' }} readOnly /><p style={{ fontSize: '0.66rem', color: 'var(--text-muted)', marginTop: '6px' }}>Email cannot be changed.</p></div>
+
+                  <div style={{ height: '1px', background: 'var(--border)', margin: '12px 0' }} />
+                  <div>
+                    <h3 style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 16px' }}>Investor Profile</h3>
+                    
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '16px' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '8px' }}>Investor Type</label>
+                        <select name="investor_type" value={formData.investor_type} onChange={e => setFormData({...formData, investor_type: e.target.value})} style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--border)', fontSize: '0.84rem', outline: 'none', backgroundColor: 'var(--bg)', color: 'var(--text-dark)' }}>
+                          <option value="Retail Investor">Retail Investor</option>
+                          <option value="Institutional Manager">Institutional Manager</option>
+                          <option value="Islamic Finance Scholar / Expert">Islamic Finance Scholar / Expert</option>
+                          <option value="Academic / Researcher">Academic / Researcher</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '8px' }}>Primary Use Case</label>
+                        <select name="primary_use_case" value={formData.primary_use_case} onChange={e => setFormData({...formData, primary_use_case: e.target.value})} style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--border)', fontSize: '0.84rem', outline: 'none', backgroundColor: 'var(--bg)', color: 'var(--text-dark)' }}>
+                          <option value="Personal Wealth Growth">Personal Wealth Growth</option>
+                          <option value="Halal Portfolio Compliance">Halal Portfolio Compliance</option>
+                          <option value="Client Advisory Services">Client Advisory Services</option>
+                          <option value="Zakat Calculation & Cleansing">Zakat Calculation & Cleansing</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '8px' }}>Investment Experience</label>
+                      <select name="investment_experience" value={formData.investment_experience} onChange={e => setFormData({...formData, investment_experience: e.target.value})} style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--border)', fontSize: '0.84rem', outline: 'none', backgroundColor: 'var(--bg)', color: 'var(--text-dark)' }}>
+                        <option value="Novice (Just Starting)">Novice (Just Starting)</option>
+                        <option value="Competent (Casual Investor)">Competent (Casual Investor)</option>
+                        <option value="Proficient (Active Trader)">Proficient (Active Trader)</option>
+                        <option value="Expert (Professional)">Expert (Professional)</option>
+                      </select>
+                    </div>
+                  </div>
+                  
                   <div style={{ marginTop: '12px' }}><button type="submit" disabled={isSubmitting} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '14px 24px', background: 'var(--primary)', color: 'var(--bg)', border: 'none', borderRadius: '12px', fontWeight: 800, cursor: isSubmitting ? 'not-allowed' : 'pointer', opacity: isSubmitting ? 0.7 : 1 }}><Save size={18} /> {isSubmitting ? 'Saving...' : 'Save Changes'}</button></div>
                 </form>
               )}

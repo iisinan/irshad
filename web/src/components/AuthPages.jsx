@@ -182,8 +182,9 @@ export const RegisterPage = () => {
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [country, setCountry] = useState('Nigeria');
-  const [occupation, setOccupation] = useState('');
-  const [investmentGoal, setInvestmentGoal] = useState('Halal Long-Term Wealth');
+  const [investorType, setInvestorType] = useState('Retail Investor');
+  const [primaryUseCase, setPrimaryUseCase] = useState('Personal Wealth Growth');
+  const [investmentExperience, setInvestmentExperience] = useState('Novice (Just Starting)');
   const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -228,8 +229,9 @@ export const RegisterPage = () => {
       password_confirmation: passConfirm,
       phone_number: phoneNumber,
       location: country,
-      occupation: occupation,
-      investment_goal: investmentGoal,
+      investor_type: investorType,
+      primary_use_case: primaryUseCase,
+      investment_experience: investmentExperience,
     });
     
     if (res.success) {
@@ -296,15 +298,36 @@ export const RegisterPage = () => {
             </div>
           </div>
 
-          <FormField label="Occupation / Profession" name="occupation" placeholder="e.g. Engineer, Analyst" value={occupation} onChange={e => setOccupation(e.target.value)} />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
+              <label className="auth-label">Investor Type</label>
+              <select name="investorType" className="auth-input" value={investorType} onChange={e => setInvestorType(e.target.value)}>
+                <option value="Retail Investor">Retail Investor</option>
+                <option value="Institutional Manager">Institutional Manager</option>
+                <option value="Islamic Finance Scholar / Expert">Islamic Finance Scholar / Expert</option>
+                <option value="Academic / Researcher">Academic / Researcher</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
+              <label className="auth-label">Primary Use Case</label>
+              <select name="primaryUseCase" className="auth-input" value={primaryUseCase} onChange={e => setPrimaryUseCase(e.target.value)}>
+                <option value="Personal Wealth Growth">Personal Wealth Growth</option>
+                <option value="Halal Portfolio Compliance">Halal Portfolio Compliance</option>
+                <option value="Client Advisory Services">Client Advisory Services</option>
+                <option value="Zakat Calculation & Cleansing">Zakat Calculation & Cleansing</option>
+              </select>
+            </div>
+          </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
-            <label className="auth-label">Primary Investment Goal</label>
-            <select name="investmentGoal" className="auth-input" value={investmentGoal} onChange={e => setInvestmentGoal(e.target.value)}>
-              <option value="Halal Long-Term Wealth">Halal Long-Term Wealth Building</option>
-              <option value="Zakat & Purification Management">Zakat & Purification Management</option>
-              <option value="Shariah-Compliant Dividends">Shariah-Compliant Dividends & Passive Income</option>
-              <option value="Active Stock Trading">Active Stock Trading & Analysis</option>
+            <label className="auth-label">Investment Experience</label>
+            <select name="investmentExperience" className="auth-input" value={investmentExperience} onChange={e => setInvestmentExperience(e.target.value)}>
+              <option value="Novice (Just Starting)">Novice (Just Starting)</option>
+              <option value="Competent (Casual Investor)">Competent (Casual Investor)</option>
+              <option value="Proficient (Active Trader)">Proficient (Active Trader)</option>
+              <option value="Expert (Professional)">Expert (Professional)</option>
             </select>
           </div>
 

@@ -29,8 +29,9 @@ class AuthController extends Controller
             'location' => $request->location,
             'role' => 'user', // Default role
             'preferences' => [
-                'occupation' => $request->occupation,
-                'investment_goal' => $request->investment_goal,
+                'investor_type' => $request->investor_type,
+                'primary_use_case' => $request->primary_use_case,
+                'investment_experience' => $request->investment_experience,
                 'dob' => $request->dob,
             ],
         ]);

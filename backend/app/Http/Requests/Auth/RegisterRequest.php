@@ -25,8 +25,9 @@ class RegisterRequest extends FormRequest
             'phone_number' => ['nullable', 'string', 'max:20'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'location' => ['nullable', 'string', 'max:255'],
-            'occupation' => ['nullable', 'string', 'max:255'],
-            'investment_goal' => ['nullable', 'string', 'max:255'],
+            'investor_type' => ['nullable', 'string', 'max:255'],
+            'primary_use_case' => ['nullable', 'string', 'max:255'],
+            'investment_experience' => ['nullable', 'string', 'max:255'],
             'dob' => ['nullable', 'string', 'max:50'],
         ];
     }
