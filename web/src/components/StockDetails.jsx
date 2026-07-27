@@ -16,7 +16,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
   // Use optimistic data passed via router state for instant render
   const optimisticStock = location.state?.stock || null;
   const [stock, setStock] = useState(optimisticStock);
-  const [loading, setLoading] = useState(!optimisticStock); // only show full spinner if no optimistic data
+  const [loading, setLoading] = useState(true); // always show full spinner to prevent layout shifts
   const [enriching, setEnriching] = useState(!!optimisticStock); // silent background fetch
   const [dividendInput, setDividendInput] = useState('');
   const [aiAnalysis, setAiAnalysis] = useState(null);

@@ -19,7 +19,7 @@ class ProfileController extends Controller
     {
         $userId = $request->user()->id;
         
-        $user = \Illuminate\Support\Facades\Cache::remember("user.profile.{$userId}", 3600, function () use ($userId) {
+        $user = \Illuminate\Support\Facades\Cache::tags(['users'])->remember("user.profile.{$userId}", 3600, function () use ($userId) {
             $u = \App\Models\User::find($userId);
             $u->screened_count = \App\Models\History::where('user_id', $userId)
                 ->whereIn('action', ['scan', 'check'])
@@ -54,7 +54,7 @@ class ProfileController extends Controller
 
         $user->update($validated);
         
-        \Illuminate\Support\Facades\Cache::forget("user.profile.{$user->id}");
+        \Illuminate\Support\Facades\Cache::tags(['users'])->forget("user.profile.{$user->id}");
 
         return $this->success($user, 'Profile updated successfully');
     }

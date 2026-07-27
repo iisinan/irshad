@@ -128,7 +128,7 @@ class AaoifiScreeningService
         // 4. Final Verdict Engine
         $finalStatus = 'halal';
         
-        if ($businessStatus === 'fail' || $debtStatus === 'fail' || $cashStatus === 'fail') {
+        if ($businessStatus === 'fail' || $debtStatus === 'fail' || $cashStatus === 'fail' || $impIncomeStatus === 'fail') {
             $finalStatus = 'non-halal';
         } elseif ($businessStatus === 'warning' || $debtStatus === 'insufficient_data' || $cashStatus === 'insufficient_data') {
             $finalStatus = 'doubtful';
