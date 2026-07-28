@@ -445,6 +445,11 @@ class StockController extends Controller
             }
 
             $stage1Pass = ($stage1['compliance_status'] ?? 'PASS') === 'PASS';
+
+            // DB business_status is ground truth (set by admin or sync job). Override AI cache if DB says otherwise.
+            if ($existingScreening && $existingScreening->business_status) {
+                $stage1Pass = $existingScreening->business_status === 'pass';
+            }
             
             // Recalculate Stage 2 Pass dynamically instead of trusting the AI script, 
             // since the AI script frequently fails due to missing denominators.
