@@ -439,7 +439,7 @@ const AaoifiScreening = () => {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           
-          {report.stage1?.purification_required && (
+          {report.stage1?.purification_required && finalStatus === 'halal' && (
             <div className="hover-card" style={{ background: 'var(--questionable-bg)', padding: '20px', borderRadius: '16px', border: '1px solid var(--questionable)', transition: 'transform 0.2s' }}>
               <div style={{ fontWeight: 800, color: 'var(--questionable)', fontSize: '0.84rem', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <AlertTriangle size={18} /> Dividend Purification Required

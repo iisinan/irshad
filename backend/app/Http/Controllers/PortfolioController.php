@@ -32,7 +32,8 @@ class PortfolioController extends Controller
 
             $totalValue = $holding->shares * $currentPrice;
             
-            $purificationDue = $totalValue * ($nonCompliantRatio / 100);
+            $isHalal = strtolower($status) === 'halal' || strtolower($status) === 'compliant';
+            $purificationDue = $isHalal ? $totalValue * ($nonCompliantRatio / 100) : 0;
 
             // Calculate return
             $returnPercentage = 0;
@@ -51,7 +52,7 @@ class PortfolioController extends Controller
                 'total_value' => $totalValue,
                 'return_percentage' => round($returnPercentage, 2),
                 'status' => strtolower($status),
-                'is_halal' => strtolower($status) === 'halal' || strtolower($status) === 'compliant',
+                'is_halal' => $isHalal,
                 'purification_due' => round($purificationDue, 2),
                 'logo_url' => $company->logo_url ?? null,
             ];

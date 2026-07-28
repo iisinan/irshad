@@ -684,7 +684,8 @@ const StockDetails = ({ symbol: propSymbol }) => {
 
 
           {/* Purification Calculator */}
-          <div className="detail-panel hover-card" style={{ 
+          {isHalal && (
+            <div className="detail-panel hover-card" style={{ 
             background: 'linear-gradient(135deg, #071F24 0%, #0D3E42 100%)', 
             border: '1px solid rgba(212, 175, 55, 0.15)', 
             color: 'white',
@@ -758,6 +759,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
               </div>
             </div>
             </div>
+          )}
 
             {/* Buy Now */}
             <button 
