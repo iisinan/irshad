@@ -155,12 +155,11 @@ function HoldingRow({ holding, onDelete, onEdit }) {
         transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
         position: 'relative',
         cursor: 'pointer',
-        boxShadow: hov ? '0 12px 32px rgba(0,0,0,0.05)' : '0 4px 16px rgba(0,0,0,0.02)',
-        overflow: 'hidden'
+        boxShadow: hov ? '0 12px 32px rgba(0,0,0,0.05)' : '0 4px 16px rgba(0,0,0,0.02)'
       }}
     >
       {/* Indicator */}
-      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '6px', background: accentColor }} />
+      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '6px', background: accentColor, borderTopLeftRadius: '20px', borderBottomLeftRadius: '20px' }} />
 
       {/* Logo & Symbol */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1.5, minWidth: 0 }}>
@@ -213,24 +212,23 @@ function HoldingRow({ holding, onDelete, onEdit }) {
       </div>
 
       {/* Actions */}
-      <div style={{ width: '40px', position: 'relative', display: 'flex', justifyContent: 'flex-end' }} onClick={e => e.stopPropagation()}>
+      <div style={{ display: 'flex', gap: '8px', paddingLeft: '24px' }} onClick={e => e.stopPropagation()}>
         <button 
-          onClick={() => setMenuOpen(!menuOpen)}
-          style={{ background: 'transparent', border: 'none', color: hov ? 'var(--text-dark)' : 'var(--text-light)', cursor: 'pointer', padding: '6px', borderRadius: '50%' }}
+          onClick={() => onEdit(holding)}
+          style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-dark)', cursor: 'pointer', padding: '8px 12px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, fontSize: '0.7rem', transition: 'all 0.2s' }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(212,175,55,0.1)'; e.currentTarget.style.borderColor = 'rgba(212,175,55,0.3)'; e.currentTarget.style.color = 'var(--gold)'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-dark)'; }}
         >
-          <MoreVertical size={16} />
+          <Edit2 size={13} /> Edit
         </button>
-
-        {menuOpen && (
-          <div style={{ position: 'absolute', right: 0, top: '36px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '12px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)', padding: '6px', zIndex: 10, minWidth: '120px', animation: 'fadeIn 0.15s ease' }}>
-            <button onClick={() => { setMenuOpen(false); onEdit(holding); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', borderRadius: '8px', background: 'transparent', border: 'none', fontSize: '0.66rem', fontWeight: 600, color: 'var(--text-dark)', cursor: 'pointer', textAlign: 'left' }} onMouseEnter={e => e.currentTarget.style.background='var(--bg-section)'} onMouseLeave={e => e.currentTarget.style.background='transparent'}>
-              <Edit2 size={13} /> Edit
-            </button>
-            <button onClick={() => { setMenuOpen(false); onDelete(holding.id); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', borderRadius: '8px', background: 'transparent', border: 'none', fontSize: '0.66rem', fontWeight: 600, color: 'var(--non-halal)', cursor: 'pointer', textAlign: 'left' }} onMouseEnter={e => e.currentTarget.style.background='#fee2e2'} onMouseLeave={e => e.currentTarget.style.background='transparent'}>
-              <Trash2 size={13} /> Delete
-            </button>
-          </div>
-        )}
+        <button 
+          onClick={() => onDelete(holding.id)}
+          style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--non-halal)', cursor: 'pointer', padding: '8px 12px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, fontSize: '0.7rem', transition: 'all 0.2s' }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.1)'; e.currentTarget.style.borderColor = 'rgba(239,68,68,0.3)'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'var(--border)'; }}
+        >
+          <Trash2 size={13} /> Delete
+        </button>
       </div>
     </div>
   );
