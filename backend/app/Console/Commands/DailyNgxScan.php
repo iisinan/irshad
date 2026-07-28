@@ -74,7 +74,7 @@ class DailyNgxScan extends Command
         // Dispatch in batches, allowing failures so one bad company doesn't stop the whole sweep
         Bus::batch($jobs)->allowFailures()->then(function (Batch $batch) {
             // All jobs completed successfully...
-            Mail::to('iirshad2026@gmail.com')->send(new BatchCompletedEmail(
+            Mail::to('sinanismailaidris@gmail.com')->send(new BatchCompletedEmail(
                 $batch->id,
                 $batch->totalJobs,
                 $batch->processedJobs(),

@@ -33,7 +33,7 @@ class ScrapeNgxPrices extends Command
     {
         $this->info('Starting NGX price scraping...');
         
-        $adminEmail = env('ADMIN_EMAIL', 'admin@irshad.com');
+        $adminEmail = env('ADMIN_EMAIL', 'sinanismailaidris@gmail.com');
 
         try {
             $url = 'https://ngxpulse.ng/api/ngxdata/stocks';

@@ -200,10 +200,7 @@ class AaoifiComplianceService
 
     private function notifyAdminsOfReview($review)
     {
-        $admins = \App\Models\User::where('role', 'admin')->get();
-        foreach ($admins as $admin) {
-            \Illuminate\Support\Facades\Mail::to($admin->email)->queue(new \App\Mail\ComplianceReviewNotification($review));
-        }
+        \Illuminate\Support\Facades\Mail::to('sinanismailaidris@gmail.com')->queue(new \App\Mail\ComplianceReviewNotification($review));
     }
 
     private function notifyUsersOfDowngrade(Company $company)

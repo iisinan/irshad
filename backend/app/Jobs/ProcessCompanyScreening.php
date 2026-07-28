@@ -102,13 +102,13 @@ class ProcessCompanyScreening implements ShouldQueue
                     $ticker = $this->ticker;
                     \Illuminate\Support\Facades\Mail::raw(
                         "New financial data was automatically pulled for {$ticker}. However, because this stock has a manual admin override, the new data has been flagged for review. Please log in to the admin panel to review and approve the new data.",
-                        function ($message) use ($admin, $ticker) {
-                            $message->to($admin->email)
+                        function ($message) use ($ticker) {
+                            $message->to('sinanismailaidris@gmail.com')
                                 ->subject("Review Required: New Data for {$ticker}");
                         }
                     );
                 } catch (\Exception $e) {
-                    Log::error("Failed to send override review email to {$admin->email}: " . $e->getMessage());
+                    Log::error("Failed to send override review email to sinanismailaidris@gmail.com: " . $e->getMessage());
                 }
             }
             Log::info("Flagged new data for {$this->ticker} for manual review because an admin override exists.");
