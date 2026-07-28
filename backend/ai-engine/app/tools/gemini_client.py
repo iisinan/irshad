@@ -8,7 +8,7 @@ class GeminiClient:
     def __init__(self):
         self.api_key = os.getenv("GEMINI_API_KEY")
         if self.api_key:
-            self.client = genai.Client(api_key=self.api_key, http_options=genai_types.HttpOptions(api_version='v1'))
+            self.client = genai.Client(api_key=self.api_key)
         else:
             self.client = None
 
