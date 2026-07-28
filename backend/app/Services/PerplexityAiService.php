@@ -259,19 +259,29 @@ class PerplexityAiService
                     return $parsed;
                 }
             }
+            
+            $status = $response->status();
             Log::error('Perplexity AI Stage 1 failed or returned invalid JSON', [
-                'status' => $response->status(),
+                'status' => $status,
                 'body' => $response->body()
             ]);
+            
+            if ($status === 401 || $status === 429) {
+                try {
+                    \Illuminate\Support\Facades\Mail::raw("Perplexity API has failed or run out of quota (Status: {$status}). Please check your billing details and update the PERPLEXITY_API_KEY.", function ($message) {
+                        $message->to('sinanismailaidris@gmail.com')
+                                ->subject('CRITICAL: Perplexity API Quota Exceeded / Failed');
+                    });
+                } catch (\Exception $mailEx) {
+                    Log::error('Failed to send Perplexity alert email: ' . $mailEx->getMessage());
+                }
+            }
+            
+            throw new \Exception('Perplexity API failed to return valid response.');
+            
         } catch (\Exception $e) {
             Log::error('Exception in Perplexity Stage 1 screening: ' . $e->getMessage());
+            throw $e; // Rethrow so the controller knows it failed
         }
-
-        return [
-            'compliance_status' => 'PASS', // Fallback to pass to allow Stage 2 to proceed if AI fails
-            'haram_revenue_percent' => 0,
-            'purification_required' => false,
-            'reason' => 'AI screening failed to complete. Business activity assumed compliant for further analysis.'
-        ];
     }
 }

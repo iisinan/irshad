@@ -415,10 +415,34 @@ class StockController extends Controller
             }
 
             // Run Stage 1 (Qualitative) using Perplexity AI (Cached for 7 days)
-            $stage1 = cache()->remember("aaoifi_stage1_{$company->symbol}", now()->addDays(7), function () use ($company) {
-                $perplexity = new \App\Services\PerplexityAiService();
-                return $perplexity->runBusinessActivityScreening($company);
-            });
+            $cacheKey = "aaoifi_stage1_{$company->symbol}";
+            $fallbackKey = "aaoifi_stage1_{$company->symbol}_fallback";
+            
+            $stage1 = cache()->get($cacheKey);
+            
+            if (!$stage1) {
+                try {
+                    $perplexity = new \App\Services\PerplexityAiService();
+                    $stage1 = $perplexity->runBusinessActivityScreening($company);
+                    cache()->put($cacheKey, $stage1, now()->addDays(7));
+                    cache()->put($fallbackKey, $stage1, now()->addDays(365)); // Save a long-term fallback
+                } catch (\Exception $e) {
+                    // On failure, try to use the last known good result
+                    $oldCache = cache()->get($fallbackKey);
+                    
+                    if ($oldCache) {
+                        $stage1 = $oldCache;
+                    } else {
+                        // If no fallback exists, use a safe default but DO NOT cache it
+                        $stage1 = [
+                            'compliance_status' => 'PASS',
+                            'haram_revenue_percent' => 0,
+                            'purification_required' => false,
+                            'reason' => 'AI screening failed to complete. Business activity assumed compliant for further analysis.'
+                        ];
+                    }
+                }
+            }
 
             $stage1Pass = ($stage1['compliance_status'] ?? 'PASS') === 'PASS';
             
