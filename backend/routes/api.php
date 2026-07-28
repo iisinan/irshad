@@ -108,6 +108,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/email/resend', [VerificationController::class, 'resend']);
         Route::post('/portfolio',              [PortfolioController::class, 'store']);
         Route::post('/portfolio/bulk',         [PortfolioController::class, 'bulkStore']);
+        Route::put('/portfolio/{id}',          [PortfolioController::class, 'update']);
         Route::delete('/portfolio/{id}',       [PortfolioController::class, 'destroy']);
 
         // Watchlist

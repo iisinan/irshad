@@ -121,6 +121,27 @@ class PortfolioController extends Controller
         return $this->success($holding, 'Holding added to portfolio successfully.');
     }
 
+    public function update(Request $request, $id): JsonResponse
+    {
+        $request->validate([
+            'shares' => 'required|numeric|min:0',
+            'average_buy_price' => 'required|numeric|min:0',
+        ]);
+
+        $holding = Holding::where('user_id', Auth::id())->where('id', $id)->first();
+        
+        if (!$holding) {
+            return $this->error('Holding not found', 404);
+        }
+
+        $holding->update([
+            'shares' => $request->shares,
+            'average_buy_price' => $request->average_buy_price,
+        ]);
+
+        return $this->success($holding, 'Holding updated successfully.');
+    }
+
     /**
      * Remove a holding.
      */
