@@ -41,9 +41,17 @@ class AnalyzeAllStocksCommand extends Command
                 $financials = $company->financials->first();
 
                 $result = $aiService->analyzeCompliance($company, $financials, $statusStr);
-                $score = $result['confidence_score'] ?? 'N/A';
+                $score = $result['confidence_score'] ?? null;
                 $sourcesCount = count($result['sources'] ?? []);
-                $this->info(" -> Success! Confidence: {$score}%, Sources: {$sourcesCount}");
+                $this->info(" -> Success! Confidence: " . ($score ?? 'N/A') . "%, Sources: {$sourcesCount}");
+
+                if ($score !== null) {
+                    \Illuminate\Support\Facades\DB::table('stock_statuses')
+                        ->updateOrInsert(
+                            ['company_id' => $company->id],
+                            ['confidence_score' => $score, 'updated_at' => now()]
+                        );
+                }
             } catch (\Exception $e) {
                 $this->error(" -> Failed for {$company->symbol}: " . $e->getMessage());
             }

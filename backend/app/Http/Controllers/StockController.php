@@ -500,7 +500,8 @@ class StockController extends Controller
             ];
 
             $perplexityResult = cache()->get("stock.perplexity.v1.{$company->symbol}");
-            $confidenceScore = $perplexityResult['confidence_score'] ?? 88;
+            $dbConfidenceScore = $company->status ? $company->status->confidence_score : null;
+            $confidenceScore = $perplexityResult['confidence_score'] ?? ($dbConfidenceScore ?? 88);
 
             $mapped = [
                 'company_id' => $company->id,
