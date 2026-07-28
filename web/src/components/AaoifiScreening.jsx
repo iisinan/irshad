@@ -351,7 +351,7 @@ const AaoifiScreening = () => {
           <div>
             <h1 style={{ margin: 0, fontSize: '1.32rem', fontWeight: 900, color: 'var(--text-dark)' }}>{symbol} Screening</h1>
             <p style={{ margin: 0, fontSize: '0.79rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-              AAOIFI Standard • Updated {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              AAOIFI Standard
             </p>
           </div>
         </div>
