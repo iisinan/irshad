@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2, Brain, Globe, Newspaper, Bell, X, ShieldCheck, XCircle, AlertTriangle, Star, Activity, BookOpen, ChevronDown, ChevronUp, Briefcase, Scale, Landmark } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import api, { fetchStockDetails, fetchAiAnalysis, setPriceAlert, fetchWatchlist, addToWatchlist, removeFromWatchlist, overrideStockStatus } from '../services/api';
+import api, { fetchStockDetails, fetchAiAnalysis, setPriceAlert, fetchWatchlist, addToWatchlist, removeFromWatchlist } from '../services/api';
 import CompanyLogo from './CompanyLogo';
 import ReactMarkdown from 'react-markdown';
 import { useAuth } from '../context/AuthContext';
@@ -34,13 +34,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const [inWatchlist, setInWatchlist] = useState(false);
   const [watchlistLoading, setWatchlistLoading] = useState(false);
 
-  // Admin Override State
-  const [showStatusOverrideModal, setShowStatusOverrideModal] = useState(false);
-  const [overrideStatus, setOverrideStatus] = useState('');
-  const [overrideReason, setOverrideReason] = useState('');
-  const [overrideEvidence, setOverrideEvidence] = useState('');
-  const [overrideSaving, setOverrideSaving] = useState(false);
-  const [overrideError, setOverrideError] = useState('');
+
 
   const handleAskAI = () => {
     setAiLoading(true);
@@ -797,83 +791,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
           document.body
         )}
 
-        {/* ─── Admin Status Override Modal ─── */}
-        {showStatusOverrideModal && createPortal(
-          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000, padding: '20px' }}>
-            <div className="animate-fade-in" style={{ background: 'var(--bg)', borderRadius: '24px', padding: '32px', maxWidth: '500px', width: '100%', boxShadow: '0 24px 64px rgba(0,0,0,0.2)', border: '1px solid var(--border)', maxHeight: '90vh', overflowY: 'auto' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-dark)', margin: 0 }}>Edit Compliance Status</h2>
-                <button onClick={() => setShowStatusOverrideModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
-                  <X size={20} />
-                </button>
-              </div>
-            
-              <form onSubmit={async (e) => {
-                e.preventDefault();
-                setOverrideSaving(true);
-                setOverrideError('');
-                try {
-                  await overrideStockStatus(symbol, {
-                    status: overrideStatus,
-                    reason: overrideReason,
-                    evidence_link: overrideEvidence
-                  });
-                  setShowStatusOverrideModal(false);
-                  window.location.reload();
-                } catch (err) {
-                  setOverrideError(err.response?.data?.message || 'Failed to override status');
-                } finally {
-                  setOverrideSaving(false);
-                }
-              }}>
-                {overrideError && <div style={{ background: 'var(--non-halal-bg)', color: 'var(--non-halal)', padding: '12px', borderRadius: '8px', fontSize: '0.88rem', marginBottom: '20px' }}>{overrideError}</div>}
-                
-                <div style={{ marginBottom: '20px' }}>
-                  <label style={{ display:'block', fontSize:'0.75rem', fontWeight:700, color:'var(--text-muted)', marginBottom:'8px', textTransform:'uppercase', letterSpacing:'0.5px' }}>Shariah Status</label>
-                  <select 
-                    value={overrideStatus}
-                    onChange={e => setOverrideStatus(e.target.value)}
-                    style={{ width:'100%', padding: '12px', borderRadius:'12px', border:'1px solid var(--border)', background:'var(--bg-section)', fontSize:'0.88rem', fontWeight:600, outline:'none' }}
-                  >
-                    <option value="halal">Halal</option>
-                    <option value="doubtful">Doubtful</option>
-                    <option value="non-halal">Non-Halal</option>
-                  </select>
-                </div>
 
-                <div style={{ marginBottom: '20px' }}>
-                  <label style={{ display:'block', fontSize:'0.75rem', fontWeight:700, color:'var(--text-muted)', marginBottom:'8px', textTransform:'uppercase', letterSpacing:'0.5px' }}>Reasoning / Notes</label>
-                  <textarea 
-                    value={overrideReason}
-                    onChange={e => setOverrideReason(e.target.value)}
-                    placeholder="Explain why this status is being overridden..."
-                    rows={4}
-                    style={{ width:'100%', padding: '12px', borderRadius:'12px', border:'1px solid var(--border)', background:'var(--bg-section)', fontSize:'0.88rem', outline:'none', resize: 'vertical' }}
-                  />
-                </div>
-
-                <div style={{ marginBottom: '32px' }}>
-                  <label style={{ display:'block', fontSize:'0.75rem', fontWeight:700, color:'var(--text-muted)', marginBottom:'8px', textTransform:'uppercase', letterSpacing:'0.5px' }}>Evidence / Reference Link</label>
-                  <input 
-                    type="url"
-                    value={overrideEvidence}
-                    onChange={e => setOverrideEvidence(e.target.value)}
-                    placeholder="https://..."
-                    style={{ width:'100%', padding: '12px', borderRadius:'12px', border:'1px solid var(--border)', background:'var(--bg-section)', fontSize:'0.88rem', outline:'none' }}
-                  />
-                </div>
-
-                <div style={{ display:'flex', gap:'12px' }}>
-                  <button type="button" onClick={() => setShowStatusOverrideModal(false)} style={{ flex:1, padding:'14px', borderRadius:'12px', background:'var(--bg-section)', border:'none', color:'var(--text-muted)', fontWeight:700, cursor:'pointer' }}>Cancel</button>
-                  <button type="submit" disabled={overrideSaving} style={{ flex:1.5, padding:'14px', borderRadius:'12px', background:'var(--primary)', border:'none', color:'white', fontWeight:700, cursor:overrideSaving ? 'not-allowed' : 'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                    {overrideSaving ? <div className="spinner" style={{ width:'16px', height:'16px', borderWidth: '2px', borderColor: 'rgba(255,255,255,0.3)', borderTopColor: 'white' }}/> : 'Save Override'}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>,
-          document.body
-        )}
 
       {/* ─── News Section ─── */}
       <div style={{ marginTop: '32px', paddingBottom: '32px' }}>
