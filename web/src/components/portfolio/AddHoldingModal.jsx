@@ -69,6 +69,26 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
 
   const submit = (e) => {
     e.preventDefault();
+
+    for (let i = 0; i < rows.length; i++) {
+      const r = rows[i];
+      // If the row has any data filled out, it must have ALL data filled out
+      if (r.sym || r.sh || r.pr) {
+        if (!r.sym) {
+          alert(`Holding #${i + 1}: Ticker symbol cannot be empty.`);
+          return;
+        }
+        if (!r.sh || Number(r.sh) <= 0) {
+          alert(`Holding #${i + 1}: Please enter a valid number of shares.`);
+          return;
+        }
+        if (!r.pr || Number(r.pr) < 0) {
+          alert(`Holding #${i + 1}: Please enter a valid average price.`);
+          return;
+        }
+      }
+    }
+
     const validRows = rows.filter(r => r.sym && r.sh && r.pr);
     if (validRows.length === 0) {
       alert('Please fill out at least one complete holding row (Ticker, Shares, Avg Price).');

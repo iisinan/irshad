@@ -73,7 +73,14 @@ function EditHoldingModal({ holding, onClose, onSuccess }) {
   const [loading, setLoading] = useState(false);
   const submit = async (e) => {
     e.preventDefault();
-    if (!sh || !pr) return;
+    if (!sh || Number(sh) <= 0) {
+      alert('Please enter a valid number of shares.');
+      return;
+    }
+    if (!pr || Number(pr) < 0) {
+      alert('Please enter a valid average price.');
+      return;
+    }
     try { setLoading(true); await updateHolding(holding.id, { shares: +sh, average_buy_price: +pr }); onSuccess(); toastSuccess('Holding updated'); }
     catch (err) { toastError(err?.message || 'Failed to update holding'); }
     finally { setLoading(false); }
