@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2, Brain, Globe, Newspaper, Bell, X, ShieldCheck, XCircle, AlertTriangle, Star, Activity, BookOpen } from 'lucide-react';
+import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2, Brain, Globe, Newspaper, Bell, X, ShieldCheck, XCircle, AlertTriangle, Star, Activity, BookOpen, ChevronDown, ChevronUp } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import api, { fetchStockDetails, fetchAiAnalysis, setPriceAlert, fetchWatchlist, addToWatchlist, removeFromWatchlist, overrideStockStatus } from '../services/api';
 import CompanyLogo from './CompanyLogo';
@@ -20,6 +20,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const [enriching, setEnriching] = useState(!!optimisticStock); // silent background fetch
   const [dividendInput, setDividendInput] = useState('');
   const [aiAnalysis, setAiAnalysis] = useState(null);
+  const [isAiExpanded, setIsAiExpanded] = useState(false);
   const [aiData, setAiData] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState(null);
@@ -394,22 +395,27 @@ const StockDetails = ({ symbol: propSymbol }) => {
           </div>
 
           {/* Irshad Shariah Analysis */}
-          <div className="detail-panel" style={{ background: 'var(--bg-section)', border: '1px solid var(--border-strong)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <div className="detail-panel" style={{ background: 'var(--bg-section)', border: '1px solid var(--border-strong)', cursor: aiAnalysis ? 'pointer' : 'default' }} onClick={() => { if (aiAnalysis) setIsAiExpanded(!isAiExpanded); }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: (isAiExpanded || aiLoading || aiError || !aiAnalysis) ? '16px' : '0' }}>
               <div className="detail-section-label" style={{ marginBottom: 0, color: 'var(--gold)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Brain size={16} /> Irshad Analysis Reasoning
               </div>
-              {!aiAnalysis && !aiLoading && (
-                <button onClick={handleAskAI} className="btn-primary" style={{ padding: '8px 16px', fontSize: '0.75rem', background: 'var(--gold)', color: '#1A1208', border: 'none', fontWeight: 700 }}>
-                  Ask Irshad
-                </button>
-              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                {!aiAnalysis && !aiLoading && (
+                  <button onClick={(e) => { e.stopPropagation(); handleAskAI(); }} className="btn-primary" style={{ padding: '8px 16px', fontSize: '0.75rem', background: 'var(--gold)', color: '#1A1208', border: 'none', fontWeight: 700 }}>
+                    Ask Irshad
+                  </button>
+                )}
+                {aiAnalysis && (
+                  isAiExpanded ? <ChevronUp size={18} color="var(--text-muted)" /> : <ChevronDown size={18} color="var(--text-muted)" />
+                )}
+              </div>
             </div>
             
             {aiLoading && <div style={{ color: 'var(--text-muted)', fontSize: '0.79rem', fontStyle: 'italic' }}>Irshad is searching corporate disclosures & analyzing financials...</div>}
             {aiError && <div style={{ color: 'var(--non-halal)', fontSize: '0.79rem' }}>{aiError}</div>}
-            {aiAnalysis && (
-              <div>
+            {aiAnalysis && isAiExpanded && (
+              <div className="animate-fade-in">
                 {aiData?.confidence_score && (
                   <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ background: 'var(--gold-bg, rgba(212, 175, 55, 0.15))', color: 'var(--gold)', padding: '4px 12px', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 800, border: '1px solid var(--gold)' }}>
