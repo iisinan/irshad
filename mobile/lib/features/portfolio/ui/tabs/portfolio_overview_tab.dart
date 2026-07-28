@@ -76,6 +76,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
           return provider.isGuest 
             ? const SizedBox() 
             : FloatingActionButton(
+                heroTag: null,
                 onPressed: () => _showAddHoldingSheet(context),
                 backgroundColor: context.textDark,
                 child: const Icon(Icons.add, color: Colors.white),

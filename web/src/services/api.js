@@ -83,7 +83,7 @@ export const fetchProfile = async () => {
 
 export const updateProfile = async (data) => {
   const response = await api.put('/profile', data);
-  localforage.removeItem('irshad_portfolio_cache_v10');
+  localforage.removeItem('irshad_portfolio_cache_v14');
   return response.data;
 };
 
@@ -98,7 +98,7 @@ export const resendVerification = async () => {
 };
 
 export const fetchPortfolio = async () => {
-  const cacheKey = 'irshad_portfolio_cache_v10';
+  const cacheKey = 'irshad_portfolio_cache_v14';
   try {
     const response = await api.get('/portfolio');
     await localforage.setItem(cacheKey, response.data);

@@ -28,6 +28,7 @@ class _BasketsScreenState extends State<BasketsScreen> {
       floatingActionButton: Padding(
         padding: EdgeInsets.only(bottom: 80 + MediaQuery.of(context).padding.bottom),
         child: FloatingActionButton.extended(
+          heroTag: null,
           onPressed: () async {
             final result = await Navigator.push(
               context,

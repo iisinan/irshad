@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   Wallet, AlertCircle, ShieldAlert,
   Plus, X, Trash2, CheckCircle, ArrowUpRight, ArrowDownRight,
@@ -114,29 +115,45 @@ function EditHoldingModal({ holding, onClose, onSuccess }) {
 
 /* ─── Holding Card (Sleek List Item) ────────────────────────── */
 function HoldingRow({ holding, onDelete, onEdit }) {
+  const navigate = useNavigate();
   const [hov, setHov] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const isUp = (holding.return_percentage || 0) >= 0;
-  const isHalal = !!holding.is_halal;
+  
+  const statusRaw = holding.status ? holding.status.toLowerCase() : (holding.is_halal ? 'halal' : 'non-halal');
+  const finalStatus = ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(holding.symbol) ? 'halal' : statusRaw;
   const hasPurif = (holding.purification_due || 0) > 0;
   
-  const accentColor = hasPurif ? 'var(--doubtful)' : isHalal ? 'var(--halal)' : 'var(--non-halal)';
+  const getBadgeStyle = (status) => {
+    if (status === 'halal' || status === 'compliant') return { bg: 'rgba(34, 197, 94, 0.1)', color: 'var(--halal)', text: 'Halal' };
+    if (status === 'non-halal' || status === 'non_halal' || status === 'non-compliant' || status === 'fail') return { bg: 'rgba(239, 68, 68, 0.1)', color: 'var(--non-halal)', text: 'Non-Halal' };
+    return { bg: 'rgba(245, 158, 11, 0.1)', color: 'var(--questionable)', text: 'Doubtful' };
+  };
+  const badge = getBadgeStyle(finalStatus);
+  const accentColor = badge.color;
   const sparkData = [0.88,0.92,0.89,0.95,0.97,isUp?1.0:0.95].map(m => ({ v:(holding.total_value||0)*m }));
 
   return (
     <div
+      className="hover-card"
+      onClick={() => navigate(`/market/${holding.symbol}`, { state: { stock: holding } })}
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => { setHov(false); setMenuOpen(false); }}
       style={{
-        display: 'flex', alignItems: 'center', padding: '16px 20px',
-        background: hov ? 'var(--bg-section)' : 'var(--bg)',
-        borderBottom: '1px solid var(--border)',
-        transition: 'background 0.2s ease',
-        position: 'relative'
+        display: 'flex', alignItems: 'center', padding: '20px 24px',
+        background: 'linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%)',
+        border: '1px solid var(--border)',
+        borderRadius: '20px',
+        marginBottom: '12px',
+        transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+        position: 'relative',
+        cursor: 'pointer',
+        boxShadow: hov ? '0 12px 32px rgba(0,0,0,0.05)' : '0 4px 16px rgba(0,0,0,0.02)',
+        overflow: 'hidden'
       }}
     >
       {/* Indicator */}
-      <div style={{ position: 'absolute', left: 0, top: '16px', bottom: '16px', width: '4px', borderRadius: '0 4px 4px 0', background: accentColor }} />
+      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '6px', background: accentColor }} />
 
       {/* Logo & Symbol */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1.5, minWidth: 0 }}>
@@ -144,15 +161,9 @@ function HoldingRow({ holding, onDelete, onEdit }) {
         <div style={{ minWidth: 0 }}>
           <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.79rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
             {holding.symbol}
-            {hasPurif ? (
-              <span style={{ padding: '2px 6px', borderRadius: '4px', background: 'rgba(245, 158, 11, 0.1)', color: 'var(--doubtful)', fontSize: '0.48rem', fontWeight: 800, textTransform: 'uppercase', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                <AlertCircle size={9} /> Purify {fmtK(holding.purification_due)}
-              </span>
-            ) : isHalal ? (
-              <span style={{ padding: '2px 6px', borderRadius: '4px', background: 'rgba(34, 197, 94, 0.1)', color: 'var(--halal)', fontSize: '0.48rem', fontWeight: 800, textTransform: 'uppercase' }}>Halal</span>
-            ) : (
-              <span style={{ padding: '2px 6px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--non-halal)', fontSize: '0.48rem', fontWeight: 800, textTransform: 'uppercase' }}>Non-Halal</span>
-            )}
+            <span style={{ padding: '2px 6px', borderRadius: '4px', background: badge.bg, color: badge.color, fontSize: '0.48rem', fontWeight: 800, textTransform: 'uppercase' }}>
+              {badge.text}
+            </span>
           </div>
           <div style={{ fontSize: '0.62rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>{holding.name || holding.symbol}</div>
         </div>
@@ -195,7 +206,7 @@ function HoldingRow({ holding, onDelete, onEdit }) {
       </div>
 
       {/* Actions */}
-      <div style={{ width: '40px', position: 'relative', display: 'flex', justifyContent: 'flex-end' }}>
+      <div style={{ width: '40px', position: 'relative', display: 'flex', justifyContent: 'flex-end' }} onClick={e => e.stopPropagation()}>
         <button 
           onClick={() => setMenuOpen(!menuOpen)}
           style={{ background: 'transparent', border: 'none', color: hov ? 'var(--text-dark)' : 'var(--text-light)', cursor: 'pointer', padding: '6px', borderRadius: '50%' }}
@@ -228,8 +239,9 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
   const totalBalance    = summary.total_balance    || 0;
   const purificationDue = summary.purification_due || 0;
   const compliance      = summary.health_percentage ?? 100;
-  const halalCount      = holdings.filter(h => h.is_halal).length;
-  const nonHalalCount   = holdings.filter(h => !h.is_halal).length;
+  const isHoldingHalal = h => !!h.is_halal || ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(h.symbol);
+  const halalCount      = holdings.filter(isHoldingHalal).length;
+  const nonHalalCount   = holdings.filter(h => !isHoldingHalal(h)).length;
   const totalGainPct    = holdings.length ? (holdings.reduce((s,h) => s + (h.return_percentage||0), 0) / holdings.length).toFixed(2) : null;
   const isPortfolioUp   = totalGainPct !== null ? Number(totalGainPct) >= 0 : true;
 
@@ -239,9 +251,9 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
   };
 
   const filterFn = h => {
-    if (activeFilter === 'halal')    return h.is_halal && !(h.purification_due);
+    if (activeFilter === 'halal')    return isHoldingHalal(h) && !(h.purification_due);
     if (activeFilter === 'purify')   return (h.purification_due||0) > 0;
-    if (activeFilter === 'nonhalal') return !h.is_halal;
+    if (activeFilter === 'nonhalal') return !isHoldingHalal(h);
     return true;
   };
   const displayHoldings = [...holdings].filter(filterFn).sort((a,b) => (b.total_value||0) - (a.total_value||0));
@@ -370,11 +382,11 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
       </div>
 
       {/* ─── HOLDINGS LIST ─── */}
-      <div className="stagger-3" style={{ background: 'var(--bg)', borderRadius: '20px', border: '1px solid var(--border)', overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,0.02)' }}>
+      <div className="stagger-3" style={{ marginTop: '24px' }}>
         
         {/* Header */}
         {displayHoldings.length > 0 && (
-          <div style={{ display: 'flex', padding: '16px 20px', background: 'var(--bg-section)', borderBottom: '1px solid var(--border)' }}>
+          <div style={{ display: 'flex', padding: '0 24px 16px 24px' }}>
             <div style={{ flex: 1.5, fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', paddingLeft: '62px' }}>Asset</div>
             <div style={{ flex: 1, textAlign: 'center', fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>7D Trend</div>
             <div style={{ flex: 1, textAlign: 'right', fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Value / Shares</div>

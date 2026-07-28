@@ -115,6 +115,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         ],
       ),
       floatingActionButton: _filteredFavorites.isEmpty && !_isLoading ? null : FloatingActionButton(
+        heroTag: null,
         onPressed: () {
           _showAddBottomSheet(context);
         },

@@ -42,6 +42,7 @@ const ShariahPage = lazyWithRetry(() => import('./components/Shariah'));
 const ResourcesPage = lazyWithRetry(() => import('./components/Resources'));
 const Profile = lazyWithRetry(() => import('./components/Profile'));
 const AdminDashboard = lazyWithRetry(() => import('./components/AdminDashboard'));
+const AdminComplianceReviews = lazyWithRetry(() => import('./components/AdminComplianceReviews'));
 const AdminUsers = lazyWithRetry(() => import('./components/AdminUsers'));
 const ZakatSettingsAdmin = lazyWithRetry(() => import('./components/ZakatSettingsAdmin'));
 const Pricing = lazyWithRetry(() => import('./components/Pricing'));
@@ -705,6 +706,13 @@ function App() {
                     <ProtectedRoute adminOnly={true}>
                       <AdminLayout>
                         <AdminDashboard />
+                      </AdminLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/admin/compliance-reviews" element={
+                    <ProtectedRoute adminOnly={true}>
+                      <AdminLayout>
+                        <AdminComplianceReviews />
                       </AdminLayout>
                     </ProtectedRoute>
                   } />

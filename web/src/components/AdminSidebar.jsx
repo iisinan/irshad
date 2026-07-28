@@ -15,9 +15,10 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
   const { user, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
 
-  const ADMIN_NAV_ITEMS = [
+    const ADMIN_NAV_ITEMS = [
     { section: 'Admin' },
     { label: 'Alerts', icon: LayoutDashboard, to: '/admin' },
+    { label: 'Compliance Reviews', icon: Shield, to: '/admin/compliance-reviews' },
     { label: 'Registered Users', icon: Users, to: '/admin/users' },
     { label: 'Tickers', icon: Database, to: '/admin?tab=stocks' },
     { label: 'Resources', icon: BookOpen, to: '/admin/resources' },

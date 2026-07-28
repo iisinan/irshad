@@ -80,12 +80,13 @@ class AaoifiComplianceService
                 }
             }
 
-            // JAIZ BANK EXEMPTION AND NARRATIVE
-            if (strtoupper($company->symbol) === 'JAIZBANK' || strtoupper($company->symbol) === 'JAIZ') {
+            // ISLAMIC FINANCE INSTITUTIONS & EXEMPTIONS
+            $islamicBanks = ['JAIZBANK', 'JAIZ', 'TAJBANK', 'TAJ', 'LOTUS', 'LOTUSBANK', 'NREIT'];
+            if (in_array(strtoupper($company->symbol), $islamicBanks)) {
                 return $this->saveStatus(
                     $company, 
                     'halal', 
-                    "Status is Halal. Jaiz Bank is a fully licensed Islamic bank operating strictly under non-interest banking principles."
+                    "Status is Halal. This company is explicitly exempted as a compliant institution (e.g., Islamic Bank, compliant REIT)."
                 );
             }
 
@@ -153,6 +154,30 @@ class AaoifiComplianceService
 
         $oldStatus = $stockStatus ? $stockStatus->status : null;
 
+        if ($oldStatus !== $status) {
+            // Check if there is already a pending review for this exact change
+            $existingReview = \App\Models\ComplianceReview::where('company_id', $company->id)
+                ->where('status', 'pending')
+                ->where('new_status', $status)
+                ->first();
+
+            if (!$existingReview) {
+                $review = \App\Models\ComplianceReview::create([
+                    'company_id' => $company->id,
+                    'old_status' => $oldStatus,
+                    'new_status' => $status,
+                    'reason' => $reasonText,
+                    'status' => 'pending'
+                ]);
+
+                $this->notifyAdminsOfReview($review);
+            }
+            
+            // Return existing status without modifying the database
+            return $stockStatus ?? (object)['status' => 'pending'];
+        }
+
+        // If status hasn't changed, just update the timestamp
         $newStatus = StockStatus::updateOrCreate(
             ['company_id' => $company->id],
             [
@@ -165,27 +190,20 @@ class AaoifiComplianceService
 
         $company->update(['current_status' => $status]);
 
-        // Keep aaoifi_screenings table in sync
         $aaoifiScreening = \App\Models\AaoifiScreening::where('company_id', $company->id)->latest()->first();
         if ($aaoifiScreening) {
             $aaoifiScreening->update(['final_status' => $status]);
         }
 
-        if ($oldStatus !== $status && $oldStatus !== null) {
-            \App\Models\ComplianceHistory::create([
-                'company_id' => $company->id,
-                'old_status' => $oldStatus,
-                'new_status' => $status,
-                'reason' => $reasonText,
-                'changed_at' => now(),
-            ]);
-        }
-
-        if ($oldStatus === 'halal' && $status === 'non-halal') {
-            $this->notifyUsersOfDowngrade($company);
-        }
-
         return $newStatus;
+    }
+
+    private function notifyAdminsOfReview($review)
+    {
+        $admins = \App\Models\User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            \Illuminate\Support\Facades\Mail::to($admin->email)->queue(new \App\Mail\ComplianceReviewNotification($review));
+        }
     }
 
     private function notifyUsersOfDowngrade(Company $company)

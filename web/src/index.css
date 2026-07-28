@@ -3576,7 +3576,7 @@ img[src="/logo.svg"] {
 .dashboard-main-content {
   flex: 1;
   padding-left: 0 !important;
-  overflow-x: hidden;
+  overflow: visible;
   min-width: 0;
 }
 

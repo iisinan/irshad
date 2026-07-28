@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2, Brain, Globe, Newspaper, Bell, X, ShieldCheck, XCircle, AlertTriangle, Star, Activity, BookOpen, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2, Brain, Globe, Newspaper, Bell, X, ShieldCheck, XCircle, AlertTriangle, Star, Activity, BookOpen, ChevronDown, ChevronUp, Briefcase, Scale, Landmark } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import api, { fetchStockDetails, fetchAiAnalysis, setPriceAlert, fetchWatchlist, addToWatchlist, removeFromWatchlist, overrideStockStatus } from '../services/api';
 import CompanyLogo from './CompanyLogo';
 import ReactMarkdown from 'react-markdown';
 import { useAuth } from '../context/AuthContext';
+import { formatAppJustification } from '../utils/screeningFormatter';
+
 const StockDetails = ({ symbol: propSymbol }) => {
   const { symbol: paramSymbol } = useParams();
   const symbol = propSymbol || paramSymbol;
@@ -48,7 +50,8 @@ const StockDetails = ({ symbol: propSymbol }) => {
         const payload = r.data || r;
         setAiData(payload);
         const analysisText = payload?.reasoning || payload?.analysis || "No analysis returned.";
-        setAiAnalysis(analysisText);
+        const isNonHalalReport = stock?.status?.status === 'non-halal' || stock?.status?.stage1?.status === 'non-halal' || stock?.current_status === 'non-halal';
+        setAiAnalysis(formatAppJustification(analysisText, isNonHalalReport));
       })
       .catch(e => {
         console.error(e);
@@ -137,6 +140,8 @@ const StockDetails = ({ symbol: propSymbol }) => {
     }
   }
 
+  reason = formatAppJustification(reason, isNonHalal);
+
   // ─── Financial ratios ─────────────────────────────
   const financials = stock.financials;
   const latest = Array.isArray(financials) && financials.length > 0 ? financials[0] : null;
@@ -177,8 +182,8 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const renderRatioProgressBar = (title, subtitle, ratio, threshold, isMinimum = false, isCurrency = false, showThreshold = true) => {
     if (ratio === null || ratio === undefined) {
       return (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '24px', padding: '24px 0', borderBottom: '1px solid var(--border)' }}>
-          <div style={{ flex: '0 0 220px', paddingLeft: '16px' }}>
+        <div className="ratio-row" style={{ display: 'flex', alignItems: 'center', gap: '24px', padding: '24px 16px', borderBottom: '1px solid var(--border)', transition: 'all 0.3s ease', borderRadius: '16px', margin: '0 -16px' }}>
+          <div style={{ flex: '0 0 220px', paddingLeft: '8px' }}>
             <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.88rem', marginBottom: '4px' }}>{title}</div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{subtitle}</div>
           </div>
@@ -203,6 +208,8 @@ const StockDetails = ({ symbol: propSymbol }) => {
       }
     }
     const color = isPassing ? 'var(--halal)' : 'var(--non-halal)';
+    const gradient = isPassing ? 'linear-gradient(90deg, rgba(22,163,74,0.3) 0%, var(--halal) 100%)' : 'linear-gradient(90deg, rgba(220,38,38,0.3) 0%, var(--non-halal) 100%)';
+    const shadow = isPassing ? '0 0 12px rgba(22,163,74,0.6)' : '0 0 12px rgba(220,38,38,0.6)';
     
     const maxVisual = showThreshold ? Math.max(thresholdNum / 0.7, ratioVal / 0.9, 1) : Math.max(ratioVal * 1.2, 1);
     const fillPercent = maxVisual > 0 ? (ratioVal / maxVisual) * 100 : 0;
@@ -213,38 +220,43 @@ const StockDetails = ({ symbol: propSymbol }) => {
 
     return (
       <div 
+        className="ratio-row hover-card"
         style={{ 
-          display: 'flex', alignItems: 'center', gap: '24px', padding: '24px 0', 
+          display: 'flex', alignItems: 'center', gap: '24px', padding: '24px 16px', 
           borderBottom: '1px solid var(--border)',
-          transition: 'all 0.2s', position: 'relative'
+          transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', position: 'relative',
+          borderRadius: '16px', margin: '0 -16px'
         }}
-        onMouseOver={e => { e.currentTarget.style.background = 'var(--bg-section)'; }}
-        onMouseOut={e => { e.currentTarget.style.background = 'transparent'; }}
       >
-        <div style={{ flex: '0 0 220px', paddingLeft: '16px' }}>
+        <div style={{ flex: '0 0 220px', paddingLeft: '8px' }}>
           <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.88rem', marginBottom: '4px' }}>{title}</div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{subtitle}</div>
         </div>
         
-        <div style={{ flex: 1, position: 'relative', height: '14px', background: 'var(--bg-section)', borderRadius: '10px' }}>
+        <div style={{ flex: 1, position: 'relative', height: '12px', background: 'var(--bg-section)', borderRadius: '10px', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.05)' }}>
           <div style={{ 
             position: 'absolute', top: 0, left: 0, height: '100%', 
             width: `${Math.min(fillPercent, 100)}%`, 
-            background: color, 
+            background: gradient, 
             borderRadius: '10px',
-            transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)'
+            boxShadow: shadow,
+            transition: 'width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
           }} />
           {showThreshold && (
             <>
               <div style={{
                 position: 'absolute', top: '-6px', bottom: '-6px', 
                 left: `${thresholdPercent}%`, width: '2px', 
-                background: 'var(--non-halal)',
+                background: 'var(--text-dark)',
+                borderRadius: '2px',
+                boxShadow: '0 0 4px rgba(0,0,0,0.3)',
                 zIndex: 10
               }} />
               <div style={{
                 position: 'absolute', top: '22px', left: `calc(${thresholdPercent}% - 30px)`,
-                fontSize: '0.66rem', color: 'var(--text-muted)', fontWeight: 600, width: '60px', textAlign: 'center'
+                fontSize: '0.66rem', color: 'var(--text-muted)', fontWeight: 700, width: '60px', textAlign: 'center',
+                background: 'var(--bg)', padding: '2px 6px', borderRadius: '6px', border: '1px solid var(--border)',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
               }}>
                 limit {displayThreshold}
               </div>
@@ -252,9 +264,9 @@ const StockDetails = ({ symbol: propSymbol }) => {
           )}
         </div>
         
-        <div style={{ flex: '0 0 140px', textAlign: 'right', paddingRight: '16px' }}>
-          <div style={{ fontSize: isCurrency ? '1.1rem' : '1.5rem', fontWeight: 900, color }}>{displayVal}</div>
-          {showThreshold && <div style={{ fontSize: '0.66rem', fontWeight: 700, color, marginTop: '4px' }}>{headroomDisplay}</div>}
+        <div style={{ flex: '0 0 140px', textAlign: 'right', paddingRight: '8px' }}>
+          <div style={{ fontSize: isCurrency ? '1.1rem' : '1.5rem', fontWeight: 900, color, textShadow: `0 2px 10px ${color}33` }}>{displayVal}</div>
+          {showThreshold && <div style={{ fontSize: '0.66rem', fontWeight: 700, color, marginTop: '4px', opacity: 0.9 }}>{headroomDisplay}</div>}
         </div>
       </div>
     );
@@ -294,26 +306,27 @@ const StockDetails = ({ symbol: propSymbol }) => {
         </div>
       )}
 
-      {/* ─── Header Card ─── */}
-      <div className="detail-header" style={{ background: 'linear-gradient(135deg, #0D1B2A 0%, #0F5257 65%, #0B6B71 100%)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '24px', position: 'relative', overflow: 'hidden' }}>
-        {/* Background orbs instead of plain logo */}
-        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(201,168,76,0.08)', borderRadius: '50%' }} />
-        <div style={{ position: 'absolute', bottom: '-80px', left: '-40px', width: '180px', height: '180px', background: 'rgba(255,255,255,0.03)', borderRadius: '50%' }} />
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '10px' }}>
+      {/* ─── Header Card (Redesigned with Verdict & Justification as Primary) ─── */}
+      <div className="detail-header" style={{ background: 'linear-gradient(135deg, #0D1B2A 0%, #0F5257 65%, #0B6B71 100%)', padding: '28px clamp(20px, 4vw, 36px)', borderRadius: '24px', position: 'relative', overflow: 'hidden', boxShadow: '0 12px 40px rgba(0,0,0,0.15)', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        {/* Background ambient orbs */}
+        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '240px', height: '240px', background: 'radial-gradient(circle, rgba(201,168,76,0.15) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none', animation: 'orbFloat 18s ease-in-out infinite alternate' }} />
+        <div style={{ position: 'absolute', bottom: '-80px', left: '-40px', width: '300px', height: '300px', background: 'radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none', animation: 'orbFloat 25s ease-in-out infinite alternate-reverse' }} />
+        
+        {/* Top Row: Company Info (Left) & Secondary Price / Actions (Right) */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '20px', width: '100%', position: 'relative', zIndex: 1 }}>
+          
+          {/* Left: Logo & Company Name */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <CompanyLogo
               symbol={stock.symbol}
               logoUrl={stock.logo_url}
               size={56}
               radius={14}
-              style={{ background: 'var(--bg)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
+              style={{ background: 'var(--bg)', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', flexShrink: 0 }}
             />
-            <div style={{ position: 'relative', zIndex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <h1 style={{ fontSize: '1.67rem', fontWeight: '800', letterSpacing: '-0.5px', color: 'white' }}>{stock.name}</h1>
-                <span className={`status-badge ${badgeClass}`} style={{ fontSize: '0.66rem', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
-                  <StatusIcon size={12} /> {statusStr}
-                </span>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                <h1 style={{ fontSize: '1.75rem', fontWeight: '900', letterSpacing: '-0.5px', color: 'white', margin: 0, lineHeight: 1.1 }}>{stock.name}</h1>
                 {user?.role === 'admin' && (
                   <button 
                     onClick={() => {
@@ -324,7 +337,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
                     }}
                     style={{
                       background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)',
-                      color: 'white', padding: '4px 8px', borderRadius: '8px', fontSize: '0.66rem',
+                      color: 'white', padding: '4px 10px', borderRadius: '8px', fontSize: '0.65rem',
                       fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s',
                       display: 'flex', alignItems: 'center', gap: '4px'
                     }}
@@ -335,49 +348,113 @@ const StockDetails = ({ symbol: propSymbol }) => {
                   </button>
                 )}
               </div>
-              <p style={{ color: 'rgba(255,255,255,0.65)', fontWeight: 600, marginTop: '6px', letterSpacing: '0.5px' }}>
+              <p style={{ color: 'rgba(255,255,255,0.65)', fontWeight: 600, margin: '6px 0 0', letterSpacing: '0.5px', fontSize: '0.84rem' }}>
                 {stock.symbol} · {stock.sector ?? 'Market Listed'} · Stock Exchange
               </p>
             </div>
           </div>
-        </div>
-        <div style={{ textAlign: 'right', position: 'relative', zIndex: 1 }}>
-          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.66rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase' }}>Latest Price</p>
-          <div style={{ fontSize: '1.94rem', fontWeight: '800', color: 'white', letterSpacing: '-1px' }}>₦ {latestPrice.toFixed(2)}</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: isPositive ? '#4ade80' : '#f87171', fontWeight: 700, justifyContent: 'flex-end', marginTop: '4px' }}>
-            {isPositive ? <TrendingUp size={14} /> : <TrendingDown size={14} />} {priceChangePct.toFixed(2)}%
+
+          {/* Right: Actions & Secondary Price Tag */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <button
+                 onClick={toggleWatchlist}
+                 disabled={watchlistLoading}
+                 style={{ 
+                   display: 'flex', alignItems: 'center', gap: '6px', 
+                   background: inWatchlist ? 'var(--gold)' : 'rgba(255,255,255,0.15)', 
+                   border: `1px solid ${inWatchlist ? 'var(--gold)' : 'rgba(255,255,255,0.3)'}`, 
+                   color: inWatchlist ? '#1A1208' : 'white', 
+                   padding: '7px 14px', borderRadius: '10px', fontSize: '0.74rem', 
+                   fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s',
+                   boxShadow: inWatchlist ? '0 4px 12px rgba(212, 175, 55, 0.3)' : 'none'
+                 }}
+              >
+                 {watchlistLoading ? <div className="spinner" style={{width:'14px', height:'14px', borderTopColor: inWatchlist?'#1A1208':'white', borderWidth: '2px'}}/> : <Bell size={14} fill={inWatchlist ? '#1A1208' : 'none'} />}
+                 {inWatchlist ? 'Alert Set' : 'Alert'}
+              </button>
+            </div>
+
+            {/* Secondary Price Display */}
+            <div className="hover-card" style={{ textAlign: 'right', background: 'rgba(0,0,0,0.18)', padding: '6px 14px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase' }}>Latest Price</div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', justifyContent: 'flex-end', marginTop: '2px' }}>
+                <span style={{ fontSize: '1.35rem', fontWeight: '850', color: 'white', letterSpacing: '-0.5px' }}>₦ {latestPrice.toFixed(2)}</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px', color: isPositive ? '#4ade80' : '#f87171', fontWeight: 700, fontSize: '0.75rem' }}>
+                  {isPositive ? <TrendingUp size={12} /> : <TrendingDown size={12} />} {priceChangePct.toFixed(2)}%
+                </span>
+              </div>
+            </div>
           </div>
-          <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-            <button
-               onClick={toggleWatchlist}
-               disabled={watchlistLoading}
-               style={{ 
-                 display: 'flex', alignItems: 'center', gap: '6px', 
-                 background: inWatchlist ? 'var(--gold)' : 'rgba(255,255,255,0.15)', 
-                 border: `1px solid ${inWatchlist ? 'var(--gold)' : 'rgba(255,255,255,0.3)'}`, 
-                 color: inWatchlist ? '#1A1208' : 'white', 
-                 padding: '8px 16px', borderRadius: '12px', fontSize: '0.75rem', 
-                 fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s'
-               }}
-            >
-               {watchlistLoading ? <div className="spinner" style={{width:'14px', height:'14px', borderTopColor: inWatchlist?'#1A1208':'white', borderWidth: '2px'}}/> : <Star size={14} fill={inWatchlist ? '#1A1208' : 'none'} />}
-               {inWatchlist ? 'Saved' : 'Watchlist'}
-            </button>
-            <button 
-              onClick={() => setShowAlertDialog(true)}
-              style={{ 
-                display: 'flex', alignItems: 'center', gap: '6px', 
-                background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', 
-                color: 'white', padding: '8px 16px', borderRadius: '12px', fontSize: '0.75rem', 
-                fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s'
-              }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.25)' }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.15)' }}
-            >
-              <Bell size={14} /> Alert
-            </button>
+
+        </div>
+
+        {/* ─── Bottom Row: Primary Verdict & Justification Banner ─── */}
+        <div style={{
+          position: 'relative', zIndex: 1,
+          width: '100%', boxSizing: 'border-box',
+          background: isHalal 
+            ? 'linear-gradient(135deg, rgba(22, 163, 74, 0.28) 0%, rgba(20, 83, 45, 0.35) 100%)' 
+            : isNonHalal 
+            ? 'linear-gradient(135deg, rgba(220, 38, 38, 0.32) 0%, rgba(153, 27, 27, 0.38) 100%)' 
+            : 'linear-gradient(135deg, rgba(202, 138, 4, 0.28) 0%, rgba(133, 77, 14, 0.35) 100%)',
+          border: `1.5px solid ${isHalal ? 'rgba(74, 222, 128, 0.45)' : isNonHalal ? 'rgba(248, 113, 113, 0.45)' : 'rgba(250, 204, 21, 0.45)'}`,
+          borderRadius: '18px',
+          padding: '20px 24px',
+          boxShadow: isHalal 
+            ? '0 12px 32px rgba(22, 163, 74, 0.25), inset 0 1px 0 rgba(255,255,255,0.1)' 
+            : isNonHalal 
+            ? '0 12px 32px rgba(220, 38, 38, 0.28), inset 0 1px 0 rgba(255,255,255,0.1)' 
+            : '0 12px 32px rgba(202, 138, 4, 0.25), inset 0 1px 0 rgba(255,255,255,0.1)',
+          backdropFilter: 'blur(16px)',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          alignItems: 'center',
+          gap: '24px',
+          transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+        }}
+        onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
+        onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; }}
+        >
+          {/* Left: Primary Verdict */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{
+              width: '56px', height: '56px', borderRadius: '16px',
+              background: isHalal ? '#16a34a' : isNonHalal ? '#dc2626' : '#ca8a04',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: isHalal ? '0 0 20px rgba(22, 163, 74, 0.5)' : isNonHalal ? '0 0 20px rgba(220, 38, 38, 0.5)' : '0 0 20px rgba(202, 138, 4, 0.5)', 
+              flexShrink: 0,
+              border: '2px solid rgba(255,255,255,0.3)',
+              animation: 'pulse 2.5s infinite alternate'
+            }}>
+              <StatusIcon size={30} color="white" />
+            </div>
+            <div>
+              <div style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.2px', color: 'rgba(255,255,255,0.75)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                AAOIFI Compliance Verdict
+              </div>
+              <div style={{ fontSize: '1.95rem', fontWeight: 950, color: 'white', letterSpacing: '-0.5px', lineHeight: 1, textShadow: '0 2px 12px rgba(0,0,0,0.3)' }}>
+                {statusStr}
+              </div>
+            </div>
+          </div>
+
+          {/* Right: Summary of Justification */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', borderLeft: '1px solid rgba(255,255,255,0.15)', paddingLeft: '24px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+              <span style={{ fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--gold, #d4af37)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <ShieldCheck size={14} color="var(--gold, #d4af37)" /> Screening Justification Summary
+              </span>
+              <Link to={`/market/${stock.symbol}/aaoifi`} style={{ fontSize: '0.72rem', fontWeight: 700, color: 'white', textDecoration: 'none', background: 'rgba(255,255,255,0.15)', padding: '4px 12px', borderRadius: '100px', border: '1px solid rgba(255,255,255,0.25)', transition: 'all 0.2s', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                Full Audit →
+              </Link>
+            </div>
+            <p style={{ margin: 0, fontSize: '0.9rem', color: 'rgba(255,255,255,0.92)', lineHeight: 1.5, fontWeight: 500, textShadow: '0 1px 2px rgba(0,0,0,0.1)' }}>
+              {reason || 'Screened strictly according to AAOIFI Standard No. 21 methodology. All business operations and financial ratios comply with Shariah requirements.'}
+            </p>
           </div>
         </div>
+
       </div>
 
       {/* ─── Two Column Layout ─── */}
@@ -386,123 +463,154 @@ const StockDetails = ({ symbol: propSymbol }) => {
         {/* Left Column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           
-          {/* About Company */}
-          <div className="detail-panel">
-            <div className="detail-section-label">About Company</div>
-            <p style={{ fontSize: '0.92rem', lineHeight: 1.85, color: 'var(--text-body)' }}>
-              {stock.overview || `${stock.name} is a publicly traded company on the Stock Exchange, operating within the ${stock.sector || 'Unknown'} sector. Its primary business activities include the production, provision, and distribution of goods and services specific to the ${stock.sector || 'Unknown'} industry. The company focuses on delivering sustainable, long-term value to its shareholders and stakeholders across the region.`}
-            </p>
+          {/* About Company (Furnished with Industry, Board, and Date Price) */}
+          <div className="detail-panel" style={{ padding: '28px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '24px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)' }}>
+            <div className="detail-section-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--primary)', marginBottom: '20px' }}>
+              <Briefcase size={16} /> ABOUT {stock.name}
+            </div>
+
+            {/* Key Details Grid Ribbon */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
+              
+              {/* Metric 1: Industry */}
+              <div className="hover-card" style={{ background: 'var(--bg-section)', padding: '16px 18px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Landmark size={14} color="var(--primary)" /> Industry / Sector
+                </span>
+                <span style={{ fontSize: '1.02rem', color: 'var(--text-dark)', fontWeight: 850 }}>
+                  {stock.sector || stock.industry || 'Financial Services'}
+                </span>
+              </div>
+
+              {/* Metric 2: NGX Board */}
+              <div className="hover-card" style={{ background: 'var(--bg-section)', padding: '16px 18px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Scale size={14} color="var(--gold, #d4af37)" /> NGX Trading Board
+                </span>
+                <span style={{ fontSize: '1.02rem', color: 'var(--text-dark)', fontWeight: 850 }}>
+                  {stock.board || stock.ngx_board || (stock.symbol === 'JAIZBANK' || stock.symbol === 'TAJBANK' || stock.symbol === 'LOTUS' || stock.symbol === 'NREIT' ? 'Non-Interest Board' : 'Equity Board / Main')}
+                </span>
+              </div>
+
+              {/* Metric 3: Price as at Date */}
+              <div className="hover-card" style={{ background: 'var(--bg-section)', padding: '16px 18px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Activity size={14} color="var(--halal, #16a34a)" /> Price as at {latestPriceObj?.date ? new Date(latestPriceObj.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                </span>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+                  <span style={{ fontSize: '1.05rem', color: 'var(--text-dark)', fontWeight: 900 }}>
+                    ₦ {latestPrice.toFixed(2)}
+                  </span>
+                  <span style={{ fontSize: '0.74rem', fontWeight: 700, color: isPositive ? 'var(--halal)' : 'var(--non-halal)' }}>
+                    ({isPositive ? '+' : ''}{priceChangePct.toFixed(2)}%)
+                  </span>
+                </div>
+              </div>
+
+              {/* Metric 4: Analyst Target */}
+              <div className="hover-card" style={{ background: 'var(--bg-section)', padding: '16px 18px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <TrendingUp size={14} color="var(--primary)" /> Analyst Target
+                </span>
+                <span style={{ fontSize: '1.02rem', color: 'var(--text-dark)', fontWeight: 850 }}>
+                  {stock.analysts_target ? `₦ ${stock.analysts_target}` : 'N/A'}
+                </span>
+              </div>
+
+              {/* Metric 5: Dividend Yield */}
+              <div className="hover-card" style={{ background: 'var(--bg-section)', padding: '16px 18px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <BarChart2 size={14} color="var(--gold, #d4af37)" /> Dividend Yield
+                </span>
+                <span style={{ fontSize: '1.02rem', color: 'var(--text-dark)', fontWeight: 850 }}>
+                  {stock.div_yield ? `${(parseFloat(stock.div_yield) * 100).toFixed(2)}%` : 'N/A'}
+                </span>
+              </div>
+
+              {/* Metric 6: SEC Registration */}
+              <div className="hover-card" style={{ background: 'var(--bg-section)', padding: '16px 18px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <ShieldCheck size={14} color="var(--halal, #16a34a)" /> SEC Registration
+                </span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: 'var(--halal)', fontWeight: 800, fontSize: '0.95rem' }}>
+                  <CheckCircle size={15} /> Verified & Listed
+                </span>
+              </div>
+
+            </div>
           </div>
 
           {/* Irshad Shariah Analysis */}
-          <div className="detail-panel" style={{ background: 'var(--bg-section)', border: '1px solid var(--border-strong)', cursor: aiAnalysis ? 'pointer' : 'default' }} onClick={() => { if (aiAnalysis) setIsAiExpanded(!isAiExpanded); }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: (isAiExpanded || aiLoading || aiError || !aiAnalysis) ? '16px' : '0' }}>
-              <div className="detail-section-label" style={{ marginBottom: 0, color: 'var(--gold)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Brain size={16} /> Irshad Analysis Reasoning
+          <div className="detail-panel hover-card" style={{ 
+            background: 'linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%)', 
+            border: '1px solid rgba(212, 175, 55, 0.25)', 
+            boxShadow: '0 8px 32px rgba(212, 175, 55, 0.05)',
+            cursor: aiAnalysis ? 'pointer' : 'default',
+            position: 'relative', overflow: 'hidden'
+          }} onClick={() => { if (aiAnalysis) setIsAiExpanded(!isAiExpanded); }}>
+            <div style={{ position: 'absolute', top: '-100px', left: '-100px', width: '300px', height: '300px', background: 'radial-gradient(circle, rgba(212, 175, 55, 0.08) 0%, transparent 60%)', pointerEvents: 'none' }} />
+            
+            <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: (isAiExpanded || aiLoading || aiError || !aiAnalysis) ? '16px' : '0' }}>
+              <div className="detail-section-label" style={{ marginBottom: 0, color: 'var(--gold)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ background: 'rgba(212, 175, 55, 0.15)', padding: '8px', borderRadius: '10px', display: 'flex' }}>
+                  <Brain size={18} color="var(--gold)" />
+                </div>
+                Irshad Analysis Reasoning
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 {!aiAnalysis && !aiLoading && (
-                  <button onClick={(e) => { e.stopPropagation(); handleAskAI(); }} className="btn-primary" style={{ padding: '8px 16px', fontSize: '0.75rem', background: 'var(--gold)', color: '#1A1208', border: 'none', fontWeight: 700 }}>
-                    Ask Irshad
+                  <button onClick={(e) => { e.stopPropagation(); handleAskAI(); }} className="btn-primary" style={{ padding: '8px 20px', fontSize: '0.78rem', background: 'linear-gradient(135deg, #d4af37 0%, #b89326 100%)', color: '#1A1208', border: 'none', fontWeight: 800, boxShadow: '0 4px 12px rgba(212, 175, 55, 0.3)' }}>
+                    Ask Irshad ✨
                   </button>
                 )}
                 {aiAnalysis && (
-                  isAiExpanded ? <ChevronUp size={18} color="var(--text-muted)" /> : <ChevronDown size={18} color="var(--text-muted)" />
+                  <div style={{ background: 'rgba(212, 175, 55, 0.1)', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {isAiExpanded ? <ChevronUp size={18} color="var(--gold)" /> : <ChevronDown size={18} color="var(--gold)" />}
+                  </div>
                 )}
               </div>
             </div>
             
-            {aiLoading && <div style={{ color: 'var(--text-muted)', fontSize: '0.79rem', fontStyle: 'italic' }}>Irshad is searching corporate disclosures & analyzing financials...</div>}
-            {aiError && <div style={{ color: 'var(--non-halal)', fontSize: '0.79rem' }}>{aiError}</div>}
-            {aiAnalysis && isAiExpanded && (
-              <div className="animate-fade-in">
-                {aiData?.confidence_score && (
-                  <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ background: 'var(--gold-bg, rgba(212, 175, 55, 0.15))', color: 'var(--gold)', padding: '4px 12px', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 800, border: '1px solid var(--gold)' }}>
-                      ✨ Irshad Confidence Score: {aiData.confidence_score}%
-                    </span>
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              {aiLoading && <div style={{ color: 'var(--text-muted)', fontSize: '0.84rem', fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: '8px' }}><div className="spinner" style={{width: '14px', height: '14px', borderWidth: '2px'}} /> Irshad is searching corporate disclosures & analyzing financials...</div>}
+              {aiError && <div style={{ color: 'var(--non-halal)', fontSize: '0.79rem' }}>{aiError}</div>}
+              {aiAnalysis && isAiExpanded && (
+                <div className="animate-fade-in" style={{ background: 'rgba(255,255,255,0.03)', padding: '24px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', marginTop: '8px' }}>
+                  <div style={{ color: 'var(--text-body)', lineHeight: 1.7, fontSize: '0.9rem' }}>
+                    <ReactMarkdown>{aiAnalysis}</ReactMarkdown>
                   </div>
-                )}
-                <div style={{ color: 'var(--text-body)', lineHeight: 1.7, fontSize: '0.84rem' }}>
-                  <ReactMarkdown>{aiAnalysis}</ReactMarkdown>
                 </div>
-                
-
-              </div>
-            )}
-            {!aiAnalysis && !aiLoading && !aiError && (
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.84rem', margin: 0 }}>
-                Get a real-time Shariah assessment powered by Irshad with confidence scoring and source citations.
-              </p>
-            )}
-          </div>
-
-          {/* AAOIFI Screening Result Banner (Large & Prominent) */}
-          <div className="detail-panel" style={{ 
-            borderLeft: `8px solid ${screeningColor}`, 
-            background: 'linear-gradient(145deg, #ffffff, #f8fafc)',
-            padding: '36px 40px',
-            position: 'relative',
-            overflow: 'hidden',
-            boxShadow: '0 12px 40px rgba(0,0,0,0.06)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '28px'
-          }}>
-            <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: '260px', height: '260px', background: screeningBg, borderRadius: '50%', filter: 'blur(60px)', opacity: 0.6, zIndex: 0 }} />
-
-            <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                <div style={{ 
-                  background: isHalal ? 'rgba(74, 222, 128, 0.2)' : isNonHalal ? 'rgba(248, 113, 113, 0.2)' : 'rgba(250, 204, 21, 0.2)', 
-                  border: `2px solid ${isHalal ? 'rgba(74, 222, 128, 0.4)' : isNonHalal ? 'rgba(248, 113, 113, 0.4)' : 'rgba(250, 204, 21, 0.4)'}`,
-                  color: isHalal ? '#16a34a' : isNonHalal ? '#dc2626' : '#ca8a04',
-                  padding: '16px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center'
-                }}>
-                  <StatusIcon size={36} />
-                </div>
-                <div>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: screeningColor, marginBottom: '6px' }}>AAOIFI COMPLIANCE VERDICT</div>
-                  <h3 style={{ margin: 0, fontSize: '1.85rem', fontWeight: 900, color: 'var(--text-dark)' }}>
-                    {isHalal ? 'HALAL' : isNonHalal ? 'NON-HALAL' : 'DOUBTFUL'}
-                  </h3>
-                  <p style={{ margin: '6px 0 0', fontSize: '0.92rem', color: 'var(--text-muted)' }}>
-                    {reason || 'Screened strictly according to AAOIFI Standard No. 21 methodology'}
-                  </p>
-                </div>
-              </div>
-
-              <div>
-                <Link to={`/market/${stock.symbol}/aaoifi`} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '14px 28px', fontSize: '0.92rem', fontWeight: 800, background: 'var(--primary)', color: 'var(--bg)', border: 'none', borderRadius: '100px', textDecoration: 'none', boxShadow: '0 6px 16px rgba(15, 82, 87, 0.25)' }}>
-                  <ShieldCheck size={20} />
-                  View Full AAOIFI Result & Audit
-                </Link>
-              </div>
+              )}
+              {!aiAnalysis && !aiLoading && !aiError && (
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: 0, marginTop: '8px' }}>
+                  Get a real-time Shariah assessment powered by Irshad with contextual source citations.
+                </p>
+              )}
             </div>
-
-
           </div>
+
+
 
           {/* Advanced Metrics (Market Data) */}
           {(stock.valuation_info && stock.valuation_info !== 'N/A' && stock.valuation_info !== 'O' || 
             stock.growth_info && stock.growth_info !== 'N/A' && stock.growth_info !== 'O') && (
-            <div className="detail-panel" style={{ padding: '24px', background: 'var(--bg-section)', border: '1px solid var(--border)' }}>
-              <div className="detail-section-label">Advanced Metrics</div>
+            <div className="detail-panel" style={{ padding: '28px', background: 'var(--bg-section)', border: '1px solid var(--border)' }}>
+              <div className="detail-section-label" style={{ marginBottom: '20px' }}>Advanced Metrics</div>
               <div className="detail-metrics-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 {stock.valuation_info && stock.valuation_info !== 'N/A' && stock.valuation_info !== 'O' && (
-                  <div style={{ background: 'var(--bg)', padding: '20px', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <TrendingUp size={14} color="var(--primary)" /> Valuation
+                  <div className="hover-card" style={{ background: 'linear-gradient(135deg, var(--bg) 0%, var(--bg-section) 100%)', padding: '24px', borderRadius: '20px', border: '1px solid var(--border)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <TrendingUp size={16} color="var(--primary)" /> Valuation
                     </span>
-                    <span style={{ fontSize: '1rem', color: 'var(--text-dark)', fontWeight: 800 }}>{stock.valuation_info}</span>
+                    <span style={{ fontSize: '1.05rem', color: 'var(--text-dark)', fontWeight: 850 }}>{stock.valuation_info}</span>
                   </div>
                 )}
                 {stock.growth_info && stock.growth_info !== 'N/A' && stock.growth_info !== 'O' && (
-                  <div style={{ background: 'var(--bg)', padding: '20px', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <TrendingUp size={14} color="var(--halal)" /> Growth Forecast
+                  <div className="hover-card" style={{ background: 'linear-gradient(135deg, var(--bg) 0%, var(--bg-section) 100%)', padding: '24px', borderRadius: '20px', border: '1px solid var(--border)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <TrendingUp size={16} color="var(--halal)" /> Growth Forecast
                     </span>
-                    <span style={{ fontSize: '1rem', color: 'var(--text-dark)', fontWeight: 800 }}>{stock.growth_info}</span>
+                    <span style={{ fontSize: '1.05rem', color: 'var(--text-dark)', fontWeight: 850 }}>{stock.growth_info}</span>
                   </div>
                 )}
               </div>
@@ -570,38 +678,22 @@ const StockDetails = ({ symbol: propSymbol }) => {
           </div>
         </div>
 
-        {/* Right Column */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        {/* Right Column (Sticky so it stays fixed and doesn't move with page scroll) */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', position: 'sticky', top: '24px', alignSelf: 'start' }}>
 
-          {/* Overview */}
-          <div className="detail-panel">
-            <div className="detail-section-label">Overview</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              {[
-                { label: 'Sector', value: stock.sector || 'N/A' },
-                { label: 'Industry', value: stock.business_type || 'Equities' },
-                { label: 'Exchange', value: 'Stock Exchange' },
-                { label: 'Analyst Target', value: stock.analysts_target ? `₦ ${stock.analysts_target}` : 'N/A' },
-                { label: 'Dividend Yield', value: stock.div_yield ? `${(parseFloat(stock.div_yield) * 100).toFixed(2)}%` : 'N/A' },
-              ].map(row => (
-                <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ color: 'var(--text-muted)', fontSize: '0.77rem', fontWeight: 500 }}>{row.label}</span>
-                  <span style={{ color: 'var(--text-dark)', fontWeight: 700, fontSize: '0.84rem' }}>{row.value}</span>
-                </div>
-              ))}
-              
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: 'var(--text-muted)', fontSize: '0.77rem', fontWeight: 500 }}>SEC Registration</span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--halal)', fontWeight: 700, fontSize: '0.75rem', background: 'var(--halal-bg)', padding: '2px 8px', borderRadius: '12px' }}>
-                  <CheckCircle size={12} /> Verified
-                </span>
-              </div>
-            </div>
-          </div>
+
 
           {/* Purification Calculator */}
-          <div className="detail-panel" style={{ background: 'linear-gradient(135deg, #0A2E36 0%, #0F5257 100%)', border: 'none', color: 'white' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+          <div className="detail-panel hover-card" style={{ 
+            background: 'linear-gradient(135deg, #071F24 0%, #0D3E42 100%)', 
+            border: '1px solid rgba(212, 175, 55, 0.15)', 
+            color: 'white',
+            boxShadow: '0 12px 32px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.05)',
+            position: 'relative', overflow: 'hidden'
+          }}>
+            <div style={{ position: 'absolute', top: 0, right: 0, width: '150px', height: '150px', background: 'radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 70%)', pointerEvents: 'none' }} />
+            
+            <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
               <div style={{ paddingRight: '12px' }}>
                 <h3 style={{ color: 'white', fontWeight: 800, margin: '0 0 6px', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <ShieldCheck size={18} color="var(--gold)" /> Dividend Purification
@@ -610,32 +702,32 @@ const StockDetails = ({ symbol: propSymbol }) => {
                   Cleanse your dividend earnings from non-compliant income based on AAOIFI standards.
                 </p>
               </div>
-              <div style={{ flexShrink: 0, textAlign: 'right', background: 'rgba(201,168,76,0.15)', padding: '8px 12px', borderRadius: '12px', border: '1px solid rgba(201,168,76,0.3)' }}>
-                <div style={{ fontSize: '0.66rem', color: 'var(--gold)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '2px' }}>Purification Rate</div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 900, color: 'white' }}>{purificationRate}%</div>
+              <div style={{ flexShrink: 0, textAlign: 'right', background: 'linear-gradient(135deg, rgba(201,168,76,0.2) 0%, rgba(201,168,76,0.05) 100%)', padding: '10px 14px', borderRadius: '12px', border: '1px solid rgba(201,168,76,0.3)', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+                <div style={{ fontSize: '0.66rem', color: 'var(--gold)', fontWeight: 800, textTransform: 'uppercase', marginBottom: '2px', letterSpacing: '0.5px' }}>Purification Rate</div>
+                <div style={{ fontSize: '1.2rem', fontWeight: 900, color: 'white', textShadow: '0 2px 8px rgba(212, 175, 55, 0.3)' }}>{purificationRate}%</div>
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
-              <div style={{ background: 'rgba(255,255,255,0.06)', padding: '12px', borderRadius: '10px' }}>
-                <div style={{ fontSize: '0.66rem', color: 'rgba(255,255,255,0.5)', fontWeight: 600, marginBottom: '4px' }}>Non-Compliant Revenue</div>
-                <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'white' }}>
+            <div style={{ position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
+              <div style={{ background: 'rgba(255,255,255,0.04)', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ fontSize: '0.66rem', color: 'rgba(255,255,255,0.5)', fontWeight: 700, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Non-Compliant Rev.</div>
+                <div style={{ fontSize: '0.94rem', fontWeight: 800, color: 'white' }}>
                   {latest?.non_compliant_income_ratio ? `${(parseFloat(latest.non_compliant_income_ratio) * 100).toFixed(2)}%` : 'N/A'}
                 </div>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.06)', padding: '12px', borderRadius: '10px' }}>
-                <div style={{ fontSize: '0.66rem', color: 'rgba(255,255,255,0.5)', fontWeight: 600, marginBottom: '4px' }}>Interest Income Ratio</div>
-                <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'white' }}>
+              <div style={{ background: 'rgba(255,255,255,0.04)', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ fontSize: '0.66rem', color: 'rgba(255,255,255,0.5)', fontWeight: 700, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Interest Income</div>
+                <div style={{ fontSize: '0.94rem', fontWeight: 800, color: 'white' }}>
                   {interestRatio}%
                 </div>
               </div>
             </div>
 
-            <div style={{ background: 'rgba(0,0,0,0.2)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'rgba(255,255,255,0.8)', marginBottom: '10px' }}>Calculate Purification Due</label>
+            <div style={{ position: 'relative', zIndex: 1, background: 'rgba(0,0,0,0.25)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'rgba(255,255,255,0.8)', marginBottom: '12px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Calculate Purification Due</label>
               <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                 <div style={{ position: 'relative', flex: 1 }}>
-                  <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.5)', fontWeight: 700 }}>₦</span>
+                  <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.5)', fontWeight: 800 }}>₦</span>
                   <input
                     type="number"
                     placeholder="Enter dividend"
@@ -643,69 +735,166 @@ const StockDetails = ({ symbol: propSymbol }) => {
                     onChange={e => setDividendInput(e.target.value)}
                     style={{
                       width: '100%',
-                      padding: '12px 12px 12px 28px',
-                      borderRadius: '8px',
-                      border: '1px solid rgba(255,255,255,0.2)',
-                      background: 'rgba(255,255,255,0.1)',
+                      padding: '14px 14px 14px 36px',
+                      borderRadius: '10px',
+                      border: '1px solid rgba(255,255,255,0.15)',
+                      background: 'rgba(255,255,255,0.08)',
                       color: 'white',
-                      fontSize: '0.88rem',
+                      fontSize: '0.94rem',
+                      fontWeight: 600,
                       outline: 'none',
+                      transition: 'all 0.2s'
                     }}
+                    onFocus={e => { e.target.style.borderColor = 'var(--gold)'; e.target.style.background = 'rgba(255,255,255,0.12)'; }}
+                    onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.15)'; e.target.style.background = 'rgba(255,255,255,0.08)'; }}
                   />
                 </div>
                 {purificationAmount !== null && dividendInput !== '' && (
-                  <div style={{ flex: '0 0 auto', background: 'var(--gold)', padding: '10px 16px', borderRadius: '8px', color: '#1A1208', textAlign: 'center', minWidth: '90px' }}>
-                    <div style={{ fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase', marginBottom: '2px', opacity: 0.8 }}>Amount Due</div>
-                    <div style={{ fontSize: '0.94rem', fontWeight: 900 }}>₦ {purificationAmount}</div>
+                  <div className="animate-fade-in" style={{ flex: '0 0 auto', background: 'linear-gradient(135deg, #d4af37 0%, #b89326 100%)', padding: '12px 16px', borderRadius: '10px', color: '#1A1208', textAlign: 'center', minWidth: '100px', boxShadow: '0 4px 12px rgba(212, 175, 55, 0.3)' }}>
+                    <div style={{ fontSize: '0.6rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '2px', opacity: 0.8, letterSpacing: '0.5px' }}>Amount Due</div>
+                    <div style={{ fontSize: '1rem', fontWeight: 900 }}>₦ {purificationAmount}</div>
                   </div>
                 )}
               </div>
             </div>
-          </div>
-
-          {/* Buy Now */}
-          <button 
-            onClick={(e) => {
-              e.preventDefault();
-              if (!user) {
-                navigate('/login');
-              } else {
-                setShowBrokerageModal(true);
-              }
-            }}
-            className="btn-primary" 
-            style={{ width: '100%', justifyContent: 'center', padding: '15px', fontSize: '0.88rem', border: 'none', cursor: 'pointer' }}
-          >
-            Buy Now
-          </button>
-
-          <p style={{ fontSize: '0.7rem', color: 'var(--text-light)', textAlign: 'center', lineHeight: 1.5 }}>
-            Link your Nigerian brokerage account to enable live trading.
-          </p>
-        </div>
-      </div>
-
-      {/* ─── Brokerage Integration Modal ─── */}
-      {showBrokerageModal && createPortal(
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000, padding: '20px' }}>
-          <div className="animate-fade-in" style={{ background: 'var(--bg)', borderRadius: '24px', padding: '40px', maxWidth: '420px', width: '100%', boxShadow: '0 20px 40px rgba(0,0,0,0.1)', border: '1px solid var(--border)' }}>
-            <div style={{ width: '64px', height: '64px', background: 'var(--primary-50)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', color: 'var(--primary)' }}>
-              <Building2 size={32} />
             </div>
-            <h3 style={{ fontSize: '1.32rem', fontWeight: 900, color: 'var(--text-dark)', textAlign: 'center', marginBottom: '12px' }}>Coming Soon</h3>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', textAlign: 'center', lineHeight: 1.5, marginBottom: '32px' }}>
-              Brokerage integration is currently on hold. We will notify you when trading is available.
-            </p>
-            <button className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '16px', fontSize: '0.88rem' }} onClick={() => setShowBrokerageModal(false)}>
-              Got it, thanks
+
+            {/* Buy Now */}
+            <button 
+              onClick={(e) => {
+                e.preventDefault();
+                if (!user) {
+                  navigate('/login');
+                } else {
+                  setShowBrokerageModal(true);
+                }
+              }}
+              className="hover-card" 
+              style={{ 
+                width: '100%', justifyContent: 'center', padding: '16px', fontSize: '0.94rem', 
+                border: 'none', cursor: 'pointer', borderRadius: '16px',
+                background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)',
+                color: 'white', fontWeight: 800, letterSpacing: '0.5px',
+                boxShadow: '0 8px 24px rgba(6, 78, 59, 0.25), inset 0 1px 0 rgba(255,255,255,0.2)',
+                transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                display: 'flex', alignItems: 'center', gap: '8px'
+              }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(6, 78, 59, 0.35), inset 0 1px 0 rgba(255,255,255,0.2)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(6, 78, 59, 0.25), inset 0 1px 0 rgba(255,255,255,0.2)'; }}
+            >
+              Buy Now
             </button>
+
+            <p style={{ fontSize: '0.7rem', color: 'var(--text-light)', textAlign: 'center', lineHeight: 1.5 }}>
+              Link your Nigerian brokerage account to enable live trading.
+            </p>
           </div>
-        </div>,
-        document.body
-      )}
+        </div>
+
+        {/* ─── Brokerage Integration Modal ─── */}
+        {showBrokerageModal && createPortal(
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000, padding: '20px' }}>
+            <div className="animate-fade-in" style={{ background: 'var(--bg)', borderRadius: '24px', padding: '40px', maxWidth: '420px', width: '100%', boxShadow: '0 24px 64px rgba(0,0,0,0.2)', border: '1px solid var(--border)' }}>
+              <div style={{ width: '64px', height: '64px', background: 'var(--bg-section)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', color: 'var(--primary)', border: '1px solid var(--border)' }}>
+                <Building2 size={32} />
+              </div>
+              <h2 style={{ textAlign: 'center', fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '12px' }}>Live Trading Coming Soon</h2>
+              <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '32px' }}>
+                We are currently integrating with top Nigerian stockbrokers to enable seamless trading directly from Irshad. 
+              </p>
+              <button 
+                onClick={() => setShowBrokerageModal(false)}
+                style={{ width: '100%', padding: '14px', borderRadius: '12px', background: 'var(--bg-section)', border: '1px solid var(--border)', color: 'var(--text-dark)', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'var(--border)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'var(--bg-section)'}
+              >
+                Close
+              </button>
+            </div>
+          </div>,
+          document.body
+        )}
+
+        {/* ─── Admin Status Override Modal ─── */}
+        {showStatusOverrideModal && createPortal(
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000, padding: '20px' }}>
+            <div className="animate-fade-in" style={{ background: 'var(--bg)', borderRadius: '24px', padding: '32px', maxWidth: '500px', width: '100%', boxShadow: '0 24px 64px rgba(0,0,0,0.2)', border: '1px solid var(--border)', maxHeight: '90vh', overflowY: 'auto' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-dark)', margin: 0 }}>Edit Compliance Status</h2>
+                <button onClick={() => setShowStatusOverrideModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
+                  <X size={20} />
+                </button>
+              </div>
+            
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                setOverrideSaving(true);
+                setOverrideError('');
+                try {
+                  await overrideStockStatus(symbol, {
+                    status: overrideStatus,
+                    reason: overrideReason,
+                    evidence_link: overrideEvidence
+                  });
+                  setShowStatusOverrideModal(false);
+                  window.location.reload();
+                } catch (err) {
+                  setOverrideError(err.response?.data?.message || 'Failed to override status');
+                } finally {
+                  setOverrideSaving(false);
+                }
+              }}>
+                {overrideError && <div style={{ background: 'var(--non-halal-bg)', color: 'var(--non-halal)', padding: '12px', borderRadius: '8px', fontSize: '0.88rem', marginBottom: '20px' }}>{overrideError}</div>}
+                
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display:'block', fontSize:'0.75rem', fontWeight:700, color:'var(--text-muted)', marginBottom:'8px', textTransform:'uppercase', letterSpacing:'0.5px' }}>Shariah Status</label>
+                  <select 
+                    value={overrideStatus}
+                    onChange={e => setOverrideStatus(e.target.value)}
+                    style={{ width:'100%', padding: '12px', borderRadius:'12px', border:'1px solid var(--border)', background:'var(--bg-section)', fontSize:'0.88rem', fontWeight:600, outline:'none' }}
+                  >
+                    <option value="halal">Halal</option>
+                    <option value="doubtful">Doubtful</option>
+                    <option value="non-halal">Non-Halal</option>
+                  </select>
+                </div>
+
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display:'block', fontSize:'0.75rem', fontWeight:700, color:'var(--text-muted)', marginBottom:'8px', textTransform:'uppercase', letterSpacing:'0.5px' }}>Reasoning / Notes</label>
+                  <textarea 
+                    value={overrideReason}
+                    onChange={e => setOverrideReason(e.target.value)}
+                    placeholder="Explain why this status is being overridden..."
+                    rows={4}
+                    style={{ width:'100%', padding: '12px', borderRadius:'12px', border:'1px solid var(--border)', background:'var(--bg-section)', fontSize:'0.88rem', outline:'none', resize: 'vertical' }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '32px' }}>
+                  <label style={{ display:'block', fontSize:'0.75rem', fontWeight:700, color:'var(--text-muted)', marginBottom:'8px', textTransform:'uppercase', letterSpacing:'0.5px' }}>Evidence / Reference Link</label>
+                  <input 
+                    type="url"
+                    value={overrideEvidence}
+                    onChange={e => setOverrideEvidence(e.target.value)}
+                    placeholder="https://..."
+                    style={{ width:'100%', padding: '12px', borderRadius:'12px', border:'1px solid var(--border)', background:'var(--bg-section)', fontSize:'0.88rem', outline:'none' }}
+                  />
+                </div>
+
+                <div style={{ display:'flex', gap:'12px' }}>
+                  <button type="button" onClick={() => setShowStatusOverrideModal(false)} style={{ flex:1, padding:'14px', borderRadius:'12px', background:'var(--bg-section)', border:'none', color:'var(--text-muted)', fontWeight:700, cursor:'pointer' }}>Cancel</button>
+                  <button type="submit" disabled={overrideSaving} style={{ flex:1.5, padding:'14px', borderRadius:'12px', background:'var(--primary)', border:'none', color:'white', fontWeight:700, cursor:overrideSaving ? 'not-allowed' : 'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                    {overrideSaving ? <div className="spinner" style={{ width:'16px', height:'16px', borderWidth: '2px', borderColor: 'rgba(255,255,255,0.3)', borderTopColor: 'white' }}/> : 'Save Override'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>,
+          document.body
+        )}
 
       {/* ─── News Section ─── */}
-      <div style={{ marginTop: '32px' }}>
+      <div style={{ marginTop: '32px', paddingBottom: '32px' }}>
         <div className="detail-panel">
           <div className="detail-section-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px' }}>
             <Newspaper size={18} /> Latest News for {stock.symbol}
@@ -717,9 +906,9 @@ const StockDetails = ({ symbol: propSymbol }) => {
               Loading latest news...
             </div>
           ) : stock.news && stock.news.length > 0 ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
-              {stock.news.map((article, i) => (
-                <a key={i} href={article.url} target="_blank" rel="noopener noreferrer" className="hover-card" style={{ display: 'flex', flexDirection: 'column', padding: '0', border: '1px solid var(--border)', borderRadius: '16px', textDecoration: 'none', background: 'var(--bg)', overflow: 'hidden', transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+              {stock.news.slice(0, 6).map((article, i) => (
+                <a key={i} href={article.url} target="_blank" rel="noopener noreferrer" className="hover-card" style={{ display: 'flex', flexDirection: 'column', padding: '0', border: '1px solid var(--border)', borderRadius: '16px', textDecoration: 'none', background: 'linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%)', overflow: 'hidden', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: '0 4px 16px rgba(0,0,0,0.02)' }}>
                   {article.thumbnail_url && (
                     <div style={{ height: '140px', width: '100%', overflow: 'hidden', background: 'var(--bg-section)' }}>
                       <img src={article.thumbnail_url} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -728,9 +917,9 @@ const StockDetails = ({ symbol: propSymbol }) => {
                   <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', flex: 1 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                       {article.source && (
-                        <span style={{ fontSize: '0.7rem', color: 'var(--primary)', fontWeight: 700, background: 'var(--primary-50)', padding: '4px 10px', borderRadius: '100px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{article.source}</span>
+                        <span style={{ fontSize: '0.68rem', color: 'var(--primary)', fontWeight: 800, background: 'var(--primary-50)', padding: '4px 10px', borderRadius: '100px', textTransform: 'uppercase', letterSpacing: '0.5px', boxShadow: '0 2px 8px rgba(6, 78, 59, 0.1)' }}>{article.source}</span>
                       )}
-                      <span style={{ fontSize: '0.66rem', color: 'var(--text-light)', fontWeight: 600 }}>{article.published_at ? new Date(article.published_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : ''}</span>
+                      <span style={{ fontSize: '0.66rem', color: 'var(--text-light)', fontWeight: 700 }}>{article.published_at ? new Date(article.published_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : ''}</span>
                     </div>
                     <h4 style={{ fontSize: '0.94rem', fontWeight: 800, color: 'var(--text-dark)', lineHeight: 1.4, margin: '0 0 8px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                       {article.title}
@@ -797,84 +986,6 @@ const StockDetails = ({ symbol: propSymbol }) => {
                 <button type="button" onClick={() => setShowAlertDialog(false)} style={{ flex:1, padding:'14px', borderRadius:'12px', background:'var(--bg-alt)', border:'1px solid var(--border)', color:'var(--text-muted)', fontWeight:700, fontSize: '0.79rem', cursor:'pointer' }}>Cancel</button>
                 <button type="submit" disabled={alertSaving} style={{ flex:1.5, padding:'14px', borderRadius:'12px', background:'var(--primary)', border:'none', color:'var(--bg)', fontWeight:700, fontSize: '0.79rem', cursor:alertSaving ? 'not-allowed' : 'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', boxShadow:'0 8px 20px rgba(15, 82, 87, 0.2)' }}>
                   {alertSaving ? <div className="spinner" style={{ width:'16px', height:'16px', borderTopColor:'white' }}/> : 'Save Alert'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>,
-        document.body
-      )}
-
-      {/* ─── Admin Status Override Modal ─── */}
-      {showStatusOverrideModal && createPortal(
-        <div className="animate-fade-in" style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.6)', backdropFilter:'blur(8px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:100000, padding:'24px' }}>
-          <div style={{ background: 'var(--bg)', borderRadius:'24px', width:'100%', maxWidth:'500px', boxShadow:'0 32px 64px rgba(0,0,0,0.2)', border: '1px solid var(--border)', overflow:'hidden', animation:'slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>
-            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'24px', borderBottom:'1px solid var(--border)', background: 'var(--bg-section)' }}>
-              <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight:800, color:'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <ShieldCheck size={20} color="var(--primary)" /> Admin Override Status
-              </h3>
-              <button onClick={() => setShowStatusOverrideModal(false)} style={{ background:'var(--bg)', border:'none', width:'32px', height:'32px', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--text-muted)', cursor:'pointer' }}><X size={16}/></button>
-            </div>
-            
-            <form onSubmit={async (e) => {
-              e.preventDefault();
-              setOverrideSaving(true);
-              setOverrideError('');
-              try {
-                await overrideStockStatus(symbol, {
-                  status: overrideStatus,
-                  reason: overrideReason,
-                  evidence_link: overrideEvidence
-                });
-                setShowStatusOverrideModal(false);
-                window.location.reload();
-              } catch (err) {
-                setOverrideError(err.response?.data?.message || 'Failed to override status');
-              } finally {
-                setOverrideSaving(false);
-              }
-            }} style={{ padding: '24px', maxHeight: '70vh', overflowY: 'auto' }}>
-              {overrideError && <div style={{ background: 'var(--non-halal-bg)', color: 'var(--non-halal)', padding: '12px', borderRadius: '8px', fontSize: '0.88rem', marginBottom: '20px' }}>{overrideError}</div>}
-              
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display:'block', fontSize:'0.75rem', fontWeight:700, color:'var(--text-muted)', marginBottom:'8px', textTransform:'uppercase', letterSpacing:'0.5px' }}>Shariah Status</label>
-                <select 
-                  value={overrideStatus}
-                  onChange={e => setOverrideStatus(e.target.value)}
-                  style={{ width:'100%', padding:'12px', borderRadius:'12px', border:'1px solid var(--border)', background:'var(--bg-section)', fontSize:'0.88rem', fontWeight:600, outline:'none' }}
-                >
-                  <option value="halal">Halal</option>
-                  <option value="doubtful">Doubtful</option>
-                  <option value="non-halal">Non-Halal</option>
-                </select>
-              </div>
-
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display:'block', fontSize:'0.75rem', fontWeight:700, color:'var(--text-muted)', marginBottom:'8px', textTransform:'uppercase', letterSpacing:'0.5px' }}>Reasoning / Notes</label>
-                <textarea 
-                  value={overrideReason}
-                  onChange={e => setOverrideReason(e.target.value)}
-                  placeholder="Explain why this status is being overridden..."
-                  rows={4}
-                  style={{ width:'100%', padding:'12px', borderRadius:'12px', border:'1px solid var(--border)', background:'var(--bg-section)', fontSize:'0.88rem', outline:'none', resize: 'vertical' }}
-                />
-              </div>
-
-              <div style={{ marginBottom: '32px' }}>
-                <label style={{ display:'block', fontSize:'0.75rem', fontWeight:700, color:'var(--text-muted)', marginBottom:'8px', textTransform:'uppercase', letterSpacing:'0.5px' }}>Evidence / Reference Link</label>
-                <input 
-                  type="url"
-                  value={overrideEvidence}
-                  onChange={e => setOverrideEvidence(e.target.value)}
-                  placeholder="https://..."
-                  style={{ width:'100%', padding:'12px', borderRadius:'12px', border:'1px solid var(--border)', background:'var(--bg-section)', fontSize:'0.88rem', outline:'none' }}
-                />
-              </div>
-
-              <div style={{ display:'flex', gap:'12px' }}>
-                <button type="button" onClick={() => setShowStatusOverrideModal(false)} style={{ flex:1, padding:'14px', borderRadius:'12px', background:'var(--bg-section)', border:'none', color:'var(--text-muted)', fontWeight:700, cursor:'pointer' }}>Cancel</button>
-                <button type="submit" disabled={overrideSaving} style={{ flex:1.5, padding:'14px', borderRadius:'12px', background:'var(--primary)', border:'none', color:'white', fontWeight:700, cursor:overrideSaving ? 'not-allowed' : 'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                  {overrideSaving ? <div className="spinner" style={{ width:'16px', height:'16px', borderWidth: '2px', borderColor: 'rgba(255,255,255,0.3)', borderTopColor: 'white' }}/> : 'Save Override'}
                 </button>
               </div>
             </form>

@@ -61,7 +61,8 @@ class AaoifiScreeningService
         $name = strtolower($company->name ?? '');
         $symbol = strtolower($company->symbol ?? '');
 
-        if (strtoupper($company->symbol) === 'JAIZBANK' || strtoupper($company->symbol) === 'JAIZ') {
+        $islamicBanks = ['JAIZBANK', 'JAIZ', 'TAJBANK', 'TAJ', 'LOTUS', 'LOTUSBANK'];
+        if (in_array(strtoupper($company->symbol), $islamicBanks)) {
             $businessStatus = 'pass';
         } else {
             foreach (AaoifiComplianceService::BLACKLIST_KEYWORDS as $keyword) {

@@ -171,8 +171,9 @@ export default function Portfolio() {
   }));
   if (pieData.length === 0) pieData.push({ name: 'No Holdings', value: 1, color: '#e5e7eb' });
 
-  const halalCount    = holdings.filter(h => h.is_halal).length;
-  const nonHalalCount = holdings.filter(h => !h.is_halal).length;
+  const isHoldingHalal = h => !!h.is_halal || ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(h.symbol);
+  const halalCount    = holdings.filter(isHoldingHalal).length;
+  const nonHalalCount = holdings.filter(h => !isHoldingHalal(h)).length;
   const needsPurif    = holdings.filter(h => h.purification_due > 0).length;
 
   const MOCK_PERF = [];

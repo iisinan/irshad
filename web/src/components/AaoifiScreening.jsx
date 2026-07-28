@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { fetchAaoifiScreening, updateAaoifiData } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { formatAppJustification } from '../utils/screeningFormatter';
 
 const LOADING_STEPS = [
   "Initializing AAOIFI Screening...",
@@ -187,9 +188,10 @@ const AaoifiScreening = () => {
         <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', lineHeight: 1.6, marginBottom: '32px' }}>{error}</p>
         <Link 
           to={`/market/${symbol}`} 
-          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', background: 'var(--bg)', color: 'var(--text-dark)', fontWeight: 700, textDecoration: 'none', borderRadius: '100px', border: '1px solid var(--border)', transition: 'all 0.2s', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
-          onMouseOver={e => { e.currentTarget.style.borderColor = 'var(--text-dark)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-          onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'none'; }}
+          className="hover-card"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', background: 'linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%)', color: 'var(--text-dark)', fontWeight: 700, textDecoration: 'none', borderRadius: '100px', border: '1px solid var(--border)', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--text-dark)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.06)'; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)'; }}
         >
           <ArrowLeft size={18} /> Return to {symbol} Overview
         </Link>
@@ -198,6 +200,9 @@ const AaoifiScreening = () => {
   }
 
   if (!report) return null;
+  const isNonHalalReport = report.final_status === 'non-halal' || report.stage1?.status === 'non-halal' || report.business_status === 'fail';
+  const cleanStatusReason = formatAppJustification(report.status_reason, isNonHalalReport);
+  const cleanStage1Reason = formatAppJustification(report.stage1?.reason || report.business_reasoning, isNonHalalReport);
   const fd = report.financial_data_used || {};
   const totalAssets = parseFloat(fd.total_assets) || 0;
   const marketCap = parseFloat(fd.market_cap) || 0;
@@ -266,7 +271,7 @@ const AaoifiScreening = () => {
   const renderRatioProgressBar = (title, subtitle, ratio, threshold, numLabel, numVal, denLabel, denVal, formula, isMinimum = false) => {
     if (ratio === null || ratio === undefined || isNaN(ratio)) {
       return (
-        <div className="ratio-progress-row unavailable">
+        <div className="ratio-progress-row unavailable hover-card">
           <div className="ratio-col-label">
             <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.88rem', marginBottom: '4px' }}>{title}</div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{subtitle}</div>
@@ -299,7 +304,7 @@ const AaoifiScreening = () => {
     return (
       <div 
         onClick={() => openModal(title, ratio, isMinimum ? `≥ ${threshold}%` : `≤ ${threshold}%`, formula, numLabel, numVal, denLabel, denVal)}
-        className="ratio-progress-row"
+        className="ratio-progress-row hover-card"
       >
         <div className="ratio-col-label">
           <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.88rem', marginBottom: '4px' }}>{title}</div>
@@ -362,10 +367,12 @@ const AaoifiScreening = () => {
             onClick={handleOpenOverrideModal}
             style={{ 
               display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', 
-              background: 'var(--primary)', border: 'none', borderRadius: '12px', 
-              cursor: 'pointer', fontWeight: 700, color: 'white', transition: 'all 0.2s',
-              boxShadow: '0 4px 12px rgba(45, 212, 191, 0.2)'
+              background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)', border: 'none', borderRadius: '12px', 
+              cursor: 'pointer', fontWeight: 800, color: 'white', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+              boxShadow: '0 8px 20px rgba(6, 78, 59, 0.2), inset 0 1px 0 rgba(255,255,255,0.2)'
             }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 24px rgba(6, 78, 59, 0.3), inset 0 1px 0 rgba(255,255,255,0.2)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(6, 78, 59, 0.2), inset 0 1px 0 rgba(255,255,255,0.2)'; }}
           >
             <ShieldCheck size={18} /> Edit Data
           </button>
@@ -374,19 +381,19 @@ const AaoifiScreening = () => {
           onClick={() => window.print()}
           style={{ 
             display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', 
-            background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '12px', 
-            cursor: 'pointer', fontWeight: 700, color: 'var(--text-dark)', transition: 'all 0.2s',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+            background: 'linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%)', border: '1px solid var(--border)', borderRadius: '12px', 
+            cursor: 'pointer', fontWeight: 800, color: 'var(--text-dark)', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.02)'
           }}
-          onMouseOver={e => {
+          onMouseEnter={e => {
             e.currentTarget.style.borderColor = 'var(--text-dark)';
             e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)';
+            e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.06)';
           }}
-          onMouseOut={e => {
+          onMouseLeave={e => {
             e.currentTarget.style.borderColor = 'var(--border)';
             e.currentTarget.style.transform = 'none';
-            e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.02)';
+            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.02)';
           }}
         >
           <Download size={18} /> Export Report
@@ -394,27 +401,32 @@ const AaoifiScreening = () => {
         </div>
       </div>
 
-      <div style={{ 
+      <div className="detail-header" style={{ 
         padding: '56px 36px', borderRadius: '32px', background: bgStatus, 
-        border: `2px solid ${statusColor}60`, textAlign: 'center', marginBottom: '40px',
-        boxShadow: `0 32px 64px -16px ${statusColor}25`,
-        position: 'relative', overflow: 'hidden'
+        border: `2px solid ${statusColor}40`, textAlign: 'center', marginBottom: '40px',
+        boxShadow: `0 32px 64px -16px ${statusColor}25, inset 0 2px 20px ${statusColor}10`,
+        position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center'
       }}>
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '8px', background: statusColor }} />
-        <StatusIcon size={96} color={statusColor} style={{ margin: '0 auto 24px', filter: `drop-shadow(0 12px 24px ${statusColor}50)` }} />
-        <div style={{ fontSize: '0.82rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', color: statusColor, marginBottom: '8px' }}>AAOIFI COMPLIANCE VERDICT</div>
-        <h1 style={{ fontSize: '2.75rem', fontWeight: 900, color: statusColor, margin: '0 0 16px 0', letterSpacing: '-1px' }}>
+        {/* Background ambient orbs */}
+        <div style={{ position: 'absolute', top: '-60px', right: '-40px', width: '280px', height: '280px', background: `radial-gradient(circle, ${statusColor}15 0%, transparent 70%)`, borderRadius: '50%', pointerEvents: 'none', animation: 'orbFloat 20s ease-in-out infinite alternate' }} />
+        <div style={{ position: 'absolute', bottom: '-80px', left: '-40px', width: '320px', height: '320px', background: `radial-gradient(circle, ${statusColor}10 0%, transparent 70%)`, borderRadius: '50%', pointerEvents: 'none', animation: 'orbFloat 25s ease-in-out infinite alternate-reverse' }} />
+        
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '8px', background: statusColor, boxShadow: `0 0 20px ${statusColor}` }} />
+        <div style={{ position: 'relative', zIndex: 1, animation: 'pulse 3s infinite alternate' }}>
+          <StatusIcon size={96} color={statusColor} style={{ margin: '0 auto 24px', filter: `drop-shadow(0 12px 32px ${statusColor}70)` }} />
+        </div>
+        <div style={{ position: 'relative', zIndex: 1, fontSize: '0.86rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px', color: statusColor, marginBottom: '12px', textShadow: `0 2px 10px ${statusColor}30` }}>AAOIFI COMPLIANCE VERDICT</div>
+        <h1 style={{ position: 'relative', zIndex: 1, fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: 900, color: statusColor, margin: '0 0 16px 0', letterSpacing: '-1.5px', textShadow: `0 4px 20px ${statusColor}40` }}>
           {finalStatus === 'halal' ? 'HALAL' : finalStatus === 'non-halal' ? 'NON-HALAL' : 'DOUBTFUL'}
         </h1>
-        <p style={{ color: 'var(--text-dark)', margin: '0 auto 32px', fontWeight: 600, fontSize: '1.05rem', maxWidth: '600px' }}>
-          {report.status_reason || 'Screened in accordance with AAOIFI Shariah Standard No. 21 (Financial & Business Activity Rules).'}
+        <p style={{ position: 'relative', zIndex: 1, color: 'var(--text-dark)', margin: '0 auto', fontWeight: 600, fontSize: '1.1rem', maxWidth: '650px', lineHeight: 1.6 }}>
+          {cleanStatusReason || 'Screened in accordance with AAOIFI Shariah Standard No. 21 (Financial & Business Activity Rules).'}
         </p>
-
       </div>
 
 
 
-      <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', marginBottom: '48px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)' }}>
+      <div className="hover-card" style={{ background: 'linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', marginBottom: '48px', boxShadow: '0 12px 32px rgba(0,0,0,0.03)', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
           <div>
             <h2 style={{ fontSize: '0.79rem', fontWeight: 800, color: '#C49852', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>STAGE 1: BUSINESS ACTIVITY SCREENING</h2>
@@ -428,7 +440,7 @@ const AaoifiScreening = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           
           {report.stage1?.purification_required && (
-            <div style={{ background: 'var(--questionable-bg)', padding: '20px', borderRadius: '16px', border: '1px solid var(--questionable)' }}>
+            <div className="hover-card" style={{ background: 'var(--questionable-bg)', padding: '20px', borderRadius: '16px', border: '1px solid var(--questionable)', transition: 'transform 0.2s' }}>
               <div style={{ fontWeight: 800, color: 'var(--questionable)', fontSize: '0.84rem', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <AlertTriangle size={18} /> Dividend Purification Required
               </div>
@@ -439,7 +451,7 @@ const AaoifiScreening = () => {
           )}
 
           {report.stage1?.status === 'non-halal' && (
-            <div style={{ background: 'var(--non-halal-bg)', padding: '20px', borderRadius: '16px', border: '1px solid var(--non-halal)' }}>
+            <div className="hover-card" style={{ background: 'var(--non-halal-bg)', padding: '20px', borderRadius: '16px', border: '1px solid var(--non-halal)', transition: 'transform 0.2s' }}>
               <div style={{ fontWeight: 800, color: 'var(--non-halal)', fontSize: '0.84rem', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <AlertTriangle size={18} /> Prohibited Activities Exceed Limits
               </div>
@@ -454,14 +466,14 @@ const AaoifiScreening = () => {
               <Brain size={16} color="var(--primary)" /> Stage 1 Screening Reasoning
             </div>
             <p style={{ margin: 0, fontSize: '0.92rem', lineHeight: 1.7, color: 'var(--text-dark)', padding: '20px', background: 'var(--bg-section)', borderRadius: '16px', border: '1px solid var(--border)' }}>
-              {report.stage1?.reason || report.business_reasoning || 'N/A'}
+              {cleanStage1Reason || 'N/A'}
             </p>
           </div>
         </div>
       </div>
 
-      {symbol !== 'JAIZBANK' && (debtRatio !== null || report.impermissible_income_ratio != null || cashRatio !== null) && (
-      <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', marginBottom: '48px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)' }}>
+      {!['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(symbol) && (debtRatio !== null || report.impermissible_income_ratio != null || cashRatio !== null) && (
+      <div className="hover-card" style={{ background: 'linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', marginBottom: '48px', boxShadow: '0 12px 32px rgba(0,0,0,0.03)', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
           <div>
             <h2 style={{ fontSize: '0.79rem', fontWeight: 800, color: '#C49852', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>STAGE 2: QUANTITATIVE FINANCIAL RATIO SCREENING</h2>
@@ -481,7 +493,7 @@ const AaoifiScreening = () => {
         </div>
 
         {report.status_reason && report.stage1?.status !== 'non-halal' && (cashRatio > 30 || (report.impermissible_income_ratio > 5)) && (
-          <div style={{ background: 'rgba(196,152,82,0.08)', border: '1px solid rgba(196,152,82,0.3)', borderRadius: '16px', padding: '16px 20px', marginBottom: '24px', display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+          <div className="hover-card" style={{ background: 'linear-gradient(135deg, rgba(196,152,82,0.1) 0%, rgba(196,152,82,0.03) 100%)', border: '1px solid rgba(196,152,82,0.3)', borderRadius: '16px', padding: '16px 20px', marginBottom: '24px', display: 'flex', gap: '14px', alignItems: 'flex-start', boxShadow: '0 4px 12px rgba(196,152,82,0.05)', transition: 'all 0.3s' }}>
             <span style={{ fontSize: '1.3rem', flexShrink: 0 }}>🏦</span>
             <div>
               <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#C49852', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>Scholar-Verified Islamic Financial Institution</div>
@@ -514,7 +526,7 @@ const AaoifiScreening = () => {
       </div>
       )}
 
-      <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', marginBottom: '48px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)' }}>
+      <div className="hover-card" style={{ background: 'linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', marginBottom: '48px', boxShadow: '0 12px 32px rgba(0,0,0,0.03)', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }}>
         <button 
           onClick={() => setEvidenceExpanded(!evidenceExpanded)}
           style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
@@ -531,12 +543,6 @@ const AaoifiScreening = () => {
 
         {evidenceExpanded && (
           <div className="animate-fade-in" style={{ marginTop: '32px', paddingTop: '32px', borderTop: '1px solid var(--border)' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', marginBottom: '32px', padding: '12px 24px', background: 'var(--bg-section)', borderRadius: '100px', border: '1px solid var(--border)' }}>
-              <Brain size={20} color="var(--primary)" /> 
-              <span style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.88rem' }}>Irshad Confidence Score</span>
-              <div style={{ width: '1px', height: '24px', background: 'var(--border)', margin: '0 8px' }} />
-              <span style={{ fontWeight: 900, color: 'var(--primary)', fontSize: '1.1rem' }}>{report.business_reasoning?.confidence_score || 'N/A'}%</span>
-            </div>
 
             {(report.financial_data_used?.source_links?.length > 0 || report.financial_data_used?.source) && (
               <div style={{ marginBottom: '32px' }}>
@@ -544,7 +550,7 @@ const AaoifiScreening = () => {
                 {report.financial_data_used?.source_links?.length > 0 ? (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
                     {report.financial_data_used.source_links.map((link, i) => (
-                      <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '16px', background: 'var(--bg-section)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border)', textDecoration: 'none', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.transform = 'translateY(-2px)'; }} onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'none'; }}>
+                      <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className="hover-card" style={{ display: 'flex', alignItems: 'center', gap: '16px', background: 'linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border)', textDecoration: 'none', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }} onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.05)'; }} onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.02)'; }}>
                         <div style={{ color: 'var(--primary)', background: 'var(--primary-bg)', padding: '10px', borderRadius: '12px' }}><FileText size={20} /></div>
                         <div>
                           <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '4px' }}>{link.name}</div>
@@ -578,19 +584,19 @@ const AaoifiScreening = () => {
                 <Activity size={16} color="var(--primary)" /> Business Activity & Referenced Financial Data For AAOIFI Screening
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px' }}>
-                <div style={{ background: 'var(--bg-section)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
+                <div className="hover-card" style={{ background: 'var(--bg-section)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', transition: 'transform 0.2s' }}>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Market Capitalization</span>
                   <span style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{marketCap ? `₦${(marketCap/1000000000).toFixed(2)}B` : 'N/A'}</span>
                 </div>
-                <div style={{ background: 'var(--bg-section)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
+                <div className="hover-card" style={{ background: 'var(--bg-section)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', transition: 'transform 0.2s' }}>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Total Interest Debt</span>
                   <span style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{totalDebt ? `₦${(totalDebt/1000000000).toFixed(2)}B` : '₦0'}</span>
                 </div>
-                <div style={{ background: 'var(--bg-section)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
+                <div className="hover-card" style={{ background: 'var(--bg-section)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', transition: 'transform 0.2s' }}>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Cash & Securities</span>
                   <span style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{cashAndSecurities ? `₦${(cashAndSecurities/1000000000).toFixed(2)}B` : '₦0'}</span>
                 </div>
-                <div style={{ background: 'var(--bg-section)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
+                <div className="hover-card" style={{ background: 'var(--bg-section)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', transition: 'transform 0.2s' }}>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Total Assets</span>
                   <span style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{totalAssets ? `₦${(totalAssets/1000000000).toFixed(2)}B` : 'N/A'}</span>
                 </div>
@@ -603,7 +609,7 @@ const AaoifiScreening = () => {
       {/* Modal Overlay */}
       {/* Modal Overlay */}
       {modalData && createPortal(
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000, padding: '24px', opacity: 1, transition: 'opacity 0.3s' }}>
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000, padding: '24px', opacity: 1, transition: 'opacity 0.3s' }}>
           <div className="animate-fade-in" style={{ background: 'var(--bg)', borderRadius: '32px', width: '100%', maxWidth: '500px', overflow: 'hidden', boxShadow: '0 32px 64px rgba(0,0,0,0.15), 0 0 0 1px var(--border)' }}>
             <div style={{ padding: '24px 32px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-section)' }}>
               <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800 }}>Calculation Details</h3>
@@ -653,7 +659,7 @@ const AaoifiScreening = () => {
 
       {/* Admin Override Modal */}
       {showOverrideModal && createPortal(
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000, padding: '24px' }}>
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000, padding: '24px' }}>
           <div className="animate-fade-in" style={{ background: 'var(--bg)', borderRadius: '24px', width: '100%', maxWidth: '600px', overflow: 'hidden', boxShadow: '0 32px 64px rgba(0,0,0,0.2)', border: '1px solid var(--border)', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
             <div style={{ padding: '24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800 }}>Admin Data Override</h3>

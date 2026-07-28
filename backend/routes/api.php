@@ -58,6 +58,11 @@ Route::prefix('v1')->group(function () {
 
     // ── Protected Routes ─────────────────────────────────────────────────
     Route::middleware('auth:sanctum')->group(function () {
+        // Admin Compliance Routes
+        Route::get('/admin/compliance-reviews', [\App\Http\Controllers\AdminComplianceController::class, 'index']);
+        Route::post('/admin/compliance-reviews/{id}/approve', [\App\Http\Controllers\AdminComplianceController::class, 'approve']);
+        Route::post('/admin/compliance-reviews/{id}/reject', [\App\Http\Controllers\AdminComplianceController::class, 'reject']);
+
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::post('/email/verification-notification', [VerificationController::class, 'resend'])->name('verification.send');
 
