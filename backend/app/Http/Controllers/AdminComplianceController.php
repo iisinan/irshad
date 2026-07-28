@@ -69,17 +69,85 @@ class AdminComplianceController extends Controller
     public function reject($id)
     {
         $review = ComplianceReview::findOrFail($id);
-        
+
         if ($review->status !== 'pending') {
             return response()->json(['error' => 'Review is not pending'], 400);
         }
 
         $review->update([
-            'status' => 'rejected',
+            'status'      => 'rejected',
             'reviewed_by' => auth()->id(),
             'reviewed_at' => now(),
         ]);
 
         return response()->json(['message' => 'Review rejected', 'review' => $review]);
     }
-}
+
+    /**
+     * One-click Approve from email button (no login required — validated by UUID).
+     */
+    public function approveViaLink(Request $request, $id)
+    {
+        $review = ComplianceReview::findOrFail($id);
+
+        if ($review->status !== 'pending') {
+            return response('<h2 style="font-family:Arial">⚠️ This review has already been actioned.</h2>', 200)
+                ->header('Content-Type', 'text/html');
+        }
+
+        $company = $review->company;
+        $company->update(['current_status' => $review->new_status]);
+
+        StockStatus::updateOrCreate(
+            ['company_id' => $company->id],
+            [
+                'status'             => $review->new_status,
+                'reason'             => $review->reason,
+                'verified_by_scholar'=> true,
+                'last_updated'       => now(),
+            ]
+        );
+
+        $aaoifiScreening = \App\Models\AaoifiScreening::where('company_id', $company->id)->latest()->first();
+        if ($aaoifiScreening) {
+            $aaoifiScreening->update(['final_status' => $review->new_status]);
+        }
+
+        \App\Models\ComplianceHistory::create([
+            'company_id' => $company->id,
+            'old_status' => $review->old_status,
+            'new_status' => $review->new_status,
+            'reason'     => $review->reason,
+            'changed_at' => now(),
+        ]);
+
+        $review->update([
+            'status'      => 'approved',
+            'reviewed_at' => now(),
+        ]);
+
+        return response('<h2 style="font-family:Arial;color:green">✅ Status change approved and applied to the live app.</h2>', 200)
+            ->header('Content-Type', 'text/html');
+    }
+
+    /**
+     * One-click Reject from email button (no login required — validated by UUID).
+     */
+    public function rejectViaLink(Request $request, $id)
+    {
+        $review = ComplianceReview::findOrFail($id);
+
+        if ($review->status !== 'pending') {
+            return response('<h2 style="font-family:Arial">⚠️ This review has already been actioned.</h2>', 200)
+                ->header('Content-Type', 'text/html');
+        }
+
+        $review->update([
+            'status'      => 'rejected',
+            'reviewed_at' => now(),
+        ]);
+
+        return response('<h2 style="font-family:Arial;color:crimson">❌ Change rejected. The current stock status remains unchanged.</h2>', 200)
+            ->header('Content-Type', 'text/html');
+    }
+

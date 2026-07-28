@@ -56,9 +56,14 @@ Route::prefix('v1')->group(function () {
         Route::get('/stocks/{symbol}/aaoifi-screening', [StockController::class, 'aaoifiScreening']);
     });
 
+    // One-click email link routes — no login required, UUID is the security token
+    Route::get('/admin/compliance-reviews/{id}/approve-link', [\App\Http\Controllers\AdminComplianceController::class, 'approveViaLink']);
+    Route::get('/admin/compliance-reviews/{id}/reject-link',  [\App\Http\Controllers\AdminComplianceController::class, 'rejectViaLink']);
+
     // ── Protected Routes ─────────────────────────────────────────────────
     Route::middleware('auth:sanctum')->group(function () {
-        // Admin Compliance Routes
+
+        // Admin Compliance Routes (requires login — for dashboard use)
         Route::get('/admin/compliance-reviews', [\App\Http\Controllers\AdminComplianceController::class, 'index']);
         Route::post('/admin/compliance-reviews/{id}/approve', [\App\Http\Controllers\AdminComplianceController::class, 'approve']);
         Route::post('/admin/compliance-reviews/{id}/reject', [\App\Http\Controllers\AdminComplianceController::class, 'reject']);

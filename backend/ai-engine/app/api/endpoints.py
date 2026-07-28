@@ -32,10 +32,10 @@ async def screen_company(ticker: str, financial_year: int = 2025, db: AsyncSessi
         "pdf_path": None,
         "raw_pdf_extraction": {},
         "business_intelligence": {},
+        "perplexity_financials": {},
+        "business_news": [],
         "cross_verified_data": {},
         "normalized_data": {},
-        "confidence_score": 0,
-        "confidence_breakdown": {},
         "source_urls": {},
         "calculation_results": {},
         "ai_explanation": None,
@@ -53,21 +53,21 @@ async def screen_company(ticker: str, financial_year: int = 2025, db: AsyncSessi
         # Determine if we need to fallback to 2025
         final_values = result_state.get("cross_verified_data", {})
         bus_result = result_state.get("business_intelligence", {})
-        business_failed = bus_result and bus_result.get("verdict") == "Non-Compliant"
-        
+        business_failed = bus_result and bus_result.get("business_compliance_status") == "Non-Compliant"
+
         # Did it fail to find financials, but the business isn't non-compliant?
         if not final_values and not business_failed:
             if initial_state["financial_year"] == 2026:
                 print(f"Fallback to 2025 triggered for {ticker}")
                 initial_state["financial_year"] = 2025
                 result_state = await graph_app.ainvoke(initial_state)
-                
+
                 if result_state.get("error"):
                     raise HTTPException(status_code=500, detail=result_state["error"])
-                    
-                final_values = result_state.get("cross_verified_data", {})
-                bus_result = result_state.get("business_intelligence", {})
-                business_failed = bus_result and bus_result.get("verdict") == "Non-Compliant"
+
+                final_values    = result_state.get("cross_verified_data", {})
+                bus_result      = result_state.get("business_intelligence", {})
+                business_failed = bus_result and bus_result.get("business_compliance_status") == "Non-Compliant"
             
         # Extract results
         calc_results = result_state.get("calculation_results", {})
@@ -94,19 +94,20 @@ async def screen_company(ticker: str, financial_year: int = 2025, db: AsyncSessi
             sources["business_news"] = bus_result.get("source_urls")
 
         # Format exact JSON structure requested
+        business_screen = bus_result.get("business_compliance_status", "Halal") if bus_result else "Halal"
         response_data = {
             "company": result_state.get("company_name", ticker),
             "ticker": ticker.upper(),
             "financial_year": financial_year,
-            "confidence": result_state.get("confidence_score", 0),
             "sources": sources,
             "financials": final_values,
             "aaoifi": {
-                "business_activity": bus_result.get("verdict", "PASS") if bus_result else "PASS", 
+                "business_activity": business_screen,
+                "detected_prohibited_activities": bus_result.get("detected_prohibited_activities", []) if bus_result else [],
                 "interest_debt_ratio": raw_ratios.get("interest_bearing_debt_ratio", 0),
                 "interest_income_ratio": raw_ratios.get("non_permissible_income_ratio", 0),
                 "cash_ratio": raw_ratios.get("cash_and_equivalents_ratio", 0),
-                "overall": "SHARIAH COMPLIANT" if calc_results.get("overall_financial_pass") else "NON COMPLIANT"
+                "overall": "SHARIAH COMPLIANT" if calc_results.get("overall_financial_pass") and business_screen != "Non-Compliant" else "NON COMPLIANT"
             },
             "explanation": result_state.get("ai_explanation", "")
         }

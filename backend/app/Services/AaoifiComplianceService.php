@@ -200,6 +200,8 @@ class AaoifiComplianceService
 
     private function notifyAdminsOfReview($review)
     {
+        // Eager-load the company relation so it is available in the queued mailable
+        $review->load('company');
         \Illuminate\Support\Facades\Mail::to('sinanismailaidris@gmail.com')->queue(new \App\Mail\ComplianceReviewNotification($review));
     }
 
