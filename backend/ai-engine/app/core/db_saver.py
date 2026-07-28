@@ -75,7 +75,7 @@ async def save_graph_result_to_db(db: AsyncSession, ticker: str, financial_year:
             source_publication_dates=sanitize_json(bus_result.get("source_publication_dates")),
             ai_explanation=bus_result.get("ai_explanation"),
             confidence_score=bus_result.get("confidence_score", 0),
-            business_compliance_status=bus_result.get("verdict"),
+            business_compliance_status=bus_result.get("business_compliance_status"),
             last_analysed_timestamp=timestamp_obj
         )
         db.add(bus_screening)

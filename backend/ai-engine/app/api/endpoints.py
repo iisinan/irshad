@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from app.core.database import get_db
 from app.models.financial_screening import FinancialScreening
 from app.graph.builder import build_graph
+from app.core.db_saver import sanitize_json
 
 router = APIRouter()
 graph_app = build_graph()
