@@ -16,11 +16,11 @@ export default function StatementTab({ data }) {
     if (data?.holdings && data.holdings.length > 0) {
       // 1. Holdings
       data.holdings.forEach(h => {
-        const val = h.units * h.current_price;
+        const val = h.shares * h.current_price;
         trxs.push({
           id: `HLD-${h.id || Math.floor(Math.random()*10000)}`,
           date: new Date(h.updated_at || Date.now() - Math.random() * 10000000000).toISOString(),
-          desc: `Asset Holding - ${h.symbol} (${h.units} units @ ₦${h.current_price})`,
+          desc: `Asset Holding - ${h.symbol} (${h.shares} units @ ₦${h.current_price})`,
           type: 'holding',
           amount: val,
           icon: Building2,
@@ -29,7 +29,7 @@ export default function StatementTab({ data }) {
       });
 
       // 2. Mock some Zakat and Purification based on total value
-      const totalValue = data.holdings.reduce((sum, h) => sum + (h.units * h.current_price), 0);
+      const totalValue = data.holdings.reduce((sum, h) => sum + (h.shares * h.current_price), 0);
       
       if (totalValue > 500000) {
         trxs.push({
