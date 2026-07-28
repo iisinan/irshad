@@ -97,7 +97,7 @@ class PerplexityAiService
 
                         return [
                             'reasoning' => $parsed['reasoning'],
-                            'confidence_score' => (int) ($parsed['confidence_score'] ?? 88),
+                            'confidence_score' => (int) ($parsed['confidence_score'] ?? 0),
                             'sources' => !empty($sources) ? $sources : ['NGX Corporate Disclosures', 'AAOIFI Standards Framework'],
                         ];
                     }
@@ -126,7 +126,7 @@ class PerplexityAiService
 
         return [
             'reasoning' => $reasoning,
-            'confidence_score' => 88,
+            'confidence_score' => 0,
             'sources' => [
                 'NGX Corporate Disclosures',
                 'AAOIFI Shariah Standard No. 21',
