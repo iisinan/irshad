@@ -26,13 +26,13 @@ services:
       - key: AI_ENGINE_URL
         sync: false # Set to the Render URL of your irshad-ai-engine service
 
-  # 2. The Laravel Queue Worker
+  # 2. The Laravel Queue & Scheduler Worker
   - type: worker
     name: irshad-queue-worker
     env: docker
     dockerContext: backend
     dockerfilePath: backend/Dockerfile
-    dockerCommand: 'bash -c "php artisan queue:work --timeout=3600 & php artisan queue:work --timeout=3600 & php artisan queue:work --timeout=3600 & wait"'
+    dockerCommand: 'bash -c "php artisan schedule:work & php artisan queue:work --timeout=3600 & php artisan queue:work --timeout=3600 & wait"'
     plan: free
     envVars:
       - key: APP_ENV
@@ -77,26 +77,3 @@ services:
     envVars:
       - key: PORT
         value: 80 # Nginx default in the Dockerfile
-
-  # 5. Laravel Scheduler
-  - type: cron
-    name: irshad-scheduler
-    env: docker
-    dockerContext: backend
-    dockerfilePath: backend/Dockerfile
-    dockerCommand: "php artisan schedule:run"
-    schedule: "* * * * *"
-    plan: free
-    envVars:
-      - key: APP_ENV
-        value: production
-      - key: APP_KEY
-        sync: false
-      - key: DB_CONNECTION
-        value: pgsql
-      - key: DB_URL
-        sync: false
-      - key: LOG_CHANNEL
-        value: stderr
-      - key: AI_ENGINE_URL
-        sync: false
