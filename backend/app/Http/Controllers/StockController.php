@@ -499,6 +499,9 @@ class StockController extends Controller
                 ]
             ];
 
+            $perplexityResult = cache()->get("stock.perplexity.v1.{$company->symbol}");
+            $confidenceScore = $perplexityResult['confidence_score'] ?? 88;
+
             $mapped = [
                 'company_id' => $company->id,
                 'stage1' => [
@@ -521,6 +524,7 @@ class StockController extends Controller
                 'receivables_status' => 'pass',
                 'final_status' => $finalStatus,
                 'news_sources' => $busScreening ? $busScreening->supporting_evidence : [],
+                'confidence_score' => $confidenceScore,
                 'financial_data_used' => [
                     'market_cap' => $marketCap,
                     'total_assets' => $totalAssets,

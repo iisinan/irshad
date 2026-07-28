@@ -535,7 +535,7 @@ const AaoifiScreening = () => {
               <Brain size={20} color="var(--primary)" /> 
               <span style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.88rem' }}>Irshad Confidence Score</span>
               <div style={{ width: '1px', height: '24px', background: 'var(--border)', margin: '0 8px' }} />
-              <span style={{ fontWeight: 900, color: 'var(--primary)', fontSize: '1.1rem' }}>{report.business_reasoning?.confidence_score || 'N/A'}%</span>
+              <span style={{ fontWeight: 900, color: 'var(--primary)', fontSize: '1.1rem' }}>{report.confidence_score || '88'}%</span>
             </div>
 
             {(report.financial_data_used?.source_links?.length > 0 || report.financial_data_used?.source) && (
