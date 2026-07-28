@@ -77,3 +77,26 @@ services:
     envVars:
       - key: PORT
         value: 80 # Nginx default in the Dockerfile
+
+  # 5. Laravel Scheduler
+  - type: cron
+    name: irshad-scheduler
+    env: docker
+    dockerContext: backend
+    dockerfilePath: backend/Dockerfile
+    dockerCommand: "php artisan schedule:run"
+    schedule: "* * * * *"
+    plan: free
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_KEY
+        sync: false
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_URL
+        sync: false
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: AI_ENGINE_URL
+        sync: false
