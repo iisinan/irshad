@@ -26,29 +26,7 @@ services:
       - key: AI_ENGINE_URL
         sync: false # Set to the Render URL of your irshad-ai-engine service
 
-  # 2. The Laravel Queue & Scheduler Worker
-  - type: worker
-    name: irshad-queue-worker
-    env: docker
-    dockerContext: backend
-    dockerfilePath: backend/Dockerfile
-    dockerCommand: 'bash -c "php artisan schedule:work & php artisan queue:work --timeout=3600 & php artisan queue:work --timeout=3600 & wait"'
-    plan: free
-    envVars:
-      - key: APP_ENV
-        value: production
-      - key: APP_KEY
-        sync: false
-      - key: DB_CONNECTION
-        value: pgsql
-      - key: DB_URL
-        sync: false
-      - key: QUEUE_CONNECTION
-        value: database
-      - key: LOG_CHANNEL
-        value: stderr
-      - key: AI_ENGINE_URL
-        sync: false
+
 
   # 3. The Python AI Engine
   - type: web
