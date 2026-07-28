@@ -367,8 +367,8 @@ const AaoifiScreening = () => {
             onClick={handleOpenOverrideModal}
             style={{ 
               display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', 
-              background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)', border: 'none', borderRadius: '12px', 
-              cursor: 'pointer', fontWeight: 800, color: 'white', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+              background: 'linear-gradient(135deg, #065F46 0%, #047857 100%)', border: 'none', borderRadius: '12px', 
+              cursor: 'pointer', fontWeight: 800, color: '#ffffff', fontSize: '0.88rem', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
               boxShadow: '0 8px 20px rgba(6, 78, 59, 0.2), inset 0 1px 0 rgba(255,255,255,0.2)'
             }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 24px rgba(6, 78, 59, 0.3), inset 0 1px 0 rgba(255,255,255,0.2)'; }}
