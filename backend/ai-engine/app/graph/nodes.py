@@ -83,18 +83,51 @@ async def download_pdf(state: GraphState) -> GraphState:
         return state
         
     url = state["annual_report_url"]
+    
+    async def save_response_to_pdf(content: bytes) -> str:
+        fd, path = tempfile.mkstemp(suffix=".pdf")
+        with os.fdopen(fd, 'wb') as f:
+            f.write(content)
+        return path
+
     try:
-        async with httpx.AsyncClient(timeout=60.0) as client:
+        # ATTEMPT 1: Standard HTTP (Free)
+        async with httpx.AsyncClient(timeout=30.0) as client:
             resp = await client.get(url, follow_redirects=True)
-            if resp.status_code == 200:
-                fd, path = tempfile.mkstemp(suffix=".pdf")
-                with os.fdopen(fd, 'wb') as f:
-                    f.write(resp.content)
+            
+            if resp.status_code == 200 and b"%PDF" in resp.content[:1024]:
+                path = await save_response_to_pdf(resp.content)
                 state["pdf_path"] = path
                 import hashlib
                 state["sha256_hash"] = hashlib.sha256(resp.content).hexdigest()
+                return state
+                
+        # ATTEMPT 2: ScraperAPI Proxy (Cheap Fallback)
+        scraper_api_key = os.getenv("SCRAPERAPI_KEY")
+        if scraper_api_key:
+            print(f"[{state['ticker']}] HTTP failed or not a PDF. Falling back to ScraperAPI for PDF download...")
+            proxies = {
+                "http://": f"http://scraperapi:{scraper_api_key}@proxy-server.scraperapi.com:8001",
+                "https://": f"http://scraperapi:{scraper_api_key}@proxy-server.scraperapi.com:8001"
+            }
+            async with httpx.AsyncClient(proxies=proxies, timeout=60.0, verify=False) as client:
+                resp = await client.get(url, follow_redirects=True)
+                if resp.status_code == 200 and b"%PDF" in resp.content[:1024]:
+                    path = await save_response_to_pdf(resp.content)
+                    state["pdf_path"] = path
+                    import hashlib
+                    state["sha256_hash"] = hashlib.sha256(resp.content).hexdigest()
+                    return state
+
+        # ATTEMPT 3: Apify Puppeteer (Expensive Fallback)
+        # Assuming Apify logic would be added here if needed to grab the direct blob, 
+        # but typically ScraperAPI catches 99% of Cloudflare blocks for static PDFs.
+        print(f"[{state['ticker']}] ScraperAPI failed to download PDF. Marking as failed.")
+        state["error"] = "All download attempts failed (HTTP -> ScraperAPI)"
+        
     except Exception as e:
         state["error"] = f"Failed to download PDF: {str(e)}"
+        
     return state
 
 # 7. Store PDF

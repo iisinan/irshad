@@ -58,35 +58,29 @@ class BusinessIntelligenceAgent:
                     "type": "ARRAY",
                     "items": {"type": "STRING"}
                 },
-                "detected_prohibited_activities": {
+                "revenue_segments": {
                     "type": "ARRAY",
                     "items": {"type": "STRING"}
                 },
                 "ai_explanation": {"type": "STRING"},
-                "confidence_score": {"type": "NUMBER"},
-                "business_compliance_status": {"type": "STRING", "enum": ["Halal", "Questionable", "Non-Compliant"]}
+                "confidence_score": {"type": "NUMBER"}
             },
-            "required": ["business_summary", "current_core_business", "detected_business_activities", "detected_prohibited_activities", "ai_explanation", "business_compliance_status"]
+            "required": ["business_summary", "current_core_business", "detected_business_activities", "ai_explanation"]
         }
         
         from google.genai import types
         import json
+        from app.tools.aaoifi_calculator import AAOIFICalculator
         
         prompt = f"Company: {company_name} ({ticker})\n" \
                  f"Principal Activities (from Annual Report): {principal_activities}\n" \
                  f"Business Segments (from Annual Report): {business_segments}\n" \
                  f"Web Snippets (Recent): {supporting_evidence}\n\n" \
-                 f"Based on AAOIFI Shariah standards, determine if this company engages in any non-permissible (haram) core business activities. Look carefully for any of the following categories and their synonyms:\n" \
-                 f"1. Conventional Finance (interest-based banking, riba, conventional insurance, commercial banking, lending, microfinance, credit)\n" \
-                 f"2. Alcohol (breweries, liquor, spirits, wine, distilling, intoxicating drinks)\n" \
-                 f"3. Pork (swine, non-halal meat processing, porcine products)\n" \
-                 f"4. Gambling (casinos, betting, lottery, games of chance, sports betting, bookmaking)\n" \
-                 f"5. Adult Entertainment (pornography, obscenity, adult content, escort services)\n" \
-                 f"6. Weapons & Defense (arms manufacturing, firearms, military equipment, munitions)\n" \
-                 f"7. Tobacco (cigarettes, smoking, nicotine, vaping)\n" \
-                 f"Return structured JSON."
+                 f"Your task is purely extraction. Based on the provided information, extract the company's core business activities and revenue segments.\n" \
+                 f"Do not make compliance judgments.\n" \
+                 f"Return structured JSON matching the schema."
                  
-        print("Analyzing business compliance with Gemini...")
+        print("Analyzing business compliance with Gemini (Extraction only)...")
         try:
             def _generate():
                 return self.gemini.models.generate_content(
@@ -100,6 +94,14 @@ class BusinessIntelligenceAgent:
             response = await asyncio.to_thread(_generate)
             
             result = json.loads(response.text)
+            
+            # Deterministic Python Verification
+            activities_to_check = result.get("detected_business_activities", []) + result.get("revenue_segments", [])
+            verification_result = AAOIFICalculator.verify_business_activities(activities_to_check)
+            
+            result["business_compliance_status"] = verification_result["business_compliance_status"]
+            result["detected_prohibited_activities"] = verification_result["matched_prohibited_keywords"]
+            
             result["supporting_evidence"] = supporting_evidence
             result["source_urls"] = source_urls
             result["source_publication_dates"] = [] # Can extract if needed

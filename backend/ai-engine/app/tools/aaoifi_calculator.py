@@ -84,3 +84,36 @@ class AAOIFICalculator:
         ])
 
         return results
+
+    @classmethod
+    def verify_business_activities(cls, activities: list) -> Dict[str, Any]:
+        """
+        Deterministically evaluates extracted business activities against AAOIFI prohibited sectors.
+        Returns the compliance status and the matched haram keywords if any.
+        """
+        prohibited_keywords = [
+            "interest", "bank", "banking", "riba", "insurance", "assurance", "lending", 
+            "microfinance", "credit", "mortgage", "alcohol", "brew", "brewery", "liquor", 
+            "spirits", "wine", "distilling", "pork", "swine", "porcine", "gambling", 
+            "casino", "betting", "lottery", "pornography", "escort", "weapons", "arms", 
+            "munitions", "tobacco", "cigarette", "vaping"
+        ]
+
+        matched_keywords = set()
+        
+        for activity in activities:
+            activity_lower = activity.lower()
+            for keyword in prohibited_keywords:
+                # Basic substring match. Can be enhanced with regex or NLP if needed.
+                if keyword in activity_lower:
+                    matched_keywords.add(keyword)
+        
+        status = "Halal"
+        if matched_keywords:
+            status = "Non-Compliant"
+
+        return {
+            "business_compliance_status": status,
+            "matched_prohibited_keywords": list(matched_keywords)
+        }
+
