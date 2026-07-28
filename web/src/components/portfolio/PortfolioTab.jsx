@@ -391,12 +391,15 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
         
         {/* Header */}
         {displayHoldings.length > 0 && (
-          <div style={{ display: 'flex', padding: '0 24px 16px 24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', padding: '0 24px 16px 24px' }}>
             <div style={{ flex: 1.5, fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', paddingLeft: '62px' }}>Asset</div>
-            <div style={{ flex: 1, textAlign: 'center', fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>7D Trend</div>
+            <div style={{ flex: 1, textAlign: 'center', fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', paddingLeft: '20px' }}>7D Trend</div>
             <div style={{ flex: 1, textAlign: 'right', fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Value / Shares</div>
-            <div style={{ flex: 0.8, textAlign: 'right', fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', paddingRight: '20px' }}>Total Return</div>
-            <div style={{ width: '40px' }} />
+            <div style={{ flex: 0.8, textAlign: 'right', fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', paddingLeft: '20px' }}>Total Return</div>
+            <div style={{ paddingLeft: '24px', display: 'flex', gap: '8px' }}>
+              <div style={{ width: '71px' }} />
+              <div style={{ width: '85px' }} />
+            </div>
           </div>
         )}
 
