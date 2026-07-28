@@ -492,35 +492,7 @@ const AaoifiScreening = () => {
           </div>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '32px' }}>
-          <div style={{ background: 'var(--bg-section)', borderRadius: '16px', border: '1px solid var(--border)', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--halal)', color: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.9rem', flexShrink: 0 }}>1</div>
-              <div>
-                <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-dark)' }}>Debt Ratio &lt; 30%</div>
-                <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Total debt / {denLabel} × 100</div>
-              </div>
-            </div>
-          </div>
-          <div style={{ background: 'var(--bg-section)', borderRadius: '16px', border: '1px solid var(--border)', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--halal)', color: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.9rem', flexShrink: 0 }}>2</div>
-              <div>
-                <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-dark)' }}>Cash Ratio &lt; 30%</div>
-                <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>(Cash + security) / {denLabel} × 100</div>
-              </div>
-            </div>
-          </div>
-          <div style={{ background: 'var(--bg-section)', borderRadius: '16px', border: '1px solid var(--border)', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--halal)', color: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.9rem', flexShrink: 0 }}>3</div>
-              <div>
-                <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-dark)' }}>Impure Revenue &lt; 5%</div>
-                <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Impure income / Total revenue × 100</div>
-              </div>
-            </div>
-          </div>
-        </div>
+
         
         <div style={{ marginTop: '16px' }}>
           {renderRatioProgressBar(
