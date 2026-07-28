@@ -327,26 +327,6 @@ const StockDetails = ({ symbol: propSymbol }) => {
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                 <h1 style={{ fontSize: '1.75rem', fontWeight: '900', letterSpacing: '-0.5px', color: 'white', margin: 0, lineHeight: 1.1 }}>{stock.name}</h1>
-                {user?.role === 'admin' && (
-                  <button 
-                    onClick={() => {
-                      setOverrideStatus(rawStatus?.status?.toLowerCase() || (typeof rawStatus === 'string' ? rawStatus.toLowerCase() : 'doubtful'));
-                      setOverrideReason(rawStatus?.reason || '');
-                      setOverrideEvidence(stock.evidence_link || '');
-                      setShowStatusOverrideModal(true);
-                    }}
-                    style={{
-                      background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)',
-                      color: 'white', padding: '4px 10px', borderRadius: '8px', fontSize: '0.65rem',
-                      fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s',
-                      display: 'flex', alignItems: 'center', gap: '4px'
-                    }}
-                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.25)' }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.15)' }}
-                  >
-                    <ShieldCheck size={12} /> Edit Status
-                  </button>
-                )}
               </div>
               <p style={{ color: 'rgba(255,255,255,0.65)', fontWeight: 600, margin: '6px 0 0', letterSpacing: '0.5px', fontSize: '0.84rem' }}>
                 {stock.symbol} · {stock.sector ?? 'Market Listed'} · Stock Exchange
