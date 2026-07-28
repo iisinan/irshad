@@ -472,7 +472,7 @@ const AaoifiScreening = () => {
         </div>
       </div>
 
-      {!['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(symbol) && (debtRatio !== null || report.impermissible_income_ratio != null || cashRatio !== null) && (
+      {!['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(symbol) && report.stage1?.status !== 'non-halal' && (debtRatio !== null || report.impermissible_income_ratio != null || cashRatio !== null) && (
       <div className="hover-card" style={{ background: 'linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', marginBottom: '48px', boxShadow: '0 12px 32px rgba(0,0,0,0.03)', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
           <div>
