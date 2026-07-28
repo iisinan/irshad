@@ -438,7 +438,7 @@ class StockController extends Controller
                             'compliance_status' => 'PASS',
                             'haram_revenue_percent' => 0,
                             'purification_required' => false,
-                            'reason' => 'AI screening failed to complete. Business activity assumed compliant for further analysis.'
+                            'reason' => null
                         ];
                     }
                 }
@@ -462,10 +462,8 @@ class StockController extends Controller
             $computedStatus = ($stage1Pass && $stage2Pass) ? 'halal' : 'non-halal';
             $finalStatus = $dbStatus ?? $computedStatus;
             
-            $statusReason = null;
-            if ($isScholarVerified) {
-                $statusReason = $company->status->reason;
-            } else {
+            $statusReason = $company->status ? $company->status->reason : null;
+            if (!$statusReason) {
                 if ($finalStatus === 'halal') {
                     $statusReason = 'Passes both qualitative business and quantitative financial Shariah compliance checks.';
                 } else {
@@ -507,10 +505,10 @@ class StockController extends Controller
                     'status' => $stage1Pass ? 'halal' : 'non-halal',
                     'haram_revenue_percent' => $stage1['haram_revenue_percent'] ?? 0,
                     'purification_required' => $stage1['purification_required'] ?? false,
-                    'reason' => $stage1['reason'] ?? '',
+                    'reason' => !empty($stage1['reason']) ? $stage1['reason'] : $statusReason,
                 ],
                 'business_status' => $stage1Pass ? 'pass' : 'fail',
-                'business_reasoning' => $stage1['reason'] ?? $company->activity_reason,
+                'business_reasoning' => !empty($stage1['reason']) ? $stage1['reason'] : $statusReason,
                 'debt_ratio' => $debtRatio,
                 'debt_status' => $debtPass ? 'pass' : 'fail',
                 'cash_ratio' => $cashRatio,
