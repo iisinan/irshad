@@ -134,6 +134,79 @@ class PerplexityAiService
             ]
         ];
     }
+
+    /**
+     * Fetch industry and analyst target for a company using Perplexity AI.
+     */
+    public function fetchIndustryAndTarget($company): array
+    {
+        if (empty($this->apiKey)) {
+            return ['industry' => 'Unknown', 'analysts_target' => 'N/A'];
+        }
+
+        $prompt = "Provide the specific Industry classification and the current 1-year Analyst Price Target (in NGN, if available) for the following company traded on the Nigerian Exchange (NGX).\n\n";
+        $prompt .= "Company: {$company->name} ({$company->symbol})\n\n";
+        $prompt .= "Search the live web for this specific financial data. If the analyst price target is completely unavailable or not covered by analysts, return \"N/A\" for it.\n\n";
+        $prompt .= "You MUST return a JSON object with EXACTLY these two keys without any extra text or markdown code blocks:\n";
+        $prompt .= "1. \"industry\": A short string (e.g., \"Banking\", \"Oil & Gas Exploration\", \"Telecommunications Services\", \"Consumer Goods\").\n";
+        $prompt .= "2. \"analysts_target\": A string representing the mean/average analyst price target (e.g., \"₦120.50\", or \"N/A\" if unavailable).\n";
+
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Content-Type' => 'application/json',
+            ])->timeout(45)->post($this->baseUrl, [
+                'model' => $this->model,
+                'messages' => [
+                    [
+                        'role' => 'system',
+                        'content' => 'You are a financial AI assistant powered by Perplexity. Your task is to provide the exact industry classification and analyst price target for a publicly traded stock. You must output only valid JSON without markdown code blocks.'
+                    ],
+                    [
+                        'role' => 'user',
+                        'content' => $prompt
+                    ]
+                ],
+                'temperature' => 0.1,
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                $content = $data['choices'][0]['message']['content'] ?? '';
+
+                // Strip markdown wrapping if present
+                $content = trim($content);
+                if (str_starts_with($content, '```json')) {
+                    $content = substr($content, 7);
+                } elseif (str_starts_with($content, '```')) {
+                    $content = substr($content, 3);
+                }
+                if (str_ends_with($content, '```')) {
+                    $content = substr($content, 0, -3);
+                }
+                $content = trim($content);
+
+                $parsed = json_decode($content, true);
+
+                if (is_array($parsed) && isset($parsed['industry'])) {
+                    return [
+                        'industry' => $parsed['industry'] ?? 'Unknown',
+                        'analysts_target' => $parsed['analysts_target'] ?? 'N/A',
+                    ];
+                }
+            }
+
+            Log::error('Perplexity AI fetchIndustryAndTarget failed or returned invalid JSON', [
+                'status' => $response->status(),
+                'body' => $response->body()
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Perplexity AI Exception (fetchIndustryAndTarget): ' . $e->getMessage());
+        }
+
+        return ['industry' => 'Unknown', 'analysts_target' => 'N/A'];
+    }
+
     public function runBusinessActivityScreening($company, $allowApiCall = true)
     {
         $name = strtolower($company->name);

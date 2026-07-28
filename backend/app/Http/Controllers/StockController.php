@@ -438,7 +438,7 @@ class StockController extends Controller
                             'compliance_status' => 'PASS',
                             'haram_revenue_percent' => 0,
                             'purification_required' => false,
-                            'reason' => null
+                            'reason' => 'Detailed business activity reasoning is currently unavailable. Assumed compliant based on sector classification for further analysis.'
                         ];
                     }
                 }
@@ -462,8 +462,10 @@ class StockController extends Controller
             $computedStatus = ($stage1Pass && $stage2Pass) ? 'halal' : 'non-halal';
             $finalStatus = $dbStatus ?? $computedStatus;
             
-            $statusReason = $company->status ? $company->status->reason : null;
-            if (!$statusReason) {
+            $statusReason = null;
+            if ($isScholarVerified) {
+                $statusReason = $company->status->reason;
+            } else {
                 if ($finalStatus === 'halal') {
                     $statusReason = 'Passes both qualitative business and quantitative financial Shariah compliance checks.';
                 } else {
@@ -499,20 +501,16 @@ class StockController extends Controller
                 ]
             ];
 
-            $perplexityResult = cache()->get("stock.perplexity.v1.{$company->symbol}");
-            $dbConfidenceScore = $company->status ? $company->status->confidence_score : null;
-            $confidenceScore = $perplexityResult['confidence_score'] ?? ($dbConfidenceScore ?? 88);
-
             $mapped = [
                 'company_id' => $company->id,
                 'stage1' => [
                     'status' => $stage1Pass ? 'halal' : 'non-halal',
                     'haram_revenue_percent' => $stage1['haram_revenue_percent'] ?? 0,
                     'purification_required' => $stage1['purification_required'] ?? false,
-                    'reason' => !empty($stage1['reason']) ? $stage1['reason'] : $statusReason,
+                    'reason' => $stage1['reason'] ?? '',
                 ],
                 'business_status' => $stage1Pass ? 'pass' : 'fail',
-                'business_reasoning' => !empty($stage1['reason']) ? $stage1['reason'] : $statusReason,
+                'business_reasoning' => $stage1['reason'] ?? $company->activity_reason,
                 'debt_ratio' => $debtRatio,
                 'debt_status' => $debtPass ? 'pass' : 'fail',
                 'cash_ratio' => $cashRatio,
@@ -525,7 +523,6 @@ class StockController extends Controller
                 'receivables_status' => 'pass',
                 'final_status' => $finalStatus,
                 'news_sources' => $busScreening ? $busScreening->supporting_evidence : [],
-                'confidence_score' => $confidenceScore,
                 'financial_data_used' => [
                     'market_cap' => $marketCap,
                     'total_assets' => $totalAssets,

@@ -193,7 +193,7 @@ class _ResourcesTabState extends State<ResourcesTab> {
                   padding: const EdgeInsets.only(right: 8.0),
                   child: FilterChip(
                     label: Text(
-                      cat,
+                      cat ?? '',
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         color: isSelected ? Colors.white : context.textDark,
@@ -202,7 +202,7 @@ class _ResourcesTabState extends State<ResourcesTab> {
                     selected: isSelected,
                     onSelected: (selected) {
                       setState(() {
-                        _selectedCategory = cat;
+                        _selectedCategory = cat ?? '';
                       });
                     },
                     backgroundColor: context.bgAlt,

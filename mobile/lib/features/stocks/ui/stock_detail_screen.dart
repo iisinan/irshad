@@ -169,7 +169,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     bool isNonHalal = status == 'non-halal';
     Color statusColor = isHalal ? context.halal : (isNonHalal ? context.haram : context.questionable);
     Color badgeBg = isHalal ? context.halalBg : (isNonHalal ? context.haramBg : context.questionableBg);
-    String statusLabel = isHalal ? 'SHARIAH COMPLIANT' : (isNonHalal ? 'NOT COMPLIANT' : 'QUESTIONABLE');
+    String statusLabel = isHalal ? 'HALAL' : (isNonHalal ? 'NON-HALAL' : 'QUESTIONABLE');
 
     final financials = _currentStock['financials'];
     final latestFin = (financials != null && financials is List && financials.isNotEmpty) ? financials[0] : null;
@@ -312,6 +312,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                   ],
 
                   // Company Metadata
+                  _buildDetailedOverview(),
                   _buildCompanyInfo(),
                   
                   // AAOIFI Screening Breakdown
@@ -332,6 +333,9 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
 
                   // Advanced Metrics (SWS)
                   _buildAdvancedMetrics(),
+                  
+                  // Analyst Rating
+                  _buildAnalystRating(),
 
                   // AI Halal Assistant Button
                   _buildAiAssistantButton(),
@@ -354,6 +358,9 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                     _buildNewsSection(),
                     const SizedBox(height: 32),
                   ],
+
+                  // Company Profile
+                  _buildCompanyProfile(),
 
                   // Scholar/Admin Override Button
                   _buildAdminOverrideButton(),
@@ -541,10 +548,10 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  label == 'SHARIAH COMPLIANT' ? Icons.check_circle_rounded : 
-                  label == 'NOT COMPLIANT' ? Icons.cancel_rounded : Icons.help_rounded,
+                  label == 'HALAL' ? Icons.check_circle_rounded : 
+                  label == 'NON-HALAL' ? Icons.cancel_rounded : Icons.help_rounded,
                   color: color, 
-                  size: 26
+                  size: 20
                 ),
                 const SizedBox(width: 10),
                 Text(label, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: color, letterSpacing: 0.8)),
@@ -665,6 +672,138 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     );
   }
 
+  Widget _buildDetailedOverview() {
+    final sector = _currentStock['sector'] ?? 'Unknown';
+    final industry = _currentStock['industry'] ?? 'Unknown';
+    final analystTarget = _currentStock['analysts_target'] != null ? '₦ ${_currentStock['analysts_target']}' : 'N/A';
+    
+    Widget buildRow(String label, String value, {bool isVerified = false}) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(label, style: TextStyle(color: context.textMuted, fontSize: 13, fontWeight: FontWeight.w500)),
+            Row(
+              children: [
+                if (isVerified) const Icon(Icons.verified, color: Colors.blue, size: 16),
+                if (isVerified) const SizedBox(width: 4),
+                Text(value, style: TextStyle(color: context.textDark, fontSize: 14, fontWeight: FontWeight.bold)),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader('Overview'),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: context.bgAlt,
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Column(
+            children: [
+              buildRow('Sector', sector),
+              buildRow('Industry', industry),
+              buildRow('Exchange', 'Stock Exchange'),
+              buildRow('Analyst Target', analystTarget),
+              buildRow('SEC Registration', 'Verified', isVerified: true),
+            ],
+          ),
+        ),
+        const SizedBox(height: 32),
+      ],
+    );
+  }
+
+  Widget _buildCompanyProfile() {
+    final address = _currentStock['address'] ?? 'N/A';
+    final phone = _currentStock['phone'] ?? 'N/A';
+    final website = _currentStock['website'] ?? 'N/A';
+    
+    if (address == 'N/A' && phone == 'N/A' && website == 'N/A') return const SizedBox.shrink();
+
+    Widget buildRow(IconData icon, String value) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: context.textMuted, size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(value, style: TextStyle(color: context.textDark, fontSize: 14, fontWeight: FontWeight.w500)),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader('Company Profile'),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: context.bgAlt,
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Column(
+            children: [
+              if (address != 'N/A') buildRow(Icons.location_on_outlined, address),
+              if (phone != 'N/A') buildRow(Icons.phone_outlined, phone),
+              if (website != 'N/A') buildRow(Icons.language_outlined, website),
+            ],
+          ),
+        ),
+        const SizedBox(height: 32),
+      ],
+    );
+  }
+
+  Widget _buildAnalystRating() {
+    final rating = _currentStock['analysts_rating'] ?? 'N/A';
+    if (rating == 'N/A') return const SizedBox.shrink();
+    
+    Color ratingColor = Colors.grey;
+    if (rating.toLowerCase().contains('buy')) ratingColor = Colors.green;
+    if (rating.toLowerCase().contains('sell')) ratingColor = Colors.red;
+    if (rating.toLowerCase().contains('hold')) ratingColor = Colors.orange;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader('Analysts Rating'),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(16),
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: ratingColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: ratingColor.withOpacity(0.3)),
+          ),
+          child: Column(
+            children: [
+              Text('Consensus', style: TextStyle(color: ratingColor, fontSize: 12, fontWeight: FontWeight.w600)),
+              const SizedBox(height: 4),
+              Text(rating.toUpperCase(), style: TextStyle(color: ratingColor, fontSize: 20, fontWeight: FontWeight.w900)),
+            ],
+          ),
+        ),
+        const SizedBox(height: 32),
+      ],
+    );
+  }
+
   Widget _buildCompanyInfo() {
     String formatAmt(double amt) {
       if (amt == 0) return '0';
@@ -709,8 +848,6 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('Overview'),
-        const SizedBox(height: 12),
         Column(children: rows),
         const SizedBox(height: 32),
       ],
@@ -1044,16 +1181,16 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: badgeBg.withValues(alpha: 0.15),
+                    color: bg.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(30),
-                    border: Border.all(color: badgeBg.withValues(alpha: 0.3)),
+                    border: Border.all(color: bg.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(isHalal ? Icons.check_circle : (isNonHalal ? Icons.cancel : Icons.info), color: statusColor, size: 12),
                       const SizedBox(width: 4),
-                      Text(isHalal ? '100% COMPLIANT' : (isNonHalal ? 'NON-COMPLIANT' : 'UNDER REVIEW'), 
+                      Text(isHalal ? 'HALAL' : (isNonHalal ? 'NON-HALAL' : 'UNDER REVIEW'), 
                         style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.w800)),
                     ],
                   ),
@@ -1312,6 +1449,9 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     final nonCompliantRev = latest != null && latest['non_compliant_income_ratio'] != null 
         ? _parseDouble(latest['non_compliant_income_ratio']) 
         : 0.0; 
+    final interestRatio = latest != null && latest['interest_income_ratio'] != null 
+        ? _parseDouble(latest['interest_income_ratio']) 
+        : 0.0;
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -1333,6 +1473,40 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
           const SizedBox(height: 16),
           Text('Received non-halal dividends from this stock? Calculate your purification due.', 
             style: TextStyle(color: context.textMuted, fontSize: 13, height: 1.4)),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(color: context.bg, borderRadius: BorderRadius.circular(16)),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Non-Halal Revenue', style: TextStyle(color: context.textMuted, fontSize: 10, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 4),
+                      Text('${nonCompliantRev.toStringAsFixed(2)}%', style: TextStyle(color: context.textDark, fontSize: 14, fontWeight: FontWeight.w900)),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(color: context.bg, borderRadius: BorderRadius.circular(16)),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Interest Income Ratio', style: TextStyle(color: context.textMuted, fontSize: 10, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 4),
+                      Text('${interestRatio.toStringAsFixed(2)}%', style: TextStyle(color: context.textDark, fontSize: 14, fontWeight: FontWeight.w900)),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 24),
           TextField(
             controller: _purificationController,

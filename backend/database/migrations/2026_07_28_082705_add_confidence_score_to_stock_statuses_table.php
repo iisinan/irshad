@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('stock_statuses', function (Blueprint $table) {
-            $table->integer('confidence_score')->nullable()->after('reason');
+            //
         });
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('stock_statuses', function (Blueprint $table) {
-            $table->dropColumn('confidence_score');
+            //
         });
     }
 };
