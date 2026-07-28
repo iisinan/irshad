@@ -55,6 +55,8 @@ class PortfolioController extends Controller
                 'is_halal' => $isHalal,
                 'purification_due' => round($purificationDue, 2),
                 'logo_url' => $company->logo_url ?? null,
+                'created_at' => $holding->created_at?->toISOString(),
+                'updated_at' => $holding->updated_at?->toISOString(),
             ];
         });
 
