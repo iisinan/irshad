@@ -59,9 +59,11 @@ export default function ZakatTab({ data }) {
           currentRate = Number(res.data.zakat_exchange_rate);
           setExchangeRate(currentRate);
         }
-        
-        if (res.data.zakat_gold_price_override) {
-          setGoldPrice(Number(res.data.zakat_gold_price_override));
+
+        // Only use override if it's a real positive number
+        const override = Number(res.data.zakat_gold_price_override);
+        if (override > 0) {
+          setGoldPrice(override);
           setOverrideActive(true);
         } else {
           setOverrideActive(false);
@@ -90,7 +92,7 @@ export default function ZakatTab({ data }) {
   const [irrigation, setIrrigation] = useState('natural'); // natural, artificial
 
   // Financial Calculations
-  const financialNisab = goldPrice * 85;
+  const financialNisab = (goldPrice > 0 ? goldPrice : 150000) * 85;
   const cashNum = Number(cash) || 0;
   const goldNum = (Number(goldGrams) || 0) * goldPrice;
   const totalWealth = portfolioValue + cashNum + goldNum;
