@@ -23,6 +23,55 @@ async def save_graph_result_to_db(db: AsyncSession, ticker: str, financial_year:
 
     final_values = result_state.get("cross_verified_data", {})
     calc_results = result_state.get("calculation_results", {})
+    bus_result = result_state.get("business_intelligence", {})
+    
+    # --- ADMIN REVIEW SAFEGUARD ---
+    if company:
+        current_status = company.current_status or "Unknown"
+        
+        # Calculate new potential status
+        new_status = "Unknown"
+        financial_pass = calc_results.get("overall_financial_pass")
+        bus_status = bus_result.get("business_compliance_status")
+        
+        if financial_pass is False or bus_status == "Non-Compliant":
+            new_status = "Non-Compliant"
+        elif financial_pass is True and bus_status == "Halal":
+            new_status = "Halal"
+            
+        if new_status != "Unknown" and current_status != "Unknown" and new_status != current_status:
+            print(f"[{ticker}] VERDICT CHANGE DETECTED: {current_status} -> {new_status}. Queuing Admin Review instead of saving.")
+            
+            # Insert into compliance_reviews
+            from sqlalchemy import text
+            await db.execute(
+                text("""
+                    INSERT INTO compliance_reviews (company_id, old_status, new_status, reason, status, created_at, updated_at)
+                    VALUES (:cid, :old, :new, :reason, 'pending', NOW(), NOW())
+                """),
+                {
+                    "cid": company_id,
+                    "old": current_status,
+                    "new": new_status,
+                    "reason": "Automated pipeline detected a verdict change from recent data extraction."
+                }
+            )
+            await db.commit()
+            
+            # Send email alert via artisan command
+            import subprocess
+            import os
+            try:
+                laravel_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
+                subprocess.run(["php", "artisan", "compliance:alert", str(company_id)], cwd=laravel_dir, check=True)
+                print(f"ALERT EMAIL SENT TO: sinanismailaidris@gmail.com for {ticker}")
+            except Exception as e:
+                print(f"Failed to trigger email alert command: {e}")
+            
+            # Skip saving new financials
+            result_state["skip_financials"] = True
+            return None
+    # ------------------------------
     
     if not result_state.get("skip_financials"):
         extracted_year = result_state.get("raw_pdf_extraction", {}).get("financial_year")

@@ -389,3 +389,57 @@ export const fetchBusinessNewsOverview = async () => {
 };
 
 export default api;
+
+// ==========================================
+// UPDATES — News & Insights
+// ==========================================
+
+export const fetchUpdatesNews = async () => {
+  const response = await api.get('/updates/news');
+  return response.data;
+};
+
+export const fetchDigestPreference = async () => {
+  const response = await api.get('/updates/digest');
+  return response.data;
+};
+
+export const updateDigestPreference = async (prefs) => {
+  const response = await api.put('/updates/digest', prefs);
+  return response.data;
+};
+
+// ==========================================
+// INBOX — User Notifications
+// ==========================================
+
+export const fetchInboxNotifications = async (params = {}) => {
+  const response = await api.get('/notifications/inbox', { params });
+  return response.data;
+};
+
+export const fetchUnreadCount = async () => {
+  const response = await api.get('/notifications/unread-count');
+  return response.data;
+};
+
+export const markNotificationRead = async (id) => {
+  const response = await api.put(`/notifications/${id}/read`);
+  return response.data;
+};
+
+export const markAllNotificationsRead = async () => {
+  const response = await api.put('/notifications/read-all');
+  return response.data;
+};
+
+export const archiveNotification = async (id) => {
+  const response = await api.put(`/notifications/${id}/archive`);
+  return response.data;
+};
+
+export const deleteNotification = async (id) => {
+  const response = await api.delete(`/notifications/${id}`);
+  return response.data;
+};
+

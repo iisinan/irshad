@@ -42,6 +42,9 @@ class Company extends Model
         'activity_reason',
         'latest_price',
         'price_change_pct',
+        'email',
+        'date_listed',
+        'date_of_incorporation',
     ];
 
     public function financials(): HasMany

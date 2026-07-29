@@ -101,6 +101,27 @@ async def search_financial_statements(state: GraphState) -> GraphState:
         if "source_urls" not in state:
             state["source_urls"] = {}
         state["source_urls"]["annual_report"] = state["annual_report_url"]
+        
+        # Extraction Optimization (Duplicate Check)
+        ngx_date = results.get("ngx_date")
+        if ngx_date:
+            try:
+                from datetime import datetime
+                parsed_date = datetime.strptime(ngx_date, "%B %d, %Y").date()
+                
+                async with AsyncSessionLocal() as db:
+                    res = await db.execute(
+                        select(FinancialScreening)
+                        .where(FinancialScreening.company_ticker == state["ticker"])
+                        .where(FinancialScreening.published_date >= parsed_date)
+                    )
+                    existing = res.scalars().first()
+                    if existing and existing.chosen_values:
+                        print(f"[{state['ticker']}] Database already has data for {ngx_date} or newer. Skipping PDF extraction.")
+                        state["existing_financial_data"] = existing.chosen_values
+                        state["skip_financials"] = True
+            except Exception as e:
+                print(f"[{state['ticker']}] Error checking duplicate date '{ngx_date}': {e}")
 
     return state
 

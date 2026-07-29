@@ -4,7 +4,7 @@ import { fetchPortfolio, addHolding, removeHolding, fetchNgxStocks, formatLogoUr
 import { toastError, toastSuccess } from '../utils/toast';
 import { useAuth } from '../context/AuthContext';
 import localforage from 'localforage';
-import { X, Search, LayoutDashboard, BarChart2, Star, Calculator, ShieldCheck, BookOpen, Info, Landmark, Briefcase, Bell, Activity, Lock, CheckCircle2, FileText } from 'lucide-react';
+import { X, Search, LayoutDashboard, BarChart2, Star, Calculator, ShieldCheck, BookOpen, Info, Landmark, Briefcase, Bell, Activity, Lock, CheckCircle2, FileText, Rss } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
 import PortfolioTab from './portfolio/PortfolioTab';
@@ -14,6 +14,7 @@ import ZakatTab from './portfolio/ZakatTab';
 import PurificationTab from './portfolio/PurificationTab';
 import LecturesTab from './portfolio/LecturesTab';
 import StatementTab from './portfolio/StatementTab';
+import UpdatesTab from './portfolio/UpdatesTab';
 
 import AddHoldingModal from "./portfolio/AddHoldingModal";
 
@@ -70,7 +71,7 @@ export default function Portfolio() {
   const location = useLocation();
   const getTabFromHash = (hash) => {
     const h = hash.replace('#', '');
-    return ['holdings', 'market', 'watchlist', 'zakat', 'purification', 'lectures', 'statement'].includes(h) ? h : 'holdings';
+    return ['holdings', 'market', 'watchlist', 'zakat', 'purification', 'lectures', 'statement', 'updates'].includes(h) ? h : 'holdings';
   };
   
   const [activeTab, setActiveTab] = useState(() => getTabFromHash(location.hash));
@@ -157,7 +158,8 @@ export default function Portfolio() {
     { id: 'statement',    label: 'Statement',       icon: FileText },
     { id: 'zakat',        label: 'Zakat',           icon: Calculator },
     { id: 'purification', label: 'Purification',    icon: ShieldCheck },
-    { id: 'lectures',     label: 'Resources',       icon: BookOpen }
+    { id: 'lectures',     label: 'Resources',       icon: BookOpen },
+    { id: 'updates',      label: 'Updates',         icon: Rss },
   ];
 
   // Compute sidebar data
@@ -310,6 +312,11 @@ export default function Portfolio() {
           {mountedTabs.includes('statement') && (
             <div style={{ display: activeTab === 'statement' ? 'block' : 'none' }}>
               <StatementTab data={data} />
+            </div>
+          )}
+          {mountedTabs.includes('updates') && (
+            <div style={{ display: activeTab === 'updates' ? 'block' : 'none' }}>
+              <UpdatesTab />
             </div>
           )}
 

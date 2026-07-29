@@ -34,6 +34,21 @@ class FinancialScraper:
                     await new Promise(r => setTimeout(r, 5000)); // wait for ajax to load table
                 } catch (e) {}
                 
+                const profile = await page.$$eval('.tab-content table tr, table tr', rows => {
+                    let result = {};
+                    rows.forEach(row => {
+                        const cells = row.querySelectorAll('td, th');
+                        if (cells.length >= 2) {
+                            const key = cells[0].innerText.trim().replace(':', '');
+                            const value = cells[1].innerText.trim();
+                            if (key && value) {
+                                result[key] = value;
+                            }
+                        }
+                    });
+                    return result;
+                });
+                
                 const data = await page.$$eval('a', els => {
                     return els.filter(a => a.href && a.href.toLowerCase().endsWith('.pdf'))
                               .map(a => {
@@ -44,12 +59,12 @@ class FinancialScraper:
                                   };
                               });
                 });
-                return { data: data };
+                return { data: data, profile: profile };
             }""",
             "proxyConfiguration": { "useApifyProxy": True }
         }
         
-        results = {"ngx": None, "official": None}
+        results = {"ngx": None, "official": None, "profile": None}
         
         try:
             def _run_puppeteer():
@@ -60,6 +75,9 @@ class FinancialScraper:
             extracted_docs = []
             
             for item in self.client.dataset(run["defaultDatasetId"]).iterate_items():
+                if "profile" in item and not results["profile"]:
+                    results["profile"] = item["profile"]
+                    
                 for doc in item.get("data", []):
                     url = str(doc.get("url") or "")
                     text = str(doc.get("text") or "")
@@ -99,10 +117,27 @@ class FinancialScraper:
                     })
                     
             if extracted_docs:
-                # Sort by newest date first
-                extracted_docs.sort(key=lambda x: x["date"], reverse=True)
+                # Add a priority score to prioritize Annual/Audited reports
+                for doc in extracted_docs:
+                    combined = (doc["url"] + doc["text"]).lower()
+                    
+                    # Score 0 (Lowest): Press Releases, Corporate Actions
+                    if any(kw in combined for kw in ["press release", "corporate action", "presentation"]):
+                        doc["priority"] = 0
+                    # Score 3 (Highest): Annual Reports, Audited Statements
+                    elif any(kw in combined for kw in ["annual", "audited", "full year", "fy"]):
+                        doc["priority"] = 3
+                    # Score 1 (Low): Quarterly Reports, H1/9M
+                    elif any(kw in combined for kw in ["q1", "q2", "q3", "h1", "9m", "nine months", "quarter"]):
+                        doc["priority"] = 1
+                    # Score 2 (Default): Unknown/Other financial statements
+                    else:
+                        doc["priority"] = 2
+
+                # Sort by Priority (descending), then by Date (descending)
+                extracted_docs.sort(key=lambda x: (x["priority"], x["date"]), reverse=True)
                 
-                print(f"DEBUG: Found {len(extracted_docs)} PDFs for {ticker}. Newest: {extracted_docs[0]['date']} -> {extracted_docs[0]['url']}")
+                print(f"DEBUG: Found {len(extracted_docs)} PDFs for {ticker}. Best Match: {extracted_docs[0]['date']} (Priority: {extracted_docs[0]['priority']}) -> {extracted_docs[0]['url']}")
                 best_doc = extracted_docs[0]
                 results["official"] = best_doc["url"]
                 results["ngx"] = best_doc["url"]

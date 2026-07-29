@@ -1,0 +1,8 @@
+# Excel vs Database Discrepancies
+
+| Ticker | DB Status | Excel Status | Excel Rationale | DB Rationale |
+|---|---|---|---|---|
+| CHAMS | Fail | Pass | Identity management and payments-infrastructure group across three segments: Identity Management (biometric ID, card personalization for financial/healthcare/corporate clients via Card Centre Nigeria), Payments/Transactional Systems (switching via ChamsSwitch, ATM deployment via Chams Access, mobile money via ChamsMobile), and ICT Training - plus a 2026 pivot into AI/data-centre infrastructure via new subsidiary ChamsCorp. No banking, insurance, alcohol, or gambling exposure - this is fee-based payments rails/fintech infrastructure, not a lender. One standing caveat shared with ETRANZACT: mobile money operators sometimes earn interest on pooled customer float balances rather than passing it through - ChamsMobile's treatment of this is unconfirmed and sits at the financial-ratio layer, not a business-activity concern. | Failed AAOIFI financial ratio screening: impermissible income ratio (5.14%) exceeds the 5% limit. |
+| FTNCOCOA | Fail | Pass | Cocoa processing - permissible core activity. | Failed AAOIFI financial ratio screening: interest-bearing debt ratio (63.94%) exceeds the 30% limit based on live market capitalisation. |
+| GEREGU | Fail | Pass | Power generation - permissible core activity. | Failed AAOIFI financial ratio screening: impermissible income ratio (6.23%) exceeds the 5% limit. |
+| UPDC | Fail | Pass | Real estate development - permissible core activity. | Failed AAOIFI financial ratio screening: impermissible income ratio (14.08%) exceeds the 5% limit. |

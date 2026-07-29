@@ -23,3 +23,6 @@ Schedule::command('irshad:market-data')->twiceDaily(0, 12);
 
 // New AI Engine sweep exclusively for Business Intelligence (News)
 Schedule::command('irshad:update-business')->twiceDaily(0, 12);
+
+// Updates section: detect Halal ↔ Non-Halal changes and push inbox notifications
+Schedule::command('irshad:detect-compliance-changes')->hourly();

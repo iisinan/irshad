@@ -11,7 +11,7 @@ class AdminComplianceController extends Controller
 {
     public function index()
     {
-        $reviews = ComplianceReview::with('company')->where('status', 'pending')->orderBy('created_at', 'desc')->get();
+        $reviews = ComplianceReview::with(['company', 'company.aaoifiScreening'])->where('status', 'pending')->orderBy('created_at', 'desc')->get();
         return response()->json($reviews);
     }
 

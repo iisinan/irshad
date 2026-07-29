@@ -26,7 +26,7 @@ You are an expert financial auditor extracting data from the official {financial
 Your strict instructions are to extract the following exact figures from the financial statements (Statement of Profit or Loss, Statement of Financial Position, Statement of Cash Flows).
 
 CRITICAL RULES - NO HALLUCINATION ALLOWED:
-1. ONLY extract data if it clearly represents the FULL YEAR {financial_year} (FY {financial_year}) results.
+1. ONLY extract data if it clearly represents the FULL YEAR results for either {financial_year} or the most recent prior year available in the document (e.g. {financial_year - 1}). Always prefer {financial_year} if present.
 2. DO NOT perform any calculations. Extract the raw figures exactly as printed.
 3. If a value is not explicitly found, return 0 and set confidence to 0.
 4. You MUST include the page number and the exact quote from the document where you found the number.
@@ -58,7 +58,7 @@ Here is the document text (this might be truncated, do your best):
             import asyncio
             def _generate():
                 return self.client.models.generate_content(
-                    model='gemini-1.5-flash',
+                    model='gemini-3.6-flash',
                     contents=prompt,
                     config=genai_types.GenerateContentConfig(
                         temperature=0.1,

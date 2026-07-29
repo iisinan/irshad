@@ -1,0 +1,1079 @@
+{
+  "NGX Screen": [
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "Business-activity screen only (what each company DOES). Financial-ratio screening — debt ratio, interest income %, impermissible income % — requires each company's latest financial statements and is NOT performed here; see the Financial Screen column. Compiled from public sector/company data, July 2026. Not a fatwa or investment advice — verify with a qualified Shariah advisor before investing."
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "Ticker",
+      "__EMPTY": "Sector",
+      "__EMPTY_1": "Business Activity Screen",
+      "__EMPTY_2": "Rationale",
+      "__EMPTY_3": "Financial Screen",
+      "__EMPTY_4": "Notes"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "ABBEYBANK",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional bank - interest-based lending/deposits (riba).",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "ABCTRANS",
+      "__EMPTY": "SERVICES",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Transport/logistics services - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "ACADEMY",
+      "__EMPTY": "SERVICES",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Education services - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "ACCESSCORP",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional bank - interest-based lending/deposits (riba).",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "AFRINSURE",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional insurance - riba/gharar in contract structure.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "AFRIPRUD",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional insurance - riba/gharar in contract structure.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "AFROMEDIA",
+      "__EMPTY": "SERVICES",
+      "__EMPTY_1": "DOUBTFUL",
+      "__EMPTY_2": "Outdoor advertising/media - check client mix (alcohol/betting ad revenue share).",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "AIICO",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional insurance - riba/gharar in contract structure.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "AIRTELAFRI",
+      "__EMPTY": "ICT",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Telecom services - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "ALEX",
+      "__EMPTY": "NATURAL RESOURCES",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Mining/resources - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "ARADEL",
+      "__EMPTY": "OIL AND GAS",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Oil & gas production/marketing - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "AUSTINLAZ",
+      "__EMPTY": "INDUSTRIAL GOODS",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Industrial products - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "AVAIF",
+      "__EMPTY": "CONSTRUCTION/REAL ESTATE",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "CORRECTED from PASS. AVA Infrastructure Fund's core business activities focus on providing debt financing for infrastructure development projects across Nigeria (greenfield developments, expansion, recapitalisations, rehabilitation of mature assets). Its own stated objective is to deliver income to unit holders through debt financing, with management describing its strategy as allocating private credit. Same category as NIDF, CNIF, and MOFIREIF - a debt fund, not a property-holding trust, despite the infrastructure/real estate framing.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "BAPLC",
+      "__EMPTY": "ICT",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Tech/electronics - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "BERGER",
+      "__EMPTY": "INDUSTRIAL GOODS",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Paints manufacturing - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "BETAGLAS",
+      "__EMPTY": "INDUSTRIAL GOODS",
+      "__EMPTY_1": "DOUBTFUL",
+      "__EMPTY_2": "Manufactures generic glass bottles/containers - the product itself (glass packaging) is not alcohol, and clients span soft drinks, pharma, food and cosmetics too. However, named major customers explicitly include Nigerian Breweries (Heineken), AB InBev, and Guinness Nigeria - breweries and spirits producers appear to be a dominant, not incidental, part of the customer base. Revenue share from alcohol-industry clients is unconfirmed but the concentration signal is material - closer to a REIT overexposed to impermissible tenants than a comfortable pass. Needs customer-revenue breakdown before resolving.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "BUACEMENT",
+      "__EMPTY": "INDUSTRIAL GOODS",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Cement manufacturing - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "BUAFOODS",
+      "__EMPTY": "CONSUMER GOODS",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Food products - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "CADBURY",
+      "__EMPTY": "CONSUMER GOODS",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Confectionery/food - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "CAP",
+      "__EMPTY": "INDUSTRIAL GOODS",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Paints manufacturing - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "CAVERTON",
+      "__EMPTY": "SERVICES",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Aviation/helicopter services - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "CHAMPION",
+      "__EMPTY": "CONSUMER GOODS",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "CORRECTED from original PASS/VERIFY classification. Champion Breweries Plc is a straightforward alcohol producer - brews and markets Champion Lager Beer and other alcoholic beverages as core, majority-revenue products; Heineken International holds a majority equity stake since 2014. Same category as NB, Guinness, and International Breweries.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "CHAMS",
+      "__EMPTY": "ICT",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Identity management and payments-infrastructure group across three segments: Identity Management (biometric ID, card personalization for financial/healthcare/corporate clients via Card Centre Nigeria), Payments/Transactional Systems (switching via ChamsSwitch, ATM deployment via Chams Access, mobile money via ChamsMobile), and ICT Training - plus a 2026 pivot into AI/data-centre infrastructure via new subsidiary ChamsCorp. No banking, insurance, alcohol, or gambling exposure - this is fee-based payments rails/fintech infrastructure, not a lender. One standing caveat shared with ETRANZACT: mobile money operators sometimes earn interest on pooled customer float balances rather than passing it through - ChamsMobile's treatment of this is unconfirmed and sits at the financial-ratio layer, not a business-activity concern.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "CHELLARAM",
+      "__EMPTY": "CONGLOMERATES",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Diversified conglomerate across two segments: Industrial Raw Materials (chemicals, machinery, packaging supplied to food/pharma/manufacturing sectors) and Consumer Products (dairy via Chellarams DMK JV, frozen foods, apparel, bicycles, KFC franchise), plus real estate rental income. No alcohol, gambling, or interest-based lending found in segment breakdown - the earlier 'may include beverages' concern did not materialize. Minor open items: rental-property tenant mix and confirming no alcohol service at KFC outlets, both low-stakes.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "CILEASING",
+      "__EMPTY": "SERVICES",
+      "__EMPTY_1": "DOUBTFUL",
+      "__EMPTY_2": "Equipment leasing - ijara-style leasing is permissible in principle, but conventional lease financing structure needs verification.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "CMFC",
+      "__EMPTY": "CONGLOMERATES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "CORRECTED - this is NOT Consolidated Hallmark Insurance as originally misidentified. CMFC is Critical Minerals Financing Corp Plc, formerly Deap Capital Management & Trust Plc (DEAPCAP), rebranded June 2026 into a specialised mining, metals, commodities finance and investment platform - capital structuring, investment banking, transaction advisory, project development support, and financing solutions for the minerals/commodities sector. No line-item CMFC revenue disclosure confirms this, but per typical revenue patterns of comparable mining/commodities financing corporations, 'financing solutions' and 'capital structuring' in this space are overwhelmingly monetized through structured debt and interest spread rather than fee-only advisory (the same pattern confirmed directly for UCAP once its lending subsidiary was examined) - treated as FAIL on that basis.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "CNIF",
+      "__EMPTY": "CONSTRUCTION/REAL ESTATE",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "CORRECTED from PASS. Coronation Infrastructure Fund is explicitly a closed-end debt fund, investing in loans, securities and securitised debt instruments of infrastructure companies, targeting a return of 3% over the FGN bond yield. H1 2026 results confirm interest income as the Fund's primary revenue driver, with infrastructure loans and money-market placements as the main contributors. Same category as NIDF and MOFIREIF - interest-based lending as the core, explicit product, not a property-holding trust.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "CONHALLPLC",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional insurance - riba/gharar in contract structure.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "CONOIL",
+      "__EMPTY": "OIL AND GAS",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Petroleum marketing - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "CORNERST",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional insurance - riba/gharar in contract structure.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "CUSTODIAN",
+      "__EMPTY": "CONGLOMERATES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Insurance/financial services holding group - core business is conventional insurance.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "CUTIX",
+      "__EMPTY": "INDUSTRIAL GOODS",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Cables/wires manufacturing - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "CWG",
+      "__EMPTY": "ICT",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "IT services - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "DAARCOMM",
+      "__EMPTY": "SERVICES",
+      "__EMPTY_1": "DOUBTFUL",
+      "__EMPTY_2": "Broadcast media - programming content mix needs review (advertising for alcohol/betting, entertainment content standards).",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "DANGCEM",
+      "__EMPTY": "INDUSTRIAL GOODS",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Cement manufacturing - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "DANGSUGAR",
+      "__EMPTY": "CONSUMER GOODS",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Sugar refining - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "EKOCORP",
+      "__EMPTY": "HEALTHCARE",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Hospital operator (Eko Hospitals) - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "ELLAHLAKES",
+      "__EMPTY": "AGRICULTURE",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Diversified agribusiness (palm oil, cassava, soybean, maize) is otherwise permissible, but company has launched and is actively scaling commercial pig farming (piggery >1,000 heads per 2026 disclosures) - swine production is a categorical exclusion in standard Shariah screens, not subject to a revenue-materiality threshold. Also carries elevated financial risk: FY2025 revenue of ~N67-147m against a loss after tax of N1.596bn, and a recent N6.3bn debt-to-equity conversion signaling heavy prior leverage.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "ENAMELWA",
+      "__EMPTY": "CONSUMER GOODS",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Enamelware/houseware manufacturing - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "ETERNA",
+      "__EMPTY": "OIL AND GAS",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Petroleum marketing/lubricants - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "ETI",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional bank (Ecobank Transnational) - interest-based lending/deposits (riba).",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "ETRANZACT",
+      "__EMPTY": "ICT",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Payment technology services - permissible core activity (verify no interest-bearing float structuring).",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "EUNISELL",
+      "__EMPTY": "SERVICES",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Oilfield chemicals/services - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "FCMB",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional bank - interest-based lending/deposits (riba).",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "FIDELITYBK",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional bank - interest-based lending/deposits (riba).",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "FIDSON",
+      "__EMPTY": "HEALTHCARE",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Pharmaceuticals manufacturing - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "FIRSTHOLDCO",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional bank holding co (First Bank) - interest-based lending/deposits (riba).",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "FTGINSURE",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional insurance - riba/gharar in contract structure.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "FTNCOCOA",
+      "__EMPTY": "AGRICULTURE",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Cocoa processing - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "GEREGU",
+      "__EMPTY": "UTILITIES",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Power generation - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "GOLDBREW",
+      "__EMPTY": "CONSUMER GOODS",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Brewery (Golden Guinea Breweries) - alcohol production.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "GTCO",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional bank holding co - interest-based lending/deposits (riba).",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "GUINEAINS",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional insurance - riba/gharar in contract structure.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "GUINNESS",
+      "__EMPTY": "CONSUMER GOODS",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Brewery (Guinness Nigeria) - alcohol production.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "HBMNG",
+      "__EMPTY": "INDUSTRIAL GOODS",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Cement manufacturing (formerly Lafarge Africa) - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "HMCALL",
+      "__EMPTY": "CONSTRUCTION/REAL ESTATE",
+      "__EMPTY_1": "DOUBTFUL",
+      "__EMPTY_2": "Real estate + hospitality mix - hotel/resort operations may include bar revenue; needs verification.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "HONYFLOUR",
+      "__EMPTY": "CONSUMER GOODS",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Flour milling/food - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "IKEJAHOTEL",
+      "__EMPTY": "SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Hospitality group operating Federal Palace Hotels & Casino - gambling and alcohol sales are core revenue lines.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "IMG",
+      "__EMPTY": "NATURAL RESOURCES",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Mining/resources - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "INFINITY",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Mortgage bank - interest-based lending (riba).",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "INTBREW",
+      "__EMPTY": "CONSUMER GOODS",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Brewery (International Breweries) - alcohol production.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "INTENEGINS",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional insurance - riba/gharar in contract structure.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "JAIZBANK",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Non-interest (Islamic) bank, licensed by CBN as Shariah-compliant - core model itself is riba-free; verify individual products with a Shariah advisor as with any institution.",
+      "__EMPTY_3": "OK"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "JAPAULGOLD",
+      "__EMPTY": "OIL AND GAS",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Mining/marine support services - permissible core activity (NGX sector tag is nominal).",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "JBERGER",
+      "__EMPTY": "CONSTRUCTION/REAL ESTATE",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Construction/engineering - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "JOHNHOLT",
+      "__EMPTY": "CONGLOMERATES",
+      "__EMPTY_1": "DOUBTFUL",
+      "__EMPTY_2": "Diversified trading conglomerate - segment revenue mix needs breakdown.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "JULI",
+      "__EMPTY": "SERVICES",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Pharmaceutical distribution - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "LASACO",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional insurance - riba/gharar in contract structure.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "LEARNAFRCA",
+      "__EMPTY": "SERVICES",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Publishing/education materials - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "LEGENDINT",
+      "__EMPTY": "ICT",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Technology/ICT services - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "LINKASSURE",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional insurance - riba/gharar in contract structure.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "LIVESTOCK",
+      "__EMPTY": "AGRICULTURE",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Livestock/feed - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "LIVINGTRUST",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Mortgage bank - interest-based lending (riba).",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "MANSARD",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional insurance (AXA Mansard) - riba/gharar in contract structure.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "MAYBAKER",
+      "__EMPTY": "HEALTHCARE",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Pharmaceuticals manufacturing - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "MBENEFIT",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional insurance - riba/gharar in contract structure.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "MCNICHOLS",
+      "__EMPTY": "CONSUMER GOODS",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Consumer products/lottery-adjacent - VERIFY: has historically had lottery/gaming terminal business lines; confirm current segment mix before treating as pass.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "MECURE",
+      "__EMPTY": "HEALTHCARE",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Pharmaceuticals manufacturing - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "MEYER",
+      "__EMPTY": "INDUSTRIAL GOODS",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Paints/building materials - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "MOFIREIF",
+      "__EMPTY": "CONSTRUCTION/REAL ESTATE",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "CORRECTED from original PASS classification, which mistakenly treated this as a property-holding REIT. MOFI Real Estate Investment Fund (MREIF) is actually a government-backed mortgage lending vehicle, not a rental-property trust - its core business is originating fixed-rate mortgage loans to homebuyers at a stated 9.75% interest rate (well below commercial bank rates of 18-22%), plus construction financing guarantees to developers, with repayments recycled into new loans. Interest-bearing lending is the core product, not an incidental tenant-mix issue like genuine property REITs (NREIT, UPDCREIT, SFSREIT, UHOMREIT) - same category as the mortgage banks (INFINITY, LIVINGTRUST) already marked FAIL.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "MORISON",
+      "__EMPTY": "HEALTHCARE",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Pharmaceuticals/consumer health - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "MTNN",
+      "__EMPTY": "ICT",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Telecom services - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "MULTITREX",
+      "__EMPTY": "CONSUMER GOODS",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Food/starch processing - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "MULTIVERSE",
+      "__EMPTY": "NATURAL RESOURCES",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Mining/resources holding - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "NAHCO",
+      "__EMPTY": "SERVICES",
+      "__EMPTY_1": "DOUBTFUL",
+      "__EMPTY_2": "Core aviation ground/cargo/passenger handling and logistics lines (NAHCO FTZ, Commodities, Logistics, Power Solutions, Aviation Academy) are clean fee-for-service businesses. However, NAHCO Travel and Hospitality Limited (NHTL) now directly operates Sapphire Hotel, a 20-room in-terminal hotel at MMIA Terminal II (opened Feb 2026), with an on-site restaurant/lounge. No alcohol service confirmed either way in public disclosures - amenities described (breakfast, lunch/dinner, business office, gym, prayer area) suggest a business-transit orientation, but F&B/bar revenue at the hotel needs direct confirmation before treating as fully clean. Not comparable to Ikeja Hotel (no casino/nightclub indicated).",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "NASCON",
+      "__EMPTY": "CONSUMER GOODS",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Salt/food seasoning - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "NB",
+      "__EMPTY": "CONSUMER GOODS",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Brewery (Nigerian Breweries) - alcohol production.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "NCR",
+      "__EMPTY": "ICT",
+      "__EMPTY_1": "DOUBTFUL",
+      "__EMPTY_2": "Core business is hardware/technology vending - ATMs, POS terminals, self-service kiosks, software - not a gaming operator itself. However, company literature explicitly names 'gaming' as one of its served industry verticals alongside financial services, retail, hospitality, healthcare, and travel. This is a vendor-to-mixed-clients profile (comparable to leasing to varied tenants) rather than a direct activity exclusion, but the revenue share attributable to gaming/betting-sector clients is unconfirmed - needs segment data before resolving to a clean PASS.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "NEIMETH",
+      "__EMPTY": "HEALTHCARE",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Pharmaceuticals manufacturing - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "NEM",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional insurance - riba/gharar in contract structure.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "NESTLE",
+      "__EMPTY": "CONSUMER GOODS",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Food & beverage manufacturing - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "NGXGROUP",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "DOUBTFUL",
+      "__EMPTY_2": "Own operated business (NGX Exchange, NGX RegCo, NGX RelCo) is fee-based - listing/trading fees, market data, regulation, real estate - not itself riba, comparable to how most global exchange operators are treated. Complication sits in the Strategic Investment segment: NGX Group holds equity stakes in CSCS and NASD (fine, fee-based) but also in FMDQ Securities Exchange, a market dedicated almost entirely to conventional bond/money-market/FX trading. Stake size and FMDQ's own revenue mix are unconfirmed - determines whether this is an immaterial minority holding or a taint on the parent. Genuine scholarly judgment call, not resolved by financial ratios alone.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "NIDF",
+      "__EMPTY": "CONSTRUCTION/REAL ESTATE",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "CORRECTED from original PASS/VERIFY classification. Nigeria Infrastructure Debt Fund is explicitly a debt fund, not a property-holding trust - it makes primarily debt investments in infrastructure projects, targeting a gross return of 3.00-4.50% over comparable FGN bond yields, with 80% of assets in senior debt/securitised debt/loans to government agencies. Income to unit-holders comes from coupon and fees received from borrowers. This is interest-based lending as the core, explicit product (not incidental), same category as MOFIREIF, INFINITY, and LIVINGTRUST.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "NNFM",
+      "__EMPTY": "CONSUMER GOODS",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Flour milling - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "NPFMCRFBK",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Microfinance bank - interest-based lending (riba).",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "NREIT",
+      "__EMPTY": "CONSTRUCTION/REAL ESTATE",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Chapel Hill Denham Nigeria Real Estate Investment Trust - unlike other REIT-labeled NGX names on this list, NREIT is an actually certified Shariah-compliant fund, not just an inferred one: it has a named Shariah Adviser (Lotus Financial Services Limited), offer documents explicitly commit proceeds to Shariah-compliant, income-producing commercial real estate (office, retail, industrial, corporate residential), and management states a strategy of avoiding heavy reliance on debt financing - addressing the debt-ratio screen directly, not just business activity. Appears to be the only NGX REIT with actual third-party Shariah certification; the other REIT names (UHOMREIT, SFSREIT, UPDCREIT, AVAIF, CNIF) should not be assumed equivalent and still need their own tenant-mix/debt-structure check.",
+      "__EMPTY_3": "OK"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "NSLTECH",
+      "__EMPTY": "SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "CORRECTED from original PASS classification, which was in error. Secure Electronic Technology Plc (formerly National Sports Lottery Plc) directly operates a licensed national lottery business in Nigeria (exclusive 15-year license from Dec 2001), with stated operations covering lottery business, gaming products, airtime vending, and card payments. FY2025 financials show prize/winnings costs of N2.32bn and ticket costs of N1.60bn - core revenue is lottery/gambling activity, not incidental.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "OANDO",
+      "__EMPTY": "OIL AND GAS",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Oil & gas production/marketing - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "OKOMUOIL",
+      "__EMPTY": "AGRICULTURE",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Palm oil production - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "OMATEK",
+      "__EMPTY": "ICT",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Computer hardware - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "PHARMDEKO",
+      "__EMPTY": "HEALTHCARE",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Pharmaceuticals manufacturing - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "PREMPAINTS",
+      "__EMPTY": "INDUSTRIAL GOODS",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Paints manufacturing - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "PRESCO",
+      "__EMPTY": "AGRICULTURE",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Palm oil production - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "PRESTIGE",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional insurance - riba/gharar in contract structure.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "PZ",
+      "__EMPTY": "CONSUMER GOODS",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Household/personal care products - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "REDSTAREX",
+      "__EMPTY": "SERVICES",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Courier/logistics - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "REGALINS",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional insurance - riba/gharar in contract structure.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "RONCHESS",
+      "__EMPTY": "CONSTRUCTION/REAL ESTATE",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Real estate development - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "ROYALEX",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional insurance - riba/gharar in contract structure.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "RTBRISCOE",
+      "__EMPTY": "SERVICES",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Equipment/vehicle trading & services - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "SCOA",
+      "__EMPTY": "CONGLOMERATES",
+      "__EMPTY_1": "DOUBTFUL",
+      "__EMPTY_2": "Diversified trading conglomerate (vehicles/equipment) - segment revenue mix needs breakdown.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "SEPLAT",
+      "__EMPTY": "OIL AND GAS",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Oil & gas production - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "SFSREIT",
+      "__EMPTY": "CONSTRUCTION/REAL ESTATE",
+      "__EMPTY_1": "DOUBTFUL",
+      "__EMPTY_2": "Core business (acquiring, leasing, managing commercial/residential real estate) is genuinely permissible - Nigeria's first listed REIT. However, its own governing allocation rules typically invest 75% in real estate and 25% in real estate related investments such as mortgages, real estate backed securities and real estate related equities, plus a 10% cash buffer, and its own risk disclosures confirm exposure to unfavorable Interest Rate fluctuations due to the sensitivity of its financial instruments. Up to a quarter of the portfolio is structurally earmarked for interest-bearing mortgage/debt instruments - a disclosed financial-ratio concern, not an activity-level exclusion like the pure debt funds (NIDF/CNIF/MOFIREIF/AVAIF).",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "SKYAVN",
+      "__EMPTY": "SERVICES",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Aviation ground handling - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "SOVRENINS",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional insurance - riba/gharar in contract structure.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "STACO",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional insurance - riba/gharar in contract structure.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "STANBIC",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional bank (Stanbic IBTC) - interest-based lending/deposits (riba).",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "STERLINGNG",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional bank - interest-based lending/deposits (riba).",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "SUNUASSUR",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional insurance - riba/gharar in contract structure.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "TANTALIZER",
+      "__EMPTY": "SERVICES",
+      "__EMPTY_1": "DOUBTFUL",
+      "__EMPTY_2": "Core quick-service restaurant business remains clean (verify no alcohol sales at any outlet, as previously noted). However, wholly owned subsidiary Tantainment Limited runs a 'live-game show' platform called 'Chances by Tantainment' (Q2 2026 launch, ~N30bn valuation, 10% stake sold to RGM Materials Solutions for N2bn). Public disclosures don't clarify whether 'Chances' involves real-money wagering/betting by viewers or is a production-funded prize/entertainment format - the name, emphasis on 'regulatory and compliance frameworks,' and 'tech-driven platform' framing warrant direct verification (terms of participation, NLRC or state gaming-authority licensing status) before resolving either way. FAIL if wagering-based; PASS likely holds if it's a skill/entertainment format with no player-side stakes.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "THOMASWY",
+      "__EMPTY": "NATURAL RESOURCES",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Trading/resources - permissible core activity, but historically a diversified trading house; verify segment mix.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "TIP",
+      "__EMPTY": "SERVICES",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "The Initiates Plc - Nigeria's only listed environmental/waste management solutions company. Core activities: hazardous and non-hazardous waste treatment, asbestos handling, wastewater treatment, e-waste processing, thermal desorption, and industrial cleaning/decontamination services, primarily serving the Oil & Gas sector. ISO 9001:2015 and 14001:2015 certified. Expanding via majority-owned Uganda subsidiary, funded through internal cash flow (no conventional debt). No lending/insurance/alcohol/gambling exposure - a clean, regulation-driven service business.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "TOTAL",
+      "__EMPTY": "OIL AND GAS",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Petroleum marketing/lubricants - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "TRANSCOHOT",
+      "__EMPTY": "SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "CORRECTED from REVIEW. Transcorp Hotels operates Transcorp Hilton Abuja, which has an on-site casino (40 slot machines, 9 table games including Blackjack and Poker) alongside its nightclub and bars - marketed as a core hotel amenity, not a minor incidental feature. Same category as Ikeja Hotel/Federal Palace Casino - the earlier 'no casino identified' note was an unverified guess, not a checked fact.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "TRANSCORP",
+      "__EMPTY": "CONGLOMERATES",
+      "__EMPTY_1": "DOUBTFUL",
+      "__EMPTY_2": "Diversified conglomerate spanning power, oil/gas, and hospitality (Transcorp Hilton) - segment mix, esp. hotel bar revenue, needs breakdown.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "TRANSEXPR",
+      "__EMPTY": "SERVICES",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Logistics/courier - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "TRANSPOWER",
+      "__EMPTY": "UTILITIES",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Power transmission - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "TRIPPLEG",
+      "__EMPTY": "INDUSTRIAL GOODS",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Industrial products - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "UACN",
+      "__EMPTY": "CONGLOMERATES",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Diversified conglomerate - foods, real estate, logistics, paints; predominantly permissible lines but check any residual holdings before final sign-off.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "UBA",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional bank - interest-based lending/deposits (riba).",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "UCAP",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "CORRECTED from REVIEW. United Capital Plc directly operates UCEE Microfinance Bank as a named core segment, plus a Consumer Finance segment engaged in consumer lending and MSME financing - not incidental interest income, but directly operated lending subsidiaries. Clean fee-based lines (asset management, stockbroking, advisory, trusteeship) exist alongside this, but same pattern as VFD Group: a directly operated bank/lending arm as a core segment is not offset by other clean segments.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "UHOMREIT",
+      "__EMPTY": "CONSTRUCTION/REAL ESTATE",
+      "__EMPTY_1": "DOUBTFUL",
+      "__EMPTY_2": "Core business (acquiring/developing/managing/selling real estate) is genuinely permissible. However, managed by Union Homes Savings & Loans Plc, a subsidiary of Union Bank of Nigeria Plc, and the Fund Managers spread the portfolio mix across commercial and residential property investment and mortgage assets - i.e., the fund directly holds mortgage assets, not just property. Its own financial statements state the investment strategy is to invest in equity and debt securities, with loans and receivables measured at amortised cost using the effective interest method - explicit interest-bearing loan accounting on the fund's books. Same financial-ratio concern as SFSREIT, arguably more explicit given the direct mortgage-asset holdings.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "UNILEVER",
+      "__EMPTY": "CONSUMER GOODS",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Household/personal care products - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "UNIONDICON",
+      "__EMPTY": "CONSUMER GOODS",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Diagnostics/consumer products - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "UNITYBNK",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional bank - interest-based lending/deposits (riba).",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "UNIVINSURE",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional insurance - riba/gharar in contract structure.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "UPDC",
+      "__EMPTY": "CONSTRUCTION/REAL ESTATE",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Real estate development - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "UPDCREIT",
+      "__EMPTY": "CONSTRUCTION/REAL ESTATE",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Real estate investment trust - permissible core activity; check tenant mix.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "UPL",
+      "__EMPTY": "SERVICES",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "University Press Plc (founded 1949 as Oxford University Press Nigeria) - Nigeria's largest indigenous book publisher, engaged in printing, publishing, sale and distribution of educational (pre-primary through tertiary curriculum) and general reading books and materials. No alcohol, gambling, or interest-based lending exposure - a clean publishing/education business.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "VERITASKAP",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional insurance - riba/gharar in contract structure.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "VFDGROUP",
+      "__EMPTY": "INVESTMENT",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Core business operations explicitly include microfinance banking (VFD Microfinance Bank, Vbank digital bank), mortgage banking (Abbey Mortgage Bank), insurance brokerage (Atiat Insurance Brokers), and conventional asset leasing (Atiat Leasing) - these are named primary segments, not incidental holdings. Group has also issued its own interest-bearing debt notes and holds an equity stake in NEM Insurance (a conventional insurer, already FAIL). Clean segments (Anchoria Asset Management, stockbroking, real estate/hospitality, digital media, arts) do not offset banking being a core, operated line of business.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "VITAFOAM",
+      "__EMPTY": "CONSUMER GOODS",
+      "__EMPTY_1": "PASS",
+      "__EMPTY_2": "Foam/furniture manufacturing - permissible core activity.",
+      "__EMPTY_3": "Needs data"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "WAPIC",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional insurance - riba/gharar in contract structure.",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "WEMABANK",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional bank - interest-based lending/deposits (riba).",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "ZENITHBANK",
+      "__EMPTY": "FINANCIAL SERVICES",
+      "__EMPTY_1": "FAIL",
+      "__EMPTY_2": "Conventional bank - interest-based lending/deposits (riba).",
+      "__EMPTY_3": "N/A (fails activity screen)"
+    },
+    {
+      "NGX Listed Companies — Shariah (Halal) Business-Activity Screen": "ZICHIS",
+      "__EMPTY": "AGRICULTURE",
+      "__EMPTY_1": "DOUBTFUL",
+      "__EMPTY_2": "Core activities (oil palm, poultry, fish farming, feed milling, crop cultivation, snail farming) are permissible, but the company's own NGX listing announcement names piggery among its stated business lines - swine farming is a categorical exclusion regardless of revenue share. Current public-facing materials (company site, most profiles) omit piggery, so current materiality is unconfirmed - needs direct segment-revenue check in latest annual report/prospectus. Separately, NGX suspended trading and opened an investigation into the stock after an 859% one-month price surge - a governance/integrity risk independent of the halal screen.",
+      "__EMPTY_3": "Needs data"
+    }
+  ],
+  "Summary": [
+    {
+      "NGX Shariah Business-Activity Screen — Summary": "Result",
+      "__EMPTY": "Count",
+      "__EMPTY_1": "% of 146"
+    },
+    {
+      "NGX Shariah Business-Activity Screen — Summary": "PASS",
+      "__EMPTY": 76,
+      "__EMPTY_1": 0.5205479452054794
+    },
+    {
+      "NGX Shariah Business-Activity Screen — Summary": "FAIL",
+      "__EMPTY": 55,
+      "__EMPTY_1": 0.3767123287671233
+    },
+    {
+      "NGX Shariah Business-Activity Screen — Summary": "DOUBTFUL",
+      "__EMPTY": 15,
+      "__EMPTY_1": 0.10273972602739725
+    },
+    {
+      "NGX Shariah Business-Activity Screen — Summary": "TOTAL",
+      "__EMPTY": 146,
+      "__EMPTY_1": 1
+    },
+    {
+      "NGX Shariah Business-Activity Screen — Summary": "How to read this:"
+    },
+    {
+      "NGX Shariah Business-Activity Screen — Summary": "PASS — core business activity is permissible under standard screens (e.g. AAOIFI-style). Financial ratios (debt, interest income, impermissible income %) still need verification per company."
+    },
+    {
+      "NGX Shariah Business-Activity Screen — Summary": "FAIL — core business activity itself is not permissible (conventional banking/insurance, alcohol production, gambling). No financial ratio check changes this."
+    },
+    {
+      "NGX Shariah Business-Activity Screen — Summary": "DOUBTFUL — mixed or unclear business lines (conglomerates, hospitality with bar/alcohol exposure, leasing, investment holding cos with lending subsidiaries) needing a closer look at segment revenue before a PASS/FAIL call."
+    },
+    {
+      "NGX Shariah Business-Activity Screen — Summary": "Financial Screen column: 'OK' (green) = certified compliant with AAOIFI-style financial screens by an actual Shariah advisory board (currently JAIZBANK and NREIT only) - a stronger assurance level than an inferred PASS. 'Needs data' = business activity is fine but debt/interest-income ratios are unverified. 'N/A (fails activity screen)' (amber) = financial ratios are moot since the company already fails on business activity alone."
+    }
+  ]
+}
