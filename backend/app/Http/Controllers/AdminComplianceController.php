@@ -19,6 +19,23 @@ class AdminComplianceController extends Controller
         return response()->json($reviews);
     }
 
+    public function getStats()
+    {
+        $totalStocks = \App\Models\Company::count();
+        $halalStocks = \App\Models\Company::where('current_status', 'halal')->count();
+        $nonHalalStocks = \App\Models\Company::where('current_status', 'non-halal')->count();
+        $doubtfulStocks = \App\Models\Company::where('current_status', 'doubtful')->count();
+        $pendingReviews = ComplianceReview::where('status', 'pending')->count();
+
+        return response()->json([
+            'total_stocks' => $totalStocks,
+            'halal_stocks' => $halalStocks,
+            'non_halal_stocks' => $nonHalalStocks,
+            'doubtful_stocks' => $doubtfulStocks,
+            'pending_reviews' => $pendingReviews,
+        ]);
+    }
+
     public function history(Request $request)
     {
         $perPage = $request->input('per_page', 50);
@@ -64,13 +81,22 @@ class AdminComplianceController extends Controller
                 $review = ComplianceReview::findOrFail($id);
                 if ($review->status !== 'pending') continue;
                 $company = $review->company;
-                $company->update(['current_status' => $review->new_status]);
-                StockStatus::updateOrCreate(
-                    ['company_id' => $company->id],
-                    ['status' => $review->new_status, 'reason' => $review->reason, 'verified_by_scholar' => true, 'last_updated' => now()]
-                );
-                $aaoifi = \App\Models\AaoifiScreening::where('company_id', $company->id)->latest()->first();
-                if ($aaoifi) $aaoifi->update(['final_status' => $review->new_status]);
+                if (!empty($review->payload)) {
+                    $financial = \App\Models\Financial::updateOrCreate(['company_id' => $company->id], $review->payload);
+                    $complianceService = app(\App\Services\AaoifiComplianceService::class);
+                    $complianceService->evaluateCompliance($company, $financial, $company->sector);
+                }
+
+                if ($review->new_status && $review->new_status !== $review->old_status) {
+                    $company->update(['current_status' => $review->new_status]);
+                    StockStatus::updateOrCreate(
+                        ['company_id' => $company->id],
+                        ['status' => $review->new_status, 'reason' => $review->reason, 'verified_by_scholar' => true, 'last_updated' => now()]
+                    );
+                    $aaoifi = \App\Models\AaoifiScreening::where('company_id', $company->id)->latest()->first();
+                    if ($aaoifi) $aaoifi->update(['final_status' => $review->new_status]);
+                }
+                
                 ComplianceHistory::create(['company_id' => $company->id, 'old_status' => $review->old_status, 'new_status' => $review->new_status, 'reason' => $review->reason, 'changed_at' => now()]);
                 $review->update(['status' => 'approved', 'reviewed_by' => auth()->id(), 'reviewed_at' => now()]);
                 $approved++;

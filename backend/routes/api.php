@@ -64,6 +64,7 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
 
         // Admin Compliance Routes (requires login — for dashboard use)
+        Route::get('/admin/stats', [\App\Http\Controllers\AdminComplianceController::class, 'getStats']);
         Route::get('/admin/compliance-reviews', [\App\Http\Controllers\AdminComplianceController::class, 'index']);
         Route::get('/admin/compliance-reviews/history', [\App\Http\Controllers\AdminComplianceController::class, 'history']);
         Route::get('/admin/compliance-reviews/system-logs', [\App\Http\Controllers\AdminComplianceController::class, 'systemLogs']);
