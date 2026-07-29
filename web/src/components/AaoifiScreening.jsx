@@ -492,18 +492,6 @@ const AaoifiScreening = () => {
           </div>
         </div>
 
-        {report.status_reason && report.stage1?.status !== 'non-halal' && (cashRatio > 30 || (report.impermissible_income_ratio > 5)) && (
-          <div className="hover-card" style={{ background: 'linear-gradient(135deg, rgba(196,152,82,0.1) 0%, rgba(196,152,82,0.03) 100%)', border: '1px solid rgba(196,152,82,0.3)', borderRadius: '16px', padding: '16px 20px', marginBottom: '24px', display: 'flex', gap: '14px', alignItems: 'flex-start', boxShadow: '0 4px 12px rgba(196,152,82,0.05)', transition: 'all 0.3s' }}>
-            <span style={{ fontSize: '1.3rem', flexShrink: 0 }}>🏦</span>
-            <div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#C49852', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>Scholar-Verified Islamic Financial Institution</div>
-              <p style={{ margin: 0, fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
-                This company is a <strong style={{ color: 'var(--text-dark)' }}>Shariah-compliant Islamic financial institution</strong>. Its revenue labelled as "interest income" in standard financial data is actually <strong style={{ color: 'var(--text-dark)' }}>Murabaha / Ijarah profit sharing</strong> — which is Halal under AAOIFI standards. The standard AAOIFI ratio thresholds are designed for non-financial companies and are not directly applicable here. The final verdict has been verified by a qualified Islamic scholar.
-              </p>
-            </div>
-          </div>
-        )}
-
 
         
         <div style={{ marginTop: '16px' }}>
