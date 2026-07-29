@@ -3,10 +3,10 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import {
-  BarChart2, Briefcase, Star, Activity,
+  BarChart2, Star, Activity,
   HeartHandshake, Calculator, BookOpen,
   User, LogOut, ChevronLeft, ChevronRight,
-  X, Moon, Sun, LayoutDashboard, Shield, FileText, Bell
+  X, Moon, Sun, Shield, FileText, Bell
 } from 'lucide-react';
 
 export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {

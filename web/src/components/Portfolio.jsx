@@ -4,7 +4,7 @@ import { fetchPortfolio, addHolding, removeHolding, fetchNgxStocks, formatLogoUr
 import { toastError, toastSuccess } from '../utils/toast';
 import { useAuth } from '../context/AuthContext';
 import localforage from 'localforage';
-import { X, Search, LayoutDashboard, BarChart2, Star, Calculator, ShieldCheck, BookOpen, Info, Landmark, Briefcase, Bell, Activity, Lock, CheckCircle2, FileText, Rss } from 'lucide-react';
+import { X, Search, BarChart2, Star, Calculator, ShieldCheck, BookOpen, Briefcase, Activity, FileText, Rss } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
 import PortfolioTab from './portfolio/PortfolioTab';
@@ -65,6 +65,7 @@ export default function Portfolio() {
         setLoading(false);
       }
     }).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const [error, setError] = useState(null);
 
@@ -115,6 +116,7 @@ export default function Portfolio() {
       loadData(true);
     }, 30000);
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
   const handleAdd = async (payload) => {

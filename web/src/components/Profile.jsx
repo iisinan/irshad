@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
-  Shield, CheckCircle, AlertTriangle, XCircle, 
+  Shield, CheckCircle,
   Trash2, User, Monitor, LogOut, AlertCircle, Award, Save
 } from 'lucide-react';
 import { fetchProfile, updateProfile, deleteAccount } from '../services/api';

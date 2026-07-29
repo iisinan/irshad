@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
 import { ArrowLeft, Save, Plus, Trash2, Activity, Info, Newspaper, X, ChevronRight } from 'lucide-react';
 import api, { updateTickerAbout, addTickerNews, deleteTickerNews, overrideStockStatus } from '../services/api';
 import toast from 'react-hot-toast';

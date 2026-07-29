@@ -103,6 +103,7 @@ export default function AdminLayout({ children }) {
                     await resendVerification();
                     setLinkSent(true);
                   } catch(err) {
+                    console.error(err);
                     btn.textContent = 'Failed. Try Again';
                     btn.disabled = false;
                   }

@@ -500,7 +500,7 @@ export const ResetPasswordPage = () => {
     setMessage('');
     
     try {
-      const res = await api.post('/reset-password', { email, token, password, password_confirmation: passwordConfirmation });
+      await api.post('/reset-password', { email, token, password, password_confirmation: passwordConfirmation });
       setMessage('Password successfully reset! Redirecting to login...');
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
@@ -620,6 +620,7 @@ export const VerifyEmailPage = () => {
       };
       verifyEmail();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate]);
 
   const handleResend = async () => {
