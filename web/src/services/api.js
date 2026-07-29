@@ -341,35 +341,19 @@ export const updateSettings = async (settings) => {
 // MOCK ENDPOINTS FOR PUBLIC OVERVIEW DASHBOARD
 // ==========================================
 export const fetchOverviewStats = async () => {
-  return new Promise(resolve => setTimeout(() => resolve({
-    data: {
-      totalTracked: 0,
-      shariahCompliant: 0,
-      nonCompliant: 0,
-      underReview: 0,
-      annualReportsProcessed: 0,
-      newsAnalyzed: 0,
-      lastUpdated: new Date().toISOString()
-    }
-  }), 800));
+  return await api.get('/public/stats');
 };
 
 export const fetchRecentScreenings = async () => {
-  return new Promise(resolve => setTimeout(() => resolve({
-    data: []
-  }), 800));
+  return await api.get('/public/recent-screenings');
 };
 
 export const fetchLatestReports = async () => {
-  return new Promise(resolve => setTimeout(() => resolve({
-    data: []
-  }), 800));
+  return await api.get('/public/latest-reports');
 };
 
 export const fetchBusinessNewsOverview = async () => {
-  return new Promise(resolve => setTimeout(() => resolve({
-    data: []
-  }), 800));
+  return await api.get('/public/business-news');
 };
 
 export default api;

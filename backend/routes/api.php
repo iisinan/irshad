@@ -56,6 +56,12 @@ Route::prefix('v1')->group(function () {
         Route::get('/stocks/{symbol}/aaoifi-screening', [StockController::class, 'aaoifiScreening']);
     });
 
+    // ── Public Overview / Landing Page ──
+    Route::get('/public/stats',              [\App\Http\Controllers\PublicOverviewController::class, 'stats']);
+    Route::get('/public/recent-screenings',  [\App\Http\Controllers\PublicOverviewController::class, 'recentScreenings']);
+    Route::get('/public/latest-reports',     [\App\Http\Controllers\PublicOverviewController::class, 'latestReports']);
+    Route::get('/public/business-news',      [\App\Http\Controllers\PublicOverviewController::class, 'businessNews']);
+
     // One-click email link routes — no login required, UUID is the security token
     Route::get('/admin/compliance-reviews/{id}/approve-link', [\App\Http\Controllers\AdminComplianceController::class, 'approveViaLink']);
     Route::get('/admin/compliance-reviews/{id}/reject-link',  [\App\Http\Controllers\AdminComplianceController::class, 'rejectViaLink']);
@@ -164,7 +170,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/updates/news',    [\App\Http\Controllers\UpdatesController::class, 'newsAndInsights']);
         Route::get('/updates/digest',  [\App\Http\Controllers\UpdatesController::class, 'digestPreference']);
         Route::put('/updates/digest',  [\App\Http\Controllers\UpdatesController::class, 'updateDigestPreference']);
-        
+
         // ── Admin Routes ─────────────────────────────────────────────────────
         Route::middleware(\App\Http\Middleware\AdminMiddleware::class)->group(function () {
             // User Management
