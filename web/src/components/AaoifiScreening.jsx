@@ -433,7 +433,7 @@ const AaoifiScreening = () => {
             <p style={{ fontSize: '1.32rem', fontWeight: 900, color: 'var(--text-dark)', margin: '8px 0 0 0' }}>Core operations & Revenue</p>
           </div>
           <div style={{ padding: '6px 14px', borderRadius: '100px', background: report.stage1?.status === 'halal' ? 'var(--halal-bg)' : 'var(--non-halal-bg)', color: report.stage1?.status === 'halal' ? 'var(--halal)' : 'var(--non-halal)', fontSize: '0.66rem', fontWeight: 800, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
-            {report.stage1?.status || 'UNKNOWN'}
+            {report.stage1?.status === 'halal' ? 'PASS' : report.stage1?.status === 'non-halal' ? 'FAIL' : 'UNKNOWN'}
           </div>
         </div>
 
