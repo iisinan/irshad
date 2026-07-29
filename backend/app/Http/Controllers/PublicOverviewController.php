@@ -29,7 +29,7 @@ class PublicOverviewController extends Controller
     {
         $screenings = ComplianceHistory::with('company:id,symbol,name,logo_url')
             ->whereNotNull('new_status')
-            ->orderBy('reviewed_at', 'desc')
+            ->orderBy('changed_at', 'desc')
             ->take(5)
             ->get()
             ->map(function ($item) {
