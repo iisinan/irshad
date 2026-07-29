@@ -166,8 +166,27 @@ class AaoifiComplianceService
     private function saveStatus(Company $company, string $status, string $reasonText)
     {
         $stockStatus = $company->status()->first();
+        $oldStatus = $stockStatus ? $stockStatus->status : null;
         
         if ($stockStatus && $stockStatus->verified_by_scholar) {
+            if ($oldStatus !== $status) {
+                // Status has drifted from the scholar's verification, stage a review to notify them
+                $existingReview = \App\Models\ComplianceReview::where('company_id', $company->id)
+                    ->where('status', 'pending')
+                    ->where('new_status', $status)
+                    ->first();
+
+                if (!$existingReview) {
+                    $review = \App\Models\ComplianceReview::create([
+                        'company_id' => $company->id,
+                        'old_status' => $oldStatus,
+                        'new_status' => $status,
+                        'reason' => "SCHOLAR REVIEW REQUIRED: " . $reasonText,
+                        'status' => 'pending'
+                    ]);
+                    $this->notifyAdminsOfReview($review);
+                }
+            }
             return $stockStatus;
         }
 
