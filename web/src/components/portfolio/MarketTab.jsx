@@ -37,11 +37,7 @@ const getStatus = (company) => {
   return 'doubtful';
 };
 
-const STATUS_CFG = {
-  halal:       { label: 'Halal',     cls: 'status-halal',     Icon: CheckCircle },
-  'non-halal': { label: 'Non-Halal', cls: 'status-non-halal', Icon: AlertCircle },
-  doubtful:    { label: 'Doubtful',  cls: 'status-doubtful',  Icon: HelpCircle  },
-};
+
 
 /* ─── Table header cell — defined OUTSIDE to avoid re-mounting ───────────── */
 const TH = ({ children, right }) => (
@@ -62,8 +58,7 @@ const TH = ({ children, right }) => (
 
 /* ─── Stock table row ────────────────────────────────────────────────────── */
 const StockRow = React.memo(({ stock, idx, isWatched, onToggle }) => {
-  const status = getStatus(stock);
-  const cfg    = STATUS_CFG[status] || STATUS_CFG.doubtful;
+
   const isPos  = Number(stock.price_change_pct ?? 0) >= 0;
 
 

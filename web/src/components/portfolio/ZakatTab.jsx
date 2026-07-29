@@ -48,6 +48,7 @@ export default function ZakatTab({ data }) {
 
   useEffect(() => {
     loadSettings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadSettings = async () => {
@@ -125,6 +126,7 @@ export default function ZakatTab({ data }) {
       const pricePerGramNgn = pricePerGramUsd * rateToUse;
       setGoldPrice(Math.round(pricePerGramNgn));
     } catch (err) {
+      console.error(err);
       setFetchError('Could not fetch live price. Please enter manually.');
     } finally {
       setIsFetchingNisab(false);

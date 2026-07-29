@@ -3,10 +3,10 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import {
-  BarChart2, Briefcase, Star, Activity,
-  HeartHandshake, Calculator, BookOpen,
-  User, LogOut, ChevronLeft, ChevronRight,
-  X, Moon, Sun, LayoutDashboard, Shield, Users, ArrowLeft, Database
+  Activity,
+  HeartHandshake, BookOpen,
+  LogOut, ChevronLeft, ChevronRight,
+  X, Moon, Sun, LayoutDashboard, Shield, Users, ArrowLeft
 } from 'lucide-react';
 
 export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {

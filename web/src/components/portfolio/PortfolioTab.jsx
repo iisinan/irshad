@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import {
-  Wallet, AlertCircle, ShieldAlert,
-  Plus, X, Trash2, CheckCircle, ArrowUpRight, ArrowDownRight,
-  RefreshCw, Edit2, MoreVertical
+  Wallet,
+  Plus, X, Trash2, ArrowUpRight, ArrowDownRight,
+  RefreshCw, Edit2
 } from 'lucide-react';
 import {
   AreaChart, Area, YAxis, ResponsiveContainer
@@ -124,12 +124,11 @@ function EditHoldingModal({ holding, onClose, onSuccess }) {
 function HoldingRow({ holding, onDelete, onEdit }) {
   const navigate = useNavigate();
   const [hov, setHov] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
+
   const isUp = (holding.return_percentage || 0) >= 0;
   
   const statusRaw = holding.status ? holding.status.toLowerCase() : (holding.is_halal ? 'halal' : 'non-halal');
   const finalStatus = ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(holding.symbol) ? 'halal' : statusRaw;
-  const hasPurif = (holding.purification_due || 0) > 0;
   
   const getBadgeStyle = (status) => {
     if (status === 'halal' || status === 'compliant') return { bg: 'rgba(34, 197, 94, 0.1)', color: 'var(--halal)', text: 'Halal' };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, FileText, CheckCircle, Scale, XCircle, AlertTriangle, Sparkles, BookOpen } from 'lucide-react';
+import { ShieldCheck, FileText, CheckCircle, Scale, XCircle, Sparkles, BookOpen } from 'lucide-react';
 import Footer from './Footer';
 
 /* Ratio gauge bar component */

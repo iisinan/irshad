@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, Component } from 'react';
-import { Eye, BarChart2, Star, TrendingUp, TrendingDown, Trash2, Shield, AlertCircle, HelpCircle, CheckCircle, ChevronRight, Search, Mail, MessageSquare, Filter, Plus, Bell } from 'lucide-react';
-import { fetchWatchlist, removeFromWatchlist, fetchNgxStocks, addToWatchlist, updateWatchlist } from '../../services/api';
+import { Eye, BarChart2, Star, TrendingUp, TrendingDown, Trash2, AlertCircle, HelpCircle, CheckCircle, ChevronRight, Mail, Plus, Bell } from 'lucide-react';
+import { fetchWatchlist, removeFromWatchlist, fetchNgxStocks } from '../../services/api';
 import CompanyLogo from '../CompanyLogo';
 import { toastError, toastSuccess } from '../../utils/toast';
 import { useNavigate } from 'react-router-dom';
@@ -101,20 +101,6 @@ export default function WatchlistTab() {
     } catch (err) {
       console.error(err);
       toastError('Failed to remove from watchlist');
-    }
-  };
-
-  const handleAdd = async (symbol) => {
-    try {
-      const res = await addToWatchlist(symbol);
-      const newItem = res.data || res;
-      setWatchlistItems(prev => [...prev, newItem]);
-      setWatchlistSymbols(prev => [...prev, symbol]);
-      setSearchQuery('');
-      setIsSearching(false);
-      toastSuccess('Added to watchlist');
-    } catch (err) {
-      toastError('Failed to add to watchlist');
     }
   };
 

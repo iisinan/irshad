@@ -109,7 +109,7 @@ const AaoifiScreening = () => {
       try {
         const parsed = JSON.parse(evLinks);
         evLinks = Array.isArray(parsed) ? parsed : [evLinks];
-      } catch(e) {
+      } catch (_e) {
         evLinks = [evLinks];
       }
     }
@@ -209,42 +209,19 @@ const AaoifiScreening = () => {
   const marketCap = parseFloat(fd.market_cap) || 0;
   const totalDebt = parseFloat(fd.total_debt) || 0;
   const cashAndSecurities = (parseFloat(fd.cash) || 0) + (parseFloat(fd.interest_bearing_securities) || 0);
-  const illiquidAssets = parseFloat(fd.illiquid_assets) || 0;
-  const accountsReceivable = parseFloat(fd.accounts_receivable) || 0;
 
   const denVal = denominator === 'total_assets' ? totalAssets : marketCap;
   const denLabel = denominator === 'total_assets' ? 'Total Assets' : 'Market Cap';
 
   let debtRatio = null;
-  let debtStatus = 'insufficient_data';
   if (denVal > 0) {
     debtRatio = (totalDebt / denVal) * 100;
-    debtStatus = debtRatio <= 30 ? 'pass' : (debtRatio <= 33 ? 'warning' : 'fail');
   }
 
   let cashRatio = null;
-  let cashStatus = 'insufficient_data';
   if (denVal > 0) {
     cashRatio = (cashAndSecurities / denVal) * 100;
-    cashStatus = cashRatio <= 30 ? 'pass' : (cashRatio <= 33 ? 'warning' : 'fail');
   }
-
-  // Illiquid Assets always uses Total Assets
-  let illiquidRatio = null;
-  let illiquidStatus = report.illiquid_status || 'insufficient_data';
-  if (totalAssets > 0) {
-    illiquidRatio = report.illiquid_ratio;
-  }
-
-  // Receivables always uses Total Assets
-  let receivablesRatio = null;
-  let receivablesStatus = report.receivables_status || 'insufficient_data';
-  if (totalAssets > 0) {
-    receivablesRatio = report.receivables_ratio;
-  }
-
-  const businessStatus = report.business_status || 'insufficient_data';
-  const impIncomeStatus = report.impermissible_income_status || 'insufficient_data';
 
   // Ensure we use the exact final status calculated by the backend which respects the database ground truth
   // and admin manual overrides, instead of re-calculating it blindly on the frontend.

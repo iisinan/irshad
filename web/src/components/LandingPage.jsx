@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield, ArrowRight, Search as SearchIcon, FileText, Globe, FileDigit, ChevronRight, Sparkles, TrendingUp, ArrowUpRight, CheckCircle, Lock, Zap, BarChart2, Smartphone } from 'lucide-react';
+import { Shield, ArrowRight, Search as SearchIcon, FileText, Globe, FileDigit, ChevronRight, Sparkles, TrendingUp, CheckCircle, Lock, Zap, BarChart2, Smartphone } from 'lucide-react';
 import { fetchOverviewStats, fetchRecentScreenings, fetchLatestReports, fetchBusinessNewsOverview } from '../services/api';
 import Footer from './Footer';
 
@@ -103,8 +103,6 @@ export default function LandingPage() {
   const [search, setSearch] = useState('');
   const [stats, setStats]     = useState(null);
   const [recent, setRecent]   = useState([]);
-  const [reports, setReports] = useState([]);
-  const [news, setNews]       = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
