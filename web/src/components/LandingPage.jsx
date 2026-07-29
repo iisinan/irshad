@@ -362,15 +362,17 @@ export default function LandingPage() {
               {loading
                 ? [0,1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 72, borderRadius: 14 }} />)
                 : recent.slice(0, 4).map((co) => (
-                  <Link key={co.id} to={`/market/${co.symbol}`} style={{ padding: '14px 16px', background: 'var(--bg)', border: '1.5px solid var(--border-strong)', borderRadius: 14, display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', transition: 'border-color 0.2s, box-shadow 0.2s, transform 0.2s' }}
+                  <Link key={co.id} to={`/market/${co.symbol}`} style={{ padding: '16px', background: 'var(--bg)', border: '1.5px solid var(--border-strong)', borderRadius: 14, display: 'flex', flexDirection: 'column', gap: 14, textDecoration: 'none', transition: 'border-color 0.2s, box-shadow 0.2s, transform 0.2s' }}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,109,100,0.35)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,109,100,0.09)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-strong)'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; }}>
-                    <CompanyAvatar symbol={co.symbol} size={34} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 700, fontSize: '0.84rem', color: 'var(--text-dark)', marginBottom: 2 }}>{co.symbol}</div>
-                      <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{co.name}</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <CompanyAvatar symbol={co.symbol} size={42} />
+                      <StatusPill verdict={co.status ?? co.verdict} />
                     </div>
-                    <StatusPill verdict={co.status ?? co.verdict} />
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--text-dark)', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{co.symbol}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{co.name}</div>
+                    </div>
                   </Link>
                 ))}
             </div>
