@@ -65,8 +65,11 @@ Route::prefix('v1')->group(function () {
 
         // Admin Compliance Routes (requires login — for dashboard use)
         Route::get('/admin/compliance-reviews', [\App\Http\Controllers\AdminComplianceController::class, 'index']);
+        Route::get('/admin/compliance-reviews/history', [\App\Http\Controllers\AdminComplianceController::class, 'history']);
         Route::post('/admin/compliance-reviews/{id}/approve', [\App\Http\Controllers\AdminComplianceController::class, 'approve']);
         Route::post('/admin/compliance-reviews/{id}/reject', [\App\Http\Controllers\AdminComplianceController::class, 'reject']);
+        Route::post('/admin/compliance-reviews/bulk-approve', [\App\Http\Controllers\AdminComplianceController::class, 'bulkApprove']);
+        Route::post('/admin/compliance-reviews/bulk-reject', [\App\Http\Controllers\AdminComplianceController::class, 'bulkReject']);
 
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::post('/email/verification-notification', [VerificationController::class, 'resend'])->name('verification.send');
@@ -142,15 +145,23 @@ Route::prefix('v1')->group(function () {
         Route::post('/stocks/{symbol}/alerts', [PriceAlertController::class, 'store']);
         Route::delete('/alerts/{id}', [PriceAlertController::class, 'destroy']);
 
-        // Notifications
+        // Notifications (Inbox)
+        Route::get('/notifications/inbox',          [\App\Http\Controllers\NotificationController::class, 'inbox']);
+        Route::get('/notifications/unread-count',   [\App\Http\Controllers\NotificationController::class, 'unreadCount']);
+        Route::put('/notifications/read-all',       [\App\Http\Controllers\NotificationController::class, 'markAllRead']);
+        Route::put('/notifications/{id}/read',      [\App\Http\Controllers\NotificationController::class, 'markRead']);
+        Route::put('/notifications/{id}/archive',   [\App\Http\Controllers\NotificationController::class, 'archive']);
+        Route::delete('/notifications/{id}',        [\App\Http\Controllers\NotificationController::class, 'destroy']);
         Route::post('/notifications/subscribe', function (Request $request) {
             $request->validate(['fcm_token' => 'required|string']);
             auth()->user()->update(['fcm_token' => $request->fcm_token]);
             return response()->json(['message' => 'Successfully subscribed to push notifications']);
         });
-        Route::get('/notifications', function () {
-            return response()->json(['data' => []]);
-        });
+
+        // Updates — News & Insights, Digest preferences
+        Route::get('/updates/news',    [\App\Http\Controllers\UpdatesController::class, 'newsAndInsights']);
+        Route::get('/updates/digest',  [\App\Http\Controllers\UpdatesController::class, 'digestPreference']);
+        Route::put('/updates/digest',  [\App\Http\Controllers\UpdatesController::class, 'updateDigestPreference']);
         
         // ── Admin Routes ─────────────────────────────────────────────────────
         Route::middleware(\App\Http\Middleware\AdminMiddleware::class)->group(function () {
