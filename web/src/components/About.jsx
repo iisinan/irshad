@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shield, Target, Users, BookOpen, Sparkles, Globe, Award } from 'lucide-react';
+import { Shield, Target, Users, BookOpen, Sparkles, Globe } from 'lucide-react';
 import Footer from './Footer';
 
 const STATS = [

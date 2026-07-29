@@ -3,7 +3,7 @@ import { Eye, BarChart2, Star, TrendingUp, TrendingDown, Trash2, Shield, AlertCi
 import { fetchWatchlist, removeFromWatchlist, fetchNgxStocks, addToWatchlist, updateWatchlist } from '../../services/api';
 import CompanyLogo from '../CompanyLogo';
 import { toastError, toastSuccess } from '../../utils/toast';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import AddWatchlistModal from './AddWatchlistModal';
 import WatchlistAlertModal from './WatchlistAlertModal';
 
@@ -86,6 +86,7 @@ export default function WatchlistTab() {
 
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleRemove = async (symbol) => {
@@ -98,6 +99,7 @@ export default function WatchlistTab() {
       setWatchlistSymbols(prev => prev.filter(s => s !== symbol));
       toastSuccess(`Removed ${symbol} from watchlist`);
     } catch (err) {
+      console.error(err);
       toastError('Failed to remove from watchlist');
     }
   };
@@ -377,7 +379,7 @@ export default function WatchlistTab() {
           allStocks={allStocks} 
           watchlistSymbols={watchlistSymbols} 
           onClose={() => setShowAddModal(false)}
-          onAdded={(symbols) => {
+          onAdded={() => {
             loadData(); // reload watchlist items from backend
           }}
         />

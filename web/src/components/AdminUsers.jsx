@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { fetchAdminUsers, createAdminUser, updateAdminUser, deleteAdminUser } from '../services/api';
-import { Users, Shield, Plus, X, Search, Edit2, Trash2, Crown, ChevronRight, UserCheck } from 'lucide-react';
+import { Users, Shield, Plus, X, Search, Edit2, Trash2, Crown, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -78,7 +78,7 @@ const AdminUsers = () => {
   useEffect(() => {
     if (user?.role !== 'admin') { navigate('/portfolio'); return; }
     loadUsers(page, debouncedSearch);
-  }, [user, page, debouncedSearch]);
+  }, [user, page, debouncedSearch, navigate]);
 
   const loadUsers = async (currentPage, currentSearch) => {
     try {
@@ -91,6 +91,7 @@ const AdminUsers = () => {
         localStorage.setItem('irshad_admin_users_cache_v1', JSON.stringify({ data: res.data || [], meta: res }));
       }
     } catch (err) {
+      console.error(err);
       toast.error('Failed to load users');
     } finally {
       setLoading(false);
@@ -150,7 +151,7 @@ const AdminUsers = () => {
   };
 
   // ── Modal backdrop/container ──────────────────────────────
-  const ModalWrap = ({ children, onClose }) => createPortal(
+  const ModalWrap = ({ children }) => createPortal(
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000, padding: '24px' }}>
       <div className="animate-fade-in" style={{ background: 'var(--bg)', width: '100%', maxWidth: '440px', borderRadius: '24px', boxShadow: '0 32px 64px rgba(0,0,0,0.25)', overflow: 'hidden', border: '1px solid var(--border)' }}>
         {children}

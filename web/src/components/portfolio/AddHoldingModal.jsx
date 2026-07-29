@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Search, Plus, CheckCircle2, Lock, ShieldCheck, ChevronDown, Trash2, FileText, UploadCloud, RefreshCw } from 'lucide-react';
+import { X, Search, Plus, CheckCircle2, Lock, ShieldCheck, Trash2, FileText, UploadCloud } from 'lucide-react';
 import { fetchNgxStocks, linkBroker } from '../../services/api';
 import CompanyLogo from '../CompanyLogo';
 
@@ -261,7 +261,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
               <h4 style={{ fontSize: '1.41rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 16px', letterSpacing: '-0.5px' }}>
                 Link your Broker
               </h4>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: 0, lineHeight: 1.6, maxWidth:'320px', margin:'0 auto' }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: '0 auto', lineHeight: 1.6, maxWidth:'320px' }}>
                 Connect your brokerage account to Irshad to seamlessly track your Shariah-compliant investments.
               </p>
             </div>
@@ -323,7 +323,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
               <h4 style={{ fontSize: '1.41rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 16px', letterSpacing: '-0.5px' }}>
                 Upload Statement
               </h4>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: 0, lineHeight: 1.6, maxWidth:'320px', margin:'0 auto' }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: '0 auto', lineHeight: 1.6, maxWidth:'320px' }}>
                 Upload your trade log or portfolio statement (PDF/CSV) to automatically extract your holdings.
               </p>
             </div>

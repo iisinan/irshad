@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, AlertCircle } from 'lucide-react';
+import { Menu, AlertCircle } from 'lucide-react';
 import DashboardSidebar from './DashboardSidebar';
 import { useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -110,6 +110,7 @@ export default function DashboardLayout({ children }) {
                     await resendVerification();
                     setLinkSent(true);
                   } catch(err) {
+                    console.error(err);
                     btn.textContent = 'Failed. Try Again';
                     btn.disabled = false;
                   }

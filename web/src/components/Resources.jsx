@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Play, FileText, Download, ExternalLink, BookOpen, Search, X, Plus, Edit2, Trash2, CheckCircle } from 'lucide-react';
+import { Play, FileText, Download, BookOpen, Search, X, Plus, Edit2, Trash2 } from 'lucide-react';
 import api, { createResource, updateResource, deleteResource } from '../services/api';
 import Footer from './Footer';
 import { useAuth } from '../context/AuthContext';

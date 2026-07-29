@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Newspaper, BookOpen, Inbox, Bell } from 'lucide-react';
+import { Newspaper, BookOpen, Inbox } from 'lucide-react';
 import UpdatesNews  from './UpdatesNews';
 import UpdatesGuide from './UpdatesGuide';
 import UpdatesInbox from './UpdatesInbox';

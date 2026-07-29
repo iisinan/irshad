@@ -1,90 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
-  Shield, Bell, Star, TrendingUp, TrendingDown, Eye, BarChart2,
-  BookOpen, Award, CheckCircle, AlertTriangle, XCircle, 
-  ArrowUpRight, ArrowDownRight, Activity, Trash2, Settings, Search, Sparkles, User, Monitor, LogOut, Save, AlertCircle, LayoutDashboard
+  Shield, CheckCircle, AlertTriangle, XCircle, 
+  Trash2, User, Monitor, LogOut, AlertCircle, Award, Save
 } from 'lucide-react';
-import { fetchProfile, fetchWatchlist, fetchPortfolio, fetchHistory, removeFromWatchlist, updateProfile, deleteAccount } from '../services/api';
+import { fetchProfile, updateProfile, deleteAccount } from '../services/api';
 
-/* ─── Helpers ──────────────────────────────────────── */
-const fmt = (n) => Number(n).toLocaleString('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 });
 
-const statusConfig = {
-  Halal:     { color: 'var(--halal)',    bg: 'var(--halal-bg)',    icon: CheckCircle,    label: 'Halal' },
-  'Non-Halal':{ color: 'var(--non-halal)',bg: 'var(--non-halal-bg)',icon: XCircle,       label: 'Non-Halal' },
-  Doubtful:  { color: 'var(--doubtful)', bg: 'var(--doubtful-bg)', icon: AlertTriangle,  label: 'Doubtful' },
-};
 
 /* ─── Sub-components ────────────────────────────────── */
-const StatCard = ({ label, value, subValue, icon: Icon, iconColor, trend }) => (
-  <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)', padding: '24px', display: 'flex', flexDirection: 'column', gap: '12px', flex: 1, minWidth: '160px', transition: 'all 0.3s cubic-bezier(0.16,1,0.3,1)', cursor: 'default', position: 'relative', overflow: 'hidden' }}
-    onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,0,0,0.06)'; e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.borderColor = 'transparent'; }}
-    onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderColor = 'var(--border)'; }}
-  >
-    <div style={{ position: 'absolute', top: 0, right: 0, width: '100px', height: '100px', background: `radial-gradient(circle at top right, ${iconColor}15, transparent 70%)`, pointerEvents: 'none' }} />
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-      <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: `${iconColor}15`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon size={20} color={iconColor} /></div>
-      {trend !== undefined && (
-        <span style={{ fontSize: '0.69rem', fontWeight: 700, color: trend >= 0 ? 'var(--halal)' : 'var(--non-halal)', display: 'flex', alignItems: 'center', gap: '2px' }}>
-          {trend >= 0 ? <ArrowUpRight size={13} /> : <ArrowDownRight size={13} />}{Math.abs(trend)}%
-        </span>
-      )}
-    </div>
-    <div>
-      <div style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--text-dark)', lineHeight: 1 }}>{value}</div>
-      {subValue && <div style={{ fontSize: '0.69rem', color: 'var(--text-muted)', marginTop: '4px' }}>{subValue}</div>}
-    </div>
-    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>{label}</div>
-  </div>
-);
-
-const WatchlistRow = ({ stock, onRemove }) => {
-  const navigate = useNavigate();
-  const isUp = stock.change >= 0;
-  const s = statusConfig[stock.status] || statusConfig['Halal'];
-  const SIcon = s.icon;
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 20px', borderBottom: '1px solid var(--border)', transition: 'all 0.25s', cursor: 'pointer' }}
-      onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(15,82,87,0.06)'; e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.zIndex = '10'; e.currentTarget.style.position = 'relative'; }}
-      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.zIndex = '1'; }}
-      onClick={() => navigate(`/market/${stock.symbol}`)}
-    >
-      <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'var(--primary-50)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.66rem', color: 'var(--primary)', flexShrink: 0 }}>{stock.symbol.slice(0, 3)}</div>
-      <div style={{ flex: 1 }}>
-        <div style={{ fontWeight: 700, fontSize: '0.84rem', color: 'var(--text-dark)' }}>{stock.symbol}</div>
-        <div style={{ fontSize: '0.69rem', color: 'var(--text-muted)' }}>{stock.name}</div>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><SIcon size={13} color={s.color} /><span style={{ fontSize: '0.63rem', fontWeight: 700, color: s.color }}>{s.label}</span></div>
-      <div style={{ textAlign: 'right', minWidth: '90px' }}>
-        <div style={{ fontWeight: 700, fontSize: '0.84rem', color: 'var(--text-dark)' }}>₦{stock.price?.toLocaleString()}</div>
-        <div style={{ fontSize: '0.69rem', color: isUp ? 'var(--halal)' : 'var(--non-halal)', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '2px' }}>
-          {isUp ? <ArrowUpRight size={11} /> : <ArrowDownRight size={11} />}{isUp ? '+' : ''}{stock.change?.toFixed(2)}%
-        </div>
-      </div>
-      <button onClick={e => { e.stopPropagation(); onRemove(stock.symbol); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-light)', padding: '4px', borderRadius: '6px', display: 'flex', alignItems: 'center' }}
-        onMouseEnter={e => { e.currentTarget.style.color = 'var(--non-halal)'; e.currentTarget.style.background = 'var(--non-halal-bg)'; }}
-        onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-light)'; e.currentTarget.style.background = 'none'; }}
-      ><Trash2 size={15} /></button>
-    </div>
-  );
-};
-
-const ActivityRow = ({ item }) => (
-  <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '12px 20px', borderBottom: '1px solid var(--border)', transition: 'background 0.2s', cursor: 'default' }}
-    onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-section)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-  >
-    <div style={{ width: '36px', height: '36px', borderRadius: '10px', flexShrink: 0, background: item.type === 'alert' ? 'var(--doubtful-bg)' : 'var(--primary-50)', color: item.type === 'alert' ? 'var(--doubtful)' : 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      {item.type === 'gain' && <TrendingUp size={16} />}{item.type === 'screening' && <CheckCircle size={16} />}{item.type === 'alert' && <AlertTriangle size={16} />}{item.type === 'view' && <Eye size={16} />}
-    </div>
-    <div style={{ flex: 1 }}>
-      <div style={{ fontSize: '0.77rem', fontWeight: 600, color: 'var(--text-dark)' }}>{item.label}</div>
-      <div style={{ fontSize: '0.67rem', color: 'var(--text-muted)' }}>{item.time}</div>
-    </div>
-    {item.value && <div style={{ fontSize: '0.75rem', fontWeight: 700, color: item.type === 'gain' ? 'var(--halal)' : 'var(--non-halal)' }}>{item.value}</div>}
-  </div>
-);
 
 /* ─── Main Profile Component ───────────────────────── */
 export default function Profile() {
@@ -93,9 +18,6 @@ export default function Profile() {
 
   const [activeSection, setActiveSection] = useState('profile');
   const [profileUser, setProfileUser] = useState(null);
-  const [watchlist, setWatchlist] = useState([]);
-  const [portfolio, setPortfolio] = useState(null);
-  const [history, setHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Settings Forms State
@@ -119,17 +41,11 @@ export default function Profile() {
     const loadData = async () => {
       if (!user) return;
       try {
-        const [profileData, watchlistData, portfolioData, historyData] = await Promise.all([
-          fetchProfile().catch(() => ({ data: null })),
-          fetchWatchlist().catch(() => []),
-          fetchPortfolio().catch(() => ({ data: null })),
-          fetchHistory().catch(() => ({ data: { history: [] } }))
+        const [profileData] = await Promise.all([
+          fetchProfile().catch(() => ({ data: null }))
         ]);
         
         setProfileUser(profileData.data);
-        setWatchlist(watchlistData);
-        setPortfolio(portfolioData.data);
-        setHistory(historyData.data?.history || []);
       } catch (err) {
         console.error("Failed to fetch profile data", err);
       } finally {
@@ -154,13 +70,6 @@ export default function Profile() {
       }));
     }
   }, [profileUser, user]);
-
-  const removeFromWatchlistUI = async (symbol) => {
-    try {
-      await removeFromWatchlist(symbol);
-      setWatchlist(w => w.filter(s => s.symbol !== symbol));
-    } catch (err) { console.error("Failed to remove", err); }
-  };
 
   const handleUpdate = async (e, section) => {
     e.preventDefault();
@@ -207,6 +116,7 @@ export default function Profile() {
       await deleteAccount();
       logout();
     } catch (err) {
+      console.error(err);
       setMessage({ type: 'error', text: 'Failed to delete account. Please contact support.' });
       setIsSubmitting(false);
     }
@@ -218,17 +128,6 @@ export default function Profile() {
   const initials = (currentUser.name || currentUser.first_name || 'U').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
   const displayName = currentUser.name || `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim();
 
-  // Metrics
-  const safeWatchlist = Array.isArray(watchlist) ? watchlist : [];
-  const halalCount = safeWatchlist.filter(s => s.status === 'Halal').length;
-  const nonHalalCount = safeWatchlist.filter(s => s.status === 'Non-Halal').length;
-  const doubtfulCount = safeWatchlist.filter(s => s.status === 'Doubtful').length;
-  const halalPercentage = safeWatchlist.length > 0 ? Math.round((halalCount / safeWatchlist.length) * 100) : 0;
-  const displayHistory = Array.isArray(history) && history.length > 0 ? history : [
-    { type: 'screening', label: 'GTCO screened as Halal', time: '2 hours ago' },
-    { type: 'gain', label: 'DANGCEM up 2.14% today', time: '4 hours ago', value: '+₦5,600' },
-    { type: 'view', label: 'You viewed ZENITHBANK', time: 'Yesterday' }
-  ];
 
   const sections = [
     { id: 'profile', icon: User, label: 'Personal Info' },

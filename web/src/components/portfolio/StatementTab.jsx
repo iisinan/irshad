@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { FileText, Download, Filter, FileDigit, Clock, CheckCircle2, ArrowDown, ArrowUp, Building2, Calculator, HeartHandshake } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { FileText, Download, Filter, Building2 } from 'lucide-react';
 import { toastSuccess, toastInfo } from '../../utils/toast';
 
 export default function StatementTab({ data }) {
@@ -46,7 +46,7 @@ export default function StatementTab({ data }) {
     let result = transactions;
     if (type !== 'all') result = result.filter(t => t.type === type);
     return result;
-  }, [transactions, type, dateRange]);
+  }, [transactions, type]);
 
   const handleDownload = () => {
     toastSuccess(`Preparing PDF Statement...`);

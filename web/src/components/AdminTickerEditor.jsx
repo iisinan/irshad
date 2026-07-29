@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { ArrowLeft, Save, Plus, Trash2, Activity, Info, FileText, Newspaper, X, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Save, Plus, Trash2, Activity, Info, Newspaper, X, ChevronRight } from 'lucide-react';
 import api, { updateTickerAbout, addTickerNews, deleteTickerNews, overrideStockStatus } from '../services/api';
 import toast from 'react-hot-toast';
 
@@ -11,7 +11,7 @@ export default function AdminTickerEditor() {
   const { symbol } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { isDark } = useTheme();
+
 
   const [stock, setStock] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -33,6 +33,7 @@ export default function AdminTickerEditor() {
       return;
     }
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [symbol, user, navigate]);
 
   const loadData = async () => {
@@ -53,6 +54,7 @@ export default function AdminTickerEditor() {
           const parsed = JSON.parse(evLinks);
           evLinks = Array.isArray(parsed) ? parsed : [evLinks];
         } catch(e) {
+          console.error(e);
           evLinks = [evLinks];
         }
       }
@@ -142,6 +144,7 @@ export default function AdminTickerEditor() {
       toast.success('News deleted');
       loadData();
     } catch (err) {
+      console.error(err);
       toast.error('Failed to delete news');
     }
   };

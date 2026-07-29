@@ -68,6 +68,7 @@ export default function WatchlistAlertModal({ stock, watchlistData, onClose, onU
       onUpdated({ ...watchlistData, ...prefs });
       onClose();
     } catch (err) {
+      console.error(err);
       toastError('Failed to save alert preferences');
     } finally {
       setSaving(false);

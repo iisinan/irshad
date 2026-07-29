@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, BellRing, Trash2, ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown } from 'lucide-react';
+import { Bell, BellRing, Trash2, ArrowUpRight, ArrowDownRight, TrendingUp } from 'lucide-react';
 import { fetchPriceAlerts, deletePriceAlert } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
 
@@ -16,6 +16,7 @@ export default function AlertsTab() {
 
   useEffect(() => {
     loadAlerts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadAlerts = async () => {

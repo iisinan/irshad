@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { useParams, Link } from 'react-router-dom';
 import { 
   ArrowLeft, CheckCircle, XCircle, AlertTriangle, 
-  HelpCircle, ShieldCheck, ChevronRight, FileText, Brain, Download, Activity
+  HelpCircle, ShieldCheck, ChevronRight, FileText, Brain, Download, Activity, Trash2
 } from 'lucide-react';
 import { fetchAaoifiScreening, updateAaoifiData } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -45,7 +45,7 @@ const AaoifiScreening = () => {
     cash: '',
     interest_income: '',
     total_assets: '',
-    total_assets: '',
+    market_cap: '',
     total_revenue: '',
     evidence_links: ['']
   });
@@ -122,6 +122,7 @@ const AaoifiScreening = () => {
       cash: fd.cash_and_equivalents || fd.cash || '',
       interest_income: fd.interest_income || '',
       total_assets: fd.total_assets || '',
+      market_cap: fd.market_cap || '',
       total_revenue: fd.total_revenue || '',
       evidence_links: evLinks
     });
@@ -674,6 +675,10 @@ const AaoifiScreening = () => {
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Market Cap</label>
+                  <input required type="number" step="any" value={overrideData.market_cap} onChange={e => setOverrideData({...overrideData, market_cap: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.88rem', outline: 'none' }} />
+                </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Total Debt</label>
                   <input required type="number" step="any" value={overrideData.total_debt} onChange={e => setOverrideData({...overrideData, total_debt: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.88rem', outline: 'none' }} />

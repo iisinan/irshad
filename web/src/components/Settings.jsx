@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { User, Shield, BookOpen, Bell, Trash2, LogOut, CheckCircle, AlertCircle, Save, Monitor } from 'lucide-react';
+import { User, Shield, Trash2, LogOut, CheckCircle, AlertCircle, Save, Monitor } from 'lucide-react';
 import { fetchProfile, updateProfile, deleteAccount } from '../services/api';
 
 export default function Settings() {
@@ -110,6 +110,7 @@ export default function Settings() {
       await deleteAccount();
       logout();
     } catch (err) {
+      console.error(err);
       setMessage({ type: 'error', text: 'Failed to delete account. Please contact support.' });
       setIsSubmitting(false);
     }

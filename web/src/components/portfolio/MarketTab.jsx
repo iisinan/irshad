@@ -65,7 +65,7 @@ const StockRow = React.memo(({ stock, idx, isWatched, onToggle }) => {
   const status = getStatus(stock);
   const cfg    = STATUS_CFG[status] || STATUS_CFG.doubtful;
   const isPos  = Number(stock.price_change_pct ?? 0) >= 0;
-  const Icon   = cfg.Icon;
+
 
   return (
     <tr

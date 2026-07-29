@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Play, FileText, Download, ExternalLink, BookOpen, Search, X } from 'lucide-react';
+import { Play, FileText, Download, BookOpen, Search, X } from 'lucide-react';
 import api from '../../services/api';
 
 export default function LecturesTab() {

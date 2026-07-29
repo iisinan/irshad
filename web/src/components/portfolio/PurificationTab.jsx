@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ShieldAlert, ArrowRight, X, Heart, CheckCircle } from 'lucide-react';
+import { ShieldAlert, ArrowRight, Heart, CheckCircle } from 'lucide-react';
 
 /* ─── Purify Modal ─────────────────────────────────────────── */
 function PurifyModal({ holding, onClose, onSuccess }) {
@@ -126,7 +126,7 @@ export default function PurificationTab({ data }) {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            {needsPurification.map((h, idx) => (
+            {needsPurification.map((h) => (
               <div key={h.id} style={{
                 display: 'grid',
                 gridTemplateColumns: '1fr auto',

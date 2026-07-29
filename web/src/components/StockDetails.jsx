@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2, Brain, Globe, Newspaper, Bell, X, ShieldCheck, AlertTriangle, Activity, ChevronDown, ChevronUp, Briefcase, Scale, Landmark } from 'lucide-react';
+import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2, Brain, Globe, Newspaper, Bell, X, ShieldCheck, Activity, ChevronDown, ChevronUp, Briefcase, Scale, Landmark } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import api, { fetchStockDetails, fetchAiAnalysis, setPriceAlert, fetchWatchlist, addToWatchlist, removeFromWatchlist } from '../services/api';
 import CompanyLogo from './CompanyLogo';
@@ -136,7 +136,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
   // ─── Financial ratios ─────────────────────────────
   const financials = stock.financials;
   const latest = Array.isArray(financials) && financials.length > 0 ? financials[0] : null;
-  const debt = parseFloat(latest?.total_debt) || 0;
+
   const marketCap = parseFloat(latest?.market_cap) || 0;
   const safeMarketCap = marketCap > 0 ? marketCap : 1;
   const interest = parseFloat(latest?.interest_income) || 0;

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Shield, Search, AlertTriangle, CheckCircle, Edit2, X, Package, TrendingUp, AlertCircle, Calculator, RefreshCw, ChevronRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { Shield, Search, CheckCircle, Edit2, X, TrendingUp, AlertCircle, RefreshCw, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -76,7 +76,7 @@ const AdminDashboard = () => {
     gcTime: 1000 * 60 * 60,
   });
 
-  const { data: alerts = [], isFetching: alertsFetching, refetch: refetchAlerts } = useQuery({
+  const { data: alerts = [], refetch: refetchAlerts } = useQuery({
     queryKey: ['admin-alerts'],
     queryFn: async () => {
       const res = await api.get('/admin/alerts');
@@ -95,7 +95,6 @@ const AdminDashboard = () => {
   });
 
   const loading = stocksFetching && stocks.length === 0;
-  const [error, setError] = useState(null);
 
   const loadData = () => {
     refetchStocks();
@@ -203,6 +202,7 @@ const AdminDashboard = () => {
       setImportPreview(null);
       loadData();
     } catch (err) {
+      console.error(err);
       toastError('Failed to apply import');
     } finally {
       setImporting(false);

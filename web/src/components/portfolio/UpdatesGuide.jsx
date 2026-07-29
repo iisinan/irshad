@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
-  BookOpen, HelpCircle, Navigation, PlayCircle, MessageCircle,
-  ChevronDown, ChevronRight, ExternalLink, LifeBuoy, Lightbulb,
+  BookOpen, HelpCircle, Navigation, PlayCircle,
+  ChevronDown, ChevronRight, LifeBuoy, Lightbulb,
   Briefcase, BarChart2, Star, Bell, Settings, ShieldCheck, Calculator,
   FileText, CheckCircle2, AlertTriangle, Mail
 } from 'lucide-react';
