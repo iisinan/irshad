@@ -155,6 +155,34 @@ class AaoifiComplianceService
         $oldStatus = $stockStatus ? $stockStatus->status : null;
 
         if ($oldStatus !== $status) {
+            // Auto-approve downgrades to non-halal if it failed Business Activity (Rule 1)
+            if ($status === 'non-halal' && str_contains($reasonText, 'Rule 1')) {
+                // Apply immediately
+                StockStatus::updateOrCreate(
+                    ['company_id' => $company->id],
+                    [
+                        'status' => $status,
+                        'reason' => $reasonText,
+                        'verified_by_scholar' => false,
+                        'last_updated' => now(),
+                    ]
+                );
+                $company->update(['current_status' => $status]);
+                $aaoifiScreening = \App\Models\AaoifiScreening::where('company_id', $company->id)->latest()->first();
+                if ($aaoifiScreening) {
+                    $aaoifiScreening->update(['final_status' => $status]);
+                }
+                // Record the history for the automatic change
+                \App\Models\ComplianceHistory::create([
+                    'company_id' => $company->id,
+                    'old_status' => $oldStatus,
+                    'new_status' => $status,
+                    'reason' => $reasonText . ' (Auto-applied)',
+                    'changed_at' => now(),
+                ]);
+                return $company->status()->first();
+            }
+
             // Check if there is already a pending review for this exact change
             $existingReview = \App\Models\ComplianceReview::where('company_id', $company->id)
                 ->where('status', 'pending')

@@ -289,6 +289,7 @@ class PerplexityAiService
         $prompt .= "  \"compliance_status\": \"PASS\" or \"FAIL\",\n";
         $prompt .= "  \"haram_revenue_percent\": <float or null>,\n";
         $prompt .= "  \"purification_required\": <boolean>,\n";
+        $prompt .= "  \"business_summary\": \"<Detailed paragraph explaining exactly what the company's core operations and revenue sources are. Mention if they are involved in finance, alcohol, etc.>\",\n";
         $prompt .= "  \"reason\": \"<Short human-readable explanation of the decision>\"\n";
         $prompt .= "}";
 

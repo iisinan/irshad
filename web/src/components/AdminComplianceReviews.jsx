@@ -543,12 +543,16 @@ export default function AdminComplianceReviews() {
                                     </div>
                                     {review.company.aaoifi_screening.business_reasoning && (
                                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 8 }}>
-                                        {Object.entries(review.company.aaoifi_screening.business_reasoning).map(([key, val]) => (
-                                          <div key={key} style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', borderBottom: '1px dashed var(--border)' }}>
-                                            <span style={{ textTransform: 'capitalize' }}>{key.replace(/_/g, ' ')}</span>
-                                            <span style={{ fontWeight: 600 }}>{typeof val === 'boolean' ? (val ? 'Yes' : 'No') : val}</span>
-                                          </div>
-                                        ))}
+                                        {typeof review.company.aaoifi_screening.business_reasoning === 'string' ? (
+                                          <div style={{ lineHeight: 1.5 }}>{review.company.aaoifi_screening.business_reasoning}</div>
+                                        ) : (
+                                          Object.entries(review.company.aaoifi_screening.business_reasoning).map(([key, val]) => (
+                                            <div key={key} style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', borderBottom: '1px dashed var(--border)' }}>
+                                              <span style={{ textTransform: 'capitalize' }}>{key.replace(/_/g, ' ')}</span>
+                                              <span style={{ fontWeight: 600, textAlign: 'right', maxWidth: '60%' }}>{typeof val === 'boolean' ? (val ? 'Yes' : 'No') : String(val)}</span>
+                                            </div>
+                                          ))
+                                        )}
                                       </div>
                                     )}
                                   </div>

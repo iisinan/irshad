@@ -515,7 +515,7 @@ class StockController extends Controller
                     'reason' => $stage1['reason'] ?? '',
                 ],
                 'business_status' => $stage1Pass ? 'pass' : 'fail',
-                'business_reasoning' => $stage1['reason'] ?? $company->activity_reason,
+                'business_reasoning' => $stage1 ?? null,
                 'debt_ratio' => $debtRatio,
                 'debt_status' => $debtPass ? 'pass' : 'fail',
                 'cash_ratio' => $cashRatio,
