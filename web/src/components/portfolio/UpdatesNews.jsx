@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, BarChart2,
-  BookOpen, Calendar, ExternalLink, RefreshCw, Mail, Bell, ChevronRight,
-  ArrowRight, Newspaper, Zap, Shield, Star, Info
+  TrendingUp, AlertTriangle, CheckCircle2, BarChart2,
+  ExternalLink, RefreshCw, Mail, Bell, ChevronRight,
+  ArrowRight, Newspaper, Zap, Shield, Star
 } from 'lucide-react';
 import { fetchUpdatesNews, fetchDigestPreference, updateDigestPreference } from '../../services/api';
 import { toastSuccess, toastError } from '../../utils/toast';

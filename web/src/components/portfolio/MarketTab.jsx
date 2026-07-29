@@ -182,13 +182,14 @@ export default function MarketTab() {
   const [sortBy,    setSortBy]    = useState('default');
 
   // Safely extract from potentially stale cache shapes
-  const actualStocks = Array.isArray(stocks) ? stocks : (stocks?.data || []);
-  const actualInitialWatchlist = Array.isArray(initialWatchlist) ? initialWatchlist : (initialWatchlist?.data ? initialWatchlist.data.map(w => w.symbol) : []);
+  const actualStocks = useMemo(() => Array.isArray(stocks) ? stocks : (stocks?.data || []), [stocks]);
+  const actualInitialWatchlist = useMemo(() => Array.isArray(initialWatchlist) ? initialWatchlist : (initialWatchlist?.data ? initialWatchlist.data.map(w => w.symbol) : []), [initialWatchlist]);
 
   useEffect(() => {
     if (actualInitialWatchlist.length > 0 && watchlist.length === 0) {
       setWatchlist(actualInitialWatchlist);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actualInitialWatchlist]);
 
   const handleToggle = async (symbol, isWatched) => {
@@ -211,11 +212,7 @@ export default function MarketTab() {
     return sectorMap[sectorF] || [];
   }, [sectorF, sectorMap]);
 
-  const counts = useMemo(() => ({
-    halal:    actualStocks.filter(s => getStatus(s) === 'halal').length,
-    nonHalal: actualStocks.filter(s => getStatus(s) === 'non-halal').length,
-    doubtful: actualStocks.filter(s => !['halal', 'non-halal'].includes(getStatus(s))).length,
-  }), [actualStocks]);
+
 
   const filtered = useMemo(() => {
     let list = actualStocks.filter(s => {
@@ -230,7 +227,6 @@ export default function MarketTab() {
     if (sortBy === 'losers')   list = [...list].sort((a, b) => (a.price_change_pct || 0) - (b.price_change_pct || 0));
     if (sortBy === 'cap_high') list = [...list].sort((a, b) => (b.market_cap || 0) - (a.market_cap || 0));
     if (sortBy === 'pe_low')   list = [...list].sort((a, b) => (a.pe_ratio > 0 ? a.pe_ratio : 999) - (b.pe_ratio > 0 ? b.pe_ratio : 999));
-    return list;
     return list;
   }, [actualStocks, search, statusF, sectorF, industryF, sortBy]);
 

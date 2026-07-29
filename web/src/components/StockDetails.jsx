@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2, Brain, Globe, Newspaper, Bell, X, ShieldCheck, XCircle, AlertTriangle, Star, Activity, BookOpen, ChevronDown, ChevronUp, Briefcase, Scale, Landmark } from 'lucide-react';
+import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2, Brain, Globe, Newspaper, Bell, X, ShieldCheck, AlertTriangle, Activity, ChevronDown, ChevronUp, Briefcase, Scale, Landmark } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import api, { fetchStockDetails, fetchAiAnalysis, setPriceAlert, fetchWatchlist, addToWatchlist, removeFromWatchlist } from '../services/api';
 import CompanyLogo from './CompanyLogo';
@@ -23,7 +23,6 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const [dividendInput, setDividendInput] = useState('');
   const [aiAnalysis, setAiAnalysis] = useState(null);
   const [isAiExpanded, setIsAiExpanded] = useState(false);
-  const [aiData, setAiData] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState(null);
   
@@ -42,7 +41,6 @@ const StockDetails = ({ symbol: propSymbol }) => {
     fetchAiAnalysis(symbol)
       .then(r => {
         const payload = r.data || r;
-        setAiData(payload);
         const analysisText = payload?.reasoning || payload?.analysis || "No analysis returned.";
         const isNonHalalReport = stock?.status?.status === 'non-halal' || stock?.status?.stage1?.status === 'non-halal' || stock?.current_status === 'non-halal';
         setAiAnalysis(formatAppJustification(analysisText, isNonHalalReport));
@@ -76,6 +74,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
 
     // Automatically fetch AI analysis
     handleAskAI();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [symbol, user]);
 
   useEffect(() => {
@@ -105,32 +104,30 @@ const StockDetails = ({ symbol: propSymbol }) => {
 
   // ─── Status logic ───────────────────────────────────
   let statusStr = 'UNDER REVIEW';
-  let badgeClass = 'status-doubtful';
   let reason = 'This stock has not been fully screened yet. Its Shariah compliance status is currently under review.';
   let StatusIcon = HelpCircle;
   let isHalal = false;
   let isNonHalal = false;
-  let isDoubtful = true;
 
   const rawStatus = stock.status;
   if (typeof rawStatus === 'object' && rawStatus !== null) {
     const s = rawStatus.status?.toLowerCase();
     if (s === 'halal' || s === 'compliant') {
-      statusStr = 'HALAL'; badgeClass = 'status-halal'; StatusIcon = CheckCircle; isHalal = true; isNonHalal = false; isDoubtful = false;
+      statusStr = 'HALAL'; StatusIcon = CheckCircle; isHalal = true; isNonHalal = false;
     } else if (s === 'non-halal' || s === 'non-compliant') {
-      statusStr = 'NON-HALAL'; badgeClass = 'status-non-halal'; StatusIcon = AlertCircle; isNonHalal = true; isHalal = false; isDoubtful = false;
+      statusStr = 'NON-HALAL'; StatusIcon = AlertCircle; isNonHalal = true; isHalal = false;
     } else if (s === 'doubtful') {
-      statusStr = 'DOUBTFUL'; badgeClass = 'status-doubtful'; StatusIcon = AlertCircle; isDoubtful = true; isHalal = false; isNonHalal = false;
+      statusStr = 'DOUBTFUL'; StatusIcon = AlertCircle; isHalal = false; isNonHalal = false;
     }
     reason = rawStatus.reason ?? reason;
   } else if (typeof rawStatus === 'string') {
     const s = rawStatus.toLowerCase();
     if (s === 'halal' || s === 'compliant') {
-      statusStr = 'HALAL'; badgeClass = 'status-halal'; StatusIcon = CheckCircle; isHalal = true; isNonHalal = false; isDoubtful = false;
+      statusStr = 'HALAL'; StatusIcon = CheckCircle; isHalal = true; isNonHalal = false;
     } else if (s === 'non-halal' || s === 'non-compliant') {
-      statusStr = 'NON-HALAL'; badgeClass = 'status-non-halal'; StatusIcon = AlertCircle; isNonHalal = true; isHalal = false; isDoubtful = false;
+      statusStr = 'NON-HALAL'; StatusIcon = AlertCircle; isNonHalal = true; isHalal = false;
     } else if (s === 'doubtful') {
-      statusStr = 'DOUBTFUL'; badgeClass = 'status-doubtful'; StatusIcon = AlertCircle; isDoubtful = true; isHalal = false; isNonHalal = false;
+      statusStr = 'DOUBTFUL'; StatusIcon = AlertCircle; isHalal = false; isNonHalal = false;
     }
   }
 
@@ -144,14 +141,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const safeMarketCap = marketCap > 0 ? marketCap : 1;
   const interest = parseFloat(latest?.interest_income) || 0;
   const rawRevenue = parseFloat(latest?.total_revenue) || 0;
-  const assets = parseFloat(latest?.total_assets) || 0;
   const revenue = rawRevenue > 0 ? rawRevenue : safeMarketCap;
-  
-  const hasFinancialHighlights = marketCap > 0 || debt > 0 || rawRevenue > 0 || interest > 0;
-
-  const debtRatio = ((debt / safeMarketCap) * 100).toFixed(1);
-  const cash = (parseFloat(latest?.cash_and_equivalents) || 0) + (parseFloat(latest?.interest_bearing_securities) || 0);
-  const cashRatio = ((cash / safeMarketCap) * 100).toFixed(1);
   const interestRatio = ((interest / revenue) * 100).toFixed(1);
   const purificationRate = latest?.non_compliant_income_ratio ? parseFloat(latest.non_compliant_income_ratio).toFixed(2) : interestRatio;
 
@@ -159,9 +149,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
     ? ((parseFloat(dividendInput) || 0) * (parseFloat(purificationRate) / 100)).toFixed(2)
     : null;
 
-  const screeningColor = isHalal ? 'var(--halal)' : isNonHalal ? 'var(--non-halal)' : 'var(--doubtful)';
-  const screeningBg = isHalal ? 'var(--halal-bg)' : isNonHalal ? 'var(--non-halal-bg)' : 'var(--doubtful-bg)';
-  const screeningBorder = isHalal ? 'var(--halal-border)' : isNonHalal ? 'var(--non-halal-border)' : 'var(--doubtful-border)';
+
 
   const dailyPrices = stock.daily_prices || [];
   const latestPriceObj = dailyPrices.length > 0 ? dailyPrices[0] : null;
@@ -173,98 +161,6 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const isPositive = priceChange >= 0;
 
 
-  const renderRatioProgressBar = (title, subtitle, ratio, threshold, isMinimum = false, isCurrency = false, showThreshold = true) => {
-    if (ratio === null || ratio === undefined) {
-      return (
-        <div className="ratio-row" style={{ display: 'flex', alignItems: 'center', gap: '24px', padding: '24px 16px', borderBottom: '1px solid var(--border)', transition: 'all 0.3s ease', borderRadius: '16px', margin: '0 -16px' }}>
-          <div style={{ flex: '0 0 220px', paddingLeft: '8px' }}>
-            <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.88rem', marginBottom: '4px' }}>{title}</div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{subtitle}</div>
-          </div>
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '0.79rem' }}>
-            <AlertTriangle size={16} /> Insufficient data
-          </div>
-        </div>
-      );
-    }
-
-    const ratioVal = parseFloat(ratio) || 0;
-    const thresholdNum = parseFloat(threshold);
-    const isPassing = !showThreshold ? true : (isMinimum ? ratioVal >= thresholdNum : ratioVal <= thresholdNum);
-    
-    const diff = Math.abs(thresholdNum - ratioVal);
-    let headroomDisplay = '';
-    if (showThreshold) {
-      if (isCurrency) {
-         headroomDisplay = isPassing ? `₦${diff.toLocaleString()} headroom` : (isMinimum ? `₦${diff.toLocaleString()} shortfall` : `₦${diff.toLocaleString()} excess`);
-      } else {
-         headroomDisplay = isPassing ? `${diff.toFixed(1)}pp headroom` : (isMinimum ? `${diff.toFixed(1)}pp shortfall` : `${diff.toFixed(1)}pp excess`);
-      }
-    }
-    const color = isPassing ? 'var(--halal)' : 'var(--non-halal)';
-    const gradient = isPassing ? 'linear-gradient(90deg, rgba(22,163,74,0.3) 0%, var(--halal) 100%)' : 'linear-gradient(90deg, rgba(220,38,38,0.3) 0%, var(--non-halal) 100%)';
-    const shadow = isPassing ? '0 0 12px rgba(22,163,74,0.6)' : '0 0 12px rgba(220,38,38,0.6)';
-    
-    const maxVisual = showThreshold ? Math.max(thresholdNum / 0.7, ratioVal / 0.9, 1) : Math.max(ratioVal * 1.2, 1);
-    const fillPercent = maxVisual > 0 ? (ratioVal / maxVisual) * 100 : 0;
-    const thresholdPercent = (showThreshold && maxVisual > 0) ? (thresholdNum / maxVisual) * 100 : 0;
-    
-    const displayVal = isCurrency ? `₦ ${ratioVal.toLocaleString(undefined, {maximumFractionDigits: 0})}` : `${ratioVal.toFixed(1)}%`;
-    const displayThreshold = isCurrency ? `₦ ${(thresholdNum/1000000000).toFixed(1)}B` : `${thresholdNum}%`;
-
-    return (
-      <div 
-        className="ratio-row hover-card"
-        style={{ 
-          display: 'flex', alignItems: 'center', gap: '24px', padding: '24px 16px', 
-          borderBottom: '1px solid var(--border)',
-          transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', position: 'relative',
-          borderRadius: '16px', margin: '0 -16px'
-        }}
-      >
-        <div style={{ flex: '0 0 220px', paddingLeft: '8px' }}>
-          <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.88rem', marginBottom: '4px' }}>{title}</div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{subtitle}</div>
-        </div>
-        
-        <div style={{ flex: 1, position: 'relative', height: '12px', background: 'var(--bg-section)', borderRadius: '10px', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.05)' }}>
-          <div style={{ 
-            position: 'absolute', top: 0, left: 0, height: '100%', 
-            width: `${Math.min(fillPercent, 100)}%`, 
-            background: gradient, 
-            borderRadius: '10px',
-            boxShadow: shadow,
-            transition: 'width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
-          }} />
-          {showThreshold && (
-            <>
-              <div style={{
-                position: 'absolute', top: '-6px', bottom: '-6px', 
-                left: `${thresholdPercent}%`, width: '2px', 
-                background: 'var(--text-dark)',
-                borderRadius: '2px',
-                boxShadow: '0 0 4px rgba(0,0,0,0.3)',
-                zIndex: 10
-              }} />
-              <div style={{
-                position: 'absolute', top: '22px', left: `calc(${thresholdPercent}% - 30px)`,
-                fontSize: '0.66rem', color: 'var(--text-muted)', fontWeight: 700, width: '60px', textAlign: 'center',
-                background: 'var(--bg)', padding: '2px 6px', borderRadius: '6px', border: '1px solid var(--border)',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
-              }}>
-                limit {displayThreshold}
-              </div>
-            </>
-          )}
-        </div>
-        
-        <div style={{ flex: '0 0 140px', textAlign: 'right', paddingRight: '8px' }}>
-          <div style={{ fontSize: isCurrency ? '1.1rem' : '1.5rem', fontWeight: 900, color, textShadow: `0 2px 10px ${color}33` }}>{displayVal}</div>
-          {showThreshold && <div style={{ fontSize: '0.66rem', fontWeight: 700, color, marginTop: '4px', opacity: 0.9 }}>{headroomDisplay}</div>}
-        </div>
-      </div>
-    );
-  };
 
   // ─── AI Analysis & Actions ─────────────────────────
   const toggleWatchlist = async () => {

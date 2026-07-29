@@ -106,7 +106,7 @@ const PaginationControls = ({ meta, onPage }) => {
 
 /* ─── main component ────────────────────────────────────────── */
 export default function AdminComplianceReviews() {
-  const { user } = useAuth();
+  useAuth();
 
   // tabs: 'pending' | 'history' | 'system'
   const [tab, setTab] = useState('pending');
@@ -242,7 +242,11 @@ export default function AdminComplianceReviews() {
     else setSelected(new Set(filtered.map(r => r.id)));
   };
   const toggleOne = (id) => {
-    setSelected(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
+    setSelected(prev => { 
+      const s = new Set(prev); 
+      if (s.has(id)) s.delete(id); else s.add(id); 
+      return s; 
+    });
   };
 
   /* ─── render ─────────────────────────────────────────────── */
