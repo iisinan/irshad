@@ -238,10 +238,10 @@ export default function AdminComplianceReviews() {
           </div>
           <div>
             <h1 style={{ margin: 0, fontSize: '1.45rem', fontWeight: 900, color: 'var(--text-dark)' }}>
-              Compliance Review
+              Compliance Review Queue
             </h1>
             <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 500, marginTop: 2 }}>
-              AI-detected status changes awaiting admin decision
+              Comprehensive business activity & financial results awaiting admin decision
             </p>
           </div>
         </div>
@@ -517,13 +517,75 @@ export default function AdminComplianceReviews() {
                               onMouseEnter={e => e.currentTarget.style.borderColor = '#047857'}
                               onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
                             >
-                              <p style={{
-                                margin: 0, color: 'var(--text-muted)', fontSize: '0.83rem', lineHeight: 1.55, fontWeight: 500,
-                                overflow: 'hidden', display: isExpanded ? 'block' : '-webkit-box',
-                                WebkitLineClamp: isExpanded ? 'unset' : 2, WebkitBoxOrient: 'vertical',
-                              }}>
-                                {review.reason || 'No reason provided.'}
-                              </p>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: isExpanded ? 16 : 0 }}>
+                                <p style={{
+                                  margin: 0, color: 'var(--text-muted)', fontSize: '0.83rem', lineHeight: 1.55, fontWeight: 500,
+                                  overflow: 'hidden', display: isExpanded ? 'block' : '-webkit-box',
+                                  WebkitLineClamp: isExpanded ? 'unset' : 2, WebkitBoxOrient: 'vertical',
+                                }}>
+                                  <span style={{ fontWeight: 700, color: 'var(--text-dark)', marginRight: 6 }}>Admin Note / Reason:</span>
+                                  {review.reason || 'No reason provided.'}
+                                </p>
+                                {!isExpanded && <span style={{ fontSize: '0.7rem', color: '#065F46', fontWeight: 700, whiteSpace: 'nowrap', marginLeft: 10 }}>Show details ↓</span>}
+                              </div>
+
+                              {isExpanded && review.company?.aaoifi_screening && (
+                                <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, marginTop: 12 }}>
+                                  <h4 style={{ margin: '0 0 12px 0', fontSize: '0.8rem', color: 'var(--text-dark)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                    Comprehensive Screening Result
+                                  </h4>
+                                  
+                                  {/* Stage 1: Business Activity */}
+                                  <div style={{ background: 'var(--bg-section)', borderRadius: 10, padding: 12, marginBottom: 12, border: '1px solid rgba(0,0,0,0.03)' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                                      <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dark)' }}>Stage 1: Business Activity</span>
+                                      <StatusPill status={review.company.aaoifi_screening.business_status === 'pass' ? 'halal' : 'non-halal'} />
+                                    </div>
+                                    {review.company.aaoifi_screening.business_reasoning && (
+                                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 8 }}>
+                                        {Object.entries(review.company.aaoifi_screening.business_reasoning).map(([key, val]) => (
+                                          <div key={key} style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', borderBottom: '1px dashed var(--border)' }}>
+                                            <span style={{ textTransform: 'capitalize' }}>{key.replace(/_/g, ' ')}</span>
+                                            <span style={{ fontWeight: 600 }}>{typeof val === 'boolean' ? (val ? 'Yes' : 'No') : val}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* Stage 2: Financial Ratios */}
+                                  {review.company.aaoifi_screening.business_status === 'pass' && (
+                                    <div style={{ background: 'var(--bg-section)', borderRadius: 10, padding: 12, border: '1px solid rgba(0,0,0,0.03)' }}>
+                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                                        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dark)' }}>Stage 2: Financial Ratios (AAOIFI)</span>
+                                        <StatusPill status={review.company.aaoifi_screening.final_status} />
+                                      </div>
+                                      
+                                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10 }}>
+                                        {[
+                                          { label: 'Debt Ratio (< 30%)', val: review.company.aaoifi_screening.debt_ratio, stat: review.company.aaoifi_screening.debt_status },
+                                          { label: 'Cash Ratio (< 30%)', val: review.company.aaoifi_screening.cash_ratio, stat: review.company.aaoifi_screening.cash_status },
+                                          { label: 'Haram Income (< 5%)', val: review.company.aaoifi_screening.impermissible_income_ratio, stat: review.company.aaoifi_screening.impermissible_income_status },
+                                        ].map((item, i) => (
+                                          <div key={i} style={{ background: 'var(--bg)', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)' }}>
+                                            <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>{item.label}</div>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-dark)' }}>{item.val}%</span>
+                                              <span style={{ fontSize: '0.65rem', fontWeight: 800, color: item.stat === 'pass' ? '#059669' : '#DC2626' }}>
+                                                {item.stat?.toUpperCase()}
+                                              </span>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                  
+                                  <div style={{ textAlign: 'center', marginTop: 12 }}>
+                                    <span style={{ fontSize: '0.7rem', color: '#065F46', fontWeight: 700 }}>Hide details ↑</span>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>
