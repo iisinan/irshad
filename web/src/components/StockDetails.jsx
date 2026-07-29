@@ -38,6 +38,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const handleAskAI = () => {
     setAiLoading(true);
     setAiError(null);
+    setIsAiExpanded(true);
     fetchAiAnalysis(symbol)
       .then(r => {
         const payload = r.data || r;
@@ -71,9 +72,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
         setInWatchlist(list.some(item => item.symbol === symbol));
       }).catch(console.error);
     }
-
-    // Automatically fetch AI analysis
-    handleAskAI();
+    // AI Analysis is now fetched on-demand by user
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [symbol, user]);
 
@@ -415,9 +414,12 @@ const StockDetails = ({ symbol: propSymbol }) => {
             background: 'linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%)', 
             border: '1px solid rgba(212, 175, 55, 0.25)', 
             boxShadow: '0 8px 32px rgba(212, 175, 55, 0.05)',
-            cursor: aiAnalysis ? 'pointer' : 'default',
+            cursor: (!aiAnalysis && !aiLoading) ? 'pointer' : 'default',
             position: 'relative', overflow: 'hidden'
-          }} onClick={() => { if (aiAnalysis) setIsAiExpanded(!isAiExpanded); }}>
+          }} onClick={() => { 
+            if (aiAnalysis) setIsAiExpanded(!isAiExpanded); 
+            else if (!aiLoading) handleAskAI();
+          }}>
             <div style={{ position: 'absolute', top: '-100px', left: '-100px', width: '300px', height: '300px', background: 'radial-gradient(circle, rgba(212, 175, 55, 0.08) 0%, transparent 60%)', pointerEvents: 'none' }} />
             
             <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: (isAiExpanded || aiLoading || aiError || !aiAnalysis) ? '16px' : '0' }}>
@@ -429,12 +431,13 @@ const StockDetails = ({ symbol: propSymbol }) => {
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 {!aiAnalysis && !aiLoading && (
-                  <button onClick={(e) => { e.stopPropagation(); handleAskAI(); }} className="btn-primary" style={{ padding: '8px 20px', fontSize: '0.78rem', background: 'linear-gradient(135deg, #d4af37 0%, #b89326 100%)', color: '#1A1208', border: 'none', fontWeight: 800, boxShadow: '0 4px 12px rgba(212, 175, 55, 0.3)' }}>
+                  <button onClick={(e) => { e.stopPropagation(); handleAskAI(); }} className="btn-primary" style={{ padding: '8px 20px', fontSize: '0.78rem', background: 'linear-gradient(135deg, #d4af37 0%, #b89326 100%)', color: '#1A1208', border: 'none', fontWeight: 800, boxShadow: '0 4px 12px rgba(212, 175, 55, 0.3)', pointerEvents: 'none' }}>
                     Ask Irshad ✨
                   </button>
                 )}
                 {aiAnalysis && (
-                  <div style={{ background: 'rgba(212, 175, 55, 0.1)', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ background: 'rgba(212, 175, 55, 0.1)', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                       onClick={(e) => { e.stopPropagation(); setIsAiExpanded(!isAiExpanded); }}>
                     {isAiExpanded ? <ChevronUp size={18} color="var(--gold)" /> : <ChevronDown size={18} color="var(--gold)" />}
                   </div>
                 )}
