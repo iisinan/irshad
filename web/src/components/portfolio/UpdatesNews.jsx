@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, BarChart2,
   BookOpen, Calendar, ExternalLink, RefreshCw, Mail, Bell, ChevronRight,
@@ -218,6 +219,7 @@ const DigestBanner = () => {
 const ComplianceCard = ({ item }) => {
   const isWorsening = item.new_status === 'non_halal' || item.new_status === 'non-halal';
   const isImproving = (item.new_status === 'halal') && (item.previous_status === 'non_halal' || item.previous_status === 'non-halal');
+  const navigate = useNavigate();
 
   return (
     <div className="animate-slide-up" style={{
@@ -229,7 +231,9 @@ const ComplianceCard = ({ item }) => {
       display: 'flex',
       gap: '14px',
       alignItems: 'flex-start',
+      cursor: 'pointer',
     }}
+      onClick={() => navigate(`/market/${item.symbol}`)}
       onMouseEnter={e => { e.currentTarget.style.boxShadow = 'var(--shadow-md)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = isWorsening ? 'var(--non-halal)' : isImproving ? 'var(--halal)' : 'var(--primary-100)'; }}
       onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderColor = isWorsening ? 'var(--non-halal-border)' : isImproving ? 'var(--halal-border)' : 'var(--border)'; }}
     >
@@ -258,7 +262,7 @@ const ComplianceCard = ({ item }) => {
             Updated: {item.updated_at ? new Date(item.updated_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : item.time_ago}
           </span>
           {item.report_url && (
-            <a href={item.report_url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.69rem', fontWeight: 800, color: 'var(--primary)', textDecoration: 'none' }}>
+            <a href={item.report_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.69rem', fontWeight: 800, color: 'var(--primary)', textDecoration: 'none' }}>
               View Report <ExternalLink size={11} />
             </a>
           )}
@@ -279,9 +283,11 @@ const BusinessCard = ({ item }) => {
     regulatory:          { color: '#7C3AED',           bg: 'rgba(124,58,237,0.1)' },
   };
   const tc = typeColors[item.activity_type] || { color: 'var(--text-muted)', bg: 'var(--bg-section)' };
+  const navigate = useNavigate();
 
   return (
-    <div className="animate-slide-up" style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '16px', padding: '18px', display: 'flex', gap: '14px', alignItems: 'flex-start', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }}
+    <div className="animate-slide-up" style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '16px', padding: '18px', display: 'flex', gap: '14px', alignItems: 'flex-start', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', cursor: 'pointer' }}
+      onClick={() => navigate(`/market/${item.symbol}`)}
       onMouseEnter={e => { e.currentTarget.style.boxShadow = 'var(--shadow-md)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = 'var(--primary-100)'; }}
       onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderColor = 'var(--border)'; }}
     >
@@ -307,7 +313,7 @@ const BusinessCard = ({ item }) => {
             <span style={{ fontSize: '0.66rem', color: 'var(--text-muted)', fontWeight: 600 }}>{item.time_ago}</span>
           </div>
           {item.source_url && (
-            <a href={item.source_url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.69rem', fontWeight: 800, color: 'var(--primary)', textDecoration: 'none' }}>
+            <a href={item.source_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.69rem', fontWeight: 800, color: 'var(--primary)', textDecoration: 'none' }}>
               Read Source <ExternalLink size={11} />
             </a>
           )}
