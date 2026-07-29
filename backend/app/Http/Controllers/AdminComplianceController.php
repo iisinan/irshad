@@ -39,7 +39,7 @@ class AdminComplianceController extends Controller
     public function history(Request $request)
     {
         $perPage = $request->input('per_page', 50);
-        $history = ComplianceReview::with(['company', 'company.aaoifiScreening', 'reviewer'])
+        $history = ComplianceReview::with(['company', 'company.aaoifiScreening', 'company.latestFinancial', 'reviewer'])
             ->whereIn('status', ['approved', 'rejected'])
             ->orderBy('reviewed_at', 'desc')
             ->paginate($perPage);
@@ -52,6 +52,7 @@ class AdminComplianceController extends Controller
                 'old_status'   => $r->old_status,
                 'new_status'   => $r->new_status,
                 'reason'       => $r->reason,
+                'payload'      => $r->payload,
                 'status'       => $r->status,
                 'reviewed_by'  => $r->reviewer?->name ?? 'Admin',
                 'reviewed_at'  => $r->reviewed_at,
@@ -216,6 +217,16 @@ class AdminComplianceController extends Controller
         }
 
         $company = $review->company;
+        
+        if (!empty($review->payload)) {
+            $financial = \App\Models\Financial::updateOrCreate(
+                ['company_id' => $company->id],
+                $review->payload
+            );
+            $complianceService = app(\App\Services\AaoifiComplianceService::class);
+            $complianceService->evaluateCompliance($company, $financial, $company->sector);
+        }
+
         $company->update(['current_status' => $review->new_status]);
 
         StockStatus::updateOrCreate(

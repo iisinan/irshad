@@ -165,11 +165,11 @@ export default function AdminComplianceReviews() {
     finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchPending(); }, []);
   useEffect(() => {
-    if (tab === 'history' && history.data.length === 0) fetchHistory();
-    else if (tab === 'system' && systemLogs.data.length === 0) fetchSystemLogs();
-    else setLoading(false); // already loaded
+    setExpandedId(null); // Clear expanded state on tab switch
+    if (tab === 'pending') fetchPending(reviews.meta?.current_page || 1);
+    if (tab === 'history') fetchHistory(history.meta?.current_page || 1);
+    if (tab === 'system') fetchSystemLogs(systemLogs.meta?.current_page || 1);
   }, [tab]);
 
   /* ─── actions ────────────────────────────────────────────── */
@@ -856,8 +856,67 @@ export default function AdminComplianceReviews() {
                       {!isExpanded && <span style={{ fontSize: '0.7rem', color: '#065F46', fontWeight: 700, whiteSpace: 'nowrap', marginLeft: 10 }}>Show details ↓</span>}
                     </div>
                     
-                              {isExpanded && review.company?.aaoifi_screening && (
+                              {isExpanded && (
                                 <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, marginTop: 12 }}>
+                                  
+                                  {review.payload && (
+                                    <div style={{ marginBottom: 24 }}>
+                                      <h4 style={{ margin: '0 0 12px 0', fontSize: '0.8rem', color: 'var(--text-dark)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                        Financial Data Changes
+                                      </h4>
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 10, fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)' }}>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                                          <span style={{ textDecoration: 'line-through', opacity: 0.6 }}>000</span> = Current in DB
+                                        </span>
+                                        <ArrowRight size={10} />
+                                        <span style={{ color: '#059669' }}>000 = Proposed</span>
+                                      </div>
+                                      <div style={{ background: 'var(--bg-section)', borderRadius: 10, padding: 12, border: '1px solid rgba(0,0,0,0.03)' }}>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10 }}>
+                                          {Object.entries(review.payload)
+                                            .filter(([k, v]) => !['created_at', 'updated_at', 'id', 'company_id'].includes(k) && v !== null)
+                                            .map(([key, val]) => {
+                                              const formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                                              
+                                              const formatNumber = (num) => {
+                                                if (typeof num === 'number') {
+                                                  if (num > 1000000000) return (num / 1000000000).toFixed(2) + 'B';
+                                                  else if (num > 1000000) return (num / 1000000).toFixed(2) + 'M';
+                                                }
+                                                return num;
+                                              };
+
+                                              const currentVal = review.company?.latest_financial?.[key];
+                                              const isDifferent = currentVal !== undefined && currentVal !== val;
+                                              
+                                              return (
+                                                <div key={key} style={{ background: 'var(--bg)', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)' }}>
+                                                  <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>{formattedKey}</div>
+                                                  {isDifferent ? (
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                      <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', textDecoration: 'line-through' }}>
+                                                        {formatNumber(currentVal)}
+                                                      </span>
+                                                      <ArrowRight size={10} color="var(--text-muted)" />
+                                                      <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#059669' }}>
+                                                        {formatNumber(val)}
+                                                      </span>
+                                                    </div>
+                                                  ) : (
+                                                    <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-dark)' }}>
+                                                      {formatNumber(val)}
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              );
+                                          })}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {review.company?.aaoifi_screening && (
+                                    <>
                                   <h4 style={{ margin: '0 0 12px 0', fontSize: '0.8rem', color: 'var(--text-dark)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                                     Comprehensive Screening Result
                                   </h4>
@@ -911,6 +970,9 @@ export default function AdminComplianceReviews() {
                                       </div>
                                     </div>
                                   )}
+                                  
+                                  </>
+                                )}
                                   
                                   <div style={{ textAlign: 'center', marginTop: 12, cursor: 'pointer' }} onClick={() => setExpandedId(null)}>
                                     <span style={{ fontSize: '0.7rem', color: '#065F46', fontWeight: 700 }}>Hide details ↑</span>
