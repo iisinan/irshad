@@ -178,22 +178,25 @@ class SyncNgxData extends Command
                         || !empty($data['pe_ratio']);
 
                     if ($hasFinancials) {
-                        $financial = Financial::updateOrCreate(
-                            ['company_id' => $company->id],
-                            [
-                                'total_assets'    => $data['total_assets']    ?? 0,
-                                'total_debt'      => $data['total_debt']      ?? 0,
-                                'total_revenue'   => $data['total_revenue']   ?? 0,
-                                'interest_income' => $data['interest_income'] ?? 0,
-                                'market_cap'      => $marketCap,
-                                'eps'             => $data['eps']             ?? null,
-                                'pe_ratio'        => $data['pe_ratio']        ?? null,
-                                'roe'             => $data['roe']             ?? null,
-                                'dividend_yield'  => $data['dividend_yield']  ?? null,
-                                'profit_margin'   => $data['profit_margin']   ?? null,
-                            ]
+                        $newData = [
+                            'total_assets'    => $data['total_assets']    ?? 0,
+                            'total_debt'      => $data['total_debt']      ?? 0,
+                            'total_revenue'   => $data['total_revenue']   ?? 0,
+                            'interest_income' => $data['interest_income'] ?? 0,
+                            'market_cap'      => $marketCap,
+                            'eps'             => $data['eps']             ?? null,
+                            'pe_ratio'        => $data['pe_ratio']        ?? null,
+                            'roe'             => $data['roe']             ?? null,
+                            'dividend_yield'  => $data['dividend_yield']  ?? null,
+                            'profit_margin'   => $data['profit_margin']   ?? null,
+                        ];
+
+                        $financialUpdateService = app(\App\Services\FinancialUpdateService::class);
+                        $financialUpdateService->proposeUpdate(
+                            $company, 
+                            $newData, 
+                            "Automated NGX / Yahoo Finance sync"
                         );
-                        $complianceService->evaluateCompliance($company, $financial, $company->fresh()->sector);
                     } else {
                         $existing = $company->financials()->latest()->first();
                         if ($existing) {

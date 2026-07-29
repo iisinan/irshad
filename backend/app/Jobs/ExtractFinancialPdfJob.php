@@ -78,22 +78,23 @@ class ExtractFinancialPdfJob implements ShouldQueue
         if ($process->isSuccessful()) {
             $result = json_decode($process->getOutput(), true);
             if ($result && isset($result['status']) && $result['status'] === 'success') {
-                $financials = Financial::updateOrCreate(
-                    [
-                        'company_id' => $company->id,
-                        'reporting_period' => now()->year . '-Q' . ceil(now()->month / 3),
-                    ],
-                    [
-                        'total_assets' => $result['total_assets'] ?? 0,
-                        'total_debt' => $result['total_debt'] ?? 0,
-                        'total_revenue' => $result['total_revenue'] ?? 1,
-                        'interest_income' => $result['interest_income'] ?? 0,
-                        'non_halal_income' => $result['interest_income'] ?? 0,
-                    ]
+                $newData = [
+                    'reporting_period' => now()->year . '-Q' . ceil(now()->month / 3),
+                    'total_assets' => $result['total_assets'] ?? 0,
+                    'total_debt' => $result['total_debt'] ?? 0,
+                    'total_revenue' => $result['total_revenue'] ?? 1,
+                    'interest_income' => $result['interest_income'] ?? 0,
+                    'non_halal_income' => $result['interest_income'] ?? 0,
+                ];
+
+                $financialUpdateService = app(\App\Services\FinancialUpdateService::class);
+                $financialUpdateService->proposeUpdate(
+                    $company, 
+                    $newData, 
+                    "AI extraction from recent PDF upload"
                 );
                 
-                $complianceService->evaluateCompliance($company, $financials, $company->sector);
-                Log::info("Successfully extracted and evaluated financials for {$symbol}.");
+                Log::info("Successfully extracted financials for {$symbol}. Queued for admin review.");
             } else {
                 Log::warning("AI Extraction returned error for {$symbol}.");
             }

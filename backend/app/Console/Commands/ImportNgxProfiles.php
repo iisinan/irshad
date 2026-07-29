@@ -81,21 +81,25 @@ class ImportNgxProfiles extends Command
 
                     // Upsert market cap into financials — include defaults for NOT NULL cols
                     if ($marketCap > 0) {
+                        $newData = ['market_cap' => $marketCap];
+                        
                         $existing = Financial::where('company_id', $company->id)->first();
-                        if ($existing) {
-                            // Just update market cap — don't overwrite real financial data
-                            $existing->update(['market_cap' => $marketCap]);
-                        } else {
+                        if (!$existing) {
                             // New record — must provide defaults for NOT NULL columns
-                            Financial::create([
-                                'company_id'      => $company->id,
-                                'market_cap'      => $marketCap,
+                            $newData = array_merge($newData, [
                                 'total_assets'    => 0,
                                 'total_debt'      => 0,
                                 'total_revenue'   => 0,
                                 'interest_income' => 0,
                             ]);
                         }
+                        
+                        $financialUpdateService = app(\App\Services\FinancialUpdateService::class);
+                        $financialUpdateService->proposeUpdate(
+                            $company, 
+                            $newData, 
+                            "Manual CSV Import from NGX"
+                        );
                     }
 
                     $ok++;

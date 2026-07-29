@@ -114,31 +114,34 @@ class ProcessCompanyFinancialsJob implements ShouldQueue
             throw new \Exception("AI Extraction failed for {$symbol} (Gemini API returned null).");
         }
 
-        // 4. Save to Database
-        $financial = Financial::updateOrCreate(
-            ['company_id' => $this->company->id],
-            [
-                'total_assets' => $this->cleanNumber($extractedData['total_assets'] ?? null),
-                'total_debt' => $this->cleanNumber($extractedData['total_debt'] ?? null),
-                'total_revenue' => $this->cleanNumber($extractedData['total_revenue'] ?? null),
-                'interest_income' => $this->cleanNumber($extractedData['interest_income'] ?? null),
-                'eps' => $this->cleanNumber($extractedData['eps'] ?? null),
-                'pe_ratio' => $this->cleanNumber($extractedData['pe_ratio'] ?? null),
-                'roe' => $this->cleanNumber($extractedData['roe'] ?? null),
-                'dividend_yield' => $this->cleanNumber($extractedData['dividend_yield'] ?? null),
-                'profit_margin' => $this->cleanNumber($extractedData['profit_margin'] ?? null),
-                'cash_and_equivalents' => $this->cleanNumber($extractedData['cash_and_equivalents'] ?? null),
-                'interest_bearing_securities' => $this->cleanNumber($extractedData['interest_bearing_securities'] ?? null),
-                'accounts_receivable' => $this->cleanNumber($extractedData['accounts_receivable'] ?? null),
-                'illiquid_assets' => $this->cleanNumber($extractedData['illiquid_assets'] ?? null),
-            ]
-        );
+        $newData = [
+            'total_assets' => $this->cleanNumber($extractedData['total_assets'] ?? null),
+            'total_debt' => $this->cleanNumber($extractedData['total_debt'] ?? null),
+            'total_revenue' => $this->cleanNumber($extractedData['total_revenue'] ?? null),
+            'interest_income' => $this->cleanNumber($extractedData['interest_income'] ?? null),
+            'eps' => $this->cleanNumber($extractedData['eps'] ?? null),
+            'pe_ratio' => $this->cleanNumber($extractedData['pe_ratio'] ?? null),
+            'roe' => $this->cleanNumber($extractedData['roe'] ?? null),
+            'dividend_yield' => $this->cleanNumber($extractedData['dividend_yield'] ?? null),
+            'profit_margin' => $this->cleanNumber($extractedData['profit_margin'] ?? null),
+            'cash_and_equivalents' => $this->cleanNumber($extractedData['cash_and_equivalents'] ?? null),
+            'interest_bearing_securities' => $this->cleanNumber($extractedData['interest_bearing_securities'] ?? null),
+            'accounts_receivable' => $this->cleanNumber($extractedData['accounts_receivable'] ?? null),
+            'illiquid_assets' => $this->cleanNumber($extractedData['illiquid_assets'] ?? null),
+            'net_income' => $this->cleanNumber($extractedData['net_income'] ?? null),
+            'reporting_period' => $extractedData['reporting_period'] ?? null,
+            'interest_income_ratio' => $this->cleanNumber($extractedData['interest_income_ratio'] ?? null),
+            'non_compliant_income_ratio' => $this->cleanNumber($extractedData['non_compliant_income_ratio'] ?? null),
+        ];
 
-        Log::info("Saved financials for {$symbol}. Triggering AAOIFI Evaluation...");
-
-        // 5. Trigger AAOIFI Evaluation
-        $complianceService->evaluateCompliance($this->company, $financial);
-
+        // 4. Save to Database via Service
+        $financialUpdateService = app(\App\Services\FinancialUpdateService::class);
+        $financialUpdateService->proposeUpdate(
+            $this->company, 
+            $newData, 
+            "AI extraction from recent financial report"
+        ); 
+        
         Log::info("Completed {$symbol} successfully via Queue.");
     }
 

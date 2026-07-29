@@ -11,9 +11,15 @@ class ComplianceReview extends Model
         'old_status',
         'new_status',
         'reason',
+        'payload',
         'status',
         'reviewed_by',
         'reviewed_at'
+    ];
+
+    protected $casts = [
+        'payload' => 'array',
+        'reviewed_at' => 'datetime',
     ];
 
     public function company()

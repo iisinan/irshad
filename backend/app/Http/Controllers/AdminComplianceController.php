@@ -108,21 +108,37 @@ class AdminComplianceController extends Controller
 
         // Apply changes
         $company = $review->company;
-        $company->update(['current_status' => $finalStatus]);
+        
+        // Apply the financial payload if it exists
+        if (!empty($review->payload)) {
+            $financial = \App\Models\Financial::updateOrCreate(
+                ['company_id' => $company->id],
+                $review->payload
+            );
+            
+            // Re-evaluate full AAOIFI compliance now that financials are saved
+            $complianceService = app(\App\Services\AaoifiComplianceService::class);
+            $complianceService->evaluateCompliance($company, $financial, $company->sector);
+        }
 
-        StockStatus::updateOrCreate(
-            ['company_id' => $company->id],
-            [
-                'status' => $finalStatus,
-                'reason' => $finalReason,
-                'verified_by_scholar' => true, // Admin manually approved/edited this
-                'last_updated' => now(),
-            ]
-        );
+        // Apply manual status changes
+        if ($finalStatus && $finalStatus !== $review->old_status) {
+            $company->update(['current_status' => $finalStatus]);
 
-        $aaoifiScreening = \App\Models\AaoifiScreening::where('company_id', $company->id)->latest()->first();
-        if ($aaoifiScreening) {
-            $aaoifiScreening->update(['final_status' => $finalStatus]);
+            StockStatus::updateOrCreate(
+                ['company_id' => $company->id],
+                [
+                    'status' => $finalStatus,
+                    'reason' => $finalReason,
+                    'verified_by_scholar' => true, // Admin manually approved/edited this
+                    'last_updated' => now(),
+                ]
+            );
+
+            $aaoifiScreening = \App\Models\AaoifiScreening::where('company_id', $company->id)->latest()->first();
+            if ($aaoifiScreening) {
+                $aaoifiScreening->update(['final_status' => $finalStatus]);
+            }
         }
 
         \App\Models\ComplianceHistory::create([

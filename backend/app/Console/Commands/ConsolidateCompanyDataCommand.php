@@ -65,32 +65,30 @@ class ConsolidateCompanyDataCommand extends Command
                     'div_yield' => $goldenRecord['dividend_yield'] ?? null,
                 ]);
                 
-                $financial = \App\Models\Financial::updateOrCreate(
-                    ['company_id' => $company->id],
-                    [
-                        'eps' => $goldenRecord['eps'] ?? null,
-                        'pe_ratio' => $goldenRecord['pe_ratio'] ?? null,
-                        'roe' => $goldenRecord['roe'] ?? null,
-                        'dividend_yield' => $goldenRecord['dividend_yield'] ?? null,
-                        'profit_margin' => $goldenRecord['profit_margin'] ?? null,
-                        'total_assets' => $goldenRecord['total_assets'] ?? 0,
-                        'total_debt' => $goldenRecord['total_debt'] ?? 0,
-                        'total_revenue' => $goldenRecord['total_revenue'] ?? 0,
-                        'interest_income' => $goldenRecord['interest_income'] ?? 0,
-                        'market_cap' => $goldenRecord['market_cap'] ?? 0,
-                    ]
-                );
-                
-                // Re-evaluate AAOIFI compliance with the new AI-derived metrics
-                $complianceService = app(\App\Services\AaoifiComplianceService::class);
-                
-                // Pass the AI sector evaluation array to the compliance service
-                $aiSectorEval = [
-                    'has_prohibited_activities' => $goldenRecord['has_prohibited_activities'] ?? null,
-                    'reason' => $goldenRecord['prohibited_activities_reason'] ?? null,
+                $newData = [
+                    'eps' => $goldenRecord['eps'] ?? null,
+                    'pe_ratio' => $goldenRecord['pe_ratio'] ?? null,
+                    'roe' => $goldenRecord['roe'] ?? null,
+                    'dividend_yield' => $goldenRecord['dividend_yield'] ?? null,
+                    'profit_margin' => $goldenRecord['profit_margin'] ?? null,
+                    'total_assets' => $goldenRecord['total_assets'] ?? 0,
+                    'total_debt' => $goldenRecord['total_debt'] ?? 0,
+                    'total_revenue' => $goldenRecord['total_revenue'] ?? 0,
+                    'interest_income' => $goldenRecord['interest_income'] ?? 0,
+                    'market_cap' => $goldenRecord['market_cap'] ?? 0,
                 ];
                 
-                $complianceService->evaluateCompliance($company, $financial, $company->sector, $aiSectorEval);
+                $financialUpdateService = app(\App\Services\FinancialUpdateService::class);
+                $financialUpdateService->proposeUpdate(
+                    $company, 
+                    $newData, 
+                    "AI consolidation of fragmented data"
+                );
+                
+                $this->info("Updated company and proposed financial data for: {$company->symbol}");
+                
+                // We don't evaluate compliance here anymore because it requires admin approval.
+                // It will be evaluated when the Admin approves the Financial Update in the UI.
 
                 // Clear caches so the updated data is instantly available to the frontend
                 \Illuminate\Support\Facades\Cache::forget('stocks.index_v3');

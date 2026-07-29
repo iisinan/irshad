@@ -90,9 +90,11 @@ class ScrapeNgxProfiles extends Command
 
                     // Upsert Financial row with market cap
                     if ($data['market_cap'] > 0) {
-                        Financial::updateOrCreate(
-                            ['company_id' => $company->id],
-                            ['market_cap' => $data['market_cap']]
+                        $financialUpdateService = app(\App\Services\FinancialUpdateService::class);
+                        $financialUpdateService->proposeUpdate(
+                            $company, 
+                            ['market_cap' => $data['market_cap']], 
+                            "Automated NGX profile scraping"
                         );
                     }
 
