@@ -26,3 +26,6 @@ Schedule::command('irshad:update-business')->twiceDaily(0, 12);
 
 // Updates section: detect Halal ↔ Non-Halal changes and push inbox notifications
 Schedule::command('irshad:detect-compliance-changes')->hourly();
+
+// Send weekly updates digest
+Schedule::command('irshad:send-updates-digest')->weeklyOn(5, '15:00');

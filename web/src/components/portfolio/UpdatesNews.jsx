@@ -44,20 +44,7 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-/* ── Confidence pill ── */
-const ConfidencePill = ({ level }) => {
-  const cfg = {
-    high:   { color: 'var(--halal)',     bg: 'var(--halal-bg)',     label: '● High' },
-    medium: { color: 'var(--doubtful)',  bg: 'var(--doubtful-bg)',  label: '● Medium' },
-    low:    { color: 'var(--text-muted)', bg: 'var(--bg-section)', label: '● Low' },
-  };
-  const c = cfg[level] || cfg['medium'];
-  return (
-    <span style={{ fontSize: '0.66rem', fontWeight: 800, color: c.color, background: c.bg, padding: '2px 8px', borderRadius: '10px' }}>
-      {c.label}
-    </span>
-  );
-};
+/* ── Confidence pill removed per user request ── */
 
 /* ── Section header ── */
 const SectionHeader = ({ icon: Icon, title, count, color = 'var(--primary)' }) => (
@@ -311,7 +298,6 @@ const BusinessCard = ({ item }) => {
             <span style={{ fontSize: '0.66rem', fontWeight: 800, padding: '3px 8px', borderRadius: '10px', background: tc.bg, color: tc.color }}>
               {item.activity_label || item.activity_type}
             </span>
-            {item.confidence_level && <ConfidencePill level={item.confidence_level} />}
           </div>
         </div>
         <p style={{ fontSize: '0.75rem', color: 'var(--text-body)', lineHeight: 1.5, margin: '0 0 10px' }}>{item.summary}</p>

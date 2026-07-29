@@ -51,8 +51,6 @@ class UpdatesController extends Controller
                 'summary'          => $b->summary,
                 'source'           => $b->source,
                 'source_url'       => $b->source_url,
-                'confidence_level' => $b->confidence_level,
-                'confidence_score' => $b->confidence_score,
                 'date_detected'    => $b->date_detected,
                 'time_ago'         => $b->date_detected?->diffForHumans(),
             ]);
@@ -76,25 +74,7 @@ class UpdatesController extends Controller
                 'time_ago'     => $n->published_at?->diffForHumans(),
             ]);
 
-        // If no real data, fall back to compliance_histories for richer presentation
-        if ($complianceChanges->isEmpty()) {
-            $complianceChanges = ComplianceHistory::with('company:id,symbol,name,logo_url')
-                ->orderBy('changed_at', 'desc')
-                ->limit(20)
-                ->get()
-                ->map(fn($c) => [
-                    'id'              => $c->id,
-                    'symbol'          => $c->company?->symbol,
-                    'name'            => $c->company?->name,
-                    'logo_url'        => $c->company?->logo_url,
-                    'previous_status' => $c->old_status,
-                    'new_status'      => $c->new_status,
-                    'reason'          => $c->reason,
-                    'report_url'      => null,
-                    'updated_at'      => $c->changed_at,
-                    'time_ago'        => $c->changed_at?->diffForHumans(),
-                ]);
-        }
+
 
         return response()->json([
             'data' => [

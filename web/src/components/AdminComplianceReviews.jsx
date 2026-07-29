@@ -6,7 +6,7 @@ import {
   Check, X, Shield, Clock, AlertTriangle, Edit2, Save,
   RefreshCw, TrendingUp, TrendingDown, ArrowRight,
   Sparkles, ExternalLink, History, Search, Filter,
-  CheckSquare, Square, ChevronDown, Inbox
+  CheckSquare, Square, ChevronDown, Inbox, ShieldAlert, ChevronLeft, ChevronRight, Settings
 } from 'lucide-react';
 
 /* ─── helpers ──────────────────────────────────────────────── */
@@ -69,14 +69,51 @@ const Toast = ({ toast }) => toast ? (
   </div>
 ) : null;
 
+const PaginationControls = ({ meta, onPage }) => {
+  if (!meta || meta.last_page <= 1) return null;
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginTop: 24 }}>
+      <button
+        onClick={() => onPage(meta.current_page - 1)}
+        disabled={meta.current_page === 1}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px',
+          borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-section)',
+          color: meta.current_page === 1 ? 'var(--border)' : 'var(--text-dark)',
+          fontWeight: 700, fontSize: '0.82rem', cursor: meta.current_page === 1 ? 'not-allowed' : 'pointer'
+        }}
+      >
+        <ChevronLeft size={14}/> Prev
+      </button>
+      <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+        Page {meta.current_page} of {meta.last_page}
+      </span>
+      <button
+        onClick={() => onPage(meta.current_page + 1)}
+        disabled={meta.current_page === meta.last_page}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px',
+          borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-section)',
+          color: meta.current_page === meta.last_page ? 'var(--border)' : 'var(--text-dark)',
+          fontWeight: 700, fontSize: '0.82rem', cursor: meta.current_page === meta.last_page ? 'not-allowed' : 'pointer'
+        }}
+      >
+        Next <ChevronRight size={14}/>
+      </button>
+    </div>
+  );
+};
+
 /* ─── main component ────────────────────────────────────────── */
 export default function AdminComplianceReviews() {
   const { user } = useAuth();
 
-  // tabs: 'pending' | 'history'
+  // tabs: 'pending' | 'history' | 'system'
   const [tab, setTab] = useState('pending');
-  const [reviews, setReviews]   = useState([]);
-  const [history, setHistory]   = useState([]);
+  const [reviews, setReviews]     = useState({ data: [], meta: null });
+  const [history, setHistory]     = useState({ data: [], meta: null });
+  const [systemLogs, setSystemLogs] = useState({ data: [], meta: null });
+  
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState('');
   const [toast, setToast]       = useState(null);
@@ -100,33 +137,43 @@ export default function AdminComplianceReviews() {
   };
 
   /* ─── data fetching ──────────────────────────────────────── */
-  const fetchPending = async () => {
+  const fetchPending = async (page = 1) => {
     setLoading(true);
     try {
-      const r = await api.get('/admin/compliance-reviews');
-      setReviews(r.data);
+      const r = await api.get(`/admin/compliance-reviews?page=${page}`);
+      setReviews({ data: r.data.data, meta: r.data });
       setError('');
     } catch { setError('Failed to load reviews'); }
     finally { setLoading(false); }
   };
 
-  const fetchHistory = async () => {
+  const fetchHistory = async (page = 1) => {
     setLoading(true);
     try {
-      const r = await api.get('/admin/compliance-reviews/history');
-      setHistory(r.data);
+      const r = await api.get(`/admin/compliance-reviews/history?page=${page}`);
+      setHistory({ data: r.data.data, meta: r.data });
     } catch { setError('Failed to load history'); }
+    finally { setLoading(false); }
+  };
+
+  const fetchSystemLogs = async (page = 1) => {
+    setLoading(true);
+    try {
+      const r = await api.get(`/admin/compliance-reviews/system-logs?page=${page}`);
+      setSystemLogs({ data: r.data.data, meta: r.data });
+    } catch { setError('Failed to load system logs'); }
     finally { setLoading(false); }
   };
 
   useEffect(() => { fetchPending(); }, []);
   useEffect(() => {
-    if (tab === 'history' && history.length === 0) fetchHistory();
-    if (tab === 'pending') setLoading(false); // already loaded
+    if (tab === 'history' && history.data.length === 0) fetchHistory();
+    else if (tab === 'system' && systemLogs.data.length === 0) fetchSystemLogs();
+    else setLoading(false); // already loaded
   }, [tab]);
 
   /* ─── actions ────────────────────────────────────────────── */
-  const remove = (id) => setReviews(prev => prev.filter(r => r.id !== id));
+  const remove = (id) => setReviews(prev => ({ ...prev, data: prev.data.filter(r => r.id !== id) }));
 
   const handleApprove = async (id) => {
     setProcId(id);
@@ -162,7 +209,7 @@ export default function AdminComplianceReviews() {
     const ids = [...selected];
     try {
       await api.post('/admin/compliance-reviews/bulk-approve', { ids });
-      setReviews(prev => prev.filter(r => !ids.includes(r.id)));
+      setReviews(prev => ({ ...prev, data: prev.data.filter(r => !ids.includes(r.id)) }));
       setSelected(new Set());
       showToast(`${ids.length} reviews approved!`);
     } catch { showToast('Bulk approve failed', 'error'); }
@@ -172,7 +219,7 @@ export default function AdminComplianceReviews() {
     const ids = [...selected];
     try {
       await api.post('/admin/compliance-reviews/bulk-reject', { ids });
-      setReviews(prev => prev.filter(r => !ids.includes(r.id)));
+      setReviews(prev => ({ ...prev, data: prev.data.filter(r => !ids.includes(r.id)) }));
       setSelected(new Set());
       showToast(`${ids.length} reviews rejected.`);
     } catch { showToast('Bulk reject failed', 'error'); }
@@ -180,7 +227,7 @@ export default function AdminComplianceReviews() {
 
   /* ─── derived data ───────────────────────────────────────── */
   const filtered = useMemo(() => {
-    let res = reviews;
+    let res = reviews.data;
     if (search) res = res.filter(r => (r.company?.symbol + ' ' + r.company?.name).toLowerCase().includes(search.toLowerCase()));
     if (filterDir === 'to-halal')    res = res.filter(r => r.new_status === 'halal');
     if (filterDir === 'to-nonhalal') res = res.filter(r => r.new_status === 'non-halal');
@@ -264,19 +311,20 @@ export default function AdminComplianceReviews() {
       {/* ── Stat cards (pending tab only) ───────────────────── */}
       {tab === 'pending' && (
         <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
-          <StatCard icon={Clock}        label="Pending"        value={reviews.length}                                             color="#F59E0B" />
-          <StatCard icon={TrendingUp}   label="→ Halal"        value={reviews.filter(r=>r.new_status==='halal').length}           color="#059669" />
-          <StatCard icon={TrendingDown} label="→ Non-Halal"    value={reviews.filter(r=>r.new_status==='non-halal').length}       color="#DC2626" />
-          <StatCard icon={History}      label="Resolved"       value={history.length || '—'}                                      color="#6366F1"
-            sub={history.length ? `${history.filter(h=>h.status==='approved').length} approved` : 'Click History tab'} />
+          <StatCard icon={Clock}        label="Pending"        value={reviews.meta?.total || reviews.data.length}                 color="#F59E0B" />
+          <StatCard icon={TrendingUp}   label="→ Halal"        value={reviews.data.filter(r=>r.new_status==='halal').length}      color="#059669" />
+          <StatCard icon={TrendingDown} label="→ Non-Halal"    value={reviews.data.filter(r=>r.new_status==='non-halal').length}  color="#DC2626" />
+          <StatCard icon={History}      label="Resolved"       value={history.meta?.total || '—'}                                 color="#6366F1"
+            sub="Click History tab to view" />
         </div>
       )}
 
       {/* ── Tabs + filters ─────────────────────────────────── */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', gap: 8 }}>
-          {tabBtn('pending', 'Pending', Inbox, reviews.length)}
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {tabBtn('pending', 'Pending', Inbox, reviews.meta?.total || reviews.data.length)}
           {tabBtn('history', 'History', History)}
+          {tabBtn('system', 'System Logs', ShieldAlert)}
         </div>
 
         {tab === 'pending' && (
@@ -639,6 +687,7 @@ export default function AdminComplianceReviews() {
                   );
                 })}
               </div>
+              <PaginationControls meta={reviews.meta} onPage={fetchPending} />
             </>
           )}
         </>
@@ -647,47 +696,268 @@ export default function AdminComplianceReviews() {
       {/* ═══════════ HISTORY TAB ════════════════════════════ */}
       {!loading && tab === 'history' && (
         <>
-          {history.length === 0 ? (
+          {history.data.length === 0 ? (
             <div style={{ background: 'var(--bg-section)', border: '1px solid var(--border)', borderRadius: 20, padding: '48px 24px', textAlign: 'center' }}>
-              <History size={40} color="var(--text-muted)" style={{ opacity: .4, marginBottom: 14 }}/>
+              <History size={40} color="var(--text-muted)" style={{ opacity: .4, marginBottom: 14, margin: '0 auto' }}/>
               <p style={{ color: 'var(--text-muted)', margin: 0 }}>No resolved reviews yet.</p>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {history.map(item => (
-                <div key={item.id} style={{
+            <>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {history.data.map(review => {
+                const isExpanded = expandedId === review.id;
+                return (
+                <div key={review.id} style={{
                   background: 'var(--bg-section)', border: '1px solid var(--border)', borderRadius: 16,
-                  padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap'
+                  padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 14
                 }}>
-                  <Badge color={item.status === 'approved' ? '#059669' : '#DC2626'}>
-                    {item.status === 'approved' ? '✓ Approved' : '✗ Rejected'}
-                  </Badge>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14 }}>
+                    <Badge color={review.status === 'approved' ? '#059669' : '#DC2626'}>
+                      {review.status === 'approved' ? '✓ Approved' : '✗ Rejected'}
+                    </Badge>
 
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                      <span style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.9rem' }}>{item.company?.symbol}</span>
-                      <span style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>{item.company?.name}</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                        <span style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.9rem' }}>{review.company?.symbol}</span>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>{review.company?.name}</span>
+                      </div>
                     </div>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 2, fontWeight: 500 }}>
-                      {item.reason?.slice(0, 90)}{item.reason?.length > 90 ? '…' : ''}
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                      <StatusPill status={review.old_status}/>
+                      <ArrowRight size={12} color="var(--text-muted)"/>
+                      <StatusPill status={review.new_status}/>
+                    </div>
+
+                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>{review.reviewed_by}</div>
+                      <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: 2 }}>
+                        {review.reviewed_at ? new Date(review.reviewed_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+                      </div>
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-                    <StatusPill status={item.old_status}/>
-                    <ArrowRight size={12} color="var(--text-muted)"/>
-                    <StatusPill status={item.new_status}/>
-                  </div>
-
-                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>{item.reviewed_by}</div>
-                    <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: 2 }}>
-                      {item.reviewed_at ? new Date(item.reviewed_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+                  <div
+                    style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 12, padding: '12px 15px', cursor: 'pointer', transition: 'border-color .2s' }}
+                    onClick={() => setExpandedId(isExpanded ? null : review.id)}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = '#047857'}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: isExpanded ? 16 : 0 }}>
+                      <p style={{
+                        margin: 0, color: 'var(--text-muted)', fontSize: '0.83rem', lineHeight: 1.55, fontWeight: 500,
+                        overflow: 'hidden', display: isExpanded ? 'block' : '-webkit-box',
+                        WebkitLineClamp: isExpanded ? 'unset' : 2, WebkitBoxOrient: 'vertical',
+                      }}>
+                        <span style={{ fontWeight: 700, color: 'var(--text-dark)', marginRight: 6 }}>Admin Note / Reason:</span>
+                        {review.reason || 'No reason provided.'}
+                      </p>
+                      {!isExpanded && <span style={{ fontSize: '0.7rem', color: '#065F46', fontWeight: 700, whiteSpace: 'nowrap', marginLeft: 10 }}>Show details ↓</span>}
                     </div>
+                    
+                              {isExpanded && review.company?.aaoifi_screening && (
+                                <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, marginTop: 12 }}>
+                                  <h4 style={{ margin: '0 0 12px 0', fontSize: '0.8rem', color: 'var(--text-dark)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                    Comprehensive Screening Result
+                                  </h4>
+                                  
+                                  {/* Stage 1: Business Activity */}
+                                  <div style={{ background: 'var(--bg-section)', borderRadius: 10, padding: 12, marginBottom: 12, border: '1px solid rgba(0,0,0,0.03)' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                                      <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dark)' }}>Stage 1: Business Activity</span>
+                                      <StatusPill status={review.company.aaoifi_screening.business_status === 'pass' ? 'halal' : 'non-halal'} />
+                                    </div>
+                                    {review.company.aaoifi_screening.business_reasoning && (
+                                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 8 }}>
+                                        {typeof review.company.aaoifi_screening.business_reasoning === 'string' ? (
+                                          <div style={{ lineHeight: 1.5 }}>{review.company.aaoifi_screening.business_reasoning}</div>
+                                        ) : (
+                                          Object.entries(review.company.aaoifi_screening.business_reasoning).map(([key, val]) => (
+                                            <div key={key} style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', borderBottom: '1px dashed var(--border)' }}>
+                                              <span style={{ textTransform: 'capitalize' }}>{key.replace(/_/g, ' ')}</span>
+                                              <span style={{ fontWeight: 600, textAlign: 'right', maxWidth: '60%' }}>{typeof val === 'boolean' ? (val ? 'Yes' : 'No') : String(val)}</span>
+                                            </div>
+                                          ))
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* Stage 2: Financial Ratios */}
+                                  {review.company.aaoifi_screening.business_status === 'pass' && (
+                                    <div style={{ background: 'var(--bg-section)', borderRadius: 10, padding: 12, border: '1px solid rgba(0,0,0,0.03)' }}>
+                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                                        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dark)' }}>Stage 2: Financial Ratios (AAOIFI)</span>
+                                        <StatusPill status={review.company.aaoifi_screening.final_status} />
+                                      </div>
+                                      
+                                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10 }}>
+                                        {[
+                                          { label: 'Debt Ratio (< 30%)', val: review.company.aaoifi_screening.debt_ratio, stat: review.company.aaoifi_screening.debt_status },
+                                          { label: 'Cash Ratio (< 30%)', val: review.company.aaoifi_screening.cash_ratio, stat: review.company.aaoifi_screening.cash_status },
+                                          { label: 'Haram Income (< 5%)', val: review.company.aaoifi_screening.impermissible_income_ratio, stat: review.company.aaoifi_screening.impermissible_income_status },
+                                        ].map((item, i) => (
+                                          <div key={i} style={{ background: 'var(--bg)', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)' }}>
+                                            <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>{item.label}</div>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-dark)' }}>{item.val}%</span>
+                                              <span style={{ fontSize: '0.65rem', fontWeight: 800, color: item.stat === 'pass' ? '#059669' : '#DC2626' }}>
+                                                {item.stat?.toUpperCase()}
+                                              </span>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                  
+                                  <div style={{ textAlign: 'center', marginTop: 12, cursor: 'pointer' }} onClick={() => setExpandedId(null)}>
+                                    <span style={{ fontSize: '0.7rem', color: '#065F46', fontWeight: 700 }}>Hide details ↑</span>
+                                  </div>
+                                </div>
+                              )}
+
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
+            <PaginationControls meta={history.meta} onPage={fetchHistory} />
+            </>
+          )}
+        </>
+      )}
+
+      {/* ═══════════ SYSTEM LOGS TAB ════════════════════════════ */}
+      {!loading && tab === 'system' && (
+        <>
+          {systemLogs.data.length === 0 ? (
+            <div style={{ background: 'var(--bg-section)', border: '1px solid var(--border)', borderRadius: 20, padding: '48px 24px', textAlign: 'center' }}>
+              <ShieldAlert size={40} color="var(--text-muted)" style={{ opacity: .4, marginBottom: 14, margin: '0 auto' }}/>
+              <p style={{ color: 'var(--text-muted)', margin: 0 }}>No automated system actions found.</p>
+            </div>
+          ) : (
+            <>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {systemLogs.data.map(review => {
+                const isExpanded = expandedId === review.id;
+                return (
+                <div key={review.id} style={{
+                  background: 'var(--bg-section)', border: '1px solid var(--border)', borderRadius: 16,
+                  padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 14
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14 }}>
+                    <Badge color="#6366F1">
+                      <Settings size={10} style={{ marginRight: 4, display: 'inline-block', verticalAlign: 'text-top' }}/>
+                      Auto-Applied
+                    </Badge>
+
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                        <span style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.9rem' }}>{review.company?.symbol}</span>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>{review.company?.name}</span>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                      <StatusPill status={review.old_status}/>
+                      <ArrowRight size={12} color="var(--text-muted)"/>
+                      <StatusPill status={review.new_status}/>
+                    </div>
+
+                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>System Worker</div>
+                      <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: 2 }}>
+                        {review.changed_at ? new Date(review.changed_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 12, padding: '12px 15px', cursor: 'pointer', transition: 'border-color .2s' }}
+                    onClick={() => setExpandedId(isExpanded ? null : review.id)}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = '#047857'}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: isExpanded ? 16 : 0 }}>
+                      <p style={{
+                        margin: 0, color: 'var(--text-muted)', fontSize: '0.83rem', lineHeight: 1.55, fontWeight: 500,
+                        overflow: 'hidden', display: isExpanded ? 'block' : '-webkit-box',
+                        WebkitLineClamp: isExpanded ? 'unset' : 2, WebkitBoxOrient: 'vertical',
+                      }}>
+                        <span style={{ fontWeight: 700, color: 'var(--text-dark)', marginRight: 6 }}>Log Message:</span>
+                        {review.reason || 'No reason provided.'}
+                      </p>
+                      {!isExpanded && <span style={{ fontSize: '0.7rem', color: '#065F46', fontWeight: 700, whiteSpace: 'nowrap', marginLeft: 10 }}>Show details ↓</span>}
+                    </div>
+                    
+                              {isExpanded && review.company?.aaoifi_screening && (
+                                <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, marginTop: 12 }}>
+                                  <h4 style={{ margin: '0 0 12px 0', fontSize: '0.8rem', color: 'var(--text-dark)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                    Comprehensive Screening Result
+                                  </h4>
+                                  
+                                  {/* Stage 1: Business Activity */}
+                                  <div style={{ background: 'var(--bg-section)', borderRadius: 10, padding: 12, marginBottom: 12, border: '1px solid rgba(0,0,0,0.03)' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                                      <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dark)' }}>Stage 1: Business Activity</span>
+                                      <StatusPill status={review.company.aaoifi_screening.business_status === 'pass' ? 'halal' : 'non-halal'} />
+                                    </div>
+                                    {review.company.aaoifi_screening.business_reasoning && (
+                                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 8 }}>
+                                        {typeof review.company.aaoifi_screening.business_reasoning === 'string' ? (
+                                          <div style={{ lineHeight: 1.5 }}>{review.company.aaoifi_screening.business_reasoning}</div>
+                                        ) : (
+                                          Object.entries(review.company.aaoifi_screening.business_reasoning).map(([key, val]) => (
+                                            <div key={key} style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', borderBottom: '1px dashed var(--border)' }}>
+                                              <span style={{ textTransform: 'capitalize' }}>{key.replace(/_/g, ' ')}</span>
+                                              <span style={{ fontWeight: 600, textAlign: 'right', maxWidth: '60%' }}>{typeof val === 'boolean' ? (val ? 'Yes' : 'No') : String(val)}</span>
+                                            </div>
+                                          ))
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* Stage 2: Financial Ratios */}
+                                  {review.company.aaoifi_screening.business_status === 'pass' && (
+                                    <div style={{ background: 'var(--bg-section)', borderRadius: 10, padding: 12, border: '1px solid rgba(0,0,0,0.03)' }}>
+                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                                        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dark)' }}>Stage 2: Financial Ratios (AAOIFI)</span>
+                                        <StatusPill status={review.company.aaoifi_screening.final_status} />
+                                      </div>
+                                      
+                                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10 }}>
+                                        {[
+                                          { label: 'Debt Ratio (< 30%)', val: review.company.aaoifi_screening.debt_ratio, stat: review.company.aaoifi_screening.debt_status },
+                                          { label: 'Cash Ratio (< 30%)', val: review.company.aaoifi_screening.cash_ratio, stat: review.company.aaoifi_screening.cash_status },
+                                          { label: 'Haram Income (< 5%)', val: review.company.aaoifi_screening.impermissible_income_ratio, stat: review.company.aaoifi_screening.impermissible_income_status },
+                                        ].map((item, i) => (
+                                          <div key={i} style={{ background: 'var(--bg)', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)' }}>
+                                            <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>{item.label}</div>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-dark)' }}>{item.val}%</span>
+                                              <span style={{ fontSize: '0.65rem', fontWeight: 800, color: item.stat === 'pass' ? '#059669' : '#DC2626' }}>
+                                                {item.stat?.toUpperCase()}
+                                              </span>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                  
+                                  <div style={{ textAlign: 'center', marginTop: 12, cursor: 'pointer' }} onClick={() => setExpandedId(null)}>
+                                    <span style={{ fontSize: '0.7rem', color: '#065F46', fontWeight: 700 }}>Hide details ↑</span>
+                                  </div>
+                                </div>
+                              )}
+
+                  </div>
+                </div>
+              )})}
+            </div>
+            <PaginationControls meta={systemLogs.meta} onPage={fetchSystemLogs} />
+            </>
           )}
         </>
       )}

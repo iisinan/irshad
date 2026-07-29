@@ -66,6 +66,7 @@ Route::prefix('v1')->group(function () {
         // Admin Compliance Routes (requires login — for dashboard use)
         Route::get('/admin/compliance-reviews', [\App\Http\Controllers\AdminComplianceController::class, 'index']);
         Route::get('/admin/compliance-reviews/history', [\App\Http\Controllers\AdminComplianceController::class, 'history']);
+        Route::get('/admin/compliance-reviews/system-logs', [\App\Http\Controllers\AdminComplianceController::class, 'systemLogs']);
         Route::post('/admin/compliance-reviews/{id}/approve', [\App\Http\Controllers\AdminComplianceController::class, 'approve']);
         Route::post('/admin/compliance-reviews/{id}/reject', [\App\Http\Controllers\AdminComplianceController::class, 'reject']);
         Route::post('/admin/compliance-reviews/bulk-approve', [\App\Http\Controllers\AdminComplianceController::class, 'bulkApprove']);

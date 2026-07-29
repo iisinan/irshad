@@ -134,34 +134,7 @@ const NotifCard = ({ notif, onRead, onArchive, onDelete }) => {
   );
 };
 
-/* ── Mock notifications for empty state demonstration ── */
-const MOCK_NOTIFICATIONS = [
-  {
-    id: 'mock-1', icon: '🔔', title: 'Dangote Cement — Status Changed', category: 'screening',
-    message: 'Dangote Cement has moved from Halal to Non-Halal. Reason: Interest-bearing debt exceeded AAOIFI threshold (33.2%). Please review your holdings.',
-    action_url: '/stocks/DANGCEM', action_label: 'View Report', created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), read_at: null,
-  },
-  {
-    id: 'mock-2', icon: '✅', title: 'Portfolio Update', category: 'portfolio',
-    message: 'Your portfolio has been synced successfully. 7 holdings are Halal, 1 requires purification.',
-    action_url: null, action_label: null, created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), read_at: new Date().toISOString(),
-  },
-  {
-    id: 'mock-3', icon: '💰', title: 'Price Alert — MTNN', category: 'price_alerts',
-    message: 'MTN Nigeria (MTNN) has reached your target price of ₦255.00. Current price: ₦256.50.',
-    action_url: '/stocks/MTNN', action_label: 'View Stock', created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), read_at: null,
-  },
-  {
-    id: 'mock-4', icon: '📊', title: 'Screening Completed — BUAFOODS', category: 'screening',
-    message: 'BUA Foods Plc has been re-screened using 2025 annual report data. Status remains Halal.',
-    action_url: '/stocks/BUAFOODS', action_label: 'View Report', created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), read_at: new Date().toISOString(),
-  },
-  {
-    id: 'mock-5', icon: '📰', title: 'Business Activity — NESTLE', category: 'business_activity',
-    message: 'Nestlé Nigeria has announced expansion into fortified food products. Confidence: High. This does not affect Shariah compliance.',
-    action_url: null, action_label: null, created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), read_at: null,
-  },
-];
+/* ── Removed Mock Notifications ── */
 
 /* ══════════════════════════════════════════════════════════════
    Main Component
@@ -175,7 +148,6 @@ export default function UpdatesInbox() {
   const [activeCategory, setActiveCategory] = useState('all');
   const [search, setSearch]                 = useState('');
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
-  const [useMock, setUseMock]               = useState(false);
   const pollRef = useRef(null);
 
   const load = useCallback(async (params = {}, append = false) => {
@@ -194,13 +166,10 @@ export default function UpdatesInbox() {
       setNotifications(prev => append ? [...prev, ...newItems] : newItems);
       setUnreadCount(res.unread_count || 0);
       setPagination(res.pagination);
-      setUseMock(false);
     } catch {
-      // Fall back to mock data if the API is not yet available
       if (!append) {
-        setNotifications(MOCK_NOTIFICATIONS);
-        setUnreadCount(MOCK_NOTIFICATIONS.filter(n => !n.read_at).length);
-        setUseMock(true);
+        setNotifications([]);
+        setUnreadCount(0);
       }
     } finally {
       setLoading(false);
@@ -219,11 +188,6 @@ export default function UpdatesInbox() {
   }, [load]);
 
   const handleRead = async (id) => {
-    if (useMock) {
-      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read_at: new Date().toISOString() } : n));
-      setUnreadCount(c => Math.max(0, c - 1));
-      return;
-    }
     try {
       await markNotificationRead(id);
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, read_at: new Date().toISOString() } : n));
@@ -232,12 +196,6 @@ export default function UpdatesInbox() {
   };
 
   const handleMarkAllRead = async () => {
-    if (useMock) {
-      setNotifications(prev => prev.map(n => ({ ...n, read_at: new Date().toISOString() })));
-      setUnreadCount(0);
-      toastSuccess('All notifications marked as read');
-      return;
-    }
     try {
       await markAllNotificationsRead();
       setNotifications(prev => prev.map(n => ({ ...n, read_at: n.read_at || new Date().toISOString() })));
@@ -247,10 +205,6 @@ export default function UpdatesInbox() {
   };
 
   const handleArchive = async (id) => {
-    if (useMock) {
-      setNotifications(prev => prev.filter(n => n.id !== id));
-      return;
-    }
     try {
       await archiveNotification(id);
       setNotifications(prev => prev.filter(n => n.id !== id));
@@ -259,11 +213,6 @@ export default function UpdatesInbox() {
   };
 
   const handleDelete = async (id) => {
-    if (useMock) {
-      setNotifications(prev => prev.filter(n => n.id !== id));
-      toastSuccess('Notification deleted');
-      return;
-    }
     try {
       await deleteNotification(id);
       setNotifications(prev => prev.filter(n => n.id !== id));
@@ -288,11 +237,6 @@ export default function UpdatesInbox() {
           {unreadCount > 0 && (
             <span style={{ fontSize: '0.69rem', fontWeight: 900, padding: '3px 9px', borderRadius: '20px', background: 'var(--primary)', color: 'white' }}>
               {unreadCount} unread
-            </span>
-          )}
-          {useMock && (
-            <span style={{ fontSize: '0.63rem', fontWeight: 700, color: 'var(--text-muted)', padding: '3px 8px', borderRadius: '8px', background: 'var(--bg-section)', border: '1px solid var(--border)' }}>
-              Preview
             </span>
           )}
         </div>

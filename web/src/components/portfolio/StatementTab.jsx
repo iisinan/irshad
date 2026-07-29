@@ -28,37 +28,6 @@ export default function StatementTab({ data }) {
         });
       });
 
-      // 2. Mock some Zakat and Purification based on total value
-      const totalValue = data.holdings.reduce((sum, h) => sum + (h.shares * h.current_price), 0);
-      
-      if (totalValue > 500000) {
-        trxs.push({
-          id: `ZAK-${Math.floor(Math.random()*10000)}`,
-          date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-          desc: 'Annual Zakat Deduction (2.5%)',
-          type: 'zakat',
-          amount: -(totalValue * 0.025),
-          icon: Calculator,
-          color: 'var(--accent)'
-        });
-      }
-      
-      const hasDoubtful = data.holdings.some(h => h.verdict === 'Doubtful');
-      if (hasDoubtful) {
-        trxs.push({
-          id: `PUR-${Math.floor(Math.random()*10000)}`,
-          date: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-          desc: 'Dividend Purification (Charity)',
-          type: 'purification',
-          amount: -(totalValue * 0.005),
-          icon: HeartHandshake,
-          color: 'var(--doubtful)'
-        });
-      }
-    } else {
-      trxs = [
-        { id: 'TRX-101', date: new Date().toISOString(), desc: 'Initial Account Funding', type: 'deposit', amount: 1500000, icon: ArrowDown, color: 'var(--halal)' }
-      ];
     }
 
     // Sort ascending for balance calculation

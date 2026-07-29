@@ -9,22 +9,29 @@ use App\Models\StockStatus;
 
 class AdminComplianceController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $reviews = ComplianceReview::with(['company', 'company.aaoifiScreening'])->where('status', 'pending')->orderBy('created_at', 'desc')->get();
+        $perPage = $request->input('per_page', 50);
+        $reviews = ComplianceReview::with(['company', 'company.aaoifiScreening'])
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
         return response()->json($reviews);
     }
 
-    public function history()
+    public function history(Request $request)
     {
-        $history = ComplianceReview::with(['company', 'reviewer'])
+        $perPage = $request->input('per_page', 50);
+        $history = ComplianceReview::with(['company', 'company.aaoifiScreening', 'reviewer'])
             ->whereIn('status', ['approved', 'rejected'])
             ->orderBy('reviewed_at', 'desc')
-            ->limit(100)
-            ->get()
-            ->map(fn($r) => [
+            ->paginate($perPage);
+            
+        // Map the paginated items to the desired format
+        $history->getCollection()->transform(function ($r) {
+            return [
                 'id'           => $r->id,
-                'company'      => $r->company ? ['symbol' => $r->company->symbol, 'name' => $r->company->name] : null,
+                'company'      => clone $r->company, // Keep the full company object so aaoifiScreening is available
                 'old_status'   => $r->old_status,
                 'new_status'   => $r->new_status,
                 'reason'       => $r->reason,
@@ -32,8 +39,20 @@ class AdminComplianceController extends Controller
                 'reviewed_by'  => $r->reviewer?->name ?? 'Admin',
                 'reviewed_at'  => $r->reviewed_at,
                 'created_at'   => $r->created_at,
-            ]);
+            ];
+        });
+        
         return response()->json($history);
+    }
+    
+    public function systemLogs(Request $request)
+    {
+        $perPage = $request->input('per_page', 50);
+        $logs = ComplianceHistory::with(['company', 'company.aaoifiScreening'])
+            ->where('reason', 'like', '%(Auto-applied)%')
+            ->orderBy('changed_at', 'desc')
+            ->paginate($perPage);
+        return response()->json($logs);
     }
 
     public function bulkApprove(Request $request)

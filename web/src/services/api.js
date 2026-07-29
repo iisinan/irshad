@@ -343,12 +343,12 @@ export const updateSettings = async (settings) => {
 export const fetchOverviewStats = async () => {
   return new Promise(resolve => setTimeout(() => resolve({
     data: {
-      totalTracked: 156,
-      shariahCompliant: 89,
-      nonCompliant: 48,
-      underReview: 19,
-      annualReportsProcessed: 142,
-      newsAnalyzed: 384,
+      totalTracked: 0,
+      shariahCompliant: 0,
+      nonCompliant: 0,
+      underReview: 0,
+      annualReportsProcessed: 0,
+      newsAnalyzed: 0,
       lastUpdated: new Date().toISOString()
     }
   }), 800));
@@ -356,35 +356,19 @@ export const fetchOverviewStats = async () => {
 
 export const fetchRecentScreenings = async () => {
   return new Promise(resolve => setTimeout(() => resolve({
-    data: [
-      { id: 1, symbol: 'MTNN', name: 'MTN Nigeria Communications Plc', status: 'halal', date: '2026-07-24T10:30:00Z' },
-      { id: 2, symbol: 'DANGSUGAR', name: 'Dangote Sugar Refinery Plc', status: 'halal', date: '2026-07-23T15:45:00Z' },
-      { id: 3, symbol: 'NB', name: 'Nigerian Breweries Plc', status: 'non-halal', date: '2026-07-22T09:15:00Z' },
-      { id: 4, symbol: 'OANDO', name: 'Oando Plc', status: 'doubtful', date: '2026-07-21T14:20:00Z' },
-      { id: 5, symbol: 'ZENITHBANK', name: 'Zenith Bank Plc', status: 'non-halal', date: '2026-07-20T11:10:00Z' },
-      { id: 6, symbol: 'BUACEMENT', name: 'BUA Cement Plc', status: 'halal', date: '2026-07-19T16:05:00Z' },
-    ]
+    data: []
   }), 800));
 };
 
 export const fetchLatestReports = async () => {
   return new Promise(resolve => setTimeout(() => resolve({
-    data: [
-      { id: 101, symbol: 'MTNN', name: 'MTN Nigeria', year: 2025, date: '2026-07-15', type: 'Audited Financial Statements' },
-      { id: 102, symbol: 'NESTLE', name: 'Nestle Nigeria Plc', year: 2025, date: '2026-07-10', type: 'Annual Report' },
-      { id: 103, symbol: 'GTCO', name: 'Guaranty Trust Holding', year: 2025, date: '2026-07-08', type: 'Audited Financial Statements' },
-      { id: 104, symbol: 'AIRTELAFRI', name: 'Airtel Africa Plc', year: 2025, date: '2026-07-02', type: 'Annual Report' }
-    ]
+    data: []
   }), 800));
 };
 
 export const fetchBusinessNewsOverview = async () => {
   return new Promise(resolve => setTimeout(() => resolve({
-    data: [
-      { id: 201, symbol: 'DANGCEM', headline: 'Dangote Cement announces successful completion of ₦100bn Series 1 Bond', date: '2026-07-20', source: 'NGX Announcements', summary: 'This new debt issuance will impact the interest-bearing debt ratio in their next AAOIFI screening.' },
-      { id: 202, symbol: 'NB', headline: 'Nigerian Breweries secures new credit facility to manage FX losses', date: '2026-07-18', source: 'BusinessDay Nigeria', summary: 'Increased debt burden continues to negatively affect AAOIFI compliance standing.' },
-      { id: 203, symbol: 'PRESCO', headline: 'Presco Plc expands agricultural operations into new states', date: '2026-07-12', source: 'Reuters', summary: 'Core business activity remains fundamentally halal with expansion in pure agricultural sectors.' }
-    ]
+    data: []
   }), 800));
 };
 

@@ -197,10 +197,7 @@ export default function UpdatesGuide() {
       question: 'What does "Purification Required" mean?',
       answer: 'If you hold a stock that was Halal for part of a year but became Non-Halal, or if the company earns a small amount of incidental Non-Halal income (e.g., interest from cash deposits), you may be required to purify a proportionate amount of your dividends or capital gains by donating it to charity. Irshad calculates this for you in the Purification tab.',
     },
-    {
-      question: 'How are confidence scores calculated?',
-      answer: 'Confidence scores reflect how certain Irshad is about a detected business activity or screening result. A High score means the information comes from official filings, annual reports, or verified regulatory announcements. A Medium score means the data comes from reputable news sources or AI-analysed disclosures. A Low score indicates the information is unverified and should be independently confirmed.',
-    },
+
     {
       question: 'Can compliance status change after I buy a stock?',
       answer: 'Yes. Shariah compliance is dynamic and changes with a company\'s financial performance and business activities. Irshad monitors your holdings and will notify you via the Inbox and Updates section if any of your stocks change status. It is your responsibility to act on these changes according to your Shariah advisors\' guidance.',

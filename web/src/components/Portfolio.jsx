@@ -178,7 +178,6 @@ export default function Portfolio() {
   const nonHalalCount = holdings.filter(h => !isHoldingHalal(h)).length;
   const needsPurif    = holdings.filter(h => h.purification_due > 0).length;
 
-  const MOCK_PERF = [];
 
   const fmtK = (n) => {
     const v = Number(n||0);
