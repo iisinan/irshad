@@ -3,7 +3,7 @@ import { Shield, Target, Users, BookOpen, Sparkles, Globe } from 'lucide-react';
 import Footer from './Footer';
 
 const STATS = [
-  { num: '2023', label: 'Founded', icon: '🚀' },
+  { num: '2026', label: 'Founded', icon: '🚀' },
   { num: '5,000+', label: 'Active Users', icon: '👥' },
   { num: '150+', label: 'Stocks Screened', icon: '📊' },
 ];
