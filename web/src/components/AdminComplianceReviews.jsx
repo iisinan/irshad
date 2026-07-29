@@ -591,15 +591,36 @@ export default function AdminComplianceReviews() {
                                             .filter(([k, v]) => !['created_at', 'updated_at', 'id', 'company_id'].includes(k) && v !== null)
                                             .map(([key, val]) => {
                                               const formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                                              let formattedVal = val;
-                                              if (typeof val === 'number') {
-                                                if (val > 1000000000) formattedVal = (val / 1000000000).toFixed(2) + 'B';
-                                                else if (val > 1000000) formattedVal = (val / 1000000).toFixed(2) + 'M';
-                                              }
+                                              
+                                              const formatNumber = (num) => {
+                                                if (typeof num === 'number') {
+                                                  if (num > 1000000000) return (num / 1000000000).toFixed(2) + 'B';
+                                                  else if (num > 1000000) return (num / 1000000).toFixed(2) + 'M';
+                                                }
+                                                return num;
+                                              };
+
+                                              const currentVal = review.company?.financials?.[key];
+                                              const isDifferent = currentVal !== undefined && currentVal !== val;
+                                              
                                               return (
                                                 <div key={key} style={{ background: 'var(--bg)', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)' }}>
                                                   <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>{formattedKey}</div>
-                                                  <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-dark)' }}>{formattedVal}</div>
+                                                  {isDifferent ? (
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                      <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', textDecoration: 'line-through' }}>
+                                                        {formatNumber(currentVal)}
+                                                      </span>
+                                                      <ArrowRight size={10} color="var(--text-muted)" />
+                                                      <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#059669' }}>
+                                                        {formatNumber(val)}
+                                                      </span>
+                                                    </div>
+                                                  ) : (
+                                                    <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-dark)' }}>
+                                                      {formatNumber(val)}
+                                                    </div>
+                                                  )}
                                                 </div>
                                               );
                                           })}
@@ -641,25 +662,65 @@ export default function AdminComplianceReviews() {
                                         <div style={{ background: 'var(--bg-section)', borderRadius: 10, padding: 12, border: '1px solid rgba(0,0,0,0.03)' }}>
                                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                                             <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dark)' }}>Stage 2: Financial Ratios (AAOIFI)</span>
-                                            <StatusPill status={review.company.aaoifi_screening.final_status} />
                                           </div>
                                           
                                           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10 }}>
-                                            {[
-                                              { label: 'Debt Ratio (< 30%)', val: review.company.aaoifi_screening.debt_ratio, stat: review.company.aaoifi_screening.debt_status },
-                                              { label: 'Cash Ratio (< 30%)', val: review.company.aaoifi_screening.cash_ratio, stat: review.company.aaoifi_screening.cash_status },
-                                              { label: 'Haram Income (< 5%)', val: review.company.aaoifi_screening.impermissible_income_ratio, stat: review.company.aaoifi_screening.impermissible_income_status },
-                                            ].map((item, i) => (
-                                              <div key={i} style={{ background: 'var(--bg)', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)' }}>
-                                                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>{item.label}</div>
-                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                                  <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-dark)' }}>{item.val}%</span>
-                                                  <span style={{ fontSize: '0.65rem', fontWeight: 800, color: item.stat === 'pass' ? '#059669' : '#DC2626' }}>
-                                                    {item.stat?.toUpperCase()}
-                                                  </span>
-                                                </div>
-                                              </div>
-                                            ))}
+                                            {(() => {
+                                              const currFin = review.company?.financials || {};
+                                              const propFin = { ...currFin, ...(review.payload || {}) };
+                                              
+                                              const calcRatios = (fin) => {
+                                                const mcap = parseFloat(fin.market_cap) || 1;
+                                                const rev = parseFloat(fin.total_revenue) || 1;
+                                                const debt = parseFloat(fin.total_debt) || 0;
+                                                const cash = (parseFloat(fin.cash_and_equivalents) || 0) + (parseFloat(fin.interest_bearing_securities) || 0);
+                                                const haram = parseFloat(fin.interest_income) || 0;
+                                                return {
+                                                  debtRatio: (debt / mcap * 100).toFixed(4),
+                                                  cashRatio: (cash / mcap * 100).toFixed(4),
+                                                  haramRatio: (haram / rev * 100).toFixed(4),
+                                                  debtPass: (debt / mcap) <= 0.30,
+                                                  cashPass: (cash / mcap) <= 0.30,
+                                                  haramPass: (haram / rev) <= 0.05,
+                                                };
+                                              };
+                                              
+                                              const currRatios = calcRatios(currFin);
+                                              const propRatios = calcRatios(propFin);
+                                              
+                                              const items = [
+                                                { label: 'Debt Ratio (< 30%)', curr: currRatios.debtRatio, prop: propRatios.debtRatio, currPass: currRatios.debtPass, propPass: propRatios.debtPass },
+                                                { label: 'Cash Ratio (< 30%)', curr: currRatios.cashRatio, prop: propRatios.cashRatio, currPass: currRatios.cashPass, propPass: propRatios.cashPass },
+                                                { label: 'Haram Income (< 5%)', curr: currRatios.haramRatio, prop: propRatios.haramRatio, currPass: currRatios.haramPass, propPass: propRatios.haramPass },
+                                              ];
+
+                                              return items.map((item, i) => {
+                                                const isDiff = item.curr !== item.prop;
+                                                return (
+                                                  <div key={i} style={{ background: 'var(--bg)', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)' }}>
+                                                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>{item.label}</div>
+                                                    
+                                                    {isDiff ? (
+                                                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', opacity: 0.6 }}>
+                                                          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', textDecoration: 'line-through' }}>{item.curr}%</span>
+                                                          <span style={{ fontSize: '0.6rem', fontWeight: 800, color: item.currPass ? '#059669' : '#DC2626' }}>{item.currPass ? 'PASS' : 'FAIL'}</span>
+                                                        </div>
+                                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                          <span style={{ fontSize: '0.85rem', fontWeight: 800, color: item.propPass ? '#059669' : '#DC2626' }}>{item.prop}%</span>
+                                                          <span style={{ fontSize: '0.65rem', fontWeight: 800, color: item.propPass ? '#059669' : '#DC2626' }}>{item.propPass ? 'PASS' : 'FAIL'}</span>
+                                                        </div>
+                                                      </div>
+                                                    ) : (
+                                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                        <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-dark)' }}>{item.prop}%</span>
+                                                        <span style={{ fontSize: '0.65rem', fontWeight: 800, color: item.propPass ? '#059669' : '#DC2626' }}>{item.propPass ? 'PASS' : 'FAIL'}</span>
+                                                      </div>
+                                                    )}
+                                                  </div>
+                                                );
+                                              });
+                                            })()}
                                           </div>
                                         </div>
                                       )}
