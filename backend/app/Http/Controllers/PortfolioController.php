@@ -55,6 +55,7 @@ class PortfolioController extends Controller
                 'is_halal' => $isHalal,
                 'purification_due' => round($purificationDue, 2),
                 'logo_url' => $company->logo_url ?? null,
+                'purchase_date' => $holding->purchase_date,
                 'created_at' => $holding->created_at?->toISOString(),
                 'updated_at' => $holding->updated_at?->toISOString(),
             ];
@@ -170,6 +171,7 @@ class PortfolioController extends Controller
             'holdings.*.symbol' => 'required|string|exists:companies,symbol',
             'holdings.*.shares' => 'required|numeric|min:0.01',
             'holdings.*.average_buy_price' => 'nullable|numeric|min:0',
+            'holdings.*.purchase_date' => 'nullable|date',
         ]);
 
         $userId = Auth::id();
@@ -181,6 +183,7 @@ class PortfolioController extends Controller
                 'symbol' => strtoupper($holdingData['symbol']),
                 'shares' => $holdingData['shares'],
                 'average_buy_price' => $holdingData['average_buy_price'] ?? null,
+                'purchase_date' => $holdingData['purchase_date'] ?? null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
@@ -190,7 +193,7 @@ class PortfolioController extends Controller
         Holding::upsert(
             $upsertData,
             ['user_id', 'symbol'], // Unique keys
-            ['shares', 'average_buy_price', 'updated_at'] // Columns to update if exists
+            ['shares', 'average_buy_price', 'purchase_date', 'updated_at'] // Columns to update if exists
         );
 
         return $this->success(null, 'Holdings added to portfolio successfully.');

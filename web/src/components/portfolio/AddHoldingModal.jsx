@@ -8,7 +8,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
   const [tab, setTab] = useState(initialTab || 'manual');
   
   // Rows for bulk add
-  const [rows, setRows] = useState([{ id: Date.now(), sym: '', sh: '', pr: '' }]);
+  const [rows, setRows] = useState([{ id: Date.now(), sym: '', sh: '', pr: '', date: '' }]);
   const [activeRowId, setActiveRowId] = useState(null);
 
   const [allStocks, setAllStocks] = useState([]);
@@ -62,7 +62,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
     setActiveRowId(null);
   };
 
-  const addRow = () => setRows(prev => [...prev, { id: Date.now(), sym: '', sh: '', pr: '' }]);
+  const addRow = () => setRows(prev => [...prev, { id: Date.now(), sym: '', sh: '', pr: '', date: '' }]);
   const removeRow = (id) => setRows(prev => prev.length > 1 ? prev.filter(r => r.id !== id) : prev);
 
   const totalCost = rows.reduce((acc, r) => acc + ((Number(r.sh)||0) * (Number(r.pr)||0)), 0);
@@ -98,7 +98,8 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
     const holdings = validRows.map(r => ({
       symbol: r.sym.toUpperCase(),
       shares: Number(r.sh),
-      average_buy_price: Number(r.pr)
+      average_buy_price: Number(r.pr),
+      purchase_date: r.date || null
     }));
     onAdd(holdings);
   };
@@ -168,7 +169,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
                   </div>
                   
                   {/* Ticker Search & Inputs */}
-                  <div style={{ display:'grid', gridTemplateColumns:'1.5fr 1fr 1fr', gap:'16px', alignItems: 'flex-start' }}>
+                  <div style={{ display:'grid', gridTemplateColumns:'1.5fr 1fr 1fr 1.2fr', gap:'12px', alignItems: 'flex-start' }}>
                     <div>
                       <label style={{ display:'block', fontSize: '0.7rem', fontWeight:700, color:'var(--text-dark)', marginBottom:'8px' }}>Ticker Symbol</label>
                       <div style={{ position:'relative' }}>
@@ -221,6 +222,10 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
                     <div>
                       <label style={{ display:'block', fontSize: '0.7rem', fontWeight:700, color:'var(--text-dark)', marginBottom:'8px' }}>Avg Price (₦)</label>
                       <input type="number" value={row.pr} onChange={e=>handleRowChange(row.id, 'pr', e.target.value)} placeholder="0.00" min="0" step="any" style={{ width:'100%', padding:'14px', borderRadius:'12px', border:'2px solid var(--border)', fontSize: '0.88rem', fontWeight:700, outline:'none', background:'var(--bg-section)', transition:'all 0.2s' }} onFocus={e => { e.target.style.borderColor = 'var(--primary)'; e.target.style.background = 'var(--bg)'; }} onBlur={e => { e.target.style.borderColor = 'var(--border)'; e.target.style.background = 'var(--bg-section)'; }}/>
+                    </div>
+                    <div>
+                      <label style={{ display:'block', fontSize: '0.7rem', fontWeight:700, color:'var(--text-dark)', marginBottom:'8px' }}>Date (Optional)</label>
+                      <input type="date" value={row.date} onChange={e=>handleRowChange(row.id, 'date', e.target.value)} style={{ width:'100%', padding:'14px', borderRadius:'12px', border:'2px solid var(--border)', fontSize: '0.88rem', fontWeight:700, outline:'none', background:'var(--bg-section)', transition:'all 0.2s' }} onFocus={e => { e.target.style.borderColor = 'var(--primary)'; e.target.style.background = 'var(--bg)'; }} onBlur={e => { e.target.style.borderColor = 'var(--border)'; e.target.style.background = 'var(--bg-section)'; }}/>
                     </div>
                   </div>
                 </div>

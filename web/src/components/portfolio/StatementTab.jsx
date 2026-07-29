@@ -19,7 +19,7 @@ export default function StatementTab({ data }) {
         const val = h.shares * h.current_price;
         trxs.push({
           id: `HLD-${h.id || Math.floor(Math.random()*10000)}`,
-          date: new Date(h.created_at || h.updated_at || Date.now()).toISOString(),
+          date: new Date(h.purchase_date || h.created_at || h.updated_at || Date.now()).toISOString(),
           desc: `Asset Holding - ${h.symbol} (${h.shares} units @ ₦${h.current_price})`,
           type: 'holding',
           amount: val,
