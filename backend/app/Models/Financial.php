@@ -42,4 +42,9 @@ class Financial extends Model
     {
         return $this->interest_income_ratio;
     }
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
 }
