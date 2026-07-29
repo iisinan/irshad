@@ -52,6 +52,11 @@ class Company extends Model
         return $this->hasMany(Financial::class);
     }
 
+    public function latestFinancial(): HasOne
+    {
+        return $this->hasOne(Financial::class)->latestOfMany();
+    }
+
     public function status(): HasOne
     {
         return $this->hasOne(StockStatus::class);

@@ -583,8 +583,15 @@ export default function AdminComplianceReviews() {
                                   {review.payload && Object.keys(review.payload).length > 0 && (
                                     <div style={{ marginBottom: 20 }}>
                                       <h4 style={{ margin: '0 0 12px 0', fontSize: '0.8rem', color: 'var(--text-dark)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                                        Proposed Financial Updates
+                                        Financial Data Changes
                                       </h4>
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 10, fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)' }}>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                                          <span style={{ textDecoration: 'line-through', opacity: 0.6 }}>000</span> = Current in DB
+                                        </span>
+                                        <ArrowRight size={10} />
+                                        <span style={{ color: '#059669' }}>000 = Proposed</span>
+                                      </div>
                                       <div style={{ background: 'var(--bg-section)', borderRadius: 10, padding: 12, border: '1px solid rgba(0,0,0,0.03)' }}>
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10 }}>
                                           {Object.entries(review.payload)
@@ -600,7 +607,7 @@ export default function AdminComplianceReviews() {
                                                 return num;
                                               };
 
-                                              const currentVal = review.company?.financials?.[key];
+                                              const currentVal = review.company?.latest_financial?.[key];
                                               const isDifferent = currentVal !== undefined && currentVal !== val;
                                               
                                               return (
@@ -666,7 +673,7 @@ export default function AdminComplianceReviews() {
                                           
                                           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10 }}>
                                             {(() => {
-                                              const currFin = review.company?.financials || {};
+                                              const currFin = review.company?.latest_financial || {};
                                               const propFin = { ...currFin, ...(review.payload || {}) };
                                               
                                               const calcRatios = (fin) => {

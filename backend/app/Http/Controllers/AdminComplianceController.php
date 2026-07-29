@@ -12,7 +12,7 @@ class AdminComplianceController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->input('per_page', 50);
-        $reviews = ComplianceReview::with(['company', 'company.aaoifiScreening'])
+        $reviews = ComplianceReview::with(['company', 'company.aaoifiScreening', 'company.latestFinancial'])
             ->where('status', 'pending')
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
