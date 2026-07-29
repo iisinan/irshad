@@ -12,10 +12,27 @@ class AdminComplianceController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->input('per_page', 50);
-        $reviews = ComplianceReview::with(['company', 'company.aaoifiScreening', 'company.latestFinancial'])
-            ->where('status', 'pending')
-            ->orderBy('created_at', 'desc')
-            ->paginate($perPage);
+        $query = ComplianceReview::with(['company', 'company.aaoifiScreening', 'company.latestFinancial'])
+            ->where('status', 'pending');
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->whereHas('company', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('symbol', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('filter') && $request->input('filter') !== 'all') {
+            $filter = $request->input('filter');
+            if ($filter === 'to-halal') {
+                $query->where('new_status', 'halal');
+            } elseif ($filter === 'to-nonhalal') {
+                $query->where('new_status', 'non-halal');
+            }
+        }
+
+        $reviews = $query->orderBy('created_at', 'desc')->paginate($perPage);
         return response()->json($reviews);
     }
 
@@ -219,10 +236,15 @@ class AdminComplianceController extends Controller
         $company = $review->company;
         
         if (!empty($review->payload)) {
-            $financial = \App\Models\Financial::updateOrCreate(
-                ['company_id' => $company->id],
-                $review->payload
-            );
+            $financial = $company->latestFinancial;
+            if ($financial) {
+                $financial->update($review->payload);
+            } else {
+                $financial = \App\Models\Financial::create(array_merge(
+                    ['company_id' => $company->id],
+                    $review->payload
+                ));
+            }
             $complianceService = app(\App\Services\AaoifiComplianceService::class);
             $complianceService->evaluateCompliance($company, $financial, $company->sector);
         }

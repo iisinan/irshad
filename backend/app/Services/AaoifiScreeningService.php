@@ -22,9 +22,10 @@ class AaoifiScreeningService
         // 1. Gather Data
         $financials = $company->financials()->latest()->first();
         
-        // Fetch mock/local news for context
-        $news = News::where('title', 'like', "%{$company->name}%")
-            ->orWhere('title', 'like', "%{$company->symbol}%")
+        // Fetch mock/local news for context, prioritizing direct company relations
+        $news = News::where('company_id', $company->id)
+            ->orWhere('title', 'ilike', "%{$company->name}%")
+            ->orWhere('title', 'ilike', "%{$company->symbol}%")
             ->latest()
             ->take(5)
             ->get()
@@ -48,7 +49,12 @@ class AaoifiScreeningService
         }
 
         // 2. Business Activity Screening
-        $aiResult = $this->geminiService->analyzeBusinessActivity($company, $combinedNews, $financials);
+        $aiResult = null;
+        try {
+            $aiResult = $this->geminiService->analyzeBusinessActivity($company, $combinedNews, $financials);
+        } catch (\Exception $e) {
+            Log::error("Failed to analyze business activity with AI for {$company->symbol}: " . $e->getMessage());
+        }
         
         $businessStatus = 'pass';
         if ($aiResult && !empty($aiResult['prohibited_activities'])) {

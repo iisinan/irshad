@@ -137,10 +137,10 @@ export default function AdminComplianceReviews() {
   };
 
   /* ─── data fetching ──────────────────────────────────────── */
-  const fetchPending = async (page = 1) => {
+  const fetchPending = async (page = 1, searchQuery = search, filterQuery = filterDir) => {
     setLoading(true);
     try {
-      const r = await api.get(`/admin/compliance-reviews?page=${page}`);
+      const r = await api.get(`/admin/compliance-reviews?page=${page}&search=${searchQuery}&filter=${filterQuery}`);
       setReviews({ data: r.data.data, meta: r.data });
       setError('');
     } catch { setError('Failed to load reviews'); }
@@ -167,10 +167,16 @@ export default function AdminComplianceReviews() {
 
   useEffect(() => {
     setExpandedId(null); // Clear expanded state on tab switch
-    if (tab === 'pending') fetchPending(reviews.meta?.current_page || 1);
+    if (tab === 'pending') {
+      const timer = setTimeout(() => {
+        // When search/filter changes, we reset to page 1. When switching tabs, we fetch current page.
+        fetchPending(1, search, filterDir);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
     if (tab === 'history') fetchHistory(history.meta?.current_page || 1);
     if (tab === 'system') fetchSystemLogs(systemLogs.meta?.current_page || 1);
-  }, [tab]);
+  }, [tab, search, filterDir]);
 
   /* ─── actions ────────────────────────────────────────────── */
   const remove = (id) => setReviews(prev => ({ ...prev, data: prev.data.filter(r => r.id !== id) }));
@@ -227,12 +233,8 @@ export default function AdminComplianceReviews() {
 
   /* ─── derived data ───────────────────────────────────────── */
   const filtered = useMemo(() => {
-    let res = reviews.data;
-    if (search) res = res.filter(r => (r.company?.symbol + ' ' + r.company?.name).toLowerCase().includes(search.toLowerCase()));
-    if (filterDir === 'to-halal')    res = res.filter(r => r.new_status === 'halal');
-    if (filterDir === 'to-nonhalal') res = res.filter(r => r.new_status === 'non-halal');
-    return res;
-  }, [reviews, search, filterDir]);
+    return reviews.data;
+  }, [reviews]);
 
   const allSelected = filtered.length > 0 && filtered.every(r => selected.has(r.id));
   const toggleAll = () => {
@@ -692,7 +694,14 @@ export default function AdminComplianceReviews() {
                                                 };
                                               };
                                               
-                                              const currRatios = calcRatios(currFin);
+                                              const currRatios = {
+                                                debtRatio: parseFloat(review.company.aaoifi_screening.debt_ratio).toFixed(4),
+                                                cashRatio: parseFloat(review.company.aaoifi_screening.cash_ratio).toFixed(4),
+                                                haramRatio: parseFloat(review.company.aaoifi_screening.impermissible_income_ratio).toFixed(4),
+                                                debtPass: review.company.aaoifi_screening.debt_status === 'pass',
+                                                cashPass: review.company.aaoifi_screening.cash_status === 'pass',
+                                                haramPass: review.company.aaoifi_screening.impermissible_income_status === 'pass',
+                                              };
                                               const propRatios = calcRatios(propFin);
                                               
                                               const items = [

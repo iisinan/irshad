@@ -29,3 +29,6 @@ Schedule::command('irshad:detect-compliance-changes')->hourly();
 
 // Send weekly updates digest
 Schedule::command('irshad:send-updates-digest')->weeklyOn(5, '15:00');
+
+// Enforce strict AAOIFI math on Company status
+Schedule::command('compliance:enforce-math')->dailyAt('01:00');
