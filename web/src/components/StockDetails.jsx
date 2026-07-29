@@ -414,18 +414,18 @@ const StockDetails = ({ symbol: propSymbol }) => {
           </div>
 
           {/* Right: Summary of Justification */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', borderLeft: '1px solid rgba(255,255,255,0.15)', paddingLeft: '24px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
-              <span style={{ fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--gold, #d4af37)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <ShieldCheck size={14} color="var(--gold, #d4af37)" /> Screening Justification Summary
-              </span>
-              <Link to={`/market/${stock.symbol}/aaoifi`} style={{ fontSize: '0.72rem', fontWeight: 700, color: 'white', textDecoration: 'none', background: 'rgba(255,255,255,0.15)', padding: '4px 12px', borderRadius: '100px', border: '1px solid rgba(255,255,255,0.25)', transition: 'all 0.2s', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                Full Audit →
-              </Link>
-            </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderLeft: '1px solid rgba(255,255,255,0.15)', paddingLeft: '24px', flex: 1 }}>
+            <span style={{ fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--gold, #d4af37)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <ShieldCheck size={14} color="var(--gold, #d4af37)" /> Screening Justification Summary
+            </span>
             <p style={{ margin: 0, fontSize: '0.9rem', color: 'rgba(255,255,255,0.92)', lineHeight: 1.5, fontWeight: 500, textShadow: '0 1px 2px rgba(0,0,0,0.1)' }}>
               {reason || 'Screened strictly according to AAOIFI Standard No. 21 methodology. All business operations and financial ratios comply with Shariah requirements.'}
             </p>
+            <div style={{ marginTop: '4px' }}>
+              <Link to={`/market/${stock.symbol}/aaoifi`} style={{ fontSize: '0.72rem', fontWeight: 700, color: 'white', textDecoration: 'none', background: 'rgba(255,255,255,0.15)', padding: '5px 16px', borderRadius: '100px', border: '1px solid rgba(255,255,255,0.25)', transition: 'all 0.2s', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                Full Audit →
+              </Link>
+            </div>
           </div>
         </div>
 
