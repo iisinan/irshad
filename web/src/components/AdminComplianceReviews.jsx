@@ -147,19 +147,19 @@ export default function AdminComplianceReviews() {
     finally { setLoading(false); }
   };
 
-  const fetchHistory = async (page = 1) => {
+  const fetchHistory = async (page = 1, searchQuery = search, filterQuery = filterDir) => {
     setLoading(true);
     try {
-      const r = await api.get(`/admin/compliance-reviews/history?page=${page}`);
+      const r = await api.get(`/admin/compliance-reviews/history?page=${page}&search=${searchQuery}&filter=${filterQuery}`);
       setHistory({ data: r.data.data, meta: r.data });
     } catch { setError('Failed to load history'); }
     finally { setLoading(false); }
   };
 
-  const fetchSystemLogs = async (page = 1) => {
+  const fetchSystemLogs = async (page = 1, searchQuery = search, filterQuery = filterDir) => {
     setLoading(true);
     try {
-      const r = await api.get(`/admin/compliance-reviews/system-logs?page=${page}`);
+      const r = await api.get(`/admin/compliance-reviews/system-logs?page=${page}&search=${searchQuery}&filter=${filterQuery}`);
       setSystemLogs({ data: r.data.data, meta: r.data });
     } catch { setError('Failed to load system logs'); }
     finally { setLoading(false); }
@@ -167,15 +167,13 @@ export default function AdminComplianceReviews() {
 
   useEffect(() => {
     setExpandedId(null); // Clear expanded state on tab switch
-    if (tab === 'pending') {
-      const timer = setTimeout(() => {
-        // When search/filter changes, we reset to page 1. When switching tabs, we fetch current page.
-        fetchPending(1, search, filterDir);
-      }, 300);
-      return () => clearTimeout(timer);
-    }
-    if (tab === 'history') fetchHistory(history.meta?.current_page || 1);
-    if (tab === 'system') fetchSystemLogs(systemLogs.meta?.current_page || 1);
+    const timer = setTimeout(() => {
+      // When search/filter changes, we reset to page 1.
+      if (tab === 'pending') fetchPending(1, search, filterDir);
+      if (tab === 'history') fetchHistory(1, search, filterDir);
+      if (tab === 'system') fetchSystemLogs(1, search, filterDir);
+    }, 300);
+    return () => clearTimeout(timer);
   }, [tab, search, filterDir]);
 
   /* ─── actions ────────────────────────────────────────────── */
@@ -233,8 +231,10 @@ export default function AdminComplianceReviews() {
 
   /* ─── derived data ───────────────────────────────────────── */
   const filtered = useMemo(() => {
+    if (tab === 'history') return history.data;
+    if (tab === 'system') return systemLogs.data;
     return reviews.data;
-  }, [reviews]);
+  }, [reviews, history, systemLogs, tab]);
 
   const allSelected = filtered.length > 0 && filtered.every(r => selected.has(r.id));
   const toggleAll = () => {
@@ -695,12 +695,12 @@ export default function AdminComplianceReviews() {
                                               };
                                               
                                               const currRatios = {
-                                                debtRatio: parseFloat(review.company.aaoifi_screening.debt_ratio).toFixed(4),
-                                                cashRatio: parseFloat(review.company.aaoifi_screening.cash_ratio).toFixed(4),
-                                                haramRatio: parseFloat(review.company.aaoifi_screening.impermissible_income_ratio).toFixed(4),
-                                                debtPass: review.company.aaoifi_screening.debt_status === 'pass',
-                                                cashPass: review.company.aaoifi_screening.cash_status === 'pass',
-                                                haramPass: review.company.aaoifi_screening.impermissible_income_status === 'pass',
+                                                debtRatio: parseFloat(review.company?.aaoifi_screening?.debt_ratio || 0).toFixed(4),
+                                                cashRatio: parseFloat(review.company?.aaoifi_screening?.cash_ratio || 0).toFixed(4),
+                                                haramRatio: parseFloat(review.company?.aaoifi_screening?.impermissible_income_ratio || 0).toFixed(4),
+                                                debtPass: review.company?.aaoifi_screening?.debt_status === 'pass',
+                                                cashPass: review.company?.aaoifi_screening?.cash_status === 'pass',
+                                                haramPass: review.company?.aaoifi_screening?.impermissible_income_status === 'pass',
                                               };
                                               const propRatios = calcRatios(propFin);
                                               

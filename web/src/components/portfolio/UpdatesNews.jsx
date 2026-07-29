@@ -325,6 +325,7 @@ const BusinessCard = ({ item }) => {
 
 /* ── Market Intelligence Card ── */
 const MarketCard = ({ item }) => {
+  const navigate = useNavigate();
   const categoryIcons = {
     market_intelligence: BarChart2,
     earnings:            TrendingUp,
@@ -342,7 +343,8 @@ const MarketCard = ({ item }) => {
   }[item.category] || 'var(--text-muted)';
 
   return (
-    <div className="animate-slide-up" style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px 18px', display: 'flex', gap: '12px', alignItems: 'flex-start', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }}
+    <div className="animate-slide-up" style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px 18px', display: 'flex', gap: '12px', alignItems: 'flex-start', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', cursor: item.symbol ? 'pointer' : 'default' }}
+      onClick={() => item.symbol && navigate(`/market/${item.symbol}`)}
       onMouseEnter={e => { e.currentTarget.style.boxShadow = 'var(--shadow-md)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = 'var(--primary-100)'; }}
       onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderColor = 'var(--border)'; }}
     >

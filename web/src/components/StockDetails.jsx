@@ -153,7 +153,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const cash = (parseFloat(latest?.cash_and_equivalents) || 0) + (parseFloat(latest?.interest_bearing_securities) || 0);
   const cashRatio = ((cash / safeMarketCap) * 100).toFixed(1);
   const interestRatio = ((interest / revenue) * 100).toFixed(1);
-  const purificationRate = latest?.non_compliant_income_ratio ? (parseFloat(latest.non_compliant_income_ratio) * 100).toFixed(2) : interestRatio;
+  const purificationRate = latest?.non_compliant_income_ratio ? parseFloat(latest.non_compliant_income_ratio).toFixed(2) : interestRatio;
 
   const purificationAmount = dividendInput
     ? ((parseFloat(dividendInput) || 0) * (parseFloat(purificationRate) / 100)).toFixed(2)

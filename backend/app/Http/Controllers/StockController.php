@@ -241,6 +241,21 @@ class StockController extends Controller
             ]
         );
 
+        $company->update(['current_status' => $request->status]);
+
+        $aaoifiScreening = \App\Models\AaoifiScreening::where('company_id', $company->id)->latest()->first();
+        if ($aaoifiScreening) {
+            $aaoifiScreening->update(['final_status' => $request->status]);
+        }
+
+        \App\Models\ComplianceHistory::create([
+            'company_id' => $company->id,
+            'old_status' => $oldStatus,
+            'new_status' => $request->status,
+            'reason'     => 'Scholar Override' . ($request->reason ? ': ' . $request->reason : ''),
+            'changed_at' => now(),
+        ]);
+
         // Audit log
         \App\Models\AuditLog::create([
             'user_id' => $user->id,
@@ -267,6 +282,9 @@ class StockController extends Controller
     public function updateAaoifi(Request $request, string $symbol): JsonResponse
     {
         $request->validate([
+            'market_cap' => 'nullable|numeric',
+            'total_assets' => 'nullable|numeric',
+            'total_revenue' => 'nullable|numeric',
             'total_debt' => 'nullable|numeric',
             'cash' => 'nullable|numeric',
             'interest_income' => 'nullable|numeric',
@@ -275,6 +293,11 @@ class StockController extends Controller
         ]);
 
         $company = Company::where('symbol', $symbol)->firstOrFail();
+
+        if ($request->has('market_cap')) {
+            $company->market_cap = $request->market_cap;
+            $company->save();
+        }
         
         $screening = \App\Models\FinancialScreening::where('company_ticker', $symbol)
             ->orderBy('created_at', 'desc')
@@ -328,11 +351,21 @@ class StockController extends Controller
         // Also update the financials table so normal checks see it
         $financial = \App\Models\Financial::where('company_id', $company->id)->latest()->first();
         if ($financial) {
-            $financial->update([
+            $updateData = [
                 'total_debt' => $request->total_debt,
                 'cash_and_equivalents' => $request->cash,
                 'interest_income' => $request->interest_income,
-            ]);
+            ];
+            if ($request->has('market_cap')) {
+                $updateData['market_cap'] = $request->market_cap;
+            }
+            if ($request->has('total_assets')) {
+                $updateData['total_assets'] = $request->total_assets;
+            }
+            if ($request->has('total_revenue')) {
+                $updateData['total_revenue'] = $request->total_revenue;
+            }
+            $financial->update($updateData);
         }
 
         // Trigger compliance re-eval (which updates the stock status on the dashboard)

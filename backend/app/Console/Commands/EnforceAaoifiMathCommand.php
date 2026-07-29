@@ -81,6 +81,14 @@ class EnforceAaoifiMathCommand extends Command
                     ]);
                 }
 
+                \App\Models\ComplianceHistory::create([
+                    'company_id' => $company->id,
+                    'old_status' => $oldStatus,
+                    'new_status' => $expectedFinalStatus,
+                    'reason' => 'Status automatically corrected to match AAOIFI mathematical evaluation.',
+                    'changed_at' => now(),
+                ]);
+
                 $this->warn("Fixed {$company->symbol}: Was {$oldStatus}, now is {$expectedFinalStatus} based on strict math.");
                 $fixedCount++;
             }

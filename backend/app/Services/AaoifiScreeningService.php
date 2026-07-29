@@ -175,18 +175,32 @@ class AaoifiScreeningService
         // Synchronize with Company current_status & StockStatus
         $stockStatus = $company->status()->first();
         if (!$stockStatus || !$stockStatus->verified_by_scholar) {
+            $oldStatus = $company->current_status;
             $company->update(['current_status' => $finalStatus]);
+            
+            $reason = $finalStatus === 'non-halal' 
+                ? ($businessStatus === 'fail' ? "Failed Rule 1: Non-compliant business activity." : "Failed AAOIFI financial ratio screening.")
+                : "Stock passes all screens cleanly. Status is 100% Halal and Shariah-compliant.";
+
             \App\Models\StockStatus::updateOrCreate(
                 ['company_id' => $company->id],
                 [
                     'status' => $finalStatus,
-                    'reason' => $finalStatus === 'non-halal' 
-                        ? ($businessStatus === 'fail' ? "Failed Rule 1: Non-compliant business activity." : "Failed AAOIFI financial ratio screening.")
-                        : "Stock passes all screens cleanly. Status is 100% Halal and Shariah-compliant.",
+                    'reason' => $reason,
                     'verified_by_scholar' => false,
                     'last_updated' => now(),
                 ]
             );
+
+            if ($oldStatus !== $finalStatus) {
+                \App\Models\ComplianceHistory::create([
+                    'company_id' => $company->id,
+                    'old_status' => $oldStatus,
+                    'new_status' => $finalStatus,
+                    'reason' => $reason . ' (Auto-applied)',
+                    'changed_at' => now(),
+                ]);
+            }
         }
 
         return $screening;

@@ -319,10 +319,17 @@ class GeminiAiService
         $prompt .= "- 'status_reason': A clear, friendly explanation (1-2 sentences) of why this status was chosen, mentioning any specific ingredients found.\n";
         $prompt .= "- 'ingredients_text': The extracted list of ingredients from the image, combined with the user's text if applicable.\n";
 
+        $apiKeys = array_map('trim', explode(',', $this->apiKey));
+        $currentKeyIndex = \Illuminate\Support\Facades\Cache::get('gemini_key_index', 0);
+        if (!isset($apiKeys[$currentKeyIndex])) {
+            $currentKeyIndex = 0;
+        }
+        $apiKey = $apiKeys[$currentKeyIndex];
+
         try {
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
-            ])->timeout(60)->post("{$this->baseUrl}/gemini-1.5-flash:generateContent?key={$this->apiKey}", [
+            ])->timeout(60)->post("{$this->baseUrl}/gemini-1.5-flash:generateContent?key={$apiKey}", [
                 'contents' => [
                     [
                         'parts' => [

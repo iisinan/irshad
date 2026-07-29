@@ -129,7 +129,17 @@ class AaoifiComplianceService
         }
 
         // STAGE 4: RULE 4 (NGX Impermissible Income Limit Check)
+        $reits = ['NESF', 'SKYESHELT', 'UHOMREIT', 'UPDC REIT', 'UPDCREIT'];
         if ($purificationFactor > self::MAX_INTEREST_INCOME_RATIO) {
+            // Check if it's a REIT, they are exempted from the generic interest income check
+            if (in_array(strtoupper($company->symbol), $reits)) {
+                return $this->saveStatus(
+                    $company, 
+                    'halal', 
+                    "Stock passes all screens. Status is Halal. (Exempted from Rule 4 as a REIT under AAOIFI FAS 32; requires scholar verification of underlying assets)."
+                );
+            }
+
             return $this->saveStatus(
                 $company, 
                 'non-halal', 

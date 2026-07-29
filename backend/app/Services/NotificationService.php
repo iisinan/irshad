@@ -22,9 +22,10 @@ class NotificationService
         $users = User::whereIn('id', $favoritedUserIds)->whereNotNull('fcm_token')->get();
 
         foreach ($users as $user) {
+            $reason = $type === 'product' ? $item->status_reason : ($item->status()->first()?->reason ?? 'a recent compliance review');
             $this->sendPushNotification($user->fcm_token, [
                 'title' => "Update on " . ($type === 'product' ? $item->name : $item->symbol),
-                'body' => ($type === 'product' ? $item->name : $item->symbol) . " has been reclassified as " . strtoupper($newStatus) . " due to " . ($item->status_reason ?? $item->reason),
+                'body' => ($type === 'product' ? $item->name : $item->symbol) . " has been reclassified as " . strtoupper($newStatus) . ". Reason: " . $reason,
                 'data' => [
                     'type' => $type,
                     'reference_id' => $item->id,

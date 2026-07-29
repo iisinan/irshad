@@ -60,6 +60,7 @@ export default function AdminTickerEditor() {
         evLinks = [''];
       }
       setFinancialsForm({
+        market_cap: data.market_cap || 0,
         total_assets: fin?.total_assets || 0,
         total_debt: fin?.total_debt || 0,
         cash: fin?.cash_and_equivalents || 0,

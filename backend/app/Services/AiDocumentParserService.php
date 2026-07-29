@@ -136,7 +136,11 @@ class AiDocumentParserService
 
                 if ($response->status() == 429) {
                     Log::warning("Gemini Rate Limit Hit (429). Attempt " . ($attempt + 1));
-                    sleep(20);
+                    $currentKeyIndex = ($currentKeyIndex + 1) % count($apiKeys);
+                    $apiKey = $apiKeys[$currentKeyIndex];
+                    \Illuminate\Support\Facades\Cache::put('gemini_key_index', $currentKeyIndex);
+                    $url = $baseUrl . $apiKey;
+                    sleep(2);
                     continue;
                 }
 

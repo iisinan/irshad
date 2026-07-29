@@ -9,6 +9,7 @@ import {
   archiveNotification, deleteNotification
 } from '../../services/api';
 import { toastSuccess, toastError } from '../../utils/toast';
+import { Link } from 'react-router-dom';
 
 /* ── Skeleton ── */
 const NotifSkeleton = () => {
@@ -111,11 +112,15 @@ const NotifCard = ({ notif, onRead, onArchive, onDelete }) => {
             {new Date(notif.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
           </span>
           <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto', flexWrap: 'wrap' }}>
-            {notif.action_url && (
-              <a href={notif.action_url} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.69rem', fontWeight: 800, color: 'var(--primary)', textDecoration: 'none' }}>
+            {notif.action_url && notif.action_url.startsWith('/') ? (
+              <Link to={notif.action_url} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.69rem', fontWeight: 800, color: 'var(--primary)', textDecoration: 'none' }}>
+                {notif.action_label || 'View'} <ChevronRight size={11} />
+              </Link>
+            ) : notif.action_url ? (
+              <a href={notif.action_url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.69rem', fontWeight: 800, color: 'var(--primary)', textDecoration: 'none' }}>
                 {notif.action_label || 'View'} <ChevronRight size={11} />
               </a>
-            )}
+            ) : null}
             {isUnread && (
               <button onClick={() => onRead(notif.id)} title="Mark as read" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.66rem', fontWeight: 800, color: 'var(--text-muted)', background: 'var(--bg-section)', border: '1px solid var(--border)', borderRadius: '8px', padding: '3px 8px', cursor: 'pointer' }}>
                 <Check size={11} /> Read
