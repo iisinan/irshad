@@ -27,27 +27,33 @@ class VerifyCompliance extends Command
      */
     public function handle(AaoifiComplianceService $aaoifiService)
     {
-        $this->info('Starting compliance verification for Halal stocks...');
+        $this->info('Starting compliance verification for all stocks...');
 
-        // Get all stocks currently marked as halal
-        $halalStocks = Company::where('current_status', 'halal')->get();
-        $count = $halalStocks->count();
-        $this->info("Found {$count} halal stocks to verify.");
+        // Get all stocks
+        $stocks = Company::all();
+        $count = $stocks->count();
+        $this->info("Found {$count} stocks to verify.");
 
         $discrepancies = 0;
 
         $bar = $this->output->createProgressBar($count);
         $bar->start();
 
-        foreach ($halalStocks as $company) {
-            // Evaluating will automatically stage a review if status changes.
-            $result = $aaoifiService->evaluate($company);
+        foreach ($stocks as $company) {
+            $financials = $company->financials()->latest()->first();
+            if (!$financials) {
+                continue;
+            }
             
-            // Re-fetch current_status to see if it changed or if a review was staged
-            // Actually, evaluate returns the stockStatus or an object with 'status' => 'pending'
+            $oldStatus = $company->current_status;
+            // Evaluating will automatically stage a review if status changes, or auto-apply if it failed business activity.
+            $result = $aaoifiService->evaluateCompliance($company, $financials, $company->sector);
             
-            // Let's check if the returned status from evaluation indicates a difference.
-            if (isset($result->status) && $result->status !== 'halal') {
+            // Check if status changed
+            if (isset($result->status) && $result->status !== $oldStatus && $result->status !== 'pending') {
+                $discrepancies++;
+            } elseif (isset($result->status) && $result->status === 'pending') {
+                // Means a review was staged, which is also a discrepancy from current state
                 $discrepancies++;
             }
 
@@ -58,10 +64,10 @@ class VerifyCompliance extends Command
         $this->newLine(2);
 
         if ($discrepancies > 0) {
-            $this->warn("Verification complete. Found {$discrepancies} stocks that no longer meet Halal criteria based on current data.");
-            $this->info("Compliance reviews have been staged for these discrepancies. Check the admin dashboard.");
+            $this->warn("Verification complete. Found {$discrepancies} stocks with incorrect status or staged for review.");
+            $this->info("Compliance reviews have been staged for these discrepancies (except Rule 1 violations which auto-apply). Check the admin dashboard.");
         } else {
-            $this->info('Verification complete. All Halal stocks are fully compliant!');
+            $this->info('Verification complete. All stocks are correctly synced with AAOIFI rules!');
         }
     }
 }

@@ -128,6 +128,15 @@ class AaoifiComplianceService
             );
         }
 
+        // STAGE 4: RULE 4 (NGX Impermissible Income Limit Check)
+        if ($purificationFactor > self::MAX_INTEREST_INCOME_RATIO) {
+            return $this->saveStatus(
+                $company, 
+                'non-halal', 
+                "Failed Rule 4: Impermissible Income Check based on recent financial disclosure. Impermissible income ratio is " . round($purificationFactor * 100, 2) . "% (Max permitted threshold is 5.00%)."
+            );
+        }
+
         // PIPELINE RESULT PROCESSING (ALL STAGES PASSED)
         if ($purificationFactor > 0) {
             return $this->saveStatus(
