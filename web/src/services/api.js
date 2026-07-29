@@ -175,16 +175,6 @@ export const removeFromWatchlist = async (symbol) => {
   return response.data;
 };
 
-const getNext3AM = () => {
-  const now = new Date();
-  const next3AM = new Date(now);
-  next3AM.setHours(3, 0, 0, 0);
-  if (now > next3AM) {
-    next3AM.setDate(next3AM.getDate() + 1);
-  }
-  return next3AM.getTime();
-};
-
 export const fetchSectors = async () => {
   const res = await api.get('/sectors');
   return res.data;

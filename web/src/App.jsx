@@ -1,10 +1,8 @@
 import React, { useEffect, useState, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
-import { TrendingUp, TrendingDown, ArrowRight, CheckCircle, Shield, BarChart2, ChevronRight, Smartphone, Apple, Play, AlertCircle, HelpCircle, Home, Scale, Info, BookOpen, Settings, LayoutDashboard, User, Moon, Sun } from 'lucide-react';
-import { fetchNgxStocks } from './services/api';
+import { Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
+import { Shield, Home, Scale, Info, BookOpen, Settings, LayoutDashboard, Moon, Sun } from 'lucide-react';
 import DashboardLayout from './components/DashboardLayout';
 import AdminLayout from './components/AdminLayout';
-import Footer from './components/Footer';
 import { LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage } from './components/AuthPages';
 import ErrorBoundary from './components/ErrorBoundary';
 import NotFound from './components/NotFound';
@@ -278,85 +276,11 @@ const TopNavbar = () => {
 };
 
 
-/* ─── Ticker ──────────────────────────────────────────────── */
-const StockTicker = () => {
-  const [stocks, setStocks] = useState([]);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    fetchNgxStocks().then(r => { if (r.data) setStocks(r.data.filter(s => parseFloat(s.latest_price) > 0)); }).catch(() => {});
-  }, []);
-
-  if (stocks.length === 0) return null;
-
-  return (
-    <div className="ticker-wrap">
-      <div className="ticker">
-        {stocks.concat(stocks).map((stock, i) => {
-          let statusStr = 'QUESTIONABLE';
-          let color = 'var(--doubtful)';
-          const rawStatus = stock.status;
-          if (typeof rawStatus === 'object' && rawStatus !== null) {
-            const s = rawStatus.status?.toLowerCase();
-            if (s === 'halal') { statusStr = 'HALAL'; color = 'var(--halal)'; }
-            else if (s === 'non-halal') { statusStr = 'NON-HALAL'; color = 'var(--non-halal)'; }
-          } else if (typeof rawStatus === 'string') {
-            const s = rawStatus.toLowerCase();
-            if (s === 'compliant' || s === 'halal') { statusStr = 'HALAL'; color = 'var(--halal)'; }
-            else if (s === 'non-halal') { statusStr = 'NON-HALAL'; color = 'var(--non-halal)'; }
-          }
-
-          const displayPrice = Number(stock.latest_price || stock.daily_prices?.[0]?.price || 0).toFixed(2);
-
-          return (
-            <div key={`${stock.symbol}-${i}`} className="ticker-item" onClick={() => navigate(`/market/${stock.symbol}`)}>
-              <span className="ticker-item-symbol">{stock.symbol}</span>
-              <span className="ticker-item-price">₦{displayPrice}</span>
-              <span style={{ fontWeight: 800, fontSize: '0.62rem', color, padding: '2px 6px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)' }}>{statusStr}</span>
-              <div className="ticker-separator" />
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
-/* ─── Company Avatar ────────────────────────────────────────── */
-const CompanyAvatar = ({ symbol, size = 40, style = {} }) => {
-  const [error, setError] = useState(false);
-  const letter = (symbol || '').substring(0, 2).toUpperCase();
-  const radius = size * 0.25;
-
-  return (
-    <div style={{
-      width: size, height: size, borderRadius: radius,
-      background: 'var(--bg-section)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontWeight: 800, color: 'var(--text-dark)', fontSize: `${size * 0.35}px`,
-      overflow: 'hidden', flexShrink: 0,
-      border: '1px solid var(--border)',
-      ...style
-    }}>
-      {!error ? (
-        <img
-          src={`https://storage.googleapis.com/irshad-images/logos/${(symbol || '').toLowerCase()}.png`}
-          alt={symbol}
-          onError={() => setError(true)}
-          style={{ width: '100%', height: '100%', objectFit: 'contain', background: 'var(--bg)' }}
-        />
-      ) : (
-        letter
-      )}
-    </div>
-  );
-};
-
-/* ─── Screen a Stock Page ──────────────────────────────────── */
 
 
 /* ─── App Shell ──────────────────────────────────────────── */
 function App() {
-  const { loading: authLoading, user } = useAuth();
+  const { loading: authLoading } = useAuth();
 
   // Handle the seamless handoff from the native HTML splash screen
   useEffect(() => {

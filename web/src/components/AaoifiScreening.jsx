@@ -109,7 +109,7 @@ const AaoifiScreening = () => {
       try {
         const parsed = JSON.parse(evLinks);
         evLinks = Array.isArray(parsed) ? parsed : [evLinks];
-      } catch (_e) {
+      } catch {
         evLinks = [evLinks];
       }
     }

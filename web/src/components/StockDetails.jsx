@@ -431,7 +431,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 {!aiAnalysis && !aiLoading && (
-                  <button onClick={(e) => { e.stopPropagation(); handleAskAI(); }} className="btn-primary" style={{ padding: '8px 20px', fontSize: '0.78rem', background: 'linear-gradient(135deg, #d4af37 0%, #b89326 100%)', color: '#1A1208', border: 'none', fontWeight: 800, boxShadow: '0 4px 12px rgba(212, 175, 55, 0.3)', pointerEvents: 'none' }}>
+                  <button onClick={(e) => { e.stopPropagation(); handleAskAI(); }} className="btn-primary" style={{ padding: '8px 20px', fontSize: '0.78rem', background: 'linear-gradient(135deg, #d4af37 0%, #b89326 100%)', color: '#1A1208', border: 'none', fontWeight: 800, boxShadow: '0 4px 12px rgba(212, 175, 55, 0.3)' }}>
                     Ask Irshad ✨
                   </button>
                 )}

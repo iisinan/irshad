@@ -18,7 +18,7 @@ export default function ZakatSettingsAdmin() {
       setLoading(true);
       const data = await getSettings();
       if (data.data) setSettings(prev => ({ ...prev, ...data.data }));
-    } catch (err) {
+    } catch {
       setMessage({ type: 'error', text: 'Failed to load settings.' });
     } finally {
       setLoading(false);
@@ -33,7 +33,7 @@ export default function ZakatSettingsAdmin() {
       await updateSettings(settings);
       setMessage({ type: 'success', text: 'Settings saved successfully!' });
       setTimeout(() => setMessage({ type: '', text: '' }), 4000);
-    } catch (err) {
+    } catch {
       setMessage({ type: 'error', text: 'Failed to save settings. Please try again.' });
     } finally {
       setSaving(false);

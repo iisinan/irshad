@@ -51,7 +51,7 @@ export default function UpdatesTab() {
       {/* Sub-tab Navigation */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
         gap: '10px',
         marginBottom: '28px',
       }}>

@@ -54,7 +54,7 @@ export default function AddWatchlistModal({ onClose, onAdded, allStocks, watchli
       await addMultipleToWatchlist(selectedSymbols, false, true); // Opt-in to email by default
       onAdded(selectedSymbols);
       onClose();
-    } catch (err) {
+    } catch {
       alert('Failed to add assets. Please try again.');
     } finally {
       setIsAdding(false);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, TrendingUp, TrendingDown, Star, BarChart2, X, CheckCircle, AlertCircle, HelpCircle } from 'lucide-react';
+import { Search, TrendingUp, TrendingDown, Star, BarChart2, X } from 'lucide-react';
 import { fetchNgxStocks, fetchWatchlist, addToWatchlist, removeFromWatchlist, fetchSectors } from '../../services/api';
 import CompanyLogo from '../CompanyLogo';
 import { Link } from 'react-router-dom';

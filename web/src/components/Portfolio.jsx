@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { fetchPortfolio, addHolding, removeHolding, fetchNgxStocks, formatLogoUrl } from '../services/api';
+import { fetchPortfolio, removeHolding } from '../services/api';
 import { toastError, toastSuccess } from '../utils/toast';
 import { useAuth } from '../context/AuthContext';
 import localforage from 'localforage';
-import { X, Search, BarChart2, Star, Calculator, ShieldCheck, BookOpen, Briefcase, Activity, FileText, Rss } from 'lucide-react';
+import { Search, BarChart2, Star, Calculator, ShieldCheck, BookOpen, Briefcase, Activity, FileText, Rss } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
 import PortfolioTab from './portfolio/PortfolioTab';
