@@ -27,21 +27,29 @@ class PublicOverviewController extends Controller
 
     public function recentScreenings()
     {
-        $screenings = ComplianceHistory::with('company:id,symbol,name,logo_url')
-            ->whereNotNull('new_status')
-            ->orderBy('changed_at', 'desc')
-            ->take(5)
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'symbol' => $item->company ? $item->company->symbol : 'UNKNOWN',
-                    'name' => $item->company ? $item->company->name : 'Unknown Company',
-                    'status' => $item->new_status,
-                ];
-            });
-            
-        return response()->json($screenings);
+        try {
+            $screenings = ComplianceHistory::with('company:id,symbol,name,logo_url')
+                ->whereNotNull('new_status')
+                ->orderBy('changed_at', 'desc')
+                ->take(5)
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'symbol' => $item->company ? $item->company->symbol : 'UNKNOWN',
+                        'name' => $item->company ? $item->company->name : 'Unknown Company',
+                        'status' => $item->new_status,
+                    ];
+                });
+                
+            return response()->json($screenings);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile()
+            ], 500);
+        }
     }
 
     public function latestReports()
