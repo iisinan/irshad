@@ -214,7 +214,7 @@ export default function LandingPage() {
             {/* Store badges */}
             <div className="animate-slide-up stagger-4" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 32 }}>
               <a href="https://apps.apple.com" target="_blank" rel="noopener noreferrer"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 11, background: 'var(--text-dark)', color: 'white', padding: '11px 20px', borderRadius: 13, textDecoration: 'none', transition: 'transform 0.2s, box-shadow 0.2s', boxShadow: '0 4px 16px rgba(0,0,0,0.18)', border: '1px solid rgba(255,255,255,0.06)' }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 11, background: '#111', color: 'white', padding: '11px 20px', borderRadius: 13, textDecoration: 'none', transition: 'transform 0.2s, box-shadow 0.2s', boxShadow: '0 4px 16px rgba(0,0,0,0.18)', border: '1px solid rgba(255,255,255,0.06)' }}
                 onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 10px 28px rgba(0,0,0,0.26)'; }}
                 onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.18)'; }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="white" style={{ flexShrink: 0 }}>
@@ -227,7 +227,7 @@ export default function LandingPage() {
               </a>
 
               <a href="https://play.google.com" target="_blank" rel="noopener noreferrer"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 11, background: 'var(--text-dark)', color: 'white', padding: '11px 20px', borderRadius: 13, textDecoration: 'none', transition: 'transform 0.2s, box-shadow 0.2s', boxShadow: '0 4px 16px rgba(0,0,0,0.18)', border: '1px solid rgba(255,255,255,0.06)' }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 11, background: '#111', color: 'white', padding: '11px 20px', borderRadius: 13, textDecoration: 'none', transition: 'transform 0.2s, box-shadow 0.2s', boxShadow: '0 4px 16px rgba(0,0,0,0.18)', border: '1px solid rgba(255,255,255,0.06)' }}
                 onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 10px 28px rgba(0,0,0,0.26)'; }}
                 onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.18)'; }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
