@@ -577,60 +577,93 @@ export default function AdminComplianceReviews() {
                                 {!isExpanded && <span style={{ fontSize: '0.7rem', color: '#065F46', fontWeight: 700, whiteSpace: 'nowrap', marginLeft: 10 }}>Show details ↓</span>}
                               </div>
 
-                              {isExpanded && review.company?.aaoifi_screening && (
+                              {isExpanded && (
                                 <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, marginTop: 12 }}>
-                                  <h4 style={{ margin: '0 0 12px 0', fontSize: '0.8rem', color: 'var(--text-dark)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                                    Comprehensive Screening Result
-                                  </h4>
-                                  
-                                  {/* Stage 1: Business Activity */}
-                                  <div style={{ background: 'var(--bg-section)', borderRadius: 10, padding: 12, marginBottom: 12, border: '1px solid rgba(0,0,0,0.03)' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                                      <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dark)' }}>Stage 1: Business Activity</span>
-                                      <StatusPill status={review.company.aaoifi_screening.business_status === 'pass' ? 'halal' : 'non-halal'} />
+                                  {/* Proposed Financial Data */}
+                                  {review.payload && Object.keys(review.payload).length > 0 && (
+                                    <div style={{ marginBottom: 20 }}>
+                                      <h4 style={{ margin: '0 0 12px 0', fontSize: '0.8rem', color: 'var(--text-dark)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                        Proposed Financial Updates
+                                      </h4>
+                                      <div style={{ background: 'var(--bg-section)', borderRadius: 10, padding: 12, border: '1px solid rgba(0,0,0,0.03)' }}>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10 }}>
+                                          {Object.entries(review.payload)
+                                            .filter(([k, v]) => !['created_at', 'updated_at', 'id', 'company_id'].includes(k) && v !== null)
+                                            .map(([key, val]) => {
+                                              const formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                                              let formattedVal = val;
+                                              if (typeof val === 'number') {
+                                                if (val > 1000000000) formattedVal = (val / 1000000000).toFixed(2) + 'B';
+                                                else if (val > 1000000) formattedVal = (val / 1000000).toFixed(2) + 'M';
+                                              }
+                                              return (
+                                                <div key={key} style={{ background: 'var(--bg)', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)' }}>
+                                                  <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>{formattedKey}</div>
+                                                  <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-dark)' }}>{formattedVal}</div>
+                                                </div>
+                                              );
+                                          })}
+                                        </div>
+                                      </div>
                                     </div>
-                                    {review.company.aaoifi_screening.business_reasoning && (
-                                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 8 }}>
-                                        {typeof review.company.aaoifi_screening.business_reasoning === 'string' ? (
-                                          <div style={{ lineHeight: 1.5 }}>{review.company.aaoifi_screening.business_reasoning}</div>
-                                        ) : (
-                                          Object.entries(review.company.aaoifi_screening.business_reasoning).map(([key, val]) => (
-                                            <div key={key} style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', borderBottom: '1px dashed var(--border)' }}>
-                                              <span style={{ textTransform: 'capitalize' }}>{key.replace(/_/g, ' ')}</span>
-                                              <span style={{ fontWeight: 600, textAlign: 'right', maxWidth: '60%' }}>{typeof val === 'boolean' ? (val ? 'Yes' : 'No') : String(val)}</span>
-                                            </div>
-                                          ))
+                                  )}
+
+                                  {review.company?.aaoifi_screening && (
+                                    <>
+                                      <h4 style={{ margin: '0 0 12px 0', fontSize: '0.8rem', color: 'var(--text-dark)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                        Comprehensive Screening Result
+                                      </h4>
+                                      
+                                      {/* Stage 1: Business Activity */}
+                                      <div style={{ background: 'var(--bg-section)', borderRadius: 10, padding: 12, marginBottom: 12, border: '1px solid rgba(0,0,0,0.03)' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                                          <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dark)' }}>Stage 1: Business Activity</span>
+                                          <StatusPill status={review.company.aaoifi_screening.business_status === 'pass' ? 'halal' : 'non-halal'} />
+                                        </div>
+                                        {review.company.aaoifi_screening.business_reasoning && (
+                                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 8 }}>
+                                            {typeof review.company.aaoifi_screening.business_reasoning === 'string' ? (
+                                              <div style={{ lineHeight: 1.5 }}>{review.company.aaoifi_screening.business_reasoning}</div>
+                                            ) : (
+                                              Object.entries(review.company.aaoifi_screening.business_reasoning).map(([key, val]) => (
+                                                <div key={key} style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', borderBottom: '1px dashed var(--border)' }}>
+                                                  <span style={{ textTransform: 'capitalize' }}>{key.replace(/_/g, ' ')}</span>
+                                                  <span style={{ fontWeight: 600, textAlign: 'right', maxWidth: '60%' }}>{typeof val === 'boolean' ? (val ? 'Yes' : 'No') : String(val)}</span>
+                                                </div>
+                                              ))
+                                            )}
+                                          </div>
                                         )}
                                       </div>
-                                    )}
-                                  </div>
 
-                                  {/* Stage 2: Financial Ratios */}
-                                  {review.company.aaoifi_screening.business_status === 'pass' && (
-                                    <div style={{ background: 'var(--bg-section)', borderRadius: 10, padding: 12, border: '1px solid rgba(0,0,0,0.03)' }}>
-                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                                        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dark)' }}>Stage 2: Financial Ratios (AAOIFI)</span>
-                                        <StatusPill status={review.company.aaoifi_screening.final_status} />
-                                      </div>
-                                      
-                                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10 }}>
-                                        {[
-                                          { label: 'Debt Ratio (< 30%)', val: review.company.aaoifi_screening.debt_ratio, stat: review.company.aaoifi_screening.debt_status },
-                                          { label: 'Cash Ratio (< 30%)', val: review.company.aaoifi_screening.cash_ratio, stat: review.company.aaoifi_screening.cash_status },
-                                          { label: 'Haram Income (< 5%)', val: review.company.aaoifi_screening.impermissible_income_ratio, stat: review.company.aaoifi_screening.impermissible_income_status },
-                                        ].map((item, i) => (
-                                          <div key={i} style={{ background: 'var(--bg)', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)' }}>
-                                            <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>{item.label}</div>
-                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-dark)' }}>{item.val}%</span>
-                                              <span style={{ fontSize: '0.65rem', fontWeight: 800, color: item.stat === 'pass' ? '#059669' : '#DC2626' }}>
-                                                {item.stat?.toUpperCase()}
-                                              </span>
-                                            </div>
+                                      {/* Stage 2: Financial Ratios */}
+                                      {review.company.aaoifi_screening.business_status === 'pass' && (
+                                        <div style={{ background: 'var(--bg-section)', borderRadius: 10, padding: 12, border: '1px solid rgba(0,0,0,0.03)' }}>
+                                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                                            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dark)' }}>Stage 2: Financial Ratios (AAOIFI)</span>
+                                            <StatusPill status={review.company.aaoifi_screening.final_status} />
                                           </div>
-                                        ))}
-                                      </div>
-                                    </div>
+                                          
+                                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10 }}>
+                                            {[
+                                              { label: 'Debt Ratio (< 30%)', val: review.company.aaoifi_screening.debt_ratio, stat: review.company.aaoifi_screening.debt_status },
+                                              { label: 'Cash Ratio (< 30%)', val: review.company.aaoifi_screening.cash_ratio, stat: review.company.aaoifi_screening.cash_status },
+                                              { label: 'Haram Income (< 5%)', val: review.company.aaoifi_screening.impermissible_income_ratio, stat: review.company.aaoifi_screening.impermissible_income_status },
+                                            ].map((item, i) => (
+                                              <div key={i} style={{ background: 'var(--bg)', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)' }}>
+                                                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>{item.label}</div>
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                  <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-dark)' }}>{item.val}%</span>
+                                                  <span style={{ fontSize: '0.65rem', fontWeight: 800, color: item.stat === 'pass' ? '#059669' : '#DC2626' }}>
+                                                    {item.stat?.toUpperCase()}
+                                                  </span>
+                                                </div>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+                                    </>
                                   )}
                                   
                                   <div style={{ textAlign: 'center', marginTop: 12 }}>
