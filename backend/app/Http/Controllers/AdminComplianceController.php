@@ -56,10 +56,27 @@ class AdminComplianceController extends Controller
     public function history(Request $request)
     {
         $perPage = $request->input('per_page', 50);
-        $history = ComplianceReview::with(['company', 'company.aaoifiScreening', 'company.latestFinancial', 'reviewer'])
-            ->whereIn('status', ['approved', 'rejected'])
-            ->orderBy('reviewed_at', 'desc')
-            ->paginate($perPage);
+        $query = ComplianceReview::with(['company', 'company.aaoifiScreening', 'company.latestFinancial', 'reviewer'])
+            ->whereIn('status', ['approved', 'rejected']);
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->whereHas('company', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('symbol', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('filter') && $request->input('filter') !== 'all') {
+            $filter = $request->input('filter');
+            if ($filter === 'to-halal') {
+                $query->where('new_status', 'halal');
+            } elseif ($filter === 'to-nonhalal') {
+                $query->where('new_status', 'non-halal');
+            }
+        }
+
+        $history = $query->orderBy('reviewed_at', 'desc')->paginate($perPage);
             
         // Map the paginated items to the desired format
         $history->getCollection()->transform(function ($r) {
@@ -83,10 +100,27 @@ class AdminComplianceController extends Controller
     public function systemLogs(Request $request)
     {
         $perPage = $request->input('per_page', 50);
-        $logs = ComplianceHistory::with(['company', 'company.aaoifiScreening'])
-            ->where('reason', 'like', '%(Auto-applied)%')
-            ->orderBy('changed_at', 'desc')
-            ->paginate($perPage);
+        $query = ComplianceHistory::with(['company', 'company.aaoifiScreening'])
+            ->where('reason', 'like', '%(Auto-applied)%');
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->whereHas('company', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('symbol', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('filter') && $request->input('filter') !== 'all') {
+            $filter = $request->input('filter');
+            if ($filter === 'to-halal') {
+                $query->where('new_status', 'halal');
+            } elseif ($filter === 'to-nonhalal') {
+                $query->where('new_status', 'non-halal');
+            }
+        }
+
+        $logs = $query->orderBy('changed_at', 'desc')->paginate($perPage);
         return response()->json($logs);
     }
 
@@ -100,7 +134,15 @@ class AdminComplianceController extends Controller
                 if ($review->status !== 'pending') continue;
                 $company = $review->company;
                 if (!empty($review->payload)) {
-                    $financial = \App\Models\Financial::updateOrCreate(['company_id' => $company->id], $review->payload);
+                    $financial = $company->latestFinancial;
+                    if ($financial) {
+                        $financial->update($review->payload);
+                    } else {
+                        $financial = \App\Models\Financial::create(array_merge(
+                            ['company_id' => $company->id],
+                            $review->payload
+                        ));
+                    }
                     $complianceService = app(\App\Services\AaoifiComplianceService::class);
                     $complianceService->evaluateCompliance($company, $financial, $company->sector);
                 }
@@ -155,10 +197,15 @@ class AdminComplianceController extends Controller
         
         // Apply the financial payload if it exists
         if (!empty($review->payload)) {
-            $financial = \App\Models\Financial::updateOrCreate(
-                ['company_id' => $company->id],
-                $review->payload
-            );
+            $financial = $company->latestFinancial;
+            if ($financial) {
+                $financial->update($review->payload);
+            } else {
+                $financial = \App\Models\Financial::create(array_merge(
+                    ['company_id' => $company->id],
+                    $review->payload
+                ));
+            }
             
             // Re-evaluate full AAOIFI compliance now that financials are saved
             $complianceService = app(\App\Services\AaoifiComplianceService::class);
