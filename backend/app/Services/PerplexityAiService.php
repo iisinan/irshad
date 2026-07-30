@@ -283,7 +283,6 @@ class PerplexityAiService
         $prompt .= "- Adult entertainment / pornography\n";
         $prompt .= "- Weapons/arms manufacturing (where prohibited by scholars)\n";
         $prompt .= "- Any other clearly haram activity under mainstream Islamic finance.\n\n";
-        $prompt .= "If the company has mixed activities, calculate Haram Revenue % = (Revenue from prohibited activities / Total revenue) * 100. If Haram Revenue % >= 5%, mark as FAIL. If Haram Revenue % < 5%, allow it to proceed (PASS), but flag that dividend purification will be required.\n\n";
         $prompt .= "You MUST return a JSON object with EXACTLY these keys (no markdown blocks, no extra text):\n";
         $prompt .= "{\n";
         $prompt .= "  \"compliance_status\": \"PASS\" or \"FAIL\",\n";
