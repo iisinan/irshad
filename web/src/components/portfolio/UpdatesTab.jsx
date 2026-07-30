@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Newspaper, BookOpen, Inbox } from 'lucide-react';
 import UpdatesNews  from './UpdatesNews';
-import UpdatesGuide from './UpdatesGuide';
 import UpdatesInbox from './UpdatesInbox';
 import { fetchUnreadCount } from '../../services/api';
 
@@ -30,12 +29,6 @@ export default function UpdatesTab() {
       label: 'News & Insights',
       icon: Newspaper,
       description: 'Compliance changes, business activity & market intelligence',
-    },
-    {
-      id: 'guide',
-      label: 'Help & Guide',
-      icon: BookOpen,
-      description: 'Getting started, FAQs, tutorials and support',
     },
     {
       id: 'inbox',
@@ -157,7 +150,6 @@ export default function UpdatesTab() {
       {/* Tab Content with staggered fade up */}
       <div className="animate-slide-up stagger-3" key={activeSubTab} style={{ minHeight: '400px' }}>
         {activeSubTab === 'news'  && <UpdatesNews />}
-        {activeSubTab === 'guide' && <UpdatesGuide />}
         {activeSubTab === 'inbox' && <UpdatesInbox />}
       </div>
     </div>

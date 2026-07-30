@@ -15,6 +15,7 @@ import PurificationTab from './portfolio/PurificationTab';
 import LecturesTab from './portfolio/LecturesTab';
 import StatementTab from './portfolio/StatementTab';
 import UpdatesTab from './portfolio/UpdatesTab';
+import GuideTab from './portfolio/GuideTab';
 
 import AddHoldingModal from "./portfolio/AddHoldingModal";
 
@@ -161,6 +162,7 @@ export default function Portfolio() {
     { id: 'zakat',        label: 'Zakat',           icon: Calculator },
     { id: 'purification', label: 'Purification',    icon: ShieldCheck },
     { id: 'lectures',     label: 'Resources',       icon: BookOpen },
+    { id: 'guide',        label: 'Guide',           icon: BookOpen },
     { id: 'updates',      label: 'Updates',         icon: Rss },
   ];
 
@@ -318,6 +320,11 @@ export default function Portfolio() {
           {mountedTabs.includes('updates') && (
             <div style={{ display: activeTab === 'updates' ? 'block' : 'none' }}>
               <UpdatesTab />
+            </div>
+          )}
+          {mountedTabs.includes('guide') && (
+            <div style={{ display: activeTab === 'guide' ? 'block' : 'none' }}>
+              <GuideTab />
             </div>
           )}
 
