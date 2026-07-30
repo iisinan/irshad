@@ -6,7 +6,7 @@ import {
   BarChart2, Star, Activity,
   HeartHandshake, Calculator, BookOpen,
   User, LogOut, ChevronLeft, ChevronRight,
-  X, Moon, Sun, Shield, FileText, Bell
+  X, Moon, Sun, Shield, FileText, Bell, HelpCircle
 } from 'lucide-react';
 
 export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
@@ -21,6 +21,7 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
     { label: 'Market Screener', icon: BarChart2,        to: '/portfolio#market' },
     { label: 'Alert',          icon: Star,             to: '/portfolio#watchlist' },
     { label: 'Updates',        icon: Bell,             to: '/portfolio#updates' },
+    { label: 'Help & Guide',   icon: HelpCircle,       to: '/portfolio#guide' },
     { section: 'Islamic Finance' },
     { label: 'Purification',   icon: HeartHandshake,   to: '/portfolio#purification' },
     { label: 'Zakat',          icon: Calculator,        to: '/portfolio#zakat' },
