@@ -256,7 +256,7 @@ export default function Profile() {
 
               {activeSection === 'preferences' && (
                 <form onSubmit={e => handleUpdate(e, 'preferences')} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                  <div><h2 style={{ fontSize: '1.06rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 4px' }}>Shariah Screening Strictness</h2><p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', margin: 0 }}>Choose how strictly you want the AI to evaluate companies based on the AAOIFI standard.</p></div>
+                  <div><h2 style={{ fontSize: '1.06rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 4px' }}>Shariah Screening Strictness</h2><p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', margin: 0 }}>Choose how strictly you want the system to evaluate companies based on the AAOIFI standard.</p></div>
                   <div style={{ height: '1px', background: 'var(--border)' }} />
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     {['relaxed', 'moderate', 'strict'].map(level => (
