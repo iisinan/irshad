@@ -106,11 +106,16 @@ class SyncCompanyStatus extends Command
             $calculatedStatus = ($stage1Pass && $stage2Pass) ? 'halal' : 'non-halal';
             $finalStatus     = $isVerified ? $stockStatus->status : $calculatedStatus;
 
-            $statusReason = $isVerified
-                ? $stockStatus->reason
-                : ($finalStatus === 'halal'
-                    ? 'Passes both qualitative business and quantitative financial Shariah compliance checks.'
-                    : 'Fails Shariah compliance based on current financial disclosures or business activities.');
+            $statusReason = null;
+            if ($isVerified) {
+                $statusReason = $stockStatus->reason;
+            } else if ($finalStatus === 'halal') {
+                $statusReason = 'Passes both qualitative business and quantitative financial Shariah compliance checks.';
+            } else if (!$stage1Pass && !empty($stage1['reason'])) {
+                $statusReason = $stage1['reason'];
+            } else {
+                $statusReason = 'Fails Shariah compliance based on current financial disclosures or business activities.';
+            }
 
             // Update companies table
             if ($company->current_status !== $finalStatus) {

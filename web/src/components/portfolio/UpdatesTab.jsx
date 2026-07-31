@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Newspaper, BookOpen, Inbox } from 'lucide-react';
+import { Newspaper, Inbox } from 'lucide-react';
 import UpdatesNews  from './UpdatesNews';
 import UpdatesInbox from './UpdatesInbox';
 import { fetchUnreadCount } from '../../services/api';

@@ -42,29 +42,6 @@ function AnimCounter({ target }) {
   return <>{fmtK(val)}</>;
 }
 
-/* ─── Compliance Ring ───────────────────────────────────────── */
-function ComplianceRing({ pct, size = 90 }) {
-  const r = size * 0.4;
-  const circ = 2 * Math.PI * r;
-  const dash = Math.min(pct, 100) / 100 * circ;
-  const color = pct >= 90 ? '#22c55e' : pct >= 70 ? '#f59e0b' : '#ef4444';
-  const cx = size / 2, cy = size / 2;
-  return (
-    <div style={{ position: 'relative', width: size, height: size }}>
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ filter: `drop-shadow(0 0 6px ${color}40)`, flexShrink: 0 }}>
-        <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--border)" strokeWidth={size * 0.08} />
-        <circle cx={cx} cy={cy} r={r} fill="none" stroke={color} strokeWidth={size * 0.08}
-          strokeDasharray={`${dash} ${circ}`} strokeLinecap="round"
-          transform={`rotate(-90 ${cx} ${cy})`}
-          style={{ transition: 'stroke-dasharray 1.4s cubic-bezier(0.16,1,0.3,1)' }} />
-      </svg>
-      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ fontSize: size * 0.18, fontWeight: 900, color: 'var(--text-dark)', lineHeight: 1 }}>{pct}%</div>
-        <div style={{ fontSize: size * 0.09, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Halal</div>
-      </div>
-    </div>
-  );
-}
 
 /* ─── Edit Modal ────────────────────────────────────────────── */
 function EditHoldingModal({ holding, onClose, onSuccess }) {
@@ -339,7 +316,7 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
 
         {/* Right: Compliance */}
         <div style={{ zIndex: 1, display: 'flex', alignItems: 'center', gap: '24px', background: 'var(--bg)', padding: '24px', borderRadius: '20px', border: '1px solid var(--border)', boxShadow: '0 8px 24px rgba(0,0,0,0.04)' }}>
-          <ComplianceRing pct={compliance} size={110} />
+
           <div>
             <div style={{ fontSize: '0.62rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Shariah Status</div>
             <div style={{ fontSize: '1.06rem', fontWeight: 900, color: 'var(--text-dark)' }}>

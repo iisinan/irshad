@@ -45,51 +45,122 @@ class EnforceAaoifiMathCommand extends Command
                 continue;
             }
 
-            // Verify the math matches the final status
-            $shouldBeFail = (
-                $screening->business_status === 'fail' ||
-                $screening->debt_status === 'fail' ||
-                $screening->cash_status === 'fail' ||
-                $screening->impermissible_income_status === 'fail'
-            );
+            $changed = false;
+            $oldFinalStatus = $screening->final_status;
 
-            $expectedFinalStatus = $shouldBeFail ? 'non-halal' : $screening->final_status;
-
-            // Fix the screening final status if the math says it should fail but it says halal
-            if ($expectedFinalStatus === 'non-halal' && $screening->final_status === 'halal') {
-                $screening->update(['final_status' => 'non-halal']);
+            // Recalculate debt status
+            if ($screening->debt_ratio !== null) {
+                $expectedDebt = $screening->debt_ratio <= 30 ? 'pass' : ($screening->debt_ratio <= 33 ? 'warning' : 'fail');
+                if ($screening->debt_status !== $expectedDebt) {
+                    $screening->debt_status = $expectedDebt;
+                    $changed = true;
+                }
             }
 
-            // Ensure Company top-level status matches the enforced screening status
-            if ($company->current_status !== $expectedFinalStatus) {
+            // Recalculate cash status
+            if ($screening->cash_ratio !== null) {
+                $expectedCash = $screening->cash_ratio <= 30 ? 'pass' : ($screening->cash_ratio <= 33 ? 'warning' : 'fail');
+                if ($screening->cash_status !== $expectedCash) {
+                    $screening->cash_status = $expectedCash;
+                    $changed = true;
+                }
+            }
+
+            // Recalculate income status
+            if ($screening->impermissible_income_ratio !== null) {
+                $expectedInc = $screening->impermissible_income_ratio <= 5 ? 'pass' : 'fail';
+                if ($screening->impermissible_income_status !== $expectedInc) {
+                    $screening->impermissible_income_status = $expectedInc;
+                    $changed = true;
+                }
+            }
+
+            // Determine what final status SHOULD be
+            $expectedFinalStatus = 'halal';
+            
+            if ($screening->business_status === 'fail' || $screening->debt_status === 'fail' || $screening->cash_status === 'fail' || $screening->impermissible_income_status === 'fail') {
+                $expectedFinalStatus = 'non-halal';
+            } elseif ($screening->business_status === 'warning' || $screening->debt_status === 'warning' || $screening->cash_status === 'warning' || $screening->impermissible_income_status === 'warning') {
+                $expectedFinalStatus = 'doubtful';
+            } elseif ($screening->business_status === 'insufficient_data' || $screening->debt_status === 'insufficient_data' || $screening->cash_status === 'insufficient_data' || $screening->impermissible_income_status === 'insufficient_data') {
+                $expectedFinalStatus = 'doubtful';
+            }
+
+            if ($screening->final_status !== $expectedFinalStatus) {
+                $screening->final_status = $expectedFinalStatus;
+                $changed = true;
+            }
+
+            if ($changed) {
+                $screening->save();
+            }
+
+            // We only want to update the reason if the company fails math, OR if its current status is different.
+            $needsUpdate = ($company->current_status !== $expectedFinalStatus) || 
+                           ($statusModel && $statusModel->reason === 'Status automatically corrected to match AAOIFI mathematical evaluation.');
+
+            if ($needsUpdate) {
+                $reasonParts = [];
+                if ($expectedFinalStatus === 'halal') {
+                    $mathReason = 'Passes both qualitative business and quantitative financial Shariah compliance checks.';
+                } else {
+                    if ($screening->debt_status === 'fail') {
+                        $reasonParts[] = 'Interest-Bearing Debt (' . round($screening->debt_ratio, 2) . '% > 30%)';
+                    }
+                    if ($screening->cash_status === 'fail') {
+                        $reasonParts[] = 'Cash and Equivalents (' . round($screening->cash_ratio, 2) . '% > 30%)';
+                    }
+                    if ($screening->impermissible_income_status === 'fail') {
+                        $reasonParts[] = 'Impermissible Income (' . round($screening->impermissible_income_ratio, 2) . '% > 5%)';
+                    }
+                    if ($screening->business_status === 'fail') {
+                        $reasonParts[] = 'Prohibited Business Activity';
+                    }
+                    
+                    if (!empty($reasonParts)) {
+                        $mathReason = 'Fails AAOIFI mathematical screening: ' . implode(', ', $reasonParts) . '.';
+                    } else {
+                        $mathReason = 'Fails Shariah compliance based on current financial disclosures or business activities.';
+                    }
+                }
+
                 $oldStatus = $company->current_status;
-                $company->update(['current_status' => $expectedFinalStatus]);
+                
+                if ($company->current_status !== $expectedFinalStatus) {
+                    $company->update(['current_status' => $expectedFinalStatus]);
+                }
 
                 // Update StockStatus record
                 if ($statusModel) {
+                    // Only overwrite the reason if it was the generic one, OR if we are forcing it to non-halal/doubtful due to math.
+                    // If it is halal, and we just changed it to halal, maybe we don't have the AI reason, so $mathReason is okay.
                     $statusModel->update([
                         'status' => $expectedFinalStatus,
-                        'reason' => 'Status automatically corrected to match AAOIFI mathematical evaluation.'
+                        'reason' => $mathReason
                     ]);
                 } else {
                     \App\Models\StockStatus::create([
                         'company_id' => $company->id,
                         'status' => $expectedFinalStatus,
-                        'reason' => 'Status automatically corrected to match AAOIFI mathematical evaluation.',
+                        'reason' => $mathReason,
                         'verified_by_scholar' => false,
                         'last_updated' => now(),
                     ]);
                 }
 
-                \App\Models\ComplianceHistory::create([
-                    'company_id' => $company->id,
-                    'old_status' => $oldStatus,
-                    'new_status' => $expectedFinalStatus,
-                    'reason' => 'Status automatically corrected to match AAOIFI mathematical evaluation.',
-                    'changed_at' => now(),
-                ]);
-
-                $this->warn("Fixed {$company->symbol}: Was {$oldStatus}, now is {$expectedFinalStatus} based on strict math.");
+                if ($oldStatus !== $expectedFinalStatus) {
+                    \App\Models\ComplianceHistory::create([
+                        'company_id' => $company->id,
+                        'old_status' => $oldStatus,
+                        'new_status' => $expectedFinalStatus,
+                        'reason' => $mathReason,
+                        'changed_at' => now(),
+                    ]);
+                    $this->warn("Fixed {$company->symbol}: Was {$oldStatus}, now is {$expectedFinalStatus} based on strict math.");
+                } else {
+                    $this->info("Updated reason for {$company->symbol}.");
+                }
+                
                 $fixedCount++;
             }
         }

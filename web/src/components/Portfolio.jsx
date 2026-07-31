@@ -392,26 +392,7 @@ export default function Portfolio() {
               <div style={{ width:'10px', height:'10px', borderRadius:'50%', background:'var(--halal)', boxShadow:'0 0 10px rgba(34,197,94,0.4)' }}/> Shariah Health
             </h3>
             
-            {/* Compliance Score Bar */}
-            {(holdings || []).length > 0 && (
-              <div style={{ marginBottom:'18px', padding:'16px', background:'var(--bg-section)', borderRadius:'14px' }}>
-                <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'8px' }}>
-                  <span style={{ fontSize: '0.69rem', fontWeight:700, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.5px' }}>Compliance Score</span>
-                  <span style={{ fontSize: '0.79rem', fontWeight:900, color: halalCount === (holdings || []).length ? 'var(--halal)' : nonHalalCount > 0 ? 'var(--non-halal)' : 'var(--doubtful)' }}>
-                    {(holdings || []).length > 0 ? `${Math.round((halalCount / (holdings || []).length) * 100)}%` : '—'}
-                  </span>
-                </div>
-                <div style={{ height:'8px', background:'var(--border)', borderRadius:'4px', overflow:'hidden' }}>
-                  <div style={{ 
-                    width: (holdings || []).length > 0 ? `${(halalCount / (holdings || []).length) * 100}%` : '0%',
-                    height:'100%',
-                    background: halalCount === (holdings || []).length ? 'var(--halal)' : 'var(--doubtful)',
-                    borderRadius:'4px',
-                    transition:'width 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
-                  }}/>
-                </div>
-              </div>
-            )}
+
 
             <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
               {[

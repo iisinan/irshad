@@ -292,9 +292,9 @@ export default function GuideTab() {
             <h4 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 20px' }}>How Screening Works</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <Step number={1} title="Company Data Collection" description="Irshad collects annual reports, audited financial statements, and business disclosure documents from the NSE, company websites, and verified data sources." />
-              <Step number={2} title="AI-Powered Analysis" description="Our AI Engine analyses the financial statements to extract revenue by business segment, total debt, interest income, and other key metrics required for AAOIFI screening." />
+              <Step number={2} title="Financial Data Extraction" description="Irshad analyses the financial statements to extract revenue by business segment, total debt, interest income, and other key metrics required for AAOIFI screening." />
               <Step number={3} title="AAOIFI Ratio Calculation" description="Irshad calculates the three core AAOIFI financial ratios: interest-bearing debt, interest income, and liquid assets — each relative to total assets." />
-              <Step number={4} title="Business Activity Review" description="The AI reviews corporate announcements and news to detect any involvement in prohibited activities (alcohol, tobacco, conventional banking, entertainment, etc.)." />
+              <Step number={4} title="Business Activity Review" description="Irshad reviews corporate announcements and news to detect any involvement in prohibited activities (alcohol, tobacco, conventional banking, entertainment, etc.)." />
               <Step number={5} title="Final Status Assignment" description="Based on both tests, the company is assigned a status: Halal, Non-Halal, or Doubtful. The status is updated whenever new financial data becomes available." />
             </div>
           </div>

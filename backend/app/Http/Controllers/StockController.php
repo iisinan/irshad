@@ -506,6 +506,8 @@ class StockController extends Controller
             } else {
                 if ($finalStatus === 'halal') {
                     $statusReason = 'Passes both qualitative business and quantitative financial Shariah compliance checks.';
+                } else if (!$stage1Pass && !empty($stage1['reason'])) {
+                    $statusReason = $stage1['reason'];
                 } else {
                     $statusReason = 'Fails Shariah compliance based on current financial disclosures or business activities.';
                 }

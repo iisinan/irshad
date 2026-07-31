@@ -153,11 +153,22 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const dailyPrices = stock.daily_prices || [];
   const latestPriceObj = dailyPrices.length > 0 ? dailyPrices[0] : null;
   const previousPriceObj = dailyPrices.length > 1 ? dailyPrices[1] : null;
-  const latestPrice = latestPriceObj ? parseFloat(latestPriceObj.price) : 0;
+  
+  // Use stock.latest_price from the company table as ground truth, fallback to daily_prices
+  const latestPrice = stock.latest_price ? parseFloat(stock.latest_price) : (latestPriceObj ? parseFloat(latestPriceObj.price) : 0);
+  
+  // For price change, use stock.price_change_pct if available, else calculate manually
+  const priceChangePct = stock.price_change_pct ? parseFloat(stock.price_change_pct) : (
+      previousPriceObj && parseFloat(previousPriceObj.price) > 0 
+          ? ((latestPrice - parseFloat(previousPriceObj.price)) / parseFloat(previousPriceObj.price)) * 100 
+          : 0
+  );
+  
   const previousPrice = previousPriceObj ? parseFloat(previousPriceObj.price) : latestPrice;
   const priceChange = latestPrice - previousPrice;
-  const priceChangePct = previousPrice > 0 ? (priceChange / previousPrice) * 100 : 0;
-  const isPositive = priceChange >= 0;
+  
+  // Determine if it's positive based on the percentage change
+  const isPositive = priceChangePct >= 0;
 
 
 
@@ -648,7 +659,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
               style={{ 
                 width: '100%', justifyContent: 'center', padding: '16px', fontSize: '0.94rem', 
                 border: 'none', cursor: 'pointer', borderRadius: '16px',
-                background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)',
+                background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%)',
                 color: 'white', fontWeight: 800, letterSpacing: '0.5px',
                 boxShadow: '0 8px 24px rgba(6, 78, 59, 0.25), inset 0 1px 0 rgba(255,255,255,0.2)',
                 transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
