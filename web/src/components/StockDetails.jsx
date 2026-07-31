@@ -327,11 +327,13 @@ const StockDetails = ({ symbol: propSymbol }) => {
             <p style={{ margin: 0, fontSize: '0.9rem', color: 'rgba(255,255,255,0.92)', lineHeight: 1.5, fontWeight: 500, textShadow: '0 1px 2px rgba(0,0,0,0.1)' }}>
               {reason || 'Screened strictly according to AAOIFI Standard No. 21 methodology. All business operations and financial ratios comply with Shariah requirements.'}
             </p>
-            <div style={{ marginTop: '4px' }}>
-              <Link to={`/market/${stock.symbol}/aaoifi`} style={{ fontSize: '0.72rem', fontWeight: 700, color: 'white', textDecoration: 'none', background: 'rgba(255,255,255,0.15)', padding: '5px 16px', borderRadius: '100px', border: '1px solid rgba(255,255,255,0.25)', transition: 'all 0.2s', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                Full Audit →
-              </Link>
-            </div>
+            {isHalal && (
+              <div style={{ marginTop: '4px' }}>
+                <Link to={`/market/${stock.symbol}/aaoifi`} style={{ fontSize: '0.72rem', fontWeight: 700, color: 'white', textDecoration: 'none', background: 'rgba(255,255,255,0.15)', padding: '5px 16px', borderRadius: '100px', border: '1px solid rgba(255,255,255,0.25)', transition: 'all 0.2s', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  Full Audit →
+                </Link>
+              </div>
+            )}
           </div>
         </div>
 
