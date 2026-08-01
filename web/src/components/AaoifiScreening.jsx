@@ -279,10 +279,14 @@ const AaoifiScreening = () => {
     const fillPercent = (ratioVal / maxVisual) * 100;
     const thresholdPercent = (thresholdNum / maxVisual) * 100;
 
+    const numValParsed = parseFloat(numVal) || 0;
+    const isClickable = numValParsed !== 0;
+
     return (
       <div 
-        onClick={() => openModal(title, ratio, isMinimum ? `≥ ${threshold}%` : `≤ ${threshold}%`, formula, numLabel, numVal, denLabel, denVal)}
-        className="ratio-progress-row hover-card"
+        onClick={isClickable ? () => openModal(title, ratio, isMinimum ? `≥ ${threshold}%` : `≤ ${threshold}%`, formula, numLabel, numVal, denLabel, denVal) : undefined}
+        className={`ratio-progress-row ${isClickable ? 'hover-card' : ''}`}
+        style={isClickable ? {} : { cursor: 'default' }}
       >
         <div className="ratio-col-label">
           <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.88rem', marginBottom: '4px' }}>{title}</div>
