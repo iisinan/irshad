@@ -37,7 +37,7 @@ class SyncNgxPulse extends Command
         }
 
         // Run the python script
-        $process = Process::fromShellCommandline("source venv/bin/activate && set -a && source .env && set +a && python3 app/scripts/ngxpulse_scraper.py", $aiEnginePath);
+        $process = Process::fromShellCommandline("source venv/bin/activate && set -a && source .env && set +a && python3 -m app.scripts.ngxpulse_scraper", $aiEnginePath);
         
         $process->setTimeout(3600); // Allow up to 1 hour for large syncs
         $process->run(function ($type, $buffer) {
