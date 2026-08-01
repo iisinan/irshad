@@ -152,6 +152,7 @@ export default function MarketTab() {
       return Array.isArray(r) ? r : (r?.data || []);
     },
     staleTime: 5 * 60 * 1000,
+    refetchInterval: 30000,
   });
 
   const { data: initialWatchlist = [] } = useQuery({

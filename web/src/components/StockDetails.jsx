@@ -57,11 +57,20 @@ const StockDetails = ({ symbol: propSymbol }) => {
   };
 
   useEffect(() => {
-    // Always fetch full data in background; merge so we add financials & chart
+    const fetchLatest = () => {
+      fetchStockDetails(symbol)
+        .then(r => { if (r.data) setStock(r.data); })
+        .catch(console.error);
+    };
+
+    // Initial fetch
     fetchStockDetails(symbol)
       .then(r => { if (r.data) setStock(r.data); })
       .catch(console.error)
       .finally(() => { setLoading(false); setEnriching(false); });
+      
+    // Silent background polling every 30 seconds
+    const intervalId = setInterval(fetchLatest, 30000);
       
     // Log history
     if (user) {
@@ -71,7 +80,8 @@ const StockDetails = ({ symbol: propSymbol }) => {
         setInWatchlist(list.some(item => item.symbol === symbol));
       }).catch(console.error);
     }
-    // AI Analysis is now fetched on-demand by user
+    
+    return () => clearInterval(intervalId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [symbol, user]);
 
