@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2, Brain, Globe, Newspaper, Bell, X, ShieldCheck, Activity, ChevronDown, ChevronUp, Briefcase, Scale, Landmark } from 'lucide-react';
+import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2, Brain, Globe, Newspaper, Bell, X, ShieldCheck, Activity, ChevronDown, ChevronUp, Briefcase, Scale, Landmark, Droplets } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import api, { fetchStockDetails, fetchAiAnalysis, setPriceAlert, fetchWatchlist, addToWatchlist, removeFromWatchlist } from '../services/api';
 import CompanyLogo from './CompanyLogo';
@@ -132,11 +132,17 @@ const StockDetails = ({ symbol: propSymbol }) => {
 
   reason = formatAppJustification(reason, isNonHalal);
 
+  const aaoifiData = stock.aaoifi_screening ?? stock.compliance_data ?? null;
+  const hasPurification = isHalal && !!aaoifiData?.purification_required;
+  if (hasPurification) {
+    statusStr = 'HALAL WITH PURIFICATION';
+    StatusIcon = Droplets;
+  }
+
   // ─── Business activity failure flag ──────────────────
   // True when the stock is non-halal specifically because it failed the
   // qualitative business activity screen (not just the financial ratios).
   // In this case we hide analysis, metrics, price chart and news.
-  const aaoifiData = stock.aaoifi_screening ?? stock.compliance_data ?? null;
   const isFailedBusinessActivity = isNonHalal && (
     aaoifiData?.business_status === 'fail' ||
     stock?.business_status === 'fail' ||
@@ -284,15 +290,19 @@ const StockDetails = ({ symbol: propSymbol }) => {
         <div style={{
           position: 'relative', zIndex: 1,
           width: '100%', boxSizing: 'border-box',
-          background: isHalal 
+          background: hasPurification 
+            ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.28) 0%, rgba(180, 83, 9, 0.35) 100%)' 
+            : isHalal 
             ? 'linear-gradient(135deg, rgba(22, 163, 74, 0.28) 0%, rgba(20, 83, 45, 0.35) 100%)' 
             : isNonHalal 
             ? 'linear-gradient(135deg, rgba(220, 38, 38, 0.32) 0%, rgba(153, 27, 27, 0.38) 100%)' 
             : 'linear-gradient(135deg, rgba(202, 138, 4, 0.28) 0%, rgba(133, 77, 14, 0.35) 100%)',
-          border: `1.5px solid ${isHalal ? 'rgba(74, 222, 128, 0.45)' : isNonHalal ? 'rgba(248, 113, 113, 0.45)' : 'rgba(250, 204, 21, 0.45)'}`,
+          border: `1.5px solid ${hasPurification ? 'rgba(251, 191, 36, 0.45)' : isHalal ? 'rgba(74, 222, 128, 0.45)' : isNonHalal ? 'rgba(248, 113, 113, 0.45)' : 'rgba(250, 204, 21, 0.45)'}`,
           borderRadius: '18px',
           padding: '20px 24px',
-          boxShadow: isHalal 
+          boxShadow: hasPurification 
+            ? '0 12px 32px rgba(245, 158, 11, 0.25), inset 0 1px 0 rgba(255,255,255,0.1)' 
+            : isHalal 
             ? '0 12px 32px rgba(22, 163, 74, 0.25), inset 0 1px 0 rgba(255,255,255,0.1)' 
             : isNonHalal 
             ? '0 12px 32px rgba(220, 38, 38, 0.28), inset 0 1px 0 rgba(255,255,255,0.1)' 
@@ -311,9 +321,9 @@ const StockDetails = ({ symbol: propSymbol }) => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <div style={{
               width: '56px', height: '56px', borderRadius: '16px',
-              background: isHalal ? '#16a34a' : isNonHalal ? '#dc2626' : '#ca8a04',
+              background: hasPurification ? '#f59e0b' : isHalal ? '#16a34a' : isNonHalal ? '#dc2626' : '#ca8a04',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: isHalal ? '0 0 20px rgba(22, 163, 74, 0.5)' : isNonHalal ? '0 0 20px rgba(220, 38, 38, 0.5)' : '0 0 20px rgba(202, 138, 4, 0.5)', 
+              boxShadow: hasPurification ? '0 0 20px rgba(245, 158, 11, 0.5)' : isHalal ? '0 0 20px rgba(22, 163, 74, 0.5)' : isNonHalal ? '0 0 20px rgba(220, 38, 38, 0.5)' : '0 0 20px rgba(202, 138, 4, 0.5)', 
               flexShrink: 0,
               border: '2px solid rgba(255,255,255,0.3)',
               animation: 'pulse 2.5s infinite alternate'

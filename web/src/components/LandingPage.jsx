@@ -81,14 +81,17 @@ const AnimatedNumber = ({ value }) => {
 };
 
 const StatusPill = ({ verdict }) => {
+  const v = typeof verdict === 'object' ? verdict?.status : verdict;
+  const purif = typeof verdict === 'object' ? verdict?.purification_required : false;
+
   const map = {
-    halal:     { label: 'Halal',     bg: 'var(--halal-bg)',     color: 'var(--halal)',     border: 'var(--halal-border)'     },
-    compliant: { label: 'Halal',     bg: 'var(--halal-bg)',     color: 'var(--halal)',     border: 'var(--halal-border)'     },
+    halal:     { label: purif ? 'Halal w/ Purify' : 'Halal',     bg: purif ? 'rgba(245, 158, 11, 0.15)' : 'var(--halal-bg)',     color: purif ? '#f59e0b' : 'var(--halal)',     border: purif ? 'rgba(245, 158, 11, 0.4)' : 'var(--halal-border)'     },
+    compliant: { label: purif ? 'Halal w/ Purify' : 'Halal',     bg: purif ? 'rgba(245, 158, 11, 0.15)' : 'var(--halal-bg)',     color: purif ? '#f59e0b' : 'var(--halal)',     border: purif ? 'rgba(245, 158, 11, 0.4)' : 'var(--halal-border)'     },
     non_halal: { label: 'Non-Halal', bg: 'var(--non-halal-bg)', color: 'var(--non-halal)', border: 'var(--non-halal-border)' },
     'non-halal': { label: 'Non-Halal', bg: 'var(--non-halal-bg)', color: 'var(--non-halal)', border: 'var(--non-halal-border)' },
     doubtful:  { label: 'Doubtful',  bg: 'var(--doubtful-bg)',  color: 'var(--doubtful)',  border: 'var(--doubtful-border)'  },
   };
-  const s = map[verdict?.toLowerCase()] || map.doubtful;
+  const s = map[v?.toLowerCase()] || map.doubtful;
   return (
     <span style={{ fontSize: '0.7rem', fontWeight: 700, padding: '3px 10px', borderRadius: 20, background: s.bg, color: s.color, border: `1px solid ${s.border}`, whiteSpace: 'nowrap', flexShrink: 0 }}>
       {s.label}

@@ -42,9 +42,16 @@ class StockController extends Controller
             return Company::select(['id', 'name', 'symbol', 'sector', 'current_status', 'latest_price', 'price_change_pct', 'logo_url', 'market_cap', 'pe_ratio'])
                 ->whereNotNull('latest_price')
                 ->where('latest_price', '>', 0)
+                ->with('aaoifiScreening:company_id,impermissible_income_ratio')
                 ->get()
                 ->map(function ($company) {
-                    $company->status = $company->current_status ? ['status' => $company->current_status] : null;
+                    $ratio = $company->aaoifiScreening ? $company->aaoifiScreening->impermissible_income_ratio : 0;
+                    $company->status = $company->current_status ? [
+                        'status' => $company->current_status,
+                        'purification_required' => $company->current_status === 'halal' && $ratio > 0,
+                        'haram_revenue_percent' => $ratio
+                    ] : null;
+                    unset($company->aaoifiScreening);
                     return $company;
                 });
         });
