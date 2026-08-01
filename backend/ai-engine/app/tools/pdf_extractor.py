@@ -149,8 +149,14 @@ class PDFExtractor:
             max_retries = 3
             for attempt in range(max_retries):
                 try:
-                    response = await asyncio.to_thread(_generate)
+                    response = await asyncio.wait_for(asyncio.to_thread(_generate), timeout=60.0)
                     return json.loads(response.text)
+                except asyncio.TimeoutError:
+                    print(f"Gemini API Error (Attempt {attempt + 1}/{max_retries}): Request timed out after 60 seconds.")
+                    if attempt == max_retries - 1:
+                        print(f"Failed to extract after {max_retries} attempts.")
+                        return {}
+                    await asyncio.sleep(5 * (2 ** attempt))
                 except Exception as e:
                     print(f"Gemini API Error (Attempt {attempt + 1}/{max_retries}): {e}")
                     if attempt == max_retries - 1:
