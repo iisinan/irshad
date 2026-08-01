@@ -25,6 +25,8 @@ services:
         value: 8080
       - key: AI_ENGINE_URL
         sync: false # Set to the Render URL of your irshad-ai-engine service
+      - key: GEMINI_API_KEY
+        sync: false # Required for the background cron job to extract PDFs
 
 
 
