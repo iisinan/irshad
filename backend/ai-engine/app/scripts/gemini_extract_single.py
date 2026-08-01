@@ -23,21 +23,7 @@ def main():
 
     client = genai.Client(api_key=api_key, http_options=genai_types.HttpOptions(api_version='v1beta'))
 
-    # TRUNCATE PDF TO FIRST 25 PAGES TO SAVE TOKENS
-    max_pages = 25
-    truncated_pdf_path = pdf_path.replace(".pdf", "_truncated.pdf")
-    try:
-        doc = fitz.open(pdf_path)
-        if doc.page_count > max_pages:
-            doc.select(range(max_pages))
-            doc.save(truncated_pdf_path)
-            upload_path = truncated_pdf_path
-        else:
-            upload_path = pdf_path
-        doc.close()
-    except Exception as e:
-        print(f"PDF truncation failed: {e}", file=sys.stderr)
-        upload_path = pdf_path
+    upload_path = pdf_path
 
     print(f"Uploading {upload_path}...", file=sys.stderr)
     gemini_file = client.files.upload(file=upload_path)
