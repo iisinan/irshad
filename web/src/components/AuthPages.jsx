@@ -339,7 +339,7 @@ export const RegisterPage = () => {
               placeholder="Strong password"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              hint="At least 8 characters."
+              hint="8+ chars (mix of uppercase, lowercase, numbers, symbols)."
               required
               minLength={8}
             />
