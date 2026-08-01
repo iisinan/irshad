@@ -41,8 +41,6 @@ class StockController extends Controller
     {
         $stocks = Cache::tags(['stocks'])->remember('stocks.index', 300, function () {
             return Company::select(['id', 'name', 'symbol', 'sector', 'current_status', 'latest_price', 'price_change_pct', 'logo_url', 'market_cap', 'pe_ratio'])
-                ->whereNotNull('latest_price')
-                ->where('latest_price', '>', 0)
                 ->with('aaoifiScreening:company_id,impermissible_income_ratio')
                 ->get()
                 ->map(function ($company) {
@@ -215,7 +213,7 @@ class StockController extends Controller
                 'id', 'name', 'symbol', 'sector', 'current_status',
                 'latest_price', 'price_change', 'price_change_pct',
                 'market_cap', 'pe_ratio', 'eps', 'logo_url',
-            ])->whereNotNull('latest_price')->where('latest_price', '>', 0);
+            ]);
 
             if ($request->has('status') && ! empty($request->status)) {
                 $statusFilters = explode(',', strtolower($request->status));

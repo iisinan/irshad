@@ -1,5 +1,16 @@
 services:
-  # 1. The Laravel Backend
+  # 1. The React Frontend (Static Site)
+  - type: web
+    name: irshad-frontend
+    env: static
+    buildCommand: cd web && npm install && npm run build
+    staticPublishPath: web/dist
+    plan: free
+    envVars:
+      - key: VITE_API_URL
+        sync: false # Set this to the URL of irshad-backend
+
+  # 2. The Laravel Backend
   - type: web
     name: irshad-backend
     env: docker
@@ -17,8 +28,15 @@ services:
         value: pgsql
       - key: DB_URL
         sync: false # Render will ask you to fill this in manually with your Neon DB string
+      - key: CACHE_STORE
+        value: redis
       - key: QUEUE_CONNECTION
-        value: database
+        value: redis
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: irshad-redis
+          property: connectionString
       - key: LOG_CHANNEL
         value: stderr
       - key: PORT
@@ -27,8 +45,6 @@ services:
         sync: false # Set to the Render URL of your irshad-ai-engine service
       - key: GEMINI_API_KEY
         sync: false # Required for the background cron job to extract PDFs
-
-
 
   # 3. The Python AI Engine
   - type: web
@@ -57,3 +73,9 @@ services:
     envVars:
       - key: PORT
         value: 80 # Nginx default in the Dockerfile
+
+  # 5. Redis Cache & Queue Broker
+  - type: redis
+    name: irshad-redis
+    plan: free
+    maxmemoryPolicy: allkeys-lru
