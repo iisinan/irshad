@@ -151,6 +151,13 @@ class StockController extends Controller
             'status'       => $lastPaidDividend->status,
         ] : null;
 
+        // Expose business_status so the frontend can hide analysis/metrics/news
+        // for stocks that failed qualitative business activity screening.
+        $aaoifiScreening = \App\Models\AaoifiScreening::where('company_id', $stock->id)
+            ->select('business_status')
+            ->first();
+        $stockArray['business_status'] = $aaoifiScreening?->business_status ?? null;
+
         return $this->success($stockArray);
     }
 

@@ -132,6 +132,17 @@ const StockDetails = ({ symbol: propSymbol }) => {
 
   reason = formatAppJustification(reason, isNonHalal);
 
+  // ─── Business activity failure flag ──────────────────
+  // True when the stock is non-halal specifically because it failed the
+  // qualitative business activity screen (not just the financial ratios).
+  // In this case we hide analysis, metrics, price chart and news.
+  const aaoifiData = stock.aaoifi_screening ?? stock.compliance_data ?? null;
+  const isFailedBusinessActivity = isNonHalal && (
+    aaoifiData?.business_status === 'fail' ||
+    stock?.business_status === 'fail' ||
+    (stock?.status && typeof stock.status === 'object' && stock.status?.business_status === 'fail')
+  );
+
   // ─── Financial ratios ─────────────────────────────
   const financials = stock.financials;
   const latest = Array.isArray(financials) && financials.length > 0 ? financials[0] : null;
@@ -422,7 +433,8 @@ const StockDetails = ({ symbol: propSymbol }) => {
             </div>
           </div>
 
-          {/* Irshad Shariah Analysis */}
+          {/* Irshad Shariah Analysis — hidden for business activity failures */}
+          {!isFailedBusinessActivity && (
           <div className="detail-panel hover-card" style={{ 
             background: 'linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%)', 
             border: '1px solid rgba(212, 175, 55, 0.25)', 
@@ -474,11 +486,12 @@ const StockDetails = ({ symbol: propSymbol }) => {
               )}
             </div>
           </div>
+          )}
 
 
 
-          {/* Advanced Metrics (Market Data) */}
-          {(stock.valuation_info && stock.valuation_info !== 'N/A' && stock.valuation_info !== 'O' || 
+          {/* Advanced Metrics — hidden for business activity failures */}
+          {!isFailedBusinessActivity && (stock.valuation_info && stock.valuation_info !== 'N/A' && stock.valuation_info !== 'O' ||
             stock.growth_info && stock.growth_info !== 'N/A' && stock.growth_info !== 'O') && (
             <div className="detail-panel" style={{ padding: '28px', background: 'var(--bg-section)', border: '1px solid var(--border)' }}>
               <div className="detail-section-label" style={{ marginBottom: '20px' }}>Advanced Metrics</div>
@@ -503,7 +516,8 @@ const StockDetails = ({ symbol: propSymbol }) => {
             </div>
           )}
 
-          {/* Price Chart */}
+          {/* Price Chart — hidden for business activity failures */}
+          {!isFailedBusinessActivity && (
           <div className="detail-panel">
             <div className="detail-section-label">Price History (30 Days)</div>
             <div style={{ height: '240px', width: '100%', marginTop: '16px' }}>
@@ -562,6 +576,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
               )}
             </div>
           </div>
+          )}
         </div>
 
         {/* Right Column (Sticky so it stays fixed and doesn't move with page scroll) */}
@@ -697,7 +712,8 @@ const StockDetails = ({ symbol: propSymbol }) => {
 
 
 
-      {/* ─── News Section ─── */}
+      {/* ─── News Section — hidden for business activity failures ─── */}
+      {!isFailedBusinessActivity && (
       <div style={{ marginTop: '32px', paddingBottom: '32px' }}>
         <div className="detail-panel">
           <div className="detail-section-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px' }}>
@@ -746,6 +762,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
           )}
         </div>
       </div>
+      )}
 
       {/* ─── Price Alert Modal ─── */}
       {showAlertDialog && createPortal(
