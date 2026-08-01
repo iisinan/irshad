@@ -35,3 +35,6 @@ Schedule::command('compliance:enforce-math')->dailyAt('01:00');
 
 // NGXPulse Daily Financials Sync (JSON API -> Gemini Extraction)
 Schedule::command('irshad:sync-ngxpulse')->dailyAt('03:00');
+
+// NGX Pulse Dividend Calendar — scrape & update every morning at 9:00 AM
+Schedule::command('dividends:update')->dailyAt('09:00');

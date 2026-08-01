@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calculator, Download, Coins, Wheat, Bug as Cow, Scale, CheckCircle2, RefreshCw, AlertCircle } from 'lucide-react';
+import { Calculator, Download, Coins, Wheat, Bug as Cow, Scale, CheckCircle2, RefreshCw, AlertCircle, Calendar, Bell, Edit2 } from 'lucide-react';
 import { getSettings } from '../../services/api';
 
 function getCowZakat(n) {
@@ -35,11 +35,39 @@ function getSheepZakat(n) {
   if (n <= 120) return '1 Sheep/Goat';
   if (n <= 200) return '2 Sheep/Goats';
   if (n <= 399) return '3 Sheep/Goats';
-  return `${Math.floor(n / 100)} Sheep/Goats`;
 }
 
 export default function ZakatTab({ data }) {
-  // Settings & Live Fetch
+  // ─── Hawl date from localStorage (set via AddHoldingModal) ───────────────
+  const ZAKAT_DATE_KEY = 'irshad_zakat_hawl_date';
+  const [hawlDate, setHawlDate] = useState(() => localStorage.getItem(ZAKAT_DATE_KEY) || null);
+  const [editingHawl, setEditingHawl] = useState(false);
+  const [hawlInput, setHawlInput] = useState(hawlDate || '');
+
+  const hawlDueDate = hawlDate ? (() => {
+    const d = new Date(hawlDate);
+    d.setFullYear(d.getFullYear() + 1);
+    return d;
+  })() : null;
+
+  const daysUntilDue = hawlDueDate ? Math.ceil((hawlDueDate - new Date()) / (1000 * 60 * 60 * 24)) : null;
+
+  const saveHawlDate = () => {
+    if (hawlInput) {
+      localStorage.setItem(ZAKAT_DATE_KEY, hawlInput);
+      setHawlDate(hawlInput);
+    }
+    setEditingHawl(false);
+  };
+
+  const clearHawlDate = () => {
+    localStorage.removeItem(ZAKAT_DATE_KEY);
+    localStorage.removeItem('irshad_zakat_date_asked');
+    setHawlDate(null);
+    setHawlInput('');
+    setEditingHawl(false);
+  };
+
   const [exchangeRate, setExchangeRate] = useState(1600); // USD to NGN default
   const [goldPrice, setGoldPrice] = useState(150000); // NGN per gram default
   const [isFetchingNisab, setIsFetchingNisab] = useState(false);
@@ -163,6 +191,57 @@ export default function ZakatTab({ data }) {
           </div>
         </div>
       </div>
+
+      {/* ─── Hawl (Zakat) Date Banner ─── */}
+      {hawlDate && !editingHawl ? (
+        <div className="no-print" style={{ background: 'linear-gradient(135deg, rgba(212,175,55,0.08) 0%, rgba(212,175,55,0.04) 100%)', border: '1px solid rgba(212,175,55,0.25)', borderRadius: '20px', padding: '20px 28px', marginBottom: '28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Bell size={20} color="#d4af37" />
+            </div>
+            <div>
+              <div style={{ fontSize: '0.63rem', fontWeight: 800, color: '#b89326', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '4px' }}>Your Zakat (Hawl) Date</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-dark)' }}>
+                  <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Started:</span> {new Date(hawlDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                </span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-dark)' }}>
+                  <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Due:</span> {hawlDueDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                </span>
+                {daysUntilDue !== null && (
+                  <span style={{ padding: '4px 12px', borderRadius: '100px', background: daysUntilDue <= 30 ? 'rgba(239,68,68,0.1)' : daysUntilDue <= 90 ? 'rgba(245,158,11,0.1)' : 'rgba(34,197,94,0.1)', color: daysUntilDue <= 30 ? '#dc2626' : daysUntilDue <= 90 ? '#d97706' : '#16a34a', fontSize: '0.72rem', fontWeight: 800 }}>
+                    {daysUntilDue > 0 ? `${daysUntilDue} days remaining` : 'Zakat Due Now!'}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+          <button onClick={() => { setHawlInput(hawlDate); setEditingHawl(true); }} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 16px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text-muted)', fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer', transition: 'all 0.2s', flexShrink: 0 }} onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(212,175,55,0.4)'} onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}>
+            <Edit2 size={13} /> Edit Date
+          </button>
+        </div>
+      ) : !hawlDate || editingHawl ? (
+        <div className="no-print" style={{ background: 'var(--bg)', border: '2px dashed rgba(212,175,55,0.35)', borderRadius: '20px', padding: '22px 28px', marginBottom: '28px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: editingHawl ? '16px' : '0', flexWrap: 'wrap' }}>
+            <Calendar size={18} color="#d4af37" />
+            <span style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-dark)' }}>Set your Hawl (Zakat start) date</span>
+            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>— The date you first owned zakatable wealth</span>
+          </div>
+          {editingHawl && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              <input type="date" value={hawlInput} max={new Date().toISOString().split('T')[0]} onChange={e => setHawlInput(e.target.value)} style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border)', fontSize: '0.88rem', fontWeight: 700, outline: 'none', color: 'var(--text-dark)', background: 'var(--bg-section)' }} />
+              <button onClick={saveHawlDate} disabled={!hawlInput} style={{ padding: '10px 20px', borderRadius: '10px', background: hawlInput ? 'var(--primary)' : 'var(--bg-section)', border: 'none', color: hawlInput ? 'white' : 'var(--text-muted)', fontWeight: 800, fontSize: '0.8rem', cursor: hawlInput ? 'pointer' : 'not-allowed', transition: 'all 0.2s' }}>Save</button>
+              {hawlDate && <button onClick={() => setEditingHawl(false)} style={{ padding: '10px 16px', borderRadius: '10px', background: 'var(--bg-section)', border: '1px solid var(--border)', color: 'var(--text-muted)', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}>Cancel</button>}
+              {hawlDate && <button onClick={clearHawlDate} style={{ padding: '10px 16px', borderRadius: '10px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#dc2626', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}>Clear</button>}
+            </div>
+          )}
+          {!editingHawl && (
+            <button onClick={() => setEditingHawl(true)} style={{ marginTop: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '10px', background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.25)', color: '#b89326', fontWeight: 800, fontSize: '0.75rem', cursor: 'pointer', transition: 'all 0.2s' }}>
+              <Calendar size={13} /> Set Date
+            </button>
+          )}
+        </div>
+      ) : null}
 
       <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap', alignItems: 'flex-start' }}>
         
