@@ -524,8 +524,9 @@ class StockController extends Controller
                 'company_id' => $company->id,
                 'stage1' => [
                     'status' => $aaoifiScreening->business_status === 'pass' ? 'halal' : 'non-halal',
-                    'haram_revenue_percent' => 0,
-                    'purification_required' => false,
+                    'haram_revenue_percent' => round((float) ($aaoifiScreening->impermissible_income_ratio ?? 0), 4),
+                    'purification_required' => $aaoifiScreening->impermissible_income_status === 'pass'
+                        && (float) ($aaoifiScreening->impermissible_income_ratio ?? 0) > 0,
                     'reason' => $aaoifiScreening->business_reasoning,
                 ],
                 'business_status' => $aaoifiScreening->business_status,
