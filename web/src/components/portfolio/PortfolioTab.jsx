@@ -6,9 +6,7 @@ import {
   Plus, X, Trash2, ArrowUpRight, ArrowDownRight,
   RefreshCw, Edit2
 } from 'lucide-react';
-import {
-  AreaChart, Area, YAxis, ResponsiveContainer
-} from 'recharts';
+
 import { updateHolding } from '../../services/api';
 import CompanyLogo from '../CompanyLogo';
 import { toastError, toastSuccess } from '../../utils/toast';
@@ -114,7 +112,6 @@ function HoldingRow({ holding, onDelete, onEdit }) {
   };
   const badge = getBadgeStyle(finalStatus);
   const accentColor = badge.color;
-  const sparkData = [0.88,0.92,0.89,0.95,0.97,isUp?1.0:0.95].map(m => ({ v:(holding.total_value||0)*m }));
 
   return (
     <div
@@ -198,7 +195,6 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
 
   const { summary, holdings } = data;
   const totalBalance    = summary.total_balance    || 0;
-  const purificationDue = summary.purification_due || 0;
   const compliance      = summary.health_percentage ?? 100;
   const isHoldingHalal = h => !!h.is_halal || ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(h.symbol);
   const halalCount      = holdings.filter(isHoldingHalal).length;

@@ -20,7 +20,6 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const [stock, setStock] = useState(optimisticStock);
   const [loading, setLoading] = useState(true); // always show full spinner to prevent layout shifts
   const [enriching, setEnriching] = useState(!!optimisticStock); // silent background fetch
-  const [dividendInput, setDividendInput] = useState('');
   const [aiAnalysis, setAiAnalysis] = useState(null);
   const [isAiExpanded, setIsAiExpanded] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
@@ -162,9 +161,6 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const interestRatio = ((interest / revenue) * 100).toFixed(1);
   const purificationRate = latest?.non_compliant_income_ratio ? parseFloat(latest.non_compliant_income_ratio).toFixed(2) : interestRatio;
 
-  const purificationAmount = dividendInput
-    ? ((parseFloat(dividendInput) || 0) * (parseFloat(purificationRate) / 100)).toFixed(2)
-    : null;
 
 
 
@@ -181,10 +177,8 @@ const StockDetails = ({ symbol: propSymbol }) => {
           ? ((latestPrice - parseFloat(previousPriceObj.price)) / parseFloat(previousPriceObj.price)) * 100 
           : 0
   );
-  
-  const previousPrice = previousPriceObj ? parseFloat(previousPriceObj.price) : latestPrice;
-  const priceChange = latestPrice - previousPrice;
-  
+
+
   // Determine if it's positive based on the percentage change
   const isPositive = priceChangePct >= 0;
 

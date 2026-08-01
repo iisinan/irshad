@@ -60,7 +60,7 @@ export default function Portfolio() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    localforage.getItem('irshad_portfolio_cache_v10').then(cached => {
+    localforage.getItem('irshad_portfolio_cache').then(cached => {
       if (cached && !data) {
         setData(cached.data || null);
         setLoading(false);

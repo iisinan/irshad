@@ -62,7 +62,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await loginUser(credentials);
       if (res.data && res.data.access_token) {
-        localforage.removeItem('irshad_portfolio_cache_v10');
+        localforage.removeItem('irshad_portfolio_cache');
         localStorage.setItem('auth_token', res.data.access_token);
         localStorage.setItem('auth_user', JSON.stringify(res.data.user));
         setUser(res.data.user);
@@ -81,7 +81,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await registerUser(data);
       if (res.data && res.data.access_token) {
-        localforage.removeItem('irshad_portfolio_cache_v10');
+        localforage.removeItem('irshad_portfolio_cache');
         localStorage.setItem('auth_token', res.data.access_token);
         localStorage.setItem('auth_user', JSON.stringify(res.data.user));
         setUser(res.data.user);
@@ -100,7 +100,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await googleLoginUser(credential);
       if (res.data && res.data.access_token) {
-        localforage.removeItem('irshad_portfolio_cache_v10');
+        localforage.removeItem('irshad_portfolio_cache');
         localStorage.setItem('auth_token', res.data.access_token);
         localStorage.setItem('auth_user', JSON.stringify(res.data.user));
         setUser(res.data.user);
@@ -137,7 +137,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_user');
-    localforage.removeItem('irshad_portfolio_cache_v10');
+    localforage.removeItem('irshad_portfolio_cache');
     localStorage.removeItem('irshad_admin_stocks_v1');
     localStorage.removeItem('irshad_admin_products_v1');
     localStorage.removeItem('irshad_admin_alerts_v1');
