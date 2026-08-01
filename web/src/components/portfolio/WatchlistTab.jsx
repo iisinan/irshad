@@ -6,6 +6,7 @@ import { toastError, toastSuccess } from '../../utils/toast';
 import { useNavigate } from 'react-router-dom';
 import AddWatchlistModal from './AddWatchlistModal';
 import WatchlistAlertModal from './WatchlistAlertModal';
+import Skeleton from '../ui/Skeleton';
 
 class ModalErrorBoundary extends Component {
   constructor(props) {
@@ -249,9 +250,12 @@ export default function WatchlistTab() {
           ))}
         </div>
       ) : loading ? (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '60px 0', gap: '16px' }}>
-          <div className="spinner" />
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.79rem', fontWeight: 600 }}>Loading watchlist...</p>
+        <div style={{ padding: '80px 20px', textAlign: 'center' }}>
+          <div style={{ maxWidth: '400px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <Skeleton height="60px" borderRadius="12px" />
+            <Skeleton height="60px" borderRadius="12px" />
+            <Skeleton height="60px" borderRadius="12px" />
+          </div>
         </div>
       ) : watchedStocks.length === 0 ? (
         <div style={{ 

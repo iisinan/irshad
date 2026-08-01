@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Bell, BellRing, Trash2, ArrowUpRight, ArrowDownRight, TrendingUp } from 'lucide-react';
 import { fetchPriceAlerts, deletePriceAlert } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
+import Skeleton from '../ui/Skeleton';
 
 export default function AlertsTab() {
   const [alerts, setAlerts] = useState(() => {
@@ -63,9 +64,12 @@ export default function AlertsTab() {
 
       <div style={{ padding: '32px' }}>
         {loading ? (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '60px 0', gap: '16px' }}>
-            <div className="spinner" style={{ width: '40px', height: '40px', border: '3px solid var(--border)', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.79rem' }}>Loading alerts...</p>
+          <div style={{ padding: '20px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '600px', margin: '0 auto' }}>
+              <Skeleton height="70px" borderRadius="12px" />
+              <Skeleton height="70px" borderRadius="12px" />
+              <Skeleton height="70px" borderRadius="12px" />
+            </div>
           </div>
         ) : alerts.length === 0 ? (
           <div style={{ 

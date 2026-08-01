@@ -4,6 +4,7 @@ import { fetchNgxStocks, fetchWatchlist, addToWatchlist, removeFromWatchlist, fe
 import CompanyLogo from '../CompanyLogo';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import Skeleton from '../ui/Skeleton';
 
 /* ─── Helpers ─────────────────────────────────────────────────────────────── */
 const fmtPrice = (p) => {
@@ -335,9 +336,15 @@ export default function MarketTab() {
         borderTop: 'none', borderRadius: '0 0 20px 20px', overflow: 'hidden',
       }}>
         {isLoading ? (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '80px 0', gap: '14px' }}>
-            <div className="spinner" />
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.77rem' }}>Loading market data…</p>
+          <div style={{ padding: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
+              <Skeleton height="140px" borderRadius="16px" />
+              <Skeleton height="140px" borderRadius="16px" />
+              <Skeleton height="140px" borderRadius="16px" />
+              <Skeleton height="140px" borderRadius="16px" />
+              <Skeleton height="140px" borderRadius="16px" />
+              <Skeleton height="140px" borderRadius="16px" />
+            </div>
           </div>
         ) : error ? (
           <div style={{ textAlign: 'center', padding: '80px 24px', color: 'var(--text-muted)' }}>
