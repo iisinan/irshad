@@ -510,10 +510,11 @@ const AaoifiScreening = () => {
         {evidenceExpanded && (
           <div className="animate-fade-in" style={{ marginTop: '32px', paddingTop: '32px', borderTop: '1px solid var(--border)' }}>
 
-            {(report.financial_data_used?.source_links?.length > 0 || report.financial_data_used?.source) && (
+            {(report.financial_data_used?.source_links?.length > 0 || report.financial_data_used?.source || report.financial_data_used?.source_url) && (
               <div style={{ marginBottom: '32px' }}>
                 <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.97rem', marginBottom: '12px' }}>Extracted Financial Data Sources</div>
-                {report.financial_data_used?.source_links?.length > 0 ? (
+                
+                {report.financial_data_used?.source_links?.length > 0 && (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
                     {report.financial_data_used.source_links.map((link, i) => (
                       <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className="hover-card" style={{ display: 'flex', alignItems: 'center', gap: '16px', background: 'linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border)', textDecoration: 'none', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }} onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.05)'; }} onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.02)'; }}>
@@ -533,7 +534,29 @@ const AaoifiScreening = () => {
                       </a>
                     ))}
                   </div>
-                ) : (
+                )}
+
+                {report.financial_data_used?.source_url && !report.financial_data_used?.source_links?.length && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
+                      <a href={report.financial_data_used.source_url} target="_blank" rel="noopener noreferrer" className="hover-card" style={{ display: 'flex', alignItems: 'center', gap: '16px', background: 'linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border)', textDecoration: 'none', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }} onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.05)'; }} onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.02)'; }}>
+                        <div style={{ color: 'var(--primary)', background: 'var(--primary-bg)', padding: '10px', borderRadius: '12px' }}><FileText size={20} /></div>
+                        <div>
+                          <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '4px' }}>Nigerian Exchange Group (NGX)</div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Official corporate filings and pricing</div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                            <span style={{ fontWeight: 700 }}>Published:</span> {report.financial_data_used.published_date || 'Unknown Date'}
+                          </div>
+                          {(report.financial_data_used.financial_year || report.financial_data_used.reporting_period) && (
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                              <span style={{ fontWeight: 700 }}>Reporting Period:</span> {report.financial_data_used.reporting_period || 'Annual Report'} (FY {report.financial_data_used.financial_year || 'Unknown'})
+                            </div>
+                          )}
+                        </div>
+                      </a>
+                  </div>
+                )}
+
+                {report.financial_data_used?.source && !report.financial_data_used?.source_links?.length && !report.financial_data_used?.source_url && (
                   <div style={{ display: 'flex', gap: '12px', alignItems: 'center', background: 'var(--bg-section)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)' }}>
                     <div style={{ color: 'var(--primary)', background: 'var(--primary-bg)', padding: '8px', borderRadius: '10px' }}><FileText size={18} /></div>
                     <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-dark)', lineHeight: 1.5 }}>

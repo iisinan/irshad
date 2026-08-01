@@ -27,12 +27,15 @@ class AAOIFICalculator:
                 return float(val.get("value", 0.0) or 0.0)
             return float(val or 0.0)
 
-        total_assets   = get_val("total_assets")
-        total_debt     = get_val("total_debt")
-        cash           = get_val("cash_and_equivalents")
-        total_revenue  = get_val("total_revenue")
-        interest_income = get_val("interest_income")
+        unit_multiplier = float(normalized_data.get("unit_multiplier", 1.0))
 
+        total_assets   = get_val("total_assets") * unit_multiplier
+        total_debt     = get_val("total_debt") * unit_multiplier
+        cash           = get_val("cash_and_equivalents") * unit_multiplier
+        total_revenue  = get_val("total_revenue") * unit_multiplier
+        interest_income = get_val("interest_income") * unit_multiplier
+
+        market_cap = float(market_cap)
         # Determine denominator: prefer market cap, fall back to total assets
         denominator      = market_cap if market_cap > 0 else total_assets
         denominator_type = "Market Capitalization" if market_cap > 0 else "Total Assets"

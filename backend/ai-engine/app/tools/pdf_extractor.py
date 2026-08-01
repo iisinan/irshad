@@ -73,22 +73,26 @@ class PDFExtractor:
                     },
                     "total_revenue": evidence_based_field(
                         "Total revenue / turnover / gross earnings for the FULL reporting period. "
+                        "Synonyms: Revenue; Net sales; Sales revenue; Total revenue; Total income; Net revenue; Operating revenue; Turnover; Gross revenue; Income from operations. "
                         "Return the RAW value as printed in the report (before applying unit_multiplier)."
                     ),
                     "total_debt": evidence_based_field(
                         "Total interest-bearing debt: sum of short-term and long-term borrowings, bonds, loans. "
+                        "Synonyms: Long-term debt/borrowings; Notes payable; Bonds payable; Term loans; Debt securities; Finance lease liabilities; Sukuk; Current portion of long-term debt; Short-term borrowings/loans; Bank overdrafts; Commercial paper. "
                         "For banks: use only interest-bearing borrowings (NOT customer deposits). Raw value."
                     ),
                     "cash_and_equivalents": evidence_based_field(
-                        "Cash and cash equivalents plus short-term liquid investments. Raw value."
+                        "Cash and cash equivalents plus short-term liquid investments. "
+                        "Synonyms: Cash and cash equivalents; Cash on hand; Bank balances; Unrestricted cash; Time/Fixed/Term deposits; Certificates of deposit; Short-term investments; Marketable/Trading securities; Treasury bills; Money market instruments. Raw value."
                     ),
                     "interest_income": evidence_based_field(
                         "Non-permissible / interest income earned by the company. "
-                        "For non-financial companies: look for 'finance income', 'interest income on deposits'. "
+                        "Synonyms for Interest: Interest income/revenue; Finance income; Income from investments; Interest on deposits/loans. "
+                        "Synonyms for Other Haram: Revenue from prohibited activities; Haram revenue; Impermissible business income; Non-compliant other income. "
                         "For banks: this is the gross interest income line. If not separately disclosed, return 0. Raw value."
                     ),
                     "total_assets": evidence_based_field(
-                        "Total assets from the balance sheet. Raw value."
+                        "Total assets from the balance sheet. Synonyms: Total assets; Assets; Consolidated total assets. Raw value."
                     ),
                     "principal_activities": {
                         "type": "STRING",
@@ -134,7 +138,7 @@ class PDFExtractor:
             print("Extracting data with Gemini (unit-aware)...")
             def _generate():
                 return self.client.models.generate_content(
-                    model='models/gemini-3.1-flash-lite',
+                    model='gemini-3.5-flash',
                     contents=[gemini_file, prompt],
                     config=types.GenerateContentConfig(
                         response_mime_type="application/json",

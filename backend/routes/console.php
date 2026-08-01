@@ -32,3 +32,6 @@ Schedule::command('irshad:send-updates-digest')->weeklyOn(5, '15:00');
 
 // Enforce strict AAOIFI math on Company status
 Schedule::command('compliance:enforce-math')->dailyAt('01:00');
+
+// NGXPulse Daily Financials Sync (JSON API -> Gemini Extraction)
+Schedule::command('irshad:sync-ngxpulse')->dailyAt('03:00');

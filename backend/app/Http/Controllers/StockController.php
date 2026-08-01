@@ -438,79 +438,12 @@ class StockController extends Controller
     {
         $company = Company::where('symbol', $symbol)->firstOrFail();
         
-        // 1. Check if we have a fresh FinancialScreening from the new AI Engine
-        $existingScreening = \App\Models\FinancialScreening::where('company_ticker', $symbol)
-            ->where('created_at', '>=', now()->subDays(7))
-            ->orderBy('created_at', 'desc')
-            ->first();
+        $aaoifiScreening = \App\Models\AaoifiScreening::where('company_id', $company->id)->first();
             
-        if ($existingScreening) {
-            $busScreening = \App\Models\BusinessScreening::where('ticker', $symbol)->orderBy('created_at', 'desc')->first();
-            
-            $calc = $existingScreening->calculation_results ?? [];
-            $ratios = $calc['ratios'] ?? [];
-            $status = $calc['status'] ?? [];
-            $chosen = $existingScreening->chosen_values ?? [];
-            
-            $financial = $company->financials()->latest()->first();
-
-            // Map the Python Engine output to the legacy frontend format
-            // Fallback to database financials if Python AI extraction failed (returned 0 or empty)
-            $totalAssets = !empty($chosen['total_assets']['value']) ? $chosen['total_assets']['value'] : ($financial->total_assets ?? 0);
-            $totalDebt = !empty($chosen['total_debt']['value']) ? $chosen['total_debt']['value'] : ($financial->total_debt ?? 0);
-            $cash = !empty($chosen['cash_and_equivalents']['value']) ? $chosen['cash_and_equivalents']['value'] : ($financial->cash_and_equivalents ?? 0);
-            $interestIncome = !empty($chosen['interest_income']['value']) ? $chosen['interest_income']['value'] : ($financial->interest_income ?? 0);
-            $totalRevenue = !empty($chosen['total_revenue']['value']) ? $chosen['total_revenue']['value'] : ($financial->total_revenue ?? 0);
-            $marketCap = ($calc['denominator_used'] ?? null) === 'Market Capitalization' && !empty($calc['denominator_value']) ? $calc['denominator_value'] : $company->market_cap;
-            
-            $impureRatio = $ratios['non_permissible_income_ratio'] ?? null;
-            if ($impureRatio === null && $totalRevenue > 0) {
-                $impureRatio = ($interestIncome / $totalRevenue) * 100;
-            } else if ($impureRatio !== null) {
-                $impureRatio = $impureRatio * 100;
-            }
-
-            $debtRatio = isset($ratios['interest_bearing_debt_ratio']) ? $ratios['interest_bearing_debt_ratio'] * 100 : null;
-            if ($debtRatio === null && $marketCap > 0) {
-                $debtRatio = ($totalDebt / $marketCap) * 100;
-            }
-            
-            $cashRatio = isset($ratios['cash_and_equivalents_ratio']) ? $ratios['cash_and_equivalents_ratio'] * 100 : null;
-            if ($cashRatio === null && $marketCap > 0) {
-                $cashRatio = ($cash / $marketCap) * 100;
-            }
-
-            // Stage 1 (Qualitative) is strictly from the database (AaoifiScreening).
-            $stage1Pass = true;
-            $stage1Reason = 'Passes business activity screening based on Excel manual verdict.';
-            
-            if ($existingScreening && $existingScreening->business_status) {
-                $stage1Pass = $existingScreening->business_status === 'pass';
-                $stage1Reason = $existingScreening->business_reasoning ?? $stage1Reason;
-            } else {
-                $stage1Pass = false;
-                $stage1Reason = 'Business activity status is pending review.';
-            }
-
-            $stage1 = [
-                'compliance_status' => $stage1Pass ? 'PASS' : 'FAIL',
-                'reason' => $stage1Reason
-            ];
-            // Recalculate Stage 2 Pass dynamically instead of trusting the AI script, 
-            // since the AI script frequently fails due to missing denominators.
-            $debtPass = $debtRatio !== null ? ($debtRatio <= 30) : true;
-            $cashPass = $cashRatio !== null ? ($cashRatio <= 30) : true;
-            $impurePass = $impureRatio !== null ? ($impureRatio <= 5) : true;
-            
-            $stage2Pass = $debtPass && $cashPass && $impurePass;
-            
-            // FINAL STATUS — always use the DB as ground truth (kept accurate by irshad:sync-status).
-            // Only fall back to live computation if no DB record exists yet for this stock.
-            // This ensures the analysis page verdict always matches the listing page verdict.
-            $dbStatus = $company->status ? $company->status->status : null;
+        if ($aaoifiScreening) {
             $isScholarVerified = $company->status && $company->status->verified_by_scholar;
-            $computedStatus = ($stage1Pass && $stage2Pass) ? 'halal' : 'non-halal';
-            $finalStatus = $dbStatus ?? $computedStatus;
+            $dbStatus = $company->status ? $company->status->status : null;
+            $finalStatus = $dbStatus ?? $aaoifiScreening->final_status;
             
             $statusReason = null;
             if ($isScholarVerified) {
@@ -518,87 +451,68 @@ class StockController extends Controller
             } else {
                 if ($finalStatus === 'halal') {
                     $statusReason = 'Passes both qualitative business and quantitative financial Shariah compliance checks.';
-                } else if (!$stage1Pass && !empty($stage1['reason'])) {
-                    $statusReason = $stage1['reason'];
+                } else if ($aaoifiScreening->business_status === 'fail' && !empty($aaoifiScreening->business_reasoning)) {
+                    $statusReason = $aaoifiScreening->business_reasoning;
                 } else {
                     $statusReason = 'Fails Shariah compliance based on current financial disclosures or business activities.';
                 }
             }
-            $aaoifiDB = \App\Models\AaoifiScreening::where('company_id', $company->id)->first();
-            $dbSource = $aaoifiDB && isset($aaoifiDB->financial_data_used['source']) 
-                ? $aaoifiDB->financial_data_used['source'] 
-                : "Data aggregated from Nigerian Exchange Group (NGX), AfricanFinancials, and Yahoo Finance.";
 
-            $ngxUrl = 'https://ngxgroup.com/exchange/data/company-profile/?symbol=' . $company->symbol;
-            if ($existingScreening && !empty($existingScreening->source_urls['ngx'])) {
-                $ngxUrl = $existingScreening->source_urls['ngx'];
+            $finData = $aaoifiScreening->financial_data_used ?? [];
+            if (is_string($finData)) {
+                $finData = json_decode($finData, true) ?? [];
             }
+            $unit = $finData['unit_multiplier'] ?? 1;
 
-            $publishedDate = 'Unknown Date';
-            if ($existingScreening && $existingScreening->published_date) {
-                $publishedDate = $existingScreening->published_date->format('F j, Y');
-            }
+            $getVal = function($key) use ($finData, $unit) {
+                if (isset($finData[$key]) && is_array($finData[$key]) && isset($finData[$key]['value'])) {
+                    return $finData[$key]['value'] * $unit;
+                }
+                if (isset($finData[$key]) && is_numeric($finData[$key])) {
+                    return $finData[$key] * $unit;
+                }
+                return 0;
+            };
 
-            $financialYear = $existingScreening ? $existingScreening->financial_year : $company->financials()->latest()->first()?->financial_year;
-            $reportQuarter = ($existingScreening && $existingScreening->report_quarter) ? $existingScreening->report_quarter : 'Annual Report';
-
-            $sourceLinks = [
-                [
-                    'name' => 'Nigerian Exchange Group (NGX)',
-                    'description' => 'Official corporate filings and pricing',
-                    'url' => $ngxUrl,
-                    'published_date' => $publishedDate,
-                    'financial_year' => $financialYear,
-                    'report_quarter' => $reportQuarter
-                ]
-            ];
+            $frontendFinData = array_merge($finData, [
+                'total_assets' => $getVal('total_assets'),
+                'total_debt'   => $getVal('total_debt'),
+                'cash'         => $getVal('cash_and_equivalents'),
+                'interest_income' => $getVal('interest_income'),
+                'total_revenue' => $getVal('total_revenue'),
+                'market_cap'   => $company->market_cap,
+            ]);
 
             $mapped = [
                 'company_id' => $company->id,
                 'stage1' => [
-                    'status' => $stage1Pass ? 'halal' : 'non-halal',
-                    'haram_revenue_percent' => $stage1['haram_revenue_percent'] ?? 0,
-                    'purification_required' => $stage1['purification_required'] ?? false,
-                    'reason' => $stage1['reason'] ?? '',
+                    'status' => $aaoifiScreening->business_status === 'pass' ? 'halal' : 'non-halal',
+                    'haram_revenue_percent' => 0,
+                    'purification_required' => false,
+                    'reason' => $aaoifiScreening->business_reasoning,
                 ],
-                'business_status' => $stage1Pass ? 'pass' : 'fail',
-                'business_reasoning' => $stage1 ?? null,
-                'debt_ratio' => $debtRatio,
-                'debt_status' => $debtPass ? 'pass' : 'fail',
-                'cash_ratio' => $cashRatio,
-                'cash_status' => $cashPass ? 'pass' : 'fail',
-                'impermissible_income_ratio' => $impureRatio,
-                'impermissible_income_status' => $impurePass ? 'pass' : 'fail',
-                'illiquid_ratio' => null, // Python engine currently doesn't compute this
-                'illiquid_status' => 'pass',
-                'receivables_ratio' => null, // Python engine currently doesn't compute this
-                'receivables_status' => 'pass',
+                'business_status' => $aaoifiScreening->business_status,
+                'business_reasoning' => $aaoifiScreening->business_reasoning,
+                'debt_ratio' => $aaoifiScreening->debt_ratio,
+                'debt_status' => $aaoifiScreening->debt_status,
+                'cash_ratio' => $aaoifiScreening->cash_ratio,
+                'cash_status' => $aaoifiScreening->cash_status,
+                'impermissible_income_ratio' => $aaoifiScreening->impermissible_income_ratio,
+                'impermissible_income_status' => $aaoifiScreening->impermissible_income_status,
+                'illiquid_ratio' => $aaoifiScreening->illiquid_ratio,
+                'illiquid_status' => $aaoifiScreening->illiquid_status,
+                'receivables_ratio' => $aaoifiScreening->receivables_ratio,
+                'receivables_status' => $aaoifiScreening->receivables_status,
                 'final_status' => $finalStatus,
-                'news_sources' => $busScreening ? $busScreening->supporting_evidence : [],
-                'financial_data_used' => [
-                    'market_cap' => $marketCap,
-                    'total_assets' => $totalAssets,
-                    'total_debt' => $totalDebt,
-                    'cash' => $cash,
-                    'interest_bearing_securities' => 0,
-                    'accounts_receivable' => 0,
-                    'illiquid_assets' => 0,
-                    'interest_income' => $interestIncome,
-                    'total_revenue' => $totalRevenue,
-                    'source' => $dbSource,
-                    'source_links' => $sourceLinks,
-                ],
-                'ai_explanation' => !empty($existingScreening->ai_explanation) ? $existingScreening->ai_explanation : $company->activity_reason,
+                'news_sources' => $aaoifiScreening->news_sources ?? [],
+                'financial_data_used' => $frontendFinData,
+                'ai_explanation' => $aaoifiScreening->business_reasoning ?? $company->activity_reason,
                 'status_reason' => $statusReason,
             ];
             
             return $this->success($mapped);
         }
         
-        // 2. If no fresh data exists, trigger the background job
-        \App\Jobs\ProcessCompanyScreening::dispatch($symbol);
-        
-        // 3. Return 202 Accepted so the frontend knows to poll
         return response()->json([
             'status' => 'processing',
             'message' => 'Screening is currently running in the background. Please check back in a few minutes.'
