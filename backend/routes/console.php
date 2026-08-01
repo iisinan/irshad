@@ -15,10 +15,10 @@ Schedule::command('app:scrape-ngx-prices')->dailyAt('03:00');
 Schedule::command('news:aggregate')->hourly();
 Schedule::command('news:scrape-stocks')->everyTwoHours();
 Schedule::command('app:snapshot-portfolios')->dailyAt('17:00');
-Schedule::command('alerts:process')->everyMinute();
+// DEACTIVATED: Schedule::command('alerts:process')->everyMinute();
 
 // Our new AI Engine sweep for Annual Reports
-Schedule::command('irshad:daily-scan')->dailyAt('00:00');
+// DEACTIVATED: Schedule::command('irshad:daily-scan')->dailyAt('00:00');
 Schedule::command('irshad:market-data')->twiceDaily(0, 12);
 
 // DEACTIVATED: Business Intelligence sweep (Perplexity + Gemini AI)
