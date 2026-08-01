@@ -210,9 +210,7 @@ function HoldingRow({ holding, onDelete, onEdit }) {
   );
 }
 
-/* ─── Main Component ────────────────────────────────────────── */
-export default function PortfolioTab({ data, setShowAddModal, handleDelete, refreshData }) {
-  const [activeFilter, setActiveFilter] = useState('all');
+export default function PortfolioTab({ data, setShowAddModal, handleDelete, refreshData, activeFilter = 'all', setActiveFilter }) {
   const [editingHolding, setEditingHolding] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
 

@@ -80,6 +80,7 @@ export default function Portfolio() {
   const [mountedTabs, setMountedTabs] = useState([activeTab]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('all');
 
   // Sync tab with URL hash if it changes
   useEffect(() => {
@@ -284,7 +285,14 @@ export default function Portfolio() {
         <div style={{ minWidth: 0 }}>
           {mountedTabs.includes('holdings') && (
             <div style={{ display: activeTab === 'holdings' ? 'block' : 'none' }}>
-              <PortfolioTab data={data} setShowAddModal={setShowAddModal} handleDelete={handleDelete} changeTab={handleTabChange} refreshData={loadData} />
+              <PortfolioTab 
+                data={data}
+                setShowAddModal={setShowAddModal}
+                handleDelete={handleDelete}
+                refreshData={loadData}
+                activeFilter={activeFilter}
+                setActiveFilter={setActiveFilter}
+              />
             </div>
           )}
           {mountedTabs.includes('market') && (
@@ -396,9 +404,9 @@ export default function Portfolio() {
 
             <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
               {[
-                { label: 'Halal Holdings',   value: halalCount,    color: 'var(--halal)',     bg: 'var(--halal-bg)',     border: 'var(--halal-border)',     action: () => handleTabChange('holdings') },
-                { label: 'Non-Halal',        value: nonHalalCount, color: 'var(--non-halal)', bg: 'var(--non-halal-bg)', border: 'var(--non-halal-border)', action: () => handleTabChange('holdings') },
-                { label: 'Need Purification',value: needsPurif,    color: 'var(--doubtful)',  bg: 'var(--doubtful-bg)',  border: 'var(--doubtful-border)',  action: () => handleTabChange('purification') },
+                { label: 'Halal Holdings',   value: halalCount,    color: 'var(--halal)',     bg: 'var(--halal-bg)',     border: 'var(--halal-border)',     action: () => { setActiveFilter('halal'); handleTabChange('holdings'); } },
+                { label: 'Non-Halal',        value: nonHalalCount, color: 'var(--non-halal)', bg: 'var(--non-halal-bg)', border: 'var(--non-halal-border)', action: () => { setActiveFilter('nonhalal'); handleTabChange('holdings'); } },
+                { label: 'Need Purification',value: needsPurif,    color: 'var(--doubtful)',  bg: 'var(--doubtful-bg)',  border: 'var(--doubtful-border)',  action: () => { setActiveFilter('purify'); handleTabChange('holdings'); } },
               ].map(row => (
                 <div 
                   key={row.label} 
