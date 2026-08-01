@@ -1,0 +1,1363 @@
+[
+    {
+        "symbol": "INTBREW",
+        "business_status": "fail",
+        "business_reasoning": "The company is involved in the production or distribution of alcohol."
+    },
+    {
+        "symbol": "WEMABANK",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "OANDO",
+        "business_status": "pass",
+        "business_reasoning": "Oil & gas production\/marketing. The core business activities are permissible."
+    },
+    {
+        "symbol": "PZ",
+        "business_status": "pass",
+        "business_reasoning": "Household\/personal care products. The core business activities are permissible."
+    },
+    {
+        "symbol": "VITAFOAM",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "MECURE",
+        "business_status": "pass",
+        "business_reasoning": "Pharmaceuticals manufacturing. The core business activities are permissible."
+    },
+    {
+        "symbol": "UTC",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "TOTAL",
+        "business_status": "pass",
+        "business_reasoning": {
+            "principal_business": "Blending, marketing, and distribution of petroleum products and energy solutions.",
+            "secondary_businesses": [
+                "Service-station convenience store retail",
+                "Solar energy product distribution"
+            ],
+            "revenue_sources": [
+                "Sale of fuels (PMS, AGO, DPK, Aviation fuel)",
+                "Sale of lubricants and LPG",
+                "Solar products and modern convenience store sales"
+            ],
+            "prohibited_activities": [],
+            "confidence_score": 95,
+            "evidence": "TotalEnergies Marketing Nigeria Plc operates primarily in downstream oil and gas marketing, distributing petroleum products, lubricants, and solar products across Nigeria.",
+            "reasoning": "The core business activities of fuel distribution, lubricant blending, LPG marketing, and solar energy solutions are fully permissible (halal) under AAOIFI Standard No. 21. The company does not engage in prohibited core activities such as conventional financial services, gambling, adult entertainment, tobacco manufacturing, or pork\/alcohol production."
+        }
+    },
+    {
+        "symbol": "AIICO",
+        "business_status": "fail",
+        "business_reasoning": "The company operates in conventional insurance, which involves prohibited elements such as Riba and Gharar."
+    },
+    {
+        "symbol": "CONOIL",
+        "business_status": "pass",
+        "business_reasoning": "Petroleum marketing. The core business activities are permissible."
+    },
+    {
+        "symbol": "CADBURY",
+        "business_status": "pass",
+        "business_reasoning": "Confectionery\/food. The core business activities are permissible."
+    },
+    {
+        "symbol": "ACCESSCORP",
+        "business_status": "fail",
+        "business_reasoning": "The company operates as a conventional bank engaged in interest-based lending and deposit-taking."
+    },
+    {
+        "symbol": "VANLEER",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "NOTORE",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "DANGSUGAR",
+        "business_status": "pass",
+        "business_reasoning": "Sugar refining. The core business activities are permissible."
+    },
+    {
+        "symbol": "UNILEVER",
+        "business_status": "pass",
+        "business_reasoning": {
+            "principal_business": "Manufacturing and marketing of fast-moving consumer goods (FMCG) across personal care, home care, and food product categories.",
+            "secondary_businesses": [
+                "Distribution and wholesaling of household and personal care consumer products"
+            ],
+            "revenue_sources": [
+                "Sale of food products (e.g., Knorr, Royco seasonings)",
+                "Sale of personal care products (e.g., Vaseline, Close Up, Pepsodent)",
+                "Sale of home care products (e.g., Sunlight)"
+            ],
+            "prohibited_activities": [],
+            "confidence_score": 95,
+            "evidence": "Unilever Nigeria PLC operates purely in the Consumer Staples sector, focusing on personal care, home care, and food seasonings (Knorr, Royco, Vaseline, Close Up). There is no indication of involvement in alcohol, pork processing, gambling, conventional financial services, tobacco, or defense.",
+            "reasoning": "The core business activities of manufacturing and selling everyday food, personal care, and home care items are fully permissible (Halal) under AAOIFI Standard No. 21. No primary prohibited business sector presence is identified."
+        }
+    },
+    {
+        "symbol": "MANSARD",
+        "business_status": "fail",
+        "business_reasoning": "The company operates in conventional insurance, which involves prohibited elements such as Riba and Gharar."
+    },
+    {
+        "symbol": "IKEJAHOTEL",
+        "business_status": "fail",
+        "business_reasoning": "The company is involved in the production or distribution of alcohol."
+    },
+    {
+        "symbol": "MOFIREIF",
+        "business_status": "pass",
+        "business_reasoning": {
+            "principal_business": "Real estate investment trust (REIT) and fund engaged in property acquisition, holding, leasing, and management in Nigeria.",
+            "secondary_businesses": [
+                "Property management",
+                "Real estate asset appreciation and development"
+            ],
+            "revenue_sources": [
+                "Rental income from commercial and residential properties",
+                "Capital gains on property disposition",
+                "Property management fees"
+            ],
+            "prohibited_activities": [],
+            "confidence_score": 85,
+            "evidence": "MOFIREIF is listed on the Nigerian Exchange (NGX) in the Construction\/Real Estate sector, operating as a real estate investment fund focused on core property asset investments and lease income generation.",
+            "reasoning": "Under AAOIFI Standard No. 21, real estate investment, property management, and leasing are inherently permissible (Halal) principal business activities. There is no evidence that the fund's primary activity involves interest-based financial services, conventional banking, alcohol, gambling, or other prohibited industries."
+        }
+    },
+    {
+        "symbol": "CHAMPION",
+        "business_status": "fail",
+        "business_reasoning": "The company is involved in the production or distribution of alcohol."
+    },
+    {
+        "symbol": "UPDC",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "ACADEMY",
+        "business_status": "pass",
+        "business_reasoning": "Education services. The core business activities are permissible."
+    },
+    {
+        "symbol": "MAYBAKER",
+        "business_status": "pass",
+        "business_reasoning": "Pharmaceuticals manufacturing. The core business activities are permissible."
+    },
+    {
+        "symbol": "JAPAULGOLD",
+        "business_status": "pass",
+        "business_reasoning": "Mining\/marine support services. The core business activities are permissible (NGX sector tag is nominal)."
+    },
+    {
+        "symbol": "ETERNA",
+        "business_status": "pass",
+        "business_reasoning": "Petroleum marketing\/lubricants. The core business activities are permissible."
+    },
+    {
+        "symbol": "UPDCREIT",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "LIVESTOCK",
+        "business_status": "fail",
+        "business_reasoning": "The company's operations include prohibited activities such as pork production (piggery)."
+    },
+    {
+        "symbol": "ELLAHLAKES",
+        "business_status": "fail",
+        "business_reasoning": "The company's operations include prohibited activities such as pork production (piggery)."
+    },
+    {
+        "symbol": "FTNCOCOA",
+        "business_status": "pass",
+        "business_reasoning": "Cocoa processing. The core business activities are permissible."
+    },
+    {
+        "symbol": "LINKASSURE",
+        "business_status": "fail",
+        "business_reasoning": "The company operates in conventional insurance, which involves prohibited elements such as Riba and Gharar."
+    },
+    {
+        "symbol": "NPFMCRFBK",
+        "business_status": "fail",
+        "business_reasoning": "The company operates as a microfinance institution engaged in interest-based lending."
+    },
+    {
+        "symbol": "LASACO",
+        "business_status": "fail",
+        "business_reasoning": "The company operates in conventional insurance, which involves prohibited elements such as Riba and Gharar."
+    },
+    {
+        "symbol": "TANTALIZER",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "MTNN",
+        "business_status": "pass",
+        "business_reasoning": "Telecom services. The core business activities are permissible."
+    },
+    {
+        "symbol": "DANGCEM",
+        "business_status": "pass",
+        "business_reasoning": "Cement manufacturing. The core business activities are permissible."
+    },
+    {
+        "symbol": "MBENEFIT",
+        "business_status": "fail",
+        "business_reasoning": "The company operates in conventional insurance, which involves prohibited elements such as Riba and Gharar."
+    },
+    {
+        "symbol": "VERITASKAP",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "PRESTIGE",
+        "business_status": "fail",
+        "business_reasoning": "The company operates in conventional insurance, which involves prohibited elements such as Riba and Gharar."
+    },
+    {
+        "symbol": "REDSTAREX",
+        "business_status": "pass",
+        "business_reasoning": "Courier\/logistics. The core business activities are permissible."
+    },
+    {
+        "symbol": "LIVINGTRUST",
+        "business_status": "fail",
+        "business_reasoning": "The company operates as a mortgage bank engaged in interest-based lending."
+    },
+    {
+        "symbol": "UNITYBNK",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "BUACEMENT",
+        "business_status": "pass",
+        "business_reasoning": "Cement manufacturing. The core business activities are permissible."
+    },
+    {
+        "symbol": "GTCO",
+        "business_status": "fail",
+        "business_reasoning": "The company operates as a conventional bank engaged in interest-based lending and deposit-taking."
+    },
+    {
+        "symbol": "UHOMREIT",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "CAVERTON",
+        "business_status": "pass",
+        "business_reasoning": "Aviation\/helicopter services. The core business activities are permissible."
+    },
+    {
+        "symbol": "NCR",
+        "business_status": "doubtful",
+        "business_reasoning": "Core business is hardware\/technology vending - ATMs, POS terminals, self-service kiosks, software - not a gaming operator itself. However, company literature explicitly names 'gaming' as one of its served industry verticals alongside financial services, retail, hospitality, healthcare, and travel. This is a vendor-to-mixed-clients profile (comparable to leasing to varied tenants) rather than a direct activity exclusion, but the revenue share attributable to gaming\/betting-sector clients is unconfirmed - needs segment data before resolving to a clean PASS."
+    },
+    {
+        "symbol": "CILEASING",
+        "business_status": "doubtful",
+        "business_reasoning": "Equipment leasing - ijara-style leasing is permissible in principle, but conventional lease financing structure needs verification."
+    },
+    {
+        "symbol": "RTBRISCOE",
+        "business_status": "pass",
+        "business_reasoning": "Equipment\/vehicle trading & services. The core business activities are permissible."
+    },
+    {
+        "symbol": "UNIVINSURE",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "SIMCAPVAL",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "ROADS",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "OKOMUOIL",
+        "business_status": "pass",
+        "business_reasoning": "Palm oil production. The core business activities are permissible."
+    },
+    {
+        "symbol": "ABCTRANS",
+        "business_status": "pass",
+        "business_reasoning": "Transport\/logistics services. The core business activities are permissible."
+    },
+    {
+        "symbol": "REGALINS",
+        "business_status": "fail",
+        "business_reasoning": "The company operates in conventional insurance, which involves prohibited elements such as Riba and Gharar."
+    },
+    {
+        "symbol": "ROYALEX",
+        "business_status": "fail",
+        "business_reasoning": "The company operates in conventional insurance, which involves prohibited elements such as Riba and Gharar."
+    },
+    {
+        "symbol": "MULTIVERSE",
+        "business_status": "pass",
+        "business_reasoning": "Mining\/resources holding. The core business activities are permissible."
+    },
+    {
+        "symbol": "CHELLARAM",
+        "business_status": "pass",
+        "business_reasoning": "The company is involved in the production or distribution of alcohol."
+    },
+    {
+        "symbol": "HMCALL",
+        "business_status": "doubtful",
+        "business_reasoning": "Real estate + hospitality mix - hotel\/resort operations may include bar revenue; needs verification."
+    },
+    {
+        "symbol": "MEYER",
+        "business_status": "pass",
+        "business_reasoning": "Paints\/building materials. The core business activities are permissible."
+    },
+    {
+        "symbol": "LEGENDINT",
+        "business_status": "pass",
+        "business_reasoning": "Technology\/ICT services. The core business activities are permissible."
+    },
+    {
+        "symbol": "UCAP",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "SFSREIT",
+        "business_status": "doubtful",
+        "business_reasoning": "Core business (acquiring, leasing, managing commercial\/residential real estate) is genuinely permissible - Nigeria's first listed REIT. However, its own governing allocation rules typically invest 75% in real estate and 25% in real estate related investments such as mortgages, real estate backed securities and real estate related equities, plus a 10% cash buffer, and its own risk disclosures confirm exposure to unfavorable Interest Rate fluctuations due to the sensitivity of its financial instruments. Up to a quarter of the portfolio is structurally earmarked for interest-bearing mortgage\/debt instruments - a disclosed financial-ratio concern, not an activity-level exclusion like the pure debt funds (NIDF\/CNIF\/MOFIREIF\/AVAIF)."
+    },
+    {
+        "symbol": "RONCHESS",
+        "business_status": "pass",
+        "business_reasoning": "Real estate development. The core business activities are permissible."
+    },
+    {
+        "symbol": "GOLDBREW",
+        "business_status": "fail",
+        "business_reasoning": "The company is involved in the production or distribution of alcohol."
+    },
+    {
+        "symbol": "UNIONDICON",
+        "business_status": "pass",
+        "business_reasoning": {
+            "principal_business": "Processing, packaging, and distribution of edible salt and agricultural goods.",
+            "secondary_businesses": [
+                "Cassava cultivation and processing"
+            ],
+            "revenue_sources": [
+                "Sale of refined and packaged salt",
+                "Sale of processed cassava and agricultural products"
+            ],
+            "prohibited_activities": [],
+            "confidence_score": 90,
+            "evidence": "Union Dicon Salt Plc is listed under the Consumer Goods sector on the Nigerian Exchange (NGX) and focuses primarily on salt processing, packaging, and agricultural projects such as cassava farming.",
+            "reasoning": "The company's primary business activities involve manufacturing and trading basic food products (salt and agricultural produce), which are permissible (Halal) under AAOIFI Standard No. 21. No primary involvement in prohibited business activities (e.g., alcohol, tobacco, gambling, conventional finance, pork, or weapons) was identified."
+        }
+    },
+    {
+        "symbol": "MCNICHOLS",
+        "business_status": "pass",
+        "business_reasoning": "Consumer products\/lottery-adjacent - VERIFY: has historically had lottery\/gaming terminal business lines; confirm current segment mix before treating as pass."
+    },
+    {
+        "symbol": "INTENEGINS",
+        "business_status": "fail",
+        "business_reasoning": "The company operates in conventional insurance, which involves prohibited elements such as Riba and Gharar."
+    },
+    {
+        "symbol": "OMATEK",
+        "business_status": "pass",
+        "business_reasoning": "Computer hardware. The core business activities are permissible."
+    },
+    {
+        "symbol": "STACO",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "NSLTECH",
+        "business_status": "fail",
+        "business_reasoning": "Secure Electronic Technology Plc (formerly National Sports Lottery Plc) directly operates a licensed national lottery business in Nigeria (exclusive 15-year license from Dec 2001), with stated operations covering lottery business, gaming products, airtime vending, and card payments. FY2025 financials show prize\/winnings costs of N2.32bn and ticket costs of N1.60bn - core revenue is lottery\/gambling activity, not incidental."
+    },
+    {
+        "symbol": "JOHNHOLT",
+        "business_status": "doubtful",
+        "business_reasoning": "Diversified trading conglomerate - segment revenue mix needs breakdown."
+    },
+    {
+        "symbol": "WAPIC",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "AUSTINLAZ",
+        "business_status": "pass",
+        "business_reasoning": "Industrial products. The core business activities are permissible."
+    },
+    {
+        "symbol": "ENAMELWA",
+        "business_status": "pass",
+        "business_reasoning": "Enamelware\/houseware manufacturing. The core business activities are permissible."
+    },
+    {
+        "symbol": "EKOCORP",
+        "business_status": "pass",
+        "business_reasoning": "Hospital operator (Eko Hospitals). The core business activities are permissible."
+    },
+    {
+        "symbol": "TRIPPLEG",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "MULTITREX",
+        "business_status": "pass",
+        "business_reasoning": "Food\/starch processing. The core business activities are permissible."
+    },
+    {
+        "symbol": "THOMASWY",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "JULI",
+        "business_status": "pass",
+        "business_reasoning": "Pharmaceutical distribution. The core business activities are permissible."
+    },
+    {
+        "symbol": "EUNISELL",
+        "business_status": "pass",
+        "business_reasoning": "Oilfield chemicals\/services. The core business activities are permissible."
+    },
+    {
+        "symbol": "TRANSEXPR",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "AFROMEDIA",
+        "business_status": "doubtful",
+        "business_reasoning": "The company is involved in the production or distribution of alcohol."
+    },
+    {
+        "symbol": "PHARMDEKO",
+        "business_status": "pass",
+        "business_reasoning": "Pharmaceuticals manufacturing. The core business activities are permissible."
+    },
+    {
+        "symbol": "BAPLC",
+        "business_status": "pass",
+        "business_reasoning": "Tech\/electronics. The core business activities are permissible."
+    },
+    {
+        "symbol": "HBMNG",
+        "business_status": "pass",
+        "business_reasoning": "Cement manufacturing (formerly Lafarge Africa). The core business activities are permissible."
+    },
+    {
+        "symbol": "UNIONVENT",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "GEREGU",
+        "business_status": "pass",
+        "business_reasoning": "Power generation. The core business activities are permissible."
+    },
+    {
+        "symbol": "CAPHOTEL",
+        "business_status": "fail",
+        "business_reasoning": {
+            "principal_business": "Hotel operation and management, primarily providing luxury accommodation and hospitality services.",
+            "secondary_businesses": [
+                "Food and beverage services",
+                "Banqueting and conference hall rentals",
+                "Recreational and leisure facilities"
+            ],
+            "revenue_sources": [
+                "Room accommodation bookings",
+                "Food and beverage sales (restaurants, bars, room service)",
+                "Event space and banqueting rentals",
+                "Recreational service fees"
+            ],
+            "prohibited_activities": [
+                "Production or distribution of alcohol",
+                "Sale of non-halal meat or pork"
+            ],
+            "confidence_score": 90,
+            "evidence": "Capital Hotels Plc owns and operates the Abuja Continental Hotel (formerly Sheraton Abuja Hotel), a major full-service luxury hotel offering lodging, food, beverage, and event hosting to corporate, diplomatic, and international clients.",
+            "reasoning": "While hotel lodging and event hosting are inherently permissible business activities, full-service international luxury hotels routinely serve alcohol and non-halal food (including pork) as part of their standard food and beverage operations. Under AAOIFI Standard No. 21, the sale and serving of alcoholic beverages and non-halal food items constitute prohibited business activities, rendering the business non-compliant."
+        }
+    },
+    {
+        "symbol": "UBN",
+        "business_status": "fail",
+        "business_reasoning": {
+            "principal_business": "Conventional commercial banking and retail\/corporate financial services.",
+            "secondary_businesses": [
+                "Treasury and investment management",
+                "Real estate investment and property holdings",
+                "Trade finance and foreign exchange services"
+            ],
+            "revenue_sources": [
+                "Interest income from loans, advances, and securities",
+                "Fees and commissions on banking transactions",
+                "Trading income and net gains on financial instruments"
+            ],
+            "prohibited_activities": [
+                "Conventional banking or lending on interest"
+            ],
+            "confidence_score": 98,
+            "evidence": "Union Bank of Nigeria Plc (UBN) is a major public conventional commercial bank listed on the Nigerian Exchange (NGX). Its primary operations consist of interest-based lending and deposit-taking.",
+            "reasoning": "Under AAOIFI Shariah Standard No. 21, core business activities involving interest-based financial intermediation (Riba), such as conventional commercial banking, are strictly impermissible. Because Union Bank of Nigeria Plc operates as a conventional interest-bearing financial institution, its principal business fails the core activity screening."
+        }
+    },
+    {
+        "symbol": "NREIF",
+        "business_status": "pass",
+        "business_reasoning": {
+            "principal_business": "Real estate investment, ownership, and management through a Real Estate Investment Trust (REIT) structure.",
+            "secondary_businesses": [
+                "Property leasing and tenant management",
+                "Real estate acquisition and strategic asset re-development"
+            ],
+            "revenue_sources": [
+                "Rental and lease income from real estate properties",
+                "Capital gains from real estate property sales",
+                "Property management fees"
+            ],
+            "prohibited_activities": [],
+            "confidence_score": 85,
+            "evidence": "NREIF operates in the Real Estate sector under the REITs industry, focusing on core real estate sector investments and rental income generation.",
+            "reasoning": "Under AAOIFI Standard No. 21, investment in and leasing of real estate is fundamentally permissible (halal). Based on available disclosures, the company's core business involves real estate ownership and management rather than prohibited activities like conventional financial lending, gambling, or tobacco. Full shariah compliance for a REIT also requires tenant-level screening and financial ratio checks, but at the core business activity level, it is permissible."
+        }
+    },
+    {
+        "symbol": "FLOURMILL",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "ASOSAVINGS",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "FIRSTHOLDCO",
+        "business_status": "fail",
+        "business_reasoning": "The company operates as a conventional bank engaged in interest-based lending and deposit-taking."
+    },
+    {
+        "symbol": "DAARCOMM",
+        "business_status": "doubtful",
+        "business_reasoning": "The company is involved in the production or distribution of alcohol."
+    },
+    {
+        "symbol": "NEWGOLD",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "7UP",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "IHS",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "NESF",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "DUNLOP",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "VALUEFUND",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "AFRIPRUD",
+        "business_status": "fail",
+        "business_reasoning": "The company operates in conventional insurance, which involves prohibited elements such as Riba and Gharar."
+    },
+    {
+        "symbol": "UNIONDAC",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "DIAMONDBNK",
+        "business_status": "fail",
+        "business_reasoning": {
+            "principal_business": "Conventional commercial banking and financial services.",
+            "secondary_businesses": [
+                "Retail banking",
+                "Corporate banking",
+                "Treasury and investment services"
+            ],
+            "revenue_sources": [
+                "Net interest income from loans and securities",
+                "Fees and commission income",
+                "Trading income"
+            ],
+            "prohibited_activities": [
+                "Conventional banking or lending on interest"
+            ],
+            "confidence_score": 95,
+            "evidence": "Diamond Bank PLC was a publicly listed commercial bank in Nigeria operating on conventional banking principles, generating revenue primarily from interest-bearing loans and deposits before merging with Access Bank.",
+            "reasoning": "Under AAOIFI Standard No. 21, conventional banking and lending activities involving interest (Riba) are strictly impermissible. Since Diamond Bank PLC's core business involved receiving interest-bearing deposits and issuing interest-bearing loans, its principal business activities are non-compliant."
+        }
+    },
+    {
+        "symbol": "HMARKINS",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "DEAPCAP",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "ANINO",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "CNIF",
+        "business_status": "fail",
+        "business_reasoning": "Coronation Infrastructure Fund is explicitly a closed-end debt fund, investing in loans, securities and securitised debt instruments of infrastructure companies, targeting a return of 3% over the FGN bond yield. H1 2026 results confirm interest income as the Fund's primary revenue driver, with infrastructure loans and money-market placements as the main contributors. Same category as NIDF and MOFIREIF - interest-based lending as the core, explicit product, not a property-holding trust."
+    },
+    {
+        "symbol": "EVANSMED",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "GOLDINSURE",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "NIG-GERMAN",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "MRS",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "INTERLINK",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "WAPCO",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "AIRTELAFRI",
+        "business_status": "pass",
+        "business_reasoning": "Telecom services. The core business activities are permissible."
+    },
+    {
+        "symbol": "TRANSCORP",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "FTGINSURE",
+        "business_status": "fail",
+        "business_reasoning": "The company operates in conventional insurance, which involves prohibited elements such as Riba and Gharar."
+    },
+    {
+        "symbol": "GUINEAINS",
+        "business_status": "fail",
+        "business_reasoning": "The company operates in conventional insurance, which involves prohibited elements such as Riba and Gharar."
+    },
+    {
+        "symbol": "RAKUNITY",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "AVONCROWN",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "MANDRID",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "PRESCO",
+        "business_status": "pass",
+        "business_reasoning": "Palm oil production. The core business activities are permissible."
+    },
+    {
+        "symbol": "GNI",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "FIRSTALUM",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "INITSPLC",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "SKYESHELT",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "UPDC REIT",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "NIGERINS",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "SKYEBANK",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "UNHOMES",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "FBNH",
+        "business_status": "fail",
+        "business_reasoning": {
+            "source": "Quadratic HQ verified FY2024",
+            "principal_business": "FBN Holdings PLC",
+            "confidence_score": 80,
+            "reasoning": "Conventional bank\/financial institution \u2014 core business involves interest (riba). Business screen fails under AAOIFI Standard No. 21."
+        }
+    },
+    {
+        "symbol": "JAIZBANK",
+        "business_status": "pass",
+        "business_reasoning": "Non-interest (Islamic) bank, licensed by CBN as Shariah-compliant - core model itself is riba-free; verify individual products with a Shariah advisor as with any institution."
+    },
+    {
+        "symbol": "BECOPETRO",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "GLAXOSMITH",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "TIGERBRANDS",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "CONTINSURE",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "OMOMORBNK",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "ABBEYBDS",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "UAC-PROP",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "MEDVIEWAIR",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "NEIMETH",
+        "business_status": "pass",
+        "business_reasoning": "Pharmaceuticals manufacturing. The core business activities are permissible."
+    },
+    {
+        "symbol": "SUNUASSUR",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "CUTIX",
+        "business_status": "pass",
+        "business_reasoning": "Cables\/wires manufacturing. The core business activities are permissible."
+    },
+    {
+        "symbol": "DNMEYER",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "EQUITYASUR",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "PORTPAINT",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "BUAFOODS",
+        "business_status": "pass",
+        "business_reasoning": "Food products. The core business activities are permissible."
+    },
+    {
+        "symbol": "ARADEL",
+        "business_status": "pass",
+        "business_reasoning": "Oil & gas production\/marketing. The core business activities are permissible."
+    },
+    {
+        "symbol": "DANGFLOUR",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "AGLEVENT",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "VONO",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "FIDELITYBK",
+        "business_status": "fail",
+        "business_reasoning": "The company operates as a conventional bank engaged in interest-based lending and deposit-taking."
+    },
+    {
+        "symbol": "GUINNESS",
+        "business_status": "fail",
+        "business_reasoning": "The company is involved in the production or distribution of alcohol."
+    },
+    {
+        "symbol": "UACN",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "NASCON",
+        "business_status": "pass",
+        "business_reasoning": "Salt\/food seasoning. The core business activities are permissible."
+    },
+    {
+        "symbol": "UPL",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "CCNN",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "CUSTODIAN",
+        "business_status": "fail",
+        "business_reasoning": "The company operates in conventional insurance, which involves prohibited elements such as Riba and Gharar."
+    },
+    {
+        "symbol": "NAHCO",
+        "business_status": "doubtful",
+        "business_reasoning": "The company is involved in the production or distribution of alcohol."
+    },
+    {
+        "symbol": "NGXGROUP",
+        "business_status": "doubtful",
+        "business_reasoning": "Own operated business (NGX Exchange, NGX RegCo, NGX RelCo) is fee-based - listing\/trading fees, market data, regulation, real estate - not itself riba, comparable to how most global exchange operators are treated. Complication sits in the Strategic Investment segment: NGX Group holds equity stakes in CSCS and NASD (fine, fee-based) but also in FMDQ Securities Exchange, a market dedicated almost entirely to conventional bond\/money-market\/FX trading. Stake size and FMDQ's own revenue mix are unconfirmed - determines whether this is an immaterial minority holding or a taint on the parent. Genuine scholarly judgment call, not resolved by financial ratios alone."
+    },
+    {
+        "symbol": "CAPOIL",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "JAPAULOIL",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "FO",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "CAP",
+        "business_status": "pass",
+        "business_reasoning": "Paints manufacturing. The core business activities are permissible."
+    },
+    {
+        "symbol": "CORNERST",
+        "business_status": "fail",
+        "business_reasoning": "The company operates in conventional insurance, which involves prohibited elements such as Riba and Gharar."
+    },
+    {
+        "symbol": "CWG",
+        "business_status": "pass",
+        "business_reasoning": "IT services. The core business activities are permissible."
+    },
+    {
+        "symbol": "INFINITY",
+        "business_status": "fail",
+        "business_reasoning": "The company operates as a mortgage bank engaged in interest-based lending."
+    },
+    {
+        "symbol": "SCOA",
+        "business_status": "doubtful",
+        "business_reasoning": "Diversified trading conglomerate (vehicles\/equipment) - segment revenue mix needs breakdown."
+    },
+    {
+        "symbol": "IPWA",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "NESTLE",
+        "business_status": "pass",
+        "business_reasoning": "Food & beverage manufacturing. The core business activities are permissible."
+    },
+    {
+        "symbol": "LAWUNION",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "UNITYKAP",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "OMOSAVBNK",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "ASHAKACEM",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "PAINTCOM",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "MOBIL",
+        "business_status": "pass",
+        "business_reasoning": {
+            "principal_business": "Marketing and distribution of downstream petroleum products, lubricants, and LPG.",
+            "secondary_businesses": [
+                "Manufacture and blending of automotive and industrial lubricants",
+                "Operation of retail service stations",
+                "Real estate and property leasing related to retail outlets"
+            ],
+            "revenue_sources": [
+                "Sale of white products (Premium Motor Spirit, Automotive Gas Oil, Dual Purpose Kerosene)",
+                "Sale of lubricants and specialty products",
+                "Liquefied Petroleum Gas (LPG) sales",
+                "Rental and property income"
+            ],
+            "prohibited_activities": [],
+            "confidence_score": 95,
+            "evidence": "Mobil Oil Nigeria Plc (now known as 11 Plc) is a downstream oil and gas company focused on retailing fuel, manufacturing lubricants, and marketing petroleum products in Nigeria.",
+            "reasoning": "The core business activities of fuel distribution, LPG marketing, and lubricant manufacturing are non-financial, real-economy activities that do not involve any prohibited sectors under AAOIFI Standard No. 21."
+        }
+    },
+    {
+        "symbol": "TOURIST",
+        "business_status": "fail",
+        "business_reasoning": {
+            "compliance_status": "FAIL",
+            "reason": "FAIL \u2014 Tourist Company of Nigeria PLC operates hotels and casino facilities. Casino gambling is explicitly prohibited (haram) under Islamic Shariah law regardless of financial ratios."
+        }
+    },
+    {
+        "symbol": "SEPLAT",
+        "business_status": "pass",
+        "business_reasoning": "Oil & gas production. The core business activities are permissible."
+    },
+    {
+        "symbol": "STANBIC",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "TRANSCOHOT",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "NB",
+        "business_status": "fail",
+        "business_reasoning": "The company is involved in the production or distribution of alcohol."
+    },
+    {
+        "symbol": "SKYAVN",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "ZENITHBANK",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "ETI",
+        "business_status": "fail",
+        "business_reasoning": "The company operates as a conventional bank engaged in interest-based lending and deposit-taking."
+    },
+    {
+        "symbol": "NIGROPES",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "SMURFIT",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "UBA",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "TRANSPOWER",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "NNFM",
+        "business_status": "pass",
+        "business_reasoning": "Flour milling. The core business activities are permissible."
+    },
+    {
+        "symbol": "JBERGER",
+        "business_status": "pass",
+        "business_reasoning": "Construction\/engineering. The core business activities are permissible."
+    },
+    {
+        "symbol": "FCMB",
+        "business_status": "fail",
+        "business_reasoning": "The company operates as a conventional bank engaged in interest-based lending and deposit-taking."
+    },
+    {
+        "symbol": "STUDPRESS",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "\tCILEASING",
+        "business_status": "pass",
+        "business_reasoning": {
+            "principal_business": "Commercial equipment leasing, marine vessel chartering, fleet management, and manpower outsourcing services.",
+            "secondary_businesses": [
+                "Logistics management",
+                "Personnel recruitment and maintenance services",
+                "Finance leasing"
+            ],
+            "revenue_sources": [
+                "Marine vessel charter fees",
+                "Fleet management and vehicle lease payments",
+                "Manpower outsourcing contracts",
+                "Equipment lease and maintenance revenue"
+            ],
+            "prohibited_activities": [],
+            "confidence_score": 90,
+            "evidence": "C&I Leasing operates specialized business units (C&I Marine, Hertz Fleet Management, Citilease) delivering marine support vessels, fleet management, equipment operating leases, and manpower solutions to oil & gas and telecom sectors.",
+            "reasoning": "The core business of leasing physical assets (operating leases, marine chartering) and providing service solutions (fleet management, manpower outsourcing) is inherently permissible (Halal) under AAOIFI Standard No. 21. The company is classified under Industrials and does not operate as a conventional bank or prohibited financial institution, though financial ratio screening (e.g., debt and interest-bearing income from conventional finance leases) would be required for full compliance."
+        }
+    },
+    {
+        "symbol": "CUSTODYINS",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "STDINSURE",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "AFRPAINTS",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "FORTISMFB",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "OASISINS",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "RESORTSAL",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "GUARANTY",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "STERLINGNG",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "BETAGLAS",
+        "business_status": "doubtful",
+        "business_reasoning": "The company is involved in the production or distribution of alcohol."
+    },
+    {
+        "symbol": "FIDSON",
+        "business_status": "pass",
+        "business_reasoning": "Pharmaceuticals manufacturing. The core business activities are permissible."
+    },
+    {
+        "symbol": "NIDF",
+        "business_status": "fail",
+        "business_reasoning": "Nigeria Infrastructure Debt Fund is explicitly a debt fund, not a property-holding trust - it makes primarily debt investments in infrastructure projects, targeting a gross return of 3.00-4.50% over comparable FGN bond yields, with 80% of assets in senior debt\/securitised debt\/loans to government agencies. Income to unit-holders comes from coupon and fees received from borrowers. This is interest-based lending as the core, explicit product (not incidental), same category as MOFIREIF, INFINITY, and LIVINGTRUST."
+    },
+    {
+        "symbol": "NEM",
+        "business_status": "fail",
+        "business_reasoning": "The company operates in conventional insurance, which involves prohibited elements such as Riba and Gharar."
+    },
+    {
+        "symbol": "NREIT",
+        "business_status": "pass",
+        "business_reasoning": "Chapel Hill Denham Nigeria Real Estate Investment Trust - unlike other REIT-labeled NGX names on this list, NREIT is an actually certified Shariah-compliant fund, not just an inferred one: it has a named Shariah Adviser (Lotus Financial Services Limited), offer documents explicitly commit proceeds to Shariah-compliant, income-producing commercial real estate (office, retail, industrial, corporate residential), and management states a strategy of avoiding heavy reliance on debt financing - addressing the debt-ratio screen directly, not just business activity. Appears to be the only NGX REIT with actual third-party Shariah certification; the other REIT names (UHOMREIT, SFSREIT, UPDCREIT, AVAIF, CNIF) should not be assumed equivalent and still need their own tenant-mix\/debt-structure check."
+    },
+    {
+        "symbol": "ETRANZACT",
+        "business_status": "pass",
+        "business_reasoning": "Payment technology services. The core business activities are permissible (verify no interest-bearing float structuring)."
+    },
+    {
+        "symbol": "HONYFLOUR",
+        "business_status": "pass",
+        "business_reasoning": "Flour milling\/food. The core business activities are permissible."
+    },
+    {
+        "symbol": "VFDGROUP",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "CONHALLPLC",
+        "business_status": "fail",
+        "business_reasoning": "The company operates in conventional insurance, which involves prohibited elements such as Riba and Gharar."
+    },
+    {
+        "symbol": "LEARNAFRCA",
+        "business_status": "pass",
+        "business_reasoning": "Publishing\/education materials. The core business activities are permissible."
+    },
+    {
+        "symbol": "BERGER",
+        "business_status": "pass",
+        "business_reasoning": "Paints manufacturing. The core business activities are permissible."
+    },
+    {
+        "symbol": "CHAMS",
+        "business_status": "pass",
+        "business_reasoning": "The company is involved in the production or distribution of alcohol."
+    },
+    {
+        "symbol": "SOVRENINS",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "TIP",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "IMG",
+        "business_status": "pass",
+        "business_reasoning": "Mining\/resources. The core business activities are permissible."
+    },
+    {
+        "symbol": "ZICHIS",
+        "business_status": "fail",
+        "business_reasoning": "Non-halal. The company's stated business lines include piggery operations, which is a categorical Shariah exclusion under AAOIFI standards."
+    },
+    {
+        "symbol": "MORISON",
+        "business_status": "pass",
+        "business_reasoning": "Pharmaceuticals\/consumer health. The core business activities are permissible."
+    },
+    {
+        "symbol": "AFRINSURE",
+        "business_status": "fail",
+        "business_reasoning": "The company operates in conventional insurance, which involves prohibited elements such as Riba and Gharar."
+    },
+    {
+        "symbol": "AVAIF",
+        "business_status": "fail",
+        "business_reasoning": "AVA Infrastructure Fund's core business activities focus on providing debt financing for infrastructure development projects across Nigeria (greenfield developments, expansion, recapitalisations, rehabilitation of mature assets). Its own stated objective is to deliver income to unit holders through debt financing, with management describing its strategy as allocating private credit. Same category as NIDF, CNIF, and MOFIREIF - a debt fund, not a property-holding trust, despite the infrastructure\/real estate framing."
+    },
+    {
+        "symbol": "PREMPAINTS",
+        "business_status": "pass",
+        "business_reasoning": "Paints manufacturing. The core business activities are permissible."
+    },
+    {
+        "symbol": "ALEX",
+        "business_status": "pass",
+        "business_reasoning": "Mining\/resources. The core business activities are permissible."
+    },
+    {
+        "symbol": "ABBEYBANK",
+        "business_status": "fail",
+        "business_reasoning": "The company operates as a conventional bank engaged in interest-based lending and deposit-taking."
+    },
+    {
+        "symbol": "CMFC",
+        "business_status": "fail",
+        "business_reasoning": "CORRECTED - this is NOT Consolidated Hallmark Insurance as originally misidentified. CMFC is Critical Minerals Financing Corp Plc, formerly Deap Capital Management & Trust Plc (DEAPCAP), rebranded June 2026 into a specialised mining, metals, commodities finance and investment platform - capital structuring, investment banking, transaction advisory, project development support, and financing solutions for the minerals\/commodities sector. No line-item CMFC revenue disclosure confirms this, but per typical revenue patterns of comparable mining\/commodities financing corporations, 'financing solutions' and 'capital structuring' in this space are overwhelmingly monetized through structured debt and interest spread rather than fee-only advisory (the same pattern confirmed directly for UCAP once its lending subsidiary was examined) - treated as FAIL on that basis."
+    },
+    {
+        "symbol": "COURTVILLE",
+        "business_status": "pass",
+        "business_reasoning": {
+            "principal_business": "Information technology and business process outsourcing (BPO) services, specializing in e-government automation systems.",
+            "secondary_businesses": [
+                "Software development and IT consulting",
+                "E-commerce platforms and digital publishing",
+                "Database management and franchise administration"
+            ],
+            "revenue_sources": [
+                "Transaction fees from e-government platforms (such as the AutoReg motor vehicle registration system)",
+                "IT consulting and custom software development fees",
+                "Business process outsourcing service fees"
+            ],
+            "prohibited_activities": [],
+            "confidence_score": 90,
+            "evidence": "Courteville Business Solutions PLC is a technology enterprise primarily recognized for developing 'AutoReg', an automated motor vehicle administration system used across Nigeria, alongside providing IT consulting, digital publishing, and BPO services.",
+            "reasoning": "The company's primary business activities revolve around technology solutions, software engineering, and business process automation. These activities do not violate AAOIFI Standard No. 21 rules, as they do not involve interest-based financial intermediation, alcohol, gambling, pork, adult entertainment, tobacco, or defense\/weapons manufacturing."
+        }
+    },
+    {
+        "symbol": "BOCGAS",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "ROKANA",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "ACCESS",
+        "business_status": "fail",
+        "business_reasoning": {
+            "source": "Quadratic HQ verified FY2024",
+            "principal_business": "Access Holdings PLC",
+            "confidence_score": 80,
+            "reasoning": "Conventional bank\/financial institution \u2014 core business involves interest (riba). Business screen fails under AAOIFI Standard No. 21."
+        }
+    },
+    {
+        "symbol": "AIRSERVICE",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "UNIC",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "ARBICO",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "UBCAP",
+        "business_status": "fail",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "DANFLOUR",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "STERLNBANK",
+        "business_status": "pass",
+        "business_reasoning": null
+    },
+    {
+        "symbol": "GSPECPLC",
+        "business_status": "pass",
+        "business_reasoning": null
+    }
+]

@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import time
 from typing import Dict, Any, Optional
@@ -11,7 +12,7 @@ class PDFExtractor:
         if not api_key:
             raise ValueError("GEMINI_API_KEY is not set")
         from google.genai import types as genai_types
-        self.client = genai.Client(api_key=api_key, http_options=genai_types.HttpOptions(api_version='v1'))
+        self.client = genai.Client(api_key=api_key, http_options=genai_types.HttpOptions(api_version='v1beta'))
 
     async def extract_financials(self, pdf_path: str, financial_year: int) -> Dict[str, Any]:
         """
@@ -22,7 +23,8 @@ class PDFExtractor:
         if not os.path.exists(pdf_path):
             raise FileNotFoundError(f"PDF not found at {pdf_path}")
 
-        print(f"Uploading {pdf_path} to Gemini...")
+        print(f"Uploading {pdf_path} to Gemini...", flush=True)
+        sys.stdout.flush()
         gemini_file = await asyncio.to_thread(self.client.files.upload, file=pdf_path)
 
         try:
@@ -135,35 +137,43 @@ class PDFExtractor:
                 f"Extract all fields from the attached financial report now."
             )
 
-            print("Extracting data with Gemini (unit-aware)...")
-            def _generate():
-                return self.client.models.generate_content(
-                    model='gemini-3.5-flash',
-                    contents=[gemini_file, prompt],
-                    config=types.GenerateContentConfig(
-                        response_mime_type="application/json",
-                        response_schema=schema,
-                    ),
-                )
+            MODELS_TO_TRY = ['gemini-3.5-flash', 'gemini-3.6-flash', 'gemini-2.5-flash-lite']
+            
+            for model_name in MODELS_TO_TRY:
+                def _generate(m=model_name):
+                    return self.client.models.generate_content(
+                        model=m,
+                        contents=[gemini_file, prompt],
+                        config=types.GenerateContentConfig(
+                            response_mime_type="application/json",
+                            response_schema=schema,
+                        ),
+                    )
 
-            max_retries = 3
-            for attempt in range(max_retries):
-                try:
-                    response = await asyncio.wait_for(asyncio.to_thread(_generate), timeout=60.0)
-                    return json.loads(response.text)
-                except asyncio.TimeoutError:
-                    print(f"Gemini API Error (Attempt {attempt + 1}/{max_retries}): Request timed out after 60 seconds.")
-                    if attempt == max_retries - 1:
-                        print(f"Failed to extract after {max_retries} attempts.")
-                        return {}
-                    await asyncio.sleep(5 * (2 ** attempt))
-                except Exception as e:
-                    print(f"Gemini API Error (Attempt {attempt + 1}/{max_retries}): {e}")
-                    if attempt == max_retries - 1:
-                        print(f"Failed to extract after {max_retries} attempts.")
-                        return {}
-                    # Exponential backoff (5s, 10s, 20s...)
-                    await asyncio.sleep(5 * (2 ** attempt))
+                max_retries = 3
+                for attempt in range(max_retries):
+                    try:
+                        print(f"Trying model {model_name} (attempt {attempt+1}/{max_retries})...", flush=True)
+                        response = await asyncio.wait_for(asyncio.to_thread(_generate), timeout=90.0)
+                        return json.loads(response.text)
+                    except asyncio.TimeoutError:
+                        print(f"Timeout on {model_name} attempt {attempt+1}. Retrying...", flush=True)
+                        if attempt < max_retries - 1:
+                            await asyncio.sleep(5 * (2 ** attempt))
+                    except Exception as e:
+                        err = str(e)
+                        print(f"Error on {model_name} attempt {attempt+1}: {err}", flush=True)
+                        if '404' in err or 'NOT_FOUND' in err or 'deprecated' in err.lower():
+                            print(f"Model {model_name} not available. Trying next model...", flush=True)
+                            break  # Try next model immediately
+                        if attempt < max_retries - 1:
+                            await asyncio.sleep(5 * (2 ** attempt))
+                        else:
+                            break  # Try next model
+            
+            print("All models failed.", flush=True)
+            return {}
+
         finally:
             print(f"Cleaning up Gemini file: {gemini_file.name}...")
             try:

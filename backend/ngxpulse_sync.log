@@ -1,0 +1,26 @@
+Starting NGXPulse Daily Delta Sync...
+
+   Symfony\Component\Process\Exception\ProcessSignaledException 
+
+  The process has been signaled with signal "15".
+
+  at vendor/symfony/process/Process.php:473
+    469▕             usleep(1000);
+    470▕         }
+    471▕ 
+    472▕         if ($this->processInformation['signaled'] && $this->processInformation['termsig'] !== $this->latestSignal) {
+  ➜ 473▕             throw new ProcessSignaledException($this);
+    474▕         }
+    475▕ 
+    476▕         return $this->exitcode;
+    477▕     }
+
+      [2m+1 vendor frames [22m
+
+  2   app/Console/Commands/SyncNgxPulse.php:43
+      Symfony\Component\Process\Process::run(Object(Closure))
+      [2m+13 vendor frames [22m
+
+  16  artisan:13
+      Illuminate\Foundation\Application::handleCommand(Object(Symfony\Component\Console\Input\ArgvInput))
+
