@@ -89,7 +89,7 @@ class StockController extends Controller
      */
     public function show(string $symbol): JsonResponse
     {
-        $stock = \Illuminate\Support\Facades\Cache::remember("stocks.show.{$symbol}_v2", 300, function () use ($symbol) {
+        $stock = \Illuminate\Support\Facades\Cache::remember("stocks.show.{$symbol}_v3", 300, function () use ($symbol) {
             $company = Company::with(['status', 'financials' => fn($q) => $q->latest(), 'dailyPrices' => fn($q) => $q->latest('date'), 'news'])->where('symbol', $symbol)->firstOrFail();
             
             // Map the FinancialScreening into financials for legacy mobile app compatibility
