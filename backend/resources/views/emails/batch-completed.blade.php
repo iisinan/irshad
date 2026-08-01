@@ -16,5 +16,5 @@ Go to Dashboard
 @endcomponent
 
 Thanks,<br>
-{{ config('app.name') }} AI Engine
+{{ config('app.name') }} Engine
 @endcomponent

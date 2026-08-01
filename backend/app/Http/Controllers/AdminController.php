@@ -228,7 +228,7 @@ class AdminController extends Controller
                 'financial_screenings.calculation_results'
             )
             ->orderBy('companies.symbol')
-            ->get();
+            ->cursor();
         
         $headers = [
             "Content-type"        => "text/csv",

@@ -144,7 +144,7 @@ class _ScanScreenState extends State<ScanScreen> {
                     Image.asset('assets/images/logo.png', height: 40, color: Colors.white.withOpacity(0.7)),
                     const SizedBox(width: 12),
                     Text(
-                      'AI POWERED VERIFICATION',
+                      'SMART VERIFICATION',
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.5),
                         fontSize: 10,

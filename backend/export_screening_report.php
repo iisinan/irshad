@@ -18,8 +18,8 @@ foreach ($companiesMissingScreening as $c) {
 
 $screenings = AaoifiScreening::with('company:id,symbol,name')->get();
 
-$screeningsOutput = "### AAOIFI AI Business Activity Analysis (" . $screenings->count() . ")\n";
-$screeningsOutput .= "This table shows the AI's breakdown of the primary business activities for screened stocks.\n\n";
+$screeningsOutput = "### AAOIFI Business Activity Analysis (" . $screenings->count() . ")\n";
+$screeningsOutput .= "This table shows the system's breakdown of the primary business activities for screened stocks.\n\n";
 $screeningsOutput .= "| Symbol | Business Status | Principal Activities | Prohibited Activities | Reasoning |\n|---|---|---|---|---|\n";
 
 foreach ($screenings as $s) {

@@ -40,7 +40,7 @@
                             <th class="px-6 py-4 font-medium">Status</th>
                             <th class="px-6 py-4 font-medium text-right">Debt Ratio</th>
                             <th class="px-6 py-4 font-medium text-right">Income Ratio</th>
-                            <th class="px-6 py-4 font-medium text-center">AI Analysis</th>
+                            <th class="px-6 py-4 font-medium text-center">Irshad Analysis</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-700/50">
@@ -101,7 +101,7 @@
                                         <button 
                                             onclick="alert('{{ addslashes(str_replace(PHP_EOL, ' ', $stock->ai_explanation)) }}')"
                                             class="inline-flex items-center justify-center p-2 rounded-lg bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 hover:text-indigo-300 border border-indigo-500/20 transition-all"
-                                            title="View AI Analysis"
+                                            title="View Irshad Analysis"
                                         >
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                         </button>

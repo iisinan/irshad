@@ -68,7 +68,7 @@
             </tr>
         </table>
 
-        <p style="font-size:13px; font-weight:bold; margin-bottom: 6px;">AI Reasoning:</p>
+        <p style="font-size:13px; font-weight:bold; margin-bottom: 6px;">Reasoning:</p>
         <div class="reason-box">{{ $review->reason }}</div>
 
         <p style="font-size: 13px; color: #555;">
@@ -87,7 +87,7 @@
     </div>
 
     <div class="footer">
-        This email was sent by the Irshad AI Engine. Do not reply to this email.
+        This email was sent by the Irshad Engine. Do not reply to this email.
     </div>
 
 </div>

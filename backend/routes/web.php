@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return response()->json(['message' => 'Irshad AI Engine API is running']);
+    return response()->json(['message' => 'Irshad Engine API is running']);
 });
 
 Route::get('/health', function () {

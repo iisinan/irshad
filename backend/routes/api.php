@@ -111,44 +111,47 @@ Route::prefix('v1')->group(function () {
         // Billing
         Route::post('/billing/upgrade', [BillingController::class, 'upgrade']);
 
-        // Brokerage
-        Route::post('/brokerage/link',    [BrokerageController::class, 'link']);
-        Route::get('/brokerage/accounts', [BrokerageController::class, 'accounts']);
-        Route::post('/brokerage/trade',   [BrokerageController::class, 'trade']);
-
-        // Portfolio & Trading
-        Route::get('/portfolio', [PortfolioController::class, 'index']);
-        Route::get('/portfolio/movers', [PortfolioController::class, 'movers']);
-        Route::post('/broker/link', [TradeController::class, 'linkBroker']);
-        Route::post('/broker/trade', [TradeController::class, 'executeTrade']);
-
         // Verification
         Route::post('/email/resend', [VerificationController::class, 'resend']);
-        Route::post('/portfolio',              [PortfolioController::class, 'store']);
-        Route::post('/portfolio/bulk',         [PortfolioController::class, 'bulkStore']);
-        Route::put('/portfolio/{id}',          [PortfolioController::class, 'update']);
-        Route::delete('/portfolio/{id}',       [PortfolioController::class, 'destroy']);
 
-        // Watchlist
-        Route::get('/watchlist',               [\App\Http\Controllers\WatchlistController::class, 'index']);
-        Route::post('/watchlist',              [\App\Http\Controllers\WatchlistController::class, 'store']);
-        Route::post('/watchlist/bulk',         [\App\Http\Controllers\WatchlistController::class, 'bulkStore']);
-        Route::put('/watchlist/{symbol}',      [\App\Http\Controllers\WatchlistController::class, 'update']);
-        Route::delete('/watchlist/{symbol}',   [\App\Http\Controllers\WatchlistController::class, 'destroy']);
+        // ── Verified Protected Routes (Require Email Verification) ──
+        Route::middleware('verified')->group(function () {
+            // Brokerage
+            Route::post('/brokerage/link',    [BrokerageController::class, 'link']);
+            Route::get('/brokerage/accounts', [BrokerageController::class, 'accounts']);
+            Route::post('/brokerage/trade',   [BrokerageController::class, 'trade']);
 
-        // Onboarding (atomic: bulk watchlist + mark onboarded in one request)
-        Route::post('/onboard',                [\App\Http\Controllers\WatchlistController::class, 'onboard']);
+            // Portfolio & Trading
+            Route::get('/portfolio', [PortfolioController::class, 'index']);
+            Route::get('/portfolio/movers', [PortfolioController::class, 'movers']);
+            Route::post('/broker/link', [TradeController::class, 'linkBroker']);
+            Route::post('/broker/trade', [TradeController::class, 'executeTrade']);
 
+            Route::post('/portfolio',              [PortfolioController::class, 'store']);
+            Route::post('/portfolio/bulk',         [PortfolioController::class, 'bulkStore']);
+            Route::put('/portfolio/{id}',          [PortfolioController::class, 'update']);
+            Route::delete('/portfolio/{id}',       [PortfolioController::class, 'destroy']);
 
-        // Favorites
-        Route::get('/favorites',               [\App\Http\Controllers\FavoriteController::class, 'index']);
-        Route::post('/favorites',              [\App\Http\Controllers\FavoriteController::class, 'store']);
-        Route::put('/favorites/{favorite}',    [\App\Http\Controllers\FavoriteController::class, 'update']);
-        Route::delete('/favorites/{favorite}', [\App\Http\Controllers\FavoriteController::class, 'destroy']); // uses route model binding on {favorite} ID
+            // Watchlist
+            Route::get('/watchlist',               [\App\Http\Controllers\WatchlistController::class, 'index']);
+            Route::post('/watchlist',              [\App\Http\Controllers\WatchlistController::class, 'store']);
+            Route::post('/watchlist/bulk',         [\App\Http\Controllers\WatchlistController::class, 'bulkStore']);
+            Route::put('/watchlist/{symbol}',      [\App\Http\Controllers\WatchlistController::class, 'update']);
+            Route::delete('/watchlist/{symbol}',   [\App\Http\Controllers\WatchlistController::class, 'destroy']);
 
-        // History
-        Route::get('/history',  [HistoryController::class, 'index']);
-        Route::post('/history', [HistoryController::class, 'store']);
+            // Onboarding (atomic: bulk watchlist + mark onboarded in one request)
+            Route::post('/onboard',                [\App\Http\Controllers\WatchlistController::class, 'onboard']);
+
+            // Favorites
+            Route::get('/favorites',               [\App\Http\Controllers\FavoriteController::class, 'index']);
+            Route::post('/favorites',              [\App\Http\Controllers\FavoriteController::class, 'store']);
+            Route::put('/favorites/{favorite}',    [\App\Http\Controllers\FavoriteController::class, 'update']);
+            Route::delete('/favorites/{favorite}', [\App\Http\Controllers\FavoriteController::class, 'destroy']);
+
+            // History
+            Route::get('/history',  [HistoryController::class, 'index']);
+            Route::post('/history', [HistoryController::class, 'store']);
+        });
 
         // Price Alerts
         Route::get('/alerts', [PriceAlertController::class, 'index']);
