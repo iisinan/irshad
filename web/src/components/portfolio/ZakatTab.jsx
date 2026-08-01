@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Calculator, Download, Coins, Wheat, Bug as Cow, Scale, CheckCircle2, RefreshCw, AlertCircle, Calendar, Bell, Edit2 } from 'lucide-react';
-import { getSettings } from '../../services/api';
+import api, { getSettings } from '../../services/api';
 
 function getCowZakat(n) {
   if (n < 30) return 'None (Below Nisab)';
@@ -56,6 +56,7 @@ export default function ZakatTab({ data }) {
     if (hawlInput) {
       localStorage.setItem(ZAKAT_DATE_KEY, hawlInput);
       setHawlDate(hawlInput);
+      api.put('/profile', { preferences: { zakat_hawl_date: hawlInput } }).catch(console.error);
     }
     setEditingHawl(false);
   };
@@ -66,6 +67,7 @@ export default function ZakatTab({ data }) {
     setHawlDate(null);
     setHawlInput('');
     setEditingHawl(false);
+    api.put('/profile', { preferences: { zakat_hawl_date: null } }).catch(console.error);
   };
 
   const [exchangeRate, setExchangeRate] = useState(1600); // USD to NGN default

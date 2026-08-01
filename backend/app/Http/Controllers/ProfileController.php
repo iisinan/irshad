@@ -52,6 +52,11 @@ class ProfileController extends Controller
             $validated['password'] = Hash::make($validated['password']);
         }
 
+        if (isset($validated['preferences'])) {
+            $existingPreferences = $user->preferences ?? [];
+            $validated['preferences'] = array_merge($existingPreferences, $validated['preferences']);
+        }
+
         $user->update($validated);
         
         \Illuminate\Support\Facades\Cache::tags(['users'])->forget("user.profile.{$user->id}");

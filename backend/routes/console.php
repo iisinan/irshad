@@ -38,3 +38,6 @@ Schedule::command('irshad:sync-ngxpulse')->dailyAt('03:00');
 
 // NGX Pulse Dividend Calendar — scrape & update every morning at 9:00 AM
 Schedule::command('dividends:update')->dailyAt('09:00');
+
+// Send Zakat Reminders daily at 8:00 AM
+Schedule::command('app:send-zakat-reminders')->dailyAt('08:00');

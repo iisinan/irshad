@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Search, Plus, CheckCircle2, Lock, ShieldCheck, Trash2, FileText, UploadCloud, Calendar, Bell } from 'lucide-react';
-import { fetchNgxStocks, linkBroker } from '../../services/api';
+import api, { fetchNgxStocks, linkBroker } from '../../services/api';
 import CompanyLogo from '../CompanyLogo';
 
 // ─── Zakat Date Confirmation Popup ──────────────────────────────────────────
@@ -227,12 +227,15 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
       // Use the earliest purchase date among new holdings
       const earliestDate = validRows.map(r => r.date).sort()[0];
       setZakatPromptDate(earliestDate);
+    } else {
+      onClose();
     }
   };
 
   const handleZakatYes = () => {
     localStorage.setItem(ZAKAT_DATE_KEY, zakatPromptDate);
     localStorage.setItem(ZAKAT_ASKED_KEY, 'yes');
+    api.put('/profile', { preferences: { zakat_hawl_date: zakatPromptDate } }).catch(console.error);
     setZakatPromptDate(null);
     setShowZakatConfirm(true);
   };
