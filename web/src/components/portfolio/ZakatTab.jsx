@@ -46,7 +46,7 @@ export default function ZakatTab({ data }) {
 
   const hawlDueDate = hawlDate ? (() => {
     const d = new Date(hawlDate);
-    d.setFullYear(d.getFullYear() + 1);
+    d.setDate(d.getDate() + 354);
     return d;
   })() : null;
 

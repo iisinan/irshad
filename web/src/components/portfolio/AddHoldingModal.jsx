@@ -8,7 +8,7 @@ import CompanyLogo from '../CompanyLogo';
 function ZakatDatePrompt({ purchaseDate, onYes, onNo }) {
   const zakatDueDate = (() => {
     const d = new Date(purchaseDate);
-    d.setFullYear(d.getFullYear() + 1);
+    d.setDate(d.getDate() + 354);
     return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
   })();
 
@@ -72,7 +72,7 @@ function ZakatDatePrompt({ purchaseDate, onYes, onNo }) {
 function ZakatConfirmation({ purchaseDate, onDone }) {
   const zakatDueDate = (() => {
     const d = new Date(purchaseDate);
-    d.setFullYear(d.getFullYear() + 1);
+    d.setDate(d.getDate() + 354);
     return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
   })();
 
@@ -190,7 +190,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
 
   const totalCost = rows.reduce((acc, r) => acc + ((Number(r.sh) || 0) * (Number(r.pr) || 0)), 0);
 
-  const submit = async (e) => {
+  const submit = (e) => {
     e.preventDefault();
 
     for (let i = 0; i < rows.length; i++) {
@@ -217,8 +217,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
     }));
 
     // Save holdings first
-    const success = await onAdd(holdings);
-    if (!success) return;
+    onAdd(holdings);
 
     // Decide whether to show zakat prompt
     const zakatAlreadySet = !!localStorage.getItem(ZAKAT_DATE_KEY);
@@ -228,8 +227,6 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
       // Use the earliest purchase date among new holdings
       const earliestDate = validRows.map(r => r.date).sort()[0];
       setZakatPromptDate(earliestDate);
-    } else {
-      onClose();
     }
   };
 
