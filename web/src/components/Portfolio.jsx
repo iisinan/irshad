@@ -396,11 +396,17 @@ export default function Portfolio() {
 
             <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
               {[
-                { label: 'Halal Holdings',   value: halalCount,    color: 'var(--halal)',     bg: 'var(--halal-bg)',     border: 'var(--halal-border)' },
-                { label: 'Non-Halal',        value: nonHalalCount, color: 'var(--non-halal)', bg: 'var(--non-halal-bg)', border: 'var(--non-halal-border)' },
-                { label: 'Need Purification',value: needsPurif,    color: 'var(--doubtful)',  bg: 'var(--doubtful-bg)',  border: 'var(--doubtful-border)' },
+                { label: 'Halal Holdings',   value: halalCount,    color: 'var(--halal)',     bg: 'var(--halal-bg)',     border: 'var(--halal-border)',     action: () => handleTabChange('holdings') },
+                { label: 'Non-Halal',        value: nonHalalCount, color: 'var(--non-halal)', bg: 'var(--non-halal-bg)', border: 'var(--non-halal-border)', action: () => handleTabChange('holdings') },
+                { label: 'Need Purification',value: needsPurif,    color: 'var(--doubtful)',  bg: 'var(--doubtful-bg)',  border: 'var(--doubtful-border)',  action: () => handleTabChange('purification') },
               ].map(row => (
-                <div key={row.label} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 14px', borderRadius:'12px', background:row.bg, border:`1px solid ${row.border}` }}>
+                <div 
+                  key={row.label} 
+                  onClick={row.action}
+                  style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 14px', borderRadius:'12px', background:row.bg, border:`1px solid ${row.border}`, cursor:'pointer', transition:'all 0.2s' }}
+                  onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
+                  onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                >
                   <span style={{ fontSize: '0.72rem', fontWeight:700, color:row.color }}>{row.label}</span>
                   <span style={{ fontSize: '0.97rem', fontWeight:900, color:row.color }}>{row.value}</span>
                 </div>
