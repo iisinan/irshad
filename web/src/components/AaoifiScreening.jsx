@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { useParams, Link } from 'react-router-dom';
 import { 
   ArrowLeft, CheckCircle, XCircle, AlertTriangle, 
-  HelpCircle, ShieldCheck, ChevronRight, FileText, Brain, Download, Activity, Trash2
+  HelpCircle, ShieldCheck, ChevronRight, FileText, Brain, Download, Activity, Trash2, Droplets
 } from 'lucide-react';
 import { fetchAaoifiScreening, updateAaoifiData } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -227,14 +227,20 @@ const AaoifiScreening = () => {
   // and admin manual overrides, instead of re-calculating it blindly on the frontend.
   let finalStatus = report.final_status || 'doubtful';
 
+  // Purification detection
+  const hasPurification = finalStatus === 'halal' && !!report.stage1?.purification_required;
+  const purificationPercent = parseFloat(report.stage1?.haram_revenue_percent) || 0;
+
   let statusColor = 'var(--text-muted)';
   let StatusIcon = HelpCircle;
   let bgStatus = 'var(--bg-section)';
 
   if (finalStatus === 'halal') {
-    statusColor = 'var(--halal)';
-    StatusIcon = CheckCircle;
-    bgStatus = 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%)';
+    statusColor = hasPurification ? 'var(--halal)' : 'var(--halal)';
+    StatusIcon = hasPurification ? Droplets : CheckCircle;
+    bgStatus = hasPurification
+      ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(245, 158, 11, 0.08) 100%)'
+      : 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%)';
   } else if (finalStatus === 'non-halal') {
     statusColor = 'var(--non-halal)';
     StatusIcon = XCircle;
@@ -384,26 +390,104 @@ const AaoifiScreening = () => {
       </div>
 
       <div className="detail-header" style={{ 
-        padding: '56px 36px', borderRadius: '32px', background: bgStatus, 
-        border: `2px solid ${statusColor}40`, textAlign: 'center', marginBottom: '40px',
-        boxShadow: `0 32px 64px -16px ${statusColor}25, inset 0 2px 20px ${statusColor}10`,
+        padding: hasPurification ? '48px 36px 0 36px' : '56px 36px', borderRadius: '32px', background: bgStatus, 
+        border: hasPurification ? '2px solid rgba(245,158,11,0.45)' : `2px solid ${statusColor}40`, textAlign: 'center', marginBottom: '40px',
+        boxShadow: hasPurification
+          ? '0 32px 64px -16px rgba(16,185,129,0.2), inset 0 2px 20px rgba(245,158,11,0.08)'
+          : `0 32px 64px -16px ${statusColor}25, inset 0 2px 20px ${statusColor}10`,
         position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center'
       }}>
         {/* Background ambient orbs */}
         <div style={{ position: 'absolute', top: '-60px', right: '-40px', width: '280px', height: '280px', background: `radial-gradient(circle, ${statusColor}15 0%, transparent 70%)`, borderRadius: '50%', pointerEvents: 'none', animation: 'orbFloat 20s ease-in-out infinite alternate' }} />
         <div style={{ position: 'absolute', bottom: '-80px', left: '-40px', width: '320px', height: '320px', background: `radial-gradient(circle, ${statusColor}10 0%, transparent 70%)`, borderRadius: '50%', pointerEvents: 'none', animation: 'orbFloat 25s ease-in-out infinite alternate-reverse' }} />
+        {hasPurification && (
+          <div style={{ position: 'absolute', top: '-60px', left: '50%', transform: 'translateX(-50%)', width: '220px', height: '220px', background: 'radial-gradient(circle, rgba(245,158,11,0.12) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
+        )}
         
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '8px', background: statusColor, boxShadow: `0 0 20px ${statusColor}` }} />
+        {/* Top status bar — green for halal, amber for purification */}
+        <div style={{ 
+          position: 'absolute', top: 0, left: 0, right: 0, height: '8px', 
+          background: hasPurification
+            ? 'linear-gradient(90deg, var(--halal) 0%, var(--questionable) 100%)'
+            : statusColor,
+          boxShadow: hasPurification
+            ? '0 0 20px rgba(245,158,11,0.6)'
+            : `0 0 20px ${statusColor}`
+        }} />
+
         <div style={{ position: 'relative', zIndex: 1, animation: 'pulse 3s infinite alternate' }}>
-          <StatusIcon size={96} color={statusColor} style={{ margin: '0 auto 24px', filter: `drop-shadow(0 12px 32px ${statusColor}70)` }} />
+          <StatusIcon size={96} color={hasPurification ? 'var(--halal)' : statusColor} style={{ margin: '0 auto 24px', filter: `drop-shadow(0 12px 32px ${hasPurification ? 'rgba(16,185,129,0.7)' : statusColor + '70'})` }} />
         </div>
-        <div style={{ position: 'relative', zIndex: 1, fontSize: '0.86rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px', color: statusColor, marginBottom: '12px', textShadow: `0 2px 10px ${statusColor}30` }}>AAOIFI COMPLIANCE VERDICT</div>
-        <h1 style={{ position: 'relative', zIndex: 1, fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: 900, color: statusColor, margin: '0 0 16px 0', letterSpacing: '-1.5px', textShadow: `0 4px 20px ${statusColor}40` }}>
-          {finalStatus === 'halal' ? 'HALAL' : finalStatus === 'non-halal' ? 'NON-HALAL' : 'DOUBTFUL'}
+
+        <div style={{ position: 'relative', zIndex: 1, fontSize: '0.86rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px', color: hasPurification ? 'var(--halal)' : statusColor, marginBottom: '12px', textShadow: `0 2px 10px ${statusColor}30` }}>AAOIFI COMPLIANCE VERDICT</div>
+
+        <h1 style={{ position: 'relative', zIndex: 1, fontSize: 'clamp(2.2rem, 5vw, 3.2rem)', fontWeight: 900, color: hasPurification ? 'var(--halal)' : statusColor, margin: '0 0 8px 0', letterSpacing: '-1.5px', textShadow: `0 4px 20px ${statusColor}40`, lineHeight: 1.1 }}>
+          {finalStatus === 'halal'
+            ? (hasPurification ? 'HALAL' : 'HALAL')
+            : finalStatus === 'non-halal' ? 'NON-HALAL' : 'DOUBTFUL'}
         </h1>
-        <p style={{ position: 'relative', zIndex: 1, color: 'var(--text-dark)', margin: '0 auto', fontWeight: 600, fontSize: '1.1rem', maxWidth: '650px', lineHeight: 1.6 }}>
+
+        {hasPurification && (
+          <div style={{ position: 'relative', zIndex: 1, marginBottom: '8px' }}>
+            <span style={{ fontSize: '1.08rem', fontWeight: 800, color: 'var(--questionable)', letterSpacing: '1px', textTransform: 'uppercase', textShadow: '0 2px 10px rgba(245,158,11,0.3)' }}>
+              WITH PURIFICATION
+            </span>
+          </div>
+        )}
+
+        <p style={{ position: 'relative', zIndex: 1, color: 'var(--text-dark)', margin: '0 auto', fontWeight: 600, fontSize: '1.0rem', maxWidth: '600px', lineHeight: 1.6, marginBottom: hasPurification ? '36px' : '0' }}>
           {cleanStatusReason || 'Screened in accordance with AAOIFI Shariah Standard No. 21 (Financial & Business Activity Rules).'}
         </p>
+
+        {/* Purification strip — only shown when purification is required */}
+        {hasPurification && (
+          <div style={{
+            position: 'relative', zIndex: 1,
+            width: 'calc(100% + 72px)', marginLeft: '-36px', marginRight: '-36px',
+            background: 'linear-gradient(135deg, rgba(245,158,11,0.18) 0%, rgba(245,158,11,0.10) 100%)',
+            borderTop: '1.5px solid rgba(245,158,11,0.35)',
+            padding: '24px 36px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '32px', flexWrap: 'wrap'
+          }}>
+            {/* Icon + label */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{
+                width: '40px', height: '40px', borderRadius: '50%',
+                background: 'rgba(245,158,11,0.2)', border: '1.5px solid rgba(245,158,11,0.5)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+              }}>
+                <Droplets size={20} color="var(--questionable)" />
+              </div>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--questionable)', marginBottom: '2px' }}>Dividend Purification Required</div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-dark)', fontWeight: 500, lineHeight: 1.4 }}>
+                  Purify <strong style={{ color: 'var(--questionable)' }}>{purificationPercent}%</strong> of any dividends received from this stock
+                </div>
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div style={{ width: '1px', height: '40px', background: 'rgba(245,158,11,0.3)' }} />
+
+            {/* Big stat */}
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '2.2rem', fontWeight: 900, color: 'var(--questionable)', lineHeight: 1, letterSpacing: '-1px' }}>
+                {purificationPercent}%
+              </div>
+              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginTop: '4px' }}>Of Dividends To Purify</div>
+            </div>
+
+            {/* Divider */}
+            <div style={{ width: '1px', height: '40px', background: 'rgba(245,158,11,0.3)' }} />
+
+            {/* Explanation */}
+            <div style={{ maxWidth: '260px', textAlign: 'left' }}>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-dark)', fontWeight: 500, lineHeight: 1.5 }}>
+                The company earns <strong style={{ color: 'var(--questionable)' }}>{purificationPercent}%</strong> from non-compliant sources. Donate this portion of any dividends or returns to charity.
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
 
