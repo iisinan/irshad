@@ -126,15 +126,17 @@ export default function Portfolio() {
       setIsAdding(true);
       const { addBulkHoldings } = await import('../services/api');
       await addBulkHoldings(payload);
-      setShowAddModal(false);
       loadData();
       toastSuccess('Holdings added to portfolio');
+      return true; // Indicate success so modal can proceed
     } catch (err) {
       toastError(err?.message || 'Failed to add holdings');
+      return false;
     } finally {
       setIsAdding(false);
     }
   };
+
 
   const handleDelete = async (id) => {
     try {
