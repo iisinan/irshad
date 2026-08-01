@@ -146,6 +146,31 @@ class EnforceAaoifiMathCommand extends Command
                 }
 
                 $oldStatus = $company->current_status;
+
+                $isHalalToNonHalal = ($oldStatus === 'halal' && $expectedFinalStatus === 'non-halal');
+                $isNonHalalToHalal = ($oldStatus === 'non-halal' && $expectedFinalStatus === 'halal');
+
+                if ($isHalalToNonHalal || $isNonHalalToHalal) {
+                    $existingReview = \App\Models\ComplianceReview::where('company_id', $company->id)
+                        ->where('status', 'pending')
+                        ->where('old_status', $oldStatus)
+                        ->where('new_status', $expectedFinalStatus)
+                        ->first();
+
+                    if (!$existingReview) {
+                        \App\Models\ComplianceReview::create([
+                            'company_id' => $company->id,
+                            'old_status' => $oldStatus,
+                            'new_status' => $expectedFinalStatus,
+                            'reason' => "Automated sync math change: " . $mathReason,
+                            'status' => 'pending'
+                        ]);
+                        $this->warn("Staged compliance review for {$company->symbol} ({$oldStatus} -> {$expectedFinalStatus})");
+                    } else {
+                        $this->info("Compliance review already pending for {$company->symbol} ({$oldStatus} -> {$expectedFinalStatus})");
+                    }
+                    continue; // Do not apply the update immediately
+                }
                 
                 if ($company->current_status !== $expectedFinalStatus) {
                     $company->update(['current_status' => $expectedFinalStatus]);

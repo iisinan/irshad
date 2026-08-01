@@ -194,7 +194,8 @@ class AaoifiComplianceService
 
         if ($oldStatus !== $status) {
             // Auto-approve downgrades to non-halal if it failed Business Activity (Rule 1)
-            if ($status === 'non-halal' && str_contains($reasonText, 'Rule 1')) {
+            // But only if it was NOT halal before (e.g. from pending or doubtful). Any change from halal to non-halal must go to admin review.
+            if ($status === 'non-halal' && str_contains($reasonText, 'Rule 1') && $oldStatus !== 'halal') {
                 // Apply immediately
                 StockStatus::updateOrCreate(
                     ['company_id' => $company->id],
