@@ -190,7 +190,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
 
   const totalCost = rows.reduce((acc, r) => acc + ((Number(r.sh) || 0) * (Number(r.pr) || 0)), 0);
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
 
     for (let i = 0; i < rows.length; i++) {
@@ -217,7 +217,8 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
     }));
 
     // Save holdings first
-    onAdd(holdings);
+    const success = await onAdd(holdings);
+    if (!success) return; // if it failed, do not proceed to close or prompt
 
     // Decide whether to show zakat prompt
     const zakatAlreadySet = !!localStorage.getItem(ZAKAT_DATE_KEY);
