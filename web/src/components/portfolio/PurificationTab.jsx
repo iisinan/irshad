@@ -90,13 +90,6 @@ export default function PurificationTab({ data }) {
               <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.79rem', marginTop: '4px' }}>Cleanse your portfolio of non-compliant income</p>
             </div>
           </div>
-          
-          <div style={{ textAlign: 'right', background: 'rgba(255,255,255,0.05)', padding: '16px 24px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)', backdropFilter: 'blur(10px)' }}>
-            <div style={{ fontSize: '0.66rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700, color: 'rgba(255,255,255,0.5)', marginBottom: '4px' }}>Total Due</div>
-            <div style={{ fontSize: '1.76rem', fontWeight: 900, color: purificationDue > 0 ? '#f87171' : 'white', letterSpacing: '-1px', transition: 'color 0.3s', lineHeight: 1 }}>
-              ₦{purificationDue.toLocaleString()}
-            </div>
-          </div>
         </div>
       </div>
 
