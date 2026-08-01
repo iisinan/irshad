@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -9,50 +10,51 @@ class AiDocumentParserService
 {
     /**
      * Send a downloaded PDF to Gemini 1.5 to extract structured financial data.
-     * 
-     * @param string $pdfFilePath Absolute path to the local PDF file
+     *
+     * @param  string  $pdfFilePath  Absolute path to the local PDF file
      * @return array|null An array containing ['total_assets', 'total_debt', 'total_revenue', 'interest_income']
      */
     public function extractFinancialsFromPdf(string $pdfFilePath): ?array
     {
         $apiKeysString = config('services.gemini.key');
-        
+
         if (empty($apiKeysString)) {
-            Log::error("GEMINI_API_KEY is not set.");
+            Log::error('GEMINI_API_KEY is not set.');
+
             return null;
         }
 
         $apiKeys = array_map('trim', explode(',', $apiKeysString));
-        $currentKeyIndex = \Illuminate\Support\Facades\Cache::get('gemini_key_index', 0);
-        if (!isset($apiKeys[$currentKeyIndex])) {
+        $currentKeyIndex = Cache::get('gemini_key_index', 0);
+        if (! isset($apiKeys[$currentKeyIndex])) {
             $currentKeyIndex = 0;
         }
         $apiKey = $apiKeys[$currentKeyIndex];
-        
+
         // Actively alternate for the next request
         $nextKeyIndex = ($currentKeyIndex + 1) % count($apiKeys);
-        \Illuminate\Support\Facades\Cache::put('gemini_key_index', $nextKeyIndex);
-        $baseUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=";
-        $url = $baseUrl . $apiKey;
+        Cache::put('gemini_key_index', $nextKeyIndex);
+        $baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=';
+        $url = $baseUrl.$apiKey;
 
         try {
             $mimeType = str_ends_with($pdfFilePath, '.txt') ? 'text/plain' : 'application/pdf';
-            
+
             // 1. Upload File to Gemini using stream to save memory
-            $uploadUrl = "https://generativelanguage.googleapis.com/upload/v1beta/files?key=" . $apiKey;
-            
+            $uploadUrl = 'https://generativelanguage.googleapis.com/upload/v1beta/files?key='.$apiKey;
+
             $fileSize = filesize($pdfFilePath);
             $fileResource = fopen($pdfFilePath, 'r');
-            
+
             $ch = curl_init($uploadUrl);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_TIMEOUT, 300);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
                 'X-Goog-Upload-Command: start, upload, finalize',
-                'X-Goog-Upload-Header-Content-Length: ' . $fileSize,
-                'X-Goog-Upload-Header-Content-Type: ' . $mimeType,
-                'Content-Type: ' . $mimeType,
+                'X-Goog-Upload-Header-Content-Length: '.$fileSize,
+                'X-Goog-Upload-Header-Content-Type: '.$mimeType,
+                'Content-Type: '.$mimeType,
             ]);
             // Use INFILE for streaming the upload directly from disk to network
             curl_setopt($ch, CURLOPT_PUT, true); // Required for CURLOPT_INFILE
@@ -67,7 +69,8 @@ class AiDocumentParserService
             fclose($fileResource);
 
             if ($httpCode >= 400 || $responseBody === false) {
-                Log::error("Gemini File Upload Failed. HTTP {$httpCode}. Error: {$curlError}. Body: " . $responseBody);
+                Log::error("Gemini File Upload Failed. HTTP {$httpCode}. Error: {$curlError}. Body: ".$responseBody);
+
                 return null;
             }
 
@@ -75,8 +78,9 @@ class AiDocumentParserService
             $fileUri = $uploadData['file']['uri'] ?? null;
             $fileName = $uploadData['file']['name'] ?? null; // To delete later
 
-            if (!$fileUri) {
-                Log::error("Gemini File Upload did not return a URI.");
+            if (! $fileUri) {
+                Log::error('Gemini File Upload did not return a URI.');
+
                 return null;
             }
 
@@ -86,16 +90,16 @@ class AiDocumentParserService
                     [
                         'parts' => [
                             [
-                                'text' => "You are an expert financial analyst. Please read this financial statement and extract the exact financial metrics for the most recent period. If a number is missing, try to infer it from related fields (e.g. Finance Income = Interest Income). Return the result as JSON."
+                                'text' => 'You are an expert financial analyst. Please read this financial statement and extract the exact financial metrics for the most recent period. If a number is missing, try to infer it from related fields (e.g. Finance Income = Interest Income). Return the result as JSON.',
                             ],
                             [
                                 'fileData' => [
                                     'mimeType' => $mimeType,
-                                    'fileUri' => $fileUri
-                                ]
-                            ]
-                        ]
-                    ]
+                                    'fileUri' => $fileUri,
+                                ],
+                            ],
+                        ],
+                    ],
                 ],
                 'generationConfig' => [
                     'responseMimeType' => 'application/json',
@@ -114,11 +118,11 @@ class AiDocumentParserService
                             'cash_and_equivalents' => ['type' => 'NUMBER'],
                             'interest_bearing_securities' => ['type' => 'NUMBER'],
                             'accounts_receivable' => ['type' => 'NUMBER'],
-                            'illiquid_assets' => ['type' => 'NUMBER']
-                        ]
+                            'illiquid_assets' => ['type' => 'NUMBER'],
+                        ],
                     ],
-                    'temperature' => 0.0
-                ]
+                    'temperature' => 0.0,
+                ],
             ];
 
             $maxRetries = 10;
@@ -135,22 +139,24 @@ class AiDocumentParserService
                 }
 
                 if ($response->status() == 429) {
-                    Log::warning("Gemini Rate Limit Hit (429). Attempt " . ($attempt + 1));
+                    Log::warning('Gemini Rate Limit Hit (429). Attempt '.($attempt + 1));
                     $currentKeyIndex = ($currentKeyIndex + 1) % count($apiKeys);
                     $apiKey = $apiKeys[$currentKeyIndex];
-                    \Illuminate\Support\Facades\Cache::put('gemini_key_index', $currentKeyIndex);
-                    $url = $baseUrl . $apiKey;
+                    Cache::put('gemini_key_index', $currentKeyIndex);
+                    $url = $baseUrl.$apiKey;
                     sleep(2);
+
                     continue;
                 }
 
                 if ($response->status() >= 500) {
-                    Log::warning("Gemini API Error ({$response->status()}). Attempt " . ($attempt + 1));
+                    Log::warning("Gemini API Error ({$response->status()}). Attempt ".($attempt + 1));
                     sleep(10);
+
                     continue;
                 }
 
-                Log::error("Gemini API Error: " . $response->body());
+                Log::error('Gemini API Error: '.$response->body());
                 break;
             }
 
@@ -159,25 +165,27 @@ class AiDocumentParserService
                 Http::delete("https://generativelanguage.googleapis.com/v1beta/{$fileName}?key={$apiKey}");
             }
 
-            if (!$generateSuccess) {
-                Log::error("Gemini API failed after retries.");
+            if (! $generateSuccess) {
+                Log::error('Gemini API failed after retries.');
+
                 return null;
             }
 
             $response = $generateResponse;
 
-            if (!$response->successful()) {
-                echo "Gemini API failed after retries: " . $response->body() . "\n";
-                Log::error("Gemini API failed after retries: " . $response->body());
+            if (! $response->successful()) {
+                echo 'Gemini API failed after retries: '.$response->body()."\n";
+                Log::error('Gemini API failed after retries: '.$response->body());
+
                 return null;
             }
 
             $json = $response->json();
-            
+
             if (isset($json['candidates'][0]['content']['parts'][0]['text'])) {
                 $rawText = $json['candidates'][0]['content']['parts'][0]['text'];
                 $parsed = json_decode(trim($rawText), true);
-                
+
                 if (json_last_error() === JSON_ERROR_NONE) {
                     return [
                         'total_assets' => $parsed['total_assets'] ?? 0,
@@ -197,11 +205,13 @@ class AiDocumentParserService
                 }
             }
 
-            Log::error("Failed to parse Gemini JSON response", ['response' => $json]);
+            Log::error('Failed to parse Gemini JSON response', ['response' => $json]);
+
             return null;
 
         } catch (\Exception $e) {
-            Log::error("AiDocumentParserService Error: " . $e->getMessage());
+            Log::error('AiDocumentParserService Error: '.$e->getMessage());
+
             return null;
         }
     }

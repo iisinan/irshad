@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Company;
 use App\Models\History;
 use App\Models\Product;
-use App\Models\Company;
 use App\Traits\ApiResponder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -28,10 +28,10 @@ class HistoryController extends Controller
         $history = $query->paginate(20);
 
         $results = collect($history->items());
-        
+
         $scanRefs = $results->where('action', 'scan')->pluck('reference_id')->unique();
         $otherRefs = $results->where('action', '!=', 'scan')->pluck('reference_id')->unique();
-        
+
         $products = Product::whereIn('barcode', $scanRefs)->get()->keyBy('barcode');
         $companies = Company::whereIn('symbol', $otherRefs)->get()->keyBy('symbol');
 

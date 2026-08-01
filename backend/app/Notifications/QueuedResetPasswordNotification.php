@@ -31,12 +31,12 @@ class QueuedResetPasswordNotification extends Notification implements ShouldQueu
     public function toMail(object $notifiable): MailMessage
     {
         $resetUrl = config('app.frontend_url', 'http://localhost:5173')
-            . '/reset-password?token=' . $this->token
-            . '&email=' . urlencode($notifiable->getEmailForPasswordReset());
+            .'/reset-password?token='.$this->token
+            .'&email='.urlencode($notifiable->getEmailForPasswordReset());
 
         return (new MailMessage)
             ->subject('Reset Your Irshad Password')
-            ->greeting('As-salamu alaykum, ' . ($notifiable->first_name ?? explode(' ', $notifiable->name)[0] ?? 'there') . '!')
+            ->greeting('As-salamu alaykum, '.($notifiable->first_name ?? explode(' ', $notifiable->name)[0] ?? 'there').'!')
             ->line('We received a request to reset the password for your Irshad account.')
             ->action('Reset Password', $resetUrl)
             ->line('This link will expire in **60 minutes**.')

@@ -2,8 +2,9 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\Company;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Artisan;
 
 class SeedNgxLogosCommand extends Command
 {
@@ -27,20 +28,20 @@ class SeedNgxLogosCommand extends Command
     public function handle()
     {
         $companies = Company::all();
-        $this->info("Updating logos for " . $companies->count() . " companies...");
+        $this->info('Updating logos for '.$companies->count().' companies...');
 
         foreach ($companies as $company) {
             // We use UI Avatars for consistent, reliable initial-based logos
             $name = urlencode(substr($company->symbol, 0, 2)); // Use first two letters of symbol
             $logoUrl = "https://ui-avatars.com/api/?name={$name}&background=0F5257&color=fff&size=128&bold=true";
-            
+
             $company->update(['logo_url' => $logoUrl]);
             $this->info("Updated {$company->symbol} -> {$logoUrl}");
         }
-        
-        // Also clear the cache since we modified company data
-        \Illuminate\Support\Facades\Artisan::call('cache:clear');
 
-        $this->info("Done! Logos have been seeded and cache cleared.");
+        // Also clear the cache since we modified company data
+        Artisan::call('cache:clear');
+
+        $this->info('Done! Logos have been seeded and cache cleared.');
     }
 }

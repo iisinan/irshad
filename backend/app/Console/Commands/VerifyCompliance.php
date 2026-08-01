@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\Company;
 use App\Services\AaoifiComplianceService;
+use Illuminate\Console\Command;
 
 class VerifyCompliance extends Command
 {
@@ -41,14 +41,14 @@ class VerifyCompliance extends Command
 
         foreach ($stocks as $company) {
             $financials = $company->financials()->latest()->first();
-            if (!$financials) {
+            if (! $financials) {
                 continue;
             }
-            
+
             $oldStatus = $company->current_status;
             // Evaluating will automatically stage a review if status changes, or auto-apply if it failed business activity.
             $result = $aaoifiService->evaluateCompliance($company, $financials, $company->sector);
-            
+
             // Check if status changed
             if (isset($result->status) && $result->status !== $oldStatus && $result->status !== 'pending') {
                 $discrepancies++;
@@ -65,7 +65,7 @@ class VerifyCompliance extends Command
 
         if ($discrepancies > 0) {
             $this->warn("Verification complete. Found {$discrepancies} stocks with incorrect status or staged for review.");
-            $this->info("Compliance reviews have been staged for these discrepancies (except Rule 1 violations which auto-apply). Check the admin dashboard.");
+            $this->info('Compliance reviews have been staged for these discrepancies (except Rule 1 violations which auto-apply). Check the admin dashboard.');
         } else {
             $this->info('Verification complete. All stocks are correctly synced with AAOIFI rules!');
         }

@@ -29,7 +29,7 @@ class BasketController extends Controller
                 }
             })
             ->get();
-            
+
         return $this->success($baskets);
     }
 
@@ -42,6 +42,7 @@ class BasketController extends Controller
         if ($basket->user_id !== null && $basket->user_id !== auth('sanctum')->id()) {
             return $this->error('Unauthorized', 403);
         }
+
         return $this->success($basket);
     }
 
@@ -54,7 +55,7 @@ class BasketController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'symbols' => 'required|array',
-            'symbols.*' => 'string'
+            'symbols.*' => 'string',
         ]);
 
         $basket = Basket::create([
@@ -81,7 +82,7 @@ class BasketController extends Controller
             'name' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
             'symbols' => 'sometimes|array',
-            'symbols.*' => 'string'
+            'symbols.*' => 'string',
         ]);
 
         $basket->update($validated);
@@ -99,6 +100,7 @@ class BasketController extends Controller
         }
 
         $basket->delete();
+
         return $this->success(['message' => 'Basket deleted successfully']);
     }
 
@@ -129,8 +131,10 @@ class BasketController extends Controller
 
         foreach ($symbols as $symbol) {
             $company = Company::with('status')->where('symbol', $symbol)->first();
-            if (!$company) continue;
-            
+            if (! $company) {
+                continue;
+            }
+
             $statusStr = strtolower($company->status?->status ?? 'unknown');
             if (in_array($statusStr, ['halal', 'compliant'])) {
                 $investableSymbols[] = $symbol;
@@ -148,7 +152,7 @@ class BasketController extends Controller
         try {
             $result = DB::transaction(function () use ($user, $investableSymbols, $allocationPerStock, $totalAmount) {
                 $brokerage = BrokerageAccount::where('user_id', $user->id)->lockForUpdate()->first();
-                if (!$brokerage) {
+                if (! $brokerage) {
                     throw new \Exception('Please link a broker before trading.');
                 }
 
@@ -160,15 +164,19 @@ class BasketController extends Controller
                 $purchases = [];
 
                 foreach ($investableSymbols as $symbol) {
-                    $company = Company::with(['dailyPrices' => fn($q) => $q->latest('date')->limit(1)])
+                    $company = Company::with(['dailyPrices' => fn ($q) => $q->latest('date')->limit(1)])
                         ->where('symbol', $symbol)
                         ->first();
 
                     $latestPrice = $company->dailyPrices->first()?->price ?? 0;
-                    if ($latestPrice <= 0) continue;
+                    if ($latestPrice <= 0) {
+                        continue;
+                    }
 
                     $sharesToBuy = floor($allocationPerStock / $latestPrice);
-                    if ($sharesToBuy <= 0) continue;
+                    if ($sharesToBuy <= 0) {
+                        continue;
+                    }
 
                     $cost = $sharesToBuy * $latestPrice;
                     $totalCost += $cost;
@@ -181,7 +189,7 @@ class BasketController extends Controller
                         'company' => $company,
                         'shares' => $sharesToBuy,
                         'price' => $latestPrice,
-                        'cost' => $cost
+                        'cost' => $cost,
                     ];
                 }
 
@@ -204,7 +212,7 @@ class BasketController extends Controller
                         $oldTotalValue = $holding->average_buy_price * $holding->shares;
                         $newTotalValue = $oldTotalValue + $purchase['cost'];
                         $newShares = $holding->shares + $purchase['shares'];
-                        
+
                         $holding->shares = $newShares;
                         $holding->average_buy_price = $newTotalValue / $newShares;
                     } else {
@@ -221,14 +229,15 @@ class BasketController extends Controller
                 return [
                     'total_invested' => $totalCost,
                     'new_balance' => $brokerage->cash_balance,
-                    'purchases' => collect($purchases)->map(fn($p) => ['symbol' => $p['company']->symbol, 'shares' => $p['shares'], 'cost' => $p['cost']])
+                    'purchases' => collect($purchases)->map(fn ($p) => ['symbol' => $p['company']->symbol, 'shares' => $p['shares'], 'cost' => $p['cost']]),
                 ];
             });
 
             return $this->success($result, 'Successfully invested in basket.');
         } catch (\Exception $e) {
             $code = str_contains($e->getMessage(), 'link a broker') || str_contains($e->getMessage(), 'funds') || str_contains($e->getMessage(), 'Cannot invest') ? 400 : 500;
-            return $this->error('Investment failed: ' . $e->getMessage(), $code);
+
+            return $this->error('Investment failed: '.$e->getMessage(), $code);
         }
     }
 }

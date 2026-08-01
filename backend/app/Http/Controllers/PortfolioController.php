@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BrokerageAccount;
+use App\Models\Company;
 use App\Models\Holding;
+use App\Models\PortfolioSnapshot;
+use App\Models\Watchlist;
 use App\Traits\ApiResponder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -21,8 +25,8 @@ class PortfolioController extends Controller
             'company.financials:id,company_id,total_revenue,interest_income',
             'company.dividends' => function ($query) {
                 $query->where('status', 'paid')
-                      ->where('pay_date', '>=', now()->subMonths(12));
-            }
+                    ->where('pay_date', '>=', now()->subMonths(12));
+            },
         ])
             ->where('user_id', Auth::id())
             ->get();
@@ -31,15 +35,15 @@ class PortfolioController extends Controller
             $company = $holding->company;
             $currentPrice = (float) ($company->latest_price ?? 0);
             $status = $company->current_status ?? 'doubtful';
-            
+
             // Financials relationship returns a collection, take first
             $financials = $company?->financials?->first();
             $nonCompliantRatio = $financials?->non_compliant_income_ratio ?? 0;
 
             $totalValue = $holding->shares * $currentPrice;
-            
+
             $isHalal = strtolower($status) === 'halal' || strtolower($status) === 'compliant';
-            
+
             // Calculate Purification Due based on paid dividends in the trailing 12 months
             $trailingDividendsPerShare = $company?->dividends?->sum('amount') ?? 0;
             $totalDividendsReceived = $holding->shares * $trailingDividendsPerShare;
@@ -72,19 +76,19 @@ class PortfolioController extends Controller
         });
 
         // Get Brokerage Cash
-        $brokerage = \App\Models\BrokerageAccount::where('user_id', Auth::id())->first();
+        $brokerage = BrokerageAccount::where('user_id', Auth::id())->first();
         $cashBalance = $brokerage ? $brokerage->cash_balance : 0;
 
         // Summary
         $stocksBalance = $portfolioData->sum('total_value');
         $totalBalance = $stocksBalance + $cashBalance;
         $totalPurification = $portfolioData->sum('purification_due');
-        
+
         $halalValue = $portfolioData->where('is_halal', true)->sum('total_value');
         $healthPercentage = $stocksBalance > 0 ? round(($halalValue / $stocksBalance) * 100, 1) : 100;
 
         // Fetch trailing 30 days of history
-        $history = \App\Models\PortfolioSnapshot::where('user_id', Auth::id())
+        $history = PortfolioSnapshot::where('user_id', Auth::id())
             ->where('date', '>=', now()->subDays(30)->toDateString())
             ->orderBy('date', 'asc')
             ->get(['date', 'total_balance as value']);
@@ -93,7 +97,7 @@ class PortfolioController extends Controller
         if ($history->isEmpty() || $history->last()->date->toDateString() !== now()->toDateString()) {
             $history->push([
                 'date' => now()->toDateString(),
-                'value' => $totalBalance
+                'value' => $totalBalance,
             ]);
         }
 
@@ -105,7 +109,7 @@ class PortfolioController extends Controller
                 'purification_due' => $totalPurification,
                 'health_percentage' => $healthPercentage,
             ],
-            'history' => $history
+            'history' => $history,
         ]);
     }
 
@@ -142,8 +146,8 @@ class PortfolioController extends Controller
         ]);
 
         $holding = Holding::where('user_id', Auth::id())->where('id', $id)->first();
-        
-        if (!$holding) {
+
+        if (! $holding) {
             return $this->error('Holding not found', 404);
         }
 
@@ -161,8 +165,8 @@ class PortfolioController extends Controller
     public function destroy($id): JsonResponse
     {
         $holding = Holding::where('user_id', Auth::id())->where('id', $id)->first();
-        
-        if (!$holding) {
+
+        if (! $holding) {
             return $this->error('Holding not found', 404);
         }
 
@@ -215,27 +219,27 @@ class PortfolioController extends Controller
     public function movers(): JsonResponse
     {
         $userId = Auth::id();
-        
+
         $holdingSymbols = Holding::where('user_id', $userId)->pluck('symbol')->toArray();
-        $watchlistSymbols = \App\Models\Watchlist::where('user_id', $userId)->pluck('symbol')->toArray();
-        
+        $watchlistSymbols = Watchlist::where('user_id', $userId)->pluck('symbol')->toArray();
+
         $allSymbols = array_unique(array_merge($holdingSymbols, $watchlistSymbols));
-        
+
         if (empty($allSymbols)) {
             return $this->success(['gainers' => [], 'losers' => []]);
         }
-        
-        $companies = \App\Models\Company::select(['id', 'symbol', 'name', 'latest_price', 'price_change_pct', 'logo_url'])
+
+        $companies = Company::select(['id', 'symbol', 'name', 'latest_price', 'price_change_pct', 'logo_url'])
             ->whereIn('symbol', $allSymbols)
             ->whereNotNull('price_change_pct')
             ->get();
-            
+
         $gainers = $companies->where('price_change_pct', '>', 0)->sortByDesc('price_change_pct')->take(3)->values();
         $losers = $companies->where('price_change_pct', '<', 0)->sortBy('price_change_pct')->take(3)->values();
-        
+
         return $this->success([
             'gainers' => $gainers,
-            'losers' => $losers
+            'losers' => $losers,
         ]);
     }
 }

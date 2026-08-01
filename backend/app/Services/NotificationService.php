@@ -2,11 +2,11 @@
 
 namespace App\Services;
 
-use App\Models\User;
+use App\Jobs\NotifyUsersOfAssetChange;
 use App\Models\Favorite;
+use App\Models\User;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use App\Jobs\NotifyUsersOfAssetChange;
 
 class NotificationService
 {
@@ -24,13 +24,13 @@ class NotificationService
         foreach ($users as $user) {
             $reason = $type === 'product' ? $item->status_reason : ($item->status()->first()?->reason ?? 'a recent compliance review');
             $this->sendPushNotification($user->fcm_token, [
-                'title' => "Update on " . ($type === 'product' ? $item->name : $item->symbol),
-                'body' => ($type === 'product' ? $item->name : $item->symbol) . " has been reclassified as " . strtoupper($newStatus) . ". Reason: " . $reason,
+                'title' => 'Update on '.($type === 'product' ? $item->name : $item->symbol),
+                'body' => ($type === 'product' ? $item->name : $item->symbol).' has been reclassified as '.strtoupper($newStatus).'. Reason: '.$reason,
                 'data' => [
                     'type' => $type,
                     'reference_id' => $item->id,
                     'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
-                ]
+                ],
             ]);
         }
 
@@ -45,7 +45,7 @@ class NotificationService
     {
         // Placeholder for FCM v1 API call
         Log::info("Sending push notification to token: {$token}", $notification);
-        
+
         // Example:
         // Http::withToken(config('services.fcm.key'))
         //     ->post('https://fcm.googleapis.com/v1/projects/' . config('services.fcm.project_id') . '/messages:send', [

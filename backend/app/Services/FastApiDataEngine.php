@@ -31,11 +31,13 @@ class FastApiDataEngine
                 return $response->json();
             }
 
-            Log::error("AI Engine API error: " . $response->body());
+            Log::error('AI Engine API error: '.$response->body());
+
             return null;
 
         } catch (\Exception $e) {
-            Log::error("Failed to connect to AI Engine: " . $e->getMessage());
+            Log::error('Failed to connect to AI Engine: '.$e->getMessage());
+
             return null;
         }
     }

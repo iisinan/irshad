@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditLog;
 use App\Models\Product;
+use App\Services\GeminiAiService;
 use App\Traits\ApiResponder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 class ProductController extends Controller
@@ -19,12 +21,12 @@ class ProductController extends Controller
     public function index(Request $request): JsonResponse
     {
         // Check if user is scholar or admin
-        if (!in_array($request->user()->role, ['admin', 'scholar'])) {
+        if (! in_array($request->user()->role, ['admin', 'scholar'])) {
             return $this->unauthorized('Only scholars or admins can view all products list.');
         }
 
         $page = $request->get('page', 1);
-        $products = \Illuminate\Support\Facades\Cache::tags(['products'])->remember('products.admin.index.page_' . $page, 300, function () {
+        $products = Cache::tags(['products'])->remember('products.admin.index.page_'.$page, 300, function () {
             return Product::orderByRaw("CASE WHEN status = 'doubtful' THEN 1 ELSE 2 END")
                 ->orderBy('created_at', 'desc')
                 ->paginate(50);
@@ -53,16 +55,16 @@ class ProductController extends Controller
         // Fallback to OpenFoodFacts
         try {
             $response = Http::timeout(10)->get("https://world.openfoodfacts.org/api/v0/product/{$barcode}.json");
-            
+
             if ($response->successful() && $response->json('status') === 1) {
                 $productData = $response->json('product');
-                
-                $ingredientsText = $productData['ingredients_text_en'] 
-                    ?? $productData['ingredients_text'] 
+
+                $ingredientsText = $productData['ingredients_text_en']
+                    ?? $productData['ingredients_text']
                     ?? null;
-                
+
                 $statusData = $this->analyzeHalalStatus($ingredientsText);
-                
+
                 $product = Product::create([
                     'barcode' => $barcode,
                     'name' => $productData['product_name'] ?? 'Unknown Product',
@@ -91,21 +93,21 @@ class ProductController extends Controller
         if (empty($ingredientsText)) {
             return [
                 'status' => 'doubtful',
-                'reason' => 'No ingredients listed. Status cannot be verified automatically.'
+                'reason' => 'No ingredients listed. Status cannot be verified automatically.',
             ];
         }
 
         $text = strtolower($ingredientsText);
 
         $haramKeywords = [
-            'pork', 'lard', 'bacon', 'ham', 'swine', 'porcine', 
-            'gelatin', 'gelatine', 'carmine', 'cochineal', 'e120', 
-            'wine', 'beer', 'rum', 'alcohol', 'liqueur', 'brandy'
+            'pork', 'lard', 'bacon', 'ham', 'swine', 'porcine',
+            'gelatin', 'gelatine', 'carmine', 'cochineal', 'e120',
+            'wine', 'beer', 'rum', 'alcohol', 'liqueur', 'brandy',
         ];
 
         $doubtfulKeywords = [
             'e471', 'e472', 'mono- and diglycerides', 'monoglycerides', 'diglycerides',
-            'rennet', 'pepsin', 'whey', 'shortening', 'glycerin', 'glycerol', 'stearic acid'
+            'rennet', 'pepsin', 'whey', 'shortening', 'glycerin', 'glycerol', 'stearic acid',
         ];
 
         $foundHaram = [];
@@ -115,10 +117,10 @@ class ProductController extends Controller
             }
         }
 
-        if (!empty($foundHaram)) {
+        if (! empty($foundHaram)) {
             return [
                 'status' => 'non-halal',
-                'reason' => 'Contains strictly prohibited ingredients: ' . implode(', ', $foundHaram)
+                'reason' => 'Contains strictly prohibited ingredients: '.implode(', ', $foundHaram),
             ];
         }
 
@@ -129,16 +131,16 @@ class ProductController extends Controller
             }
         }
 
-        if (!empty($foundDoubtful)) {
+        if (! empty($foundDoubtful)) {
             return [
                 'status' => 'doubtful',
-                'reason' => 'Contains ambiguous ingredients that require scholar verification: ' . implode(', ', $foundDoubtful)
+                'reason' => 'Contains ambiguous ingredients that require scholar verification: '.implode(', ', $foundDoubtful),
             ];
         }
 
         return [
             'status' => 'halal',
-            'reason' => 'No prohibited or doubtful ingredients detected by automatic screening.'
+            'reason' => 'No prohibited or doubtful ingredients detected by automatic screening.',
         ];
     }
 
@@ -148,6 +150,7 @@ class ProductController extends Controller
     public function showByBarcode(string $barcode): JsonResponse
     {
         $product = Product::with('ingredients')->where('barcode', $barcode)->firstOrFail();
+
         return $this->success($product);
     }
 
@@ -157,7 +160,7 @@ class ProductController extends Controller
     public function search(Request $request): JsonResponse
     {
         $query = $request->get('q');
-        
+
         $products = Product::where('name', 'LIKE', "%{$query}%")
             ->orWhere('brand', 'LIKE', "%{$query}%")
             ->limit(10)
@@ -172,7 +175,7 @@ class ProductController extends Controller
     public function updateStatus(Request $request, Product $product): JsonResponse
     {
         // Check if user is scholar or admin
-        if (!in_array($request->user()->role, ['admin', 'scholar'])) {
+        if (! in_array($request->user()->role, ['admin', 'scholar'])) {
             return $this->unauthorized('Only scholars or admins can update status');
         }
 
@@ -182,17 +185,17 @@ class ProductController extends Controller
         ]);
 
         $oldStatus = $product->getOriginal('status');
-        
+
         $product->update([
             'status' => $validated['status'],
             'status_reason' => $validated['status_reason'],
             'verified_by_scholar' => true,
         ]);
 
-        \Illuminate\Support\Facades\Cache::tags(['products'])->flush();
+        Cache::tags(['products'])->flush();
 
         // Audit log
-        \App\Models\AuditLog::create([
+        AuditLog::create([
             'user_id' => $request->user()->id,
             'action' => 'override_product_status',
             'target_type' => Product::class,
@@ -200,8 +203,8 @@ class ProductController extends Controller
             'changes' => [
                 'old_status' => $oldStatus,
                 'new_status' => $validated['status'],
-                'reason' => $validated['status_reason']
-            ]
+                'reason' => $validated['status_reason'],
+            ],
         ]);
 
         return $this->success($product, 'Product status updated and verified.');
@@ -210,7 +213,7 @@ class ProductController extends Controller
     /**
      * Submit a new product for review.
      */
-    public function store(Request $request, \App\Services\GeminiAiService $aiService): JsonResponse
+    public function store(Request $request, GeminiAiService $aiService): JsonResponse
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -235,17 +238,17 @@ class ProductController extends Controller
             $analysis = $aiService->analyzeProductImage($imagePath, $extractedIngredients);
             if ($analysis) {
                 $status = $analysis['status'] ?? 'doubtful';
-                $statusReason = "AI Analysis: " . ($analysis['status_reason'] ?? 'Unknown');
-                if (!empty($analysis['ingredients_text'])) {
+                $statusReason = 'AI Analysis: '.($analysis['status_reason'] ?? 'Unknown');
+                if (! empty($analysis['ingredients_text'])) {
                     $extractedIngredients = $analysis['ingredients_text'];
                 }
                 $isAiAnalyzed = true;
             }
-        } elseif (!empty($extractedIngredients)) {
+        } elseif (! empty($extractedIngredients)) {
             // Fallback to text analysis if no image but text is provided
             $analysis = $this->analyzeHalalStatus($extractedIngredients);
             $status = $analysis['status'];
-            $statusReason = "Auto-screened text: " . $analysis['reason'];
+            $statusReason = 'Auto-screened text: '.$analysis['reason'];
         }
 
         $product = Product::create([
@@ -256,11 +259,11 @@ class ProductController extends Controller
             'status' => $status,
             'status_reason' => $statusReason,
             'verified_by_scholar' => false,
-            'image_url' => $imagePath ? asset('storage/' . $imagePath) : null,
+            'image_url' => $imagePath ? asset('storage/'.$imagePath) : null,
             'metadata' => [
                 'submitted_by' => $request->user()->id,
                 'ai_analyzed' => $isAiAnalyzed,
-            ]
+            ],
         ]);
 
         return $this->success($product, 'Product submitted and analyzed successfully', 201);

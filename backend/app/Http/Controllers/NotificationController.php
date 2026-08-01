@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\UserNotification;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
@@ -27,26 +27,26 @@ class NotificationController extends Controller
         }
 
         if ($request->has('search') && strlen($request->search) > 1) {
-            $search = '%' . $request->search . '%';
+            $search = '%'.$request->search.'%';
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', $search)
-                  ->orWhere('message', 'like', $search);
+                    ->orWhere('message', 'like', $search);
             });
         }
 
         $notifications = $query->paginate(20);
-        $unreadCount   = UserNotification::where('user_id', auth()->id())
+        $unreadCount = UserNotification::where('user_id', auth()->id())
             ->whereNull('read_at')
             ->whereNull('archived_at')
             ->count();
 
         return response()->json([
-            'data'         => $notifications->items(),
+            'data' => $notifications->items(),
             'unread_count' => $unreadCount,
-            'pagination'   => [
+            'pagination' => [
                 'current_page' => $notifications->currentPage(),
-                'last_page'    => $notifications->lastPage(),
-                'total'        => $notifications->total(),
+                'last_page' => $notifications->lastPage(),
+                'total' => $notifications->total(),
             ],
         ]);
     }
@@ -59,6 +59,7 @@ class NotificationController extends Controller
     {
         $notification = UserNotification::where('user_id', auth()->id())->findOrFail($id);
         $notification->markAsRead();
+
         return response()->json(['message' => 'Marked as read']);
     }
 
@@ -82,6 +83,7 @@ class NotificationController extends Controller
     public function destroy(int $id): JsonResponse
     {
         UserNotification::where('user_id', auth()->id())->findOrFail($id)->delete();
+
         return response()->json(['message' => 'Notification deleted']);
     }
 
@@ -93,6 +95,7 @@ class NotificationController extends Controller
     {
         $notification = UserNotification::where('user_id', auth()->id())->findOrFail($id);
         $notification->update(['archived_at' => now()]);
+
         return response()->json(['message' => 'Notification archived']);
     }
 

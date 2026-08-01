@@ -1,19 +1,23 @@
 <?php
+
 require __DIR__.'/vendor/autoload.php';
 $app = require_once __DIR__.'/bootstrap/app.php';
-$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+$kernel = $app->make(Kernel::class);
 $kernel->bootstrap();
 
 use App\Models\AaoifiScreening;
 use App\Models\Company;
 use App\Models\StockStatus;
+use Illuminate\Contracts\Console\Kernel;
 
 $screenings = AaoifiScreening::with('company')->get();
 
 $stats = ['halal' => 0, 'non-halal' => 0, 'doubtful' => 0, 'errors' => 0];
 
 foreach ($screenings as $s) {
-    if (!$s->company) continue;
+    if (! $s->company) {
+        continue;
+    }
 
     // Recalculate status based on new rules
     // debtRatio <= 30 => pass, else fail
@@ -52,14 +56,14 @@ foreach ($screenings as $s) {
 
     // Sync with StockStatus
     $stockStatus = $company->status()->first();
-    if (!$stockStatus || !$stockStatus->verified_by_scholar) {
+    if (! $stockStatus || ! $stockStatus->verified_by_scholar) {
         StockStatus::updateOrCreate(
             ['company_id' => $company->id],
             [
                 'status' => $finalStatus,
                 'reason' => $finalStatus === 'non-halal'
-                    ? ($businessStatus === 'fail' ? "Failed Rule 1: Non-compliant business activity." : "Failed AAOIFI financial ratio screening.")
-                    : "Stock passes all screens cleanly. Status is 100% Halal and Shariah-compliant.",
+                    ? ($businessStatus === 'fail' ? 'Failed Rule 1: Non-compliant business activity.' : 'Failed AAOIFI financial ratio screening.')
+                    : 'Stock passes all screens cleanly. Status is 100% Halal and Shariah-compliant.',
                 'verified_by_scholar' => false,
                 'last_updated' => now(),
             ]

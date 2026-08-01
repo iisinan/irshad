@@ -4,16 +4,16 @@ namespace App\Console\Commands;
 
 use App\Models\Company;
 use App\Models\DailyPrice;
-use App\Models\Financial;
-use App\Services\NgxService;
 use App\Services\AaoifiComplianceService;
+use App\Services\FinancialUpdateService;
+use App\Services\NgxService;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Exception;
 
 class SyncNgxData extends Command
 {
@@ -23,39 +23,42 @@ class SyncNgxData extends Command
 
     public function handle(NgxService $ngxService, AaoifiComplianceService $complianceService)
     {
-        $batchSize   = (int) $this->option('batch');
-        $fetchLogos  = $this->option('logos');
-        $pricesOnly  = $this->option('prices-only');
+        $batchSize = (int) $this->option('batch');
+        $fetchLogos = $this->option('logos');
+        $pricesOnly = $this->option('prices-only');
 
         $livePrices = [];
-        if (!$this->option('fundamentals-only')) {
+        if (! $this->option('fundamentals-only')) {
             $this->info('Fetching all live prices from NGX official API...');
-            
+
             $livePrices = $ngxService->fetchAllLivePrices();
-            $this->info('Got ' . count($livePrices) . ' live prices from NGX API.');
+            $this->info('Got '.count($livePrices).' live prices from NGX API.');
 
             if (empty($livePrices)) {
                 $this->error('NGX price fetch returned empty. Aborting sync.');
+
                 return Command::FAILURE;
             }
         }
 
-        if (!$this->option('fundamentals-only')) {
+        if (! $this->option('fundamentals-only')) {
             // ── STEP 2: Save prices for all companies in one transaction ───────────
             $this->info('Saving prices to database...');
             try {
                 DB::reconnect();
                 DB::beginTransaction();
 
-                $today     = now()->toDateString();
+                $today = now()->toDateString();
                 $yesterday = now()->subDay()->toDateString();
                 $pricesSaved = 0;
 
                 foreach (Company::all() as $company) {
-                    $symbol    = trim($company->symbol);
+                    $symbol = trim($company->symbol);
                     $priceData = $livePrices[$symbol] ?? null;
 
-                    if (!$priceData || $priceData['price'] <= 0) continue;
+                    if (! $priceData || $priceData['price'] <= 0) {
+                        continue;
+                    }
 
                     $currentPrice = $priceData['price'];
 
@@ -86,8 +89,9 @@ class SyncNgxData extends Command
                 $this->info("✓ Saved prices for {$pricesSaved} companies.");
             } catch (Exception $e) {
                 DB::rollBack();
-                $this->error('Price save failed: ' . $e->getMessage());
-                Log::error('NGX price save failed: ' . $e->getMessage());
+                $this->error('Price save failed: '.$e->getMessage());
+                Log::error('NGX price save failed: '.$e->getMessage());
+
                 return Command::FAILURE;
             }
         }
@@ -95,6 +99,7 @@ class SyncNgxData extends Command
         if ($this->option('prices-only')) {
             Cache::flush();
             $this->info('Prices-only sync complete. Cache flushed.');
+
             return Command::SUCCESS;
         }
 
@@ -103,13 +108,13 @@ class SyncNgxData extends Command
         $this->info('Fetching fundamentals from Yahoo Finance in batches...');
 
         $companies = Company::all();
-        $batches   = $companies->chunk($batchSize);
-        $synced    = 0;
-        $errors    = 0;
+        $batches = $companies->chunk($batchSize);
+        $synced = 0;
+        $errors = 0;
 
         foreach ($batches as $batchIndex => $batch) {
             $batchNum = $batchIndex + 1;
-            $this->info("--- Fundamentals Batch {$batchNum} / " . $batches->count() . " ---");
+            $this->info("--- Fundamentals Batch {$batchNum} / ".$batches->count().' ---');
 
             $fetched = [];
             foreach ($batch as $company) {
@@ -118,13 +123,13 @@ class SyncNgxData extends Command
                     $fetched[] = ['company' => $company, 'data' => $fundamentals];
 
                     // Only log if we got something useful
-                    $gotData = !empty($fundamentals['sector']) || !empty($fundamentals['eps']) || $fundamentals['market_cap'] > 0;
+                    $gotData = ! empty($fundamentals['sector']) || ! empty($fundamentals['eps']) || $fundamentals['market_cap'] > 0;
                     $this->line($gotData
                         ? "  ✓ {$company->symbol} — sector={$fundamentals['sector']}, PE={$fundamentals['pe_ratio']}"
                         : "  — {$company->symbol} (no Yahoo data)"
                     );
                 } catch (Exception $e) {
-                    $this->warn("  ✗ {$company->symbol}: " . $e->getMessage());
+                    $this->warn("  ✗ {$company->symbol}: ".$e->getMessage());
                     $errors++;
                 }
                 sleep(3); // 3 seconds between requests to avoid rate limits
@@ -137,33 +142,33 @@ class SyncNgxData extends Command
 
                 foreach ($fetched as $item) {
                     $company = $item['company'];
-                    $data    = $item['data'];
+                    $data = $item['data'];
                     $priceData = $livePrices[trim($company->symbol)] ?? null;
 
                     // Update company profile
                     $companyUpdate = [];
-                    if (!empty($data['sector']) && ($company->sector === 'Unknown' || empty($company->sector))) {
+                    if (! empty($data['sector']) && ($company->sector === 'Unknown' || empty($company->sector))) {
                         $companyUpdate['sector'] = $data['sector'];
                     }
-                    if (!empty($data['industry'])) {
+                    if (! empty($data['industry'])) {
                         $companyUpdate['industry'] = $data['industry'];
                     }
-                    if (!empty($data['overview'])) {
+                    if (! empty($data['overview'])) {
                         $companyUpdate['overview'] = $data['overview'];
                     }
-                    if (!empty($data['analysts_target']) && $data['analysts_target'] > 0) {
+                    if (! empty($data['analysts_target']) && $data['analysts_target'] > 0) {
                         $companyUpdate['analysts_target'] = $data['analysts_target'];
                     }
                     if (isset($data['dividend_yield']) && $data['dividend_yield'] !== null) {
                         $companyUpdate['div_yield'] = round($data['dividend_yield'] * 100, 4);
                     }
-                    
+
                     $marketCap = $data['market_cap'] ?? 0;
                     $companyUpdate['market_cap'] = $marketCap;
                     $companyUpdate['eps'] = $data['eps'] ?? null;
                     $companyUpdate['pe_ratio'] = $data['pe_ratio'] ?? null;
 
-                    if (!empty($companyUpdate)) {
+                    if (! empty($companyUpdate)) {
                         $company->update($companyUpdate);
                     }
 
@@ -174,28 +179,28 @@ class SyncNgxData extends Command
                     $hasFinancials = ($data['total_assets'] > 0)
                         || ($marketCap > 0)
                         || ($data['total_revenue'] > 0)
-                        || !empty($data['eps'])
-                        || !empty($data['pe_ratio']);
+                        || ! empty($data['eps'])
+                        || ! empty($data['pe_ratio']);
 
                     if ($hasFinancials) {
                         $newData = [
-                            'total_assets'    => $data['total_assets']    ?? 0,
-                            'total_debt'      => $data['total_debt']      ?? 0,
-                            'total_revenue'   => $data['total_revenue']   ?? 0,
+                            'total_assets' => $data['total_assets'] ?? 0,
+                            'total_debt' => $data['total_debt'] ?? 0,
+                            'total_revenue' => $data['total_revenue'] ?? 0,
                             'interest_income' => $data['interest_income'] ?? 0,
-                            'market_cap'      => $marketCap,
-                            'eps'             => $data['eps']             ?? null,
-                            'pe_ratio'        => $data['pe_ratio']        ?? null,
-                            'roe'             => $data['roe']             ?? null,
-                            'dividend_yield'  => $data['dividend_yield']  ?? null,
-                            'profit_margin'   => $data['profit_margin']   ?? null,
+                            'market_cap' => $marketCap,
+                            'eps' => $data['eps'] ?? null,
+                            'pe_ratio' => $data['pe_ratio'] ?? null,
+                            'roe' => $data['roe'] ?? null,
+                            'dividend_yield' => $data['dividend_yield'] ?? null,
+                            'profit_margin' => $data['profit_margin'] ?? null,
                         ];
 
-                        $financialUpdateService = app(\App\Services\FinancialUpdateService::class);
+                        $financialUpdateService = app(FinancialUpdateService::class);
                         $financialUpdateService->proposeUpdate(
-                            $company, 
-                            $newData, 
-                            "Automated NGX / Yahoo Finance sync"
+                            $company,
+                            $newData,
+                            'Automated NGX / Yahoo Finance sync'
                         );
                     } else {
                         $existing = $company->financials()->latest()->first();
@@ -216,8 +221,8 @@ class SyncNgxData extends Command
 
             } catch (Exception $e) {
                 DB::rollBack();
-                $this->error("  ✗ Batch {$batchNum} FAILED: " . $e->getMessage());
-                Log::error("Fundamentals batch {$batchNum} failed: " . $e->getMessage());
+                $this->error("  ✗ Batch {$batchNum} FAILED: ".$e->getMessage());
+                Log::error("Fundamentals batch {$batchNum} failed: ".$e->getMessage());
                 $errors++;
             }
 
@@ -229,11 +234,11 @@ class SyncNgxData extends Command
 
         $this->info('');
         $this->info('════════════════════════════════════');
-        $this->info("Sync complete!");
-        $this->info("  Prices  : " . count($livePrices) . " companies");
+        $this->info('Sync complete!');
+        $this->info('  Prices  : '.count($livePrices).' companies');
         $this->info("  Fundamentals: {$synced} processed");
         $this->info("  Errors  : {$errors}");
-        $this->info("  Cache   : Flushed");
+        $this->info('  Cache   : Flushed');
         $this->info('════════════════════════════════════');
 
         return Command::SUCCESS;
@@ -245,7 +250,9 @@ class SyncNgxData extends Command
     private function fetchLogosForBatch($companies): void
     {
         foreach ($companies as $company) {
-            if ($company->logo_url) continue;
+            if ($company->logo_url) {
+                continue;
+            }
 
             try {
                 $symbol = trim($company->symbol);
@@ -253,7 +260,7 @@ class SyncNgxData extends Command
 
                 $profileRes = Http::withHeaders([
                     'User-Agent' => 'Mozilla/5.0',
-                    'Accept'     => 'application/json',
+                    'Accept' => 'application/json',
                 ])->timeout(8)->get("https://query2.finance.yahoo.com/v10/finance/quoteSummary/{$yahooSymbol}", [
                     'modules' => 'summaryProfile',
                 ]);
@@ -264,16 +271,17 @@ class SyncNgxData extends Command
                 }
 
                 if ($website) {
-                    $domain   = parse_url($website, PHP_URL_HOST);
+                    $domain = parse_url($website, PHP_URL_HOST);
                     if ($domain) {
                         $imgRes = Http::timeout(6)->get("https://logo.clearbit.com/{$domain}");
                         if ($imgRes && $imgRes->successful() && str_contains($imgRes->header('Content-Type') ?? '', 'image')) {
-                            $filename = 'logos/' . strtolower($symbol) . '.png';
+                            $filename = 'logos/'.strtolower($symbol).'.png';
                             Storage::disk('public')->put($filename, $imgRes->body());
                             DB::reconnect();
-                            $company->update(['logo_url' => '/storage/' . $filename]);
+                            $company->update(['logo_url' => '/storage/'.$filename]);
                             $this->line("  🖼  Logo saved for {$symbol}");
                             usleep(400000);
+
                             continue;
                         }
                     }
@@ -282,7 +290,7 @@ class SyncNgxData extends Command
                 $this->line("  — No logo for {$symbol}");
                 usleep(200000);
             } catch (Exception $e) {
-                Log::warning("Logo fetch failed for {$company->symbol}: " . $e->getMessage());
+                Log::warning("Logo fetch failed for {$company->symbol}: ".$e->getMessage());
             }
         }
     }

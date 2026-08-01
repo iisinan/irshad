@@ -1,6 +1,9 @@
 <?php
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Prometheus\CollectorRegistry;
+use Prometheus\RenderTextFormat;
 
 Route::get('/', function () {
     return response()->json(['message' => 'Irshad Engine API is running']);
@@ -8,28 +11,29 @@ Route::get('/', function () {
 
 Route::get('/health', function () {
     try {
-        \Illuminate\Support\Facades\DB::connection()->getPdo();
+        DB::connection()->getPdo();
         $dbStatus = 'connected';
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
         $dbStatus = 'disconnected';
+
         return response()->json(['status' => 'unhealthy', 'database' => $dbStatus, 'error' => $e->getMessage()], 500);
     }
 
     return response()->json([
-        'status' => 'healthy', 
+        'status' => 'healthy',
         'database' => $dbStatus,
-        'timestamp' => now()->toIso8601String()
+        'timestamp' => now()->toIso8601String(),
     ]);
 });
 
 Route::get('/metrics', function () {
-    if (!class_exists(\Prometheus\CollectorRegistry::class)) {
+    if (! class_exists(CollectorRegistry::class)) {
         return response('Prometheus not installed', 501);
     }
-    
-    $registry = \Prometheus\CollectorRegistry::getDefault();
-    $renderer = new \Prometheus\RenderTextFormat();
+
+    $registry = CollectorRegistry::getDefault();
+    $renderer = new RenderTextFormat;
     $result = $renderer->render($registry->getMetricFamilySamples());
 
-    return response($result)->header('Content-Type', \Prometheus\RenderTextFormat::MIME_TYPE);
+    return response($result)->header('Content-Type', RenderTextFormat::MIME_TYPE);
 });

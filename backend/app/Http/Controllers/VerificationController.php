@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\User;
-use Illuminate\Auth\Events\Verified;
 use App\Traits\ApiResponder;
+use Illuminate\Auth\Events\Verified;
+use Illuminate\Http\Request;
 
 class VerificationController extends Controller
 {
@@ -15,7 +15,7 @@ class VerificationController extends Controller
     {
         $user = User::findOrFail($id);
 
-        if (!hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
+        if (! hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
             return response()->json(['message' => 'Invalid verification link'], 400);
         }
 

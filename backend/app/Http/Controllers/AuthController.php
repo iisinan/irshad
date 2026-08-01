@@ -6,11 +6,11 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\User;
 use App\Traits\ApiResponder;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -36,7 +36,7 @@ class AuthController extends Controller
             ],
         ]);
 
-        event(new \Illuminate\Auth\Events\Registered($user));
+        event(new Registered($user));
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -52,7 +52,7 @@ class AuthController extends Controller
      */
     public function login(LoginRequest $request): JsonResponse
     {
-        if (!Auth::attempt($request->only('email', 'password'))) {
+        if (! Auth::attempt($request->only('email', 'password'))) {
             return $this->unauthorized('Invalid login details');
         }
 
@@ -79,7 +79,7 @@ class AuthController extends Controller
         $client = new \Google_Client(['client_id' => env('GOOGLE_CLIENT_ID')]);
         $payload = $client->verifyIdToken($request->credential);
 
-        if (!$payload) {
+        if (! $payload) {
             return $this->unauthorized('Invalid Google token');
         }
 
@@ -91,7 +91,7 @@ class AuthController extends Controller
         // Find user by google_id or email
         $user = User::where('google_id', $googleId)->orWhere('email', $email)->first();
 
-        if (!$user) {
+        if (! $user) {
             // Register new user
             $user = User::create([
                 'name' => $name,

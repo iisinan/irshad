@@ -3,9 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Jobs\ProcessCompanyScreening;
-use App\Jobs\UpdateMarketData;
 use App\Mail\BatchCompletedEmail;
 use App\Models\Company;
+use App\Models\FinancialStatementStatus;
 use Illuminate\Bus\Batch;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Bus;
@@ -36,21 +36,21 @@ class DailyNgxScan extends Command
 
         $targetYear = 2025; // Force FY 2025 to avoid Q1 2026 AI hallucinations
         $companies = Company::where('is_active', true)->get();
-        
+
         $jobs = [];
         $queuedCount = 0;
 
         foreach ($companies as $company) {
-            $status = \App\Models\FinancialStatementStatus::where('company_ticker', $company->symbol)
+            $status = FinancialStatementStatus::where('company_ticker', $company->symbol)
                 ->where('financial_year', $targetYear)
                 ->first();
 
             $shouldQueue = false;
 
-            if (!$status) {
+            if (! $status) {
                 // Never checked before
                 $shouldQueue = true;
-            } elseif ($status->status === 'awaiting_report' && (!$status->next_retry_at || $status->next_retry_at->isPast())) {
+            } elseif ($status->status === 'awaiting_report' && (! $status->next_retry_at || $status->next_retry_at->isPast())) {
                 // Waiting for report and it's time to retry
                 $shouldQueue = true;
             } elseif ($status->status === 'failed') {
@@ -68,6 +68,7 @@ class DailyNgxScan extends Command
 
         if (empty($jobs)) {
             $this->info('No companies need screening today.');
+
             return;
         }
 

@@ -35,7 +35,7 @@ class TradeController extends Controller
         $brokerage = BrokerageAccount::create([
             'user_id' => $user->id,
             'broker_name' => $request->broker_name,
-            'access_token' => 'mock_token_' . uniqid(),
+            'access_token' => 'mock_token_'.uniqid(),
             'cash_balance' => 1000000.00, // ₦1M
         ]);
 
@@ -55,7 +55,7 @@ class TradeController extends Controller
         $user = auth()->user();
 
         // 1. Load company, its status, and latest price
-        $company = Company::with(['status', 'dailyPrices' => fn($q) => $q->latest('date')->limit(1)])
+        $company = Company::with(['status', 'dailyPrices' => fn ($q) => $q->latest('date')->limit(1)])
             ->where('symbol', $request->symbol)
             ->first();
 
@@ -81,7 +81,7 @@ class TradeController extends Controller
             $result = DB::transaction(function () use ($user, $company, $request, $latestPrice, $totalCost) {
                 // 4. Lock the brokerage account to prevent race conditions
                 $brokerage = BrokerageAccount::where('user_id', $user->id)->lockForUpdate()->first();
-                if (!$brokerage) {
+                if (! $brokerage) {
                     throw new \Exception('Please link a broker before trading.');
                 }
 
@@ -105,7 +105,7 @@ class TradeController extends Controller
                     $oldTotalValue = $holding->average_buy_price * $holding->shares;
                     $newTotalValue = $oldTotalValue + $totalCost;
                     $newShares = $holding->shares + $request->shares;
-                    
+
                     $holding->shares = $newShares;
                     $holding->average_buy_price = $newTotalValue / $newShares;
                 } else {
@@ -120,7 +120,7 @@ class TradeController extends Controller
 
                 return [
                     'holding' => $holding,
-                    'new_balance' => $brokerage->cash_balance
+                    'new_balance' => $brokerage->cash_balance,
                 ];
             });
 
@@ -128,7 +128,8 @@ class TradeController extends Controller
 
         } catch (\Exception $e) {
             $code = $e->getMessage() === 'Insufficient funds.' || $e->getMessage() === 'Please link a broker before trading.' ? 400 : 500;
-            return $this->error('Trade execution failed: ' . $e->getMessage(), $code);
+
+            return $this->error('Trade execution failed: '.$e->getMessage(), $code);
         }
     }
 }

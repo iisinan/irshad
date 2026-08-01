@@ -35,6 +35,7 @@ class Financial extends Model
         if ($revenue == 0) {
             return 0;
         }
+
         return round(((float) $this->interest_income / $revenue) * 100, 2);
     }
 

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->bigInteger('volume')->nullable();
             $table->date('date');
             $table->timestamps();
-            
+
             // A company should only have one price entry per day
             $table->unique(['company_id', 'date']);
         });

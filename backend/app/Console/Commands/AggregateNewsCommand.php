@@ -2,15 +2,16 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\News;
-use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
-use SimpleXMLElement;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class AggregateNewsCommand extends Command
 {
     protected $signature = 'news:aggregate';
+
     protected $description = 'Aggregates news from various RSS feeds (Nairametrics, BusinessDay, Investing.com)';
 
     protected $feeds = [
@@ -21,18 +22,18 @@ class AggregateNewsCommand extends Command
 
     public function handle()
     {
-        $this->info("Starting news aggregation...");
+        $this->info('Starting news aggregation...');
 
         foreach ($this->feeds as $source => $url) {
             $this->info("Fetching feed from {$source}...");
             try {
-                $response = \Illuminate\Support\Facades\Http::timeout(5)
+                $response = Http::timeout(5)
                     ->withHeaders(['User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'])
                     ->get($url);
-                
+
                 if ($response->successful()) {
                     $xml = simplexml_load_string($response->body(), 'SimpleXMLElement', LIBXML_NOCDATA);
-                    
+
                     if ($xml && isset($xml->channel->item)) {
                         $count = 0;
                         foreach ($xml->channel->item as $item) {
@@ -40,21 +41,21 @@ class AggregateNewsCommand extends Command
                             $link = (string) $item->link;
                             $pubDate = (string) $item->pubDate;
                             $description = strip_tags((string) $item->description);
-                            $excerpt = substr($description, 0, 200) . (strlen($description) > 200 ? '...' : '');
+                            $excerpt = substr($description, 0, 200).(strlen($description) > 200 ? '...' : '');
 
                             // Extract thumbnail if available
                             $thumbnailUrl = null;
-                            
+
                             // Handle standard media:content
                             $media = $item->children('media', true);
                             if ($media && isset($media->content)) {
                                 $thumbnailUrl = (string) $media->content->attributes()->url;
-                            } 
+                            }
                             // Handle Nairametrics/WP specific enclosed images
                             elseif (isset($item->enclosure)) {
                                 $thumbnailUrl = (string) $item->enclosure->attributes()->url;
                             }
-                            
+
                             // Parse date
                             $publishedAt = null;
                             try {
@@ -84,14 +85,14 @@ class AggregateNewsCommand extends Command
                         $this->info("Added {$count} new articles from {$source}.");
                     }
                 } else {
-                     $this->error("HTTP request failed for {$source}. Status: " . $response->status());
+                    $this->error("HTTP request failed for {$source}. Status: ".$response->status());
                 }
             } catch (\Exception $e) {
-                $this->error("Failed to fetch/parse {$source}: " . $e->getMessage());
-                Log::error("News Aggregation Error [{$source}]: " . $e->getMessage());
+                $this->error("Failed to fetch/parse {$source}: ".$e->getMessage());
+                Log::error("News Aggregation Error [{$source}]: ".$e->getMessage());
             }
         }
 
-        $this->info("News aggregation complete.");
+        $this->info('News aggregation complete.');
     }
 }

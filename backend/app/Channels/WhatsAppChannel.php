@@ -11,7 +11,6 @@ class WhatsAppChannel
      * Send the given notification.
      *
      * @param  mixed  $notifiable
-     * @param  \Illuminate\Notifications\Notification  $notification
      * @return void
      */
     public function send($notifiable, Notification $notification)
@@ -36,14 +35,15 @@ class WhatsAppChannel
         }
 
         if (! $phoneNumber) {
-            Log::warning('WhatsAppChannel: Missing phone number for notifiable ID ' . ($notifiable->id ?? 'unknown'));
+            Log::warning('WhatsAppChannel: Missing phone number for notifiable ID '.($notifiable->id ?? 'unknown'));
+
             return;
         }
 
         // Simulating the WhatsApp API payload delivery
-        Log::channel('single')->info("================ WHATSAPP ALERT DISPATCHED ================");
+        Log::channel('single')->info('================ WHATSAPP ALERT DISPATCHED ================');
         Log::channel('single')->info("To: {$phoneNumber}");
         Log::channel('single')->info("Message:\n{$message}");
-        Log::channel('single')->info("==========================================================");
+        Log::channel('single')->info('==========================================================');
     }
 }

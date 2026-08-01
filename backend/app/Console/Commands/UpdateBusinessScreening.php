@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\Company;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -39,18 +39,18 @@ class UpdateBusinessScreening extends Command
                 // The AI Engine will now automatically run business screening first,
                 // and thanks to caching, it will skip PDF extraction if already done.
                 $response = Http::timeout(300)->post("{$engineUrl}/api/screen-company/{$company->symbol}", [
-                    'financial_year' => 2026
+                    'financial_year' => 2026,
                 ]);
 
                 if ($response->successful()) {
                     $this->info("✅ {$company->symbol} updated successfully.");
                 } else {
-                    $this->error("❌ Failed to update {$company->symbol}. Engine returned: " . $response->status());
-                    Log::error("Business screening update failed for {$company->symbol}: " . $response->body());
+                    $this->error("❌ Failed to update {$company->symbol}. Engine returned: ".$response->status());
+                    Log::error("Business screening update failed for {$company->symbol}: ".$response->body());
                 }
             } catch (\Exception $e) {
-                $this->error("❌ Exception for {$company->symbol}: " . $e->getMessage());
-                Log::error("Business screening exception for {$company->symbol}: " . $e->getMessage());
+                $this->error("❌ Exception for {$company->symbol}: ".$e->getMessage());
+                Log::error("Business screening exception for {$company->symbol}: ".$e->getMessage());
             }
         }
 

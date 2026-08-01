@@ -2,12 +2,13 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\Company;
+use Illuminate\Console\Command;
 
 class UpdateSectors extends Command
 {
     protected $signature = 'app:update-sectors';
+
     protected $description = 'Updates NGX stock sectors with hardcoded data';
 
     public function handle()

@@ -1,10 +1,14 @@
 <?php
+
+use App\Models\Company;
+use Illuminate\Contracts\Console\Kernel;
+
 require __DIR__.'/vendor/autoload.php';
 $app = require_once __DIR__.'/bootstrap/app.php';
-$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+$kernel = $app->make(Kernel::class);
 $kernel->bootstrap();
 
-$companies = \App\Models\Company::with('aaoifiScreening')->get();
+$companies = Company::with('aaoifiScreening')->get();
 $results = [];
 
 foreach ($companies as $company) {
@@ -18,4 +22,4 @@ foreach ($companies as $company) {
 }
 
 file_put_contents('db_dump.json', json_encode($results, JSON_PRETTY_PRINT));
-echo "Dumped ".count($results)." records.\n";
+echo 'Dumped '.count($results)." records.\n";

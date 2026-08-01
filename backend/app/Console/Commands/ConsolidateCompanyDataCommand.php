@@ -3,30 +3,32 @@
 namespace App\Console\Commands;
 
 use App\Models\Company;
-use App\Models\DataSource;
+use App\Services\FinancialUpdateService;
 use App\Services\GeminiAiService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Cache;
 
 class ConsolidateCompanyDataCommand extends Command
 {
     protected $signature = 'data:consolidate {--symbol= : The specific symbol to consolidate (e.g. MTNN)}';
+
     protected $description = 'Consolidate multiple data sources into a Golden Record using Gemini';
 
     public function handle(GeminiAiService $aiService)
     {
         $symbol = $this->option('symbol');
-        
+
         $query = Company::with('dataSources');
         if ($symbol) {
             $query->where('symbol', $symbol);
         }
-        
+
         $companies = $query->get();
         $this->info("Consolidating data for {$companies->count()} companies...");
-        
+
         foreach ($companies as $company) {
             $this->info("Consolidating for {$company->symbol}...");
-            
+
             $sourcesData = [];
             foreach ($company->dataSources as $source) {
                 $raw = json_decode($source->raw_data, true);
@@ -34,7 +36,7 @@ class ConsolidateCompanyDataCommand extends Command
                     $sourcesData[$source->source_name] = $raw;
                 }
             }
-            
+
             // Add current company state as a baseline
             $sourcesData['Current_DB'] = [
                 'sector' => $company->sector,
@@ -44,12 +46,12 @@ class ConsolidateCompanyDataCommand extends Command
             ];
 
             $goldenRecord = $aiService->consolidateCompanyData($company->symbol, $sourcesData);
-            
+
             if ($goldenRecord === null) {
                 $this->warn("Gemini failed or rate limited. Using smart industry fallback data for {$company->symbol}.");
                 $goldenRecord = $this->generateFallbackData($company);
             }
-            
+
             if ($goldenRecord && isset($goldenRecord['sector'])) {
                 $company->update([
                     'sector' => $goldenRecord['sector'],
@@ -64,7 +66,7 @@ class ConsolidateCompanyDataCommand extends Command
                     'growth_info' => $goldenRecord['growth_info'] ?? null,
                     'div_yield' => $goldenRecord['dividend_yield'] ?? null,
                 ]);
-                
+
                 $newData = [
                     'eps' => $goldenRecord['eps'] ?? null,
                     'pe_ratio' => $goldenRecord['pe_ratio'] ?? null,
@@ -77,35 +79,35 @@ class ConsolidateCompanyDataCommand extends Command
                     'interest_income' => $goldenRecord['interest_income'] ?? 0,
                     'market_cap' => $goldenRecord['market_cap'] ?? 0,
                 ];
-                
-                $financialUpdateService = app(\App\Services\FinancialUpdateService::class);
+
+                $financialUpdateService = app(FinancialUpdateService::class);
                 $financialUpdateService->proposeUpdate(
-                    $company, 
-                    $newData, 
-                    "AI consolidation of fragmented data"
+                    $company,
+                    $newData,
+                    'AI consolidation of fragmented data'
                 );
-                
+
                 $this->info("Updated company and proposed financial data for: {$company->symbol}");
-                
+
                 // We don't evaluate compliance here anymore because it requires admin approval.
                 // It will be evaluated when the Admin approves the Financial Update in the UI.
 
                 // Clear caches so the updated data is instantly available to the frontend
-                \Illuminate\Support\Facades\Cache::tags(['stocks'])->flush();
+                Cache::tags(['stocks'])->flush();
 
                 $this->info("Successfully consolidated and checked compliance for {$company->symbol}");
             } else {
                 $this->error("Failed to generate Golden Record for {$company->symbol}");
             }
-            
+
             // Respect Gemini free tier limits (15 RPM)
-            if (!$symbol) {
-                $this->info("Sleeping for 4 seconds to respect API limits...");
+            if (! $symbol) {
+                $this->info('Sleeping for 4 seconds to respect API limits...');
                 sleep(4);
             }
         }
-        
-        $this->info("Done consolidating data.");
+
+        $this->info('Done consolidating data.');
     }
 
     private function generateFallbackData(Company $company)
@@ -113,10 +115,10 @@ class ConsolidateCompanyDataCommand extends Command
         // Give some variance based on symbol
         $hash = md5($company->symbol);
         $randomBase = hexdec(substr($hash, 0, 4)) / 65535; // 0.0 to 1.0
-        
+
         $sector = $company->sector ?? 'Financials'; // Default to Financials if unknown
         $marketCapBase = 10000000000 + ($randomBase * 500000000000); // 10B to 500B NGN
-        
+
         // Realistic ratios based on sector
         $ratios = [
             'Financials' => ['pe' => 5.5, 'roe' => 0.15, 'debt_ratio' => 0.60, 'profit_margin' => 0.25],
@@ -126,19 +128,19 @@ class ConsolidateCompanyDataCommand extends Command
             'Healthcare' => ['pe' => 14.0, 'roe' => 0.12, 'debt_ratio' => 0.25, 'profit_margin' => 0.10],
             'Energy' => ['pe' => 8.0, 'roe' => 0.10, 'debt_ratio' => 0.40, 'profit_margin' => 0.08],
         ];
-        
+
         $metrics = $ratios[$sector] ?? ['pe' => 10.0, 'roe' => 0.15, 'debt_ratio' => 0.35, 'profit_margin' => 0.15];
-        
+
         // Add randomness (-20% to +20%)
         $variance = 0.8 + ($randomBase * 0.4);
-        
+
         $pe = $metrics['pe'] * $variance;
-        $eps = ($marketCapBase / 100000000) / $pe; 
-        
+        $eps = ($marketCapBase / 100000000) / $pe;
+
         $assets = $marketCapBase * 1.5;
         $debt = $assets * ($metrics['debt_ratio'] * $variance);
         $revenue = $marketCapBase * 0.8;
-        
+
         // For Financials, interest income is high
         $interestIncome = 0;
         if (strpos(strtolower($sector), 'financ') !== false || strpos(strtolower($sector), 'bank') !== false) {
@@ -146,7 +148,7 @@ class ConsolidateCompanyDataCommand extends Command
         } else {
             $interestIncome = $assets * 0.02; // Small interest on cash reserves
         }
-        
+
         return [
             'sector' => $sector,
             'industry' => $company->industry ?? 'General',
@@ -162,7 +164,7 @@ class ConsolidateCompanyDataCommand extends Command
             'total_debt' => round($debt),
             'total_revenue' => round($revenue),
             'interest_income' => round($interestIncome),
-            'valuation_info' => 'Currently trading at a relatively fair valuation compared to industry peers with a P/E ratio around ' . round($pe, 1) . '.',
+            'valuation_info' => 'Currently trading at a relatively fair valuation compared to industry peers with a P/E ratio around '.round($pe, 1).'.',
             'growth_info' => 'Expected steady growth over the coming year based on historical sector trends.',
         ];
     }

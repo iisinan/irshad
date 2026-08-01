@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\ScrapeNGXJob;
 use Illuminate\Console\Command;
 
 class ScrapeNGXData extends Command
@@ -26,7 +27,7 @@ class ScrapeNGXData extends Command
     public function handle()
     {
         $this->info('Dispatching NGX scraping job...');
-        \App\Jobs\ScrapeNGXJob::dispatch();
+        ScrapeNGXJob::dispatch();
         $this->info('Job dispatched successfully.');
     }
 }

@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Company;
 use App\Models\Financial;
+use App\Services\FinancialUpdateService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -12,35 +13,38 @@ use Illuminate\Support\Facades\Storage;
 
 class ImportNgxProfiles extends Command
 {
-    protected $signature   = 'ngx:import-profiles {--logos : Also fetch logos via Clearbit}';
+    protected $signature = 'ngx:import-profiles {--logos : Also fetch logos via Clearbit}';
+
     protected $description = 'Import scraped NGX company profiles from /tmp/ngx_profiles.json into the database';
 
     public function handle()
     {
         $jsonFile = '/tmp/ngx_profiles.json';
 
-        if (!file_exists($jsonFile)) {
+        if (! file_exists($jsonFile)) {
             $this->error("File not found: {$jsonFile}. Run the Python scraper first.");
+
             return Command::FAILURE;
         }
 
-        $raw  = file_get_contents($jsonFile);
+        $raw = file_get_contents($jsonFile);
         $data = json_decode($raw, true);
 
-        if (!$data) {
+        if (! $data) {
             $this->error("Failed to parse JSON from {$jsonFile}");
+
             return Command::FAILURE;
         }
 
-        $total   = count($data);
-        $ok      = 0;
+        $total = count($data);
+        $ok = 0;
         $skipped = 0;
-        $errors  = 0;
+        $errors = 0;
 
         $this->info("Importing {$total} company profiles...");
 
         $batchSize = 20;
-        $chunks    = array_chunk($data, $batchSize, true);
+        $chunks = array_chunk($data, $batchSize, true);
 
         foreach ($chunks as $chunkIdx => $chunk) {
             try {
@@ -48,21 +52,23 @@ class ImportNgxProfiles extends Command
                 DB::beginTransaction();
 
                 foreach ($chunk as $symbol => $info) {
-                    if (!empty($info['error']) && empty($info['sector'])) {
+                    if (! empty($info['error']) && empty($info['sector'])) {
                         $skipped++;
+
                         continue;
                     }
 
                     $company = Company::where('symbol', $symbol)->first();
-                    if (!$company) {
+                    if (! $company) {
                         $skipped++;
+
                         continue;
                     }
 
-                    $sector    = $info['sector']   ?? '';
-                    $industry  = $info['industry'] ?? '';
+                    $sector = $info['sector'] ?? '';
+                    $industry = $info['industry'] ?? '';
                     $marketCap = (float) ($info['market_cap'] ?? 0);
-                    $website   = $info['website']  ?? '';
+                    $website = $info['website'] ?? '';
 
                     // Only update sector/industry if currently missing
                     $update = [];
@@ -75,30 +81,30 @@ class ImportNgxProfiles extends Command
                     if ($website && empty($company->website)) {
                         $update['website'] = $website;
                     }
-                    if (!empty($update)) {
+                    if (! empty($update)) {
                         $company->update($update);
                     }
 
                     // Upsert market cap into financials — include defaults for NOT NULL cols
                     if ($marketCap > 0) {
                         $newData = ['market_cap' => $marketCap];
-                        
+
                         $existing = Financial::where('company_id', $company->id)->first();
-                        if (!$existing) {
+                        if (! $existing) {
                             // New record — must provide defaults for NOT NULL columns
                             $newData = array_merge($newData, [
-                                'total_assets'    => 0,
-                                'total_debt'      => 0,
-                                'total_revenue'   => 0,
+                                'total_assets' => 0,
+                                'total_debt' => 0,
+                                'total_revenue' => 0,
                                 'interest_income' => 0,
                             ]);
                         }
-                        
-                        $financialUpdateService = app(\App\Services\FinancialUpdateService::class);
+
+                        $financialUpdateService = app(FinancialUpdateService::class);
                         $financialUpdateService->proposeUpdate(
-                            $company, 
-                            $newData, 
-                            "Manual CSV Import from NGX"
+                            $company,
+                            $newData,
+                            'Manual CSV Import from NGX'
                         );
                     }
 
@@ -106,11 +112,11 @@ class ImportNgxProfiles extends Command
                 }
 
                 DB::commit();
-                $this->line("  ✓ Chunk " . ($chunkIdx + 1) . " committed ({$ok} imported so far)");
+                $this->line('  ✓ Chunk '.($chunkIdx + 1)." committed ({$ok} imported so far)");
 
             } catch (\Exception $e) {
                 DB::rollBack();
-                $this->error("  ✗ Chunk " . ($chunkIdx + 1) . " failed: " . $e->getMessage());
+                $this->error('  ✗ Chunk '.($chunkIdx + 1).' failed: '.$e->getMessage());
                 $errors++;
             }
         }
@@ -124,7 +130,7 @@ class ImportNgxProfiles extends Command
 
         $this->info('');
         $this->info('════════════════════════════════════');
-        $this->info("Import complete!");
+        $this->info('Import complete!');
         $this->info("  Imported : {$ok}");
         $this->info("  Skipped  : {$skipped}");
         $this->info("  Errors   : {$errors}");
@@ -140,21 +146,23 @@ class ImportNgxProfiles extends Command
             ->whereNull('logo_url')
             ->get();
 
-        $this->info("  " . $companies->count() . " companies with website but no logo.");
+        $this->info('  '.$companies->count().' companies with website but no logo.');
 
         foreach ($companies as $company) {
             try {
                 $domain = parse_url($company->website, PHP_URL_HOST);
-                if (!$domain) continue;
+                if (! $domain) {
+                    continue;
+                }
 
                 $r = Http::withHeaders(['User-Agent' => 'Mozilla/5.0'])->timeout(8)
                     ->get("https://logo.clearbit.com/{$domain}");
 
                 if ($r && $r->successful() && str_contains($r->header('Content-Type') ?? '', 'image')) {
-                    $filename = 'logos/' . strtolower(trim($company->symbol)) . '.png';
+                    $filename = 'logos/'.strtolower(trim($company->symbol)).'.png';
                     Storage::disk('public')->put($filename, $r->body());
                     DB::reconnect();
-                    $company->update(['logo_url' => '/storage/' . $filename]);
+                    $company->update(['logo_url' => '/storage/'.$filename]);
                     $this->line("  🖼  {$company->symbol} ({$domain})");
                 } else {
                     $this->line("  — {$company->symbol}: no Clearbit logo");
@@ -162,7 +170,7 @@ class ImportNgxProfiles extends Command
 
                 usleep(400000);
             } catch (\Exception $e) {
-                Log::warning("Logo fetch failed for {$company->symbol}: " . $e->getMessage());
+                Log::warning("Logo fetch failed for {$company->symbol}: ".$e->getMessage());
             }
         }
     }

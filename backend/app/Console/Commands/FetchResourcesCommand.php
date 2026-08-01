@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\Resource;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 
 class FetchResourcesCommand extends Command
@@ -27,21 +27,22 @@ class FetchResourcesCommand extends Command
      */
     public function handle()
     {
-        $this->info("Starting resource fetch...");
+        $this->info('Starting resource fetch...');
 
         $apiKey = config('services.youtube.key');
-        
-        if (!$apiKey) {
-            $this->warn("No YouTube API Key found. Seeding dummy data instead...");
+
+        if (! $apiKey) {
+            $this->warn('No YouTube API Key found. Seeding dummy data instead...');
             $this->seedDummyData();
+
             return;
         }
 
-        $this->info("Fetching from YouTube API...");
-        
+        $this->info('Fetching from YouTube API...');
+
         // Trusted channels or generic safe queries
         $queries = ['Halal Investing', 'Islamic Finance', 'Zakat on Shares', 'AAOIFI Standards'];
-        
+
         foreach ($queries as $query) {
             $response = Http::get('https://www.googleapis.com/youtube/v3/search', [
                 'part' => 'snippet',
@@ -49,7 +50,7 @@ class FetchResourcesCommand extends Command
                 'type' => 'video',
                 'maxResults' => 5,
                 'videoEmbeddable' => 'true',
-                'key' => $apiKey
+                'key' => $apiKey,
             ]);
 
             if ($response->successful() && isset($response->json()['items'])) {
@@ -62,7 +63,7 @@ class FetchResourcesCommand extends Command
                             'scholar' => $item['snippet']['channelTitle'],
                             'type' => 'video',
                             'thumbnail' => $item['snippet']['thumbnails']['high']['url'] ?? null,
-                            'url' => 'https://www.youtube.com/embed/' . $item['id']['videoId'],
+                            'url' => 'https://www.youtube.com/embed/'.$item['id']['videoId'],
                             'category' => 'General',
                         ]
                     );
@@ -72,7 +73,7 @@ class FetchResourcesCommand extends Command
             }
         }
 
-        $this->info("Resources fetched successfully.");
+        $this->info('Resources fetched successfully.');
     }
 
     private function seedDummyData()
@@ -86,7 +87,7 @@ class FetchResourcesCommand extends Command
                 'thumbnail' => 'https://images.unsplash.com/photo-1555597673-b21d5c935865?auto=format&fit=crop&q=80&w=800',
                 'url' => 'https://www.youtube.com/embed/tgbNymZ7vqY',
                 'category' => 'Foundations',
-                'external_id' => 'dummy_1'
+                'external_id' => 'dummy_1',
             ],
             [
                 'title' => 'AAOIFI Shariah Standard No. 21 (Fetched)',
@@ -96,14 +97,14 @@ class FetchResourcesCommand extends Command
                 'thumbnail' => null,
                 'url' => 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
                 'category' => 'Standards',
-                'external_id' => 'dummy_2'
-            ]
+                'external_id' => 'dummy_2',
+            ],
         ];
 
         foreach ($dummies as $data) {
             Resource::updateOrCreate(['external_id' => $data['external_id']], $data);
         }
 
-        $this->info("Dummy resources seeded successfully.");
+        $this->info('Dummy resources seeded successfully.');
     }
 }

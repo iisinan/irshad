@@ -3,9 +3,9 @@
 namespace App\Services;
 
 use App\Models\Company;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
 
 class NgxService
 {
@@ -23,8 +23,8 @@ class NgxService
         try {
             $response = Http::withHeaders([
                 'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-                'Accept'     => 'application/json',
-            ])->timeout(20)->get(self::NGX_API . "/statistics/ticker", [
+                'Accept' => 'application/json',
+            ])->timeout(20)->get(self::NGX_API.'/statistics/ticker', [
                 '$filter' => "TickerType eq 'EQUITIES'",
             ]);
 
@@ -34,15 +34,16 @@ class NgxService
                     $symbol = trim($item['SYMBOL'] ?? '');
                     if ($symbol && isset($item['Value'])) {
                         $prices[$symbol] = [
-                            'price'      => (float) $item['Value'],
+                            'price' => (float) $item['Value'],
                             'change_pct' => (float) ($item['PercChange'] ?? 0),
                         ];
                     }
                 }
+
                 return $prices;
             }
         } catch (\Exception $e) {
-            Log::error('NGX live price fetch failed: ' . $e->getMessage());
+            Log::error('NGX live price fetch failed: '.$e->getMessage());
         }
 
         return [];
@@ -55,30 +56,30 @@ class NgxService
      */
     public function fetchFundamentals(Company $company): array
     {
-        $symbol      = trim($company->symbol);
+        $symbol = trim($company->symbol);
         $yahooSymbol = str_contains($symbol, '.') ? $symbol : "{$symbol}.LG";
 
         $result = [
-            'sector'          => null,
-            'industry'        => null,
-            'overview'        => null,
+            'sector' => null,
+            'industry' => null,
+            'overview' => null,
             'analysts_target' => null,
-            'dividend_yield'  => null,
-            'market_cap'      => 0,
-            'total_assets'    => 0,
-            'total_debt'      => 0,
-            'total_revenue'   => 0,
+            'dividend_yield' => null,
+            'market_cap' => 0,
+            'total_assets' => 0,
+            'total_debt' => 0,
+            'total_revenue' => 0,
             'interest_income' => 0,
-            'eps'             => null,
-            'pe_ratio'        => null,
-            'roe'             => null,
-            'profit_margin'   => null,
+            'eps' => null,
+            'pe_ratio' => null,
+            'roe' => null,
+            'profit_margin' => null,
         ];
 
         try {
             $response = Http::withHeaders([
                 'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-                'Accept'     => 'application/json',
+                'Accept' => 'application/json',
             ])->retry(2, 500, throw: false)->timeout(12)->get(
                 "https://query2.finance.yahoo.com/v10/finance/quoteSummary/{$yahooSymbol}",
                 ['modules' => 'financialData,defaultKeyStatistics,balanceSheetHistory,summaryDetail,summaryProfile']
@@ -88,32 +89,32 @@ class NgxService
                 $modules = $response->json('quoteSummary.result.0');
                 if ($modules) {
                     $financialData = $modules['financialData'] ?? [];
-                    $keyStats      = $modules['defaultKeyStatistics'] ?? [];
+                    $keyStats = $modules['defaultKeyStatistics'] ?? [];
                     $summaryDetail = $modules['summaryDetail'] ?? [];
-                    $profile       = $modules['summaryProfile'] ?? [];
+                    $profile = $modules['summaryProfile'] ?? [];
 
-                    $result['sector']          = $profile['sector'] ?? null;
-                    $result['industry']        = $profile['industry'] ?? null;
-                    $result['overview']        = $profile['longBusinessSummary'] ?? null;
+                    $result['sector'] = $profile['sector'] ?? null;
+                    $result['industry'] = $profile['industry'] ?? null;
+                    $result['overview'] = $profile['longBusinessSummary'] ?? null;
                     $result['analysts_target'] = $financialData['targetMeanPrice']['raw'] ?? null;
-                    $result['dividend_yield']  = $summaryDetail['dividendYield']['raw'] ?? null;
+                    $result['dividend_yield'] = $summaryDetail['dividendYield']['raw'] ?? null;
 
-                    $result['market_cap']     = $keyStats['enterpriseValue']['raw'] ?? 0;
-                    $result['eps']            = $keyStats['trailingEps']['raw'] ?? null;
-                    $result['pe_ratio']       = $summaryDetail['trailingPE']['raw'] ?? null;
-                    $result['total_revenue']  = $financialData['totalRevenue']['raw'] ?? 0;
-                    $result['total_debt']     = $financialData['totalDebt']['raw'] ?? 0;
-                    $result['profit_margin']  = $financialData['profitMargins']['raw'] ?? null;
-                    $result['roe']            = $financialData['returnOnEquity']['raw'] ?? null;
+                    $result['market_cap'] = $keyStats['enterpriseValue']['raw'] ?? 0;
+                    $result['eps'] = $keyStats['trailingEps']['raw'] ?? null;
+                    $result['pe_ratio'] = $summaryDetail['trailingPE']['raw'] ?? null;
+                    $result['total_revenue'] = $financialData['totalRevenue']['raw'] ?? 0;
+                    $result['total_debt'] = $financialData['totalDebt']['raw'] ?? 0;
+                    $result['profit_margin'] = $financialData['profitMargins']['raw'] ?? null;
+                    $result['roe'] = $financialData['returnOnEquity']['raw'] ?? null;
 
                     $balanceSheets = $modules['balanceSheetHistory']['balanceSheetStatements'] ?? [];
-                    if (!empty($balanceSheets)) {
+                    if (! empty($balanceSheets)) {
                         $result['total_assets'] = $balanceSheets[0]['totalAssets']['raw'] ?? 0;
                     }
                 }
             }
         } catch (\Exception $e) {
-            Log::warning("Yahoo fundamentals fetch failed for {$symbol}: " . $e->getMessage());
+            Log::warning("Yahoo fundamentals fetch failed for {$symbol}: ".$e->getMessage());
         }
 
         return $result;
@@ -125,25 +126,25 @@ class NgxService
      */
     public function fetchAtomicData(Company $company): array
     {
-        $symbol   = trim($company->symbol);
-        $livePrices = Cache::remember('ngx_live_prices', 300, fn() => $this->fetchAllLivePrices());
+        $symbol = trim($company->symbol);
+        $livePrices = Cache::remember('ngx_live_prices', 300, fn () => $this->fetchAllLivePrices());
 
-        $priceData   = $livePrices[$symbol] ?? null;
+        $priceData = $livePrices[$symbol] ?? null;
         $fundamentals = $this->fetchFundamentals($company);
 
         // Fallback to DB if NGX API doesn't have this symbol
-        $price    = $priceData ? $priceData['price'] : 0;
+        $price = $priceData ? $priceData['price'] : 0;
         $prevPrice = $price; // NGX API only gives current price; yesterday's comes from DB
 
         if ($price == 0) {
             $latestDb = $company->dailyPrices()->latest('date')->first();
-            $price    = $latestDb?->price ?? 0;
+            $price = $latestDb?->price ?? 0;
             $prevPrice = $company->dailyPrices()->latest('date')->skip(1)->first()?->price ?? $price;
         }
 
         return array_merge($fundamentals, [
-            'symbol'     => $symbol,
-            'price'      => $price,
+            'symbol' => $symbol,
+            'price' => $price,
             'prev_price' => $prevPrice,
         ]);
     }

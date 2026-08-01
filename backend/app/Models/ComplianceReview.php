@@ -14,7 +14,7 @@ class ComplianceReview extends Model
         'payload',
         'status',
         'reviewed_by',
-        'reviewed_at'
+        'reviewed_at',
     ];
 
     protected $casts = [

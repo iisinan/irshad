@@ -2,12 +2,12 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\Company;
 use App\Models\News;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class ScrapeStockNewsCommand extends Command
 {
@@ -30,7 +30,7 @@ class ScrapeStockNewsCommand extends Command
      */
     public function handle()
     {
-        $this->info("Starting stock-specific news aggregation...");
+        $this->info('Starting stock-specific news aggregation...');
 
         $companies = Company::all();
         $this->info("Found {$companies->count()} companies to process.");
@@ -56,15 +56,15 @@ class ScrapeStockNewsCommand extends Command
                             $title = (string) $item->title;
                             $link = (string) $item->link;
                             $pubDate = (string) $item->pubDate;
-                            
+
                             // Google News puts the source at the end of the title or in <source> tag
                             $sourceName = isset($item->source) ? (string) $item->source : 'Google News';
 
                             // Clean up title (remove the " - Source" suffix if it exists)
-                            $title = preg_replace('/ - ' . preg_quote($sourceName, '/') . '$/', '', $title);
+                            $title = preg_replace('/ - '.preg_quote($sourceName, '/').'$/', '', $title);
 
                             $description = strip_tags((string) $item->description);
-                            $excerpt = substr($description, 0, 200) . (strlen($description) > 200 ? '...' : '');
+                            $excerpt = substr($description, 0, 200).(strlen($description) > 200 ? '...' : '');
 
                             $publishedAt = null;
                             try {
@@ -98,17 +98,17 @@ class ScrapeStockNewsCommand extends Command
                         $this->info(" -> Added {$count} new articles for {$company->symbol}.");
                     }
                 } else {
-                    $this->error(" -> HTTP request failed. Status: " . $response->status());
+                    $this->error(' -> HTTP request failed. Status: '.$response->status());
                 }
             } catch (\Exception $e) {
-                $this->error(" -> Failed to fetch/parse: " . $e->getMessage());
-                Log::error("Stock News Aggregation Error [{$company->symbol}]: " . $e->getMessage());
+                $this->error(' -> Failed to fetch/parse: '.$e->getMessage());
+                Log::error("Stock News Aggregation Error [{$company->symbol}]: ".$e->getMessage());
             }
 
             // Sleep briefly to avoid rate limits
             usleep(500000); // 0.5 seconds
         }
 
-        $this->info("Stock-specific news aggregation complete.");
+        $this->info('Stock-specific news aggregation complete.');
     }
 }

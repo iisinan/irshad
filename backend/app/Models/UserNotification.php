@@ -20,9 +20,9 @@ class UserNotification extends Model
     ];
 
     protected $casts = [
-        'read_at'      => 'datetime',
-        'archived_at'  => 'datetime',
-        'meta'         => 'array',
+        'read_at' => 'datetime',
+        'archived_at' => 'datetime',
+        'meta' => 'array',
     ];
 
     public function user()
@@ -37,7 +37,7 @@ class UserNotification extends Model
 
     public function markAsRead(): void
     {
-        if (!$this->read_at) {
+        if (! $this->read_at) {
             $this->update(['read_at' => now()]);
         }
     }
@@ -48,14 +48,14 @@ class UserNotification extends Model
     public static function notify(int $userId, string $title, string $message, array $options = []): self
     {
         return self::create([
-            'user_id'      => $userId,
-            'icon'         => $options['icon']         ?? '🔔',
-            'title'        => $title,
-            'message'      => $message,
-            'category'     => $options['category']     ?? 'system',
-            'action_url'   => $options['action_url']   ?? null,
+            'user_id' => $userId,
+            'icon' => $options['icon'] ?? '🔔',
+            'title' => $title,
+            'message' => $message,
+            'category' => $options['category'] ?? 'system',
+            'action_url' => $options['action_url'] ?? null,
             'action_label' => $options['action_label'] ?? null,
-            'meta'         => $options['meta']         ?? null,
+            'meta' => $options['meta'] ?? null,
         ]);
     }
 }

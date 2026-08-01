@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ComplianceStatusChange;
 use App\Models\BusinessActivityUpdate;
+use App\Models\ComplianceStatusChange;
 use App\Models\NewsArticle;
 use App\Models\WeeklyDigestPreference;
-use App\Models\ComplianceHistory;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class UpdatesController extends Controller
 {
@@ -23,17 +22,17 @@ class UpdatesController extends Controller
             ->orderBy('updated_at_change', 'desc')
             ->limit(20)
             ->get()
-            ->map(fn($c) => [
-                'id'              => $c->id,
-                'symbol'          => $c->company?->symbol,
-                'name'            => $c->company?->name,
-                'logo_url'        => $c->company?->logo_url,
+            ->map(fn ($c) => [
+                'id' => $c->id,
+                'symbol' => $c->company?->symbol,
+                'name' => $c->company?->name,
+                'logo_url' => $c->company?->logo_url,
                 'previous_status' => $c->previous_status,
-                'new_status'      => $c->new_status,
-                'reason'          => $c->reason,
-                'report_url'      => $c->report_url,
-                'updated_at'      => $c->updated_at_change,
-                'time_ago'        => $c->updated_at_change?->diffForHumans(),
+                'new_status' => $c->new_status,
+                'reason' => $c->reason,
+                'report_url' => $c->report_url,
+                'updated_at' => $c->updated_at_change,
+                'time_ago' => $c->updated_at_change?->diffForHumans(),
             ]);
 
         // 2. Business Activity Updates
@@ -41,18 +40,18 @@ class UpdatesController extends Controller
             ->orderBy('date_detected', 'desc')
             ->limit(20)
             ->get()
-            ->map(fn($b) => [
-                'id'               => $b->id,
-                'symbol'           => $b->company?->symbol,
-                'name'             => $b->company?->name,
-                'logo_url'         => $b->company?->logo_url,
-                'activity_type'    => $b->activity_type,
-                'activity_label'   => $b->activity_type_label,
-                'summary'          => $b->summary,
-                'source'           => $b->source,
-                'source_url'       => $b->source_url,
-                'date_detected'    => $b->date_detected,
-                'time_ago'         => $b->date_detected?->diffForHumans(),
+            ->map(fn ($b) => [
+                'id' => $b->id,
+                'symbol' => $b->company?->symbol,
+                'name' => $b->company?->name,
+                'logo_url' => $b->company?->logo_url,
+                'activity_type' => $b->activity_type,
+                'activity_label' => $b->activity_type_label,
+                'summary' => $b->summary,
+                'source' => $b->source,
+                'source_url' => $b->source_url,
+                'date_detected' => $b->date_detected,
+                'time_ago' => $b->date_detected?->diffForHumans(),
             ]);
 
         // 3. Market Intelligence (from news_articles, category = market_intelligence etc.)
@@ -61,27 +60,25 @@ class UpdatesController extends Controller
             ->orderBy('published_at', 'desc')
             ->limit(15)
             ->get()
-            ->map(fn($n) => [
-                'id'           => $n->id,
-                'symbol'       => $n->company?->symbol,
-                'name'         => $n->company?->name,
-                'title'        => $n->title,
-                'category'     => $n->category,
-                'content'      => $n->content,
-                'source'       => $n->source,
-                'source_url'   => $n->source_url,
+            ->map(fn ($n) => [
+                'id' => $n->id,
+                'symbol' => $n->company?->symbol,
+                'name' => $n->company?->name,
+                'title' => $n->title,
+                'category' => $n->category,
+                'content' => $n->content,
+                'source' => $n->source,
+                'source_url' => $n->source_url,
                 'published_at' => $n->published_at,
-                'time_ago'     => $n->published_at?->diffForHumans(),
+                'time_ago' => $n->published_at?->diffForHumans(),
             ]);
-
-
 
         return response()->json([
             'data' => [
-                'compliance_changes'  => $complianceChanges,
-                'business_updates'    => $businessUpdates,
+                'compliance_changes' => $complianceChanges,
+                'business_updates' => $businessUpdates,
                 'market_intelligence' => $marketIntelligence,
-            ]
+            ],
         ]);
     }
 
@@ -106,9 +103,9 @@ class UpdatesController extends Controller
     public function updateDigestPreference(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'email_enabled'  => 'boolean',
+            'email_enabled' => 'boolean',
             'in_app_enabled' => 'boolean',
-            'frequency'      => 'in:weekly,monthly',
+            'frequency' => 'in:weekly,monthly',
         ]);
 
         $pref = WeeklyDigestPreference::updateOrCreate(

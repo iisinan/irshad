@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\Company;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
@@ -32,7 +32,7 @@ class FetchLogosCommand extends Command
         $this->info("Found {$companies->count()} companies. Fetching profiles (logos and overviews)...");
 
         // Ensure directory exists
-        if (!Storage::disk('public')->exists('logos')) {
+        if (! Storage::disk('public')->exists('logos')) {
             Storage::disk('public')->makeDirectory('logos');
         }
 
@@ -45,11 +45,12 @@ class FetchLogosCommand extends Command
 
             $logoPath = "logos/{$symbol}.png";
             $hasLogo = Storage::disk('public')->exists($logoPath) && $company->logo_url;
-            $hasOverview = !empty($company->overview);
+            $hasOverview = ! empty($company->overview);
 
             // Skip if we already have both and not forcing
-            if (!$force && $hasLogo && $hasOverview) {
+            if (! $force && $hasLogo && $hasOverview) {
                 $bar->advance();
+
                 continue;
             }
 
@@ -60,13 +61,13 @@ class FetchLogosCommand extends Command
                 $response = Http::withHeaders([
                     'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
                 ])->timeout(5)->get("https://query2.finance.yahoo.com/v10/finance/quoteSummary/{$yahooSymbol}", [
-                    'modules' => 'assetProfile'
+                    'modules' => 'assetProfile',
                 ]);
 
                 if ($response->successful()) {
                     $website = $response->json('quoteSummary.result.0.assetProfile.website');
                     $overview = $response->json('quoteSummary.result.0.assetProfile.longBusinessSummary');
-                    
+
                     if ($website) {
                         $parsedUrl = parse_url($website);
                         $domain = $parsedUrl['host'] ?? null;
@@ -82,7 +83,7 @@ class FetchLogosCommand extends Command
             $updated = false;
 
             // Save Overview
-            if ($overview && (!$hasOverview || $force)) {
+            if ($overview && (! $hasOverview || $force)) {
                 $company->overview = $overview;
                 $updated = true;
             }
@@ -95,11 +96,11 @@ class FetchLogosCommand extends Command
                     $updated = true;
                 }
             }
-            
+
             if ($updated) {
                 $company->save();
             }
-            
+
             usleep(200000); // 200ms
             $bar->advance();
         }

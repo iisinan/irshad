@@ -2,14 +2,15 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\Company;
 use App\Services\PerplexityAiService;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 
 class AnalyzeAllStocksCommand extends Command
 {
     protected $signature = 'irshad:analyze-all-stocks {--symbol= : Specific stock symbol to analyze} {--force : Force refresh cache}';
+
     protected $description = 'Fetch and cache Irshad AI Shariah analysis for all stocks using Perplexity search engine.';
 
     public function handle(PerplexityAiService $aiService)
@@ -17,7 +18,7 @@ class AnalyzeAllStocksCommand extends Command
         $symbol = $this->option('symbol');
         $force = $this->option('force');
 
-        $query = Company::with(['status', 'financials' => fn($q) => $q->latest()]);
+        $query = Company::with(['status', 'financials' => fn ($q) => $q->latest()]);
         if ($symbol) {
             $query->where('symbol', strtoupper($symbol));
         }
@@ -45,7 +46,7 @@ class AnalyzeAllStocksCommand extends Command
                 $sourcesCount = count($result['sources'] ?? []);
                 $this->info(" -> Success! Confidence: {$score}%, Sources: {$sourcesCount}");
             } catch (\Exception $e) {
-                $this->error(" -> Failed for {$company->symbol}: " . $e->getMessage());
+                $this->error(" -> Failed for {$company->symbol}: ".$e->getMessage());
             }
 
             // Sleep briefly to respect Perplexity API rate limits and avoid throttling
@@ -54,6 +55,6 @@ class AnalyzeAllStocksCommand extends Command
             }
         }
 
-        $this->info("Completed Irshad AI Shariah analysis for all stocks.");
+        $this->info('Completed Irshad AI Shariah analysis for all stocks.');
     }
 }

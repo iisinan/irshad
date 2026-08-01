@@ -19,7 +19,7 @@ return new class extends Migration
             $table->decimal('market_cap', 20, 2)->nullable()->after('current_status');
             $table->decimal('pe_ratio', 10, 2)->nullable()->after('market_cap');
             $table->decimal('eps', 10, 2)->nullable()->after('pe_ratio');
-            
+
             // Indexes for fast filtering
             $table->index('sector');
             $table->index('symbol');
@@ -36,7 +36,7 @@ return new class extends Migration
             $table->dropIndex(['sector']);
             $table->dropIndex(['symbol']);
             $table->dropIndex(['current_status']);
-            
+
             $table->dropColumn([
                 'latest_price',
                 'price_change',
@@ -44,7 +44,7 @@ return new class extends Migration
                 'current_status',
                 'market_cap',
                 'pe_ratio',
-                'eps'
+                'eps',
             ]);
         });
     }

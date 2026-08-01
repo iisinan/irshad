@@ -18,7 +18,7 @@ return new class extends Migration
             $table->decimal('shares', 15, 2);
             $table->decimal('average_buy_price', 15, 2)->nullable();
             $table->timestamps();
-            
+
             $table->unique(['user_id', 'symbol']);
         });
     }

@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\News;
 use App\Http\Resources\NewsResource;
+use App\Models\Company;
+use App\Models\News;
 use Illuminate\Http\Request;
 
 class NewsController extends Controller
@@ -16,7 +17,7 @@ class NewsController extends Controller
         $query = News::with('company')->orderBy('published_at', 'desc');
 
         if ($symbol) {
-            $company = \App\Models\Company::where('symbol', $symbol)->first();
+            $company = Company::where('symbol', $symbol)->first();
             if ($company) {
                 $query->where('company_id', $company->id);
             } else {
@@ -34,7 +35,7 @@ class NewsController extends Controller
                 'current_page' => $news->currentPage(),
                 'last_page' => $news->lastPage(),
                 'total' => $news->total(),
-            ]
+            ],
         ]);
     }
 }

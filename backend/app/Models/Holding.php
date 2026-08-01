@@ -13,7 +13,7 @@ class Holding extends Model
         'user_id',
         'symbol',
         'shares',
-        'average_buy_price'
+        'average_buy_price',
     ];
 
     public function user()

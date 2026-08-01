@@ -2,17 +2,16 @@
 
 namespace App\Jobs;
 
+use App\Models\Company;
+use App\Services\AaoifiComplianceService;
+use App\Services\AiDocumentParserService;
+use App\Services\FinancialUpdateService;
+use App\Services\NgxDocumentScraperService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use App\Models\Company;
-use App\Models\Financial;
-use App\Services\NgxDocumentScraperService;
-use App\Services\AiDocumentParserService;
-use App\Services\AaoifiComplianceService;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class ProcessCompanyFinancialsJob implements ShouldQueue
@@ -63,18 +62,19 @@ class ProcessCompanyFinancialsJob implements ShouldQueue
 
         // 1. Find PDF
         $pdfUrl = $scraper->findLatestFinancialReportPdfUrl($symbol);
-        if (!$pdfUrl) {
+        if (! $pdfUrl) {
             Log::warning("No PDF found for {$symbol}");
+
             return;
         }
 
         Log::info("Found PDF for {$symbol}: {$pdfUrl}");
 
         // 2. Download the PDF locally
-        $tempPath = storage_path('app/temp_financials_' . $symbol . '_' . time() . '.pdf');
+        $tempPath = storage_path('app/temp_financials_'.$symbol.'_'.time().'.pdf');
         try {
             $fp = fopen($tempPath, 'w+');
-            $ch = curl_init(str_replace(" ", "%20", $pdfUrl));
+            $ch = curl_init(str_replace(' ', '%20', $pdfUrl));
             curl_setopt($ch, CURLOPT_TIMEOUT, 300);
             curl_setopt($ch, CURLOPT_FILE, $fp);
             curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
@@ -84,18 +84,20 @@ class ProcessCompanyFinancialsJob implements ShouldQueue
             curl_close($ch);
             fclose($fp);
 
-            if (!$success) {
-                Log::warning("Failed to download PDF for {$symbol}. cURL Error: " . $error);
+            if (! $success) {
+                Log::warning("Failed to download PDF for {$symbol}. cURL Error: ".$error);
                 if (file_exists($tempPath)) {
                     unlink($tempPath);
                 }
+
                 return;
             }
         } catch (\Exception $e) {
-            Log::warning("Error downloading PDF for {$symbol}: " . $e->getMessage());
+            Log::warning("Error downloading PDF for {$symbol}: ".$e->getMessage());
             if (file_exists($tempPath)) {
                 unlink($tempPath);
             }
+
             return;
         }
 
@@ -108,7 +110,7 @@ class ProcessCompanyFinancialsJob implements ShouldQueue
             unlink($tempPath);
         }
 
-        if (!$extractedData) {
+        if (! $extractedData) {
             Log::error("AI Extraction failed for {$symbol}");
             // Throw exception so Laravel Queue records this as a failure and retries
             throw new \Exception("AI Extraction failed for {$symbol} (Gemini API returned null).");
@@ -135,13 +137,13 @@ class ProcessCompanyFinancialsJob implements ShouldQueue
         ];
 
         // 4. Save to Database via Service
-        $financialUpdateService = app(\App\Services\FinancialUpdateService::class);
+        $financialUpdateService = app(FinancialUpdateService::class);
         $financialUpdateService->proposeUpdate(
-            $this->company, 
-            $newData, 
-            "AI extraction from recent financial report"
-        ); 
-        
+            $this->company,
+            $newData,
+            'AI extraction from recent financial report'
+        );
+
         Log::info("Completed {$symbol} successfully via Queue.");
     }
 
@@ -153,14 +155,14 @@ class ProcessCompanyFinancialsJob implements ShouldQueue
         if (is_numeric($value)) {
             return (float) $value;
         }
-        
+
         // Remove everything except numbers, dots, and minus signs
         $cleaned = preg_replace('/[^0-9.-]/', '', $value);
-        
+
         if ($cleaned === '' || $cleaned === '-' || $cleaned === '.') {
             return null;
         }
-        
+
         return (float) $cleaned;
     }
 }

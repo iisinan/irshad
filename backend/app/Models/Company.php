@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Company extends Model
 {
@@ -15,8 +15,8 @@ class Company extends Model
     protected function logoUrl(): Attribute
     {
         return Attribute::make(
-            get: fn (?string $value) => ($value && !str_starts_with($value, 'http')) 
-                ? rtrim(config('app.url'), '/') . '/' . ltrim($value, '/')
+            get: fn (?string $value) => ($value && ! str_starts_with($value, 'http'))
+                ? rtrim(config('app.url'), '/').'/'.ltrim($value, '/')
                 : $value,
         );
     }

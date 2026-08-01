@@ -17,6 +17,6 @@ class Resource extends Model
         'thumbnail',
         'url',
         'category',
-        'external_id' // e.g., YouTube Video ID to avoid duplicates
+        'external_id', // e.g., YouTube Video ID to avoid duplicates
     ];
 }

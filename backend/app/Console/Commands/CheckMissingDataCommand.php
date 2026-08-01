@@ -2,13 +2,14 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\Company;
 use App\Models\Financial;
+use Illuminate\Console\Command;
 
 class CheckMissingDataCommand extends Command
 {
     protected $signature = 'data:check-missing';
+
     protected $description = 'Check missing AAOIFI data';
 
     public function handle()
@@ -16,11 +17,12 @@ class CheckMissingDataCommand extends Command
         $totalCompanies = Company::count();
         if ($totalCompanies === 0) {
             $this->info(json_encode(['error' => 'No companies found']));
+
             return;
         }
 
         $missingSector = Company::whereNull('sector')->orWhere('sector', '')->orWhere('sector', 'Unknown')->count();
-        
+
         $companiesWithFinancials = Financial::distinct('company_id')->count();
         $missingBroadFinancials = $totalCompanies - $companiesWithFinancials; // Roughly
 

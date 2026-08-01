@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\UserNotification;
+use Illuminate\Database\Seeder;
 
 class NotificationsSeeder extends Seeder
 {
@@ -14,8 +14,9 @@ class NotificationsSeeder extends Seeder
     public function run(): void
     {
         $user = User::first();
-        if (!$user) {
+        if (! $user) {
             $this->command->warn('No users found. Skipping NotificationsSeeder.');
+
             return;
         }
 

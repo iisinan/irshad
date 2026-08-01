@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Traits\ApiResponder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
-use App\Models\User;
-use App\Traits\ApiResponder;
 
 class PasswordResetController extends Controller
 {
@@ -41,9 +39,9 @@ class PasswordResetController extends Controller
     public function reset(Request $request)
     {
         $request->validate([
-            'token'                 => 'required|string',
-            'email'                 => 'required|email',
-            'password'              => 'required|min:8|confirmed',
+            'token' => 'required|string',
+            'email' => 'required|email',
+            'password' => 'required|min:8|confirmed',
         ]);
 
         $status = Password::reset(
@@ -65,9 +63,9 @@ class PasswordResetController extends Controller
         return response()->json([
             'message' => match ($status) {
                 Password::INVALID_TOKEN => 'This reset link is invalid or has expired. Please request a new one.',
-                Password::INVALID_USER  => 'We could not find a user with that email address.',
-                default                 => 'Something went wrong. Please try again.',
-            }
+                Password::INVALID_USER => 'We could not find a user with that email address.',
+                default => 'Something went wrong. Please try again.',
+            },
         ], 400);
     }
 }

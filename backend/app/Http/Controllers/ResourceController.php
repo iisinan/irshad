@@ -15,7 +15,7 @@ class ResourceController extends Controller
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('scholar', 'like', "%{$search}%");
+                    ->orWhere('scholar', 'like', "%{$search}%");
             });
         }
 
@@ -45,7 +45,7 @@ class ResourceController extends Controller
 
         return response()->json([
             'message' => 'Resource created successfully',
-            'resource' => $resource
+            'resource' => $resource,
         ], 201);
     }
 
@@ -67,7 +67,7 @@ class ResourceController extends Controller
 
         return response()->json([
             'message' => 'Resource updated successfully',
-            'resource' => $resource
+            'resource' => $resource,
         ]);
     }
 
@@ -77,7 +77,7 @@ class ResourceController extends Controller
         $resource->delete();
 
         return response()->json([
-            'message' => 'Resource deleted successfully'
+            'message' => 'Resource deleted successfully',
         ]);
     }
 }

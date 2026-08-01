@@ -2,10 +2,9 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Models\WeeklyDigestPreference;
-use App\Models\User;
 use App\Mail\UpdatesDigestMail;
+use App\Models\WeeklyDigestPreference;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 
 class SendUpdatesDigest extends Command
@@ -39,11 +38,12 @@ class SendUpdatesDigest extends Command
 
         if ($preferences->isEmpty()) {
             $this->info('No users opted in for the email digest.');
+
             return self::SUCCESS;
         }
 
         foreach ($preferences as $pref) {
-            if (!$pref->user) {
+            if (! $pref->user) {
                 continue;
             }
 
@@ -51,11 +51,12 @@ class SendUpdatesDigest extends Command
                 Mail::to($pref->user->email)->send(new UpdatesDigestMail($pref->user));
                 $this->info("Sent digest to {$pref->user->email}");
             } catch (\Exception $e) {
-                $this->error("Failed to send digest to {$pref->user->email}: " . $e->getMessage());
+                $this->error("Failed to send digest to {$pref->user->email}: ".$e->getMessage());
             }
         }
 
         $this->info('Updates Digest delivery completed.');
+
         return self::SUCCESS;
     }
 }

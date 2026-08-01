@@ -33,7 +33,7 @@ class VerifyEmailNotification extends Notification implements ShouldQueue
 
         return (new MailMessage)
             ->subject('Verify Your Irshad Email Address')
-            ->greeting('As-salamu alaykum, ' . ($notifiable->first_name ?? explode(' ', $notifiable->name)[0] ?? 'there') . '!')
+            ->greeting('As-salamu alaykum, '.($notifiable->first_name ?? explode(' ', $notifiable->name)[0] ?? 'there').'!')
             ->line('Please click the button below to verify your email address.')
             ->action('Verify Email Address', $verificationUrl)
             ->line('If you did not create an account, no further action is required.')
@@ -60,8 +60,8 @@ class VerifyEmailNotification extends Notification implements ShouldQueue
 
         // Map it to the frontend URL
         $frontendUrl = config('app.frontend_url', env('FRONTEND_URL', 'http://localhost:5173'));
-        
+
         // Pass the signed API URL as a query parameter to the frontend
-        return rtrim($frontendUrl, '/') . '/verify-email?url=' . urlencode($apiUrl);
+        return rtrim($frontendUrl, '/').'/verify-email?url='.urlencode($apiUrl);
     }
 }

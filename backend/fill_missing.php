@@ -1,10 +1,12 @@
 <?php
+
 require __DIR__.'/vendor/autoload.php';
 $app = require_once __DIR__.'/bootstrap/app.php';
-$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+$app->make(Kernel::class)->bootstrap();
 
-use Illuminate\Support\Facades\Http;
 use App\Models\Company;
+use Illuminate\Contracts\Console\Kernel;
+use Illuminate\Support\Facades\Http;
 
 $companies = Company::all();
 $missing = [];
@@ -19,14 +21,14 @@ $apiKey = env('GEMINI_API_KEY');
 foreach ($missing as $c) {
     echo "Processing {$c->symbol} - {$c->name}\n";
     $prompt = "You are a financial data assistant. Provide the exact 'Industry', 'Sector', and a brief 'Overview' (1-2 sentences) for the Nigerian stock: {$c->symbol} ({$c->name}). Return ONLY a JSON object with keys: industry, sector, overview. Do not include markdown formatting or backticks. Example: {\"industry\": \"Banking\", \"sector\": \"Financial Services\", \"overview\": \"A leading bank in Nigeria.\"} If you don't know, provide your best guess for the Nigerian market.";
-    
+
     // Using gemini-pro instead
     $response = Http::withOptions(['verify' => false])->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={$apiKey}", [
         'contents' => [
-            ['parts' => [['text' => $prompt]]]
-        ]
+            ['parts' => [['text' => $prompt]]],
+        ],
     ]);
-    
+
     if ($response->successful()) {
         $jsonStr = $response->json('candidates.0.content.parts.0.text');
         if ($jsonStr) {
@@ -56,7 +58,7 @@ foreach ($missing as $c) {
             }
         }
     } else {
-        echo "API failed for {$c->symbol}: " . $response->body() . "\n";
+        echo "API failed for {$c->symbol}: ".$response->body()."\n";
     }
     usleep(500000); // 0.5s rate limiting
 }

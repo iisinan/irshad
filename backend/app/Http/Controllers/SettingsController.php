@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Setting;
 use Illuminate\Http\Request;
 
 class SettingsController extends Controller
 {
     public function index()
     {
-        $settings = \App\Models\Setting::pluck('value', 'key');
+        $settings = Setting::pluck('value', 'key');
+
         return response()->json([
             'status' => 'success',
-            'data' => $settings
+            'data' => $settings,
         ]);
     }
 
@@ -19,11 +21,11 @@ class SettingsController extends Controller
     {
         $validated = $request->validate([
             'settings' => 'required|array',
-            'settings.*' => 'nullable|string'
+            'settings.*' => 'nullable|string',
         ]);
 
         foreach ($validated['settings'] as $key => $value) {
-            \App\Models\Setting::updateOrCreate(
+            Setting::updateOrCreate(
                 ['key' => $key],
                 ['value' => $value]
             );
@@ -31,7 +33,7 @@ class SettingsController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Settings updated successfully'
+            'message' => 'Settings updated successfully',
         ]);
     }
 }

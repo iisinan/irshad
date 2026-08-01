@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use App\Traits\ApiResponder;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class BillingController extends Controller
 {

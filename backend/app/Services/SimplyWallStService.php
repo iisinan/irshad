@@ -3,12 +3,11 @@
 namespace App\Services;
 
 use App\Models\Company;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 class SimplyWallStService
 {
     protected string $baseUrl = 'https://api.simplywall.st/v1'; // Placeholder
+
     protected string $apiKey;
 
     public function __construct()
@@ -31,7 +30,7 @@ class SimplyWallStService
             ['symbol' => 'TSLA', 'name' => 'Tesla Inc', 'exchange' => 'NASDAQ', 'sector' => 'Consumer Discretionary'],
         ];
 
-        return array_filter($allStocks, function($stock) use ($query) {
+        return array_filter($allStocks, function ($stock) use ($query) {
             return stripos($stock['symbol'], $query) !== false || stripos($stock['name'], $query) !== false;
         });
     }

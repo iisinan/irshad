@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\AdminAlert;
+use App\Models\Company;
+use App\Models\News;
+use App\Models\User;
 use App\Traits\ApiResponder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -22,15 +24,16 @@ class AdminController extends Controller
     {
         $query = User::latest();
 
-        if ($request->has('search') && !empty($request->search)) {
+        if ($request->has('search') && ! empty($request->search)) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
         $users = $query->paginate(20);
+
         return response()->json($users);
     }
 
@@ -44,7 +47,7 @@ class AdminController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
             'role' => 'nullable|string|in:admin,user',
-            'plan' => 'nullable|string'
+            'plan' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -61,7 +64,7 @@ class AdminController extends Controller
 
         return response()->json([
             'message' => 'Admin account created successfully.',
-            'user' => $user
+            'user' => $user,
         ], 201);
     }
 
@@ -74,7 +77,7 @@ class AdminController extends Controller
             ->where('resolved', false)
             ->latest()
             ->paginate(20);
-            
+
         return response()->json($alerts);
     }
 
@@ -85,8 +88,10 @@ class AdminController extends Controller
     {
         $alert = AdminAlert::findOrFail($id);
         $alert->update(['resolved' => true]);
+
         return $this->success(null, 'Alert resolved successfully');
     }
+
     /**
      * Update user details (admin only).
      */
@@ -96,7 +101,7 @@ class AdminController extends Controller
 
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
+            'email' => 'sometimes|string|email|max:255|unique:users,email,'.$user->id,
             'role' => 'sometimes|string|in:admin,user',
             'plan' => 'sometimes|string|in:free,paid',
         ]);
@@ -116,13 +121,14 @@ class AdminController extends Controller
     public function deleteUser($id)
     {
         $user = User::findOrFail($id);
-        
+
         // Prevent deleting yourself
         if (auth()->id() === $user->id) {
             return response()->json(['message' => 'Cannot delete your own account'], 403);
         }
 
         $user->delete();
+
         return $this->success(null, 'User deleted successfully');
     }
 
@@ -131,7 +137,7 @@ class AdminController extends Controller
      */
     public function updateTickerAbout(Request $request, $symbol)
     {
-        $company = \App\Models\Company::where('symbol', $symbol)->firstOrFail();
+        $company = Company::where('symbol', $symbol)->firstOrFail();
 
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes|string|max:255',
@@ -147,7 +153,7 @@ class AdminController extends Controller
 
         $company->update($request->only(['name', 'sector', 'industry', 'description', 'overview']));
 
-        \Illuminate\Support\Facades\Cache::tags(['stocks'])->flush();
+        Cache::tags(['stocks'])->flush();
 
         return $this->success($company, 'Company details updated successfully');
     }
@@ -157,7 +163,7 @@ class AdminController extends Controller
      */
     public function addTickerNews(Request $request, $symbol)
     {
-        $company = \App\Models\Company::where('symbol', $symbol)->firstOrFail();
+        $company = Company::where('symbol', $symbol)->firstOrFail();
 
         $validator = Validator::make($request->all(), [
             'title' => 'nullable|string|max:255',
@@ -171,7 +177,7 @@ class AdminController extends Controller
             return response()->json(['message' => 'Validation error', 'errors' => $validator->errors()], 422);
         }
 
-        $news = new \App\Models\News();
+        $news = new News;
         $news->company_id = $company->id;
         $news->title = $request->title ?? 'Untitled News';
         $news->url = $request->url ?? '#';
@@ -181,7 +187,7 @@ class AdminController extends Controller
         $news->published_at = now();
         $news->save();
 
-        \Illuminate\Support\Facades\Cache::tags(['stocks'])->flush();
+        Cache::tags(['stocks'])->flush();
 
         return response()->json(['message' => 'News added successfully', 'data' => $news]);
     }
@@ -191,12 +197,12 @@ class AdminController extends Controller
      */
     public function deleteTickerNews($symbol, $newsId)
     {
-        $company = \App\Models\Company::where('symbol', $symbol)->firstOrFail();
-        $news = \App\Models\News::where('id', $newsId)->where('company_id', $company->id)->firstOrFail();
-        
+        $company = Company::where('symbol', $symbol)->firstOrFail();
+        $news = News::where('id', $newsId)->where('company_id', $company->id)->firstOrFail();
+
         $news->delete();
 
-        \Illuminate\Support\Facades\Cache::tags(['stocks'])->flush();
+        Cache::tags(['stocks'])->flush();
 
         return $this->success(null, 'News deleted successfully');
     }
@@ -229,31 +235,31 @@ class AdminController extends Controller
             )
             ->orderBy('companies.symbol')
             ->cursor();
-        
+
         $headers = [
-            "Content-type"        => "text/csv",
-            "Content-Disposition" => "attachment; filename=stocks.csv",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
+            'Content-type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename=stocks.csv',
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
         ];
-        
+
         $columns = [
             'Ticker', 'Name', 'Verdict', 'Reason', 'Business Activity',
-            'Debt Ratio', 'Cash Ratio', 'Impermissible Income Ratio', 'Scholar Override'
+            'Debt Ratio', 'Cash Ratio', 'Impermissible Income Ratio', 'Scholar Override',
         ];
-        
-        $callback = function() use($companies, $columns) {
+
+        $callback = function () use ($companies, $columns) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $columns, ',', '"', '\\');
-            
+
             foreach ($companies as $company) {
                 $calc = [];
                 if ($company->calculation_results) {
                     $calc = json_decode($company->calculation_results, true) ?? [];
                 }
                 $ratios = $calc['ratios'] ?? [];
-                
+
                 // Format ratios as readable percentages (stored as decimals e.g. 0.003 = 0.3%)
                 $debtRatio = isset($ratios['interest_bearing_debt_ratio'])
                     ? round(floatval($ratios['interest_bearing_debt_ratio']) * 100, 4) : '';
@@ -261,7 +267,7 @@ class AdminController extends Controller
                     ? round(floatval($ratios['cash_and_equivalents_ratio']) * 100, 4) : '';
                 $impureRatio = isset($ratios['non_permissible_income_ratio'])
                     ? round(floatval($ratios['non_permissible_income_ratio']) * 100, 4) : '';
-                
+
                 fputcsv($file, [
                     $company->symbol,
                     $company->name,
@@ -271,12 +277,12 @@ class AdminController extends Controller
                     $debtRatio,
                     $cashRatio,
                     $impureRatio,
-                    $company->verified_by_scholar ? 'TRUE' : 'FALSE'
+                    $company->verified_by_scholar ? 'TRUE' : 'FALSE',
                 ]);
             }
             fclose($file);
         };
-        
+
         return response()->stream($callback, 200, $headers);
     }
 
@@ -286,36 +292,40 @@ class AdminController extends Controller
     public function previewImport(Request $request)
     {
         $request->validate(['file' => 'required|mimes:csv,txt,xlsx,xls']);
-        
+
         $file = $request->file('file');
-        
+
         $rows = [];
-        if (($handle = fopen($file->getRealPath(), "r")) !== FALSE) {
-            while (($data = fgetcsv($handle, 10000, ",")) !== FALSE) {
+        if (($handle = fopen($file->getRealPath(), 'r')) !== false) {
+            while (($data = fgetcsv($handle, 10000, ',')) !== false) {
                 $rows[] = $data;
             }
             fclose($handle);
         }
-        
+
         $header = array_shift($rows); // Remove header
-        
+
         $changes = [];
         foreach ($rows as $row) {
-            if (count($row) < 9) continue; // Skip invalid rows
-            
+            if (count($row) < 9) {
+                continue;
+            } // Skip invalid rows
+
             $symbol = $row[0];
             $newVerdict = strtolower(trim($row[2]));
             $newReason = trim($row[3]);
             $newOverrideStr = strtoupper(trim($row[8]));
             $newOverride = ($newOverrideStr === 'TRUE' || $newOverrideStr === '1' || $newOverrideStr === 'YES');
-            
-            $company = \App\Models\Company::where('symbol', $symbol)->with('status')->first();
-            if (!$company) continue; // Skip if ticker not found
-            
+
+            $company = Company::where('symbol', $symbol)->with('status')->first();
+            if (! $company) {
+                continue;
+            } // Skip if ticker not found
+
             $currentVerdict = $company->status ? strtolower($company->status->status) : 'unknown';
             $currentReason = $company->status ? trim($company->status->reason) : '';
-            $currentOverride = $company->status ? (bool)$company->status->verified_by_scholar : false;
-            
+            $currentOverride = $company->status ? (bool) $company->status->verified_by_scholar : false;
+
             // Only flag if something important changed
             if ($newVerdict !== $currentVerdict || $newOverride !== $currentOverride || $newReason !== $currentReason) {
                 $changes[] = [
@@ -326,11 +336,11 @@ class AdminController extends Controller
                     'old_override' => $currentOverride,
                     'new_override' => $newOverride,
                     'old_reason' => $currentReason,
-                    'new_reason' => $newReason
+                    'new_reason' => $newReason,
                 ];
             }
         }
-        
+
         return response()->json(['data' => $changes]);
     }
 
@@ -341,12 +351,14 @@ class AdminController extends Controller
     {
         $changes = $request->input('changes', []);
         $updatedCount = 0;
-        
+
         foreach ($changes as $change) {
-            $company = \App\Models\Company::where('symbol', $change['ticker'])->first();
-            if (!$company) continue;
-            
-            \Illuminate\Support\Facades\DB::table('stock_statuses')->updateOrInsert(
+            $company = Company::where('symbol', $change['ticker'])->first();
+            if (! $company) {
+                continue;
+            }
+
+            DB::table('stock_statuses')->updateOrInsert(
                 ['company_id' => $company->id],
                 [
                     'status' => $change['new_verdict'],
@@ -356,17 +368,17 @@ class AdminController extends Controller
                     'updated_at' => now(),
                 ]
             );
-            
-            \Illuminate\Support\Facades\DB::table('companies')->where('id', $company->id)->update([
-                'current_status' => $change['new_verdict']
+
+            DB::table('companies')->where('id', $company->id)->update([
+                'current_status' => $change['new_verdict'],
             ]);
-            
+
             Cache::tags(['stocks'])->flush();
             $updatedCount++;
         }
-        
-        \Illuminate\Support\Facades\Cache::tags(['stocks'])->flush();
-        
+
+        Cache::tags(['stocks'])->flush();
+
         return response()->json(['message' => "Successfully updated $updatedCount tickers."]);
     }
 }

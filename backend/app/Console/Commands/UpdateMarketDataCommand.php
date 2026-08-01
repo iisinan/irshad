@@ -6,7 +6,6 @@ use App\Jobs\UpdateMarketData;
 use App\Models\Company;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Bus;
-use Illuminate\Bus\Batch;
 
 class UpdateMarketDataCommand extends Command
 {

@@ -2,19 +2,20 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\Company;
+use Illuminate\Console\Command;
 
 class BackfillFlattenedData extends Command
 {
     protected $signature = 'data:backfill';
+
     protected $description = 'Backfills flattened data onto the companies table';
 
     public function handle()
     {
-        $companies = Company::with(['status', 'financials' => fn($q) => $q->latest(), 'dailyPrices' => fn($q) => $q->latest('date')->limit(2)])->get();
-        $this->info("Backfilling " . $companies->count() . " companies...");
-        
+        $companies = Company::with(['status', 'financials' => fn ($q) => $q->latest(), 'dailyPrices' => fn ($q) => $q->latest('date')->limit(2)])->get();
+        $this->info('Backfilling '.$companies->count().' companies...');
+
         foreach ($companies as $company) {
             $fin = $company->financials->first();
             $prices = $company->dailyPrices;
@@ -22,9 +23,9 @@ class BackfillFlattenedData extends Command
             $prev = $prices->skip(1)->first();
 
             $latestPrice = (float) ($latest?->price ?? 0);
-            $prevPrice   = (float) ($prev?->price ?? $latestPrice);
-            $change      = $latestPrice - $prevPrice;
-            
+            $prevPrice = (float) ($prev?->price ?? $latestPrice);
+            $change = $latestPrice - $prevPrice;
+
             $changePct = (float) ($latest?->change_pct ?? 0);
             if ($changePct == 0 && $prevPrice > 0) {
                 $changePct = round(($change / $prevPrice) * 100, 2);
@@ -40,7 +41,7 @@ class BackfillFlattenedData extends Command
                 'price_change_pct' => $changePct,
             ]);
         }
-        
-        $this->info("Done backfilling.");
+
+        $this->info('Done backfilling.');
     }
 }

@@ -26,34 +26,37 @@ class ImportBusinessExcel extends Command
      */
     public function handle()
     {
-        $this->info("Starting Business Activity Excel Import (Stage 1)...");
+        $this->info('Starting Business Activity Excel Import (Stage 1)...');
 
         $aiEnginePath = base_path('ai-engine');
-        $scriptPath = $aiEnginePath . '/app/scripts/ingest_business_excel.py';
+        $scriptPath = $aiEnginePath.'/app/scripts/ingest_business_excel.py';
 
-        if (!file_exists($scriptPath)) {
+        if (! file_exists($scriptPath)) {
             $this->error("Python script not found at {$scriptPath}");
+
             return 1;
         }
 
         // Run the python script using the ai-engine virtual environment
-        $process = Process::fromShellCommandline("source venv/bin/activate && set -a && source .env && set +a && python3 app/scripts/ingest_business_excel.py", $aiEnginePath);
-        
+        $process = Process::fromShellCommandline('source venv/bin/activate && set -a && source .env && set +a && python3 app/scripts/ingest_business_excel.py', $aiEnginePath);
+
         $process->setTimeout(null); // It might take a while to hit Gemini for every ticker
         $process->run(function ($type, $buffer) {
-            if (Process::ERR === $type) {
+            if ($type === Process::ERR) {
                 $this->error($buffer);
             } else {
                 $this->line($buffer);
             }
         });
 
-        if (!$process->isSuccessful()) {
-            $this->error("Business Activity Import Failed.");
+        if (! $process->isSuccessful()) {
+            $this->error('Business Activity Import Failed.');
+
             return 1;
         }
 
-        $this->info("Business Activity Import Completed.");
+        $this->info('Business Activity Import Completed.');
+
         return 0;
     }
 }

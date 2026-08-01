@@ -2,6 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Models\User;
+use App\Notifications\ZakatReminderNotification;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class SendZakatReminders extends Command
@@ -27,34 +30,36 @@ class SendZakatReminders extends Command
     {
         $this->info('Starting Zakat Reminders check...');
 
-        $users = \App\Models\User::whereNotNull('preferences')->get();
+        $users = User::whereNotNull('preferences')->get();
         $count = 0;
 
         foreach ($users as $user) {
             $hawlDate = $user->preferences['zakat_hawl_date'] ?? null;
-            if (!$hawlDate) continue;
+            if (! $hawlDate) {
+                continue;
+            }
 
             try {
                 // The hawl date from preferences
-                $start = \Carbon\Carbon::parse($hawlDate);
-                
+                $start = Carbon::parse($hawlDate);
+
                 // Add 354 days to get the due date
                 $due = $start->copy()->addDays(354);
-                
+
                 // Today at midnight
-                $today = \Carbon\Carbon::now()->startOfDay();
-                
+                $today = Carbon::now()->startOfDay();
+
                 // Diff in days
                 $daysRemaining = $today->diffInDays($due->startOfDay(), false);
 
                 // Check if we should remind them (30 days, 7 days, or 0 days)
                 if (in_array($daysRemaining, [30, 7, 0])) {
-                    $user->notify(new \App\Notifications\ZakatReminderNotification($daysRemaining, $due->format('M j, Y')));
+                    $user->notify(new ZakatReminderNotification($daysRemaining, $due->format('M j, Y')));
                     $this->info("Sent Zakat reminder to {$user->email} ({$daysRemaining} days remaining)");
                     $count++;
                 }
             } catch (\Exception $e) {
-                $this->error("Error processing Zakat reminder for User ID {$user->id}: " . $e->getMessage());
+                $this->error("Error processing Zakat reminder for User ID {$user->id}: ".$e->getMessage());
             }
         }
 

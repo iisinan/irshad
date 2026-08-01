@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Company;
+use App\Models\DailyPrice;
 use App\Models\Watchlist;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class WatchlistController extends Controller
@@ -13,16 +15,16 @@ class WatchlistController extends Controller
         $user = $request->user();
         $watchlistItems = Watchlist::where('user_id', $user->id)->get();
 
-        $watchlistSymbols = $watchlistItems->pluck('symbol')->map(fn($s) => strtoupper($s))->toArray();
+        $watchlistSymbols = $watchlistItems->pluck('symbol')->map(fn ($s) => strtoupper($s))->toArray();
 
         // 1. Fetch only the companies in the watchlist
-        $companies = \App\Models\Company::whereIn('symbol', $watchlistSymbols)->get()->keyBy(fn($c) => strtoupper($c->symbol));
+        $companies = Company::whereIn('symbol', $watchlistSymbols)->get()->keyBy(fn ($c) => strtoupper($c->symbol));
 
         // 2. Fetch the last 7 daily prices for ONLY these symbols (for sparklines)
         // Since sqlite/postgres might require complex window functions to get top N per group easily,
         // it's often faster to just query date >= 7 days ago if it's daily data, or do a simple in-memory map.
         // For 7 days, we can just grab the prices from the last 7 calendar days.
-        $recentPrices = \App\Models\DailyPrice::whereIn('company_id', $companies->pluck('id'))
+        $recentPrices = DailyPrice::whereIn('company_id', $companies->pluck('id'))
             ->where('date', '>=', now()->subDays(10)->toDateString())
             ->orderBy('date', 'asc')
             ->get()
@@ -31,7 +33,7 @@ class WatchlistController extends Controller
         $formatted = $watchlistItems->map(function ($item) use ($companies, $recentPrices) {
             $symbol = strtoupper($item->symbol);
             $company = $companies->get($symbol);
-            
+
             $currentPrice = 0;
             $changePct = 0;
             $statusString = 'Doubtful';
@@ -43,12 +45,15 @@ class WatchlistController extends Controller
 
                 // Get last 7 days of prices for sparkline
                 $prices = $recentPrices->get($company->id, collect());
-                $historicalPrices = $prices->take(-7)->pluck('price')->map(fn($p) => (float)$p)->values()->toArray();
+                $historicalPrices = $prices->take(-7)->pluck('price')->map(fn ($p) => (float) $p)->values()->toArray();
 
                 if ($company->current_status) {
                     $rawStatus = strtolower($company->current_status);
-                    if (in_array($rawStatus, ['halal', 'compliant'])) $statusString = 'Halal';
-                    elseif (in_array($rawStatus, ['non-halal', 'non-compliant'])) $statusString = 'Non-Halal';
+                    if (in_array($rawStatus, ['halal', 'compliant'])) {
+                        $statusString = 'Halal';
+                    } elseif (in_array($rawStatus, ['non-halal', 'non-compliant'])) {
+                        $statusString = 'Non-Halal';
+                    }
                 }
             }
 
@@ -76,10 +81,10 @@ class WatchlistController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'symbol'         => 'required|string',
-            'alert_inapp'    => 'sometimes|boolean',
-            'alert_push'     => 'sometimes|boolean',
-            'alert_email'    => 'sometimes|boolean',
+            'symbol' => 'required|string',
+            'alert_inapp' => 'sometimes|boolean',
+            'alert_push' => 'sometimes|boolean',
+            'alert_email' => 'sometimes|boolean',
             'alert_verdict_change' => 'sometimes|boolean',
             'alert_compliance_risk' => 'sometimes|boolean',
             'alert_weekly_digest' => 'sometimes|boolean',
@@ -91,12 +96,12 @@ class WatchlistController extends Controller
         $watchlist = Watchlist::firstOrCreate(
             [
                 'user_id' => $user->id,
-                'symbol'  => strtoupper($request->symbol),
+                'symbol' => strtoupper($request->symbol),
             ],
             [
-                'alert_inapp'    => $request->input('alert_inapp', false),
-                'alert_push'     => $request->input('alert_push', false),
-                'alert_email'    => $request->input('alert_email', false),
+                'alert_inapp' => $request->input('alert_inapp', false),
+                'alert_push' => $request->input('alert_push', false),
+                'alert_email' => $request->input('alert_email', false),
                 'alert_verdict_change' => $request->input('alert_verdict_change', false),
                 'alert_compliance_risk' => $request->input('alert_compliance_risk', false),
                 'alert_weekly_digest' => $request->input('alert_weekly_digest', false),
@@ -105,7 +110,7 @@ class WatchlistController extends Controller
         );
 
         // If it already existed but alerts were passed, update them.
-        if (!$watchlist->wasRecentlyCreated) {
+        if (! $watchlist->wasRecentlyCreated) {
             $watchlist->update($request->only(['alert_inapp', 'alert_push', 'alert_email', 'alert_verdict_change', 'alert_compliance_risk', 'alert_weekly_digest', 'alert_price_change']));
         }
 
@@ -119,39 +124,39 @@ class WatchlistController extends Controller
     public function bulkStore(Request $request)
     {
         $request->validate([
-            'symbols'        => 'required|array|min:1',
-            'symbols.*'      => 'required|string',
-            'alert_inapp'    => 'sometimes|boolean',
-            'alert_push'     => 'sometimes|boolean',
-            'alert_email'    => 'sometimes|boolean',
+            'symbols' => 'required|array|min:1',
+            'symbols.*' => 'required|string',
+            'alert_inapp' => 'sometimes|boolean',
+            'alert_push' => 'sometimes|boolean',
+            'alert_email' => 'sometimes|boolean',
             'alert_verdict_change' => 'sometimes|boolean',
             'alert_compliance_risk' => 'sometimes|boolean',
             'alert_weekly_digest' => 'sometimes|boolean',
             'alert_price_change' => 'sometimes|boolean',
         ]);
 
-        $user          = $request->user();
-        $alertEmail    = $request->boolean('alert_email', false);
-        $alertInapp    = $request->boolean('alert_inapp', false);
-        $alertPush     = $request->boolean('alert_push', false);
-        $alertVerdict  = $request->boolean('alert_verdict_change', false);
-        $alertRisk     = $request->boolean('alert_compliance_risk', false);
-        $alertWeekly   = $request->boolean('alert_weekly_digest', false);
-        $alertPrice    = $request->boolean('alert_price_change', false);
-        $now           = now();
+        $user = $request->user();
+        $alertEmail = $request->boolean('alert_email', false);
+        $alertInapp = $request->boolean('alert_inapp', false);
+        $alertPush = $request->boolean('alert_push', false);
+        $alertVerdict = $request->boolean('alert_verdict_change', false);
+        $alertRisk = $request->boolean('alert_compliance_risk', false);
+        $alertWeekly = $request->boolean('alert_weekly_digest', false);
+        $alertPrice = $request->boolean('alert_price_change', false);
+        $now = now();
 
-        $rows = collect($request->symbols)->map(fn($sym) => [
-            'user_id'        => $user->id,
-            'symbol'         => strtoupper($sym),
-            'alert_email'    => $alertEmail,
-            'alert_inapp'    => $alertInapp,
-            'alert_push'     => $alertPush,
+        $rows = collect($request->symbols)->map(fn ($sym) => [
+            'user_id' => $user->id,
+            'symbol' => strtoupper($sym),
+            'alert_email' => $alertEmail,
+            'alert_inapp' => $alertInapp,
+            'alert_push' => $alertPush,
             'alert_verdict_change' => $alertVerdict,
             'alert_compliance_risk' => $alertRisk,
             'alert_weekly_digest' => $alertWeekly,
             'alert_price_change' => $alertPrice,
-            'created_at'     => $now,
-            'updated_at'     => $now,
+            'created_at' => $now,
+            'updated_at' => $now,
         ])->toArray();
 
         Watchlist::upsert(
@@ -175,31 +180,31 @@ class WatchlistController extends Controller
     public function onboard(Request $request)
     {
         $request->validate([
-            'symbols'        => 'required|array|min:1',
-            'symbols.*'      => 'required|string',
-            'alert_inapp'    => 'sometimes|boolean',
-            'alert_push'     => 'sometimes|boolean',
-            'alert_email'    => 'sometimes|boolean',
-            'phone_number'   => 'sometimes|string|nullable|max:20',
-            'risk_profile'   => 'sometimes|string|in:conservative,moderate,aggressive',
+            'symbols' => 'required|array|min:1',
+            'symbols.*' => 'required|string',
+            'alert_inapp' => 'sometimes|boolean',
+            'alert_push' => 'sometimes|boolean',
+            'alert_email' => 'sometimes|boolean',
+            'phone_number' => 'sometimes|string|nullable|max:20',
+            'risk_profile' => 'sometimes|string|in:conservative,moderate,aggressive',
         ]);
 
-        $user          = $request->user();
-        $alertEmail    = $request->boolean('alert_email', false);
-        $alertInapp    = $request->boolean('alert_inapp', false);
-        $alertPush     = $request->boolean('alert_push', false);
-        $phoneNumber   = $request->input('phone_number');
-        $riskProfile   = $request->input('risk_profile', 'moderate');
-        $now           = now();
+        $user = $request->user();
+        $alertEmail = $request->boolean('alert_email', false);
+        $alertInapp = $request->boolean('alert_inapp', false);
+        $alertPush = $request->boolean('alert_push', false);
+        $phoneNumber = $request->input('phone_number');
+        $riskProfile = $request->input('risk_profile', 'moderate');
+        $now = now();
 
-        $rows = collect($request->symbols)->map(fn($sym) => [
-            'user_id'        => $user->id,
-            'symbol'         => strtoupper($sym),
-            'alert_email'    => $alertEmail,
-            'alert_inapp'    => $alertInapp,
-            'alert_push'     => $alertPush,
-            'created_at'     => $now,
-            'updated_at'     => $now,
+        $rows = collect($request->symbols)->map(fn ($sym) => [
+            'user_id' => $user->id,
+            'symbol' => strtoupper($sym),
+            'alert_email' => $alertEmail,
+            'alert_inapp' => $alertInapp,
+            'alert_push' => $alertPush,
+            'created_at' => $now,
+            'updated_at' => $now,
         ])->toArray();
 
         DB::transaction(function () use ($user, $rows, $phoneNumber, $riskProfile) {
@@ -214,7 +219,7 @@ class WatchlistController extends Controller
             $prefs = $user->preferences ?? [];
             $prefs['onboarded'] = true;
             $prefs['risk_profile'] = $riskProfile;
-            
+
             $updates = ['preferences' => $prefs];
             if ($phoneNumber) {
                 $updates['phone_number'] = $phoneNumber;
@@ -226,16 +231,16 @@ class WatchlistController extends Controller
 
         return response()->json([
             'message' => 'Onboarding complete',
-            'user'    => $user,
+            'user' => $user,
         ], 201);
     }
 
     public function update(Request $request, $symbol)
     {
         $request->validate([
-            'alert_inapp'    => 'sometimes|boolean',
-            'alert_push'     => 'sometimes|boolean',
-            'alert_email'    => 'sometimes|boolean',
+            'alert_inapp' => 'sometimes|boolean',
+            'alert_push' => 'sometimes|boolean',
+            'alert_email' => 'sometimes|boolean',
             'alert_verdict_change' => 'sometimes|boolean',
             'alert_compliance_risk' => 'sometimes|boolean',
             'alert_weekly_digest' => 'sometimes|boolean',
@@ -258,8 +263,8 @@ class WatchlistController extends Controller
         $user = $request->user();
 
         $deleted = Watchlist::where('user_id', $user->id)
-                            ->where('symbol', strtoupper($symbol))
-                            ->delete();
+            ->where('symbol', strtoupper($symbol))
+            ->delete();
 
         if ($deleted) {
             return response()->json(['message' => 'Removed from watchlist']);

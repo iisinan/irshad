@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\CorporateDisclosure;
+use Illuminate\Http\Request;
 
 class CorporateDisclosureController extends Controller
 {
@@ -14,10 +14,10 @@ class CorporateDisclosureController extends Controller
         $disclosures = CorporateDisclosure::orderBy('published_at', 'desc')
             ->limit($limit)
             ->get();
-            
+
         return response()->json([
             'success' => true,
-            'data' => $disclosures
+            'data' => $disclosures,
         ]);
     }
 }

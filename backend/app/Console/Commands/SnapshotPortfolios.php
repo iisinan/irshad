@@ -2,6 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Models\BrokerageAccount;
+use App\Models\Holding;
+use App\Models\PortfolioSnapshot;
+use App\Models\User;
 use Illuminate\Console\Command;
 
 class SnapshotPortfolios extends Command
@@ -12,18 +16,19 @@ class SnapshotPortfolios extends Command
      * @var string
      */
     protected $signature = 'app:snapshot-portfolios';
+
     protected $description = 'Snapshots the total portfolio value for all users at market close';
 
     public function handle()
     {
         $this->info('Starting portfolio snapshot...');
 
-        $users = \App\Models\User::all();
+        $users = User::all();
         $today = now()->toDateString();
         $count = 0;
 
         foreach ($users as $user) {
-            $holdings = \App\Models\Holding::with(['company.status', 'company.dailyPrices' => fn($q) => $q->latest('date')])
+            $holdings = Holding::with(['company.status', 'company.dailyPrices' => fn ($q) => $q->latest('date')])
                 ->where('user_id', $user->id)
                 ->get();
 
@@ -47,12 +52,12 @@ class SnapshotPortfolios extends Command
                 }
             }
 
-            $brokerage = \App\Models\BrokerageAccount::where('user_id', $user->id)->first();
+            $brokerage = BrokerageAccount::where('user_id', $user->id)->first();
             $cashBalance = $brokerage ? $brokerage->cash_balance : 0;
             $totalBalance = $stocksBalance + $cashBalance;
             $healthPercentage = $stocksBalance > 0 ? round(($halalValue / $stocksBalance) * 100, 1) : 100;
 
-            \App\Models\PortfolioSnapshot::updateOrCreate(
+            PortfolioSnapshot::updateOrCreate(
                 ['user_id' => $user->id, 'date' => $today],
                 [
                     'total_balance' => $totalBalance,

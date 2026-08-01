@@ -15,9 +15,9 @@ class WeeklyDigestPreference extends Model
     ];
 
     protected $casts = [
-        'email_enabled'  => 'boolean',
+        'email_enabled' => 'boolean',
         'in_app_enabled' => 'boolean',
-        'last_sent_at'   => 'datetime',
+        'last_sent_at' => 'datetime',
     ];
 
     public function user()

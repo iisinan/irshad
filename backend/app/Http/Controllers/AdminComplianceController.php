@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\ComplianceReview;
+use App\Models\AaoifiScreening;
+use App\Models\Company;
 use App\Models\ComplianceHistory;
+use App\Models\ComplianceReview;
+use App\Models\Financial;
 use App\Models\StockStatus;
+use App\Services\AaoifiComplianceService;
+use Illuminate\Http\Request;
 
 class AdminComplianceController extends Controller
 {
@@ -19,7 +23,7 @@ class AdminComplianceController extends Controller
             $search = $request->input('search');
             $query->whereHas('company', function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('symbol', 'like', "%{$search}%");
+                    ->orWhere('symbol', 'like', "%{$search}%");
             });
         }
 
@@ -33,15 +37,16 @@ class AdminComplianceController extends Controller
         }
 
         $reviews = $query->orderBy('created_at', 'desc')->paginate($perPage);
+
         return response()->json($reviews);
     }
 
     public function getStats()
     {
-        $totalStocks = \App\Models\Company::count();
-        $halalStocks = \App\Models\Company::where('current_status', 'halal')->count();
-        $nonHalalStocks = \App\Models\Company::where('current_status', 'non-halal')->count();
-        $doubtfulStocks = \App\Models\Company::where('current_status', 'doubtful')->count();
+        $totalStocks = Company::count();
+        $halalStocks = Company::where('current_status', 'halal')->count();
+        $nonHalalStocks = Company::where('current_status', 'non-halal')->count();
+        $doubtfulStocks = Company::where('current_status', 'doubtful')->count();
         $pendingReviews = ComplianceReview::where('status', 'pending')->count();
 
         return response()->json([
@@ -63,7 +68,7 @@ class AdminComplianceController extends Controller
             $search = $request->input('search');
             $query->whereHas('company', function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('symbol', 'like', "%{$search}%");
+                    ->orWhere('symbol', 'like', "%{$search}%");
             });
         }
 
@@ -77,26 +82,26 @@ class AdminComplianceController extends Controller
         }
 
         $history = $query->orderBy('reviewed_at', 'desc')->paginate($perPage);
-            
+
         // Map the paginated items to the desired format
         $history->getCollection()->transform(function ($r) {
             return [
-                'id'           => $r->id,
-                'company'      => clone $r->company, // Keep the full company object so aaoifiScreening is available
-                'old_status'   => $r->old_status,
-                'new_status'   => $r->new_status,
-                'reason'       => $r->reason,
-                'payload'      => $r->payload,
-                'status'       => $r->status,
-                'reviewed_by'  => $r->reviewer?->name ?? 'Admin',
-                'reviewed_at'  => $r->reviewed_at,
-                'created_at'   => $r->created_at,
+                'id' => $r->id,
+                'company' => clone $r->company, // Keep the full company object so aaoifiScreening is available
+                'old_status' => $r->old_status,
+                'new_status' => $r->new_status,
+                'reason' => $r->reason,
+                'payload' => $r->payload,
+                'status' => $r->status,
+                'reviewed_by' => $r->reviewer?->name ?? 'Admin',
+                'reviewed_at' => $r->reviewed_at,
+                'created_at' => $r->created_at,
             ];
         });
-        
+
         return response()->json($history);
     }
-    
+
     public function systemLogs(Request $request)
     {
         $perPage = $request->input('per_page', 50);
@@ -107,7 +112,7 @@ class AdminComplianceController extends Controller
             $search = $request->input('search');
             $query->whereHas('company', function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('symbol', 'like', "%{$search}%");
+                    ->orWhere('symbol', 'like', "%{$search}%");
             });
         }
 
@@ -121,6 +126,7 @@ class AdminComplianceController extends Controller
         }
 
         $logs = $query->orderBy('changed_at', 'desc')->paginate($perPage);
+
         return response()->json($logs);
     }
 
@@ -131,19 +137,21 @@ class AdminComplianceController extends Controller
         foreach ($ids as $id) {
             try {
                 $review = ComplianceReview::findOrFail($id);
-                if ($review->status !== 'pending') continue;
+                if ($review->status !== 'pending') {
+                    continue;
+                }
                 $company = $review->company;
-                if (!empty($review->payload)) {
+                if (! empty($review->payload)) {
                     $financial = $company->latestFinancial;
                     if ($financial) {
                         $financial->update($review->payload);
                     } else {
-                        $financial = \App\Models\Financial::create(array_merge(
+                        $financial = Financial::create(array_merge(
                             ['company_id' => $company->id],
                             $review->payload
                         ));
                     }
-                    $complianceService = app(\App\Services\AaoifiComplianceService::class);
+                    $complianceService = app(AaoifiComplianceService::class);
                     $complianceService->evaluateCompliance($company, $financial, $company->sector);
                 }
 
@@ -153,15 +161,20 @@ class AdminComplianceController extends Controller
                         ['company_id' => $company->id],
                         ['status' => $review->new_status, 'reason' => $review->reason, 'verified_by_scholar' => true, 'last_updated' => now()]
                     );
-                    $aaoifi = \App\Models\AaoifiScreening::where('company_id', $company->id)->latest()->first();
-                    if ($aaoifi) $aaoifi->update(['final_status' => $review->new_status]);
+                    $aaoifi = AaoifiScreening::where('company_id', $company->id)->latest()->first();
+                    if ($aaoifi) {
+                        $aaoifi->update(['final_status' => $review->new_status]);
+                    }
                 }
-                
+
                 ComplianceHistory::create(['company_id' => $company->id, 'old_status' => $review->old_status, 'new_status' => $review->new_status, 'reason' => $review->reason, 'changed_at' => now()]);
                 $review->update(['status' => 'approved', 'reviewed_by' => auth()->id(), 'reviewed_at' => now()]);
                 $approved++;
-            } catch (\Exception $e) { continue; }
+            } catch (\Exception $e) {
+                continue;
+            }
         }
+
         return response()->json(['message' => "Approved {$approved} reviews"]);
     }
 
@@ -172,18 +185,23 @@ class AdminComplianceController extends Controller
         foreach ($ids as $id) {
             try {
                 $review = ComplianceReview::findOrFail($id);
-                if ($review->status !== 'pending') continue;
+                if ($review->status !== 'pending') {
+                    continue;
+                }
                 $review->update(['status' => 'rejected', 'reviewed_by' => auth()->id(), 'reviewed_at' => now()]);
                 $rejected++;
-            } catch (\Exception $e) { continue; }
+            } catch (\Exception $e) {
+                continue;
+            }
         }
+
         return response()->json(['message' => "Rejected {$rejected} reviews"]);
     }
 
     public function approve(Request $request, $id)
     {
         $review = ComplianceReview::findOrFail($id);
-        
+
         if ($review->status !== 'pending') {
             return response()->json(['error' => 'Review is not pending'], 400);
         }
@@ -194,21 +212,21 @@ class AdminComplianceController extends Controller
 
         // Apply changes
         $company = $review->company;
-        
+
         // Apply the financial payload if it exists
-        if (!empty($review->payload)) {
+        if (! empty($review->payload)) {
             $financial = $company->latestFinancial;
             if ($financial) {
                 $financial->update($review->payload);
             } else {
-                $financial = \App\Models\Financial::create(array_merge(
+                $financial = Financial::create(array_merge(
                     ['company_id' => $company->id],
                     $review->payload
                 ));
             }
-            
+
             // Re-evaluate full AAOIFI compliance now that financials are saved
-            $complianceService = app(\App\Services\AaoifiComplianceService::class);
+            $complianceService = app(AaoifiComplianceService::class);
             $complianceService->evaluateCompliance($company, $financial, $company->sector);
         }
 
@@ -226,13 +244,13 @@ class AdminComplianceController extends Controller
                 ]
             );
 
-            $aaoifiScreening = \App\Models\AaoifiScreening::where('company_id', $company->id)->latest()->first();
+            $aaoifiScreening = AaoifiScreening::where('company_id', $company->id)->latest()->first();
             if ($aaoifiScreening) {
                 $aaoifiScreening->update(['final_status' => $finalStatus]);
             }
         }
 
-        \App\Models\ComplianceHistory::create([
+        ComplianceHistory::create([
             'company_id' => $company->id,
             'old_status' => $review->old_status,
             'new_status' => $finalStatus,
@@ -260,7 +278,7 @@ class AdminComplianceController extends Controller
         }
 
         $review->update([
-            'status'      => 'rejected',
+            'status' => 'rejected',
             'reviewed_by' => auth()->id(),
             'reviewed_at' => now(),
         ]);
@@ -281,18 +299,18 @@ class AdminComplianceController extends Controller
         }
 
         $company = $review->company;
-        
-        if (!empty($review->payload)) {
+
+        if (! empty($review->payload)) {
             $financial = $company->latestFinancial;
             if ($financial) {
                 $financial->update($review->payload);
             } else {
-                $financial = \App\Models\Financial::create(array_merge(
+                $financial = Financial::create(array_merge(
                     ['company_id' => $company->id],
                     $review->payload
                 ));
             }
-            $complianceService = app(\App\Services\AaoifiComplianceService::class);
+            $complianceService = app(AaoifiComplianceService::class);
             $complianceService->evaluateCompliance($company, $financial, $company->sector);
         }
 
@@ -301,28 +319,28 @@ class AdminComplianceController extends Controller
         StockStatus::updateOrCreate(
             ['company_id' => $company->id],
             [
-                'status'             => $review->new_status,
-                'reason'             => $review->reason,
-                'verified_by_scholar'=> true,
-                'last_updated'       => now(),
+                'status' => $review->new_status,
+                'reason' => $review->reason,
+                'verified_by_scholar' => true,
+                'last_updated' => now(),
             ]
         );
 
-        $aaoifiScreening = \App\Models\AaoifiScreening::where('company_id', $company->id)->latest()->first();
+        $aaoifiScreening = AaoifiScreening::where('company_id', $company->id)->latest()->first();
         if ($aaoifiScreening) {
             $aaoifiScreening->update(['final_status' => $review->new_status]);
         }
 
-        \App\Models\ComplianceHistory::create([
+        ComplianceHistory::create([
             'company_id' => $company->id,
             'old_status' => $review->old_status,
             'new_status' => $review->new_status,
-            'reason'     => $review->reason,
+            'reason' => $review->reason,
             'changed_at' => now(),
         ]);
 
         $review->update([
-            'status'      => 'approved',
+            'status' => 'approved',
             'reviewed_at' => now(),
         ]);
 
@@ -343,7 +361,7 @@ class AdminComplianceController extends Controller
         }
 
         $review->update([
-            'status'      => 'rejected',
+            'status' => 'rejected',
             'reviewed_at' => now(),
         ]);
 

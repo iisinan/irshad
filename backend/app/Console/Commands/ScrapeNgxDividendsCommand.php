@@ -2,13 +2,13 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Company;
+use App\Models\Dividend;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use App\Models\Company;
-use App\Models\Dividend;
-use Exception;
 
 class ScrapeNgxDividendsCommand extends Command
 {
@@ -31,10 +31,10 @@ class ScrapeNgxDividendsCommand extends Command
      */
     public function handle()
     {
-        $this->info("Starting NGX Pulse Dividend Scrape...");
+        $this->info('Starting NGX Pulse Dividend Scrape...');
         $startTime = microtime(true);
         $url = 'https://ngxpulse.ng/ngx-dividend-calendar';
-        
+
         $newFound = 0;
         $updated = 0;
         $errors = [];
@@ -47,8 +47,8 @@ class ScrapeNgxDividendsCommand extends Command
                 ->timeout(15)
                 ->get($url);
 
-            if (!$response->successful()) {
-                throw new Exception("HTTP request failed with status: " . $response->status());
+            if (! $response->successful()) {
+                throw new Exception('HTTP request failed with status: '.$response->status());
             }
 
             $html = $response->body();
@@ -59,10 +59,10 @@ class ScrapeNgxDividendsCommand extends Command
                 $data = json_decode($json, true);
 
                 if (json_last_error() !== JSON_ERROR_NONE) {
-                    throw new Exception("JSON Decode Error: " . json_last_error_msg());
+                    throw new Exception('JSON Decode Error: '.json_last_error_msg());
                 }
 
-                if (!isset($data['rows']) || !is_array($data['rows'])) {
+                if (! isset($data['rows']) || ! is_array($data['rows'])) {
                     throw new Exception("Invalid JSON structure: missing 'rows'.");
                 }
 
@@ -70,15 +70,15 @@ class ScrapeNgxDividendsCommand extends Command
                     $ticker = trim($row['symbol']);
                     $company = Company::where('symbol', $ticker)->first();
 
-                    if (!$company) {
+                    if (! $company) {
                         // Skip if we don't track this company
                         continue;
                     }
 
                     // Parse dates safely
-                    $exDate = !empty($row['exDate']) ? $row['exDate'] : null;
-                    $recordDate = !empty($row['recordDate']) ? $row['recordDate'] : null;
-                    $payDate = !empty($row['payDate']) ? $row['payDate'] : null;
+                    $exDate = ! empty($row['exDate']) ? $row['exDate'] : null;
+                    $recordDate = ! empty($row['recordDate']) ? $row['recordDate'] : null;
+                    $payDate = ! empty($row['payDate']) ? $row['payDate'] : null;
                     $amount = floatval($row['amount']);
                     $type = trim($row['type'] ?? '');
                     $status = trim(strtolower($row['status'] ?? 'tbd'));
@@ -105,20 +105,20 @@ class ScrapeNgxDividendsCommand extends Command
 
                     if ($dividend->wasRecentlyCreated) {
                         $newFound++;
-                    } else if ($dividend->wasChanged()) {
+                    } elseif ($dividend->wasChanged()) {
                         $updated++;
                     }
                 }
             } else {
-                throw new Exception("Could not find window.__SSR_DIVIDEND_CALENDAR__ in the HTML.");
+                throw new Exception('Could not find window.__SSR_DIVIDEND_CALENDAR__ in the HTML.');
             }
         } catch (Exception $e) {
             $errors[] = $e->getMessage();
-            Log::error("Dividend Scrape Error: " . $e->getMessage());
+            Log::error('Dividend Scrape Error: '.$e->getMessage());
         }
 
         $duration = round(microtime(true) - $startTime, 2);
-        
+
         $this->info("Finished in {$duration}s. New: {$newFound}, Updated: {$updated}");
 
         // Send Email Notification
@@ -129,14 +129,14 @@ class ScrapeNgxDividendsCommand extends Command
     {
         $to = 'sinanismailaidris@gmail.com';
         $subject = 'NGX Pulse Dividend Scrape Summary';
-        
+
         $body = "NGX Pulse Dividend Scrape Summary\n";
         $body .= "---------------------------------\n";
         $body .= "Duration: {$duration}s\n";
         $body .= "New Dividends Found: {$newFound}\n";
         $body .= "Existing Dividends Updated: {$updated}\n\n";
 
-        if (!empty($errors)) {
+        if (! empty($errors)) {
             $body .= "ERRORS ENCOUNTERED:\n";
             foreach ($errors as $error) {
                 $body .= "- {$error}\n";
@@ -151,8 +151,8 @@ class ScrapeNgxDividendsCommand extends Command
             });
             $this->info("Email summary sent to {$to}.");
         } catch (Exception $e) {
-            Log::error("Failed to send dividend scrape email: " . $e->getMessage());
-            $this->error("Failed to send email: " . $e->getMessage());
+            Log::error('Failed to send dividend scrape email: '.$e->getMessage());
+            $this->error('Failed to send email: '.$e->getMessage());
         }
     }
 }

@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Models\PriceAlert;
 use App\Models\Company;
+use App\Models\PriceAlert;
 use App\Services\PushNotificationService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -40,8 +40,8 @@ class ProcessPriceAlerts extends Command
 
         foreach ($alerts as $alert) {
             $latestPriceRecord = $alert->company->dailyPrices->first();
-            
-            if (!$latestPriceRecord) {
+
+            if (! $latestPriceRecord) {
                 continue;
             }
 
@@ -71,7 +71,7 @@ class ProcessPriceAlerts extends Command
                             ['type' => 'price_alert', 'symbol' => $symbol]
                         );
                     } catch (\Exception $e) {
-                        Log::error("Failed to send push notification to user {$alert->user->id}: " . $e->getMessage());
+                        Log::error("Failed to send push notification to user {$alert->user->id}: ".$e->getMessage());
                     }
                 }
 

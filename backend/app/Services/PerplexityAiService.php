@@ -2,14 +2,17 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Mail;
 
 class PerplexityAiService
 {
     protected string $apiKey;
+
     protected string $baseUrl = 'https://api.perplexity.ai/chat/completions';
+
     protected string $model;
 
     public function __construct()
@@ -28,6 +31,7 @@ class PerplexityAiService
         return Cache::remember("stock.perplexity.v1.{$symbol}", 60 * 24, function () use ($company, $financials, $status) {
             if (empty($this->apiKey)) {
                 Log::warning("PERPLEXITY_API_KEY is not set. Using fallback analysis for {$company->symbol}.");
+
                 return $this->getFallbackAnalysis($company, $status);
             }
 
@@ -38,10 +42,10 @@ class PerplexityAiService
 
             if ($financials) {
                 $prompt .= "Recent Financial Summary:\n";
-                $prompt .= "- Total Revenue: " . ($financials->total_revenue ?? 'N/A') . "\n";
-                $prompt .= "- Total Debt: " . ($financials->total_debt ?? 'N/A') . "\n";
-                $prompt .= "- Cash & Equivalents: " . ($financials->cash_and_equivalents ?? 'N/A') . "\n";
-                $prompt .= "- Market Cap: " . ($company->market_cap ?? 'N/A') . "\n";
+                $prompt .= '- Total Revenue: '.($financials->total_revenue ?? 'N/A')."\n";
+                $prompt .= '- Total Debt: '.($financials->total_debt ?? 'N/A')."\n";
+                $prompt .= '- Cash & Equivalents: '.($financials->cash_and_equivalents ?? 'N/A')."\n";
+                $prompt .= '- Market Cap: '.($company->market_cap ?? 'N/A')."\n";
             }
 
             $prompt .= "\nSearch the live web for recent business disclosures, annual reports, and news of this company. Evaluate its business activities and financial ratios according to AAOIFI Shariah standards (e.g., alcohol, gambling, conventional finance, interest-bearing debt < 30%, impermissible income < 5%).\n\n";
@@ -52,19 +56,19 @@ class PerplexityAiService
 
             try {
                 $response = Http::withHeaders([
-                    'Authorization' => 'Bearer ' . $this->apiKey,
+                    'Authorization' => 'Bearer '.$this->apiKey,
                     'Content-Type' => 'application/json',
                 ])->timeout(45)->post($this->baseUrl, [
                     'model' => $this->model,
                     'messages' => [
                         [
                             'role' => 'system',
-                            'content' => 'You are an expert Islamic finance AI assistant powered by Perplexity. Your task is to analyze a publicly traded stock for Shariah compliance according to AAOIFI standards. You must output only valid JSON without markdown code blocks.'
+                            'content' => 'You are an expert Islamic finance AI assistant powered by Perplexity. Your task is to analyze a publicly traded stock for Shariah compliance according to AAOIFI standards. You must output only valid JSON without markdown code blocks.',
                         ],
                         [
                             'role' => 'user',
-                            'content' => $prompt
-                        ]
+                            'content' => $prompt,
+                        ],
                     ],
                     'temperature' => 0.1,
                 ]);
@@ -91,24 +95,24 @@ class PerplexityAiService
                     if (is_array($parsed) && isset($parsed['reasoning'])) {
                         // Merge Perplexity native citations with JSON sources
                         $sources = $parsed['sources'] ?? [];
-                        if (is_array($citations) && !empty($citations)) {
+                        if (is_array($citations) && ! empty($citations)) {
                             $sources = array_values(array_unique(array_merge($sources, $citations)));
                         }
 
                         return [
                             'reasoning' => $parsed['reasoning'],
                             'confidence_score' => (int) ($parsed['confidence_score'] ?? 0),
-                            'sources' => !empty($sources) ? $sources : ['NGX Corporate Disclosures', 'AAOIFI Standards Framework'],
+                            'sources' => ! empty($sources) ? $sources : ['NGX Corporate Disclosures', 'AAOIFI Standards Framework'],
                         ];
                     }
                 }
 
                 Log::error('Perplexity AI API failed or returned invalid JSON', [
                     'status' => $response->status(),
-                    'body' => $response->body()
+                    'body' => $response->body(),
                 ]);
             } catch (\Exception $e) {
-                Log::error('Perplexity AI Exception: ' . $e->getMessage());
+                Log::error('Perplexity AI Exception: '.$e->getMessage());
             }
 
             return $this->getFallbackAnalysis($company, $status);
@@ -122,7 +126,7 @@ class PerplexityAiService
         $reasoning .= "Based on the latest financial disclosures and business screening protocols, **{$company->symbol}** is classified as **{$statusFormatted}** according to AAOIFI Shariah Standard No. 21.\n\n";
         $reasoning .= "- **Business Activity Screening**: The company's core operations within the **{$company->sector}** sector have been audited against prohibited industries (such as conventional financial services, gambling, alcohol, and pork products).\n";
         $reasoning .= "- **Financial Ratios Evaluation**: Interest-bearing debt, cash holdings, and impermissible revenue streams were checked against the standard AAOIFI thresholds (30% for debt and liquidity ratios, 5% for non-permissible income).\n\n";
-        $reasoning .= "*Note: This assessment is generated via verified corporate disclosures and AAOIFI screening standards.*";
+        $reasoning .= '*Note: This assessment is generated via verified corporate disclosures and AAOIFI screening standards.*';
 
         return [
             'reasoning' => $reasoning,
@@ -130,8 +134,8 @@ class PerplexityAiService
             'sources' => [
                 'NGX Corporate Disclosures',
                 'AAOIFI Shariah Standard No. 21',
-                'Annual Financial Statements'
-            ]
+                'Annual Financial Statements',
+            ],
         ];
     }
 
@@ -153,19 +157,19 @@ class PerplexityAiService
 
         try {
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Authorization' => 'Bearer '.$this->apiKey,
                 'Content-Type' => 'application/json',
             ])->timeout(45)->post($this->baseUrl, [
                 'model' => $this->model,
                 'messages' => [
                     [
                         'role' => 'system',
-                        'content' => 'You are a financial AI assistant powered by Perplexity. Your task is to provide the exact industry classification and analyst price target for a publicly traded stock. You must output only valid JSON without markdown code blocks.'
+                        'content' => 'You are a financial AI assistant powered by Perplexity. Your task is to provide the exact industry classification and analyst price target for a publicly traded stock. You must output only valid JSON without markdown code blocks.',
                     ],
                     [
                         'role' => 'user',
-                        'content' => $prompt
-                    ]
+                        'content' => $prompt,
+                    ],
                 ],
                 'temperature' => 0.1,
             ]);
@@ -198,10 +202,10 @@ class PerplexityAiService
 
             Log::error('Perplexity AI fetchIndustryAndTarget failed or returned invalid JSON', [
                 'status' => $response->status(),
-                'body' => $response->body()
+                'body' => $response->body(),
             ]);
         } catch (\Exception $e) {
-            Log::error('Perplexity AI Exception (fetchIndustryAndTarget): ' . $e->getMessage());
+            Log::error('Perplexity AI Exception (fetchIndustryAndTarget): '.$e->getMessage());
         }
 
         return ['industry' => 'Unknown', 'analysts_target' => 'N/A'];
@@ -214,21 +218,21 @@ class PerplexityAiService
         $industry = strtolower($company->industry ?? '');
 
         // 1. Rule-based checks for obvious prohibited business activities:
-        
+
         // Alcohol / Breweries
-        if (str_contains($name, 'brew') || 
-            str_contains($name, 'guinness') || 
-            str_contains($name, 'beer') || 
-            str_contains($name, 'alcohol') || 
-            str_contains($industry, 'brew') || 
-            str_contains($industry, 'beer') || 
+        if (str_contains($name, 'brew') ||
+            str_contains($name, 'guinness') ||
+            str_contains($name, 'beer') ||
+            str_contains($name, 'alcohol') ||
+            str_contains($industry, 'brew') ||
+            str_contains($industry, 'beer') ||
             str_contains($industry, 'alcohol') ||
             $company->symbol === 'NB') {
             return [
                 'compliance_status' => 'FAIL',
                 'haram_revenue_percent' => 100,
                 'purification_required' => false,
-                'reason' => 'Company is engaged in brewery and alcoholic beverage production/distribution.'
+                'reason' => 'Company is engaged in brewery and alcoholic beverage production/distribution.',
             ];
         }
 
@@ -236,35 +240,35 @@ class PerplexityAiService
         // Exclude Shariah-compliant institutions from the hard failure
         $isIslamicFinance = str_contains($name, 'jaiz') || str_contains($name, 'lotus') || str_contains($name, 'taj');
 
-        if (!$isIslamicFinance) {
-            if (str_contains($name, 'bank') || 
-                str_contains($name, 'insurance') || 
-                str_contains($name, 'assurance') || 
-                str_contains($name, 'reinsurance') || 
-                str_contains($name, 'microfinance') || 
-                str_contains($name, 'leasing') || 
+        if (! $isIslamicFinance) {
+            if (str_contains($name, 'bank') ||
+                str_contains($name, 'insurance') ||
+                str_contains($name, 'assurance') ||
+                str_contains($name, 'reinsurance') ||
+                str_contains($name, 'microfinance') ||
+                str_contains($name, 'leasing') ||
                 str_contains($name, 'finance') ||
                 str_contains($name, 'mortgage') ||
-                str_contains($sector, 'financial') || 
-                str_contains($sector, 'insurance') || 
-                str_contains($industry, 'bank') || 
-                str_contains($industry, 'insurance') || 
+                str_contains($sector, 'financial') ||
+                str_contains($sector, 'insurance') ||
+                str_contains($industry, 'bank') ||
+                str_contains($industry, 'insurance') ||
                 str_contains($industry, 'finance')) {
                 return [
                     'compliance_status' => 'FAIL',
                     'haram_revenue_percent' => 100,
                     'purification_required' => false,
-                    'reason' => 'Company is engaged in conventional interest-based financial, banking, or insurance services.'
+                    'reason' => 'Company is engaged in conventional interest-based financial, banking, or insurance services.',
                 ];
             }
         }
 
-        if (!$allowApiCall || empty($this->apiKey)) {
+        if (! $allowApiCall || empty($this->apiKey)) {
             return [
                 'compliance_status' => 'PASS',
                 'haram_revenue_percent' => 0,
                 'purification_required' => false,
-                'reason' => 'AI screening skipped or offline. Core business activity is assumed compliant based on local rules.'
+                'reason' => 'AI screening skipped or offline. Core business activity is assumed compliant based on local rules.',
             ];
         }
 
@@ -290,23 +294,23 @@ class PerplexityAiService
         $prompt .= "  \"purification_required\": <boolean>,\n";
         $prompt .= "  \"business_summary\": \"<Detailed paragraph explaining exactly what the company's core operations and revenue sources are. Mention if they are involved in finance, alcohol, etc.>\",\n";
         $prompt .= "  \"reason\": \"<Short human-readable explanation of the decision>\"\n";
-        $prompt .= "}";
+        $prompt .= '}';
 
         try {
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Authorization' => 'Bearer '.$this->apiKey,
                 'Content-Type' => 'application/json',
             ])->timeout(60)->post($this->baseUrl, [
                 'model' => $this->model,
                 'messages' => [
                     [
                         'role' => 'system',
-                        'content' => 'You are an expert Islamic finance AI assistant powered by Perplexity. Your task is to perform Stage 1 of AAOIFI Shariah screening. Output ONLY valid JSON.'
+                        'content' => 'You are an expert Islamic finance AI assistant powered by Perplexity. Your task is to perform Stage 1 of AAOIFI Shariah screening. Output ONLY valid JSON.',
                     ],
                     [
                         'role' => 'user',
-                        'content' => $prompt
-                    ]
+                        'content' => $prompt,
+                    ],
                 ],
                 'temperature' => 0.1,
             ]);
@@ -314,7 +318,7 @@ class PerplexityAiService
             if ($response->successful()) {
                 $data = $response->json();
                 $content = $data['choices'][0]['message']['content'] ?? '';
-                
+
                 $content = trim($content);
                 if (str_starts_with($content, '```json')) {
                     $content = substr($content, 7);
@@ -332,28 +336,27 @@ class PerplexityAiService
                     return $parsed;
                 }
             }
-            
+
             $status = $response->status();
             Log::error('Perplexity AI Stage 1 failed or returned invalid JSON', [
                 'status' => $status,
-                'body' => $response->body()
+                'body' => $response->body(),
             ]);
-            
+
             if ($status === 401 || $status === 429) {
                 try {
-                    \Illuminate\Support\Facades\Mail::raw("Perplexity API has failed or run out of quota (Status: {$status}). Please check your billing details and update the PERPLEXITY_API_KEY.", function ($message) {
+                    Mail::raw("Perplexity API has failed or run out of quota (Status: {$status}). Please check your billing details and update the PERPLEXITY_API_KEY.", function ($message) {
                         $message->to('sinanismailaidris@gmail.com')
-                                ->subject('CRITICAL: Perplexity API Quota Exceeded / Failed');
+                            ->subject('CRITICAL: Perplexity API Quota Exceeded / Failed');
                     });
                 } catch (\Exception $mailEx) {
-                    Log::error('Failed to send Perplexity alert email: ' . $mailEx->getMessage());
+                    Log::error('Failed to send Perplexity alert email: '.$mailEx->getMessage());
                 }
             }
-            
+
             throw new \Exception('Perplexity API failed to return valid response.');
-            
         } catch (\Exception $e) {
-            Log::error('Exception in Perplexity Stage 1 screening: ' . $e->getMessage());
+            Log::error('Exception in Perplexity Stage 1 screening: '.$e->getMessage());
             throw $e; // Rethrow so the controller knows it failed
         }
     }

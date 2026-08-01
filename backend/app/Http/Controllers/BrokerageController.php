@@ -44,6 +44,7 @@ class BrokerageController extends Controller
     public function accounts(): JsonResponse
     {
         $accounts = BrokerageAccount::where('user_id', Auth::id())->get();
+
         return $this->success($accounts);
     }
 
@@ -66,7 +67,7 @@ class BrokerageController extends Controller
 
         $url = $brokerUrls[strtolower($request->broker_name)] ?? null;
 
-        if (!$url) {
+        if (! $url) {
             return $this->error('Deep link not available for this broker.', 404);
         }
 

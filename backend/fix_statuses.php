@@ -1,4 +1,8 @@
 <?php
+
+use App\Models\Company;
+use App\Models\StockStatus;
+
 $updates = [
     'ABCTRANS' => 'halal',
     'ACADEMY' => 'halal',
@@ -65,14 +69,14 @@ $updates = [
 
 $count = 0;
 foreach ($updates as $symbol => $status) {
-    $company = \App\Models\Company::where('symbol', $symbol)->first();
+    $company = Company::where('symbol', $symbol)->first();
     if ($company) {
-        $stockStatus = \App\Models\StockStatus::updateOrCreate(
+        $stockStatus = StockStatus::updateOrCreate(
             ['company_id' => $company->id],
             [
                 'status' => $status,
                 'reasoning' => 'Manual override applied based on the July 2026 NGX Shariah Excel report.',
-                'last_checked_at' => now()
+                'last_checked_at' => now(),
             ]
         );
         $count++;

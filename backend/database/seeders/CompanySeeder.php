@@ -3,8 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Company;
-use App\Models\Financial;
-use App\Models\StockStatus;
 use Illuminate\Database\Seeder;
 
 class CompanySeeder extends Seeder

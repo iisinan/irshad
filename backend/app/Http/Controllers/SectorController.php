@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class SectorController extends Controller
@@ -37,11 +36,11 @@ class SectorController extends Controller
                 $sector = 'Real Estate';
             }
 
-            if (!isset($grouped[$sector])) {
+            if (! isset($grouped[$sector])) {
                 $grouped[$sector] = [];
             }
 
-            if (!in_array($industry, $grouped[$sector])) {
+            if (! in_array($industry, $grouped[$sector])) {
                 $grouped[$sector][] = $industry;
             }
         }
@@ -57,7 +56,7 @@ class SectorController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data' => $grouped
+            'data' => $grouped,
         ]);
     }
 }

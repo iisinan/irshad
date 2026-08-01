@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\Company;
 use App\Services\PerplexityAiService;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
 class UpdateIndustryTargetsCommand extends Command
@@ -37,7 +37,7 @@ class UpdateIndustryTargetsCommand extends Command
         foreach ($companies as $company) {
             try {
                 $result = $perplexityService->fetchIndustryAndTarget($company);
-                
+
                 $target = $result['analysts_target'] ?? 'N/A';
                 if (is_string($target)) {
                     $target = preg_replace('/[^\d\.]/', '', $target);
@@ -49,7 +49,7 @@ class UpdateIndustryTargetsCommand extends Command
 
                 $this->info("\nUpdated {$company->symbol}: Industry -> {$result['industry']}, Target -> {$result['analysts_target']}");
             } catch (\Exception $e) {
-                Log::error("Failed to update {$company->symbol}: " . $e->getMessage());
+                Log::error("Failed to update {$company->symbol}: ".$e->getMessage());
                 $this->error("\nFailed to update {$company->symbol}. Check logs.");
             }
 

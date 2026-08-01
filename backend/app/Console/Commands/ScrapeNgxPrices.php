@@ -2,12 +2,12 @@
 
 namespace App\Console\Commands;
 
+use App\Mail\ScraperAlert;
+use App\Models\Company;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\DB;
-use App\Models\Company;
-use App\Mail\ScraperAlert;
 use Throwable;
 
 class ScrapeNgxPrices extends Command
@@ -32,7 +32,7 @@ class ScrapeNgxPrices extends Command
     public function handle()
     {
         $this->info('Starting NGX price scraping...');
-        
+
         $adminEmail = env('ADMIN_EMAIL', 'sinanismailaidris@gmail.com');
 
         try {
@@ -40,31 +40,31 @@ class ScrapeNgxPrices extends Command
             $apiKey = env('NGXPULSE_API_KEY', config('services.ngxpulse.key', ''));
 
             if (empty($apiKey)) {
-                $this->error("NGXPULSE_API_KEY is not set in .env. The API will likely reject the request.");
+                $this->error('NGXPULSE_API_KEY is not set in .env. The API will likely reject the request.');
             }
 
             $response = Http::withHeaders([
                 'accept' => 'application/json',
                 'X-API-Key' => $apiKey,
                 'Referer' => 'https://ngxpulse.ng/',
-                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
             ])->timeout(30)->get($url);
 
-            if (!$response->successful()) {
-                throw new \Exception("NGX Pulse Endpoint returned status code: " . $response->status());
+            if (! $response->successful()) {
+                throw new \Exception('NGX Pulse Endpoint returned status code: '.$response->status());
             }
 
             $data = $response->json();
             $stocksList = $data['stocks'] ?? null;
 
-            if (!is_array($stocksList) || empty($stocksList)) {
-                throw new \Exception("NGX Pulse Endpoint returned empty or invalid JSON array.");
+            if (! is_array($stocksList) || empty($stocksList)) {
+                throw new \Exception('NGX Pulse Endpoint returned empty or invalid JSON array.');
             }
 
             // Structure check
             $firstItem = $stocksList[0] ?? null;
-            if (!$firstItem || !isset($firstItem['symbol']) || !array_key_exists('current_price', $firstItem) || !array_key_exists('volume', $firstItem)) {
-                throw new \Exception("NGX JSON Structure has changed! The required keys (symbol, current_price, volume) were not found.");
+            if (! $firstItem || ! isset($firstItem['symbol']) || ! array_key_exists('current_price', $firstItem) || ! array_key_exists('volume', $firstItem)) {
+                throw new \Exception('NGX JSON Structure has changed! The required keys (symbol, current_price, volume) were not found.');
             }
 
             $updatesCount = 0;
@@ -96,24 +96,26 @@ class ScrapeNgxPrices extends Command
                 $changePct = $stock['change_percent'] ?? 0;
                 $volume = $stock['volume'] ?? null;
                 $sharesOutstanding = $stock['shares_outstanding'] ?? null;
-                
+
                 $sector = isset($stock['sector']) ? ucwords(strtolower($stock['sector'])) : 'Unknown';
                 $industry = isset($stock['industry']) ? ucwords(strtolower($stock['industry'])) : null;
-                
+
                 $logoUrl = null;
                 if (isset($logoMapping[$symbol])) {
-                    $logoUrl = "https://ngxpulse.ng/logos_small/" . $logoMapping[$symbol];
+                    $logoUrl = 'https://ngxpulse.ng/logos_small/'.$logoMapping[$symbol];
                 }
-                
+
                 $marketCap = $stock['market_cap'] ?? null;
 
-                if (empty($symbol) || $closePrice === null) continue;
+                if (empty($symbol) || $closePrice === null) {
+                    continue;
+                }
 
                 $activeSymbols[] = $symbol;
 
                 $company = Company::where('symbol', $symbol)->first();
 
-                if (!$company) {
+                if (! $company) {
                     // Create the company if it's missing using NGX data
                     $company = Company::create([
                         'symbol' => $symbol,
@@ -143,7 +145,7 @@ class ScrapeNgxPrices extends Command
                         'volume_today' => $volume,
                         'is_active' => true,
                     ];
-                    
+
                     if ($logoUrl) {
                         $updateData['logo_url'] = $logoUrl;
                     }
@@ -153,7 +155,7 @@ class ScrapeNgxPrices extends Command
                     if ($industry) {
                         $updateData['industry'] = $industry;
                     }
-                    
+
                     $company->update($updateData);
                 }
 
@@ -182,7 +184,7 @@ class ScrapeNgxPrices extends Command
 
             $details = "Successfully updated prices for {$updatesCount} companies.\n";
             if (count($missingSymbols) > 0) {
-                $details .= "The following symbols from NGX are missing in our DB: " . implode(', ', $missingSymbols);
+                $details .= 'The following symbols from NGX are missing in our DB: '.implode(', ', $missingSymbols);
             }
 
             $this->info($details);
@@ -192,10 +194,10 @@ class ScrapeNgxPrices extends Command
 
         } catch (Throwable $e) {
             DB::rollBack();
-            $this->error("Scraper Failed: " . $e->getMessage());
-            
+            $this->error('Scraper Failed: '.$e->getMessage());
+
             // Fire Error Email
-            $errorDetails = "Scraper Exception: \n" . $e->getMessage() . "\n\nFile: " . $e->getFile() . " on line " . $e->getLine();
+            $errorDetails = "Scraper Exception: \n".$e->getMessage()."\n\nFile: ".$e->getFile().' on line '.$e->getLine();
             Mail::to($adminEmail)->send(new ScraperAlert('error', $errorDetails));
 
             return Command::FAILURE;

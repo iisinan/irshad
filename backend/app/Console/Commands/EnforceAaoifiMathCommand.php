@@ -2,9 +2,11 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Models\AaoifiScreening;
 use App\Models\Company;
+use App\Models\ComplianceHistory;
+use App\Models\ComplianceReview;
+use App\Models\StockStatus;
+use Illuminate\Console\Command;
 
 class EnforceAaoifiMathCommand extends Command
 {
@@ -27,7 +29,7 @@ class EnforceAaoifiMathCommand extends Command
      */
     public function handle()
     {
-        $this->info("Starting AAOIFI mathematical enforcement...");
+        $this->info('Starting AAOIFI mathematical enforcement...');
 
         $companies = Company::with(['aaoifiScreening', 'status'])->get();
         $fixedCount = 0;
@@ -36,7 +38,7 @@ class EnforceAaoifiMathCommand extends Command
             $screening = $company->aaoifiScreening;
             $statusModel = $company->status()->first();
 
-            if (!$screening) {
+            if (! $screening) {
                 continue;
             }
 
@@ -85,8 +87,8 @@ class EnforceAaoifiMathCommand extends Command
                 // Stage 2: Financial Screening (only if business activity is halal/pass)
                 if ($screening->debt_status === 'fail' || $screening->cash_status === 'fail' || $screening->impermissible_income_status === 'fail') {
                     $expectedFinalStatus = 'non-halal';
-                } elseif (in_array($screening->debt_status, ['warning', 'doubtful', 'insufficient_data']) || 
-                          in_array($screening->cash_status, ['warning', 'doubtful', 'insufficient_data']) || 
+                } elseif (in_array($screening->debt_status, ['warning', 'doubtful', 'insufficient_data']) ||
+                          in_array($screening->cash_status, ['warning', 'doubtful', 'insufficient_data']) ||
                           in_array($screening->impermissible_income_status, ['warning', 'doubtful', 'insufficient_data'])) {
                     $expectedFinalStatus = 'doubtful';
                 } else {
@@ -123,23 +125,23 @@ class EnforceAaoifiMathCommand extends Command
 
                 if (in_array($screening->business_status, ['fail', 'doubtful'])) {
                     $mathReason = $businessReason ?: 'Fails qualitative business screening.';
-                } else if ($screening->business_status === 'pass') {
+                } elseif ($screening->business_status === 'pass') {
                     if ($expectedFinalStatus === 'halal') {
-                        $mathReason = $businessReason ? ($businessReason . ' Additionally, it passes all AAOIFI quantitative financial screening ratios.') : 'Passes both qualitative business and quantitative financial Shariah compliance checks.';
+                        $mathReason = $businessReason ? ($businessReason.' Additionally, it passes all AAOIFI quantitative financial screening ratios.') : 'Passes both qualitative business and quantitative financial Shariah compliance checks.';
                     } else {
                         $finFails = [];
                         if ($screening->debt_status === 'fail') {
-                            $finFails[] = 'Interest-Bearing Debt (' . round($screening->debt_ratio, 2) . '% > 30%)';
+                            $finFails[] = 'Interest-Bearing Debt ('.round($screening->debt_ratio, 2).'% > 30%)';
                         }
                         if ($screening->cash_status === 'fail') {
-                            $finFails[] = 'Cash and Equivalents (' . round($screening->cash_ratio, 2) . '% > 30%)';
+                            $finFails[] = 'Cash and Equivalents ('.round($screening->cash_ratio, 2).'% > 30%)';
                         }
                         if ($screening->impermissible_income_status === 'fail') {
-                            $finFails[] = 'Impermissible Income (' . round($screening->impermissible_income_ratio, 2) . '% > 5%)';
+                            $finFails[] = 'Impermissible Income ('.round($screening->impermissible_income_ratio, 2).'% > 5%)';
                         }
-                        
-                        $stage2Text = !empty($finFails) ? ' However, it fails quantitative financial screening due to: ' . implode(', ', $finFails) . '.' : ' However, it fails quantitative financial screening.';
-                        $mathReason = $businessReason ? ($businessReason . $stage2Text) : $stage2Text;
+
+                        $stage2Text = ! empty($finFails) ? ' However, it fails quantitative financial screening due to: '.implode(', ', $finFails).'.' : ' However, it fails quantitative financial screening.';
+                        $mathReason = $businessReason ? ($businessReason.$stage2Text) : $stage2Text;
                     }
                 } else {
                     $mathReason = 'Pending Shariah compliance screening.';
@@ -151,27 +153,28 @@ class EnforceAaoifiMathCommand extends Command
                 $isNonHalalToHalal = ($oldStatus === 'non-halal' && $expectedFinalStatus === 'halal');
 
                 if ($isHalalToNonHalal || $isNonHalalToHalal) {
-                    $existingReview = \App\Models\ComplianceReview::where('company_id', $company->id)
+                    $existingReview = ComplianceReview::where('company_id', $company->id)
                         ->where('status', 'pending')
                         ->where('old_status', $oldStatus)
                         ->where('new_status', $expectedFinalStatus)
                         ->first();
 
-                    if (!$existingReview) {
-                        \App\Models\ComplianceReview::create([
+                    if (! $existingReview) {
+                        ComplianceReview::create([
                             'company_id' => $company->id,
                             'old_status' => $oldStatus,
                             'new_status' => $expectedFinalStatus,
-                            'reason' => "Automated sync math change: " . $mathReason,
-                            'status' => 'pending'
+                            'reason' => 'Automated sync math change: '.$mathReason,
+                            'status' => 'pending',
                         ]);
                         $this->warn("Staged compliance review for {$company->symbol} ({$oldStatus} -> {$expectedFinalStatus})");
                     } else {
                         $this->info("Compliance review already pending for {$company->symbol} ({$oldStatus} -> {$expectedFinalStatus})");
                     }
+
                     continue; // Do not apply the update immediately
                 }
-                
+
                 if ($company->current_status !== $expectedFinalStatus) {
                     $company->update(['current_status' => $expectedFinalStatus]);
                 }
@@ -182,10 +185,10 @@ class EnforceAaoifiMathCommand extends Command
                     // If it is halal, and we just changed it to halal, maybe we don't have the AI reason, so $mathReason is okay.
                     $statusModel->update([
                         'status' => $expectedFinalStatus,
-                        'reason' => $mathReason
+                        'reason' => $mathReason,
                     ]);
                 } else {
-                    \App\Models\StockStatus::create([
+                    StockStatus::create([
                         'company_id' => $company->id,
                         'status' => $expectedFinalStatus,
                         'reason' => $mathReason,
@@ -195,7 +198,7 @@ class EnforceAaoifiMathCommand extends Command
                 }
 
                 if ($oldStatus !== $expectedFinalStatus) {
-                    \App\Models\ComplianceHistory::create([
+                    ComplianceHistory::create([
                         'company_id' => $company->id,
                         'old_status' => $oldStatus,
                         'new_status' => $expectedFinalStatus,
@@ -206,7 +209,7 @@ class EnforceAaoifiMathCommand extends Command
                 } else {
                     $this->info("Updated reason for {$company->symbol}.");
                 }
-                
+
                 $fixedCount++;
             }
         }

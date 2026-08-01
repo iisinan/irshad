@@ -4,13 +4,14 @@ namespace App\Console\Commands;
 
 use App\Models\Company;
 use App\Models\DailyPrice;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class SeedHistoricalPrices extends Command
 {
     protected $signature = 'ngx:seed-history {days=30 : Number of days to seed}';
+
     protected $description = 'Seed realistic synthetic historical daily prices for companies with live prices';
 
     public function handle()
@@ -22,7 +23,8 @@ class SeedHistoricalPrices extends Command
         $this->info("Found {$companies->count()} companies with a live price.");
 
         if ($companies->isEmpty()) {
-            $this->warn("No companies found with latest_price. Aborting.");
+            $this->warn('No companies found with latest_price. Aborting.');
+
             return Command::SUCCESS;
         }
 
@@ -38,16 +40,16 @@ class SeedHistoricalPrices extends Command
 
             foreach ($companies as $company) {
                 // Determine a base volatility for this company (e.g., between 0.5% and 3% daily movement)
-                $volatility = rand(5, 30) / 1000; 
-                
+                $volatility = rand(5, 30) / 1000;
+
                 // Start with the latest price
                 $currentSimulatedPrice = $company->latest_price;
 
                 $history = [];
-                
+
                 for ($i = 1; $i <= $days; $i++) {
                     $date = $today->copy()->subDays($i);
-                    
+
                     // Skip weekends (NGX doesn't trade on weekends)
                     if ($date->isWeekend()) {
                         continue;
@@ -55,9 +57,9 @@ class SeedHistoricalPrices extends Command
 
                     // Random daily change between -$volatility and +$volatility
                     $dailyChangePct = (rand(-100, 100) / 100) * $volatility;
-                    
+
                     $prevPrice = $currentSimulatedPrice / (1 + $dailyChangePct);
-                    
+
                     // Add some rounding to make it look like real stock prices (2 decimals)
                     $prevPrice = round($prevPrice, 2);
 
@@ -83,7 +85,8 @@ class SeedHistoricalPrices extends Command
 
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->error("Failed to seed historical prices: " . $e->getMessage());
+            $this->error('Failed to seed historical prices: '.$e->getMessage());
+
             return Command::FAILURE;
         }
 

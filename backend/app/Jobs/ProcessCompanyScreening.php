@@ -2,11 +2,15 @@
 
 namespace App\Jobs;
 
+use App\Models\FinancialScreening;
+use App\Models\FinancialStatementStatus;
+use App\Models\User;
 use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class ProcessCompanyScreening implements ShouldQueue
 {
@@ -15,6 +19,7 @@ class ProcessCompanyScreening implements ShouldQueue
     public $ticker;
 
     public $tries = 3;
+
     public $timeout = 900; // 15 minutes because Gemini/Apify might take a while
 
     public function backoff()
@@ -40,8 +45,8 @@ class ProcessCompanyScreening implements ShouldQueue
         }
 
         $targetYear = 2025; // Force FY 2025 instead of date('Y') to avoid Q1 2026 hallucinations
-        
-        $status = \App\Models\FinancialStatementStatus::firstOrCreate(
+
+        $status = FinancialStatementStatus::firstOrCreate(
             ['company_ticker' => $this->ticker, 'financial_year' => $targetYear],
             ['status' => 'pending']
         );
@@ -52,7 +57,7 @@ class ProcessCompanyScreening implements ShouldQueue
         Log::info("Starting background screening for {$this->ticker}");
 
         // Get the latest manual override before the AI runs
-        $manualOverride = \App\Models\FinancialScreening::where('company_ticker', $this->ticker)
+        $manualOverride = FinancialScreening::where('company_ticker', $this->ticker)
             ->where('is_manual_override', true)
             ->latest()
             ->first();
@@ -64,7 +69,7 @@ class ProcessCompanyScreening implements ShouldQueue
         if ($response->failed()) {
             $error = $response->json('detail') ?? $response->body();
             Log::error("Failed screening for {$this->ticker}: {$error}");
-            throw new \Exception("AI Engine Error: " . $error);
+            throw new \Exception('AI Engine Error: '.$error);
         }
 
         $data = $response->json();
@@ -74,11 +79,12 @@ class ProcessCompanyScreening implements ShouldQueue
                 'next_retry_at' => now()->addDays(7), // Retry in 7 days
             ]);
             Log::info("Report not found for {$this->ticker}. Set to awaiting_report.");
+
             return;
         }
 
         // AI Engine inserted a new row. Let's get the latest row.
-        $newScreening = \App\Models\FinancialScreening::where('company_ticker', $this->ticker)
+        $newScreening = FinancialScreening::where('company_ticker', $this->ticker)
             ->latest()
             ->first();
 
@@ -95,12 +101,12 @@ class ProcessCompanyScreening implements ShouldQueue
             $manualOverride->save();
 
             // Send notification to Admins
-            $admins = \App\Models\User::where('role', 'admin')->get();
+            $admins = User::where('role', 'admin')->get();
             foreach ($admins as $admin) {
                 // Laravel Notification or raw mail (we'll just use basic mail logic here, assuming a Mailable exists or raw)
                 try {
                     $ticker = $this->ticker;
-                    \Illuminate\Support\Facades\Mail::raw(
+                    Mail::raw(
                         "New financial data was automatically pulled for {$ticker}. However, because this stock has a manual admin override, the new data has been flagged for review. Please log in to the admin panel to review and approve the new data.",
                         function ($message) use ($ticker) {
                             $message->to('sinanismailaidris@gmail.com')
@@ -108,7 +114,7 @@ class ProcessCompanyScreening implements ShouldQueue
                         }
                     );
                 } catch (\Exception $e) {
-                    Log::error("Failed to send override review email to sinanismailaidris@gmail.com: " . $e->getMessage());
+                    Log::error('Failed to send override review email to sinanismailaidris@gmail.com: '.$e->getMessage());
                 }
             }
             Log::info("Flagged new data for {$this->ticker} for manual review because an admin override exists.");
@@ -124,11 +130,11 @@ class ProcessCompanyScreening implements ShouldQueue
     public function failed(\Throwable $exception): void
     {
         $targetYear = date('Y');
-        
-        $status = \App\Models\FinancialStatementStatus::where('company_ticker', $this->ticker)
+
+        $status = FinancialStatementStatus::where('company_ticker', $this->ticker)
             ->where('financial_year', $targetYear)
             ->first();
-            
+
         if ($status) {
             $status->update([
                 'status' => 'failed',

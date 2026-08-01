@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Company;
-use App\Models\Financial;
 use App\Models\BusinessActivityUpdate;
+use App\Models\Company;
 use App\Models\ComplianceHistory;
+use App\Models\Financial;
 
 class PublicOverviewController extends Controller
 {
@@ -41,13 +40,13 @@ class PublicOverviewController extends Controller
                         'status' => $item->new_status,
                     ];
                 });
-                
+
             return response()->json($screenings);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => $e->getMessage(),
                 'line' => $e->getLine(),
-                'file' => $e->getFile()
+                'file' => $e->getFile(),
             ], 500);
         }
     }
@@ -58,7 +57,7 @@ class PublicOverviewController extends Controller
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get();
-            
+
         return response()->json($reports);
     }
 
@@ -68,7 +67,7 @@ class PublicOverviewController extends Controller
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get();
-            
+
         return response()->json($news);
     }
 }

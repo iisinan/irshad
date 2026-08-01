@@ -33,10 +33,10 @@ class PriceAlertController extends Controller
         ]);
 
         $company = Company::where('symbol', strtoupper($symbol))->firstOrFail();
-        
+
         // Find latest price to determine condition automatically
         $latestPrice = $company->dailyPrices()->latest('date')->first();
-        if (!$latestPrice) {
+        if (! $latestPrice) {
             return response()->json(['message' => 'No price data available for this stock to set an alert.'], 400);
         }
 
@@ -60,7 +60,7 @@ class PriceAlertController extends Controller
 
         return response()->json([
             'message' => "Price alert set! You will be notified when {$symbol} goes {$condition} ₦{$targetPrice}.",
-            'data' => $alert
+            'data' => $alert,
         ], 201);
     }
 

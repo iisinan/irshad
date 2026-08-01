@@ -3,8 +3,8 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -14,6 +14,7 @@ class ScraperAlert extends Mailable
     use Queueable, SerializesModels;
 
     public $status;
+
     public $details;
 
     /**
@@ -31,6 +32,7 @@ class ScraperAlert extends Mailable
     public function envelope(): Envelope
     {
         $subjectPrefix = $this->status === 'success' ? '✅ Success' : '🚨 ALERT';
+
         return new Envelope(
             subject: "{$subjectPrefix}: NGX Price Scraper",
         );
@@ -49,11 +51,10 @@ class ScraperAlert extends Mailable
     /**
      * Get the attachments for the message.
      *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     * @return array<int, Attachment>
      */
     public function attachments(): array
     {
         return [];
     }
 }
-

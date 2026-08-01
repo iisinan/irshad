@@ -2,19 +2,28 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\StockStatusChanged;
+use App\Models\AaoifiScreening;
+use App\Models\AuditLog;
 use App\Models\Company;
-use App\Models\StockStatus;
+use App\Models\ComplianceHistory;
+use App\Models\Dividend;
+use App\Models\Financial;
+use App\Models\FinancialScreening;
 use App\Services\AaoifiComplianceService;
 use App\Services\NgxService;
+use App\Services\PerplexityAiService;
 use App\Traits\ApiResponder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class StockController extends Controller
 {
     use ApiResponder;
 
     protected NgxService $ngxService;
+
     protected AaoifiComplianceService $complianceService;
 
     public function __construct(NgxService $ngxService, AaoifiComplianceService $complianceService)
@@ -25,12 +34,12 @@ class StockController extends Controller
 
     private function clearStockCaches(?string $symbol = null): void
     {
-        \Illuminate\Support\Facades\Cache::tags(['stocks'])->flush();
+        Cache::tags(['stocks'])->flush();
     }
 
     public function index(): JsonResponse
     {
-        $stocks = \Illuminate\Support\Facades\Cache::tags(['stocks'])->remember('stocks.index', 300, function () {
+        $stocks = Cache::tags(['stocks'])->remember('stocks.index', 300, function () {
             return Company::select(['id', 'name', 'symbol', 'sector', 'current_status', 'latest_price', 'price_change_pct', 'logo_url', 'market_cap', 'pe_ratio'])
                 ->whereNotNull('latest_price')
                 ->where('latest_price', '>', 0)
@@ -41,13 +50,14 @@ class StockController extends Controller
                     $company->status = $company->current_status ? [
                         'status' => $company->current_status,
                         'purification_required' => $company->current_status === 'halal' && $ratio > 0,
-                        'haram_revenue_percent' => $ratio
+                        'haram_revenue_percent' => $ratio,
                     ] : null;
                     unset($company->aaoifiScreening);
+
                     return $company;
                 });
         });
-        
+
         return $this->success($stocks);
     }
 
@@ -56,7 +66,7 @@ class StockController extends Controller
      */
     public function complianceChanges(): JsonResponse
     {
-        $changes = \App\Models\ComplianceHistory::with('company:id,symbol,name')
+        $changes = ComplianceHistory::with('company:id,symbol,name')
             ->orderBy('changed_at', 'desc')
             ->limit(10)
             ->get()
@@ -81,18 +91,18 @@ class StockController extends Controller
      */
     public function show(string $symbol): JsonResponse
     {
-        $stock = \Illuminate\Support\Facades\Cache::tags(['stocks'])->remember("stocks.show.{$symbol}", 300, function () use ($symbol) {
-            $company = Company::with(['status', 'financials' => fn($q) => $q->latest(), 'dailyPrices' => fn($q) => $q->latest('date'), 'news'])->where('symbol', $symbol)->firstOrFail();
-            
+        $stock = Cache::tags(['stocks'])->remember("stocks.show.{$symbol}", 300, function () use ($symbol) {
+            $company = Company::with(['status', 'financials' => fn ($q) => $q->latest(), 'dailyPrices' => fn ($q) => $q->latest('date'), 'news'])->where('symbol', $symbol)->firstOrFail();
+
             // Map the FinancialScreening into financials for legacy mobile app compatibility
-            $existingScreening = \App\Models\FinancialScreening::where('company_ticker', $symbol)
+            $existingScreening = FinancialScreening::where('company_ticker', $symbol)
                 ->orderBy('created_at', 'desc')
                 ->first();
-                
+
             if ($existingScreening) {
                 $calc = $existingScreening->calculation_results ?? [];
                 $ratios = $calc['ratios'] ?? [];
-                
+
                 $simulatedFinancial = [
                     'overall_financial_pass' => $calc['overall_financial_pass'] ?? true,
                     'interest_income_ratio' => $ratios['non_permissible_income_ratio'] ?? 0,
@@ -104,57 +114,58 @@ class StockController extends Controller
                     'published_date' => $existingScreening->published_date,
                     'financial_year' => $existingScreening->financial_year,
                 ];
-                
+
                 if ($company->financials && $company->financials->count() > 0) {
                     $fin = $company->financials->first();
-                    foreach($simulatedFinancial as $key => $val) {
+                    foreach ($simulatedFinancial as $key => $val) {
                         $fin->$key = $val;
                     }
                 } else {
-                    $company->setRelation('financials', collect([new \App\Models\Financial($simulatedFinancial)]));
+                    $company->setRelation('financials', collect([new Financial($simulatedFinancial)]));
                 }
             }
+
             return $company;
         });
 
         // Append dividend data (latest upcoming + last paid) — not cached so always fresh
         $dividendData = null;
-        $upcomingDividend = \App\Models\Dividend::where('ticker', $symbol)
+        $upcomingDividend = Dividend::where('ticker', $symbol)
             ->where('status', 'upcoming')
             ->whereNotNull('ex_date')
             ->orderBy('ex_date', 'asc')
             ->first();
 
-        $lastPaidDividend = \App\Models\Dividend::where('ticker', $symbol)
+        $lastPaidDividend = Dividend::where('ticker', $symbol)
             ->where('status', 'paid')
             ->orderBy('pay_date', 'desc')
             ->first();
 
         $stockArray = $stock->toArray();
         $stockArray['upcoming_dividend'] = $upcomingDividend ? [
-            'amount'       => $upcomingDividend->amount,
-            'currency'     => $upcomingDividend->currency,
-            'dividend_type'=> $upcomingDividend->dividend_type,
-            'ex_date'      => $upcomingDividend->ex_date?->toDateString(),
-            'record_date'  => $upcomingDividend->record_date?->toDateString(),
-            'pay_date'     => $upcomingDividend->pay_date?->toDateString(),
-            'status'       => $upcomingDividend->status,
+            'amount' => $upcomingDividend->amount,
+            'currency' => $upcomingDividend->currency,
+            'dividend_type' => $upcomingDividend->dividend_type,
+            'ex_date' => $upcomingDividend->ex_date?->toDateString(),
+            'record_date' => $upcomingDividend->record_date?->toDateString(),
+            'pay_date' => $upcomingDividend->pay_date?->toDateString(),
+            'status' => $upcomingDividend->status,
         ] : null;
 
         $stockArray['last_paid_dividend'] = $lastPaidDividend ? [
-            'amount'       => $lastPaidDividend->amount,
-            'currency'     => $lastPaidDividend->currency,
-            'dividend_type'=> $lastPaidDividend->dividend_type,
-            'ex_date'      => $lastPaidDividend->ex_date?->toDateString(),
-            'pay_date'     => $lastPaidDividend->pay_date?->toDateString(),
-            'status'       => $lastPaidDividend->status,
+            'amount' => $lastPaidDividend->amount,
+            'currency' => $lastPaidDividend->currency,
+            'dividend_type' => $lastPaidDividend->dividend_type,
+            'ex_date' => $lastPaidDividend->ex_date?->toDateString(),
+            'pay_date' => $lastPaidDividend->pay_date?->toDateString(),
+            'status' => $lastPaidDividend->status,
         ] : null;
 
         // Expose business_status so the frontend can hide analysis/metrics/news
         // for stocks that failed qualitative business activity screening.
         // Also inject purification_required into the status object so the frontend
         // can show the "HALAL WITH PURIFICATION" banner.
-        $aaoifiScreening = \App\Models\AaoifiScreening::where('company_id', $stock->id)
+        $aaoifiScreening = AaoifiScreening::where('company_id', $stock->id)
             ->select('business_status', 'impermissible_income_ratio', 'impermissible_income_status')
             ->first();
         $stockArray['business_status'] = $aaoifiScreening?->business_status ?? null;
@@ -176,13 +187,14 @@ class StockController extends Controller
         $stocks = Company::select(['id', 'name', 'symbol', 'sector', 'current_status', 'latest_price', 'price_change_pct', 'logo_url'])
             ->whereNotNull('latest_price')
             ->where('latest_price', '>', 0)
-            ->where(function($q) use ($query) {
+            ->where(function ($q) use ($query) {
                 $q->where('name', 'LIKE', "%{$query}%")
-                  ->orWhere('symbol', 'LIKE', "%{$query}%");
+                    ->orWhere('symbol', 'LIKE', "%{$query}%");
             })
             ->limit(20)
             ->get()->map(function ($company) {
                 $company->status = $company->current_status ? ['status' => $company->current_status] : null;
+
                 return $company;
             });
 
@@ -193,24 +205,24 @@ class StockController extends Controller
     {
         $allowedParams = $request->only(['status', 'sector', 'min_market_cap', 'pe_max', 'per_page', 'page']);
         // Strip out any empty/null params before hashing for deterministic cache keys
-        $allowedParams = array_filter($allowedParams, fn($v) => !is_null($v) && $v !== '');
+        $allowedParams = array_filter($allowedParams, fn ($v) => ! is_null($v) && $v !== '');
         ksort($allowedParams);
-        
-        $cacheKey = 'stocks.ngx_' . md5(json_encode($allowedParams));
-        
-        $stocks = \Illuminate\Support\Facades\Cache::tags(['stocks'])->remember($cacheKey, 300, function () use ($request) {
+
+        $cacheKey = 'stocks.ngx_'.md5(json_encode($allowedParams));
+
+        $stocks = Cache::tags(['stocks'])->remember($cacheKey, 300, function () use ($request) {
             $query = Company::select([
-                'id', 'name', 'symbol', 'sector', 'current_status', 
-                'latest_price', 'price_change', 'price_change_pct', 
-                'market_cap', 'pe_ratio', 'eps', 'logo_url'
+                'id', 'name', 'symbol', 'sector', 'current_status',
+                'latest_price', 'price_change', 'price_change_pct',
+                'market_cap', 'pe_ratio', 'eps', 'logo_url',
             ])->whereNotNull('latest_price')->where('latest_price', '>', 0);
 
-            if ($request->has('status') && !empty($request->status)) {
+            if ($request->has('status') && ! empty($request->status)) {
                 $statusFilters = explode(',', strtolower($request->status));
                 $query->whereIn('current_status', $statusFilters);
             }
 
-            if ($request->has('sector') && !empty($request->sector)) {
+            if ($request->has('sector') && ! empty($request->sector)) {
                 $sectorFilters = explode(',', strtolower($request->sector));
                 $query->whereIn('sector', $sectorFilters);
             }
@@ -224,15 +236,17 @@ class StockController extends Controller
             }
 
             $perPage = $request->input('per_page');
-            
+
             if ($perPage) {
-                return $query->paginate((int)$perPage)->through(function ($company) {
+                return $query->paginate((int) $perPage)->through(function ($company) {
                     $company->status = $company->current_status ? ['status' => $company->current_status] : null;
+
                     return $company;
                 });
             } else {
                 return $query->get()->map(function ($company) {
                     $company->status = $company->current_status ? ['status' => $company->current_status] : null;
+
                     return $company;
                 });
             }
@@ -247,11 +261,11 @@ class StockController extends Controller
      */
     public function check(string $symbol): JsonResponse
     {
-        $company = Company::with(['financials' => fn($q) => $q->latest()])->where('symbol', $symbol)->firstOrFail();
+        $company = Company::with(['financials' => fn ($q) => $q->latest()])->where('symbol', $symbol)->firstOrFail();
 
         $financials = $company->financials->first();
 
-        if (!$financials) {
+        if (! $financials) {
             return $this->error('No financial data available for this stock. Please wait for the next scheduled scrape.', 404);
         }
 
@@ -260,7 +274,7 @@ class StockController extends Controller
 
         $this->clearStockCaches($symbol);
 
-        return $this->success($company->load(['status', 'financials', 'dailyPrices' => fn($q) => $q->latest('date')->limit(1)]), 'Screening completed.');
+        return $this->success($company->load(['status', 'financials', 'dailyPrices' => fn ($q) => $q->latest('date')->limit(1)]), 'Screening completed.');
     }
 
     /**
@@ -271,7 +285,7 @@ class StockController extends Controller
     {
         // Role check — only scholars and admins may override
         $user = auth()->user();
-        if (!$user || !in_array($user->role, ['scholar', 'admin'])) {
+        if (! $user || ! in_array($user->role, ['scholar', 'admin'])) {
             return $this->error('Forbidden. Only scholars and admins may override compliance status.', 403);
         }
 
@@ -286,30 +300,30 @@ class StockController extends Controller
         $status = $company->status()->updateOrCreate(
             ['company_id' => $company->id],
             [
-                'status'             => $request->status,
-                'reason'             => 'Scholar Override' . ($request->reason ? ': ' . $request->reason : ''),
+                'status' => $request->status,
+                'reason' => 'Scholar Override'.($request->reason ? ': '.$request->reason : ''),
                 'verified_by_scholar' => true,
-                'last_updated'       => now(),
+                'last_updated' => now(),
             ]
         );
 
         $company->update(['current_status' => $request->status]);
 
-        $aaoifiScreening = \App\Models\AaoifiScreening::where('company_id', $company->id)->latest()->first();
+        $aaoifiScreening = AaoifiScreening::where('company_id', $company->id)->latest()->first();
         if ($aaoifiScreening) {
             $aaoifiScreening->update(['final_status' => $request->status]);
         }
 
-        \App\Models\ComplianceHistory::create([
+        ComplianceHistory::create([
             'company_id' => $company->id,
             'old_status' => $oldStatus,
             'new_status' => $request->status,
-            'reason'     => 'Scholar Override' . ($request->reason ? ': ' . $request->reason : ''),
+            'reason' => 'Scholar Override'.($request->reason ? ': '.$request->reason : ''),
             'changed_at' => now(),
         ]);
 
         // Audit log
-        \App\Models\AuditLog::create([
+        AuditLog::create([
             'user_id' => $user->id,
             'action' => 'override_stock_status',
             'target_type' => Company::class,
@@ -317,11 +331,11 @@ class StockController extends Controller
             'changes' => [
                 'old_status' => $oldStatus,
                 'new_status' => $request->status,
-                'reason' => $request->reason
-            ]
+                'reason' => $request->reason,
+            ],
         ]);
 
-        event(new \App\Events\StockStatusChanged($company, $status));
+        event(new StockStatusChanged($company, $status));
 
         $this->clearStockCaches($symbol);
 
@@ -341,7 +355,7 @@ class StockController extends Controller
             'cash' => 'nullable|numeric',
             'interest_income' => 'nullable|numeric',
             'evidence_links' => 'nullable|array',
-            'evidence_links.*' => 'url'
+            'evidence_links.*' => 'url',
         ]);
 
         $company = Company::where('symbol', $symbol)->firstOrFail();
@@ -350,12 +364,12 @@ class StockController extends Controller
             $company->market_cap = $request->market_cap;
             $company->save();
         }
-        
-        $screening = \App\Models\FinancialScreening::where('company_ticker', $symbol)
+
+        $screening = FinancialScreening::where('company_ticker', $symbol)
             ->orderBy('created_at', 'desc')
             ->first();
 
-        if (!$screening) {
+        if (! $screening) {
             return $this->error('No existing screening found to override. Please run a screening first.', 404);
         }
 
@@ -401,7 +415,7 @@ class StockController extends Controller
         $screening->save();
 
         // Also update the financials table so normal checks see it
-        $financial = \App\Models\Financial::where('company_id', $company->id)->latest()->first();
+        $financial = Financial::where('company_id', $company->id)->latest()->first();
         if ($financial) {
             $updateData = [
                 'total_debt' => $request->total_debt,
@@ -433,10 +447,10 @@ class StockController extends Controller
     /**
      * Ask Perplexity AI for a Shariah analysis of the stock with confidence score and sources.
      */
-    public function getAiAnalysis(string $symbol, \App\Services\PerplexityAiService $aiService): JsonResponse
+    public function getAiAnalysis(string $symbol, PerplexityAiService $aiService): JsonResponse
     {
-        $company = Company::with(['status', 'financials' => fn($q) => $q->latest()])->where('symbol', $symbol)->firstOrFail();
-        
+        $company = Company::with(['status', 'financials' => fn ($q) => $q->latest()])->where('symbol', $symbol)->firstOrFail();
+
         $statusStr = $company->status ? $company->status->status : 'unknown';
         $financials = $company->financials->first();
 
@@ -446,7 +460,7 @@ class StockController extends Controller
             'reasoning' => $result['reasoning'],
             'confidence_score' => $result['confidence_score'],
             'sources' => $result['sources'],
-            'analysis' => $result['reasoning']
+            'analysis' => $result['reasoning'],
         ]);
     }
 
@@ -456,14 +470,14 @@ class StockController extends Controller
     public function aaoifiScreening(string $symbol): JsonResponse
     {
         $company = Company::where('symbol', $symbol)->firstOrFail();
-        
-        $aaoifiScreening = \App\Models\AaoifiScreening::where('company_id', $company->id)->first();
-            
+
+        $aaoifiScreening = AaoifiScreening::where('company_id', $company->id)->first();
+
         if ($aaoifiScreening) {
             $isScholarVerified = $company->status && $company->status->verified_by_scholar;
             $dbStatus = $company->status ? $company->status->status : null;
             $finalStatus = $dbStatus ?? $aaoifiScreening->final_status;
-            
+
             $statusReason = null;
             if ($isScholarVerified) {
                 $statusReason = $company->status->reason;
@@ -481,26 +495,26 @@ class StockController extends Controller
                     }
                 }
                 $businessReason = trim($businessReason);
-                
+
                 if (in_array($aaoifiScreening->business_status, ['fail', 'doubtful'])) {
                     $statusReason = $businessReason ?: 'Fails qualitative business screening.';
-                } else if ($aaoifiScreening->business_status === 'pass') {
+                } elseif ($aaoifiScreening->business_status === 'pass') {
                     if ($finalStatus === 'halal') {
-                        $statusReason = $businessReason ? ($businessReason . ' Additionally, it passes all AAOIFI quantitative financial screening ratios.') : 'Passes both qualitative business and quantitative financial Shariah compliance checks.';
+                        $statusReason = $businessReason ? ($businessReason.' Additionally, it passes all AAOIFI quantitative financial screening ratios.') : 'Passes both qualitative business and quantitative financial Shariah compliance checks.';
                     } else {
                         $finFails = [];
                         if ($aaoifiScreening->debt_status === 'fail') {
-                            $finFails[] = 'Interest-Bearing Debt (' . round($aaoifiScreening->debt_ratio, 2) . '% > 30%)';
+                            $finFails[] = 'Interest-Bearing Debt ('.round($aaoifiScreening->debt_ratio, 2).'% > 30%)';
                         }
                         if ($aaoifiScreening->cash_status === 'fail') {
-                            $finFails[] = 'Cash and Equivalents (' . round($aaoifiScreening->cash_ratio, 2) . '% > 30%)';
+                            $finFails[] = 'Cash and Equivalents ('.round($aaoifiScreening->cash_ratio, 2).'% > 30%)';
                         }
                         if ($aaoifiScreening->impermissible_income_status === 'fail') {
-                            $finFails[] = 'Impermissible Income (' . round($aaoifiScreening->impermissible_income_ratio, 2) . '% > 5%)';
+                            $finFails[] = 'Impermissible Income ('.round($aaoifiScreening->impermissible_income_ratio, 2).'% > 5%)';
                         }
-                        
-                        $stage2Text = !empty($finFails) ? ' However, it fails quantitative financial screening due to: ' . implode(', ', $finFails) . '.' : ' However, it fails quantitative financial screening.';
-                        $statusReason = $businessReason ? ($businessReason . $stage2Text) : $stage2Text;
+
+                        $stage2Text = ! empty($finFails) ? ' However, it fails quantitative financial screening due to: '.implode(', ', $finFails).'.' : ' However, it fails quantitative financial screening.';
+                        $statusReason = $businessReason ? ($businessReason.$stage2Text) : $stage2Text;
                     }
                 } else {
                     $statusReason = 'Pending Shariah compliance screening.';
@@ -513,23 +527,24 @@ class StockController extends Controller
             }
             $unit = $finData['unit_multiplier'] ?? 1;
 
-            $getVal = function($key) use ($finData, $unit) {
+            $getVal = function ($key) use ($finData, $unit) {
                 if (isset($finData[$key]) && is_array($finData[$key]) && isset($finData[$key]['value'])) {
                     return $finData[$key]['value'] * $unit;
                 }
                 if (isset($finData[$key]) && is_numeric($finData[$key])) {
                     return $finData[$key] * $unit;
                 }
+
                 return 0;
             };
 
             $frontendFinData = array_merge($finData, [
                 'total_assets' => $getVal('total_assets'),
-                'total_debt'   => $getVal('total_debt'),
-                'cash'         => $getVal('cash_and_equivalents'),
+                'total_debt' => $getVal('total_debt'),
+                'cash' => $getVal('cash_and_equivalents'),
                 'interest_income' => $getVal('interest_income'),
                 'total_revenue' => $getVal('total_revenue'),
-                'market_cap'   => $company->market_cap,
+                'market_cap' => $company->market_cap,
             ]);
 
             $mapped = [
@@ -559,13 +574,13 @@ class StockController extends Controller
                 'ai_explanation' => $aaoifiScreening->business_reasoning ?? $company->activity_reason,
                 'status_reason' => $statusReason,
             ];
-            
+
             return $this->success($mapped);
         }
-        
+
         return response()->json([
             'status' => 'processing',
-            'message' => 'Screening is currently running in the background. Please check back in a few minutes.'
+            'message' => 'Screening is currently running in the background. Please check back in a few minutes.',
         ], 202);
     }
 }

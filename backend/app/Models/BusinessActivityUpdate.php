@@ -18,7 +18,7 @@ class BusinessActivityUpdate extends Model
     ];
 
     protected $casts = [
-        'date_detected'    => 'datetime',
+        'date_detected' => 'datetime',
         'confidence_score' => 'float',
     ];
 
@@ -32,14 +32,14 @@ class BusinessActivityUpdate extends Model
      */
     public function getActivityTypeLabelAttribute(): string
     {
-        return match($this->activity_type) {
-            'acquisition'         => 'New Acquisition',
-            'new_business'        => 'New Line of Business',
-            'disposal'            => 'Business Unit Disposal',
+        return match ($this->activity_type) {
+            'acquisition' => 'New Acquisition',
+            'new_business' => 'New Line of Business',
+            'disposal' => 'Business Unit Disposal',
             'prohibited_activity' => 'Prohibited Activity Detected',
-            'islamic_finance'     => 'Entry into Islamic Finance',
-            'regulatory'          => 'Regulatory Announcement',
-            default               => ucfirst(str_replace('_', ' ', $this->activity_type)),
+            'islamic_finance' => 'Entry into Islamic Finance',
+            'regulatory' => 'Regulatory Announcement',
+            default => ucfirst(str_replace('_', ' ', $this->activity_type)),
         };
     }
 }

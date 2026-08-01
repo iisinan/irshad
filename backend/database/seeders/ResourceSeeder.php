@@ -2,10 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use App\Models\Resource;
+use Illuminate\Database\Seeder;
 
 class ResourceSeeder extends Seeder
 {
@@ -107,7 +105,7 @@ class ResourceSeeder extends Seeder
                 'url' => 'https://www.youtube.com/embed/2B_4O44sABC',
                 'category' => 'Strategy',
                 'external_id' => 'yt-etf-vs-stocks',
-            ]
+            ],
         ];
 
         foreach ($resources as $res) {

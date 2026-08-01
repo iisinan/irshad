@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Models\ComplianceReview;
 use App\Models\Company;
+use App\Models\ComplianceReview;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 
 class SendComplianceAlertCommand extends Command
@@ -30,32 +30,34 @@ class SendComplianceAlertCommand extends Command
     {
         $companyId = $this->argument('company_id');
         $company = Company::find($companyId);
-        
-        if (!$company) {
-            $this->error("Company not found.");
+
+        if (! $company) {
+            $this->error('Company not found.');
+
             return;
         }
 
         $review = ComplianceReview::where('company_id', $companyId)
-                                  ->where('status', 'pending')
-                                  ->orderBy('created_at', 'desc')
-                                  ->first();
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->first();
 
-        if (!$review) {
-            $this->error("No pending review found for this company.");
+        if (! $review) {
+            $this->error('No pending review found for this company.');
+
             return;
         }
 
         $adminEmail = 'sinanismailaidris@gmail.com';
         $subject = "Irshad Alert: Compliance Verdict Change for {$company->symbol}";
-        
+
         $body = "Admin,\n\n"
-              . "The automated pipeline detected a verdict change for {$company->name} ({$company->symbol}).\n\n"
-              . "Old Status: {$review->old_status}\n"
-              . "New Status: {$review->new_status}\n"
-              . "Reason: {$review->reason}\n\n"
-              . "The latest financial extraction has been blocked from updating the database until you review it.\n\n"
-              . "Please log in to the admin portal to approve or reject this change.\n";
+              ."The automated pipeline detected a verdict change for {$company->name} ({$company->symbol}).\n\n"
+              ."Old Status: {$review->old_status}\n"
+              ."New Status: {$review->new_status}\n"
+              ."Reason: {$review->reason}\n\n"
+              ."The latest financial extraction has been blocked from updating the database until you review it.\n\n"
+              ."Please log in to the admin portal to approve or reject this change.\n";
 
         try {
             Mail::raw($body, function ($message) use ($adminEmail, $subject) {
@@ -63,7 +65,7 @@ class SendComplianceAlertCommand extends Command
             });
             $this->info("Alert email sent successfully to $adminEmail");
         } catch (\Exception $e) {
-            $this->error("Failed to send email: " . $e->getMessage());
+            $this->error('Failed to send email: '.$e->getMessage());
         }
     }
 }

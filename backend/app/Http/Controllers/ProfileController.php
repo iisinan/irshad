@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\History;
+use App\Models\User;
 use App\Traits\ApiResponder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
@@ -18,16 +21,17 @@ class ProfileController extends Controller
     public function show(Request $request): JsonResponse
     {
         $userId = $request->user()->id;
-        
-        $user = \Illuminate\Support\Facades\Cache::tags(['users'])->remember("user.profile.{$userId}", 3600, function () use ($userId) {
-            $u = \App\Models\User::find($userId);
-            $u->screened_count = \App\Models\History::where('user_id', $userId)
+
+        $user = Cache::tags(['users'])->remember("user.profile.{$userId}", 3600, function () use ($userId) {
+            $u = User::find($userId);
+            $u->screened_count = History::where('user_id', $userId)
                 ->whereIn('action', ['scan', 'check'])
                 ->distinct('reference_id')
                 ->count('reference_id');
+
             return $u;
         });
-            
+
         return $this->success($user, 'Profile retrieved successfully');
     }
 
@@ -58,8 +62,8 @@ class ProfileController extends Controller
         }
 
         $user->update($validated);
-        
-        \Illuminate\Support\Facades\Cache::tags(['users'])->forget("user.profile.{$user->id}");
+
+        Cache::tags(['users'])->forget("user.profile.{$user->id}");
 
         return $this->success($user, 'Profile updated successfully');
     }
