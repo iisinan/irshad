@@ -292,7 +292,7 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
                   )}
                 </div>
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '2px' }}>
-                  {user?.email || 'user@irshad.com'}
+                  {user?.email || 'user@iirshad.com'}
                 </div>
               </div>
             </Link>

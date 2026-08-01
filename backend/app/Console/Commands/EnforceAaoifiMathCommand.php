@@ -107,7 +107,19 @@ class EnforceAaoifiMathCommand extends Command
             $needsUpdate = true;
 
             if ($needsUpdate) {
-                $businessReason = trim((string) $screening->business_reasoning);
+                $bReasonRaw = $screening->business_reasoning;
+                $businessReason = '';
+                if (is_array($bReasonRaw)) {
+                    $businessReason = $bReasonRaw['reasoning'] ?? $bReasonRaw['evidence'] ?? json_encode($bReasonRaw);
+                } elseif (is_string($bReasonRaw)) {
+                    $decoded = json_decode($bReasonRaw, true);
+                    if (is_array($decoded) && isset($decoded['reasoning'])) {
+                        $businessReason = $decoded['reasoning'];
+                    } else {
+                        $businessReason = $bReasonRaw;
+                    }
+                }
+                $businessReason = trim($businessReason);
 
                 if (in_array($screening->business_status, ['fail', 'doubtful'])) {
                     $mathReason = $businessReason ?: 'Fails qualitative business screening.';

@@ -56,7 +56,7 @@ class ZakatReminderNotification extends Notification
                     ->greeting($greeting)
                     ->line($message)
                     ->line('You can use the Irshad Zakat Calculator to accurately determine your obligation across your financial wealth, livestock, and agriculture.')
-                    ->action('Calculate My Zakat', config('app.frontend_url', 'https://irshad.ng') . '/portfolio#zakat')
+                    ->action('Calculate My Zakat', config('app.frontend_url', 'https://iirshad.com') . '/portfolio#zakat')
                     ->line('JazakAllah Khair for trusting Irshad with your portfolio.');
     }
 

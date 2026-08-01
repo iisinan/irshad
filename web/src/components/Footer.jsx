@@ -23,7 +23,7 @@ const Footer = () => (
         </p>
         
         <div style={{ display: 'flex', gap: '16px', marginTop: '32px' }}>
-          <a href="mailto:hello@irshad.com" style={{ color: '#9CA3AF', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '8px' }} onMouseEnter={e => e.currentTarget.style.color = 'white'} onMouseLeave={e => e.currentTarget.style.color = '#9CA3AF'}>
+          <a href="mailto:hello@iirshad.com" style={{ color: '#9CA3AF', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '8px' }} onMouseEnter={e => e.currentTarget.style.color = 'white'} onMouseLeave={e => e.currentTarget.style.color = '#9CA3AF'}>
             <Mail size={18} />
             <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Contact Us</span>
           </a>
