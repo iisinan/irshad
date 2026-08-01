@@ -1,0 +1,732 @@
+[
+  {
+    "ticker": "ABBEYBANK",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional bank engaging in interest-based lending and deposits, which constitutes Riba."
+  },
+  {
+    "ticker": "ABCTRANS",
+    "business_status": "pass",
+    "business_reasoning": "The company provides transport and logistics services, which is a permissible core activity."
+  },
+  {
+    "ticker": "ACADEMY",
+    "business_status": "pass",
+    "business_reasoning": "The company provides education services, which is a permissible core activity."
+  },
+  {
+    "ticker": "ACCESSCORP",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional bank engaging in interest-based lending and deposits, which constitutes Riba."
+  },
+  {
+    "ticker": "AFRINSURE",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional insurance provider, which contains structural elements of Riba and Gharar."
+  },
+  {
+    "ticker": "AFRIPRUD",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional insurance provider, which contains structural elements of Riba and Gharar."
+  },
+  {
+    "ticker": "AFROMEDIA",
+    "business_status": "doubtful",
+    "business_reasoning": "The company is involved in outdoor advertising and media; further verification of its client mix is required to ensure revenue from non-permissible ads (e.g., alcohol or betting) does not exceed limits."
+  },
+  {
+    "ticker": "AIICO",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional insurance provider, which contains structural elements of Riba and Gharar."
+  },
+  {
+    "ticker": "AIRTELAFRI",
+    "business_status": "pass",
+    "business_reasoning": "Telecom services - permissible core activity."
+  },
+  {
+    "ticker": "ALEX",
+    "business_status": "pass",
+    "business_reasoning": "Mining/resources - permissible core activity."
+  },
+  {
+    "ticker": "ARADEL",
+    "business_status": "pass",
+    "business_reasoning": "Oil & gas production/marketing - permissible core activity."
+  },
+  {
+    "ticker": "AUSTINLAZ",
+    "business_status": "pass",
+    "business_reasoning": "Industrial products - permissible core activity."
+  },
+  {
+    "ticker": "AVAIF",
+    "business_status": "fail",
+    "business_reasoning": "CORRECTED from PASS. AVA Infrastructure Fund's core business activities focus on providing debt financing for infrastructure development projects across Nigeria (greenfield developments, expansion, recapitalisations, rehabilitation of mature assets). Its own stated objective is to deliver income to unit holders through debt financing, with management describing its strategy as allocating private credit. Same category as NIDF, CNIF, and MOFIREIF - a debt fund, not a property-holding trust, despite the infrastructure/real estate framing."
+  },
+  {
+    "ticker": "BAPLC",
+    "business_status": "pass",
+    "business_reasoning": "Tech/electronics - permissible core activity."
+  },
+  {
+    "ticker": "BERGER",
+    "business_status": "pass",
+    "business_reasoning": "Paints manufacturing - permissible core activity."
+  },
+  {
+    "ticker": "BETAGLAS",
+    "business_status": "doubtful",
+    "business_reasoning": "Manufactures generic glass bottles/containers - the product itself (glass packaging) is not alcohol, and clients span soft drinks, pharma, food and cosmetics too. However, named major customers explicitly include Nigerian Breweries (Heineken), AB InBev, and Guinness Nigeria - breweries and spirits producers appear to be a dominant, not incidental, part of the customer base. Revenue share from alcohol-industry clients is unconfirmed but the concentration signal is material - closer to a REIT overexposed to impermissible tenants than a comfortable pass. Needs customer-revenue breakdown before resolving."
+  },
+  {
+    "ticker": "BUACEMENT",
+    "business_status": "pass",
+    "business_reasoning": "Cement manufacturing - permissible core activity."
+  },
+  {
+    "ticker": "BUAFOODS",
+    "business_status": "pass",
+    "business_reasoning": "Food products - permissible core activity."
+  },
+  {
+    "ticker": "CADBURY",
+    "business_status": "pass",
+    "business_reasoning": "Confectionery/food - permissible core activity."
+  },
+  {
+    "ticker": "CAP",
+    "business_status": "pass",
+    "business_reasoning": "Paints manufacturing - permissible core activity."
+  },
+  {
+    "ticker": "CAVERTON",
+    "business_status": "pass",
+    "business_reasoning": "Aviation/helicopter services - permissible core activity."
+  },
+  {
+    "ticker": "CHAMPION",
+    "business_status": "fail",
+    "business_reasoning": "CORRECTED from original PASS/VERIFY classification. Champion Breweries Plc is a straightforward alcohol producer - brews and markets Champion Lager Beer and other alcoholic beverages as core, majority-revenue products; Heineken International holds a majority equity stake since 2014. Same category as NB, Guinness, and International Breweries."
+  },
+  {
+    "ticker": "CHAMS",
+    "business_status": "pass",
+    "business_reasoning": "Identity management and payments-infrastructure group across three segments: Identity Management (biometric ID, card personalization for financial/healthcare/corporate clients via Card Centre Nigeria), Payments/Transactional Systems (switching via ChamsSwitch, ATM deployment via Chams Access, mobile money via ChamsMobile), and ICT Training - plus a 2026 pivot into AI/data-centre infrastructure via new subsidiary ChamsCorp. No banking, insurance, alcohol, or gambling exposure - this is fee-based payments rails/fintech infrastructure, not a lender. One standing caveat shared with ETRANZACT: mobile money operators sometimes earn interest on pooled customer float balances rather than passing it through - ChamsMobile's treatment of this is unconfirmed and sits at the financial-ratio layer, not a business-activity concern."
+  },
+  {
+    "ticker": "CHELLARAM",
+    "business_status": "pass",
+    "business_reasoning": "Diversified conglomerate across two segments: Industrial Raw Materials (chemicals, machinery, packaging supplied to food/pharma/manufacturing sectors) and Consumer Products (dairy via Chellarams DMK JV, frozen foods, apparel, bicycles, KFC franchise), plus real estate rental income. No alcohol, gambling, or interest-based lending found in segment breakdown - the earlier 'may include beverages' concern did not materialize. Minor open items: rental-property tenant mix and confirming no alcohol service at KFC outlets, both low-stakes."
+  },
+  {
+    "ticker": "CILEASING",
+    "business_status": "doubtful",
+    "business_reasoning": "Equipment leasing - ijara-style leasing is permissible in principle, but conventional lease financing structure needs verification."
+  },
+  {
+    "ticker": "CMFC",
+    "business_status": "fail",
+    "business_reasoning": "CORRECTED - this is NOT Consolidated Hallmark Insurance as originally misidentified. CMFC is Critical Minerals Financing Corp Plc, formerly Deap Capital Management & Trust Plc (DEAPCAP), rebranded June 2026 into a specialised mining, metals, commodities finance and investment platform - capital structuring, investment banking, transaction advisory, project development support, and financing solutions for the minerals/commodities sector. No line-item CMFC revenue disclosure confirms this, but per typical revenue patterns of comparable mining/commodities financing corporations, 'financing solutions' and 'capital structuring' in this space are overwhelmingly monetized through structured debt and interest spread rather than fee-only advisory (the same pattern confirmed directly for UCAP once its lending subsidiary was examined) - treated as FAIL on that basis."
+  },
+  {
+    "ticker": "CNIF",
+    "business_status": "fail",
+    "business_reasoning": "CORRECTED from PASS. Coronation Infrastructure Fund is explicitly a closed-end debt fund, investing in loans, securities and securitised debt instruments of infrastructure companies, targeting a return of 3% over the FGN bond yield. H1 2026 results confirm interest income as the Fund's primary revenue driver, with infrastructure loans and money-market placements as the main contributors. Same category as NIDF and MOFIREIF - interest-based lending as the core, explicit product, not a property-holding trust."
+  },
+  {
+    "ticker": "CONHALLPLC",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional insurance provider, which contains structural elements of Riba and Gharar."
+  },
+  {
+    "ticker": "CONOIL",
+    "business_status": "pass",
+    "business_reasoning": "Petroleum marketing - permissible core activity."
+  },
+  {
+    "ticker": "CORNERST",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional insurance provider, which contains structural elements of Riba and Gharar."
+  },
+  {
+    "ticker": "CUSTODIAN",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional insurance provider, which contains structural elements of Riba and Gharar."
+  },
+  {
+    "ticker": "CUTIX",
+    "business_status": "pass",
+    "business_reasoning": "Cables/wires manufacturing - permissible core activity."
+  },
+  {
+    "ticker": "CWG",
+    "business_status": "pass",
+    "business_reasoning": "IT services - permissible core activity."
+  },
+  {
+    "ticker": "DAARCOMM",
+    "business_status": "doubtful",
+    "business_reasoning": "Broadcast media - programming content mix needs review (advertising for alcohol/betting, entertainment content standards)."
+  },
+  {
+    "ticker": "DANGCEM",
+    "business_status": "pass",
+    "business_reasoning": "Cement manufacturing - permissible core activity."
+  },
+  {
+    "ticker": "DANGSUGAR",
+    "business_status": "pass",
+    "business_reasoning": "Sugar refining - permissible core activity."
+  },
+  {
+    "ticker": "EKOCORP",
+    "business_status": "pass",
+    "business_reasoning": "Hospital operator (Eko Hospitals) - permissible core activity."
+  },
+  {
+    "ticker": "ELLAHLAKES",
+    "business_status": "fail",
+    "business_reasoning": "Diversified agribusiness (palm oil, cassava, soybean, maize) is otherwise permissible, but company has launched and is actively scaling commercial pig farming (piggery >1,000 heads per 2026 disclosures) - swine production is a categorical exclusion in standard Shariah screens, not subject to a revenue-materiality threshold. Also carries elevated financial risk: FY2025 revenue of ~N67-147m against a loss after tax of N1.596bn, and a recent N6.3bn debt-to-equity conversion signaling heavy prior leverage."
+  },
+  {
+    "ticker": "ENAMELWA",
+    "business_status": "pass",
+    "business_reasoning": "Enamelware/houseware manufacturing - permissible core activity."
+  },
+  {
+    "ticker": "ETERNA",
+    "business_status": "pass",
+    "business_reasoning": "Petroleum marketing/lubricants - permissible core activity."
+  },
+  {
+    "ticker": "ETI",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional bank engaging in interest-based lending and deposits, which constitutes Riba."
+  },
+  {
+    "ticker": "ETRANZACT",
+    "business_status": "pass",
+    "business_reasoning": "Payment technology services - permissible core activity (verify no interest-bearing float structuring)."
+  },
+  {
+    "ticker": "EUNISELL",
+    "business_status": "pass",
+    "business_reasoning": "Oilfield chemicals/services - permissible core activity."
+  },
+  {
+    "ticker": "FCMB",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional bank engaging in interest-based lending and deposits, which constitutes Riba."
+  },
+  {
+    "ticker": "FIDELITYBK",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional bank engaging in interest-based lending and deposits, which constitutes Riba."
+  },
+  {
+    "ticker": "FIDSON",
+    "business_status": "pass",
+    "business_reasoning": "Pharmaceuticals manufacturing - permissible core activity."
+  },
+  {
+    "ticker": "FIRSTHOLDCO",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional bank engaging in interest-based lending and deposits, which constitutes Riba."
+  },
+  {
+    "ticker": "FTGINSURE",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional insurance provider, which contains structural elements of Riba and Gharar."
+  },
+  {
+    "ticker": "FTNCOCOA",
+    "business_status": "pass",
+    "business_reasoning": "Cocoa processing - permissible core activity."
+  },
+  {
+    "ticker": "GEREGU",
+    "business_status": "pass",
+    "business_reasoning": "Power generation - permissible core activity."
+  },
+  {
+    "ticker": "GOLDBREW",
+    "business_status": "fail",
+    "business_reasoning": "Brewery (Golden Guinea Breweries) - alcohol production."
+  },
+  {
+    "ticker": "GTCO",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional bank engaging in interest-based lending and deposits, which constitutes Riba."
+  },
+  {
+    "ticker": "GUINEAINS",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional insurance provider, which contains structural elements of Riba and Gharar."
+  },
+  {
+    "ticker": "GUINNESS",
+    "business_status": "fail",
+    "business_reasoning": "Brewery (Guinness Nigeria) - alcohol production."
+  },
+  {
+    "ticker": "HBMNG",
+    "business_status": "pass",
+    "business_reasoning": "Cement manufacturing (formerly Lafarge Africa) - permissible core activity."
+  },
+  {
+    "ticker": "HMCALL",
+    "business_status": "doubtful",
+    "business_reasoning": "Real estate + hospitality mix - hotel/resort operations may include bar revenue; needs verification."
+  },
+  {
+    "ticker": "HONYFLOUR",
+    "business_status": "pass",
+    "business_reasoning": "Flour milling/food - permissible core activity."
+  },
+  {
+    "ticker": "IKEJAHOTEL",
+    "business_status": "fail",
+    "business_reasoning": "Hospitality group operating Federal Palace Hotels & Casino - gambling and alcohol sales are core revenue lines."
+  },
+  {
+    "ticker": "IMG",
+    "business_status": "pass",
+    "business_reasoning": "Mining/resources - permissible core activity."
+  },
+  {
+    "ticker": "INFINITY",
+    "business_status": "fail",
+    "business_reasoning": "Mortgage bank - interest-based lending (riba)."
+  },
+  {
+    "ticker": "INTBREW",
+    "business_status": "fail",
+    "business_reasoning": "Brewery (International Breweries) - alcohol production."
+  },
+  {
+    "ticker": "INTENEGINS",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional insurance provider, which contains structural elements of Riba and Gharar."
+  },
+  {
+    "ticker": "JAIZBANK",
+    "business_status": "pass",
+    "business_reasoning": "Non-interest (Islamic) bank, licensed by CBN as Shariah-compliant - core model itself is riba-free; verify individual products with a Shariah advisor as with any institution."
+  },
+  {
+    "ticker": "JAPAULGOLD",
+    "business_status": "pass",
+    "business_reasoning": "Mining/marine support services - permissible core activity (NGX sector tag is nominal)."
+  },
+  {
+    "ticker": "JBERGER",
+    "business_status": "pass",
+    "business_reasoning": "Construction/engineering - permissible core activity."
+  },
+  {
+    "ticker": "JOHNHOLT",
+    "business_status": "doubtful",
+    "business_reasoning": "Diversified trading conglomerate - segment revenue mix needs breakdown."
+  },
+  {
+    "ticker": "JULI",
+    "business_status": "pass",
+    "business_reasoning": "Pharmaceutical distribution - permissible core activity."
+  },
+  {
+    "ticker": "LASACO",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional insurance provider, which contains structural elements of Riba and Gharar."
+  },
+  {
+    "ticker": "LEARNAFRCA",
+    "business_status": "pass",
+    "business_reasoning": "Publishing/education materials - permissible core activity."
+  },
+  {
+    "ticker": "LEGENDINT",
+    "business_status": "pass",
+    "business_reasoning": "Technology/ICT services - permissible core activity."
+  },
+  {
+    "ticker": "LINKASSURE",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional insurance provider, which contains structural elements of Riba and Gharar."
+  },
+  {
+    "ticker": "LIVESTOCK",
+    "business_status": "fail",
+    "business_reasoning": "The company core activities include, Piggery and pig feeds production and sale."
+  },
+  {
+    "ticker": "LIVINGTRUST",
+    "business_status": "fail",
+    "business_reasoning": "Mortgage bank - interest-based lending (riba)."
+  },
+  {
+    "ticker": "MANSARD",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional insurance provider, which contains structural elements of Riba and Gharar."
+  },
+  {
+    "ticker": "MAYBAKER",
+    "business_status": "pass",
+    "business_reasoning": "Pharmaceuticals manufacturing - permissible core activity."
+  },
+  {
+    "ticker": "MBENEFIT",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional insurance provider, which contains structural elements of Riba and Gharar."
+  },
+  {
+    "ticker": "MCNICHOLS",
+    "business_status": "pass",
+    "business_reasoning": "Consumer products/lottery-adjacent - VERIFY: has historically had lottery/gaming terminal business lines; confirm current segment mix before treating as pass."
+  },
+  {
+    "ticker": "MECURE",
+    "business_status": "pass",
+    "business_reasoning": "Pharmaceuticals manufacturing - permissible core activity."
+  },
+  {
+    "ticker": "MEYER",
+    "business_status": "pass",
+    "business_reasoning": "Paints/building materials - permissible core activity."
+  },
+  {
+    "ticker": "MOFIREIF",
+    "business_status": "fail",
+    "business_reasoning": "CORRECTED from original PASS classification, which mistakenly treated this as a property-holding REIT. MOFI Real Estate Investment Fund (MREIF) is actually a government-backed mortgage lending vehicle, not a rental-property trust - its core business is originating fixed-rate mortgage loans to homebuyers at a stated 9.75% interest rate (well below commercial bank rates of 18-22%), plus construction financing guarantees to developers, with repayments recycled into new loans. Interest-bearing lending is the core product, not an incidental tenant-mix issue like genuine property REITs (NREIT, UPDCREIT, SFSREIT, UHOMREIT) - same category as the mortgage banks (INFINITY, LIVINGTRUST) already marked FAIL."
+  },
+  {
+    "ticker": "MORISON",
+    "business_status": "pass",
+    "business_reasoning": "Pharmaceuticals/consumer health - permissible core activity."
+  },
+  {
+    "ticker": "MTNN",
+    "business_status": "pass",
+    "business_reasoning": "Telecom services - permissible core activity."
+  },
+  {
+    "ticker": "MULTITREX",
+    "business_status": "pass",
+    "business_reasoning": "Food/starch processing - permissible core activity."
+  },
+  {
+    "ticker": "MULTIVERSE",
+    "business_status": "pass",
+    "business_reasoning": "Mining/resources holding - permissible core activity."
+  },
+  {
+    "ticker": "NAHCO",
+    "business_status": "doubtful",
+    "business_reasoning": "Core aviation ground/cargo/passenger handling and logistics lines (NAHCO FTZ, Commodities, Logistics, Power Solutions, Aviation Academy) are clean fee-for-service businesses. However, NAHCO Travel and Hospitality Limited (NHTL) now directly operates Sapphire Hotel, a 20-room in-terminal hotel at MMIA Terminal II (opened Feb 2026), with an on-site restaurant/lounge. No alcohol service confirmed either way in public disclosures - amenities described (breakfast, lunch/dinner, business office, gym, prayer area) suggest a business-transit orientation, but F&B/bar revenue at the hotel needs direct confirmation before treating as fully clean. Not comparable to Ikeja Hotel (no casino/nightclub indicated)."
+  },
+  {
+    "ticker": "NASCON",
+    "business_status": "pass",
+    "business_reasoning": "Salt/food seasoning - permissible core activity."
+  },
+  {
+    "ticker": "NB",
+    "business_status": "fail",
+    "business_reasoning": "Brewery (Nigerian Breweries) - alcohol production."
+  },
+  {
+    "ticker": "NCR",
+    "business_status": "doubtful",
+    "business_reasoning": "Core business is hardware/technology vending - ATMs, POS terminals, self-service kiosks, software - not a gaming operator itself. However, company literature explicitly names 'gaming' as one of its served industry verticals alongside financial services, retail, hospitality, healthcare, and travel. This is a vendor-to-mixed-clients profile (comparable to leasing to varied tenants) rather than a direct activity exclusion, but the revenue share attributable to gaming/betting-sector clients is unconfirmed - needs segment data before resolving to a clean PASS."
+  },
+  {
+    "ticker": "NEIMETH",
+    "business_status": "pass",
+    "business_reasoning": "Pharmaceuticals manufacturing - permissible core activity."
+  },
+  {
+    "ticker": "NEM",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional insurance provider, which contains structural elements of Riba and Gharar."
+  },
+  {
+    "ticker": "NESTLE",
+    "business_status": "pass",
+    "business_reasoning": "Food & beverage manufacturing - permissible core activity."
+  },
+  {
+    "ticker": "NGXGROUP",
+    "business_status": "doubtful",
+    "business_reasoning": "Own operated business (NGX Exchange, NGX RegCo, NGX RelCo) is fee-based - listing/trading fees, market data, regulation, real estate - not itself riba, comparable to how most global exchange operators are treated. Complication sits in the Strategic Investment segment: NGX Group holds equity stakes in CSCS and NASD (fine, fee-based) but also in FMDQ Securities Exchange, a market dedicated almost entirely to conventional bond/money-market/FX trading. Stake size and FMDQ's own revenue mix are unconfirmed - determines whether this is an immaterial minority holding or a taint on the parent. Genuine scholarly judgment call, not resolved by financial ratios alone."
+  },
+  {
+    "ticker": "NIDF",
+    "business_status": "fail",
+    "business_reasoning": "CORRECTED from original PASS/VERIFY classification. Nigeria Infrastructure Debt Fund is explicitly a debt fund, not a property-holding trust - it makes primarily debt investments in infrastructure projects, targeting a gross return of 3.00-4.50% over comparable FGN bond yields, with 80% of assets in senior debt/securitised debt/loans to government agencies. Income to unit-holders comes from coupon and fees received from borrowers. This is interest-based lending as the core, explicit product (not incidental), same category as MOFIREIF, INFINITY, and LIVINGTRUST."
+  },
+  {
+    "ticker": "NNFM",
+    "business_status": "pass",
+    "business_reasoning": "Flour milling - permissible core activity."
+  },
+  {
+    "ticker": "NPFMCRFBK",
+    "business_status": "fail",
+    "business_reasoning": "Microfinance bank - interest-based lending (riba)."
+  },
+  {
+    "ticker": "NREIT",
+    "business_status": "pass",
+    "business_reasoning": "Chapel Hill Denham Nigeria Real Estate Investment Trust - unlike other REIT-labeled NGX names on this list, NREIT is an actually certified Shariah-compliant fund, not just an inferred one: it has a named Shariah Adviser (Lotus Financial Services Limited), offer documents explicitly commit proceeds to Shariah-compliant, income-producing commercial real estate (office, retail, industrial, corporate residential), and management states a strategy of avoiding heavy reliance on debt financing - addressing the debt-ratio screen directly, not just business activity. Appears to be the only NGX REIT with actual third-party Shariah certification; the other REIT names (UHOMREIT, SFSREIT, UPDCREIT, AVAIF, CNIF) should not be assumed equivalent and still need their own tenant-mix/debt-structure check."
+  },
+  {
+    "ticker": "NSLTECH",
+    "business_status": "fail",
+    "business_reasoning": "CORRECTED from original PASS classification, which was in error. Secure Electronic Technology Plc (formerly National Sports Lottery Plc) directly operates a licensed national lottery business in Nigeria (exclusive 15-year license from Dec 2001), with stated operations covering lottery business, gaming products, airtime vending, and card payments. FY2025 financials show prize/winnings costs of N2.32bn and ticket costs of N1.60bn - core revenue is lottery/gambling activity, not incidental."
+  },
+  {
+    "ticker": "OANDO",
+    "business_status": "pass",
+    "business_reasoning": "Oil & gas production/marketing - permissible core activity."
+  },
+  {
+    "ticker": "OKOMUOIL",
+    "business_status": "pass",
+    "business_reasoning": "Palm oil production - permissible core activity."
+  },
+  {
+    "ticker": "OMATEK",
+    "business_status": "pass",
+    "business_reasoning": "Computer hardware - permissible core activity."
+  },
+  {
+    "ticker": "PHARMDEKO",
+    "business_status": "pass",
+    "business_reasoning": "Pharmaceuticals manufacturing - permissible core activity."
+  },
+  {
+    "ticker": "PREMPAINTS",
+    "business_status": "pass",
+    "business_reasoning": "Paints manufacturing - permissible core activity."
+  },
+  {
+    "ticker": "PRESCO",
+    "business_status": "pass",
+    "business_reasoning": "Palm oil production - permissible core activity."
+  },
+  {
+    "ticker": "PRESTIGE",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional insurance provider, which contains structural elements of Riba and Gharar."
+  },
+  {
+    "ticker": "PZ",
+    "business_status": "pass",
+    "business_reasoning": "Household/personal care products - permissible core activity."
+  },
+  {
+    "ticker": "REDSTAREX",
+    "business_status": "pass",
+    "business_reasoning": "Courier/logistics - permissible core activity."
+  },
+  {
+    "ticker": "REGALINS",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional insurance provider, which contains structural elements of Riba and Gharar."
+  },
+  {
+    "ticker": "RONCHESS",
+    "business_status": "pass",
+    "business_reasoning": "Real estate development - permissible core activity."
+  },
+  {
+    "ticker": "ROYALEX",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional insurance provider, which contains structural elements of Riba and Gharar."
+  },
+  {
+    "ticker": "RTBRISCOE",
+    "business_status": "pass",
+    "business_reasoning": "Equipment/vehicle trading & services - permissible core activity."
+  },
+  {
+    "ticker": "SCOA",
+    "business_status": "doubtful",
+    "business_reasoning": "Diversified trading conglomerate (vehicles/equipment) - segment revenue mix needs breakdown."
+  },
+  {
+    "ticker": "SEPLAT",
+    "business_status": "pass",
+    "business_reasoning": "Oil & gas production - permissible core activity."
+  },
+  {
+    "ticker": "SFSREIT",
+    "business_status": "doubtful",
+    "business_reasoning": "Core business (acquiring, leasing, managing commercial/residential real estate) is genuinely permissible - Nigeria's first listed REIT. However, its own governing allocation rules typically invest 75% in real estate and 25% in real estate related investments such as mortgages, real estate backed securities and real estate related equities, plus a 10% cash buffer, and its own risk disclosures confirm exposure to unfavorable Interest Rate fluctuations due to the sensitivity of its financial instruments. Up to a quarter of the portfolio is structurally earmarked for interest-bearing mortgage/debt instruments - a disclosed financial-ratio concern, not an activity-level exclusion like the pure debt funds (NIDF/CNIF/MOFIREIF/AVAIF)."
+  },
+  {
+    "ticker": "SKYAVN",
+    "business_status": "pass",
+    "business_reasoning": "Aviation ground handling - permissible core activity."
+  },
+  {
+    "ticker": "SOVRENINS",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional insurance provider, which contains structural elements of Riba and Gharar."
+  },
+  {
+    "ticker": "STACO",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional insurance provider, which contains structural elements of Riba and Gharar."
+  },
+  {
+    "ticker": "STANBIC",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional bank engaging in interest-based lending and deposits, which constitutes Riba."
+  },
+  {
+    "ticker": "STERLINGNG",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional bank engaging in interest-based lending and deposits, which constitutes Riba."
+  },
+  {
+    "ticker": "SUNUASSUR",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional insurance provider, which contains structural elements of Riba and Gharar."
+  },
+  {
+    "ticker": "TANTALIZER",
+    "business_status": "doubtful",
+    "business_reasoning": "Core quick-service restaurant business remains clean (verify no alcohol sales at any outlet, as previously noted). However, wholly owned subsidiary Tantainment Limited runs a 'live-game show' platform called 'Chances by Tantainment' (Q2 2026 launch, ~N30bn valuation, 10% stake sold to RGM Materials Solutions for N2bn). Public disclosures don't clarify whether 'Chances' involves real-money wagering/betting by viewers or is a production-funded prize/entertainment format - the name, emphasis on 'regulatory and compliance frameworks,' and 'tech-driven platform' framing warrant direct verification (terms of participation, NLRC or state gaming-authority licensing status) before resolving either way. FAIL if wagering-based; PASS likely holds if it's a skill/entertainment format with no player-side stakes."
+  },
+  {
+    "ticker": "THOMASWY",
+    "business_status": "pass",
+    "business_reasoning": "Trading/resources - permissible core activity, but historically a diversified trading house; verify segment mix."
+  },
+  {
+    "ticker": "TIP",
+    "business_status": "pass",
+    "business_reasoning": "The Initiates Plc - Nigeria's only listed environmental/waste management solutions company. Core activities: hazardous and non-hazardous waste treatment, asbestos handling, wastewater treatment, e-waste processing, thermal desorption, and industrial cleaning/decontamination services, primarily serving the Oil & Gas sector. ISO 9001:2015 and 14001:2015 certified. Expanding via majority-owned Uganda subsidiary, funded through internal cash flow (no conventional debt). No lending/insurance/alcohol/gambling exposure - a clean, regulation-driven service business."
+  },
+  {
+    "ticker": "TOTAL",
+    "business_status": "pass",
+    "business_reasoning": "Petroleum marketing/lubricants - permissible core activity."
+  },
+  {
+    "ticker": "TRANSCOHOT",
+    "business_status": "fail",
+    "business_reasoning": "CORRECTED from REVIEW. Transcorp Hotels operates Transcorp Hilton Abuja, which has an on-site casino (40 slot machines, 9 table games including Blackjack and Poker) alongside its nightclub and bars - marketed as a core hotel amenity, not a minor incidental feature. Same category as Ikeja Hotel/Federal Palace Casino - the earlier 'no casino identified' note was an unverified guess, not a checked fact."
+  },
+  {
+    "ticker": "TRANSCORP",
+    "business_status": "doubtful",
+    "business_reasoning": "Diversified conglomerate spanning power, oil/gas, and hospitality (Transcorp Hilton) - segment mix, esp. hotel bar revenue, needs breakdown."
+  },
+  {
+    "ticker": "TRANSEXPR",
+    "business_status": "pass",
+    "business_reasoning": "Logistics/courier - permissible core activity."
+  },
+  {
+    "ticker": "TRANSPOWER",
+    "business_status": "pass",
+    "business_reasoning": "Power transmission - permissible core activity."
+  },
+  {
+    "ticker": "TRIPPLEG",
+    "business_status": "pass",
+    "business_reasoning": "Industrial products - permissible core activity."
+  },
+  {
+    "ticker": "UACN",
+    "business_status": "pass",
+    "business_reasoning": "Diversified conglomerate - foods, real estate, logistics, paints; predominantly permissible lines but check any residual holdings before final sign-off."
+  },
+  {
+    "ticker": "UBA",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional bank engaging in interest-based lending and deposits, which constitutes Riba."
+  },
+  {
+    "ticker": "UCAP",
+    "business_status": "fail",
+    "business_reasoning": "CORRECTED from REVIEW. United Capital Plc directly operates UCEE Microfinance Bank as a named core segment, plus a Consumer Finance segment engaged in consumer lending and MSME financing - not incidental interest income, but directly operated lending subsidiaries. Clean fee-based lines (asset management, stockbroking, advisory, trusteeship) exist alongside this, but same pattern as VFD Group: a directly operated bank/lending arm as a core segment is not offset by other clean segments."
+  },
+  {
+    "ticker": "UHOMREIT",
+    "business_status": "doubtful",
+    "business_reasoning": "Core business (acquiring/developing/managing/selling real estate) is genuinely permissible. However, managed by Union Homes Savings & Loans Plc, a subsidiary of Union Bank of Nigeria Plc, and the Fund Managers spread the portfolio mix across commercial and residential property investment and mortgage assets - i.e., the fund directly holds mortgage assets, not just property. Its own financial statements state the investment strategy is to invest in equity and debt securities, with loans and receivables measured at amortised cost using the effective interest method - explicit interest-bearing loan accounting on the fund's books. Same financial-ratio concern as SFSREIT, arguably more explicit given the direct mortgage-asset holdings."
+  },
+  {
+    "ticker": "UNILEVER",
+    "business_status": "pass",
+    "business_reasoning": "Household/personal care products - permissible core activity."
+  },
+  {
+    "ticker": "UNIONDICON",
+    "business_status": "pass",
+    "business_reasoning": "Diagnostics/consumer products - permissible core activity."
+  },
+  {
+    "ticker": "UNITYBNK",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional bank engaging in interest-based lending and deposits, which constitutes Riba."
+  },
+  {
+    "ticker": "UNIVINSURE",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional insurance provider, which contains structural elements of Riba and Gharar."
+  },
+  {
+    "ticker": "UPDC",
+    "business_status": "pass",
+    "business_reasoning": "Real estate development - permissible core activity."
+  },
+  {
+    "ticker": "UPDCREIT",
+    "business_status": "pass",
+    "business_reasoning": "Real estate investment trust - permissible core activity; check tenant mix."
+  },
+  {
+    "ticker": "UPL",
+    "business_status": "pass",
+    "business_reasoning": "University Press Plc (founded 1949 as Oxford University Press Nigeria) - Nigeria's largest indigenous book publisher, engaged in printing, publishing, sale and distribution of educational (pre-primary through tertiary curriculum) and general reading books and materials. No alcohol, gambling, or interest-based lending exposure - a clean publishing/education business."
+  },
+  {
+    "ticker": "VERITASKAP",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional insurance provider, which contains structural elements of Riba and Gharar."
+  },
+  {
+    "ticker": "VFDGROUP",
+    "business_status": "fail",
+    "business_reasoning": "Core business operations explicitly include microfinance banking (VFD Microfinance Bank, Vbank digital bank), mortgage banking (Abbey Mortgage Bank), insurance brokerage (Atiat Insurance Brokers), and conventional asset leasing (Atiat Leasing) - these are named primary segments, not incidental holdings. Group has also issued its own interest-bearing debt notes and holds an equity stake in NEM Insurance (a conventional insurer, already FAIL). Clean segments (Anchoria Asset Management, stockbroking, real estate/hospitality, digital media, arts) do not offset banking being a core, operated line of business."
+  },
+  {
+    "ticker": "VITAFOAM",
+    "business_status": "pass",
+    "business_reasoning": "Foam/furniture manufacturing - permissible core activity."
+  },
+  {
+    "ticker": "WAPIC",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional insurance provider, which contains structural elements of Riba and Gharar."
+  },
+  {
+    "ticker": "WEMABANK",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional bank engaging in interest-based lending and deposits, which constitutes Riba."
+  },
+  {
+    "ticker": "ZENITHBANK",
+    "business_status": "fail",
+    "business_reasoning": "The company operates as a conventional bank engaging in interest-based lending and deposits, which constitutes Riba."
+  },
+  {
+    "ticker": "ZICHIS",
+    "business_status": "fail",
+    "business_reasoning": "Core activities (oil palm, poultry, fish farming, feed milling, crop cultivation, snail farming) are permissible, but the company's own NGX listing announcement names piggery among its stated business lines - swine farming is a categorical exclusion regardless of revenue share. Current public-facing materials (company site, most profiles) omit piggery, so current materiality is unconfirmed - needs direct segment-revenue check in latest annual report/prospectus. Separately, NGX suspended trading and opened an investigation into the stock after an 859% one-month price surge - a governance/integrity risk independent of the halal screen."
+  }
+]

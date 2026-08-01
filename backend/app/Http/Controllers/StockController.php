@@ -456,12 +456,30 @@ class StockController extends Controller
             if ($isScholarVerified) {
                 $statusReason = $company->status->reason;
             } else {
-                if ($finalStatus === 'halal') {
-                    $statusReason = 'Passes both qualitative business and quantitative financial Shariah compliance checks.';
-                } else if ($aaoifiScreening->business_status === 'fail' && !empty($aaoifiScreening->business_reasoning)) {
-                    $statusReason = $aaoifiScreening->business_reasoning;
+                $businessReason = trim((string) $aaoifiScreening->business_reasoning);
+                
+                if (in_array($aaoifiScreening->business_status, ['fail', 'doubtful'])) {
+                    $statusReason = $businessReason ?: 'Fails qualitative business screening.';
+                } else if ($aaoifiScreening->business_status === 'pass') {
+                    if ($finalStatus === 'halal') {
+                        $statusReason = $businessReason ? ($businessReason . ' Additionally, it passes all AAOIFI quantitative financial screening ratios.') : 'Passes both qualitative business and quantitative financial Shariah compliance checks.';
+                    } else {
+                        $finFails = [];
+                        if ($aaoifiScreening->debt_status === 'fail') {
+                            $finFails[] = 'Interest-Bearing Debt (' . round($aaoifiScreening->debt_ratio, 2) . '% > 30%)';
+                        }
+                        if ($aaoifiScreening->cash_status === 'fail') {
+                            $finFails[] = 'Cash and Equivalents (' . round($aaoifiScreening->cash_ratio, 2) . '% > 30%)';
+                        }
+                        if ($aaoifiScreening->impermissible_income_status === 'fail') {
+                            $finFails[] = 'Impermissible Income (' . round($aaoifiScreening->impermissible_income_ratio, 2) . '% > 5%)';
+                        }
+                        
+                        $stage2Text = !empty($finFails) ? ' However, it fails quantitative financial screening due to: ' . implode(', ', $finFails) . '.' : ' However, it fails quantitative financial screening.';
+                        $statusReason = $businessReason ? ($businessReason . $stage2Text) : $stage2Text;
+                    }
                 } else {
-                    $statusReason = 'Fails Shariah compliance based on current financial disclosures or business activities.';
+                    $statusReason = 'Pending Shariah compliance screening.';
                 }
             }
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';\nimport { X, Search, Plus, CheckCircle2, Lock, ShieldCheck, Trash2, FileText, UploadCloud, Calendar, Bell } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { X, Search, Plus, CheckCircle2, Lock, ShieldCheck, Trash2, FileText, UploadCloud, Calendar, Bell } from 'lucide-react';
 import { fetchNgxStocks, linkBroker } from '../../services/api';
 import CompanyLogo from '../CompanyLogo';
 
