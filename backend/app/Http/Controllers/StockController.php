@@ -25,20 +25,12 @@ class StockController extends Controller
 
     private function clearStockCaches(?string $symbol = null): void
     {
-        \Illuminate\Support\Facades\Cache::forget('stocks.index');
-        \Illuminate\Support\Facades\Cache::forget('stocks.index_v6');
-        \Illuminate\Support\Facades\Cache::forget('stocks.ngx');
-        \Illuminate\Support\Facades\Cache::forget('stocks.ngx_v3');
-        if ($symbol) {
-            \Illuminate\Support\Facades\Cache::forget("stocks.show.{$symbol}");
-            \Illuminate\Support\Facades\Cache::forget("stocks.show.{$symbol}_v2");
-            \Illuminate\Support\Facades\Cache::forget("aaoifi_stage1_{$symbol}");
-        }
+        \Illuminate\Support\Facades\Cache::tags(['stocks'])->flush();
     }
 
     public function index(): JsonResponse
     {
-        $stocks = \Illuminate\Support\Facades\Cache::remember('stocks.index_v6', 300, function () {
+        $stocks = \Illuminate\Support\Facades\Cache::tags(['stocks'])->remember('stocks.index', 300, function () {
             return Company::select(['id', 'name', 'symbol', 'sector', 'current_status', 'latest_price', 'price_change_pct', 'logo_url', 'market_cap', 'pe_ratio'])
                 ->whereNotNull('latest_price')
                 ->where('latest_price', '>', 0)
@@ -89,7 +81,7 @@ class StockController extends Controller
      */
     public function show(string $symbol): JsonResponse
     {
-        $stock = \Illuminate\Support\Facades\Cache::remember("stocks.show.{$symbol}_v3", 300, function () use ($symbol) {
+        $stock = \Illuminate\Support\Facades\Cache::tags(['stocks'])->remember("stocks.show.{$symbol}", 300, function () use ($symbol) {
             $company = Company::with(['status', 'financials' => fn($q) => $q->latest(), 'dailyPrices' => fn($q) => $q->latest('date'), 'news'])->where('symbol', $symbol)->firstOrFail();
             
             // Map the FinancialScreening into financials for legacy mobile app compatibility
@@ -200,9 +192,13 @@ class StockController extends Controller
     public function ngx(Request $request): JsonResponse
     {
         $allowedParams = $request->only(['status', 'sector', 'min_market_cap', 'pe_max', 'per_page', 'page']);
-        $cacheKey = 'stocks.ngx_v6_' . md5(json_encode($allowedParams));
+        // Strip out any empty/null params before hashing for deterministic cache keys
+        $allowedParams = array_filter($allowedParams, fn($v) => !is_null($v) && $v !== '');
+        ksort($allowedParams);
         
-        $stocks = \Illuminate\Support\Facades\Cache::remember($cacheKey, 300, function () use ($request) {
+        $cacheKey = 'stocks.ngx_' . md5(json_encode($allowedParams));
+        
+        $stocks = \Illuminate\Support\Facades\Cache::tags(['stocks'])->remember($cacheKey, 300, function () use ($request) {
             $query = Company::select([
                 'id', 'name', 'symbol', 'sector', 'current_status', 
                 'latest_price', 'price_change', 'price_change_pct', 

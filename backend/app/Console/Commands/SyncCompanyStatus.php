@@ -141,9 +141,7 @@ class SyncCompanyStatus extends Command
         }
 
         // Clear global stock listing caches
-        Cache::forget('stocks.index_v6');
-        Cache::forget('stocks.index_v5');
-        Cache::forget('stocks.index_v4');
+        Cache::tags(['stocks'])->flush();
         $this->info("Done. Synced {$updatedCount} companies. All caches cleared.");
     }
 }

@@ -91,9 +91,7 @@ class ConsolidateCompanyDataCommand extends Command
                 // It will be evaluated when the Admin approves the Financial Update in the UI.
 
                 // Clear caches so the updated data is instantly available to the frontend
-                \Illuminate\Support\Facades\Cache::forget('stocks.index_v3');
-                \Illuminate\Support\Facades\Cache::forget('stocks.ngx_v3');
-                \Illuminate\Support\Facades\Cache::forget("stocks.show.{$company->symbol}");
+                \Illuminate\Support\Facades\Cache::tags(['stocks'])->flush();
 
                 $this->info("Successfully consolidated and checked compliance for {$company->symbol}");
             } else {

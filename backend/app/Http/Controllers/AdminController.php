@@ -147,7 +147,7 @@ class AdminController extends Controller
 
         $company->update($request->only(['name', 'sector', 'industry', 'description', 'overview']));
 
-        \Illuminate\Support\Facades\Cache::forget("stocks.show.{$symbol}");
+        \Illuminate\Support\Facades\Cache::tags(['stocks'])->flush();
 
         return $this->success($company, 'Company details updated successfully');
     }
@@ -181,7 +181,7 @@ class AdminController extends Controller
         $news->published_at = now();
         $news->save();
 
-        \Illuminate\Support\Facades\Cache::forget("stocks.show.{$symbol}_v2");
+        \Illuminate\Support\Facades\Cache::tags(['stocks'])->flush();
 
         return response()->json(['message' => 'News added successfully', 'data' => $news]);
     }
@@ -196,7 +196,7 @@ class AdminController extends Controller
         
         $news->delete();
 
-        \Illuminate\Support\Facades\Cache::forget("stocks.show.{$symbol}");
+        \Illuminate\Support\Facades\Cache::tags(['stocks'])->flush();
 
         return $this->success(null, 'News deleted successfully');
     }
@@ -361,13 +361,11 @@ class AdminController extends Controller
                 'current_status' => $change['new_verdict']
             ]);
             
-            Cache::forget("stocks.show.{$company->symbol}");
-            Cache::forget("stocks.show.{$company->symbol}_v2");
-            Cache::forget("aaoifi_stage1_{$company->symbol}"); // Clear analysis page cache too
+            Cache::tags(['stocks'])->flush();
             $updatedCount++;
         }
         
-        \Illuminate\Support\Facades\Cache::forget('stocks.index_v6');
+        \Illuminate\Support\Facades\Cache::tags(['stocks'])->flush();
         
         return response()->json(['message' => "Successfully updated $updatedCount tickers."]);
     }
