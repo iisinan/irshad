@@ -33,10 +33,7 @@ services:
       - key: QUEUE_CONNECTION
         value: redis
       - key: REDIS_URL
-        fromService:
-          type: redis
-          name: irshad-redis
-          property: connectionString
+        value: redis://127.0.0.1:6379
       - key: LOG_CHANNEL
         value: stderr
       - key: PORT
@@ -74,8 +71,3 @@ services:
       - key: PORT
         value: 80 # Nginx default in the Dockerfile
 
-  # 5. Redis Cache & Queue Broker
-  - type: redis
-    name: irshad-redis
-    plan: free
-    maxmemoryPolicy: allkeys-lru

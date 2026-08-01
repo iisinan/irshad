@@ -8,9 +8,9 @@ RUN apk add --no-cache \
     curl \
     libpng-dev \
     libxml2-dev \
-    zip \
     unzip \
     git \
+    redis \
     postgresql-dev \
     oniguruma-dev \
     libzip-dev \
@@ -23,6 +23,12 @@ RUN apk add --no-cache \
 
 # Install PHP extensions
 RUN docker-php-ext-install pdo_pgsql mbstring exif pcntl bcmath gd xml zip sockets
+
+# Install Redis PHP extension
+RUN apk add --no-cache pcre-dev $PHPIZE_DEPS \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
+    && apk del pcre-dev $PHPIZE_DEPS
 
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
