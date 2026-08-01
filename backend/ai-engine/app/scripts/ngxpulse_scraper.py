@@ -99,7 +99,8 @@ async def main():
             # Release the DB connection back to the pool before starting long-running network tasks
             await session.commit()
 
-            print(f"[{ticker}] New Financial Statement found! Downloading...", flush=True)
+            print(f"[{ticker}] New Financial Statement found! Downloading (sleeping 10s to avoid rate limits)...", flush=True)
+            await asyncio.sleep(10)
             
             # Download PDF
             pdf_path = f"/tmp/{ticker}_financials.pdf"
