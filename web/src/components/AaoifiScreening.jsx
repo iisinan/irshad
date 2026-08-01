@@ -28,7 +28,7 @@ const AaoifiScreening = () => {
   const { data: res, isLoading: queryLoading, error: queryError } = useQuery({
     queryKey: ['aaoifi', symbol],
     queryFn: () => fetchAaoifiScreening(symbol),
-    staleTime: 1000 * 60 * 60, // Cache for 1 hour
+    staleTime: 0, // Immediately refetch to clear cache
     refetchInterval: (query) => query.state.data?.status === 'processing' ? 10000 : false,
   });
 
