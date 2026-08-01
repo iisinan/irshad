@@ -103,33 +103,34 @@ class EnforceAaoifiMathCommand extends Command
                 $screening->save();
             }
 
-            // We only want to update the reason if the company fails math, OR if its current status is different.
-            $needsUpdate = ($company->current_status !== $expectedFinalStatus) || 
-                           ($statusModel && $statusModel->reason === 'Status automatically corrected to match AAOIFI mathematical evaluation.');
+            // Force update all to ensure the new dynamic justifications are fully synced
+            $needsUpdate = true;
 
             if ($needsUpdate) {
-                $reasonParts = [];
-                if ($expectedFinalStatus === 'halal') {
-                    $mathReason = 'Passes both qualitative business and quantitative financial Shariah compliance checks.';
-                } else {
-                    if ($screening->debt_status === 'fail') {
-                        $reasonParts[] = 'Interest-Bearing Debt (' . round($screening->debt_ratio, 2) . '% > 30%)';
-                    }
-                    if ($screening->cash_status === 'fail') {
-                        $reasonParts[] = 'Cash and Equivalents (' . round($screening->cash_ratio, 2) . '% > 30%)';
-                    }
-                    if ($screening->impermissible_income_status === 'fail') {
-                        $reasonParts[] = 'Impermissible Income (' . round($screening->impermissible_income_ratio, 2) . '% > 5%)';
-                    }
-                    if ($screening->business_status === 'fail') {
-                        $reasonParts[] = 'Prohibited Business Activity';
-                    }
-                    
-                    if (!empty($reasonParts)) {
-                        $mathReason = 'Fails AAOIFI mathematical screening: ' . implode(', ', $reasonParts) . '.';
+                $businessReason = trim((string) $screening->business_reasoning);
+
+                if (in_array($screening->business_status, ['fail', 'doubtful'])) {
+                    $mathReason = $businessReason ?: 'Fails qualitative business screening.';
+                } else if ($screening->business_status === 'pass') {
+                    if ($expectedFinalStatus === 'halal') {
+                        $mathReason = $businessReason ? ($businessReason . ' Additionally, it passes all AAOIFI quantitative financial screening ratios.') : 'Passes both qualitative business and quantitative financial Shariah compliance checks.';
                     } else {
-                        $mathReason = 'Fails Shariah compliance based on current financial disclosures or business activities.';
+                        $finFails = [];
+                        if ($screening->debt_status === 'fail') {
+                            $finFails[] = 'Interest-Bearing Debt (' . round($screening->debt_ratio, 2) . '% > 30%)';
+                        }
+                        if ($screening->cash_status === 'fail') {
+                            $finFails[] = 'Cash and Equivalents (' . round($screening->cash_ratio, 2) . '% > 30%)';
+                        }
+                        if ($screening->impermissible_income_status === 'fail') {
+                            $finFails[] = 'Impermissible Income (' . round($screening->impermissible_income_ratio, 2) . '% > 5%)';
+                        }
+                        
+                        $stage2Text = !empty($finFails) ? ' However, it fails quantitative financial screening due to: ' . implode(', ', $finFails) . '.' : ' However, it fails quantitative financial screening.';
+                        $mathReason = $businessReason ? ($businessReason . $stage2Text) : $stage2Text;
                     }
+                } else {
+                    $mathReason = 'Pending Shariah compliance screening.';
                 }
 
                 $oldStatus = $company->current_status;
