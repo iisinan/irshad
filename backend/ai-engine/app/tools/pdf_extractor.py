@@ -146,13 +146,18 @@ class PDFExtractor:
                     ),
                 )
 
-            response = await asyncio.to_thread(_generate)
-
-            try:
-                return json.loads(response.text)
-            except Exception as e:
-                print(f"Failed to parse Gemini response: {e}")
-                return {}
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    response = await asyncio.to_thread(_generate)
+                    return json.loads(response.text)
+                except Exception as e:
+                    print(f"Gemini API Error (Attempt {attempt + 1}/{max_retries}): {e}")
+                    if attempt == max_retries - 1:
+                        print(f"Failed to extract after {max_retries} attempts.")
+                        return {}
+                    # Exponential backoff (5s, 10s, 20s...)
+                    await asyncio.sleep(5 * (2 ** attempt))
         finally:
             print(f"Cleaning up Gemini file: {gemini_file.name}...")
             try:
