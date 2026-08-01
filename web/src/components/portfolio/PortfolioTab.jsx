@@ -151,24 +151,6 @@ function HoldingRow({ holding, onDelete, onEdit }) {
         </div>
       </div>
 
-      {/* Trend Line */}
-      <div style={{ flex: 1, height: '36px', padding: '0 20px', opacity: hov ? 1 : 0.6, transition: 'opacity 0.2s' }}>
-        {holding.total_value > 0 && (
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={sparkData}>
-              <defs>
-                <linearGradient id={`sp-${holding.id}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={isUp?'#22c55e':'#ef4444'} stopOpacity={0.2}/>
-                  <stop offset="100%" stopColor={isUp?'#22c55e':'#ef4444'} stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <YAxis domain={['dataMin - 5000','dataMax + 5000']} hide/>
-              <Area type="monotone" dataKey="v" stroke={isUp?'#22c55e':'#ef4444'} strokeWidth={2} fill={`url(#sp-${holding.id})`} dot={false}/>
-            </AreaChart>
-          </ResponsiveContainer>
-        )}
-      </div>
-
       {/* Shares & Value */}
       <div style={{ flex: 1, textAlign: 'right' }}>
         <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.79rem' }}>{fmtK(holding.total_value)}</div>
@@ -300,8 +282,7 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
           <div style={{ display:'flex', gap:'12px', flexWrap:'wrap' }}>
             {[
               { lbl: 'Halal', val: halalCount, bg: 'rgba(34,197,94,0.1)', color: '#22c55e' },
-              { lbl: 'Non-Halal', val: nonHalalCount, bg: 'rgba(239,68,68,0.1)', color: '#ef4444' },
-              { lbl: 'Purify', val: fmtK(purificationDue), bg: 'rgba(245,158,11,0.1)', color: '#f59e0b' }
+              { lbl: 'Non-Halal', val: nonHalalCount, bg: 'rgba(239,68,68,0.1)', color: '#ef4444' }
             ].map(stat => stat.val > 0 || stat.val !== "₦0" ? (
               <div key={stat.lbl} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg)', padding: '6px 14px', borderRadius: '12px', border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
                 <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: stat.color }} />
@@ -335,7 +316,6 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
           {[
             { id:'all', label:'All Holdings' },
             { id:'halal', label:'Halal' },
-            { id:'purify', label:'Purify' },
             { id:'nonhalal', label:'Non-Halal' }
           ].map(f => (
             <button key={f.id} onClick={() => setActiveFilter(f.id)} style={{
@@ -367,7 +347,6 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
         {displayHoldings.length > 0 && (
           <div style={{ display: 'flex', alignItems: 'center', padding: '0 24px 16px 24px' }}>
             <div style={{ flex: 1.5, fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', paddingLeft: '62px' }}>Asset</div>
-            <div style={{ flex: 1, textAlign: 'center', fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', paddingLeft: '20px' }}>7D Trend</div>
             <div style={{ flex: 1, textAlign: 'right', fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Value / Shares</div>
             <div style={{ flex: 0.8, textAlign: 'right', fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', paddingLeft: '20px' }}>Total Return</div>
             <div style={{ paddingLeft: '24px', display: 'flex', gap: '8px' }}>
