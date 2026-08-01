@@ -569,113 +569,105 @@ const StockDetails = ({ symbol: propSymbol }) => {
 
 
 
-          {/* Purification Calculator */}
+          {/* Dividend Purification — redesigned */}
           {isHalal && (
-            <div className="detail-panel hover-card" style={{ 
-            background: 'linear-gradient(135deg, #071F24 0%, #0D3E42 100%)', 
-            border: '1px solid rgba(212, 175, 55, 0.15)', 
-            color: 'white',
-            boxShadow: '0 12px 32px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.05)',
-            position: 'relative', overflow: 'hidden'
-          }}>
-            <div style={{ position: 'absolute', top: 0, right: 0, width: '150px', height: '150px', background: 'radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 70%)', pointerEvents: 'none' }} />
-            
-            <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
-              <div style={{ paddingRight: '12px' }}>
-                <h3 style={{ color: 'white', fontWeight: 800, margin: '0 0 6px', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <ShieldCheck size={18} color="var(--gold)" /> Dividend Purification
-                </h3>
-                <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem', margin: 0, lineHeight: 1.5 }}>
-                  Cleanse your dividend earnings from non-compliant income based on AAOIFI standards.
-                </p>
-              </div>
-              <div style={{ flexShrink: 0, textAlign: 'right', background: 'linear-gradient(135deg, rgba(201,168,76,0.2) 0%, rgba(201,168,76,0.05) 100%)', padding: '10px 14px', borderRadius: '12px', border: '1px solid rgba(201,168,76,0.3)', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
-                <div style={{ fontSize: '0.66rem', color: 'var(--gold)', fontWeight: 800, textTransform: 'uppercase', marginBottom: '2px', letterSpacing: '0.5px' }}>Purification Rate</div>
-                <div style={{ fontSize: '1.2rem', fontWeight: 900, color: 'white', textShadow: '0 2px 8px rgba(212, 175, 55, 0.3)' }}>{purificationRate}%</div>
-              </div>
-            </div>
+            <div className="detail-panel" style={{
+              background: 'linear-gradient(160deg, #071F24 0%, #0B3038 60%, #071A20 100%)',
+              border: '1px solid rgba(212,175,55,0.18)',
+              color: 'white',
+              boxShadow: '0 16px 48px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.06)',
+              position: 'relative', overflow: 'hidden', borderRadius: '20px'
+            }}>
+              {/* Decorative glow */}
+              <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'radial-gradient(circle, rgba(212,175,55,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
+              <div style={{ position: 'absolute', bottom: '-60px', left: '-20px', width: '180px', height: '180px', background: 'radial-gradient(circle, rgba(0,214,143,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
-            <div style={{ position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
-              <div style={{ background: 'rgba(255,255,255,0.04)', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <div style={{ fontSize: '0.66rem', color: 'rgba(255,255,255,0.5)', fontWeight: 700, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Non-Compliant Rev.</div>
-                <div style={{ fontSize: '0.94rem', fontWeight: 800, color: 'white' }}>
-                  {latest?.non_compliant_income_ratio ? `${(parseFloat(latest.non_compliant_income_ratio) * 100).toFixed(2)}%` : 'N/A'}
+              {/* Header */}
+              <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ShieldCheck size={18} color="#d4af37" />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.66rem', color: 'rgba(255,255,255,0.45)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '2px' }}>AAOIFI Compliant</div>
+                    <div style={{ fontSize: '1rem', fontWeight: 800, color: 'white' }}>Dividend Purification</div>
+                  </div>
+                </div>
+                {/* Purification Rate Badge */}
+                <div style={{ textAlign: 'center', background: 'linear-gradient(135deg, rgba(212,175,55,0.2) 0%, rgba(212,175,55,0.06) 100%)', padding: '8px 14px', borderRadius: '12px', border: '1px solid rgba(212,175,55,0.3)' }}>
+                  <div style={{ fontSize: '0.6rem', color: '#d4af37', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Purification Rate</div>
+                  <div style={{ fontSize: '1.3rem', fontWeight: 900, color: 'white', lineHeight: 1.1, marginTop: '2px' }}>{purificationRate}%</div>
                 </div>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.04)', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <div style={{ fontSize: '0.66rem', color: 'rgba(255,255,255,0.5)', fontWeight: 700, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Interest Income</div>
-                <div style={{ fontSize: '0.94rem', fontWeight: 800, color: 'white' }}>
-                  {interestRatio}%
-                </div>
-              </div>
-            </div>
 
-            <div style={{ position: 'relative', zIndex: 1, background: 'rgba(0,0,0,0.25)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'rgba(255,255,255,0.8)', marginBottom: '12px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Calculate Purification Due</label>
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                <div style={{ position: 'relative', flex: 1 }}>
-                  <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.5)', fontWeight: 800 }}>₦</span>
-                  <input
-                    type="number"
-                    placeholder="Enter dividend"
-                    value={dividendInput}
-                    onChange={e => setDividendInput(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '14px 14px 14px 36px',
-                      borderRadius: '10px',
-                      border: '1px solid rgba(255,255,255,0.15)',
-                      background: 'rgba(255,255,255,0.08)',
-                      color: 'white',
-                      fontSize: '0.94rem',
-                      fontWeight: 600,
-                      outline: 'none',
-                      transition: 'all 0.2s'
-                    }}
-                    onFocus={e => { e.target.style.borderColor = 'var(--gold)'; e.target.style.background = 'rgba(255,255,255,0.12)'; }}
-                    onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.15)'; e.target.style.background = 'rgba(255,255,255,0.08)'; }}
-                  />
+              {/* Divider */}
+              <div style={{ height: '1px', background: 'rgba(255,255,255,0.06)', marginBottom: '18px', position: 'relative', zIndex: 1 }} />
+
+              {/* Upcoming Dividend Section */}
+              <div style={{ position: 'relative', zIndex: 1, marginBottom: '14px' }}>
+                <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: stock?.upcoming_dividend ? '#00d68f' : 'rgba(255,255,255,0.2)', display: 'inline-block', boxShadow: stock?.upcoming_dividend ? '0 0 8px #00d68f' : 'none' }} />
+                  Upcoming Dividend
                 </div>
-                {purificationAmount !== null && dividendInput !== '' && (
-                  <div className="animate-fade-in" style={{ flex: '0 0 auto', background: 'linear-gradient(135deg, #d4af37 0%, #b89326 100%)', padding: '12px 16px', borderRadius: '10px', color: '#1A1208', textAlign: 'center', minWidth: '100px', boxShadow: '0 4px 12px rgba(212, 175, 55, 0.3)' }}>
-                    <div style={{ fontSize: '0.6rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '2px', opacity: 0.8, letterSpacing: '0.5px' }}>Amount Due</div>
-                    <div style={{ fontSize: '1rem', fontWeight: 900 }}>₦ {purificationAmount}</div>
+                {stock?.upcoming_dividend ? (
+                  <div style={{ background: 'rgba(0,214,143,0.05)', border: '1px solid rgba(0,214,143,0.15)', borderRadius: '14px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {/* Amount + Type */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.45)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>Amount Per Share</div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#00d68f', letterSpacing: '-0.5px' }}>₦{parseFloat(stock.upcoming_dividend.amount).toFixed(2)}</div>
+                      </div>
+                      <div style={{ background: 'rgba(0,214,143,0.12)', border: '1px solid rgba(0,214,143,0.2)', borderRadius: '8px', padding: '6px 12px' }}>
+                        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#00d68f' }}>{stock.upcoming_dividend.dividend_type || 'Dividend'}</div>
+                      </div>
+                    </div>
+                    {/* Dates row */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                      {[
+                        { label: 'Ex-Date', val: stock.upcoming_dividend.ex_date },
+                        { label: 'Record Date', val: stock.upcoming_dividend.record_date },
+                        { label: 'Pay Date', val: stock.upcoming_dividend.pay_date },
+                      ].map(({ label, val }) => (
+                        <div key={label} style={{ background: 'rgba(0,0,0,0.2)', borderRadius: '10px', padding: '10px', textAlign: 'center' }}>
+                          <div style={{ fontSize: '0.58rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '4px' }}>{label}</div>
+                          <div style={{ fontSize: '0.76rem', fontWeight: 700, color: 'rgba(255,255,255,0.85)' }}>
+                            {val ? new Date(val).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' }) : '—'}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <span style={{ fontSize: '1rem' }}>📅</span>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'rgba(255,255,255,0.6)' }}>No upcoming dividend declared</div>
+                      <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.35)', marginTop: '2px' }}>We'll update when NGX publishes one</div>
+                    </div>
                   </div>
                 )}
               </div>
-            </div>
+
+              {/* Last Paid Dividend */}
+              {stock?.last_paid_dividend && (
+                <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '12px 16px' }}>
+                  <div>
+                    <div style={{ fontSize: '0.62rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '3px' }}>Last Paid Dividend</div>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'rgba(255,255,255,0.75)' }}>₦{parseFloat(stock.last_paid_dividend.amount).toFixed(2)} · {stock.last_paid_dividend.dividend_type}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: '0.62rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '3px' }}>Paid On</div>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)' }}>
+                      {stock.last_paid_dividend.pay_date ? new Date(stock.last_paid_dividend.pay_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
-            {/* Buy Now */}
-            <button 
-              onClick={(e) => {
-                e.preventDefault();
-                if (!user) {
-                  navigate('/login');
-                } else {
-                  setShowBrokerageModal(true);
-                }
-              }}
-              className="hover-card" 
-              style={{ 
-                width: '100%', justifyContent: 'center', padding: '16px', fontSize: '0.94rem', 
-                border: 'none', cursor: 'pointer', borderRadius: '16px',
-                background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%)',
-                color: 'white', fontWeight: 800, letterSpacing: '0.5px',
-                boxShadow: '0 8px 24px rgba(6, 78, 59, 0.25), inset 0 1px 0 rgba(255,255,255,0.2)',
-                transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                display: 'flex', alignItems: 'center', gap: '8px'
-              }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(6, 78, 59, 0.35), inset 0 1px 0 rgba(255,255,255,0.2)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(6, 78, 59, 0.25), inset 0 1px 0 rgba(255,255,255,0.2)'; }}
-            >
-              Buy Now
-            </button>
-
-            <p style={{ fontSize: '0.7rem', color: 'var(--text-light)', textAlign: 'center', lineHeight: 1.5 }}>
-              Link your Nigerian brokerage account to enable live trading.
-            </p>
           </div>
         </div>
 

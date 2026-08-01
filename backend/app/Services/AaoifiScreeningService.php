@@ -142,8 +142,9 @@ class AaoifiScreeningService
         }
 
         // 5. Save to DB
-        $screening = AaoifiScreening::create([
-            'company_id' => $company->id,
+        $screening = AaoifiScreening::updateOrCreate(
+            ['company_id' => $company->id],
+            [
             'business_status' => $businessStatus,
             'business_reasoning' => $aiResult,
             'debt_ratio' => $debtRatio,

@@ -76,14 +76,22 @@ class EnforceAaoifiMathCommand extends Command
             }
 
             // Determine what final status SHOULD be
-            $expectedFinalStatus = 'halal';
-            
-            if ($screening->business_status === 'fail' || $screening->debt_status === 'fail' || $screening->cash_status === 'fail' || $screening->impermissible_income_status === 'fail') {
+            // ONLY halal business activities proceed to stage 2 (financial) screening.
+            if ($screening->business_status === 'fail' || $screening->business_status === 'non-halal') {
                 $expectedFinalStatus = 'non-halal';
-            } elseif ($screening->business_status === 'warning' || $screening->debt_status === 'warning' || $screening->cash_status === 'warning' || $screening->impermissible_income_status === 'warning') {
+            } elseif ($screening->business_status === 'warning' || $screening->business_status === 'doubtful' || $screening->business_status === 'insufficient_data') {
                 $expectedFinalStatus = 'doubtful';
-            } elseif ($screening->business_status === 'insufficient_data' || $screening->debt_status === 'insufficient_data' || $screening->cash_status === 'insufficient_data' || $screening->impermissible_income_status === 'insufficient_data') {
-                $expectedFinalStatus = 'doubtful';
+            } else {
+                // Stage 2: Financial Screening (only if business activity is halal/pass)
+                if ($screening->debt_status === 'fail' || $screening->cash_status === 'fail' || $screening->impermissible_income_status === 'fail') {
+                    $expectedFinalStatus = 'non-halal';
+                } elseif (in_array($screening->debt_status, ['warning', 'doubtful', 'insufficient_data']) || 
+                          in_array($screening->cash_status, ['warning', 'doubtful', 'insufficient_data']) || 
+                          in_array($screening->impermissible_income_status, ['warning', 'doubtful', 'insufficient_data'])) {
+                    $expectedFinalStatus = 'doubtful';
+                } else {
+                    $expectedFinalStatus = 'halal';
+                }
             }
 
             if ($screening->final_status !== $expectedFinalStatus) {

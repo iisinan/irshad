@@ -118,7 +118,40 @@ class StockController extends Controller
             return $company;
         });
 
-        return $this->success($stock);
+        // Append dividend data (latest upcoming + last paid) — not cached so always fresh
+        $dividendData = null;
+        $upcomingDividend = \App\Models\Dividend::where('ticker', $symbol)
+            ->where('status', 'upcoming')
+            ->whereNotNull('ex_date')
+            ->orderBy('ex_date', 'asc')
+            ->first();
+
+        $lastPaidDividend = \App\Models\Dividend::where('ticker', $symbol)
+            ->where('status', 'paid')
+            ->orderBy('pay_date', 'desc')
+            ->first();
+
+        $stockArray = $stock->toArray();
+        $stockArray['upcoming_dividend'] = $upcomingDividend ? [
+            'amount'       => $upcomingDividend->amount,
+            'currency'     => $upcomingDividend->currency,
+            'dividend_type'=> $upcomingDividend->dividend_type,
+            'ex_date'      => $upcomingDividend->ex_date?->toDateString(),
+            'record_date'  => $upcomingDividend->record_date?->toDateString(),
+            'pay_date'     => $upcomingDividend->pay_date?->toDateString(),
+            'status'       => $upcomingDividend->status,
+        ] : null;
+
+        $stockArray['last_paid_dividend'] = $lastPaidDividend ? [
+            'amount'       => $lastPaidDividend->amount,
+            'currency'     => $lastPaidDividend->currency,
+            'dividend_type'=> $lastPaidDividend->dividend_type,
+            'ex_date'      => $lastPaidDividend->ex_date?->toDateString(),
+            'pay_date'     => $lastPaidDividend->pay_date?->toDateString(),
+            'status'       => $lastPaidDividend->status,
+        ] : null;
+
+        return $this->success($stockArray);
     }
 
     public function search(Request $request): JsonResponse
@@ -447,43 +480,22 @@ class StockController extends Controller
                 $cashRatio = ($cash / $marketCap) * 100;
             }
 
-            // Run Stage 1 (Qualitative) using Perplexity AI (Cached for 7 days)
-            $cacheKey = "aaoifi_stage1_{$company->symbol}";
-            $fallbackKey = "aaoifi_stage1_{$company->symbol}_fallback";
+            // Stage 1 (Qualitative) is strictly from the database (AaoifiScreening).
+            $stage1Pass = true;
+            $stage1Reason = 'Passes business activity screening based on Excel manual verdict.';
             
-            $stage1 = cache()->get($cacheKey);
-            
-            if (!$stage1) {
-                try {
-                    $perplexity = new \App\Services\PerplexityAiService();
-                    $stage1 = $perplexity->runBusinessActivityScreening($company);
-                    cache()->put($cacheKey, $stage1, now()->addDays(7));
-                    cache()->put($fallbackKey, $stage1, now()->addDays(365)); // Save a long-term fallback
-                } catch (\Exception $e) {
-                    // On failure, try to use the last known good result
-                    $oldCache = cache()->get($fallbackKey);
-                    
-                    if ($oldCache) {
-                        $stage1 = $oldCache;
-                    } else {
-                        // If no fallback exists, use a safe default but DO NOT cache it
-                        $stage1 = [
-                            'compliance_status' => 'PASS',
-                            'haram_revenue_percent' => 0,
-                            'purification_required' => false,
-                            'reason' => 'Detailed business activity reasoning is currently unavailable. Assumed compliant based on sector classification for further analysis.'
-                        ];
-                    }
-                }
-            }
-
-            $stage1Pass = ($stage1['compliance_status'] ?? 'PASS') === 'PASS';
-
-            // DB business_status is ground truth (set by admin or sync job). Override AI cache if DB says otherwise.
             if ($existingScreening && $existingScreening->business_status) {
                 $stage1Pass = $existingScreening->business_status === 'pass';
+                $stage1Reason = $existingScreening->business_reasoning ?? $stage1Reason;
+            } else {
+                $stage1Pass = false;
+                $stage1Reason = 'Business activity status is pending review.';
             }
-            
+
+            $stage1 = [
+                'compliance_status' => $stage1Pass ? 'PASS' : 'FAIL',
+                'reason' => $stage1Reason
+            ];
             // Recalculate Stage 2 Pass dynamically instead of trusting the AI script, 
             // since the AI script frequently fails due to missing denominators.
             $debtPass = $debtRatio !== null ? ($debtRatio <= 30) : true;

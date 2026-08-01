@@ -17,7 +17,13 @@ class PortfolioController extends Controller
      */
     public function index(): JsonResponse
     {
-        $holdings = Holding::with(['company.financials:id,company_id,total_revenue,interest_income'])
+        $holdings = Holding::with([
+            'company.financials:id,company_id,total_revenue,interest_income',
+            'company.dividends' => function ($query) {
+                $query->where('status', 'paid')
+                      ->where('pay_date', '>=', now()->subMonths(12));
+            }
+        ])
             ->where('user_id', Auth::id())
             ->get();
 
@@ -33,7 +39,11 @@ class PortfolioController extends Controller
             $totalValue = $holding->shares * $currentPrice;
             
             $isHalal = strtolower($status) === 'halal' || strtolower($status) === 'compliant';
-            $purificationDue = $isHalal ? $totalValue * ($nonCompliantRatio / 100) : 0;
+            
+            // Calculate Purification Due based on paid dividends in the trailing 12 months
+            $trailingDividendsPerShare = $company?->dividends?->sum('amount') ?? 0;
+            $totalDividendsReceived = $holding->shares * $trailingDividendsPerShare;
+            $purificationDue = $isHalal ? $totalDividendsReceived * ($nonCompliantRatio / 100) : 0;
 
             // Calculate return
             $returnPercentage = 0;

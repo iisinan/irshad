@@ -78,18 +78,13 @@ class SyncCompanyStatus extends Command
             }
 
             // --- Stage 1: Business Activity ---
-            // Use cached result if available (same 7-day key as StockController).
-            // Do NOT call Perplexity if not cached — quota may be exhausted and it will hang.
-            // Instead, treat missing stage1 as PASS (conservative approach).
-            $stage1 = Cache::get("aaoifi_stage1_{$symbol}");
-            if ($stage1 === null) {
-                // No cache — run local rule-based screening without calling external Perplexity API
-                $perplexity = new \App\Services\PerplexityAiService();
-                $stage1 = $perplexity->runBusinessActivityScreening($company, false);
+            // Business activity status is now strictly derived from the AaoifiScreening database (which is seeded by Excel).
+            $existingScreening = \App\Models\AaoifiScreening::where('company_id', $company->id)->first();
+            $stage1Pass = false;
+            
+            if ($existingScreening && $existingScreening->business_status) {
+                $stage1Pass = $existingScreening->business_status === 'pass';
             }
-
-            // compliance_status is PASS or FAIL (from Perplexity cache)
-            $stage1Pass = ($stage1['compliance_status'] ?? 'PASS') === 'PASS';
 
             // --- Stage 2: Financial Ratios ---
             // If ratio data is missing, assume pass (same as StockController line 394-396)
