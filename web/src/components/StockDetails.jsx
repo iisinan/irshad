@@ -133,7 +133,8 @@ const StockDetails = ({ symbol: propSymbol }) => {
   reason = formatAppJustification(reason, isNonHalal);
 
   const aaoifiData = stock.aaoifi_screening ?? stock.compliance_data ?? null;
-  const hasPurification = isHalal && !!aaoifiData?.purification_required;
+  // purification_required is injected into stock.status by the backend
+  const hasPurification = isHalal && !!(rawStatus?.purification_required);
   if (hasPurification) {
     statusStr = 'HALAL WITH PURIFICATION';
     StatusIcon = Droplets;

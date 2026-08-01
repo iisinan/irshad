@@ -160,10 +160,19 @@ class StockController extends Controller
 
         // Expose business_status so the frontend can hide analysis/metrics/news
         // for stocks that failed qualitative business activity screening.
+        // Also inject purification_required into the status object so the frontend
+        // can show the "HALAL WITH PURIFICATION" banner.
         $aaoifiScreening = \App\Models\AaoifiScreening::where('company_id', $stock->id)
-            ->select('business_status')
+            ->select('business_status', 'impermissible_income_ratio', 'impermissible_income_status')
             ->first();
         $stockArray['business_status'] = $aaoifiScreening?->business_status ?? null;
+
+        // Inject purification flag into the status object
+        if (isset($stockArray['status']) && is_array($stockArray['status'])) {
+            $ratio = (float) ($aaoifiScreening?->impermissible_income_ratio ?? 0);
+            $stockArray['status']['purification_required'] = ($stockArray['status']['status'] ?? '') === 'halal' && $ratio > 0;
+            $stockArray['status']['haram_revenue_percent'] = round($ratio, 4);
+        }
 
         return $this->success($stockArray);
     }
