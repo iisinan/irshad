@@ -21,7 +21,7 @@ trait SafeCache
 
             return $store;
         } catch (\Exception $e) {
-            return Cache::store();
+            return Cache::store('file');
         }
     }
 
@@ -45,7 +45,7 @@ trait SafeCache
         try {
             Cache::tags($tags)->forget($key);
         } catch (\Exception $e) {
-            Cache::forget($key);
+            Cache::store('file')->forget($key);
         }
     }
 }
