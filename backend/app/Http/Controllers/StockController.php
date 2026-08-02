@@ -37,7 +37,7 @@ class StockController extends Controller
 
     public function index(): JsonResponse
     {
-        $stocks = $this->safeCache()->remember('stocks.index', 300, function () {
+        $stocks = $this->safeTaggedCache(['stocks'])->remember('stocks.index', 300, function () {
             return Company::select(['id', 'name', 'symbol', 'sector', 'current_status', 'latest_price', 'price_change_pct', 'logo_url', 'market_cap', 'pe_ratio'])
                 ->with('aaoifiScreening:company_id,impermissible_income_ratio')
                 ->get()
@@ -87,7 +87,7 @@ class StockController extends Controller
      */
     public function show(string $symbol): JsonResponse
     {
-        $stock = $this->safeCache()->remember("stocks.show.{$symbol}", 300, function () use ($symbol) {
+        $stock = $this->safeTaggedCache(['stocks'])->remember("stocks.show.{$symbol}", 300, function () use ($symbol) {
             $company = Company::with(['status', 'financials' => fn ($q) => $q->latest(), 'dailyPrices' => fn ($q) => $q->latest('date'), 'news'])->where('symbol', $symbol)->firstOrFail();
 
             // Map the FinancialScreening into financials for legacy mobile app compatibility
@@ -178,7 +178,7 @@ class StockController extends Controller
 
     public function search(Request $request): JsonResponse
     {
-        $query = substr(trim($request->get('q', '')), 0, 100);
+        $query = substr(trim($request->get('q', $request->get('query', ''))), 0, 100);
 
         $stocks = Company::select(['id', 'name', 'symbol', 'sector', 'current_status', 'latest_price', 'price_change_pct', 'logo_url'])
             ->whereNotNull('latest_price')
@@ -206,7 +206,7 @@ class StockController extends Controller
 
         $cacheKey = 'stocks.ngx_'.md5(json_encode($allowedParams));
 
-        $stocks = $this->safeCache()->remember($cacheKey, 300, function () use ($request) {
+        $stocks = $this->safeTaggedCache(['stocks'])->remember($cacheKey, 300, function () use ($request) {
             $query = Company::select([
                 'id', 'name', 'symbol', 'sector', 'current_status',
                 'latest_price', 'price_change', 'price_change_pct',
