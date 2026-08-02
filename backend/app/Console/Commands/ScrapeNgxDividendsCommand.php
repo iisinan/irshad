@@ -79,7 +79,7 @@ class ScrapeNgxDividendsCommand extends Command
                     $exDate = ! empty($row['exDate']) ? $row['exDate'] : null;
                     $recordDate = ! empty($row['recordDate']) ? $row['recordDate'] : null;
                     $payDate = ! empty($row['payDate']) ? $row['payDate'] : null;
-                    $amount = floatval($row['amount']);
+                    $amount = round(floatval($row['amount']), 4);
                     $type = trim($row['type'] ?? '');
                     $status = trim(strtolower($row['status'] ?? 'tbd'));
                     $currency = trim($row['currency'] ?? 'NGN');
