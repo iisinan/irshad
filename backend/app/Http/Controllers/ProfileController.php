@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\History;
 use App\Models\User;
 use App\Traits\ApiResponder;
+use App\Traits\SafeCache;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -14,6 +15,7 @@ use Illuminate\Validation\Rule;
 class ProfileController extends Controller
 {
     use ApiResponder;
+    use SafeCache;
 
     /**
      * Get profile of authenticated user.
@@ -22,7 +24,7 @@ class ProfileController extends Controller
     {
         $userId = $request->user()->id;
 
-        $user = Cache::tags(['users'])->remember("user.profile.{$userId}", 3600, function () use ($userId) {
+        $user = $this->safeTaggedCache(['users'])->remember("user.profile.{$userId}", 3600, function () use ($userId) {
             $u = User::find($userId);
             $u->screened_count = History::where('user_id', $userId)
                 ->whereIn('action', ['scan', 'check'])
@@ -63,7 +65,7 @@ class ProfileController extends Controller
 
         $user->update($validated);
 
-        Cache::tags(['users'])->forget("user.profile.{$user->id}");
+        $this->safeForgetTagged(['users'], "user.profile.{$user->id}");
 
         return $this->success($user, 'Profile updated successfully');
     }

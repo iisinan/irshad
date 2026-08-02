@@ -14,6 +14,7 @@ use App\Services\AaoifiComplianceService;
 use App\Services\NgxService;
 use App\Services\PerplexityAiService;
 use App\Traits\ApiResponder;
+use App\Traits\SafeCache;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -21,6 +22,7 @@ use Illuminate\Support\Facades\Cache;
 class StockController extends Controller
 {
     use ApiResponder;
+    use SafeCache;
 
     protected NgxService $ngxService;
 
@@ -32,29 +34,6 @@ class StockController extends Controller
         $this->complianceService = $complianceService;
     }
 
-    private function clearStockCaches(?string $symbol = null): void
-    {
-        try {
-            Cache::tags(['stocks'])->flush();
-        } catch (\Exception $e) {
-            Cache::flush();
-        }
-    }
-
-    /**
-     * Returns a cache store that supports tags (Redis) or falls back to tagless cache.
-     */
-    private function safeCache(): \Illuminate\Cache\TaggedCache|\Illuminate\Cache\Repository
-    {
-        try {
-            $store = Cache::tags(['stocks']);
-            // Trigger a connection to verify Redis is available
-            $store->has('__ping');
-            return $store;
-        } catch (\Exception $e) {
-            return Cache::store();
-        }
-    }
 
     public function index(): JsonResponse
     {
@@ -108,7 +87,7 @@ class StockController extends Controller
      */
     public function show(string $symbol): JsonResponse
     {
-        $stock = Cache::tags(['stocks'])->remember("stocks.show.{$symbol}", 300, function () use ($symbol) {
+        $stock = $this->safeCache()->remember("stocks.show.{$symbol}", 300, function () use ($symbol) {
             $company = Company::with(['status', 'financials' => fn ($q) => $q->latest(), 'dailyPrices' => fn ($q) => $q->latest('date'), 'news'])->where('symbol', $symbol)->firstOrFail();
 
             // Map the FinancialScreening into financials for legacy mobile app compatibility
