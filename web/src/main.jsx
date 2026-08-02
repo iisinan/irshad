@@ -9,7 +9,14 @@ import { GoogleOAuthProvider } from '@react-oauth/google'
 import { BrowserRouter as Router } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      retryDelay: 1000,
+    },
+  },
+});
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '695007449342-h6pllbs2fctnjlnq5tr0j9ktlmoaohed.apps.googleusercontent.com';
 

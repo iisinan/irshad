@@ -153,6 +153,9 @@ export default function MarketTab() {
     },
     staleTime: 5 * 60 * 1000,
     refetchInterval: 30000,
+    refetchOnWindowFocus: true,
+    retry: 2,
+    retryDelay: 2000,
   });
 
   const { data: initialWatchlist = [] } = useQuery({
