@@ -15,6 +15,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "livewire/livewire": "^4.3",
+        "predis/predis": "^3.5",
         "promphp/prometheus_client_php": "^2.15",
         "resend/resend-laravel": "^1.4",
         "resend/resend-php": "^1.5",

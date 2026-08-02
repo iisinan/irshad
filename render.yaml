@@ -32,6 +32,8 @@ services:
         value: redis
       - key: QUEUE_CONNECTION
         value: redis
+      - key: REDIS_CLIENT
+        value: predis
       - key: REDIS_URL
         value: redis://127.0.0.1:6379
       - key: LOG_CHANNEL
