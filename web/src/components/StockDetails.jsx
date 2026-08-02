@@ -4,6 +4,7 @@ import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2, Brain, Globe, Newspaper, Bell, X, ShieldCheck, Activity, ChevronDown, ChevronUp, Briefcase, Scale, Landmark, Droplets } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import api, { fetchStockDetails, fetchAiAnalysis, setPriceAlert, fetchWatchlist, addToWatchlist, removeFromWatchlist } from '../services/api';
+import { useQuery } from '@tanstack/react-query';
 import CompanyLogo from './CompanyLogo';
 import ReactMarkdown from 'react-markdown';
 import { useAuth } from '../context/AuthContext';
@@ -17,9 +18,25 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const { user } = useAuth();
   // Use optimistic data passed via router state for instant render
   const optimisticStock = location.state?.stock || null;
-  const [stock, setStock] = useState(optimisticStock);
-  const [loading, setLoading] = useState(true); // always show full spinner to prevent layout shifts
-  const [enriching, setEnriching] = useState(!!optimisticStock); // silent background fetch
+
+  // React Query — uses cached data instantly on repeat visits, fetches fresh in background
+  const { data: fetchedStock, isLoading: queryLoading } = useQuery({
+    queryKey: ['stock', symbol],
+    queryFn: async () => {
+      const r = await fetchStockDetails(symbol);
+      return r?.data || r;
+    },
+    staleTime: 5 * 60 * 1000,     // 5 min cache — repeat visits are instant
+    placeholderData: optimisticStock, // show market list data immediately while fetching
+    retry: 2,
+    retryDelay: 1500,
+  });
+
+  // Use freshly fetched data, or fall back to what was passed from the market list
+  const stock = fetchedStock || optimisticStock;
+  // Only show spinner if we have NO data at all (first ever visit to this stock)
+  const loading = queryLoading && !stock;
+
   const [aiAnalysis, setAiAnalysis] = useState(null);
   const [isAiExpanded, setIsAiExpanded] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
@@ -32,7 +49,17 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const [inWatchlist, setInWatchlist] = useState(false);
   const [watchlistLoading, setWatchlistLoading] = useState(false);
 
-
+  // Log history & load watchlist status
+  useEffect(() => {
+    if (user) {
+      api.post('/history', { action: 'check', reference_id: symbol }).catch(() => {});
+      fetchWatchlist().then(res => {
+        const list = res?.data || res || [];
+        setInWatchlist(list.some(item => item.symbol === symbol));
+      }).catch(console.error);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [symbol, user]);
 
   const handleAskAI = () => {
     setAiLoading(true);
@@ -56,40 +83,6 @@ const StockDetails = ({ symbol: propSymbol }) => {
       .finally(() => setAiLoading(false));
   };
 
-  useEffect(() => {
-    const fetchLatest = () => {
-      fetchStockDetails(symbol)
-        .then(r => { if (r.data) setStock(r.data); })
-        .catch(console.error);
-    };
-
-    // Initial fetch
-    fetchStockDetails(symbol)
-      .then(r => { if (r.data) setStock(r.data); })
-      .catch(console.error)
-      .finally(() => { setLoading(false); setEnriching(false); });
-      
-    // Silent background polling every 30 seconds
-    const intervalId = setInterval(fetchLatest, 30000);
-      
-    // Log history
-    if (user) {
-      api.post('/history', { action: 'check', reference_id: symbol }).catch(() => {});
-      fetchWatchlist().then(res => {
-        const list = res?.data || res || [];
-        setInWatchlist(list.some(item => item.symbol === symbol));
-      }).catch(console.error);
-    }
-    
-    return () => clearInterval(intervalId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [symbol, user]);
-
-  useEffect(() => {
-    if (!loading) {
-      window.dispatchEvent(new CustomEvent('stock-data-loaded'));
-    }
-  }, [loading]);
 
   if (loading) {
     return (
