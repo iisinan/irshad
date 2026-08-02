@@ -534,13 +534,16 @@ class StockController extends Controller
                 return 0;
             };
 
+            $companyFin = $company->financials()->latest()->first();
+
             $frontendFinData = array_merge($finData, [
-                'total_assets' => $getVal('total_assets'),
-                'total_debt' => $getVal('total_debt'),
-                'cash' => $getVal('cash_and_equivalents'),
-                'interest_income' => $getVal('interest_income'),
-                'total_revenue' => $getVal('total_revenue'),
-                'market_cap' => $company->market_cap,
+                'total_assets' => $getVal('total_assets') ?: ($companyFin->total_assets ?? 0),
+                'total_debt' => $getVal('total_debt') ?: ($companyFin->total_debt ?? 0),
+                'cash' => $getVal('cash_and_equivalents') ?: ($companyFin->cash_and_equivalents ?? 0),
+                'interest_bearing_securities' => $getVal('interest_bearing_securities') ?: ($companyFin->interest_bearing_securities ?? 0),
+                'interest_income' => $getVal('interest_income') ?: ($companyFin->interest_income ?? 0),
+                'total_revenue' => $getVal('total_revenue') ?: ($companyFin->total_revenue ?? 0),
+                'market_cap' => $company->market_cap ?? ($companyFin->market_cap ?? 0),
             ]);
 
             $mapped = [
