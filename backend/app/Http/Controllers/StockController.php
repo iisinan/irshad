@@ -34,12 +34,31 @@ class StockController extends Controller
 
     private function clearStockCaches(?string $symbol = null): void
     {
-        Cache::tags(['stocks'])->flush();
+        try {
+            Cache::tags(['stocks'])->flush();
+        } catch (\Exception $e) {
+            Cache::flush();
+        }
+    }
+
+    /**
+     * Returns a cache store that supports tags (Redis) or falls back to tagless cache.
+     */
+    private function safeCache(): \Illuminate\Cache\TaggedCache|\Illuminate\Cache\Repository
+    {
+        try {
+            $store = Cache::tags(['stocks']);
+            // Trigger a connection to verify Redis is available
+            $store->has('__ping');
+            return $store;
+        } catch (\Exception $e) {
+            return Cache::store();
+        }
     }
 
     public function index(): JsonResponse
     {
-        $stocks = Cache::tags(['stocks'])->remember('stocks.index', 300, function () {
+        $stocks = $this->safeCache()->remember('stocks.index', 300, function () {
             return Company::select(['id', 'name', 'symbol', 'sector', 'current_status', 'latest_price', 'price_change_pct', 'logo_url', 'market_cap', 'pe_ratio'])
                 ->with('aaoifiScreening:company_id,impermissible_income_ratio')
                 ->get()
@@ -208,7 +227,7 @@ class StockController extends Controller
 
         $cacheKey = 'stocks.ngx_'.md5(json_encode($allowedParams));
 
-        $stocks = Cache::tags(['stocks'])->remember($cacheKey, 300, function () use ($request) {
+        $stocks = $this->safeCache()->remember($cacheKey, 300, function () use ($request) {
             $query = Company::select([
                 'id', 'name', 'symbol', 'sector', 'current_status',
                 'latest_price', 'price_change', 'price_change_pct',
