@@ -245,53 +245,11 @@ class SyncNgxData extends Command
     }
 
     /**
-     * Fetch and store logos using Clearbit (free, no API key).
+     * Previously fetched logos using Yahoo Finance to find the website domain.
+     * Removed per user request.
      */
     private function fetchLogosForBatch($companies): void
     {
-        foreach ($companies as $company) {
-            if ($company->logo_url) {
-                continue;
-            }
-
-            try {
-                $symbol = trim($company->symbol);
-                $yahooSymbol = str_contains($symbol, '.') ? $symbol : "{$symbol}.LG";
-
-                $profileRes = Http::withHeaders([
-                    'User-Agent' => 'Mozilla/5.0',
-                    'Accept' => 'application/json',
-                ])->timeout(8)->get("https://query2.finance.yahoo.com/v10/finance/quoteSummary/{$yahooSymbol}", [
-                    'modules' => 'summaryProfile',
-                ]);
-
-                $website = null;
-                if ($profileRes && $profileRes->successful()) {
-                    $website = $profileRes->json('quoteSummary.result.0.summaryProfile.website');
-                }
-
-                if ($website) {
-                    $domain = parse_url($website, PHP_URL_HOST);
-                    if ($domain) {
-                        $imgRes = Http::timeout(6)->get("https://logo.clearbit.com/{$domain}");
-                        if ($imgRes && $imgRes->successful() && str_contains($imgRes->header('Content-Type') ?? '', 'image')) {
-                            $filename = 'logos/'.strtolower($symbol).'.png';
-                            Storage::disk('public')->put($filename, $imgRes->body());
-                            DB::reconnect();
-                            $company->update(['logo_url' => '/storage/'.$filename]);
-                            $this->line("  🖼  Logo saved for {$symbol}");
-                            usleep(400000);
-
-                            continue;
-                        }
-                    }
-                }
-
-                $this->line("  — No logo for {$symbol}");
-                usleep(200000);
-            } catch (Exception $e) {
-                Log::warning("Logo fetch failed for {$company->symbol}: ".$e->getMessage());
-            }
-        }
+        // Logos are now primarily fetched via ngxpulse scraper
     }
 }

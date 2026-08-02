@@ -50,16 +50,12 @@ class NgxService
     }
 
     /**
-     * Fetch supplemental fundamental data from Yahoo Finance for a single company.
-     * Used to get sector, industry, PE ratio, EPS, analyst targets, etc.
-     * Yahoo Finance does NOT have NGX prices but DOES have fundamental data for large-cap NGX stocks.
+     * Previously fetched supplemental fundamental data from Yahoo Finance.
+     * Removed per user request. Now returns empty structure.
      */
     public function fetchFundamentals(Company $company): array
     {
-        $symbol = trim($company->symbol);
-        $yahooSymbol = str_contains($symbol, '.') ? $symbol : "{$symbol}.LG";
-
-        $result = [
+        return [
             'sector' => null,
             'industry' => null,
             'overview' => null,
@@ -75,54 +71,11 @@ class NgxService
             'roe' => null,
             'profit_margin' => null,
         ];
-
-        try {
-            $response = Http::withHeaders([
-                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-                'Accept' => 'application/json',
-            ])->retry(2, 500, throw: false)->timeout(12)->get(
-                "https://query2.finance.yahoo.com/v10/finance/quoteSummary/{$yahooSymbol}",
-                ['modules' => 'financialData,defaultKeyStatistics,balanceSheetHistory,summaryDetail,summaryProfile']
-            );
-
-            if ($response && $response->successful()) {
-                $modules = $response->json('quoteSummary.result.0');
-                if ($modules) {
-                    $financialData = $modules['financialData'] ?? [];
-                    $keyStats = $modules['defaultKeyStatistics'] ?? [];
-                    $summaryDetail = $modules['summaryDetail'] ?? [];
-                    $profile = $modules['summaryProfile'] ?? [];
-
-                    $result['sector'] = $profile['sector'] ?? null;
-                    $result['industry'] = $profile['industry'] ?? null;
-                    $result['overview'] = $profile['longBusinessSummary'] ?? null;
-                    $result['analysts_target'] = $financialData['targetMeanPrice']['raw'] ?? null;
-                    $result['dividend_yield'] = $summaryDetail['dividendYield']['raw'] ?? null;
-
-                    $result['market_cap'] = $keyStats['enterpriseValue']['raw'] ?? 0;
-                    $result['eps'] = $keyStats['trailingEps']['raw'] ?? null;
-                    $result['pe_ratio'] = $summaryDetail['trailingPE']['raw'] ?? null;
-                    $result['total_revenue'] = $financialData['totalRevenue']['raw'] ?? 0;
-                    $result['total_debt'] = $financialData['totalDebt']['raw'] ?? 0;
-                    $result['profit_margin'] = $financialData['profitMargins']['raw'] ?? null;
-                    $result['roe'] = $financialData['returnOnEquity']['raw'] ?? null;
-
-                    $balanceSheets = $modules['balanceSheetHistory']['balanceSheetStatements'] ?? [];
-                    if (! empty($balanceSheets)) {
-                        $result['total_assets'] = $balanceSheets[0]['totalAssets']['raw'] ?? 0;
-                    }
-                }
-            }
-        } catch (\Exception $e) {
-            Log::warning("Yahoo fundamentals fetch failed for {$symbol}: ".$e->getMessage());
-        }
-
-        return $result;
     }
 
     /**
      * Legacy method — kept for backward compatibility.
-     * Now uses NGX API for price + Yahoo for fundamentals.
+     * Uses NGX API for price.
      */
     public function fetchAtomicData(Company $company): array
     {
