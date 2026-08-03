@@ -13,20 +13,24 @@ import './index.css';
 
 const lazyWithRetry = (componentImport) =>
   React.lazy(async () => {
-    const pageHasAlreadyBeenForceRefreshed = JSON.parse(
-      window.sessionStorage.getItem('page-has-been-force-refreshed') || 'false'
-    );
     try {
-      const component = await componentImport();
-      window.sessionStorage.setItem('page-has-been-force-refreshed', 'false');
-      return component;
+      return await componentImport();
     } catch (error) {
-      if (!pageHasAlreadyBeenForceRefreshed) {
-        window.sessionStorage.setItem('page-has-been-force-refreshed', 'true');
+      const isChunkError = 
+        error?.message?.includes('dynamically imported module') ||
+        error?.message?.includes('Loading chunk') ||
+        error?.message?.includes('Failed to fetch');
+
+      const refreshKey = 'chunk_reload_' + window.location.pathname;
+      const alreadyRefreshed = sessionStorage.getItem(refreshKey);
+
+      if (isChunkError && !alreadyRefreshed) {
+        sessionStorage.setItem(refreshKey, 'true');
         window.location.reload();
-        // Return a promise that never resolves so React Suspense stays active during reload
+        // Return a pending promise so Suspense stays active while browser reloads
         return new Promise(() => {});
       }
+      sessionStorage.removeItem(refreshKey);
       throw error;
     }
   });

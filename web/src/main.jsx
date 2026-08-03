@@ -20,6 +20,12 @@ const queryClient = new QueryClient({
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '695007449342-h6pllbs2fctnjlnq5tr0j9ktlmoaohed.apps.googleusercontent.com';
 
+// Automatically reload when a dynamic chunk fails to load due to a new deployment
+window.addEventListener('vite:preloadError', (event) => {
+  event.preventDefault();
+  window.location.reload();
+});
+
 import { initAnalytics } from './utils/analytics';
 initAnalytics();
 
