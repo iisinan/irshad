@@ -537,22 +537,26 @@ class StockController extends Controller
             $companyFin = $company->financials()->latest()->first();
 
             $frontendFinData = array_merge($finData, [
-                'total_assets' => $getVal('total_assets') ?: ($companyFin->total_assets ?? 0),
-                'total_debt' => $getVal('total_debt') ?: ($companyFin->total_debt ?? 0),
-                'cash' => $getVal('cash_and_equivalents') ?: ($companyFin->cash_and_equivalents ?? 0),
-                'interest_bearing_securities' => $getVal('interest_bearing_securities') ?: ($companyFin->interest_bearing_securities ?? 0),
-                'interest_income' => $getVal('interest_income') ?: ($companyFin->interest_income ?? 0),
-                'total_revenue' => $getVal('total_revenue') ?: ($companyFin->total_revenue ?? 0),
-                'market_cap' => $company->market_cap ?? ($companyFin->market_cap ?? 0),
+                'total_assets' => ($companyFin->total_assets ?? 0) ?: $getVal('total_assets'),
+                'total_debt' => ($companyFin->total_debt ?? 0) ?: $getVal('total_debt'),
+                'cash' => ($companyFin->cash_and_equivalents ?? 0) ?: $getVal('cash_and_equivalents'),
+                'interest_bearing_securities' => ($companyFin->interest_bearing_securities ?? 0) ?: $getVal('interest_bearing_securities'),
+                'interest_income' => ($companyFin->interest_income ?? 0) ?: $getVal('interest_income'),
+                'total_revenue' => ($companyFin->total_revenue ?? 0) ?: $getVal('total_revenue'),
+                'market_cap' => ($companyFin->market_cap ?? 0) ?: ($company->market_cap ?? 0),
             ]);
+
+            $calculatedIncomeRatio = 0;
+            if ($frontendFinData['total_revenue'] > 0) {
+                $calculatedIncomeRatio = ($frontendFinData['interest_income'] / $frontendFinData['total_revenue']) * 100;
+            }
 
             $mapped = [
                 'company_id' => $company->id,
                 'stage1' => [
                     'status' => $aaoifiScreening->business_status === 'pass' ? 'halal' : 'non-halal',
-                    'haram_revenue_percent' => round((float) ($aaoifiScreening->impermissible_income_ratio ?? 0), 4),
-                    'purification_required' => $aaoifiScreening->impermissible_income_status === 'pass'
-                        && (float) ($aaoifiScreening->impermissible_income_ratio ?? 0) > 0,
+                    'haram_revenue_percent' => round($calculatedIncomeRatio, 4),
+                    'purification_required' => $calculatedIncomeRatio > 0 && $calculatedIncomeRatio <= 5,
                     'reason' => $aaoifiScreening->business_reasoning,
                 ],
                 'business_status' => $aaoifiScreening->business_status,
@@ -561,8 +565,8 @@ class StockController extends Controller
                 'debt_status' => $aaoifiScreening->debt_status,
                 'cash_ratio' => $aaoifiScreening->cash_ratio,
                 'cash_status' => $aaoifiScreening->cash_status,
-                'impermissible_income_ratio' => $aaoifiScreening->impermissible_income_ratio,
-                'impermissible_income_status' => $aaoifiScreening->impermissible_income_status,
+                'impermissible_income_ratio' => $calculatedIncomeRatio,
+                'impermissible_income_status' => $calculatedIncomeRatio <= 5 ? 'pass' : 'fail',
                 'illiquid_ratio' => $aaoifiScreening->illiquid_ratio,
                 'illiquid_status' => $aaoifiScreening->illiquid_status,
                 'receivables_ratio' => $aaoifiScreening->receivables_ratio,
