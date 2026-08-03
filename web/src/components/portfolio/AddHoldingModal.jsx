@@ -468,21 +468,17 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
                         {/* Date — REQUIRED */}
                         <div>
                           <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '10px' }}>
-                            Purchase Date <span style={{ color: '#ef4444' }}>*</span>
+                            Purchase Date
                           </label>
                           <input
                             type="date"
                             value={row.date}
-                            required
                             max={new Date().toISOString().split('T')[0]}
                             onChange={e => handleRowChange(row.id, 'date', e.target.value)}
-                            style={{ width: '100%', padding: '12px 16px', borderRadius: '10px', border: `1px solid ${row.date ? 'var(--border)' : '#fca5a5'}`, fontSize: '0.9rem', fontWeight: 700, outline: 'none', background: row.date ? '#FFFFFF' : '#fef2f2', transition: 'border-color 0.2s', color: row.date ? 'var(--text-dark)' : 'var(--text-muted)' }}
+                            style={{ width: '100%', padding: '12px 16px', borderRadius: '10px', border: '1px solid var(--border)', fontSize: '0.9rem', fontWeight: 700, outline: 'none', background: '#FFFFFF', transition: 'border-color 0.2s', color: row.date ? 'var(--text-dark)' : 'var(--text-muted)' }}
                             onFocus={e => { e.target.style.borderColor = 'var(--primary)'; e.target.style.background = '#FFFFFF'; }}
-                            onBlur={e => { e.target.style.borderColor = row.date ? 'var(--border)' : '#fca5a5'; e.target.style.background = row.date ? '#FFFFFF' : '#fef2f2'; }}
+                            onBlur={e => { e.target.style.borderColor = 'var(--border)'; e.target.style.background = '#FFFFFF'; }}
                           />
-                          {!row.date && (
-                            <div style={{ fontSize: '0.7rem', color: '#ef4444', marginTop: '8px', fontWeight: 700 }}>Required for Zakat calculation</div>
-                          )}
                         </div>
                       </div>
                     </div>
