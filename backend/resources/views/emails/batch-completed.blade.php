@@ -1,20 +1,25 @@
 @component('mail::message')
-# Daily Financial Screening Batch Completed
+# Daily Market Screening Complete
 
-The daily automated NGX market sweep and AAOIFI screening has finished processing.
+As-salamu alaykum,
 
-**Batch Summary:**
-- **Batch ID:** {{ $batchId }}
-- **Total Companies Queued:** {{ $totalJobs }}
-- **Processed Successfully:** {{ $processedJobs }}
-- **Failed Jobs:** {{ $failedJobs }}
+The automated NGX daily market sweep and AAOIFI Shariah screening has successfully completed. Below is a summary of this batch run.
 
-You can review the updated Market Data and AAOIFI Screenings live on the Irshad platform.
+**Batch Summary**
+
+| | |
+|---|---|
+| **Batch ID** | {{ $batchId }} |
+| **Total Companies Queued** | {{ $totalJobs }} |
+| **Processed Successfully** | {{ $processedJobs }} |
+| **Failed Jobs** | {{ $failedJobs }} |
+
+All results are now live on the Irshad platform. You may review updated AAOIFI screenings and market data from the dashboard.
 
 @component('mail::button', ['url' => config('app.url')])
 Go to Dashboard
 @endcomponent
 
-Thanks,<br>
-{{ config('app.name') }} Engine
+Jazakallah Khair,
+The Irshad Engine
 @endcomponent

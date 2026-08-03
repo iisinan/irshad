@@ -2,7 +2,7 @@
 <tr>
 <td class="header">
 <a href="{{ $url }}" style="display: inline-block; text-decoration: none;">
-<span style="font-size: 24px; font-weight: 800; color: #10b981; letter-spacing: -0.5px;">IRSHAD</span>
+<img src="https://iirshad.com/logo.svg" alt="Irshad" style="height: 48px; width: auto; display: block; margin: 0 auto;" />
 </a>
 </td>
 </tr>

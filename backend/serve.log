@@ -1,0 +1,7 @@
+
+   INFO  Server running on [http://127.0.0.1:8081].  
+
+  Press Ctrl+C to stop the server
+
+  2026-08-02 00:40:27 /api/stocks/ngx ............................ ~ 501.42ms
+  2026-08-02 00:40:48 /api/v1/stocks/ngx ............................... ~ 3s

@@ -70,11 +70,11 @@ class AggregateNewsCommand extends Command
                             $news = News::firstOrCreate(
                                 ['url' => $link],
                                 [
-                                    'title' => $title,
+                                    'title' => $this->sanitizeUtf8($title),
                                     'source' => $source,
-                                    'thumbnail_url' => $thumbnailUrl,
+                                    'thumbnail_url' => $this->sanitizeUtf8($thumbnailUrl),
                                     'published_at' => $publishedAt,
-                                    'excerpt' => $excerpt,
+                                    'excerpt' => $this->sanitizeUtf8($excerpt),
                                 ]
                             );
 
@@ -94,5 +94,20 @@ class AggregateNewsCommand extends Command
         }
 
         $this->info('News aggregation complete.');
+    }
+
+    /**
+     * Remove malformed UTF-8 characters to prevent database errors.
+     */
+    private function sanitizeUtf8(?string $string): ?string
+    {
+        if ($string === null) {
+            return null;
+        }
+        $cleaned = iconv('UTF-8', 'UTF-8//IGNORE', $string);
+        if ($cleaned === false) {
+            $cleaned = mb_convert_encoding($string, 'UTF-8', 'UTF-8');
+        }
+        return $cleaned;
     }
 }

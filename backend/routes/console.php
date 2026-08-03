@@ -41,3 +41,7 @@ Schedule::command('dividends:update')->dailyAt('09:00')->withoutOverlapping()->e
 
 // Send Zakat Reminders daily at 8:00 AM
 Schedule::command('app:send-zakat-reminders')->dailyAt('08:00')->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
+
+// Prune old NGXPulse audit logs daily
+Schedule::command('irshad:prune-audits')->daily()->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
+

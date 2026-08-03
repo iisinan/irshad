@@ -53,7 +53,7 @@ class SnapshotPortfolios extends Command
             }
 
             $brokerage = BrokerageAccount::where('user_id', $user->id)->first();
-            $cashBalance = $brokerage ? $brokerage->cash_balance : 0;
+            $cashBalance = $brokerage?->cash_balance ?? 0.0;
             $totalBalance = $stocksBalance + $cashBalance;
             $healthPercentage = $stocksBalance > 0 ? round(($halalValue / $stocksBalance) * 100, 1) : 100;
 

@@ -71,19 +71,31 @@ class AssetStatusAlert extends Notification implements ShouldQueue
         $assetName = $this->assetType === 'stock' ? $this->asset->name.' ('.$this->asset->symbol.')' : $this->asset->name;
         $oldFormatted = ucfirst($this->oldStatus);
         $newFormatted = ucfirst($this->newStatus);
+        $firstName = $notifiable->first_name ?? explode(' ', $notifiable->name)[0] ?? 'there';
 
-        $warning = strtolower($this->newStatus) === 'non-halal'
-            ? 'Please review your portfolio, as this asset no longer complies with Shariah standards.'
-            : 'You can review the updated status and details on your Irshad dashboard.';
+        $isNowNonHalal = strtolower($this->newStatus) === 'non-halal';
+        $isNowHalal    = strtolower($this->newStatus) === 'halal';
+
+        if ($isNowNonHalal) {
+            $contextLine = '**'.$assetName.'** has changed its Shariah compliance status from **'.$oldFormatted.'** to **'.$newFormatted.'**.';
+            $actionLine  = 'We recommend reviewing your portfolio and considering whether to divest from this asset to keep your investments aligned with your values.';
+        } elseif ($isNowHalal) {
+            $contextLine = '**'.$assetName.'** has been reclassified as **'.$newFormatted.'** (previously: '.$oldFormatted.').';
+            $actionLine  = 'You may now consider adding this asset to your portfolio if it aligns with your investment goals.';
+        } else {
+            $contextLine = '**'.$assetName.'** has been updated from **'.$oldFormatted.'** to **'.$newFormatted.'**.';
+            $actionLine  = 'You can review the full details and updated AAOIFI screening report on your Irshad dashboard.';
+        }
 
         return (new MailMessage)
-            ->subject('Irshad Alert: '.$assetName.' Status Update')
-            ->greeting('Assalamu Alaikum, '.$notifiable->name.'!')
-            ->line('This is an important update regarding an item on your Watchlist.')
-            ->line("**{$assetName}** has been updated from **{$oldFormatted}** to **{$newFormatted}**.")
-            ->line($warning)
-            ->action('View Watchlist', url('/watchlist'))
-            ->line('Thank you for using Irshad to keep your finances pure.');
+            ->subject('Irshad Alert: '.$assetName.' — Status Changed to '.$newFormatted)
+            ->greeting('As-salamu alaykum, '.$firstName.'!')
+            ->line('We are writing to inform you of an important change affecting an asset on your Watchlist.')
+            ->line($contextLine)
+            ->line($actionLine)
+            ->action('View on Irshad', url('/watchlist'))
+            ->line('May Allah bless your wealth and keep your finances pure.')
+            ->salutation('Jazakallah Khair, The Irshad Team');
     }
 
     /**

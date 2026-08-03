@@ -59,7 +59,7 @@ def main():
             "principal_activities": {"type": "STRING", "description": "Brief description of company's principal business activities."},
             "is_bank_or_financial": {"type": "BOOLEAN", "description": "True if this is a bank, insurance company, or financial institution."}
         },
-        "required": ["financial_year", "reporting_currency", "unit_multiplier", "total_revenue", "total_debt", "cash_and_equivalents", "total_assets", "is_bank_or_financial"]
+        "required": ["financial_year", "reporting_period", "reporting_currency", "unit_multiplier", "total_revenue", "total_debt", "cash_and_equivalents", "total_assets", "is_bank_or_financial"]
     }
 
     prompt = (

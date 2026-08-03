@@ -213,6 +213,11 @@ Route::prefix('v1')->group(function () {
             // AAOIFI Override
             Route::put('/stocks/{symbol}/aaoifi', [StockController::class, 'updateAaoifi']);
 
+            // Financial Review Queue
+            Route::get('/admin/financial-review', [\App\Http\Controllers\FinancialReviewQueueController::class, 'index']);
+            Route::post('/admin/financial-review/{id}/approve', [\App\Http\Controllers\FinancialReviewQueueController::class, 'approve']);
+            Route::post('/admin/financial-review/{id}/reject', [\App\Http\Controllers\FinancialReviewQueueController::class, 'reject']);
+
             // Resource Management
             Route::post('/resources', [ResourceController::class, 'store']);
             Route::put('/resources/{id}', [ResourceController::class, 'update']);

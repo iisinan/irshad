@@ -12,6 +12,7 @@ class BrokerageAccount extends Model
         'account_id',
         'access_token',
         'status',
+        'cash_balance',
     ];
 
     protected $casts = [

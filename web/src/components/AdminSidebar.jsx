@@ -6,7 +6,7 @@ import {
   Activity,
   HeartHandshake, BookOpen,
   LogOut, ChevronLeft, ChevronRight,
-  X, Moon, Sun, LayoutDashboard, Shield, Users, ArrowLeft
+  X, Moon, Sun, LayoutDashboard, Shield, Users, ArrowLeft, Inbox
 } from 'lucide-react';
 
 export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
@@ -22,6 +22,7 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
     { label: 'Compliance Reviews', icon: Shield, to: '/admin/compliance-reviews' },
     { label: 'Registered Users', icon: Users, to: '/admin/users' },
     { label: 'Resources', icon: BookOpen, to: '/admin/resources' },
+    { label: 'Financial Data Queue', icon: Inbox, to: '/admin/financial-queue' },
     { label: 'Zakat Settings', icon: HeartHandshake, to: '/admin/zakat-settings' },
     { section: 'Exit' },
     { label: 'Back to App', icon: ArrowLeft, to: '/portfolio' }

@@ -34,13 +34,16 @@ class QueuedResetPasswordNotification extends Notification implements ShouldQueu
             .'/reset-password?token='.$this->token
             .'&email='.urlencode($notifiable->getEmailForPasswordReset());
 
+        $firstName = $notifiable->first_name ?? explode(' ', $notifiable->name)[0] ?? 'there';
+
         return (new MailMessage)
             ->subject('Reset Your Irshad Password')
-            ->greeting('As-salamu alaykum, '.($notifiable->first_name ?? explode(' ', $notifiable->name)[0] ?? 'there').'!')
+            ->greeting('As-salamu alaykum, '.$firstName.'!')
             ->line('We received a request to reset the password for your Irshad account.')
-            ->action('Reset Password', $resetUrl)
-            ->line('This link will expire in **60 minutes**.')
-            ->line('If you did not request a password reset, you can safely ignore this email — your account is secure.')
-            ->salutation('With regards, The Irshad Team');
+            ->line('Click the button below to choose a new password. This link is valid for **60 minutes**.')
+            ->action('Reset My Password', $resetUrl)
+            ->line('If you did not request a password reset, please ignore this email — your account remains secure and no changes have been made.')
+            ->line('For your security, never share this link with anyone.')
+            ->salutation('Jazakallah Khair, The Irshad Team');
     }
 }

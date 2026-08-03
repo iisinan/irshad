@@ -46,6 +46,7 @@ const AdminUsers = lazyWithRetry(() => import('./components/AdminUsers'));
 const ZakatSettingsAdmin = lazyWithRetry(() => import('./components/ZakatSettingsAdmin'));
 const Pricing = lazyWithRetry(() => import('./components/Pricing'));
 const LandingPage = lazyWithRetry(() => import('./components/LandingPage'));
+const AdminFinancialReviewQueue = lazyWithRetry(() => import('./components/AdminFinancialReviewQueue'));
 const DASHBOARD_ROUTES = ['/portfolio', '/profile', '/admin'];
 
 /* ─── Animated Routes Wrapper ─────────────────────────────── */
@@ -371,6 +372,13 @@ function App() {
                     <ProtectedRoute adminOnly={true}>
                       <AdminLayout>
                         <ZakatSettingsAdmin />
+                      </AdminLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/admin/financial-queue" element={
+                    <ProtectedRoute adminOnly={true}>
+                      <AdminLayout>
+                        <AdminFinancialReviewQueue />
                       </AdminLayout>
                     </ProtectedRoute>
                   } />

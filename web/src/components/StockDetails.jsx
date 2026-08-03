@@ -20,22 +20,16 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const optimisticStock = location.state?.stock || null;
 
   // React Query — uses cached data instantly on repeat visits, fetches fresh in background
-  const { data: fetchedStock, isFetching: queryLoading } = useQuery({
+  const { data: stock, isLoading: loading } = useQuery({
     queryKey: ['stock', symbol],
     queryFn: async () => {
       const r = await fetchStockDetails(symbol);
       return r?.data || r;
     },
     staleTime: 5 * 60 * 1000,     // 5 min cache — repeat visits are instant
-    placeholderData: optimisticStock, // show market list data immediately while fetching
     retry: 2,
     retryDelay: 1500,
   });
-
-  // Use freshly fetched data, or fall back to what was passed from the market list
-  const stock = fetchedStock || optimisticStock;
-  // Only show spinner if we have NO data at all (first ever visit to this stock)
-  const loading = queryLoading && !stock;
 
   const [aiAnalysis, setAiAnalysis] = useState(null);
   const [isAiExpanded, setIsAiExpanded] = useState(false);

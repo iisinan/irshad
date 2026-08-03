@@ -31,13 +31,17 @@ class VerifyEmailNotification extends Notification implements ShouldQueue
     {
         $verificationUrl = $this->verificationUrl($notifiable);
 
+        $firstName = $notifiable->first_name ?? explode(' ', $notifiable->name)[0] ?? 'there';
+
         return (new MailMessage)
-            ->subject('Verify Your Irshad Email Address')
-            ->greeting('As-salamu alaykum, '.($notifiable->first_name ?? explode(' ', $notifiable->name)[0] ?? 'there').'!')
-            ->line('Please click the button below to verify your email address.')
-            ->action('Verify Email Address', $verificationUrl)
-            ->line('If you did not create an account, no further action is required.')
-            ->salutation('With regards, The Irshad Team');
+            ->subject('Verify Your Email Address — Irshad')
+            ->greeting('As-salamu alaykum, '.$firstName.'!')
+            ->line('Welcome to Irshad — your trusted Shariah-compliant investment companion.')
+            ->line('To complete your registration and activate your account, please verify your email address by clicking the button below.')
+            ->action('Verify My Email Address', $verificationUrl)
+            ->line('This verification link will expire in **60 minutes**.')
+            ->line('If you did not create an Irshad account, you can safely ignore this email.')
+            ->salutation('Jazakallah Khair, The Irshad Team');
     }
 
     /**

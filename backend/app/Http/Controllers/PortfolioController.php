@@ -77,7 +77,7 @@ class PortfolioController extends Controller
 
         // Get Brokerage Cash
         $brokerage = BrokerageAccount::where('user_id', Auth::id())->first();
-        $cashBalance = $brokerage ? $brokerage->cash_balance : 0;
+        $cashBalance = $brokerage?->cash_balance ?? 0.0;
 
         // Summary
         $stocksBalance = $portfolioData->sum('total_value');
