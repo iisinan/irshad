@@ -208,6 +208,7 @@ export default function Portfolio() {
                 updates: 'Updates',
                 guide: 'Help & Guide',
                 zakat: 'Zakat',
+                purification: 'Purification',
                 lectures: 'Resources',
                 statement: 'Statements'
               }[activeTab] || 'Portfolio & Tools'}

@@ -13,12 +13,20 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Queue\Middleware\RateLimited;
 
 class ProcessCompanyFinancialsJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public function middleware()
+    {
+        return [new RateLimited('gemini-api')];
+    }
+
     public $company;
+    
+    public ?string $pdfUrl;
 
     /**
      * The number of seconds the job can run before timing out.
@@ -28,14 +36,21 @@ class ProcessCompanyFinancialsJob implements ShouldQueue
     public $timeout = 300;
 
     /**
-     * The number of times the job may be attempted.
+     * The number of times the job may be attempted (high to allow rate-limit releases).
      *
      * @var int
      */
-    public $tries = 3;
+    public $tries = 500;
 
     /**
-     * The number of seconds to wait before retrying the job.
+     * The maximum number of unhandled exceptions to allow before failing.
+     *
+     * @var int
+     */
+    public $maxExceptions = 3;
+
+    /**
+     * The number of seconds to wait before retrying the job on exception.
      *
      * @var array
      */
@@ -44,9 +59,10 @@ class ProcessCompanyFinancialsJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(Company $company)
+    public function __construct(Company $company, ?string $pdfUrl = null)
     {
         $this->company = $company;
+        $this->pdfUrl = $pdfUrl;
     }
 
     /**
@@ -69,8 +85,15 @@ class ProcessCompanyFinancialsJob implements ShouldQueue
         }
 
         try {
-            // 1. Find PDF — Sole Source: ngxpulse.ng/disclosures via Apify
-            $pdfUrl = $scraper->findLatestFinancialReportPdfUrl($symbol);
+            // 1. Resolve PDF URL
+            $pdfUrl = $this->pdfUrl;
+            
+            if (!$pdfUrl) {
+                // Phase 9: Fallback to Apify
+                Log::info("[{$symbol}] No URL provided from API Phase. Triggering Apify fallback...");
+                $pdfUrl = $scraper->findLatestFinancialReportPdfUrl($symbol);
+            }
+
             if (! $pdfUrl) {
                 Log::warning("[{$symbol}] No financial statement PDF found via any source. Skipping.");
                 return;
@@ -191,6 +214,7 @@ class ProcessCompanyFinancialsJob implements ShouldQueue
         curl_setopt($ch, CURLOPT_FILE, $fp);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_FAILONERROR, true);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
         curl_exec($ch);
         fclose($fp);
     }

@@ -68,6 +68,8 @@ class PortfolioController extends Controller
                 'status' => strtolower($status),
                 'is_halal' => $isHalal,
                 'purification_due' => round($purificationDue, 2),
+                'total_dividends' => round($totalDividendsReceived, 2),
+                'non_compliant_ratio' => round($nonCompliantRatio, 2),
                 'logo_url' => $company->logo_url ?? null,
                 'purchase_date' => $holding->purchase_date,
                 'created_at' => $holding->created_at?->toISOString(),

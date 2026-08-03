@@ -25,5 +25,9 @@ class AppServiceProvider extends ServiceProvider
     {
         Product::observe(ProductObserver::class);
         StockStatus::observe(StockStatusObserver::class);
+
+        \Illuminate\Support\Facades\RateLimiter::for('gemini-api', function ($job) {
+            return \Illuminate\Cache\RateLimiting\Limit::perMinute(12);
+        });
     }
 }

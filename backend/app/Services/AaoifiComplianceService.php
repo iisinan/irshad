@@ -60,51 +60,23 @@ class AaoifiComplianceService
 
     public function evaluateCompliance(Company $company, Financial $financials, ?string $swsIndustry = null, ?array $aiSectorEval = null)
     {
-        // For Rule 1: Use activity detection if available, fallback to robust keyword check
-        if ($aiSectorEval && isset($aiSectorEval['has_prohibited_activities'])) {
-            if ($aiSectorEval['has_prohibited_activities'] === true) {
-                $reason = $aiSectorEval['reason'] ?? "Failed Rule 1: Sector Check. The company's core business activity involves prohibited elements (e.g., alcohol, gambling, conventional finance) according to AAOIFI standards.";
+        $screening = AaoifiScreening::where('company_id', $company->id)->latest()->first();
 
-                return $this->saveStatus($company, 'non-halal', 'Failed Rule 1 (Activity Verified): '.$reason);
-            }
-        } else {
-            // Robust fallback check
-            $sector = strtolower($company->sector ?? '');
-            $businessType = strtolower($company->business_type ?? '');
-            $name = strtolower($company->name ?? '');
-            $symbol = strtolower($company->symbol ?? '');
-            $sws = strtolower($swsIndustry ?? '');
+        // Check if the business activity screen already failed from the master list (Excel)
+        if ($screening && $screening->business_status === 'fail') {
+            return $this->saveStatus(
+                $company,
+                'non-halal',
+                'Failed Rule 1: Business Activity Check. ' . ($screening->business_reasoning ?? 'The stock failed due to non-compliant business activities.')
+            );
+        }
 
-            $isBlacklistedSector = false;
-
-            foreach (self::BLACKLIST_KEYWORDS as $keyword) {
-                if (str_contains($sector, $keyword) ||
-                    str_contains($businessType, $keyword) ||
-                    str_contains($name, $keyword) ||
-                    str_contains($symbol, $keyword) ||
-                    str_contains($sws, $keyword)) {
-                    $isBlacklistedSector = true;
-                    break;
-                }
-            }
-
-            // ISLAMIC FINANCE INSTITUTIONS & EXEMPTIONS
-            $islamicBanks = ['JAIZBANK', 'JAIZ', 'TAJBANK', 'TAJ', 'LOTUS', 'LOTUSBANK', 'NREIT'];
-            if (in_array(strtoupper($company->symbol), $islamicBanks)) {
-                return $this->saveStatus(
-                    $company,
-                    'halal',
-                    'Status is Halal. This company is explicitly exempted as a compliant institution (e.g., Islamic Bank, compliant REIT).'
-                );
-            }
-
-            if ($isBlacklistedSector) {
-                return $this->saveStatus(
-                    $company,
-                    'non-halal',
-                    'Failed Rule 1: Business Activity Check. The stock failed due to non-compliant business activities (e.g., alcohol, conventional finance/banking, gambling, tobacco).'
-                );
-            }
+        if ($screening && $screening->business_status === 'doubtful') {
+            return $this->saveStatus(
+                $company,
+                'doubtful',
+                'Doubtful Rule 1: Business Activity Check. ' . ($screening->business_reasoning ?? 'The stock is marked as doubtful and requires scholar review.')
+            );
         }
 
         // Ensure variables are not zero to avoid division by zero

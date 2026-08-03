@@ -616,6 +616,27 @@ export default function AdminComplianceReviews() {
                                               const currentVal = review.company?.latest_financial?.[key];
                                               const isDifferent = currentVal !== undefined && currentVal !== val;
                                               
+                                              if (['s3_url', 'source_url'].includes(key)) {
+                                                return (
+                                                  <div key={key} style={{ background: 'var(--bg)', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', gridColumn: '1 / -1' }}>
+                                                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>{formattedKey}</div>
+                                                    <a href={val} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.75rem', fontWeight: 700, color: '#059669', wordBreak: 'break-all' }}>
+                                                      {val}
+                                                    </a>
+                                                  </div>
+                                                );
+                                              }
+                                              if (key === 'file_hash') {
+                                                return (
+                                                  <div key={key} style={{ background: 'var(--bg)', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', gridColumn: '1 / -1' }}>
+                                                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>{formattedKey}</div>
+                                                    <div style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: 'var(--text-dark)', wordBreak: 'break-all' }}>
+                                                      {val}
+                                                    </div>
+                                                  </div>
+                                                );
+                                              }
+                                              
                                               return (
                                                 <div key={key} style={{ background: 'var(--bg)', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)' }}>
                                                   <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>{formattedKey}</div>

@@ -24,65 +24,12 @@ class AaoifiScreeningService
         // 1. Gather Data
         $financials = $company->financials()->latest()->first();
 
-        // Fetch mock/local news for context, prioritizing direct company relations
-        $news = News::where('company_id', $company->id)
-            ->orWhere('title', 'ilike', "%{$company->name}%")
-            ->orWhere('title', 'ilike', "%{$company->symbol}%")
-            ->latest()
-            ->take(5)
-            ->get()
-            ->toArray();
-
-        $disclosures = CorporateDisclosure::where('company_symbol', $company->symbol)
-            ->latest()
-            ->take(3)
-            ->get()
-            ->map(fn ($d) => ['title' => $d->title])
-            ->toArray();
-
-        $combinedNews = array_merge($news, $disclosures);
-
-        if (empty($combinedNews)) {
-            // Mock a recent news item if the database is empty for this company
-            $combinedNews = [
-                ['title' => "{$company->name} releases latest quarterly financial results."],
-                ['title' => "{$company->name} announces new strategic focus in its core sector."],
-            ];
-        }
-
         // 2. Business Activity Screening
-        $aiResult = null;
-        try {
-            $aiResult = $this->geminiService->analyzeBusinessActivity($company, $combinedNews, $financials);
-        } catch (\Exception $e) {
-            Log::error("Failed to analyze business activity with AI for {$company->symbol}: ".$e->getMessage());
-        }
-
-        $businessStatus = 'pass';
-        if ($aiResult && ! empty($aiResult['prohibited_activities'])) {
-            $businessStatus = 'fail';
-        }
-
-        // Keyword blacklist check (Rule 1 fallback alignment)
-        $sector = strtolower($company->sector ?? '');
-        $businessType = strtolower($company->business_type ?? '');
-        $name = strtolower($company->name ?? '');
-        $symbol = strtolower($company->symbol ?? '');
-
-        $islamicBanks = ['JAIZBANK', 'JAIZ', 'TAJBANK', 'TAJ', 'LOTUS', 'LOTUSBANK'];
-        if (in_array(strtoupper($company->symbol), $islamicBanks)) {
-            $businessStatus = 'pass';
-        } else {
-            foreach (AaoifiComplianceService::BLACKLIST_KEYWORDS as $keyword) {
-                if (str_contains($sector, $keyword) ||
-                    str_contains($businessType, $keyword) ||
-                    str_contains($name, $keyword) ||
-                    str_contains($symbol, $keyword)) {
-                    $businessStatus = 'fail';
-                    break;
-                }
-            }
-        }
+        // We now rely entirely on the manual master list (Excel) imported into the database.
+        $existingScreening = AaoifiScreening::where('company_id', $company->id)->latest()->first();
+        $businessStatus = $existingScreening->business_status ?? 'doubtful';
+        $aiResult = $existingScreening->business_reasoning ?? null;
+        $combinedNews = $existingScreening->news_sources ?? [];
 
         // 3. Financial Ratio Screening
         $marketCap = $financials ? (float) $financials->market_cap : 0;
@@ -113,19 +60,9 @@ class AaoifiScreeningService
 
         $illiquidRatio = null;
         $illiquidStatus = 'insufficient_data';
-        if ($totalAssets > 0 && $illiquidAssets > 0) {
-            // AAOIFI: Illiquid Assets / Total Assets >= 30%
-            $illiquidRatio = ($illiquidAssets / $totalAssets) * 100;
-            $illiquidStatus = $illiquidRatio >= 30 ? 'pass' : 'fail';
-        }
 
         $receivablesRatio = null;
         $receivablesStatus = 'insufficient_data';
-        if ($totalAssets > 0 && $accountsReceivable > 0) {
-            // AAOIFI / DJIM: Accounts Receivable / Total Assets <= 45%
-            $receivablesRatio = ($accountsReceivable / $totalAssets) * 100;
-            $receivablesStatus = $receivablesRatio <= 45 ? 'pass' : 'fail';
-        }
 
         $impermissibleIncomeRatio = null;
         $impIncomeStatus = 'insufficient_data';
