@@ -20,7 +20,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const optimisticStock = location.state?.stock || null;
 
   // React Query — uses cached data instantly on repeat visits, fetches fresh in background
-  const { data: stock, isLoading: loading } = useQuery({
+  const { data: stock, isLoading: loading, isFetching } = useQuery({
     queryKey: ['stock', symbol],
     queryFn: async () => {
       const r = await fetchStockDetails(symbol);
@@ -208,7 +208,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
       </button>
 
       {/* Subtle enriching indicator */}
-      {queryLoading && (
+      {isFetching && !loading && (
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginLeft: '16px', color: 'var(--text-muted)', fontSize: '0.69rem', verticalAlign: 'middle' }}>
           <div className="spinner" style={{ width: '12px', height: '12px', borderWidth: '2px' }} />
           Loading full data...
@@ -722,7 +722,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
             <Newspaper size={18} /> Latest News for {stock.symbol}
           </div>
           
-          {queryLoading ? (
+          {isFetching && !loading ? (
             <div style={{ padding: '40px 0', textAlign: 'center', color: 'var(--text-muted)' }}>
               <div className="spinner" style={{ margin: '0 auto 12px' }} />
               Loading latest news...
