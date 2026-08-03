@@ -169,6 +169,15 @@ class StockController extends Controller
         // Inject purification flag into the status object
         if (isset($stockArray['status']) && is_array($stockArray['status'])) {
             $ratio = (float) ($aaoifiScreening?->impermissible_income_ratio ?? 0);
+            
+            // Fallback: Calculate dynamically from financials if ratio is 0
+            if ($ratio == 0 && $stock->financials && $stock->financials->count() > 0) {
+                $financial = $stock->financials->first();
+                if ($financial->total_revenue > 0) {
+                    $ratio = ($financial->interest_income / $financial->total_revenue) * 100;
+                }
+            }
+
             $stockArray['status']['purification_required'] = ($stockArray['status']['status'] ?? '') === 'halal' && $ratio > 0;
             $stockArray['status']['haram_revenue_percent'] = round($ratio, 4);
         }

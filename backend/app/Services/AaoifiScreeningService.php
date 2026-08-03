@@ -109,6 +109,10 @@ class AaoifiScreeningService
                     'illiquid_assets' => $illiquidAssets,
                     'interest_income' => $interestIncome,
                     'total_revenue' => $totalRevenue,
+                    'source_url' => $financials ? $financials->source_url : null,
+                    'published_date' => $financials ? $financials->published_date : null,
+                    'reporting_period' => $financials ? $financials->reporting_period : null,
+                    'financial_year' => $financials ? (preg_match('/20\d{2}/', $financials->reporting_period, $matches) ? $matches[0] : null) : null,
                 ],
             ]);
 

@@ -52,7 +52,7 @@ class NotifyUsersOfAssetChange implements ShouldQueue
             // Find in Watchlists (Web)
             $watchlists = Watchlist::where('symbol', $this->asset->symbol)
                 ->where(function ($query) {
-                    $query->where('alert_email', true)->orWhere('alert_whatsapp', true);
+                    $query->where('alert_email', true)->orWhere('alert_push', true);
                 })->get();
 
             foreach ($watchlists as $wl) {
@@ -62,8 +62,8 @@ class NotifyUsersOfAssetChange implements ShouldQueue
                 if ($wl->alert_email) {
                     $usersToNotify[$wl->user_id]['channels'][] = 'mail';
                 }
-                if ($wl->alert_whatsapp) {
-                    $usersToNotify[$wl->user_id]['channels'][] = 'whatsapp';
+                if ($wl->alert_push) {
+                    $usersToNotify[$wl->user_id]['channels'][] = 'database';
                 }
             }
 

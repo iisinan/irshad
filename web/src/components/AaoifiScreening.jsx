@@ -229,7 +229,8 @@ const AaoifiScreening = () => {
 
   // Purification detection
   const hasPurification = finalStatus === 'halal' && !!report.stage1?.purification_required;
-  const purificationPercent = parseFloat(report.stage1?.haram_revenue_percent) || 0;
+  const rawPurification = parseFloat(report.stage1?.haram_revenue_percent) || 0;
+  const purificationPercent = (Math.floor(rawPurification * 100) / 100).toFixed(2);
 
   let statusColor = 'var(--text-muted)';
   let StatusIcon = HelpCircle;
@@ -277,7 +278,7 @@ const AaoifiScreening = () => {
     const thresholdNum = parseFloat(threshold);
     const isPassing = isMinimum ? ratioVal >= thresholdNum : ratioVal <= thresholdNum;
     
-    const diff = Math.abs(thresholdNum - ratioVal).toFixed(1);
+    const diff = Math.abs(thresholdNum - ratioVal).toFixed(2);
     const headroomDisplay = isPassing ? `${diff}pp headroom` : (isMinimum ? `${diff}pp shortfall` : `${diff}pp excess`);
     const color = isPassing ? 'var(--halal)' : 'var(--non-halal)';
     
@@ -322,7 +323,7 @@ const AaoifiScreening = () => {
         </div>
         
         <div className="ratio-col-value">
-          <div style={{ fontSize: '1.32rem', fontWeight: 900, color }}>{ratioVal.toFixed(1)}%</div>
+          <div style={{ fontSize: '1.32rem', fontWeight: 900, color }}>{ratioVal.toFixed(2)}%</div>
           <div style={{ fontSize: '0.7rem', fontWeight: 700, color, marginTop: '4px' }}>{headroomDisplay}</div>
         </div>
       </div>
@@ -435,7 +436,7 @@ const AaoifiScreening = () => {
           </div>
         )}
 
-        <p style={{ position: 'relative', zIndex: 1, color: 'var(--text-dark)', margin: '0 auto', fontWeight: 600, fontSize: '1.0rem', maxWidth: '600px', lineHeight: 1.6, marginBottom: hasPurification ? '36px' : '0' }}>
+        <p style={{ position: 'relative', zIndex: 1, color: 'var(--text-dark)', margin: '0 auto', fontWeight: 600, fontSize: '1.0rem', maxWidth: '600px', lineHeight: 1.6, marginBottom: hasPurification ? '24px' : '0' }}>
           {cleanStatusReason || 'Screened in accordance with AAOIFI Shariah Standard No. 21 (Financial & Business Activity Rules).'}
         </p>
 
@@ -446,44 +447,44 @@ const AaoifiScreening = () => {
             width: 'calc(100% + 72px)', marginLeft: '-36px', marginRight: '-36px',
             background: 'linear-gradient(135deg, rgba(245,158,11,0.18) 0%, rgba(245,158,11,0.10) 100%)',
             borderTop: '1.5px solid rgba(245,158,11,0.35)',
-            padding: '24px 36px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '32px', flexWrap: 'wrap'
+            padding: '16px 36px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '24px', flexWrap: 'wrap'
           }}>
             {/* Icon + label */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div style={{
-                width: '40px', height: '40px', borderRadius: '50%',
+                width: '32px', height: '32px', borderRadius: '50%',
                 background: 'rgba(245,158,11,0.2)', border: '1.5px solid rgba(245,158,11,0.5)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
               }}>
-                <Droplets size={20} color="var(--questionable)" />
+                <Droplets size={16} color="var(--questionable)" />
               </div>
               <div style={{ textAlign: 'left' }}>
-                <div style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--questionable)', marginBottom: '2px' }}>Dividend Purification Required</div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-dark)', fontWeight: 500, lineHeight: 1.4 }}>
-                  Purify <strong style={{ color: 'var(--questionable)' }}>{purificationPercent}%</strong> of any dividends received from this stock
+                <div style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.2px', color: 'var(--questionable)', marginBottom: '2px' }}>Dividend Purification</div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-dark)', fontWeight: 500, lineHeight: 1.4 }}>
+                  Purify <strong style={{ color: 'var(--questionable)' }}>{purificationPercent}%</strong> of dividends
                 </div>
               </div>
             </div>
 
             {/* Divider */}
-            <div style={{ width: '1px', height: '40px', background: 'rgba(245,158,11,0.3)' }} />
+            <div style={{ width: '1px', height: '32px', background: 'rgba(245,158,11,0.3)' }} />
 
             {/* Big stat */}
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '2.2rem', fontWeight: 900, color: 'var(--questionable)', lineHeight: 1, letterSpacing: '-1px' }}>
+              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--questionable)', lineHeight: 1, letterSpacing: '-0.5px' }}>
                 {purificationPercent}%
               </div>
-              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginTop: '4px' }}>Of Dividends To Purify</div>
+              <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginTop: '4px' }}>To Purify</div>
             </div>
 
             {/* Divider */}
-            <div style={{ width: '1px', height: '40px', background: 'rgba(245,158,11,0.3)' }} />
+            <div style={{ width: '1px', height: '32px', background: 'rgba(245,158,11,0.3)' }} />
 
             {/* Explanation */}
-            <div style={{ maxWidth: '260px', textAlign: 'left' }}>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-dark)', fontWeight: 500, lineHeight: 1.5 }}>
-                The company earns <strong style={{ color: 'var(--questionable)' }}>{purificationPercent}%</strong> from non-compliant sources. Donate this portion of any dividends or returns to charity.
+            <div style={{ maxWidth: '240px', textAlign: 'left' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-dark)', fontWeight: 500, lineHeight: 1.5 }}>
+                The company earns <strong style={{ color: 'var(--questionable)' }}>{purificationPercent}%</strong> from non-compliant sources. Donate this portion to charity.
               </div>
             </div>
           </div>
@@ -632,11 +633,11 @@ const AaoifiScreening = () => {
                           <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '4px' }}>Nigerian Exchange Group (NGX)</div>
                           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Official corporate filings and pricing</div>
                           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                            <span style={{ fontWeight: 700 }}>Published:</span> {report.financial_data_used.published_date || 'Unknown Date'}
+                            <span style={{ fontWeight: 700 }}>Published:</span> {report.financial_data_used.published_date || report.published_date || 'Unknown Date'}
                           </div>
-                          {(report.financial_data_used.financial_year || report.financial_data_used.reporting_period) && (
+                          {(report.financial_data_used.financial_year || report.reporting_year || report.financial_data_used.reporting_period || report.reporting_period) && (
                             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                              <span style={{ fontWeight: 700 }}>Reporting Period:</span> {report.financial_data_used.reporting_period || 'Annual Report'} (FY {report.financial_data_used.financial_year || 'Unknown'})
+                              <span style={{ fontWeight: 700 }}>Reporting Period:</span> {report.financial_data_used.reporting_period || report.reporting_period || 'Annual Report'} (FY {report.financial_data_used.financial_year || report.reporting_year || 'Unknown'})
                             </div>
                           )}
                         </div>
@@ -647,9 +648,21 @@ const AaoifiScreening = () => {
                 {report.financial_data_used?.source && !report.financial_data_used?.source_links?.length && !report.financial_data_used?.source_url && (
                   <div style={{ display: 'flex', gap: '12px', alignItems: 'center', background: 'var(--bg-section)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)' }}>
                     <div style={{ color: 'var(--primary)', background: 'var(--primary-bg)', padding: '8px', borderRadius: '10px' }}><FileText size={18} /></div>
-                    <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-dark)', lineHeight: 1.5 }}>
-                      {report.financial_data_used.source}
-                    </span>
+                    <div>
+                      <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-dark)', lineHeight: 1.5 }}>
+                        {report.financial_data_used.source}
+                      </span>
+                      {(report.financial_data_used.published_date || report.published_date) && (
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                          <span style={{ fontWeight: 700 }}>Published:</span> {report.financial_data_used.published_date || report.published_date}
+                        </div>
+                      )}
+                      {(report.financial_data_used.financial_year || report.reporting_year || report.financial_data_used.reporting_period || report.reporting_period) && (
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                          <span style={{ fontWeight: 700 }}>Reporting Period:</span> {report.financial_data_used.reporting_period || report.reporting_period || 'Annual Report'} (FY {report.financial_data_used.financial_year || report.reporting_year || 'Unknown'})
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>

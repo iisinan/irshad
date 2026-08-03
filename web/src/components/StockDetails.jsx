@@ -156,7 +156,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const interest = parseFloat(latest?.interest_income) || 0;
   const rawRevenue = parseFloat(latest?.total_revenue) || 0;
   const revenue = rawRevenue > 0 ? rawRevenue : safeMarketCap;
-  const interestRatio = ((interest / revenue) * 100).toFixed(1);
+  const interestRatio = ((interest / revenue) * 100).toFixed(2);
   const purificationRate = latest?.non_compliant_income_ratio ? parseFloat(latest.non_compliant_income_ratio).toFixed(2) : interestRatio;
 
 
