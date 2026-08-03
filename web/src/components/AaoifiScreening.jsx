@@ -214,6 +214,8 @@ const AaoifiScreening = () => {
   const marketCap = parseFloat(fd.market_cap) || 0;
   const totalDebt = parseFloat(fd.total_debt) || 0;
   const cashAndSecurities = (parseFloat(fd.cash) || 0) + (parseFloat(fd.interest_bearing_securities) || 0);
+  const totalRevenue = parseFloat(fd.total_revenue) || 0;
+  const interestIncome = parseFloat(fd.interest_income) || 0;
 
   const denVal = denominator === 'total_assets' ? totalAssets : marketCap;
   const denLabel = denominator === 'total_assets' ? 'Total Assets' : 'Market Cap';
@@ -965,24 +967,32 @@ const AaoifiScreening = () => {
             {/* Referenced Financial Data Used for Screening */}
             <div style={{ borderTop: `1px solid var(--border)`, paddingTop: '28px', margin: '32px 0 0 0', textAlign: 'left' }}>
               <div style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'flex-start' }}>
-                <Activity size={16} color="var(--primary)" /> Business Activity & Referenced Financial Data For AAOIFI Screening
+                <Activity size={16} color="var(--primary)" /> Referenced Financial Inputs for AAOIFI Screening
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px' }}>
-                <div className="hover-card" style={{ background: 'var(--bg-section)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', transition: 'transform 0.2s' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Market Capitalization</span>
-                  <span style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{marketCap ? `₦${formatNumber(marketCap)}` : 'N/A'}</span>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
+                <div className="hover-card" style={{ background: 'var(--bg-section)', padding: '16px 18px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', transition: 'transform 0.2s' }}>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>Market Capitalization</span>
+                  <span style={{ fontSize: '1.12rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px', fontVariantNumeric: 'tabular-nums' }}>{marketCap ? `₦${formatNumber(marketCap)}` : 'N/A'}</span>
                 </div>
-                <div className="hover-card" style={{ background: 'var(--bg-section)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', transition: 'transform 0.2s' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Total Interest Debt</span>
-                  <span style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{totalDebt ? `₦${formatNumber(totalDebt)}` : '₦0.00'}</span>
+                <div className="hover-card" style={{ background: 'var(--bg-section)', padding: '16px 18px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', transition: 'transform 0.2s' }}>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>Total Assets</span>
+                  <span style={{ fontSize: '1.12rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px', fontVariantNumeric: 'tabular-nums' }}>{totalAssets ? `₦${formatNumber(totalAssets)}` : 'N/A'}</span>
                 </div>
-                <div className="hover-card" style={{ background: 'var(--bg-section)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', transition: 'transform 0.2s' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Cash & Securities</span>
-                  <span style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{cashAndSecurities ? `₦${formatNumber(cashAndSecurities)}` : '₦0.00'}</span>
+                <div className="hover-card" style={{ background: 'var(--bg-section)', padding: '16px 18px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', transition: 'transform 0.2s' }}>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>Total Interest Debt</span>
+                  <span style={{ fontSize: '1.12rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px', fontVariantNumeric: 'tabular-nums' }}>{totalDebt ? `₦${formatNumber(totalDebt)}` : '₦0.00'}</span>
                 </div>
-                <div className="hover-card" style={{ background: 'var(--bg-section)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', transition: 'transform 0.2s' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Total Assets</span>
-                  <span style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{totalAssets ? `₦${formatNumber(totalAssets)}` : 'N/A'}</span>
+                <div className="hover-card" style={{ background: 'var(--bg-section)', padding: '16px 18px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', transition: 'transform 0.2s' }}>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>Cash & Securities</span>
+                  <span style={{ fontSize: '1.12rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px', fontVariantNumeric: 'tabular-nums' }}>{cashAndSecurities ? `₦${formatNumber(cashAndSecurities)}` : '₦0.00'}</span>
+                </div>
+                <div className="hover-card" style={{ background: 'var(--bg-section)', padding: '16px 18px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', transition: 'transform 0.2s' }}>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>Total Revenue</span>
+                  <span style={{ fontSize: '1.12rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px', fontVariantNumeric: 'tabular-nums' }}>{totalRevenue ? `₦${formatNumber(totalRevenue)}` : 'N/A'}</span>
+                </div>
+                <div className="hover-card" style={{ background: 'var(--bg-section)', padding: '16px 18px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', transition: 'transform 0.2s' }}>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>Impure / Interest Income</span>
+                  <span style={{ fontSize: '1.12rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px', fontVariantNumeric: 'tabular-nums' }}>{interestIncome ? `₦${formatNumber(interestIncome)}` : '₦0.00'}</span>
                 </div>
               </div>
             </div>
@@ -992,14 +1002,17 @@ const AaoifiScreening = () => {
 
       {/* Modal Overlay: Calculation Details */}
       {modalData && createPortal(
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000, padding: '24px', opacity: 1, transition: 'opacity 0.3s' }}>
-          <div className="animate-fade-in" style={{ background: 'var(--bg)', borderRadius: '28px', width: '100%', maxWidth: '500px', overflow: 'hidden', boxShadow: '0 32px 64px rgba(0,0,0,0.25), 0 0 0 1px var(--border)' }}>
-            <div style={{ padding: '24px 28px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-section)' }}>
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000, padding: '24px', opacity: 1, transition: 'opacity 0.3s' }}>
+          <div className="animate-fade-in" style={{ background: 'var(--bg)', borderRadius: '28px', width: '100%', maxWidth: '520px', overflow: 'hidden', boxShadow: '0 32px 64px rgba(0,0,0,0.25), 0 0 0 1px var(--border)' }}>
+            <div style={{ padding: '22px 28px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-section)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(196,152,82,0.15)', border: '1px solid rgba(196,152,82,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Calculator size={18} color="#C49852" />
+                <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(196,152,82,0.15)', border: '1px solid rgba(196,152,82,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Calculator size={19} color="#C49852" />
                 </div>
-                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)' }}>Calculation Breakdown</h3>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.08rem', fontWeight: 800, color: 'var(--text-dark)' }}>Calculation Breakdown</h3>
+                  <p style={{ margin: 0, fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>AAOIFI Shariah Standard No. 21</p>
+                </div>
               </div>
               <button 
                 onClick={() => setModalData(null)} 
@@ -1012,62 +1025,92 @@ const AaoifiScreening = () => {
             </div>
             
             <div style={{ padding: '28px' }}>
-              <div style={{ marginBottom: '24px', textAlign: 'center' }}>
-                <div style={{ fontWeight: 800, fontSize: '1.15rem', marginBottom: '6px', color: 'var(--text-dark)' }}>{modalData.title}</div>
-                <div style={{ display: 'inline-block', padding: '4px 14px', background: 'rgba(196,152,82,0.1)', border: '1px solid rgba(196,152,82,0.25)', borderRadius: '100px', color: '#C49852', fontSize: '0.75rem', fontWeight: 700 }}>
-                  AAOIFI Threshold: {modalData.threshold}
+              <div style={{ marginBottom: '20px', textAlign: 'center' }}>
+                <div style={{ fontWeight: 800, fontSize: '1.2rem', marginBottom: '6px', color: 'var(--text-dark)', letterSpacing: '-0.3px' }}>{modalData.title}</div>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 14px', background: 'rgba(196,152,82,0.1)', border: '1px solid rgba(196,152,82,0.25)', borderRadius: '100px', color: '#C49852', fontSize: '0.74rem', fontWeight: 700 }}>
+                  <span>Max Limit: <strong>{modalData.threshold}</strong></span>
                 </div>
               </div>
 
-              <div style={{ background: 'var(--bg-section)', padding: '16px', borderRadius: '14px', border: '1px dashed var(--border)', marginBottom: '24px', textAlign: 'center' }}>
-                <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.6px', display: 'block', marginBottom: '6px' }}>Mathematical Formula</span>
-                <span style={{ fontSize: '0.88rem', color: 'var(--text-dark)', fontWeight: 700, fontFamily: 'monospace' }}>{modalData.formula}</span>
+              {/* Mathematical Equation Fraction Visual */}
+              <div style={{ background: 'var(--bg-section)', borderRadius: '20px', padding: '20px', border: '1px solid var(--border)', marginBottom: '20px' }}>
+                <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '14px', textAlign: 'center' }}>
+                  Mathematical Formulation
+                </div>
+                
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '14px', flexWrap: 'wrap' }}>
+                  {/* Fraction */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '180px' }}>
+                    {/* Numerator */}
+                    <div style={{ textAlign: 'center', paddingBottom: '6px' }}>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>{modalData.numLabel}</div>
+                      <div style={{ fontSize: '0.96rem', fontWeight: 800, color: 'var(--text-dark)', fontVariantNumeric: 'tabular-nums' }}>₦{formatExactCurrency(modalData.numVal)}</div>
+                    </div>
+                    {/* Division line */}
+                    <div style={{ width: '100%', height: '2px', background: 'var(--border-strong, #ccc)', borderRadius: '1px' }} />
+                    {/* Denominator */}
+                    <div style={{ textAlign: 'center', paddingTop: '6px' }}>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>{modalData.denLabel}</div>
+                      <div style={{ fontSize: '0.96rem', fontWeight: 800, color: 'var(--text-dark)', fontVariantNumeric: 'tabular-nums' }}>₦{formatExactCurrency(modalData.denVal)}</div>
+                    </div>
+                  </div>
+
+                  <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-muted)' }}>× 100</div>
+                  <div style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--text-dark)' }}>=</div>
+                  <div style={{ fontSize: '1.45rem', fontWeight: 900, color: modalData.ratio <= parseFloat(modalData.threshold.replace(/[^0-9.]/g, '')) ? 'var(--halal)' : 'var(--non-halal)', fontVariantNumeric: 'tabular-nums' }}>
+                    {modalData.ratio.toFixed(2)}%
+                  </div>
+                </div>
               </div>
 
-              <div style={{ background: 'var(--bg-section)', borderRadius: '16px', padding: '6px 16px', border: '1px solid var(--border)', marginBottom: '24px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px dashed var(--border)' }}>
-                  <span style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-muted)' }}>{modalData.numLabel} (Numerator)</span>
-                  <span style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-dark)' }}>₦{formatExactCurrency(modalData.numVal)}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0' }}>
-                  <span style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-muted)' }}>{modalData.denLabel} (Denominator)</span>
-                  <span style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-dark)' }}>₦{formatExactCurrency(modalData.denVal)}</span>
-                </div>
-              </div>
+              {/* Calculated Result Card */}
+              {(() => {
+                const numericThreshold = parseFloat(modalData.threshold.replace(/[^0-9.]/g, '')) || 0;
+                const isCompliant = modalData.ratio <= numericThreshold;
+                const delta = Math.abs(numericThreshold - modalData.ratio).toFixed(2);
 
-              <div style={{ 
-                background: modalData.ratio <= parseFloat(modalData.threshold.replace(/[^0-9.]/g, '')) 
-                  ? 'linear-gradient(135deg, rgba(16,185,129,0.1) 0%, rgba(16,185,129,0.04) 100%)' 
-                  : 'linear-gradient(135deg, rgba(239,68,68,0.1) 0%, rgba(239,68,68,0.04) 100%)', 
-                padding: '20px', 
-                borderRadius: '20px', 
-                textAlign: 'center', 
-                border: modalData.ratio <= parseFloat(modalData.threshold.replace(/[^0-9.]/g, '')) 
-                  ? '1px solid rgba(16,185,129,0.25)' 
-                  : '1px solid rgba(239,68,68,0.25)' 
-              }}>
-                <div style={{ fontWeight: 800, fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>
-                  Calculated Result
-                </div>
-                <div style={{ fontSize: '2.6rem', fontWeight: 900, color: modalData.ratio <= parseFloat(modalData.threshold.replace(/[^0-9.]/g, '')) ? 'var(--halal)' : 'var(--non-halal)', lineHeight: 1, letterSpacing: '-1px' }}>
-                  {modalData.ratio.toFixed(2)}%
-                </div>
-                <div style={{ marginTop: '10px' }}>
-                  <span style={{ 
-                    display: 'inline-block',
-                    padding: '4px 12px',
-                    borderRadius: '100px',
-                    fontSize: '0.72rem',
-                    fontWeight: 800,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px',
-                    background: modalData.ratio <= parseFloat(modalData.threshold.replace(/[^0-9.]/g, '')) ? 'var(--halal-bg)' : 'var(--non-halal-bg)',
-                    color: modalData.ratio <= parseFloat(modalData.threshold.replace(/[^0-9.]/g, '')) ? 'var(--halal)' : 'var(--non-halal)'
+                return (
+                  <div style={{ 
+                    background: isCompliant 
+                      ? 'linear-gradient(135deg, rgba(16,185,129,0.12) 0%, rgba(16,185,129,0.04) 100%)' 
+                      : 'linear-gradient(135deg, rgba(239,68,68,0.12) 0%, rgba(239,68,68,0.04) 100%)', 
+                    padding: '22px', 
+                    borderRadius: '20px', 
+                    textAlign: 'center', 
+                    border: isCompliant 
+                      ? '1px solid rgba(16,185,129,0.3)' 
+                      : '1px solid rgba(239,68,68,0.3)',
+                    boxShadow: isCompliant 
+                      ? '0 8px 24px rgba(16,185,129,0.08)' 
+                      : '0 8px 24px rgba(239,68,68,0.08)'
                   }}>
-                    {modalData.ratio <= parseFloat(modalData.threshold.replace(/[^0-9.]/g, '')) ? '✓ Compliant with AAOIFI' : '✕ Exceeds AAOIFI Threshold'}
-                  </span>
-                </div>
-              </div>
+                    <div style={{ fontWeight: 800, fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>
+                      Screening Assessment
+                    </div>
+                    <div style={{ fontSize: '2.8rem', fontWeight: 950, color: isCompliant ? 'var(--halal)' : 'var(--non-halal)', lineHeight: 1, letterSpacing: '-1.5px', fontVariantNumeric: 'tabular-nums' }}>
+                      {modalData.ratio.toFixed(2)}%
+                    </div>
+                    <div style={{ marginTop: '14px', display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <span style={{ 
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '5px 14px',
+                        borderRadius: '100px',
+                        fontSize: '0.74rem',
+                        fontWeight: 800,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        background: isCompliant ? 'var(--halal-bg)' : 'var(--non-halal-bg)',
+                        color: isCompliant ? 'var(--halal)' : 'var(--non-halal)',
+                        border: isCompliant ? '1px solid rgba(16,185,129,0.3)' : '1px solid rgba(239,68,68,0.3)'
+                      }}>
+                        {isCompliant ? `✓ Compliant · ${delta}pp Headroom` : `✕ Non-Compliant · ${delta}pp Excess`}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </div>,
