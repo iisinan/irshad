@@ -4,7 +4,8 @@ import { createPortal } from 'react-dom';
 import { useParams, Link } from 'react-router-dom';
 import { 
   ArrowLeft, CheckCircle, XCircle, AlertTriangle, 
-  HelpCircle, ShieldCheck, ChevronRight, FileText, Brain, Download, Activity, Trash2, Droplets
+  HelpCircle, ShieldCheck, ChevronRight, FileText, Brain, Download, Activity, Trash2, Droplets,
+  Calendar, Sparkles
 } from 'lucide-react';
 import { fetchAaoifiScreening, updateAaoifiData } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -493,48 +494,200 @@ const AaoifiScreening = () => {
 
 
 
-      <div className="hover-card" style={{ background: 'linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', marginBottom: '48px', boxShadow: '0 12px 32px rgba(0,0,0,0.03)', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
+      {/* ─── STAGE 1: BUSINESS ACTIVITY SCREENING ─── */}
+      <div className="hover-card" style={{ 
+        background: 'linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%)', 
+        borderRadius: '24px', 
+        border: '1px solid var(--border)', 
+        padding: '32px', 
+        marginBottom: '40px', 
+        boxShadow: '0 12px 32px rgba(0,0,0,0.03)', 
+        transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        {/* Subtle top indicator */}
+        <div style={{
+          position: 'absolute',
+          top: 0, left: 0, right: 0, height: '3px',
+          background: report.stage1?.status === 'halal' 
+            ? 'linear-gradient(90deg, #10B981, rgba(16,185,129,0.3), transparent)' 
+            : 'linear-gradient(90deg, #EF4444, rgba(239,68,68,0.3), transparent)'
+        }} />
+
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <h2 style={{ fontSize: '0.79rem', fontWeight: 800, color: '#C49852', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>STAGE 1: BUSINESS ACTIVITY SCREENING</h2>
-            <p style={{ fontSize: '1.32rem', fontWeight: 900, color: 'var(--text-dark)', margin: '8px 0 0 0' }}>Core operations & Revenue</p>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 10px', borderRadius: '8px', background: 'rgba(196,152,82,0.1)', border: '1px solid rgba(196,152,82,0.25)', marginBottom: '8px' }}>
+              <ShieldCheck size={13} color="#C49852" />
+              <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#C49852', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+                STAGE 1: BUSINESS ACTIVITY SCREENING
+              </span>
+            </div>
+            <h2 style={{ fontSize: '1.35rem', fontWeight: 900, color: 'var(--text-dark)', margin: 0, letterSpacing: '-0.4px' }}>
+              Core Operations & Revenue
+            </h2>
           </div>
-          <div style={{ padding: '6px 14px', borderRadius: '100px', background: report.stage1?.status === 'halal' ? 'var(--halal-bg)' : 'var(--non-halal-bg)', color: report.stage1?.status === 'halal' ? 'var(--halal)' : 'var(--non-halal)', fontSize: '0.66rem', fontWeight: 800, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
-            {report.stage1?.status === 'halal' ? 'PASS' : report.stage1?.status === 'non-halal' ? 'FAIL' : 'UNKNOWN'}
+
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '6px 16px',
+            borderRadius: '100px',
+            background: report.stage1?.status === 'halal' ? 'var(--halal-bg)' : 'var(--non-halal-bg)',
+            border: `1px solid ${report.stage1?.status === 'halal' ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'}`,
+            color: report.stage1?.status === 'halal' ? 'var(--halal)' : 'var(--non-halal)',
+            fontSize: '0.72rem',
+            fontWeight: 900,
+            letterSpacing: '0.8px',
+            textTransform: 'uppercase',
+            boxShadow: report.stage1?.status === 'halal' ? '0 2px 10px rgba(16,185,129,0.15)' : '0 2px 10px rgba(239,68,68,0.15)'
+          }}>
+            {report.stage1?.status === 'halal' ? (
+              <>
+                <CheckCircle size={14} /> PASS
+              </>
+            ) : report.stage1?.status === 'non-halal' ? (
+              <>
+                <XCircle size={14} /> FAIL
+              </>
+            ) : 'UNKNOWN'}
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           
+          {/* Dividend Purification Callout */}
           {report.stage1?.purification_required && finalStatus === 'halal' && (
-            <div className="hover-card" style={{ background: 'var(--questionable-bg)', padding: '20px', borderRadius: '16px', border: '1px solid var(--questionable)', transition: 'transform 0.2s' }}>
-              <div style={{ fontWeight: 800, color: 'var(--questionable)', fontSize: '0.84rem', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <AlertTriangle size={18} /> Dividend Purification Required
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(217,119,6,0.07) 0%, rgba(245,158,11,0.02) 100%)',
+              padding: '20px 24px',
+              borderRadius: '18px',
+              border: '1px solid rgba(217,119,6,0.25)',
+              borderLeft: '4px solid #D97706',
+              boxShadow: '0 4px 16px rgba(217,119,6,0.06)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '20px',
+              flexWrap: 'wrap'
+            }}>
+              <div style={{ flex: '1 1 320px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(217,119,6,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#D97706' }}>
+                    <Droplets size={16} />
+                  </div>
+                  <span style={{ fontWeight: 800, color: '#D97706', fontSize: '0.92rem', letterSpacing: '-0.2px' }}>
+                    Dividend Purification Required
+                  </span>
+                </div>
+                <p style={{ margin: 0, color: 'var(--text-dark)', fontWeight: 500, fontSize: '0.86rem', lineHeight: 1.6 }}>
+                  This company passes Stage 1, but derives <strong style={{ color: '#D97706', fontWeight: 800 }}>{purificationPercent}%</strong> of its revenue from non-compliant sources. In accordance with AAOIFI standards, you must purify this portion of your dividend payouts.
+                </p>
               </div>
-              <p style={{ margin: 0, color: 'var(--text-dark)', fontWeight: 500, fontSize: '0.9rem', lineHeight: 1.6 }}>
-                This company passes Stage 1, but has <strong>{report.stage1?.haram_revenue_percent}%</strong> revenue from non-compliant sources. You must purify this portion of your dividends.
-              </p>
+
+              {/* Stat highlight pill */}
+              <div style={{
+                background: 'var(--bg)',
+                borderRadius: '14px',
+                padding: '12px 20px',
+                border: '1px solid rgba(217,119,6,0.2)',
+                textAlign: 'center',
+                minWidth: '120px',
+                boxShadow: '0 2px 8px rgba(217,119,6,0.08)'
+              }}>
+                <div style={{ fontSize: '0.62rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>
+                  Impure Ratio
+                </div>
+                <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#D97706', letterSpacing: '-0.5px' }}>
+                  {purificationPercent}%
+                </div>
+                <div style={{ fontSize: '0.62rem', fontWeight: 700, color: 'var(--halal)', marginTop: '2px' }}>
+                  ≤ 5.00% Limit
+                </div>
+              </div>
             </div>
           )}
 
+          {/* Prohibited Activities Exceed Limits */}
           {report.stage1?.status === 'non-halal' && (
-            <div className="hover-card" style={{ background: 'var(--non-halal-bg)', padding: '20px', borderRadius: '16px', border: '1px solid var(--non-halal)', transition: 'transform 0.2s' }}>
-              <div style={{ fontWeight: 800, color: 'var(--non-halal)', fontSize: '0.84rem', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <AlertTriangle size={18} /> Prohibited Activities Exceed Limits
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(239,68,68,0.07) 0%, rgba(220,38,38,0.02) 100%)',
+              padding: '20px 24px',
+              borderRadius: '18px',
+              border: '1px solid rgba(239,68,68,0.25)',
+              borderLeft: '4px solid #EF4444',
+              boxShadow: '0 4px 16px rgba(239,68,68,0.06)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '20px',
+              flexWrap: 'wrap'
+            }}>
+              <div style={{ flex: '1 1 320px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(239,68,68,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#EF4444' }}>
+                    <AlertTriangle size={16} />
+                  </div>
+                  <span style={{ fontWeight: 800, color: '#EF4444', fontSize: '0.92rem', letterSpacing: '-0.2px' }}>
+                    Prohibited Activities Exceed Limits
+                  </span>
+                </div>
+                <p style={{ margin: 0, color: 'var(--text-dark)', fontWeight: 500, fontSize: '0.86rem', lineHeight: 1.6 }}>
+                  This company fails Stage 1 because its non-compliant revenue (<strong style={{ color: '#EF4444' }}>{(parseFloat(report.stage1?.haram_revenue_percent) || 0).toFixed(2)}%</strong>) exceeds the 5% AAOIFI tolerance threshold, or it is primarily engaged in prohibited business activities.
+                </p>
               </div>
-              <p style={{ margin: 0, color: 'var(--text-dark)', fontWeight: 500, fontSize: '0.9rem', lineHeight: 1.6 }}>
-                This company fails Stage 1 because its non-compliant revenue ({report.stage1?.haram_revenue_percent}%) exceeds the 5% tolerance, or it is primarily engaged in prohibited activities.
-              </p>
+
+              <div style={{
+                background: 'var(--bg)',
+                borderRadius: '14px',
+                padding: '12px 20px',
+                border: '1px solid rgba(239,68,68,0.2)',
+                textAlign: 'center',
+                minWidth: '120px',
+                boxShadow: '0 2px 8px rgba(239,68,68,0.08)'
+              }}>
+                <div style={{ fontSize: '0.62rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>
+                  Impure Ratio
+                </div>
+                <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#EF4444', letterSpacing: '-0.5px' }}>
+                  {(parseFloat(report.stage1?.haram_revenue_percent) || 0).toFixed(2)}%
+                </div>
+                <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#EF4444', marginTop: '2px' }}>
+                  Exceeds 5% Limit
+                </div>
+              </div>
             </div>
           )}
           
-          <div style={{ paddingTop: '24px' }}>
-            <div style={{ fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.84rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Brain size={16} color="var(--primary)" /> Stage 1 Screening Reasoning
+          {/* Shariah Screening Reasoning */}
+          <div style={{ paddingTop: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
+              <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.84rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Brain size={16} color="var(--primary)" /> Stage 1 Screening Reasoning
+              </div>
+              {(report.published_date || report.reporting_period || report.reporting_year) && (
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Calendar size={12} />
+                  <span>{report.reporting_period || 'Annual Report'} {report.reporting_year ? `(${report.reporting_year})` : ''}</span>
+                  {report.published_date && <span>· Published {report.published_date}</span>}
+                </div>
+              )}
             </div>
-            <p style={{ margin: 0, fontSize: '0.92rem', lineHeight: 1.7, color: 'var(--text-dark)', padding: '20px', background: 'var(--bg-section)', borderRadius: '16px', border: '1px solid var(--border)' }}>
+            <div style={{ 
+              fontSize: '0.92rem', 
+              lineHeight: 1.7, 
+              color: 'var(--text-dark)', 
+              padding: '20px 24px', 
+              background: 'var(--bg-section)', 
+              borderRadius: '16px', 
+              border: '1px solid var(--border)',
+              borderLeft: '3px solid var(--primary)',
+              boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.02)'
+            }}>
               {cleanStage1Reason || 'N/A'}
-            </p>
+            </div>
           </div>
         </div>
       </div>
