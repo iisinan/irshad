@@ -38,6 +38,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
   
   const [showBrokerageModal, setShowBrokerageModal] = useState(false);
   const [showAlertDialog, setShowAlertDialog] = useState(false);
+  const [showPurificationModal, setShowPurificationModal] = useState(false);
   const [alertPrice, setAlertPrice] = useState('');
   const [alertSaving, setAlertSaving] = useState(false);
   const [inWatchlist, setInWatchlist] = useState(false);
@@ -611,7 +612,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
                   </div>
                 </div>
                 {/* Purification Rate Badge */}
-                <div style={{ textAlign: 'center', background: 'linear-gradient(135deg, rgba(212,175,55,0.2) 0%, rgba(212,175,55,0.06) 100%)', padding: '8px 14px', borderRadius: '12px', border: '1px solid rgba(212,175,55,0.3)' }}>
+                <div onClick={() => setShowPurificationModal(true)} className="hover-card" style={{ cursor: 'pointer', textAlign: 'center', background: 'linear-gradient(135deg, rgba(212,175,55,0.2) 0%, rgba(212,175,55,0.06) 100%)', padding: '8px 14px', borderRadius: '12px', border: '1px solid rgba(212,175,55,0.3)' }}>
                   <div style={{ fontSize: '0.6rem', color: '#d4af37', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Purification Rate</div>
                   <div style={{ fontSize: '1.3rem', fontWeight: 900, color: 'white', lineHeight: 1.1, marginTop: '2px' }}>{purificationRate}%</div>
                 </div>
@@ -812,6 +813,60 @@ const StockDetails = ({ symbol: propSymbol }) => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ─── Purification Formula Modal ─── */}
+      {showPurificationModal && createPortal(
+        <div className="animate-fade-in" style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.6)', backdropFilter:'blur(4px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:100000, padding:'20px' }}>
+          <div style={{ background: 'var(--bg)', borderRadius:'24px', width:'100%', maxWidth:'460px', boxShadow:'0 24px 64px rgba(0,0,0,0.2)', border: '1px solid var(--border)', overflow:'hidden', animation:'slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'24px', borderBottom:'1px solid var(--border)' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight:800, color:'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                <ShieldCheck size={20} color="var(--gold, #d4af37)" /> Purification Formula
+              </h3>
+              <button onClick={() => setShowPurificationModal(false)} style={{ background:'var(--bg-section)', border:'none', width:'32px', height:'32px', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--text-muted)', cursor:'pointer' }}><X size={16}/></button>
+            </div>
+            
+            <div style={{ padding: '32px 24px' }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '24px', lineHeight: 1.5 }}>
+                The purification rate is calculated using the AAOIFI methodology, determining the proportion of non-permissible income relative to total revenue.
+              </p>
+
+              <div style={{ background: 'var(--bg-section)', border: '1px solid var(--border)', borderRadius: '16px', padding: '20px', marginBottom: '24px' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '12px' }}>AAOIFI Formula</div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', flexWrap: 'wrap', fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-dark)' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <span style={{ borderBottom: '2px solid var(--border)', paddingBottom: '4px', marginBottom: '4px' }}>Total Non-Permissible Income</span>
+                    <span>Total Revenue</span>
+                  </div>
+                  <span>× 100</span>
+                </div>
+              </div>
+
+              <div style={{ background: 'var(--bg-section)', border: '1px solid var(--border)', borderRadius: '16px', padding: '20px' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '12px' }}>{stock.symbol} Calculation</div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', flexWrap: 'wrap', fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <span style={{ borderBottom: '2px solid var(--border)', paddingBottom: '6px', marginBottom: '6px', color: 'var(--non-halal)' }}>{interest > 0 ? `₦${interest.toLocaleString('en-NG', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : '₦0.00'}</span>
+                    <span style={{ color: 'var(--primary)' }}>{rawRevenue > 0 ? `₦${rawRevenue.toLocaleString('en-NG', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : 'N/A'}</span>
+                  </div>
+                  <span>× 100</span>
+                  <span>= <span style={{ color: 'var(--gold, #d4af37)' }}>{purificationRate}%</span></span>
+                </div>
+              </div>
+
+            </div>
+            <div style={{ padding: '20px 24px', background: 'var(--bg-section)', borderTop: '1px solid var(--border)' }}>
+              <button 
+                onClick={() => setShowPurificationModal(false)}
+                className="btn-primary"
+                style={{ width: '100%', padding: '14px', borderRadius: '12px' }}
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>,
         document.body
