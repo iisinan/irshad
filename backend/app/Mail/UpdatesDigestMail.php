@@ -30,7 +30,7 @@ class UpdatesDigestMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Irshad Weekly Portfolio & Market Digest',
+            subject: '📊 Your Weekly Irshad Portfolio & Market Digest',
         );
     }
 
@@ -42,8 +42,8 @@ class UpdatesDigestMail extends Mailable
         return new Content(
             markdown: 'emails.updates.digest',
             with: [
-                'name' => $this->user->name,
-                'updatesUrl' => url('/portfolio'),
+                'name'       => $this->user->first_name ?? explode(' ', $this->user->name)[0] ?? $this->user->name,
+                'updatesUrl' => config('app.frontend_url', 'https://iirshad.com').'/updates',
             ],
         );
     }

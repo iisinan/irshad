@@ -52,4 +52,8 @@ return [
         'key' => env('YOUTUBE_API_KEY'),
     ],
 
+    'apify' => [
+        'token' => env('APIFY_TOKEN'),
+    ],
+
 ];

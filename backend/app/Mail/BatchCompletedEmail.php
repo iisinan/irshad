@@ -41,7 +41,7 @@ class BatchCompletedEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Daily Financial Screening Batch Completed',
+            subject: '✅ Irshad: Daily Market Screening Complete',
         );
     }
 

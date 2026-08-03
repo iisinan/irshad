@@ -30,7 +30,7 @@ class ComplianceReviewNotification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Compliance Review Notification',
+            subject: '⚠️ Irshad: Shariah Status Change — Admin Review Required',
         );
     }
 

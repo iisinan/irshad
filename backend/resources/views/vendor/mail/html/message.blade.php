@@ -21,7 +21,9 @@
 {{-- Footer --}}
 <x-slot:footer>
 <x-mail::footer>
-© {{ date('Y') }} Irshad. {{ __('All rights reserved.') }}
+© {{ date('Y') }} [Irshad](https://iirshad.com) · Shariah-Compliant Investing for Nigerian Muslims
+
+[Visit Irshad](https://iirshad.com) &nbsp;·&nbsp; [Market](https://iirshad.com/market) &nbsp;·&nbsp; [Support](mailto:support@iirshad.com)
 </x-mail::footer>
 </x-slot:footer>
 </x-mail::layout>
