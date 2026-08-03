@@ -201,7 +201,16 @@ export default function Portfolio() {
           <div>
             <div className="section-label" style={{ marginBottom: '12px', background: 'var(--primary-50)', color: 'var(--primary)', border: 'none' }}>Personal Hub</div>
             <h1 style={{ fontSize: '2.46rem', fontWeight: 900, letterSpacing: '-1.5px', color: 'var(--text-dark)', lineHeight: 1.1 }}>
-              Portfolio & Tools
+              {{
+                holdings: 'Holdings',
+                market: 'Market Screener',
+                watchlist: 'Alert',
+                updates: 'Updates',
+                guide: 'Help & Guide',
+                zakat: 'Zakat',
+                lectures: 'Resources',
+                statement: 'Statements'
+              }[activeTab] || 'Portfolio & Tools'}
             </h1>
             {totalBalance > 0 && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '8px' }}>
