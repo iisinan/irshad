@@ -54,21 +54,23 @@ const AboutPage = () => (
       <div className="about-vision-grid" style={{ marginBottom: '48px' }}>
         {/* Vision card */}
         <div style={{
-          background: 'linear-gradient(145deg, #0F5257 0%, #0D1B2A 100%)',
+          background: 'linear-gradient(135deg, #0A192F 0%, #0F3A40 50%, #0B4F55 100%)',
           borderRadius: '24px', padding: '40px',
           position: 'relative', overflow: 'hidden',
+          boxShadow: '0 16px 40px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.1)',
+          border: '1px solid rgba(255,255,255,0.1)'
         }}>
-          <div style={{ position: 'absolute', bottom: '-50px', right: '-50px', width: '200px', height: '200px', background: 'rgba(201,168,76,0.08)', borderRadius: '50%' }} />
+          <div style={{ position: 'absolute', bottom: '-50px', right: '-50px', width: '220px', height: '220px', background: 'radial-gradient(circle, rgba(201,168,76,0.15) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
           <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.3)', padding: '5px 14px', borderRadius: '40px', marginBottom: '24px' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.3)', padding: '5px 14px', borderRadius: '40px', marginBottom: '24px', backdropFilter: 'blur(8px)' }}>
               <Globe size={13} color="var(--gold)" />
-              <span style={{ fontSize: '0.63rem', fontWeight: 700, color: 'var(--gold)', letterSpacing: '1px', textTransform: 'uppercase' }}>Our Vision</span>
+              <span style={{ fontSize: '0.63rem', fontWeight: 800, color: 'var(--gold)', letterSpacing: '1px', textTransform: 'uppercase' }}>Our Vision</span>
             </div>
-            <h3 style={{ fontSize: '1.32rem', fontWeight: 900, color: 'white', marginBottom: '16px', letterSpacing: '-0.5px' }}>Africa's Most Trusted Islamic FinTech</h3>
-            <p style={{ color: 'rgba(255,255,255,0.75)', lineHeight: 1.75, marginBottom: '16px', fontSize: '0.85rem' }}>
+            <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'white', marginBottom: '16px', letterSpacing: '-0.5px' }}>Africa's Most Trusted Islamic FinTech</h3>
+            <p style={{ color: 'rgba(255,255,255,0.82)', lineHeight: 1.75, marginBottom: '16px', fontSize: '0.88rem' }}>
               To become the most trusted Islamic financial technology platform in Africa, starting with the Nigerian equities market.
             </p>
-            <p style={{ color: 'rgba(255,255,255,0.6)', lineHeight: 1.75, fontSize: '0.81rem' }}>
+            <p style={{ color: 'rgba(255,255,255,0.65)', lineHeight: 1.75, fontSize: '0.84rem' }}>
               We believe growing wealth and adhering to one's faith should not be mutually exclusive. Our platform provides the clarity needed to invest confidently.
             </p>
           </div>
@@ -98,21 +100,22 @@ const AboutPage = () => (
       {/* ─── Mission CTA ─── */}
       <div style={{
         borderRadius: '24px', padding: '56px 48px', textAlign: 'center',
-        background: '#1A1208',
-        boxShadow: '0 16px 48px rgba(201,168,76,0.15)',
+        background: 'linear-gradient(135deg, #0A192F 0%, #0F3A40 50%, #0B4F55 100%)',
+        border: '1.5px solid rgba(201,168,76,0.3)',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
         position: 'relative', overflow: 'hidden',
       }}>
-        <div style={{ position: 'absolute', top: '-80px', right: '-80px', width: '300px', height: '300px', background: 'rgba(201,168,76,0.06)', borderRadius: '50%' }} />
-        <div style={{ position: 'absolute', bottom: '-100px', left: '-60px', width: '240px', height: '240px', background: 'rgba(255,255,255,0.02)', borderRadius: '50%' }} />
+        <div style={{ position: 'absolute', top: '-80px', right: '-80px', width: '320px', height: '320px', background: 'radial-gradient(circle, rgba(201,168,76,0.12) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: '-100px', left: '-60px', width: '280px', height: '280px', background: 'radial-gradient(circle, rgba(16,185,129,0.08) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
         <div style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.3)', padding: '6px 18px', borderRadius: '40px', marginBottom: '24px' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.3)', padding: '6px 18px', borderRadius: '40px', marginBottom: '24px', backdropFilter: 'blur(8px)' }}>
             <Sparkles size={14} color="var(--gold)" />
-            <span style={{ fontSize: '0.69rem', fontWeight: 700, color: 'var(--gold)', letterSpacing: '1px', textTransform: 'uppercase' }}>Our Mission</span>
+            <span style={{ fontSize: '0.69rem', fontWeight: 800, color: 'var(--gold)', letterSpacing: '1px', textTransform: 'uppercase' }}>Our Mission</span>
           </div>
           <h2 style={{ color: 'white', fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', fontWeight: 900, marginBottom: '20px', letterSpacing: '-0.5px', lineHeight: 1.2 }}>
             Shariah-Compliant Investing,<br />Made Effortless
           </h2>
-          <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.92rem', lineHeight: 1.8, maxWidth: '600px', margin: '0 auto' }}>
+          <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.94rem', lineHeight: 1.8, maxWidth: '600px', margin: '0 auto' }}>
             To make Shariah-compliant investing accessible, transparent, and effortless for every Muslim on the Nigerian Exchange — so you can grow your wealth without compromising your faith.
           </p>
         </div>

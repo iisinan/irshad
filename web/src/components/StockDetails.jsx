@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2, Brain, Globe, Newspaper, Bell, X, ShieldCheck, Activity, ChevronDown, ChevronUp, Briefcase, Scale, Landmark, Droplets } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2, Brain, Globe, Newspaper, Bell, X, ShieldCheck, Activity, ChevronDown, ChevronUp, Briefcase, Scale, Landmark, Droplets } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import api, { fetchStockDetails, fetchAiAnalysis, setPriceAlert, fetchWatchlist, addToWatchlist, removeFromWatchlist } from '../services/api';
 import { useQuery } from '@tanstack/react-query';
@@ -217,64 +217,99 @@ const StockDetails = ({ symbol: propSymbol }) => {
       )}
 
       {/* ─── Header Card (Redesigned with Verdict & Justification as Primary) ─── */}
-      <div className="detail-header" style={{ background: 'linear-gradient(135deg, #0D1B2A 0%, #0F5257 65%, #0B6B71 100%)', padding: '28px clamp(20px, 4vw, 36px)', borderRadius: '24px', position: 'relative', overflow: 'hidden', boxShadow: '0 12px 40px rgba(0,0,0,0.15)', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <div className="detail-header" style={{
+        background: 'linear-gradient(135deg, #0A192F 0%, #0F3A40 50%, #0B4F55 100%)',
+        padding: '32px clamp(20px, 4vw, 36px)',
+        borderRadius: '24px',
+        position: 'relative',
+        overflow: 'hidden',
+        boxShadow: '0 16px 48px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.1) inset',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '24px'
+      }}>
         {/* Background ambient orbs */}
-        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '240px', height: '240px', background: 'radial-gradient(circle, rgba(201,168,76,0.15) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none', animation: 'orbFloat 18s ease-in-out infinite alternate' }} />
-        <div style={{ position: 'absolute', bottom: '-80px', left: '-40px', width: '300px', height: '300px', background: 'radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none', animation: 'orbFloat 25s ease-in-out infinite alternate-reverse' }} />
+        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '260px', height: '260px', background: 'radial-gradient(circle, rgba(201,168,76,0.12) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none', animation: 'orbFloat 18s ease-in-out infinite alternate' }} />
+        <div style={{ position: 'absolute', bottom: '-80px', left: '-40px', width: '320px', height: '320px', background: 'radial-gradient(circle, rgba(16,185,129,0.08) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none', animation: 'orbFloat 25s ease-in-out infinite alternate-reverse' }} />
         
         {/* Top Row: Company Info (Left) & Secondary Price / Actions (Right) */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '20px', width: '100%', position: 'relative', zIndex: 1 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', width: '100%', position: 'relative', zIndex: 1 }}>
           
           {/* Left: Logo & Company Name */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <CompanyLogo
               symbol={stock.symbol}
               logoUrl={stock.logo_url}
-              size={56}
-              radius={14}
-              style={{ background: 'var(--bg)', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', flexShrink: 0 }}
+              size={58}
+              radius={16}
+              style={{ background: 'var(--bg)', boxShadow: '0 8px 24px rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.2)', flexShrink: 0 }}
             />
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                <h1 style={{ fontSize: '1.75rem', fontWeight: '900', letterSpacing: '-0.5px', color: 'white', margin: 0, lineHeight: 1.1 }}>{stock.name}</h1>
+                <h1 style={{ fontSize: '1.85rem', fontWeight: 900, letterSpacing: '-0.6px', color: 'white', margin: 0, lineHeight: 1.1, fontFamily: 'inherit' }}>{stock.name}</h1>
               </div>
-              <p style={{ color: 'rgba(255,255,255,0.65)', fontWeight: 600, margin: '6px 0 0', letterSpacing: '0.5px', fontSize: '0.84rem' }}>
-                {stock.symbol} · {stock.sector ?? 'Market Listed'} · Stock Exchange
+              <p style={{ color: 'rgba(255,255,255,0.7)', fontWeight: 600, margin: '6px 0 0', letterSpacing: '0.4px', fontSize: '0.84rem', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <span style={{ color: 'var(--gold, #d4af37)', fontWeight: 800 }}>{stock.symbol}</span>
+                <span>·</span>
+                <span>{stock.sector ?? 'Market Listed'}</span>
+                <span>·</span>
+                <span style={{ background: 'rgba(255,255,255,0.12)', padding: '2px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 700 }}>NGX Listed</span>
               </p>
             </div>
           </div>
 
           {/* Right: Actions & Secondary Price Tag */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <button
-                 onClick={toggleWatchlist}
-                 disabled={watchlistLoading}
-                 style={{ 
-                   display: 'flex', alignItems: 'center', gap: '6px', 
-                   background: inWatchlist ? 'var(--gold)' : 'rgba(255,255,255,0.15)', 
-                   border: `1px solid ${inWatchlist ? 'var(--gold)' : 'rgba(255,255,255,0.3)'}`, 
-                   color: inWatchlist ? '#1A1208' : 'white', 
-                   padding: '7px 14px', borderRadius: '10px', fontSize: '0.74rem', 
-                   fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s',
-                   boxShadow: inWatchlist ? '0 4px 12px rgba(212, 175, 55, 0.3)' : 'none'
-                 }}
-              >
-                 {watchlistLoading ? <div className="spinner" style={{width:'14px', height:'14px', borderTopColor: inWatchlist?'#1A1208':'white', borderWidth: '2px'}}/> : <Bell size={14} fill={inWatchlist ? '#1A1208' : 'none'} />}
-                 {inWatchlist ? 'Alert Set' : 'Alert'}
-              </button>
-            </div>
-
-            {/* Secondary Price Display */}
-            <div className="hover-card" style={{ textAlign: 'right', background: 'rgba(0,0,0,0.18)', padding: '6px 14px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-              <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase' }}>Latest Price</div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', justifyContent: 'flex-end', marginTop: '2px' }}>
-                <span style={{ fontSize: '1.35rem', fontWeight: '850', color: 'white', letterSpacing: '-0.5px' }}>₦ {latestPrice.toFixed(2)}</span>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px', color: isPositive ? '#4ade80' : '#f87171', fontWeight: 700, fontSize: '0.75rem' }}>
-                  {isPositive ? <TrendingUp size={12} /> : <TrendingDown size={12} />} {priceChangePct.toFixed(2)}%
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+            {/* Price Tag Card */}
+            <div style={{
+              textAlign: 'right',
+              background: 'rgba(255, 255, 255, 0.08)',
+              padding: '10px 18px',
+              borderRadius: '16px',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              backdropFilter: 'blur(16px)',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.15)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px', color: 'rgba(255,255,255,0.6)', fontSize: '0.62rem', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase' }}>
+                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10B981', boxShadow: '0 0 6px #10B981' }} />
+                Latest Price
+              </div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', justifyContent: 'flex-end', marginTop: '3px' }}>
+                <span style={{ fontSize: '1.45rem', fontWeight: 900, color: 'white', letterSpacing: '-0.5px', fontVariantNumeric: 'tabular-nums' }}>
+                  ₦ {latestPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '3px',
+                  color: isPositive ? '#34D399' : '#F87171',
+                  background: isPositive ? 'rgba(52, 211, 153, 0.15)' : 'rgba(248, 113, 113, 0.15)',
+                  padding: '2px 8px', borderRadius: '6px',
+                  fontWeight: 800, fontSize: '0.74rem', fontVariantNumeric: 'tabular-nums'
+                }}>
+                  {isPositive ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
+                  {isPositive ? '+' : ''}{priceChangePct.toFixed(2)}%
                 </span>
               </div>
             </div>
+
+            {/* Alert / Watchlist Button */}
+            <button
+               onClick={toggleWatchlist}
+               disabled={watchlistLoading}
+               style={{ 
+                 display: 'flex', alignItems: 'center', gap: '7px', 
+                 background: inWatchlist ? 'var(--gold)' : 'rgba(255,255,255,0.12)', 
+                 border: `1px solid ${inWatchlist ? 'var(--gold)' : 'rgba(255,255,255,0.25)'}`, 
+                 color: inWatchlist ? '#0F172A' : 'white', 
+                 padding: '12px 18px', borderRadius: '14px', fontSize: '0.78rem', 
+                 fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s',
+                 boxShadow: inWatchlist ? '0 6px 20px rgba(212, 175, 55, 0.35)' : '0 2px 8px rgba(0,0,0,0.1)',
+                 backdropFilter: 'blur(10px)'
+               }}
+               className="hover-lift"
+            >
+               {watchlistLoading ? <div className="spinner" style={{width:'14px', height:'14px', borderTopColor: inWatchlist?'#0F172A':'white', borderWidth: '2px'}}/> : <Bell size={15} fill={inWatchlist ? '#0F172A' : 'none'} />}
+               {inWatchlist ? 'Alert Set' : 'Alert'}
+            </button>
           </div>
 
         </div>
@@ -283,68 +318,76 @@ const StockDetails = ({ symbol: propSymbol }) => {
         <div style={{
           position: 'relative', zIndex: 1,
           width: '100%', boxSizing: 'border-box',
-          background: hasPurification 
-            ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.28) 0%, rgba(180, 83, 9, 0.35) 100%)' 
-            : isHalal 
-            ? 'linear-gradient(135deg, rgba(22, 163, 74, 0.28) 0%, rgba(20, 83, 45, 0.35) 100%)' 
-            : isNonHalal 
-            ? 'linear-gradient(135deg, rgba(220, 38, 38, 0.32) 0%, rgba(153, 27, 27, 0.38) 100%)' 
-            : 'linear-gradient(135deg, rgba(202, 138, 4, 0.28) 0%, rgba(133, 77, 14, 0.35) 100%)',
-          border: `1.5px solid ${hasPurification ? 'rgba(251, 191, 36, 0.45)' : isHalal ? 'rgba(74, 222, 128, 0.45)' : isNonHalal ? 'rgba(248, 113, 113, 0.45)' : 'rgba(250, 204, 21, 0.45)'}`,
-          borderRadius: '18px',
-          padding: '20px 24px',
-          boxShadow: hasPurification 
-            ? '0 12px 32px rgba(245, 158, 11, 0.25), inset 0 1px 0 rgba(255,255,255,0.1)' 
-            : isHalal 
-            ? '0 12px 32px rgba(22, 163, 74, 0.25), inset 0 1px 0 rgba(255,255,255,0.1)' 
-            : isNonHalal 
-            ? '0 12px 32px rgba(220, 38, 38, 0.28), inset 0 1px 0 rgba(255,255,255,0.1)' 
-            : '0 12px 32px rgba(202, 138, 4, 0.25), inset 0 1px 0 rgba(255,255,255,0.1)',
-          backdropFilter: 'blur(16px)',
+          background: 'linear-gradient(135deg, rgba(10, 25, 47, 0.8) 0%, rgba(15, 58, 64, 0.7) 100%)',
+          border: `1.5px solid ${hasPurification ? 'rgba(245, 158, 11, 0.4)' : isHalal ? 'rgba(16, 185, 129, 0.4)' : isNonHalal ? 'rgba(239, 68, 68, 0.4)' : 'rgba(234, 179, 8, 0.4)'}`,
+          borderRadius: '20px',
+          padding: '24px 28px',
+          boxShadow: '0 12px 36px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(20px)',
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gridTemplateColumns: 'minmax(280px, 1.1fr) 1.5fr',
           alignItems: 'center',
-          gap: '24px',
-          transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+          gap: '28px',
+          transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
         }}
-        onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
-        onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; }}
+        className="hover-card"
         >
           {/* Left: Primary Verdict */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
             <div style={{
-              width: '56px', height: '56px', borderRadius: '16px',
-              background: hasPurification ? '#f59e0b' : isHalal ? '#16a34a' : isNonHalal ? '#dc2626' : '#ca8a04',
+              width: '60px', height: '60px', borderRadius: '18px',
+              background: hasPurification 
+                ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' 
+                : isHalal 
+                ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)' 
+                : isNonHalal 
+                ? 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)' 
+                : 'linear-gradient(135deg, #EAB308 0%, #CA8A04 100%)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: hasPurification ? '0 0 20px rgba(245, 158, 11, 0.5)' : isHalal ? '0 0 20px rgba(22, 163, 74, 0.5)' : isNonHalal ? '0 0 20px rgba(220, 38, 38, 0.5)' : '0 0 20px rgba(202, 138, 4, 0.5)', 
+              boxShadow: hasPurification 
+                ? '0 8px 24px rgba(245, 158, 11, 0.45)' 
+                : isHalal 
+                ? '0 8px 24px rgba(16, 185, 129, 0.45)' 
+                : isNonHalal 
+                ? '0 8px 24px rgba(239, 68, 68, 0.45)' 
+                : '0 8px 24px rgba(234, 179, 8, 0.45)', 
               flexShrink: 0,
               border: '2px solid rgba(255,255,255,0.3)',
-              animation: 'pulse 2.5s infinite alternate'
             }}>
               <StatusIcon size={30} color="white" />
             </div>
             <div>
-              <div style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.2px', color: 'rgba(255,255,255,0.75)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                AAOIFI Compliance Verdict
+              <div style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.2px', color: 'rgba(255,255,255,0.7)', marginBottom: '5px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                AAOIFI COMPLIANCE VERDICT
               </div>
-              <div style={{ fontSize: '1.95rem', fontWeight: 950, color: 'white', letterSpacing: '-0.5px', lineHeight: 1, textShadow: '0 2px 12px rgba(0,0,0,0.3)' }}>
+              <div style={{ fontSize: '1.75rem', fontWeight: 950, color: 'white', letterSpacing: '-0.5px', lineHeight: 1.1, textShadow: '0 2px 12px rgba(0,0,0,0.3)' }}>
                 {statusStr}
               </div>
             </div>
           </div>
 
           {/* Right: Summary of Justification */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderLeft: '1px solid rgba(255,255,255,0.15)', paddingLeft: '24px', flex: 1 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', borderLeft: '1px solid rgba(255,255,255,0.12)', paddingLeft: '28px' }}>
             <span style={{ fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--gold, #d4af37)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <ShieldCheck size={14} color="var(--gold, #d4af37)" /> Screening Justification Summary
+              <ShieldCheck size={14} color="var(--gold, #d4af37)" /> SCREENING JUSTIFICATION SUMMARY
             </span>
-            <p style={{ margin: 0, fontSize: '0.9rem', color: 'rgba(255,255,255,0.92)', lineHeight: 1.5, fontWeight: 500, textShadow: '0 1px 2px rgba(0,0,0,0.1)' }}>
+            <p style={{ margin: 0, fontSize: '0.88rem', color: 'rgba(255,255,255,0.92)', lineHeight: 1.55, fontWeight: 450, textShadow: '0 1px 2px rgba(0,0,0,0.1)' }}>
               {reason || 'Screened strictly according to AAOIFI Standard No. 21 methodology. All business operations and financial ratios comply with Shariah requirements.'}
             </p>
             {(isHalal || stock?.business_status === 'pass' || aaoifiData?.business_status === 'pass') && (
               <div style={{ marginTop: '4px' }}>
-                <Link to={`/market/${stock.symbol}/aaoifi`} style={{ fontSize: '0.72rem', fontWeight: 700, color: 'white', textDecoration: 'none', background: 'rgba(255,255,255,0.15)', padding: '5px 16px', borderRadius: '100px', border: '1px solid rgba(255,255,255,0.25)', transition: 'all 0.2s', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  Full Audit →
+                <Link to={`/market/${stock.symbol}/aaoifi`} style={{
+                  fontSize: '0.74rem', fontWeight: 800, color: 'white', textDecoration: 'none',
+                  background: 'linear-gradient(135deg, rgba(201,168,76,0.2) 0%, rgba(201,168,76,0.1) 100%)',
+                  padding: '7px 18px', borderRadius: '100px',
+                  border: '1px solid rgba(201,168,76,0.4)',
+                  transition: 'all 0.2s', display: 'inline-flex', alignItems: 'center', gap: '6px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'var(--gold)'; e.currentTarget.style.color = '#0F172A'; e.currentTarget.style.borderColor = 'var(--gold)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(201,168,76,0.4)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'linear-gradient(135deg, rgba(201,168,76,0.2) 0%, rgba(201,168,76,0.1) 100%)'; e.currentTarget.style.color = 'white'; e.currentTarget.style.borderColor = 'rgba(201,168,76,0.4)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)'; }}
+                >
+                  Full Audit <ArrowRight size={13} />
                 </Link>
               </div>
             )}
