@@ -18,8 +18,8 @@ function ZakatDatePrompt({ purchaseDate, onYes, onNo }) {
   })();
 
   return createPortal(
-    <div className="animate-fade-in" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200000, padding: '24px' }}>
-      <div style={{ background: 'var(--bg)', borderRadius: '24px', width: '100%', maxWidth: '440px', boxShadow: '0 32px 80px rgba(0,0,0,0.2)', overflow: 'hidden', animation: 'slideUpFade 0.35s cubic-bezier(0.16,1,0.3,1)' }}>
+    <div className="zakat-prompt-overlay animate-fade-in" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200000, padding: '24px' }}>
+      <div className="zakat-prompt-box" style={{ background: 'var(--bg)', borderRadius: '24px', width: '100%', maxWidth: '440px', boxShadow: '0 32px 80px rgba(0,0,0,0.2)', overflow: 'hidden', animation: 'slideUpFade 0.35s cubic-bezier(0.16,1,0.3,1)' }}>
         {/* Icon Header */}
         <div style={{ background: 'linear-gradient(135deg, var(--primary) 0%, #0a5a60 100%)', padding: '32px 28px 24px', textAlign: 'center' }}>
           <div style={{ width: '60px', height: '60px', borderRadius: '18px', background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
@@ -87,8 +87,8 @@ function ZakatConfirmation({ purchaseDate, onDone }) {
   })();
 
   return createPortal(
-    <div className="animate-fade-in" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200000, padding: '24px' }}>
-      <div style={{ background: 'var(--bg)', borderRadius: '24px', width: '100%', maxWidth: '440px', boxShadow: '0 32px 80px rgba(0,0,0,0.2)', overflow: 'hidden', animation: 'slideUpFade 0.35s cubic-bezier(0.16,1,0.3,1)' }}>
+    <div className="zakat-prompt-overlay animate-fade-in" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200000, padding: '24px' }}>
+      <div className="zakat-prompt-box" style={{ background: 'var(--bg)', borderRadius: '24px', width: '100%', maxWidth: '440px', boxShadow: '0 32px 80px rgba(0,0,0,0.2)', overflow: 'hidden', animation: 'slideUpFade 0.35s cubic-bezier(0.16,1,0.3,1)' }}>
         {/* Success Header */}
         <div style={{ background: 'linear-gradient(135deg, #15803d 0%, #166534 100%)', padding: '32px 28px 24px', textAlign: 'center' }}>
           <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>

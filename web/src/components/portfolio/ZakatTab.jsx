@@ -44,6 +44,14 @@ export default function ZakatTab({ data }) {
   const [editingHawl, setEditingHawl] = useState(false);
   const [hawlInput, setHawlInput] = useState(hawlDate || '');
 
+  useEffect(() => {
+    const stored = localStorage.getItem(ZAKAT_DATE_KEY);
+    if (stored !== hawlDate) {
+      setHawlDate(stored);
+      setHawlInput(stored || '');
+    }
+  }, [data, hawlDate]);
+
   const hawlDueDate = hawlDate ? (() => {
     const d = new Date(hawlDate);
     const today = new Date();
