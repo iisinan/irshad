@@ -58,7 +58,7 @@ const AdminDashboard = () => {
   const queryClient = useQueryClient();
 
   // ── React Query fetchers (cache-first, background refresh) ──
-  const { data: stocks = [], isFetching: stocksFetching, refetch: refetchStocks } = useQuery({
+  const { data: stocks = [], isFetching: stocksFetching, refetch: refetchStocks, error: stocksError } = useQuery({
     queryKey: ['admin-stocks'],
     queryFn: async () => {
       const res = await api.get('/stocks');
@@ -76,7 +76,7 @@ const AdminDashboard = () => {
     gcTime: 1000 * 60 * 60,
   });
 
-  const { data: alerts = [], refetch: refetchAlerts } = useQuery({
+  const { data: alerts = [], refetch: refetchAlerts, error: alertsError } = useQuery({
     queryKey: ['admin-alerts'],
     queryFn: async () => {
       const res = await api.get('/admin/alerts');
@@ -95,6 +95,7 @@ const AdminDashboard = () => {
   });
 
   const loading = stocksFetching && stocks.length === 0;
+  const error = stocksError?.message || alertsError?.message;
 
   const loadData = () => {
     refetchStocks();
