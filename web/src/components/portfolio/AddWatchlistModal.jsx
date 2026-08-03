@@ -62,38 +62,73 @@ export default function AddWatchlistModal({ onClose, onAdded, allStocks, watchli
   };
 
   return (
-    <div className="animate-fade-in" style={{ position: 'fixed', inset: 0, background: 'rgba(15,82,87,0.4)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999, padding: '24px' }}>
-      <div style={{ background: 'var(--bg)', borderRadius: '28px', width: '100%', maxWidth: '640px', boxShadow: '0 32px 80px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.5) inset', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '85vh', animation: 'slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>
-        
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px 32px', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
-          <div>
-            <h3 style={{ fontSize: '1.23rem', fontWeight: 900, color: 'var(--text-dark)', margin: 0, letterSpacing: '-0.5px' }}>Add to Watchlist</h3>
-            <p style={{ fontSize: '0.79rem', color: 'var(--text-muted)', margin: '4px 0 0 0', fontWeight: 500 }}>Select the assets you want to track.</p>
+    <>
+      <style>{`
+        @media (max-width: 640px) {
+          .modal-overlay {
+            padding: 0 !important;
+            align-items: flex-end !important;
+          }
+          
+          .modal-box {
+            max-width: 100% !important;
+            width: 100% !important;
+            height: 100% !important;
+            max-height: 100vh !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+          }
+          
+          .modal-header {
+            padding: 20px 20px 16px !important;
+            border-bottom: 1px solid var(--border) !important;
+          }
+          
+          .modal-search {
+            padding: 16px 20px !important;
+          }
+          
+          .modal-body {
+            padding: 16px !important;
+          }
+          
+          .modal-footer {
+            padding: 16px 20px 24px !important;
+          }
+        }
+      `}</style>
+      <div className="modal-overlay animate-fade-in" style={{ position: 'fixed', inset: 0, background: 'rgba(15,82,87,0.4)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999, padding: '24px' }}>
+        <div className="modal-box" style={{ background: 'var(--bg)', borderRadius: '28px', width: '100%', maxWidth: '640px', boxShadow: '0 32px 80px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.5) inset', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '85vh', animation: 'slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+          
+          {/* Header */}
+          <div className="modal-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px 32px', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
+            <div>
+              <h3 style={{ fontSize: '1.23rem', fontWeight: 900, color: 'var(--text-dark)', margin: 0, letterSpacing: '-0.5px' }}>Add to Watchlist</h3>
+              <p style={{ fontSize: '0.79rem', color: 'var(--text-muted)', margin: '4px 0 0 0', fontWeight: 500 }}>Select the assets you want to track.</p>
+            </div>
+            <button onClick={onClose} style={{ background: 'var(--bg-section)', border: 'none', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--border)'} onMouseLeave={e => e.currentTarget.style.background = 'var(--bg-section)'}>
+              <X size={20} />
+            </button>
           </div>
-          <button onClick={onClose} style={{ background: 'var(--bg-section)', border: 'none', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--border)'} onMouseLeave={e => e.currentTarget.style.background = 'var(--bg-section)'}>
-            <X size={20} />
-          </button>
-        </div>
-
-        {/* Search */}
-        <div style={{ padding: '20px 32px', background: 'var(--bg-section)', borderBottom: '1px solid var(--border)' }}>
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-            <Search size={20} color="var(--text-muted)" style={{ position: 'absolute', left: '16px' }} />
-            <input 
-              type="text" 
-              placeholder="Search by symbol or name..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ width: '100%', padding: '16px 16px 16px 48px', borderRadius: '16px', border: '2px solid transparent', fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-dark)', outline: 'none', background: 'var(--bg)', transition: 'all 0.2s', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}
-              onFocus={e => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 8px 24px rgba(15,82,87,0.1)'; }}
-              onBlur={e => { e.target.style.borderColor = 'transparent'; e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.02)'; }}
-            />
+  
+          {/* Search */}
+          <div className="modal-search" style={{ padding: '20px 32px', background: 'var(--bg-section)', borderBottom: '1px solid var(--border)' }}>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <Search size={20} color="var(--text-muted)" style={{ position: 'absolute', left: '16px' }} />
+              <input 
+                type="text" 
+                placeholder="Search by symbol or name..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{ width: '100%', padding: '16px 16px 16px 48px', borderRadius: '16px', border: '2px solid transparent', fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-dark)', outline: 'none', background: 'var(--bg)', transition: 'all 0.2s', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}
+                onFocus={e => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 8px 24px rgba(15,82,87,0.1)'; }}
+                onBlur={e => { e.target.style.borderColor = 'transparent'; e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.02)'; }}
+              />
+            </div>
           </div>
-        </div>
-
-        {/* List */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '16px 32px' }}>
+  
+          {/* List */}
+          <div className="modal-body" style={{ flex: 1, overflowY: 'auto', padding: '16px 32px' }}>
           {availableStocks.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>
               No assets found. You may have already added them all!
@@ -139,7 +174,7 @@ export default function AddWatchlistModal({ onClose, onAdded, allStocks, watchli
         </div>
 
         {/* Footer */}
-        <div style={{ padding: '24px 32px', borderTop: '1px solid var(--border)', background: 'var(--bg)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="modal-footer" style={{ padding: '24px 32px', borderTop: '1px solid var(--border)', background: 'var(--bg)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-muted)' }}>
             {selectedSymbols.length} selected
           </div>
@@ -157,5 +192,6 @@ export default function AddWatchlistModal({ onClose, onAdded, allStocks, watchli
         </div>
       </div>
     </div>
+    </>
   );
 }

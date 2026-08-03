@@ -270,12 +270,118 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
 
   return (
     <>
+      <style>{`
+        /* Custom scrollbar hiding for horizontal tabs */
+        .modal-tabs::-webkit-scrollbar {
+          display: none;
+        }
+        
+        @media (max-width: 640px) {
+          .modal-overlay {
+            padding: 0 !important;
+            align-items: flex-end !important;
+          }
+          
+          .modal-box {
+            max-width: 100% !important;
+            width: 100% !important;
+            height: 100% !important;
+            max-height: 100vh !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+          }
+          
+          .modal-header {
+            padding: 20px 20px 16px !important;
+            border-bottom: 1px solid var(--border) !important;
+          }
+          
+          .modal-tabs {
+            padding: 0 16px !important;
+            overflow-x: auto !important;
+            white-space: nowrap !important;
+            -webkit-overflow-scrolling: touch !important;
+            scrollbar-width: none !important;
+          }
+          
+          .modal-tabs button {
+            padding: 12px 16px !important;
+            font-size: 0.82rem !important;
+            flex: none !important;
+          }
+          
+          .modal-body {
+            padding: 16px !important;
+          }
+          
+          .holding-row-card {
+            padding: 16px !important;
+            margin-bottom: 16px !important;
+            border-radius: 14px !important;
+          }
+          
+          .holding-inputs-grid {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 16px 12px !important;
+          }
+          
+          .holding-inputs-grid > div:nth-child(1) {
+            grid-column: span 2 !important;
+          }
+          
+          .holding-inputs-grid > div:nth-child(2) {
+            grid-column: span 1 !important;
+          }
+          
+          .holding-inputs-grid > div:nth-child(3) {
+            grid-column: span 1 !important;
+          }
+          
+          .holding-inputs-grid > div:nth-child(4) {
+            grid-column: span 2 !important;
+          }
+          
+          .modal-footer {
+            padding: 16px 20px 24px !important;
+          }
+          
+          .broker-grid {
+            grid-template-columns: 1fr !important;
+            gap: 12px !important;
+          }
+          
+          .broker-card {
+            padding: 16px !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            text-align: left !important;
+            gap: 16px !important;
+          }
+          
+          .broker-card div {
+            margin: 0 !important;
+          }
+          
+          .broker-card span {
+            text-align: left !important;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .zakat-prompt-overlay {
+            padding: 16px !important;
+          }
+          .zakat-prompt-box {
+            border-radius: 20px !important;
+          }
+        }
+      `}</style>
       {createPortal(
-        <div className="animate-fade-in" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000, padding: '24px' }}>
-          <div ref={modalRef} style={{ background: 'var(--bg)', borderRadius: '24px', width: '100%', maxWidth: '720px', boxShadow: '0 24px 64px rgba(0,0,0,0.12)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh', animation: 'slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+        <div className="modal-overlay animate-fade-in" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000, padding: '24px' }}>
+          <div className="modal-box" ref={modalRef} style={{ background: 'var(--bg)', borderRadius: '24px', width: '100%', maxWidth: '720px', boxShadow: '0 24px 64px rgba(0,0,0,0.12)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh', animation: 'slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>
 
             {/* Header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '32px 32px 24px', background: 'var(--bg)' }}>
+            <div className="modal-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '32px 32px 24px', background: 'var(--bg)' }}>
               <div>
                 <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-dark)', margin: 0 }}>Add Holdings</h3>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '8px 0 0 0' }}>Update your portfolio tracking.</p>
@@ -286,7 +392,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
             </div>
 
             {/* Tabs */}
-            <div style={{ display: 'flex', padding: '0 32px', background: 'var(--bg)', borderBottom: '1px solid var(--border)' }}>
+            <div className="modal-tabs" style={{ display: 'flex', padding: '0 32px', background: 'var(--bg)', borderBottom: '1px solid var(--border)' }}>
               <button onClick={() => setTab('manual')} style={{ flex: 1, padding: '16px 0', background: 'none', border: 'none', fontSize: '0.88rem', fontWeight: 800, color: tab === 'manual' ? 'var(--primary)' : 'var(--text-muted)', borderBottom: tab === 'manual' ? '2px solid var(--primary)' : '2px solid transparent', cursor: 'pointer', transition: 'all 0.2s' }}>Manual Entry</button>
               <button onClick={() => setTab('import')} style={{ flex: 1, padding: '16px 0', background: 'none', border: 'none', fontSize: '0.88rem', fontWeight: 700, color: tab === 'import' ? 'var(--primary)' : 'var(--text-muted)', borderBottom: tab === 'import' ? '2px solid var(--primary)' : '2px solid transparent', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}><FileText size={16} /> Import Statement</button>
               <button onClick={() => setTab('broker')} style={{ flex: 1, padding: '16px 0', background: 'none', border: 'none', fontSize: '0.88rem', fontWeight: 700, color: tab === 'broker' ? 'var(--primary)' : 'var(--text-muted)', borderBottom: tab === 'broker' ? '2px solid var(--primary)' : '2px solid transparent', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}><Lock size={16} /> Link Broker</button>
@@ -294,9 +400,9 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
 
             {tab === 'manual' ? (
               <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1 }}>
-                <div style={{ padding: '32px', overflowY: 'auto', flex: 1, background: '#FFFFFF' }}>
+                <div className="modal-body" style={{ padding: '32px', overflowY: 'auto', flex: 1, background: '#FFFFFF' }}>
                   {rows.map((row, index) => (
-                    <div key={row.id} style={{ background: '#FFFFFF', padding: '24px', borderRadius: '16px', marginBottom: '24px', border: '1px solid var(--border)', position: 'relative' }}>
+                    <div key={row.id} className="holding-row-card" style={{ background: '#FFFFFF', padding: '24px', borderRadius: '16px', marginBottom: '24px', border: '1px solid var(--border)', position: 'relative' }}>
                       {/* Row Header & Delete */}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                         <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>HOLDING #{index + 1}</div>
@@ -308,7 +414,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
                       </div>
 
                       {/* Inputs */}
-                      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1.2fr', gap: '12px', alignItems: 'flex-start' }}>
+                      <div className="holding-inputs-grid" style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1.2fr', gap: '12px', alignItems: 'flex-start' }}>
                         {/* Ticker */}
                         <div>
                           <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '10px' }}>Ticker Symbol</label>
@@ -378,7 +484,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
                 </div>
 
                 {/* Footer */}
-                <div style={{ padding: '24px 32px', borderTop: '1px solid var(--border)', background: '#FFFFFF' }}>
+                <div className="modal-footer" style={{ padding: '24px 32px', borderTop: '1px solid var(--border)', background: '#FFFFFF' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                     <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-dark)' }}>Estimated Total</span>
                     <span style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--primary)' }}>₦{totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
@@ -398,19 +504,19 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
                   <h4 style={{ fontSize: '1.41rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 16px', letterSpacing: '-0.5px' }}>Link your Broker</h4>
                   <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: '0 auto', lineHeight: 1.6, maxWidth: '320px' }}>Connect your brokerage account to Irshad to seamlessly track your Shariah-compliant investments.</p>
                 </div>
-                <div style={{ padding: '32px', flex: 1, overflowY: 'auto' }}>
+                <div className="modal-body" style={{ padding: '32px', flex: 1, overflowY: 'auto' }}>
                   {linkMessage && (<div style={{ marginBottom: '24px', padding: '16px', borderRadius: '12px', background: linkMessage.includes('successfully') ? 'var(--halal-bg)' : 'var(--non-halal-bg)', color: linkMessage.includes('successfully') ? 'var(--halal)' : 'var(--non-halal)', fontSize: '0.84rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '10px' }}><CheckCircle2 size={18} /> {linkMessage}</div>)}
                   <p style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '20px' }}>Select an Institution</p>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  <div className="broker-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                     {['Meristem', 'Stanbic IBTC', 'CSCS', 'Risevest'].map((broker) => (
-                      <div key={broker} onClick={() => setBrokerName(broker)} style={{ padding: '24px', borderRadius: '16px', border: brokerName === broker ? '2px solid var(--primary)' : '2px solid var(--border)', background: brokerName === broker ? 'var(--primary-50)' : 'var(--bg)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', transition: 'all 0.2s', boxShadow: brokerName === broker ? '0 8px 24px rgba(15, 82, 87, 0.1)' : 'none' }}>
+                      <div key={broker} onClick={() => setBrokerName(broker)} className="broker-card" style={{ padding: '24px', borderRadius: '16px', border: brokerName === broker ? '2px solid var(--primary)' : '2px solid var(--border)', background: brokerName === broker ? 'var(--primary-50)' : 'var(--bg)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', transition: 'all 0.2s', boxShadow: brokerName === broker ? '0 8px 24px rgba(15, 82, 87, 0.1)' : 'none' }}>
                         <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: brokerName === broker ? 'var(--bg)' : 'var(--bg-section)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.23rem', fontWeight: 800, color: 'var(--text-dark)' }}>{broker.charAt(0)}</div>
                         <span style={{ fontSize: '0.84rem', fontWeight: 800, color: 'var(--text-dark)', textAlign: 'center' }}>{broker}</span>
                       </div>
                     ))}
                   </div>
                 </div>
-                <div style={{ padding: '24px 32px', borderTop: '1px solid var(--border)', background: 'var(--bg)' }}>
+                <div className="modal-footer" style={{ padding: '24px 32px', borderTop: '1px solid var(--border)', background: 'var(--bg)' }}>
                   <button type="button" onClick={handleLinkBroker} disabled={linking || !brokerName} style={{ width: '100%', padding: '16px', borderRadius: '16px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.88rem', cursor: (linking || !brokerName) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 8px 24px rgba(15, 82, 87, 0.25)', opacity: (linking || !brokerName) ? 0.7 : 1, transition: 'all 0.2s' }}>
                     {linking ? <div className="spinner" style={{ width: '20px', height: '20px', borderTopColor: 'white' }} /> : 'Continue'}
                   </button>
@@ -423,7 +529,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
                   <h4 style={{ fontSize: '1.41rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 16px', letterSpacing: '-0.5px' }}>Upload Statement</h4>
                   <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: '0 auto', lineHeight: 1.6, maxWidth: '320px' }}>Upload your trade log or portfolio statement (PDF/CSV) to automatically extract your holdings.</p>
                 </div>
-                <div style={{ padding: '32px', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="modal-body" style={{ padding: '32px', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                   <div style={{ width: '100%', padding: '48px 24px', borderRadius: '20px', border: '2px dashed var(--border)', background: 'var(--bg)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.background = 'var(--primary-50)'; }} onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'var(--bg)'; }} onClick={() => document.getElementById('file-upload').click()}>
                     <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'var(--bg-section)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}><UploadCloud size={28} /></div>
                     <div>
