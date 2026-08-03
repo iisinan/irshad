@@ -9,10 +9,10 @@ const STATS = [
 ];
 
 const VALUES = [
-  { icon: Target,   color: '#0F5257', bg: 'var(--primary-50)',  border: 'var(--primary-100)', title: 'Accuracy',   desc: 'Strict AAOIFI standards applied to every single stock automatically.' },
-  { icon: Shield,   color: '#0F5257', bg: 'var(--primary-50)',  border: 'var(--primary-100)', title: 'Trust',      desc: 'Scholar-backed methodology, transparent and auditable at every step.' },
-  { icon: Users,    color: '#8b5cf6', bg: '#ede9fe',            border: '#ddd6fe',            title: 'Community',  desc: 'Built specifically for the Nigerian Muslim investor community.' },
-  { icon: BookOpen, color: '#d97706', bg: 'var(--gold-50)',     border: 'var(--gold-border)', title: 'Education',  desc: 'Financial literacy tools that help you invest with full understanding.' },
+  { icon: Target,   color: '#0F5257', bg: 'var(--primary-50)',  border: 'var(--primary-100)', title: 'Direct-Source Accuracy',   desc: 'Every screening is backed by official NGX Pulse filings and audited reports with verifiable timestamps.' },
+  { icon: Shield,   color: '#0F5257', bg: 'var(--primary-50)',  border: 'var(--primary-100)', title: 'AAOIFI Standard 21', desc: 'Strict application of global Shariah Standard 21 thresholds with zero arbitrary buffer zones.' },
+  { icon: Users,    color: '#8b5cf6', bg: '#ede9fe',            border: '#ddd6fe',            title: 'Community First',  desc: 'Engineered specifically for conscious Muslim retail and institutional investors in Nigeria.' },
+  { icon: BookOpen, color: '#d97706', bg: 'var(--gold-50)',     border: 'var(--gold-border)', title: 'Dividend Purification',  desc: 'Automated math to isolate and cleanse incidental interest revenue down to two decimal places.' },
 ];
 
 const AboutPage = () => (
@@ -28,7 +28,7 @@ const AboutPage = () => (
           <span style={{ color: 'var(--primary)' }}>in Nigeria</span>
         </h1>
         <p style={{ fontSize: '0.97rem', lineHeight: 1.85, color: 'var(--text-muted)', maxWidth: '640px', margin: '0 auto' }}>
-          Irshad was founded to solve a critical problem: the complete lack of transparent, accessible, and automated Shariah compliance data for the local stock market.
+          Irshad bridges faith and modern finance through automated, auditable AAOIFI Shariah screening for all Nigerian Exchange (NGX) listed equities.
         </p>
       </div>
 
@@ -68,10 +68,10 @@ const AboutPage = () => (
             </div>
             <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'white', marginBottom: '16px', letterSpacing: '-0.5px' }}>Africa's Most Trusted Islamic FinTech</h3>
             <p style={{ color: 'rgba(255,255,255,0.82)', lineHeight: 1.75, marginBottom: '16px', fontSize: '0.88rem' }}>
-              To become the most trusted Islamic financial technology platform in Africa, starting with the Nigerian equities market.
+              To become the standard for Islamic financial technology across Africa, starting with rigorous computational Shariah screening for the Nigerian capital market.
             </p>
             <p style={{ color: 'rgba(255,255,255,0.65)', lineHeight: 1.75, fontSize: '0.84rem' }}>
-              We believe growing wealth and adhering to one's faith should not be mutually exclusive. Our platform provides the clarity needed to invest confidently.
+              We eliminate black-box ratings by connecting every compliance verdict directly to audited financial statements, enabling Muslims to invest with absolute certainty.
             </p>
           </div>
         </div>
@@ -97,6 +97,27 @@ const AboutPage = () => (
         </div>
       </div>
 
+      {/* ─── Methodology & Data Transparency Pillar ─── */}
+      <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '24px', padding: '36px', marginBottom: '48px' }}>
+        <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '14px' }}>
+          Our Commitment to Shariah & Data Integrity
+        </h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
+          <div style={{ background: 'var(--bg-section)', padding: '20px', borderRadius: '16px', border: '1px solid var(--border)' }}>
+            <h4 style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--primary)', marginBottom: '6px' }}>Auditable Filing Evidence</h4>
+            <p style={{ fontSize: '0.76rem', color: 'var(--text-muted)', lineHeight: 1.65, margin: 0 }}>
+              No opaque scores. Every verdict displays the exact reporting period, filing date, and linkable regulatory source document from NGX Pulse.
+            </p>
+          </div>
+          <div style={{ background: 'var(--bg-section)', padding: '20px', borderRadius: '16px', border: '1px solid var(--border)' }}>
+            <h4 style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--primary)', marginBottom: '6px' }}>Mathematical Precision</h4>
+            <p style={{ fontSize: '0.76rem', color: 'var(--text-muted)', lineHeight: 1.65, margin: 0 }}>
+              Strict enforcement of AAOIFI 30% debt/cash ceilings and 5% impure revenue limits, with precise 2-decimal dividend purification calculations.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* ─── Mission CTA ─── */}
       <div style={{
         borderRadius: '24px', padding: '56px 48px', textAlign: 'center',
@@ -104,6 +125,7 @@ const AboutPage = () => (
         border: '1.5px solid rgba(201,168,76,0.3)',
         boxShadow: '0 20px 60px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
         position: 'relative', overflow: 'hidden',
+        marginBottom: '40px'
       }}>
         <div style={{ position: 'absolute', top: '-80px', right: '-80px', width: '320px', height: '320px', background: 'radial-gradient(circle, rgba(201,168,76,0.12) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', bottom: '-100px', left: '-60px', width: '280px', height: '280px', background: 'radial-gradient(circle, rgba(16,185,129,0.08) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
@@ -119,6 +141,13 @@ const AboutPage = () => (
             To make Shariah-compliant investing accessible, transparent, and effortless for every Muslim on the Nigerian Exchange — so you can grow your wealth without compromising your faith.
           </p>
         </div>
+      </div>
+
+      {/* ─── Scholarly & Independence Notice ─── */}
+      <div style={{ padding: '20px 24px', background: 'var(--bg-section)', borderRadius: '16px', border: '1px solid var(--border)', textAlign: 'center', marginBottom: '40px' }}>
+        <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: 1.65, margin: 0 }}>
+          <strong>Independence & Shariah Notice:</strong> Irshad is an independent financial technology platform. We implement computational screening of public regulatory filings according to AAOIFI Shariah Standard No. 21. Irshad is not an official organ of AAOIFI nor a certified financial advisor. Investors are encouraged to consult qualified Shariah scholars for personalized financial rulings.
+        </p>
       </div>
 
     </div>

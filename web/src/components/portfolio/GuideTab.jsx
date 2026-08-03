@@ -3,7 +3,7 @@ import {
   BookOpen, HelpCircle, Navigation, PlayCircle,
   ChevronDown, ChevronRight, LifeBuoy, Lightbulb,
   Briefcase, BarChart2, Star, Bell, Settings, ShieldCheck, Calculator,
-  FileText, CheckCircle2, AlertTriangle, Mail
+  FileText, CheckCircle2, AlertTriangle, Mail, Scale
 } from 'lucide-react';
 
 /* ── Collapsible FAQ Item ── */
@@ -295,12 +295,104 @@ export default function GuideTab() {
           <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '16px', padding: '24px' }}>
             <h4 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 20px' }}>How Screening Works</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <Step number={1} title="Company Data Collection" description="Irshad collects annual reports, audited financial statements, and business disclosure documents from the NSE, company websites, and verified data sources." />
-              <Step number={2} title="Financial Data Extraction" description="Irshad analyses the financial statements to extract revenue by business segment, total debt, interest income, and other key metrics required for AAOIFI screening." />
-              <Step number={3} title="Business Activity Review" description="Irshad reviews corporate announcements and news to detect any involvement in prohibited activities (alcohol, tobacco, conventional banking, entertainment, etc.)." />
-              <Step number={4} title="AAOIFI Ratio Calculation" description="Irshad calculates the three core AAOIFI financial ratios: interest-bearing debt, interest income, and liquid assets — each relative to total assets." />
-              <Step number={5} title="Final Status Assignment" description="Based on both tests, the company is assigned a status: Halal, Non-Halal, or Doubtful. The status is updated whenever new financial data becomes available." />
+              <Step number={1} title="Direct Regulatory Ingestion" description="Irshad pulls official quarterly and audited annual financial statements directly from NGX Pulse, company disclosures, and verified exchange filings." />
+              <Step number={2} title="Business Activity Screen (Rule 3/4/1)" description="Algorithmic review of revenue by business segments to verify exclusion from conventional banking, alcohol, gambling, adult entertainment, tobacco, and arms." />
+              <Step number={3} title="Quantitative Ratio Computation" description="Rigorous calculation of the 3 AAOIFI Standard 21 thresholds: Interest Debt ≤ 30% Market Cap, Cash & Securities ≤ 30% Market Cap, and Impure Revenue ≤ 5% Total Revenue." />
+              <Step number={4} title="Purification Rate Extraction" description="Calculates the exact purification percentage (Impure Income ÷ Total Income) required to cleanse dividend distributions." />
+              <Step number={5} title="Live Verdict & Audit Trail" description="Assignments of Halal, Non-Halal, or Doubtful with full line-item math and linkable source filing evidence." />
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Methodology Section ─── */}
+      {activeSection === 'methodology' && (
+        <div className="animate-slide-up stagger-1">
+          <SectionHeader icon={ShieldCheck} title="AAOIFI Shariah Standard No. 21 Methodology" />
+
+          {/* Jurisprudential Foundations */}
+          <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '18px', padding: '24px', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+              <Scale size={18} color="var(--primary)" />
+              <h3 style={{ fontSize: '0.9rem', fontWeight: 900, color: 'var(--text-dark)', margin: 0 }}>The 4 Juristic Pillars (Appendix B)</h3>
+            </div>
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.7, marginBottom: '16px' }}>
+              Islamic scholars established the permissibility of investing in modern corporations with incidental interest contact based on four foundational classical legal maxims:
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px' }}>
+              {[
+                { title: '1. Removal of Hardship (Al-Mashaqqah Tajlib At-Taysir)', desc: 'Requiring 0.00% contact with conventional interest would lock the Muslim Ummah out of global capital markets and economic enterprise.' },
+                { title: '2. Majority-Halal Wealth (Ghalabat al-Halal)', desc: 'When 95%+ of revenue is generated through lawful trade, the company\'s wealth is predominantly halal and permissible to co-own.' },
+                { title: '3. Separation of Bargains (Tafriq al-Safqah)', desc: 'The permissible operating equity remains valid, while the subordinate non-halal income stream is isolated and purified.' },
+                { title: '4. Subordinate Follows Primary (At-Tabi\' Tabi\')', desc: 'Incidental cash deposits and operating receivables are subordinate to the primary lawful commercial activity of the company.' },
+              ].map((p, idx) => (
+                <div key={idx} style={{ background: 'var(--bg-section)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '4px' }}>{p.title}</div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>{p.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Ratio Thresholds Matrix */}
+          <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '18px', padding: '24px', marginBottom: '20px' }}>
+            <h3 style={{ fontSize: '0.9rem', fontWeight: 900, color: 'var(--text-dark)', margin: '0 0 14px' }}>Two-Stage Screening Architecture</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {[
+                {
+                  rule: 'Stage 1: Business Activity (Rule 3/4/1)',
+                  threshold: '0% Tolerance for Core Prohibited Activities',
+                  formula: 'Core revenue must NOT be derived from Conventional Banking/Insurance, Alcohol, Pork, Gambling, Adult Media, Tobacco, or Arms.',
+                  badge: 'Strict Qualitative Filter',
+                  color: 'var(--non-halal)'
+                },
+                {
+                  rule: 'Stage 2A: Debt Ratio (Rule 3/4/2)',
+                  threshold: '≤ 30.00%',
+                  formula: 'Total Interest-Bearing Debt ÷ Market Capitalization (excludes trade payables & non-interest liabilities)',
+                  badge: 'Financial Ratio',
+                  color: 'var(--primary)'
+                },
+                {
+                  rule: 'Stage 2B: Cash & Securities (Rule 3/4/3)',
+                  threshold: '≤ 30.00%',
+                  formula: '(Cash & Equivalents + Interest-Bearing Securities) ÷ Market Capitalization',
+                  badge: 'Financial Ratio',
+                  color: 'var(--primary)'
+                },
+                {
+                  rule: 'Stage 2C: Impermissible Income (Rule 3/4/4)',
+                  threshold: '≤ 5.00%',
+                  formula: '(Interest Income + Minor Prohibited Revenue) ÷ Total Revenue',
+                  badge: 'Purification Trigger',
+                  color: 'var(--gold)'
+                },
+              ].map((item, idx) => (
+                <div key={idx} style={{ padding: '14px 16px', background: 'var(--bg-section)', borderRadius: '14px', border: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                  <div style={{ flex: 1, minWidth: '220px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                      <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dark)' }}>{item.rule}</span>
+                      <span style={{ fontSize: '0.64rem', padding: '2px 8px', borderRadius: '6px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text-muted)', fontWeight: 700 }}>{item.badge}</span>
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{item.formula}</div>
+                  </div>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 900, color: item.color, background: 'var(--bg)', padding: '6px 14px', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                    {item.threshold}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Prohibited Trading Practices */}
+          <div style={{ background: 'linear-gradient(135deg, rgba(239,68,68,0.04) 0%, transparent 100%)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '18px', padding: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+              <AlertTriangle size={16} color="var(--non-halal)" />
+              <h4 style={{ fontSize: '0.84rem', fontWeight: 800, color: 'var(--text-dark)', margin: 0 }}>Prohibited Trading Practices (Standard 21)</h4>
+            </div>
+            <p style={{ fontSize: '0.76rem', color: 'var(--text-muted)', lineHeight: 1.6, margin: 0 }}>
+              Under AAOIFI Standard 21, Shariah compliance extends to how equities are traded. <strong>Conventional Short Selling</strong> (selling shares you do not own — <em>Bay' ma la Yamlik</em>), <strong>Options / Financial Derivatives</strong> (due to <em>Gharar</em> / speculation), and <strong>Margin Trading</strong> (borrowing on interest) are strictly impermissible. Irshad only evaluates spot cash equity ownership.
+            </p>
           </div>
         </div>
       )}

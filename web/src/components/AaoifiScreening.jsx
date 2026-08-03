@@ -1030,34 +1030,59 @@ const AaoifiScreening = () => {
                 )}
 
                 {report.financial_data_used?.source && !report.financial_data_used?.source_links?.length && !report.financial_data_used?.source_url && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', background: 'linear-gradient(145deg, var(--bg-section) 0%, var(--bg) 100%)', padding: '20px', borderRadius: '18px', border: '1px solid var(--border)', boxShadow: '0 4px 16px rgba(0,0,0,0.02)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'var(--primary-bg)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(6, 78, 59, 0.12)' }}>
-                        <FileText size={20} />
-                      </div>
-                      <div>
-                        <span style={{ fontSize: '0.94rem', fontWeight: 800, color: 'var(--text-dark)', lineHeight: 1.4, display: 'block' }}>
-                          {report.financial_data_used.source}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' }}>
+                    <a
+                      href={`https://ngxgroup.com/exchange/data/company-profile/?symbol=${report.ticker || report.stock_ticker || ''}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover-card"
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        gap: '16px',
+                        background: 'linear-gradient(145deg, var(--bg-section) 0%, var(--bg) 100%)',
+                        padding: '20px',
+                        borderRadius: '18px',
+                        border: '1px solid var(--border)',
+                        textDecoration: 'none',
+                        transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                        boxShadow: '0 4px 16px rgba(0,0,0,0.02)'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'var(--primary-bg)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(6, 78, 59, 0.12)' }}>
+                            <FileText size={20} />
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '0.94rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '2px' }}>
+                              {report.financial_data_used.source}
+                            </div>
+                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>Official NGX Corporate Disclosure</div>
+                          </div>
+                        </div>
+                        <span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', padding: '3px 8px', borderRadius: '6px', background: 'rgba(16,185,129,0.1)', color: 'var(--halal)', border: '1px solid rgba(16,185,129,0.2)', whiteSpace: 'nowrap' }}>
+                          View on NGX
                         </span>
-                        <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>Corporate financial disclosure</span>
                       </div>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', paddingTop: '12px', borderTop: '1px dashed var(--border)' }}>
-                      {(report.financial_data_used.published_date || report.published_date) && (
-                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '3px 10px', borderRadius: '6px', background: 'var(--bg-section)', border: '1px solid var(--border)', fontSize: '0.72rem' }}>
-                          <Calendar size={12} color="var(--primary)" />
-                          <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Published:</span>
-                          <span style={{ fontWeight: 800, color: 'var(--text-dark)' }}>{formatFriendlyDate(report.financial_data_used.published_date || report.published_date)}</span>
-                        </div>
-                      )}
-                      {(report.financial_data_used.reporting_period || report.reporting_period || report.financial_data_used.financial_year || report.reporting_year) && (
-                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '3px 10px', borderRadius: '6px', background: 'var(--bg-section)', border: '1px solid var(--border)', fontSize: '0.72rem' }}>
-                          <Activity size={12} color="#C49852" />
-                          <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Period:</span>
-                          <span style={{ fontWeight: 800, color: 'var(--text-dark)' }}>{report.financial_data_used.reporting_period || report.reporting_period || 'Annual Report'} (FY {report.financial_data_used.financial_year || report.reporting_year || 'Latest'})</span>
-                        </div>
-                      )}
-                    </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', paddingTop: '12px', borderTop: '1px dashed var(--border)' }}>
+                        {(report.financial_data_used.published_date || report.published_date) && (
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '3px 10px', borderRadius: '6px', background: 'var(--bg-section)', border: '1px solid var(--border)', fontSize: '0.72rem' }}>
+                            <Calendar size={12} color="var(--primary)" />
+                            <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Published:</span>
+                            <span style={{ fontWeight: 800, color: 'var(--text-dark)' }}>{formatFriendlyDate(report.financial_data_used.published_date || report.published_date)}</span>
+                          </div>
+                        )}
+                        {(report.financial_data_used.reporting_period || report.reporting_period || report.financial_data_used.financial_year || report.reporting_year) && (
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '3px 10px', borderRadius: '6px', background: 'var(--bg-section)', border: '1px solid var(--border)', fontSize: '0.72rem' }}>
+                            <Activity size={12} color="#C49852" />
+                            <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Period:</span>
+                            <span style={{ fontWeight: 800, color: 'var(--text-dark)' }}>{report.financial_data_used.reporting_period || report.reporting_period || 'Annual Report'} (FY {report.financial_data_used.financial_year || report.reporting_year || 'Latest'})</span>
+                          </div>
+                        )}
+                      </div>
+                    </a>
                   </div>
                 )}
               </div>

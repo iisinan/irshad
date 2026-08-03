@@ -69,6 +69,30 @@ const ShariahPage = () => (
         </div>
       </div>
 
+      {/* ─── Jurisprudential Foundations ─── */}
+      <div style={{ background: 'var(--bg)', borderRadius: '24px', padding: '36px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-md)', marginBottom: '24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+          <BookOpen size={24} color="var(--primary)" />
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text-dark)', margin: 0 }}>The 4 Juristic Foundations (Appendix B)</h2>
+        </div>
+        <p style={{ color: 'var(--text-muted)', lineHeight: 1.75, fontSize: '0.86rem', marginBottom: '20px' }}>
+          Why is investing in mixed companies permitted in modern capital markets? Classical Islamic jurisprudence provides four distinct legal principles under AAOIFI Standard 21:
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
+          {[
+            { name: '1. Removal of Hardship (Al-Mashaqqah Tajlib At-Taysir)', desc: 'Requiring absolute 0.00% contact with conventional interest would isolate Muslims from global enterprise and modern wealth creation.' },
+            { name: '2. Predominance of Halal (Ghalabat al-Halal)', desc: 'When 95%+ of revenue is derived from permissible trade, the company\'s wealth is predominantly lawful to co-own.' },
+            { name: '3. Separation of Bargains (Tafriq al-Safqah)', desc: 'Permissible commercial equity ownership remains valid, while the minor impermissible revenue is segregated and purified.' },
+            { name: '4. Subordinate Follows Primary (At-Tabi\' Tabi\')', desc: 'Incidental cash deposits in conventional banks are subordinate to the primary operating commercial activity.' },
+          ].map((item, idx) => (
+            <div key={idx} style={{ background: 'var(--bg-section)', padding: '16px', borderRadius: '14px', border: '1px solid var(--border)' }}>
+              <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '6px' }}>{item.name}</div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>{item.desc}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* ─── Phase 1: Business Activity ─── */}
       <div style={{ background: 'var(--bg)', borderRadius: '24px', padding: '40px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-md)', marginBottom: '24px', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: 'var(--non-halal)', borderRadius: '4px 0 0 4px' }} />
@@ -83,7 +107,7 @@ const ShariahPage = () => (
         </div>
 
         <p style={{ color: 'var(--text-muted)', lineHeight: 1.8, fontSize: '0.88rem', marginBottom: '28px' }}>
-          Before looking at any financial metrics, we analyze a company's core business activities. A company is immediately marked as <strong style={{ color: 'var(--non-halal)' }}>NON-HALAL</strong> if its primary business involves any of the following:
+          Before analyzing financial ratios, we examine a company's core operations. A company is immediately marked as <strong style={{ color: 'var(--non-halal)' }}>NON-HALAL</strong> if its primary business involves:
         </p>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '10px' }}>
@@ -92,10 +116,10 @@ const ShariahPage = () => (
             'Alcohol Production or Sales',
             'Pork & Non-Halal Meat',
             'Gambling & Casinos',
-            'Adult Entertainment',
-            'Weapons & Defense',
-            'Tobacco',
-            'Interest-based Lending',
+            'Adult Entertainment & Media',
+            'Weapons & Defense Manufacturing',
+            'Tobacco & Tobacco Products',
+            'Interest-based Lending & Usury',
           ].map(item => (
             <div key={item} style={{
               display: 'flex', alignItems: 'center', gap: '12px',
@@ -123,24 +147,24 @@ const ShariahPage = () => (
         </div>
 
         <p style={{ color: 'var(--text-muted)', lineHeight: 1.8, fontSize: '0.88rem', marginBottom: '28px' }}>
-          If a company passes the business screen, we analyze its balance sheet. Per <strong>AAOIFI Rule 21</strong>, companies must pass three strict financial thresholds. The compliance threshold is shown on each bar below.
+          Companies passing the business activity screen are tested against <strong>AAOIFI Standard 21</strong> quantitative thresholds using live Market Capitalization:
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <RatioGauge
             threshold={30}
-            label="1. Debt ratio — Total debt / Market cap × 100"
-            note="Total interest-bearing debt divided by market cap multiplied by 100 must be less than 30% to be halal."
+            label="1. Debt Ratio — Total Interest-Bearing Debt / Market Cap × 100"
+            note="Excludes trade payables, supplier credit, and non-interest operating liabilities. Must not exceed 30.00%."
           />
           <RatioGauge
             threshold={30}
-            label="2. Cash ratio — (Cash + security) / Market cap × 100"
-            note="Cash and interest-bearing securities divided by market cap multiplied by 100 must be less than 30% to be halal."
+            label="2. Cash Ratio — (Cash + Interest Securities) / Market Cap × 100"
+            note="Ensures the company is an operating enterprise and not a cash holding shell. Must not exceed 30.00%."
           />
           <RatioGauge
             threshold={5}
-            label="3. Impure revenue — Impure income / Total revenue × 100"
-            note="Impure income divided by total revenue multiplied by 100 must be less than 5% to be halal."
+            label="3. Impure Revenue — Non-Permissible Income / Total Revenue × 100"
+            note="Incidental interest and minor prohibited revenue must not exceed 5.00%. Requires dividend purification."
           />
         </div>
       </div>
@@ -149,7 +173,7 @@ const ShariahPage = () => (
       <div style={{
         background: 'linear-gradient(135deg, #0F5257 0%, #0D1B2A 100%)',
         borderRadius: '24px', padding: '40px', boxShadow: 'var(--shadow-md)',
-        position: 'relative', overflow: 'hidden',
+        position: 'relative', overflow: 'hidden', marginBottom: '24px'
       }}>
         <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '180px', height: '180px', background: 'rgba(201,168,76,0.08)', borderRadius: '50%' }} />
 
@@ -164,17 +188,17 @@ const ShariahPage = () => (
         </div>
 
         <p style={{ lineHeight: 1.8, fontSize: '0.88rem', color: 'rgba(255,255,255,0.8)', marginBottom: '20px', position: 'relative', zIndex: 1 }}>
-          Even fully Halal companies often have trace amounts of interest income from cash stored in conventional banks. AAOIFI requires investors to <strong style={{ color: 'white' }}>"purify"</strong> their earnings by calculating the exact percentage of impermissible income and donating it to charity.
+          Even compliant companies often earn trace interest from cash stored in conventional commercial banks. AAOIFI requires investors to <strong style={{ color: 'white' }}>purify</strong> their dividend earnings by donating the exact non-halal fraction to charity.
         </p>
         <p style={{ lineHeight: 1.8, fontSize: '0.88rem', color: 'rgba(255,255,255,0.8)', position: 'relative', zIndex: 1, marginBottom: '28px' }}>
-          Irshad automatically calculates the <strong style={{ color: 'white' }}>Purification Rate</strong> for every stock on the market — removing the guesswork so your dividends remain 100% clean.
+          Irshad computes the exact <strong style={{ color: 'white' }}>Purification Rate</strong> (to two decimal places, e.g. 2.00%) for every stock on the NGX — removing guesswork so your returns remain 100% halal.
         </p>
 
         <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', position: 'relative', zIndex: 1 }}>
           {[
-            { icon: CheckCircle, label: 'Auto-calculated', sub: 'Per holding, per dividend' },
-            { icon: ShieldCheck, label: 'AAOIFI compliant', sub: 'Globally recognized standard' },
-            { icon: FileText, label: 'Charity guidance', sub: 'Irshad tracks your total due' },
+            { icon: CheckCircle, label: 'Auto-Calculated', sub: 'Per stock dividend distribution' },
+            { icon: ShieldCheck, label: 'AAOIFI Standard 21', sub: 'Strict scholar-approved math' },
+            { icon: FileText, label: 'Charity Disbursement', sub: 'Track your total due across portfolios' },
           ].map(({ icon: Icon, label, sub }) => (
             <div key={label} style={{ flex: '1 1 180px', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '18px 20px', backdropFilter: 'blur(4px)' }}>
               <Icon size={20} color="var(--gold)" style={{ marginBottom: '10px' }} />
@@ -182,6 +206,36 @@ const ShariahPage = () => (
               <div style={{ fontSize: '0.69rem', color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>{sub}</div>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* ─── Prohibited Trading Mechanisms ─── */}
+      <div style={{ background: 'var(--bg)', borderRadius: '24px', padding: '36px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)', marginBottom: '32px' }}>
+        <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '12px' }}>
+          Trading Rules under Standard 21
+        </h3>
+        <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: 1.75, marginBottom: '20px' }}>
+          A stock may be Halal, but how you trade it must also comply with Islamic law:
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
+          <div style={{ padding: '16px', background: 'var(--bg-section)', borderRadius: '14px', border: '1px solid var(--border)' }}>
+            <h4 style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--non-halal)', marginBottom: '6px' }}>No Short Selling</h4>
+            <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)', lineHeight: 1.6, margin: 0 }}>
+              Selling unowned borrowed shares (<em>Bay' ma la Yamlik</em>) is strictly prohibited. You may only sell shares you legitimately own.
+            </p>
+          </div>
+          <div style={{ padding: '16px', background: 'var(--bg-section)', borderRadius: '14px', border: '1px solid var(--border)' }}>
+            <h4 style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--non-halal)', marginBottom: '6px' }}>No Margin Leverage</h4>
+            <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)', lineHeight: 1.6, margin: 0 }}>
+              Trading on borrowed funds with interest charges is prohibited. All equity purchases must be cash-funded.
+            </p>
+          </div>
+          <div style={{ padding: '16px', background: 'var(--bg-section)', borderRadius: '14px', border: '1px solid var(--border)' }}>
+            <h4 style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--non-halal)', marginBottom: '6px' }}>No Options or Derivatives</h4>
+            <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)', lineHeight: 1.6, margin: 0 }}>
+              Financial options, futures, and synthetic swaps contain excessive uncertainty (<em>Gharar</em>) and speculation.
+            </p>
+          </div>
         </div>
       </div>
 

@@ -137,17 +137,17 @@ export default function LandingPage() {
   ];
 
   const features = [
-    { icon: Shield,      title: 'AAOIFI Std. 21',  desc: 'Every screening strictly follows the globally recognised Islamic finance standard — no shortcuts, no approximations.' },
-    { icon: Zap,         title: 'Automated',        desc: 'Proprietary models extract financial ratios from raw annual report PDFs in seconds, fully automatically.' },
-    { icon: Lock,        title: 'Audit-Ready',      desc: 'Full methodology transparency with downloadable compliance records for institutional and retail investors alike.' },
-    { icon: CheckCircle, title: 'Live Coverage',    desc: 'Nigerian equity market covered in real time, with re-screening triggered on every new regulatory filing.' },
+    { icon: Shield,      title: 'AAOIFI Standard 21', desc: 'Screening built on the gold standard for Islamic equity trading — strictly enforcing 30% debt, 30% cash, and 5% impure revenue limits.' },
+    { icon: Sparkles,    title: 'Dividend Purification', desc: 'Automatic calculation of non-halal income fractions down to 2 decimal places so you can cleanse your dividends with precision.' },
+    { icon: Lock,        title: 'NGX Filing Evidence', desc: 'Zero black-box ratings. Every verdict links to official, timestamped regulatory reports from NGX Pulse.' },
+    { icon: CheckCircle, title: 'Continuous Monitoring', desc: 'Quarterly and annual financial statements trigger immediate recalculations and watchlist compliance alerts.' },
   ];
 
   const pipeline = [
-    { n: '01', title: 'Data Ingestion',    desc: 'Audited financial statements fetched from regulatory filings',        icon: Globe      },
-    { n: '02', title: 'Data Extraction',   desc: 'Automated parsing of balance sheets and income statements',           icon: FileDigit  },
-    { n: '03', title: 'AAOIFI Rules',      desc: 'Three-ratio test applied per AAOIFI Shariah Standard No. 21',        icon: Shield     },
-    { n: '04', title: 'Verdict Published', desc: 'Halal / Doubtful / Non-Halal with a full, auditable trail',           icon: Sparkles   },
+    { n: '01', title: 'Regulatory Ingestion',  desc: 'Audited filings & quarterly reports fetched from NGX Pulse',          icon: Globe      },
+    { n: '02', title: 'Business Purity Screen',desc: 'Rule 3/4/1 exclusion of conventional banking, alcohol & vice sectors',icon: Shield     },
+    { n: '03', title: '30% / 5% Ratio Testing', desc: 'Strict quantitative assessment against live Market Capitalisation',   icon: FileDigit  },
+    { n: '04', title: 'Purification & Verdict', desc: 'Instant Halal / Non-Halal verdict with automated dividend cleansing', icon: Sparkles   },
   ];
 
   return (
