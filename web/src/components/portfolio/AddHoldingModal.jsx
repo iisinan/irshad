@@ -8,7 +8,12 @@ import CompanyLogo from '../CompanyLogo';
 function ZakatDatePrompt({ purchaseDate, onYes, onNo }) {
   const zakatDueDate = (() => {
     const d = new Date(purchaseDate);
-    d.setDate(d.getDate() + 354);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    d.setHours(0, 0, 0, 0);
+    while (d < today) {
+      d.setDate(d.getDate() + 354);
+    }
     return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
   })();
 
@@ -72,7 +77,12 @@ function ZakatDatePrompt({ purchaseDate, onYes, onNo }) {
 function ZakatConfirmation({ purchaseDate, onDone }) {
   const zakatDueDate = (() => {
     const d = new Date(purchaseDate);
-    d.setDate(d.getDate() + 354);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    d.setHours(0, 0, 0, 0);
+    while (d < today) {
+      d.setDate(d.getDate() + 354);
+    }
     return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
   })();
 

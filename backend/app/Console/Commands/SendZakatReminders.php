@@ -41,13 +41,20 @@ class SendZakatReminders extends Command
 
             try {
                 // The hawl date from preferences
-                $start = Carbon::parse($hawlDate);
-
-                // Add 354 days to get the due date
-                $due = $start->copy()->addDays(354);
+                $start = Carbon::parse($hawlDate)->startOfDay();
 
                 // Today at midnight
                 $today = Carbon::now()->startOfDay();
+
+                $due = $start->copy();
+                if ($due->isBefore($today)) {
+                    $daysPassed = $start->diffInDays($today, false);
+                    $cycles = (int) ceil($daysPassed / 354);
+                    if ($cycles < 1) {
+                        $cycles = 1;
+                    }
+                    $due->addDays($cycles * 354);
+                }
 
                 // Diff in days
                 $daysRemaining = $today->diffInDays($due->startOfDay(), false);

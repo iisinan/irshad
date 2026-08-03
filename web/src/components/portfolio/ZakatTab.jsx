@@ -46,11 +46,21 @@ export default function ZakatTab({ data }) {
 
   const hawlDueDate = hawlDate ? (() => {
     const d = new Date(hawlDate);
-    d.setDate(d.getDate() + 354);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    d.setHours(0, 0, 0, 0);
+    while (d < today) {
+      d.setDate(d.getDate() + 354);
+    }
     return d;
   })() : null;
 
-  const daysUntilDue = hawlDueDate ? Math.ceil((hawlDueDate - new Date()) / (1000 * 60 * 60 * 24)) : null;
+  const daysUntilDue = hawlDueDate ? (() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const diffTime = hawlDueDate - today;
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  })() : null;
 
   const saveHawlDate = () => {
     if (hawlInput) {
