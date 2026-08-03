@@ -5,7 +5,7 @@ import { useParams, Link } from 'react-router-dom';
 import { 
   ArrowLeft, CheckCircle, XCircle, AlertTriangle, 
   HelpCircle, ShieldCheck, ChevronRight, FileText, Brain, Download, Activity, Trash2, Droplets,
-  Calendar, Sparkles
+  Calendar, Sparkles, TrendingUp, Calculator, ExternalLink, Sliders
 } from 'lucide-react';
 import { fetchAaoifiScreening, updateAaoifiData } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -59,35 +59,39 @@ const AaoifiScreening = () => {
     if (simulatedLoading) {
       timer = setInterval(() => {
         setStepIndex(prev => (prev < LOADING_STEPS.length - 1 ? prev + 1 : prev));
-      }, 1500);
+      }, 350);
     }
     return () => clearInterval(timer);
   }, [simulatedLoading]);
 
-  // Synchronize query state with UI theater
+  // Turn off simulated loading when real data is ready and minimum time has passed
   useEffect(() => {
-    if (!queryLoading && res?.status === 'success') {
-      setStepIndex(LOADING_STEPS.length - 1);
-      const t = setTimeout(() => {
+    if (!queryLoading && res) {
+      const minTimer = setTimeout(() => {
         setSimulatedLoading(false);
-      }, 800);
-      return () => clearTimeout(t);
-    } else if (!queryLoading && queryError) {
-      setSimulatedLoading(false);
+      }, 1000);
+      return () => clearTimeout(minTimer);
     }
-  }, [queryLoading, res, queryError]);
+  }, [queryLoading, res]);
 
   const loading = queryLoading || simulatedLoading;
   const report = res?.data;
   const error = queryError ? (queryError.response?.data?.message || queryError.message || 'An error occurred') : null;
 
   const formatNumber = (val) => {
-    if (!val) return '0';
+    if (!val && val !== 0) return '0.00';
     const num = parseFloat(val);
-    if (isNaN(num)) return '0';
-    if (num > 1000000000) return (num / 1000000000).toFixed(2) + ' Billion';
-    if (num > 1000000) return (num / 1000000).toFixed(2) + ' Million';
-    return num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (isNaN(num)) return '0.00';
+    if (num >= 1000000000) return (num / 1000000000).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' Billion';
+    if (num >= 1000000) return (num / 1000000).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' Million';
+    return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+
+  const formatExactCurrency = (val) => {
+    if (!val && val !== 0) return '0.00';
+    const num = parseFloat(val);
+    if (isNaN(num)) return '0.00';
+    return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
   const openModal = (title, ratio, threshold, formula, numLabel, numVal, denLabel, denVal) => {
@@ -257,18 +261,25 @@ const AaoifiScreening = () => {
   const renderRatioProgressBar = (title, subtitle, ratio, threshold, numLabel, numVal, denLabel, denVal, formula, isMinimum = false) => {
     if (ratio === null || ratio === undefined || isNaN(ratio)) {
       return (
-        <div className="ratio-progress-row unavailable hover-card">
+        <div className="ratio-progress-row unavailable hover-card" style={{
+          background: 'linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%)',
+          borderRadius: '20px',
+          padding: '22px 24px',
+          marginBottom: '16px',
+          border: '1px solid var(--border)',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.02)'
+        }}>
           <div className="ratio-col-label">
-            <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.88rem', marginBottom: '4px' }}>{title}</div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{subtitle}</div>
+            <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.92rem', marginBottom: '4px' }}>{title}</div>
+            <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>{subtitle}</div>
           </div>
           
-          <div className="ratio-col-bar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700, letterSpacing: '0.5px' }}>DATA UNAVAILABLE</span>
+          <div className="ratio-col-bar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.04)', borderRadius: '100px', height: '14px' }}>
+            <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 800, letterSpacing: '0.6px' }}>DATA UNAVAILABLE</span>
           </div>
           
           <div className="ratio-col-value">
-            <div style={{ fontSize: '1.32rem', fontWeight: 900, color: 'var(--text-muted)' }}>N/A</div>
+            <div style={{ fontSize: '1.35rem', fontWeight: 900, color: 'var(--text-muted)', lineHeight: 1.1 }}>N/A</div>
             <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', marginTop: '4px' }}>Insufficient data</div>
           </div>
         </div>
@@ -282,10 +293,13 @@ const AaoifiScreening = () => {
     const diff = Math.abs(thresholdNum - ratioVal).toFixed(2);
     const headroomDisplay = isPassing ? `${diff}pp headroom` : (isMinimum ? `${diff}pp shortfall` : `${diff}pp excess`);
     const color = isPassing ? 'var(--halal)' : 'var(--non-halal)';
+    const barGradient = isPassing 
+      ? 'linear-gradient(90deg, #10B981 0%, #059669 100%)' 
+      : 'linear-gradient(90deg, #EF4444 0%, #DC2626 100%)';
     
     const maxVisual = Math.max(thresholdNum / 0.7, ratioVal / 0.9, 1);
-    const fillPercent = (ratioVal / maxVisual) * 100;
-    const thresholdPercent = (thresholdNum / maxVisual) * 100;
+    const fillPercent = Math.min((ratioVal / maxVisual) * 100, 100);
+    const thresholdPercent = Math.min((thresholdNum / maxVisual) * 100, 100);
 
     const numValParsed = parseFloat(numVal) || 0;
     const isClickable = numValParsed !== 0;
@@ -294,38 +308,80 @@ const AaoifiScreening = () => {
       <div 
         onClick={isClickable ? () => openModal(title, ratio, isMinimum ? `≥ ${threshold}%` : `≤ ${threshold}%`, formula, numLabel, numVal, denLabel, denVal) : undefined}
         className={`ratio-progress-row ${isClickable ? 'hover-card' : ''}`}
-        style={isClickable ? {} : { cursor: 'default' }}
+        style={{
+          background: 'linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%)',
+          borderRadius: '20px',
+          padding: '22px 24px',
+          marginBottom: '16px',
+          border: '1px solid var(--border)',
+          cursor: isClickable ? 'pointer' : 'default',
+          transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.02)'
+        }}
       >
         <div className="ratio-col-label">
-          <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.88rem', marginBottom: '4px' }}>{title}</div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{subtitle}</div>
+          <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.92rem', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span>{title}</span>
+            {isClickable && (
+              <span style={{ fontSize: '0.62rem', padding: '2px 8px', borderRadius: '100px', background: 'rgba(0,0,0,0.04)', color: 'var(--text-muted)', fontWeight: 700, border: '1px solid var(--border)' }}>
+                Inspect ↗
+              </span>
+            )}
+          </div>
+          <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', fontWeight: 500 }}>{subtitle}</div>
         </div>
         
-        <div className="ratio-col-bar">
+        <div className="ratio-col-bar" style={{
+          position: 'relative',
+          height: '14px',
+          background: 'rgba(0,0,0,0.06)',
+          borderRadius: '100px',
+          overflow: 'visible'
+        }}>
+          {/* Progress fill bar */}
           <div style={{ 
             position: 'absolute', top: 0, left: 0, height: '100%', 
-            width: `${Math.min(fillPercent, 100)}%`, 
-            background: color, 
-            borderRadius: '10px',
+            width: `${fillPercent}%`, 
+            background: barGradient, 
+            borderRadius: '100px',
+            boxShadow: isPassing ? '0 0 12px rgba(16,185,129,0.3)' : '0 0 12px rgba(239,68,68,0.3)',
             transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)'
           }} />
+
+          {/* Threshold pin */}
           <div style={{
-            position: 'absolute', top: '-6px', bottom: '-6px', 
-            left: `${thresholdPercent}%`, width: '2px', 
+            position: 'absolute', top: '-4px', bottom: '-4px', 
+            left: `${thresholdPercent}%`, width: '2.5px', 
             background: 'var(--non-halal)',
-            zIndex: 10
+            borderRadius: '2px',
+            zIndex: 10,
+            boxShadow: '0 0 6px rgba(239,68,68,0.6)'
           }} />
           <div style={{
-            position: 'absolute', top: '22px', left: `calc(${thresholdPercent}% - 30px)`,
-            fontSize: '0.66rem', color: 'var(--text-muted)', fontWeight: 600, width: '60px', textAlign: 'center'
+            position: 'absolute', top: '18px', left: `calc(${thresholdPercent}% - 35px)`,
+            fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, width: '70px', textAlign: 'center',
+            letterSpacing: '0.2px'
           }}>
             limit {threshold}%
           </div>
         </div>
         
-        <div className="ratio-col-value">
-          <div style={{ fontSize: '1.32rem', fontWeight: 900, color }}>{ratioVal.toFixed(2)}%</div>
-          <div style={{ fontSize: '0.7rem', fontWeight: 700, color, marginTop: '4px' }}>{headroomDisplay}</div>
+        <div className="ratio-col-value" style={{ textAlign: 'right' }}>
+          <div style={{ fontSize: '1.38rem', fontWeight: 900, color, letterSpacing: '-0.5px', lineHeight: 1.1 }}>
+            {ratioVal.toFixed(2)}%
+          </div>
+          <div style={{ 
+            display: 'inline-block',
+            fontSize: '0.66rem', 
+            fontWeight: 800, 
+            color, 
+            marginTop: '4px',
+            padding: '2px 8px',
+            borderRadius: '6px',
+            background: isPassing ? 'var(--halal-bg)' : 'var(--non-halal-bg)'
+          }}>
+            {headroomDisplay}
+          </div>
         </div>
       </div>
     );
@@ -437,9 +493,18 @@ const AaoifiScreening = () => {
           </div>
         )}
 
-        <p style={{ position: 'relative', zIndex: 1, color: 'var(--text-dark)', margin: '0 auto', fontWeight: 600, fontSize: '1.0rem', maxWidth: '600px', lineHeight: 1.6, marginBottom: hasPurification ? '24px' : '0' }}>
+        <p style={{ position: 'relative', zIndex: 1, color: 'var(--text-dark)', margin: '0 auto', fontWeight: 600, fontSize: '1.0rem', maxWidth: '600px', lineHeight: 1.6, marginBottom: hasPurification ? '16px' : '0' }}>
           {cleanStatusReason || 'Screened in accordance with AAOIFI Shariah Standard No. 21 (Financial & Business Activity Rules).'}
         </p>
+
+        {/* Reporting Metadata Pill */}
+        {(report?.reporting_period || report?.reporting_year || report?.published_date) && (
+          <div style={{ position: 'relative', zIndex: 1, display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', background: 'rgba(0,0,0,0.05)', borderRadius: '100px', fontSize: '0.76rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: hasPurification ? '20px' : '0', border: '1px solid var(--border)' }}>
+            <Calendar size={13} />
+            <span>{report.reporting_period || 'Annual Report'} {report.reporting_year ? `(${report.reporting_year})` : ''}</span>
+            {report.published_date && <span>· Published {report.published_date}</span>}
+          </div>
+        )}
 
         {/* Purification strip — only shown when purification is required */}
         {hasPurification && (
@@ -448,46 +513,54 @@ const AaoifiScreening = () => {
             width: 'calc(100% + 72px)', marginLeft: '-36px', marginRight: '-36px',
             background: 'linear-gradient(135deg, rgba(245,158,11,0.18) 0%, rgba(245,158,11,0.10) 100%)',
             borderTop: '1.5px solid rgba(245,158,11,0.35)',
-            padding: '16px 36px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '24px', flexWrap: 'wrap'
+            padding: '18px 36px',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '20px', flexWrap: 'wrap'
           }}>
             {/* Icon + label */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <div style={{
-                width: '32px', height: '32px', borderRadius: '50%',
+                width: '36px', height: '36px', borderRadius: '50%',
                 background: 'rgba(245,158,11,0.2)', border: '1.5px solid rgba(245,158,11,0.5)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
               }}>
-                <Droplets size={16} color="var(--questionable)" />
+                <Droplets size={18} color="var(--questionable)" />
               </div>
               <div style={{ textAlign: 'left' }}>
-                <div style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.2px', color: 'var(--questionable)', marginBottom: '2px' }}>Dividend Purification</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-dark)', fontWeight: 500, lineHeight: 1.4 }}>
+                <div style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.2px', color: 'var(--questionable)', marginBottom: '2px' }}>Dividend Purification Required</div>
+                <div style={{ fontSize: '0.82rem', color: 'var(--text-dark)', fontWeight: 600, lineHeight: 1.4 }}>
                   Purify <strong style={{ color: 'var(--questionable)' }}>{purificationPercent}%</strong> of dividends
                 </div>
               </div>
             </div>
 
-            {/* Divider */}
-            <div style={{ width: '1px', height: '32px', background: 'rgba(245,158,11,0.3)' }} />
-
             {/* Big stat */}
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--questionable)', lineHeight: 1, letterSpacing: '-0.5px' }}>
-                {purificationPercent}%
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{ textAlign: 'center', padding: '0 16px', borderLeft: '1px solid rgba(245,158,11,0.3)', borderRight: '1px solid rgba(245,158,11,0.3)' }}>
+                <div style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--questionable)', lineHeight: 1, letterSpacing: '-0.5px' }}>
+                  {purificationPercent}%
+                </div>
+                <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginTop: '4px' }}>To Purify</div>
               </div>
-              <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginTop: '4px' }}>To Purify</div>
+
+              {/* Explanation */}
+              <div style={{ maxWidth: '240px', textAlign: 'left' }}>
+                <div style={{ fontSize: '0.76rem', color: 'var(--text-dark)', fontWeight: 500, lineHeight: 1.4 }}>
+                  The company earns <strong style={{ color: 'var(--questionable)' }}>{purificationPercent}%</strong> from non-compliant sources. Donate this portion to charity.
+                </div>
+              </div>
             </div>
 
-            {/* Divider */}
-            <div style={{ width: '1px', height: '32px', background: 'rgba(245,158,11,0.3)' }} />
-
-            {/* Explanation */}
-            <div style={{ maxWidth: '240px', textAlign: 'left' }}>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-dark)', fontWeight: 500, lineHeight: 1.5 }}>
-                The company earns <strong style={{ color: 'var(--questionable)' }}>{purificationPercent}%</strong> from non-compliant sources. Donate this portion to charity.
-              </div>
-            </div>
+            {/* Action Link */}
+            <Link to="/portfolio" style={{
+              display: 'inline-flex', alignItems: 'center', gap: '6px',
+              padding: '8px 16px', borderRadius: '10px',
+              background: 'rgba(245,158,11,0.2)', border: '1px solid rgba(245,158,11,0.4)',
+              color: 'var(--questionable)', fontSize: '0.78rem', fontWeight: 800, textDecoration: 'none',
+              transition: 'all 0.2s'
+            }}>
+              <span>Purify in Portfolio</span>
+              <ChevronRight size={14} />
+            </Link>
           </div>
         )}
       </div>
@@ -693,40 +766,46 @@ const AaoifiScreening = () => {
       </div>
 
       {!['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(symbol) && (finalStatus === 'halal' || report.business_status === 'pass') && (debtRatio !== null || report.impermissible_income_ratio != null || cashRatio !== null) && (
-      <div className="hover-card" style={{ background: 'linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', marginBottom: '48px', boxShadow: '0 12px 32px rgba(0,0,0,0.03)', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+      <div className="hover-card" style={{ background: 'linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', marginBottom: '40px', boxShadow: '0 12px 32px rgba(0,0,0,0.03)', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <h2 style={{ fontSize: '0.79rem', fontWeight: 800, color: '#C49852', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>STAGE 2: QUANTITATIVE FINANCIAL RATIO SCREENING</h2>
-            <p style={{ fontSize: '1.32rem', fontWeight: 900, color: 'var(--text-dark)', margin: '8px 0 0 0' }}>The Three AAOIFI Financial Metrics</p>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 10px', borderRadius: '8px', background: 'rgba(196,152,82,0.1)', border: '1px solid rgba(196,152,82,0.25)', marginBottom: '8px' }}>
+              <TrendingUp size={13} color="#C49852" />
+              <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#C49852', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+                STAGE 2: QUANTITATIVE FINANCIAL SCREENING
+              </span>
+            </div>
+            <p style={{ fontSize: '1.32rem', fontWeight: 900, color: 'var(--text-dark)', margin: 0 }}>The Three AAOIFI Financial Ratios</p>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-section)', borderRadius: '100px', border: '1px solid var(--border)', fontSize: '0.75rem', overflow: 'hidden' }}>
-            <span style={{ padding: '6px 12px', color: 'var(--text-muted)' }}>Denominator</span>
+          <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-section)', borderRadius: '12px', border: '1px solid var(--border)', fontSize: '0.78rem', overflow: 'hidden', padding: '2px 6px' }}>
+            <span style={{ padding: '6px 8px', color: 'var(--text-muted)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Sliders size={13} />
+              Denominator:
+            </span>
             <select 
               value={denominator}
               onChange={e => setDenominator(e.target.value)}
-              style={{ background: 'var(--bg)', border: 'none', borderLeft: '1px solid var(--border)', padding: '6px 12px', fontWeight: 700, cursor: 'pointer', outline: 'none', color: 'var(--text-dark)' }}
+              style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '8px', padding: '6px 12px', fontWeight: 700, cursor: 'pointer', outline: 'none', color: 'var(--text-dark)', margin: '2px 0' }}
             >
-              <option value="market_cap">Market cap</option>
+              <option value="market_cap">Market Cap (Default)</option>
               <option value="total_assets">Total Assets</option>
             </select>
           </div>
         </div>
 
-
-        
-        <div style={{ marginTop: '16px' }}>
+        <div style={{ marginTop: '20px' }}>
           {renderRatioProgressBar(
-            '1. Debt ratio', 'Total debt / Market cap × 100', 
+            '1. Debt ratio', `Total Debt / ${denLabel} × 100`, 
             debtRatio, 30, 
             'Total Debt', totalDebt, denLabel, denVal, `Total Debt / ${denLabel} × 100`
           )}
           {renderRatioProgressBar(
-            '2. Cash ratio', '(Cash + security) / Market cap × 100', 
+            '2. Cash ratio', `(Cash + Securities) / ${denLabel} × 100`, 
             cashRatio, 30, 
-            'Cash & Securities', cashAndSecurities, denLabel, denVal, `(Cash + Security) / ${denLabel} × 100`
+            'Cash & Securities', cashAndSecurities, denLabel, denVal, `(Cash + Securities) / ${denLabel} × 100`
           )}
           {renderRatioProgressBar(
-            '3. Impure revenue', 'Impure income / Total revenue × 100', 
+            '3. Impure revenue', 'Impure Income / Total Revenue × 100', 
             report.impermissible_income_ratio, 5, 
             'Impure Income', report.financial_data_used?.interest_income, 'Total Revenue', report.financial_data_used?.total_revenue, 'Impure Income / Total Revenue × 100'
           )}
@@ -734,32 +813,41 @@ const AaoifiScreening = () => {
       </div>
       )}
 
+      {/* ─── STAGE 3: TRANSPARENCY & EVIDENCE ─── */}
       <div className="hover-card" style={{ background: 'linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', marginBottom: '48px', boxShadow: '0 12px 32px rgba(0,0,0,0.03)', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }}>
         <button 
           onClick={() => setEvidenceExpanded(!evidenceExpanded)}
           style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
         >
           <div style={{ textAlign: 'left' }}>
-            <h2 style={{ fontSize: '0.79rem', fontWeight: 800, color: '#C49852', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>TRANSPARENCY & EVIDENCE</h2>
-            <p style={{ fontSize: '1.32rem', fontWeight: 900, color: 'var(--text-dark)', margin: '8px 0 0 0' }}>Data sources & Irshad Confidence</p>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 10px', borderRadius: '8px', background: 'rgba(196,152,82,0.1)', border: '1px solid rgba(196,152,82,0.25)', marginBottom: '8px' }}>
+              <FileText size={13} color="#C49852" />
+              <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#C49852', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+                STAGE 3: TRANSPARENCY & EVIDENCE
+              </span>
+            </div>
+            <p style={{ fontSize: '1.32rem', fontWeight: 900, color: 'var(--text-dark)', margin: 0 }}>Data Sources & Financial References</p>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '0.79rem', fontWeight: 600 }}>
-            {evidenceExpanded ? 'Hide details' : 'View details'}
-            <ChevronRight size={24} color="var(--text-muted)" style={{ transform: evidenceExpanded ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '0.82rem', fontWeight: 700, background: 'var(--bg-section)', padding: '8px 16px', borderRadius: '100px', border: '1px solid var(--border)' }}>
+            <span>{evidenceExpanded ? 'Hide Details' : 'View Details'}</span>
+            <ChevronRight size={18} color="var(--text-muted)" style={{ transform: evidenceExpanded ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
           </div>
         </button>
 
         {evidenceExpanded && (
-          <div className="animate-fade-in" style={{ marginTop: '32px', paddingTop: '32px', borderTop: '1px solid var(--border)' }}>
+          <div className="animate-fade-in" style={{ marginTop: '28px', paddingTop: '28px', borderTop: '1px solid var(--border)' }}>
 
             {(report.financial_data_used?.source_links?.length > 0 || report.financial_data_used?.source || report.financial_data_used?.source_url) && (
               <div style={{ marginBottom: '32px' }}>
-                <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.97rem', marginBottom: '12px' }}>Extracted Financial Data Sources</div>
+                <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.95rem', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <ExternalLink size={16} color="var(--primary)" />
+                  Extracted Financial Data Sources
+                </div>
                 
                 {report.financial_data_used?.source_links?.length > 0 && (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
                     {report.financial_data_used.source_links.map((link, i) => (
-                      <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className="hover-card" style={{ display: 'flex', alignItems: 'center', gap: '16px', background: 'linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border)', textDecoration: 'none', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }} onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.05)'; }} onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.02)'; }}>
+                      <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className="hover-card" style={{ display: 'flex', alignItems: 'center', gap: '16px', background: 'var(--bg-section)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border)', textDecoration: 'none', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }} onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.05)'; }} onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.02)'; }}>
                         <div style={{ color: 'var(--primary)', background: 'var(--primary-bg)', padding: '10px', borderRadius: '12px' }}><FileText size={20} /></div>
                         <div>
                           <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '4px' }}>{link.name}</div>
@@ -780,7 +868,7 @@ const AaoifiScreening = () => {
 
                 {report.financial_data_used?.source_url && !report.financial_data_used?.source_links?.length && (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
-                      <a href={report.financial_data_used.source_url} target="_blank" rel="noopener noreferrer" className="hover-card" style={{ display: 'flex', alignItems: 'center', gap: '16px', background: 'linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border)', textDecoration: 'none', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }} onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.05)'; }} onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.02)'; }}>
+                      <a href={report.financial_data_used.source_url} target="_blank" rel="noopener noreferrer" className="hover-card" style={{ display: 'flex', alignItems: 'center', gap: '16px', background: 'var(--bg-section)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border)', textDecoration: 'none', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }} onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.05)'; }} onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.02)'; }}>
                         <div style={{ color: 'var(--primary)', background: 'var(--primary-bg)', padding: '10px', borderRadius: '12px' }}><FileText size={20} /></div>
                         <div>
                           <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '4px' }}>Nigerian Exchange Group (NGX)</div>
@@ -829,19 +917,19 @@ const AaoifiScreening = () => {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px' }}>
                 <div className="hover-card" style={{ background: 'var(--bg-section)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', transition: 'transform 0.2s' }}>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Market Capitalization</span>
-                  <span style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{marketCap ? `₦${(marketCap/1000000000).toFixed(2)}B` : 'N/A'}</span>
+                  <span style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{marketCap ? `₦${formatNumber(marketCap)}` : 'N/A'}</span>
                 </div>
                 <div className="hover-card" style={{ background: 'var(--bg-section)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', transition: 'transform 0.2s' }}>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Total Interest Debt</span>
-                  <span style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{totalDebt ? `₦${(totalDebt/1000000000).toFixed(2)}B` : '₦0'}</span>
+                  <span style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{totalDebt ? `₦${formatNumber(totalDebt)}` : '₦0.00'}</span>
                 </div>
                 <div className="hover-card" style={{ background: 'var(--bg-section)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', transition: 'transform 0.2s' }}>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Cash & Securities</span>
-                  <span style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{cashAndSecurities ? `₦${(cashAndSecurities/1000000000).toFixed(2)}B` : '₦0'}</span>
+                  <span style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{cashAndSecurities ? `₦${formatNumber(cashAndSecurities)}` : '₦0.00'}</span>
                 </div>
                 <div className="hover-card" style={{ background: 'var(--bg-section)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', transition: 'transform 0.2s' }}>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Total Assets</span>
-                  <span style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{totalAssets ? `₦${(totalAssets/1000000000).toFixed(2)}B` : 'N/A'}</span>
+                  <span style={{ fontSize: '1.15rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px' }}>{totalAssets ? `₦${formatNumber(totalAssets)}` : 'N/A'}</span>
                 </div>
               </div>
             </div>
@@ -849,13 +937,17 @@ const AaoifiScreening = () => {
         )}
       </div>
 
-      {/* Modal Overlay */}
-      {/* Modal Overlay */}
+      {/* Modal Overlay: Calculation Details */}
       {modalData && createPortal(
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000, padding: '24px', opacity: 1, transition: 'opacity 0.3s' }}>
-          <div className="animate-fade-in" style={{ background: 'var(--bg)', borderRadius: '32px', width: '100%', maxWidth: '500px', overflow: 'hidden', boxShadow: '0 32px 64px rgba(0,0,0,0.15), 0 0 0 1px var(--border)' }}>
-            <div style={{ padding: '24px 32px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-section)' }}>
-              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800 }}>Calculation Details</h3>
+          <div className="animate-fade-in" style={{ background: 'var(--bg)', borderRadius: '28px', width: '100%', maxWidth: '500px', overflow: 'hidden', boxShadow: '0 32px 64px rgba(0,0,0,0.25), 0 0 0 1px var(--border)' }}>
+            <div style={{ padding: '24px 28px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-section)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(196,152,82,0.15)', border: '1px solid rgba(196,152,82,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Calculator size={18} color="#C49852" />
+                </div>
+                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)' }}>Calculation Breakdown</h3>
+              </div>
               <button 
                 onClick={() => setModalData(null)} 
                 style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)', transition: 'all 0.2s' }}
@@ -866,32 +958,61 @@ const AaoifiScreening = () => {
               </button>
             </div>
             
-            <div style={{ padding: '32px' }}>
-              <div style={{ marginBottom: '32px', textAlign: 'center' }}>
-                <div style={{ fontWeight: 800, fontSize: '1.1rem', marginBottom: '8px', color: 'var(--text-dark)' }}>{modalData.title}</div>
-                <div style={{ display: 'inline-block', padding: '6px 16px', background: 'var(--bg-section)', borderRadius: '100px', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600 }}>
-                  Threshold: {modalData.threshold}
+            <div style={{ padding: '28px' }}>
+              <div style={{ marginBottom: '24px', textAlign: 'center' }}>
+                <div style={{ fontWeight: 800, fontSize: '1.15rem', marginBottom: '6px', color: 'var(--text-dark)' }}>{modalData.title}</div>
+                <div style={{ display: 'inline-block', padding: '4px 14px', background: 'rgba(196,152,82,0.1)', border: '1px solid rgba(196,152,82,0.25)', borderRadius: '100px', color: '#C49852', fontSize: '0.75rem', fontWeight: 700 }}>
+                  AAOIFI Threshold: {modalData.threshold}
                 </div>
               </div>
 
-              <div style={{ background: 'var(--bg-section)', padding: '16px', borderRadius: '12px', border: '1px dashed var(--border)', marginBottom: '24px', textAlign: 'center' }}>
-                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '8px' }}>Formula</span>
-                <span style={{ fontSize: '0.84rem', color: 'var(--text-dark)', fontWeight: 600, fontFamily: 'monospace' }}>{modalData.formula}</span>
+              <div style={{ background: 'var(--bg-section)', padding: '16px', borderRadius: '14px', border: '1px dashed var(--border)', marginBottom: '24px', textAlign: 'center' }}>
+                <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.6px', display: 'block', marginBottom: '6px' }}>Mathematical Formula</span>
+                <span style={{ fontSize: '0.88rem', color: 'var(--text-dark)', fontWeight: 700, fontFamily: 'monospace' }}>{modalData.formula}</span>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '16px 0', borderBottom: '1px dashed var(--border)' }}>
-                <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>{modalData.numLabel}</span>
-                <span style={{ fontWeight: 800, fontSize: '0.97rem' }}>₦{formatNumber(modalData.numVal)}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '16px 0' }}>
-                <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>{modalData.denLabel}</span>
-                <span style={{ fontWeight: 800, fontSize: '0.97rem' }}>₦{formatNumber(modalData.denVal)}</span>
+              <div style={{ background: 'var(--bg-section)', borderRadius: '16px', padding: '6px 16px', border: '1px solid var(--border)', marginBottom: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px dashed var(--border)' }}>
+                  <span style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-muted)' }}>{modalData.numLabel} (Numerator)</span>
+                  <span style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-dark)' }}>₦{formatExactCurrency(modalData.numVal)}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0' }}>
+                  <span style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-muted)' }}>{modalData.denLabel} (Denominator)</span>
+                  <span style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-dark)' }}>₦{formatExactCurrency(modalData.denVal)}</span>
+                </div>
               </div>
 
-              <div style={{ marginTop: '32px', background: 'var(--bg-section)', padding: '24px', borderRadius: '24px', textAlign: 'center', border: '1px solid var(--border)' }}>
-                <div style={{ fontWeight: 700, fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px' }}>Result</div>
-                <div style={{ fontSize: '2.64rem', fontWeight: 900, color: modalData.ratio <= parseFloat(modalData.threshold.replace(/[^0-9.]/g, '')) ? 'var(--halal)' : 'var(--non-halal)', lineHeight: 1 }}>
+              <div style={{ 
+                background: modalData.ratio <= parseFloat(modalData.threshold.replace(/[^0-9.]/g, '')) 
+                  ? 'linear-gradient(135deg, rgba(16,185,129,0.1) 0%, rgba(16,185,129,0.04) 100%)' 
+                  : 'linear-gradient(135deg, rgba(239,68,68,0.1) 0%, rgba(239,68,68,0.04) 100%)', 
+                padding: '20px', 
+                borderRadius: '20px', 
+                textAlign: 'center', 
+                border: modalData.ratio <= parseFloat(modalData.threshold.replace(/[^0-9.]/g, '')) 
+                  ? '1px solid rgba(16,185,129,0.25)' 
+                  : '1px solid rgba(239,68,68,0.25)' 
+              }}>
+                <div style={{ fontWeight: 800, fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>
+                  Calculated Result
+                </div>
+                <div style={{ fontSize: '2.6rem', fontWeight: 900, color: modalData.ratio <= parseFloat(modalData.threshold.replace(/[^0-9.]/g, '')) ? 'var(--halal)' : 'var(--non-halal)', lineHeight: 1, letterSpacing: '-1px' }}>
                   {modalData.ratio.toFixed(2)}%
+                </div>
+                <div style={{ marginTop: '10px' }}>
+                  <span style={{ 
+                    display: 'inline-block',
+                    padding: '4px 12px',
+                    borderRadius: '100px',
+                    fontSize: '0.72rem',
+                    fontWeight: 800,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    background: modalData.ratio <= parseFloat(modalData.threshold.replace(/[^0-9.]/g, '')) ? 'var(--halal-bg)' : 'var(--non-halal-bg)',
+                    color: modalData.ratio <= parseFloat(modalData.threshold.replace(/[^0-9.]/g, '')) ? 'var(--halal)' : 'var(--non-halal)'
+                  }}>
+                    {modalData.ratio <= parseFloat(modalData.threshold.replace(/[^0-9.]/g, '')) ? '✓ Compliant with AAOIFI' : '✕ Exceeds AAOIFI Threshold'}
+                  </span>
                 </div>
               </div>
             </div>
