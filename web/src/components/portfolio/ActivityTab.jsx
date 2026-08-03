@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Activity, Clock, Search, ShieldCheck } from 'lucide-react';
+import { Activity, Clock, Search, ShieldCheck, ChevronRight } from 'lucide-react';
 import { fetchHistory } from '../../services/api';
 import Skeleton from '../ui/Skeleton';
+import CompanyLogo from '../CompanyLogo';
 import { useNavigate } from 'react-router-dom';
 
 export default function ActivityTab() {
@@ -59,16 +60,21 @@ export default function ActivityTab() {
     <div className="animate-fade-in stagger-1" style={{ background: 'var(--bg)', borderRadius:'24px', padding:'0', boxShadow:'var(--shadow-sm)', border:'1px solid var(--border)', overflow:'hidden' }}>
       
       {/* Header */}
-      <div style={{ background: 'linear-gradient(135deg, #0D1B2A 0%, #0F5257 65%, #0B6B71 100%)', padding: '32px', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ background: 'linear-gradient(135deg, #0D1B2A 0%, #0F5257 65%, #0B6B71 100%)', padding: '32px', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' }}>
         <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(201,168,76,0.08)', borderRadius: '50%' }} />
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', zIndex: 1 }}>
           <div style={{ width: '56px', height: '56px', background: 'rgba(255,255,255,0.1)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gold)', border: '1px solid rgba(255,255,255,0.2)' }}>
             <Activity size={28} />
           </div>
           <div>
-            <h2 style={{ fontSize: '1.23rem', fontWeight: 800, color: 'white', letterSpacing: '-0.5px' }}>Activity Log</h2>
-            <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.79rem', marginTop: '4px' }}>Your recent screening and scan history</p>
+            <h2 style={{ fontSize: '1.23rem', fontWeight: 800, color: 'white', letterSpacing: '-0.5px', margin: 0 }}>Activity Log</h2>
+            <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.79rem', marginTop: '4px', margin: 0 }}>Your recent screening and scan history</p>
           </div>
+        </div>
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <span style={{ color: 'white', fontSize: '0.78rem', fontWeight: 800, background: 'rgba(255,255,255,0.1)', padding: '8px 16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)' }}>
+            {history.length} {history.length === 1 ? 'Record' : 'Records'}
+          </span>
         </div>
       </div>
 
@@ -76,9 +82,9 @@ export default function ActivityTab() {
         {loading ? (
           <div style={{ padding: '20px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '600px', margin: '0 auto' }}>
-              <Skeleton height="70px" borderRadius="12px" />
-              <Skeleton height="70px" borderRadius="12px" />
-              <Skeleton height="70px" borderRadius="12px" />
+              <Skeleton height="70px" borderRadius="14px" />
+              <Skeleton height="70px" borderRadius="14px" />
+              <Skeleton height="70px" borderRadius="14px" />
             </div>
           </div>
         ) : history.length === 0 ? (
@@ -108,44 +114,58 @@ export default function ActivityTab() {
                 fontWeight:800, fontSize: '0.84rem', cursor:'pointer', textDecoration:'none',
                 boxShadow:'0 8px 24px rgba(201,168,76,0.3)', transition:'transform 0.2s, boxShadow 0.2s' 
               }}
+              className="hover-lift"
             >
               <Search size={18}/> Screen Stocks
             </button>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {history.map((item, i) => (
-              <div 
-                key={item.id}
-                onClick={() => {
-                  if (item.action === 'check' && item.detail?.symbol) {
-                    navigate(`/market/${item.detail.symbol}`);
-                  }
-                }}
-                className={`roll-in-anim ${item.action === 'check' ? 'hover-lift' : ''}`}
-                style={{ 
-                  animationDelay: `${i * 0.03}s`,
-                  background: 'var(--bg)', borderRadius: '16px', padding: '20px', border: '1px solid var(--border)',
-                  cursor: item.action === 'check' ? 'pointer' : 'default', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'space-between'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <div style={{ width: '42px', height: '42px', background: 'var(--primary-50)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', fontWeight: 800 }}>
-                    {getActionIcon(item.action)}
+            {history.map((item, i) => {
+              const isStock = item.action === 'check' && item.detail?.symbol;
+              return (
+                <div 
+                  key={item.id || i}
+                  onClick={() => {
+                    if (isStock) {
+                      navigate(`/market/${item.detail.symbol}`);
+                    }
+                  }}
+                  className={`roll-in-anim ${isStock ? 'hover-lift' : ''}`}
+                  style={{ 
+                    animationDelay: `${(i % 15) * 0.03}s`,
+                    background: 'var(--bg)', borderRadius: '16px', padding: '18px 20px', border: '1px solid var(--border)',
+                    cursor: isStock ? 'pointer' : 'default', transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)', 
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    {isStock ? (
+                      <CompanyLogo symbol={item.detail.symbol} logoUrl={item.detail.logo_url} size={42} radius={12} />
+                    ) : (
+                      <div style={{ width: '42px', height: '42px', background: 'var(--primary-50)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', fontWeight: 800 }}>
+                        {getActionIcon(item.action)}
+                      </div>
+                    )}
+                    <div>
+                      <h4 style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--text-dark)', margin: 0, letterSpacing: '-0.2px' }}>
+                        {getActionText(item)}
+                      </h4>
+                      <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)', margin: '4px 0 0', fontWeight: 500 }}>
+                        {item.detail?.name || (isStock ? `${item.detail.symbol} Screening Analysis` : 'Manual Action')}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--text-dark)' }}>{getActionText(item)}</h4>
-                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                      {item.detail?.name || 'Manual Action'}
-                    </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-light)', fontSize: '0.72rem', fontWeight: 600 }}>
+                      <Clock size={13} />
+                      {formatDate(item.created_at)}
+                    </div>
+                    {isStock && <ChevronRight size={18} color="var(--text-light)" />}
                   </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-light)', fontSize: '0.7rem', fontWeight: 600 }}>
-                  <Clock size={12} />
-                  {formatDate(item.created_at)}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

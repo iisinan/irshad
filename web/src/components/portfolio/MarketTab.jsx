@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, TrendingUp, TrendingDown, Star, BarChart2, X } from 'lucide-react';
+import { Search, TrendingUp, TrendingDown, Star, BarChart2, X, CheckCircle, AlertCircle, HelpCircle, ShieldCheck } from 'lucide-react';
 import { fetchNgxStocks, fetchWatchlist, addToWatchlist, removeFromWatchlist, fetchSectors } from '../../services/api';
 import CompanyLogo from '../CompanyLogo';
 import { Link } from 'react-router-dom';
@@ -8,15 +8,15 @@ import Skeleton from '../ui/Skeleton';
 
 /* ─── Helpers ─────────────────────────────────────────────────────────────── */
 const fmtPrice = (p) => {
-  try { return Number(p ?? 0).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  try { return Number(p ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
   catch { return Number(p ?? 0).toFixed(2); }
 };
 
 const fmtCap = (c) => {
   if (!c || c === 0) return '—';
-  if (c >= 1e12) return `₦${(c / 1e12).toFixed(1)}T`;
-  if (c >= 1e9)  return `₦${(c / 1e9).toFixed(1)}B`;
-  return `₦${(c / 1e6).toFixed(0)}M`;
+  if (c >= 1e12) return `₦${(c / 1e12).toFixed(2)}T`;
+  if (c >= 1e9)  return `₦${(c / 1e9).toFixed(2)}B`;
+  return `₦${(c / 1e6).toFixed(2)}M`;
 };
 
 const normSector = (s) => {
@@ -25,29 +25,32 @@ const normSector = (s) => {
   return map[s] || s;
 };
 
-const getStatus = (company) => {
-  const raw = company.status;
-  if (typeof raw === 'object' && raw !== null) {
-    const s = raw.status?.toLowerCase();
-    return s === 'compliant' ? 'halal' : (s || 'doubtful');
+const getStatusConfig = (company) => {
+  let statusStr = 'DOUBTFUL';
+  let cls = 'status-doubtful';
+  let icon = <HelpCircle size={11} />;
+
+  const rawStatus = company.status;
+  if (typeof rawStatus === 'object' && rawStatus !== null) {
+    const s = rawStatus.status?.toLowerCase();
+    if (s === 'halal' || s === 'compliant') { statusStr = 'HALAL'; cls = 'status-halal'; icon = <CheckCircle size={11} />; }
+    else if (s === 'non-halal' || s === 'non_compliant') { statusStr = 'NON-HALAL'; cls = 'status-non-halal'; icon = <AlertCircle size={11} />; }
+  } else if (typeof rawStatus === 'string') {
+    const s = rawStatus.toLowerCase();
+    if (s === 'compliant' || s === 'halal') { statusStr = 'HALAL'; cls = 'status-halal'; icon = <CheckCircle size={11} />; }
+    else if (s === 'non-halal' || s === 'non_compliant') { statusStr = 'NON-HALAL'; cls = 'status-non-halal'; icon = <AlertCircle size={11} />; }
   }
-  if (typeof raw === 'string') {
-    const s = raw.toLowerCase();
-    return s === 'compliant' ? 'halal' : s;
-  }
-  return 'doubtful';
+  return { label: statusStr, cls, icon, raw: statusStr.toLowerCase() };
 };
 
-
-
 /* ─── Table header cell — defined OUTSIDE to avoid re-mounting ───────────── */
-const TH = ({ children, right }) => (
+const TH = ({ children, right, center }) => (
   <th style={{
-    padding: '11px 16px',
-    fontSize: '0.62rem', fontWeight: 700,
-    textTransform: 'uppercase', letterSpacing: '0.5px',
+    padding: '12px 16px',
+    fontSize: '0.65rem', fontWeight: 800,
+    textTransform: 'uppercase', letterSpacing: '0.6px',
     color: 'var(--text-muted)',
-    textAlign: right ? 'right' : 'left',
+    textAlign: right ? 'right' : center ? 'center' : 'left',
     background: 'var(--bg-section)',
     borderBottom: '1px solid var(--border)',
     whiteSpace: 'nowrap',
@@ -59,9 +62,8 @@ const TH = ({ children, right }) => (
 
 /* ─── Stock table row ────────────────────────────────────────────────────── */
 const StockRow = React.memo(({ stock, idx, isWatched, onToggle }) => {
-
   const isPos  = Number(stock.price_change_pct ?? 0) >= 0;
-
+  const cfg = getStatusConfig(stock);
 
   return (
     <tr
@@ -70,73 +72,82 @@ const StockRow = React.memo(({ stock, idx, isWatched, onToggle }) => {
       style={{ borderBottom: '1px solid var(--border)', transition: 'background 0.15s' }}
     >
       {/* Rank */}
-      <td style={{ padding: '13px 8px 13px 20px', color: 'var(--text-light)', fontSize: '0.68rem', fontWeight: 700 }}>
+      <td style={{ padding: '14px 8px 14px 20px', color: 'var(--text-light)', fontSize: '0.72rem', fontWeight: 700 }}>
         {idx + 1}
       </td>
 
       {/* Company */}
-      <td style={{ padding: '13px 16px' }}>
+      <td style={{ padding: '14px 16px' }}>
         <Link
           to={`/market/${stock.symbol}`}
           state={{ stock }}
-          style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '11px' }}
+          style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px' }}
         >
-            <CompanyLogo symbol={stock.symbol} logoUrl={stock.logo_url} size={36} radius={9} />
+          <CompanyLogo symbol={stock.symbol} logoUrl={stock.logo_url} size={38} radius={10} />
           <div>
-            <div style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.77rem', lineHeight: 1.2 }}>
+            <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.86rem', lineHeight: 1.2, letterSpacing: '-0.2px' }}>
               {stock.symbol}
             </div>
-            <div style={{ fontSize: '0.64rem', color: 'var(--text-muted)', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>
               {stock.name}
             </div>
           </div>
         </Link>
       </td>
 
+      {/* Shariah Status */}
+      <td style={{ padding: '14px 16px' }}>
+        <span className={`status-badge ${cfg.cls}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 10px', fontSize: '0.66rem', fontWeight: 800, letterSpacing: '0.3px' }}>
+          {cfg.icon}
+          {cfg.label}
+        </span>
+      </td>
 
       {/* Price */}
-      <td style={{ padding: '13px 16px', textAlign: 'right', fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.77rem', fontVariantNumeric: 'tabular-nums' }}>
+      <td style={{ padding: '14px 16px', textAlign: 'right', fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.84rem', fontVariantNumeric: 'tabular-nums' }}>
         ₦{fmtPrice(stock.latest_price)}
       </td>
 
       {/* Change */}
-      <td style={{ padding: '13px 16px', textAlign: 'right' }}>
+      <td style={{ padding: '14px 16px', textAlign: 'right' }}>
         <span style={{
-          display: 'inline-flex', alignItems: 'center', gap: '3px',
-          fontSize: '0.7rem', fontWeight: 700,
+          display: 'inline-flex', alignItems: 'center', gap: '4px',
+          fontSize: '0.72rem', fontWeight: 800,
           color: isPos ? 'var(--halal)' : 'var(--non-halal)',
           background: isPos ? 'var(--halal-bg)' : 'var(--non-halal-bg)',
-          padding: '3px 8px', borderRadius: '6px',
+          padding: '4px 9px', borderRadius: '8px',
+          fontVariantNumeric: 'tabular-nums'
         }}>
-          {isPos ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+          {isPos ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
           {isPos ? '+' : ''}{Number(stock.price_change_pct ?? 0).toFixed(2)}%
         </span>
       </td>
 
       {/* Mkt Cap */}
-      <td style={{ padding: '13px 16px', textAlign: 'right', color: 'var(--text-muted)', fontSize: '0.72rem', fontWeight: 600 }}>
+      <td style={{ padding: '14px 16px', textAlign: 'right', color: 'var(--text-muted)', fontSize: '0.78rem', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
         {fmtCap(stock.market_cap)}
       </td>
 
       {/* P/E */}
-      <td style={{ padding: '13px 16px', textAlign: 'right', color: 'var(--text-muted)', fontSize: '0.72rem', fontWeight: 600 }}>
+      <td style={{ padding: '14px 16px', textAlign: 'right', color: 'var(--text-muted)', fontSize: '0.78rem', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
         {stock.pe_ratio ? Number(stock.pe_ratio).toFixed(1) : '—'}
       </td>
 
       {/* Star */}
-      <td style={{ padding: '13px 20px 13px 8px', textAlign: 'right' }}>
+      <td style={{ padding: '14px 20px 14px 8px', textAlign: 'right' }}>
         <button
           onClick={() => onToggle(stock.symbol, isWatched)}
           style={{
-            background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
+            background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
             color: isWatched ? 'var(--gold)' : 'var(--border)',
             transition: 'color 0.15s, transform 0.15s',
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center'
           }}
           title={isWatched ? 'Remove from watchlist' : 'Add to watchlist'}
           onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.25)'}
           onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
         >
-          <Star size={16} fill={isWatched ? 'currentColor' : 'none'} />
+          <Star size={17} fill={isWatched ? 'currentColor' : 'none'} />
         </button>
       </td>
     </tr>
@@ -212,13 +223,20 @@ export default function MarketTab() {
     return sectorMap[sectorF] || [];
   }, [sectorF, sectorMap]);
 
-
+  const halalCount = useMemo(() => {
+    return actualStocks.filter(s => getStatusConfig(s).label === 'HALAL').length;
+  }, [actualStocks]);
 
   const filtered = useMemo(() => {
     let list = actualStocks.filter(s => {
       const q = search.toLowerCase();
       if (q && !s.symbol?.toLowerCase().includes(q) && !s.name?.toLowerCase().includes(q)) return false;
-      if (statusF !== 'all' && getStatus(s) !== statusF) return false;
+      if (statusF !== 'all') {
+        const cfg = getStatusConfig(s);
+        if (statusF === 'halal' && cfg.label !== 'HALAL') return false;
+        if (statusF === 'non-halal' && cfg.label !== 'NON-HALAL') return false;
+        if (statusF === 'doubtful' && cfg.label !== 'DOUBTFUL') return false;
+      }
       if (sectorF !== 'all' && normSector(s.sector) !== sectorF) return false;
       if (industryF !== 'all' && s.business_type !== industryF) return false;
       return true;
@@ -230,55 +248,68 @@ export default function MarketTab() {
     return list;
   }, [actualStocks, search, statusF, sectorF, industryF, sortBy]);
 
-  const hasFilters = search || statusF !== 'all' || sectorF !== 'all' || industryF !== 'all';
+  const hasFilters = search || statusF !== 'all' || sectorF !== 'all' || industryF !== 'all' || sortBy !== 'default';
   const clearAll   = () => { setSearch(''); setStatusF('all'); setSectorF('all'); setIndustryF('all'); setSortBy('default'); };
 
   const selectStyle = (active) => ({
-    padding: '9px 12px', borderRadius: '10px', outline: 'none', cursor: 'pointer',
-    fontSize: '0.74rem', fontWeight: 600, color: 'var(--text-dark)', fontFamily: 'inherit',
-    border: active ? '1.5px solid var(--primary)' : '1.5px solid var(--border)',
+    padding: '9px 14px', borderRadius: '12px', outline: 'none', cursor: 'pointer',
+    fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-dark)', fontFamily: 'inherit',
+    border: active ? '1.5px solid var(--primary)' : '1px solid var(--border)',
     background: active ? 'var(--primary-50)' : 'var(--bg-section)',
+    transition: 'all 0.2s',
   });
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
+    <div className="animate-fade-in stagger-1" style={{ display: 'flex', flexDirection: 'column' }}>
 
-      {/* ── Header card ─────────────────────────────────────── */}
-      <div style={{
-        background: 'var(--bg)', padding: '22px 24px 0',
-        borderRadius: '20px 20px 0 0', border: '1px solid var(--border)', borderBottom: 'none',
+      {/* ── Header Hero Banner ─────────────────────────────────────── */}
+      <div style={{ 
+        background: 'linear-gradient(135deg, #0D1B2A 0%, #0F5257 65%, #0B6B71 100%)', 
+        borderRadius: '24px', padding: '32px', 
+        boxShadow: '0 12px 32px rgba(13,27,42,0.15)', 
+        border: 'none', marginBottom: '24px', 
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
+        position: 'relative', overflow: 'hidden', flexWrap: 'wrap', gap: '24px' 
       }}>
-        {/* Title + summary pills */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '18px', flexWrap: 'wrap', gap: '12px' }}>
-          <div>
-            <h2 style={{ fontSize: '1.14rem', fontWeight: 800, color: 'var(--text-dark)', letterSpacing: '-0.3px', margin: 0 }}>
-              Market Screener
-            </h2>
-            <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '3px' }}>
-              Nigerian Exchange · {actualStocks.length} companies
-            </p>
+        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(201,168,76,0.08)', borderRadius: '50%' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', zIndex: 1 }}>
+          <div style={{ width: '56px', height: '56px', background: 'rgba(255,255,255,0.1)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gold)', border: '1px solid rgba(255,255,255,0.2)' }}>
+            <BarChart2 size={28} />
           </div>
-
-          {actualStocks.length > 0 && (
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            </div>
-          )}
+          <div>
+            <h2 style={{ fontSize: '1.23rem', fontWeight: 800, color: 'white', letterSpacing: '-0.5px', margin: 0 }}>Market Screener</h2>
+            <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.79rem', marginTop: '4px', margin: 0 }}>Nigerian Exchange (NGX) · AAOIFI Shariah Standard No. 21 Screened</p>
+          </div>
         </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', position: 'relative', zIndex: 1 }}>
+          <div style={{ color: 'white', fontSize: '0.79rem', fontWeight: 800, background: 'rgba(255,255,255,0.1)', padding: '10px 16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)' }}>
+            {actualStocks.length} Companies
+          </div>
+          <div style={{ color: '#10B981', fontSize: '0.79rem', fontWeight: 800, background: 'rgba(16,185,129,0.15)', padding: '10px 16px', borderRadius: '12px', border: '1px solid rgba(16,185,129,0.3)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <ShieldCheck size={14} /> {halalCount} Halal
+          </div>
+        </div>
+      </div>
 
-        {/* Filter bar */}
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', paddingBottom: '1px' }}>
+      {/* ── Filter Card ─────────────────────────────────────── */}
+      <div style={{
+        background: 'var(--bg)', padding: '24px',
+        borderRadius: '24px 24px 0 0', border: '1px solid var(--border)', borderBottom: 'none',
+        display: 'flex', flexDirection: 'column', gap: '16px'
+      }}>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
           {/* Search */}
-          <div style={{ position: 'relative', flex: '1 1 220px', maxWidth: '320px' }}>
-            <Search size={14} color="var(--text-light)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+          <div style={{ position: 'relative', flex: '1 1 240px', maxWidth: '340px' }}>
+            <Search size={15} color="var(--text-light)" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Search by symbol or name…"
+              placeholder="Search by symbol or company name…"
               style={{
-                width: '100%', paddingLeft: '34px', paddingRight: search ? '32px' : '12px',
-                paddingTop: '9px', paddingBottom: '9px',
-                borderRadius: '10px', border: '1.5px solid var(--border)',
-                background: 'var(--bg-section)', fontSize: '0.74rem',
+                width: '100%', paddingLeft: '38px', paddingRight: search ? '36px' : '14px',
+                paddingTop: '10px', paddingBottom: '10px',
+                borderRadius: '12px', border: '1px solid var(--border)',
+                background: 'var(--bg-section)', fontSize: '0.78rem',
                 color: 'var(--text-dark)', outline: 'none', fontFamily: 'inherit',
                 boxSizing: 'border-box', transition: 'border-color 0.2s',
               }}
@@ -286,19 +317,48 @@ export default function MarketTab() {
               onBlur={e   => e.target.style.borderColor = 'var(--border)'}
             />
             {search && (
-              <button onClick={() => setSearch('')} style={{ position: 'absolute', right: '9px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
-                <X size={13} />
+              <button onClick={() => setSearch('')} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
+                <X size={14} />
               </button>
             )}
           </div>
 
+          {/* Shariah Status Segmented Pills */}
+          <div style={{ display: 'flex', background: 'var(--bg-section)', borderRadius: '12px', padding: '4px', border: '1px solid var(--border)' }}>
+            {[
+              { key: 'all', label: 'All' },
+              { key: 'halal', label: 'Halal' },
+              { key: 'non-halal', label: 'Non-Halal' },
+              { key: 'doubtful', label: 'Doubtful' }
+            ].map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setStatusF(tab.key)}
+                style={{
+                  padding: '7px 14px',
+                  borderRadius: '9px',
+                  border: 'none',
+                  background: statusF === tab.key ? 'var(--bg)' : 'transparent',
+                  color: statusF === tab.key ? 'var(--text-dark)' : 'var(--text-muted)',
+                  fontWeight: statusF === tab.key ? 800 : 600,
+                  fontSize: '0.74rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  boxShadow: statusF === tab.key ? '0 2px 6px rgba(0,0,0,0.06)' : 'none'
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
 
-
+          {/* Sector Filter */}
           <select value={sectorF} onChange={e => { setSectorF(e.target.value); setIndustryF('all'); }} style={selectStyle(sectorF !== 'all')}>
             <option value="all">All Sectors</option>
             {uniqueSectors.map(s => <option key={s} value={s}>{normSector(s)}</option>)}
           </select>
 
+          {/* Industry Filter */}
           {availableIndustries.length > 0 && (
             <select value={industryF} onChange={e => setIndustryF(e.target.value)} style={selectStyle(industryF !== 'all')}>
               <option value="all">All Industries</option>
@@ -306,8 +366,9 @@ export default function MarketTab() {
             </select>
           )}
 
-          <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={selectStyle(false)}>
-            <option value="default">Default</option>
+          {/* Sort By */}
+          <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={selectStyle(sortBy !== 'default')}>
+            <option value="default">Default Sort</option>
             <option value="gainers">Top Gainers</option>
             <option value="losers">Top Losers</option>
             <option value="cap_high">Highest Mkt Cap</option>
@@ -318,61 +379,69 @@ export default function MarketTab() {
             <button
               onClick={clearAll}
               style={{
-                padding: '9px 12px', borderRadius: '10px', border: '1.5px solid var(--border)',
-                background: 'var(--bg)', fontSize: '0.72rem', fontWeight: 700,
+                padding: '9px 14px', borderRadius: '12px', border: '1px solid var(--border)',
+                background: 'var(--bg)', fontSize: '0.74rem', fontWeight: 700,
                 color: 'var(--text-muted)', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', gap: '5px',
+                display: 'flex', alignItems: 'center', gap: '6px',
+                transition: 'all 0.2s'
               }}
             >
-              <X size={12} /> Clear
+              <X size={13} /> Reset
             </button>
           )}
 
-          <span style={{ marginLeft: 'auto', fontSize: '0.71rem', fontWeight: 700, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
-            {filtered.length} result{filtered.length !== 1 ? 's' : ''}
-          </span>
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '0.74rem', fontWeight: 800, color: 'var(--text-muted)', background: 'var(--bg-section)', padding: '6px 12px', borderRadius: '100px', border: '1px solid var(--border)' }}>
+              {filtered.length} {filtered.length === 1 ? 'Company' : 'Companies'}
+            </span>
+          </div>
         </div>
       </div>
 
       {/* ── Table ─────────────────────────────────────────────── */}
       <div style={{
         background: 'var(--bg)', border: '1px solid var(--border)',
-        borderTop: 'none', borderRadius: '0 0 20px 20px', overflow: 'hidden',
+        borderRadius: '0 0 24px 24px', overflow: 'hidden',
+        boxShadow: 'var(--shadow-sm)'
       }}>
         {isLoading ? (
-          <div style={{ padding: '20px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
-              <Skeleton height="140px" borderRadius="16px" />
-              <Skeleton height="140px" borderRadius="16px" />
-              <Skeleton height="140px" borderRadius="16px" />
-              <Skeleton height="140px" borderRadius="16px" />
-              <Skeleton height="140px" borderRadius="16px" />
-              <Skeleton height="140px" borderRadius="16px" />
+          <div style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <Skeleton height="56px" borderRadius="14px" />
+              <Skeleton height="56px" borderRadius="14px" />
+              <Skeleton height="56px" borderRadius="14px" />
+              <Skeleton height="56px" borderRadius="14px" />
+              <Skeleton height="56px" borderRadius="14px" />
             </div>
           </div>
         ) : error ? (
           <div style={{ textAlign: 'center', padding: '80px 24px', color: 'var(--text-muted)' }}>
-            <BarChart2 size={42} strokeWidth={1} style={{ margin: '0 auto 14px', color: 'var(--non-halal)' }} />
-            <h3 style={{ marginBottom: '8px', color: 'var(--non-halal)' }}>Could not load market data</h3>
-            <p style={{ marginBottom: '20px', fontSize: '0.77rem' }}>{error?.message || String(error)}</p>
-            <button onClick={() => refetch()} className="btn-primary" style={{ padding: '10px 24px' }}>Try Again</button>
+            <BarChart2 size={44} strokeWidth={1.5} style={{ margin: '0 auto 16px', color: 'var(--non-halal)' }} />
+            <h3 style={{ marginBottom: '8px', color: 'var(--text-dark)', fontWeight: 800 }}>Could not load market data</h3>
+            <p style={{ marginBottom: '20px', fontSize: '0.8rem' }}>{error?.message || String(error)}</p>
+            <button onClick={() => refetch()} className="btn-primary" style={{ padding: '12px 28px', borderRadius: '12px' }}>Try Again</button>
           </div>
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '80px 24px', color: 'var(--text-muted)' }}>
-            <BarChart2 size={42} strokeWidth={1} style={{ margin: '0 auto 14px' }} />
-            <h3 style={{ marginBottom: '8px' }}>No stocks found</h3>
-            <p style={{ fontSize: '0.77rem' }}>Try adjusting your search or filters.</p>
+            <BarChart2 size={44} strokeWidth={1.5} style={{ margin: '0 auto 16px', color: 'var(--text-light)' }} />
+            <h3 style={{ marginBottom: '8px', color: 'var(--text-dark)', fontWeight: 800 }}>No companies found</h3>
+            <p style={{ fontSize: '0.8rem', maxWidth: '340px', margin: '0 auto 20px', lineHeight: 1.5 }}>
+              Try adjusting your search criteria or clearing your filters to view other NGX stocks.
+            </p>
+            <button onClick={clearAll} style={{ padding: '10px 20px', borderRadius: '12px', background: 'var(--primary-50)', color: 'var(--primary)', border: '1px solid var(--primary-100)', fontWeight: 800, fontSize: '0.78rem', cursor: 'pointer' }}>
+              Clear All Filters
+            </button>
           </div>
         ) : (
-          <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '70vh' }}>
+          <div style={{ overflowX: 'auto', maxHeight: '72vh' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'auto' }}>
               <thead>
                 <tr>
                   <TH>#</TH>
                   <TH>Company</TH>
-
+                  <TH>Shariah Status</TH>
                   <TH right>Price</TH>
-                  <TH right>Change</TH>
+                  <TH right>24h Change</TH>
                   <TH right>Mkt Cap</TH>
                   <TH right>P/E</TH>
                   <TH right>Watch</TH>

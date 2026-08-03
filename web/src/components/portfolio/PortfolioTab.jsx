@@ -138,11 +138,21 @@ function HoldingRow({ holding, onDelete, onEdit }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1.5, minWidth: 0 }}>
         <CompanyLogo symbol={holding.symbol} logoUrl={holding.logo_url} size={44} radius={12} />
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.79rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.79rem', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
             {holding.symbol}
             <span style={{ padding: '2px 6px', borderRadius: '4px', background: badge.bg, color: badge.color, fontSize: '0.48rem', fontWeight: 800, textTransform: 'uppercase' }}>
               {badge.text}
             </span>
+            {Number(holding.total_dividends || 0) > 0 && (
+              <span style={{ padding: '2px 6px', borderRadius: '4px', background: 'rgba(212,175,55,0.12)', color: 'var(--gold, #D4AF37)', fontSize: '0.48rem', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                ₦{Number(holding.total_dividends).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Divs
+              </span>
+            )}
+            {Number(holding.purification_due || 0) > 0 && (
+              <span style={{ padding: '2px 6px', borderRadius: '4px', background: 'rgba(245,158,11,0.12)', color: '#D97706', fontSize: '0.48rem', fontWeight: 800 }}>
+                ₦{Number(holding.purification_due).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} to purify
+              </span>
+            )}
           </div>
           <div style={{ fontSize: '0.62rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>{holding.name || holding.symbol}</div>
         </div>

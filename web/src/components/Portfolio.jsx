@@ -211,7 +211,7 @@ export default function Portfolio() {
                 purification: 'Purification',
                 lectures: 'Resources',
                 statement: 'Statements'
-              }[activeTab] || 'Portfolio & Tools'}
+              }[activeTab] || 'Holdings'}
             </h1>
 
           </div>

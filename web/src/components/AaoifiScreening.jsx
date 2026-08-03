@@ -5,7 +5,8 @@ import { useParams, Link } from 'react-router-dom';
 import { 
   ArrowLeft, CheckCircle, XCircle, AlertTriangle, 
   HelpCircle, ShieldCheck, ChevronRight, FileText, Brain, Download, Activity, Trash2, Droplets,
-  Calendar, Sparkles, TrendingUp, Calculator, ExternalLink, Sliders
+  Calendar, Sparkles, TrendingUp, Calculator, ExternalLink, Sliders,
+  Building2, CreditCard, Coins, BarChart3, AlertCircle, CheckCircle2, Shield
 } from 'lucide-react';
 import { fetchAaoifiScreening, updateAaoifiData } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -85,6 +86,20 @@ const AaoifiScreening = () => {
     if (num >= 1000000000) return (num / 1000000000).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' Billion';
     if (num >= 1000000) return (num / 1000000).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' Million';
     return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+
+  const formatFriendlyDate = (dateStr) => {
+    if (!dateStr) return null;
+    try {
+      if (/^\d{4}$/.test(dateStr) || /^Q\d\s+\d{4}$/i.test(dateStr) || /^\d+M\s+\(FY\s+\d+\)$/i.test(dateStr)) {
+        return dateStr;
+      }
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    } catch (e) {
+      return dateStr;
+    }
   };
 
   const formatExactCurrency = (val) => {
@@ -894,25 +909,62 @@ const AaoifiScreening = () => {
 
             {(report.financial_data_used?.source_links?.length > 0 || report.financial_data_used?.source || report.financial_data_used?.source_url) && (
               <div style={{ marginBottom: '32px' }}>
-                <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.95rem', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.92rem', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <ExternalLink size={16} color="var(--primary)" />
                   Extracted Financial Data Sources
                 </div>
                 
                 {report.financial_data_used?.source_links?.length > 0 && (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' }}>
                     {report.financial_data_used.source_links.map((link, i) => (
-                      <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className="hover-card" style={{ display: 'flex', alignItems: 'center', gap: '16px', background: 'var(--bg-section)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border)', textDecoration: 'none', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }} onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.05)'; }} onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.02)'; }}>
-                        <div style={{ color: 'var(--primary)', background: 'var(--primary-bg)', padding: '10px', borderRadius: '12px' }}><FileText size={20} /></div>
-                        <div>
-                          <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '4px' }}>{link.name}</div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{link.description}</div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                            <span style={{ fontWeight: 700 }}>Published:</span> {link.published_date || report.published_date || 'Unknown Date'}
+                      <a 
+                        key={i} 
+                        href={link.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="hover-card" 
+                        style={{ 
+                          display: 'flex', 
+                          flexDirection: 'column', 
+                          justifyContent: 'space-between',
+                          gap: '16px', 
+                          background: 'linear-gradient(145deg, var(--bg-section) 0%, var(--bg) 100%)', 
+                          padding: '20px', 
+                          borderRadius: '18px', 
+                          border: '1px solid var(--border)', 
+                          textDecoration: 'none', 
+                          transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', 
+                          boxShadow: '0 4px 16px rgba(0,0,0,0.02)' 
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'var(--primary-bg)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(6, 78, 59, 0.12)' }}>
+                              <FileText size={20} />
+                            </div>
+                            <div>
+                              <div style={{ fontSize: '0.94rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '2px' }}>{link.name}</div>
+                              <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>{link.description || 'Official regulatory filing'}</div>
+                            </div>
                           </div>
-                          {(link.financial_year || report.financial_year || link.report_quarter) && (
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                              <span style={{ fontWeight: 700 }}>Reporting Period:</span> {link.report_quarter || 'Annual Report'} (FY {link.financial_year || report.financial_year || 'Unknown'})
+                          <span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', padding: '3px 8px', borderRadius: '6px', background: 'rgba(16,185,129,0.1)', color: 'var(--halal)', border: '1px solid rgba(16,185,129,0.2)', whiteSpace: 'nowrap' }}>
+                            Verified Source
+                          </span>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', paddingTop: '12px', borderTop: '1px dashed var(--border)' }}>
+                          {(link.published_date || report.published_date) && (
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '3px 10px', borderRadius: '6px', background: 'var(--bg-section)', border: '1px solid var(--border)', fontSize: '0.72rem' }}>
+                              <Calendar size={12} color="var(--primary)" />
+                              <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Published:</span>
+                              <span style={{ fontWeight: 800, color: 'var(--text-dark)' }}>{formatFriendlyDate(link.published_date || report.published_date)}</span>
+                            </div>
+                          )}
+                          {(link.report_quarter || link.financial_year || report.financial_year) && (
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '3px 10px', borderRadius: '6px', background: 'var(--bg-section)', border: '1px solid var(--border)', fontSize: '0.72rem' }}>
+                              <Activity size={12} color="#C49852" />
+                              <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Period:</span>
+                              <span style={{ fontWeight: 800, color: 'var(--text-dark)' }}>{link.report_quarter || 'Annual'} (FY {link.financial_year || report.financial_year || 'Latest'})</span>
                             </div>
                           )}
                         </div>
@@ -922,40 +974,87 @@ const AaoifiScreening = () => {
                 )}
 
                 {report.financial_data_used?.source_url && !report.financial_data_used?.source_links?.length && (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
-                      <a href={report.financial_data_used.source_url} target="_blank" rel="noopener noreferrer" className="hover-card" style={{ display: 'flex', alignItems: 'center', gap: '16px', background: 'var(--bg-section)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border)', textDecoration: 'none', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }} onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.05)'; }} onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.02)'; }}>
-                        <div style={{ color: 'var(--primary)', background: 'var(--primary-bg)', padding: '10px', borderRadius: '12px' }}><FileText size={20} /></div>
-                        <div>
-                          <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '4px' }}>Nigerian Exchange Group (NGX)</div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Official corporate filings and pricing</div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                            <span style={{ fontWeight: 700 }}>Published:</span> {report.financial_data_used.published_date || report.published_date || 'Unknown Date'}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' }}>
+                    <a 
+                      href={report.financial_data_used.source_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="hover-card" 
+                      style={{ 
+                        display: 'flex', 
+                        flexDirection: 'column', 
+                        justifyContent: 'space-between',
+                        gap: '16px', 
+                        background: 'linear-gradient(145deg, var(--bg-section) 0%, var(--bg) 100%)', 
+                        padding: '20px', 
+                        borderRadius: '18px', 
+                        border: '1px solid var(--border)', 
+                        textDecoration: 'none', 
+                        transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', 
+                        boxShadow: '0 4px 16px rgba(0,0,0,0.02)' 
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'var(--primary-bg)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(6, 78, 59, 0.12)' }}>
+                            <FileText size={20} />
                           </div>
-                          {(report.financial_data_used.financial_year || report.reporting_year || report.financial_data_used.reporting_period || report.reporting_period) && (
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                              <span style={{ fontWeight: 700 }}>Reporting Period:</span> {report.financial_data_used.reporting_period || report.reporting_period || 'Annual Report'} (FY {report.financial_data_used.financial_year || report.reporting_year || 'Unknown'})
-                            </div>
-                          )}
+                          <div>
+                            <div style={{ fontSize: '0.94rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '2px' }}>Nigerian Exchange Group (NGX)</div>
+                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>Official corporate filings and pricing disclosure</div>
+                          </div>
                         </div>
-                      </a>
+                        <span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', padding: '3px 8px', borderRadius: '6px', background: 'rgba(16,185,129,0.1)', color: 'var(--halal)', border: '1px solid rgba(16,185,129,0.2)', whiteSpace: 'nowrap' }}>
+                          Verified Source
+                        </span>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', paddingTop: '12px', borderTop: '1px dashed var(--border)' }}>
+                        {(report.financial_data_used.published_date || report.published_date) && (
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '3px 10px', borderRadius: '6px', background: 'var(--bg-section)', border: '1px solid var(--border)', fontSize: '0.72rem' }}>
+                            <Calendar size={12} color="var(--primary)" />
+                            <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Published:</span>
+                            <span style={{ fontWeight: 800, color: 'var(--text-dark)' }}>{formatFriendlyDate(report.financial_data_used.published_date || report.published_date)}</span>
+                          </div>
+                        )}
+                        {(report.financial_data_used.reporting_period || report.reporting_period || report.financial_data_used.financial_year || report.reporting_year) && (
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '3px 10px', borderRadius: '6px', background: 'var(--bg-section)', border: '1px solid var(--border)', fontSize: '0.72rem' }}>
+                            <Activity size={12} color="#C49852" />
+                            <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Period:</span>
+                            <span style={{ fontWeight: 800, color: 'var(--text-dark)' }}>{report.financial_data_used.reporting_period || report.reporting_period || 'Annual Report'} (FY {report.financial_data_used.financial_year || report.reporting_year || 'Latest'})</span>
+                          </div>
+                        )}
+                      </div>
+                    </a>
                   </div>
                 )}
 
                 {report.financial_data_used?.source && !report.financial_data_used?.source_links?.length && !report.financial_data_used?.source_url && (
-                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center', background: 'var(--bg-section)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)' }}>
-                    <div style={{ color: 'var(--primary)', background: 'var(--primary-bg)', padding: '8px', borderRadius: '10px' }}><FileText size={18} /></div>
-                    <div>
-                      <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-dark)', lineHeight: 1.5 }}>
-                        {report.financial_data_used.source}
-                      </span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', background: 'linear-gradient(145deg, var(--bg-section) 0%, var(--bg) 100%)', padding: '20px', borderRadius: '18px', border: '1px solid var(--border)', boxShadow: '0 4px 16px rgba(0,0,0,0.02)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'var(--primary-bg)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(6, 78, 59, 0.12)' }}>
+                        <FileText size={20} />
+                      </div>
+                      <div>
+                        <span style={{ fontSize: '0.94rem', fontWeight: 800, color: 'var(--text-dark)', lineHeight: 1.4, display: 'block' }}>
+                          {report.financial_data_used.source}
+                        </span>
+                        <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>Corporate financial disclosure</span>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', paddingTop: '12px', borderTop: '1px dashed var(--border)' }}>
                       {(report.financial_data_used.published_date || report.published_date) && (
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                          <span style={{ fontWeight: 700 }}>Published:</span> {report.financial_data_used.published_date || report.published_date}
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '3px 10px', borderRadius: '6px', background: 'var(--bg-section)', border: '1px solid var(--border)', fontSize: '0.72rem' }}>
+                          <Calendar size={12} color="var(--primary)" />
+                          <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Published:</span>
+                          <span style={{ fontWeight: 800, color: 'var(--text-dark)' }}>{formatFriendlyDate(report.financial_data_used.published_date || report.published_date)}</span>
                         </div>
                       )}
-                      {(report.financial_data_used.financial_year || report.reporting_year || report.financial_data_used.reporting_period || report.reporting_period) && (
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                          <span style={{ fontWeight: 700 }}>Reporting Period:</span> {report.financial_data_used.reporting_period || report.reporting_period || 'Annual Report'} (FY {report.financial_data_used.financial_year || report.reporting_year || 'Unknown'})
+                      {(report.financial_data_used.reporting_period || report.reporting_period || report.financial_data_used.financial_year || report.reporting_year) && (
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '3px 10px', borderRadius: '6px', background: 'var(--bg-section)', border: '1px solid var(--border)', fontSize: '0.72rem' }}>
+                          <Activity size={12} color="#C49852" />
+                          <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Period:</span>
+                          <span style={{ fontWeight: 800, color: 'var(--text-dark)' }}>{report.financial_data_used.reporting_period || report.reporting_period || 'Annual Report'} (FY {report.financial_data_used.financial_year || report.reporting_year || 'Latest'})</span>
                         </div>
                       )}
                     </div>
@@ -969,30 +1068,143 @@ const AaoifiScreening = () => {
               <div style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'flex-start' }}>
                 <Activity size={16} color="var(--primary)" /> Referenced Financial Inputs for AAOIFI Screening
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
-                <div className="hover-card" style={{ background: 'var(--bg-section)', padding: '16px 18px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', transition: 'transform 0.2s' }}>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>Market Capitalization</span>
-                  <span style={{ fontSize: '1.12rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px', fontVariantNumeric: 'tabular-nums' }}>{marketCap ? `₦${formatNumber(marketCap)}` : 'N/A'}</span>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+                {/* 1. Market Capitalization */}
+                <div className="hover-card" style={{ background: 'linear-gradient(145deg, var(--bg-section) 0%, var(--bg) 100%)', padding: '20px', borderRadius: '18px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '12px', boxShadow: '0 4px 16px rgba(0,0,0,0.02)', transition: 'all 0.25s ease' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(6, 78, 59, 0.1)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <TrendingUp size={17} />
+                      </div>
+                      <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 700 }}>Market Capitalization</span>
+                    </div>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, padding: '2px 7px', borderRadius: '6px', background: 'var(--primary-bg)', color: 'var(--primary)', letterSpacing: '0.4px', textTransform: 'uppercase' }}>
+                      Denominator
+                    </span>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: '1.22rem', color: 'var(--text-dark)', fontWeight: 900, letterSpacing: '-0.3px', fontVariantNumeric: 'tabular-nums', display: 'block' }}>
+                      {marketCap ? `₦${formatNumber(marketCap)}` : 'N/A'}
+                    </span>
+                    <p style={{ margin: '4px 0 0', fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                      Primary AAOIFI Market Cap baseline
+                    </p>
+                  </div>
                 </div>
-                <div className="hover-card" style={{ background: 'var(--bg-section)', padding: '16px 18px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', transition: 'transform 0.2s' }}>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>Total Assets</span>
-                  <span style={{ fontSize: '1.12rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px', fontVariantNumeric: 'tabular-nums' }}>{totalAssets ? `₦${formatNumber(totalAssets)}` : 'N/A'}</span>
+
+                {/* 2. Total Assets */}
+                <div className="hover-card" style={{ background: 'linear-gradient(145deg, var(--bg-section) 0%, var(--bg) 100%)', padding: '20px', borderRadius: '18px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '12px', boxShadow: '0 4px 16px rgba(0,0,0,0.02)', transition: 'all 0.25s ease' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(59, 130, 246, 0.1)', color: '#2563EB', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Building2 size={17} />
+                      </div>
+                      <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 700 }}>Total Assets</span>
+                    </div>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, padding: '2px 7px', borderRadius: '6px', background: 'rgba(59, 130, 246, 0.08)', color: '#2563EB', letterSpacing: '0.4px', textTransform: 'uppercase' }}>
+                      Alternative
+                    </span>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: '1.22rem', color: 'var(--text-dark)', fontWeight: 900, letterSpacing: '-0.3px', fontVariantNumeric: 'tabular-nums', display: 'block' }}>
+                      {totalAssets ? `₦${formatNumber(totalAssets)}` : 'N/A'}
+                    </span>
+                    <p style={{ margin: '4px 0 0', fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                      Total balance sheet asset baseline
+                    </p>
+                  </div>
                 </div>
-                <div className="hover-card" style={{ background: 'var(--bg-section)', padding: '16px 18px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', transition: 'transform 0.2s' }}>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>Total Interest Debt</span>
-                  <span style={{ fontSize: '1.12rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px', fontVariantNumeric: 'tabular-nums' }}>{totalDebt ? `₦${formatNumber(totalDebt)}` : '₦0.00'}</span>
+
+                {/* 3. Total Interest Debt */}
+                <div className="hover-card" style={{ background: 'linear-gradient(145deg, var(--bg-section) 0%, var(--bg) 100%)', padding: '20px', borderRadius: '18px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '12px', boxShadow: '0 4px 16px rgba(0,0,0,0.02)', transition: 'all 0.25s ease' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(239, 68, 68, 0.1)', color: '#DC2626', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <CreditCard size={17} />
+                      </div>
+                      <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 700 }}>Total Interest Debt</span>
+                    </div>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, padding: '2px 7px', borderRadius: '6px', background: 'rgba(239, 68, 68, 0.08)', color: '#DC2626', letterSpacing: '0.4px', textTransform: 'uppercase' }}>
+                      Ratio 1 Numerator
+                    </span>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: '1.22rem', color: 'var(--text-dark)', fontWeight: 900, letterSpacing: '-0.3px', fontVariantNumeric: 'tabular-nums', display: 'block' }}>
+                      {totalDebt ? `₦${formatNumber(totalDebt)}` : '₦0.00'}
+                    </span>
+                    <p style={{ margin: '4px 0 0', fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                      Interest-bearing borrowings (&lt; 30% limit)
+                    </p>
+                  </div>
                 </div>
-                <div className="hover-card" style={{ background: 'var(--bg-section)', padding: '16px 18px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', transition: 'transform 0.2s' }}>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>Cash & Securities</span>
-                  <span style={{ fontSize: '1.12rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px', fontVariantNumeric: 'tabular-nums' }}>{cashAndSecurities ? `₦${formatNumber(cashAndSecurities)}` : '₦0.00'}</span>
+
+                {/* 4. Cash & Securities */}
+                <div className="hover-card" style={{ background: 'linear-gradient(145deg, var(--bg-section) 0%, var(--bg) 100%)', padding: '20px', borderRadius: '18px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '12px', boxShadow: '0 4px 16px rgba(0,0,0,0.02)', transition: 'all 0.25s ease' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(16, 185, 129, 0.1)', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Coins size={17} />
+                      </div>
+                      <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 700 }}>Cash & Securities</span>
+                    </div>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, padding: '2px 7px', borderRadius: '6px', background: 'rgba(16, 185, 129, 0.08)', color: '#059669', letterSpacing: '0.4px', textTransform: 'uppercase' }}>
+                      Ratio 2 Numerator
+                    </span>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: '1.22rem', color: 'var(--text-dark)', fontWeight: 900, letterSpacing: '-0.3px', fontVariantNumeric: 'tabular-nums', display: 'block' }}>
+                      {cashAndSecurities ? `₦${formatNumber(cashAndSecurities)}` : '₦0.00'}
+                    </span>
+                    <p style={{ margin: '4px 0 0', fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                      Liquid interest-bearing assets (&lt; 30% limit)
+                    </p>
+                  </div>
                 </div>
-                <div className="hover-card" style={{ background: 'var(--bg-section)', padding: '16px 18px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', transition: 'transform 0.2s' }}>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>Total Revenue</span>
-                  <span style={{ fontSize: '1.12rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px', fontVariantNumeric: 'tabular-nums' }}>{totalRevenue ? `₦${formatNumber(totalRevenue)}` : 'N/A'}</span>
+
+                {/* 5. Total Revenue */}
+                <div className="hover-card" style={{ background: 'linear-gradient(145deg, var(--bg-section) 0%, var(--bg) 100%)', padding: '20px', borderRadius: '18px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '12px', boxShadow: '0 4px 16px rgba(0,0,0,0.02)', transition: 'all 0.25s ease' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(139, 92, 246, 0.1)', color: '#7C3AED', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <BarChart3 size={17} />
+                      </div>
+                      <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 700 }}>Total Revenue</span>
+                    </div>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, padding: '2px 7px', borderRadius: '6px', background: 'rgba(139, 92, 246, 0.08)', color: '#7C3AED', letterSpacing: '0.4px', textTransform: 'uppercase' }}>
+                      Ratio 3 Denom
+                    </span>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: '1.22rem', color: 'var(--text-dark)', fontWeight: 900, letterSpacing: '-0.3px', fontVariantNumeric: 'tabular-nums', display: 'block' }}>
+                      {totalRevenue ? `₦${formatNumber(totalRevenue)}` : 'N/A'}
+                    </span>
+                    <p style={{ margin: '4px 0 0', fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                      Top-line annual or interim revenue
+                    </p>
+                  </div>
                 </div>
-                <div className="hover-card" style={{ background: 'var(--bg-section)', padding: '16px 18px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', textAlign: 'left', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', transition: 'transform 0.2s' }}>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>Impure / Interest Income</span>
-                  <span style={{ fontSize: '1.12rem', color: 'var(--text-dark)', fontWeight: 800, marginTop: '4px', fontVariantNumeric: 'tabular-nums' }}>{interestIncome ? `₦${formatNumber(interestIncome)}` : '₦0.00'}</span>
+
+                {/* 6. Impure / Interest Income */}
+                <div className="hover-card" style={{ background: 'linear-gradient(145deg, var(--bg-section) 0%, var(--bg) 100%)', padding: '20px', borderRadius: '18px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '12px', boxShadow: '0 4px 16px rgba(0,0,0,0.02)', transition: 'all 0.25s ease' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(245, 158, 11, 0.1)', color: '#D97706', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <AlertCircle size={17} />
+                      </div>
+                      <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 700 }}>Impure / Interest Income</span>
+                    </div>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, padding: '2px 7px', borderRadius: '6px', background: 'rgba(245, 158, 11, 0.08)', color: '#D97706', letterSpacing: '0.4px', textTransform: 'uppercase' }}>
+                      Ratio 3 Numerator
+                    </span>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: '1.22rem', color: 'var(--text-dark)', fontWeight: 900, letterSpacing: '-0.3px', fontVariantNumeric: 'tabular-nums', display: 'block' }}>
+                      {interestIncome ? `₦${formatNumber(interestIncome)}` : '₦0.00'}
+                    </span>
+                    <p style={{ margin: '4px 0 0', fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                      Non-operating impure income (&lt; 5% limit)
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

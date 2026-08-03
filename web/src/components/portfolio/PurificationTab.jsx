@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ShieldAlert, ArrowRight, Heart, CheckCircle, Sparkles, TrendingDown } from 'lucide-react';
+import { ShieldAlert, ArrowRight, Heart, CheckCircle, Sparkles, TrendingDown, X } from 'lucide-react';
+import CompanyLogo from '../CompanyLogo';
 
 /* ─── Purify Modal ─────────────────────────────────────────── */
 function PurifyModal({ holding, onClose, onSuccess }) {
@@ -19,15 +20,20 @@ function PurifyModal({ holding, onClose, onSuccess }) {
 
   return createPortal(
     <div className="animate-fade-in" style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.55)', backdropFilter:'blur(8px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:100000, padding:'20px' }}>
-      <div style={{ background: 'var(--bg)', borderRadius:'28px', width:'100%', maxWidth:'440px', boxShadow:'0 32px 80px rgba(0,0,0,0.18)', overflow:'hidden', animation:'slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+      <div style={{ background: 'var(--bg)', borderRadius:'28px', width:'100%', maxWidth:'440px', boxShadow:'0 32px 80px rgba(0,0,0,0.18)', overflow:'hidden', animation:'slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1)', position: 'relative' }}>
 
         {/* Modal top accent */}
         <div style={{ height:'5px', background:'linear-gradient(90deg, #D97706, #F59E0B, #FDE68A)' }} />
 
         <div style={{ padding:'36px' }}>
-          {/* Icon */}
-          <div style={{ width:'72px', height:'72px', background:'linear-gradient(135deg, rgba(217,119,6,0.12), rgba(245,158,11,0.06))', borderRadius:'22px', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 24px', border:'1px solid rgba(217,119,6,0.2)', boxShadow:'0 8px 24px rgba(217,119,6,0.12)' }}>
-            <Heart size={32} color="#D97706" fill="rgba(217,119,6,0.2)" />
+          {/* Close button */}
+          <button onClick={onClose} style={{ position: 'absolute', top: '16px', right: '16px', background: 'var(--bg-section)', border: 'none', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)', transition: 'all 0.2s' }}>
+            <X size={16} />
+          </button>
+
+          {/* Logo & Symbol */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginBottom: '20px' }}>
+            <CompanyLogo symbol={holding.symbol} logoUrl={holding.logo_url} size={64} radius={18} />
           </div>
 
           <h3 style={{ fontSize:'1.35rem', fontWeight:800, color:'var(--text-dark)', marginBottom:'8px', textAlign:'center', letterSpacing:'-0.5px' }}>
@@ -111,9 +117,7 @@ function PurificationCard({ h, onPurify }) {
         {/* Row 1 — identity + badge */}
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'18px' }}>
           <div style={{ display:'flex', alignItems:'center', gap:'14px' }}>
-            <div style={{ width:'52px', height:'52px', borderRadius:'14px', background:'linear-gradient(135deg, rgba(217,119,6,0.15), rgba(245,158,11,0.08))', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:900, fontSize:'0.78rem', color:'#D97706', letterSpacing:'0.5px', border:'1px solid rgba(217,119,6,0.2)', flexShrink:0 }}>
-              {(h.symbol || '').slice(0, 4)}
-            </div>
+            <CompanyLogo symbol={h.symbol} logoUrl={h.logo_url} size={52} radius={14} />
             <div>
               <div style={{ fontWeight:800, fontSize:'1.08rem', color:'var(--text-dark)', letterSpacing:'-0.3px' }}>{h.symbol}</div>
               <div style={{ fontSize:'0.73rem', color:'var(--text-muted)', marginTop:'3px' }}>
