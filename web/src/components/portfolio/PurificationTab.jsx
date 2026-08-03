@@ -34,14 +34,14 @@ function PurifyModal({ holding, onClose, onSuccess }) {
             Purify {holding.symbol}
           </h3>
           <p style={{ color:'var(--text-muted)', fontSize:'0.84rem', lineHeight:1.65, marginBottom:'28px', textAlign:'center' }}>
-            Donate <strong style={{ color:'var(--text-dark)' }}>₦{Number(holding.purification_due).toLocaleString()}</strong> to charity to cleanse your dividend income from non-compliant sources.
+            Donate <strong style={{ color:'var(--text-dark)' }}>₦{Number(holding.purification_due).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</strong> to charity to cleanse your dividend income from non-compliant sources.
           </p>
 
           {/* Breakdown */}
           <div style={{ background:'linear-gradient(135deg, rgba(217,119,6,0.04), rgba(245,158,11,0.02))', border:'1px solid rgba(217,119,6,0.15)', borderRadius:'16px', padding:'18px 20px', marginBottom:'24px', display:'flex', flexDirection:'column', gap:'10px' }}>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
               <span style={{ fontSize:'0.75rem', color:'var(--text-muted)', fontWeight:600 }}>Dividends received (12M)</span>
-              <span style={{ fontSize:'0.82rem', fontWeight:800, color:'var(--text-dark)' }}>₦{dividends.toLocaleString()}</span>
+              <span style={{ fontSize:'0.82rem', fontWeight:800, color:'var(--text-dark)' }}>₦{dividends.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</span>
             </div>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
               <span style={{ fontSize:'0.75rem', color:'var(--text-muted)', fontWeight:600 }}>Impure income ratio</span>
@@ -50,7 +50,7 @@ function PurifyModal({ holding, onClose, onSuccess }) {
             <div style={{ height:'1px', background:'rgba(217,119,6,0.12)' }} />
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
               <span style={{ fontSize:'0.78rem', color:'var(--text-dark)', fontWeight:700 }}>Amount to purify</span>
-              <span style={{ fontSize:'0.96rem', fontWeight:900, color:'#D97706' }}>₦{Number(holding.purification_due).toLocaleString()}</span>
+              <span style={{ fontSize:'0.96rem', fontWeight:900, color:'#D97706' }}>₦{Number(holding.purification_due).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</span>
             </div>
           </div>
 
@@ -132,7 +132,7 @@ function PurificationCard({ h, onPurify }) {
         {/* Row 2 — stat pills */}
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'10px', marginBottom:'18px' }}>
           {[
-            { label:'Dividends (12M)', value:`₦${dividends.toLocaleString()}`, sub: null },
+            { label:'Dividends (12M)', value:`₦${dividends.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`, sub: null },
             { label:'Impure Ratio', value:`${ratio.toFixed(2)}%`, sub: '≤ 5% threshold', warn: ratio > 5 },
             { label:'Portfolio Value', value:`₦${totalValue.toLocaleString()}`, sub: null },
           ].map(stat => (
@@ -166,7 +166,7 @@ function PurificationCard({ h, onPurify }) {
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', background:'linear-gradient(135deg, rgba(217,119,6,0.06), rgba(245,158,11,0.03))', borderRadius:'14px', padding:'14px 18px', border:'1px solid rgba(217,119,6,0.15)' }}>
           <div>
             <div style={{ fontSize:'0.65rem', fontWeight:700, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.5px', marginBottom:'3px' }}>Amount to Purify</div>
-            <div style={{ fontSize:'1.35rem', fontWeight:900, color:'#D97706', letterSpacing:'-0.5px' }}>₦{due.toLocaleString()}</div>
+            <div style={{ fontSize:'1.35rem', fontWeight:900, color:'#D97706', letterSpacing:'-0.5px' }}>₦{due.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
           </div>
           <button
             onClick={() => onPurify(h)}
@@ -231,11 +231,11 @@ export default function PurificationTab({ data }) {
             <div style={{ display:'flex', gap:'16px', flexWrap:'wrap' }}>
               <div style={{ background:'rgba(255,255,255,0.08)', border:'1px solid rgba(255,255,255,0.12)', borderRadius:'14px', padding:'12px 20px', backdropFilter:'blur(4px)' }}>
                 <div style={{ fontSize:'0.62rem', fontWeight:700, color:'rgba(255,255,255,0.5)', textTransform:'uppercase', letterSpacing:'0.5px', marginBottom:'4px' }}>Total Due</div>
-                <div style={{ fontSize:'1.18rem', fontWeight:900, color:'#F59E0B' }}>₦{purificationDue.toLocaleString()}</div>
+                <div style={{ fontSize:'1.18rem', fontWeight:900, color:'#F59E0B' }}>₦{purificationDue.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
               </div>
               <div style={{ background:'rgba(255,255,255,0.08)', border:'1px solid rgba(255,255,255,0.12)', borderRadius:'14px', padding:'12px 20px', backdropFilter:'blur(4px)' }}>
                 <div style={{ fontSize:'0.62rem', fontWeight:700, color:'rgba(255,255,255,0.5)', textTransform:'uppercase', letterSpacing:'0.5px', marginBottom:'4px' }}>Dividends (12M)</div>
-                <div style={{ fontSize:'1.18rem', fontWeight:900, color:'white' }}>₦{totalDivs.toLocaleString()}</div>
+                <div style={{ fontSize:'1.18rem', fontWeight:900, color:'white' }}>₦{totalDivs.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
               </div>
             </div>
           )}
