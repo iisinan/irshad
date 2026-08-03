@@ -162,9 +162,10 @@ export default function GuideTab() {
 
   const sections = [
     { id: 'getting-started', label: 'Getting Started', icon: BookOpen },
+    { id: 'methodology',     label: 'AAOIFI Standards', icon: ShieldCheck },
     { id: 'navigation',      label: 'Navigation Guide', icon: Navigation },
     { id: 'faq',             label: 'FAQs', icon: HelpCircle },
-    { id: 'tutorials',       label: 'Tutorials', icon: PlayCircle },
+    { id: 'tutorials',       label: 'Tutorials & Guides', icon: PlayCircle },
     { id: 'support',         label: 'Support', icon: LifeBuoy },
   ];
 
@@ -183,42 +184,45 @@ export default function GuideTab() {
   const faqs = [
     {
       question: 'How is a stock screened for Shariah compliance?',
-      answer: 'Irshad uses the AAOIFI (Accounting and Auditing Organisation for Islamic Financial Institutions) standard. Each company is assessed on two levels: (1) Business Activity — the company must not earn significant revenue from prohibited sectors such as alcohol, tobacco, conventional banking, or entertainment. (2) Financial Ratios — the company\'s interest-bearing debt, interest income, and receivables must each fall below 33% of its total assets or revenue. If both tests pass, the company is classified as Halal.',
+      answer: 'Irshad implements AAOIFI (Accounting and Auditing Organisation for Islamic Financial Institutions) Shariah Standard No. 21. Screening involves two distinct stages: (1) Business Activity Screen (Rule 3/4/1) — the company must not operate in prohibited sectors like conventional banking, alcohol, pork, gambling, adult media, tobacco, or weapons. (2) Quantitative Financial Ratios — interest-bearing debt must be ≤ 30% of Market Cap, cash & interest-bearing securities must be ≤ 30% of Market Cap, and impermissible/interest income must be ≤ 5% of total revenue.',
     },
     {
-      question: 'Why did a stock become Non-Halal?',
-      answer: 'A stock typically becomes Non-Halal when its latest financial statements show that one or more AAOIFI ratios have been breached — for example, interest-bearing debt exceeds 33% of total assets. It may also become Non-Halal if the company enters a prohibited business activity. You can view the specific reason on the company\'s screening report or in the Compliance Changes section of News & Insights.',
+      question: 'Why is it permissible to invest in companies with minor interest or debt?',
+      answer: 'Under AAOIFI Standard No. 21 (Appendix B), senior Islamic scholars established that investing in mixed companies is permissible based on classical jurisprudence: (1) Removal of Hardship (Al-Mashaqqah Tajlib At-Taysir) — requiring zero contact with interest would lock Muslims out of equity markets. (2) Majority-Halal Wealth (Ghalabat al-Halal) — when 95%+ of revenue is lawful, the company is predominantly halal. (3) Separation of Bargains (Tafriq al-Safqah) — the lawful operating equity stands valid, while the impermissible fraction is isolated and purified.',
     },
     {
-      question: 'How often is screening updated?',
-      answer: 'Irshad runs automated screening cycles whenever new annual reports or audited financial statements are published by NSE-listed companies. Additionally, Irshad monitors news and corporate disclosures daily for business activity changes that might affect compliance status.',
+      question: 'What does "Near Limit" (Dashed Badge) mean?',
+      answer: 'When a company\'s debt or cash ratio is approaching the 30% ceiling (e.g. 26% to 29.9%), Irshad applies a "Near Limit" proximity warning with a dashed border. The stock is currently compliant, but market price drops or next quarter\'s borrowings could cause it to exceed the threshold.',
     },
     {
-      question: 'What does "Purification Required" mean?',
-      answer: 'If you hold a stock that was Halal for part of a year but became Non-Halal, or if the company earns a small amount of incidental Non-Halal income (e.g., interest from cash deposits), you may be required to purify a proportionate amount of your dividends or capital gains by donating it to charity. Irshad calculates this for you in the Purification tab.',
-    },
-
-    {
-      question: 'Can compliance status change after I buy a stock?',
-      answer: 'Yes. Shariah compliance is dynamic and changes with a company\'s financial performance and business activities. Irshad monitors your holdings and will notify you via the Inbox and Updates section if any of your stocks change status. It is your responsibility to act on these changes according to your Shariah advisors\' guidance.',
+      question: 'What does "Purification Required" mean and how is it calculated?',
+      answer: 'If a compliant company earns up to 5% non-permissible income (such as treasury interest on bank deposits), investors must cleanse their dividend earnings. The purification percentage = (Impermissible Income ÷ Total Revenue). For example, if a stock has a 2.00% purification rate and you receive ₦100,000 in dividends, you must donate ₦2,000 to charity without expecting spiritual reward (thawab).',
     },
     {
-      question: 'What is the AAOIFI standard?',
-      answer: 'AAOIFI (Accounting and Auditing Organisation for Islamic Financial Institutions) is the leading international standard-setting body for Islamic finance. Irshad follows AAOIFI\'s Shariah Standard No. 21 for equity screening, which is widely accepted by Islamic scholars and Shariah supervisory boards across the world.',
+      question: 'Why does AAOIFI use Market Capitalisation instead of Total Assets?',
+      answer: 'AAOIFI Standard 21 specifies Market Capitalisation (or the 12/36-month average market cap) as the denominator because it represents the actual enterprise market valuation of the company\'s equity, avoiding book-value distortions from historical depreciation.',
     },
     {
-      question: 'Is Irshad a financial advisor?',
-      answer: 'No. Irshad is a Shariah compliance screening tool, not a financial advisor. It helps you understand whether a company meets generally accepted AAOIFI standards for Islamic investing. Always consult a qualified Islamic scholar or financial advisor for specific investment decisions.',
+      question: 'Does Irshad allow Short Selling, Options, or Margin Trading?',
+      answer: 'No. AAOIFI Standard No. 21 strictly prohibits conventional short selling (selling shares one does not own — Bay\' ma la Yamlik), options & derivatives contracts (due to Gharar/excessive uncertainty), and margin loans (interest-based leverage). Irshad exclusively screens spot cash equity ownership.',
+    },
+    {
+      question: 'How often are compliance determinations updated?',
+      answer: 'Screenings are updated automatically whenever quarterly (10-Q equivalent) and annual (10-K equivalent) financial statements are published to the NGX and NGX Pulse. Additionally, corporate announcements are parsed daily for major business activity or restructuring changes.',
+    },
+    {
+      question: 'Is Irshad certified by AAOIFI or a registered financial advisor?',
+      answer: 'Irshad is an independent financial technology platform. We implement a rigorous, auditable computational interpretation of AAOIFI Shariah Standard No. 21 using verified public filings. Irshad is not affiliated with or certified by AAOIFI and does not provide bespoke financial advice.',
     },
   ];
 
   const tutorials = [
-    { icon: PlayCircle, title: 'Getting Started with Irshad',      description: '3-minute walkthrough of key features',                  type: 'Video',   link: null },
-    { icon: PlayCircle, title: 'Understanding AAOIFI Screening',    description: 'Learn how the AAOIFI ratios work',                     type: 'Video',   link: null },
-    { icon: BookOpen,   title: 'How to Read a Screening Report',    description: 'Step-by-step written guide',                           type: 'Guide',   link: null },
-    { icon: PlayCircle, title: 'Setting Up Your Portfolio',         description: 'Add holdings and track your investments',              type: 'Video',   link: null },
-    { icon: BookOpen,   title: 'Calculating Your Zakat',            description: 'How Irshad computes your Zakat obligation',            type: 'Guide',   link: null },
-    { icon: BookOpen,   title: 'Understanding Income Purification',  description: 'When and how to purify Non-Halal income',             type: 'Guide',   link: null },
+    { icon: BookOpen,   title: 'AAOIFI Standard 21 Breakdown',      description: 'The 4 juristic pillars & 3 quantitative screening ratios',  type: 'Guide',   link: '/shariah' },
+    { icon: ShieldCheck,title: 'How to Purify Dividend Income',      description: 'Step-by-step calculation & charitable disbursement guide', type: 'Guide',   link: null },
+    { icon: FileText,   title: 'How to Read a Screening Report',    description: 'Understanding filing sources, headroom, and debt math',    type: 'Guide',   link: null },
+    { icon: Calculator, title: 'Calculating Portfolio Zakat',       description: 'How Irshad computes your annual equity Zakat obligation',  type: 'Guide',   link: null },
+    { icon: PlayCircle, title: 'Getting Started with Irshad',      description: '3-minute walkthrough of the Nigerian stock screener',       type: 'Video',   link: null },
+    { icon: PlayCircle, title: 'Setting Up Your Watchlist & Alerts', description: 'Monitor compliance shifts across NGX tickers in real time', type: 'Video',   link: null },
   ];
 
   return (
