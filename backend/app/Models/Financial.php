@@ -25,6 +25,12 @@ class Financial extends Model
         'interest_bearing_securities',
         'accounts_receivable',
         'illiquid_assets',
+        'net_income',
+        'reporting_period',
+        'source_url',
+        'file_hash',
+        's3_url',
+        'extraction_schema_version',
     ];
 
     protected $appends = ['interest_income_ratio', 'non_compliant_income_ratio'];

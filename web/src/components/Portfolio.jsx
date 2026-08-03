@@ -156,17 +156,7 @@ export default function Portfolio() {
     </div>
   );
 
-  const tabs = [
-    { id: 'holdings',     label: 'Holdings',        icon: Briefcase },
-    { id: 'market',       label: 'Market Screener', icon: BarChart2 },
-    { id: 'watchlist',    label: 'Alert',           icon: Star },
-    { id: 'statement',    label: 'Statement',       icon: FileText },
-    { id: 'zakat',        label: 'Zakat',           icon: Calculator },
-    { id: 'purification', label: 'Purification',    icon: ShieldCheck },
-    { id: 'lectures',     label: 'Resources',       icon: BookOpen },
-    { id: 'guide',        label: 'Guide',           icon: BookOpen },
-    { id: 'updates',      label: 'Updates',         icon: Rss },
-  ];
+
 
   // Compute sidebar data
   const holdings = data?.holdings || [];
@@ -243,40 +233,7 @@ export default function Portfolio() {
           </button>
         </div>
 
-        {/* Custom Nav Bar - Polished Segmented Control Style */}
-        <div className="hide-scrollbar" style={{ display: 'flex', gap: '8px', padding: '6px', overflowX: 'auto', background: 'var(--bg)', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)', marginBottom: '32px' }}>
-          {tabs.map(tab => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => handleTabChange(tab.id)}
-                style={{
-                  background: isActive ? 'var(--primary)' : 'transparent',
-                  border: 'none',
-                  padding: '10px 18px',
-                  fontSize: '0.75rem',
-                  fontWeight: isActive ? 800 : 700,
-                  color: isActive ? 'white' : 'var(--text-muted)',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                  whiteSpace: 'nowrap',
-                  borderRadius: '12px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  boxShadow: isActive ? '0 4px 12px rgba(15, 82, 87, 0.25)' : 'none',
-                }}
-                onMouseEnter={e => { if(!isActive) { e.currentTarget.style.color = 'var(--text-dark)'; e.currentTarget.style.background = 'var(--bg-section)'; } }}
-                onMouseLeave={e => { if(!isActive) { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.background = 'transparent'; } }}
-              >
-                <Icon size={16} color={isActive ? 'white' : 'currentColor'} />
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
+
       </div>
 
       {/* ═ Layout ═ */}

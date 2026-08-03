@@ -60,91 +60,188 @@ class ProcessCompanyFinancialsJob implements ShouldQueue
         $symbol = $this->company->symbol;
         Log::info("Job started for {$symbol}...");
 
-        // 1. Find PDF
-        $pdfUrl = $scraper->findLatestFinancialReportPdfUrl($symbol);
-        if (! $pdfUrl) {
-            Log::warning("No PDF found for {$symbol}");
+        // Acquire a Redis Lock to prevent duplicate concurrent processing (Race Conditions)
+        $lock = \Illuminate\Support\Facades\Cache::lock("financial_discovery_{$symbol}", 300);
 
+        if (! $lock->get()) {
+            Log::warning("[{$symbol}] Job is already running. Skipping to prevent race condition.");
             return;
         }
 
-        Log::info("Found PDF for {$symbol}: {$pdfUrl}");
-
-        // 2. Download the PDF locally
-        $tempPath = storage_path('app/temp_financials_'.$symbol.'_'.time().'.pdf');
         try {
-            $fp = fopen($tempPath, 'w+');
-            $ch = curl_init(str_replace(' ', '%20', $pdfUrl));
-            curl_setopt($ch, CURLOPT_TIMEOUT, 300);
-            curl_setopt($ch, CURLOPT_FILE, $fp);
-            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-            curl_setopt($ch, CURLOPT_FAILONERROR, true);
-            $success = curl_exec($ch);
-            $error = curl_error($ch);
-            curl_close($ch);
-            fclose($fp);
-
-            if (! $success) {
-                Log::warning("Failed to download PDF for {$symbol}. cURL Error: ".$error);
-                if (file_exists($tempPath)) {
-                    unlink($tempPath);
-                }
-
+            // 1. Find PDF — Sole Source: ngxpulse.ng/disclosures via Apify
+            $pdfUrl = $scraper->findLatestFinancialReportPdfUrl($symbol);
+            if (! $pdfUrl) {
+                Log::warning("[{$symbol}] No financial statement PDF found via any source. Skipping.");
                 return;
             }
-        } catch (\Exception $e) {
-            Log::warning("Error downloading PDF for {$symbol}: ".$e->getMessage());
+
+            // Layer 1 Duplicate Check: Have we processed this URL before?
+            if (\App\Models\Financial::where('source_url', $pdfUrl)->exists()) {
+                Log::info("[{$symbol}] PDF URL already processed. Skipping.");
+                return;
+            }
+
+            Log::info("Found NEW PDF URL for {$symbol}: {$pdfUrl}");
+
+            // 2. Download the PDF locally
+            $tempPath = storage_path('app/temp_financials_'.$symbol.'_'.time().'.pdf');
+            $this->downloadFile($pdfUrl, $tempPath);
+
+            if (! file_exists($tempPath) || filesize($tempPath) === 0) {
+                Log::warning("Failed to download or empty PDF for {$symbol}.");
+                return;
+            }
+
+            // Layer 2 Duplicate Check: SHA-256 Hash
+            $fileHash = hash_file('sha256', $tempPath);
+            if (\App\Models\Financial::where('file_hash', $fileHash)->exists()) {
+                Log::info("[{$symbol}] PDF Hash ({$fileHash}) already processed. Skipping exact duplicate.");
+                unlink($tempPath);
+                return;
+            }
+
+            // 3. PDF Pre-validation (Smalot) - Optional Dependency
+            if (class_exists(\Smalot\PdfParser\Parser::class)) {
+                if (! $this->validatePdf($tempPath, $symbol, $this->company->name)) {
+                    Log::error("[{$symbol}] PDF Pre-validation failed. Does not look like a valid financial statement for this company.");
+                    unlink($tempPath);
+                    return;
+                }
+            } else {
+                Log::info("[{$symbol}] smalot/pdfparser not installed, skipping PDF pre-validation.");
+            }
+
+            // 4. Archive to Cloudflare S3 - Optional Dependency
+            $s3Url = null;
+            if (class_exists(\Aws\S3\S3Client::class)) {
+                $s3Path = 'financial-statements/' . date('Y') . "/{$symbol}_{$fileHash}.pdf";
+                \Illuminate\Support\Facades\Storage::disk('s3')->put($s3Path, file_get_contents($tempPath));
+                $s3Url = \Illuminate\Support\Facades\Storage::disk('s3')->url($s3Path);
+                Log::info("[{$symbol}] Archived PDF to S3: {$s3Url}");
+            } else {
+                Log::info("[{$symbol}] league/flysystem-aws-s3-v3 not installed, skipping S3 upload.");
+            }
+
+            // 5. Extract Financials
+            Log::info("Sending {$symbol} Document to Gemini for extraction...");
+            $extractedData = $parser->extractFinancialsFromPdf($tempPath);
+
             if (file_exists($tempPath)) {
                 unlink($tempPath);
             }
 
-            return;
+            if (! $extractedData) {
+                throw new \Exception("AI Extraction failed for {$symbol} (Gemini API returned null).");
+            }
+            
+            // Post-Extraction Validation
+            $totalAssets = $this->cleanNumber($extractedData['total_assets'] ?? null);
+            if (! $totalAssets || $totalAssets <= 0) {
+                throw new \Exception("AI Validation failed for {$symbol}: Total Assets is zero or null.");
+            }
+
+            $newData = [
+                'total_assets'                  => $totalAssets,
+                'total_debt'                    => $this->cleanNumber($extractedData['total_debt'] ?? null),
+                'total_revenue'                 => $this->cleanNumber($extractedData['total_revenue'] ?? null),
+                'interest_income'               => $this->cleanNumber($extractedData['interest_income'] ?? null),
+                'eps'                           => $this->cleanNumber($extractedData['eps'] ?? null),
+                'pe_ratio'                      => $this->cleanNumber($extractedData['pe_ratio'] ?? null),
+                'roe'                           => $this->cleanNumber($extractedData['roe'] ?? null),
+                'dividend_yield'                => $this->cleanNumber($extractedData['dividend_yield'] ?? null),
+                'profit_margin'                 => $this->cleanNumber($extractedData['profit_margin'] ?? null),
+                'cash_and_equivalents'          => $this->cleanNumber($extractedData['cash_and_equivalents'] ?? null),
+                'interest_bearing_securities'   => $this->cleanNumber($extractedData['interest_bearing_securities'] ?? null),
+                'accounts_receivable'           => $this->cleanNumber($extractedData['accounts_receivable'] ?? null),
+                'illiquid_assets'               => $this->cleanNumber($extractedData['illiquid_assets'] ?? null),
+                'net_income'                    => $this->cleanNumber($extractedData['net_income'] ?? null),
+                'reporting_period'              => $extractedData['reporting_period'] ?? null,
+                'interest_income_ratio'         => $this->cleanNumber($extractedData['interest_income_ratio'] ?? null),
+                'non_compliant_income_ratio'    => $this->cleanNumber($extractedData['non_compliant_income_ratio'] ?? null),
+                
+                // Enterprise Metadata
+                'source_url'                    => $pdfUrl,
+                'file_hash'                     => $fileHash,
+                's3_url'                        => $s3Url,
+                'extraction_schema_version'     => 'v1.0',
+            ];
+
+            // 6. Save to Database (Atomic Transaction)
+            \Illuminate\Support\Facades\DB::transaction(function () use ($newData) {
+                $financialUpdateService = app(FinancialUpdateService::class);
+                $financialUpdateService->proposeUpdate(
+                    $this->company,
+                    $newData,
+                    'AI extraction from verified financial report (v1.0)'
+                );
+            });
+
+            Log::info("Completed {$symbol} successfully via Queue.");
+        } finally {
+            $lock->release();
         }
+    }
 
-        // 3. Extract Financials
-        Log::info("Sending {$symbol} Document to Gemini for extraction...");
-        $extractedData = $parser->extractFinancialsFromPdf($tempPath);
+    private function downloadFile(string $url, string $path): void
+    {
+        $fp = fopen($path, 'w+');
+        $ch = curl_init(str_replace(' ', '%20', $url));
+        curl_setopt($ch, CURLOPT_TIMEOUT, 300);
+        curl_setopt($ch, CURLOPT_FILE, $fp);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_FAILONERROR, true);
+        curl_exec($ch);
+        fclose($fp);
+    }
 
-        // Clean up the temporary file
-        if (file_exists($tempPath)) {
-            unlink($tempPath);
+    private function validatePdf(string $path, string $symbol, ?string $companyName): bool
+    {
+        if (!class_exists(\Smalot\PdfParser\Parser::class)) {
+            return true;
         }
+        
+        try {
+            $parser = new \Smalot\PdfParser\Parser();
+            $pdf = $parser->parseFile($path);
+            $pages = $pdf->getPages();
 
-        if (! $extractedData) {
-            Log::error("AI Extraction failed for {$symbol}");
-            // Throw exception so Laravel Queue records this as a failure and retries
-            throw new \Exception("AI Extraction failed for {$symbol} (Gemini API returned null).");
+            if (count($pages) === 0) {
+                return false;
+            }
+
+            // Extract text from the first 3 pages
+            $text = '';
+            for ($i = 0; $i < min(3, count($pages)); $i++) {
+                $text .= $pages[$i]->getText() . ' ';
+            }
+
+            $textLower = strtolower($text);
+            $symbolLower = strtolower($symbol);
+            $nameLower = strtolower($companyName ?? '');
+
+            // Try to match symbol
+            if (str_contains($textLower, $symbolLower)) {
+                return true;
+            }
+
+            // Fuzzy match the first word of the company name (e.g. "Airtel" for Airtel Africa Plc)
+            if ($nameLower) {
+                $parts = explode(' ', $nameLower);
+                if (count($parts) > 0 && strlen($parts[0]) > 3) {
+                    if (str_contains($textLower, $parts[0])) {
+                        return true;
+                    }
+                }
+            }
+
+            // If neither symbol nor name found, reject
+            return false;
+
+        } catch (\Exception $e) {
+            Log::warning("PDF Parser Exception for {$symbol}: " . $e->getMessage());
+            return false;
         }
-
-        $newData = [
-            'total_assets' => $this->cleanNumber($extractedData['total_assets'] ?? null),
-            'total_debt' => $this->cleanNumber($extractedData['total_debt'] ?? null),
-            'total_revenue' => $this->cleanNumber($extractedData['total_revenue'] ?? null),
-            'interest_income' => $this->cleanNumber($extractedData['interest_income'] ?? null),
-            'eps' => $this->cleanNumber($extractedData['eps'] ?? null),
-            'pe_ratio' => $this->cleanNumber($extractedData['pe_ratio'] ?? null),
-            'roe' => $this->cleanNumber($extractedData['roe'] ?? null),
-            'dividend_yield' => $this->cleanNumber($extractedData['dividend_yield'] ?? null),
-            'profit_margin' => $this->cleanNumber($extractedData['profit_margin'] ?? null),
-            'cash_and_equivalents' => $this->cleanNumber($extractedData['cash_and_equivalents'] ?? null),
-            'interest_bearing_securities' => $this->cleanNumber($extractedData['interest_bearing_securities'] ?? null),
-            'accounts_receivable' => $this->cleanNumber($extractedData['accounts_receivable'] ?? null),
-            'illiquid_assets' => $this->cleanNumber($extractedData['illiquid_assets'] ?? null),
-            'net_income' => $this->cleanNumber($extractedData['net_income'] ?? null),
-            'reporting_period' => $extractedData['reporting_period'] ?? null,
-            'interest_income_ratio' => $this->cleanNumber($extractedData['interest_income_ratio'] ?? null),
-            'non_compliant_income_ratio' => $this->cleanNumber($extractedData['non_compliant_income_ratio'] ?? null),
-        ];
-
-        // 4. Save to Database via Service
-        $financialUpdateService = app(FinancialUpdateService::class);
-        $financialUpdateService->proposeUpdate(
-            $this->company,
-            $newData,
-            'AI extraction from recent financial report'
-        );
-
-        Log::info("Completed {$symbol} successfully via Queue.");
     }
 
     private function cleanNumber($value)
