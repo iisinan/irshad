@@ -15,6 +15,13 @@ export const formatAppJustification = (text, isNonHalal = false) => {
   // 1. Strip Wikipedia/AI citation reference markers e.g. [1], [2], [1, 2], [1][4]
   let clean = cleanText.replace(/\[\d+(?:,\s*\d+)*\]/g, '').replace(/\[\d+\]/g, '').trim();
 
+  // 1b. Clean up internal "Excel" report references for end-users
+  clean = clean.replace(/based\s+on\s+the\s+July\s+2026\s+NGX\s+Shariah\s+Excel\s+report\.?/i, 'Based on the July 2026 NGX Shariah compliance screening.');
+  clean = clean.replace(/excel\s+report/i, 'compliance screening');
+  clean = clean.replace(/excel\s+sheet/i, 'official database');
+  clean = clean.replace(/excel\s+file/i, 'disclosures');
+  clean = clean.replace(/excel/i, 'Shariah audit');
+
   // 2. If it is non-halal or non-compliant, check if it's a business activity failure
   const isBusinessActivityFailure = 
     isNonHalal || 

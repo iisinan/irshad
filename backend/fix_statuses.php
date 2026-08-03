@@ -75,7 +75,7 @@ foreach ($updates as $symbol => $status) {
             ['company_id' => $company->id],
             [
                 'status' => $status,
-                'reasoning' => 'Manual override applied based on the July 2026 NGX Shariah Excel report.',
+                'reasoning' => 'Based on the July 2026 NGX Shariah compliance screening.',
                 'last_checked_at' => now(),
             ]
         );
