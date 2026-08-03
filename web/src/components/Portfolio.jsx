@@ -212,17 +212,7 @@ export default function Portfolio() {
                 statement: 'Statements'
               }[activeTab] || 'Portfolio & Tools'}
             </h1>
-            {totalBalance > 0 && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '8px' }}>
-                <span style={{ fontSize: '0.88rem', color: 'var(--text-muted)', fontWeight: 600 }}>Total Value:</span>
-                <span style={{ fontSize: '0.97rem', fontWeight: 900, color: 'var(--primary)', letterSpacing: '-0.5px' }}>{fmtK(totalBalance)}</span>
-                {holdings.length > 0 && (
-                  <span style={{ fontSize: '0.69rem', fontWeight: 700, color: 'var(--text-muted)', background: 'var(--bg-section)', padding: '2px 10px', borderRadius: '20px', border: '1px solid var(--border)' }}>
-                    {holdings.length} holdings
-                  </span>
-                )}
-              </div>
-            )}
+
           </div>
           <button
             onClick={() => setShowAddModal(true)}
