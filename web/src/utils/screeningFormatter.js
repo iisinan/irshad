@@ -6,8 +6,14 @@
 export const formatAppJustification = (text, isNonHalal = false) => {
   if (!text || typeof text !== 'string') return '';
 
+  // 0. Strip manual override prefixes (e.g. "Manual override applied", "Manual override:", etc.)
+  let cleanText = text.replace(/^Manual override(?:\s+applied)?[:\s,.-]*/i, '').trim();
+  if (cleanText.length > 0) {
+    cleanText = cleanText.charAt(0).toUpperCase() + cleanText.slice(1);
+  }
+
   // 1. Strip Wikipedia/AI citation reference markers e.g. [1], [2], [1, 2], [1][4]
-  let clean = text.replace(/\[\d+(?:,\s*\d+)*\]/g, '').replace(/\[\d+\]/g, '').trim();
+  let clean = cleanText.replace(/\[\d+(?:,\s*\d+)*\]/g, '').replace(/\[\d+\]/g, '').trim();
 
   // 2. If it is non-halal or non-compliant, check if it's a business activity failure
   const isBusinessActivityFailure = 
