@@ -3600,37 +3600,41 @@ img[src="/logo.svg"] {
   display: flex;
   align-items: center;
   gap: 24px;
-  padding: 24px 0;
-  border-bottom: 1px solid var(--border);
+  padding: 24px 28px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.02);
 }
 .ratio-progress-row:hover {
-  background: var(--bg-section);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.06);
 }
 .ratio-progress-row.unavailable {
   opacity: 0.6;
   cursor: default;
 }
 .ratio-progress-row.unavailable:hover {
-  background: transparent;
+  transform: none;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.02);
 }
 .ratio-col-label {
-  flex: 0 0 220px;
-  padding-left: 16px;
+  flex: 0 0 230px;
 }
 .ratio-col-bar {
   flex: 1;
   position: relative;
   height: 14px;
-  background: var(--bg-section);
-  border-radius: 10px;
+  background: rgba(0,0,0,0.05);
+  border-radius: 100px;
 }
 .ratio-col-value {
-  flex: 0 0 120px;
+  flex: 0 0 130px;
   text-align: right;
-  padding-right: 16px;
 }
 
 @media (max-width: 600px) {
