@@ -169,10 +169,8 @@ class RunEnterpriseFinancialDiscoveryCommand extends Command
                 ProcessCompanyFinancialsJob::dispatch($company, $pdfUrl);
                 $dispatchedCount++;
             } else {
-                // Phase 9: Fallback Search Using Apify
-                $this->info("[{$ticker}] Not found in API feed. Dispatching for Apify fallback.");
-                ProcessCompanyFinancialsJob::dispatch($company, null);
-                $fallbackCount++;
+                $this->info("[{$ticker}] Not found in API feed. Skipping as per new rule.");
+                // Removed Apify fallback
             }
         }
 
