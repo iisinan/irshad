@@ -547,18 +547,32 @@ const AaoifiScreening = () => {
           <StatusIcon size={96} color={hasPurification ? 'var(--halal)' : statusColor} style={{ margin: '0 auto 24px', filter: `drop-shadow(0 12px 32px ${hasPurification ? 'rgba(16,185,129,0.7)' : statusColor + '70'})` }} />
         </div>
 
-        <div style={{ position: 'relative', zIndex: 1, fontSize: '0.86rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px', color: hasPurification ? 'var(--halal)' : statusColor, marginBottom: '12px', textShadow: `0 2px 10px ${statusColor}30` }}>AAOIFI COMPLIANCE VERDICT</div>
+        <div style={{ position: 'relative', zIndex: 1, fontSize: '0.86rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px', color: hasPurification ? 'var(--halal)' : statusColor, marginBottom: '10px', textShadow: `0 2px 10px ${statusColor}30` }}>AAOIFI COMPLIANCE VERDICT</div>
 
-        <h1 style={{ position: 'relative', zIndex: 1, fontSize: 'clamp(2.2rem, 5vw, 3.2rem)', fontWeight: 900, color: hasPurification ? 'var(--halal)' : statusColor, margin: '0 0 8px 0', letterSpacing: '-1.5px', textShadow: `0 4px 20px ${statusColor}40`, lineHeight: 1.1 }}>
+        <h1 style={{ position: 'relative', zIndex: 1, fontSize: 'clamp(2.4rem, 6vw, 3.6rem)', fontWeight: 950, color: hasPurification ? 'var(--halal)' : statusColor, margin: '0 0 6px 0', letterSpacing: '-1.8px', textShadow: `0 4px 24px ${statusColor}40`, lineHeight: 1.05 }}>
           {finalStatus === 'halal'
-            ? (hasPurification ? 'HALAL' : 'HALAL')
+            ? 'HALAL'
             : finalStatus === 'non-halal' ? 'NON-HALAL' : 'DOUBTFUL'}
         </h1>
 
         {hasPurification && (
-          <div style={{ position: 'relative', zIndex: 1, marginBottom: '8px' }}>
-            <span style={{ fontSize: '1.08rem', fontWeight: 800, color: 'var(--questionable)', letterSpacing: '1px', textTransform: 'uppercase', textShadow: '0 2px 10px rgba(245,158,11,0.3)' }}>
-              WITH PURIFICATION
+          <div style={{ position: 'relative', zIndex: 1, marginBottom: '14px' }}>
+            <span style={{
+              fontSize: '0.78rem',
+              fontWeight: 850,
+              color: 'var(--questionable, #D97706)',
+              letterSpacing: '1.4px',
+              textTransform: 'uppercase',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: 'rgba(245, 158, 11, 0.12)',
+              border: '1px solid rgba(245, 158, 11, 0.3)',
+              padding: '4px 14px',
+              borderRadius: '100px',
+              boxShadow: '0 2px 8px rgba(245,158,11,0.2)'
+            }}>
+              <Droplets size={12} color="var(--questionable, #D97706)" /> with purification
             </span>
           </div>
         )}

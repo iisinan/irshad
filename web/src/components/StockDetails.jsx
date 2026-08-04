@@ -133,7 +133,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
   // purification_required is injected into stock.status by the backend
   const hasPurification = isHalal && !!(rawStatus?.purification_required);
   if (hasPurification) {
-    statusStr = 'HALAL WITH PURIFICATION';
+    statusStr = 'HALAL';
     StatusIcon = Droplets;
   }
 
@@ -357,11 +357,28 @@ const StockDetails = ({ symbol: propSymbol }) => {
               <StatusIcon size={30} color="white" />
             </div>
             <div>
-              <div style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.2px', color: 'rgba(255,255,255,0.7)', marginBottom: '5px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.2px', color: 'rgba(255,255,255,0.7)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 AAOIFI COMPLIANCE VERDICT
               </div>
-              <div style={{ fontSize: '1.75rem', fontWeight: 950, color: 'white', letterSpacing: '-0.5px', lineHeight: 1.1, textShadow: '0 2px 12px rgba(0,0,0,0.3)' }}>
-                {statusStr}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                <div style={{ fontSize: '2.1rem', fontWeight: 950, color: 'white', letterSpacing: '-0.8px', lineHeight: 1.05, textShadow: '0 2px 14px rgba(0,0,0,0.35)' }}>
+                  {statusStr}
+                </div>
+                {hasPurification && (
+                  <div style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 850,
+                    color: '#FCD34D',
+                    letterSpacing: '1.2px',
+                    textTransform: 'uppercase',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    textShadow: '0 2px 8px rgba(0,0,0,0.4)'
+                  }}>
+                    <Droplets size={12} color="#FCD34D" /> with purification
+                  </div>
+                )}
               </div>
             </div>
           </div>
