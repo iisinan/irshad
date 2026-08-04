@@ -15,10 +15,17 @@ export default function StatementTab({ data }) {
     
     if (data?.holdings && data.holdings.length > 0) {
       // 1. Holdings
-      data.holdings.forEach(h => {
+      // Sort holdings by date ascending to assign correct sequence numbers
+      const sortedHoldings = [...data.holdings].sort((a, b) => 
+        new Date(a.purchase_date || a.created_at || a.updated_at || 0) - 
+        new Date(b.purchase_date || b.created_at || b.updated_at || 0)
+      );
+      
+      sortedHoldings.forEach((h, idx) => {
         const val = h.shares * h.current_price;
+        const seqNum = String(idx + 1).padStart(3, '0');
         trxs.push({
-          id: `HLD-${h.id || Math.floor(Math.random()*10000)}`,
+          id: `HLD-${seqNum}`,
           date: new Date(h.purchase_date || h.created_at || h.updated_at || Date.now()).toISOString(),
           desc: `Asset Holding - ${h.symbol} (${h.shares} units @ ₦${h.current_price})`,
           type: 'holding',
@@ -27,7 +34,6 @@ export default function StatementTab({ data }) {
           color: 'var(--primary)'
         });
       });
-
     }
 
     // Sort ascending for balance calculation
