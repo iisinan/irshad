@@ -195,8 +195,6 @@ function CalcModal({ h, onClose, onPurify }) {
 
 /* ─── Purification Card (compact, clickable) ────────────────── */
 function PurificationCard({ h, onPurify }) {
-  const [showCalc, setShowCalc] = useState(false);
-
   const ratio      = Number(h.non_compliant_ratio || 0);
   const dividends  = Number(h.total_dividends || 0);
   const due        = Number(h.purification_due || 0);
@@ -218,84 +216,78 @@ function PurificationCard({ h, onPurify }) {
   }
 
   return (
-    <>
-      <div
-        onClick={() => setShowCalc(true)}
-        style={{ borderRadius: '20px', border: '1px solid var(--border)', background: 'var(--bg)', overflow: 'hidden', cursor: 'pointer', transition: 'all 0.25s cubic-bezier(0.16,1,0.3,1)', position: 'relative' }}
-        onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(217,119,6,0.4)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(217,119,6,0.1)'; e.currentTarget.style.transform = 'translateY(-3px)'; }}
-        onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)'; }}
-      >
-        {/* Top amber accent bar */}
-        <div style={{ height: '3px', background: 'linear-gradient(90deg, #D97706, #F59E0B, rgba(245,158,11,0.3))' }} />
+    <div
+      onClick={() => onPurify(h)}
+      style={{ borderRadius: '20px', border: '1px solid var(--border)', background: 'var(--bg)', overflow: 'hidden', cursor: 'pointer', transition: 'all 0.25s cubic-bezier(0.16,1,0.3,1)', position: 'relative' }}
+      onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(217,119,6,0.4)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(217,119,6,0.1)'; e.currentTarget.style.transform = 'translateY(-3px)'; }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)'; }}
+    >
+      {/* Top amber accent bar */}
+      <div style={{ height: '3px', background: 'linear-gradient(90deg, #D97706, #F59E0B, rgba(245,158,11,0.3))' }} />
 
-        <div style={{ padding: '20px 22px' }}>
-          {/* Top row: logo + name + badge + chevron */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '18px' }}>
-            <CompanyLogo symbol={h.symbol} logoUrl={h.logo_url} size={44} radius={12} />
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--text-dark)', letterSpacing: '-0.3px' }}>{h.symbol}</div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                {shares.toLocaleString()} shares · {fmt(h.average_buy_price)} avg cost
-              </div>
+      <div style={{ padding: '20px 22px' }}>
+        {/* Top row: logo + name + badge + chevron */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '18px' }}>
+          <CompanyLogo symbol={h.symbol} logoUrl={h.logo_url} size={44} radius={12} />
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--text-dark)', letterSpacing: '-0.3px' }}>{h.symbol}</div>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+              {shares.toLocaleString()} shares · {fmt(h.average_buy_price)} avg cost
             </div>
-
-            {/* Status pill */}
-            <div style={{ background: 'rgba(217,119,6,0.08)', border: '1px solid rgba(217,119,6,0.2)', borderRadius: '99px', padding: '5px 12px', display: 'flex', alignItems: 'center', gap: '5px', flexShrink: 0 }}>
-              <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#D97706', boxShadow: '0 0 6px rgba(217,119,6,0.7)' }} />
-              <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#D97706', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Purify</span>
-            </div>
-
-            <ChevronRight size={18} color="var(--text-muted)" style={{ flexShrink: 0 }} />
           </div>
 
-          {/* Stats row */}
-          <div style={{ display: 'grid', gridTemplateColumns: latestDiv ? 'repeat(4,1fr)' : 'repeat(3,1fr)', gap: '10px', marginBottom: '16px' }}>
-            {[
-              { label: 'Dividends (12M)', value: fmt(dividends), sub: 'Total received' },
-              latestDiv ? { label: dividendLabel, value: dividendVal, sub: dividendDate } : null,
-              { label: 'Impure Ratio', value: `${ratio.toFixed(2)}%`, sub: '≤ 5% threshold', warn: ratio > 5 },
-              { label: 'Portfolio Value', value: fmt(totalValue), sub: 'Current' },
-            ].filter(Boolean).map((s, i) => (
-              <div key={i} style={{ background: 'var(--bg-section)', borderRadius: '12px', padding: '10px 12px', border: '1px solid var(--border)' }}>
-                <div style={{ fontSize: '0.6rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '4px' }}>{s.label}</div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 900, color: s.warn ? '#D97706' : 'var(--text-dark)' }}>{s.value}</div>
-                <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', marginTop: '2px' }}>{s.sub}</div>
-              </div>
-            ))}
+          {/* Status pill */}
+          <div style={{ background: 'rgba(217,119,6,0.08)', border: '1px solid rgba(217,119,6,0.2)', borderRadius: '99px', padding: '5px 12px', display: 'flex', alignItems: 'center', gap: '5px', flexShrink: 0 }}>
+            <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#D97706', boxShadow: '0 0 6px rgba(217,119,6,0.7)' }} />
+            <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#D97706', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Purify</span>
           </div>
 
-          {/* Bottom row: progress bar + amount to purify */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            {/* Progress */}
-            <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-                <span style={{ fontSize: '0.62rem', fontWeight: 600, color: 'var(--text-muted)' }}>Impure portion</span>
-                <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#D97706' }}>{duePct.toFixed(2)}%</span>
-              </div>
-              <div style={{ height: '5px', background: 'var(--bg-section)', borderRadius: '99px', overflow: 'hidden', border: '1px solid var(--border)' }}>
-                <div style={{ height: '100%', width: `${Math.max(1, duePct)}%`, background: 'linear-gradient(90deg, #F59E0B, #D97706)', borderRadius: '99px', boxShadow: '0 0 8px rgba(217,119,6,0.5)', transition: 'width 1s cubic-bezier(0.16,1,0.3,1)' }} />
-              </div>
-            </div>
+          <ChevronRight size={18} color="var(--text-muted)" style={{ flexShrink: 0 }} />
+        </div>
 
-            {/* Amount to purify + hint */}
-            <div style={{ background: 'linear-gradient(135deg, rgba(217,119,6,0.1), rgba(245,158,11,0.05))', border: '1px solid rgba(217,119,6,0.2)', borderRadius: '12px', padding: '10px 16px', textAlign: 'right', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div>
-                <div style={{ fontSize: '0.58rem', fontWeight: 700, color: '#D97706', textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '1px' }}>Amount to Purify</div>
-                <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#D97706', letterSpacing: '-0.5px' }}>{fmt(due)}</div>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-muted)', fontSize: '0.68rem', fontWeight: 600, borderLeft: '1px solid rgba(217,119,6,0.15)', paddingLeft: '12px' }}>
-                <Calculator size={12} />
-                View calc
-              </div>
+        {/* Stats row */}
+        <div style={{ display: 'grid', gridTemplateColumns: latestDiv ? 'repeat(4,1fr)' : 'repeat(3,1fr)', gap: '10px', marginBottom: '16px' }}>
+          {[
+            { label: 'Dividends (12M)', value: fmt(dividends), sub: 'Total received' },
+            latestDiv ? { label: dividendLabel, value: dividendVal, sub: dividendDate } : null,
+            { label: 'Impure Ratio', value: `${ratio.toFixed(2)}%`, sub: '≤ 5% threshold', warn: ratio > 5 },
+            { label: 'Portfolio Value', value: fmt(totalValue), sub: 'Current' },
+          ].filter(Boolean).map((s, i) => (
+            <div key={i} style={{ background: 'var(--bg-section)', borderRadius: '12px', padding: '10px 12px', border: '1px solid var(--border)' }}>
+              <div style={{ fontSize: '0.6rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '4px' }}>{s.label}</div>
+              <div style={{ fontSize: '0.85rem', fontWeight: 900, color: s.warn ? '#D97706' : 'var(--text-dark)' }}>{s.value}</div>
+              <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', marginTop: '2px' }}>{s.sub}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Bottom row: progress bar + amount to purify */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          {/* Progress */}
+          <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+              <span style={{ fontSize: '0.62rem', fontWeight: 600, color: 'var(--text-muted)' }}>Impure portion</span>
+              <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#D97706' }}>{duePct.toFixed(2)}%</span>
+            </div>
+            <div style={{ height: '5px', background: 'var(--bg-section)', borderRadius: '99px', overflow: 'hidden', border: '1px solid var(--border)' }}>
+              <div style={{ height: '100%', width: `${Math.max(1, duePct)}%`, background: 'linear-gradient(90deg, #F59E0B, #D97706)', borderRadius: '99px', boxShadow: '0 0 8px rgba(217,119,6,0.5)', transition: 'width 1s cubic-bezier(0.16,1,0.3,1)' }} />
+            </div>
+          </div>
+
+          {/* Amount to purify + hint */}
+          <div style={{ background: 'linear-gradient(135deg, rgba(217,119,6,0.1), rgba(245,158,11,0.05))', border: '1px solid rgba(217,119,6,0.2)', borderRadius: '12px', padding: '10px 16px', textAlign: 'right', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div>
+              <div style={{ fontSize: '0.58rem', fontWeight: 700, color: '#D97706', textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '1px' }}>Amount to Purify</div>
+              <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#D97706', letterSpacing: '-0.5px' }}>{fmt(due)}</div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-muted)', fontSize: '0.68rem', fontWeight: 600, borderLeft: '1px solid rgba(217,119,6,0.15)', paddingLeft: '12px' }}>
+              <Calculator size={12} />
+              View calc
             </div>
           </div>
         </div>
       </div>
-
-      {showCalc && (
-        <CalcModal h={h} onClose={() => setShowCalc(false)} onPurify={onPurify} />
-      )}
-    </>
+    </div>
   );
 }
 
