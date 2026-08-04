@@ -124,7 +124,7 @@ function HoldingRow({ holding, onDelete, onEdit }) {
         background: 'linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%)',
         border: '1px solid var(--border)',
         borderRadius: '20px',
-        marginBottom: '12px',
+        marginBottom: '8px',
         transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
         position: 'relative',
         cursor: 'pointer',
@@ -242,12 +242,12 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
         background: 'linear-gradient(135deg, rgba(15,82,87,0.025) 0%, rgba(212,175,55,0.04) 100%)', 
         border: '1px solid rgba(15,82,87,0.08)',
         borderRadius: '20px', 
-        padding: '20px 26px',
+        padding: '16px 20px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         flexWrap: 'wrap',
-        gap: '20px',
+        gap: '12px',
         position: 'relative',
         overflow: 'hidden',
         boxShadow: '0 4px 20px rgba(15,82,87,0.03)'
@@ -274,7 +274,7 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
           </div>
 
           {/* Value + Avg Return Badge in a unified line */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '8px' }}>
             <div style={{ fontSize: 'clamp(1.75rem, 4vw, 2.4rem)', fontWeight: 950, color: 'var(--text-dark)', letterSpacing: '-1.2px', lineHeight: 1 }}>
               <AnimCounter target={totalBalance}/>
             </div>
