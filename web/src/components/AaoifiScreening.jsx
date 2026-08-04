@@ -518,196 +518,191 @@ const AaoifiScreening = () => {
       </div>
 
       {/* ─── HERO VERDICT CARD ─── */}
-      <div className="detail-header" style={{ 
-        padding: hasPurification ? '28px 28px 0 28px' : '32px 28px', 
-        borderRadius: '24px', 
+      <div className="detail-header hover-card" style={{ 
+        padding: hasPurification ? '24px 24px 0 24px' : '28px 24px', 
+        borderRadius: '20px', 
         background: bgStatus, 
-        border: hasPurification ? '1.5px solid rgba(245,158,11,0.4)' : `1.5px solid ${statusColor}35`, 
+        border: hasPurification ? '1px solid rgba(245,158,11,0.32)' : `1px solid ${statusColor}30`, 
         textAlign: 'center', 
-        marginBottom: '32px',
+        marginBottom: '28px',
         boxShadow: hasPurification
-          ? '0 20px 48px -12px rgba(16,185,129,0.14), inset 0 1px 12px rgba(245,158,11,0.06)'
-          : `0 20px 48px -12px ${statusColor}18, inset 0 1px 12px ${statusColor}08`,
+          ? '0 16px 36px -10px rgba(16,185,129,0.12), inset 0 1px 0 rgba(255,255,255,0.6)'
+          : `0 16px 36px -10px ${statusColor}15, inset 0 1px 0 rgba(255,255,255,0.6)`,
         position: 'relative', 
         overflow: 'hidden', 
         display: 'flex', 
         flexDirection: 'column', 
         alignItems: 'center'
       }}>
-        {/* Background ambient orbs */}
-        <div style={{ position: 'absolute', top: '-40px', right: '-30px', width: '200px', height: '200px', background: `radial-gradient(circle, ${statusColor}12 0%, transparent 70%)`, borderRadius: '50%', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: '-50px', left: '-30px', width: '220px', height: '220px', background: `radial-gradient(circle, ${statusColor}08 0%, transparent 70%)`, borderRadius: '50%', pointerEvents: 'none' }} />
-        
-        {/* Top status accent line */}
+        {/* Subtle top accent bar */}
         <div style={{ 
-          position: 'absolute', top: 0, left: 0, right: 0, height: '5px', 
+          position: 'absolute', top: 0, left: 0, right: 0, height: '4px', 
           background: hasPurification
-            ? 'linear-gradient(90deg, var(--halal) 0%, var(--questionable) 100%)'
-            : statusColor,
-          boxShadow: hasPurification
-            ? '0 0 12px rgba(245,158,11,0.5)'
-            : `0 0 12px ${statusColor}`
+            ? 'linear-gradient(90deg, var(--halal) 0%, var(--gold, #d4af37) 100%)'
+            : statusColor
         }} />
 
-        {/* Status Icon Badge */}
+        {/* Ambient subtle glow */}
+        <div style={{ position: 'absolute', top: '-50px', right: '-40px', width: '180px', height: '180px', background: `radial-gradient(circle, ${statusColor}10 0%, transparent 70%)`, borderRadius: '50%', pointerEvents: 'none' }} />
+
+        {/* Top Status Icon Badge */}
         <div style={{ 
           position: 'relative', 
           zIndex: 1, 
-          width: '64px', 
-          height: '64px', 
-          borderRadius: '20px',
-          background: hasPurification ? 'rgba(16,185,129,0.12)' : `${statusColor}15`,
-          border: `1.5px solid ${hasPurification ? 'rgba(16,185,129,0.3)' : statusColor + '30'}`,
+          width: '52px', 
+          height: '52px', 
+          borderRadius: '16px',
+          background: hasPurification ? 'rgba(16,185,129,0.1)' : `${statusColor}12`,
+          border: `1px solid ${hasPurification ? 'rgba(16,185,129,0.25)' : statusColor + '25'}`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          marginBottom: '14px',
-          boxShadow: `0 8px 20px ${hasPurification ? 'rgba(16,185,129,0.2)' : statusColor + '20'}`
+          marginBottom: '10px',
+          boxShadow: `0 4px 14px ${hasPurification ? 'rgba(16,185,129,0.15)' : statusColor + '15'}`
         }}>
-          <StatusIcon size={34} color={hasPurification ? 'var(--halal)' : statusColor} />
+          <StatusIcon size={28} color={hasPurification ? 'var(--halal)' : statusColor} />
         </div>
 
+        {/* Uppercase Kicker */}
         <div style={{ 
           position: 'relative', 
           zIndex: 1, 
-          fontSize: '0.72rem', 
-          fontWeight: 850, 
+          fontSize: '0.68rem', 
+          fontWeight: 800, 
           textTransform: 'uppercase', 
-          letterSpacing: '1.8px', 
+          letterSpacing: '1.5px', 
           color: hasPurification ? 'var(--halal)' : statusColor, 
-          marginBottom: '6px' 
+          marginBottom: '4px',
+          opacity: 0.95
         }}>
           AAOIFI COMPLIANCE VERDICT
         </div>
 
-        <h1 style={{ 
-          position: 'relative', 
-          zIndex: 1, 
-          fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', 
-          fontWeight: 950, 
-          color: hasPurification ? 'var(--halal)' : statusColor, 
-          margin: '0 0 6px 0', 
-          letterSpacing: '-1px', 
-          lineHeight: 1.1 
-        }}>
-          {finalStatus === 'halal'
-            ? 'HALAL'
-            : finalStatus === 'non-halal' ? 'NON-HALAL' : 'DOUBTFUL'}
-        </h1>
+        {/* Main Verdict Heading */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '6px', position: 'relative', zIndex: 1 }}>
+          <h1 style={{ 
+            fontSize: 'clamp(1.6rem, 3.5vw, 2.2rem)', 
+            fontWeight: 950, 
+            color: hasPurification ? 'var(--halal)' : statusColor, 
+            margin: 0, 
+            letterSpacing: '-0.8px', 
+            lineHeight: 1.1 
+          }}>
+            {finalStatus === 'halal'
+              ? 'HALAL'
+              : finalStatus === 'non-halal' ? 'NON-HALAL' : 'DOUBTFUL'}
+          </h1>
 
-        {hasPurification && (
-          <div style={{ position: 'relative', zIndex: 1, marginBottom: '10px' }}>
+          {hasPurification && (
             <span style={{
-              fontSize: '0.72rem',
+              fontSize: '0.68rem',
               fontWeight: 800,
               color: 'var(--questionable, #D97706)',
-              letterSpacing: '1.2px',
+              letterSpacing: '1px',
               textTransform: 'uppercase',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '5px',
+              gap: '4px',
               background: 'rgba(245, 158, 11, 0.12)',
               border: '1px solid rgba(245, 158, 11, 0.28)',
-              padding: '3px 12px',
-              borderRadius: '100px',
-              boxShadow: '0 2px 6px rgba(245,158,11,0.12)'
+              padding: '3px 10px',
+              borderRadius: '100px'
             }}>
-              <Droplets size={11} color="var(--questionable, #D97706)" /> with purification
+              <Droplets size={10} color="var(--questionable, #D97706)" /> with purification
             </span>
-          </div>
-        )}
+          )}
+        </div>
 
+        {/* Description Text */}
         <p style={{ 
           position: 'relative', 
           zIndex: 1, 
           color: 'var(--text-dark)', 
-          margin: '0 auto', 
-          fontWeight: 600, 
-          fontSize: '0.88rem', 
-          maxWidth: '560px', 
-          lineHeight: 1.55, 
-          marginBottom: hasPurification ? '12px' : '0' 
+          margin: '0 auto 12px auto', 
+          fontWeight: 500, 
+          fontSize: '0.84rem', 
+          maxWidth: '520px', 
+          lineHeight: 1.5 
         }}>
           {cleanStatusReason || 'Screened in accordance with AAOIFI Shariah Standard No. 21 (Financial & Business Activity Rules).'}
         </p>
 
-        {/* Reporting Metadata Pill */}
+        {/* Reporting Period Badge */}
         {(report?.reporting_period || report?.reporting_year || report?.published_date) && (
           <div style={{ 
             position: 'relative', 
             zIndex: 1, 
             display: 'inline-flex', 
             alignItems: 'center', 
-            gap: '6px', 
-            padding: '4px 12px', 
-            background: 'rgba(0,0,0,0.04)', 
+            gap: '5px', 
+            padding: '3px 10px', 
+            background: 'rgba(0,0,0,0.03)', 
             borderRadius: '100px', 
-            fontSize: '0.72rem', 
+            fontSize: '0.69rem', 
             color: 'var(--text-muted)', 
             fontWeight: 600, 
-            marginBottom: hasPurification ? '16px' : '0', 
+            marginBottom: hasPurification ? '14px' : '0', 
             border: '1px solid var(--border)' 
           }}>
-            <Calendar size={12} />
+            <Calendar size={11} />
             <span>{report.reporting_period || 'Annual Report'} {report.reporting_year ? `(${report.reporting_year})` : ''}</span>
             {report.published_date && <span>· Published {report.published_date}</span>}
           </div>
         )}
 
-        {/* Purification strip — compact, proportional bar */}
+        {/* Sleek Purification Strip */}
         {hasPurification && (
           <div style={{
             position: 'relative', zIndex: 1,
-            width: 'calc(100% + 56px)', marginLeft: '-28px', marginRight: '-28px',
-            background: 'linear-gradient(135deg, rgba(245,158,11,0.16) 0%, rgba(245,158,11,0.08) 100%)',
-            borderTop: '1px solid rgba(245,158,11,0.3)',
-            padding: '12px 24px',
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap'
+            width: 'calc(100% + 48px)', marginLeft: '-24px', marginRight: '-24px',
+            background: 'linear-gradient(135deg, rgba(245,158,11,0.12) 0%, rgba(245,158,11,0.06) 100%)',
+            borderTop: '1px solid rgba(245,158,11,0.25)',
+            padding: '10px 20px',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '14px', flexWrap: 'wrap'
           }}>
-            {/* Icon + label */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {/* Left: Icon + Text */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <div style={{
-                width: '30px', height: '30px', borderRadius: '50%',
-                background: 'rgba(245,158,11,0.18)', border: '1px solid rgba(245,158,11,0.4)',
+                width: '26px', height: '26px', borderRadius: '50%',
+                background: 'rgba(245,158,11,0.18)', border: '1px solid rgba(245,158,11,0.35)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
               }}>
-                <Droplets size={14} color="var(--questionable)" />
+                <Droplets size={12} color="var(--questionable)" />
               </div>
               <div style={{ textAlign: 'left' }}>
-                <div style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--questionable)', marginBottom: '1px' }}>Dividend Purification Required</div>
-                <div style={{ fontSize: '0.76rem', color: 'var(--text-dark)', fontWeight: 600, lineHeight: 1.3 }}>
+                <div style={{ fontSize: '0.58rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.8px', color: 'var(--questionable)', lineHeight: 1 }}>Purification Required</div>
+                <div style={{ fontSize: '0.74rem', color: 'var(--text-dark)', fontWeight: 600, marginTop: '2px' }}>
                   Purify <strong style={{ color: 'var(--questionable)' }}>{purificationPercent}%</strong> of dividends
                 </div>
               </div>
             </div>
 
-            {/* Big stat */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ textAlign: 'center', padding: '0 12px', borderLeft: '1px solid rgba(245,158,11,0.25)', borderRight: '1px solid rgba(245,158,11,0.25)' }}>
-                <div style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--questionable)', lineHeight: 1, letterSpacing: '-0.3px' }}>
+            {/* Middle: Big Stat & Explanation */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ textAlign: 'center', padding: '0 10px', borderLeft: '1px solid rgba(245,158,11,0.2)', borderRight: '1px solid rgba(245,158,11,0.2)' }}>
+                <div style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--questionable)', lineHeight: 1, letterSpacing: '-0.3px' }}>
                   {purificationPercent}%
                 </div>
-                <div style={{ fontSize: '0.58rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginTop: '2px' }}>To Purify</div>
+                <div style={{ fontSize: '0.54rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.6px', marginTop: '2px' }}>To Purify</div>
               </div>
 
-              {/* Explanation */}
-              <div style={{ maxWidth: '220px', textAlign: 'left' }}>
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-dark)', fontWeight: 500, lineHeight: 1.35 }}>
-                  The company earns <strong style={{ color: 'var(--questionable)' }}>{purificationPercent}%</strong> from non-compliant sources. Donate this portion to charity.
+              <div style={{ maxWidth: '200px', textAlign: 'left', display: 'none', md: 'block' }}>
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 500, lineHeight: 1.3 }}>
+                  Non-compliant revenue share to donate to charity.
                 </div>
               </div>
             </div>
 
-            {/* Action Link */}
+            {/* Right: Action Button */}
             <Link to="/portfolio" style={{
-              display: 'inline-flex', alignItems: 'center', gap: '5px',
-              padding: '6px 14px', borderRadius: '8px',
+              display: 'inline-flex', alignItems: 'center', gap: '4px',
+              padding: '5px 12px', borderRadius: '7px',
               background: 'rgba(245,158,11,0.18)', border: '1px solid rgba(245,158,11,0.35)',
-              color: 'var(--questionable)', fontSize: '0.74rem', fontWeight: 800, textDecoration: 'none',
-              transition: 'all 0.2s'
-            }}>
+              color: 'var(--questionable)', fontSize: '0.72rem', fontWeight: 800, textDecoration: 'none',
+              transition: 'all 0.15s ease-in-out'
+            }} className="hover-lift">
               <span>Purify in Portfolio</span>
-              <ChevronRight size={13} />
+              <ChevronRight size={12} />
             </Link>
           </div>
         )}
