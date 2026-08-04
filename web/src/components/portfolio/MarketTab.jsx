@@ -288,9 +288,9 @@ export default function MarketTab() {
         borderRadius: '24px 24px 0 0', border: '1px solid var(--border)', borderBottom: 'none',
         display: 'flex', flexDirection: 'column', gap: '16px'
       }}>
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+        <div className="market-filter-row" style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
           {/* Search */}
-          <div style={{ position: 'relative', flex: '1 1 240px', maxWidth: '340px' }}>
+          <div className="market-search-bar" style={{ position: 'relative', flex: '1 1 240px', maxWidth: '100%' }}>
             <Search size={15} color="var(--text-light)" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
             <input
               value={search}

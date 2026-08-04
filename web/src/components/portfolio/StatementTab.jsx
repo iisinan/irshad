@@ -151,8 +151,8 @@ export default function StatementTab({ data }) {
           </div>
         </div>
 
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+        <div className="statement-table-wrapper" style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '560px' }}>
             <thead>
               <tr style={{ background: 'var(--bg-section)', borderBottom: '2px solid var(--border)' }}>
                 <th style={{ padding: '16px 32px', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Date</th>

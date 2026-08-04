@@ -140,7 +140,7 @@ export default function Profile() {
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 20px 80px' }} className="animate-fade-in">
       {/* ── Hero Banner ── */}
-      <div className="animate-slide-up stagger-1" style={{ background: 'linear-gradient(135deg, #0D1B2A 0%, #0F5257 65%, #0B6B71 100%)', borderRadius: '28px', padding: '36px 40px', marginBottom: '28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', position: 'relative', overflow: 'hidden', boxShadow: '0 12px 32px rgba(13,27,42,0.15)', gap: '20px' }}>
+      <div className="animate-slide-up stagger-1 profile-hero" style={{ background: 'linear-gradient(135deg, #0D1B2A 0%, #0F5257 65%, #0B6B71 100%)', borderRadius: '28px', padding: '36px 40px', marginBottom: '28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', position: 'relative', overflow: 'hidden', boxShadow: '0 12px 32px rgba(13,27,42,0.15)', gap: '20px' }}>
         <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', borderRadius: '50%', background: 'rgba(201,168,76,0.08)' }} />
         <div style={{ display: 'flex', alignItems: 'center', gap: '28px', zIndex: 1 }}>
           <div style={{ width: '88px', height: '88px', borderRadius: '22px', background: 'rgba(255,255,255,0.25)', backdropFilter: 'blur(10px)', border: '3px solid rgba(255,255,255,0.5)', color: 'var(--bg)', fontSize: '1.76rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, letterSpacing: '-1px', boxShadow: '0 8px 32px rgba(0,0,0,0.15)', fontFamily: 'var(--serif)' }}>{initials}</div>
@@ -162,9 +162,9 @@ export default function Profile() {
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '32px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+      <div className="profile-layout" style={{ display: 'flex', gap: '32px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
         {/* Left Sidebar Menu */}
-        <div className="animate-slide-up stagger-2" style={{ width: '240px', flexShrink: 0 }}>
+        <div className="animate-slide-up stagger-2 profile-nav" style={{ width: '240px', flexShrink: 0 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', position: 'sticky', top: '100px' }}>
             {sections.map(sec => (
               <button key={sec.id} onClick={() => { setActiveSection(sec.id); setMessage({ type: '', text: '' }); }} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', borderRadius: '12px', border: 'none', background: activeSection === sec.id ? (sec.danger ? 'var(--non-halal-bg)' : 'var(--bg)') : 'transparent', color: activeSection === sec.id ? (sec.danger ? 'var(--non-halal)' : 'var(--primary)') : 'var(--text-muted)', fontWeight: activeSection === sec.id ? 800 : 600, fontSize: '0.79rem', cursor: 'pointer', transition: 'all 0.2s ease', textAlign: 'left', boxShadow: activeSection === sec.id && !sec.danger ? '0 4px 12px rgba(0,0,0,0.05)' : 'none' }}>
@@ -179,7 +179,7 @@ export default function Profile() {
         </div>
 
         {/* Main Content Area */}
-        <div className="animate-slide-up stagger-3" style={{ flex: 1, minWidth: '300px' }}>
+        <div className="animate-slide-up stagger-3" style={{ flex: 1, minWidth: 0 }}>
           
           {/* Settings Messages */}
           {message.text && (
@@ -192,12 +192,12 @@ export default function Profile() {
 
 
           {/* SETTINGS FORMS */}
-          <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)' }}>
+          <div className="profile-content-card" style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)' }}>
               {activeSection === 'profile' && (
                 <form onSubmit={e => handleUpdate(e, 'profile')} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                   <div><h2 style={{ fontSize: '1.06rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 4px' }}>Personal Information</h2><p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', margin: 0 }}>Update your basic profile details.</p></div>
                   <div style={{ height: '1px', background: 'var(--border)' }} />
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                    <div className="profile-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                     <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '8px' }}>Full Name</label><input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--border)', fontSize: '0.84rem', outline: 'none' }} /></div>
                     <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '8px' }}>Phone Number</label><input type="tel" value={formData.phone_number} onChange={e => setFormData({...formData, phone_number: e.target.value})} style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--border)', fontSize: '0.84rem', outline: 'none' }} /></div>
                   </div>
