@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Wallet,
   Plus, X, Trash2, ArrowUpRight, ArrowDownRight,
-  RefreshCw, Edit2
+  RefreshCw, Edit2, ShieldCheck
 } from 'lucide-react';
 
 import { updateHolding } from '../../services/api';
@@ -238,77 +238,121 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
       )}
 
       {/* ─── DASHBOARD HERO ─── */}
-      <div className="stagger-1" style={{ 
-        background: 'linear-gradient(135deg, rgba(15,82,87,0.03) 0%, rgba(212,175,55,0.05) 100%)', 
+      <div className="stagger-1 hover-card" style={{ 
+        background: 'linear-gradient(135deg, rgba(15,82,87,0.025) 0%, rgba(212,175,55,0.04) 100%)', 
         border: '1px solid rgba(15,82,87,0.08)',
-        borderRadius: '24px', 
-        padding: '32px 40px',
+        borderRadius: '20px', 
+        padding: '20px 26px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         flexWrap: 'wrap',
-        gap: '30px',
+        gap: '20px',
         position: 'relative',
         overflow: 'hidden',
-        boxShadow: '0 8px 32px rgba(15,82,87,0.03)'
+        boxShadow: '0 4px 20px rgba(15,82,87,0.03)'
       }}>
         {/* Background Mesh */}
-        <div style={{ position: 'absolute', top: '-50%', left: '-20%', width: '100%', height: '200%', background: 'radial-gradient(ellipse at center, rgba(15,82,87,0.05) 0%, transparent 60%)', zIndex: 0, pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: '-50%', left: '-20%', width: '100%', height: '200%', background: 'radial-gradient(ellipse at center, rgba(15,82,87,0.04) 0%, transparent 60%)', zIndex: 0, pointerEvents: 'none' }} />
         
         {/* Left: Value & Stats */}
-        <div style={{ zIndex: 1, flex: 1, minWidth: '280px' }}>
-          <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'12px' }}>
-            <span style={{ fontSize: '0.66rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'1.2px', color:'var(--text-muted)' }}>Total Balance</span>
+        <div style={{ zIndex: 1, flex: 1, minWidth: '260px' }}>
+          {/* Header Row */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+            <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.2px', color: 'var(--text-muted)' }}>Total Balance</span>
             <button
               onClick={handleRefresh}
-              style={{ background: 'var(--bg)', border:'1px solid var(--border)', borderRadius:'6px', cursor:'pointer', color:'var(--text-muted)', padding:'4px', display:'flex', boxShadow:'0 2px 4px rgba(0,0,0,0.02)' }}
+              style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '6px', cursor: 'pointer', color: 'var(--text-muted)', padding: '3px 5px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', transition: 'all 0.15s' }}
               title="Refresh portfolio"
             >
-              <RefreshCw size={12} style={{ animation: refreshing ? 'spin 0.8s linear infinite' : 'none' }}/>
+              <RefreshCw size={11} style={{ animation: refreshing ? 'spin 0.8s linear infinite' : 'none' }}/>
             </button>
-            <div style={{ display:'flex', alignItems:'center', gap:'5px', padding: '4px 8px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '20px' }}>
-              <div style={{ width:'6px', height:'6px', borderRadius:'50%', background:'#22c55e', animation:'pulse 2s ease infinite' }}/>
-              <span style={{ fontSize: '0.53rem', fontWeight:800, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.5px' }}>Live</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '2px 7px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '20px' }}>
+              <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#22c55e', animation: 'pulse 2s ease infinite' }}/>
+              <span style={{ fontSize: '0.52rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Live</span>
             </div>
           </div>
 
-          <div style={{ fontSize:'clamp(2.5rem, 6vw, 3.8rem)', fontWeight:900, color:'var(--text-dark)', letterSpacing:'-1.5px', lineHeight:1, marginBottom:'12px' }}>
-            <AnimCounter target={totalBalance}/>
-          </div>
-
-          {totalGainPct !== null && (
-            <div style={{ display:'inline-flex', alignItems:'center', gap:'6px', padding:'6px 12px', borderRadius:'10px', background: isPortfolioUp ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)', marginBottom:'24px' }}>
-              {isPortfolioUp ? <ArrowUpRight size={14} color="#22c55e"/> : <ArrowDownRight size={14} color="#ef4444"/>}
-              <span style={{ fontSize: '0.75rem', fontWeight:800, color: isPortfolioUp ? '#22c55e' : '#ef4444' }}>
-                {isPortfolioUp?'+':''}{totalGainPct}% Avg Return
-              </span>
+          {/* Value + Avg Return Badge in a unified line */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '12px' }}>
+            <div style={{ fontSize: 'clamp(1.75rem, 4vw, 2.4rem)', fontWeight: 950, color: 'var(--text-dark)', letterSpacing: '-1.2px', lineHeight: 1 }}>
+              <AnimCounter target={totalBalance}/>
             </div>
-          )}
+
+            {totalGainPct !== null && (
+              <div style={{ 
+                display: 'inline-flex', 
+                alignItems: 'center', 
+                gap: '4px', 
+                padding: '3px 8px', 
+                borderRadius: '8px', 
+                background: isPortfolioUp ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
+                border: isPortfolioUp ? '1px solid rgba(34,197,94,0.2)' : '1px solid rgba(239,68,68,0.2)'
+              }}>
+                {isPortfolioUp ? <ArrowUpRight size={12} color="#16a34a"/> : <ArrowDownRight size={12} color="#dc2626"/>}
+                <span style={{ fontSize: '0.68rem', fontWeight: 800, color: isPortfolioUp ? '#16a34a' : '#dc2626' }}>
+                  {isPortfolioUp ? '+' : ''}{totalGainPct}% Avg Return
+                </span>
+              </div>
+            )}
+          </div>
 
           {/* Mini Stats Pills */}
-          <div style={{ display:'flex', gap:'12px', flexWrap:'wrap' }}>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             {[
-              { lbl: 'Halal', val: halalCount, bg: 'rgba(34,197,94,0.1)', color: '#22c55e' },
-              { lbl: 'Non-Halal', val: nonHalalCount, bg: 'rgba(239,68,68,0.1)', color: '#ef4444' }
-            ].map(stat => stat.val > 0 || stat.val !== "₦0" ? (
-              <div key={stat.lbl} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg)', padding: '6px 14px', borderRadius: '12px', border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
-                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: stat.color }} />
-                <span style={{ fontSize: '0.66rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{stat.lbl}</span>
-                <span style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-dark)' }}>{stat.val}</span>
+              { lbl: 'Halal', val: halalCount, color: '#16a34a' },
+              { lbl: 'Non-Halal', val: nonHalalCount, color: '#dc2626' }
+            ].map(stat => (
+              <div key={stat.lbl} style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '6px', 
+                background: 'var(--bg)', 
+                padding: '4px 10px', 
+                borderRadius: '100px', 
+                border: '1px solid var(--border)', 
+                boxShadow: '0 1px 4px rgba(0,0,0,0.02)' 
+              }}>
+                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: stat.color }} />
+                <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{stat.lbl}</span>
+                <span style={{ fontSize: '0.72rem', fontWeight: 900, color: 'var(--text-dark)' }}>{stat.val}</span>
               </div>
-            ) : null)}
+            ))}
           </div>
         </div>
 
-        {/* Right: Compliance */}
-        <div style={{ zIndex: 1, display: 'flex', alignItems: 'center', gap: '24px', background: 'var(--bg)', padding: '24px', borderRadius: '20px', border: '1px solid var(--border)', boxShadow: '0 8px 24px rgba(0,0,0,0.04)' }}>
+        {/* Right: Shariah Status Card */}
+        <div style={{ 
+          zIndex: 1, 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '12px', 
+          background: 'var(--bg)', 
+          padding: '14px 18px', 
+          borderRadius: '16px', 
+          border: '1px solid var(--border)', 
+          boxShadow: '0 4px 16px rgba(0,0,0,0.02)' 
+        }}>
+          <div style={{ 
+            width: '38px', 
+            height: '38px', 
+            borderRadius: '12px', 
+            background: compliance >= 90 ? 'rgba(34,197,94,0.1)' : compliance >= 70 ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)', 
+            border: compliance >= 90 ? '1px solid rgba(34,197,94,0.25)' : compliance >= 70 ? '1px solid rgba(245,158,11,0.25)' : '1px solid rgba(239,68,68,0.25)', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            flexShrink: 0
+          }}>
+            <ShieldCheck size={18} color={compliance >= 90 ? 'var(--halal, #16a34a)' : compliance >= 70 ? 'var(--questionable, #d97706)' : 'var(--non-halal, #dc2626)'} />
+          </div>
 
           <div>
-            <div style={{ fontSize: '0.62rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Shariah Status</div>
-            <div style={{ fontSize: '1.06rem', fontWeight: 900, color: 'var(--text-dark)' }}>
+            <div style={{ fontSize: '0.58rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '2px' }}>Shariah Status</div>
+            <div style={{ fontSize: '0.94rem', fontWeight: 900, color: compliance >= 90 ? 'var(--halal, #16a34a)' : 'var(--text-dark)', lineHeight: 1.2 }}>
               {compliance >= 90 ? 'Excellent' : compliance >= 70 ? 'Needs Review' : 'Critical'}
             </div>
-            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px', maxWidth: '140px', lineHeight: 1.4 }}>
+            <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', marginTop: '2px', maxWidth: '140px', lineHeight: 1.3 }}>
               Based on AAOIFI financial screening.
             </div>
           </div>
