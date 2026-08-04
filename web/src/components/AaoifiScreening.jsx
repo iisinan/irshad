@@ -24,7 +24,7 @@ const AaoifiScreening = () => {
 
   const [modalData, setModalData] = useState(null);
   const [evidenceExpanded, setEvidenceExpanded] = useState(false);
-  const [denominator, setDenominator] = useState('market_cap');
+  const denominator = 'market_cap';
   const { user } = useAuth();
   
   const [showOverrideModal, setShowOverrideModal] = useState(false);
@@ -864,12 +864,11 @@ const AaoifiScreening = () => {
               Denominator:
             </span>
             <select 
-              value={denominator}
-              onChange={e => setDenominator(e.target.value)}
-              style={{ background: 'var(--bg-section)', border: '1px solid var(--border)', borderRadius: '8px', padding: '6px 12px', fontSize: '0.8rem', fontWeight: 800, cursor: 'pointer', outline: 'none', color: 'var(--text-dark)', transition: 'all 0.2s' }}
+              value="market_cap"
+              disabled
+              style={{ background: 'var(--bg-section)', border: '1px solid var(--border)', borderRadius: '8px', padding: '6px 12px', fontSize: '0.8rem', fontWeight: 800, cursor: 'not-allowed', outline: 'none', color: 'var(--text-dark)', transition: 'all 0.2s', opacity: 0.7 }}
             >
               <option value="market_cap">Market Cap (Default)</option>
-              <option value="total_assets">Total Assets</option>
             </select>
           </div>
         </div>
