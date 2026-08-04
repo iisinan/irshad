@@ -12,30 +12,16 @@ import { fetchAaoifiScreening, updateAaoifiData } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { formatAppJustification } from '../utils/screeningFormatter';
 
-const LOADING_STEPS = [
-  "Initializing AAOIFI Screening...",
-  "Reading latest financial statements...",
-  "Fetching regulatory filings...",
-  "Searching latest company news...",
-  "Analyzing business activities...",
-  "Consulting Irshad Engine...",
-  "Calculating AAOIFI financial ratios...",
-  "Running compliance engine...",
-  "Generating transparent report..."
-];
-
 const AaoifiScreening = () => {
   const { symbol } = useParams();
   
   const { data: res, isLoading: queryLoading, error: queryError } = useQuery({
     queryKey: ['aaoifi', symbol],
     queryFn: () => fetchAaoifiScreening(symbol),
-    staleTime: 0, // Immediately refetch to clear cache
+    staleTime: 5 * 60 * 1000, // 5 minute cache for instant loading
     refetchInterval: (query) => query.state.data?.status === 'processing' ? 10000 : false,
   });
 
-  const [simulatedLoading, setSimulatedLoading] = useState(true);
-  const [stepIndex, setStepIndex] = useState(0);
   const [modalData, setModalData] = useState(null);
   const [evidenceExpanded, setEvidenceExpanded] = useState(false);
   const [denominator, setDenominator] = useState('market_cap');
@@ -54,28 +40,7 @@ const AaoifiScreening = () => {
   const [overrideLoading, setOverrideLoading] = useState(false);
   const [overrideError, setOverrideError] = useState('');
 
-  // UI theater: simulate loading steps
-  useEffect(() => {
-    let timer;
-    if (simulatedLoading) {
-      timer = setInterval(() => {
-        setStepIndex(prev => (prev < LOADING_STEPS.length - 1 ? prev + 1 : prev));
-      }, 350);
-    }
-    return () => clearInterval(timer);
-  }, [simulatedLoading]);
-
-  // Turn off simulated loading when real data is ready and minimum time has passed
-  useEffect(() => {
-    if (!queryLoading && res) {
-      const minTimer = setTimeout(() => {
-        setSimulatedLoading(false);
-      }, 1000);
-      return () => clearTimeout(minTimer);
-    }
-  }, [queryLoading, res]);
-
-  const loading = queryLoading || simulatedLoading;
+  const loading = queryLoading;
   const report = res?.data;
   const error = queryError ? (queryError.response?.data?.message || queryError.message || 'An error occurred') : null;
 
@@ -166,35 +131,8 @@ const AaoifiScreening = () => {
 
   if (loading) {
     return (
-      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '40px 20px', textAlign: 'center', minHeight: '60vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-        <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'center' }}>
-          <div style={{ position: 'relative', width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ position: 'absolute', inset: -10, background: 'var(--primary)', opacity: 0.1, borderRadius: '50%', animation: 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite' }} />
-            <div style={{ position: 'absolute', inset: 0, border: '4px solid var(--border)', borderRadius: '50%' }} />
-            <div style={{ position: 'absolute', inset: 0, border: '4px solid var(--primary)', borderRadius: '50%', borderTopColor: 'transparent', animation: 'spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite' }} />
-            <ShieldCheck size={32} color="var(--primary)" />
-          </div>
-        </div>
-        <h2 style={{ fontSize: '1.32rem', fontWeight: 800, marginBottom: '16px' }}>Institutional AAOIFI Analysis</h2>
-        <div style={{ height: '30px', position: 'relative', overflow: 'hidden' }}>
-          <p key={stepIndex} className="animate-fade-in" style={{ color: 'var(--text-muted)', fontSize: '0.97rem', fontWeight: 500 }}>
-            {LOADING_STEPS[stepIndex]}
-          </p>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '32px' }}>
-          {LOADING_STEPS.map((_, i) => (
-            <div 
-              key={i} 
-              style={{ 
-                width: i === stepIndex ? '12px' : '8px', 
-                height: i === stepIndex ? '12px' : '8px', 
-                borderRadius: '50%', 
-                background: i <= stepIndex ? 'var(--primary)' : 'var(--border)',
-                transition: 'all 0.3s ease'
-              }} 
-            />
-          ))}
-        </div>
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '120px 0' }}>
+        <div className="spinner" />
       </div>
     );
   }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calculator, Download, Coins, Wheat, Bug as Cow, Scale, CheckCircle2, RefreshCw, AlertCircle, Calendar, Bell, Edit2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Calculator, Download, Coins, Wheat, Bug as Cow, Scale, CheckCircle2, RefreshCw, AlertCircle, Calendar, Bell, Edit2, ChevronDown, ChevronUp, Info } from 'lucide-react';
 import api, { getSettings } from '../../services/api';
 import { toastSuccess, toastError } from '../../utils/toast';
 
@@ -252,7 +252,13 @@ export default function ZakatTab({ data }) {
                 <Bell size={20} color="#d4af37" />
               </div>
               <div>
-                <div style={{ fontSize: '0.63rem', fontWeight: 800, color: '#b89326', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '4px' }}>Your Zakat (Hawl) Date</div>
+                <div style={{ fontSize: '0.63rem', fontWeight: 800, color: '#b89326', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  Your Zakat (Hawl) Date
+                  <div className="fiqh-tooltip">
+                    <Info size={12} color="#b89326" />
+                    <span className="tooltip-text">A lunar year (354 days). Zakat is only due if your wealth remains above the Nisab threshold for this entire period.</span>
+                  </div>
+                </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
                   <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-dark)' }}>
                     <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Started:</span> {new Date(hawlDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
@@ -369,8 +375,14 @@ export default function ZakatTab({ data }) {
               )}
             </div>
 
-            <div style={{ marginTop: '28px', padding: '20px 24px', background: 'linear-gradient(135deg, var(--bg-section) 0%, rgba(212,175,55,0.05) 100%)', borderRadius: '16px', border: '1px solid rgba(212,175,55,0.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ color: 'var(--text-dark)', fontWeight: 800, fontSize: '0.95rem' }}>Calculated Nisab Threshold ({nisabStandard === 'gold' ? '85g Gold' : '595g Silver'})</span>
+            <div style={{ marginTop: '28px', padding: '20px 24px', background: 'linear-gradient(135deg, var(--bg-section) 0%, rgba(212,175,55,0.05) 100%)', borderRadius: '16px', border: '1px solid rgba(212,175,55,0.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+              <span style={{ color: 'var(--text-dark)', fontWeight: 800, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                Calculated Nisab ({nisabStandard === 'gold' ? '85g Gold' : '595g Silver'})
+                <div className="fiqh-tooltip">
+                  <Info size={14} color="var(--text-muted)" />
+                  <span className="tooltip-text">Nisab is the minimum threshold of wealth. If your total wealth is below this, no Zakat is due. The Silver standard ensures more people pay Zakat to help the needy.</span>
+                </div>
+              </span>
               <span style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--gold)' }}>₦{financialNisab.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
             </div>
           </div>
@@ -457,14 +469,18 @@ export default function ZakatTab({ data }) {
               {/* Livestock Form */}
               <div className="print-card hover-lift" style={{ background: 'var(--bg)', borderRadius:'24px', padding:'36px', boxShadow:'var(--shadow-sm)', border:'1px solid var(--border)' }}>
                 <h3 style={{ fontSize: '1.14rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}><Cow size={20} color="var(--text-dark)" /> Livestock</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px', marginTop: '24px' }}>
-                  <div className="input-group">
-                    <label style={{ display:'block', fontSize: '0.79rem', fontWeight:600, color:'var(--text-dark)', marginBottom:'8px' }}>Sheep & Goats (Nisab: 40)</label>
-                    <input type="number" value={sheepCount} onChange={e => setSheepCount(e.target.value)} placeholder="0" style={{ width:'100%', padding:'14px 16px', borderRadius:'12px', border:'1px solid var(--border)', fontSize: '0.97rem', fontWeight:700, color:'var(--text-dark)', outline:'none' }} />
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginTop: '24px' }}>
+                  <div style={{ background: 'linear-gradient(135deg, rgba(34,197,94,0.05) 0%, rgba(34,197,94,0.12) 100%)', borderRadius: '16px', padding: '16px', border: '1px solid rgba(34,197,94,0.2)', position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ display:'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                      <label style={{ fontSize: '0.7rem', fontWeight:800, color:'#16a34a', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Sheep & Goats (Nisab: 40)</label>
+                    </div>
+                    <input type="number" value={sheepCount} onChange={e => setSheepCount(e.target.value)} placeholder="0" style={{ width:'100%', border:'none', fontSize: '1.4rem', fontWeight:900, color:'#16a34a', outline:'none', background: 'transparent', padding: 0 }} />
                   </div>
-                  <div className="input-group">
-                    <label style={{ display:'block', fontSize: '0.79rem', fontWeight:600, color:'var(--text-dark)', marginBottom:'8px' }}>Cows & Cattle (Nisab: 30)</label>
-                    <input type="number" value={cowCount} onChange={e => setCowCount(e.target.value)} placeholder="0" style={{ width:'100%', padding:'14px 16px', borderRadius:'12px', border:'1px solid var(--border)', fontSize: '0.97rem', fontWeight:700, color:'var(--text-dark)', outline:'none' }} />
+                  <div style={{ background: 'linear-gradient(135deg, rgba(217,119,6,0.05) 0%, rgba(217,119,6,0.12) 100%)', borderRadius: '16px', padding: '16px', border: '1px solid rgba(217,119,6,0.2)', position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ display:'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                      <label style={{ fontSize: '0.7rem', fontWeight:800, color:'#d97706', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Cows & Cattle (Nisab: 30)</label>
+                    </div>
+                    <input type="number" value={cowCount} onChange={e => setCowCount(e.target.value)} placeholder="0" style={{ width:'100%', border:'none', fontSize: '1.4rem', fontWeight:900, color:'#d97706', outline:'none', background: 'transparent', padding: 0 }} />
                   </div>
                 </div>
               </div>
@@ -473,17 +489,21 @@ export default function ZakatTab({ data }) {
               <div className="print-card hover-lift" style={{ background: 'var(--bg)', borderRadius:'24px', padding:'36px', boxShadow:'var(--shadow-sm)', border:'1px solid var(--border)' }}>
                 <h3 style={{ fontSize: '1.14rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}><Wheat size={20} color="var(--gold)" /> Agriculture & Grains</h3>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.79rem', marginBottom: '24px' }}>Nisab is 653 kg. Rate depends on irrigation.</p>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px' }}>
-                  <div className="input-group">
-                    <label style={{ display:'block', fontSize: '0.79rem', fontWeight:600, color:'var(--text-dark)', marginBottom:'8px' }}>Harvest Weight (kg)</label>
-                    <div style={{ position:'relative' }}>
-                      <input type="number" value={harvestWeight} onChange={e => setHarvestWeight(e.target.value)} placeholder="0" style={{ width:'100%', padding:'14px 48px 14px 16px', borderRadius:'12px', border:'1px solid var(--border)', fontSize: '0.97rem', fontWeight:700, color:'var(--text-dark)', outline:'none' }} />
-                      <span style={{ position:'absolute', right:'16px', top:'14px', color:'var(--text-muted)', fontWeight:700 }}>kg</span>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
+                  <div style={{ background: 'linear-gradient(135deg, rgba(212,175,55,0.05) 0%, rgba(212,175,55,0.15) 100%)', borderRadius: '16px', padding: '16px', border: '1px solid rgba(212,175,55,0.2)', position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ display:'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                      <label style={{ fontSize: '0.7rem', fontWeight:800, color:'#b89326', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Harvest Weight</label>
+                    </div>
+                    <div style={{ display:'flex', alignItems: 'baseline', gap: '4px' }}>
+                      <input type="number" value={harvestWeight} onChange={e => setHarvestWeight(e.target.value)} placeholder="0" style={{ width:'100%', border:'none', fontSize: '1.4rem', fontWeight:900, color:'var(--gold)', outline:'none', background: 'transparent', padding: 0 }} />
+                      <span style={{ color:'#b89326', fontWeight:700, fontSize: '0.9rem' }}>kg</span>
                     </div>
                   </div>
-                  <div className="input-group">
-                    <label style={{ display:'block', fontSize: '0.79rem', fontWeight:600, color:'var(--text-dark)', marginBottom:'8px' }}>Irrigation Method</label>
-                    <select value={irrigation} onChange={e => setIrrigation(e.target.value)} style={{ width:'100%', padding:'14px 16px', borderRadius:'12px', border:'1px solid var(--border)', fontSize: '0.88rem', fontWeight:600, color:'var(--text-dark)', outline:'none', background: 'var(--bg)' }}>
+                  <div style={{ background: 'var(--bg-section)', borderRadius: '16px', padding: '16px', border: '1px solid var(--border)', position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ display:'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                      <label style={{ fontSize: '0.7rem', fontWeight:800, color:'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Irrigation Method</label>
+                    </div>
+                    <select value={irrigation} onChange={e => setIrrigation(e.target.value)} style={{ width:'100%', border:'none', fontSize: '0.9rem', fontWeight:800, color:'var(--text-dark)', outline:'none', background: 'transparent', padding: 0, cursor: 'pointer' }}>
                       <option value="natural">Natural/Rain (10%)</option>
                       <option value="artificial">Artificial/Bought (5%)</option>
                     </select>
@@ -509,13 +529,18 @@ export default function ZakatTab({ data }) {
               {/* Financial Summary */}
               <div style={{ paddingBottom: '24px', borderBottom: '1px dashed var(--border)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <span style={{ fontWeight: 800, color: 'var(--text-dark)' }}>Financial Zakat</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontWeight: 800, color: 'var(--text-dark)' }}>Financial Zakat</span>
+                    {!financialEligible && totalWealth > 0 && (
+                      <span style={{ fontSize: '0.65rem', fontWeight: 700, background: 'var(--bg-section)', color: 'var(--text-muted)', padding: '2px 8px', borderRadius: '100px', border: '1px solid var(--border)' }}>Below Nisab</span>
+                    )}
+                  </div>
                   <span style={{ fontSize: '1.35rem', fontWeight: 900, color: financialEligible ? 'var(--primary)' : 'var(--text-light)', letterSpacing: '-0.5px' }}>
-                    ₦{financialZakatDue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                    {totalWealth === 0 ? '---' : `₦${financialZakatDue.toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
                   </span>
                 </div>
                 <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-                  Total Wealth: ₦{totalWealth.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                  Total Wealth: {totalWealth === 0 ? '₦0' : `₦${totalWealth.toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
                 </div>
               </div>
 

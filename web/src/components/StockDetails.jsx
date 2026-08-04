@@ -10,6 +10,18 @@ import ReactMarkdown from 'react-markdown';
 import { useAuth } from '../context/AuthContext';
 import { formatAppJustification } from '../utils/screeningFormatter';
 
+const LOADING_STEPS = [
+  "Initializing AAOIFI Screening...",
+  "Reading latest financial statements...",
+  "Fetching regulatory filings...",
+  "Searching latest company news...",
+  "Analyzing business activities...",
+  "Consulting Irshad Engine...",
+  "Calculating AAOIFI financial ratios...",
+  "Running compliance engine...",
+  "Generating transparent report..."
+];
+
 const StockDetails = ({ symbol: propSymbol }) => {
   const { symbol: paramSymbol } = useParams();
   const symbol = propSymbol || paramSymbol;
@@ -20,7 +32,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const optimisticStock = location.state?.stock || null;
 
   // React Query — uses cached data instantly on repeat visits, fetches fresh in background
-  const { data: stock, isLoading: loading, isFetching } = useQuery({
+  const { data: stock, isLoading: queryLoading, isFetching } = useQuery({
     queryKey: ['stock', symbol],
     queryFn: async () => {
       const r = await fetchStockDetails(symbol);
@@ -43,6 +55,33 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const [alertSaving, setAlertSaving] = useState(false);
   const [inWatchlist, setInWatchlist] = useState(false);
   const [watchlistLoading, setWatchlistLoading] = useState(false);
+  const [simulatedLoading, setSimulatedLoading] = useState(true);
+  const [stepIndex, setStepIndex] = useState(0);
+
+  // UI theater: simulate loading steps
+  useEffect(() => {
+    let timer;
+    if (simulatedLoading) {
+      timer = setInterval(() => {
+        setStepIndex(prev => (prev < LOADING_STEPS.length - 1 ? prev + 1 : prev));
+      }, 350);
+    }
+    return () => clearInterval(timer);
+  }, [simulatedLoading]);
+
+  // Turn off simulated loading when real data is ready and minimum time has passed
+  useEffect(() => {
+    if (!queryLoading && stock) {
+      const minTimer = setTimeout(() => {
+        setSimulatedLoading(false);
+      }, 1000);
+      return () => clearTimeout(minTimer);
+    } else if (!queryLoading && !stock) {
+      setSimulatedLoading(false);
+    }
+  }, [queryLoading, stock]);
+
+  const loading = queryLoading || simulatedLoading;
 
   // Log history & load watchlist status
   useEffect(() => {
@@ -81,8 +120,35 @@ const StockDetails = ({ symbol: propSymbol }) => {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '120px 0' }}>
-        <div className="spinner" />
+      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '120px 20px', textAlign: 'center', minHeight: '60vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'center' }}>
+          <div style={{ position: 'relative', width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ position: 'absolute', inset: -10, background: 'var(--primary)', opacity: 0.1, borderRadius: '50%', animation: 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite' }} />
+            <div style={{ position: 'absolute', inset: 0, border: '4px solid var(--border)', borderRadius: '50%' }} />
+            <div style={{ position: 'absolute', inset: 0, border: '4px solid var(--primary)', borderRadius: '50%', borderTopColor: 'transparent', animation: 'spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite' }} />
+            <ShieldCheck size={32} color="var(--primary)" />
+          </div>
+        </div>
+        <h2 style={{ fontSize: '1.32rem', fontWeight: 800, marginBottom: '16px' }}>Institutional AAOIFI Analysis</h2>
+        <div style={{ height: '30px', position: 'relative', overflow: 'hidden' }}>
+          <p key={stepIndex} className="animate-fade-in" style={{ color: 'var(--text-muted)', fontSize: '0.97rem', fontWeight: 500 }}>
+            {LOADING_STEPS[stepIndex]}
+          </p>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '32px' }}>
+          {LOADING_STEPS.map((_, i) => (
+            <div 
+              key={i} 
+              style={{ 
+                width: i === stepIndex ? '12px' : '8px', 
+                height: i === stepIndex ? '12px' : '8px', 
+                borderRadius: '50%', 
+                background: i <= stepIndex ? 'var(--primary)' : 'var(--border)',
+                transition: 'all 0.3s ease'
+              }} 
+            />
+          ))}
+        </div>
       </div>
     );
   }
