@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calculator, Download, Coins, Wheat, Bug as Cow, Scale, CheckCircle2, RefreshCw, AlertCircle, Calendar, Bell, Edit2, ChevronDown, ChevronUp, Info } from 'lucide-react';
+import { Calculator, Download, Coins, Wheat, Bug as Cow, Scale, CheckCircle2, RefreshCw, AlertCircle, Calendar, Bell, Edit2, ChevronDown, ChevronUp, Info, Sliders } from 'lucide-react';
 import api, { getSettings } from '../../services/api';
 import { toastSuccess, toastError } from '../../utils/toast';
 
@@ -97,6 +97,7 @@ export default function ZakatTab({ data }) {
   const [silverPrice, setSilverPrice] = useState(2500); // NGN per gram default
   const [nisabStandard, setNisabStandard] = useState('gold'); // gold or silver
   const [showAdvancedAssets, setShowAdvancedAssets] = useState(false);
+  const [showNisabSettings, setShowNisabSettings] = useState(false);
   const [isFetchingNisab, setIsFetchingNisab] = useState(false);
   const [fetchError, setFetchError] = useState('');
   const [overrideActive, setOverrideActive] = useState(false);
@@ -317,72 +318,86 @@ export default function ZakatTab({ data }) {
                 <h3 style={{ fontSize: '1.23rem', fontWeight: 800, color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   Smart Nisab <span style={{ padding: '4px 8px', background: 'var(--primary-10)', color: 'var(--primary)', fontSize: '0.66rem', borderRadius: '8px', fontWeight: 800 }}>LIVE</span>
                 </h3>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.84rem', margin: '4px 0 0 0' }}>Select your Nisab standard (Gold: 85g, Silver: 595g).</p>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.84rem', margin: '4px 0 0 0' }}>Your minimum threshold of wealth for Zakat eligibility.</p>
               </div>
-              <button onClick={() => fetchLiveNisab()} disabled={isFetchingNisab} className="no-print hover-lift" style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-alt)', color: 'var(--text-dark)', border: '1px solid var(--border)', padding: '10px 16px', borderRadius: '12px', fontWeight: 700, cursor: isFetchingNisab ? 'not-allowed' : 'pointer', opacity: isFetchingNisab ? 0.7 : 1 }}>
-                <RefreshCw size={16} className={isFetchingNisab ? 'animate-spin' : ''} />
-                {isFetchingNisab ? 'Fetching...' : 'Fetch Live Price'}
+              <button onClick={() => setShowNisabSettings(!showNisabSettings)} className="no-print hover-lift" style={{ display: 'flex', alignItems: 'center', gap: '8px', background: showNisabSettings ? 'var(--bg-section)' : 'var(--bg-alt)', color: 'var(--text-dark)', border: '1px solid var(--border)', padding: '10px 16px', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }}>
+                <Sliders size={16} />
+                {showNisabSettings ? 'Hide Settings' : 'Adjust Settings'}
               </button>
             </div>
 
-            {fetchError && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#ef4444', background: '#fef2f2', padding: '12px', borderRadius: '12px', marginBottom: '24px', fontSize: '0.79rem', fontWeight: 600 }}>
-                <AlertCircle size={16} /> {fetchError}
-              </div>
-            )}
-
-            <div className="no-print" style={{ display: 'flex', background: 'var(--bg-section)', borderRadius: '14px', padding: '6px', border: '1px solid var(--border)', width: 'fit-content', marginBottom: '24px' }}>
-              <button onClick={() => setNisabStandard('gold')} style={{ padding: '10px 24px', borderRadius: '10px', border: 'none', background: nisabStandard === 'gold' ? 'var(--bg)' : 'transparent', color: nisabStandard === 'gold' ? 'var(--gold)' : 'var(--text-muted)', fontWeight: nisabStandard === 'gold' ? 800 : 600, fontSize: '0.84rem', cursor: 'pointer', transition: 'all 0.2s', boxShadow: nisabStandard === 'gold' ? '0 2px 8px rgba(0,0,0,0.06)' : 'none' }}>Gold (85g)</button>
-              <button onClick={() => setNisabStandard('silver')} style={{ padding: '10px 24px', borderRadius: '10px', border: 'none', background: nisabStandard === 'silver' ? 'var(--bg)' : 'transparent', color: nisabStandard === 'silver' ? '#94a3b8' : 'var(--text-muted)', fontWeight: nisabStandard === 'silver' ? 800 : 600, fontSize: '0.84rem', cursor: 'pointer', transition: 'all 0.2s', boxShadow: nisabStandard === 'silver' ? '0 2px 8px rgba(0,0,0,0.06)' : 'none' }}>Silver (595g)</button>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
-              <div style={{ background: 'var(--bg-section)', borderRadius: '16px', padding: '16px', border: '1px solid var(--border)', position: 'relative', overflow: 'hidden' }}>
-                <div style={{ display:'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                  <label style={{ fontSize: '0.7rem', fontWeight:800, color:'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Exchange Rate</label>
-                  <span style={{ fontSize: '0.65rem', fontWeight: 700, background: 'rgba(34,197,94,0.1)', color: '#16a34a', padding: '2px 8px', borderRadius: '100px', display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#16a34a' }}/> LIVE</span>
-                </div>
-                <div style={{ display:'flex', alignItems: 'baseline', gap: '4px' }}>
-                  <span style={{ color:'var(--text-muted)', fontWeight:700, fontSize: '0.9rem' }}>₦</span>
-                  <input type="number" value={exchangeRate} onChange={e => setExchangeRate(Number(e.target.value))} style={{ width:'100%', border:'none', fontSize: '1.2rem', fontWeight:800, color:'var(--text-dark)', outline:'none', background: 'transparent', padding: 0 }} />
-                </div>
-              </div>
-
-              {nisabStandard === 'gold' ? (
-                <div style={{ background: 'linear-gradient(135deg, rgba(212,175,55,0.05) 0%, rgba(212,175,55,0.15) 100%)', borderRadius: '16px', padding: '16px', border: '1px solid rgba(212,175,55,0.2)', position: 'relative', overflow: 'hidden' }}>
-                  <div style={{ display:'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                    <label style={{ fontSize: '0.7rem', fontWeight:800, color:'#b89326', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Gold Price (Gram)</label>
-                    <span style={{ fontSize: '0.65rem', fontWeight: 700, background: 'rgba(34,197,94,0.1)', color: '#16a34a', padding: '2px 8px', borderRadius: '100px', display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#16a34a' }}/> LIVE</span>
-                  </div>
-                  <div style={{ display:'flex', alignItems: 'baseline', gap: '4px' }}>
-                    <span style={{ color:'#b89326', fontWeight:700, fontSize: '0.9rem' }}>₦</span>
-                    <input type="number" value={goldPrice} onChange={e => setGoldPrice(Number(e.target.value))} style={{ width:'100%', border:'none', fontSize: '1.2rem', fontWeight:900, color:'var(--gold)', outline:'none', background: 'transparent', padding: 0 }} />
-                  </div>
-                </div>
-              ) : (
-                <div style={{ background: 'linear-gradient(135deg, rgba(148,163,184,0.05) 0%, rgba(148,163,184,0.15) 100%)', borderRadius: '16px', padding: '16px', border: '1px solid rgba(148,163,184,0.2)', position: 'relative', overflow: 'hidden' }}>
-                  <div style={{ display:'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                    <label style={{ fontSize: '0.7rem', fontWeight:800, color:'#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Silver Price (Gram)</label>
-                    <span style={{ fontSize: '0.65rem', fontWeight: 700, background: 'rgba(34,197,94,0.1)', color: '#16a34a', padding: '2px 8px', borderRadius: '100px', display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#16a34a' }}/> LIVE</span>
-                  </div>
-                  <div style={{ display:'flex', alignItems: 'baseline', gap: '4px' }}>
-                    <span style={{ color:'#64748b', fontWeight:700, fontSize: '0.9rem' }}>₦</span>
-                    <input type="number" value={silverPrice} onChange={e => setSilverPrice(Number(e.target.value))} style={{ width:'100%', border:'none', fontSize: '1.2rem', fontWeight:900, color:'#475569', outline:'none', background: 'transparent', padding: 0 }} />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div style={{ marginTop: '28px', padding: '20px 24px', background: 'linear-gradient(135deg, var(--bg-section) 0%, rgba(212,175,55,0.05) 100%)', borderRadius: '16px', border: '1px solid rgba(212,175,55,0.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+            <div style={{ padding: '24px', background: 'linear-gradient(135deg, var(--bg-section) 0%, rgba(212,175,55,0.05) 100%)', borderRadius: '16px', border: '1px solid rgba(212,175,55,0.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
               <span style={{ color: 'var(--text-dark)', fontWeight: 800, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                Calculated Nisab ({nisabStandard === 'gold' ? '85g Gold' : '595g Silver'})
+                Wealth Nisab ({nisabStandard === 'gold' ? '85g Gold' : '595g Silver'})
                 <div className="fiqh-tooltip">
                   <Info size={14} color="var(--text-muted)" />
                   <span className="tooltip-text">Nisab is the minimum threshold of wealth. If your total wealth is below this, no Zakat is due. The Silver standard ensures more people pay Zakat to help the needy.</span>
                 </div>
               </span>
-              <span style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--gold)' }}>₦{financialNisab.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+              <span style={{ fontSize: '1.45rem', fontWeight: 900, color: 'var(--gold)' }}>₦{financialNisab.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
             </div>
+
+            {showNisabSettings && (
+              <div className="animate-fade-in" style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid var(--border)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                  <div className="no-print" style={{ display: 'flex', background: 'var(--bg-section)', borderRadius: '14px', padding: '6px', border: '1px solid var(--border)', width: 'fit-content' }}>
+                    <button onClick={() => setNisabStandard('gold')} style={{ padding: '8px 20px', borderRadius: '10px', border: 'none', background: nisabStandard === 'gold' ? 'var(--bg)' : 'transparent', color: nisabStandard === 'gold' ? 'var(--gold)' : 'var(--text-muted)', fontWeight: nisabStandard === 'gold' ? 800 : 600, fontSize: '0.84rem', cursor: 'pointer', transition: 'all 0.2s', boxShadow: nisabStandard === 'gold' ? '0 2px 8px rgba(0,0,0,0.06)' : 'none' }}>Gold (85g)</button>
+                    <button onClick={() => setNisabStandard('silver')} style={{ padding: '8px 20px', borderRadius: '10px', border: 'none', background: nisabStandard === 'silver' ? 'var(--bg)' : 'transparent', color: nisabStandard === 'silver' ? '#94a3b8' : 'var(--text-muted)', fontWeight: nisabStandard === 'silver' ? 800 : 600, fontSize: '0.84rem', cursor: 'pointer', transition: 'all 0.2s', boxShadow: nisabStandard === 'silver' ? '0 2px 8px rgba(0,0,0,0.06)' : 'none' }}>Silver (595g)</button>
+                  </div>
+                  <button onClick={() => fetchLiveNisab()} disabled={isFetchingNisab} className="no-print hover-lift" style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-alt)', color: 'var(--text-dark)', border: '1px solid var(--border)', padding: '8px 14px', borderRadius: '12px', fontWeight: 700, fontSize: '0.84rem', cursor: isFetchingNisab ? 'not-allowed' : 'pointer', opacity: isFetchingNisab ? 0.7 : 1 }}>
+                    <RefreshCw size={14} className={isFetchingNisab ? 'animate-spin' : ''} />
+                    {isFetchingNisab ? 'Fetching...' : 'Fetch Live Prices'}
+                  </button>
+                </div>
+
+                {fetchError && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#ef4444', background: '#fef2f2', padding: '12px', borderRadius: '12px', marginBottom: '20px', fontSize: '0.79rem', fontWeight: 600 }}>
+                    <AlertCircle size={16} /> {fetchError}
+                  </div>
+                )}
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
+                  <div style={{ background: 'var(--bg-section)', borderRadius: '16px', padding: '16px', border: '1px solid var(--border)', position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ display:'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                      <label style={{ fontSize: '0.7rem', fontWeight:800, color:'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Exchange Rate</label>
+                      <span style={{ fontSize: '0.65rem', fontWeight: 700, background: 'rgba(34,197,94,0.1)', color: '#16a34a', padding: '2px 8px', borderRadius: '100px', display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#16a34a' }}/> LIVE</span>
+                    </div>
+                    <div style={{ display:'flex', alignItems: 'baseline', gap: '4px' }}>
+                      <span style={{ color:'var(--text-muted)', fontWeight:700, fontSize: '0.9rem' }}>₦</span>
+                      <input type="number" value={exchangeRate} onChange={e => setExchangeRate(Number(e.target.value))} style={{ width:'100%', border:'none', fontSize: '1.2rem', fontWeight:800, color:'var(--text-dark)', outline:'none', background: 'transparent', padding: 0 }} />
+                    </div>
+                  </div>
+
+                  {nisabStandard === 'gold' ? (
+                    <div style={{ background: 'linear-gradient(135deg, rgba(212,175,55,0.05) 0%, rgba(212,175,55,0.15) 100%)', borderRadius: '16px', padding: '16px', border: '1px solid rgba(212,175,55,0.2)', position: 'relative', overflow: 'hidden' }}>
+                      <div style={{ display:'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                        <label style={{ fontSize: '0.7rem', fontWeight:800, color:'#b89326', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Gold Price (Gram)</label>
+                        <span style={{ fontSize: '0.65rem', fontWeight: 700, background: 'rgba(34,197,94,0.1)', color: '#16a34a', padding: '2px 8px', borderRadius: '100px', display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#16a34a' }}/> LIVE</span>
+                      </div>
+                      <div style={{ display:'flex', alignItems: 'baseline', gap: '4px' }}>
+                        <span style={{ color:'#b89326', fontWeight:700, fontSize: '0.9rem' }}>₦</span>
+                        <input type="number" value={goldPrice} onChange={e => setGoldPrice(Number(e.target.value))} style={{ width:'100%', border:'none', fontSize: '1.2rem', fontWeight:900, color:'var(--gold)', outline:'none', background: 'transparent', padding: 0 }} />
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ background: 'linear-gradient(135deg, rgba(148,163,184,0.05) 0%, rgba(148,163,184,0.15) 100%)', borderRadius: '16px', padding: '16px', border: '1px solid rgba(148,163,184,0.2)', position: 'relative', overflow: 'hidden' }}>
+                      <div style={{ display:'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                        <label style={{ fontSize: '0.7rem', fontWeight:800, color:'#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Silver Price (Gram)</label>
+                        <span style={{ fontSize: '0.65rem', fontWeight: 700, background: 'rgba(34,197,94,0.1)', color: '#16a34a', padding: '2px 8px', borderRadius: '100px', display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#16a34a' }}/> LIVE</span>
+                      </div>
+                      <div style={{ display:'flex', alignItems: 'baseline', gap: '4px' }}>
+                        <span style={{ color:'#64748b', fontWeight:700, fontSize: '0.9rem' }}>₦</span>
+                        <input type="number" value={silverPrice} onChange={e => setSilverPrice(Number(e.target.value))} style={{ width:'100%', border:'none', fontSize: '1.2rem', fontWeight:900, color:'#475569', outline:'none', background: 'transparent', padding: 0 }} />
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <div style={{ marginTop: '16px', textAlign: 'center' }}>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>Data intelligently fetched in real-time from MetalpriceAPI and CBN Exchange Rates</span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Financial Wealth Form */}
