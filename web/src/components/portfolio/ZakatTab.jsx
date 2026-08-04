@@ -33,7 +33,8 @@ function getSheepZakat(n) {
 }
 
 export default function ZakatTab({ data }) {
-  const { user } = useAuth();
+  const authContext = useAuth();
+  const user = authContext ? authContext.user : null;
   
   // ─── Hawl date from localStorage (set via AddHoldingModal) ───────────────
   const ZAKAT_DATE_KEY = 'irshad_zakat_hawl_date';
