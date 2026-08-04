@@ -50,6 +50,9 @@ const AdminUsers = lazyWithRetry(() => import('./components/AdminUsers'));
 const ZakatSettingsAdmin = lazyWithRetry(() => import('./components/ZakatSettingsAdmin'));
 const Pricing = lazyWithRetry(() => import('./components/Pricing'));
 const LandingPage = lazyWithRetry(() => import('./components/LandingPage'));
+const TermsPage = lazyWithRetry(() => import('./components/Terms'));
+const PrivacyPage = lazyWithRetry(() => import('./components/Privacy'));
+const DisclosurePage = lazyWithRetry(() => import('./components/Disclosure'));
 const AdminFinancialReviewQueue = lazyWithRetry(() => import('./components/AdminFinancialReviewQueue'));
 const DASHBOARD_ROUTES = ['/portfolio', '/profile', '/admin'];
 
@@ -95,6 +98,9 @@ const DocumentTitleUpdater = () => {
     else if (path.startsWith('/shariah')) title = 'Shariah Framework | Irshad';
     else if (path.startsWith('/resources')) title = 'Resources | Irshad';
     else if (path.startsWith('/about')) title = 'About Us | Irshad';
+    else if (path.startsWith('/terms')) title = 'Terms of Service | Irshad';
+    else if (path.startsWith('/privacy')) title = 'Privacy Policy | Irshad';
+    else if (path.startsWith('/disclosure')) title = 'General Disclosures & Risk | Irshad';
     document.title = title;
   }, [location]);
   return null;
@@ -330,6 +336,10 @@ function App() {
                   <Route path="/pricing" element={<Pricing />} />
                   <Route path="/shariah" element={<ShariahPage />} />
                   <Route path="/resources" element={<ResourcesPage />} />
+                  <Route path="/terms" element={<TermsPage />} />
+                  <Route path="/privacy" element={<PrivacyPage />} />
+                  <Route path="/disclosure" element={<DisclosurePage />} />
+                  <Route path="/disclosures" element={<Navigate to="/disclosure" replace />} />
                   <Route path="/market" element={<Navigate to="/portfolio" replace />} />
                   <Route path="/market/:symbol" element={
                     <DashboardLayout><StockDetails /></DashboardLayout>
