@@ -246,7 +246,7 @@ function PurificationCard({ h, onPurify }) {
         </div>
 
         {/* Stats row */}
-        <div style={{ display: 'grid', gridTemplateColumns: latestDiv ? 'repeat(4,1fr)' : 'repeat(3,1fr)', gap: '10px', marginBottom: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: latestDiv ? 'repeat(4,1fr)' : 'repeat(3,1fr)', gap: '10px', marginBottom: '16px', cursor: 'default' }} onClick={e => e.stopPropagation()}>
           {[
             { label: 'Dividends (12M)', value: fmt(dividends), sub: 'Total received' },
             latestDiv ? { label: dividendLabel, value: dividendVal, sub: dividendDate } : null,
