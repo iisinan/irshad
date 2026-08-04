@@ -205,13 +205,16 @@ const StockDetails = ({ symbol: propSymbol }) => {
 
   // ─── Business activity failure flag ──────────────────
   // True when the stock is non-halal specifically because it failed the
-  // qualitative business activity screen (not just the financial ratios).
-  // In this case we hide analysis, metrics, price chart and news.
   const isFailedBusinessActivity = isNonHalal && (
     aaoifiData?.business_status === 'fail' ||
     stock?.business_status === 'fail' ||
     (stock?.status && typeof stock.status === 'object' && stock.status?.business_status === 'fail')
   );
+
+  if (isNonHalal && !isFailedBusinessActivity) {
+    const industryText = (stock.industry || stock.sector || 'its sector').toLowerCase();
+    reason = `Although the company successfully passes the Shariah business activity screening because its core operations in ${industryText} are permissible, it fails to meet the required quantitative financial benchmarks.`;
+  }
 
   // ─── Financial ratios ─────────────────────────────
   const financials = stock.financials;
