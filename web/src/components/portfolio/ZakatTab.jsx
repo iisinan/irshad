@@ -389,17 +389,31 @@ export default function ZakatTab({ data }) {
 
           {/* Financial Wealth Form */}
           <div className="print-card hover-lift" style={{ background: 'var(--bg)', borderRadius:'24px', padding:'36px', boxShadow:'var(--shadow-sm)', border:'1px solid var(--border)' }}>
-            <h3 style={{ fontSize: '1.14rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}><Coins size={20} color="var(--primary)" /> Financial Wealth</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px', marginTop: '24px' }}>
-              <div className="input-group">
-                <label style={{ display:'block', fontSize: '0.79rem', fontWeight:600, color:'var(--text-dark)', marginBottom:'8px' }}>Stock Portfolio Value</label>
-                <div style={{ background:'var(--primary-10)', padding:'14px', borderRadius:'12px', border:'1px solid var(--primary-50)', fontSize: '0.97rem', fontWeight:700, color:'var(--primary)' }}>
-                  ₦{portfolioValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                </div>
-                <span style={{ fontSize: '0.7rem', color:'var(--text-muted)', marginTop:'6px', display:'flex', alignItems: 'center', gap: '4px' }}>
-                  <CheckCircle2 size={12} color="var(--primary)" /> Synced automatically
-                </span>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '28px', gap: '16px', flexWrap: 'wrap' }}>
+              <div>
+                <h3 style={{ fontSize: '1.14rem', fontWeight: 800, color: 'var(--text-dark)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}><Coins size={20} color="var(--primary)" /> Financial Wealth</h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '4px', marginBottom: 0, fontWeight: 500 }}>Your investable & liquid assets for Zakat calculation.</p>
               </div>
+              {totalWealth > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                  <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total Wealth</span>
+                  <span style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-1px' }}>₦{totalWealth.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Stock Portfolio — read-only display card */}
+            <div style={{ background: 'linear-gradient(135deg, var(--primary-10) 0%, rgba(15,82,87,0.12) 100%)', borderRadius: '16px', padding: '18px', border: '1px solid var(--primary-50)', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <span style={{ display:'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', fontWeight:700, color:'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>📈 Stock Portfolio</span>
+                <div style={{ fontSize: '1.35rem', fontWeight: 900, color: 'var(--primary)', letterSpacing: '-0.5px' }}>₦{portfolioValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+              </div>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.72rem', fontWeight: 700, background: 'rgba(34,197,94,0.1)', color: '#16a34a', padding: '5px 12px', borderRadius: '100px' }}>
+                <CheckCircle2 size={12} /> Auto-synced
+              </span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
               {/* Cash & Savings */}
               <div style={{ background: 'var(--bg-section)', borderRadius: '16px', padding: '18px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <label style={{ display:'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', fontWeight:700, color:'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>💵 Cash & Savings</label>
@@ -544,45 +558,42 @@ export default function ZakatTab({ data }) {
             <>
               {/* Livestock Form */}
               <div className="print-card hover-lift" style={{ background: 'var(--bg)', borderRadius:'24px', padding:'36px', boxShadow:'var(--shadow-sm)', border:'1px solid var(--border)' }}>
-                <h3 style={{ fontSize: '1.14rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}><Cow size={20} color="var(--text-dark)" /> Livestock</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginTop: '24px' }}>
-                  <div style={{ background: 'linear-gradient(135deg, rgba(34,197,94,0.05) 0%, rgba(34,197,94,0.12) 100%)', borderRadius: '16px', padding: '16px', border: '1px solid rgba(34,197,94,0.2)', position: 'relative', overflow: 'hidden' }}>
-                    <div style={{ display:'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                      <label style={{ fontSize: '0.7rem', fontWeight:800, color:'#16a34a', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Sheep & Goats (Nisab: 40)</label>
-                    </div>
-                    <input type="number" value={sheepCount} onChange={e => setSheepCount(e.target.value)} placeholder="0" style={{ width:'100%', border:'none', fontSize: '1.4rem', fontWeight:900, color:'#16a34a', outline:'none', background: 'transparent', padding: 0 }} />
+                <h3 style={{ fontSize: '1.14rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>🐄 Livestock</h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginBottom: '24px', fontWeight: 500 }}>Enter total head count for each animal type.</p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
+                  <div style={{ background: 'linear-gradient(135deg, rgba(34,197,94,0.05) 0%, rgba(34,197,94,0.12) 100%)', borderRadius: '16px', padding: '18px', border: '1px solid rgba(34,197,94,0.2)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <label style={{ fontSize: '0.75rem', fontWeight:800, color:'#16a34a', textTransform: 'uppercase', letterSpacing: '0.5px' }}>🐑 Sheep & Goats <span style={{ fontWeight: 600, color: '#16a34a99' }}>(Nisab: 40)</span></label>
+                    <input type="number" value={sheepCount} onChange={e => setSheepCount(e.target.value)} placeholder="0" style={{ width:'100%', border:'none', borderBottom: '2px solid rgba(34,197,94,0.3)', fontSize: '1.6rem', fontWeight:900, color:'#16a34a', outline:'none', background: 'transparent', padding: '4px 0', boxSizing: 'border-box' }} />
+                    {sheepNum > 0 && <span style={{ fontSize: '0.75rem', color: '#16a34a', fontWeight: 700 }}>{sheepNum >= 40 ? '✓ Above Nisab' : `${40 - sheepNum} more to reach Nisab`}</span>}
                   </div>
-                  <div style={{ background: 'linear-gradient(135deg, rgba(217,119,6,0.05) 0%, rgba(217,119,6,0.12) 100%)', borderRadius: '16px', padding: '16px', border: '1px solid rgba(217,119,6,0.2)', position: 'relative', overflow: 'hidden' }}>
-                    <div style={{ display:'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                      <label style={{ fontSize: '0.7rem', fontWeight:800, color:'#d97706', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Cows & Cattle (Nisab: 30)</label>
-                    </div>
-                    <input type="number" value={cowCount} onChange={e => setCowCount(e.target.value)} placeholder="0" style={{ width:'100%', border:'none', fontSize: '1.4rem', fontWeight:900, color:'#d97706', outline:'none', background: 'transparent', padding: 0 }} />
+                  <div style={{ background: 'linear-gradient(135deg, rgba(217,119,6,0.05) 0%, rgba(217,119,6,0.12) 100%)', borderRadius: '16px', padding: '18px', border: '1px solid rgba(217,119,6,0.2)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <label style={{ fontSize: '0.75rem', fontWeight:800, color:'#d97706', textTransform: 'uppercase', letterSpacing: '0.5px' }}>🐄 Cows & Cattle <span style={{ fontWeight: 600, color: '#d9770699' }}>(Nisab: 30)</span></label>
+                    <input type="number" value={cowCount} onChange={e => setCowCount(e.target.value)} placeholder="0" style={{ width:'100%', border:'none', borderBottom: '2px solid rgba(217,119,6,0.3)', fontSize: '1.6rem', fontWeight:900, color:'#d97706', outline:'none', background: 'transparent', padding: '4px 0', boxSizing: 'border-box' }} />
+                    {cowNum > 0 && <span style={{ fontSize: '0.75rem', color: '#d97706', fontWeight: 700 }}>{cowNum >= 30 ? '✓ Above Nisab' : `${30 - cowNum} more to reach Nisab`}</span>}
                   </div>
                 </div>
               </div>
 
               {/* Agriculture Form */}
               <div className="print-card hover-lift" style={{ background: 'var(--bg)', borderRadius:'24px', padding:'36px', boxShadow:'var(--shadow-sm)', border:'1px solid var(--border)' }}>
-                <h3 style={{ fontSize: '1.14rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}><Wheat size={20} color="var(--gold)" /> Agriculture & Grains</h3>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.79rem', marginBottom: '24px' }}>Nisab is 653 kg. Rate depends on irrigation.</p>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
-                  <div style={{ background: 'linear-gradient(135deg, rgba(212,175,55,0.05) 0%, rgba(212,175,55,0.15) 100%)', borderRadius: '16px', padding: '16px', border: '1px solid rgba(212,175,55,0.2)', position: 'relative', overflow: 'hidden' }}>
-                    <div style={{ display:'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                      <label style={{ fontSize: '0.7rem', fontWeight:800, color:'#b89326', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Harvest Weight</label>
+                <h3 style={{ fontSize: '1.14rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}><Wheat size={20} color="var(--gold)" /> Agriculture & Grains</h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginBottom: '24px', fontWeight: 500 }}>Nisab is 653 kg (5 Awsuq). Zakat rate depends on irrigation method.</p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
+                  <div style={{ background: 'linear-gradient(135deg, rgba(212,175,55,0.05) 0%, rgba(212,175,55,0.15) 100%)', borderRadius: '16px', padding: '18px', border: '1px solid rgba(212,175,55,0.25)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <label style={{ fontSize: '0.75rem', fontWeight:800, color:'#b89326', textTransform: 'uppercase', letterSpacing: '0.5px' }}>🌾 Harvest Weight</label>
+                    <div style={{ display:'flex', alignItems: 'baseline', gap: '6px' }}>
+                      <input type="number" value={harvestWeight} onChange={e => setHarvestWeight(e.target.value)} placeholder="0" style={{ width:'100%', border:'none', borderBottom: '2px solid rgba(212,175,55,0.3)', fontSize: '1.6rem', fontWeight:900, color:'var(--gold)', outline:'none', background: 'transparent', padding: '4px 0', boxSizing: 'border-box' }} />
+                      <span style={{ color:'#b89326', fontWeight:800, fontSize: '1rem' }}>kg</span>
                     </div>
-                    <div style={{ display:'flex', alignItems: 'baseline', gap: '4px' }}>
-                      <input type="number" value={harvestWeight} onChange={e => setHarvestWeight(e.target.value)} placeholder="0" style={{ width:'100%', border:'none', fontSize: '1.4rem', fontWeight:900, color:'var(--gold)', outline:'none', background: 'transparent', padding: 0 }} />
-                      <span style={{ color:'#b89326', fontWeight:700, fontSize: '0.9rem' }}>kg</span>
-                    </div>
+                    {harvestNum > 0 && <span style={{ fontSize: '0.75rem', color: agriEligible ? '#16a34a' : '#b89326', fontWeight: 700 }}>{agriEligible ? '✓ Above Nisab' : `${(agriNisab - harvestNum).toLocaleString()} kg more needed`}</span>}
                   </div>
-                  <div style={{ background: 'var(--bg-section)', borderRadius: '16px', padding: '16px', border: '1px solid var(--border)', position: 'relative', overflow: 'hidden' }}>
-                    <div style={{ display:'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                      <label style={{ fontSize: '0.7rem', fontWeight:800, color:'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Irrigation Method</label>
-                    </div>
-                    <select value={irrigation} onChange={e => setIrrigation(e.target.value)} style={{ width:'100%', border:'none', fontSize: '0.9rem', fontWeight:800, color:'var(--text-dark)', outline:'none', background: 'transparent', padding: 0, cursor: 'pointer' }}>
-                      <option value="natural">Natural/Rain (10%)</option>
-                      <option value="artificial">Artificial/Bought (5%)</option>
+                  <div style={{ background: 'var(--bg-section)', borderRadius: '16px', padding: '18px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <label style={{ fontSize: '0.75rem', fontWeight:800, color:'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>💧 Irrigation Method</label>
+                    <select value={irrigation} onChange={e => setIrrigation(e.target.value)} style={{ width:'100%', border:'none', borderBottom: '2px solid var(--border)', fontSize: '0.95rem', fontWeight:800, color:'var(--text-dark)', outline:'none', background: 'transparent', padding: '4px 0', cursor: 'pointer' }}>
+                      <option value="natural">Natural / Rain (10%)</option>
+                      <option value="artificial">Artificial / Bought (5%)</option>
                     </select>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}>Rate applied: {irrigation === 'natural' ? '10%' : '5%'}</span>
                   </div>
                 </div>
               </div>
@@ -593,68 +604,65 @@ export default function ZakatTab({ data }) {
 
         {/* RIGHT COLUMN: Sticky Summary */}
         <div className="zakat-right-col" style={{ flex: '1 1 300px', position: 'sticky', top: '24px' }}>
-          <div className="print-card hover-lift" style={{ background: 'var(--bg)', borderRadius: '24px', padding: '36px', boxShadow: '0 16px 48px rgba(0,0,0,0.06)', border: '1px solid var(--border)', position: 'relative', overflow: 'hidden' }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'linear-gradient(90deg, var(--primary) 0%, #22c5b0 100%)' }} />
-            
-            <h3 style={{ fontSize: '1.35rem', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '10px', letterSpacing: '-0.5px' }}>
-              <Calculator size={20} color="var(--primary)" /> Total Obligation
+          <div className="print-card" style={{ background: 'var(--bg)', borderRadius: '24px', padding: '32px', boxShadow: '0 16px 48px rgba(0,0,0,0.07)', border: '1px solid var(--border)', position: 'relative', overflow: 'hidden' }}>
+            {/* Top accent bar */}
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'linear-gradient(90deg, var(--primary) 0%, #22c5b0 50%, #d4af37 100%)' }} />
+
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px', letterSpacing: '-0.3px' }}>
+              <Calculator size={18} color="var(--primary)" /> Zakat Summary
             </h3>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.79rem', marginBottom: '32px' }}>Your consolidated Zakat statement based on Fiqh rules.</p>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              {/* Financial Summary */}
-              <div style={{ paddingBottom: '24px', borderBottom: '1px dashed var(--border)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontWeight: 800, color: 'var(--text-dark)' }}>Financial Zakat</span>
-                    {!financialEligible && totalWealth > 0 && (
-                      <span style={{ fontSize: '0.65rem', fontWeight: 700, background: 'var(--bg-section)', color: 'var(--text-muted)', padding: '2px 8px', borderRadius: '100px', border: '1px solid var(--border)' }}>Below Nisab</span>
-                    )}
-                  </div>
-                  <span style={{ fontSize: '1.35rem', fontWeight: 900, color: financialEligible ? 'var(--primary)' : 'var(--text-light)', letterSpacing: '-0.5px' }}>
-                    {totalWealth === 0 ? '---' : `₦${financialZakatDue.toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
-                  </span>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.76rem', marginBottom: '28px', fontWeight: 500 }}>Consolidated obligation based on Fiqh rules.</p>
+
+            {/* Financial Zakat Block */}
+            <div style={{ background: financialEligible ? 'linear-gradient(135deg, rgba(34,197,94,0.06) 0%, rgba(34,197,94,0.12) 100%)' : 'var(--bg-section)', borderRadius: '18px', padding: '20px', marginBottom: '16px', border: `1px solid ${financialEligible ? 'rgba(34,197,94,0.2)' : 'var(--border)'}` }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                <div>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 800, color: financialEligible ? '#16a34a' : 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>💰 Financial Zakat</span>
+                  {!financialEligible && totalWealth > 0 && (
+                    <div style={{ marginTop: '4px' }}><span style={{ fontSize: '0.65rem', fontWeight: 700, background: 'var(--bg)', color: 'var(--text-muted)', padding: '2px 8px', borderRadius: '100px', border: '1px solid var(--border)' }}>Below Nisab</span></div>
+                  )}
                 </div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-                  Total Wealth: {totalWealth === 0 ? '₦0' : `₦${totalWealth.toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
-                </div>
+                <span style={{ fontSize: '1.6rem', fontWeight: 900, color: financialEligible ? '#16a34a' : 'var(--text-light)', letterSpacing: '-1px' }}>
+                  {totalWealth === 0 ? '—' : `₦${financialZakatDue.toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
+                </span>
               </div>
-
-              {/* Livestock Summary */}
-              {(showAdvancedAssets || sheepNum > 0 || cowNum > 0) && (
-                <div style={{ paddingBottom: '24px', borderBottom: '1px dashed var(--border)' }}>
-                  <div style={{ fontWeight: 800, color: 'var(--text-dark)', marginBottom: '14px' }}>Livestock Zakat</div>
-                  
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>Sheep & Goats</span>
-                    <span style={{ fontWeight: 800, color: sheepNum >= 40 ? 'var(--text-dark)' : 'var(--text-light)' }}>{sheepZakat}</span>
-                  </div>
-                  
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>Cows & Cattle</span>
-                    <span style={{ fontWeight: 800, color: cowNum >= 30 ? 'var(--text-dark)' : 'var(--text-light)' }}>{cowZakat}</span>
-                  </div>
-                </div>
-              )}
-
-              {/* Agriculture Summary */}
-              {(showAdvancedAssets || harvestNum > 0) && (
-                <div style={{ background: 'var(--bg-section)', padding: '20px', borderRadius: '16px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <span style={{ fontWeight: 800, color: 'var(--text-dark)' }}>Agriculture Zakat</span>
-                    <span style={{ fontSize: '1.35rem', fontWeight: 900, color: agriEligible ? 'var(--gold)' : 'var(--text-light)', letterSpacing: '-0.5px' }}>
-                      {agriZakatDue > 0 ? `${agriZakatDue.toLocaleString(undefined, { maximumFractionDigits: 1 })} kg` : 'None'}
-                    </span>
-                  </div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-                    Harvest: {harvestNum.toLocaleString()} kg @ {irrigation === 'natural' ? '10%' : '5%'}
-                  </div>
-                </div>
-              )}
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                2.5% of ₦{totalWealth.toLocaleString(undefined, { maximumFractionDigits: 0 })} total wealth
+              </div>
             </div>
 
-            <button onClick={handlePrint} className="no-print hover-lift" style={{ marginTop: '32px', width: '100%', background: 'var(--primary)', color: 'var(--bg)', border: 'none', padding: '16px', borderRadius: '16px', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 8px 24px rgba(15,82,87,0.2)' }}>
-              <Download size={18} /> Print Statement
+            {/* Livestock Summary */}
+            {(showAdvancedAssets || sheepNum > 0 || cowNum > 0) && (
+              <div style={{ background: 'var(--bg-section)', borderRadius: '18px', padding: '20px', marginBottom: '16px', border: '1px solid var(--border)' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '14px' }}>🐄 Livestock Zakat</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>Sheep & Goats</span>
+                  <span style={{ fontWeight: 800, fontSize: '0.9rem', color: sheepNum >= 40 ? 'var(--text-dark)' : 'var(--text-light)' }}>{sheepZakat}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>Cows & Cattle</span>
+                  <span style={{ fontWeight: 800, fontSize: '0.9rem', color: cowNum >= 30 ? 'var(--text-dark)' : 'var(--text-light)' }}>{cowZakat}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Agriculture Summary */}
+            {(showAdvancedAssets || harvestNum > 0) && (
+              <div style={{ background: 'linear-gradient(135deg, rgba(212,175,55,0.05) 0%, rgba(212,175,55,0.12) 100%)', borderRadius: '18px', padding: '20px', marginBottom: '16px', border: '1px solid rgba(212,175,55,0.2)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#b89326', textTransform: 'uppercase', letterSpacing: '0.5px' }}>🌾 Agriculture Zakat</span>
+                  <span style={{ fontSize: '1.3rem', fontWeight: 900, color: agriEligible ? 'var(--gold)' : 'var(--text-light)', letterSpacing: '-0.5px' }}>
+                    {agriZakatDue > 0 ? `${agriZakatDue.toLocaleString(undefined, { maximumFractionDigits: 1 })} kg` : '—'}
+                  </span>
+                </div>
+                <div style={{ marginTop: '8px', fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                  {harvestNum.toLocaleString()} kg @ {irrigation === 'natural' ? '10%' : '5%'}
+                </div>
+              </div>
+            )}
+
+            <button onClick={handlePrint} className="no-print hover-lift" style={{ marginTop: '8px', width: '100%', background: 'linear-gradient(135deg, var(--primary) 0%, #22c5b0 100%)', color: 'white', border: 'none', padding: '16px', borderRadius: '16px', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 8px 24px rgba(15,82,87,0.25)', fontSize: '0.9rem', letterSpacing: '0.2px' }}>
+              <Download size={16} /> Print Zakat Statement
             </button>
           </div>
         </div>
