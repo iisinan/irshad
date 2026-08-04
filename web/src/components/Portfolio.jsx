@@ -199,7 +199,6 @@ export default function Portfolio() {
       <div style={{ marginBottom: '32px' }}>
         <div className="portfolio-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <div className="section-label" style={{ marginBottom: '12px', background: 'var(--primary-50)', color: 'var(--primary)', border: 'none' }}>Personal Hub</div>
             <h1 className="portfolio-title" style={{ fontSize: 'clamp(1.6rem, 5vw, 2.46rem)', fontWeight: 900, letterSpacing: '-1.5px', color: 'var(--text-dark)', lineHeight: 1.1 }}>
               {{
                 holdings: 'Holdings',

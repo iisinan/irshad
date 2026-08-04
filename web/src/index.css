@@ -4520,8 +4520,97 @@ html, body {
 
 /* ── Global: all dark hero banners inside tabs ── */
 @media (max-width: 640px) {
-  div[style*="background: 'linear-gradient(135deg, #0D1B2A"] {
-    padding: 20px 16px !important;
+  div[style*="background: 'linear-gradient(135deg, #0D1B2A"],
+  div[style*="background: 'linear-gradient(135deg, #0F5257"] {
+    padding: 24px 16px !important;
     border-radius: 18px !important;
+  }
+
+  /* Force all large inline grid minmax declarations to 1fr on mobile to prevent overflow */
+  div[style*="minmax(320px"],
+  div[style*="minmax(300px"],
+  div[style*="minmax(280px"],
+  div[style*="minmax(260px"],
+  div[style*="minmax(250px"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── About.jsx: Stats and Values grids ── */
+@media (max-width: 640px) {
+  div[style*="gridTemplateColumns: 'repeat(3, 1fr)'"] {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    padding: 16px !important;
+  }
+  div[style*="gridTemplateColumns: 'repeat(3, 1fr)'"] > div {
+    border-right: none !important;
+    border-bottom: 1px solid var(--border) !important;
+    padding: 16px !important;
+  }
+  div[style*="gridTemplateColumns: 'repeat(3, 1fr)'"] > div:last-child {
+    border-bottom: none !important;
+  }
+  /* Our commitment section */
+  div[style*="gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))'"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── Resources.jsx: Admin Manage Modal & Viewer Modal ── */
+@media (max-width: 640px) {
+  /* Manage Resource Modal Form */
+  div[style*="gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))'"] {
+    grid-template-columns: 1fr !important;
+  }
+  /* Resource Viewer Modal */
+  div[style*="maxWidth: '900px'"][style*="height: '80vh'"] {
+    height: 90vh !important;
+    border-radius: 18px !important;
+  }
+}
+
+/* ── AdminDashboard / AdminTickerEditor ── */
+@media (max-width: 640px) {
+  /* Admin Data Override Form / AdminTickerEditor Forms */
+  div[style*="gridTemplateColumns: '1fr 1fr'"] {
+    grid-template-columns: 1fr !important;
+  }
+  /* AAOIFI screening ratio breakdown modal */
+  div[style*="maxWidth: '520px'"] {
+    margin: 10px !important;
+    max-width: 100% !important;
+  }
+  /* AAOIFI screening business activity grid */
+  div[style*="gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))'"] {
+    grid-template-columns: 1fr !important;
+  }
+  /* AAOIFI screening financials summary grid */
+  div[style*="gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))'"] {
+    grid-template-columns: 1fr !important;
+  }
+  /* Admin Alerts */
+  .admin-dashboard-header-flex > div:last-child {
+    width: 100% !important;
+  }
+  .admin-dashboard-header-flex button {
+    flex: 1 !important;
+  }
+}
+
+/* ── LandingPage.jsx ── */
+@media (max-width: 640px) {
+  /* 4-column stats strip */
+  div[style*="gridTemplateColumns: 'repeat(4, 1fr)'"] {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  div[style*="gridTemplateColumns: 'repeat(4, 1fr)'"] > div {
+    border-bottom: 1px solid var(--border-strong) !important;
+  }
+  div[style*="gridTemplateColumns: 'repeat(4, 1fr)'"] > div:nth-child(even) {
+    border-right: none !important;
+  }
+  div[style*="gridTemplateColumns: 'repeat(4, 1fr)'"] > div:nth-child(n+3) {
+    border-bottom: none !important;
   }
 }
