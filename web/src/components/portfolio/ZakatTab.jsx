@@ -212,7 +212,7 @@ export default function ZakatTab({ data }) {
       <style>{`
         .print-only { display: none; }
         @media print {
-          @page { margin: 0; size: A4; }
+          @page { margin: 15mm 20mm; size: A4; }
           body * { visibility: hidden; }
           .zakat-print-container, .zakat-print-container * { visibility: visible; }
           .zakat-print-container { position: absolute; left: 0; top: 0; width: 100%; padding: 0 !important; }
@@ -229,7 +229,7 @@ export default function ZakatTab({ data }) {
       {/* ═══════════════════════════════════════════════════
           PRINT-ONLY: Full Zakat Statement Document
       ═══════════════════════════════════════════════════ */}
-      <div className="print-only" style={{ display: 'none', fontFamily: 'Georgia, serif', color: '#1a1a1a', background: '#fff', padding: '40px 48px', minHeight: '100vh' }}>
+      <div className="print-only" style={{ display: 'none', fontFamily: '"Inter", system-ui, sans-serif', color: '#0f172a', background: '#fff', padding: '0', minHeight: '100vh' }}>
 
         {/* ── Header ── */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px', paddingBottom: '24px', borderBottom: '3px solid #0F5257' }}>
@@ -383,6 +383,47 @@ export default function ZakatTab({ data }) {
             </table>
           </div>
         )}
+
+        {/* ── Consolidated Summary ── */}
+        <div style={{ marginTop: '36px', marginBottom: '32px', border: '2px solid #0F5257', borderRadius: '12px', overflow: 'hidden' }}>
+          <div style={{ background: '#0F5257', color: '#fff', padding: '14px 20px', fontSize: '15px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>
+            Summary of Zakat Payable
+          </div>
+          <div style={{ padding: '20px', background: '#f8fafc', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '14px', fontWeight: 700, color: '#334155' }}>Financial Wealth Zakat</span>
+              <span style={{ fontSize: '16px', fontWeight: 800, color: financialEligible ? '#0F5257' : '#94a3b8' }}>
+                {financialEligible ? `₦${financialZakatDue.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : '—'}
+              </span>
+            </div>
+            
+            {(sheepNum > 0 || cowNum > 0) && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '14px', fontWeight: 700, color: '#334155' }}>Livestock Zakat</span>
+                <div style={{ textAlign: 'right' }}>
+                  {sheepNum >= 40 && <div style={{ fontSize: '15px', fontWeight: 800, color: '#16a34a' }}>Sheep: {sheepZakat}</div>}
+                  {cowNum >= 30 && <div style={{ fontSize: '15px', fontWeight: 800, color: '#16a34a' }}>Cows: {cowZakat}</div>}
+                  {sheepNum < 40 && cowNum < 30 && <span style={{ fontSize: '16px', fontWeight: 800, color: '#94a3b8' }}>—</span>}
+                </div>
+              </div>
+            )}
+            
+            {harvestNum > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '14px', fontWeight: 700, color: '#334155' }}>Agriculture Zakat</span>
+                <span style={{ fontSize: '16px', fontWeight: 800, color: agriEligible ? '#d97706' : '#94a3b8' }}>
+                  {agriEligible ? `${agriZakatDue.toLocaleString(undefined, { maximumFractionDigits: 1 })} kg` : '—'}
+                </span>
+              </div>
+            )}
+            
+            {(!financialEligible && (!sheepNum || sheepNum < 40) && (!cowNum || cowNum < 30) && (!harvestNum || harvestNum < 653)) && (
+              <div style={{ padding: '12px 0', borderTop: '1px dashed #cbd5e1', textAlign: 'center', color: '#64748b', fontSize: '14px', fontWeight: 600 }}>
+                No Zakat is currently due across your registered asset classes.
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* ── Hawl Date ── */}
         {hawlDate && (
