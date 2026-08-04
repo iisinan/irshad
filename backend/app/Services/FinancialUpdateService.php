@@ -111,6 +111,22 @@ class FinancialUpdateService
             $proposedReason .= ' | Note: Proposed data passes all compliance checks.';
         }
 
+        if ($oldStatus === $proposedStatus) {
+            // No status change (halal-to-halal or non-halal-to-non-halal):
+            // Just apply the changes immediately without review or history logging
+            $financial = Financial::where('company_id', $company->id)->latest()->first();
+            if ($financial) {
+                $financial->update($newData);
+            } else {
+                $financial = Financial::create(array_merge(['company_id' => $company->id], $newData));
+            }
+            
+            $complianceService = app(AaoifiComplianceService::class);
+            $complianceService->evaluateCompliance($company, $financial, $company->sector);
+            
+            return null; // Return null since no review was generated
+        }
+
         $review = ComplianceReview::create([
             'company_id' => $company->id,
             'old_status' => $oldStatus,
