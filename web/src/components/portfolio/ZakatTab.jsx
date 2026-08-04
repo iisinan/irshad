@@ -313,28 +313,17 @@ export default function ZakatTab({ data }) {
           
           {/* Smart Nisab Setup */}
           <div className="print-card hover-lift" style={{ background: 'var(--bg)', borderRadius:'24px', padding:'36px', boxShadow:'var(--shadow-sm)', border:'1px solid var(--border)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
                 <h3 style={{ fontSize: '1.23rem', fontWeight: 800, color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  Smart Nisab <span style={{ padding: '4px 8px', background: 'var(--primary-10)', color: 'var(--primary)', fontSize: '0.66rem', borderRadius: '8px', fontWeight: 800 }}>LIVE</span>
+                  Smart Nisab Configurations <span style={{ padding: '4px 8px', background: 'var(--primary-10)', color: 'var(--primary)', fontSize: '0.66rem', borderRadius: '8px', fontWeight: 800 }}>LIVE</span>
                 </h3>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.84rem', margin: '4px 0 0 0' }}>Your minimum threshold of wealth for Zakat eligibility.</p>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.84rem', margin: '4px 0 0 0' }}>Manage your minimum thresholds for Zakat eligibility.</p>
               </div>
               <button onClick={() => setShowNisabSettings(!showNisabSettings)} className="no-print hover-lift" style={{ display: 'flex', alignItems: 'center', gap: '8px', background: showNisabSettings ? 'var(--bg-section)' : 'var(--bg-alt)', color: 'var(--text-dark)', border: '1px solid var(--border)', padding: '10px 16px', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }}>
                 <Sliders size={16} />
                 {showNisabSettings ? 'Hide Settings' : 'Adjust Settings'}
               </button>
-            </div>
-
-            <div style={{ padding: '24px', background: 'linear-gradient(135deg, var(--bg-section) 0%, rgba(212,175,55,0.05) 100%)', borderRadius: '16px', border: '1px solid rgba(212,175,55,0.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-              <span style={{ color: 'var(--text-dark)', fontWeight: 800, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                Wealth Nisab ({nisabStandard === 'gold' ? '85g Gold' : '595g Silver'})
-                <div className="fiqh-tooltip">
-                  <Info size={14} color="var(--text-muted)" />
-                  <span className="tooltip-text">Nisab is the minimum threshold of wealth. If your total wealth is below this, no Zakat is due. The Silver standard ensures more people pay Zakat to help the needy.</span>
-                </div>
-              </span>
-              <span style={{ fontSize: '1.45rem', fontWeight: 900, color: 'var(--gold)' }}>₦{financialNisab.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
             </div>
 
             {showNisabSettings && (
@@ -356,45 +345,43 @@ export default function ZakatTab({ data }) {
                   </div>
                 )}
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
-                  <div style={{ background: 'var(--bg-section)', borderRadius: '16px', padding: '16px', border: '1px solid var(--border)', position: 'relative', overflow: 'hidden' }}>
-                    <div style={{ display:'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                      <label style={{ fontSize: '0.7rem', fontWeight:800, color:'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Exchange Rate</label>
-                      <span style={{ fontSize: '0.65rem', fontWeight: 700, background: 'rgba(34,197,94,0.1)', color: '#16a34a', padding: '2px 8px', borderRadius: '100px', display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#16a34a' }}/> LIVE</span>
-                    </div>
-                    <div style={{ display:'flex', alignItems: 'baseline', gap: '4px' }}>
-                      <span style={{ color:'var(--text-muted)', fontWeight:700, fontSize: '0.9rem' }}>₦</span>
-                      <input type="number" value={exchangeRate} onChange={e => setExchangeRate(Number(e.target.value))} style={{ width:'100%', border:'none', fontSize: '1.2rem', fontWeight:800, color:'var(--text-dark)', outline:'none', background: 'transparent', padding: 0 }} />
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+                  {/* Financial Wealth Nisab */}
+                  <div style={{ background: 'var(--bg-section)', borderRadius: '16px', padding: '16px', border: '1px solid var(--border)' }}>
+                    <label style={{ fontSize: '0.7rem', fontWeight:800, color:'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', display:'block', marginBottom:'8px' }}>Financial Wealth Nisab ({nisabStandard === 'gold' ? '85g Gold' : '595g Silver'})</label>
+                    <span style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--gold)' }}>₦{financialNisab.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                    {nisabStandard === 'gold' ? (
+                      <div style={{ display:'flex', alignItems: 'center', gap: '4px', marginTop:'8px' }}>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Gold Price (Gram):</span>
+                        <input type="number" value={goldPrice} onChange={e => setGoldPrice(Number(e.target.value))} style={{ width:'80px', border:'none', fontSize: '0.85rem', fontWeight:800, color:'var(--text-dark)', outline:'none', background: 'transparent', padding: 0 }} />
+                      </div>
+                    ) : (
+                      <div style={{ display:'flex', alignItems: 'center', gap: '4px', marginTop:'8px' }}>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Silver Price (Gram):</span>
+                        <input type="number" value={silverPrice} onChange={e => setSilverPrice(Number(e.target.value))} style={{ width:'80px', border:'none', fontSize: '0.85rem', fontWeight:800, color:'var(--text-dark)', outline:'none', background: 'transparent', padding: 0 }} />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Livestock & Agri Nisabs (Static Info) */}
+                  <div style={{ background: 'var(--bg-section)', borderRadius: '16px', padding: '16px', border: '1px solid var(--border)' }}>
+                    <label style={{ fontSize: '0.7rem', fontWeight:800, color:'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', display:'block', marginBottom:'8px' }}>Livestock Nisab</label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-dark)' }}>Sheep & Goats: <span style={{ color: 'var(--primary)' }}>40</span></span>
+                      <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-dark)' }}>Cows & Buffaloes: <span style={{ color: 'var(--primary)' }}>30</span></span>
                     </div>
                   </div>
 
-                  {nisabStandard === 'gold' ? (
-                    <div style={{ background: 'linear-gradient(135deg, rgba(212,175,55,0.05) 0%, rgba(212,175,55,0.15) 100%)', borderRadius: '16px', padding: '16px', border: '1px solid rgba(212,175,55,0.2)', position: 'relative', overflow: 'hidden' }}>
-                      <div style={{ display:'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                        <label style={{ fontSize: '0.7rem', fontWeight:800, color:'#b89326', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Gold Price (Gram)</label>
-                        <span style={{ fontSize: '0.65rem', fontWeight: 700, background: 'rgba(34,197,94,0.1)', color: '#16a34a', padding: '2px 8px', borderRadius: '100px', display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#16a34a' }}/> LIVE</span>
-                      </div>
-                      <div style={{ display:'flex', alignItems: 'baseline', gap: '4px' }}>
-                        <span style={{ color:'#b89326', fontWeight:700, fontSize: '0.9rem' }}>₦</span>
-                        <input type="number" value={goldPrice} onChange={e => setGoldPrice(Number(e.target.value))} style={{ width:'100%', border:'none', fontSize: '1.2rem', fontWeight:900, color:'var(--gold)', outline:'none', background: 'transparent', padding: 0 }} />
-                      </div>
+                  <div style={{ background: 'var(--bg-section)', borderRadius: '16px', padding: '16px', border: '1px solid var(--border)' }}>
+                    <label style={{ fontSize: '0.7rem', fontWeight:800, color:'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', display:'block', marginBottom:'8px' }}>Agriculture Nisab</label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-dark)' }}>Grains & Fruits: <span style={{ color: '#16a34a' }}>653 kg (5 Awsuq)</span></span>
                     </div>
-                  ) : (
-                    <div style={{ background: 'linear-gradient(135deg, rgba(148,163,184,0.05) 0%, rgba(148,163,184,0.15) 100%)', borderRadius: '16px', padding: '16px', border: '1px solid rgba(148,163,184,0.2)', position: 'relative', overflow: 'hidden' }}>
-                      <div style={{ display:'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                        <label style={{ fontSize: '0.7rem', fontWeight:800, color:'#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Silver Price (Gram)</label>
-                        <span style={{ fontSize: '0.65rem', fontWeight: 700, background: 'rgba(34,197,94,0.1)', color: '#16a34a', padding: '2px 8px', borderRadius: '100px', display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#16a34a' }}/> LIVE</span>
-                      </div>
-                      <div style={{ display:'flex', alignItems: 'baseline', gap: '4px' }}>
-                        <span style={{ color:'#64748b', fontWeight:700, fontSize: '0.9rem' }}>₦</span>
-                        <input type="number" value={silverPrice} onChange={e => setSilverPrice(Number(e.target.value))} style={{ width:'100%', border:'none', fontSize: '1.2rem', fontWeight:900, color:'#475569', outline:'none', background: 'transparent', padding: 0 }} />
-                      </div>
-                    </div>
-                  )}
+                  </div>
                 </div>
                 
-                <div style={{ marginTop: '16px', textAlign: 'center' }}>
-                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>Data intelligently fetched in real-time from MetalpriceAPI and CBN Exchange Rates</span>
+                <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Financial data intelligently fetched in real-time from MetalpriceAPI and CBN Exchange Rates</span>
                 </div>
               </div>
             )}
@@ -445,20 +432,69 @@ export default function ZakatTab({ data }) {
                 )}
               </div>
             </div>
-            {/* Nisab Progress within Financial block */}
+            {/* Nisab Progress Summary */}
             <div style={{ marginTop: '32px', padding: '24px', background: 'var(--bg-section)', borderRadius: '20px', border: '1px solid var(--border)' }}>
-               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '14px' }}>
-                  <span style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-dark)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Wealth vs Nisab</span>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 900, color: financialEligible ? 'var(--halal)' : 'var(--text-muted)' }}>
-                    {Math.min(100, Math.round((totalWealth / financialNisab) * 100))}%
-                  </span>
-                </div>
-                <div style={{ width: '100%', height: '10px', background: 'var(--bg)', borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--border)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)' }}>
-                  <div style={{ width: `${Math.min(100, (totalWealth / financialNisab) * 100)}%`, height: '100%', background: financialEligible ? 'linear-gradient(90deg, #22c5b0 0%, var(--primary) 100%)' : 'var(--gold)', transition: 'width 0.8s cubic-bezier(0.22,1,0.36,1)' }} />
-                </div>
-                <div style={{ marginTop: '12px', fontSize: '0.75rem', fontWeight: 600, color: financialEligible ? 'var(--halal)' : 'var(--text-muted)', display: 'flex', justifyContent: 'center' }}>
-                  {financialEligible ? 'Alhamdulillah, you have reached the Nisab threshold.' : 'You have not yet reached the Nisab threshold.'}
-                </div>
+               <h4 style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '20px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Nisab Progress Summary</h4>
+               
+               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                 {/* Financial Wealth Bar */}
+                 <div>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-dark)' }}>Financial Wealth</span>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 900, color: financialEligible ? 'var(--halal)' : 'var(--text-muted)' }}>
+                        {Math.min(100, Math.round((totalWealth / financialNisab) * 100))}%
+                      </span>
+                    </div>
+                    <div style={{ width: '100%', height: '10px', background: 'var(--bg)', borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--border)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)' }}>
+                      <div style={{ width: `${Math.min(100, (totalWealth / financialNisab) * 100)}%`, height: '100%', background: financialEligible ? 'linear-gradient(90deg, #22c5b0 0%, var(--primary) 100%)' : 'var(--gold)', transition: 'width 0.8s cubic-bezier(0.22,1,0.36,1)' }} />
+                    </div>
+                 </div>
+
+                 {/* Sheep Bar */}
+                 {sheepNum > 0 && (
+                   <div>
+                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-dark)' }}>Sheep & Goats</span>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 900, color: (sheepNum >= 40) ? 'var(--halal)' : 'var(--text-muted)' }}>
+                          {Math.min(100, Math.round((sheepNum / 40) * 100))}%
+                        </span>
+                      </div>
+                      <div style={{ width: '100%', height: '10px', background: 'var(--bg)', borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--border)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)' }}>
+                        <div style={{ width: `${Math.min(100, (sheepNum / 40) * 100)}%`, height: '100%', background: (sheepNum >= 40) ? 'linear-gradient(90deg, #22c5b0 0%, var(--primary) 100%)' : 'var(--gold)', transition: 'width 0.8s cubic-bezier(0.22,1,0.36,1)' }} />
+                      </div>
+                   </div>
+                 )}
+
+                 {/* Cow Bar */}
+                 {cowNum > 0 && (
+                   <div>
+                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-dark)' }}>Cows & Buffaloes</span>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 900, color: (cowNum >= 30) ? 'var(--halal)' : 'var(--text-muted)' }}>
+                          {Math.min(100, Math.round((cowNum / 30) * 100))}%
+                        </span>
+                      </div>
+                      <div style={{ width: '100%', height: '10px', background: 'var(--bg)', borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--border)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)' }}>
+                        <div style={{ width: `${Math.min(100, (cowNum / 30) * 100)}%`, height: '100%', background: (cowNum >= 30) ? 'linear-gradient(90deg, #22c5b0 0%, var(--primary) 100%)' : 'var(--gold)', transition: 'width 0.8s cubic-bezier(0.22,1,0.36,1)' }} />
+                      </div>
+                   </div>
+                 )}
+
+                 {/* Agriculture Bar */}
+                 {harvestNum > 0 && (
+                   <div>
+                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-dark)' }}>Agriculture (Grains/Fruits)</span>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 900, color: agriEligible ? 'var(--halal)' : 'var(--text-muted)' }}>
+                          {Math.min(100, Math.round((harvestNum / agriNisab) * 100))}%
+                        </span>
+                      </div>
+                      <div style={{ width: '100%', height: '10px', background: 'var(--bg)', borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--border)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)' }}>
+                        <div style={{ width: `${Math.min(100, (harvestNum / agriNisab) * 100)}%`, height: '100%', background: agriEligible ? 'linear-gradient(90deg, #22c5b0 0%, var(--primary) 100%)' : 'var(--gold)', transition: 'width 0.8s cubic-bezier(0.22,1,0.36,1)' }} />
+                      </div>
+                   </div>
+                 )}
+               </div>
             </div>
           </div>
 
