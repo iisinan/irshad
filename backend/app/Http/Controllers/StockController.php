@@ -518,8 +518,8 @@ class StockController extends Controller
                             $finFails[] = 'Impermissible Income ('.round($aaoifiScreening->impermissible_income_ratio, 2).'% > 5%)';
                         }
 
-                        $stage2Text = ! empty($finFails) ? ' However, it fails quantitative financial screening due to: '.implode(', ', $finFails).'.' : ' However, it fails quantitative financial screening.';
-                        $statusReason = $businessReason ? ($businessReason.$stage2Text) : $stage2Text;
+                        $industryText = strtolower($company->industry ?? $company->sector ?? 'its sector');
+                        $statusReason = "Although the company successfully passes the Shariah business activity screening because its core operations in {$industryText} are permissible, it fails to meet the required quantitative financial benchmarks.";
                     }
                 } else {
                     $statusReason = 'Pending Shariah compliance screening.';

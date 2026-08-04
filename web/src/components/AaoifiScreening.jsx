@@ -160,7 +160,17 @@ const AaoifiScreening = () => {
 
   if (!report) return null;
   const isNonHalalReport = report.final_status === 'non-halal' || report.stage1?.status === 'non-halal' || report.business_status === 'fail';
-  const cleanStatusReason = formatAppJustification(report.status_reason, isNonHalalReport);
+  let cleanStatusReason = formatAppJustification(report.status_reason, isNonHalalReport);
+  
+  const isFailedBusinessActivity = isNonHalalReport && report.business_status === 'fail';
+  if (isNonHalalReport && !isFailedBusinessActivity) {
+    // If the backend didn't provide industry, fallback to 'its sector' or use companyName if necessary.
+    // In AAOIFI, we don't have stock.industry natively unless we fetch it or pass it. 
+    // Wait, the API might not include industry in `report`. If it's missing, 'its sector' works perfectly.
+    const industryText = (report.industry || 'its sector').toLowerCase();
+    cleanStatusReason = `Although the company successfully passes the Shariah business activity screening because its core operations in ${industryText} are permissible, it fails to meet the required quantitative financial benchmarks.`;
+  }
+
   const cleanStage1Reason = formatAppJustification(report.stage1?.reason || report.business_reasoning, isNonHalalReport);
   const fd = report.financial_data_used || {};
   const totalAssets = parseFloat(fd.total_assets) || 0;
