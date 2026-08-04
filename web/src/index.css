@@ -4534,6 +4534,29 @@ html, body {
   div[style*="minmax(250px"] {
     grid-template-columns: 1fr !important;
   }
+  
+  /* ── Market Screener (MarketTab.jsx) ── */
+  .market-filter-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .market-filter-row > div,
+  .market-filter-row > select {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: none !important;
+  }
+  .market-filter-row > div:nth-child(2) {
+    /* The Segmented control for Halal/Non-Halal */
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+  .market-search-bar input {
+    font-size: 16px !important; /* Force 16px to prevent iOS zoom */
+    padding-top: 14px !important;
+    padding-bottom: 14px !important;
+  }
 }
 
 /* ── About.jsx: Stats and Values grids ── */
