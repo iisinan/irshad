@@ -23,6 +23,7 @@ class PortfolioController extends Controller
     {
         $holdings = Holding::with([
             'company.financials:id,company_id,total_revenue,interest_income',
+            'company.latestDividend',
             'company.dividends' => function ($query) {
                 $query->where('status', 'paid')
                     ->where('pay_date', '>=', now()->subMonths(12));
@@ -69,6 +70,11 @@ class PortfolioController extends Controller
                 'is_halal' => $isHalal,
                 'purification_due' => round($purificationDue, 2),
                 'total_dividends' => round($totalDividendsReceived, 2),
+                'latest_dividend' => $company->latestDividend ? [
+                    'amount' => $company->latestDividend->amount,
+                    'pay_date' => $company->latestDividend->pay_date?->toISOString(),
+                    'status' => $company->latestDividend->status,
+                ] : null,
                 'non_compliant_ratio' => round($nonCompliantRatio, 2),
                 'logo_url' => $company->logo_url ?? null,
                 'purchase_date' => $holding->purchase_date,

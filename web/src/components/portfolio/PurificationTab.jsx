@@ -95,92 +95,108 @@ function PurificationCard({ h, onPurify }) {
   const totalValue = Number(h.total_value || 0);
   const shares = Number(h.shares || 0);
   const duePct = dividends > 0 ? Math.min(100, (due / dividends) * 100) : 0;
+  
+  const latestDiv = h.latest_dividend;
+  let dividendText = 'Recent Dividend';
+  let dividendVal = '₦0.00 /sh';
+  let dividendDate = null;
+  
+  if (latestDiv) {
+    const isUpcoming = latestDiv.status !== 'paid' && new Date(latestDiv.pay_date) > new Date();
+    dividendText = isUpcoming ? 'Upcoming Dividend' : 'Last Paid Dividend';
+    dividendVal = `₦${Number(latestDiv.amount).toFixed(2)} /sh`;
+    if (latestDiv.pay_date) {
+        dividendDate = new Date(latestDiv.pay_date).toLocaleDateString('en-NG', { month: 'short', year: '2-digit' });
+    }
+  }
 
   return (
     <div
       style={{
-        borderRadius: '20px',
-        border: '1px solid rgba(217,119,6,0.2)',
-        background: 'var(--bg)',
+        borderRadius: '24px',
+        border: '1px solid rgba(217,119,6,0.15)',
+        background: 'linear-gradient(180deg, var(--bg) 0%, rgba(217,119,6,0.02) 100%)',
         overflow: 'hidden',
-        boxShadow: '0 2px 12px rgba(217,119,6,0.06)',
-        transition: 'transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s',
+        boxShadow: '0 8px 30px rgba(0,0,0,0.03)',
+        transition: 'transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s',
+        position: 'relative'
       }}
-      onMouseEnter={e => { e.currentTarget.style.transform='translateY(-3px)'; e.currentTarget.style.boxShadow='0 12px 36px rgba(217,119,6,0.13)'; }}
-      onMouseLeave={e => { e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow='0 2px 12px rgba(217,119,6,0.06)'; }}
+      onMouseEnter={e => { e.currentTarget.style.transform='translateY(-4px)'; e.currentTarget.style.boxShadow='0 16px 40px rgba(217,119,6,0.1)'; }}
+      onMouseLeave={e => { e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow='0 8px 30px rgba(0,0,0,0.03)'; }}
     >
-      {/* Top colour bar */}
-      <div style={{ height:'3px', background:'linear-gradient(90deg, rgba(217,119,6,0.8), rgba(245,158,11,0.4), transparent)', borderRadius:'3px 3px 0 0' }} />
+      {/* Subtle glow effect behind logo */}
+      <div style={{ position: 'absolute', top: '-40px', left: '-40px', width: '150px', height: '150px', background: 'radial-gradient(circle, rgba(217,119,6,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
-      <div style={{ padding:'22px 24px 24px' }}>
-
+      <div style={{ padding:'28px' }}>
         {/* Row 1 — identity + badge */}
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'18px' }}>
-          <div style={{ display:'flex', alignItems:'center', gap:'14px' }}>
-            <CompanyLogo symbol={h.symbol} logoUrl={h.logo_url} size={52} radius={14} />
+        <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:'24px', position: 'relative', zIndex: 1 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:'16px' }}>
+            <div style={{ padding: '4px', background: 'var(--bg)', borderRadius: '18px', boxShadow: '0 4px 12px rgba(0,0,0,0.04)', border: '1px solid var(--border)' }}>
+                <CompanyLogo symbol={h.symbol} logoUrl={h.logo_url} size={48} radius={14} />
+            </div>
             <div>
-              <div style={{ fontWeight:800, fontSize:'1.08rem', color:'var(--text-dark)', letterSpacing:'-0.3px' }}>{h.symbol}</div>
-              <div style={{ fontSize:'0.73rem', color:'var(--text-muted)', marginTop:'3px' }}>
-                {shares.toLocaleString()} shares · ₦{Number(h.average_buy_price || 0).toLocaleString()} avg cost
+              <div style={{ fontWeight:800, fontSize:'1.15rem', color:'var(--text-dark)', letterSpacing:'-0.3px', marginBottom: '2px' }}>{h.symbol}</div>
+              <div style={{ fontSize:'0.75rem', color:'var(--text-muted)', fontWeight: 500 }}>
+                {shares.toLocaleString()} shares · ₦{Number(h.average_buy_price || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} avg cost
               </div>
             </div>
           </div>
 
-          {/* Purification badge */}
-          <div style={{ background:'linear-gradient(135deg, rgba(217,119,6,0.1), rgba(245,158,11,0.06))', border:'1px solid rgba(217,119,6,0.25)', borderRadius:'10px', padding:'6px 12px', display:'flex', alignItems:'center', gap:'5px', flexShrink:0 }}>
-            <TrendingDown size={12} color="#D97706" />
-            <span style={{ fontSize:'0.7rem', fontWeight:700, color:'#D97706' }}>Purification Required</span>
+          <div style={{ background:'rgba(217,119,6,0.08)', border:'1px solid rgba(217,119,6,0.2)', borderRadius:'99px', padding:'6px 14px', display:'flex', alignItems:'center', gap:'6px', flexShrink:0 }}>
+            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#D97706', boxShadow: '0 0 8px rgba(217,119,6,0.6)', animation: 'pulse 2s infinite' }} />
+            <span style={{ fontSize:'0.7rem', fontWeight:800, color:'#D97706', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Purification Required</span>
           </div>
         </div>
 
-        {/* Row 2 — stat pills */}
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'10px', marginBottom:'18px' }}>
+        {/* Row 2 — stat grid */}
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap:'12px', marginBottom:'24px' }}>
           {[
-            { label:'Dividends (12M)', value:`₦${dividends.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`, sub: null },
+            { label:'Dividends (12M)', value:`₦${dividends.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`, sub: 'Total received' },
+            { label: dividendText, value: dividendVal, sub: dividendDate || 'N/A' },
             { label:'Impure Ratio', value:`${ratio.toFixed(2)}%`, sub: '≤ 5% threshold', warn: ratio > 5 },
-            { label:'Portfolio Value', value:`₦${totalValue.toLocaleString()}`, sub: null },
-          ].map(stat => (
-            <div key={stat.label} style={{ background:'var(--bg-section)', borderRadius:'12px', padding:'12px 14px', border:'1px solid var(--border)' }}>
-              <div style={{ fontSize:'0.62rem', fontWeight:700, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.5px', marginBottom:'5px' }}>{stat.label}</div>
-              <div style={{ fontSize:'0.88rem', fontWeight:900, color: stat.warn ? '#D97706' : 'var(--text-dark)' }}>{stat.value}</div>
-              {stat.sub && <div style={{ fontSize:'0.6rem', color:'var(--text-muted)', marginTop:'2px' }}>{stat.sub}</div>}
+            { label:'Portfolio Value', value:`₦${totalValue.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`, sub: 'Current' },
+          ].map((stat, i) => (
+            <div key={i} style={{ background:'var(--bg)', borderRadius:'16px', padding:'14px 16px', border:'1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+              <div style={{ fontSize:'0.65rem', fontWeight:700, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.4px', marginBottom:'6px' }}>{stat.label}</div>
+              <div style={{ fontSize:'0.9rem', fontWeight:900, color: stat.warn ? '#D97706' : 'var(--text-dark)' }}>{stat.value}</div>
+              <div style={{ fontSize:'0.65rem', color:'var(--text-muted)', marginTop:'4px', fontWeight: 500 }}>{stat.sub}</div>
             </div>
           ))}
         </div>
 
         {/* Row 3 — progress bar */}
-        <div style={{ marginBottom:'18px' }}>
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'7px' }}>
-            <span style={{ fontSize:'0.67rem', fontWeight:700, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.4px' }}>Impure portion of dividends</span>
-            <span style={{ fontSize:'0.67rem', fontWeight:700, color:'#D97706' }}>{duePct.toFixed(2)}%</span>
+        <div style={{ marginBottom:'24px', background: 'var(--bg)', border: '1px solid var(--border)', padding: '16px', borderRadius: '16px' }}>
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'10px' }}>
+            <span style={{ fontSize:'0.7rem', fontWeight:800, color:'var(--text-dark)', textTransform:'uppercase', letterSpacing:'0.5px' }}>Impure portion of dividends</span>
+            <span style={{ fontSize:'0.75rem', fontWeight:800, color:'#D97706', background: 'rgba(217,119,6,0.1)', padding: '2px 8px', borderRadius: '6px' }}>{duePct.toFixed(2)}%</span>
           </div>
-          <div style={{ height:'7px', background:'var(--bg-section)', borderRadius:'99px', overflow:'hidden', border:'1px solid var(--border)' }}>
+          <div style={{ height:'8px', background:'var(--bg-section)', borderRadius:'99px', overflow:'hidden', border:'1px solid var(--border)' }}>
             <div style={{
               height:'100%',
-              width:`${duePct}%`,
-              background:'linear-gradient(90deg, #D97706, #F59E0B)',
+              width:`${Math.max(1, duePct)}%`, // At least 1% so it's visible
+              background:'linear-gradient(90deg, #F59E0B, #D97706)',
               borderRadius:'99px',
-              transition:'width 0.6s cubic-bezier(0.16,1,0.3,1)',
-              boxShadow:'0 0 8px rgba(217,119,6,0.4)'
+              transition:'width 1s cubic-bezier(0.16,1,0.3,1)',
+              boxShadow:'0 0 10px rgba(217,119,6,0.5)'
             }} />
           </div>
         </div>
 
         {/* Row 4 — amount + CTA */}
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', background:'linear-gradient(135deg, rgba(217,119,6,0.06), rgba(245,158,11,0.03))', borderRadius:'14px', padding:'14px 18px', border:'1px solid rgba(217,119,6,0.15)' }}>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', background:'linear-gradient(135deg, rgba(217,119,6,0.12), rgba(245,158,11,0.04))', borderRadius:'18px', padding:'18px 24px', border:'1px solid rgba(217,119,6,0.2)' }}>
           <div>
-            <div style={{ fontSize:'0.65rem', fontWeight:700, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.5px', marginBottom:'3px' }}>Amount to Purify</div>
-            <div style={{ fontSize:'1.35rem', fontWeight:900, color:'#D97706', letterSpacing:'-0.5px' }}>₦{due.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
+            <div style={{ fontSize:'0.7rem', fontWeight:800, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.5px', marginBottom:'4px' }}>Amount to Purify</div>
+            <div style={{ fontSize:'1.6rem', fontWeight:900, color:'#D97706', letterSpacing:'-0.5px', textShadow: '0 2px 10px rgba(217,119,6,0.15)' }}>₦{due.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
           </div>
           <button
             onClick={() => onPurify(h)}
-            style={{ display:'flex', alignItems:'center', gap:'8px', background:'linear-gradient(135deg, #D97706, #F59E0B)', color:'white', border:'none', padding:'12px 20px', borderRadius:'12px', fontSize:'0.82rem', fontWeight:800, cursor:'pointer', boxShadow:'0 6px 20px rgba(217,119,6,0.3)', transition:'opacity 0.2s, transform 0.15s', whiteSpace:'nowrap' }}
-            onMouseEnter={e => { e.currentTarget.style.opacity='0.88'; e.currentTarget.style.transform='scale(1.03)'; }}
-            onMouseLeave={e => { e.currentTarget.style.opacity='1'; e.currentTarget.style.transform='scale(1)'; }}
+            style={{ display:'flex', alignItems:'center', gap:'8px', background:'linear-gradient(135deg, #D97706, #B45309)', color:'white', border:'none', padding:'14px 24px', borderRadius:'14px', fontSize:'0.9rem', fontWeight:800, cursor:'pointer', boxShadow:'0 8px 20px rgba(217,119,6,0.3)', transition:'all 0.2s cubic-bezier(0.16,1,0.3,1)', whiteSpace:'nowrap' }}
+            onMouseEnter={e => { e.currentTarget.style.transform='scale(1.03) translateY(-2px)'; e.currentTarget.style.boxShadow='0 12px 24px rgba(217,119,6,0.4)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform='scale(1) translateY(0)'; e.currentTarget.style.boxShadow='0 8px 20px rgba(217,119,6,0.3)'; }}
           >
-            <Sparkles size={14} />
+            <Sparkles size={16} />
             Purify Now
-            <ArrowRight size={14} />
+            <ArrowRight size={16} />
           </button>
         </div>
 

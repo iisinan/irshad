@@ -62,6 +62,11 @@ class Company extends Model
         return $this->hasMany(Dividend::class);
     }
 
+    public function latestDividend(): HasOne
+    {
+        return $this->hasOne(Dividend::class)->latestOfMany('pay_date');
+    }
+
     public function status(): HasOne
     {
         return $this->hasOne(StockStatus::class);
