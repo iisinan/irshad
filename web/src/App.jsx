@@ -13,21 +13,23 @@ import './index.css';
 
 const lazyWithRetry = (componentImport) =>
   React.lazy(async () => {
+    const refreshKey = 'chunk_reload_' + window.location.pathname;
     try {
-      return await componentImport();
+      const module = await componentImport();
+      sessionStorage.removeItem(refreshKey);
+      return module;
     } catch (error) {
       const isChunkError = 
         error?.message?.includes('dynamically imported module') ||
         error?.message?.includes('Loading chunk') ||
-        error?.message?.includes('Failed to fetch');
+        error?.message?.includes('Failed to fetch') ||
+        error?.message?.includes('Importing a module script failed');
 
-      const refreshKey = 'chunk_reload_' + window.location.pathname;
       const alreadyRefreshed = sessionStorage.getItem(refreshKey);
 
       if (isChunkError && !alreadyRefreshed) {
         sessionStorage.setItem(refreshKey, 'true');
         window.location.reload();
-        // Return a pending promise so Suspense stays active while browser reloads
         return new Promise(() => {});
       }
       sessionStorage.removeItem(refreshKey);

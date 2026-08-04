@@ -203,7 +203,8 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
   const [editingHolding, setEditingHolding] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  const { summary, holdings } = data;
+  const summary         = data?.summary || {};
+  const holdings        = data?.holdings || [];
   const totalBalance    = summary.total_balance    || 0;
   const compliance      = summary.health_percentage ?? 100;
   const isHoldingHalal = h => !!h.is_halal || ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(h.symbol);
