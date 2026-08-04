@@ -48,9 +48,9 @@ function CalcModal({ h, onClose, onPurify }) {
       </div>
       <div style={{ background: 'var(--bg)' }}>
         {rows.map((row, i) => (
-          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px', borderTop: i > 0 ? '1px solid var(--border)' : 'none', background: row.highlight ? 'linear-gradient(135deg, rgba(217,119,6,0.05), rgba(245,158,11,0.02))' : 'transparent' }}>
-            <span style={{ fontSize: '0.78rem', color: row.highlight ? 'var(--text-dark)' : 'var(--text-muted)', fontWeight: row.highlight ? 700 : 500 }}>{row.label}</span>
-            <span style={{ fontSize: row.highlight ? '0.92rem' : '0.82rem', fontWeight: row.highlight ? 900 : 700, color: row.highlight ? '#D97706' : 'var(--text-dark)', marginLeft: '12px' }}>{row.value}</span>
+          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px', padding: '12px 16px', borderTop: i > 0 ? '1px solid var(--border)' : 'none', background: row.highlight ? 'linear-gradient(135deg, rgba(217,119,6,0.05), rgba(245,158,11,0.02))' : 'transparent' }}>
+            <span style={{ fontSize: '0.78rem', color: row.highlight ? 'var(--text-dark)' : 'var(--text-muted)', fontWeight: row.highlight ? 700 : 500, flex: 1, minWidth: '120px' }}>{row.label}</span>
+            <span style={{ fontSize: row.highlight ? '0.92rem' : '0.82rem', fontWeight: row.highlight ? 900 : 700, color: row.highlight ? '#D97706' : 'var(--text-dark)' }}>{row.value}</span>
           </div>
         ))}
       </div>
@@ -68,22 +68,22 @@ function CalcModal({ h, onClose, onPurify }) {
         style={{ background: 'var(--bg)', borderRadius: '28px', width: '100%', maxWidth: '520px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 40px 100px rgba(0,0,0,0.25)', animation: 'slideUpFade 0.35s cubic-bezier(0.16,1,0.3,1)', position: 'relative' }}
       >
         {/* Header */}
-        <div style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)', padding: '28px', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)', padding: '24px 20px', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '120px', height: '120px', background: 'rgba(217,119,6,0.15)', borderRadius: '50%', pointerEvents: 'none' }} />
           <button onClick={onClose} style={{ position: 'absolute', top: '16px', right: '16px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'white', zIndex: 1 }}>
             <X size={15} />
           </button>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', zIndex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '16px', position: 'relative', zIndex: 1 }}>
             <div style={{ padding: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.15)' }}>
               <CompanyLogo symbol={h.symbol} logoUrl={h.logo_url} size={48} radius={12} />
             </div>
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: '1 1 200px' }}>
               <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>Purification Calculation</div>
               <div style={{ fontWeight: 900, fontSize: '1.3rem', color: 'white', letterSpacing: '-0.5px' }}>{h.symbol}</div>
               <div style={{ fontSize: '0.73rem', color: 'rgba(255,255,255,0.55)', marginTop: '2px' }}>{Number(h.shares).toLocaleString()} shares · {fmt(h.average_buy_price)} avg cost</div>
             </div>
-            <div style={{ textAlign: 'right' }}>
+            <div style={{ textAlign: 'right', flex: '1 1 100px' }}>
               <div style={{ fontSize: '0.6rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Amount Due</div>
               <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#F59E0B', letterSpacing: '-1px', lineHeight: 1 }}>{fmt(due)}</div>
             </div>
@@ -101,7 +101,7 @@ function CalcModal({ h, onClose, onPurify }) {
           </div>
         </div>
 
-        <div style={{ padding: '24px' }}>
+        <div style={{ padding: '20px' }}>
           {/* Step 1 — Dividends */}
           <Section
             title="Step 1 — Total Dividends Received (12M)"
@@ -246,7 +246,7 @@ function PurificationCard({ h, onPurify }) {
         </div>
 
         {/* Stats row */}
-        <div style={{ display: 'grid', gridTemplateColumns: latestDiv ? 'repeat(4,1fr)' : 'repeat(3,1fr)', gap: '10px', marginBottom: '16px', cursor: 'default' }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '10px', marginBottom: '16px', cursor: 'default' }} onClick={e => e.stopPropagation()}>
           {[
             { label: 'Dividends (12M)', value: fmt(dividends), sub: 'Total received' },
             latestDiv ? { label: dividendLabel, value: dividendVal, sub: dividendDate } : null,
@@ -262,9 +262,9 @@ function PurificationCard({ h, onPurify }) {
         </div>
 
         {/* Bottom row: progress bar + amount to purify */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
           {/* Progress */}
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: '1 1 200px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
               <span style={{ fontSize: '0.62rem', fontWeight: 600, color: 'var(--text-muted)' }}>Impure portion</span>
               <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#D97706' }}>{duePct.toFixed(2)}%</span>
@@ -275,7 +275,7 @@ function PurificationCard({ h, onPurify }) {
           </div>
 
           {/* Amount to purify + hint */}
-          <div style={{ background: 'linear-gradient(135deg, rgba(217,119,6,0.1), rgba(245,158,11,0.05))', border: '1px solid rgba(217,119,6,0.2)', borderRadius: '12px', padding: '10px 16px', textAlign: 'right', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ background: 'linear-gradient(135deg, rgba(217,119,6,0.1), rgba(245,158,11,0.05))', border: '1px solid rgba(217,119,6,0.2)', borderRadius: '12px', padding: '10px 16px', flex: '1 1 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
             <div>
               <div style={{ fontSize: '0.58rem', fontWeight: 700, color: '#D97706', textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '1px' }}>Amount to Purify</div>
               <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#D97706', letterSpacing: '-0.5px' }}>{fmt(due)}</div>
