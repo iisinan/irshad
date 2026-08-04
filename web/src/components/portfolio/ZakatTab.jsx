@@ -400,101 +400,136 @@ export default function ZakatTab({ data }) {
                   <CheckCircle2 size={12} color="var(--primary)" /> Synced automatically
                 </span>
               </div>
-              <div className="input-group">
-                <label style={{ display:'block', fontSize: '0.79rem', fontWeight:600, color:'var(--text-dark)', marginBottom:'8px' }}>Cash & Savings</label>
+              {/* Cash & Savings */}
+              <div style={{ background: 'var(--bg-section)', borderRadius: '16px', padding: '18px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <label style={{ display:'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', fontWeight:700, color:'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>💵 Cash & Savings</label>
                 <div style={{ position:'relative' }}>
-                  <span style={{ position:'absolute', left:'16px', top:'14px', color:'var(--text-muted)', fontWeight:700 }}>₦</span>
-                  <input type="number" value={cash} onChange={e => setCash(e.target.value)} placeholder="0.00" style={{ width:'100%', padding:'14px 16px 14px 36px', borderRadius:'12px', border:'1px solid var(--border)', fontSize: '0.97rem', fontWeight:700, color:'var(--text-dark)', outline:'none' }} />
+                  <span style={{ position:'absolute', left:'14px', top:'50%', transform:'translateY(-50%)', color:'var(--text-muted)', fontWeight:800, fontSize: '1rem' }}>₦</span>
+                  <input type="number" value={cash} onChange={e => setCash(e.target.value)} placeholder="0.00" style={{ width:'100%', padding:'12px 14px 12px 32px', borderRadius:'10px', border:'1.5px solid var(--border)', fontSize: '1.05rem', fontWeight:800, color:'var(--text-dark)', outline:'none', background: 'var(--bg)', boxSizing: 'border-box' }} />
                 </div>
+                {Number(cash) > 0 && <span style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 700 }}>✓ Entered</span>}
               </div>
-              <div className="input-group">
-                <label style={{ display:'block', fontSize: '0.79rem', fontWeight:600, color:'var(--text-dark)', marginBottom:'8px' }}>Gold Held (Grams)</label>
+
+              {/* Gold */}
+              <div style={{ background: 'linear-gradient(135deg, rgba(212,175,55,0.06) 0%, rgba(212,175,55,0.14) 100%)', borderRadius: '16px', padding: '18px', border: '1px solid rgba(212,175,55,0.25)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <label style={{ display:'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', fontWeight:700, color:'#b89326', textTransform: 'uppercase', letterSpacing: '0.5px' }}>🥇 Gold Held (Grams)</label>
                 <div style={{ position:'relative' }}>
-                  <input type="number" value={goldGrams} onChange={e => setGoldGrams(e.target.value)} placeholder="0" style={{ width:'100%', padding:'14px 48px 14px 16px', borderRadius:'12px', border:'1px solid var(--border)', fontSize: '0.97rem', fontWeight:700, color:'var(--text-dark)', outline:'none' }} />
-                  <span style={{ position:'absolute', right:'16px', top:'14px', color:'var(--text-muted)', fontWeight:700 }}>g</span>
+                  <input type="number" value={goldGrams} onChange={e => setGoldGrams(e.target.value)} placeholder="0" style={{ width:'100%', padding:'12px 40px 12px 14px', borderRadius:'10px', border:'1.5px solid rgba(212,175,55,0.3)', fontSize: '1.05rem', fontWeight:800, color:'var(--gold)', outline:'none', background: 'var(--bg)', boxSizing: 'border-box' }} />
+                  <span style={{ position:'absolute', right:'14px', top:'50%', transform:'translateY(-50%)', color:'#b89326', fontWeight:800, fontSize: '0.85rem' }}>g</span>
                 </div>
                 {goldNum > 0 && (
-                  <span style={{ fontSize: '0.7rem', color:'var(--primary)', marginTop:'6px', display:'block', fontWeight: 600 }}>
-                    ≈ ₦{goldNum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </span>
+                  <span style={{ fontSize: '0.75rem', color:'var(--gold)', fontWeight: 700 }}>≈ ₦{goldNum.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
                 )}
               </div>
-              <div className="input-group">
-                <label style={{ display:'block', fontSize: '0.79rem', fontWeight:600, color:'var(--text-dark)', marginBottom:'8px' }}>Silver Held (Grams)</label>
+
+              {/* Silver */}
+              <div style={{ background: 'linear-gradient(135deg, rgba(148,163,184,0.06) 0%, rgba(148,163,184,0.14) 100%)', borderRadius: '16px', padding: '18px', border: '1px solid rgba(148,163,184,0.25)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <label style={{ display:'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', fontWeight:700, color:'#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>🥈 Silver Held (Grams)</label>
                 <div style={{ position:'relative' }}>
-                  <input type="number" value={silverGrams} onChange={e => setSilverGrams(e.target.value)} placeholder="0" style={{ width:'100%', padding:'14px 48px 14px 16px', borderRadius:'12px', border:'1px solid var(--border)', fontSize: '0.97rem', fontWeight:700, color:'var(--text-dark)', outline:'none' }} />
-                  <span style={{ position:'absolute', right:'16px', top:'14px', color:'var(--text-muted)', fontWeight:700 }}>g</span>
+                  <input type="number" value={silverGrams} onChange={e => setSilverGrams(e.target.value)} placeholder="0" style={{ width:'100%', padding:'12px 40px 12px 14px', borderRadius:'10px', border:'1.5px solid rgba(148,163,184,0.3)', fontSize: '1.05rem', fontWeight:800, color:'#475569', outline:'none', background: 'var(--bg)', boxSizing: 'border-box' }} />
+                  <span style={{ position:'absolute', right:'14px', top:'50%', transform:'translateY(-50%)', color:'#64748b', fontWeight:800, fontSize: '0.85rem' }}>g</span>
                 </div>
                 {silverNum > 0 && (
-                  <span style={{ fontSize: '0.7rem', color:'var(--primary)', marginTop:'6px', display:'block', fontWeight: 600 }}>
-                    ≈ ₦{silverNum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </span>
+                  <span style={{ fontSize: '0.75rem', color:'#64748b', fontWeight: 700 }}>≈ ₦{silverNum.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
                 )}
               </div>
             </div>
             {/* Nisab Progress Summary */}
-            <div style={{ marginTop: '32px', padding: '24px', background: 'var(--bg-section)', borderRadius: '20px', border: '1px solid var(--border)' }}>
-               <h4 style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '20px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Nisab Progress Summary</h4>
-               
-               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                 {/* Financial Wealth Bar */}
-                 <div>
-                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-dark)' }}>Financial Wealth</span>
-                      <span style={{ fontSize: '0.85rem', fontWeight: 900, color: financialEligible ? 'var(--halal)' : 'var(--text-muted)' }}>
-                        {Math.min(100, Math.round((totalWealth / financialNisab) * 100))}%
-                      </span>
+            <div style={{ marginTop: '32px', padding: '28px', background: 'linear-gradient(135deg, var(--bg-section) 0%, rgba(34,197,140,0.03) 100%)', borderRadius: '24px', border: '1px solid var(--border)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+                <div>
+                  <h4 style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>Nisab Progress</h4>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px', fontWeight: 500 }}>Each category is assessed independently</p>
+                </div>
+                {financialEligible && (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', borderRadius: '100px', background: 'rgba(34,197,94,0.1)', color: '#16a34a', fontSize: '0.75rem', fontWeight: 800 }}>
+                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#16a34a', display: 'inline-block' }} />
+                    Zakat Eligible
+                  </span>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+
+                {/* Financial Wealth Bar */}
+                {(() => {
+                  const pct = Math.min(100, Math.round((totalWealth / financialNisab) * 100));
+                  return (
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '10px' }}>
+                        <div>
+                          <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '6px' }}>💰 Financial Wealth</span>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 500 }}>Nisab: ₦{financialNisab.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                        </div>
+                        <span style={{ fontSize: '1rem', fontWeight: 900, color: financialEligible ? '#16a34a' : 'var(--gold)', letterSpacing: '-0.5px' }}>{pct}%</span>
+                      </div>
+                      <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.06)', borderRadius: '100px', overflow: 'hidden' }}>
+                        <div style={{ width: `${pct}%`, height: '100%', background: financialEligible ? 'linear-gradient(90deg, #22c5b0, #16a34a)' : 'linear-gradient(90deg, #f59e0b, #d97706)', borderRadius: '100px', transition: 'width 0.9s cubic-bezier(0.22,1,0.36,1)', boxShadow: financialEligible ? '0 0 8px rgba(34,197,94,0.4)' : 'none' }} />
+                      </div>
                     </div>
-                    <div style={{ width: '100%', height: '10px', background: 'var(--bg)', borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--border)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)' }}>
-                      <div style={{ width: `${Math.min(100, (totalWealth / financialNisab) * 100)}%`, height: '100%', background: financialEligible ? 'linear-gradient(90deg, #22c5b0 0%, var(--primary) 100%)' : 'var(--gold)', transition: 'width 0.8s cubic-bezier(0.22,1,0.36,1)' }} />
+                  );
+                })()}
+
+                {/* Sheep Bar */}
+                {sheepNum > 0 && (() => {
+                  const pct = Math.min(100, Math.round((sheepNum / 40) * 100));
+                  const met = sheepNum >= 40;
+                  return (
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '10px' }}>
+                        <div>
+                          <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '6px' }}>🐑 Sheep & Goats</span>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 500 }}>{sheepNum} of 40 head</span>
+                        </div>
+                        <span style={{ fontSize: '1rem', fontWeight: 900, color: met ? '#16a34a' : 'var(--gold)', letterSpacing: '-0.5px' }}>{pct}%</span>
+                      </div>
+                      <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.06)', borderRadius: '100px', overflow: 'hidden' }}>
+                        <div style={{ width: `${pct}%`, height: '100%', background: met ? 'linear-gradient(90deg, #22c5b0, #16a34a)' : 'linear-gradient(90deg, #f59e0b, #d97706)', borderRadius: '100px', transition: 'width 0.9s cubic-bezier(0.22,1,0.36,1)', boxShadow: met ? '0 0 8px rgba(34,197,94,0.4)' : 'none' }} />
+                      </div>
                     </div>
-                 </div>
+                  );
+                })()}
 
-                 {/* Sheep Bar */}
-                 {sheepNum > 0 && (
-                   <div>
-                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-dark)' }}>Sheep & Goats</span>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 900, color: (sheepNum >= 40) ? 'var(--halal)' : 'var(--text-muted)' }}>
-                          {Math.min(100, Math.round((sheepNum / 40) * 100))}%
-                        </span>
+                {/* Cow Bar */}
+                {cowNum > 0 && (() => {
+                  const pct = Math.min(100, Math.round((cowNum / 30) * 100));
+                  const met = cowNum >= 30;
+                  return (
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '10px' }}>
+                        <div>
+                          <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '6px' }}>🐄 Cows & Buffaloes</span>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 500 }}>{cowNum} of 30 head</span>
+                        </div>
+                        <span style={{ fontSize: '1rem', fontWeight: 900, color: met ? '#16a34a' : 'var(--gold)', letterSpacing: '-0.5px' }}>{pct}%</span>
                       </div>
-                      <div style={{ width: '100%', height: '10px', background: 'var(--bg)', borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--border)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)' }}>
-                        <div style={{ width: `${Math.min(100, (sheepNum / 40) * 100)}%`, height: '100%', background: (sheepNum >= 40) ? 'linear-gradient(90deg, #22c5b0 0%, var(--primary) 100%)' : 'var(--gold)', transition: 'width 0.8s cubic-bezier(0.22,1,0.36,1)' }} />
+                      <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.06)', borderRadius: '100px', overflow: 'hidden' }}>
+                        <div style={{ width: `${pct}%`, height: '100%', background: met ? 'linear-gradient(90deg, #22c5b0, #16a34a)' : 'linear-gradient(90deg, #f59e0b, #d97706)', borderRadius: '100px', transition: 'width 0.9s cubic-bezier(0.22,1,0.36,1)', boxShadow: met ? '0 0 8px rgba(34,197,94,0.4)' : 'none' }} />
                       </div>
-                   </div>
-                 )}
+                    </div>
+                  );
+                })()}
 
-                 {/* Cow Bar */}
-                 {cowNum > 0 && (
-                   <div>
-                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-dark)' }}>Cows & Buffaloes</span>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 900, color: (cowNum >= 30) ? 'var(--halal)' : 'var(--text-muted)' }}>
-                          {Math.min(100, Math.round((cowNum / 30) * 100))}%
-                        </span>
+                {/* Agriculture Bar */}
+                {harvestNum > 0 && (() => {
+                  const pct = Math.min(100, Math.round((harvestNum / agriNisab) * 100));
+                  return (
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '10px' }}>
+                        <div>
+                          <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '6px' }}>🌾 Agriculture</span>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 500 }}>{harvestNum.toLocaleString()} of 653 kg</span>
+                        </div>
+                        <span style={{ fontSize: '1rem', fontWeight: 900, color: agriEligible ? '#16a34a' : 'var(--gold)', letterSpacing: '-0.5px' }}>{pct}%</span>
                       </div>
-                      <div style={{ width: '100%', height: '10px', background: 'var(--bg)', borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--border)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)' }}>
-                        <div style={{ width: `${Math.min(100, (cowNum / 30) * 100)}%`, height: '100%', background: (cowNum >= 30) ? 'linear-gradient(90deg, #22c5b0 0%, var(--primary) 100%)' : 'var(--gold)', transition: 'width 0.8s cubic-bezier(0.22,1,0.36,1)' }} />
+                      <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.06)', borderRadius: '100px', overflow: 'hidden' }}>
+                        <div style={{ width: `${pct}%`, height: '100%', background: agriEligible ? 'linear-gradient(90deg, #22c5b0, #16a34a)' : 'linear-gradient(90deg, #f59e0b, #d97706)', borderRadius: '100px', transition: 'width 0.9s cubic-bezier(0.22,1,0.36,1)', boxShadow: agriEligible ? '0 0 8px rgba(34,197,94,0.4)' : 'none' }} />
                       </div>
-                   </div>
-                 )}
+                    </div>
+                  );
+                })()}
 
-                 {/* Agriculture Bar */}
-                 {harvestNum > 0 && (
-                   <div>
-                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-dark)' }}>Agriculture (Grains/Fruits)</span>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 900, color: agriEligible ? 'var(--halal)' : 'var(--text-muted)' }}>
-                          {Math.min(100, Math.round((harvestNum / agriNisab) * 100))}%
-                        </span>
-                      </div>
-                      <div style={{ width: '100%', height: '10px', background: 'var(--bg)', borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--border)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)' }}>
-                        <div style={{ width: `${Math.min(100, (harvestNum / agriNisab) * 100)}%`, height: '100%', background: agriEligible ? 'linear-gradient(90deg, #22c5b0 0%, var(--primary) 100%)' : 'var(--gold)', transition: 'width 0.8s cubic-bezier(0.22,1,0.36,1)' }} />
-                      </div>
-                   </div>
-                 )}
-               </div>
+              </div>
             </div>
           </div>
 
