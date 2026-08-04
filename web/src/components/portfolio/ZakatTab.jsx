@@ -151,7 +151,6 @@ export default function ZakatTab({ data }) {
 
   // Agriculture State
   const [harvestWeight, setHarvestWeight] = useState('');
-  const [irrigation, setIrrigation] = useState('natural'); // natural, artificial
 
   // Financial Calculations
   const activeNisabThreshold = nisabStandard === 'gold' ? 85 : 595;
@@ -177,7 +176,7 @@ export default function ZakatTab({ data }) {
   const harvestNum = Number(harvestWeight) || 0;
   const agriNisab = 653; // 5 Awsuq in kg
   const agriEligible = harvestNum >= agriNisab;
-  const agriRate = irrigation === 'natural' ? 0.1 : 0.05;
+  const agriRate = 0.1; // 10% for natural/rain irrigated
   const agriZakatDue = agriEligible ? harvestNum * agriRate : 0;
 
   const fetchLiveNisab = async (rateToUse = exchangeRate) => {
@@ -822,7 +821,7 @@ export default function ZakatTab({ data }) {
               {/* Agriculture Form */}
               <div className="print-card hover-lift" style={{ background: 'var(--bg)', borderRadius:'24px', padding:'36px', boxShadow:'var(--shadow-sm)', border:'1px solid var(--border)' }}>
                 <h3 style={{ fontSize: '1.14rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}><Wheat size={20} color="var(--gold)" /> Agriculture & Grains</h3>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginBottom: '24px', fontWeight: 500 }}>Nisab is 653 kg (5 Awsuq). Zakat rate depends on irrigation method.</p>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginBottom: '24px', fontWeight: 500 }}>Nisab is 653 kg (5 Awsuq). Zakat rate is 10% (Naturally Irrigated).</p>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
                   <div style={{ background: 'linear-gradient(135deg, rgba(212,175,55,0.05) 0%, rgba(212,175,55,0.15) 100%)', borderRadius: '16px', padding: '18px', border: '1px solid rgba(212,175,55,0.25)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     <label style={{ fontSize: '0.75rem', fontWeight:800, color:'#b89326', textTransform: 'uppercase', letterSpacing: '0.5px' }}>🌾 Harvest Weight</label>
@@ -831,14 +830,6 @@ export default function ZakatTab({ data }) {
                       <span style={{ color:'#b89326', fontWeight:800, fontSize: '1rem' }}>kg</span>
                     </div>
                     {harvestNum > 0 && <span style={{ fontSize: '0.75rem', color: agriEligible ? '#16a34a' : '#b89326', fontWeight: 700 }}>{agriEligible ? '✓ Above Nisab' : `${(agriNisab - harvestNum).toLocaleString()} kg more needed`}</span>}
-                  </div>
-                  <div style={{ background: 'var(--bg-section)', borderRadius: '16px', padding: '18px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    <label style={{ fontSize: '0.75rem', fontWeight:800, color:'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>💧 Irrigation Method</label>
-                    <select value={irrigation} onChange={e => setIrrigation(e.target.value)} style={{ width:'100%', border:'none', borderBottom: '2px solid var(--border)', fontSize: '0.95rem', fontWeight:800, color:'var(--text-dark)', outline:'none', background: 'transparent', padding: '4px 0', cursor: 'pointer' }}>
-                      <option value="natural">Natural / Rain (10%)</option>
-                      <option value="artificial">Artificial / Bought (5%)</option>
-                    </select>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}>Rate applied: {irrigation === 'natural' ? '10%' : '5%'}</span>
                   </div>
                 </div>
               </div>
