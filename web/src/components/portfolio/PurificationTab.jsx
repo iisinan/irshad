@@ -1,7 +1,67 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ShieldAlert, ArrowRight, Heart, CheckCircle, Sparkles, TrendingDown, X } from 'lucide-react';
+import { ShieldAlert, ArrowRight, Heart, CheckCircle, Sparkles, TrendingDown, X, FlaskConical } from 'lucide-react';
 import CompanyLogo from '../CompanyLogo';
+
+/* ─── Formula Popup Modal ───────────────────────────────────── */
+function FormulaModal({ info, onClose }) {
+  if (!info) return null;
+  return createPortal(
+    <div
+      className="animate-fade-in"
+      onClick={onClose}
+      style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.45)', backdropFilter:'blur(6px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:200000, padding:'20px' }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{ background:'var(--bg)', borderRadius:'24px', width:'100%', maxWidth:'440px', boxShadow:'0 32px 80px rgba(0,0,0,0.2)', overflow:'hidden', animation:'slideUpFade 0.35s cubic-bezier(0.16,1,0.3,1)', position:'relative' }}
+      >
+        {/* Top accent */}
+        <div style={{ height:'4px', background:'linear-gradient(90deg, var(--primary), var(--primary-light, #5EEAD4))' }} />
+
+        <div style={{ padding:'32px' }}>
+          {/* Close */}
+          <button onClick={onClose} style={{ position:'absolute', top:'14px', right:'14px', background:'var(--bg-section)', border:'none', width:'32px', height:'32px', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', color:'var(--text-muted)' }}>
+            <X size={15} />
+          </button>
+
+          {/* Title */}
+          <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'6px' }}>
+            <div style={{ width:'36px', height:'36px', borderRadius:'10px', background:'rgba(var(--primary-rgb, 15,82,87),0.08)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+              <FlaskConical size={18} color="var(--primary)" />
+            </div>
+            <div>
+              <div style={{ fontSize:'0.65rem', fontWeight:700, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.5px' }}>How it's calculated</div>
+              <div style={{ fontSize:'1.05rem', fontWeight:800, color:'var(--text-dark)', letterSpacing:'-0.3px' }}>{info.label}</div>
+            </div>
+          </div>
+
+          {/* Formula box */}
+          <div style={{ background:'var(--bg-section)', border:'1px solid var(--border)', borderRadius:'14px', padding:'18px 20px', margin:'20px 0', fontFamily:'monospace' }}>
+            <div style={{ fontSize:'0.7rem', fontWeight:700, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.5px', marginBottom:'10px' }}>Formula</div>
+            <div style={{ fontSize:'0.95rem', fontWeight:600, color:'var(--primary)', lineHeight:1.6 }}>{info.formula}</div>
+          </div>
+
+          {/* Steps */}
+          <div style={{ display:'flex', flexDirection:'column', gap:'8px', marginBottom:'20px' }}>
+            {info.steps.map((step, i) => (
+              <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', padding:'10px 14px', borderRadius:'10px', background: i === info.steps.length - 1 ? 'linear-gradient(135deg, rgba(217,119,6,0.08), rgba(245,158,11,0.04))' : 'transparent', border: i === info.steps.length - 1 ? '1px solid rgba(217,119,6,0.18)' : 'none' }}>
+                <span style={{ fontSize:'0.78rem', color:'var(--text-muted)', fontWeight:500, flex:1 }}>{step.label}</span>
+                <span style={{ fontSize:'0.85rem', fontWeight:800, color: i === info.steps.length - 1 ? '#D97706' : 'var(--text-dark)', marginLeft:'16px', whiteSpace:'nowrap' }}>{step.value}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Description */}
+          <p style={{ fontSize:'0.8rem', color:'var(--text-muted)', lineHeight:1.65, background:'var(--bg-section)', padding:'12px 16px', borderRadius:'10px', border:'1px solid var(--border)', margin:0 }}>
+            {info.description}
+          </p>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
 
 /* ─── Purify Modal ─────────────────────────────────────────── */
 function PurifyModal({ holding, onClose, onSuccess }) {
@@ -94,21 +154,75 @@ function PurificationCard({ h, onPurify }) {
   const due = Number(h.purification_due || 0);
   const totalValue = Number(h.total_value || 0);
   const shares = Number(h.shares || 0);
+  const avgPrice = Number(h.average_buy_price || 0);
+  const currentPrice = Number(h.current_price || 0);
   const duePct = dividends > 0 ? Math.min(100, (due / dividends) * 100) : 0;
-  
+  const [formulaInfo, setFormulaInfo] = useState(null);
+
   const latestDiv = h.latest_dividend;
   let dividendText = 'Recent Dividend';
   let dividendVal = '₦0.00 /sh';
   let dividendDate = null;
+  let divPerShare = 0;
   
   if (latestDiv) {
     const isUpcoming = latestDiv.status !== 'paid' && new Date(latestDiv.pay_date) > new Date();
     dividendText = isUpcoming ? 'Upcoming Dividend' : 'Last Paid Dividend';
-    dividendVal = `₦${Number(latestDiv.amount).toFixed(2)} /sh`;
+    divPerShare = Number(latestDiv.amount);
+    dividendVal = `₦${divPerShare.toFixed(2)} /sh`;
     if (latestDiv.pay_date) {
         dividendDate = new Date(latestDiv.pay_date).toLocaleDateString('en-NG', { month: 'short', year: '2-digit' });
     }
   }
+
+  // Formula definitions for each stat
+  const fmt = (n, d=2) => `₦${Number(n).toLocaleString('en-US', {minimumFractionDigits:d, maximumFractionDigits:d})}`;
+  const formulaMap = {
+    'Dividends (12M)': {
+      label: 'Dividends (12M)',
+      formula: 'Shares Held × Dividend Per Share (trailing 12M)',
+      steps: [
+        { label: 'Shares held', value: `${shares.toLocaleString()} shares` },
+        { label: 'Dividend per share (12M)', value: fmt(dividends / (shares || 1)) },
+        { label: 'Total dividends received', value: fmt(dividends) },
+      ],
+      description: 'Total cash dividends received over the trailing 12 months, calculated by multiplying your shares held by the cumulative dividend per share declared in that period.',
+    },
+    [dividendText]: latestDiv ? {
+      label: dividendText,
+      formula: 'Declared dividend per share × Shares held',
+      steps: [
+        { label: 'Dividend per share (declared)', value: `₦${divPerShare.toFixed(2)}` },
+        { label: 'Your shares', value: `${shares.toLocaleString()} shares` },
+        { label: 'Your total entitlement', value: fmt(divPerShare * shares) },
+      ],
+      description: dividendText === 'Upcoming Dividend'
+        ? 'This is the upcoming declared dividend per share. Your entitlement is calculated based on your current holding. Purification applies if the impure ratio is above 0%.'
+        : 'The most recent dividend per share paid by this company. Your entitlement was calculated based on shares held at the record date.',
+    } : null,
+    'Impure Ratio': {
+      label: 'Impure Income Ratio',
+      formula: 'Non-Compliant Revenue ÷ Total Revenue × 100',
+      steps: [
+        { label: 'Non-compliant revenue (interest income, etc.)', value: `${ratio.toFixed(4)}% of revenue` },
+        { label: 'AAOIFI tolerance threshold', value: '5.00%' },
+        { label: `Status (${ratio <= 5 ? '✅ Within' : '❌ Exceeds'} threshold)`, value: `${ratio.toFixed(2)}%` },
+      ],
+      description: "The AAOIFI-standard ratio of a company's non-permissible income (e.g., interest, haram services) to its total revenue. A stock is considered Halal if this stays at or below 5%, but any non-zero ratio requires purification of your dividend income.",
+    },
+    'Portfolio Value': {
+      label: 'Portfolio Value',
+      formula: 'Shares Held × Current Market Price',
+      steps: [
+        { label: 'Shares held', value: `${shares.toLocaleString()} shares` },
+        { label: 'Current market price', value: fmt(currentPrice) },
+        { label: 'Total current value', value: fmt(totalValue) },
+        { label: 'Avg. buy price', value: fmt(avgPrice) },
+        { label: 'Unrealised P&L', value: `${currentPrice >= avgPrice ? '+' : ''}${fmt(totalValue - shares * avgPrice)}` },
+      ],
+      description: 'The current market value of your entire position in this stock, calculated using the latest available market price. This is a real-time estimate and fluctuates with the market.',
+    },
+  };
 
   return (
     <div
@@ -156,7 +270,17 @@ function PurificationCard({ h, onPurify }) {
             { label:'Impure Ratio', value:`${ratio.toFixed(2)}%`, sub: '≤ 5% threshold', warn: ratio > 5, show: true },
             { label:'Portfolio Value', value:`₦${totalValue.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`, sub: 'Current', show: true },
           ].filter(s => s.show).map((stat, i) => (
-            <div key={i} style={{ background:'var(--bg)', borderRadius:'16px', padding:'14px 16px', border:'1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+            <div
+              key={i}
+              onClick={() => formulaMap[stat.label] && setFormulaInfo(formulaMap[stat.label])}
+              style={{ background:'var(--bg)', borderRadius:'16px', padding:'14px 16px', border:'1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)', cursor: formulaMap[stat.label] ? 'pointer' : 'default', transition:'all 0.2s', position:'relative', overflow:'hidden' }}
+              onMouseEnter={e => { if (formulaMap[stat.label]) { e.currentTarget.style.borderColor='var(--primary)'; e.currentTarget.style.boxShadow='0 4px 16px rgba(15,82,87,0.1)'; } }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor='var(--border)'; e.currentTarget.style.boxShadow='0 2px 8px rgba(0,0,0,0.02)'; }}
+            >
+              {/* Small formula hint icon */}
+              {formulaMap[stat.label] && (
+                <div style={{ position:'absolute', top:'8px', right:'8px', width:'16px', height:'16px', borderRadius:'50%', background:'var(--bg-section)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.6rem', fontWeight:800, color:'var(--text-muted)', border:'1px solid var(--border)' }}>f</div>
+              )}
               <div style={{ fontSize:'0.65rem', fontWeight:700, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.4px', marginBottom:'6px' }}>{stat.label}</div>
               <div style={{ fontSize:'0.9rem', fontWeight:900, color: stat.warn ? '#D97706' : 'var(--text-dark)' }}>{stat.value}</div>
               <div style={{ fontSize:'0.65rem', color:'var(--text-muted)', marginTop:'4px', fontWeight: 500 }}>{stat.sub}</div>
@@ -201,6 +325,9 @@ function PurificationCard({ h, onPurify }) {
         </div>
 
       </div>
+
+      {/* Formula popup */}
+      <FormulaModal info={formulaInfo} onClose={() => setFormulaInfo(null)} />
     </div>
   );
 }
