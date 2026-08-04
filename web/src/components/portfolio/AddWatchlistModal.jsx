@@ -153,11 +153,8 @@ export default function AddWatchlistModal({ onClose, onAdded, allStocks, watchli
                     <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                       <CompanyLogo symbol={stock.symbol} logoUrl={stock.logo_url} size={44} radius={12} />
                       <div>
-                        <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.92rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.92rem' }}>
                           {stock.symbol}
-                          <span style={{ fontSize: '0.57rem', fontWeight: 800, padding: '4px 8px', borderRadius: '20px', background: `${cfg.color}15`, color: cfg.color, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                            {cfg.icon} {cfg.label}
-                          </span>
                         </div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500, marginTop: '2px' }}>{stock.name}</div>
                       </div>

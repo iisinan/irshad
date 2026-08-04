@@ -284,7 +284,6 @@ export default function LandingPage() {
                         <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-dark)' }}>{co.sym}</div>
                         <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{co.name}</div>
                       </div>
-                      <StatusPill verdict={co.verdict} />
                     </div>
                   ))}
                 </div>
@@ -369,7 +368,6 @@ export default function LandingPage() {
                     onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-strong)'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <CompanyAvatar symbol={co.symbol} size={42} />
-                      <StatusPill verdict={co.status ?? co.verdict} />
                     </div>
                     <div style={{ minWidth: 0 }}>
                       <div style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--text-dark)', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{co.symbol}</div>

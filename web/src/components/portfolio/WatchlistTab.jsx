@@ -314,11 +314,8 @@ export default function WatchlistTab() {
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '16px', minWidth: '220px' }}>
                   <CompanyLogo symbol={stock.symbol} logoUrl={stock.logo_url} size={40} radius={12} />
                   <div>
-                    <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.95rem', letterSpacing: '-0.2px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.95rem', letterSpacing: '-0.2px' }}>
                       {stock.symbol}
-                      <span className={`status-badge ${cfg.cls}`} style={{ display: 'inline-flex', padding: '4px 8px', fontSize: '0.6rem' }}>
-                        {cfg.icon} {cfg.label}
-                      </span>
                     </div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px', fontWeight: 500 }}>{stock.name}</div>
                   </div>

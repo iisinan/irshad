@@ -63,7 +63,6 @@ const TH = ({ children, right, center }) => (
 /* ─── Stock table row ────────────────────────────────────────────────────── */
 const StockRow = React.memo(({ stock, idx, isWatched, onToggle }) => {
   const isPos  = Number(stock.price_change_pct ?? 0) >= 0;
-  const cfg = getStatusConfig(stock);
 
   return (
     <tr
@@ -93,14 +92,6 @@ const StockRow = React.memo(({ stock, idx, isWatched, onToggle }) => {
             </div>
           </div>
         </Link>
-      </td>
-
-      {/* Shariah Status */}
-      <td style={{ padding: '14px 16px' }}>
-        <span className={`status-badge ${cfg.cls}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 10px', fontSize: '0.66rem', fontWeight: 800, letterSpacing: '0.3px' }}>
-          {cfg.icon}
-          {cfg.label}
-        </span>
       </td>
 
       {/* Price */}
@@ -439,7 +430,6 @@ export default function MarketTab() {
                 <tr>
                   <TH>#</TH>
                   <TH>Company</TH>
-                  <TH>Shariah Status</TH>
                   <TH right>Price</TH>
                   <TH right>24h Change</TH>
                   <TH right>Mkt Cap</TH>
