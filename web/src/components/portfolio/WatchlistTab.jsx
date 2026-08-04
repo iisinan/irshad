@@ -144,7 +144,7 @@ export default function WatchlistTab() {
   }, [allStocks, watchlistSymbols, filter]);
 
   return (
-    <div className="animate-fade-in stagger-1" style={{ background: 'var(--bg)', borderRadius:'24px', padding:'40px 32px', boxShadow:'var(--shadow-sm)', border:'1px solid var(--border)' }}>
+    <div className="animate-fade-in stagger-1 watchlist-tab-card" style={{ background: 'var(--bg)', borderRadius:'24px', padding:'32px 24px', boxShadow:'var(--shadow-sm)', border:'1px solid var(--border)' }}>
       
       <div style={{ background: 'linear-gradient(135deg, #0D1B2A 0%, #0F5257 65%, #0B6B71 100%)', borderRadius:'24px', padding:'32px', boxShadow:'0 12px 32px rgba(13,27,42,0.15)', border:'none', marginBottom: '32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', overflow: 'hidden', flexWrap: 'wrap', gap: '24px' }}>
         <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(201,168,76,0.08)', borderRadius: '50%' }} />
@@ -164,7 +164,7 @@ export default function WatchlistTab() {
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '16px', marginBottom: '32px', position: 'relative', zIndex: 10, flexWrap: 'wrap', justifyContent: 'space-between' }}>
+      <div className="watchlist-action-bar" style={{ display: 'flex', gap: '16px', marginBottom: '32px', position: 'relative', zIndex: 10, flexWrap: 'wrap', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', gap: '12px' }}>
           <div style={{ display: 'flex', background: 'var(--bg-section)', borderRadius: '16px', padding: '6px', border: '1px solid var(--border)' }}>
             <button
@@ -311,7 +311,7 @@ export default function WatchlistTab() {
                 }}
                 onClick={() => navigate(`/market/${stock.symbol}`, { state: { stock } })}
               >
-                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '16px', minWidth: '220px' }}>
+                <div className="watchlist-card-main" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '16px', minWidth: '200px' }}>
                   <CompanyLogo symbol={stock.symbol} logoUrl={stock.logo_url} size={40} radius={12} />
                   <div>
                     <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.95rem', letterSpacing: '-0.2px' }}>
@@ -329,7 +329,7 @@ export default function WatchlistTab() {
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginLeft: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                <div className="watchlist-card-actions" style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: 'auto' }} onClick={(e) => e.stopPropagation()}>
                   <button 
                     type="button"
                     onClick={(e) => {

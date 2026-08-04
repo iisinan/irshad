@@ -198,7 +198,7 @@ export default function ZakatTab({ data }) {
       `}</style>
       
       {/* Hero Banner */}
-      <div className="no-print" style={{ background: 'linear-gradient(135deg, #0D1B2A 0%, #0F5257 65%, #0B6B71 100%)', borderRadius:'24px', padding:'40px', boxShadow:'0 20px 40px rgba(13,27,42,0.2), inset 0 1px 0 rgba(255,255,255,0.1)', border:'none', marginBottom: '36px', display: 'flex', alignItems: 'center', position: 'relative', overflow: 'hidden' }}>
+      <div className="no-print zakat-hero" style={{ background: 'linear-gradient(135deg, #0D1B2A 0%, #0F5257 65%, #0B6B71 100%)', borderRadius:'24px', padding:'32px 24px', boxShadow:'0 20px 40px rgba(13,27,42,0.2), inset 0 1px 0 rgba(255,255,255,0.1)', border:'none', marginBottom: '36px', display: 'flex', alignItems: 'center', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'radial-gradient(circle at 80% 0%, rgba(201,168,76,0.15) 0%, transparent 50%), radial-gradient(circle at 20% 100%, rgba(34,197,176,0.1) 0%, transparent 50%)', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(201,168,76,0.08)', borderRadius: '50%', filter: 'blur(30px)' }} />
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px', position: 'relative', zIndex: 1 }}>
@@ -263,10 +263,10 @@ export default function ZakatTab({ data }) {
         </div>
       ) : null}
 
-      <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap', alignItems: 'flex-start' }}>
+      <div className="zakat-two-col" style={{ display: 'flex', gap: '32px', flexWrap: 'wrap', alignItems: 'flex-start' }}>
         
         {/* LEFT COLUMN: Calculators */}
-        <div style={{ flex: '1 1 60%', display: 'flex', flexDirection: 'column', gap: '32px' }}>
+        <div className="zakat-left-col" style={{ flex: '1 1 min(100%, 60%)', display: 'flex', flexDirection: 'column', gap: '24px' }}>
           
           {/* Smart Nisab Setup */}
           <div className="print-card hover-lift" style={{ background: 'var(--bg)', borderRadius:'24px', padding:'36px', boxShadow:'var(--shadow-sm)', border:'1px solid var(--border)' }}>
@@ -404,7 +404,7 @@ export default function ZakatTab({ data }) {
         </div>
 
         {/* RIGHT COLUMN: Sticky Summary */}
-        <div style={{ flex: '1 1 35%', position: 'sticky', top: '24px' }}>
+        <div className="zakat-right-col" style={{ flex: '1 1 300px', position: 'sticky', top: '24px' }}>
           <div className="print-card hover-lift" style={{ background: 'var(--bg)', borderRadius: '24px', padding: '36px', boxShadow: '0 16px 48px rgba(0,0,0,0.06)', border: '1px solid var(--border)', position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'linear-gradient(90deg, var(--primary) 0%, #22c5b0 100%)' }} />
             

@@ -355,7 +355,7 @@ const AdminDashboard = () => {
         </div>
 
         {activeTab !== 'zakat' && (
-          <div style={{ display: 'flex', gap: '12px', flex: '1', minWidth: '320px', alignItems: 'center', justifyContent: 'flex-end' }}>
+          <div className="admin-filter-row" style={{ display: 'flex', gap: '12px', flex: '1', minWidth: 0, alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
             {activeTab === 'stocks' && (
               <select 
                 value={statusFilter} 
@@ -373,7 +373,7 @@ const AdminDashboard = () => {
               </select>
             )}
             
-            <div style={{ position: 'relative', flex: '0 1 320px' }}>
+            <div style={{ position: 'relative', flex: '1 1 200px', minWidth: 0 }}>
               <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
               <input
                 type="text"

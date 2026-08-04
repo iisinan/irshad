@@ -205,7 +205,7 @@ export default function PurificationTab({ data }) {
   };
 
   return (
-    <div className="animate-fade-in stagger-1">
+    <div className="animate-fade-in stagger-1 purification-tab-outer">
       {selectedHolding && (
         <PurifyModal
           holding={selectedHolding}

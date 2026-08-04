@@ -4317,3 +4317,211 @@ html, body {
     letter-spacing: -0.5px !important;
   }
 }
+
+
+/* ===================================================
+   MOBILE ROUND 2 — Additional targeted fixes
+   =================================================== */
+
+/* ── WatchlistTab ── */
+@media (max-width: 640px) {
+  .watchlist-tab-card {
+    padding: 20px 14px !important;
+    border-radius: 20px !important;
+  }
+
+  /* Hero banner in watchlist/zakat/purification — reduce padding */
+  .watchlist-tab-card > div[style*="gradient(135deg, #0D1B2A"],
+  .zakat-hero {
+    padding: 24px 16px !important;
+    border-radius: 20px !important;
+  }
+
+  /* Action bar: stack vertically on tiny screens */
+  .watchlist-action-bar {
+    flex-direction: column !important;
+    gap: 12px !important;
+    justify-content: flex-start !important;
+  }
+  .watchlist-action-bar > div:first-child {
+    width: 100% !important;
+  }
+  .watchlist-action-bar > div:first-child > div {
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+  .watchlist-action-bar > div:first-child > div > button {
+    flex: 1 !important;
+    justify-content: center !important;
+  }
+  .watchlist-action-bar > div:last-child {
+    width: 100% !important;
+    justify-content: flex-start !important;
+  }
+  .watchlist-action-bar > div:last-child > button {
+    flex: 1 !important;
+    justify-content: center !important;
+  }
+
+  /* Watchlist stock cards — wrap info & actions */
+  .watchlist-card {
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+    padding: 14px !important;
+  }
+  .watchlist-card-main {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+  .watchlist-price-col {
+    min-width: 0 !important;
+  }
+  .watchlist-card-actions {
+    width: 100% !important;
+    justify-content: flex-end !important;
+    padding-top: 8px !important;
+    border-top: 1px dashed var(--border) !important;
+  }
+}
+
+/* ── ZakatTab ── */
+@media (max-width: 700px) {
+  .zakat-two-col {
+    flex-direction: column !important;
+    gap: 20px !important;
+  }
+  .zakat-left-col {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    gap: 20px !important;
+  }
+  .zakat-right-col {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    position: static !important; /* remove sticky on mobile */
+  }
+  /* Reduce padding on zakat section cards */
+  .zakat-left-col > div.print-card,
+  .zakat-right-col > div.print-card {
+    padding: 20px 16px !important;
+    border-radius: 18px !important;
+  }
+  /* Nisab threshold row: wrap on small phones */
+  .zakat-left-col div[style*="justifyContent: 'space-between'"][style*="background: 'linear"] {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 4px !important;
+  }
+}
+
+/* ── PurificationTab ── */
+@media (max-width: 640px) {
+  /* Outer card */
+  .purification-tab-outer {
+    padding: 20px 14px !important;
+    border-radius: 20px !important;
+  }
+  /* Holding row header + purify button */
+  .purification-tab-outer > div > div[style*="justifyContent: 'space-between'"] {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+  /* Stats row — 2 col */
+  .purification-tab-outer div[style*="gridTemplateColumns: '1fr 1fr 1fr'"] {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+}
+
+/* ── AdminDashboard ── */
+@media (max-width: 640px) {
+  /* Stat cards: auto 2-col */
+  .admin-filter-row {
+    width: 100% !important;
+    justify-content: flex-start !important;
+  }
+  .admin-filter-row select,
+  .admin-filter-row input {
+    width: 100% !important;
+  }
+}
+
+/* ── AdminComplianceReviews — alert action row ── */
+@media (max-width: 640px) {
+  div[style*="display: 'flex'"][style*="gap: '10px'"][style*="flexShrink: 0"] {
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+  div[style*="display: 'flex'"][style*="gap: '10px'"][style*="flexShrink: 0"] > button {
+    flex: 1 !important;
+  }
+}
+
+/* ── AaoifiScreening (Full Audit page) ── */
+@media (max-width: 640px) {
+  /* Back button + share row */
+  div[style*="maxWidth: '800px'"][style*="padding: '24px'"] > div:first-child {
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+  }
+  div[style*="maxWidth: '800px'"][style*="padding: '24px'"] > div:first-child > div:last-child {
+    width: 100% !important;
+    justify-content: flex-start !important;
+  }
+  /* Header card: stock name + status */
+  div[style*="maxWidth: '800px'"] > div[style*="gradient(135deg"] {
+    padding: 20px 16px !important;
+  }
+  /* Stage 1 business activity table section */
+  div[style*="maxWidth: '800px'"] > div[style*="border-radius: '24px'"] {
+    border-radius: 18px !important;
+  }
+}
+
+/* ── Profile form grid investor type 2-col → 1-col ── */
+@media (max-width: 640px) {
+  .profile-form-grid {
+    grid-template-columns: 1fr !important;
+  }
+  /* Second investor profile 2-col grid in profile */
+  .profile-content-card div[style*="gridTemplateColumns: '1fr 1fr'"] {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  /* Profile content card padding */
+  .profile-content-card {
+    padding: 18px 14px !important;
+  }
+}
+
+/* ── StockDetails: tab bar (Overview / Financials / News) ── */
+@media (max-width: 640px) {
+  /* Make the stock details page top nav pill row scrollable */
+  div[style*="display: 'flex'"][style*="gap: '6px'"][style*="overflowX: 'auto'"] {
+    white-space: nowrap !important;
+    width: 100% !important;
+  }
+  /* Price + action area in verdict card */
+  .detail-header > div > div[style*="fontSize: '2"] {
+    font-size: clamp(1.6rem, 7vw, 2.5rem) !important;
+  }
+}
+
+/* ── UpdatesTab / GuideTab outer cards ── */
+@media (max-width: 640px) {
+  /* Reduce outer card padding for any tab that has 40px 32px */
+  .animate-fade-in.stagger-1[style*="padding:'40px 32px'"],
+  .animate-fade-in.stagger-1[style*="padding: '40px 32px'"] {
+    padding: 20px 14px !important;
+  }
+}
+
+/* ── Global: all dark hero banners inside tabs ── */
+@media (max-width: 640px) {
+  div[style*="background: 'linear-gradient(135deg, #0D1B2A"] {
+    padding: 20px 16px !important;
+    border-radius: 18px !important;
+  }
+}
