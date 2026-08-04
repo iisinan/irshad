@@ -149,13 +149,13 @@ function PurificationCard({ h, onPurify }) {
         </div>
 
         {/* Row 2 — stat grid */}
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap:'12px', marginBottom:'24px' }}>
+        <div style={{ display:'grid', gridTemplateColumns: latestDiv ? 'repeat(4, 1fr)' : 'repeat(3, 1fr)', gap:'12px', marginBottom:'24px' }}>
           {[
-            { label:'Dividends (12M)', value:`₦${dividends.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`, sub: 'Total received' },
-            { label: dividendText, value: dividendVal, sub: dividendDate || 'N/A' },
-            { label:'Impure Ratio', value:`${ratio.toFixed(2)}%`, sub: '≤ 5% threshold', warn: ratio > 5 },
-            { label:'Portfolio Value', value:`₦${totalValue.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`, sub: 'Current' },
-          ].map((stat, i) => (
+            { label:'Dividends (12M)', value:`₦${dividends.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`, sub: 'Total received', show: true },
+            { label: dividendText, value: dividendVal, sub: dividendDate || 'N/A', show: !!latestDiv },
+            { label:'Impure Ratio', value:`${ratio.toFixed(2)}%`, sub: '≤ 5% threshold', warn: ratio > 5, show: true },
+            { label:'Portfolio Value', value:`₦${totalValue.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`, sub: 'Current', show: true },
+          ].filter(s => s.show).map((stat, i) => (
             <div key={i} style={{ background:'var(--bg)', borderRadius:'16px', padding:'14px 16px', border:'1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
               <div style={{ fontSize:'0.65rem', fontWeight:700, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.4px', marginBottom:'6px' }}>{stat.label}</div>
               <div style={{ fontSize:'0.9rem', fontWeight:900, color: stat.warn ? '#D97706' : 'var(--text-dark)' }}>{stat.value}</div>
