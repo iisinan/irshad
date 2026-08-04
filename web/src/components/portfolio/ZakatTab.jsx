@@ -138,7 +138,6 @@ export default function ZakatTab({ data }) {
   const [cash, setCash] = useState('');
   const [goldGrams, setGoldGrams] = useState('');
   const [silverGrams, setSilverGrams] = useState('');
-  const [debts, setDebts] = useState('');
   const portfolioValue = data?.summary?.total_balance || 0;
 
   // Livestock State
@@ -157,10 +156,9 @@ export default function ZakatTab({ data }) {
   const cashNum = Number(cash) || 0;
   const goldNum = (Number(goldGrams) || 0) * goldPrice;
   const silverNum = (Number(silverGrams) || 0) * silverPrice;
-  const debtsNum = Number(debts) || 0;
   
   const grossWealth = portfolioValue + cashNum + goldNum + silverNum;
-  const totalWealth = Math.max(0, grossWealth - debtsNum);
+  const totalWealth = Math.max(0, grossWealth);
   const financialEligible = totalWealth >= financialNisab;
   const financialZakatDue = financialEligible ? totalWealth * 0.025 : 0;
 
@@ -431,15 +429,7 @@ export default function ZakatTab({ data }) {
                   </span>
                 )}
               </div>
-              <div className="input-group">
-                <label style={{ display:'block', fontSize: '0.79rem', fontWeight:600, color:'var(--text-dark)', marginBottom:'8px' }}>Short-Term Debts / Liabilities</label>
-                <div style={{ position:'relative' }}>
-                  <span style={{ position:'absolute', left:'16px', top:'14px', color:'var(--text-muted)', fontWeight:700 }}>₦</span>
-                  <input type="number" value={debts} onChange={e => setDebts(e.target.value)} placeholder="0.00" style={{ width:'100%', padding:'14px 16px 14px 36px', borderRadius:'12px', border:'1px solid var(--border)', fontSize: '0.97rem', fontWeight:700, color:'#ef4444', outline:'none', background: '#fef2f2' }} />
-                </div>
-              </div>
             </div>
-            
             {/* Nisab Progress within Financial block */}
             <div style={{ marginTop: '32px', padding: '24px', background: 'var(--bg-section)', borderRadius: '20px', border: '1px solid var(--border)' }}>
                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '14px' }}>
