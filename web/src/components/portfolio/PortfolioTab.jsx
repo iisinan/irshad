@@ -321,42 +321,6 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
           </div>
         </div>
 
-        {/* Right: Shariah Status Card */}
-        <div style={{ 
-          zIndex: 1, 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: '12px', 
-          background: 'var(--bg)', 
-          padding: '14px 18px', 
-          borderRadius: '16px', 
-          border: '1px solid var(--border)', 
-          boxShadow: '0 4px 16px rgba(0,0,0,0.02)' 
-        }}>
-          <div style={{ 
-            width: '38px', 
-            height: '38px', 
-            borderRadius: '12px', 
-            background: compliance >= 90 ? 'rgba(34,197,94,0.1)' : compliance >= 70 ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)', 
-            border: compliance >= 90 ? '1px solid rgba(34,197,94,0.25)' : compliance >= 70 ? '1px solid rgba(245,158,11,0.25)' : '1px solid rgba(239,68,68,0.25)', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            flexShrink: 0
-          }}>
-            <ShieldCheck size={18} color={compliance >= 90 ? 'var(--halal, #16a34a)' : compliance >= 70 ? 'var(--questionable, #d97706)' : 'var(--non-halal, #dc2626)'} />
-          </div>
-
-          <div>
-            <div style={{ fontSize: '0.58rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '2px' }}>Shariah Status</div>
-            <div style={{ fontSize: '0.94rem', fontWeight: 900, color: compliance >= 90 ? 'var(--halal, #16a34a)' : 'var(--text-dark)', lineHeight: 1.2 }}>
-              {compliance >= 90 ? 'Excellent' : compliance >= 70 ? 'Needs Review' : 'Critical'}
-            </div>
-            <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', marginTop: '2px', maxWidth: '140px', lineHeight: 1.3 }}>
-              Based on AAOIFI financial screening.
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* ─── ACTION BAR & FILTERS ─── */}
