@@ -3504,11 +3504,16 @@ img[src="/logo.svg"] {
   70% { transform: scale(1.1); }
 }
 
+.print-only { display: none !important; }
+
 @media print {
   body {
-    background: var(--bg) !important;
+    background: white !important;
     color: black !important;
   }
+  
+  .print-only { display: block !important; }
+  .no-print { display: none !important; }
   
   /* Hide UI navigation, buttons, toggles, sidebars */
   .top-navbar,
@@ -3527,8 +3532,20 @@ img[src="/logo.svg"] {
   }
 
   /* Ensure cards break nicely */
-  .card, div[style*="background"] {
+  .print-card, .card, div[style*="background"] {
     page-break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+  }
+
+  /* Make grid layout single column for print */
+  .zakat-two-col {
+    display: block !important;
+  }
+  .zakat-left-col, .zakat-right-col {
+    width: 100% !important;
+    margin-bottom: 24px;
+    position: static !important;
   }
 }
 
