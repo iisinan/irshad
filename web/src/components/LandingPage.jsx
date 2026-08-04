@@ -106,6 +106,8 @@ export default function LandingPage() {
   const [search, setSearch] = useState('');
   const [stats, setStats]     = useState(null);
   const [recent, setRecent]   = useState([]);
+  const [reports, setReports]   = useState([]);
+  const [news, setNews]         = useState([]);
 
   const [loading, setLoading] = useState(true);
 
