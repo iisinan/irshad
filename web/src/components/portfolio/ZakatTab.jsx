@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Calculator, Download, Coins, Wheat, Bug as Cow, Scale, CheckCircle2, RefreshCw, AlertCircle, Calendar, Bell, Edit2, ChevronDown, ChevronUp, Info, Sliders } from 'lucide-react';
 import api, { getSettings } from '../../services/api';
 import { toastSuccess, toastError } from '../../utils/toast';
+import { useAuth } from '../../context/AuthContext';
 
 function getCowZakat(n) {
   if (n < 30) return 'None (Below Nisab)';
@@ -32,6 +33,8 @@ function getSheepZakat(n) {
 }
 
 export default function ZakatTab({ data }) {
+  const { user } = useAuth();
+  
   // ─── Hawl date from localStorage (set via AddHoldingModal) ───────────────
   const ZAKAT_DATE_KEY = 'irshad_zakat_hawl_date';
   const [hawlDate, setHawlDate] = useState(() => localStorage.getItem(ZAKAT_DATE_KEY) || null);
@@ -231,8 +234,13 @@ export default function ZakatTab({ data }) {
       ═══════════════════════════════════════════════════ */}
       <div className="print-only" style={{ display: 'none', fontFamily: '"Inter", system-ui, sans-serif', color: '#0f172a', background: '#fff', padding: '0', minHeight: '100vh' }}>
 
+        {/* ── Background Watermark ── */}
+        <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', opacity: 0.03, zIndex: 0, pointerEvents: 'none' }}>
+          <img src="/logo.svg" alt="" style={{ width: '600px', height: 'auto', filter: 'grayscale(100%)' }} />
+        </div>
+
         {/* ── Header ── */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px', paddingBottom: '24px', borderBottom: '3px solid #0F5257' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', paddingBottom: '24px', borderBottom: '3px solid #0F5257', position: 'relative', zIndex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <img src="/logo.svg" alt="Irshad" style={{ height: '44px', width: 'auto' }} />
             <div>
@@ -247,11 +255,24 @@ export default function ZakatTab({ data }) {
           </div>
         </div>
 
+        {/* ── Prepared For ── */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', position: 'relative', zIndex: 1 }}>
+          <div>
+            <div style={{ fontSize: '11px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Prepared For</div>
+            <div style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a' }}>{user?.first_name || user?.name || 'Valued Client'} {user?.last_name || ''}</div>
+            <div style={{ fontSize: '13px', color: '#64748b' }}>{user?.email || ''}</div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '11px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Statement ID</div>
+            <div style={{ fontSize: '14px', fontWeight: 700, color: '#334155', fontFamily: 'monospace' }}>ZKT-{Date.now().toString().slice(-6)}</div>
+          </div>
+        </div>
+
         {/* ── Green accent rule ── */}
-        <div style={{ height: '4px', background: 'linear-gradient(90deg, #0F5257, #22c5b0, #d4af37)', borderRadius: '2px', marginBottom: '32px' }} />
+        <div style={{ height: '4px', background: 'linear-gradient(90deg, #0F5257, #22c5b0, #d4af37)', borderRadius: '2px', marginBottom: '32px', position: 'relative', zIndex: 1 }} />
 
         {/* ── Nisab Configuration ── */}
-        <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '18px 24px', marginBottom: '28px' }}>
+        <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '18px 24px', marginBottom: '28px', position: 'relative', zIndex: 1 }}>
           <div style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px' }}>Nisab Thresholds Applied</div>
           <div style={{ display: 'flex', gap: '40px', flexWrap: 'wrap' }}>
             <div><span style={{ fontSize: '12px', color: '#64748b' }}>Standard: </span><span style={{ fontSize: '13px', fontWeight: 700 }}>{nisabStandard === 'gold' ? 'Gold (85g)' : 'Silver (595g)'}</span></div>
@@ -435,12 +456,12 @@ export default function ZakatTab({ data }) {
         )}
 
         {/* ── Disclaimer ── */}
-        <div style={{ marginTop: '32px', padding: '16px 20px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '11px', color: '#64748b', lineHeight: 1.6 }}>
+        <div style={{ marginTop: '32px', padding: '16px 20px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '11px', color: '#64748b', lineHeight: 1.6, position: 'relative', zIndex: 1 }}>
           <strong style={{ color: '#334155' }}>Disclaimer:</strong> This Zakat statement is generated based on data entered by the user and live market prices at the time of generation. It is provided as a tool to assist in Zakat calculation and is not a substitute for professional Islamic financial advice. Nisab values are calculated using {nisabStandard === 'gold' ? 'Gold (85g)' : 'Silver (595g)'} standard.
         </div>
 
         {/* ── Footer ── */}
-        <div style={{ marginTop: '40px', paddingTop: '20px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ marginTop: '40px', paddingTop: '20px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <img src="/logo.svg" alt="Irshad" style={{ height: '22px', width: 'auto', opacity: 0.6 }} />
             <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600 }}>iirshad.com</span>
