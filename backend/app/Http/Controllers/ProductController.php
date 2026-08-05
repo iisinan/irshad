@@ -161,8 +161,9 @@ class ProductController extends Controller
     {
         $query = $request->get('q');
 
-        $products = Product::where('name', 'LIKE', "%{$query}%")
-            ->orWhere('brand', 'LIKE', "%{$query}%")
+        $lowerQuery = '%' . strtolower($query) . '%';
+        $products = Product::whereRaw('LOWER(name) LIKE ?', [$lowerQuery])
+            ->orWhereRaw('LOWER(brand) LIKE ?', [$lowerQuery])
             ->limit(10)
             ->get();
 
