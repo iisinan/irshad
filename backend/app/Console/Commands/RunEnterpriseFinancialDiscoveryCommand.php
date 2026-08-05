@@ -49,28 +49,26 @@ class RunEnterpriseFinancialDiscoveryCommand extends Command
             if (!$response->successful()) {
                 $this->error("Failed to fetch NGXPulse API. Status: " . $response->status());
                 Log::error("NGXPulse API Discovery failed. Status: " . $response->status());
-                // Don't return here! We want to fall back to Apify.
-                $data = [];
-            } else {
-                $data = $response->json();
-                if (isset($data['data']) && is_array($data['data'])) {
-                    $data = $data['data'];
-                }
-                
-                if (!is_array($data) || empty($data)) {
-                    $this->error("API feed is empty.");
-                    $data = [];
-                }
+                return;
+            }
+
+            $data = $response->json();
+            if (isset($data['data']) && is_array($data['data'])) {
+                $data = $data['data'];
+            }
+            
+            if (!is_array($data) || empty($data)) {
+                $this->error("API feed is empty.");
+                return;
             }
 
         } catch (\Exception $e) {
             $this->error("Connection error: " . $e->getMessage());
             Log::error("NGXPulse API Discovery exception: " . $e->getMessage());
-            // Don't return here! Fall back to Apify.
-            $data = [];
+            return;
         }
 
-        $this->info("Successfully fetched " . count($data) . " disclosures.");
+        $this->info("Successfully fetched " . count($data) . " disclosures from NGXPulse.");
 
         // Phase 4-6: Identify Financial Statements & Select Latest Filing
         $latestFilingsByTicker = [];

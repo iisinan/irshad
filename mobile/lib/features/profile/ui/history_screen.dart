@@ -6,7 +6,8 @@ import '../data/user_activity_repository.dart';
 
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 class HistoryScreen extends StatefulWidget {
-  const HistoryScreen({super.key});
+  final bool isTab;
+  const HistoryScreen({super.key, this.isTab = false});
 
   @override
   State<HistoryScreen> createState() => _HistoryScreenState();
@@ -48,7 +49,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: context.bg,
-      appBar: AppBar(
+      appBar: widget.isTab ? null : AppBar(
         title: Text('Activity History', style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
         backgroundColor: context.bg,
         elevation: 0,

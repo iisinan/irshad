@@ -16,6 +16,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _notificationsEnabled = true;
+  bool _digestEnabled = true;
   bool _biometricsEnabled = false;
   String _selectedLanguage = 'English';
   final List<String> _languages = ['English', 'Hausa', 'Yoruba', 'Igbo'];
@@ -130,6 +131,12 @@ final ApiService _apiService = ApiService();
                 title: 'Push Notifications',
                 value: _notificationsEnabled,
                 onChanged: (val) => setState(() => _notificationsEnabled = val),
+              ),
+              _buildSwitchTile(
+                icon: Icons.email_rounded,
+                title: 'Weekly Digest',
+                value: _digestEnabled,
+                onChanged: (val) => setState(() => _digestEnabled = val),
               ),
             ]),
 

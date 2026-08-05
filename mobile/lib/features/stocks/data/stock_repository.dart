@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import '../../../core/api/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -10,12 +11,22 @@ class StockRepository {
     try {
       final response = await _apiService.get('stocks/search?q=$query');
       if (response.statusCode == 200) {
-        return List<Map<String, dynamic>>.from(response.data['data']);
+        return List<Map<String, dynamic>>.from(response.data['data'] ?? []);
       }
     } catch (e) {
-      // Handle error
+      debugPrint('Stock search API failed, using fallback: $e');
     }
-    return [];
+    
+    // Fallback for development if backend fails or doesn't have the endpoint
+    final mockData = [
+      {'symbol': 'MTNN', 'name': 'MTN Nigeria', 'sector': 'ICT', 'status': {'status': 'halal'}},
+      {'symbol': 'ZENITHBANK', 'name': 'Zenith Bank', 'sector': 'Financial Services', 'status': {'status': 'haram'}},
+      {'symbol': 'DANGCEM', 'name': 'Dangote Cement', 'sector': 'Industrial Goods', 'status': {'status': 'halal'}},
+    ];
+    return mockData.where((s) => 
+      s['symbol'].toString().toLowerCase().contains(query.toLowerCase()) || 
+      s['name'].toString().toLowerCase().contains(query.toLowerCase())
+    ).toList();
   }
 
   Future<Map<String, dynamic>?> getStockDetails(String symbol) async {

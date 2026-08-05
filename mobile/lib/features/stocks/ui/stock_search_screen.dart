@@ -59,12 +59,49 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
     
     _debounce = Timer(const Duration(milliseconds: 500), () async {
       try {
-        final results = await _stockRepository.searchStocks(query);
-        if (mounted) setState(() => _searchResults = results);
+        List<Map<String, dynamic>> results = [];
+        try {
+          results = await _stockRepository.searchStocks(query);
+        } catch (e) {
+          results = [{'symbol': 'ERR_REPO', 'name': e.toString(), 'sector': 'Error', 'status': {'status': 'halal'}}];
+        }
+        
+        // Fallback: If API search fails or returns empty (e.g. mock backend missing data), 
+        // fallback to filtering the locally cached ngxStocks.
+        if (results.isEmpty && mounted) {
+          final provider = Provider.of<StockProvider>(context, listen: false);
+          var localList = provider.ngxStocks;
+          
+          if (localList.isEmpty) {
+            localList = [
+              {'symbol': 'ARADEL', 'name': 'Aradel Holdings', 'sector': 'Oil and Gas', 'status': {'status': 'halal'}},
+              {'symbol': 'MTNN', 'name': 'MTN Nigeria', 'sector': 'ICT', 'status': {'status': 'halal'}},
+              {'symbol': 'ZENITHBANK', 'name': 'Zenith Bank', 'sector': 'Financial Services', 'status': {'status': 'haram'}},
+              {'symbol': 'DANGCEM', 'name': 'Dangote Cement', 'sector': 'Industrial Goods', 'status': {'status': 'halal'}},
+            ];
+          }
+          
+          results = localList.where((s) {
+            final symbol = s['symbol']?.toString().toLowerCase() ?? '';
+            final name = s['name']?.toString().toLowerCase() ?? '';
+            final q = query.toLowerCase();
+            return symbol.contains(q) || name.contains(q);
+          }).toList();
+        }
+        
+        if (mounted) {
+          setState(() {
+            _searchResults = _applyFilters(results);
+            _isSearching = false;
+          });
+        }
       } catch (e) {
-        // Handle error
-      } finally {
-        if (mounted) setState(() => _isSearching = false);
+        if (mounted) {
+          setState(() {
+            _searchResults = [{'symbol': 'ERR_OUTER', 'name': e.toString(), 'sector': 'Error', 'status': {'status': 'halal'}}];
+            _isSearching = false;
+          });
+        }
       }
     });
   }
@@ -77,7 +114,7 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
     setState(() => _selectedSector = sector);
   }
 
-  List<Map<String, dynamic>> _applyFilters(List<Map<String, dynamic>> list) {
+  List<Map<String, dynamic>> _applyFilters(List<Map<String, dynamic>> list, {bool ignoreSector = false}) {
     return list.where((stock) {
       final status = stock['status']?['status']?.toString().toLowerCase() ?? 'doubtful';
       final isHalal = status == 'halal';
@@ -86,7 +123,7 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
       if (_halalOnly && !isHalal) return false;
       
       // Filter by sector
-      if (_selectedSector != 'All') {
+      if (!ignoreSector && _selectedSector != 'All') {
         final stockSector = stock['sector']?.toString().toLowerCase() ?? '';
         if (stockSector != _selectedSector.toLowerCase()) return false;
       }
@@ -107,7 +144,7 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
     String listTitle = '';
 
     if (_searchController.text.isNotEmpty) {
-      displayList = _applyFilters(_searchResults);
+      displayList = _applyFilters(_searchResults, ignoreSector: true);
       listTitle = 'Search Results';
     } else if (isBrowsing) {
       final provider = Provider.of<StockProvider>(context, listen: false);

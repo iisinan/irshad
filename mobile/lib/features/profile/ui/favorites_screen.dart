@@ -5,7 +5,8 @@ import '../data/user_activity_repository.dart';
 
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 class FavoritesScreen extends StatefulWidget {
-  const FavoritesScreen({super.key});
+  final bool isTab;
+  const FavoritesScreen({super.key, this.isTab = false});
 
   @override
   State<FavoritesScreen> createState() => _FavoritesScreenState();
@@ -85,7 +86,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: context.bg,
-      appBar: AppBar(
+      appBar: widget.isTab ? null : AppBar(
         title: Text('Watchlist', style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
         backgroundColor: context.bg,
         elevation: 0,

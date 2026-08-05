@@ -95,6 +95,29 @@ Color get cardBg => context.bgAlt;
                       const SizedBox(height: 12),
                       _buildPreferencesCard(),
 
+                      if (user?['role'] == 'admin' || user?['role'] == 'superadmin' || user?['is_admin'] == true) ...[
+                        const SizedBox(height: 32),
+                        _buildSectionHeader('Administration'),
+                        const SizedBox(height: 12),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: context.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: context.primary.withValues(alpha: 0.3)),
+                          ),
+                          child: ListTile(
+                            leading: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(color: context.primary, borderRadius: BorderRadius.circular(8)),
+                              child: const Icon(Icons.shield_rounded, color: Colors.white, size: 20),
+                            ),
+                            title: Text('Admin Dashboard', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: context.primary)),
+                            trailing: Icon(Icons.arrow_forward_ios_rounded, size: 14, color: context.primary),
+                            onTap: () => Navigator.pushNamed(context, '/admin'),
+                          ),
+                        ),
+                      ],
+
                       const SizedBox(height: 48),
                       // Edit Button
                       SizedBox(
@@ -270,17 +293,34 @@ Color get cardBg => context.bgAlt;
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: context.divider),
       ),
-      child: ListTile(
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(color: context.bg, borderRadius: BorderRadius.circular(8)),
-          child: Icon(Icons.calculate_outlined, color: context.textMuted, size: 20),
-        ),
-        title: Text('Zakat Calculator', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: context.textDark)),
-        trailing: Icon(Icons.arrow_forward_ios_rounded, size: 14, color: context.textMuted),
-        onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => const _ZakatWrapper()));
-        },
+      child: Column(
+        children: [
+          ListTile(
+            leading: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(color: context.bg, borderRadius: BorderRadius.circular(8)),
+              child: Icon(Icons.calculate_outlined, color: context.textMuted, size: 20),
+            ),
+            title: Text('Zakat Calculator', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: context.textDark)),
+            trailing: Icon(Icons.arrow_forward_ios_rounded, size: 14, color: context.textMuted),
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const _ZakatWrapper()));
+            },
+          ),
+          Divider(color: context.divider, height: 1, indent: 56),
+          ListTile(
+            leading: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(color: context.bg, borderRadius: BorderRadius.circular(8)),
+              child: Icon(Icons.notifications_active_outlined, color: context.textMuted, size: 20),
+            ),
+            title: Text('My Alerts', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: context.textDark)),
+            trailing: Icon(Icons.arrow_forward_ios_rounded, size: 14, color: context.textMuted),
+            onTap: () {
+              Navigator.pushNamed(context, '/alerts');
+            },
+          ),
+        ],
       ),
     );
   }

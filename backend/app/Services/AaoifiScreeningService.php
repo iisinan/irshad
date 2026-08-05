@@ -32,7 +32,13 @@ class AaoifiScreeningService
         $combinedNews = $existingScreening->news_sources ?? [];
 
         // 3. Financial Ratio Screening
-        $marketCap = $financials ? (float) $financials->market_cap : 0;
+        // IMPORTANT: Use the live company market_cap (from companies table) as the denominator.
+        // The market_cap stored in the financials table is a historical snapshot taken at the time
+        // of PDF extraction, which may be stale/inflated. The companies.market_cap is kept current.
+        $liveMarketCap = (float) ($company->market_cap ?? 0);
+        $historicalMarketCap = $financials ? (float) $financials->market_cap : 0;
+        $marketCap = $liveMarketCap > 0 ? $liveMarketCap : $historicalMarketCap;
+
         $totalAssets = $financials ? (float) $financials->total_assets : 0;
         $totalDebt = $financials ? (float) $financials->total_debt : 0;
 

@@ -12,6 +12,10 @@ class PurificationTab extends StatelessWidget {
       builder: (context, provider, child) {
         final isLoading = provider.isLoading;
         final totalPurificationDue = provider.summary['purification_due'] ?? 0.0;
+        final holdingsRequiringPurification = provider.holdings.where((h) {
+          final due = num.tryParse(h['purification_due']?.toString() ?? '0')?.toDouble() ?? 0.0;
+          return due > 0;
+        }).toList();
 
         return SingleChildScrollView(
           padding: const EdgeInsets.only(left: 24.0, right: 24.0, top: 24.0, bottom: 100.0),
@@ -61,6 +65,43 @@ class PurificationTab extends StatelessWidget {
                   ],
                 ),
               ),
+              const SizedBox(height: 32),
+              if (holdingsRequiringPurification.isNotEmpty) ...[
+                Text('BREAKDOWN BY HOLDING', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: context.textMuted, letterSpacing: 0.5)),
+                const SizedBox(height: 16),
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: holdingsRequiringPurification.length,
+                  separatorBuilder: (context, index) => const SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    final h = holdingsRequiringPurification[index];
+                    final due = num.tryParse(h['purification_due']?.toString() ?? '0')?.toDouble() ?? 0.0;
+                    return Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: context.divider),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(h['symbol'] ?? 'Unknown', style: TextStyle(fontWeight: FontWeight.w800, color: context.textDark, fontSize: 16)),
+                              const SizedBox(height: 4),
+                              Text('${h['shares']} shares', style: TextStyle(color: context.textMuted, fontSize: 13)),
+                            ],
+                          ),
+                          Text('₦${due.toStringAsFixed(2)}', style: TextStyle(fontWeight: FontWeight.w800, color: Colors.amber.shade700, fontSize: 16)),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ],
             ],
           ),
         );

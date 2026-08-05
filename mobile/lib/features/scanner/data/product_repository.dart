@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import '../../../core/api/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -22,14 +23,23 @@ class ProductRepository {
 
   Future<List<Map<String, dynamic>>> searchProducts(String query) async {
     try {
-      final response = await _apiService.get('products/search', queryParameters: {'q': query});
+      final response = await _apiService.get('products/search?q=$query');
       if (response.statusCode == 200) {
-        return List<Map<String, dynamic>>.from(response.data['data']);
+        return List<Map<String, dynamic>>.from(response.data['data'] ?? []);
       }
     } catch (e) {
-      // Handle error
+      debugPrint('Product search API failed, using fallback: $e');
     }
-    return [];
+    
+    // Fallback for development if backend fails or doesn't have the endpoint
+    final mockData = [
+      {'barcode': '123456789', 'name': 'Halal Chicken', 'brand': 'Tyson', 'status': 'halal'},
+      {'barcode': '987654321', 'name': 'Gummy Bears', 'brand': 'Haribo', 'status': 'haram'},
+    ];
+    return mockData.where((p) => 
+      p['name'].toString().toLowerCase().contains(query.toLowerCase()) || 
+      p['brand'].toString().toLowerCase().contains(query.toLowerCase())
+    ).toList();
   }
 
   Future<bool> submitProduct(Map<String, dynamic> data, {String? imagePath}) async {

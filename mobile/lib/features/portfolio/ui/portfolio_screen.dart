@@ -4,8 +4,13 @@ import '../../../core/api/api_service.dart';
 import 'tabs/portfolio_overview_tab.dart';
 import 'tabs/purification_tab.dart';
 import 'tabs/shariah_tab.dart';
-import 'tabs/resources_tab.dart'; // Added
+import 'tabs/resources_tab.dart'; 
+import 'tabs/updates_tab.dart'; // Added
+import 'tabs/guide_tab.dart'; // Added
 import 'zakat_calculator_screen.dart';
+import '../../stocks/ui/ngx_market_screen.dart';
+import '../../profile/ui/favorites_screen.dart';
+import '../../profile/ui/history_screen.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 
 class PortfolioScreen extends StatefulWidget {
@@ -19,7 +24,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 5, // Changed to 5
+      length: 10, // Changed to 10
       child: Scaffold(
         backgroundColor: context.bg,
         appBar: AppBar(
@@ -28,30 +33,46 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
           elevation: 0,
           bottom: TabBar(
             isScrollable: true,
-            labelColor: context.textDark,
+            labelColor: Colors.white,
             unselectedLabelColor: context.textMuted,
-            indicatorColor: context.primary,
-            indicatorWeight: 3,
-            labelStyle: TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
-            unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+            indicator: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              color: context.primary,
+            ),
+            indicatorSize: TabBarIndicatorSize.tab,
+            labelPadding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            labelStyle: TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+            unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
             tabAlignment: TabAlignment.start,
             dividerColor: Colors.transparent,
+            splashBorderRadius: BorderRadius.circular(20),
             tabs: [
               Tab(text: 'Overview'),
+              Tab(text: 'Updates'), // Added
+              Tab(text: 'Market'),
+              Tab(text: 'Watchlist'),
+              Tab(text: 'Activity'),
               Tab(text: 'Zakat'),
               Tab(text: 'Purification'),
               Tab(text: 'Shariah'),
-              Tab(text: 'Resources'), // Added
+              Tab(text: 'Resources'),
+              Tab(text: 'Guide'), // Added
             ],
           ),
         ),
         body: const TabBarView(
           children: [
             PortfolioOverviewTab(),
+            UpdatesTab(), // Added
+            NgxMarketScreen(isTab: true),
+            FavoritesScreen(isTab: true),
+            HistoryScreen(isTab: true),
             ZakatCalculatorScreen(isTab: true),
             PurificationTab(),
             ShariahTab(),
-            ResourcesTab(), // Added
+            ResourcesTab(),
+            GuideTab(), // Added
           ],
         ),
       ),

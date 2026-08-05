@@ -85,17 +85,11 @@ class ProcessCompanyFinancialsJob implements ShouldQueue
         }
 
         try {
-            // 1. Resolve PDF URL
+            // 1. Resolve PDF URL (Strictly from NGXPulse Disclosures)
             $pdfUrl = $this->pdfUrl;
-            
-            if (!$pdfUrl) {
-                // Phase 9: Fallback to Apify
-                Log::info("[{$symbol}] No URL provided from API Phase. Triggering Apify fallback...");
-                $pdfUrl = $scraper->findLatestFinancialReportPdfUrl($symbol);
-            }
 
             if (! $pdfUrl) {
-                Log::warning("[{$symbol}] No financial statement PDF found via any source. Skipping.");
+                Log::warning("[{$symbol}] No NGXPulse financial statement PDF found. Skipping.");
                 return;
             }
 

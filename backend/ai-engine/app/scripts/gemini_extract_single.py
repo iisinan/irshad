@@ -50,7 +50,7 @@ def main():
             "reporting_currency": {"type": "STRING"},
             "unit_multiplier": {"type": "NUMBER", "description": "1=absolute, 1000=NGN'000, 1000000=NGN millions"},
             "total_revenue": field("Total revenue / turnover / gross earnings"),
-            "interest_income": field("Interest income / finance income / investment income from interest-bearing instruments"),
+            "interest_income": field("Interest income / finance income / investment income from interest-bearing instruments and bank deposits from Notes (e.g. Note on Finance Income / Interest on fixed deposits) or Income Statement. Return 0 if None."),
             "total_debt": field("Total interest-bearing debt: borrowings, loans, bonds. Exclude customer deposits for banks."),
             "cash_and_equivalents": field("Cash and cash equivalents"),
             "total_assets": field("Total assets"),
@@ -59,7 +59,7 @@ def main():
             "principal_activities": {"type": "STRING", "description": "Brief description of company's principal business activities."},
             "is_bank_or_financial": {"type": "BOOLEAN", "description": "True if this is a bank, insurance company, or financial institution."}
         },
-        "required": ["financial_year", "reporting_period", "reporting_currency", "unit_multiplier", "total_revenue", "total_debt", "cash_and_equivalents", "total_assets", "is_bank_or_financial"]
+        "required": ["financial_year", "reporting_period", "reporting_currency", "unit_multiplier", "total_revenue", "interest_income", "total_debt", "cash_and_equivalents", "total_assets", "is_bank_or_financial"]
     }
 
     prompt = (
@@ -70,11 +70,12 @@ def main():
         f"   Return the EXACT unit_multiplier (1000 if NGN'000, 1000000 if NGN millions, 1 if absolute).\n"
         f"   Return figures as RAW numbers as printed in the document — do NOT pre-scale them.\n"
         f"2. BANK DEBT: If this is a bank, total_debt = only interest-bearing borrowings. Do NOT include customer deposits.\n"
-        f"3. EVIDENCE: For every monetary value, return the exact page number and a short quote proving the number.\n\n"
+        f"3. FINANCE / INTEREST INCOME: You MUST inspect the Statement of Profit or Loss and the Notes to the Financial Statements (look for Notes titled 'Finance Income', 'Investment Income', or 'Interest Income on bank deposits/short term deposits/fixed deposits'). Extract the exact interest income figure. If none exists anywhere in the report or notes, return 0 with quote 'None found'.\n"
+        f"4. EVIDENCE: For every monetary value, return the exact page number and a short quote proving the number.\n\n"
         f"Extract all fields from the attached financial report now."
     )
 
-    MODELS = ['gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash-001']
+    MODELS = ['gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-flash-latest']
     result = {}
     for model in MODELS:
         try:

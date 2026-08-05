@@ -77,11 +77,18 @@ class EnterpriseNGXScraper:
 
     def filter_financials(self, disclosures):
         valid = []
-        ignore_keywords = ['agm', 'dividend', 'rights issue', 'board meeting', 'press release', 'notice']
+        ignore_keywords = ['agm', 'dividend', 'rights issue', 'board meeting', 'press release', 'notice', 'directorsdealings', 'resignation', 'appointment']
         for item in disclosures:
-            if item.get("type") == "Financial Statements" and item.get("url") and item.get("symbol"):
-                title = item.get("title", "").lower()
-                if not any(kw in title for kw in ignore_keywords):
+            url = item.get("url")
+            symbol = item.get("symbol")
+            if not url or not symbol:
+                continue
+            title = item.get("title", "").lower()
+            disc_type = item.get("type", "")
+            if any(kw in title for kw in ignore_keywords):
+                continue
+            if disc_type == "Financial Statements" or any(kw in title for kw in ['financial statement', 'results release', 'audited', 'unaudited', 'annual report', 'half year', 'quarter', 'q1', 'q2', 'q3', '9 months', '9m']):
+                if url.lower().endswith('.pdf') or 'doclib.ngxgroup.com' in url.lower():
                     valid.append(item)
         return valid
 
@@ -153,12 +160,20 @@ class EnterpriseNGXScraper:
             
         if prompt:
             print(f"[{symbol}] Generating AI professional justification summary...")
-            try:
-                response = self.gemini_client.models.generate_content(
-                    model='gemini-3.5-flash',
-                    contents=prompt.strip(),
-                )
-                new_reason = response.text.strip()
+            new_reason = None
+            for model_name in ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash']:
+                try:
+                    response = self.gemini_client.models.generate_content(
+                        model=model_name,
+                        contents=prompt.strip(),
+                    )
+                    if response and response.text:
+                        new_reason = response.text.strip()
+                        break
+                except Exception as e:
+                    continue
+
+            if new_reason:
                 check_q = text("SELECT id FROM stock_statuses WHERE company_id = :cid")
                 exists = await session.execute(check_q, {'cid': cid})
                 if exists.fetchone():
@@ -167,8 +182,7 @@ class EnterpriseNGXScraper:
                 else:
                     ins = text("INSERT INTO stock_statuses (company_id, status, reason, updated_at, last_updated) VALUES (:cid, :status, :r, NOW(), NOW())")
                     await session.execute(ins, {'cid': cid, 'status': final_status, 'r': new_reason})
-            except Exception as e:
-                print(f"[{symbol}] AI Justification Generation failed: {e}")
+                await session.commit()
 
     async def log_audit(self, session, company_id, disclosure_id, url, pdf_hash, status, reason, duration=0.0):
         query = text("""
@@ -325,10 +339,10 @@ class EnterpriseNGXScraper:
             if title_period and gemini_period:
                 def norm(p):
                     p = p.lower()
-                    if any(x in p for x in ['q1', 'first quarter', 'quarter 1', '3m', '3 month', 'three month', 'jan-march']): return 'Q1'
-                    if any(x in p for x in ['q2', 'second quarter', 'quarter 2', '6m', '6 mth', '6 month', 'half year', 'h1', 'six month']): return 'Q2'
-                    if any(x in p for x in ['q3', 'third quarter', 'quarter 3', '9m', '9 month', 'nine month']): return 'Q3'
-                    if any(x in p for x in ['q4', 'fourth quarter', 'quarter 4', 'annual', 'full year', 'audited', 'year ended']): return 'Annual'
+                    if any(x in p for x in ['q1', 'first quarter', 'quarter 1', '3m', '3 month', 'three month', 'jan-march', '31 march', '31st march']): return 'Q1'
+                    if any(x in p for x in ['q2', 'second quarter', 'quarter 2', '6m', '6 mth', '6 month', 'half year', 'h1', 'hy1', 'hy2', 'six month', '30 june', '30th june', 'june 2026', 'june 2025', 'june 2024']): return 'Q2'
+                    if any(x in p for x in ['q3', 'third quarter', 'quarter 3', '9m', '9 month', 'nine month', '30 september', '30th sept', 'september 2026', 'september 2025']): return 'Q3'
+                    if any(x in p for x in ['q4', 'fourth quarter', 'quarter 4', 'annual', 'full year', 'audited', 'year ended', '31 december', '31st dec', 'december 2025', 'december 2024']): return 'Annual'
                     return p
                 
                 if norm(title_period) != norm(gemini_period):
@@ -415,6 +429,63 @@ class EnterpriseNGXScraper:
                 "cid": cid
             })
             
+            # Also sync directly to financials table
+            unit = extracted_data.get("unit_multiplier", 1) or 1
+            def get_scaled(k):
+                val_obj = extracted_data.get(k)
+                if isinstance(val_obj, dict):
+                    v = val_obj.get("value")
+                else:
+                    v = val_obj
+                if v is not None and isinstance(v, (int, float)):
+                    return float(v) * unit
+                return None
+
+            tot_assets = get_scaled("total_assets")
+            tot_debt = get_scaled("total_debt")
+            tot_rev = get_scaled("total_revenue")
+            int_inc = get_scaled("interest_income")
+            cash_eq = get_scaled("cash_and_equivalents")
+            acc_rec = get_scaled("accounts_receivable")
+            ill_ass = get_scaled("illiquid_assets")
+
+            fin_params = {
+                "cid": cid, 
+                "assets": tot_assets if tot_assets is not None else 0.0, 
+                "debt": tot_debt if tot_debt is not None else 0.0, 
+                "rev": tot_rev if tot_rev is not None else 0.0, 
+                "interest": int_inc if int_inc is not None else 0.0,
+                "cash": cash_eq if cash_eq is not None else 0.0, 
+                "receivables": acc_rec if acc_rec is not None else 0.0, 
+                "illiquid": ill_ass if ill_ass is not None else 0.0,
+                "mc": mc or 0.0, "url": url, "pd": pd_obj, "hash": pdf_hash, "rp": report_period
+            }
+
+            check_fin = await session.execute(text("SELECT id FROM financials WHERE company_id = :cid"), {"cid": cid})
+            if check_fin.fetchone():
+                await session.execute(text("""
+                    UPDATE financials SET
+                        total_assets = :assets, total_debt = :debt, total_revenue = :rev, interest_income = :interest,
+                        cash_and_equivalents = :cash, accounts_receivable = :receivables, illiquid_assets = :illiquid,
+                        market_cap = :mc, source_url = :url, published_date = :pd, file_hash = :hash, reporting_period = :rp,
+                        extraction_schema_version = 'v1.0-ngxpulse-gemini', updated_at = NOW()
+                    WHERE company_id = :cid
+                """), fin_params)
+            else:
+                await session.execute(text("""
+                    INSERT INTO financials (
+                        company_id, total_assets, total_debt, total_revenue, interest_income,
+                        cash_and_equivalents, accounts_receivable, illiquid_assets,
+                        market_cap, source_url, published_date, file_hash, reporting_period,
+                        extraction_schema_version, created_at, updated_at
+                    ) VALUES (
+                        :cid, :assets, :debt, :rev, :interest,
+                        :cash, :receivables, :illiquid,
+                        :mc, :url, :pd, :hash, :rp,
+                        'v1.0-ngxpulse-gemini', NOW(), NOW()
+                    )
+                """), fin_params)
+
             duration = time.time() - start_time
             await self.log_audit(session, cid, disclosure_id, url, pdf_hash, 'success', 'Successfully processed', duration)
             print(f"[{symbol}] ✅ Successfully updated.")
@@ -425,6 +496,7 @@ class EnterpriseNGXScraper:
                 debt_ratio or 0, cash_ratio or 0, income_ratio or 0, 
                 debt_status, cash_status, income_status
             )
+            await session.commit()
         except Exception as e:
             await session.rollback()
             await self.log_audit(session, cid, disclosure_id, url, pdf_hash, 'failed', f'DB Update crash: {e}')

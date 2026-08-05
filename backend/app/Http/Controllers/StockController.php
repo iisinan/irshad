@@ -193,8 +193,9 @@ class StockController extends Controller
             ->whereNotNull('latest_price')
             ->where('latest_price', '>', 0)
             ->where(function ($q) use ($query) {
-                $q->where('name', 'LIKE', "%{$query}%")
-                    ->orWhere('symbol', 'LIKE', "%{$query}%");
+                $lowerQuery = '%' . strtolower($query) . '%';
+                $q->whereRaw('LOWER(name) LIKE ?', [$lowerQuery])
+                    ->orWhereRaw('LOWER(symbol) LIKE ?', [$lowerQuery]);
             })
             ->limit(20)
             ->get()->map(function ($company) {
@@ -552,7 +553,7 @@ class StockController extends Controller
                 'interest_bearing_securities' => ($companyFin->interest_bearing_securities ?? 0) ?: $getVal('interest_bearing_securities'),
                 'interest_income' => ($companyFin->interest_income ?? 0) ?: $getVal('interest_income'),
                 'total_revenue' => ($companyFin->total_revenue ?? 0) ?: $getVal('total_revenue'),
-                'market_cap' => ($companyFin->market_cap ?? 0) ?: ($company->market_cap ?? 0),
+                'market_cap' => ($company->market_cap ?? 0) ?: ($companyFin->market_cap ?? 0),
             ]);
 
             $calculatedIncomeRatio = 0;

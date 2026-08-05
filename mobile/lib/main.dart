@@ -10,10 +10,13 @@ import 'features/auth/ui/register_screen.dart';
 import 'features/auth/ui/welcome_screen.dart';
 import 'features/auth/ui/profile_screen.dart';
 import 'features/auth/ui/edit_profile_screen.dart';
+import 'features/auth/ui/verify_email_screen.dart';
+import 'features/auth/ui/reset_password_screen.dart'; // Added
 import 'core/theme/app_theme.dart';
 import 'features/home/home_screen.dart';
 import 'features/profile/ui/settings_screen.dart';
 import 'features/profile/ui/notifications_screen.dart';
+import 'features/profile/ui/alerts_management_screen.dart'; // Added
 import 'features/scanner/ui/search_screen.dart';
 import 'features/scanner/ui/product_details_screen.dart';
 import 'features/scanner/ui/user_submission_screen.dart';
@@ -27,6 +30,9 @@ import 'features/profile/ui/history_screen.dart';
 import 'features/brokerage/ui/brokerage_link_screen.dart';
 import 'features/portfolio/ui/portfolio_screen.dart';
 import 'features/portfolio/ui/zakat_calculator_screen.dart';
+import 'features/admin/ui/admin_dashboard_screen.dart';
+import 'features/admin/providers/admin_provider.dart'; // Added
+import 'features/profile/providers/alerts_provider.dart'; // Added
 
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -160,6 +166,8 @@ void main() async {
         ChangeNotifierProvider(create: (_) => StockProvider()),
         ChangeNotifierProvider(create: (_) => BasketProvider()),
         ChangeNotifierProvider(create: (_) => PortfolioProvider()),
+        ChangeNotifierProvider(create: (_) => AdminProvider()),
+        ChangeNotifierProvider(create: (_) => AlertsProvider()),
         ChangeNotifierProvider.value(value: appState),
       ],
       child: IrshadApp(initialRoute: startRoute),
@@ -209,8 +217,9 @@ class IrshadApp extends StatelessWidget {
         '/onboarding':       (context) => const OnboardingScreen(),
         '/welcome':          (context) => const WelcomeScreen(),
         '/login':            (context) => const LoginScreen(),
-        '/register':         (context) => const RegisterScreen(),
-
+        '/register':         (context) => Scaffold(body: RegisterScreen()),
+        '/verify-email':     (context) => const VerifyEmailScreen(),
+        '/reset-password':   (context) => const ResetPasswordScreen(), // Added
         '/main':             (context) => const MainNavigationScreen(),
         '/profile':          (context) => const ProfileScreen(),
         '/edit_profile':     (context) => const EditProfileScreen(),
@@ -218,6 +227,8 @@ class IrshadApp extends StatelessWidget {
         '/history':          (context) => const HistoryScreen(),
         '/notifications':    (context) => const NotificationsScreen(),
         '/settings':         (context) => const SettingsScreen(),
+        '/alerts':           (context) => const AlertsManagementScreen(),
+        '/admin':            (context) => const AdminDashboardScreen(), // Added
         '/submit_product':   (context) => const UserSubmissionScreen(),
         '/brokerage/link':   (context) => const BrokerageLinkScreen(),
         '/zakat_calculator': (context) => const ZakatCalculatorScreen(),

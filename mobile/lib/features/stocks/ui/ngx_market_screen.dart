@@ -5,7 +5,8 @@ import '../providers/stock_provider.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 import '../../../core/widgets/company_avatar.dart';
 class NgxMarketScreen extends StatefulWidget {
-  const NgxMarketScreen({super.key});
+  final bool isTab;
+  const NgxMarketScreen({super.key, this.isTab = false});
 
   @override
   State<NgxMarketScreen> createState() => _NgxMarketScreenState();
@@ -85,7 +86,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: context.bg,
-      appBar: AppBar(
+      appBar: widget.isTab ? null : AppBar(
         title: Text('Live Stock Market', style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
         backgroundColor: context.bg,
         elevation: 0,
