@@ -104,7 +104,7 @@ function CalcModal({ h, onClose, onPurify }) {
         <div style={{ padding: '20px' }}>
           <Section
             title="Purification Calculation"
-            formula="Total Dividends Received × Impure Ratio"
+            formula={`${fmt(dividends)} × ${ratio.toFixed(4)}% = ${fmt(due)}`}
             accent="#D97706"
             rows={[
               { label: 'Total dividends received (12M)', value: fmt(dividends) },
@@ -169,20 +169,21 @@ function StatDetailModal({ holding: h, statKey, onClose, onOpenPurification }) {
 
   let config = {};
   if (statKey === 'dividends') {
+    const divPerShare = dividends / (shares || 1);
     config = {
       title: 'Dividends Received (12M)',
-      formula: 'Shares Held × Trailing 12M Dividend Per Share',
+      formula: `${shares.toLocaleString()} shares × ${fmt(divPerShare)} = ${fmt(dividends)}`,
       accent: '#0F5257',
       rows: [
         { label: 'Shares held', value: `${shares.toLocaleString()} shares` },
-        { label: 'Dividend per share (trailing 12M)', value: fmt(dividends / (shares || 1)) },
+        { label: 'Dividend per share (trailing 12M)', value: fmt(divPerShare) },
         { label: 'Total dividends received (12M)', value: fmt(dividends), highlight: true },
       ]
     };
   } else if (statKey === 'last_dividend') {
     config = {
       title: `${dividendLabel} Calculation`,
-      formula: 'Declared Dividend Per Share × Shares Held',
+      formula: `${fmt(divPerShare)} per share × ${shares.toLocaleString()} shares = ${fmt(divPerShare * shares)}`,
       accent: '#2563EB',
       rows: [
         { label: 'Pay date', value: dividendDate },
@@ -194,7 +195,7 @@ function StatDetailModal({ holding: h, statKey, onClose, onOpenPurification }) {
   } else if (statKey === 'impure_ratio') {
     config = {
       title: 'AAOIFI Impure Income Ratio',
-      formula: 'Non-Compliant Revenue ÷ Total Revenue × 100',
+      formula: `Non-Compliant Revenue ÷ Total Revenue × 100 = ${ratio.toFixed(4)}%`,
       accent: '#7C3AED',
       rows: [
         { label: "Company's non-compliant income (interest, etc.)", value: `${ratio.toFixed(4)}%` },
@@ -206,7 +207,7 @@ function StatDetailModal({ holding: h, statKey, onClose, onOpenPurification }) {
   } else if (statKey === 'portfolio_value') {
     config = {
       title: 'Portfolio Value Calculation',
-      formula: 'Shares Held × Current Market Price',
+      formula: `${shares.toLocaleString()} shares × ${fmt(currentPrice)} = ${fmt(totalValue)}`,
       accent: '#059669',
       rows: [
         { label: 'Shares held', value: `${shares.toLocaleString()} shares` },
