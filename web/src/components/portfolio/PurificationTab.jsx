@@ -40,11 +40,12 @@ function CalcModal({ h, onClose, onPurify }) {
     }, 1200);
   };
 
-  const Section = ({ title, formula, rows, accent }) => (
+  const Section = ({ title, formulaText, formulaCalc, rows, accent }) => (
     <div style={{ marginBottom: '16px', borderRadius: '16px', border: `1px solid ${accent || 'var(--border)'}`, overflow: 'hidden' }}>
       <div style={{ padding: '12px 16px', background: accent ? `${accent}12` : 'var(--bg-section)', borderBottom: `1px solid ${accent || 'var(--border)'}` }}>
-        <div style={{ fontSize: '0.65rem', fontWeight: 700, color: accent || 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>{title}</div>
-        <div style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 500 }}>{formula}</div>
+        <div style={{ fontSize: '0.65rem', fontWeight: 700, color: accent || 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>{title}</div>
+        {formulaText && <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '4px' }}>{formulaText}</div>}
+        {formulaCalc && <div style={{ fontFamily: 'monospace', fontSize: '0.82rem', color: 'var(--text-dark)', fontWeight: 800 }}>{formulaCalc}</div>}
       </div>
       <div style={{ background: 'var(--bg)' }}>
         {rows.map((row, i) => (
@@ -104,7 +105,8 @@ function CalcModal({ h, onClose, onPurify }) {
         <div style={{ padding: '20px' }}>
           <Section
             title="Purification Calculation"
-            formula={`${fmt(dividends)} × ${ratio.toFixed(4)}% = ${fmt(due)}`}
+            formulaText="Total Dividends Received × Impure Ratio"
+            formulaCalc={`${fmt(dividends)} × ${ratio.toFixed(4)}% = ${fmt(due)}`}
             accent="#D97706"
             rows={[
               { label: 'Total dividends received (12M)', value: fmt(dividends) },
@@ -172,7 +174,8 @@ function StatDetailModal({ holding: h, statKey, onClose, onOpenPurification }) {
     const divPerShare = dividends / (shares || 1);
     config = {
       title: 'Dividends Received (12M)',
-      formula: `${shares.toLocaleString()} shares × ${fmt(divPerShare)} = ${fmt(dividends)}`,
+      formulaText: 'Shares Held × Trailing 12M Dividend Per Share',
+      formulaCalc: `${shares.toLocaleString()} shares × ${fmt(divPerShare)} = ${fmt(dividends)}`,
       accent: '#0F5257',
       rows: [
         { label: 'Shares held', value: `${shares.toLocaleString()} shares` },
@@ -183,7 +186,8 @@ function StatDetailModal({ holding: h, statKey, onClose, onOpenPurification }) {
   } else if (statKey === 'last_dividend') {
     config = {
       title: `${dividendLabel} Calculation`,
-      formula: `${fmt(divPerShare)} per share × ${shares.toLocaleString()} shares = ${fmt(divPerShare * shares)}`,
+      formulaText: 'Declared Dividend Per Share × Shares Held',
+      formulaCalc: `${fmt(divPerShare)} per share × ${shares.toLocaleString()} shares = ${fmt(divPerShare * shares)}`,
       accent: '#2563EB',
       rows: [
         { label: 'Pay date', value: dividendDate },
@@ -195,7 +199,8 @@ function StatDetailModal({ holding: h, statKey, onClose, onOpenPurification }) {
   } else if (statKey === 'impure_ratio') {
     config = {
       title: 'AAOIFI Impure Income Ratio',
-      formula: `Non-Compliant Revenue ÷ Total Revenue × 100 = ${ratio.toFixed(4)}%`,
+      formulaText: 'Non-Compliant Revenue ÷ Total Revenue × 100',
+      formulaCalc: `Impure Income Ratio = ${ratio.toFixed(4)}%`,
       accent: '#7C3AED',
       rows: [
         { label: "Company's non-compliant income (interest, etc.)", value: `${ratio.toFixed(4)}%` },
@@ -207,7 +212,8 @@ function StatDetailModal({ holding: h, statKey, onClose, onOpenPurification }) {
   } else if (statKey === 'portfolio_value') {
     config = {
       title: 'Portfolio Value Calculation',
-      formula: `${shares.toLocaleString()} shares × ${fmt(currentPrice)} = ${fmt(totalValue)}`,
+      formulaText: 'Shares Held × Current Market Price',
+      formulaCalc: `${shares.toLocaleString()} shares × ${fmt(currentPrice)} = ${fmt(totalValue)}`,
       accent: '#059669',
       rows: [
         { label: 'Shares held', value: `${shares.toLocaleString()} shares` },
@@ -246,9 +252,10 @@ function StatDetailModal({ holding: h, statKey, onClose, onOpenPurification }) {
         {/* Formula & Rows */}
         <div style={{ padding: '24px' }}>
           <div style={{ marginBottom: '20px', borderRadius: '16px', border: `1px solid ${config.accent}30`, overflow: 'hidden' }}>
-            <div style={{ padding: '12px 16px', background: `${config.accent}12`, borderBottom: `1px solid ${config.accent}30` }}>
-              <div style={{ fontSize: '0.62rem', fontWeight: 700, color: config.accent, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>Formula</div>
-              <div style={{ fontFamily: 'monospace', fontSize: '0.82rem', color: 'var(--text-dark)', fontWeight: 700 }}>{config.formula}</div>
+            <div style={{ padding: '14px 16px', background: `${config.accent}12`, borderBottom: `1px solid ${config.accent}30` }}>
+              <div style={{ fontSize: '0.62rem', fontWeight: 700, color: config.accent, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Formula & Calculation</div>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '6px' }}>{config.formulaText}</div>
+              <div style={{ fontFamily: 'monospace', fontSize: '0.86rem', color: 'var(--text-dark)', fontWeight: 800, background: 'var(--bg-section)', padding: '6px 12px', borderRadius: '8px', border: '1px solid var(--border)', display: 'inline-block' }}>{config.formulaCalc}</div>
             </div>
             <div style={{ background: 'var(--bg)' }}>
               {config.rows.map((row, i) => (
