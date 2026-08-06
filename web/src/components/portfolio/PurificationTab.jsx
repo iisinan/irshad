@@ -102,67 +102,16 @@ function CalcModal({ h, onClose, onPurify }) {
         </div>
 
         <div style={{ padding: '20px' }}>
-          {/* Step 1 — Dividends */}
           <Section
-            title="Step 1 — Total Dividends Received (12M)"
-            formula="Shares Held × Dividend Per Share"
-            accent="#0F5257"
-            rows={[
-              { label: 'Shares held', value: `${shares.toLocaleString()} shares` },
-              { label: 'Dividend per share (trailing 12M)', value: fmt(dividends / (shares || 1)) },
-              { label: 'Total dividends received', value: fmt(dividends), highlight: true },
-            ]}
-          />
-
-          {/* Step 2 — Impure Ratio */}
-          <Section
-            title="Step 2 — AAOIFI Impure Income Ratio"
-            formula="Non-Compliant Revenue ÷ Total Revenue × 100"
-            accent="#7C3AED"
-            rows={[
-              { label: "Company's non-compliant income (interest, etc.)", value: `${ratio.toFixed(4)}%` },
-              { label: 'AAOIFI permissible threshold', value: '≤ 5.00%' },
-              { label: `Compliance status`, value: ratio <= 5 ? '✅ Passes' : '❌ Fails' },
-              { label: 'Impure ratio applied', value: `${ratio.toFixed(4)}%`, highlight: true },
-            ]}
-          />
-
-          {/* Step 3 — Purification Amount */}
-          <Section
-            title="Step 3 — Purification Amount"
-            formula="Total Dividends × Impure Ratio ÷ 100"
+            title="Purification Calculation"
+            formula="Total Dividends Received × Impure Ratio"
             accent="#D97706"
             rows={[
               { label: 'Total dividends received (12M)', value: fmt(dividends) },
-              { label: 'Multiplied by impure ratio', value: `${ratio.toFixed(4)}%` },
+              { label: 'Impure revenue ratio', value: `${ratio.toFixed(4)}%` },
               { label: 'Amount to purify (donate)', value: fmt(due), highlight: true },
             ]}
           />
-
-          {/* Step 4 — Portfolio snapshot */}
-          <Section
-            title="Portfolio Snapshot"
-            formula="Shares × Current Price"
-            rows={[
-              { label: 'Current market price', value: fmt(currentPrice) },
-              { label: 'Average buy price', value: fmt(avgPrice) },
-              { label: 'Unrealised P&L', value: `${currentPrice >= avgPrice ? '+' : ''}${fmt(totalValue - shares * avgPrice)}` },
-              { label: 'Total portfolio value', value: fmt(totalValue), highlight: true },
-            ]}
-          />
-
-          {/* Last/Upcoming dividend if available */}
-          {latestDiv && (
-            <Section
-              title={dividendLabel}
-              formula="Declared Per Share × Shares Held"
-              rows={[
-                { label: 'Pay date', value: dividendDate },
-                { label: 'Dividend per share', value: fmt(divPerShare) },
-                { label: 'Your total entitlement', value: fmt(divPerShare * shares), highlight: true },
-              ]}
-            />
-          )}
 
           {/* CTA */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '4px' }}>
