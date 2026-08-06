@@ -514,13 +514,13 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     return Container(
       width: double.infinity,
       color: context.bg,
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(_currentStock['name'] ?? '', style: TextStyle(color: context.textMuted, fontSize: 14, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
-          Text('₦${latestPrice.toStringAsFixed(2)}', style: TextStyle(fontSize: 48, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -1)),
+          Text('₦${latestPrice.toStringAsFixed(2)}', style: TextStyle(fontSize: 40, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -1)),
           if (priceChange != null)
             Padding(
               padding: const EdgeInsets.only(top: 4),
@@ -533,9 +533,9 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                 )
               ),
             ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             decoration: BoxDecoration(
               color: bg,
               borderRadius: BorderRadius.circular(100), // Large Pill badge
@@ -554,7 +554,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                   size: 20
                 ),
                 const SizedBox(width: 10),
-                Text(label, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: color, letterSpacing: 0.8)),
+                Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: color, letterSpacing: 0.5)),
               ],
             ),
           ),
@@ -702,10 +702,10 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
         _buildSectionHeader('Overview'),
         const SizedBox(height: 12),
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
             color: context.bgAlt,
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
             children: [
@@ -751,10 +751,10 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
         _buildSectionHeader('Company Profile'),
         const SizedBox(height: 12),
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
             color: context.bgAlt,
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
             children: [
@@ -784,11 +784,11 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
         _buildSectionHeader('Analysts Rating'),
         const SizedBox(height: 12),
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           width: double.infinity,
           decoration: BoxDecoration(
             color: ratingColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(color: ratingColor.withOpacity(0.3)),
           ),
           child: Column(
@@ -860,16 +860,16 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     
     Widget buildCard(String title, String value) {
       return Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: context.bgAlt,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: TextStyle(color: context.textMuted, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
-            const SizedBox(height: 8),
+            Text(title, style: TextStyle(color: context.textMuted, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
+            const SizedBox(height: 4),
             Text(value, style: TextStyle(color: context.textDark, fontSize: 14, fontWeight: FontWeight.w700)),
           ],
         ),
@@ -982,16 +982,16 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
 
   Widget _buildMetricCard(String label, String value) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: context.bgAlt,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: TextStyle(color: context.textMuted, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
-          const SizedBox(height: 8),
+          Text(label, style: TextStyle(color: context.textMuted, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
+          const SizedBox(height: 4),
           Text(value, style: TextStyle(color: context.textDark, fontSize: 14, fontWeight: FontWeight.w700)),
         ],
       ),
@@ -1614,10 +1614,10 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     final overview = _currentStock['overview'] ?? '$name operates within the $sector sector. Its primary business activities include the production, provision, and distribution of goods and services specific to the $sector industry. As a publicly traded entity on the Nigerian Exchange, it focuses on delivering sustainable value to its stakeholders.';
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
         color: context.bgAlt,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Text(
         overview,

@@ -291,7 +291,7 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
                           child: ListView.builder(
                             controller: _scrollController,
                             itemCount: _results.length + (_hasMore ? 1 : 0),
-                            padding: const EdgeInsets.only(bottom: 100, top: 12),
+                            padding: const EdgeInsets.only(bottom: 100, top: 4),
                             itemBuilder: (context, index) {
                               if (index == _results.length) {
                                 return Center(child: Padding(padding: const EdgeInsets.all(16), child: CircularProgressIndicator(color: context.primary)));
@@ -375,7 +375,7 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
     int activeFiltersCount = _selectedStatuses.length + _selectedSectors.length + (_minMarketCap != null ? 1 : 0) + (_maxPe != null ? 1 : 0);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 6.0),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
@@ -383,11 +383,11 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
             GestureDetector(
               onTap: _showFilterBottomSheet,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 decoration: BoxDecoration(
                   color: activeFiltersCount > 0 ? context.primary.withValues(alpha: 0.2) : Colors.transparent,
                   border: Border.all(color: activeFiltersCount > 0 ? context.primary : context.divider),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
                   children: [
@@ -402,10 +402,10 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
             ),
             const SizedBox(width: 12),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               decoration: BoxDecoration(
                 border: Border.all(color: context.divider),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(20),
               ),
               child: Row(
                 children: [
@@ -418,10 +418,10 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
             if (_selectedStatuses.isNotEmpty) ...[
               const SizedBox(width: 12),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 decoration: BoxDecoration(
                   border: Border.all(color: context.divider),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
                   children: [
@@ -433,10 +433,10 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
              if (_selectedSectors.isNotEmpty) ...[
               const SizedBox(width: 12),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 decoration: BoxDecoration(
                   border: Border.all(color: context.divider),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
                   children: [
@@ -457,7 +457,7 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
     final isPositive = priceChange >= 0;
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
         color: context.bgAlt,
         borderRadius: BorderRadius.circular(16),
@@ -480,18 +480,18 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
             );
           },
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 CompanyAvatar(
                   logoUrl: stock['logo_url'],
                   symbol: stock['symbol'] ?? 'S',
-                  size: 40,
-                  borderRadius: 20,
-                  fontSize: 16,
+                  size: 36,
+                  borderRadius: 18,
+                  fontSize: 14,
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -500,7 +500,7 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
                         children: [
                           Text(
                             stock['symbol'],
-                            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18, color: context.textDark, letterSpacing: -0.5),
+                            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: context.textDark, letterSpacing: -0.3),
                           ),
                           const SizedBox(width: 10),
                           Expanded(
@@ -509,20 +509,20 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
                               runSpacing: 4,
                               children: [
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(color: context.primary.withOpacity(0.08), borderRadius: BorderRadius.circular(20)),
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(color: context.primary.withOpacity(0.08), borderRadius: BorderRadius.circular(16)),
                                   child: Text(
                                     (stock['sector'] ?? 'Unknown').toUpperCase(),
-                                    style: TextStyle(color: context.primary, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5),
+                                    style: TextStyle(color: context.primary, fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: 0.5),
                                   ),
                                 ),
                                 if (stock['industry'] != null && stock['industry'].toString().isNotEmpty)
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    decoration: BoxDecoration(color: context.primary.withOpacity(0.08), borderRadius: BorderRadius.circular(20)),
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(color: context.primary.withOpacity(0.08), borderRadius: BorderRadius.circular(16)),
                                     child: Text(
                                       stock['industry'].toString().toUpperCase(),
-                                      style: TextStyle(color: context.primary, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5),
+                                      style: TextStyle(color: context.primary, fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: 0.5),
                                     ),
                                   ),
                               ],
@@ -535,7 +535,7 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
                         stock['name'] ?? 'Unknown',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 14, color: context.textMuted),
+                        style: TextStyle(fontSize: 12, color: context.textMuted),
                       ),
                     ],
                   ),
@@ -545,14 +545,14 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
                   children: [
                     Text(
                       '₦${(double.tryParse(stock['latest_price']?.toString() ?? '0') ?? 0.0).toStringAsFixed(2)}',
-                      style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16, color: context.textDark),
+                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: context.textDark),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
                       '${isPositive ? '+' : ''}${priceChangePct.toStringAsFixed(2)}%',
                       style: TextStyle(
-                        fontWeight: FontWeight.w400,
-                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 12,
                         color: isPositive ? context.halal : context.haram,
                       ),
                     ),

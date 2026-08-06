@@ -36,7 +36,13 @@ class ApiService {
     // Auth token injection
     dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
-        final token = await _storage.read(key: 'access_token');
+        String? token;
+        try {
+          token = await _storage.read(key: 'access_token');
+        } catch (e) {
+          debugPrint('FlutterSecureStorage read failed in ApiService: $e');
+          await _storage.deleteAll();
+        }
         if (token != null) {
           options.headers['Authorization'] = 'Bearer $token';
         }

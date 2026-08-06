@@ -146,7 +146,13 @@ void main() async {
   final hasSeenOnboarding = prefs.getBool('hasSeenOnboarding') ?? false;
 
   final storage = const FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
-  final token = await storage.read(key: 'access_token');
+  String? token;
+  try {
+    token = await storage.read(key: 'access_token');
+  } catch (e) {
+    debugPrint('FlutterSecureStorage read failed (likely Keystore corruption): $e');
+    await storage.deleteAll();
+  }
   final bool hasToken = token != null && token.isNotEmpty;
 
   // Lock the app behind registration: go to welcome if onboarding is done but no token
@@ -264,11 +270,16 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   Future<void> _checkInitialAuth() async {
-    final token = await _storage.read(key: 'access_token');
-    if (token != null && token.isNotEmpty) {
-      if (mounted) {
-        Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
+    try {
+      final token = await _storage.read(key: 'access_token');
+      if (token != null && token.isNotEmpty) {
+        if (mounted) {
+          Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
+        }
       }
+    } catch (e) {
+      debugPrint('FlutterSecureStorage read failed in main nav: $e');
+      await _storage.deleteAll();
     }
   }
 
