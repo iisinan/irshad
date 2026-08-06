@@ -77,7 +77,7 @@
     "config": {
         "platform-check": false,
         "platform": {
-            "php": "8.2.0",
+            "php": "8.4.1",
             "ext-sockets": "1.0.0"
         },
         "optimize-autoloader": true,
