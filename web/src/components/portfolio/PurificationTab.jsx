@@ -142,8 +142,146 @@ function CalcModal({ h, onClose, onPurify }) {
   );
 }
 
+/* ─── Stat Detail Calculation Modal ──────────────────────────── */
+function StatDetailModal({ holding: h, statKey, onClose, onOpenPurification }) {
+  if (!h || !statKey) return null;
+
+  const ratio        = Number(h.non_compliant_ratio || 0);
+  const dividends    = Number(h.total_dividends || 0);
+  const due          = Number(h.purification_due || 0);
+  const totalValue   = Number(h.total_value || 0);
+  const shares       = Number(h.shares || 0);
+  const avgPrice     = Number(h.average_buy_price || 0);
+  const currentPrice = Number(h.current_price || 0);
+
+  const latestDiv = h.latest_dividend;
+  let divPerShare = 0;
+  let dividendLabel = 'Last Paid Dividend';
+  let dividendDate = 'N/A';
+  if (latestDiv) {
+    const isUpcoming = latestDiv.status !== 'paid' && new Date(latestDiv.pay_date) > new Date();
+    dividendLabel = isUpcoming ? 'Upcoming Dividend' : 'Last Paid Dividend';
+    divPerShare = Number(latestDiv.amount);
+    if (latestDiv.pay_date) {
+      dividendDate = new Date(latestDiv.pay_date).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+  }
+
+  let config = {};
+  if (statKey === 'dividends') {
+    config = {
+      title: 'Dividends Received (12M)',
+      formula: 'Shares Held × Trailing 12M Dividend Per Share',
+      accent: '#0F5257',
+      rows: [
+        { label: 'Shares held', value: `${shares.toLocaleString()} shares` },
+        { label: 'Dividend per share (trailing 12M)', value: fmt(dividends / (shares || 1)) },
+        { label: 'Total dividends received (12M)', value: fmt(dividends), highlight: true },
+      ]
+    };
+  } else if (statKey === 'last_dividend') {
+    config = {
+      title: `${dividendLabel} Calculation`,
+      formula: 'Declared Dividend Per Share × Shares Held',
+      accent: '#2563EB',
+      rows: [
+        { label: 'Pay date', value: dividendDate },
+        { label: 'Dividend per share declared', value: fmt(divPerShare) },
+        { label: 'Shares held', value: `${shares.toLocaleString()} shares` },
+        { label: 'Total dividend payout entitlement', value: fmt(divPerShare * shares), highlight: true },
+      ]
+    };
+  } else if (statKey === 'impure_ratio') {
+    config = {
+      title: 'AAOIFI Impure Income Ratio',
+      formula: 'Non-Compliant Revenue ÷ Total Revenue × 100',
+      accent: '#7C3AED',
+      rows: [
+        { label: "Company's non-compliant income (interest, etc.)", value: `${ratio.toFixed(4)}%` },
+        { label: 'AAOIFI permissible threshold', value: '≤ 5.00%' },
+        { label: 'Shariah compliance status', value: ratio <= 5 ? '✅ Passes' : '❌ Fails' },
+        { label: 'Impure ratio applied to dividends', value: `${ratio.toFixed(4)}%`, highlight: true },
+      ]
+    };
+  } else if (statKey === 'portfolio_value') {
+    config = {
+      title: 'Portfolio Value Calculation',
+      formula: 'Shares Held × Current Market Price',
+      accent: '#059669',
+      rows: [
+        { label: 'Shares held', value: `${shares.toLocaleString()} shares` },
+        { label: 'Current market price per share', value: fmt(currentPrice) },
+        { label: 'Average buy price per share', value: fmt(avgPrice) },
+        { label: 'Unrealised P&L', value: `${currentPrice >= avgPrice ? '+' : ''}${fmt(totalValue - shares * avgPrice)}` },
+        { label: 'Total portfolio market value', value: fmt(totalValue), highlight: true },
+      ]
+    };
+  }
+
+  return createPortal(
+    <div
+      className="animate-fade-in"
+      onClick={onClose}
+      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200000, padding: '20px' }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{ background: 'var(--bg)', borderRadius: '24px', width: '100%', maxWidth: '480px', overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,0.25)', border: '1px solid var(--border)', animation: 'slideUpFade 0.3s cubic-bezier(0.16,1,0.3,1)' }}
+      >
+        {/* Header */}
+        <div style={{ padding: '20px 24px', background: 'var(--bg-section)', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <CompanyLogo symbol={h.symbol} logoUrl={h.logo_url} size={40} radius={10} />
+            <div>
+              <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h.symbol} Calculation</div>
+              <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-dark)' }}>{config.title}</h3>
+            </div>
+          </div>
+          <button onClick={onClose} style={{ background: 'var(--bg)', border: '1px solid var(--border)', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)' }}>
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Formula & Rows */}
+        <div style={{ padding: '24px' }}>
+          <div style={{ marginBottom: '20px', borderRadius: '16px', border: `1px solid ${config.accent}30`, overflow: 'hidden' }}>
+            <div style={{ padding: '12px 16px', background: `${config.accent}12`, borderBottom: `1px solid ${config.accent}30` }}>
+              <div style={{ fontSize: '0.62rem', fontWeight: 700, color: config.accent, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>Formula</div>
+              <div style={{ fontFamily: 'monospace', fontSize: '0.82rem', color: 'var(--text-dark)', fontWeight: 700 }}>{config.formula}</div>
+            </div>
+            <div style={{ background: 'var(--bg)' }}>
+              {config.rows.map((row, i) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', borderTop: i > 0 ? '1px solid var(--border)' : 'none', background: row.highlight ? 'rgba(245,158,11,0.06)' : 'transparent' }}>
+                  <span style={{ fontSize: '0.8rem', color: row.highlight ? 'var(--text-dark)' : 'var(--text-muted)', fontWeight: row.highlight ? 800 : 500 }}>{row.label}</span>
+                  <span style={{ fontSize: row.highlight ? '0.96rem' : '0.84rem', fontWeight: row.highlight ? 900 : 700, color: row.highlight ? '#D97706' : 'var(--text-dark)' }}>{row.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              onClick={() => { onClose(); onOpenPurification(h); }}
+              style={{ flex: 1, padding: '13px', borderRadius: '14px', background: 'linear-gradient(135deg, #D97706, #B45309)', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 8px 20px rgba(217,119,6,0.3)' }}
+            >
+              <Calculator size={15} /> View Purification Breakdown
+            </button>
+            <button
+              onClick={onClose}
+              style={{ padding: '13px 20px', borderRadius: '14px', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-muted)', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
 /* ─── Purification Card (compact, clickable) ────────────────── */
-function PurificationCard({ h, onPurify }) {
+function PurificationCard({ h, onPurify, onStatClick }) {
   const ratio      = Number(h.non_compliant_ratio || 0);
   const dividends  = Number(h.total_dividends || 0);
   const due        = Number(h.purification_due || 0);
@@ -163,6 +301,13 @@ function PurificationCard({ h, onPurify }) {
       dividendDate = new Date(latestDiv.pay_date).toLocaleDateString('en-NG', { month: 'short', year: '2-digit' });
     }
   }
+
+  const statItems = [
+    { key: 'dividends', label: 'Dividends (12M)', value: fmt(dividends), sub: 'Total received' },
+    latestDiv ? { key: 'last_dividend', label: dividendLabel, value: dividendVal, sub: dividendDate } : null,
+    { key: 'impure_ratio', label: 'Impure Ratio', value: `${ratio.toFixed(2)}%`, sub: '≤ 5% threshold', warn: ratio > 5 },
+    { key: 'portfolio_value', label: 'Portfolio Value', value: fmt(totalValue), sub: 'Current' },
+  ].filter(Boolean);
 
   return (
     <div
@@ -194,16 +339,39 @@ function PurificationCard({ h, onPurify }) {
           <ChevronRight size={18} color="var(--text-muted)" style={{ flexShrink: 0 }} />
         </div>
 
-        {/* Stats row */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '10px', marginBottom: '16px', cursor: 'default' }} onClick={e => e.stopPropagation()}>
-          {[
-            { label: 'Dividends (12M)', value: fmt(dividends), sub: 'Total received' },
-            latestDiv ? { label: dividendLabel, value: dividendVal, sub: dividendDate } : null,
-            { label: 'Impure Ratio', value: `${ratio.toFixed(2)}%`, sub: '≤ 5% threshold', warn: ratio > 5 },
-            { label: 'Portfolio Value', value: fmt(totalValue), sub: 'Current' },
-          ].filter(Boolean).map((s, i) => (
-            <div key={i} style={{ background: 'var(--bg-section)', borderRadius: '12px', padding: '10px 12px', border: '1px solid var(--border)' }}>
-              <div style={{ fontSize: '0.6rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '4px' }}>{s.label}</div>
+        {/* Stats row - interactive cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '10px', marginBottom: '16px' }}>
+          {statItems.map((s, i) => (
+            <div
+              key={i}
+              onClick={(e) => {
+                e.stopPropagation();
+                onStatClick(h, s.key);
+              }}
+              style={{
+                background: 'var(--bg-section)',
+                borderRadius: '12px',
+                padding: '10px 12px',
+                border: '1px solid var(--border)',
+                cursor: 'pointer',
+                transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)',
+                position: 'relative'
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.borderColor = '#D97706';
+                e.currentTarget.style.background = 'rgba(217,119,6,0.04)';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.borderColor = 'var(--border)';
+                e.currentTarget.style.background = 'var(--bg-section)';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              <div style={{ fontSize: '0.6rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span>{s.label}</span>
+                <span style={{ fontSize: '0.65rem', opacity: 0.7 }}>↗</span>
+              </div>
               <div style={{ fontSize: '0.85rem', fontWeight: 900, color: s.warn ? '#D97706' : 'var(--text-dark)' }}>{s.value}</div>
               <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', marginTop: '2px' }}>{s.sub}</div>
             </div>
@@ -244,6 +412,7 @@ function PurificationCard({ h, onPurify }) {
 export default function PurificationTab({ data }) {
   const [purifiedSymbols, setPurifiedSymbols] = useState([]);
   const [selectedHolding, setSelectedHolding] = useState(null);
+  const [activeStatTarget, setActiveStatTarget] = useState(null);
 
   const holdings = data?.holdings || [];
   const needsPurification = holdings.filter(h => h.purification_due > 0 && !purifiedSymbols.includes(h.symbol));
@@ -262,6 +431,15 @@ export default function PurificationTab({ data }) {
           h={selectedHolding}
           onClose={() => setSelectedHolding(null)}
           onPurify={(h) => { handleSuccess(h.symbol); }}
+        />
+      )}
+
+      {activeStatTarget && (
+        <StatDetailModal
+          holding={activeStatTarget.holding}
+          statKey={activeStatTarget.statKey}
+          onClose={() => setActiveStatTarget(null)}
+          onOpenPurification={(h) => setSelectedHolding(h)}
         />
       )}
 
@@ -320,7 +498,12 @@ export default function PurificationTab({ data }) {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {needsPurification.map(h => (
-              <PurificationCard key={h.id} h={h} onPurify={setSelectedHolding} />
+              <PurificationCard
+                key={h.id}
+                h={h}
+                onPurify={setSelectedHolding}
+                onStatClick={(holding, statKey) => setActiveStatTarget({ holding, statKey })}
+              />
             ))}
           </div>
         )}
