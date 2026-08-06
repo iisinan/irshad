@@ -903,7 +903,7 @@ const AaoifiScreening = () => {
           <div style={{ marginTop: '16px', padding: '16px 20px', background: 'var(--bg)', border: '1px solid rgba(245, 158, 11, 0.3)', borderRadius: '12px', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
             <AlertTriangle size={18} color="#F59E0B" style={{ flexShrink: 0, marginTop: '2px' }} />
             <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-              <strong style={{ color: 'var(--text-dark)' }}>Important:</strong> AAOIFI applies strict thresholds with no buffer zones. A company at 30.01% debt is non-compliant.
+              <strong style={{ color: 'var(--text-dark)' }}>Important:</strong> AAOIFI applies strict thresholds with no buffer zones. A company at 30.01% debt is non-halal.
             </div>
           </div>
         </div>
