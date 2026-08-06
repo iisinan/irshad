@@ -151,6 +151,7 @@ export default function ZakatTab({ data }) {
 
   // Agriculture State
   const [harvestWeight, setHarvestWeight] = useState('');
+  const [irrigation, setIrrigation] = useState('natural');
 
   // Financial Calculations
   const activeNisabThreshold = nisabStandard === 'gold' ? 85 : 595;
@@ -176,7 +177,7 @@ export default function ZakatTab({ data }) {
   const harvestNum = Number(harvestWeight) || 0;
   const agriNisab = 653; // 5 Awsuq in kg
   const agriEligible = harvestNum >= agriNisab;
-  const agriRate = 0.1; // 10% for natural/rain irrigated
+  const agriRate = irrigation === 'natural' ? 0.1 : 0.05; // 10% natural, 5% artificial
   const agriZakatDue = agriEligible ? harvestNum * agriRate : 0;
 
   const fetchLiveNisab = async (rateToUse = exchangeRate) => {
