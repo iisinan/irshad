@@ -725,51 +725,23 @@ const AaoifiScreening = () => {
           {/* Dividend Purification Callout */}
           {report.stage1?.purification_required && finalStatus === 'halal' && (
             <div style={{
-              background: 'linear-gradient(135deg, rgba(217,119,6,0.07) 0%, rgba(245,158,11,0.02) 100%)',
-              padding: '20px 24px',
-              borderRadius: '18px',
-              border: '1px solid rgba(217,119,6,0.25)',
-              borderLeft: '4px solid #D97706',
-              boxShadow: '0 4px 16px rgba(217,119,6,0.06)',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '20px',
-              flexWrap: 'wrap'
+              gap: '12px',
+              padding: '14px 20px',
+              background: 'rgba(217,119,6,0.06)',
+              border: '1px solid rgba(217,119,6,0.25)',
+              borderRadius: '14px',
             }}>
-              <div style={{ flex: '1 1 320px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                  <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(217,119,6,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#D97706' }}>
-                    <Droplets size={16} />
-                  </div>
-                  <span style={{ fontWeight: 800, color: '#D97706', fontSize: '0.92rem', letterSpacing: '-0.2px' }}>
-                    Dividend Purification Required
-                  </span>
-                </div>
-                <p style={{ margin: 0, color: 'var(--text-dark)', fontWeight: 500, fontSize: '0.86rem', lineHeight: 1.6 }}>
-                  This company passes Stage 1, but derives <strong style={{ color: '#D97706', fontWeight: 800 }}>{purificationPercent}%</strong> of its revenue from non-compliant sources. In accordance with AAOIFI standards, you must purify this portion of your dividend payouts.
-                </p>
+              <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(217,119,6,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Droplets size={17} color="#D97706" />
               </div>
-
-              {/* Stat highlight pill */}
-              <div style={{
-                background: 'var(--bg)',
-                borderRadius: '14px',
-                padding: '12px 20px',
-                border: '1px solid rgba(217,119,6,0.2)',
-                textAlign: 'center',
-                minWidth: '120px',
-                boxShadow: '0 2px 8px rgba(217,119,6,0.08)'
-              }}>
-                <div style={{ fontSize: '0.62rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>
-                  Impure Ratio
-                </div>
-                <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#D97706', letterSpacing: '-0.5px' }}>
-                  {purificationPercent}%
-                </div>
-                <div style={{ fontSize: '0.62rem', fontWeight: 700, color: 'var(--halal)', marginTop: '2px' }}>
-                  ≤ 5.00% Limit
-                </div>
+              <div style={{ flex: 1, fontSize: '0.88rem', color: 'var(--text-dark)', fontWeight: 500 }}>
+                <strong style={{ color: '#D97706' }}>Purification required:</strong> Donate <strong style={{ color: '#D97706' }}>{purificationPercent}%</strong> of dividend income to charity.
+              </div>
+              <div style={{ textAlign: 'center', flexShrink: 0 }}>
+                <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#D97706', letterSpacing: '-0.5px', lineHeight: 1 }}>{purificationPercent}%</div>
+                <div style={{ fontSize: '0.62rem', fontWeight: 700, color: 'var(--text-muted)', marginTop: '3px' }}>to purify</div>
               </div>
             </div>
           )}
