@@ -40,6 +40,7 @@ class StockController extends Controller
         $stocks = $this->safeTaggedCache(['stocks'])->remember('stocks.index', 300, function () {
             return Company::select(['id', 'name', 'symbol', 'sector', 'current_status', 'latest_price', 'price_change_pct', 'logo_url', 'market_cap', 'pe_ratio'])
                 ->with('aaoifiScreening:company_id,impermissible_income_ratio')
+                ->orderBy('symbol', 'asc')
                 ->get()
                 ->map(function ($company) {
                     $ratio = $company->aaoifiScreening ? $company->aaoifiScreening->impermissible_income_ratio : 0;
@@ -221,7 +222,7 @@ class StockController extends Controller
                 'id', 'name', 'symbol', 'sector', 'current_status',
                 'latest_price', 'price_change', 'price_change_pct',
                 'market_cap', 'pe_ratio', 'eps', 'logo_url',
-            ]);
+            ])->orderBy('symbol', 'asc');
 
             if ($request->has('status') && ! empty($request->status)) {
                 $statusFilters = explode(',', strtolower($request->status));
