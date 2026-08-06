@@ -2,15 +2,12 @@
 providers = ['php']
 
 [variables]
-NIXPACKS_PHP_VERSION = '8.2'
-NIXPACKS_PHP_EXTENSIONS = 'pdo, pdo_pgsql, pgsql, redis, bcmath, mbstring, xml, zip, gd, curl, intl'
-
-[phases.setup]
-nixPkgs = ['...', 'roadrunner']
+NIXPACKS_PHP_VERSION = '8.3'
+NIXPACKS_PHP_EXTENSIONS = 'pdo, pdo_pgsql, pgsql, redis, bcmath, mbstring, xml, zip, gd, curl, intl, sockets, opcache'
 
 [phases.build]
 cmds = [
-    'composer install --no-dev --optimize-autoloader',
+    'composer install --no-dev --optimize-autoloader --ignore-platform-reqs',
     'php artisan config:cache',
     'php artisan route:cache',
     'php artisan view:cache'
