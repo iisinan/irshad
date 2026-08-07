@@ -118,13 +118,13 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
               border: 'none',
               display: 'none', 
               alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', color: 'var(--text-muted)',
+              cursor: 'pointer', color: 'var(--text-body)',
               flexShrink: 0,
               transition: 'all 0.2s ease'
             }}
             className="desktop-only-btn hover-bg-darker"
             onMouseEnter={e => { e.currentTarget.style.background = 'var(--primary-100)'; e.currentTarget.style.color = '#FFFFFF'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'var(--primary-50)'; e.currentTarget.style.color = '#9B8D9D'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'var(--primary-50)'; e.currentTarget.style.color = 'var(--text-body)'; }}
           >
             <ChevronLeft size={16} />
           </button>
@@ -156,11 +156,11 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
               width: '40px', height: '40px', borderRadius: '12px',
               background: 'var(--primary-50)', border: 'none',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', color: 'var(--text-muted)',
+              cursor: 'pointer', color: 'var(--text-body)',
               transition: 'all 0.2s ease'
             }}
             onMouseEnter={e => { e.currentTarget.style.background = 'var(--primary-100)'; e.currentTarget.style.color = '#C9952A'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'var(--primary-50)'; e.currentTarget.style.color = '#9B8D9D'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'var(--primary-50)'; e.currentTarget.style.color = 'var(--text-body)'; }}
           >
             <ChevronRight size={18} />
           </button>
@@ -175,7 +175,7 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
             return (
               <div key={i} style={{
                 fontSize: '0.65rem', fontWeight: 800, letterSpacing: '1.4px',
-                textTransform: 'uppercase', color: 'var(--text-muted)',
+                textTransform: 'uppercase', color: 'var(--text-body)',
                 padding: '20px 12px 8px', fontFamily: 'var(--sans)'
               }}>
                 {item.section}
@@ -211,7 +211,7 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
                 background: active
                   ? 'rgba(201, 149, 42, 0.14)'
                   : 'transparent',
-                color: active ? '#C9952A' : '#9B8D9D',
+                color: active ? '#C9952A' : 'var(--text-body)',
                 textDecoration: 'none',
                 fontWeight: active ? 700 : 500,
                 fontSize: '0.84rem',
@@ -230,7 +230,7 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
               onMouseLeave={e => {
                 if (!active) {
                   e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.color = '#9B8D9D';
+                  e.currentTarget.style.color = 'var(--text-body)';
                   if (isCollapsed) e.currentTarget.style.borderLeft = '3px solid transparent';
                 }
               }}
@@ -293,7 +293,7 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
                 <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-dark)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontFamily: 'var(--sans)' }}>
                   {user?.first_name || user?.name || 'User'}
                 </div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '2px' }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-body)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '2px' }}>
                   {user?.email || 'user@iirshad.com'}
                 </div>
               </div>
@@ -304,11 +304,11 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
                 display: 'flex', alignItems: 'center', gap: '8px',
                 width: '100%', padding: '10px', borderRadius: '10px',
                 background: 'none', border: 'none',
-                color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600,
+                color: 'var(--text-body)', fontSize: '0.75rem', fontWeight: 600,
                 cursor: 'pointer', transition: 'all 0.2s', justifyContent: 'center'
               }}
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.12)'; e.currentTarget.style.color = '#EF4444'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#9B8D9D'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--text-body)'; }}
             >
               <LogOut size={16} /> Log Out
             </button>
@@ -348,10 +348,10 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
                 width: '42px', height: '42px', borderRadius: '12px',
                 background: 'none', border: 'none',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'var(--text-muted)', cursor: 'pointer',
+                color: 'var(--text-body)', cursor: 'pointer',
               }}
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.12)'; e.currentTarget.style.color = '#EF4444'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#9B8D9D'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--text-body)'; }}
             >
               <LogOut size={18} />
             </button>
