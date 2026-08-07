@@ -132,6 +132,8 @@ Return ONLY a valid JSON object matching this schema exactly, with NO markdown f
                 $finDataUsed['source_url'] = $url;
             }
             
+            $finDataUsed['file_hash'] = hash_file('sha256', $pdfPath);
+            
             $extractedDate = $extractedData['published_date'] ?? '';
             if (!empty($extractedDate)) {
                 try {
