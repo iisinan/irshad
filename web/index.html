@@ -18,6 +18,17 @@
       } else {
         document.documentElement.setAttribute('data-theme', 'light');
       }
+
+      // Safety fallback to unblock page overlay if React mount or auth check takes longer than 1.5s
+      setTimeout(function() {
+        var splash = document.getElementById('irshad-splash');
+        if (splash) {
+          splash.classList.add('splash-hidden');
+          document.body.classList.remove('no-scroll');
+          document.documentElement.classList.remove('no-scroll');
+          setTimeout(function() { if (splash.parentNode) splash.parentNode.removeChild(splash); }, 600);
+        }
+      }, 1500);
     </script>
     <style>
       body, html { margin: 0; padding: 0; background-color: var(--bg-alt, #F0F4F8); }
