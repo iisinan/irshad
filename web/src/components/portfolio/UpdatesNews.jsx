@@ -120,7 +120,7 @@ const DigestBanner = () => {
 
   return (
     <div style={{
-      background: 'linear-gradient(135deg, rgba(0,109,100,0.06) 0%, rgba(212,160,23,0.06) 100%)',
+      background: 'linear-gradient(135deg, rgba(118,88,122,0.06) 0%, rgba(212,160,23,0.06) 100%)',
       border: '1px solid var(--primary-100)',
       borderRadius: '20px',
       padding: '24px',
@@ -130,7 +130,7 @@ const DigestBanner = () => {
     }}>
       {/* Decorative blobs */}
       <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '100px', height: '100px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(212,160,23,0.12) 0%, transparent 70%)', pointerEvents: 'none', animation: 'float 6s ease-in-out infinite' }} />
-      <div style={{ position: 'absolute', bottom: '-30px', left: '-10px', width: '120px', height: '120px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,109,100,0.08) 0%, transparent 70%)', pointerEvents: 'none', animation: 'float 8s ease-in-out infinite reverse' }} />
+      <div style={{ position: 'absolute', bottom: '-30px', left: '-10px', width: '120px', height: '120px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(118,88,122,0.08) 0%, transparent 70%)', pointerEvents: 'none', animation: 'float 8s ease-in-out infinite reverse' }} />
       
       <div style={{ position: 'relative', zIndex: 1 }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>

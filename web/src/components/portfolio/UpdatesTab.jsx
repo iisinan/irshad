@@ -64,16 +64,20 @@ export default function UpdatesTab() {
                 gap: '8px',
                 padding: '16px 18px',
                 borderRadius: '16px',
-                border: `1.5px solid ${isActive ? 'var(--primary)' : 'var(--border)'}`,
-                background: isActive
-                  ? 'linear-gradient(135deg, rgba(0,109,100,0.08) 0%, rgba(212,160,23,0.05) 100%)'
-                  : 'var(--bg)',
+                background: isActive 
+                  ? 'linear-gradient(135deg, rgba(118,88,122,0.08) 0%, rgba(212,160,23,0.05) 100%)'
+                  : 'var(--bg-section)',
+                border: isActive 
+                  ? '1px solid rgba(212,160,23,0.3)' 
+                  : '1px solid var(--border)',
+                color: isActive ? 'var(--primary)' : 'var(--text-muted)',
+                fontWeight: isActive ? 800 : 600,
                 backdropFilter: isActive ? 'blur(10px)' : 'none',
                 WebkitBackdropFilter: isActive ? 'blur(10px)' : 'none',
                 cursor: 'pointer',
                 transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
                 textAlign: 'left',
-                boxShadow: isActive ? '0 8px 24px rgba(0,109,100,0.12)' : 'none',
+                boxShadow: isActive ? '0 8px 24px rgba(118,88,122,0.12)' : 'none',
                 position: 'relative',
                 overflow: 'hidden',
                 transform: isActive ? 'translateY(-2px)' : 'translateY(0)',
