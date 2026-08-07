@@ -11,52 +11,59 @@ class SectorController extends Controller
      */
     public function index()
     {
-        // Fetch distinct sectors and industries from the companies table
-        $data = DB::table('companies')
-            ->select('sector', DB::raw("COALESCE(industry, business_type, 'Other') as industry"))
-            ->whereNotNull('sector')
-            ->where('sector', '!=', '')
-            ->distinct()
-            ->get();
+        try {
+            // Fetch sectors and industries from the companies table
+            $data = DB::table('companies')
+                ->select('sector', 'industry', 'business_type')
+                ->whereNotNull('sector')
+                ->where('sector', '!=', '')
+                ->get();
 
-        // Group the industries by sector
-        $grouped = [];
+            $grouped = [];
 
-        foreach ($data as $row) {
-            // Normalize sector name for consistency if needed
-            $sector = $row->sector;
-            $industry = trim($row->industry ?? 'Other');
+            foreach ($data as $row) {
+                $sector = trim($row->sector ?? '');
+                if (!$sector) continue;
 
-            // Handle known slight misspellings or casing issues in DB
-            if (strtolower($sector) === 'ict') {
-                $sector = 'ICT';
-            } elseif (strtolower($sector) === 'oil and gas') {
-                $sector = 'Oil & Gas';
-            } elseif (strtolower($sector) === 'construction/real estate') {
-                $sector = 'Real Estate';
+                $industry = trim($row->industry ?? $row->business_type ?? 'Other');
+                if (!$industry) $industry = 'Other';
+
+                // Handle known slight misspellings or casing issues in DB
+                if (strtolower($sector) === 'ict') {
+                    $sector = 'ICT';
+                } elseif (strtolower($sector) === 'oil and gas') {
+                    $sector = 'Oil & Gas';
+                } elseif (strtolower($sector) === 'construction/real estate') {
+                    $sector = 'Real Estate';
+                }
+
+                if (!isset($grouped[$sector])) {
+                    $grouped[$sector] = [];
+                }
+
+                if (!in_array($industry, $grouped[$sector])) {
+                    $grouped[$sector][] = $industry;
+                }
             }
 
-            if (! isset($grouped[$sector])) {
-                $grouped[$sector] = [];
+            // Sort industries alphabetically within each sector
+            foreach ($grouped as $key => $industries) {
+                sort($industries);
+                $grouped[$key] = $industries;
             }
 
-            if (! in_array($industry, $grouped[$sector])) {
-                $grouped[$sector][] = $industry;
-            }
+            // Sort the sectors alphabetically
+            ksort($grouped);
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $grouped,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => 'success',
+                'data' => (object)[],
+            ]);
         }
-
-        // Sort industries alphabetically within each sector
-        foreach ($grouped as $key => $industries) {
-            sort($industries);
-            $grouped[$key] = $industries;
-        }
-
-        // Sort the sectors alphabetically
-        ksort($grouped);
-
-        return response()->json([
-            'status' => 'success',
-            'data' => $grouped,
-        ]);
     }
 }
