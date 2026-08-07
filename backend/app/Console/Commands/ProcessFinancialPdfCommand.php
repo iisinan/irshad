@@ -151,6 +151,23 @@ Return ONLY a valid JSON object matching this schema exactly, with NO markdown f
         }
 
         $this->info("Saved to database. Recalculating AAOIFI compliance...");
+
+        // Compare Market Caps
+        $pdfMarketCap = $extractedData['market_cap'] ?? 0;
+        $liveMarketCap = $company->market_cap ?? 0;
+        
+        if ($pdfMarketCap > 0 && $liveMarketCap > 0) {
+            $difference = abs($pdfMarketCap - $liveMarketCap) / $liveMarketCap * 100;
+            $this->info("\n--- Market Cap Comparison ---");
+            $this->info("PDF Extracted Market Cap: ₦" . number_format($pdfMarketCap, 2));
+            $this->info("NGXPulse Live Market Cap: ₦" . number_format($liveMarketCap, 2));
+            if ($difference > 5) {
+                $this->warn("Note: There is a " . number_format($difference, 2) . "% difference between the PDF and the Live market cap.");
+            } else {
+                $this->info("The market caps tally closely.");
+            }
+            $this->info("-----------------------------\n");
+        }
         
         // Run compliance check
         $newStatus = $aaoifiService->evaluateCompliance($company, $financials);
