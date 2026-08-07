@@ -11,9 +11,9 @@ class SectorController extends Controller
      */
     public function index()
     {
-        // Fetch distinct sectors and industries from the stocks table
-        $data = DB::table('ngx_stocks')
-            ->select('sector', 'business_type as industry')
+        // Fetch distinct sectors and industries from the companies table
+        $data = DB::table('companies')
+            ->select('sector', DB::raw("COALESCE(industry, business_type, 'Other') as industry"))
             ->whereNotNull('sector')
             ->where('sector', '!=', '')
             ->distinct()

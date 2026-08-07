@@ -172,7 +172,14 @@ export default function MarketTab() {
 
   const { data: sectorMap = {} } = useQuery({
     queryKey: ['sectorsMap'],
-    queryFn: async () => await fetchSectors(),
+    queryFn: async () => {
+      try {
+        const res = await fetchSectors();
+        return res?.data || (typeof res === 'object' && res !== null ? res : {});
+      } catch (e) {
+        return {};
+      }
+    },
     staleTime: 24 * 60 * 60 * 1000,
   });
 
