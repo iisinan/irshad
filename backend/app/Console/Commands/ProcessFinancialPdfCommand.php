@@ -97,10 +97,11 @@ Return ONLY a valid JSON object matching this schema exactly, with NO markdown f
 
         $this->info("Data extracted successfully:\n" . json_encode($extractedData, JSON_PRETTY_PRINT));
 
-        // Ensure we have a financials record
-        $financials = Financial::firstOrNew(
-            ['company_id' => $company->id]
-        );
+        // Always fetch the LATEST financial record if duplicates exist
+        $financials = Financial::where('company_id', $company->id)->orderBy('created_at', 'desc')->first();
+        if (!$financials) {
+            $financials = new Financial(['company_id' => $company->id]);
+        }
 
         $financials->total_assets = $extractedData['total_assets'] ?? 0;
         $financials->total_debt = $extractedData['total_debt'] ?? 0;
