@@ -554,7 +554,7 @@ export default function ZakatTab({ data }) {
       <div className="zakat-two-col" style={{ display: 'flex', gap: '32px', flexWrap: 'wrap', alignItems: 'flex-start' }}>
         
         {/* LEFT COLUMN: Calculators */}
-        <div className="zakat-left-col" style={{ flex: '1 1 min(100%, 60%)', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <div className="zakat-left-col" style={{ flex: '1 1 min(100%, 60%)', display: 'flex', flexDirection: 'column', gap: '32px' }}>
           
           {/* Smart Nisab Setup */}
           <div className="print-card hover-lift" style={{ background: 'var(--bg)', borderRadius:'24px', padding:'36px', boxShadow:'var(--shadow-sm)', border:'1px solid var(--border)' }}>

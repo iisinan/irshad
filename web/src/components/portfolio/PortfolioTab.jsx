@@ -227,7 +227,7 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
   const displayHoldings = [...holdings].filter(filterFn).sort((a,b) => (b.total_value||0) - (a.total_value||0));
 
   return (
-    <div className="animate-fade-in" style={{ display:'flex', flexDirection:'column', gap:'24px' }}>
+    <div className="animate-fade-in" style={{ display:'flex', flexDirection:'column', gap:'32px' }}>
 
       {editingHolding && (
         <EditHoldingModal
@@ -241,8 +241,8 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
       <div className="stagger-1 hover-card" style={{ 
         background: 'linear-gradient(135deg, rgba(201, 149, 42, 0.04) 0%, rgba(198,146,32,0.02) 100%)', 
         border: '1px solid rgba(201, 149, 42, 0.15)',
-        borderRadius: '20px', 
-        padding: '16px 20px',
+        borderRadius: '24px', 
+        padding: '28px 36px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
