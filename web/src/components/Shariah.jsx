@@ -34,18 +34,19 @@ const ShariahPage = () => (
 
       {/* ─── Hero ─── */}
       <div style={{
-        background: 'linear-gradient(135deg, #0D1B2A 0%, #0F5257 65%, #0B6B71 100%)',
+        background: 'linear-gradient(135deg, #06090E 0%, #0B101B 50%, #151D2A 100%)',
         borderRadius: '28px', padding: '64px 56px', marginBottom: '48px',
         position: 'relative', overflow: 'hidden', textAlign: 'center',
+        boxShadow: '0 20px 50px rgba(0,0,0,0.3)', border: '1px solid rgba(243, 198, 81, 0.2)'
       }}>
         {/* Decorative orbs */}
-        <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: '260px', height: '260px', background: 'rgba(201,168,76,0.08)', borderRadius: '50%' }} />
-        <div style={{ position: 'absolute', bottom: '-80px', left: '-40px', width: '200px', height: '200px', background: 'rgba(255,255,255,0.04)', borderRadius: '50%' }} />
+        <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: '260px', height: '260px', background: 'rgba(243,198,81,0.08)', borderRadius: '50%' }} />
+        <div style={{ position: 'absolute', bottom: '-80px', left: '-40px', width: '200px', height: '200px', background: 'rgba(243,198,81,0.04)', borderRadius: '50%' }} />
 
         <div style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.3)', padding: '6px 18px', borderRadius: '40px', marginBottom: '24px' }}>
-            <BookOpen size={14} color="var(--gold)" />
-            <span style={{ fontSize: '0.69rem', fontWeight: 700, color: 'var(--gold)', letterSpacing: '1px', textTransform: 'uppercase' }}>Our Methodology</span>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(243,198,81,0.12)', border: '1px solid rgba(243,198,81,0.3)', padding: '6px 18px', borderRadius: '40px', marginBottom: '24px' }}>
+            <BookOpen size={14} color="var(--primary)" />
+            <span style={{ fontSize: '0.69rem', fontWeight: 800, color: 'var(--primary)', letterSpacing: '1px', textTransform: 'uppercase' }}>Our Methodology</span>
           </div>
           <h1 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 900, letterSpacing: '-1px', color: 'white', lineHeight: 1.1, marginBottom: '20px' }}>
             AAOIFI Screening<br />
@@ -171,18 +172,19 @@ const ShariahPage = () => (
 
       {/* ─── Phase 3: Purification ─── */}
       <div style={{
-        background: 'linear-gradient(135deg, #0F5257 0%, #0D1B2A 100%)',
-        borderRadius: '24px', padding: '40px', boxShadow: 'var(--shadow-md)',
+        background: 'linear-gradient(135deg, #06090E 0%, #0B101B 50%, #151D2A 100%)',
+        borderRadius: '24px', padding: '40px', boxShadow: '0 16px 40px rgba(0,0,0,0.3)',
+        border: '1px solid rgba(243, 198, 81, 0.2)',
         position: 'relative', overflow: 'hidden', marginBottom: '24px'
       }}>
-        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '180px', height: '180px', background: 'rgba(201,168,76,0.08)', borderRadius: '50%' }} />
+        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '180px', height: '180px', background: 'rgba(243,198,81,0.08)', borderRadius: '50%' }} />
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px', position: 'relative', zIndex: 1 }}>
-          <div style={{ width: '52px', height: '52px', background: 'rgba(201,168,76,0.15)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: '1px solid rgba(201,168,76,0.3)' }}>
-            <Sparkles size={26} color="var(--gold)" />
+          <div style={{ width: '52px', height: '52px', background: 'rgba(243,198,81,0.12)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: '1px solid rgba(243,198,81,0.35)' }}>
+            <Sparkles size={26} color="var(--primary)" />
           </div>
           <div>
-            <div style={{ fontSize: '0.63rem', fontWeight: 700, color: 'var(--gold)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Phase 3</div>
+            <div style={{ fontSize: '0.63rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Phase 3</div>
             <h2 style={{ fontSize: '1.41rem', fontWeight: 900, color: 'white', letterSpacing: '-0.5px' }}>Dividend Purification</h2>
           </div>
         </div>

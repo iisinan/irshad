@@ -137,15 +137,15 @@ export default function Settings() {
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '32px 20px 80px' }} className="animate-fade-in">
       
       <div className="animate-slide-up stagger-1" style={{ 
-        background: 'linear-gradient(135deg, #0D1B2A 0%, #0F5257 100%)', 
+        background: 'linear-gradient(135deg, #06090E 0%, #0B101B 50%, #151D2A 100%)', 
         borderRadius: '24px', padding: '32px 40px', marginBottom: '32px',
         color: 'white', display: 'flex', alignItems: 'center', gap: '20px',
-        boxShadow: '0 12px 32px rgba(13,27,42,0.15)', position: 'relative', overflow: 'hidden'
+        boxShadow: '0 16px 40px rgba(0,0,0,0.3)', border: '1px solid rgba(243, 198, 81, 0.2)', position: 'relative', overflow: 'hidden'
       }}>
-        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '160px', height: '160px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
-        <div style={{ position: 'absolute', bottom: '-20px', right: '80px', width: '100px', height: '100px', borderRadius: '50%', background: 'rgba(255,255,255,0.03)' }} />
+        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '160px', height: '160px', borderRadius: '50%', background: 'rgba(243,198,81,0.08)' }} />
+        <div style={{ position: 'absolute', bottom: '-20px', right: '80px', width: '100px', height: '100px', borderRadius: '50%', background: 'rgba(243,198,81,0.04)' }} />
         
-        <div style={{ width: '72px', height: '72px', borderRadius: '20px', background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '1.58rem', fontWeight: 800, border: '2px solid rgba(255,255,255,0.4)' }}>
+        <div style={{ width: '72px', height: '72px', borderRadius: '20px', background: 'rgba(243,198,81,0.12)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '1.58rem', fontWeight: 800, border: '2px solid rgba(243,198,81,0.35)', color: 'var(--primary)', fontFamily: 'var(--serif)' }}>
           {initials}
         </div>
         <div style={{ zIndex: 1 }}>

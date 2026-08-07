@@ -21,13 +21,13 @@ function ZakatDatePrompt({ purchaseDate, onYes, onNo }) {
     <div className="zakat-prompt-overlay animate-fade-in" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200000, padding: '24px' }}>
       <div className="zakat-prompt-box" style={{ background: 'var(--bg)', borderRadius: '24px', width: '100%', maxWidth: '440px', boxShadow: '0 32px 80px rgba(0,0,0,0.2)', overflow: 'hidden', animation: 'slideUpFade 0.35s cubic-bezier(0.16,1,0.3,1)' }}>
         {/* Icon Header */}
-        <div style={{ background: 'linear-gradient(135deg, var(--primary) 0%, #0a5a60 100%)', padding: '32px 28px 24px', textAlign: 'center' }}>
-          <div style={{ width: '60px', height: '60px', borderRadius: '18px', background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-            <Calendar size={28} color="white" />
+        <div style={{ background: 'linear-gradient(135deg, #06090E 0%, #0B101B 50%, #151D2A 100%)', padding: '32px 28px 24px', textAlign: 'center', borderBottom: '1px solid rgba(243, 198, 81, 0.15)' }}>
+          <div style={{ width: '60px', height: '60px', borderRadius: '18px', background: 'rgba(243, 198, 81, 0.12)', border: '1px solid rgba(243, 198, 81, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: 'var(--primary)' }}>
+            <Calendar size={28} />
           </div>
           <h3 style={{ color: 'white', fontWeight: 900, fontSize: '1.1rem', margin: '0 0 6px', letterSpacing: '-0.3px' }}>Set Your Zakat Date?</h3>
           <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.82rem', margin: 0, lineHeight: 1.5 }}>
-            Would you like to use <strong style={{ color: 'white' }}>{new Date(purchaseDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</strong> as your Zakat calculation start date?
+            Would you like to use <strong style={{ color: 'var(--primary)' }}>{new Date(purchaseDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</strong> as your Zakat calculation start date?
           </p>
         </div>
 
@@ -38,8 +38,8 @@ function ZakatDatePrompt({ purchaseDate, onYes, onNo }) {
           </p>
 
           <div style={{ background: 'var(--bg-section)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '24px' }}>
-            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <Bell size={18} color="#d4af37" />
+            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(243,198,81,0.1)', border: '1px solid rgba(243,198,81,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Bell size={18} color="var(--primary)" />
             </div>
             <div>
               <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '3px' }}>Estimated Zakat Due Date</div>
@@ -59,7 +59,7 @@ function ZakatDatePrompt({ purchaseDate, onYes, onNo }) {
             </button>
             <button
               onClick={onYes}
-              style={{ flex: 2, padding: '14px', borderRadius: '12px', background: 'linear-gradient(135deg, var(--primary) 0%, #0a5a60 100%)', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.84rem', cursor: 'pointer', boxShadow: '0 8px 20px rgba(15,82,87,0.25)', transition: 'all 0.2s' }}
+              style={{ flex: 2, padding: '14px', borderRadius: '12px', background: 'var(--primary)', border: 'none', color: 'var(--primary-text, #0B101B)', fontWeight: 800, fontSize: '0.84rem', cursor: 'pointer', boxShadow: '0 8px 20px rgba(243,198,81,0.25)', transition: 'all 0.2s' }}
               onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
               onMouseLeave={e => e.currentTarget.style.transform = 'none'}
             >
@@ -523,8 +523,8 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
                   </div>
                 </div>
                 <div className="modal-footer" style={{ padding: '24px 32px', borderTop: '1px solid var(--border)', background: 'var(--bg)' }}>
-                  <button type="button" onClick={handleLinkBroker} disabled={linking || !brokerName} style={{ width: '100%', padding: '16px', borderRadius: '16px', background: 'var(--primary)', border: 'none', color: '#0B0F17', fontWeight: 800, fontSize: '0.88rem', cursor: (linking || !brokerName) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 8px 24px rgba(243, 198, 81, 0.25)', opacity: (linking || !brokerName) ? 0.7 : 1, transition: 'all 0.2s' }}>
-                    {linking ? <div className="spinner" style={{ width: '20px', height: '20px', borderTopColor: '#0B0F17' }} /> : 'Continue'}
+                  <button type="button" onClick={handleLinkBroker} disabled={linking || !brokerName} style={{ width: '100%', padding: '16px', borderRadius: '16px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.88rem', cursor: (linking || !brokerName) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 8px 24px rgba(118,88,122,0.25)', opacity: (linking || !brokerName) ? 0.7 : 1, transition: 'all 0.2s' }}>
+                    {linking ? <div className="spinner" style={{ width: '20px', height: '20px', borderTopColor: 'white' }} /> : 'Continue'}
                   </button>
                 </div>
               </div>

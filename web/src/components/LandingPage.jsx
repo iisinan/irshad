@@ -488,28 +488,28 @@ export default function LandingPage() {
 
         {/* CTA Banner */}
         <Reveal delay={0.04}>
-          <div style={{ position: 'relative', borderRadius: 26, overflow: 'hidden', background: 'linear-gradient(130deg, #0A3236 0%, #0F5257 50%, #0C4449 100%)', padding: 'clamp(44px,7vw,76px)', display: 'flex', flexWrap: 'wrap', gap: 40, alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 24px 48px rgba(15,82,87,0.18)' }}>
+          <div style={{ position: 'relative', borderRadius: 26, overflow: 'hidden', background: 'linear-gradient(135deg, #06090E 0%, #0B101B 50%, #151D2A 100%)', padding: 'clamp(44px,7vw,76px)', display: 'flex', flexWrap: 'wrap', gap: 40, alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 24px 60px rgba(0,0,0,0.35)', border: '1px solid rgba(243, 198, 81, 0.2)' }}>
             {/* Decorative blobs */}
-            <div style={{ position: 'absolute', right: -80, top: -80, width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(212,175,55,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', left: -60, bottom: -100, width: 280, height: 280, borderRadius: '50%', background: 'radial-gradient(circle, rgba(45,212,191,0.07) 0%, transparent 70%)', pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', right: -80, top: -80, width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(243,198,81,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', left: -60, bottom: -100, width: 280, height: 280, borderRadius: '50%', background: 'radial-gradient(circle, rgba(243,198,81,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
             {/* Radial spotlight */}
-            <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 60% 80% at 20% 50%, rgba(255,255,255,0.03) 0%, transparent 60%)', pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 60% 80% at 20% 50%, rgba(255,255,255,0.02) 0%, transparent 60%)', pointerEvents: 'none' }} />
 
             <div style={{ position: 'relative', maxWidth: 540 }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: '0.68rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: 'rgba(212,175,55,0.9)', border: '1px solid rgba(212,175,55,0.2)', padding: '4px 13px', borderRadius: 20, marginBottom: 18 }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: '0.68rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--primary)', border: '1px solid rgba(243,198,81,0.3)', padding: '4px 13px', borderRadius: 20, marginBottom: 18, background: 'rgba(243,198,81,0.08)' }}>
                 <Shield size={11} />
                 AAOIFI Standard No. 21
               </div>
               <h2 style={{ fontSize: 'clamp(1.7rem, 4vw, 2.8rem)', fontWeight: 900, color: 'white', letterSpacing: '-1.2px', lineHeight: 1.12, marginBottom: 16 }}>
                 Invest with conviction.<br />Screen with precision.
               </h2>
-              <p style={{ fontSize: '0.98rem', color: 'rgba(255,255,255,0.58)', lineHeight: 1.72, margin: 0, maxWidth: 440 }}>
+              <p style={{ fontSize: '0.98rem', color: 'rgba(255,255,255,0.65)', lineHeight: 1.72, margin: 0, maxWidth: 440 }}>
                 Every ratio. Every ruling. Every company — rigorously checked so you never have to guess.
               </p>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, position: 'relative', minWidth: 200 }}>
-              <Link to="/portfolio" className="hover-lift" style={{ padding: '14px 32px', background: 'white', color: 'var(--primary)', fontWeight: 800, fontSize: '0.92rem', borderRadius: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: '0 8px 24px rgba(0,0,0,0.2)', textDecoration: 'none' }}>
+              <Link to="/portfolio" className="hover-lift" style={{ padding: '14px 32px', background: 'var(--primary)', color: 'white', fontWeight: 800, fontSize: '0.92rem', borderRadius: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: '0 8px 24px rgba(118,88,122,0.28)', textDecoration: 'none' }}>
                 Start Screening <ArrowRight size={15} />
               </Link>
               <Link to="/shariah" style={{ padding: '13px 32px', border: '1px solid rgba(255,255,255,0.16)', color: 'rgba(255,255,255,0.82)', fontWeight: 600, fontSize: '0.9rem', borderRadius: 13, textDecoration: 'none', transition: 'border-color 0.2s, color 0.2s', textAlign: 'center', display: 'block' }}

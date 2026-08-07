@@ -60,10 +60,10 @@ export default function ActivityTab() {
     <div className="animate-fade-in stagger-1" style={{ background: 'var(--bg)', borderRadius:'24px', padding:'0', boxShadow:'var(--shadow-sm)', border:'1px solid var(--border)', overflow:'hidden' }}>
       
       {/* Header */}
-      <div style={{ background: 'linear-gradient(135deg, #0D1B2A 0%, #0F5257 65%, #0B6B71 100%)', padding: '32px', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' }}>
-        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(201,168,76,0.08)', borderRadius: '50%' }} />
+      <div style={{ background: 'linear-gradient(135deg, #06090E 0%, #0B101B 50%, #151D2A 100%)', padding: '32px', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px', borderBottom: '1px solid rgba(243, 198, 81, 0.15)' }}>
+        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(243,198,81,0.08)', borderRadius: '50%' }} />
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', zIndex: 1 }}>
-          <div style={{ width: '56px', height: '56px', background: 'rgba(255,255,255,0.1)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gold)', border: '1px solid rgba(255,255,255,0.2)' }}>
+          <div style={{ width: '56px', height: '56px', background: 'rgba(243,198,81,0.12)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', border: '1px solid rgba(243,198,81,0.35)' }}>
             <Activity size={28} />
           </div>
           <div>
@@ -72,7 +72,7 @@ export default function ActivityTab() {
           </div>
         </div>
         <div style={{ position: 'relative', zIndex: 1 }}>
-          <span style={{ color: 'white', fontSize: '0.78rem', fontWeight: 800, background: 'rgba(255,255,255,0.1)', padding: '8px 16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)' }}>
+          <span style={{ color: 'var(--primary)', fontSize: '0.78rem', fontWeight: 800, background: 'rgba(243,198,81,0.12)', padding: '8px 16px', borderRadius: '12px', border: '1px solid rgba(243,198,81,0.3)', backdropFilter: 'blur(10px)' }}>
             {history.length} {history.length === 1 ? 'Record' : 'Records'}
           </span>
         </div>

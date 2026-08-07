@@ -270,16 +270,16 @@ export default function MarketTab() {
 
       {/* ── Header Hero Banner ─────────────────────────────────────── */}
       <div style={{ 
-        background: 'linear-gradient(135deg, #0D1B2A 0%, #0F5257 65%, #0B6B71 100%)', 
+        background: 'linear-gradient(135deg, #06090E 0%, #0B101B 50%, #151D2A 100%)', 
         borderRadius: '20px', padding: '20px', 
-        boxShadow: '0 12px 32px rgba(13,27,42,0.15)', 
-        border: 'none', marginBottom: '16px', 
+        boxShadow: '0 16px 40px rgba(0,0,0,0.3)', 
+        border: '1px solid rgba(243, 198, 81, 0.2)', marginBottom: '16px', 
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
         position: 'relative', overflow: 'hidden', flexWrap: 'wrap', gap: '16px' 
       }}>
-        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '150px', height: '150px', background: 'rgba(201,168,76,0.08)', borderRadius: '50%' }} />
+        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '150px', height: '150px', background: 'rgba(243,198,81,0.08)', borderRadius: '50%' }} />
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', position: 'relative', zIndex: 1 }}>
-          <div style={{ width: '48px', height: '48px', background: 'rgba(255,255,255,0.1)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gold)', border: '1px solid rgba(255,255,255,0.2)' }}>
+          <div style={{ width: '48px', height: '48px', background: 'rgba(243,198,81,0.12)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', border: '1px solid rgba(243,198,81,0.35)' }}>
             <BarChart2 size={24} />
           </div>
           <div>
@@ -288,7 +288,7 @@ export default function MarketTab() {
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', position: 'relative', zIndex: 1 }}>
-          <div style={{ color: 'white', fontSize: '0.79rem', fontWeight: 800, background: 'rgba(255,255,255,0.1)', padding: '10px 16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)' }}>
+          <div style={{ color: 'var(--primary)', fontSize: '0.79rem', fontWeight: 800, background: 'rgba(243,198,81,0.12)', padding: '10px 16px', borderRadius: '12px', border: '1px solid rgba(243,198,81,0.3)', backdropFilter: 'blur(10px)' }}>
             {actualStocks.length} Companies
           </div>
           <div style={{ color: '#10B981', fontSize: '0.79rem', fontWeight: 800, background: 'rgba(16,185,129,0.15)', padding: '10px 16px', borderRadius: '12px', border: '1px solid rgba(16,185,129,0.3)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', gap: '6px' }}>

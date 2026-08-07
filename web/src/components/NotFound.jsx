@@ -41,17 +41,18 @@ const NotFound = () => {
               justifyContent: 'center',
               gap: '8px',
               width: '100%',
-              padding: '12px 24px',
-              backgroundColor: '#0F5257',
-              color: 'white',
+              padding: '14px 24px',
+              backgroundColor: 'var(--primary)',
+              color: 'var(--text-dark)',
               border: 'none',
-              borderRadius: '8px',
-              fontWeight: 600,
+              borderRadius: '12px',
+              fontWeight: 800,
               cursor: 'pointer',
+              boxShadow: '0 4px 16px rgba(243, 198, 81, 0.25)',
               transition: 'all 0.2s'
             }}
-            onMouseOver={(e) => { e.target.style.backgroundColor = '#0A3B3E'; e.target.style.transform = 'translateY(-1px)'; }}
-            onMouseOut={(e) => { e.target.style.backgroundColor = '#0F5257'; e.target.style.transform = 'translateY(0)'; }}
+            onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'var(--primary-hover)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+            onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'var(--primary)'; e.currentTarget.style.transform = 'translateY(0)'; }}
           >
             <Home size={18} />
             Go to Portfolio

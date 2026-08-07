@@ -60,7 +60,7 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
   return (
     <aside aria-label="Dashboard Navigation" className={`dashboard-sidebar-container ${mobileOpen ? 'open' : ''}`} style={{
       width: isCollapsed ? '80px' : '260px',
-      background: '#0B0F17',
+      background: '#2A1A2E',
       borderRight: '1px solid rgba(255, 255, 255, 0.08)',
       boxShadow: '4px 0 24px rgba(0, 0, 0, 0.25)',
       display: 'flex',
@@ -84,14 +84,14 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
               width: '40px', height: '40px', borderRadius: '12px',
               background: 'var(--gold-grad)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontWeight: 900, fontSize: '0.95rem', color: '#0B0F17',
+              fontWeight: 900, fontSize: '0.95rem', color: '#2A1A2E',
               flexShrink: 0,
               boxShadow: '0 4px 14px rgba(243, 198, 81, 0.35)'
             }}>إ</div>
             <span style={{ 
               fontWeight: 800, 
               fontSize: '1.25rem', 
-              color: '#F3C651', 
+              color: '#C9952A', 
               letterSpacing: '-0.2px', 
               fontFamily: 'var(--serif), var(--sans)',
               textShadow: '0 2px 10px rgba(243, 198, 81, 0.2)'
@@ -105,7 +105,7 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
             width: '40px', height: '40px', borderRadius: '12px',
             background: 'var(--gold-grad)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: 900, fontSize: '0.95rem', color: '#0B0F17',
+            fontWeight: 900, fontSize: '0.95rem', color: '#2A1A2E',
             boxShadow: '0 4px 14px rgba(243, 198, 81, 0.35)'
           }}>إ</div>
         )}
@@ -114,17 +114,17 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
             onClick={() => setCollapsed(true)}
             style={{
               width: '32px', height: '32px', borderRadius: '10px',
-              background: 'rgba(255, 255, 255, 0.06)', 
+              background: 'rgba(190, 169, 193, 0.08)', 
               border: 'none',
               display: 'none', 
               alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', color: '#94A3B8',
+              cursor: 'pointer', color: '#9B8D9D',
               flexShrink: 0,
               transition: 'all 0.2s ease'
             }}
             className="desktop-only-btn hover-bg-darker"
             onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)'; e.currentTarget.style.color = '#FFFFFF'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)'; e.currentTarget.style.color = '#94A3B8'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(190, 169, 193, 0.08)'; e.currentTarget.style.color = '#9B8D9D'; }}
           >
             <ChevronLeft size={16} />
           </button>
@@ -135,7 +135,7 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
           onClick={() => setMobileOpen(false)}
           style={{
             width: '32px', height: '32px', borderRadius: '10px',
-            background: 'rgba(255, 255, 255, 0.06)', border: 'none',
+            background: 'rgba(190, 169, 193, 0.08)', border: 'none',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             cursor: 'pointer', color: '#FFFFFF',
             flexShrink: 0,
@@ -154,13 +154,13 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
             aria-label="Expand sidebar"
             style={{
               width: '40px', height: '40px', borderRadius: '12px',
-              background: 'rgba(255, 255, 255, 0.06)', border: 'none',
+              background: 'rgba(190, 169, 193, 0.08)', border: 'none',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', color: '#94A3B8',
+              cursor: 'pointer', color: '#9B8D9D',
               transition: 'all 0.2s ease'
             }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)'; e.currentTarget.style.color = '#F3C651'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)'; e.currentTarget.style.color = '#94A3B8'; }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)'; e.currentTarget.style.color = '#C9952A'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(190, 169, 193, 0.08)'; e.currentTarget.style.color = '#9B8D9D'; }}
           >
             <ChevronRight size={18} />
           </button>
@@ -175,7 +175,7 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
             return (
               <div key={i} style={{
                 fontSize: '0.65rem', fontWeight: 800, letterSpacing: '1.4px',
-                textTransform: 'uppercase', color: '#64748B',
+                textTransform: 'uppercase', color: '#7A6B7E',
                 padding: '20px 12px 8px', fontFamily: 'var(--sans)'
               }}>
                 {item.section}
@@ -211,7 +211,7 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
                 background: active
                   ? 'rgba(243, 198, 81, 0.14)'
                   : 'transparent',
-                color: active ? '#F3C651' : '#94A3B8',
+                color: active ? '#C9952A' : '#9B8D9D',
                 textDecoration: 'none',
                 fontWeight: active ? 700 : 500,
                 fontSize: '0.84rem',
@@ -230,17 +230,17 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
               onMouseLeave={e => {
                 if (!active) {
                   e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.color = '#94A3B8';
+                  e.currentTarget.style.color = '#9B8D9D';
                   if (isCollapsed) e.currentTarget.style.borderLeft = '3px solid transparent';
                 }
               }}
             >
-              <Icon size={isCollapsed ? 22 : 18} style={{ flexShrink: 0, opacity: active ? 1 : 0.8, color: active ? '#F3C651' : 'currentColor' }} />
+              <Icon size={isCollapsed ? 22 : 18} style={{ flexShrink: 0, opacity: active ? 1 : 0.8, color: active ? '#C9952A' : 'currentColor' }} />
               {!isCollapsed && <span>{item.label}</span>}
               {!isCollapsed && active && (
                 <div style={{
                   marginLeft: 'auto', width: '6px', height: '6px',
-                  borderRadius: '50%', background: '#F3C651',
+                  borderRadius: '50%', background: '#C9952A',
                   boxShadow: '0 0 10px #F3C651'
                 }} />
               )}
@@ -263,27 +263,27 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
                 onClick={toggleTheme}
                 style={{
                   display: 'flex', alignItems: 'center', gap: '8px',
-                  background: 'rgba(255, 255, 255, 0.06)', 
+                  background: 'rgba(190, 169, 193, 0.08)', 
                   border: '1px solid rgba(255, 255, 255, 0.1)',
-                  color: '#F3C651', fontSize: '0.72rem', fontWeight: 600,
+                  color: '#C9952A', fontSize: '0.72rem', fontWeight: 600,
                   padding: '10px 14px', borderRadius: '10px', cursor: 'pointer',
                   width: '100%', justifyContent: 'center',
                   boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
                   transition: 'all 0.2s'
                 }}
                 onMouseEnter={e => { e.currentTarget.style.background = 'rgba(243, 198, 81, 0.15)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(190, 169, 193, 0.08)'; e.currentTarget.style.transform = 'translateY(0)'; }}
               >
                 {isDark ? <Sun size={15} /> : <Moon size={15} />}
                 <span>{isDark ? 'Switch to Light' : 'Switch to Dark'}</span>
               </button>
             </div>
-            <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none', marginBottom: '14px', padding: '6px', borderRadius: '12px', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+            <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none', marginBottom: '14px', padding: '6px', borderRadius: '12px', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(190, 169, 193, 0.08)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
               <div style={{
                 width: '42px', height: '42px', borderRadius: '50%',
                 background: 'var(--gold-grad)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#0B0F17', fontWeight: 800, fontSize: '1rem',
+                color: '#2A1A2E', fontWeight: 800, fontSize: '1rem',
                 flexShrink: 0,
                 boxShadow: '0 4px 12px rgba(243, 198, 81, 0.3)'
               }}>
@@ -293,7 +293,7 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
                 <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#FFFFFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontFamily: 'var(--sans)' }}>
                   {user?.first_name || user?.name || 'User'}
                 </div>
-                <div style={{ fontSize: '0.7rem', color: '#94A3B8', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '2px' }}>
+                <div style={{ fontSize: '0.7rem', color: '#9B8D9D', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '2px' }}>
                   {user?.email || 'user@iirshad.com'}
                 </div>
               </div>
@@ -304,11 +304,11 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
                 display: 'flex', alignItems: 'center', gap: '8px',
                 width: '100%', padding: '10px', borderRadius: '10px',
                 background: 'none', border: 'none',
-                color: '#94A3B8', fontSize: '0.75rem', fontWeight: 600,
+                color: '#9B8D9D', fontSize: '0.75rem', fontWeight: 600,
                 cursor: 'pointer', transition: 'all 0.2s', justifyContent: 'center'
               }}
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.12)'; e.currentTarget.style.color = '#EF4444'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#94A3B8'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#9B8D9D'; }}
             >
               <LogOut size={16} /> Log Out
             </button>
@@ -320,9 +320,9 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
                 title={isDark ? "Light Mode" : "Dark Mode"}
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: 'rgba(255, 255, 255, 0.06)', 
+                  background: 'rgba(190, 169, 193, 0.08)', 
                   border: '1px solid rgba(255, 255, 255, 0.1)',
-                  color: '#F3C651', width: '42px', height: '42px',
+                  color: '#C9952A', width: '42px', height: '42px',
                   borderRadius: '12px', cursor: 'pointer',
                   boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
                 }}
@@ -334,7 +334,7 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
                 width: '42px', height: '42px', borderRadius: '12px',
                 background: 'var(--gold-grad)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#0B0F17', fontWeight: 800, fontSize: '1rem',
+                color: '#2A1A2E', fontWeight: 800, fontSize: '1rem',
                 boxShadow: '0 4px 12px rgba(243, 198, 81, 0.3)'
               }}>
                 {(user?.first_name || user?.name || 'U').charAt(0).toUpperCase()}
@@ -348,10 +348,10 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
                 width: '42px', height: '42px', borderRadius: '12px',
                 background: 'none', border: 'none',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#94A3B8', cursor: 'pointer',
+                color: '#9B8D9D', cursor: 'pointer',
               }}
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.12)'; e.currentTarget.style.color = '#EF4444'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#94A3B8'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#9B8D9D'; }}
             >
               <LogOut size={18} />
             </button>

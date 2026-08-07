@@ -163,11 +163,11 @@ export default function Portfolio() {
   const summary = data?.summary || {};
   const totalBalance = summary.total_balance || 0;
   
-  const PIE_COLORS = ['#C9B89C','#2A6F73','#3B82F6','#8b5cf6','#0F5257','#06b6d4'];
+  const PIE_COLORS = ['#F3C651', '#E5B53B', '#C69220', '#6366F1', '#3B82F6', '#10B981'];
   const pieData = (holdings || []).slice(0,6).map((h,i) => ({
     name: h.symbol, value: h.total_value || 0, color: PIE_COLORS[i % PIE_COLORS.length],
   }));
-  if (pieData.length === 0) pieData.push({ name: 'No Holdings', value: 1, color: '#e5e7eb' });
+  if (pieData.length === 0) pieData.push({ name: 'No Holdings', value: 1, color: 'var(--border)' });
 
   const isHoldingHalal = h => !!h.is_halal || ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(h.symbol);
   const halalCount    = holdings.filter(isHoldingHalal).length;
@@ -220,14 +220,14 @@ export default function Portfolio() {
             style={{
               display: 'flex', alignItems: 'center', gap: '8px',
               padding: '12px 22px', borderRadius: '14px',
-              background: 'var(--primary)', color: 'var(--bg)', border: 'none',
+              background: 'var(--primary)', color: '#0B0F17', border: 'none',
               fontWeight: 800, fontSize: '0.79rem', cursor: 'pointer',
-              boxShadow: '0 8px 24px rgba(15,82,87,0.25)',
+              boxShadow: '0 8px 24px rgba(243,198,81,0.25)',
               transition: 'transform 0.2s, box-shadow 0.2s',
               flexShrink: 0,
             }}
-            onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 14px 32px rgba(15,82,87,0.3)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='0 8px 24px rgba(15,82,87,0.25)'; }}
+            onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 14px 32px rgba(243,198,81,0.35)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='0 8px 24px rgba(243,198,81,0.25)'; }}
           >
             <Search size={15} style={{ display: 'none' }} /> <span style={{ fontSize: '0.97rem', lineHeight: 1 }}>+</span> Add Holding
           </button>

@@ -9,8 +9,8 @@ const STATS = [
 ];
 
 const VALUES = [
-  { icon: Target,   color: '#0F5257', bg: 'var(--primary-50)',  border: 'var(--primary-100)', title: 'Direct-Source Accuracy',   desc: 'Every screening is backed by official NGX Pulse filings and audited reports with verifiable timestamps.' },
-  { icon: Shield,   color: '#0F5257', bg: 'var(--primary-50)',  border: 'var(--primary-100)', title: 'AAOIFI Standard 21', desc: 'Strict application of global Shariah Standard 21 thresholds with zero arbitrary buffer zones.' },
+  { icon: Target,   color: 'var(--primary)', bg: 'var(--primary-50)',  border: 'var(--primary-100)', title: 'Direct-Source Accuracy',   desc: 'Every screening is backed by official NGX Pulse filings and audited reports with verifiable timestamps.' },
+  { icon: Shield,   color: 'var(--primary)', bg: 'var(--primary-50)',  border: 'var(--primary-100)', title: 'AAOIFI Standard 21', desc: 'Strict application of global Shariah Standard 21 thresholds with zero arbitrary buffer zones.' },
   { icon: Users,    color: '#8b5cf6', bg: '#ede9fe',            border: '#ddd6fe',            title: 'Community First',  desc: 'Engineered specifically for conscious Muslim retail and institutional investors in Nigeria.' },
   { icon: BookOpen, color: '#d97706', bg: 'var(--gold-50)',     border: 'var(--gold-border)', title: 'Dividend Purification',  desc: 'Automated math to isolate and cleanse incidental interest revenue down to two decimal places.' },
 ];
@@ -54,13 +54,13 @@ const AboutPage = () => (
       <div className="about-vision-grid" style={{ marginBottom: '48px' }}>
         {/* Vision card */}
         <div style={{
-          background: 'linear-gradient(135deg, #0A192F 0%, #0F3A40 50%, #0B4F55 100%)',
+          background: 'linear-gradient(135deg, #06090E 0%, #0B101B 50%, #131B2A 100%)',
           borderRadius: '24px', padding: '40px',
           position: 'relative', overflow: 'hidden',
-          boxShadow: '0 16px 40px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.1)',
-          border: '1px solid rgba(255,255,255,0.1)'
+          boxShadow: '0 16px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(243,198,81,0.2)',
+          border: '1px solid rgba(243, 198, 81, 0.15)'
         }}>
-          <div style={{ position: 'absolute', bottom: '-50px', right: '-50px', width: '220px', height: '220px', background: 'radial-gradient(circle, rgba(201,168,76,0.15) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', bottom: '-50px', right: '-50px', width: '220px', height: '220px', background: 'radial-gradient(circle, rgba(243,198,81,0.15) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
           <div style={{ position: 'relative', zIndex: 1 }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.3)', padding: '5px 14px', borderRadius: '40px', marginBottom: '24px', backdropFilter: 'blur(8px)' }}>
               <Globe size={13} color="var(--gold)" />

@@ -31,7 +31,7 @@ export default function AdminLayout({ children }) {
       alignItems: 'flex-start',
       minHeight: '100vh',
       background: 'var(--bg)',
-      backgroundImage: 'radial-gradient(at 0% 0%, rgba(15,82,87,0.03) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(212,175,55,0.04) 0px, transparent 50%)',
+      backgroundImage: 'radial-gradient(at 0% 0%, rgba(243,198,81,0.03) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(243,198,81,0.03) 0px, transparent 50%)',
     }}>
       {/* Mobile Overlay */}
       {mobileOpen && (

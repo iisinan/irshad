@@ -176,7 +176,7 @@ function StatDetailModal({ holding: h, statKey, onClose, onOpenPurification }) {
       title: 'Dividends Received (12M)',
       formulaText: 'Shares Held × Trailing 12M Dividend Per Share',
       formulaCalc: `${shares.toLocaleString()} shares × ${fmt(divPerShare)} = ${fmt(dividends)}`,
-      accent: '#0F5257',
+      accent: 'var(--primary)',
       rows: [
         { label: 'Shares held', value: `${shares.toLocaleString()} shares` },
         { label: 'Dividend per share (trailing 12M)', value: fmt(divPerShare) },
@@ -452,14 +452,14 @@ export default function PurificationTab({ data }) {
       )}
 
       {/* ─ Header Banner ─ */}
-      <div style={{ background: 'linear-gradient(135deg, #0D1B2A 0%, #0F5257 65%, #0B6B71 100%)', borderRadius: '24px', padding: '32px', boxShadow: '0 16px 40px rgba(13,27,42,0.18)', marginBottom: '24px', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: '220px', height: '220px', background: 'rgba(201,168,76,0.07)', borderRadius: '50%', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: '-40px', left: '30%', width: '140px', height: '140px', background: 'rgba(255,255,255,0.03)', borderRadius: '50%', pointerEvents: 'none' }} />
+      <div style={{ background: 'linear-gradient(135deg, #06090E 0%, #0B101B 50%, #151D2A 100%)', borderRadius: '24px', padding: '32px', boxShadow: '0 16px 40px rgba(0,0,0,0.3)', border: '1px solid rgba(243, 198, 81, 0.2)', marginBottom: '24px', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: '220px', height: '220px', background: 'rgba(243,198,81,0.07)', borderRadius: '50%', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: '-40px', left: '30%', width: '140px', height: '140px', background: 'rgba(243,198,81,0.03)', borderRadius: '50%', pointerEvents: 'none' }} />
 
         <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
-            <div style={{ width: '58px', height: '58px', background: 'rgba(255,255,255,0.08)', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.15)', backdropFilter: 'blur(4px)' }}>
-              {purificationDue > 0 ? <ShieldAlert size={28} color="#F59E0B" /> : <CheckCircle size={28} color="#34D399" />}
+            <div style={{ width: '58px', height: '58px', background: 'rgba(243,198,81,0.12)', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(243,198,81,0.35)', backdropFilter: 'blur(4px)' }}>
+              {purificationDue > 0 ? <ShieldAlert size={28} color="var(--primary)" /> : <CheckCircle size={28} color="#34D399" />}
             </div>
             <div>
               <h2 style={{ fontSize: '1.28rem', fontWeight: 800, color: 'white', letterSpacing: '-0.5px', marginBottom: '4px' }}>Dividend Purification</h2>
