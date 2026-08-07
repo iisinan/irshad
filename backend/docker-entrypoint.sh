@@ -17,7 +17,8 @@ done
 # Run migrations
 php artisan migrate --force
 
-# Clear configuration and route caches
+# Force remove any stale cached PHP files in bootstrap/cache
+rm -rf /var/www/bootstrap/cache/*.php
 php artisan config:clear
 php artisan route:clear
 php artisan view:clear
