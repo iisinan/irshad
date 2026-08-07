@@ -181,7 +181,8 @@ export const fetchSectors = async () => {
 };
 
 export const fetchNgxStocks = async () => {
-  const response = await api.get('/stocks/ngx');
+  // Add a cache-buster so Cloudflare CDN or the browser never returns a stale empty list
+  const response = await api.get('/stocks/ngx', { params: { _cb: Date.now() } });
   return response.data;
 };
 

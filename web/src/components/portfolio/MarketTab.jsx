@@ -151,12 +151,12 @@ export default function MarketTab() {
 
   // Force-refresh on every mount to bypass stale/empty cache from previous errors
   useEffect(() => {
-    queryClient.invalidateQueries({ queryKey: ['marketData'] });
+    queryClient.invalidateQueries({ queryKey: ['marketData', 'v2'] });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const { data: stocks = [], isLoading, error, refetch } = useQuery({
-    queryKey: ['marketData'],
+    queryKey: ['marketData', 'v2'],
     queryFn: async () => {
       const r = await fetchNgxStocks();
       return Array.isArray(r) ? r : (r?.data || []);

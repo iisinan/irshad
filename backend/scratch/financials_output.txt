@@ -1,0 +1,451 @@
+FINANCIAL DATA CHECK FOR MISMATCHED STOCKS
+========================================================================================================================
+
+Ticker: OANDO
+DB Final Status: non-halal
+AAOIFI Final Status: non-halal
+Ratios:
+  - Debt Ratio (Limit 30%): 759.18% [Status: fail]
+  - Cash Ratio (Limit 30%): 142.77% [Status: fail]
+  - Imp. Income Ratio (Limit 5%): 9.06% [Status: fail]
+Raw Financials:
+  - Market Cap: 355,035,734,257
+  - Total Assets: 0
+  - Total Debt: 2,695,370,098,000
+  - Cash: 439,882,748,000
+  - Interest Bearing Sec: 67,007,063,000
+  - Interest Income: 288,032,431,000
+  - Total Revenue: 3,180,090,462,000
+------------------------------------------------------------------------------------------------------------------------
+Ticker: VITAFOAM
+DB Final Status: non-halal
+AAOIFI Final Status: halal
+Ratios:
+  - Debt Ratio (Limit 30%): 0.94% [Status: pass]
+  - Cash Ratio (Limit 30%): 5.89% [Status: pass]
+  - Imp. Income Ratio (Limit 5%): 0.47% [Status: pass]
+Raw Financials:
+  - Market Cap: 242,663,748,416
+  - Total Assets: 0
+  - Total Debt: 2,271,909,000
+  - Cash: 14,293,909,000
+  - Interest Bearing Sec: 0
+  - Interest Income: 427,741,000
+  - Total Revenue: 91,212,764,000
+------------------------------------------------------------------------------------------------------------------------
+Ticker: CONOIL
+DB Final Status: non-halal
+AAOIFI Final Status: non-halal
+Ratios:
+  - Debt Ratio (Limit 30%): 49.44% [Status: fail]
+  - Cash Ratio (Limit 30%): 10.10% [Status: pass]
+  - Imp. Income Ratio (Limit 5%): 0.00% [Status: pass]
+Raw Financials:
+  - Market Cap: 145,729,944,570
+  - Total Assets: 0
+  - Total Debt: 72,046,498,000
+  - Cash: 14,714,512,000
+  - Interest Bearing Sec: 0
+  - Interest Income: 0
+  - Total Revenue: 179,896,949,000
+------------------------------------------------------------------------------------------------------------------------
+Ticker: ETRANZACT
+DB Final Status: non-halal
+AAOIFI Final Status: non-halal
+Ratios:
+  - Debt Ratio (Limit 30%): 0.00% [Status: pass]
+  - Cash Ratio (Limit 30%): 0.00% [Status: pass]
+  - Imp. Income Ratio (Limit 5%): N/A [Status: insufficient_data]
+Raw Financials:
+  - Market Cap: 133,399,997,332
+  - Total Assets: 0
+  - Total Debt: 0
+  - Cash: 0
+  - Interest Bearing Sec: 0
+  - Interest Income: 0
+  - Total Revenue: 0
+------------------------------------------------------------------------------------------------------------------------
+Ticker: TOTAL
+DB Final Status: non-halal
+AAOIFI Final Status: non-halal
+Ratios:
+  - Debt Ratio (Limit 30%): 33.99% [Status: fail]
+  - Cash Ratio (Limit 30%): 17.77% [Status: pass]
+  - Imp. Income Ratio (Limit 5%): 0.21% [Status: pass]
+Raw Financials:
+  - Market Cap: 217,293,975,680
+  - Total Assets: 0
+  - Total Debt: 73,863,651,000
+  - Cash: 38,605,766,000
+  - Interest Bearing Sec: 0
+  - Interest Income: 918,945,000
+  - Total Revenue: 443,990,701,000
+------------------------------------------------------------------------------------------------------------------------
+Ticker: DANGSUGAR
+DB Final Status: non-halal
+AAOIFI Final Status: non-halal
+Ratios:
+  - Debt Ratio (Limit 30%): 39.26% [Status: fail]
+  - Cash Ratio (Limit 30%): 3.05% [Status: pass]
+  - Imp. Income Ratio (Limit 5%): 0.75% [Status: pass]
+Raw Financials:
+  - Market Cap: 955,959,317,409
+  - Total Assets: 0
+  - Total Debt: 375,261,584,000
+  - Cash: 29,166,697,000
+  - Interest Bearing Sec: 0
+  - Interest Income: 2,948,858,000
+  - Total Revenue: 391,854,524,000
+------------------------------------------------------------------------------------------------------------------------
+Ticker: MAYBAKER
+DB Final Status: non-halal
+AAOIFI Final Status: halal
+Ratios:
+  - Debt Ratio (Limit 30%): 4.21% [Status: pass]
+  - Cash Ratio (Limit 30%): 11.94% [Status: pass]
+  - Imp. Income Ratio (Limit 5%): 2.51% [Status: pass]
+Raw Financials:
+  - Market Cap: 69,009,395,440
+  - Total Assets: 0
+  - Total Debt: 2,908,696,000
+  - Cash: 8,242,811,000
+  - Interest Bearing Sec: 0
+  - Interest Income: 483,104,000
+  - Total Revenue: 19,280,367,000
+------------------------------------------------------------------------------------------------------------------------
+Ticker: UNILEVER
+DB Final Status: non-halal
+AAOIFI Final Status: non-halal
+Ratios:
+  - Debt Ratio (Limit 30%): 0.26% [Status: pass]
+  - Cash Ratio (Limit 30%): 12.08% [Status: pass]
+  - Imp. Income Ratio (Limit 5%): 5.43% [Status: fail]
+Raw Financials:
+  - Market Cap: 804,300,758,380
+  - Total Assets: 0
+  - Total Debt: 2,121,839,000
+  - Cash: 97,152,745,000
+  - Interest Bearing Sec: 0
+  - Interest Income: 6,513,195,000
+  - Total Revenue: 119,923,255,000
+------------------------------------------------------------------------------------------------------------------------
+Ticker: CAVERTON
+DB Final Status: non-halal
+AAOIFI Final Status: non-halal
+Ratios:
+  - Debt Ratio (Limit 30%): 460.03% [Status: fail]
+  - Cash Ratio (Limit 30%): 14.67% [Status: pass]
+  - Imp. Income Ratio (Limit 5%): 0.12% [Status: pass]
+Raw Financials:
+  - Market Cap: 16,752,548,795
+  - Total Assets: 0
+  - Total Debt: 77,066,744,000
+  - Cash: 1,676,897,000
+  - Interest Bearing Sec: 780,397,000
+  - Interest Income: 17,014,000
+  - Total Revenue: 14,681,464,000
+------------------------------------------------------------------------------------------------------------------------
+Ticker: ETERNA
+DB Final Status: non-halal
+AAOIFI Final Status: non-halal
+Ratios:
+  - Debt Ratio (Limit 30%): 68.44% [Status: fail]
+  - Cash Ratio (Limit 30%): 47.31% [Status: fail]
+  - Imp. Income Ratio (Limit 5%): 0.00% [Status: pass]
+Raw Financials:
+  - Market Cap: 43,036,773,351
+  - Total Assets: 82,750,180,000
+  - Total Debt: 29,453,568,000
+  - Cash: 20,362,540,000
+  - Interest Bearing Sec: 0
+  - Interest Income: 0
+  - Total Revenue: 217,313,027,000
+------------------------------------------------------------------------------------------------------------------------
+Ticker: ABCTRANS
+DB Final Status: non-halal
+AAOIFI Final Status: halal
+Ratios:
+  - Debt Ratio (Limit 30%): 7.43% [Status: pass]
+  - Cash Ratio (Limit 30%): 9.62% [Status: pass]
+  - Imp. Income Ratio (Limit 5%): 0.29% [Status: pass]
+Raw Financials:
+  - Market Cap: 17,944,663,305
+  - Total Assets: 0
+  - Total Debt: 1,333,923,000
+  - Cash: 865,305,000
+  - Interest Bearing Sec: 860,805,000
+  - Interest Income: 23,897,000
+  - Total Revenue: 8,266,844,000
+------------------------------------------------------------------------------------------------------------------------
+Ticker: UPL
+DB Final Status: non-halal
+AAOIFI Final Status: non-halal
+Ratios:
+  - Debt Ratio (Limit 30%): 0.00% [Status: pass]
+  - Cash Ratio (Limit 30%): 24.03% [Status: pass]
+  - Imp. Income Ratio (Limit 5%): 5.27% [Status: fail]
+Raw Financials:
+  - Market Cap: 2,308,040,846
+  - Total Assets: 4,596,414,000
+  - Total Debt: 0
+  - Cash: 554,523,000
+  - Interest Bearing Sec: 0
+  - Interest Income: 22,531,000
+  - Total Revenue: 427,140,000
+------------------------------------------------------------------------------------------------------------------------
+Ticker: BAPLC
+DB Final Status: non-halal
+AAOIFI Final Status: halal
+Ratios:
+  - Debt Ratio (Limit 30%): 0.00% [Status: pass]
+  - Cash Ratio (Limit 30%): 0.00% [Status: pass]
+  - Imp. Income Ratio (Limit 5%): N/A [Status: insufficient_data]
+Raw Financials:
+  - Market Cap: 62,500,000
+  - Total Assets: 0
+  - Total Debt: 0
+  - Cash: 0
+  - Interest Bearing Sec: 0
+  - Interest Income: 0
+  - Total Revenue: 0
+------------------------------------------------------------------------------------------------------------------------
+Ticker: GEREGU
+DB Final Status: non-halal
+AAOIFI Final Status: halal
+Ratios:
+  - Debt Ratio (Limit 30%): 0.00% [Status: pass]
+  - Cash Ratio (Limit 30%): 0.00% [Status: pass]
+  - Imp. Income Ratio (Limit 5%): N/A [Status: insufficient_data]
+Raw Financials:
+  - Market Cap: 2,064,250,000,000
+  - Total Assets: 0
+  - Total Debt: 0
+  - Cash: 0
+  - Interest Bearing Sec: 0
+  - Interest Income: 0
+  - Total Revenue: 0
+------------------------------------------------------------------------------------------------------------------------
+Ticker: AIRTELAFRI
+DB Final Status: doubtful
+AAOIFI Final Status: halal
+Ratios:
+  - Debt Ratio (Limit 30%): 14.08% [Status: pass]
+  - Cash Ratio (Limit 30%): 5.55% [Status: pass]
+  - Imp. Income Ratio (Limit 5%): 0.42% [Status: pass]
+Raw Financials:
+  - Market Cap: 21,167,591,385,600
+  - Total Assets: 0
+  - Total Debt: 2,980,932,000,000
+  - Cash: 880,110,000,000
+  - Interest Bearing Sec: 295,641,000,000
+  - Interest Income: 36,785,000,000
+  - Total Revenue: 8,739,796,000,000
+------------------------------------------------------------------------------------------------------------------------
+Ticker: UNIONDICON
+DB Final Status: non-halal
+AAOIFI Final Status: non-halal
+Ratios:
+  - Debt Ratio (Limit 30%): 0.00% [Status: pass]
+  - Cash Ratio (Limit 30%): 124.11% [Status: fail]
+  - Imp. Income Ratio (Limit 5%): 30.13% [Status: fail]
+Raw Financials:
+  - Market Cap: 6,491,795,930
+  - Total Assets: 13,583,866,000
+  - Total Debt: 0
+  - Cash: 8,057,187,000
+  - Interest Bearing Sec: 0
+  - Interest Income: 1,352,000
+  - Total Revenue: 4,487,000
+------------------------------------------------------------------------------------------------------------------------
+Ticker: NASCON
+DB Final Status: non-halal
+AAOIFI Final Status: non-halal
+Ratios:
+  - Debt Ratio (Limit 30%): 0.01% [Status: pass]
+  - Cash Ratio (Limit 30%): 9.12% [Status: pass]
+  - Imp. Income Ratio (Limit 5%): 6.59% [Status: fail]
+Raw Financials:
+  - Market Cap: 513,461,157,550
+  - Total Assets: 0
+  - Total Debt: 64,737,000
+  - Cash: 46,053,391,000
+  - Interest Bearing Sec: 764,569,000
+  - Interest Income: 5,347,101,000
+  - Total Revenue: 81,158,775,000
+------------------------------------------------------------------------------------------------------------------------
+Ticker: UACN
+DB Final Status: non-halal
+AAOIFI Final Status: non-halal
+Ratios:
+  - Debt Ratio (Limit 30%): 52.48% [Status: fail]
+  - Cash Ratio (Limit 30%): 8.56% [Status: pass]
+  - Imp. Income Ratio (Limit 5%): 0.88% [Status: pass]
+Raw Financials:
+  - Market Cap: 585,080,024,417
+  - Total Assets: 0
+  - Total Debt: 307,039,604,000
+  - Cash: 50,092,640,000
+  - Interest Bearing Sec: 0
+  - Interest Income: 3,199,414,000
+  - Total Revenue: 364,970,145,000
+------------------------------------------------------------------------------------------------------------------------
+Ticker: RTBRISCOE
+DB Final Status: non-halal
+AAOIFI Final Status: non-halal
+Ratios:
+  - Debt Ratio (Limit 30%): 158.71% [Status: fail]
+  - Cash Ratio (Limit 30%): 2.86% [Status: pass]
+  - Imp. Income Ratio (Limit 5%): 0.00% [Status: pass]
+Raw Financials:
+  - Market Cap: 11,704,702,957
+  - Total Assets: 0
+  - Total Debt: 18,576,441,000
+  - Cash: 334,841,000
+  - Interest Bearing Sec: 0
+  - Interest Income: 1,003,000
+  - Total Revenue: 24,595,456,000
+------------------------------------------------------------------------------------------------------------------------
+Ticker: NAHCO
+DB Final Status: doubtful
+AAOIFI Final Status: halal
+Ratios:
+  - Debt Ratio (Limit 30%): 1.32% [Status: pass]
+  - Cash Ratio (Limit 30%): 1.20% [Status: pass]
+  - Imp. Income Ratio (Limit 5%): 1.84% [Status: pass]
+Raw Financials:
+  - Market Cap: 345,262,500,000
+  - Total Assets: 0
+  - Total Debt: 4,554,952,000
+  - Cash: 4,132,500,000
+  - Interest Bearing Sec: 0
+  - Interest Income: 649,235,000
+  - Total Revenue: 35,355,866,000
+------------------------------------------------------------------------------------------------------------------------
+Ticker: MULTIVERSE
+DB Final Status: doubtful
+AAOIFI Final Status: halal
+Ratios:
+  - Debt Ratio (Limit 30%): 0.00% [Status: pass]
+  - Cash Ratio (Limit 30%): 0.00% [Status: pass]
+  - Imp. Income Ratio (Limit 5%): N/A [Status: insufficient_data]
+Raw Financials:
+  - Market Cap: 9,077,929,388
+  - Total Assets: 0
+  - Total Debt: 0
+  - Cash: 0
+  - Interest Bearing Sec: 0
+  - Interest Income: 0
+  - Total Revenue: 0
+------------------------------------------------------------------------------------------------------------------------
+Ticker: NNFM
+DB Final Status: non-halal
+AAOIFI Final Status: halal
+Ratios:
+  - Debt Ratio (Limit 30%): 0.00% [Status: pass]
+  - Cash Ratio (Limit 30%): 0.00% [Status: pass]
+  - Imp. Income Ratio (Limit 5%): N/A [Status: insufficient_data]
+Raw Financials:
+  - Market Cap: 14,149,080,000
+  - Total Assets: 0
+  - Total Debt: 0
+  - Cash: 0
+  - Interest Bearing Sec: 0
+  - Interest Income: 0
+  - Total Revenue: 0
+------------------------------------------------------------------------------------------------------------------------
+Ticker: JBERGER
+DB Final Status: non-halal
+AAOIFI Final Status: non-halal
+Ratios:
+  - Debt Ratio (Limit 30%): 18.30% [Status: pass]
+  - Cash Ratio (Limit 30%): 33.95% [Status: fail]
+  - Imp. Income Ratio (Limit 5%): 2.12% [Status: pass]
+Raw Financials:
+  - Market Cap: 497,280,000,000
+  - Total Assets: 1,071,272,602,000
+  - Total Debt: 91,004,166,000
+  - Cash: 168,804,545,000
+  - Interest Bearing Sec: 0
+  - Interest Income: 8,984,939,000
+  - Total Revenue: 424,562,607,000
+------------------------------------------------------------------------------------------------------------------------
+Ticker: HONYFLOUR
+DB Final Status: non-halal
+AAOIFI Final Status: non-halal
+Ratios:
+  - Debt Ratio (Limit 30%): 32.47% [Status: fail]
+  - Cash Ratio (Limit 30%): 12.30% [Status: pass]
+  - Imp. Income Ratio (Limit 5%): 0.00% [Status: pass]
+Raw Financials:
+  - Market Cap: 129,262,221,825
+  - Total Assets: 310,180,000,000
+  - Total Debt: 41,973,000,000
+  - Cash: 13,778,000,000
+  - Interest Bearing Sec: 2,127,000,000
+  - Interest Income: 0
+  - Total Revenue: 112,867,000,000
+------------------------------------------------------------------------------------------------------------------------
+Ticker: MEYER
+DB Final Status: non-halal
+AAOIFI Final Status: non-halal
+Ratios:
+  - Debt Ratio (Limit 30%): 0.02% [Status: pass]
+  - Cash Ratio (Limit 30%): 25.48% [Status: pass]
+  - Imp. Income Ratio (Limit 5%): 7.24% [Status: fail]
+Raw Financials:
+  - Market Cap: 8,312,050,302
+  - Total Assets: 0
+  - Total Debt: 1,813,000
+  - Cash: 2,118,134,000
+  - Interest Bearing Sec: 0
+  - Interest Income: 171,887,000
+  - Total Revenue: 2,374,451,000
+------------------------------------------------------------------------------------------------------------------------
+Ticker: BERGER
+DB Final Status: non-halal
+AAOIFI Final Status: halal
+Ratios:
+  - Debt Ratio (Limit 30%): 0.33% [Status: pass]
+  - Cash Ratio (Limit 30%): 5.41% [Status: pass]
+  - Imp. Income Ratio (Limit 5%): 2.13% [Status: pass]
+Raw Financials:
+  - Market Cap: 42,690,993,743
+  - Total Assets: 0
+  - Total Debt: 141,545,000
+  - Cash: 611,550,000
+  - Interest Bearing Sec: 1,700,000,000
+  - Interest Income: 147,316,000
+  - Total Revenue: 6,926,137,000
+------------------------------------------------------------------------------------------------------------------------
+Ticker: CHAMS
+DB Final Status: non-halal
+AAOIFI Final Status: non-halal
+Ratios:
+  - Debt Ratio (Limit 30%): 17.81% [Status: pass]
+  - Cash Ratio (Limit 30%): 29.43% [Status: pass]
+  - Imp. Income Ratio (Limit 5%): 5.50% [Status: fail]
+Raw Financials:
+  - Market Cap: 21,060,000,000
+  - Total Assets: 0
+  - Total Debt: 3,751,584,000
+  - Cash: 5,597,266,000
+  - Interest Bearing Sec: 600,000,000
+  - Interest Income: 538,787,000
+  - Total Revenue: 9,788,763,000
+------------------------------------------------------------------------------------------------------------------------
+Ticker: MORISON
+DB Final Status: doubtful
+AAOIFI Final Status: halal
+Ratios:
+  - Debt Ratio (Limit 30%): 1.28% [Status: pass]
+  - Cash Ratio (Limit 30%): 1.04% [Status: pass]
+  - Imp. Income Ratio (Limit 5%): 1.09% [Status: pass]
+Raw Financials:
+  - Market Cap: 15,840,864,000
+  - Total Assets: 0
+  - Total Debt: 203,073,000
+  - Cash: 164,863,000
+  - Interest Bearing Sec: 0
+  - Interest Income: 2,995,000
+  - Total Revenue: 274,084,000
+------------------------------------------------------------------------------------------------------------------------
