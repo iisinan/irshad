@@ -46,7 +46,7 @@ const getStatusConfig = (company) => {
 /* ─── Table header cell — defined OUTSIDE to avoid re-mounting ───────────── */
 const TH = ({ children, right, center }) => (
   <th style={{
-    padding: '12px 16px',
+    padding: '10px 12px',
     fontSize: '0.65rem', fontWeight: 800,
     textTransform: 'uppercase', letterSpacing: '0.6px',
     color: 'var(--text-muted)',
@@ -71,12 +71,12 @@ const StockRow = React.memo(({ stock, idx, isWatched, onToggle }) => {
       style={{ borderBottom: '1px solid var(--border)', transition: 'background 0.15s' }}
     >
       {/* Rank */}
-      <td style={{ padding: '14px 8px 14px 20px', color: 'var(--text-light)', fontSize: '0.72rem', fontWeight: 700 }}>
+      <td style={{ padding: '10px 8px 10px 16px', color: 'var(--text-light)', fontSize: '0.72rem', fontWeight: 700 }}>
         {idx + 1}
       </td>
 
       {/* Company */}
-      <td style={{ padding: '14px 16px' }}>
+      <td style={{ padding: '10px 12px' }}>
         <Link
           to={`/market/${stock.symbol}`}
           state={{ stock }}
@@ -95,12 +95,12 @@ const StockRow = React.memo(({ stock, idx, isWatched, onToggle }) => {
       </td>
 
       {/* Price */}
-      <td style={{ padding: '14px 16px', textAlign: 'right', fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.84rem', fontVariantNumeric: 'tabular-nums' }}>
+      <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.84rem', fontVariantNumeric: 'tabular-nums' }}>
         ₦{fmtPrice(stock.latest_price)}
       </td>
 
       {/* Change */}
-      <td style={{ padding: '14px 16px', textAlign: 'right' }}>
+      <td style={{ padding: '10px 12px', textAlign: 'right' }}>
         <span style={{
           display: 'inline-flex', alignItems: 'center', gap: '4px',
           fontSize: '0.72rem', fontWeight: 800,
@@ -115,17 +115,17 @@ const StockRow = React.memo(({ stock, idx, isWatched, onToggle }) => {
       </td>
 
       {/* Mkt Cap */}
-      <td style={{ padding: '14px 16px', textAlign: 'right', color: 'var(--text-muted)', fontSize: '0.78rem', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
+      <td style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--text-muted)', fontSize: '0.78rem', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
         {fmtCap(stock.market_cap)}
       </td>
 
       {/* P/E */}
-      <td style={{ padding: '14px 16px', textAlign: 'right', color: 'var(--text-muted)', fontSize: '0.78rem', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
+      <td style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--text-muted)', fontSize: '0.78rem', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
         {stock.pe_ratio ? Number(stock.pe_ratio).toFixed(1) : '—'}
       </td>
 
       {/* Star */}
-      <td style={{ padding: '14px 20px 14px 8px', textAlign: 'right' }}>
+      <td style={{ padding: '10px 16px 10px 8px', textAlign: 'right' }}>
         <button
           onClick={() => onToggle(stock.symbol, isWatched)}
           style={{
@@ -271,20 +271,20 @@ export default function MarketTab() {
       {/* ── Header Hero Banner ─────────────────────────────────────── */}
       <div style={{ 
         background: 'linear-gradient(135deg, #0D1B2A 0%, #0F5257 65%, #0B6B71 100%)', 
-        borderRadius: '24px', padding: '32px', 
+        borderRadius: '20px', padding: '20px', 
         boxShadow: '0 12px 32px rgba(13,27,42,0.15)', 
-        border: 'none', marginBottom: '24px', 
+        border: 'none', marginBottom: '16px', 
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
-        position: 'relative', overflow: 'hidden', flexWrap: 'wrap', gap: '24px' 
+        position: 'relative', overflow: 'hidden', flexWrap: 'wrap', gap: '16px' 
       }}>
-        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(201,168,76,0.08)', borderRadius: '50%' }} />
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', zIndex: 1 }}>
-          <div style={{ width: '56px', height: '56px', background: 'rgba(255,255,255,0.1)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gold)', border: '1px solid rgba(255,255,255,0.2)' }}>
-            <BarChart2 size={28} />
+        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '150px', height: '150px', background: 'rgba(201,168,76,0.08)', borderRadius: '50%' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', position: 'relative', zIndex: 1 }}>
+          <div style={{ width: '48px', height: '48px', background: 'rgba(255,255,255,0.1)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gold)', border: '1px solid rgba(255,255,255,0.2)' }}>
+            <BarChart2 size={24} />
           </div>
           <div>
-            <h2 style={{ fontSize: '1.23rem', fontWeight: 800, color: 'white', letterSpacing: '-0.5px', margin: 0 }}>Market Screener</h2>
-            <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.79rem', marginTop: '4px', margin: 0 }}>Nigerian Exchange (NGX) · AAOIFI Shariah Standard No. 21 Screened</p>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'white', letterSpacing: '-0.5px', margin: 0 }}>Market Screener</h2>
+            <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.75rem', marginTop: '2px', margin: 0 }}>Nigerian Exchange (NGX) · AAOIFI Shariah Standard No. 21</p>
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', position: 'relative', zIndex: 1 }}>
@@ -299,23 +299,23 @@ export default function MarketTab() {
 
       {/* ── Filter Card ─────────────────────────────────────── */}
       <div style={{
-        background: 'var(--bg)', padding: '24px',
-        borderRadius: '24px 24px 0 0', border: '1px solid var(--border)', borderBottom: 'none',
-        display: 'flex', flexDirection: 'column', gap: '16px'
+        background: 'var(--bg)', padding: '12px',
+        borderRadius: '16px 16px 0 0', border: '1px solid var(--border)', borderBottom: 'none',
+        display: 'flex', flexDirection: 'column', gap: '10px'
       }}>
-        <div className="market-filter-row" style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+        <div className="market-filter-row" style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
           {/* Search */}
-          <div className="market-search-bar" style={{ position: 'relative', flex: '1 1 240px', maxWidth: '100%' }}>
-            <Search size={15} color="var(--text-light)" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+          <div className="market-search-bar" style={{ position: 'relative', flex: '1 1 200px', maxWidth: '100%' }}>
+            <Search size={14} color="var(--text-light)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Search by symbol or company name…"
+              placeholder="Search ticker or name…"
               style={{
-                width: '100%', paddingLeft: '38px', paddingRight: search ? '36px' : '14px',
-                paddingTop: '10px', paddingBottom: '10px',
-                borderRadius: '12px', border: '1px solid var(--border)',
-                background: 'var(--bg-section)', fontSize: '0.78rem',
+                width: '100%', paddingLeft: '32px', paddingRight: search ? '32px' : '12px',
+                paddingTop: '8px', paddingBottom: '8px',
+                borderRadius: '10px', border: '1px solid var(--border)',
+                background: 'var(--bg-section)', fontSize: '0.75rem',
                 color: 'var(--text-dark)', outline: 'none', fontFamily: 'inherit',
                 boxSizing: 'border-box', transition: 'border-color 0.2s',
               }}

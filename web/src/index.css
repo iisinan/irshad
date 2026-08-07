@@ -208,7 +208,7 @@ textarea,
 select {
   font-family: inherit;
   font-size: 0.84rem;
-  padding: 12px 16px;
+  padding: 10px 14px;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   background: var(--bg);
@@ -533,23 +533,23 @@ textarea::placeholder {
 .main-content {
   max-width: 1240px;
   margin: 0 auto;
-  padding: 0 40px;
+  padding: 0 24px;
 }
 
 .page-wrapper {
   max-width: 1240px;
   margin: 0 auto;
-  padding: 56px 40px;
+  padding: 32px 24px 60px;
 }
 
-.section { padding: 100px 0; }
+.section { padding: 60px 0; }
 .section-alt { background: var(--bg-section); }
 
 /* ===================================================
    LANDING PAGE — HERO
    =================================================== */
 .hero {
-  padding: 100px 40px 80px;
+  padding: 60px 24px 40px;
   max-width: 880px;
   margin: 0 auto;
   text-align: center;
@@ -628,7 +628,7 @@ textarea::placeholder {
 }
 
 .stat-item {
-  padding: 36px;
+  padding: 24px;
   text-align: center;
   border-right: 1px solid var(--border);
 }
@@ -665,7 +665,7 @@ textarea::placeholder {
 .feature-card {
   background: var(--bg);
   border-radius: var(--radius-xl);
-  padding: 40px 32px;
+  padding: 32px 24px;
   border: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
   position: relative;
@@ -753,7 +753,7 @@ textarea::placeholder {
 }
 
 .news-body { 
-  padding: 28px 24px; 
+  padding: 20px 20px; 
   flex: 1;
   display: flex;
   flex-direction: column;
