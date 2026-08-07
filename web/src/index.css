@@ -9,7 +9,7 @@
    Text Muted:#9B8D9D  (muted purple-grey)
    =================================================== */
 :root {
-  --bg:           rgba(255, 255, 255, 0.97);
+  --bg:           #FFFFFF;
   --bg-alt:       rgba(249, 246, 250, 0.88);
 
   /* Soft lavender mist background */
@@ -17,7 +17,7 @@
                   radial-gradient(at 100% 100%, rgba(190, 169, 193, 0.08) 0px, transparent 50%),
                   #F7F4F9;
 
-  --bg-section:   rgba(255, 255, 255, 0.82);
+  --bg-section:   rgba(255, 255, 255, 0.95);
 
   /* Primary: deep mauve-purple */
   --primary:      #76587A;
@@ -84,7 +84,7 @@
 }
 
 [data-theme="dark"] {
-  --bg:           rgba(30, 20, 32, 0.96);
+  --bg:           #1E1420;
   --bg-alt:       rgba(40, 28, 44, 0.88);
 
   /* Deep plum dark mesh */
@@ -92,7 +92,7 @@
                   radial-gradient(at 100% 100%, rgba(201, 149, 42, 0.08) 0px, transparent 50%),
                   #1A1020;
 
-  --bg-section:   rgba(40, 28, 44, 0.65);
+  --bg-section:   rgba(40, 28, 44, 0.90);
 
   /* In dark mode, secondary lavender takes primary role */
   --primary:      #BEA9C1;
