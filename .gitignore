@@ -22,3 +22,4 @@ dist/
 /public/storage
 /storage/*.key
 /rr
+backend/*.pdf

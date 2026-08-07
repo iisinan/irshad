@@ -172,6 +172,28 @@ Return ONLY a valid JSON object matching this schema exactly, with NO markdown f
         // Run compliance check
         $newStatus = $aaoifiService->evaluateCompliance($company, $financials);
         
+        // Auto-approve and apply if staged in review
+        $pendingReview = \App\Models\ComplianceReview::where('company_id', $company->id)->where('status', 'pending')->first();
+        if ($pendingReview) {
+            $pendingReview->update(['status' => 'approved', 'reviewed_at' => now()]);
+            $cleanReason = preg_replace('/^SCHOLAR REVIEW REQUIRED:\s*/i', '', $pendingReview->reason);
+            $company->update(['current_status' => $pendingReview->new_status]);
+            \App\Models\StockStatus::updateOrCreate(
+                ['company_id' => $company->id],
+                [
+                    'status' => $pendingReview->new_status,
+                    'reason' => $cleanReason,
+                    'verified_by_scholar' => false,
+                    'last_updated' => now()
+                ]
+            );
+            $aaoifiScreening = \App\Models\AaoifiScreening::where('company_id', $company->id)->latest()->first();
+            if ($aaoifiScreening) {
+                $aaoifiScreening->update(['final_status' => $pendingReview->new_status]);
+            }
+            $newStatus = $company->status()->first();
+        }
+        
         $this->info("====================================");
         $this->info("Final Status: " . strtoupper($newStatus->status));
         $this->info("Reason: " . $newStatus->reason);

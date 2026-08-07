@@ -1279,7 +1279,18 @@ textarea::placeholder {
    =================================================== */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: none; }
+}
+
+.route-fade-wrapper {
+  animation: routeFade 0.25s ease-out;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+@keyframes routeFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 @keyframes toastSlideIn {
   from { transform: translateX(120%); opacity: 0; }
@@ -3586,6 +3597,7 @@ img[src="/logo.svg"] {
   top: 0 !important;
   height: 100vh !important;
   flex-shrink: 0;
+  align-self: flex-start;
   z-index: 100 !important;
   transition: width 0.3s cubic-bezier(0.16,1,0.3,1);
 }
@@ -3738,7 +3750,7 @@ img[src="/logo.svg"] {
 
 /* ── Shared base: no horizontal page overflow ── */
 html, body {
-  overflow-x: hidden;
+  overflow-x: clip;
   -webkit-text-size-adjust: 100%;
 }
 

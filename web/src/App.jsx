@@ -63,7 +63,7 @@ const AnimatedRoutes = ({ children }) => {
   const location = useLocation();
   // Using location.pathname as a key triggers a re-render and animation on route change
   return (
-    <div key={location.pathname} className="animate-fade-in" style={{ animationDuration: '0.3s' }}>
+    <div key={location.pathname} className="route-fade-wrapper">
       <Routes location={location}>
         {children}
       </Routes>
