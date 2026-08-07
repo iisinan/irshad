@@ -135,7 +135,7 @@ class AaoifiComplianceService
             return $this->saveStatus(
                 $company,
                 'halal',
-                'Stock passes all screens. Status is Halal with an active dividend purification factor of '.round($purificationFactor * 100, 3).'%.'
+                'Stock passes all screens. Status is Halal with an active dividend purification factor of '.round($purificationFactor * 100, 2).'%.'
             );
         }
 
