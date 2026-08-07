@@ -200,7 +200,8 @@ const AaoifiScreening = () => {
   // Purification detection
   const hasPurification = finalStatus === 'halal' && !!report.stage1?.purification_required;
   const rawPurification = parseFloat(report.stage1?.haram_revenue_percent) || 0;
-  const purificationPercent = (Math.floor(rawPurification * 100) / 100).toFixed(2);
+  // Use standard rounding to match backend calculation (e.g., 2.57% instead of truncating to 2.56%)
+  const purificationPercent = rawPurification.toFixed(2);
 
   let statusColor = 'var(--text-muted)';
   let StatusIcon = HelpCircle;
