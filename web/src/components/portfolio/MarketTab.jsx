@@ -3,7 +3,7 @@ import { Search, TrendingUp, TrendingDown, Star, BarChart2, X, CheckCircle, Aler
 import { fetchNgxStocks, fetchWatchlist, addToWatchlist, removeFromWatchlist, fetchSectors } from '../../services/api';
 import CompanyLogo from '../CompanyLogo';
 import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Skeleton from '../ui/Skeleton';
 
 /* ─── Helpers ─────────────────────────────────────────────────────────────── */
@@ -147,14 +147,22 @@ const StockRow = React.memo(({ stock, idx, isWatched, onToggle }) => {
 
 /* ─── Main component ─────────────────────────────────────────────────────── */
 export default function MarketTab() {
+  const queryClient = useQueryClient();
+
+  // Force-refresh on every mount to bypass stale/empty cache from previous errors
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ['marketData'] });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const { data: stocks = [], isLoading, error, refetch } = useQuery({
     queryKey: ['marketData'],
     queryFn: async () => {
       const r = await fetchNgxStocks();
       return Array.isArray(r) ? r : (r?.data || []);
     },
-    staleTime: 10 * 1000,
-    refetchInterval: 30000,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: true,
     retry: 2,
     retryDelay: 2000,

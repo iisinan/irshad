@@ -1,0 +1,392 @@
+[
+    {
+        "company": "NASCON \u2014 NASCON Allied Industries Plc",
+        "debt_ratio": 0.012607964409400534,
+        "debt_verdict": "Ok",
+        "cash_ratio": 9.11811133356099,
+        "cash_verdict": "Ok",
+        "inc_ratio": 6.588444687589234,
+        "inc_verdict": "Not Ok",
+        "final_verdict": "FAIL"
+    },
+    {
+        "company": "DANGSUGAR \u2014 Dangote Sugar Refinery Plc",
+        "debt_ratio": 39.25497426155943,
+        "debt_verdict": "Not Ok",
+        "cash_ratio": 3.0510395650563122,
+        "cash_verdict": "Ok",
+        "inc_ratio": 0.7525389703041938,
+        "inc_verdict": "Ok",
+        "final_verdict": "FAIL"
+    },
+    {
+        "company": "NAHCO \u2014 Nigerian Aviation Handling Company Plc",
+        "debt_ratio": 1.3192721480033307,
+        "debt_verdict": "Ok",
+        "cash_ratio": 1.1969153904637775,
+        "cash_verdict": "Ok",
+        "inc_ratio": 1.8362865160762858,
+        "inc_verdict": "Ok",
+        "final_verdict": "PASS"
+    },
+    {
+        "company": "HBMNG \u2014 HBM Nigeria Plc",
+        "debt_ratio": 0.0,
+        "debt_verdict": "Ok",
+        "cash_ratio": 6.732951162708295,
+        "cash_verdict": "Ok",
+        "inc_ratio": 3.980992656068691,
+        "inc_verdict": "Ok",
+        "final_verdict": "PASS"
+    },
+    {
+        "company": "DANGCEM \u2014 Dangote Cement Plc",
+        "debt_ratio": 3.354422878607085,
+        "debt_verdict": "Ok",
+        "cash_ratio": 4.596977908877356,
+        "cash_verdict": "Ok",
+        "inc_ratio": 0.6462386412997647,
+        "inc_verdict": "Ok",
+        "final_verdict": "PASS"
+    },
+    {
+        "company": "MTNN \u2014 MTN Nigeria Communications Plc",
+        "debt_ratio": 2.2662926399631727,
+        "debt_verdict": "Ok",
+        "cash_ratio": 6.297773297264142,
+        "cash_verdict": "Ok",
+        "inc_ratio": 1.5635148463247026,
+        "inc_verdict": "Ok",
+        "final_verdict": "PASS"
+    },
+    {
+        "company": "CHAMS \u2014 Chams Holdco Plc",
+        "debt_ratio": 17.813789173789175,
+        "debt_verdict": "Ok",
+        "cash_ratio": 29.426714150047484,
+        "cash_verdict": "Ok",
+        "inc_ratio": 5.504137754688719,
+        "inc_verdict": "Not Ok",
+        "final_verdict": "FAIL"
+    },
+    {
+        "company": "MCNICHOLS \u2014 McNichols Consolidated Plc",
+        "debt_ratio": 0.0,
+        "debt_verdict": "Ok",
+        "cash_ratio": 6.550699219300865,
+        "cash_verdict": "Ok",
+        "inc_ratio": 1.0003392480009448,
+        "inc_verdict": "Ok",
+        "final_verdict": "PASS"
+    },
+    {
+        "company": "TIP \u2014 The Initiates Plc",
+        "debt_ratio": 0.0,
+        "debt_verdict": "Ok",
+        "cash_ratio": 10.517775474074075,
+        "cash_verdict": "Ok",
+        "inc_ratio": 1.6596493205342244,
+        "inc_verdict": "Ok",
+        "final_verdict": "PASS"
+    },
+    {
+        "company": "ARADEL \u2014 Aradel Holdings Plc",
+        "debt_ratio": 29.414533460065407,
+        "debt_verdict": "Ok",
+        "cash_ratio": 28.659510183618604,
+        "cash_verdict": "Ok",
+        "inc_ratio": 0.9502401887530671,
+        "inc_verdict": "Ok",
+        "final_verdict": "PASS"
+    },
+    {
+        "company": "CWG \u2014 CWG Plc",
+        "debt_ratio": 0.011854280550150103,
+        "debt_verdict": "Ok",
+        "cash_ratio": 14.66008934359355,
+        "cash_verdict": "Ok",
+        "inc_ratio": 0.0,
+        "inc_verdict": "Ok",
+        "final_verdict": "PASS"
+    },
+    {
+        "company": "NESTLE \u2014 Nestle Nigeria Plc",
+        "debt_ratio": 19.961544378396084,
+        "debt_verdict": "Ok",
+        "cash_ratio": 0.25187044691908195,
+        "cash_verdict": "Ok",
+        "inc_ratio": 0.17258142879901978,
+        "inc_verdict": "Ok",
+        "final_verdict": "PASS"
+    },
+    {
+        "company": "CAVERTON \u2014 Caverton Offshore Support Group Plc",
+        "debt_ratio": 460.0299628615408,
+        "debt_verdict": "Not Ok",
+        "cash_ratio": 14.668179929333553,
+        "cash_verdict": "Ok",
+        "inc_ratio": 0.11588762537577996,
+        "inc_verdict": "Ok",
+        "final_verdict": "FAIL"
+    },
+    {
+        "company": "UACN \u2014 UAC of Nigeria Plc",
+        "debt_ratio": 52.47822369355659,
+        "debt_verdict": "Not Ok",
+        "cash_ratio": 8.56167325997724,
+        "cash_verdict": "Ok",
+        "inc_ratio": 0.8766234838194779,
+        "inc_verdict": "Ok",
+        "final_verdict": "FAIL"
+    },
+    {
+        "company": "NEIMETH \u2014 Neimeth International Pharmaceuticals Plc",
+        "debt_ratio": 20.422840675718394,
+        "debt_verdict": "Ok",
+        "cash_ratio": 2.5986030825335042,
+        "cash_verdict": "Ok",
+        "inc_ratio": 2.069012750184999,
+        "inc_verdict": "Ok",
+        "final_verdict": "PASS"
+    },
+    {
+        "company": "TOTAL \u2014 TotalEnergies Marketing Nigeria Plc",
+        "debt_ratio": 33.99249830505011,
+        "debt_verdict": "Not Ok",
+        "cash_ratio": 17.766606680736118,
+        "cash_verdict": "Ok",
+        "inc_ratio": 0.20697392939317436,
+        "inc_verdict": "Ok",
+        "final_verdict": "FAIL"
+    },
+    {
+        "company": "SEPLAT \u2014 Seplat Energy Plc",
+        "debt_ratio": 16.275156915288044,
+        "debt_verdict": "Ok",
+        "cash_ratio": 11.483768015557477,
+        "cash_verdict": "Ok",
+        "inc_ratio": 0.3650015726280393,
+        "inc_verdict": "Ok",
+        "final_verdict": "PASS"
+    },
+    {
+        "company": "PRESCO \u2014 Presco Plc",
+        "debt_ratio": 4.454184371398184,
+        "debt_verdict": "Ok",
+        "cash_ratio": 4.839372147685645,
+        "cash_verdict": "Ok",
+        "inc_ratio": 4.536608297666029,
+        "inc_verdict": "Ok",
+        "final_verdict": "PASS"
+    },
+    {
+        "company": "BUAFOODS \u2014 BUA Foods Plc",
+        "debt_ratio": 2.0050608093716717,
+        "debt_verdict": "Ok",
+        "cash_ratio": 0.8846226482073126,
+        "cash_verdict": "Ok",
+        "inc_ratio": 0.06478598342015474,
+        "inc_verdict": "Ok",
+        "final_verdict": "PASS"
+    },
+    {
+        "company": "CADBURY \u2014 Cadbury Nigeria Plc",
+        "debt_ratio": 12.188034737670678,
+        "debt_verdict": "Ok",
+        "cash_ratio": 6.487484495509423,
+        "cash_verdict": "Ok",
+        "inc_ratio": 0.19370704071678754,
+        "inc_verdict": "Ok",
+        "final_verdict": "PASS"
+    },
+    {
+        "company": "CAP \u2014 Chemical and Allied Products Plc",
+        "debt_ratio": 0.0,
+        "debt_verdict": "Ok",
+        "cash_ratio": 9.369401090889452,
+        "cash_verdict": "Ok",
+        "inc_ratio": 3.436131749537337,
+        "inc_verdict": "Ok",
+        "final_verdict": "PASS"
+    },
+    {
+        "company": "MAYBAKER \u2014 May & Baker Nigeria Plc",
+        "debt_ratio": 4.214927520309835,
+        "debt_verdict": "Ok",
+        "cash_ratio": 11.94447646939131,
+        "cash_verdict": "Ok",
+        "inc_ratio": 2.505678444813836,
+        "inc_verdict": "Ok",
+        "final_verdict": "PASS"
+    },
+    {
+        "company": "MECURE \u2014 MeCure Industries Plc",
+        "debt_ratio": 17.430654373024236,
+        "debt_verdict": "Ok",
+        "cash_ratio": 1.9325371443624868,
+        "cash_verdict": "Ok",
+        "inc_ratio": 0.0,
+        "inc_verdict": "Ok",
+        "final_verdict": "PASS"
+    },
+    {
+        "company": "MEYER \u2014 Meyer Plc",
+        "debt_ratio": 0.02181170630719059,
+        "debt_verdict": "Ok",
+        "cash_ratio": 25.482689866119596,
+        "cash_verdict": "Ok",
+        "inc_ratio": 7.239020725211849,
+        "inc_verdict": "Not Ok",
+        "final_verdict": "FAIL"
+    },
+    {
+        "company": "MORISON \u2014 Morison Industries Plc",
+        "debt_ratio": 1.2819565902465926,
+        "debt_verdict": "Ok",
+        "cash_ratio": 1.0407449997676894,
+        "cash_verdict": "Ok",
+        "inc_ratio": 1.0927306956991287,
+        "inc_verdict": "Ok",
+        "final_verdict": "PASS"
+    },
+    {
+        "company": "OKOMU \u2014 The Okomu Oil Palm Company Plc",
+        "debt_ratio": 0.4512758926333616,
+        "debt_verdict": "Ok",
+        "cash_ratio": 1.582438467677661,
+        "cash_verdict": "Ok",
+        "inc_ratio": 0.49684266247274034,
+        "inc_verdict": "Ok",
+        "final_verdict": "PASS"
+    },
+    {
+        "company": "OANDO \u2014 Oando PLC",
+        "debt_ratio": 759.1827632910711,
+        "debt_verdict": "Not Ok",
+        "cash_ratio": 142.7714908927022,
+        "cash_verdict": "Not Ok",
+        "inc_ratio": 9.057365959924695,
+        "inc_verdict": "Not Ok",
+        "final_verdict": "FAIL"
+    },
+    {
+        "company": "BUACEMENT \u2014 BUA Cement Plc",
+        "debt_ratio": 6.197569774401854,
+        "debt_verdict": "Ok",
+        "cash_ratio": 2.8367356542344235,
+        "cash_verdict": "Ok",
+        "inc_ratio": 2.569557679445079,
+        "inc_verdict": "Ok",
+        "final_verdict": "PASS"
+    },
+    {
+        "company": "PZ \u2014 PZ Cussons Nigeria Plc",
+        "debt_ratio": 1.790322335169113,
+        "debt_verdict": "Ok",
+        "cash_ratio": 12.431200539919548,
+        "cash_verdict": "Ok",
+        "inc_ratio": 0.47011471723016945,
+        "inc_verdict": "Ok",
+        "final_verdict": "PASS"
+    },
+    {
+        "company": "SKYAVN \u2014 Skyway Aviation Handling Company Plc",
+        "debt_ratio": 1.402318814502711,
+        "debt_verdict": "Ok",
+        "cash_ratio": 1.6650588097772707,
+        "cash_verdict": "Ok",
+        "inc_ratio": 0.5818802730659114,
+        "inc_verdict": "Ok",
+        "final_verdict": "PASS"
+    },
+    {
+        "company": "VITAFOAM \u2014 Vitafoam Nigeria Plc",
+        "debt_ratio": 0.9362374952295107,
+        "debt_verdict": "Ok",
+        "cash_ratio": 5.8904179521268505,
+        "cash_verdict": "Ok",
+        "inc_ratio": 0.46894862214678634,
+        "inc_verdict": "Ok",
+        "final_verdict": "PASS"
+    },
+    {
+        "company": "BERGER \u2014 Berger Paints Nigeria Plc",
+        "debt_ratio": 0.3315570512407606,
+        "debt_verdict": "Ok",
+        "cash_ratio": 5.414608087856019,
+        "cash_verdict": "Ok",
+        "inc_ratio": 2.1269576388685354,
+        "inc_verdict": "Ok",
+        "final_verdict": "PASS"
+    },
+    {
+        "company": "UNILEVER \u2014 Unilever Nigeria Plc",
+        "debt_ratio": 0.2638116373623405,
+        "debt_verdict": "Ok",
+        "cash_ratio": 12.079156209635103,
+        "cash_verdict": "Ok",
+        "inc_ratio": 5.4311359377295085,
+        "inc_verdict": "Not Ok",
+        "final_verdict": "FAIL"
+    },
+    {
+        "company": "RTBRISCOE \u2014 R.T. Briscoe (Nigeria) PLC",
+        "debt_ratio": 158.70920490616072,
+        "debt_verdict": "Not Ok",
+        "cash_ratio": 2.860738980086862,
+        "cash_verdict": "Ok",
+        "inc_ratio": 0.004077989039926725,
+        "inc_verdict": "Ok",
+        "final_verdict": "FAIL"
+    },
+    {
+        "company": "SCOA \u2014 SCOA Nigeria PLC",
+        "debt_ratio": 57.77746978206339,
+        "debt_verdict": "Not Ok",
+        "cash_ratio": 3.475561149309694,
+        "cash_verdict": "Ok",
+        "inc_ratio": 5.476059895113552,
+        "inc_verdict": "Not Ok",
+        "final_verdict": "FAIL"
+    },
+    {
+        "company": "AIRTELAFRI \u2014 Airtel Africa Plc",
+        "debt_ratio": 14.082528076519296,
+        "debt_verdict": "Ok",
+        "cash_ratio": 5.554486472182404,
+        "cash_verdict": "Ok",
+        "inc_ratio": 0.4208908308614983,
+        "inc_verdict": "Ok",
+        "final_verdict": "PASS"
+    },
+    {
+        "company": "CONOIL \u2014 Conoil Plc",
+        "debt_ratio": 49.43836231639624,
+        "debt_verdict": "Not Ok",
+        "cash_ratio": 10.097109446804204,
+        "cash_verdict": "Ok",
+        "inc_ratio": 0.0,
+        "inc_verdict": "Ok",
+        "final_verdict": "FAIL"
+    },
+    {
+        "company": "ABCTRANS \u2014 ABC Transport Plc",
+        "debt_ratio": 7.433535961793851,
+        "debt_verdict": "Ok",
+        "cash_ratio": 9.61907153487269,
+        "cash_verdict": "Ok",
+        "inc_ratio": 0.28907041187664845,
+        "inc_verdict": "Ok",
+        "final_verdict": "PASS"
+    },
+    {
+        "company": "ACADEMY \u2014 Academy Press Plc",
+        "debt_ratio": 7.385122197026959,
+        "debt_verdict": "Ok",
+        "cash_ratio": 5.317863441672966,
+        "cash_verdict": "Ok",
+        "inc_ratio": 0.0,
+        "inc_verdict": "Ok",
+        "final_verdict": "PASS"
+    }
+]
