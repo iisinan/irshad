@@ -812,11 +812,11 @@ textarea::placeholder {
    MARKET PAGE — STOCK CARDS  (v2 premium)
    =================================================== */
 .stock-card {
-  background: var(--bg);
+  background: linear-gradient(145deg, var(--bg) 0%, var(--bg-alt) 100%);
   border-radius: 20px;
   padding: 0;
   border: 1px solid var(--border);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.02), 0 1px 3px rgba(0,0,0,0.02);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.02);
   transition: transform 0.25s cubic-bezier(0.16,1,0.3,1),
               box-shadow 0.25s cubic-bezier(0.16,1,0.3,1),
               border-color 0.25s ease;

@@ -60,7 +60,7 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
   return (
     <aside aria-label="Dashboard Navigation" className={`dashboard-sidebar-container ${mobileOpen ? 'open' : ''}`} style={{
       width: isCollapsed ? '80px' : '260px',
-      background: 'var(--bg-alt)',
+      background: 'var(--bg)',
       borderRight: '1px solid var(--border)',
       boxShadow: 'var(--shadow-lg)',
       display: 'flex',
@@ -118,13 +118,13 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
               border: 'none',
               display: 'none', 
               alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', color: 'var(--text-body)',
+              cursor: 'pointer', color: 'var(--text-dark)',
               flexShrink: 0,
               transition: 'all 0.2s ease'
             }}
             className="desktop-only-btn hover-bg-darker"
             onMouseEnter={e => { e.currentTarget.style.background = 'var(--primary-100)'; e.currentTarget.style.color = '#FFFFFF'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'var(--primary-50)'; e.currentTarget.style.color = 'var(--text-body)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'var(--primary-50)'; e.currentTarget.style.color = 'var(--text-dark)'; }}
           >
             <ChevronLeft size={16} />
           </button>
@@ -156,11 +156,11 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
               width: '40px', height: '40px', borderRadius: '12px',
               background: 'var(--primary-50)', border: 'none',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', color: 'var(--text-body)',
+              cursor: 'pointer', color: 'var(--text-dark)',
               transition: 'all 0.2s ease'
             }}
             onMouseEnter={e => { e.currentTarget.style.background = 'var(--primary-100)'; e.currentTarget.style.color = '#C9952A'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'var(--primary-50)'; e.currentTarget.style.color = 'var(--text-body)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'var(--primary-50)'; e.currentTarget.style.color = 'var(--text-dark)'; }}
           >
             <ChevronRight size={18} />
           </button>
@@ -175,7 +175,7 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
             return (
               <div key={i} style={{
                 fontSize: '0.65rem', fontWeight: 800, letterSpacing: '1.4px',
-                textTransform: 'uppercase', color: 'var(--text-body)',
+                textTransform: 'uppercase', color: 'var(--text-dark)', opacity: 0.6,
                 padding: '20px 12px 8px', fontFamily: 'var(--sans)'
               }}>
                 {item.section}
@@ -211,9 +211,9 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
                 background: active
                   ? 'rgba(201, 149, 42, 0.14)'
                   : 'transparent',
-                color: active ? '#C9952A' : 'var(--text-body)',
+                color: active ? '#C9952A' : 'var(--text-dark)',
                 textDecoration: 'none',
-                fontWeight: active ? 700 : 500,
+                fontWeight: active ? 800 : 600,
                 fontSize: '0.84rem',
                 fontFamily: 'var(--sans)',
                 transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)',
@@ -223,14 +223,14 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
               onMouseEnter={e => {
                 if (!active) {
                   e.currentTarget.style.background = 'var(--primary-50)';
-                  e.currentTarget.style.color = '#FFFFFF';
+                  e.currentTarget.style.color = 'var(--text-dark)';
                   if (isCollapsed) e.currentTarget.style.borderLeft = '3px solid rgba(201, 149, 42, 0.5)';
                 }
               }}
               onMouseLeave={e => {
                 if (!active) {
                   e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.color = 'var(--text-body)';
+                  e.currentTarget.style.color = 'var(--text-dark)';
                   if (isCollapsed) e.currentTarget.style.borderLeft = '3px solid transparent';
                 }
               }}
