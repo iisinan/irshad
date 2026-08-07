@@ -68,9 +68,9 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
   return (
     <aside aria-label="Dashboard Navigation" className={`dashboard-sidebar-container ${mobileOpen ? 'open' : ''}`} style={{
       width: isCollapsed ? '80px' : '260px',
-      background: '#4A3350',
-      borderRight: '1px solid rgba(255, 255, 255, 0.08)',
-      boxShadow: '4px 0 24px rgba(0, 0, 0, 0.25)',
+      background: 'var(--bg-alt)',
+      borderRight: '1px solid var(--border)',
+      boxShadow: 'var(--shadow-lg)',
       display: 'flex',
       flexDirection: 'column',
       transition: 'width 0.4s cubic-bezier(0.16,1,0.3,1), transform 0.4s cubic-bezier(0.16,1,0.3,1)',
@@ -82,7 +82,7 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
         display: 'flex',
         alignItems: 'center',
         justifyContent: isCollapsed ? 'center' : 'space-between',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+        borderBottom: '1px solid var(--border)',
         minHeight: '80px',
         flexShrink: 0,
       }}>
@@ -122,17 +122,17 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
             onClick={() => setCollapsed(true)}
             style={{
               width: '32px', height: '32px', borderRadius: '10px',
-              background: 'rgba(190, 169, 193, 0.08)', 
+              background: 'var(--primary-50)', 
               border: 'none',
               display: 'none', 
               alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', color: '#9B8D9D',
+              cursor: 'pointer', color: 'var(--text-muted)',
               flexShrink: 0,
               transition: 'all 0.2s ease'
             }}
             className="desktop-only-btn hover-bg-darker"
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)'; e.currentTarget.style.color = '#FFFFFF'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(190, 169, 193, 0.08)'; e.currentTarget.style.color = '#9B8D9D'; }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'var(--primary-100)'; e.currentTarget.style.color = '#FFFFFF'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'var(--primary-50)'; e.currentTarget.style.color = '#9B8D9D'; }}
           >
             <ChevronLeft size={16} />
           </button>
@@ -143,9 +143,9 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
           onClick={() => setMobileOpen(false)}
           style={{
             width: '32px', height: '32px', borderRadius: '10px',
-            background: 'rgba(190, 169, 193, 0.08)', border: 'none',
+            background: 'var(--primary-50)', border: 'none',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', color: '#FFFFFF',
+            cursor: 'pointer', color: 'var(--text-dark)',
             flexShrink: 0,
           }}
           className="mobile-only-btn"
@@ -156,19 +156,19 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
 
       {/* ── Expand button when collapsed ── */}
       {isCollapsed && (
-        <div style={{ padding: '16px 0', display: 'flex', justifyContent: 'center', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
+        <div style={{ padding: '16px 0', display: 'flex', justifyContent: 'center', borderBottom: '1px solid var(--border)' }}>
           <button
             onClick={() => setCollapsed(!collapsed)}
             aria-label="Expand sidebar"
             style={{
               width: '40px', height: '40px', borderRadius: '12px',
-              background: 'rgba(190, 169, 193, 0.08)', border: 'none',
+              background: 'var(--primary-50)', border: 'none',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', color: '#9B8D9D',
+              cursor: 'pointer', color: 'var(--text-muted)',
               transition: 'all 0.2s ease'
             }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)'; e.currentTarget.style.color = '#C9952A'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(190, 169, 193, 0.08)'; e.currentTarget.style.color = '#9B8D9D'; }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'var(--primary-100)'; e.currentTarget.style.color = '#C9952A'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'var(--primary-50)'; e.currentTarget.style.color = '#9B8D9D'; }}
           >
             <ChevronRight size={18} />
           </button>
@@ -183,7 +183,7 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
             return (
               <div key={index} style={{
                 fontSize: '0.65rem', fontWeight: 800, letterSpacing: '1.4px',
-                textTransform: 'uppercase', color: '#7A6B7E',
+                textTransform: 'uppercase', color: 'var(--text-muted)',
                 padding: '20px 12px 8px', fontFamily: 'var(--sans)'
               }}>
                 {item.section}
@@ -221,7 +221,7 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
               }}
               onMouseEnter={e => {
                 if (!active) {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                  e.currentTarget.style.background = 'var(--primary-50)';
                   e.currentTarget.style.color = '#FFFFFF';
                   if (isCollapsed) e.currentTarget.style.borderLeft = '3px solid rgba(201, 149, 42, 0.5)';
                 }
@@ -250,10 +250,10 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
 
       {/* ── User Profile Footer ── */}
       <div style={{
-        borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+        borderTop: '1px solid var(--border)',
         padding: isCollapsed ? '20px 0' : '20px',
         flexShrink: 0,
-        background: 'rgba(0, 0, 0, 0.25)',
+        background: 'transparent',
       }}>
         {!isCollapsed ? (
           <div>
@@ -262,8 +262,8 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
                 onClick={toggleTheme}
                 style={{
                   display: 'flex', alignItems: 'center', gap: '8px',
-                  background: 'rgba(190, 169, 193, 0.08)', 
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  background: 'var(--primary-50)', 
+                  border: '1px solid var(--border-strong)',
                   color: '#C9952A', fontSize: '0.72rem', fontWeight: 600,
                   padding: '10px 14px', borderRadius: '10px', cursor: 'pointer',
                   width: '100%', justifyContent: 'center',
@@ -271,13 +271,13 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
                   transition: 'all 0.2s'
                 }}
                 onMouseEnter={e => { e.currentTarget.style.background = 'rgba(201, 149, 42, 0.15)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(190, 169, 193, 0.08)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'var(--primary-50)'; e.currentTarget.style.transform = 'translateY(0)'; }}
               >
                 {isDark ? <Sun size={15} /> : <Moon size={15} />}
                 <span>{isDark ? 'Switch to Light' : 'Switch to Dark'}</span>
               </button>
             </div>
-            <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none', marginBottom: '14px', padding: '6px', borderRadius: '12px', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(190, 169, 193, 0.08)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+            <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none', marginBottom: '14px', padding: '6px', borderRadius: '12px', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--primary-50)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
               <div style={{
                 width: '42px', height: '42px', borderRadius: '50%',
                 background: 'var(--gold-grad)',
@@ -290,14 +290,14 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
               </div>
               <div style={{ overflow: 'hidden', flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#FFFFFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontFamily: 'var(--sans)' }}>
+                  <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-dark)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontFamily: 'var(--sans)' }}>
                     {user?.first_name || user?.name || 'User'}
                   </div>
                   {user?.role === 'admin' && (
                     <span style={{ fontSize: '0.6rem', fontWeight: 800, color: '#2A1A2E', background: '#C9952A', padding: '2px 6px', borderRadius: '4px', letterSpacing: '0.5px' }}>ADMIN</span>
                   )}
                 </div>
-                <div style={{ fontSize: '0.7rem', color: '#9B8D9D', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '2px' }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '2px' }}>
                   {user?.email || 'user@iirshad.com'}
                 </div>
               </div>
@@ -308,7 +308,7 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
                 display: 'flex', alignItems: 'center', gap: '8px',
                 width: '100%', padding: '10px', borderRadius: '10px',
                 background: 'none', border: 'none',
-                color: '#9B8D9D', fontSize: '0.75rem', fontWeight: 600,
+                color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600,
                 cursor: 'pointer', transition: 'all 0.2s', justifyContent: 'center'
               }}
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.12)'; e.currentTarget.style.color = '#EF4444'; }}
@@ -324,8 +324,8 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
                 title={isDark ? "Light Mode" : "Dark Mode"}
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: 'rgba(190, 169, 193, 0.08)', 
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  background: 'var(--primary-50)', 
+                  border: '1px solid var(--border-strong)',
                   color: '#C9952A', width: '42px', height: '42px',
                   borderRadius: '12px', cursor: 'pointer',
                   boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
@@ -352,7 +352,7 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
                 width: '42px', height: '42px', borderRadius: '12px',
                 background: 'none', border: 'none',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#9B8D9D', cursor: 'pointer',
+                color: 'var(--text-muted)', cursor: 'pointer',
               }}
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.12)'; e.currentTarget.style.color = '#EF4444'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#9B8D9D'; }}
