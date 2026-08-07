@@ -17,10 +17,10 @@ done
 # Run migrations
 php artisan migrate --force
 
-# Cache configuration and routes
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
+# Clear configuration and route caches
+php artisan config:clear
+php artisan route:clear
+php artisan view:clear
 
 # Export default PORT if not set
 export PORT=${PORT:-8080}
