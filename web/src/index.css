@@ -4,64 +4,62 @@
    IRSHAD — Modern Premium Color Palette
    =================================================== */
 :root {
-  /* Core Palette - Vibrant Light Theme */
-  --bg:           rgba(255, 255, 255, 0.85); /* Glassmorphism transparency */
-  --bg-alt:       rgba(250, 250, 250, 0.6); 
+  /* Core Palette - Midnight Onyx & Sovereign 24K Gold Theme */
+  --bg:           rgba(255, 255, 255, 0.96); 
+  --bg-alt:       rgba(246, 248, 250, 0.85); 
   
-  /* Stunning Colorful Mesh Background */
-  --body-bg:      radial-gradient(at 0% 0%, rgba(212, 175, 55, 0.15) 0px, transparent 50%),
-                  radial-gradient(at 100% 0%, rgba(0, 118, 108, 0.12) 0px, transparent 50%),
-                  radial-gradient(at 100% 100%, rgba(212, 175, 55, 0.12) 0px, transparent 50%),
-                  radial-gradient(at 0% 100%, rgba(0, 118, 108, 0.15) 0px, transparent 50%),
-                  #F7F9FA;
+  /* Executive Alabaster Slate Canvas with subtle 24K gold ambiance */
+  --body-bg:      radial-gradient(at 0% 0%, rgba(243, 198, 81, 0.05) 0px, transparent 50%),
+                  radial-gradient(at 100% 100%, rgba(11, 15, 23, 0.02) 0px, transparent 50%),
+                  #F6F8FA;
 
-  --bg-section:   rgba(255, 255, 255, 0.4); 
+  --bg-section:   rgba(255, 255, 255, 0.8); 
 
-  --primary:      #006D64; /* Vibrant deep emerald/teal */
-  --primary-hover:#00554E;
-  --primary-50:   rgba(0, 109, 100, 0.08);
-  --primary-100:  rgba(0, 109, 100, 0.15);
+  --primary:      #0B0F17; /* Executive Midnight Noir */
+  --primary-hover:#1E293B;
+  --primary-50:   rgba(11, 15, 23, 0.05);
+  --primary-100:  rgba(11, 15, 23, 0.1);
   
-  --accent:       #D4A017; /* Richer, warmer gold */
-  --accent-soft:  rgba(212, 160, 23, 0.1);
+  --accent:       #F3C651; /* Sovereign 24K Gold */
+  --accent-soft:  rgba(243, 198, 81, 0.12);
   
-  --gold:         #D4A017;
-  --gold-50:      rgba(212, 160, 23, 0.1);
-  --gold-100:     rgba(212, 160, 23, 0.18);
-  --gold-border:  rgba(212, 160, 23, 0.35);
-  --gold-grad:    linear-gradient(135deg, #F3DE8A 0%, #D4A017 100%);
+  --gold:         #F3C651;
+  --gold-50:      rgba(243, 198, 81, 0.08);
+  --gold-100:     rgba(243, 198, 81, 0.16);
+  --gold-border:  rgba(243, 198, 81, 0.35);
+  --gold-grad:    linear-gradient(135deg, #FDE68A 0%, #F3C651 50%, #D97706 100%);
 
-  --text-dark:    #09131C;
-  --text-body:    #2C3E50;
-  --text-muted:   #5C7080;
-  --text-light:   #8A9BA8;
+  --text-dark:    #0B0F17;
+  --text-body:    #334155;
+  --text-muted:   #64748B;
+  --text-light:   #94A3B8;
 
-  /* FinTech Tinted Borders */
-  --border:       rgba(0, 109, 100, 0.12);
-  --border-strong:rgba(0, 109, 100, 0.22);
+  /* Executive Borders */
+  --border:       rgba(15, 23, 42, 0.08);
+  --border-strong:rgba(15, 23, 42, 0.16);
 
   /* Status */
   --halal:        #059669;
-  --halal-bg:     rgba(5, 150, 105, 0.12);
+  --halal-bg:     rgba(5, 150, 105, 0.1);
   --halal-border: rgba(5, 150, 105, 0.25);
 
   --non-halal:    #DC2626;
-  --non-halal-bg: rgba(220, 38, 38, 0.12);
+  --non-halal-bg: rgba(220, 38, 38, 0.1);
   --non-halal-border: rgba(220, 38, 38, 0.25);
 
   --doubtful:     #D97706;
-  --doubtful-bg:  rgba(217, 119, 6, 0.12);
+  --doubtful-bg:  rgba(217, 119, 6, 0.1);
   --doubtful-border: rgba(217, 119, 6, 0.25);
 
   --review:       #2563EB;
-  --review-bg:    rgba(37, 99, 235, 0.12);
+  --review-bg:    rgba(37, 99, 235, 0.1);
   --review-border:rgba(37, 99, 235, 0.25);
   
-  /* Modern FinTech Shadows */
-  --shadow-sm: 0 4px 16px rgba(0, 109, 100, 0.05);
-  --shadow-md: 0 12px 32px rgba(0, 109, 100, 0.08);
-  --shadow-lg: 0 24px 64px rgba(0, 109, 100, 0.12);
-  --shadow-green: 0 8px 32px rgba(0, 109, 100, 0.18);
+  /* Modern Private Wealth Shadows */
+  --shadow-sm: 0 4px 16px rgba(11, 15, 23, 0.04);
+  --shadow-md: 0 12px 32px rgba(11, 15, 23, 0.07);
+  --shadow-lg: 0 24px 64px rgba(11, 15, 23, 0.1);
+  --shadow-gold: 0 8px 32px rgba(243, 198, 81, 0.2);
 
   --radius-sm:  8px;
   --radius-md:  12px;
@@ -75,38 +73,36 @@
 }
 
 [data-theme="dark"] {
-  --bg:           rgba(8, 16, 20, 0.85); /* Deep space transparent background */
-  --bg-alt:       rgba(12, 24, 28, 0.6);
+  --bg:           rgba(11, 15, 23, 0.95); /* Deep midnight noir */
+  --bg-alt:       rgba(15, 23, 36, 0.85);
   
   /* Rich, immersive dark mode mesh gradient */
-  --body-bg:      radial-gradient(at 0% 0%, rgba(45, 212, 191, 0.2) 0px, transparent 50%),
-                  radial-gradient(at 100% 0%, rgba(230, 200, 117, 0.15) 0px, transparent 50%),
-                  radial-gradient(at 100% 100%, rgba(45, 212, 191, 0.15) 0px, transparent 50%),
-                  radial-gradient(at 0% 100%, rgba(230, 200, 117, 0.2) 0px, transparent 50%),
-                  #050B0E; /* Pitch black-teal base */
+  --body-bg:      radial-gradient(at 0% 0%, rgba(243, 198, 81, 0.08) 0px, transparent 50%),
+                  radial-gradient(at 100% 100%, rgba(30, 41, 59, 0.3) 0px, transparent 50%),
+                  #080C14; /* Pure midnight base */
                   
-  --bg-section:   rgba(14, 30, 34, 0.5);
+  --bg-section:   rgba(15, 23, 36, 0.6);
 
-  --primary:      #2DD4BF; /* Neon bright teal */
-  --primary-hover:#14B8A6;
-  --primary-50:   rgba(45, 212, 191, 0.15);
-  --primary-100:  rgba(45, 212, 191, 0.25);
+  --primary:      #F3C651; /* Sovereign Gold primary accent in dark mode */
+  --primary-hover:#FDE68A;
+  --primary-50:   rgba(243, 198, 81, 0.12);
+  --primary-100:  rgba(243, 198, 81, 0.2);
 
-  --accent:       #E6C875;
-  --accent-soft:  rgba(230, 200, 117, 0.15);
+  --accent:       #F3C651;
+  --accent-soft:  rgba(243, 198, 81, 0.15);
 
-  --gold:         #E6C875;
-  --gold-50:      rgba(230, 200, 117, 0.15);
-  --gold-100:     rgba(230, 200, 117, 0.25);
-  --gold-border:  rgba(230, 200, 117, 0.4);
+  --gold:         #F3C651;
+  --gold-50:      rgba(243, 198, 81, 0.15);
+  --gold-100:     rgba(243, 198, 81, 0.25);
+  --gold-border:  rgba(243, 198, 81, 0.4);
 
   --text-dark:    #F8FAFC;
   --text-body:    #E2E8F0;
   --text-muted:   #94A3B8;
   --text-light:   #64748B;
 
-  --border:       rgba(255, 255, 255, 0.1);
-  --border-strong:rgba(255, 255, 255, 0.18);
+  --border:       rgba(255, 255, 255, 0.08);
+  --border-strong:rgba(255, 255, 255, 0.16);
 
   --halal:        #34D399;
   --halal-bg:     rgba(52, 211, 153, 0.15);
@@ -446,7 +442,7 @@ textarea::placeholder {
 
 .btn-secondary:hover {
   background: var(--primary-50);
-  box-shadow: 0 4px 16px rgba(15, 82, 87, 0.1);
+  box-shadow: 0 4px 16px rgba(243, 198, 81, 0.15);
   transform: translateY(-2px);
 }
 
@@ -1324,8 +1320,8 @@ textarea::placeholder {
   background: var(--bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 0 8px 32px rgba(15, 82, 87, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
 .input-with-icon {
@@ -3223,7 +3219,7 @@ img[src="/logo.svg"] {
 .onboarding-search-box input:focus {
   border-color: var(--primary);
   background: var(--bg);
-  box-shadow: 0 0 0 4px rgba(15, 82, 87, 0.1);
+  box-shadow: 0 0 0 4px rgba(243, 198, 81, 0.15);
 }
 
 .onboarding-results {
@@ -3311,7 +3307,7 @@ img[src="/logo.svg"] {
 
 .alert-option.selected {
   border-color: var(--primary);
-  background: rgba(15, 82, 87, 0.03);
+  background: rgba(243, 198, 81, 0.08);
 }
 
 .alert-icon-box {
@@ -3448,7 +3444,7 @@ img[src="/logo.svg"] {
 }
 
 .stock-chip:hover {
-  background: #0C4347;
+  background: var(--primary-hover);
   transform: scale(0.95);
 }
 
@@ -3458,8 +3454,8 @@ img[src="/logo.svg"] {
 }
 
 .onboarding-result-item.selected {
-  background: rgba(15, 82, 87, 0.05);
-  border-color: rgba(15, 82, 87, 0.2);
+  background: rgba(243, 198, 81, 0.08);
+  border-color: rgba(243, 198, 81, 0.25);
 }
 
 .result-check {

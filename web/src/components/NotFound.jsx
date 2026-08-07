@@ -21,14 +21,14 @@ const NotFound = () => {
         padding: '40px',
         borderRadius: '16px',
         maxWidth: '480px',
-        boxShadow: '0 4px 25px rgba(15, 82, 87, 0.05)',
-        border: '1px solid #E2E8F0'
+        boxShadow: '0 4px 25px rgba(0, 0, 0, 0.08)',
+        border: '1px solid var(--border)'
       }}>
-        <h1 style={{ fontSize: '3.52rem', fontWeight: 800, color: '#0F5257', margin: '0 0 8px 0', lineHeight: 1 }}>
+        <h1 style={{ fontSize: '3.52rem', fontWeight: 800, color: 'var(--primary)', margin: '0 0 8px 0', lineHeight: 1 }}>
           404
         </h1>
-        <h2 style={{ fontSize: '1.32rem', color: '#1E293B', margin: '0 0 16px 0' }}>Page Not Found</h2>
-        <p style={{ color: '#64748B', marginBottom: '32px', lineHeight: 1.6 }}>
+        <h2 style={{ fontSize: '1.32rem', color: 'var(--text-dark)', margin: '0 0 16px 0' }}>Page Not Found</h2>
+        <p style={{ color: 'var(--text-muted)', marginBottom: '32px', lineHeight: 1.6 }}>
           The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.
         </p>
         

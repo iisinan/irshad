@@ -515,7 +515,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
                   <p style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '20px' }}>Select an Institution</p>
                   <div className="broker-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                     {['Meristem', 'Stanbic IBTC', 'CSCS', 'Risevest'].map((broker) => (
-                      <div key={broker} onClick={() => setBrokerName(broker)} className="broker-card" style={{ padding: '24px', borderRadius: '16px', border: brokerName === broker ? '2px solid var(--primary)' : '2px solid var(--border)', background: brokerName === broker ? 'var(--primary-50)' : 'var(--bg)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', transition: 'all 0.2s', boxShadow: brokerName === broker ? '0 8px 24px rgba(15, 82, 87, 0.1)' : 'none' }}>
+                      <div key={broker} onClick={() => setBrokerName(broker)} className="broker-card" style={{ padding: '24px', borderRadius: '16px', border: brokerName === broker ? '2px solid var(--primary)' : '2px solid var(--border)', background: brokerName === broker ? 'var(--primary-50)' : 'var(--bg)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', transition: 'all 0.2s', boxShadow: brokerName === broker ? '0 8px 24px rgba(243, 198, 81, 0.15)' : 'none' }}>
                         <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: brokerName === broker ? 'var(--bg)' : 'var(--bg-section)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.23rem', fontWeight: 800, color: 'var(--text-dark)' }}>{broker.charAt(0)}</div>
                         <span style={{ fontSize: '0.84rem', fontWeight: 800, color: 'var(--text-dark)', textAlign: 'center' }}>{broker}</span>
                       </div>
@@ -523,8 +523,8 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
                   </div>
                 </div>
                 <div className="modal-footer" style={{ padding: '24px 32px', borderTop: '1px solid var(--border)', background: 'var(--bg)' }}>
-                  <button type="button" onClick={handleLinkBroker} disabled={linking || !brokerName} style={{ width: '100%', padding: '16px', borderRadius: '16px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.88rem', cursor: (linking || !brokerName) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 8px 24px rgba(15, 82, 87, 0.25)', opacity: (linking || !brokerName) ? 0.7 : 1, transition: 'all 0.2s' }}>
-                    {linking ? <div className="spinner" style={{ width: '20px', height: '20px', borderTopColor: 'white' }} /> : 'Continue'}
+                  <button type="button" onClick={handleLinkBroker} disabled={linking || !brokerName} style={{ width: '100%', padding: '16px', borderRadius: '16px', background: 'var(--primary)', border: 'none', color: '#0B0F17', fontWeight: 800, fontSize: '0.88rem', cursor: (linking || !brokerName) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 8px 24px rgba(243, 198, 81, 0.25)', opacity: (linking || !brokerName) ? 0.7 : 1, transition: 'all 0.2s' }}>
+                    {linking ? <div className="spinner" style={{ width: '20px', height: '20px', borderTopColor: '#0B0F17' }} /> : 'Continue'}
                   </button>
                 </div>
               </div>

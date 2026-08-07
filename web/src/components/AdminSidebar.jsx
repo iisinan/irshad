@@ -68,11 +68,9 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
   return (
     <aside aria-label="Dashboard Navigation" className={`dashboard-sidebar-container ${mobileOpen ? 'open' : ''}`} style={{
       width: isCollapsed ? '80px' : '260px',
-      background: isDark ? 'rgba(6, 18, 20, 0.65)' : 'rgba(255, 255, 255, 0.65)',
-      backdropFilter: 'blur(24px)',
-      WebkitBackdropFilter: 'blur(24px)',
-      borderRight: isDark ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(15, 82, 87, 0.05)',
-      boxShadow: '1px 0 30px rgba(0, 0, 0, 0.03)',
+      background: '#0B0F17',
+      borderRight: '1px solid rgba(255, 255, 255, 0.08)',
+      boxShadow: '4px 0 24px rgba(0, 0, 0, 0.25)',
       display: 'flex',
       flexDirection: 'column',
       transition: 'width 0.4s cubic-bezier(0.16,1,0.3,1), transform 0.4s cubic-bezier(0.16,1,0.3,1)',
@@ -84,7 +82,7 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
         display: 'flex',
         alignItems: 'center',
         justifyContent: isCollapsed ? 'center' : 'space-between',
-        borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'}`,
+        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
         minHeight: '80px',
         flexShrink: 0,
       }}>
@@ -94,11 +92,18 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
               width: '40px', height: '40px', borderRadius: '12px',
               background: 'var(--gold-grad)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontWeight: 900, fontSize: '0.85rem', color: '#fff',
+              fontWeight: 900, fontSize: '0.95rem', color: '#0B0F17',
               flexShrink: 0,
-              boxShadow: '0 4px 12px rgba(212, 175, 55, 0.3)'
+              boxShadow: '0 4px 14px rgba(243, 198, 81, 0.35)'
             }}>إ</div>
-            <span style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--text-dark)', letterSpacing: '-0.3px', fontFamily: 'var(--sans)' }}>
+            <span style={{ 
+              fontWeight: 800, 
+              fontSize: '1.25rem', 
+              color: '#F3C651', 
+              letterSpacing: '-0.2px', 
+              fontFamily: 'var(--serif), var(--sans)',
+              textShadow: '0 2px 10px rgba(243, 198, 81, 0.2)'
+            }}>
               Irshad
             </span>
           </div>
@@ -108,8 +113,8 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
             width: '40px', height: '40px', borderRadius: '12px',
             background: 'var(--gold-grad)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: 900, fontSize: '0.85rem', color: '#fff',
-            boxShadow: '0 4px 12px rgba(212, 175, 55, 0.3)'
+            fontWeight: 900, fontSize: '0.95rem', color: '#0B0F17',
+            boxShadow: '0 4px 14px rgba(243, 198, 81, 0.35)'
           }}>إ</div>
         )}
         {!isCollapsed && (
@@ -117,17 +122,17 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
             onClick={() => setCollapsed(true)}
             style={{
               width: '32px', height: '32px', borderRadius: '10px',
-              background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', 
+              background: 'rgba(255, 255, 255, 0.06)', 
               border: 'none',
               display: 'none', 
               alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', color: 'var(--text-muted)',
+              cursor: 'pointer', color: '#94A3B8',
               flexShrink: 0,
               transition: 'all 0.2s ease'
             }}
             className="desktop-only-btn hover-bg-darker"
-            onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)'}
-            onMouseLeave={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)'}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)'; e.currentTarget.style.color = '#FFFFFF'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)'; e.currentTarget.style.color = '#94A3B8'; }}
           >
             <ChevronLeft size={16} />
           </button>
@@ -138,9 +143,9 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
           onClick={() => setMobileOpen(false)}
           style={{
             width: '32px', height: '32px', borderRadius: '10px',
-            background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', border: 'none',
+            background: 'rgba(255, 255, 255, 0.06)', border: 'none',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', color: 'var(--text-dark)',
+            cursor: 'pointer', color: '#FFFFFF',
             flexShrink: 0,
           }}
           className="mobile-only-btn"
@@ -151,19 +156,19 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
 
       {/* ── Expand button when collapsed ── */}
       {isCollapsed && (
-        <div style={{ padding: '16px 0', display: 'flex', justifyContent: 'center', borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'}` }}>
+        <div style={{ padding: '16px 0', display: 'flex', justifyContent: 'center', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
           <button
             onClick={() => setCollapsed(!collapsed)}
             aria-label="Expand sidebar"
             style={{
               width: '40px', height: '40px', borderRadius: '12px',
-              background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', border: 'none',
+              background: 'rgba(255, 255, 255, 0.06)', border: 'none',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', color: 'var(--text-muted)',
+              cursor: 'pointer', color: '#94A3B8',
               transition: 'all 0.2s ease'
             }}
-            onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)'}
-            onMouseLeave={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)'}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)'; e.currentTarget.style.color = '#F3C651'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)'; e.currentTarget.style.color = '#94A3B8'; }}
           >
             <ChevronRight size={18} />
           </button>
@@ -177,8 +182,8 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
             if (isCollapsed) return null;
             return (
               <div key={index} style={{
-                fontSize: '0.65rem', fontWeight: 800, letterSpacing: '1.2px',
-                textTransform: 'uppercase', color: 'var(--text-light)',
+                fontSize: '0.65rem', fontWeight: 800, letterSpacing: '1.4px',
+                textTransform: 'uppercase', color: '#64748B',
                 padding: '20px 12px 8px', fontFamily: 'var(--sans)'
               }}>
                 {item.section}
@@ -200,42 +205,42 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
                 gap: '14px',
                 padding: isCollapsed ? '12px 0' : '12px 16px',
                 marginBottom: '6px',
-                borderRadius: isCollapsed ? 0 : '14px',
+                borderRadius: isCollapsed ? 0 : '12px',
                 justifyContent: isCollapsed ? 'center' : 'flex-start',
                 background: active
-                  ? (isDark ? 'rgba(45, 212, 191, 0.15)' : 'var(--primary)')
+                  ? 'rgba(243, 198, 81, 0.14)'
                   : 'transparent',
-                color: active ? (isDark ? 'var(--primary)' : '#fff') : 'var(--text-muted)',
+                color: active ? '#F3C651' : '#94A3B8',
                 textDecoration: 'none',
                 fontWeight: active ? 700 : 500,
-                fontSize: '0.82rem',
+                fontSize: '0.84rem',
                 fontFamily: 'var(--sans)',
                 transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)',
-                borderLeft: active && isCollapsed ? `3px solid var(--primary)` : '3px solid transparent',
-                boxShadow: active && !isCollapsed && !isDark ? '0 8px 24px rgba(15, 82, 87, 0.25)' : 'none'
+                borderLeft: active ? '3px solid #F3C651' : '3px solid transparent',
+                boxShadow: active && !isCollapsed ? '0 4px 20px rgba(243, 198, 81, 0.15)' : 'none'
               }}
               onMouseEnter={e => {
                 if (!active) {
-                  e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)';
-                  e.currentTarget.style.color = 'var(--text-dark)';
-                  if(isCollapsed) e.currentTarget.style.borderLeft = '3px solid var(--text-muted)';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                  e.currentTarget.style.color = '#FFFFFF';
+                  if (isCollapsed) e.currentTarget.style.borderLeft = '3px solid rgba(243, 198, 81, 0.5)';
                 }
               }}
               onMouseLeave={e => {
                 if (!active) {
                   e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.color = 'var(--text-muted)';
-                  if(isCollapsed) e.currentTarget.style.borderLeft = '3px solid transparent';
+                  e.currentTarget.style.color = '#94A3B8';
+                  if (isCollapsed) e.currentTarget.style.borderLeft = '3px solid transparent';
                 }
               }}
             >
-              <Icon size={isCollapsed ? 22 : 18} style={{ flexShrink: 0, opacity: active ? 1 : 0.8 }} />
+              <Icon size={isCollapsed ? 22 : 18} style={{ flexShrink: 0, opacity: active ? 1 : 0.8, color: active ? '#F3C651' : 'currentColor' }} />
               {!isCollapsed && <span>{item.label}</span>}
-              {!isCollapsed && active && isDark && (
+              {!isCollapsed && active && (
                 <div style={{
                   marginLeft: 'auto', width: '6px', height: '6px',
-                  borderRadius: '50%', background: 'var(--primary)',
-                  boxShadow: '0 0 10px var(--primary)'
+                  borderRadius: '50%', background: '#F3C651',
+                  boxShadow: '0 0 10px #F3C651'
                 }} />
               )}
             </Link>
@@ -245,10 +250,10 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
 
       {/* ── User Profile Footer ── */}
       <div style={{
-        borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'}`,
+        borderTop: '1px solid rgba(255, 255, 255, 0.08)',
         padding: isCollapsed ? '20px 0' : '20px',
         flexShrink: 0,
-        background: isDark ? 'rgba(0,0,0,0.1)' : 'rgba(0,0,0,0.01)',
+        background: 'rgba(0, 0, 0, 0.25)',
       }}>
         {!isCollapsed ? (
           <div>
@@ -257,42 +262,42 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
                 onClick={toggleTheme}
                 style={{
                   display: 'flex', alignItems: 'center', gap: '8px',
-                  background: isDark ? 'rgba(255,255,255,0.05)' : '#fff', 
-                  border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)'}`,
-                  color: 'var(--text-dark)', fontSize: '0.72rem', fontWeight: 600,
+                  background: 'rgba(255, 255, 255, 0.06)', 
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  color: '#F3C651', fontSize: '0.72rem', fontWeight: 600,
                   padding: '10px 14px', borderRadius: '10px', cursor: 'pointer',
                   width: '100%', justifyContent: 'center',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
                   transition: 'all 0.2s'
                 }}
-                onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
-                onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(243, 198, 81, 0.15)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)'; e.currentTarget.style.transform = 'translateY(0)'; }}
               >
                 {isDark ? <Sun size={15} /> : <Moon size={15} />}
                 <span>{isDark ? 'Switch to Light' : 'Switch to Dark'}</span>
               </button>
             </div>
-            <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none', marginBottom: '14px', padding: '6px', borderRadius: '12px', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+            <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none', marginBottom: '14px', padding: '6px', borderRadius: '12px', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
               <div style={{
                 width: '42px', height: '42px', borderRadius: '50%',
                 background: 'var(--gold-grad)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'white', fontWeight: 800, fontSize: '1rem',
+                color: '#0B0F17', fontWeight: 800, fontSize: '1rem',
                 flexShrink: 0,
-                boxShadow: '0 4px 12px rgba(212, 175, 55, 0.2)'
+                boxShadow: '0 4px 12px rgba(243, 198, 81, 0.3)'
               }}>
                 {(user?.first_name || user?.name || 'U').charAt(0).toUpperCase()}
               </div>
               <div style={{ overflow: 'hidden', flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-dark)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontFamily: 'var(--sans)' }}>
+                  <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#FFFFFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontFamily: 'var(--sans)' }}>
                     {user?.first_name || user?.name || 'User'}
                   </div>
                   {user?.role === 'admin' && (
-                    <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--primary)', background: 'var(--primary-50)', padding: '2px 6px', borderRadius: '4px', letterSpacing: '0.5px' }}>ADMIN</span>
+                    <span style={{ fontSize: '0.6rem', fontWeight: 800, color: '#0B0F17', background: '#F3C651', padding: '2px 6px', borderRadius: '4px', letterSpacing: '0.5px' }}>ADMIN</span>
                   )}
                 </div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '2px' }}>
+                <div style={{ fontSize: '0.7rem', color: '#94A3B8', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '2px' }}>
                   {user?.email || 'user@iirshad.com'}
                 </div>
               </div>
@@ -303,11 +308,11 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
                 display: 'flex', alignItems: 'center', gap: '8px',
                 width: '100%', padding: '10px', borderRadius: '10px',
                 background: 'none', border: 'none',
-                color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600,
+                color: '#94A3B8', fontSize: '0.75rem', fontWeight: 600,
                 cursor: 'pointer', transition: 'all 0.2s', justifyContent: 'center'
               }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'var(--non-halal-bg)'; e.currentTarget.style.color = 'var(--non-halal)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--text-muted)'; }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.12)'; e.currentTarget.style.color = '#EF4444'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#94A3B8'; }}
             >
               <LogOut size={16} /> Log Out
             </button>
@@ -319,11 +324,11 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
                 title={isDark ? "Light Mode" : "Dark Mode"}
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: isDark ? 'rgba(255,255,255,0.05)' : '#fff', 
-                  border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)'}`,
-                  color: 'var(--text-dark)', width: '42px', height: '42px',
+                  background: 'rgba(255, 255, 255, 0.06)', 
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  color: '#F3C651', width: '42px', height: '42px',
                   borderRadius: '12px', cursor: 'pointer',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
                 }}
               >
                 {isDark ? <Sun size={18} /> : <Moon size={18} />}
@@ -333,8 +338,8 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
                 width: '42px', height: '42px', borderRadius: '12px',
                 background: 'var(--gold-grad)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'white', fontWeight: 800, fontSize: '1rem',
-                boxShadow: '0 4px 12px rgba(212, 175, 55, 0.2)'
+                color: '#0B0F17', fontWeight: 800, fontSize: '1rem',
+                boxShadow: '0 4px 12px rgba(243, 198, 81, 0.3)'
               }}>
                 {(user?.first_name || user?.name || 'U').charAt(0).toUpperCase()}
               </div>
@@ -347,10 +352,10 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
                 width: '42px', height: '42px', borderRadius: '12px',
                 background: 'none', border: 'none',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'var(--text-muted)', cursor: 'pointer',
+                color: '#94A3B8', cursor: 'pointer',
               }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'var(--non-halal-bg)'; e.currentTarget.style.color = 'var(--non-halal)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--text-muted)'; }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.12)'; e.currentTarget.style.color = '#EF4444'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#94A3B8'; }}
             >
               <LogOut size={18} />
             </button>
