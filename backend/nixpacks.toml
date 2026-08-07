@@ -8,7 +8,7 @@ NIXPACKS_PHP_EXTENSIONS = 'pdo, pdo_pgsql, pgsql, redis, bcmath, mbstring, xml, 
 [phases.build]
 cmds = [
     'composer install --no-dev --optimize-autoloader --ignore-platform-reqs',
-    'php artisan config:cache',
-    'php artisan route:cache',
-    'php artisan view:cache'
+    'php artisan config:clear',
+    'php artisan route:clear',
+    'php artisan view:clear'
 ]
