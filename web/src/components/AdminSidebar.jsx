@@ -68,7 +68,7 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
   return (
     <aside aria-label="Dashboard Navigation" className={`dashboard-sidebar-container ${mobileOpen ? 'open' : ''}`} style={{
       width: isCollapsed ? '80px' : '260px',
-      background: '#2A1A2E',
+      background: '#4A3350',
       borderRight: '1px solid rgba(255, 255, 255, 0.08)',
       boxShadow: '4px 0 24px rgba(0, 0, 0, 0.25)',
       display: 'flex',
