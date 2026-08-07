@@ -40,11 +40,11 @@ const ShariahPage = () => (
         boxShadow: '0 20px 50px rgba(0,0,0,0.3)', border: '1px solid rgba(201, 149, 42, 0.2)'
       }}>
         {/* Decorative orbs */}
-        <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: '260px', height: '260px', background: 'rgba(243,198,81,0.08)', borderRadius: '50%' }} />
-        <div style={{ position: 'absolute', bottom: '-80px', left: '-40px', width: '200px', height: '200px', background: 'rgba(243,198,81,0.04)', borderRadius: '50%' }} />
+        <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: '260px', height: '260px', background: 'rgba(201, 149, 42, 0.08)', borderRadius: '50%' }} />
+        <div style={{ position: 'absolute', bottom: '-80px', left: '-40px', width: '200px', height: '200px', background: 'rgba(201, 149, 42, 0.04)', borderRadius: '50%' }} />
 
         <div style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(243,198,81,0.12)', border: '1px solid rgba(243,198,81,0.3)', padding: '6px 18px', borderRadius: '40px', marginBottom: '24px' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(201, 149, 42, 0.12)', border: '1px solid rgba(201, 149, 42, 0.3)', padding: '6px 18px', borderRadius: '40px', marginBottom: '24px' }}>
             <BookOpen size={14} color="var(--primary)" />
             <span style={{ fontSize: '0.69rem', fontWeight: 800, color: 'var(--primary)', letterSpacing: '1px', textTransform: 'uppercase' }}>Our Methodology</span>
           </div>
@@ -177,10 +177,10 @@ const ShariahPage = () => (
         border: '1px solid rgba(201, 149, 42, 0.2)',
         position: 'relative', overflow: 'hidden', marginBottom: '24px'
       }}>
-        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '180px', height: '180px', background: 'rgba(243,198,81,0.08)', borderRadius: '50%' }} />
+        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '180px', height: '180px', background: 'rgba(201, 149, 42, 0.08)', borderRadius: '50%' }} />
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px', position: 'relative', zIndex: 1 }}>
-          <div style={{ width: '52px', height: '52px', background: 'rgba(243,198,81,0.12)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: '1px solid rgba(243,198,81,0.35)' }}>
+          <div style={{ width: '52px', height: '52px', background: 'rgba(201, 149, 42, 0.12)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: '1px solid rgba(201, 149, 42, 0.35)' }}>
             <Sparkles size={26} color="var(--primary)" />
           </div>
           <div>

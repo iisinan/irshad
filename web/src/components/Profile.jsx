@@ -141,13 +141,13 @@ export default function Profile() {
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 20px 80px' }} className="animate-fade-in">
       {/* ── Hero Banner ── */}
       <div className="animate-slide-up stagger-1 profile-hero" style={{ background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, #3C2D3E 100%)', borderRadius: '28px', padding: '36px 40px', marginBottom: '28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', position: 'relative', overflow: 'hidden', boxShadow: '0 16px 40px rgba(0,0,0,0.3)', border: '1px solid rgba(201, 149, 42, 0.2)', gap: '20px' }}>
-        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', borderRadius: '50%', background: 'rgba(243,198,81,0.08)' }} />
+        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', borderRadius: '50%', background: 'rgba(201, 149, 42, 0.08)' }} />
         <div style={{ display: 'flex', alignItems: 'center', gap: '28px', zIndex: 1 }}>
-          <div style={{ width: '88px', height: '88px', borderRadius: '22px', background: 'rgba(243,198,81,0.12)', backdropFilter: 'blur(10px)', border: '2px solid rgba(243,198,81,0.35)', color: 'var(--primary)', fontSize: '1.76rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, letterSpacing: '-1px', boxShadow: '0 8px 32px rgba(0,0,0,0.2)', fontFamily: 'var(--serif)' }}>{initials}</div>
+          <div style={{ width: '88px', height: '88px', borderRadius: '22px', background: 'rgba(201, 149, 42, 0.12)', backdropFilter: 'blur(10px)', border: '2px solid rgba(201, 149, 42, 0.35)', color: 'var(--primary)', fontSize: '1.76rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, letterSpacing: '-1px', boxShadow: '0 8px 32px rgba(0,0,0,0.2)', fontFamily: 'var(--serif)' }}>{initials}</div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
               <h1 style={{ margin: 0, fontSize: '1.76rem', fontWeight: 800, color: 'white', letterSpacing: '-0.5px' }}>{displayName}</h1>
-              {user.premium && <span style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(243,198,81,0.15)', border: '1px solid rgba(243,198,81,0.4)', color: 'var(--primary)', padding: '4px 10px', borderRadius: '12px', fontSize: '0.66rem', fontWeight: 800 }}><Award size={13} /> PREMIUM</span>}
+              {user.premium && <span style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(201, 149, 42, 0.15)', border: '1px solid rgba(201, 149, 42, 0.4)', color: 'var(--primary)', padding: '4px 10px', borderRadius: '12px', fontSize: '0.66rem', fontWeight: 800 }}><Award size={13} /> PREMIUM</span>}
             </div>
             <p style={{ margin: '6px 0 16px', color: 'rgba(255,255,255,0.65)', fontSize: '0.84rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>{user.email} <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'rgba(255,255,255,0.3)' }} /> Member since '23</p>
             <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>

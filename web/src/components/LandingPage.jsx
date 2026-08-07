@@ -490,13 +490,13 @@ export default function LandingPage() {
         <Reveal delay={0.04}>
           <div style={{ position: 'relative', borderRadius: 26, overflow: 'hidden', background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, #3C2D3E 100%)', padding: 'clamp(44px,7vw,76px)', display: 'flex', flexWrap: 'wrap', gap: 40, alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 24px 60px rgba(0,0,0,0.35)', border: '1px solid rgba(201, 149, 42, 0.2)' }}>
             {/* Decorative blobs */}
-            <div style={{ position: 'absolute', right: -80, top: -80, width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(243,198,81,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', left: -60, bottom: -100, width: 280, height: 280, borderRadius: '50%', background: 'radial-gradient(circle, rgba(243,198,81,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', right: -80, top: -80, width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(201, 149, 42, 0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', left: -60, bottom: -100, width: 280, height: 280, borderRadius: '50%', background: 'radial-gradient(circle, rgba(201, 149, 42, 0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
             {/* Radial spotlight */}
             <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 60% 80% at 20% 50%, rgba(255,255,255,0.02) 0%, transparent 60%)', pointerEvents: 'none' }} />
 
             <div style={{ position: 'relative', maxWidth: 540 }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: '0.68rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--primary)', border: '1px solid rgba(243,198,81,0.3)', padding: '4px 13px', borderRadius: 20, marginBottom: 18, background: 'rgba(243,198,81,0.08)' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: '0.68rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--primary)', border: '1px solid rgba(201, 149, 42, 0.3)', padding: '4px 13px', borderRadius: 20, marginBottom: 18, background: 'rgba(201, 149, 42, 0.08)' }}>
                 <Shield size={11} />
                 AAOIFI Standard No. 21
               </div>

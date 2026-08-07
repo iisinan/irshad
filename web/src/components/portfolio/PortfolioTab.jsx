@@ -62,7 +62,7 @@ function EditHoldingModal({ holding, onClose, onSuccess }) {
   };
   return createPortal(
     <div className="animate-fade-in" style={{ position:'fixed', inset:0, background:'rgba(6, 9, 14, 0.65)', backdropFilter:'blur(12px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:100000, padding:'24px' }}>
-      <div style={{ background: 'var(--bg)', borderRadius:'28px', width:'100%', maxWidth:'500px', boxShadow:'0 32px 80px rgba(0,0,0,0.35), 0 0 0 1px rgba(243,198,81,0.15) inset', overflow:'hidden', animation:'slideUpFade 0.4s cubic-bezier(0.16,1,0.3,1)' }}>
+      <div style={{ background: 'var(--bg)', borderRadius:'28px', width:'100%', maxWidth:'500px', boxShadow:'0 32px 80px rgba(0,0,0,0.35), 0 0 0 1px rgba(201, 149, 42, 0.15) inset', overflow:'hidden', animation:'slideUpFade 0.4s cubic-bezier(0.16,1,0.3,1)' }}>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'24px 28px 16px', borderBottom:'1px solid rgba(0,0,0,0.04)' }}>
           <div>
             <div style={{ fontWeight:900, fontSize: '0.97rem', color:'var(--text-dark)', letterSpacing: '-0.3px' }}>Edit {holding.symbol}</div>
@@ -239,8 +239,8 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
 
       {/* ─── DASHBOARD HERO ─── */}
       <div className="stagger-1 hover-card" style={{ 
-        background: 'linear-gradient(135deg, rgba(243,198,81,0.04) 0%, rgba(198,146,32,0.02) 100%)', 
-        border: '1px solid rgba(243,198,81,0.15)',
+        background: 'linear-gradient(135deg, rgba(201, 149, 42, 0.04) 0%, rgba(198,146,32,0.02) 100%)', 
+        border: '1px solid rgba(201, 149, 42, 0.15)',
         borderRadius: '20px', 
         padding: '16px 20px',
         display: 'flex',
@@ -253,7 +253,7 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
         boxShadow: '0 4px 20px rgba(0,0,0,0.03)'
       }}>
         {/* Background Mesh */}
-        <div style={{ position: 'absolute', top: '-50%', left: '-20%', width: '100%', height: '200%', background: 'radial-gradient(ellipse at center, rgba(243,198,81,0.05) 0%, transparent 60%)', zIndex: 0, pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: '-50%', left: '-20%', width: '100%', height: '200%', background: 'radial-gradient(ellipse at center, rgba(201, 149, 42, 0.05) 0%, transparent 60%)', zIndex: 0, pointerEvents: 'none' }} />
         
         {/* Left: Value & Stats */}
         <div style={{ zIndex: 1, flex: 1, minWidth: '260px' }}>

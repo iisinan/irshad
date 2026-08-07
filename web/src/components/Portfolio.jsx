@@ -220,14 +220,14 @@ export default function Portfolio() {
             style={{
               display: 'flex', alignItems: 'center', gap: '8px',
               padding: '12px 22px', borderRadius: '14px',
-              background: 'var(--primary)', color: '#0B0F17', border: 'none',
+              background: 'var(--primary)', color: 'white', border: 'none',
               fontWeight: 800, fontSize: '0.79rem', cursor: 'pointer',
-              boxShadow: '0 8px 24px rgba(243,198,81,0.25)',
+              boxShadow: '0 8px 24px rgba(201, 149, 42, 0.25)',
               transition: 'transform 0.2s, box-shadow 0.2s',
               flexShrink: 0,
             }}
-            onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 14px 32px rgba(243,198,81,0.35)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='0 8px 24px rgba(243,198,81,0.25)'; }}
+            onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 14px 32px rgba(201, 149, 42, 0.35)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='0 8px 24px rgba(201, 149, 42, 0.25)'; }}
           >
             <Search size={15} style={{ display: 'none' }} /> <span style={{ fontSize: '0.97rem', lineHeight: 1 }}>+</span> Add Holding
           </button>

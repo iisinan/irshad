@@ -474,10 +474,10 @@ export default function ZakatTab({ data }) {
       
       {/* Hero Banner */}
       <div className="no-print zakat-hero" style={{ background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, #3C2D3E 100%)', borderRadius:'24px', padding:'32px 24px', boxShadow:'0 20px 40px rgba(0,0,0,0.3)', border:'1px solid rgba(201, 149, 42, 0.2)', marginBottom: '36px', display: 'flex', alignItems: 'center', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'radial-gradient(circle at 80% 0%, rgba(243,198,81,0.12) 0%, transparent 50%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(243,198,81,0.08)', borderRadius: '50%', filter: 'blur(30px)' }} />
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'radial-gradient(circle at 80% 0%, rgba(201, 149, 42, 0.12) 0%, transparent 50%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(201, 149, 42, 0.08)', borderRadius: '50%', filter: 'blur(30px)' }} />
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px', position: 'relative', zIndex: 1 }}>
-          <div style={{ width: '72px', height: '72px', background: 'rgba(243,198,81,0.12)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', border: '1px solid rgba(243,198,81,0.35)', backdropFilter: 'blur(12px)', boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}>
+          <div style={{ width: '72px', height: '72px', background: 'rgba(201, 149, 42, 0.12)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', border: '1px solid rgba(201, 149, 42, 0.35)', backdropFilter: 'blur(12px)', boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}>
             <Scale size={36} strokeWidth={1.5} />
           </div>
           <div>

@@ -51,9 +51,9 @@ export default function AlertsTab() {
       
       {/* Header */}
       <div style={{ background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, #3C2D3E 100%)', padding: '32px', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px', borderBottom: '1px solid rgba(201, 149, 42, 0.15)' }}>
-        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(243,198,81,0.08)', borderRadius: '50%' }} />
+        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(201, 149, 42, 0.08)', borderRadius: '50%' }} />
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', zIndex: 1 }}>
-          <div style={{ width: '56px', height: '56px', background: 'rgba(243,198,81,0.12)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', border: '1px solid rgba(243,198,81,0.35)' }}>
+          <div style={{ width: '56px', height: '56px', background: 'rgba(201, 149, 42, 0.12)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', border: '1px solid rgba(201, 149, 42, 0.35)' }}>
             <Bell size={28} />
           </div>
           <div>
@@ -62,7 +62,7 @@ export default function AlertsTab() {
           </div>
         </div>
         <div style={{ position: 'relative', zIndex: 1 }}>
-          <span style={{ color: 'var(--primary)', fontSize: '0.78rem', fontWeight: 800, background: 'rgba(243,198,81,0.12)', padding: '8px 16px', borderRadius: '12px', border: '1px solid rgba(243,198,81,0.3)', backdropFilter: 'blur(10px)' }}>
+          <span style={{ color: 'var(--primary)', fontSize: '0.78rem', fontWeight: 800, background: 'rgba(201, 149, 42, 0.12)', padding: '8px 16px', borderRadius: '12px', border: '1px solid rgba(201, 149, 42, 0.3)', backdropFilter: 'blur(10px)' }}>
             {alerts.length} {alerts.length === 1 ? 'Alert' : 'Alerts'}
           </span>
         </div>

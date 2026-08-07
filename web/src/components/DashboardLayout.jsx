@@ -36,7 +36,7 @@ export default function DashboardLayout({ children }) {
       alignItems: 'flex-start',
       minHeight: '100vh',
       background: 'var(--bg)',
-      backgroundImage: 'radial-gradient(at 0% 0%, rgba(243,198,81,0.03) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(243,198,81,0.03) 0px, transparent 50%)',
+      backgroundImage: 'radial-gradient(at 0% 0%, rgba(201, 149, 42, 0.03) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(201, 149, 42, 0.03) 0px, transparent 50%)',
     }}>
       {/* Mobile Overlay */}
       {mobileOpen && (

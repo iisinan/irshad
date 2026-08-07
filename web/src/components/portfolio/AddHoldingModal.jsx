@@ -38,7 +38,7 @@ function ZakatDatePrompt({ purchaseDate, onYes, onNo }) {
           </p>
 
           <div style={{ background: 'var(--bg-section)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '24px' }}>
-            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(243,198,81,0.1)', border: '1px solid rgba(243,198,81,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(201, 149, 42, 0.1)', border: '1px solid rgba(201, 149, 42, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <Bell size={18} color="var(--primary)" />
             </div>
             <div>
@@ -59,7 +59,7 @@ function ZakatDatePrompt({ purchaseDate, onYes, onNo }) {
             </button>
             <button
               onClick={onYes}
-              style={{ flex: 2, padding: '14px', borderRadius: '12px', background: 'var(--primary)', border: 'none', color: 'var(--primary-text, #2A1A2E)', fontWeight: 800, fontSize: '0.84rem', cursor: 'pointer', boxShadow: '0 8px 20px rgba(243,198,81,0.25)', transition: 'all 0.2s' }}
+              style={{ flex: 2, padding: '14px', borderRadius: '12px', background: 'var(--primary)', border: 'none', color: 'var(--primary-text, #2A1A2E)', fontWeight: 800, fontSize: '0.84rem', cursor: 'pointer', boxShadow: '0 8px 20px rgba(201, 149, 42, 0.25)', transition: 'all 0.2s' }}
               onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
               onMouseLeave={e => e.currentTarget.style.transform = 'none'}
             >

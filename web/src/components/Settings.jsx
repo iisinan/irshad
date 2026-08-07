@@ -142,10 +142,10 @@ export default function Settings() {
         color: 'white', display: 'flex', alignItems: 'center', gap: '20px',
         boxShadow: '0 16px 40px rgba(0,0,0,0.3)', border: '1px solid rgba(201, 149, 42, 0.2)', position: 'relative', overflow: 'hidden'
       }}>
-        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '160px', height: '160px', borderRadius: '50%', background: 'rgba(243,198,81,0.08)' }} />
-        <div style={{ position: 'absolute', bottom: '-20px', right: '80px', width: '100px', height: '100px', borderRadius: '50%', background: 'rgba(243,198,81,0.04)' }} />
+        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '160px', height: '160px', borderRadius: '50%', background: 'rgba(201, 149, 42, 0.08)' }} />
+        <div style={{ position: 'absolute', bottom: '-20px', right: '80px', width: '100px', height: '100px', borderRadius: '50%', background: 'rgba(201, 149, 42, 0.04)' }} />
         
-        <div style={{ width: '72px', height: '72px', borderRadius: '20px', background: 'rgba(243,198,81,0.12)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '1.58rem', fontWeight: 800, border: '2px solid rgba(243,198,81,0.35)', color: 'var(--primary)', fontFamily: 'var(--serif)' }}>
+        <div style={{ width: '72px', height: '72px', borderRadius: '20px', background: 'rgba(201, 149, 42, 0.12)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '1.58rem', fontWeight: 800, border: '2px solid rgba(201, 149, 42, 0.35)', color: 'var(--primary)', fontFamily: 'var(--serif)' }}>
           {initials}
         </div>
         <div style={{ zIndex: 1 }}>

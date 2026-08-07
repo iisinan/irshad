@@ -75,7 +75,7 @@ const Step = ({ number, title, description }) => (
       width: '32px', height: '32px', borderRadius: '50%', flexShrink: 0,
       background: 'var(--primary)', color: 'var(--primary-text, #2A1A2E)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: '0.82rem', fontWeight: 900, boxShadow: '0 4px 12px rgba(243,198,81,0.25)',
+      fontSize: '0.82rem', fontWeight: 900, boxShadow: '0 4px 12px rgba(201, 149, 42, 0.25)',
     }}>
       {number}
     </div>
@@ -255,7 +255,7 @@ export default function GuideTab() {
           <SectionHeader icon={BookOpen} title="Getting Started with Irshad" />
           
           {/* What is Irshad */}
-          <div style={{ background: 'linear-gradient(135deg, rgba(243,198,81,0.08) 0%, rgba(198,146,32,0.03) 100%)', border: '1px solid var(--primary-100)', borderRadius: '20px', padding: '24px', marginBottom: '24px' }}>
+          <div style={{ background: 'linear-gradient(135deg, rgba(201, 149, 42, 0.08) 0%, rgba(198,146,32,0.03) 100%)', border: '1px solid var(--primary-100)', borderRadius: '20px', padding: '24px', marginBottom: '24px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
               <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'var(--primary-50)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ShieldCheck size={18} color="var(--primary)" />
@@ -424,7 +424,7 @@ export default function GuideTab() {
       {activeSection === 'tutorials' && (
         <div className="animate-slide-up stagger-1">
           <SectionHeader icon={PlayCircle} title="Tutorials & Guides" />
-          <div style={{ background: 'linear-gradient(135deg, rgba(243,198,81,0.06) 0%, transparent 100%)', border: '1px solid var(--primary-100)', borderRadius: '14px', padding: '16px 20px', marginBottom: '20px', display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <div style={{ background: 'linear-gradient(135deg, rgba(201, 149, 42, 0.06) 0%, transparent 100%)', border: '1px solid var(--primary-100)', borderRadius: '14px', padding: '16px 20px', marginBottom: '20px', display: 'flex', gap: '12px', alignItems: 'center' }}>
             <AlertTriangle size={16} color="var(--doubtful)" />
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
               Video tutorials are coming soon. Written guides are available now.
