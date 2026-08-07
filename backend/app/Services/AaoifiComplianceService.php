@@ -79,8 +79,11 @@ class AaoifiComplianceService
             );
         }
 
-        // Ensure variables are not zero to avoid division by zero
-        $marketCap = $financials->market_cap > 0 ? $financials->market_cap : 1;
+        // Sync with frontend logic: Prefer LIVE market cap from the companies table, fallback to extracted financials market cap
+        $liveMarketCap = $company->market_cap > 0 ? $company->market_cap : 0;
+        $finMarketCap = $financials->market_cap > 0 ? $financials->market_cap : 0;
+        $marketCap = $liveMarketCap ?: ($finMarketCap ?: 1);
+
         $totalRevenue = $financials->total_revenue > 0 ? $financials->total_revenue : 1;
 
         // Calculate NGX Financial Ratios
