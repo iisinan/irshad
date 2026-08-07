@@ -46,7 +46,7 @@ export default function LecturesTab() {
       <div className="animate-fade-in stagger-1" style={{ background: 'var(--bg)', borderRadius: '24px', padding: '0', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--border)', overflow: 'hidden' }}>
         
         {/* Header Banner */}
-        <div style={{ background: 'linear-gradient(135deg, #06090E 0%, #0B101B 50%, #151D2A 100%)', padding: '32px', position: 'relative', overflow: 'hidden', borderBottom: '1px solid rgba(243, 198, 81, 0.15)' }}>
+        <div style={{ background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, #3C2D3E 100%)', padding: '32px', position: 'relative', overflow: 'hidden', borderBottom: '1px solid rgba(201, 149, 42, 0.15)' }}>
           <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(243,198,81,0.08)', borderRadius: '50%' }} />
           <div style={{ position: 'absolute', bottom: '-60px', left: '30%', width: '150px', height: '150px', background: 'rgba(243,198,81,0.04)', borderRadius: '50%' }} />
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' }}>

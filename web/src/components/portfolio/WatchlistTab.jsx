@@ -146,7 +146,7 @@ export default function WatchlistTab() {
   return (
     <div className="animate-fade-in stagger-1 watchlist-tab-card" style={{ background: 'var(--bg)', borderRadius:'24px', padding:'32px 24px', boxShadow:'var(--shadow-sm)', border:'1px solid var(--border)' }}>
       
-      <div style={{ background: 'linear-gradient(135deg, #06090E 0%, #0B101B 50%, #151D2A 100%)', borderRadius:'24px', padding:'32px', boxShadow:'0 16px 40px rgba(0,0,0,0.3)', border:'1px solid rgba(243, 198, 81, 0.2)', marginBottom: '32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', overflow: 'hidden', flexWrap: 'wrap', gap: '24px' }}>
+      <div style={{ background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, #3C2D3E 100%)', borderRadius:'24px', padding:'32px', boxShadow:'0 16px 40px rgba(0,0,0,0.3)', border:'1px solid rgba(201, 149, 42, 0.2)', marginBottom: '32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', overflow: 'hidden', flexWrap: 'wrap', gap: '24px' }}>
         <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(243,198,81,0.08)', borderRadius: '50%' }} />
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', zIndex: 1 }}>
           <div style={{ width: '56px', height: '56px', background: 'rgba(243,198,81,0.12)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', border: '1px solid rgba(243,198,81,0.35)' }}>
@@ -195,7 +195,7 @@ export default function WatchlistTab() {
           {activeView === 'assets' && (
             <button 
               onClick={() => setShowAddModal(true)}
-              style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '14px 24px', borderRadius: '16px', background: 'var(--primary)', color: 'var(--primary-text, #0B101B)', border: 'none', fontWeight: 800, fontSize: '0.84rem', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 8px 24px rgba(243,198,81,0.25)' }}
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '14px 24px', borderRadius: '16px', background: 'var(--primary)', color: 'var(--primary-text, #2A1A2E)', border: 'none', fontWeight: 800, fontSize: '0.84rem', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 8px 24px rgba(243,198,81,0.25)' }}
               className="hover-lift"
             >
               <Plus size={18} /> Add Assets

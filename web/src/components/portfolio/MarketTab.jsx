@@ -270,10 +270,10 @@ export default function MarketTab() {
 
       {/* ── Header Hero Banner ─────────────────────────────────────── */}
       <div style={{ 
-        background: 'linear-gradient(135deg, #06090E 0%, #0B101B 50%, #151D2A 100%)', 
+        background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, #3C2D3E 100%)', 
         borderRadius: '20px', padding: '20px', 
         boxShadow: '0 16px 40px rgba(0,0,0,0.3)', 
-        border: '1px solid rgba(243, 198, 81, 0.2)', marginBottom: '16px', 
+        border: '1px solid rgba(201, 149, 42, 0.2)', marginBottom: '16px', 
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
         position: 'relative', overflow: 'hidden', flexWrap: 'wrap', gap: '16px' 
       }}>

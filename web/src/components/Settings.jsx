@@ -137,10 +137,10 @@ export default function Settings() {
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '32px 20px 80px' }} className="animate-fade-in">
       
       <div className="animate-slide-up stagger-1" style={{ 
-        background: 'linear-gradient(135deg, #06090E 0%, #0B101B 50%, #151D2A 100%)', 
+        background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, #3C2D3E 100%)', 
         borderRadius: '24px', padding: '32px 40px', marginBottom: '32px',
         color: 'white', display: 'flex', alignItems: 'center', gap: '20px',
-        boxShadow: '0 16px 40px rgba(0,0,0,0.3)', border: '1px solid rgba(243, 198, 81, 0.2)', position: 'relative', overflow: 'hidden'
+        boxShadow: '0 16px 40px rgba(0,0,0,0.3)', border: '1px solid rgba(201, 149, 42, 0.2)', position: 'relative', overflow: 'hidden'
       }}>
         <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '160px', height: '160px', borderRadius: '50%', background: 'rgba(243,198,81,0.08)' }} />
         <div style={{ position: 'absolute', bottom: '-20px', right: '80px', width: '100px', height: '100px', borderRadius: '50%', background: 'rgba(243,198,81,0.04)' }} />

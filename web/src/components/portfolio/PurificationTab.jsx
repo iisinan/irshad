@@ -452,7 +452,7 @@ export default function PurificationTab({ data }) {
       )}
 
       {/* ─ Header Banner ─ */}
-      <div style={{ background: 'linear-gradient(135deg, #06090E 0%, #0B101B 50%, #151D2A 100%)', borderRadius: '24px', padding: '32px', boxShadow: '0 16px 40px rgba(0,0,0,0.3)', border: '1px solid rgba(243, 198, 81, 0.2)', marginBottom: '24px', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, #3C2D3E 100%)', borderRadius: '24px', padding: '32px', boxShadow: '0 16px 40px rgba(0,0,0,0.3)', border: '1px solid rgba(201, 149, 42, 0.2)', marginBottom: '24px', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: '220px', height: '220px', background: 'rgba(243,198,81,0.07)', borderRadius: '50%', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', bottom: '-40px', left: '30%', width: '140px', height: '140px', background: 'rgba(243,198,81,0.03)', borderRadius: '50%', pointerEvents: 'none' }} />
 

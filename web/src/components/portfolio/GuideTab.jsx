@@ -73,7 +73,7 @@ const Step = ({ number, title, description }) => (
   <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
     <div style={{
       width: '32px', height: '32px', borderRadius: '50%', flexShrink: 0,
-      background: 'var(--primary)', color: 'var(--primary-text, #0B101B)',
+      background: 'var(--primary)', color: 'var(--primary-text, #2A1A2E)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       fontSize: '0.82rem', fontWeight: 900, boxShadow: '0 4px 12px rgba(243,198,81,0.25)',
     }}>

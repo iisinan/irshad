@@ -196,7 +196,7 @@ const AdminUsers = () => {
           </div>
           <button
             onClick={() => { setFormData({ name: '', email: '', password: '', role: 'user', plan: 'free' }); setShowCreateModal(true); }}
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '11px 20px', borderRadius: '12px', background: 'var(--primary)', color: 'var(--primary-text, #0B101B)', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: '0.85rem', transition: 'all 0.2s', boxShadow: '0 4px 16px rgba(243,198,81,0.25)' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '11px 20px', borderRadius: '12px', background: 'var(--primary)', color: 'var(--primary-text, #2A1A2E)', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: '0.85rem', transition: 'all 0.2s', boxShadow: '0 4px 16px rgba(243,198,81,0.25)' }}
             onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
             onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
           >

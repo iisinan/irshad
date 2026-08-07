@@ -161,7 +161,7 @@ export default function AddWatchlistModal({ onClose, onAdded, allStocks, watchli
                     </div>
 
                     <div style={{ width: '24px', height: '24px', borderRadius: '6px', border: isSelected ? 'none' : '2px solid var(--text-light)', background: isSelected ? 'var(--primary)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
-                      {isSelected && <CheckCircle2 size={16} color="var(--primary-text, #0B101B)" />}
+                      {isSelected && <CheckCircle2 size={16} color="var(--primary-text, #2A1A2E)" />}
                     </div>
                   </div>
                 );
@@ -179,12 +179,12 @@ export default function AddWatchlistModal({ onClose, onAdded, allStocks, watchli
             onClick={handleSubmit}
             disabled={selectedSymbols.length === 0 || isAdding}
             style={{ 
-              padding: '16px 32px', borderRadius: '16px', background: 'var(--primary)', border: 'none', color: 'var(--primary-text, #0B101B)', fontWeight: 800, fontSize: '0.88rem', 
+              padding: '16px 32px', borderRadius: '16px', background: 'var(--primary)', border: 'none', color: 'var(--primary-text, #2A1A2E)', fontWeight: 800, fontSize: '0.88rem', 
               cursor: selectedSymbols.length === 0 || isAdding ? 'not-allowed' : 'pointer', 
               display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 8px 24px rgba(243,198,81,0.25)', opacity: selectedSymbols.length === 0 || isAdding ? 0.7 : 1, transition: 'all 0.2s'
             }}
           >
-            {isAdding ? <div className="spinner" style={{ width: '20px', height: '20px', borderTopColor: 'var(--primary-text, #0B101B)' }} /> : 'Add to Watchlist'}
+            {isAdding ? <div className="spinner" style={{ width: '20px', height: '20px', borderTopColor: 'var(--primary-text, #2A1A2E)' }} /> : 'Add to Watchlist'}
           </button>
         </div>
       </div>

@@ -56,10 +56,10 @@ class ErrorBoundary extends React.Component {
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px', color: isChunkError ? 'var(--primary, #064E3B)' : '#DC2626' }}>
               {isChunkError ? <Sparkles size={48} /> : <AlertTriangle size={48} />}
             </div>
-            <h2 style={{ fontSize: '1.32rem', fontWeight: 800, color: 'var(--text-dark, #1E293B)', margin: '0 0 12px 0' }}>
+            <h2 style={{ fontSize: '1.32rem', fontWeight: 800, color: 'var(--text-dark, var(--text-dark))', margin: '0 0 12px 0' }}>
               {isChunkError ? 'New Update Available' : 'Something went wrong'}
             </h2>
-            <p style={{ color: 'var(--text-muted, #64748B)', marginBottom: '20px', lineHeight: 1.6, fontSize: '0.9rem' }}>
+            <p style={{ color: 'var(--text-muted, var(--text-muted))', marginBottom: '20px', lineHeight: 1.6, fontSize: '0.9rem' }}>
               {isChunkError
                 ? 'A new version of Irshad is available. Refresh to load the latest screening models and features.'
                 : "We've encountered an unexpected error. Our team has been notified."}

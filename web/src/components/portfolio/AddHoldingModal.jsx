@@ -21,8 +21,8 @@ function ZakatDatePrompt({ purchaseDate, onYes, onNo }) {
     <div className="zakat-prompt-overlay animate-fade-in" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200000, padding: '24px' }}>
       <div className="zakat-prompt-box" style={{ background: 'var(--bg)', borderRadius: '24px', width: '100%', maxWidth: '440px', boxShadow: '0 32px 80px rgba(0,0,0,0.2)', overflow: 'hidden', animation: 'slideUpFade 0.35s cubic-bezier(0.16,1,0.3,1)' }}>
         {/* Icon Header */}
-        <div style={{ background: 'linear-gradient(135deg, #06090E 0%, #0B101B 50%, #151D2A 100%)', padding: '32px 28px 24px', textAlign: 'center', borderBottom: '1px solid rgba(243, 198, 81, 0.15)' }}>
-          <div style={{ width: '60px', height: '60px', borderRadius: '18px', background: 'rgba(243, 198, 81, 0.12)', border: '1px solid rgba(243, 198, 81, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: 'var(--primary)' }}>
+        <div style={{ background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, #3C2D3E 100%)', padding: '32px 28px 24px', textAlign: 'center', borderBottom: '1px solid rgba(201, 149, 42, 0.15)' }}>
+          <div style={{ width: '60px', height: '60px', borderRadius: '18px', background: 'rgba(201, 149, 42, 0.12)', border: '1px solid rgba(201, 149, 42, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: 'var(--primary)' }}>
             <Calendar size={28} />
           </div>
           <h3 style={{ color: 'white', fontWeight: 900, fontSize: '1.1rem', margin: '0 0 6px', letterSpacing: '-0.3px' }}>Set Your Zakat Date?</h3>
@@ -59,7 +59,7 @@ function ZakatDatePrompt({ purchaseDate, onYes, onNo }) {
             </button>
             <button
               onClick={onYes}
-              style={{ flex: 2, padding: '14px', borderRadius: '12px', background: 'var(--primary)', border: 'none', color: 'var(--primary-text, #0B101B)', fontWeight: 800, fontSize: '0.84rem', cursor: 'pointer', boxShadow: '0 8px 20px rgba(243,198,81,0.25)', transition: 'all 0.2s' }}
+              style={{ flex: 2, padding: '14px', borderRadius: '12px', background: 'var(--primary)', border: 'none', color: 'var(--primary-text, #2A1A2E)', fontWeight: 800, fontSize: '0.84rem', cursor: 'pointer', boxShadow: '0 8px 20px rgba(243,198,81,0.25)', transition: 'all 0.2s' }}
               onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
               onMouseLeave={e => e.currentTarget.style.transform = 'none'}
             >
@@ -515,7 +515,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
                   <p style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '20px' }}>Select an Institution</p>
                   <div className="broker-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                     {['Meristem', 'Stanbic IBTC', 'CSCS', 'Risevest'].map((broker) => (
-                      <div key={broker} onClick={() => setBrokerName(broker)} className="broker-card" style={{ padding: '24px', borderRadius: '16px', border: brokerName === broker ? '2px solid var(--primary)' : '2px solid var(--border)', background: brokerName === broker ? 'var(--primary-50)' : 'var(--bg)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', transition: 'all 0.2s', boxShadow: brokerName === broker ? '0 8px 24px rgba(243, 198, 81, 0.15)' : 'none' }}>
+                      <div key={broker} onClick={() => setBrokerName(broker)} className="broker-card" style={{ padding: '24px', borderRadius: '16px', border: brokerName === broker ? '2px solid var(--primary)' : '2px solid var(--border)', background: brokerName === broker ? 'var(--primary-50)' : 'var(--bg)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', transition: 'all 0.2s', boxShadow: brokerName === broker ? '0 8px 24px rgba(201, 149, 42, 0.15)' : 'none' }}>
                         <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: brokerName === broker ? 'var(--bg)' : 'var(--bg-section)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.23rem', fontWeight: 800, color: 'var(--text-dark)' }}>{broker.charAt(0)}</div>
                         <span style={{ fontSize: '0.84rem', fontWeight: 800, color: 'var(--text-dark)', textAlign: 'center' }}>{broker}</span>
                       </div>

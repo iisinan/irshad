@@ -94,7 +94,7 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontWeight: 900, fontSize: '0.95rem', color: '#2A1A2E',
               flexShrink: 0,
-              boxShadow: '0 4px 14px rgba(243, 198, 81, 0.35)'
+              boxShadow: '0 4px 14px rgba(201, 149, 42, 0.35)'
             }}>إ</div>
             <span style={{ 
               fontWeight: 800, 
@@ -102,7 +102,7 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
               color: '#C9952A', 
               letterSpacing: '-0.2px', 
               fontFamily: 'var(--serif), var(--sans)',
-              textShadow: '0 2px 10px rgba(243, 198, 81, 0.2)'
+              textShadow: '0 2px 10px rgba(201, 149, 42, 0.2)'
             }}>
               Irshad
             </span>
@@ -114,7 +114,7 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
             background: 'var(--gold-grad)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontWeight: 900, fontSize: '0.95rem', color: '#2A1A2E',
-            boxShadow: '0 4px 14px rgba(243, 198, 81, 0.35)'
+            boxShadow: '0 4px 14px rgba(201, 149, 42, 0.35)'
           }}>إ</div>
         )}
         {!isCollapsed && (
@@ -208,7 +208,7 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
                 borderRadius: isCollapsed ? 0 : '12px',
                 justifyContent: isCollapsed ? 'center' : 'flex-start',
                 background: active
-                  ? 'rgba(243, 198, 81, 0.14)'
+                  ? 'rgba(201, 149, 42, 0.14)'
                   : 'transparent',
                 color: active ? '#C9952A' : '#9B8D9D',
                 textDecoration: 'none',
@@ -216,14 +216,14 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
                 fontSize: '0.84rem',
                 fontFamily: 'var(--sans)',
                 transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)',
-                borderLeft: active ? '3px solid #F3C651' : '3px solid transparent',
-                boxShadow: active && !isCollapsed ? '0 4px 20px rgba(243, 198, 81, 0.15)' : 'none'
+                borderLeft: active ? '3px solid #C9952A' : '3px solid transparent',
+                boxShadow: active && !isCollapsed ? '0 4px 20px rgba(201, 149, 42, 0.15)' : 'none'
               }}
               onMouseEnter={e => {
                 if (!active) {
                   e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
                   e.currentTarget.style.color = '#FFFFFF';
-                  if (isCollapsed) e.currentTarget.style.borderLeft = '3px solid rgba(243, 198, 81, 0.5)';
+                  if (isCollapsed) e.currentTarget.style.borderLeft = '3px solid rgba(201, 149, 42, 0.5)';
                 }
               }}
               onMouseLeave={e => {
@@ -240,7 +240,7 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
                 <div style={{
                   marginLeft: 'auto', width: '6px', height: '6px',
                   borderRadius: '50%', background: '#C9952A',
-                  boxShadow: '0 0 10px #F3C651'
+                  boxShadow: '0 0 10px #C9952A'
                 }} />
               )}
             </Link>
@@ -270,7 +270,7 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
                   boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
                   transition: 'all 0.2s'
                 }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(243, 198, 81, 0.15)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(201, 149, 42, 0.15)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'rgba(190, 169, 193, 0.08)'; e.currentTarget.style.transform = 'translateY(0)'; }}
               >
                 {isDark ? <Sun size={15} /> : <Moon size={15} />}
@@ -284,7 +284,7 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: '#2A1A2E', fontWeight: 800, fontSize: '1rem',
                 flexShrink: 0,
-                boxShadow: '0 4px 12px rgba(243, 198, 81, 0.3)'
+                boxShadow: '0 4px 12px rgba(201, 149, 42, 0.3)'
               }}>
                 {(user?.first_name || user?.name || 'U').charAt(0).toUpperCase()}
               </div>
@@ -339,7 +339,7 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
                 background: 'var(--gold-grad)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: '#2A1A2E', fontWeight: 800, fontSize: '1rem',
-                boxShadow: '0 4px 12px rgba(243, 198, 81, 0.3)'
+                boxShadow: '0 4px 12px rgba(201, 149, 42, 0.3)'
               }}>
                 {(user?.first_name || user?.name || 'U').charAt(0).toUpperCase()}
               </div>

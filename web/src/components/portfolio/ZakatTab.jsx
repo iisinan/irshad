@@ -241,16 +241,16 @@ export default function ZakatTab({ data }) {
         </div>
 
         {/* ── Header ── */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', paddingBottom: '24px', borderBottom: '3px solid #0B101B', position: 'relative', zIndex: 1 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', paddingBottom: '24px', borderBottom: '3px solid #2A1A2E', position: 'relative', zIndex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <img src="/logo.svg" alt="Irshad" style={{ height: '44px', width: 'auto' }} />
             <div>
-              <div style={{ fontSize: '22px', fontWeight: 900, color: '#0B101B', letterSpacing: '-0.5px', lineHeight: 1 }}>Irshad</div>
+              <div style={{ fontSize: '22px', fontWeight: 900, color: '#2A1A2E', letterSpacing: '-0.5px', lineHeight: 1 }}>Irshad</div>
               <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase', marginTop: '2px' }}>Shariah-Compliant Portfolio</div>
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '24px', fontWeight: 900, color: '#0B101B', letterSpacing: '-0.5px' }}>Zakat Statement</div>
+            <div style={{ fontSize: '24px', fontWeight: 900, color: '#2A1A2E', letterSpacing: '-0.5px' }}>Zakat Statement</div>
             <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px', fontWeight: 500 }}>Generated: {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
             {hawlDate && <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 500 }}>Hawl started: {new Date(hawlDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</div>}
           </div>
@@ -270,7 +270,7 @@ export default function ZakatTab({ data }) {
         </div>
 
         {/* ── Gold accent rule ── */}
-        <div style={{ height: '4px', background: 'linear-gradient(90deg, #0B101B, #C69220, #F3C651)', borderRadius: '2px', marginBottom: '32px', position: 'relative', zIndex: 1 }} />
+        <div style={{ height: '4px', background: 'linear-gradient(90deg, #2A1A2E, #C69220, #C9952A)', borderRadius: '2px', marginBottom: '32px', position: 'relative', zIndex: 1 }} />
 
         {/* ── Nisab Configuration ── */}
         <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '18px 24px', marginBottom: '28px', position: 'relative', zIndex: 1 }}>
@@ -286,7 +286,7 @@ export default function ZakatTab({ data }) {
 
         {/* ── Financial Wealth Section ── */}
         <div style={{ marginBottom: '28px' }}>
-          <div style={{ fontSize: '14px', fontWeight: 800, color: '#0B101B', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ fontSize: '14px', fontWeight: 800, color: '#2A1A2E', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ display: 'inline-block', width: '4px', height: '16px', background: '#C69220', borderRadius: '2px' }} />
             Financial Wealth
           </div>
@@ -320,8 +320,8 @@ export default function ZakatTab({ data }) {
                 <td style={{ padding: '11px 14px', textAlign: 'center' }}>—</td>
               </tr>
               <tr style={{ background: financialEligible ? '#fefce8' : '#fafafa', fontWeight: 800 }}>
-                <td style={{ padding: '12px 14px', color: '#0B101B', fontSize: '14px' }}>Total Wealth</td>
-                <td style={{ padding: '12px 14px', textAlign: 'right', color: '#0B101B', fontSize: '14px' }}>₦{totalWealth.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                <td style={{ padding: '12px 14px', color: '#2A1A2E', fontSize: '14px' }}>Total Wealth</td>
+                <td style={{ padding: '12px 14px', textAlign: 'right', color: '#2A1A2E', fontSize: '14px' }}>₦{totalWealth.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                 <td style={{ padding: '12px 14px', textAlign: 'center' }}>
                   {financialEligible
                     ? <span style={{ background: '#C69220', color: '#fff', padding: '3px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 800 }}>Nisab Reached ✓</span>
@@ -407,8 +407,8 @@ export default function ZakatTab({ data }) {
         )}
 
         {/* ── Consolidated Summary ── */}
-        <div style={{ marginTop: '36px', marginBottom: '32px', border: '2px solid #0B101B', borderRadius: '12px', overflow: 'hidden' }}>
-          <div style={{ background: '#0B101B', color: '#F3C651', padding: '14px 20px', fontSize: '15px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>
+        <div style={{ marginTop: '36px', marginBottom: '32px', border: '2px solid #2A1A2E', borderRadius: '12px', overflow: 'hidden' }}>
+          <div style={{ background: '#2A1A2E', color: '#C9952A', padding: '14px 20px', fontSize: '15px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>
             Summary of Zakat Payable
           </div>
           <div style={{ padding: '20px', background: '#f8fafc', display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -473,7 +473,7 @@ export default function ZakatTab({ data }) {
       </div>
       
       {/* Hero Banner */}
-      <div className="no-print zakat-hero" style={{ background: 'linear-gradient(135deg, #06090E 0%, #0B101B 50%, #151D2A 100%)', borderRadius:'24px', padding:'32px 24px', boxShadow:'0 20px 40px rgba(0,0,0,0.3)', border:'1px solid rgba(243, 198, 81, 0.2)', marginBottom: '36px', display: 'flex', alignItems: 'center', position: 'relative', overflow: 'hidden' }}>
+      <div className="no-print zakat-hero" style={{ background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, #3C2D3E 100%)', borderRadius:'24px', padding:'32px 24px', boxShadow:'0 20px 40px rgba(0,0,0,0.3)', border:'1px solid rgba(201, 149, 42, 0.2)', marginBottom: '36px', display: 'flex', alignItems: 'center', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'radial-gradient(circle at 80% 0%, rgba(243,198,81,0.12) 0%, transparent 50%)', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(243,198,81,0.08)', borderRadius: '50%', filter: 'blur(30px)' }} />
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px', position: 'relative', zIndex: 1 }}>

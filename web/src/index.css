@@ -457,7 +457,7 @@ textarea::placeholder {
 
 .btn-secondary:hover {
   background: var(--primary-50);
-  box-shadow: 0 4px 16px rgba(243, 198, 81, 0.15);
+  box-shadow: 0 4px 16px rgba(201, 149, 42, 0.15);
   transform: translateY(-2px);
 }
 
@@ -3234,7 +3234,7 @@ img[src="/logo.svg"] {
 .onboarding-search-box input:focus {
   border-color: var(--primary);
   background: var(--bg);
-  box-shadow: 0 0 0 4px rgba(243, 198, 81, 0.15);
+  box-shadow: 0 0 0 4px rgba(201, 149, 42, 0.15);
 }
 
 .onboarding-results {
@@ -3322,7 +3322,7 @@ img[src="/logo.svg"] {
 
 .alert-option.selected {
   border-color: var(--primary);
-  background: rgba(243, 198, 81, 0.08);
+  background: rgba(201, 149, 42, 0.08);
 }
 
 .alert-icon-box {
@@ -3469,8 +3469,8 @@ img[src="/logo.svg"] {
 }
 
 .onboarding-result-item.selected {
-  background: rgba(243, 198, 81, 0.08);
-  border-color: rgba(243, 198, 81, 0.25);
+  background: rgba(201, 149, 42, 0.08);
+  border-color: rgba(201, 149, 42, 0.25);
 }
 
 .result-check {

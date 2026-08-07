@@ -54,11 +54,11 @@ const AboutPage = () => (
       <div className="about-vision-grid" style={{ marginBottom: '48px' }}>
         {/* Vision card */}
         <div style={{
-          background: 'linear-gradient(135deg, #06090E 0%, #0B101B 50%, #131B2A 100%)',
+          background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, #131B2A 100%)',
           borderRadius: '24px', padding: '40px',
           position: 'relative', overflow: 'hidden',
           boxShadow: '0 16px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(243,198,81,0.2)',
-          border: '1px solid rgba(243, 198, 81, 0.15)'
+          border: '1px solid rgba(201, 149, 42, 0.15)'
         }}>
           <div style={{ position: 'absolute', bottom: '-50px', right: '-50px', width: '220px', height: '220px', background: 'radial-gradient(circle, rgba(243,198,81,0.15) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
           <div style={{ position: 'relative', zIndex: 1 }}>

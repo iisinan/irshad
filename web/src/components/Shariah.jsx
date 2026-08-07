@@ -34,10 +34,10 @@ const ShariahPage = () => (
 
       {/* ─── Hero ─── */}
       <div style={{
-        background: 'linear-gradient(135deg, #06090E 0%, #0B101B 50%, #151D2A 100%)',
+        background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, #3C2D3E 100%)',
         borderRadius: '28px', padding: '64px 56px', marginBottom: '48px',
         position: 'relative', overflow: 'hidden', textAlign: 'center',
-        boxShadow: '0 20px 50px rgba(0,0,0,0.3)', border: '1px solid rgba(243, 198, 81, 0.2)'
+        boxShadow: '0 20px 50px rgba(0,0,0,0.3)', border: '1px solid rgba(201, 149, 42, 0.2)'
       }}>
         {/* Decorative orbs */}
         <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: '260px', height: '260px', background: 'rgba(243,198,81,0.08)', borderRadius: '50%' }} />
@@ -172,9 +172,9 @@ const ShariahPage = () => (
 
       {/* ─── Phase 3: Purification ─── */}
       <div style={{
-        background: 'linear-gradient(135deg, #06090E 0%, #0B101B 50%, #151D2A 100%)',
+        background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, #3C2D3E 100%)',
         borderRadius: '24px', padding: '40px', boxShadow: '0 16px 40px rgba(0,0,0,0.3)',
-        border: '1px solid rgba(243, 198, 81, 0.2)',
+        border: '1px solid rgba(201, 149, 42, 0.2)',
         position: 'relative', overflow: 'hidden', marginBottom: '24px'
       }}>
         <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '180px', height: '180px', background: 'rgba(243,198,81,0.08)', borderRadius: '50%' }} />
