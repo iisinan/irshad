@@ -287,7 +287,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
 
       {/* ─── Header Card (Redesigned with Verdict & Justification as Primary) ─── */}
       <div className="detail-header" style={{
-        background: 'linear-gradient(135deg, #0A192F 0%, #0F3A40 50%, #0B4F55 100%)',
+        background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, #3C2D3E 100%)',
         padding: '32px clamp(20px, 4vw, 36px)',
         borderRadius: '24px',
         position: 'relative',
@@ -311,7 +311,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
               logoUrl={stock.logo_url}
               size={58}
               radius={16}
-              style={{ background: 'var(--bg)', boxShadow: '0 8px 24px rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.2)', flexShrink: 0 }}
+              style={{ background: 'var(--bg)', boxShadow: '0 8px 24px rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.08)', flexShrink: 0 }}
             />
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
@@ -322,7 +322,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
                 <span>·</span>
                 <span>{stock.sector ?? 'Market Listed'}</span>
                 <span>·</span>
-                <span style={{ background: 'rgba(255,255,255,0.12)', padding: '2px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 700 }}>NGX Listed</span>
+                <span style={{ background: 'rgba(255, 255, 255, 0.06)', padding: '2px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 700 }}>NGX Listed</span>
               </p>
             </div>
           </div>
@@ -332,7 +332,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
             {/* Price Tag Card */}
             <div style={{
               textAlign: 'right',
-              background: 'rgba(255, 255, 255, 0.08)',
+              background: 'rgba(255, 255, 255, 0.03)',
               padding: '10px 18px',
               borderRadius: '16px',
               border: '1px solid rgba(255, 255, 255, 0.15)',
@@ -387,7 +387,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
         <div style={{
           position: 'relative', zIndex: 1,
           width: '100%', boxSizing: 'border-box',
-          background: 'linear-gradient(135deg, rgba(10, 25, 47, 0.8) 0%, rgba(15, 58, 64, 0.7) 100%)',
+          background: 'linear-gradient(135deg, rgba(26,16,32,0.8) 0%, rgba(42,26,46,0.7) 100%)',
           border: `1.5px solid ${hasPurification ? 'rgba(245, 158, 11, 0.4)' : isHalal ? 'rgba(16, 185, 129, 0.4)' : isNonHalal ? 'rgba(239, 68, 68, 0.4)' : 'rgba(234, 179, 8, 0.4)'}`,
           borderRadius: '20px',
           padding: '24px 28px',
@@ -719,7 +719,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
           {/* Dividend Purification — redesigned */}
           {isHalal && (
             <div className="detail-panel" style={{
-              background: 'linear-gradient(160deg, #071F24 0%, #0B3038 60%, #071A20 100%)',
+              background: 'linear-gradient(160deg, #1A1020 0%, #2A1A2E 60%, #1A1020 100%)',
               border: '1px solid rgba(212,175,55,0.18)',
               color: 'white',
               boxShadow: '0 16px 48px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.06)',
@@ -727,7 +727,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
             }}>
               {/* Decorative glow */}
               <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'radial-gradient(circle, rgba(212,175,55,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
-              <div style={{ position: 'absolute', bottom: '-60px', left: '-20px', width: '180px', height: '180px', background: 'radial-gradient(circle, rgba(0,214,143,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
+              <div style={{ position: 'absolute', bottom: '-60px', left: '-20px', width: '180px', height: '180px', background: 'radial-gradient(circle, rgba(16,185,129,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
               {/* Header */}
               <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
@@ -753,19 +753,19 @@ const StockDetails = ({ symbol: propSymbol }) => {
               {/* Upcoming Dividend Section */}
               <div style={{ position: 'relative', zIndex: 1, marginBottom: '14px' }}>
                 <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: stock?.upcoming_dividend ? '#00d68f' : 'rgba(255,255,255,0.2)', display: 'inline-block', boxShadow: stock?.upcoming_dividend ? '0 0 8px #00d68f' : 'none' }} />
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: stock?.upcoming_dividend ? '#10B981' : 'rgba(255,255,255,0.2)', display: 'inline-block', boxShadow: stock?.upcoming_dividend ? '0 0 8px #10B981' : 'none' }} />
                   Upcoming Dividend
                 </div>
                 {stock?.upcoming_dividend ? (
-                  <div style={{ background: 'rgba(0,214,143,0.05)', border: '1px solid rgba(0,214,143,0.15)', borderRadius: '14px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.15)', borderRadius: '14px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     {/* Amount + Type */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div>
                         <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.45)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>Amount Per Share</div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#00d68f', letterSpacing: '-0.5px' }}>₦{parseFloat(stock.upcoming_dividend.amount).toFixed(2)}</div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#10B981', letterSpacing: '-0.5px' }}>₦{parseFloat(stock.upcoming_dividend.amount).toFixed(2)}</div>
                       </div>
-                      <div style={{ background: 'rgba(0,214,143,0.12)', border: '1px solid rgba(0,214,143,0.2)', borderRadius: '8px', padding: '6px 12px' }}>
-                        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#00d68f' }}>{stock.upcoming_dividend.dividend_type || 'Dividend'}</div>
+                      <div style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '8px', padding: '6px 12px' }}>
+                        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#10B981' }}>{stock.upcoming_dividend.dividend_type || 'Dividend'}</div>
                       </div>
                     </div>
                     {/* Dates row */}
