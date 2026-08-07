@@ -17,7 +17,11 @@ class ErrorBoundary extends React.Component {
     this.setState({ errorMessage: msg });
 
     // Auto-reload once if dynamic chunk failed due to a new deployment
-    if (msg.includes('dynamically imported module') || msg.includes('Failed to fetch dynamically imported module') || msg.includes('Loading chunk')) {
+    if (msg.includes('dynamically imported module') || 
+        msg.includes('Failed to fetch dynamically imported module') || 
+        msg.includes('Loading chunk') ||
+        msg.includes("reading 'default'") ||
+        msg.includes("Unexpected token '<'")) {
       const reloadKey = 'eb_auto_reload_' + window.location.pathname;
       if (!sessionStorage.getItem(reloadKey)) {
         sessionStorage.setItem(reloadKey, 'true');

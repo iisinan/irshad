@@ -23,7 +23,9 @@ const lazyWithRetry = (componentImport) =>
         error?.message?.includes('dynamically imported module') ||
         error?.message?.includes('Loading chunk') ||
         error?.message?.includes('Failed to fetch') ||
-        error?.message?.includes('Importing a module script failed');
+        error?.message?.includes('Importing a module script failed') ||
+        error?.message?.includes("reading 'default'") ||
+        error?.message?.includes("Unexpected token '<'");
 
       const alreadyRefreshed = sessionStorage.getItem(refreshKey);
 
