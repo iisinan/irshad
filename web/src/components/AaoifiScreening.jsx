@@ -202,6 +202,14 @@ const AaoifiScreening = () => {
   });
   const allStocks = Array.isArray(allStocksRes) ? allStocksRes : [];
 
+  const { data: portfolioRes } = useQuery({
+    queryKey: ['portfolio'],
+    queryFn: fetchPortfolio,
+    staleTime: 5 * 60 * 1000
+  });
+  
+  const hasBought = portfolioRes?.holdings?.some(h => h.symbol === symbol);
+
   /* ── UI state ── */
   const [modalData,       setModalData]       = useState(null);
   const [showOverride,    setShowOverride]     = useState(false);
