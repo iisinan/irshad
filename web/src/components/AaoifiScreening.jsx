@@ -458,7 +458,7 @@ const AaoifiScreening = () => {
               <div style={{ flex:1,fontSize:'0.83rem',color:'var(--text-dark)',fontWeight:500 }}><strong style={{ color:'#D97706' }}>Purification required:</strong> Donate <strong style={{ color:'#D97706' }}>{purPct}%</strong> of dividend income to charity.</div>
               <div style={{ textAlign:'center' }}><div style={{ fontSize:'1.2rem',fontWeight:900,color:'#D97706',lineHeight:1 }}>{purPct}%</div><div style={{ fontSize:'0.57rem',color:'var(--text-muted)',fontWeight:700,marginTop:1 }}>to purify</div></div>
             </div>)}
-            {stage1Status==='non-halal'&&(<div style={{ background:'rgba(239,68,68,0.04)',padding:'14px 18px',borderRadius:12,border:'1px solid rgba(239,68,68,0.18)',borderLeft:'3px solid #EF4444',display:'flex',alignItems:'center',justifyContent:'space-between',gap:14,flexWrap:'wrap',marginBottom:14 }}>
+            {stage1Status==='non-halal' && report.stage1?.haram_revenue_percent > 0.05 && (<div style={{ background:'rgba(239,68,68,0.04)',padding:'14px 18px',borderRadius:12,border:'1px solid rgba(239,68,68,0.18)',borderLeft:'3px solid #EF4444',display:'flex',alignItems:'center',justifyContent:'space-between',gap:14,flexWrap:'wrap',marginBottom:14 }}>
               <div style={{ flex:'1 1 220px' }}><div style={{ display:'flex',alignItems:'center',gap:6,marginBottom:4 }}><AlertTriangle size={14} color="#EF4444"/><span style={{ fontWeight:800,color:'#EF4444',fontSize:'0.84rem' }}>Prohibited Activities Detected</span></div>
               <p style={{ margin:0,color:'var(--text-muted)',fontSize:'0.79rem',lineHeight:1.6 }}>Non-compliant revenue (<strong style={{ color:'#EF4444' }}>{pct(report.stage1?.haram_revenue_percent)}</strong>) exceeds the 5% AAOIFI tolerance.</p></div>
               <div style={{ background:'var(--bg)',borderRadius:10,padding:'8px 16px',border:'1px solid rgba(239,68,68,0.18)',textAlign:'center' }}>
@@ -548,12 +548,12 @@ const AaoifiScreening = () => {
           </div>
           <div style={{ display:'flex',flexDirection:'column',gap:18 }}>
             {[
-              { label: 'Open', value: stock?.open ? `₦${stock.open.toLocaleString(undefined,{minimumFractionDigits:2})}` : '—' },
-              { label: 'Previous Close', value: stock?.previous_close ? `₦${stock.previous_close.toLocaleString(undefined,{minimumFractionDigits:2})}` : '—' },
-              { label: 'Day High', value: stock?.day_high ? `₦${stock.day_high.toLocaleString(undefined,{minimumFractionDigits:2})}` : '—' },
-              { label: 'Day Low', value: stock?.day_low ? `₦${stock.day_low.toLocaleString(undefined,{minimumFractionDigits:2})}` : '—' },
-              { label: '52W High', value: stock?.week_52_high ? `₦${stock.week_52_high.toLocaleString(undefined,{minimumFractionDigits:2})}` : '—' },
-              { label: '52W Low', value: stock?.week_52_low ? `₦${stock.week_52_low.toLocaleString(undefined,{minimumFractionDigits:2})}` : '—', noBorder: true }
+              { label: 'Open', value: stock?.open_price ? fmtRaw(stock.open_price) : '—' },
+              { label: 'Previous Close', value: stock?.previous_close ? fmtRaw(stock.previous_close) : '—' },
+              { label: 'Day High', value: stock?.day_high ? fmtRaw(stock.day_high) : '—' },
+              { label: 'Day Low', value: stock?.day_low ? fmtRaw(stock.day_low) : '—' },
+              { label: '52W High', value: stock?.fifty_two_week_high ? fmtRaw(stock.fifty_two_week_high) : '—' },
+              { label: '52W Low', value: stock?.fifty_two_week_low ? fmtRaw(stock.fifty_two_week_low) : '—', noBorder: true }
             ].map((item, idx) => (
               <div key={idx} style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:item.noBorder?'none':'1px solid rgba(91,41,113,0.06)',paddingBottom:item.noBorder?0:14 }}>
                 <span style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:600 }}>{item.label}</span>
