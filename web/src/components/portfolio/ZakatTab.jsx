@@ -290,15 +290,16 @@ export default function ZakatTab({ data }) {
             <span style={{ display: 'inline-block', width: '4px', height: '16px', background: 'var(--gold)', borderRadius: '2px' }} />
             Financial Wealth
           </div>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-            <thead>
-              <tr style={{ background: 'var(--body-bg)' }}>
-                <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700, color: '#475569', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Asset</th>
-                <th style={{ padding: '10px 14px', textAlign: 'right', fontWeight: 700, color: '#475569', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Value (₦)</th>
-                <th style={{ padding: '10px 14px', textAlign: 'center', fontWeight: 700, color: '#475569', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Status</th>
-              </tr>
-            </thead>
-            <tbody>
+          <div className="table-responsive">
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', minWidth: '400px' }}>
+              <thead>
+                <tr style={{ background: 'var(--body-bg)' }}>
+                  <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700, color: '#475569', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Asset</th>
+                  <th style={{ padding: '10px 14px', textAlign: 'right', fontWeight: 700, color: '#475569', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Value (₦)</th>
+                  <th style={{ padding: '10px 14px', textAlign: 'center', fontWeight: 700, color: '#475569', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Status</th>
+                </tr>
+              </thead>
+              <tbody>
               <tr style={{ borderBottom: '1px solid var(--body-bg)' }}>
                 <td style={{ padding: '11px 14px', color: 'var(--text-body)' }}>📈 Stock Portfolio</td>
                 <td style={{ padding: '11px 14px', textAlign: 'right', fontWeight: 700 }}>₦{portfolioValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
@@ -330,6 +331,7 @@ export default function ZakatTab({ data }) {
               </tr>
             </tbody>
           </table>
+          </div>
           {financialEligible && (
             <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '16px' }}>
               <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Zakat due @ 2.5%:</span>
@@ -345,7 +347,8 @@ export default function ZakatTab({ data }) {
               <span style={{ display: 'inline-block', width: '4px', height: '16px', background: '#16a34a', borderRadius: '2px' }} />
               Livestock Zakat
             </div>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+          <div className="table-responsive">
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', minWidth: '400px' }}>
               <thead>
                 <tr style={{ background: '#f0fdf4' }}>
                   <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700, color: '#475569', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Animal</th>
