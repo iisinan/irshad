@@ -4882,3 +4882,16 @@ html, body {
     border-bottom: none;
   }
 }
+
+@media (max-width: 640px) {
+  .stats-grid-3 {
+    grid-template-columns: 1fr !important;
+  }
+  .stats-grid-3 > div {
+    border-right: none !important;
+    border-bottom: 1px solid var(--border-strong) !important;
+  }
+  .stats-grid-3 > div:last-child {
+    border-bottom: none !important;
+  }
+}

@@ -33,7 +33,7 @@ const AboutPage = () => (
       </div>
 
       {/* ─── Stats Strip ─── */}
-      <div style={{
+      <div className="stats-grid-3" style={{
         display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
         background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)',
         boxShadow: 'var(--shadow-md)', overflow: 'hidden', marginBottom: '48px',
