@@ -40,7 +40,9 @@ export default function AlertsTab() {
     if (!window.confirm('Delete this price alert?')) return;
     try {
       await deletePriceAlert(id);
-      setAlerts(alerts.filter(a => a.id !== id));
+      const newAlerts = alerts.filter(a => a.id !== id);
+      setAlerts(newAlerts);
+      localStorage.setItem('irshad_alerts_cache_v1', JSON.stringify(newAlerts));
     } catch (err) {
       console.error('Failed to delete alert:', err);
     }

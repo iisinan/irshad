@@ -149,17 +149,20 @@ const StockRow = React.memo(({ stock, idx, isWatched, onToggle }) => {
 export default function MarketTab() {
   const queryClient = useQueryClient();
 
-  // Force-refresh on every mount to bypass stale/empty cache from previous errors
-  useEffect(() => {
-    queryClient.invalidateQueries({ queryKey: ['marketData', 'v2'] });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const { data: stocks = [], isLoading, error, refetch } = useQuery({
     queryKey: ['marketData', 'v2'],
     queryFn: async () => {
       const r = await fetchNgxStocks();
-      return Array.isArray(r) ? r : (r?.data || []);
+      const val = Array.isArray(r) ? r : (r?.data || []);
+      localStorage.setItem('irshad_market_v2', JSON.stringify(val));
+      return val;
+    },
+    initialData: () => {
+      try {
+        const cached = localStorage.getItem('irshad_market_v2');
+        if (cached) return JSON.parse(cached);
+      } catch {}
+      return undefined;
     },
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
