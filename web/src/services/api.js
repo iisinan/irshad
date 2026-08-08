@@ -2,9 +2,9 @@ import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import localforage from 'localforage';
 
-// Force use of the Railway backend since Cloudflare Pages has the old Render URL cached in VITE_API_URL
+// Force use of the Railway backend in production since Cloudflare Pages has the old Render URL cached in VITE_API_URL
 const PROD_API = 'https://irshad-backend-production.up.railway.app/api/v1';
-const API_BASE = import.meta.env.VITE_API_URL || PROD_API;
+const API_BASE = import.meta.env.DEV && import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL : PROD_API;
 const api = axios.create({
   baseURL: API_BASE,
   headers: {
