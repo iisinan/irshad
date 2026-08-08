@@ -83,11 +83,17 @@ export default function Portfolio() {
   const [activeFilter, setActiveFilter] = useState('all');
   const [initialHoldingSymbol, setInitialHoldingSymbol] = useState(null);
 
-  // Auto-open add modal if navigated with state
+  // Auto-open add modal or purification modal if navigated with state
   useEffect(() => {
-    if (location.state?.addHolding) {
-      setInitialHoldingSymbol(location.state.addHolding);
-      setShowAddModal('manual');
+    if (location.state?.action) {
+      if (location.state.targetSymbol) {
+        setInitialHoldingSymbol(location.state.targetSymbol);
+      }
+      
+      if (location.state.action === 'add') {
+        setShowAddModal('manual');
+      }
+      
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
