@@ -44,8 +44,6 @@ class AaoifiScreeningService
 
         $cash = $financials ? (float) $financials->cash_and_equivalents : 0;
         $interestBearingSecurities = $financials ? (float) $financials->interest_bearing_securities : 0;
-        $accountsReceivable = $financials ? (float) $financials->accounts_receivable : 0;
-        $illiquidAssets = $financials ? (float) $financials->illiquid_assets : 0;
 
         $interestIncome = $financials ? (float) $financials->interest_income : 0;
         $totalRevenue = $financials ? (float) $financials->total_revenue : 0;
@@ -63,12 +61,6 @@ class AaoifiScreeningService
             $cashRatio = (($cash + $interestBearingSecurities) / $marketCap) * 100;
             $cashStatus = $cashRatio <= 30 ? 'pass' : 'fail';
         }
-
-        $illiquidRatio = null;
-        $illiquidStatus = 'insufficient_data';
-
-        $receivablesRatio = null;
-        $receivablesStatus = 'insufficient_data';
 
         $impermissibleIncomeRatio = null;
         $impIncomeStatus = 'insufficient_data';
@@ -98,10 +90,6 @@ class AaoifiScreeningService
                 'cash_status' => $cashStatus,
                 'impermissible_income_ratio' => $impermissibleIncomeRatio,
                 'impermissible_income_status' => $impIncomeStatus,
-                'illiquid_ratio' => $illiquidRatio,
-                'illiquid_status' => $illiquidStatus,
-                'receivables_ratio' => $receivablesRatio,
-                'receivables_status' => $receivablesStatus,
                 'final_status' => $finalStatus,
                 'news_sources' => $combinedNews,
                 'financial_data_used' => [
@@ -111,8 +99,6 @@ class AaoifiScreeningService
                     'total_debt' => $totalDebt,
                     'cash' => $cash,
                     'interest_bearing_securities' => $interestBearingSecurities,
-                    'accounts_receivable' => $accountsReceivable,
-                    'illiquid_assets' => $illiquidAssets,
                     'interest_income' => $interestIncome,
                     'total_revenue' => $totalRevenue,
                     'source_url' => $financials ? $financials->source_url : null,

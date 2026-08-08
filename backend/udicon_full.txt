@@ -1,0 +1,1963 @@
+UNION DICON SALT PLC
+UNAUDITED ACCOUNTS
+FOR THE 2ND QUARTER
+2026
+
+UNION DICON SALT PLC
+STATEMENT OF COMPREHENSIVE INCOME 
+FOR THE PERIOD ENDED 30TH JUNE, 2026
+NOTE
+2026
+2025
+2026
+2025
+ =N='000
+ =N='000
+ =N='000
+ =N='000
+Revenue 
+7
+4,487
+                      
+-
+                          
+13,005
+                   
+-
+                         
+Less: Cost of Sales
+8
+(6,870)
+                     
+-
+                          
+955
+                         
+-
+                         
+Gross Profit
+11,357
+                    
+-
+                          
+13,960
+                   
+-
+                         
+Other Operating Income
+9
+38,852
+                    
+75,000
+                    
+110,954
+                 
+102,250
+                 
+Admimistrative Expenses
+10
+(49,001)
+                   
+(65,597)
+                   
+(130,163)
+                
+(75,985)
+                  
+Profit/(Loss) before tax
+1,208
+                      
+9,403
+                      
+9,575
+                     
+26,265
+                   
+Income Tax Expenses
+11 (i)
+-
+                               
+-
+                               
+-
+                              
+-
+                              
+Profit/(Loss) for the year
+1,208
+                      
+9,403
+                      
+9,575
+                     
+26,265
+                   
+Other Comprehensive Income
+-
+                          
+-
+                          
+Item that will be reclassified to profit or loss
+Item that may not be reclassified to profit or loss:
+  Actuarial gain on gratuity
+16 (e)
+-
+                          
+-
+                          
+-
+                         
+-
+                         
+Total Comprehensive Profit/(loss) for the year Net of Tax
+1,208
+                      
+9,403
+                      
+9,575
+                     
+26,265
+                   
+QUARTER 2
+YEAR TILL DATE
+ 1
+
+UNION DICON SALT PLC
+STATEMENT OF FINANCIAL POSITION
+AS AT 30TH JUNE, 2026
+YEAR TILL DATE
+Notes
+2026
+2025
+2026
+ASSET
+ =N='000
+ =N='000
+ =N='000
+Property, Plant and Equipment
+12
+5,167,233
+          
+255,850
+             
+5,426,545
+          
+Investment in subsidiary
+-
+                      
+-
+                      
+-
+                      
+5,167,233
+          
+255,850
+             
+5,426,545
+          
+CURRENT ASSET
+Trade and Other Receivables
+13
+359,446
+             
+73,245
+                
+721,342
+             
+Cash and Cash Equivalents
+14
+8,057,187
+          
+294,620
+             
+19,563,626
+        
+8,416,633
+          
+10,536,738
+        
+13,583,866
+        
+367,865
+             
+13,583,866
+        
+CURRENT LIABILITIES
+Trade and Other Payables
+15
+14,772,679
+        
+2,011,084
+          
+14,772,679
+        
+Current Tax liabilities
+11 (iii)
+85,957
+                
+85,957
+                
+85,957
+                
+14,858,636
+        
+(2,097,041)
+         
+14,858,636
+        
+NET CURRENT LIABILITIES
+TOTAL ASSETS LESS CURRENT LIABILITIES
+(1,274,770)
+         
+(1,473,326)
+         
+(1,274,770)
+         
+ 
+ 
+ 
+NON-CURRENT LIABILITIES
+Employee Benefit Liabilities
+16 (d)
+60,002
+                
+60,002
+                
+60,002
+                
+Deferred Tax Liabilities
+11 (v)
+11,413
+                
+11,413
+                
+11,413
+                
+71,415
+               
+71,415
+               
+71,415
+               
+NET LIABILITIES
+(1,346,185)
+         
+(1,401,911)
+         
+(1,346,185)
+         
+EQUITY
+Share Capital
+17 (a)
+136,673
+             
+136,673
+             
+136,673
+             
+Share Premium
+17 (b)
+250,638
+             
+250,638
+             
+250,638
+             
+Actuarial Valuation Reserve
+18
+65,692
+                
+65,692
+                
+65,692
+                
+Revenue Reserve
+19
+(1,799,188)
+         
+(1,854,914)
+         
+(1,799,188)
+         
+TOTAL EQUITY
+(1,346,185)
+         
+(1,401,911)
+         
+(1,346,185)
+         
+The financial statements were approved by the Board of Directors on, 13th July,2026 and signed
+ on its behalf by:
+(i)   LT. General T.Y Danjuma (RTD), GCON
+(ii) Florence S. Iroye 
+Ag. Managing Director
+ 
+(iii) Peter A. Adelowo
+FRC/2025/PRO/ICAN/001/208881
+QUARTER 2
+HEAD, ACCOUNTS
+Chairman
+ 2 
+
+UNION DICON SALT PLC
+CASHFLOW STATEMENT
+FOR THE PERIOD ENDED 30TH JUNE, 2026
+NOTES
+2026
+2025
+ =N='000
+ =N='000
+CASH FLOW FROM OPERATING ACTIVITIES
+Profit/(loss) before taxation YTD
+1,208
+                     
+35,668
+                   
+Adjustment for non cash items
+Depreciation of property, plant and equipment
+14
+3,149
+                     
+6,672
+                     
+Accruals
+-
+                         
+-
+                         
+Post balancesheet adjustement
+-
+                         
+-
+                         
+Income Tax Expense
+13(i)
+-
+                         
+-
+                         
+Operating profit before capital changes
+4,357
+                     
+42,340
+                   
+Changes in working capital
+(Increase)/Decrease in other receivables
+16
+(359,446)
+               
+(92,475)
+                  
+(Decrease)/Increase in Employee Benefit Liabilities 
+19(d)
+-
+                             
+-
+                             
+Increase/(Decrease) in Trade and other payables
+18
+14,072,679
+           
+(32,655)
+                  
+Decrease in Tax Liabilities
+Tax paid
+13
+-
+                             
+-
+                             
+NET CASH FLOW FROM OPERATING ACTIVITIES
+13,717,590
+           
+(82,790)
+                 
+CASH FLOW FROM INVESTING ACTIVITIES
+Purchase of PPE
+14
+(5,021,000)
+            
+(7,700)
+                    
+Pre-Operation Factory expenses
+(84,822)
+                  
+Investment in subsidiary
+15
+-
+                         
+-
+                         
+Net cash flow from investing activities
+(5,021,000)
+            
+(92,522)
+                 
+Net increase/decrease in cash and equivalents 
+(5,570,355)
+            
+(136,552)
+               
+cash and cash equivalent at beginning
+13,627,542
+           
+431,172
+                 
+cash and cash equivalent at the end of the quarter
+14
+8,057,187
+             
+294,620
+                
+REPRESENTED BY:
+BANK BALANCE AS AT 30TH JUNE 2026
+2,007,187
+             
+294,620
+                 
+Bank(Term Deposit)
+6,050,000
+             
+-
+                         
+8,057,187
+             
+294,620
+                
+QUARTER 2
+ 3
+
+UNION DICON SALT PLC
+STATEMENT OF CHANGE IN EQUITY
+FOR THE PERIOD ENDED 30TH JUNE, 2026
+Share 
+Share
+Reserve For
+Retained
+Total
+Capital
+Premium
+Actuarial Valuation
+Earnings
+Equity
+ =N='000
+ =N='000
+ =N='000
+ =N='000
+ =N='000
+Balance as at 1 April 2026
+136,673
+             
+250,638
+                  
+65,692
+                   
+(1,881,181)
+               
+(1,428,178)
+             
+Comprehensive Income for the year
+-
+                      
+-
+                           
+-
+                          
+-
+                             
+-
+                           
+Profit for the year
+-
+                      
+-
+                           
+-
+                          
+(34,569)
+                     
+(34,569)
+                   
+Other comprehensive income
+-
+                      
+-
+                           
+-
+                          
+-
+                             
+-
+                           
+Total comprehensive income for the year
+-
+                      
+-
+                           
+-
+                          
+(34,569)
+                     
+(34,569)
+                   
+Transaction with owners recorded directly in equity
+Balance at 30th June 2026
+136,673
+             
+250,638
+                  
+65,692
+                   
+(1,915,750)
+               
+(1,915,750)
+             
+Balance as at 1 April 2025
+136,673.00
+       
+250,638.00
+             
+65,692.00
+              
+1,881,181.00
+-           
+(1,428,178)
+             
+Comprehensive Income for the year
+-
+                      
+-
+                           
+-
+                          
+-
+                             
+-
+                           
+Profit for the year
+-
+                      
+-
+                           
+-
+                          
+26,265
+                      
+26,265
+                    
+Other comprehensive income
+-
+                      
+-
+                           
+-
+                          
+-
+                             
+-
+                           
+Total comprehensive income for the year
+-
+                      
+-
+                           
+-
+                          
+26,265
+                      
+26,265
+                    
+Transaction with owners recorded directly in equity
+Balance at 30th June 2025
+136,673
+             
+250,638
+                  
+65,692
+                   
+(1,854,916)
+               
+(1,401,913)
+             
+ 4 
+
+UNION DICON SALT PLC
+8
+FOR THE PERIOD ENDED 30TH JUNE, 2026
+NOTES TO THE FINANCIAL STATEMENTS
+1)
+Corporate information and principal activities
+Its registered office is at Phase 2, NPA Kirikiri Lighter Terminal Apapa Lagos.
+2)
+Basis of preparation
+a
+Statement of compliance
+b
+Basis of measurement
+c
+Functional and presentation currency
+d
+Use of estimates and judgement
+3
+New standards, interpretations and amendments
+(a)
+New standards, interpretations and amendments adopted from 1 January 2022
+Date Issued by IASB
+Effective date periods beginning on or 
+after
+IAS 37
+Onerous Contracts – Cost of
+Fulfilling a Contract
+14 May 2022
+1 January 2022
+Amendments to IFRS 1, IFRS 9, IFRS 16 
+and IAS
+41
+Annual Improvements to IFRS Standards 2018–2020
+14 May 2020
+1 January 2022
+IAS 16
+Property, Plant and Equipment —
+Proceeds before Intended Use (Amendments to IAS 16)
+14 May 2020
+1 January 2022
+(b)
+IFRS 3
+Reference to the Conceptual Framework
+14 May 2020
+1 January 2022
+New standards effective for adoption in the annual financial statements for the year ended 31 December 2022 but had no significant effect or impact 
+Standard/Interpretation
+The following are the new standards and interpretations that have been issued, but are not mandatory for the financial year ended 31 December 2022.
+They have not been adopted in preparing the financial statements for the year ended 31 December 2022.
+In terms of International Financial Reporting Standards, the company is required to include in its financial statements disclosure about the future
+impact of standards and interpretations issued but not yet effective at reporting date.
+At the date of authorisation of the financial statements of the Company for the year ended 31 December 2022, the following standards and
+interpretations were in issue but not yet effective:
+Dicon Salt Limited and Union Salt Limited were incorporated as private limited liability companies on 11 October 1984 and 30 May 1991 respectively. 
+The principal activity of the Company is the processing of crude salt. The issued share capital of the Company is held thus: 28% by Aims Limited, 19% by 
+The financial statements have been prepared in accordance with International Financial Reporting Standards (IFRS) as issued by the International
+Accounting Standards Board (IASB) and in compliance with the requirements of the Companies and Allied Matters Act, 2020 and Financial Reporting
+Council of Nigeria Act No 6, 2011. 
+The financial statements have been prepared under the historical cost concept except for certain financial instruments which were measured at fair 
+The Company's functional and presentation currency is the Nigerian Naira. The financial statements are presented in Nigerian Naira and have been
+rounded up to the nearest thousand except where otherwise stated.
+The preparation of ﬁnancial statements in conformity with IFRS requires the use of certain critical accounting estimates and judgments. It also requires
+management to exercise its judgement in the process of applying the Company’s accounting policies. The areas involving a higher degree of judgement
+or complexity, or areas where assumptions and estimates are signiﬁcant to the ﬁnancial statements are disclosed in note 4.
+
+UNION DICON SALT PLC
+9
+FINANCIAL STATEMENTS, 31 JUNE 2026
+NOTES TO THE FINANCIAL STATEMENTS
+Date issued by IASB
+Effective date periods beginning on or 
+after
+IAS 1
+Disclosure of Accounting Policies
+(Amendments to IAS 1 and IFRS Practice Statement 2)
+12 February 2021
+1 January 2023
+IAS 8
+Definition of Accounting
+Estimates (Amendments to IAS 8)
+12 February 2021
+1 January 2023
+IAS 12
+Deferred Tax related to Assets and Liabilities arising from 
+a single Transaction (Amendments to IAS
+12)
+7 May 2021
+1 January 2023
+IFRS 16
+Lease liability in a Sale and Leaseback (Amendments to 
+IFRS
+16)
+22 September 2022
+1 January 2024
+IAS 1
+Non-current liabilities with
+covenants
+31 October 2022
+1 January 2024
+IAS 1
+Classification of liabilities as
+current or non-current
+31 October 2022
+1 January 2024
+4)
+Critical accounting estimates and judgements
+i)
+Legal proceedings
+ii)
+Income and deferred taxation
+*All standards and interpretations will be adopted at their effective date (except for those standards and interpretations that are not applicable to the
+Entity).
+The Company makes certain estimates and assumptions regarding the future. Estimates and judgements are continually evaluated based on historical
+experience as well as other factors, including expectations of future events that are believed to be reasonable under the circumstances. In the future, 
+The Company reviews outstanding legal cases following developments in the legal proceedings and at each reporting date, in order to assess the need
+for provisions and disclosures in its financial statements. Among the factors considered in making decisions on provisions are the nature of litigation,
+claim or assessment, the legal process and potential level of damages in the jurisdiction in which the litigation, claim or assessment has been brought,
+the progress of the case (including the progress after the date of the financial statements but before those statements are issued), the opinions or views
+of legal advisers, experience on similar cases and any decision of the Company's management as to how it will respond to the litigation, claim or
+assessment.
+The Company incurs corporate tax liability and recognises changes to deferred tax assets and deferred tax liabilities, all of which are based on
+management’s interpretations of applicable laws and regulations. The quality of these estimates is highly dependent upon management’s ability to
+properly apply at times a very complex sets of rules to recognise changes in applicable rules and in the case of deferred tax assets, management’s ability
+to project future earnings from activities that may apply loss carry forward positions against future income taxes.
+Standard/Interpretation
+
+UNION DICON SALT PLC
+10
+FOR THE PERIOD ENDED 30TH JUNE, 2026
+NOTES TO THE FINANCIAL STATEMENTS
+iii)
+Impairment of  property, plant and equipment and intangible assets
+iv)
+Estimates of useful lives and residual value
+5)
+Summary of significant accounting policies
+a)
+Foreign currency transactions
+b)
+Revenue
+The goods is often sold with volume discounts based on aggregate sales value over a 12 months period. Revenue from these sales is recognized
+based on the price specified in the contract, net of the estimated volume discounts. Accumulated experience is used to estimate and provide for 
+A receivable is recognized when the goods are delivered as this is the point in time that the consideration is unconditional because only the
+passage of time is required before the payment is due.   
+Monetary items denominated in foreign currency are translated using the closing rate as at the reporting date. Non-monetary items measured at
+historical cost denominated in a foreign currency are translated with the exchange rate as at the date of initial recognition; non monetary items
+in a foreign currency that are measured at fair value are translated using the exchange rates at the date when the fair value was determined.
+Foreign exchange gains and losses resulting from the settlement of foreign currency transactions and from the translation at the reporting date
+exchange rates of monetary assets and liabilities denominated in foreign currencies are recognised in the Income statement.
+All foreign exchange gains and losses recognised in the income statement are presented net in the Income statement within other operating
+income and operating expenses respectively. Foreign exchange gains and losses on other comprehensive income items are presented in other
+comprehensive income within the corresponding item.
+The Company supplies salt in the wholesale market. Sales are recognized when control of the goods has transferred, being when the goods are
+delivered to the wholesaler, the wholesaler has full discretion over the channel and price to sell the goods, and there is no unfulfilled obligation
+that could affect the wholesale’s acceptance of the goods. Delivery occurs when the goods have been transported to the specific location of the
+The Company assesses assets or groups of assets for impairment annually or whenever events or changes in circumstances indicate that carrying
+amounts of those assets may not be recoverable. In assessing whether a write-down of the carrying amount of a potentially impaired asset is
+required, the asset’s carrying amount is compared to the recoverable amount. Frequently, the recoverable amount of an asset proves to be the
+Company’s estimated value in use.
+The estimated future cash flows applied are based on reasonable and supportable assumptions and represent management’s best estimates of
+the range of economic conditions that will exist over the remaining useful life of the cash flow generating assets.
+The estimates of useful lives and residual values of property, plant and equipment impact the annual depreciation charge. The useful lives and
+residual values are based on management experience and the condition of the assets. Consideration is given to management's intended usage
+policy for the assets in the future and potential market prices of similar assets.
+The Company's accounting policies set out below have been applied consistently to all years presented in these financial statements.
+In preparing the financial statements of the Company, transactions in currencies other than the entity's presentation currency (foreign
+currencies) are recognised at the rates of exchange prevailing at the dates of the transactions and any exchange differences arising are included
+in the income statement of the reporting period.
+
+UNION DICON SALT PLC
+FOR THE PERIOD ENDED 30TH JUNE, 2026
+NOTES TO THE FINANCIAL STATEMENTS
+c)
+Finance income and finance expense
+d)
+Property, plant and equipment
+i)    Recognition and measurement
+ii)  Subsequent costs 
+iii)  Depreciation
+Type of asset
+%
+Building
+2
+Plant and machinery
+10
+Computer equipment
+25
+Furniture and fittings
+20
+iv)  Derecognition
+e)
+Impairment of non-financial assets
+Non-financial assets other than inventories are reviewed at each reporting date for impairment or whenever events or changes in circumstances
+indicate that the carrying amount may not be recoverable. An impairment loss is recognised for the amount by which the asset's carrying amount
+exceeds its recoverable amount. The recoverable amount is the higher of an asset's fair value less cost to sell and value in use. For the purposes
+of assessing impairment, assets are grouped at the lowest levels for which they have separately identifiable cash flows (cash-generating units). 
+Interest income on short-term deposits is recognised by reference to the principal outstanding and at the effective interest rate applicable, which
+is the rate that exactly discounts estimated future cash  receipts through the expected life of the financial asset to the asset’s net carrying 
+Dividend income from investments is recognised in the income statement when the shareholder’s right to receive payment has been established
+(provided that it is probable that the economic benefits will flow to the Company) and the amount of income can be measured reliably.
+Finance costs comprise interest expense on borrowings, unwinding of the discount on provisions, changes in the fair value of financial assets at
+fair value through profit or loss where the Company holds such financial assets and impairment losses recognised on financial assets ( other than 
+Property, plant and equipment are measured at cost less accumulated depreciation and any accumulated impairment losses. Cost includes
+expenditure that is directly attributable to the acquisition of the assets. Items of property, plant and equipment under construction are disclosed
+as capital work in progress. The cost of construction recognised includes the cost of materials and direct labour, any other costs directly
+attributable to bringing the assets to a working condition for their intended use, the costs of dismantling and removing the items and restoring
+the site on which they are located, and borrowing costs on qualifying assets.
+The cost of replacing a part of an item of property, plant and equipment is recognised in the carrying amount of the item if it is probable that the
+future economic benefits embodied within the part will flow to the Company and its cost can be measured reliably. The carrying amount of the
+replaced part is then derecognised. The costs of the day-to-day servicing and maintenance of an item of property, plant and equipment are
+recognised in the income statement during the period in which they are incurred.
+Depreciation is calculated on items of property, plant and equipment to write down the cost of each asset to its residual value over its estimated
+useful life. No depreciation is charged on items of property, plant and equipment until they are brought into use. 
+The principal annual rates used for this purpose, which are consistent with those for the previous years, are as follows: 
+The assets depreciable methods, useful lives and residual values are reviewed annually and adjusted if necessary. The asset's carrying amount is
+written down immediately to its recoverable amount if the asset's carrying amount is greater than its estimated recoverable amount.
+An item of property, plant and equipment is derecognised upon disposal or when no future economic benefits are expected from its use. Any
+gains or loss arising on derecognition of the asset (calculated as the difference between the net disposal proceeds and the carrying amount of the
+asset) is included in the income statement within ‘Other income or operating expenses’ in the year that the asset is derecognised.
+
+UNION DICON SALT PLC
+12
+FOR THE PERIOD ENDED 30TH JUNE, 2026
+NOTES TO THE FINANCIAL STATEMENTS
+f)
+Inventory  
+g)
+Financial instruments
+a) Financial assets  
+ii) Classification of financial assets at amortised cost 
+•
+•
+iii) Other receivables
+iv) Prepayments
+v) Cash and cash equivalents
+For the purpose of reporting cash flows, cash and cash equivalents include cash on hand, bank balances, investments in money market
+instruments with maturity dates of less than three months and are risk free net of bank overdraft.
+Cash and cash equivalents consist of cash at bank and in hand and short-term deposits with an original maturity of three months or less.
+If the recoverable amount of an asset is estimated to be less than its carrying amount, the carrying amount of the asset is reduced to its
+recoverable amount. An impairment loss is recognised immediately in the income statement, unless the relevant asset is carried at a revalued
+amount, in which case the impairment loss is treated as a revaluation decrease.
+Where an impairment loss subsequently reverses, the carrying amount of the asset is increased to the revised estimate of its recoverable
+amount, but so that the increased carrying amount does not exceed the carrying amount that would have been determined had no impairment
+loss been recognised for the asset in prior years. A reversal of an impairment loss is recognised immediately in the income statement, unless the
+relevant asset is carried at a revalued amount, in which case the reversal of the impairment is treated as a revaluation increase.
+Inventory include salt and chilli pepper, engineering items, bags and other consumables. Inventories are valued at the lower of cost and net
+realizable value. Cost includes the cost of the products, the landing cost and the expenses/charges associated with the conveyance of the
+inventory to the warehouse. Costs of the products are determined using the average cost methods. Net realizable value is the estimated selling
+price in the ordinary course of business less estimated cost necessary to make the sale. Adequate provision is made for slow moving, obsolete
+and defective inventories to ensure that the value at which inventories is held at the reporting date is reflective of anticipated future sales
+patterns.
+Financial assets are initially recognised at fair value plus directly attributable transaction costs. Subsequent remeasurement of financial assets is
+determined by their designation that is revisited at each reporting date.
+i) Classification as trade receivables 
+Trade receivables are amounts due from customers for goods sold or services performed in the ordinary course of business. They are generally
+due for settlement within 30 days and therefore are all classified as current. Trade receivables are recognized initially at the amount of
+consideration that is uncondition unless they contain significant financing components, when they are recognized at fair value. The Company 
+The Company  classified its financial assets as at amortised cost only if both of the following criteria are met: 
+the asset is held within a business model whose objective is to collect the contractual cash flows, and 
+the contractual terms give rise to cash flows that are solely payments of principal and interest. 
+These amounts generally arise from transactions outside the usual operating activities of the Company. Interest may be charge at commercial
+rates where the terms of repayment exceed six months. Collateral is not normally obtained. The non-current other receivables are due and
+payment within three years from the end of the reporting period.  
+Prepayments are payments made in advance relating to the following year and are recognised and carried at original amount less amounts
+utilised in the statement of profit and loss and other comprehensive income.
+
+UNION DICON SALT PLC
+FOR THE PERIOD ENDED 30TH JUNE, 2026
+NOTES TO THE FINANCIAL STATEMENTS
+vi) Derecognition of financial assets
+vii) Financial liabilities and equity instruments
+a) Trade and other payables
+b) Dividends  
+c)  De-recognition of financial liabilities
+h)
+Offsetting financial instruments
+i)
+Impairment of financial instruments
+j)
+Taxation
+i) Current income tax
+The expected loss rates are based on the payment profiles of customers over a period of 36 months from 31 December 2020 and the 
+The income tax expense for the period comprises current and deferred tax expense. Tax is recognised in the income statement except to the
+extent that it relates to items recognised in other comprehensive income or directly in equity. In this case, the tax is also recognised in other
+comprehensive income or directly in equity.
+To measure the expected credit losses, trade receivables has been grouped based on shared credit risk characteristics and the days past due. The 
+The Company derecognises a financial asset only when the contractual rights to the cash flows from the asset expires, or when it transfers
+substantially all the risks and rewards of ownership of the asset to another entity. On derecognition of a financial asset in its entirety, the
+difference between the asset's carrying amount and the sum of the consideration received and receivable and the cumulative gain or loss that
+had been recognised in other comprehensive income and accumulated in equity is recognised in the income statement.
+Financial liabilities are initially recognised at fair value when the Company becomes a party to the contractual provisions of the liability.
+Subsequent measurement of financial liabilities is based on amortized cost using the effective interest method. The Company financial liabilities
+include trade and other payables. 
+Financial liabilities are presented as if the liability is due to be settled within 12 months after the reporting date, or if they are held for the
+purpose of being traded. Other financial liabilities which contractually will be settled more than 12 months after the reporting date are classified
+as non-current.
+Trade and other payables are obligations to pay for goods or services that have been acquired in the ordinary course of business from suppliers.
+Trade and other payables are recognised initially at fair value and subsequently measured at amortised cost using the effective interest method. 
+Dividends on ordinary shares are recognised as a liability and deducted from equity when they are approved by the Company’s shareholders.
+Interim dividends are deducted from equity when they are declared and no longer at the discretion of the Company. Dividends for the year that 
+The Company derecognises financial liabilities when, and only when, the Company's obligations are discharged, cancelled or they expire. The
+difference between the carrying amount of the financial liability derecognised and the consideration paid and payable is recognised in income
+statement.
+Financial assets and liabilities are offset and the net amount reported in the statement of financial position when there is a legally enforceable
+right to offset the recognised amounts and there is an intention to settle on a net basis or realise the asset and settle the liability simultaneously.
+The Company has trade receivables for the sales of inventory that is subject to the expected credit loss model. 
+While cash and cash equivalents are also subject to the impairment requirements of IFRS 9, the identified impairment loss was immaterial. 
+The Company applies the IFRS 9 simplified approach to measuring expected credit losses which uses a lifetime expected loss allowance for all 
+
+UNION DICON SALT PLC
+FOR THE PERIOD ENDED 30TH JUNE, 2026
+NOTES TO THE FINANCIAL STATEMENTS
+.     Company Income Tax - This relates to tax on revenue and profit generated by the Company during 
+     the year, to be taxed under the Companies Income Tax Act, Cap C21, LFN 2004 as amended to date
+.    Tertiary Education Tax - Tertiary education tax is based on the assessable income of the Company 
+     and is governed by the Tertiary Education Trust Fund (Establishment) Act, LFN 2011 (Amended)
+ii) Deferred tax
+.   temporary differences on the initial recognition of assets or liabilities in a transaction that is not a 
+    business combination and that affects neither accounting nor taxable profit or loss.
+.   taxable temporary differences arising on the initial recognition of goodwill.
+k)
+Employee benefits 
+(i) Short term employee benefits 
+(ii) Defined contribution plans 
+(iii) Defined benefits plan 
+The current income tax charge is calculated on the basis of the tax laws enacted or substantially enacted at the reporting date in Nigeria where
+the Company operates and generates taxable income.
+The tax currently payable is based on taxable profit for the year. Taxable profit differs from profit as reported in the income statement because it
+excludes items of income or expense that are taxable or deductible in other years, but it further excludes items that are never taxable or
+deductible. The Company is subject to the following types of current income tax:
+Deferred tax is recognised in respect of temporary differences between the carrying amounts of assets and liabilities for financial reporting
+purposes and the amounts used for taxation purposes. Deferred tax is not recognised for:
+Deferred tax is provided for using the liability method, which represents taxation at the current rate of corporate tax on all timing differences
+between the accounting values and their corresponding tax written down values. A deferred tax asset is recognised only to the extent that it is
+probable that future taxable profits will be available against which the amount will be utilised. Deferred tax assets are reduced to the extent that
+it is no longer probable that the related tax benefit will be realised.
+Deferred income tax assets and liabilities are offset when there is a legally enforceable right to offset current tax assets against current tax
+liabilities and when the deferred income tax assets and liabilities relate to income taxes levied by the same taxation authority on either the same
+taxable entity or different taxable entities where there is an intention to settle the balances on a net basis.
+Short term employee benefit obligations are measured on an undiscounted basis and are expensed as the related services are provided. The
+Company recognises wages, salaries, bonuses and other allowances for current employees in the income statement as the employees render
+such services. 
+A liability is recognised for the amount expected to be paid under short - term benefits, if the company has a present legal or constructive
+obligation to pay the amount as a result of past service provided by the employee and the obligation can be estimated reliably.
+The Company operates a defined contribution plan as stipulated in the Pension Reform Act, 2014. Under the defined contributory scheme, the
+Company contributes 10%, while its employees contribute 8% of their annual basic, housing and transport allowances to the scheme. Once the
+contributions have been paid, the Company retains no legal and constructive obligation to pay further contributions if the fund does not hold
+sufficient assets to finance benefits accruing under the retirement benefit plan. The Company's obligations are recognised in the income
+statement as administrative expenses (employee benefits) when they are due. Prepaid contributions are recognised as an asset to the extent that
+a cash refund or reduction in the future payments is available.
+Defined benefit plans define an amount of pension benefit that an employee will receive on retirement, usually dependent on one or more
+factors such as age, years of service and compensation. The liability in respect of a defined benefit pension plan is the present value of the
+defined obligation at the end of the reporting period less the fair value of plan assets, together with adjustments for un-recognised past-service
+costs. The defined benefit obligation is calculated annually by independent actuaries using the projected unit credit method. The present value of
+the defined benefit obligation is determined by discounting the estimated future cash outflows, using interest rate of government bond. Actuarial
+gains and losses arising from experience adjustment and changes in actuarial assumption are charged or credited to equity in other
+comprehensive income in the period which they arise. 
+
+UNION DICON SALT PLC
+FOR THE PERIOD ENDED 30TH JUNE, 2026
+NOTES TO THE FINANCIAL STATEMENTS
+l)
+Provisions
+m)
+Share capital, reserves and dividends
+i) Share capital  
+Share capital represents the nominal value of shares that have been issued.
+ii) Reserves
+Reserves include all current and prior periods' retained earnings.
+iii) Dividends  
+n)
+Related party transactions
+6)
+Financial instruments - risk management
+The Company is exposed through its operations to the following financial risks:
+- Credit risk
+- Fair value or cash flow interest rate risk
+- Foreign exchange risk
+- Other market price risk, and
+- Liquidity risk.
+(i) Principal financial instruments
+- Trade receivables
+- Cash and cash equivalents
+- Trade and other payables
+Provisions are not recognised for future operating losses. Where there are a number of similar obligations, the likelihood that an outflow will be
+required in settlement is determined by considering the class of obligations as a whole. A provision is recognized even if the likelihood of an
+outflow with respect to any one item included in the same class of obligations may be small.
+Provisions are measured at the present value of the expenditures expected to be required to settle the obligation. The unwinding of the discount
+is recognised as a finance cost.
+Dividends on ordinary shares are recognised as a liability and deducted from equity when they are approved by the company’s shareholders.
+Interim dividends are deducted from equity when they are declared. Dividends for the year that are approved after the statement of financial
+position date are disclosed as an event after the statement of financial position.
+Related parties include the related companies, the directors and any employee who is able to exert significant influence on the operating policies
+of the company. Key management personnel are also considered related parties. Key management personnel are those persons having authority
+and responsibility for planning, directing and controlling the activities of the entity, directly or indirectly, including any director (whether
+executive or otherwise) of that entity.
+The Company considers two parties to be related if, directly or indirectly one party has the ability to control the other party or exercise significant
+influence over the other party in making financial or operating decisions.
+Where there is a related party transactions with the company, the transactions are disclosed separately as to the type of relationship that exists
+with the company and the outstanding balances necessary to understand  their effects on the financial position and the mode of settlement.
+In common with all other businesses, the Company is exposed to risks that arise from its use of financial instruments. This note describes the
+Company's objectives, policies and processes for managing those risks and the methods used to measure them. Further quantitative information
+in respect of these risks is presented throughout these financial statements. There have been no substantive changes in the Company's exposure
+to financial instrument risks, its objectives, policies and processes for managing those risks or the methods used to measure them from previous
+periods unless otherwise stated in this note.
+The principal financial instruments used by the Company, from which financial instrument risk arises are as follows:
+A provision is recognized only if, as a result of a past event, the Company has a present legal or constructive obligation that can be estimated
+reliably, and it is probable that an outflow of economic benefits will be required to settle the obligation. The provision is measured at the best
+estimate of the expenditure required to settle the obligation at the reporting date.
+
+UNION DICON SALT PLC
+FOR THE PERIOD ENDED 30TH JUNE, 2026
+NOTES TO THE FINANCIAL STATEMENTS
+  ii)
+Financial instruments by category
+Financial assets
+2026
+2025
+N'000
+N'000
+Cash and cash equivalents
+6,050,000
+                      
+58,359
+                        
+Trade and other receivables
+359,446
+                          
+9,375
+                          
+Total financial assets
+6,409,446
+                      
+67,734
+                        
+Total liabilities
+2026
+2025
+N'000
+N'000
+Trade and other payables
+14,772,679
+                    
+2,015,164
+                  
+General objectives, policies and processes
+Credit risk
+Liquidity risk
+Capital management
+The Company is currently experiencing difficulty in meeting its financial obligations as they fall due. However, efforts is being made by the Board
+to ensure that the Company can start the production and  sales of salt in order to generate income for its working capital requirements. 
+The Company’s objectives when managing capital are to safeguard the Company’s ability to continue as a going concern in order to provide
+returns for shareholders and beneﬁts for other stakeholders and to maintain an optimal capital structure to reduce the cost of capital.
+Management is currently addressing this effectively. As part of the measures to sustain the going concern, the Company has entered into a joint
+venture arrangement with Joatalim Logistic Limited. This arrangement currently fetch the sum of N230 million annually to sustain the 
+Proper attention is focused on the impact of the negative working capital and net liabilities respectively. To facilitate this, the management is
+committed to engage in productive activities this year with the approval by the Board to revive salt production and diversify into other bussiness
+opportunities. As part of the measures to sustain the going concern, the amount due to the related parties will not be required for immediate
+repayment until the Company returns to profitable position. 
+             at amortised cost
+The Board has overall responsibility for the determination of the Company's risk management objectives and policies and, whilst retaining
+ultimate responsibility for them, it has delegated the authority for designing and operating processes that ensure the effective implementation of
+the objectives and policies to the Company's finance department. The Board receives monthly reports from the Company's Accountant through
+which it reviews the effectiveness of the processes put in place and the appropriateness of the objectives and policies it sets. The Company's
+Accountant also reviews the risk management policies and processes and reports his findings to the Board.
+The overall objective of the Board is to set policies that seek to reduce risk as far as possible without unduly affecting the Company's
+competitiveness and flexibility. Further details regarding these policies are set out below:
+Credit risk is the risk of financial loss to the Company if a customer or counterparty to a financial instrument fails to meet its contractual
+obligations. The Company is mainly exposed to credit risk from rental income. The Company is not expose to credit risk from sales of products as
+it is currently not trading.  
+Liquidity risk arises from the Company's management of working capital and the finance charges and principal repayments on its debt
+instruments. It is the risk that the Company will encounter difficulty in meeting its financial obligations as they fall due.
+            Financial liabilities
+                Loans and
+                receivables
+
+UNION DICON SALT PLC
+NOTES TO THE ACCOUNTS
+FOR THE PERIOD ENDED 30TH JUNE, 2026
+2026
+2025
+ =N= '000
+ =N= '000
+7 REVENUE
+Revenue arises from:
+            4,487                     -   
+Gross sales of salt less rebate
+                   -                       -   
+8 COST OF SALES
+          11,160                     -   
+LESS: CLOSING INVENTORY
+          18,030 
+NET COST OF SALE
+          (6,870)                    -   
+9 OTHER OPERATING INCOME
+Rental income
+          37,500            75,000 
+Dividend income
+                   -                       -   
+Other income-Interest
+            1,352 
+          38,852            75,000 
+10 ADMINISTRATIVE EXPENSES
+ AGENCY FEE 
+                   -                       -   
+ BUSINESS PLAN 
+                   -                1,000 
+ ACCOUNT SOFTWARE 
+                   -                   765 
+ AUDIT EXPENSE 
+                   -                   822 
+ COMMUNICATION/DATA EXP 
+               260                 493 
+ ADVERT & BRANDING 
+            4,241                    15 
+ CORPORATE SUB. 
+                   -                   100 
+ STAFF TRANING 
+               250                 200 
+ REGUALTORY BODIES 
+            5,678              5,215 
+ ICT 
+               176              2,306 
+ BOARD EXP. 
+                   -                   280 
+ BIRTHDAY GIFT 
+                   -                      20 
+ CAR MAINTENANCE 
+               700              1,000 
+ FUEL AND DIESEL 
+            3,427              1,399 
+ STAFF SALARY 
+            9,484              6,286 
+ MARINE EXPENSES 
+            1,908 
+195
+ SECURITY  
+0
+37
+ TRANSPORT RELIEF 
+            4,526              2,354 
+ DIRECTOR ALLOWANCE 
+               500              1,651 
+ MEDICAL/STAFF WELFARE 
+                   -                1,590 
+ CONSULTANCY & PROF. FEES 
+            2,300                     -   
+ GRATUITY 
+                   -                   500 
+ REPAIR & MAINT(M/V) 
+               240                 949 
+ OFFICE EXP. 
+            3,850                 337 
+ STATIONERIES 
+               450                 364 
+ TRAVEL AND ACCOMODATION 
+            1,643              1,254 
+ RENT- NPA 
+                   -              14,383 
+ CSR 
+                   -              20,000 
+BANK CHARGES
+            6,219                 926 
+DEPRECIATION
+            3,149              3,054 
+          49,001            65,597 
+ 6
+
+UNION DICON SALT PLC
+NOTES TO THE ACCOUNTS
+FOR THE PERIOD ENDED 30TH JUNE, 2026
+2025
+11 TAXATION
+Current income tax
+(i)
+Profit and loss account
+Company income tax
+Education tax
+Nigeria Police Trust Fund Levy
+-
+                     
+Deferred tax
+-
+                     
+-
+                     
+ Tax Act, CAP C21 LFN, 2004 as amended.
+(ii)
+Profit before tax
+26,265
+              
+Tax at the statutory corporation tax rate of 30%
+-
+                     
+Effet of income that is exempted from taxation
+-
+                     
+-
+                     
+Loss relieved
+-
+                     
+Education tax at 3% of assessable profit
+Balancing charge/allowance
+Nigeria Police Trust Fund Levy
+Capital allowances absorbed 
+-
+                     
+Minimum tax
+Deferred tax provision
+-
+                     
+Tax expense recognised in profit or loss
+-
+                     
+Effective rate
+(iii)
+Statement of financial position
+Balance at the beginning of the year
+86,332
+              
+86,332
+              
+Payment during the year:
+Income tax
+1,715
+-                 
+Provision for the year:
+Company income tax
+Nigeria Police Trust Fund Levy
+Education tax
+Minimum tax
+1,340
+                 
+Balance at the en of the year
+85,957
+              
+(iv)
+Current tax assets and liabilities
+Deferred taxation
+current and prior reporting periods:
+Recognised in Other
+Propert, Plant
+ Comprehensive
+and Equipments
+Income
+TOTAL
+N'000
+N'000
+N'000
+At 1 April 2026
+5,384
+                      
+-
+                                
+5,384
+                 
+Charged to profit or loss
+6,029
+                      
+-
+                                
+6,029
+                 
+Charged to other comprehensive income
+-
+                          
+-
+                                
+-
+                     
+Reclassification from equity to profit or loss
+-
+                          
+-
+                                
+-
+                     
+At 1 January 2026
+11,413
+                    
+-
+                                
+11,413
+              
+Charged to profit or loss
+-
+                          
+-
+                                
+-
+                     
+Charged to other comprehensive income
+-
+                          
+-
+                                
+-
+                     
+Reclassification from equity to profit or loss
+-
+                          
+-
+                                
+-
+                     
+At 30 June 2026
+11,413
+                    
+-
+                                
+11,413
+              
+(v)
+Deferred tax liabilities
+Balance at the beginning of the year
+5,384
+                      
+5,384
+                 
+Charge for the year
+6,029
+                      
+6,029
+                 
+Balance at the end of the year
+11,413
+                    
+11,413
+              
+Taxation for the period in the income statement represent deferred tax, education tax and company income tax
+Income tax recognised in profit or loss
+The company's  education tax is computed in accordance with the provisions of Education Tax Act, CAP E4 LFN, 2004 as 
+Effect of expenses that are not deductable in determining taxable profit
+The following are the major deferred tax liabilities and asset recognised by the Company and movements thereon during the 
+The charge for taxation in these finacial statements us computed in accordance with the provision of the Company's Income
+amended which is 3% of the assessable profit for the year.
+The income tax expense for the year can be reconciled to the accounting profit as per the statement 
+of comprehensive income as follows:
+ 8 
+
+UNION DICON SALT PLC
+NOTES TO THE FINANCIAL STATEMENT
+FOR THE PERIOD ENDED 30TH JUNE, 2026
+12 Property, Plant and Equipment
+LEASEHOLD
+PLANT AND
+FURNITURE &
+TRUCKS & 
+OTHER 
+VEHICLES
+COMPUTER
+ADMIN & 
+WAREHOUSE
+ LAND & BUILDING
+MACHINERY
+FITTINGS
+EQUIPMENT
+         TOTAL
+            N'000
+            N'000
+            N'000
+            N'000            N'000
+            N'000
+            N'000
+ COST
+At 1 April 2026
+66,082
+                
+113,166
+             
+169,936
+            
+17,637
+          
+366,821
+             
+Additions
+-
+                      
+822,000
+             
+520,105
+     
+1,900
+            
+111,434
+        
+1,455,439
+          
+Additions
+660,000
+             
+735,000
+             
+504,000
+        
+1,899,000
+          
+Additions
+104,000
+             
+1,562,632
+          
+1,666,632
+          
+Disposal
+-
+                      
+-
+                      
+-
+                     
+-
+                 
+At 30 June 2026
+830,082
+             
+3,232,798
+          
+169,936
+            
+520,105
+     
+19,537
+          
+615,434
+        
+5,387,892
+          
+Accumulated depreciation 
+and impairment
+At 1 April 2026
+24,374
+                
+11,316
+                
+167,900
+            
+13,920
+          
+-
+                 
+217,510
+             
+Charge for the Period
+93
+                      
+271
+                
+2,785
+            
+3,149
+                  
+At 30 June 2026
+24,374
+               
+11,316
+               
+167,993
+            
+14,096
+          
+2,785
+            
+220,659
+             
+ 
+CARRYING AMOUNTS
+At 30 June 2026
+41,708
+               
+3,221,482
+          
+1,943
+                 
+5,441
+            
+108,649
+        
+5,167,233
+          
+(a)
+(b)
+(C) 
+None of the company's assets is held under lease
+None of the company's assets is pledged as collateral for loan
+No contractual commitment to acquire asset during the year.
+ 5
+
+UNION DICON SALT PLC
+NOTES TO THE ACCOUNTS
+FOR THE PERIOD ENDED 30TH JUNE, 2026
+13 OTHER RECEIVABLES
+Amount due from related companies (13(a))
+-
+                  
+Staff loan account
+8,900
+              
+Sundry receivables
+350,546
+          
+Other assets
+359,446
+          
+Impairment allowance (13(b))
+Total trade and other receivables
+359,446
+          
+14
+CASH AND CASH EQUIVALENTS
+Cash at bank available on demand
+2,007,187
+       
+Cash Equivalent(Term Deposit)
+6,050,000
+       
+B
+PREPAYMENT
+8,057,187
+       
+15
+TRADE AND OTHER PAYBALES
+Other payables (Note 15(a))
+657,416
+          
+Accruals (Note 15(b))
+52,869
+            
+at amortised cost
+710,285
+          
+Directors current account
+14,004,447
+    
+Staff pension (15(c )) 
+57,947
+            
+14,772,679
+    
+The carrying value of trade and other paybales classified as financial liabilities measured at amortised cost 
+approximates fair value
+(a)
+Other Payables
+PAYE
+36,435
+            
+PROV. GRATUITY EXISTING STAFF
+251,992
+          
+WITHOLDING TAX ACCOUNT
+150
+                  
+Union dues
+923
+                  
+Joatelim Nig. Ltd
+350,000
+          
+CBO capital account
+16,534
+            
+ITF payables
+691
+                  
+NSITF payables
+691
+                  
+657,416
+          
+(b)
+Accruals
+Accrued charged
+-
+                  
+Salary payable
+-
+                  
+Audit fees
+-
+                  
+NHF
+617
+                  
+Staff trust fund
+143
+                  
+Rent 
+85,080
+            
+85,840
+            
+Total financial liabilities excluding loans and borrowings, classified as financial liabilities measured
+9
+
+(c ) Staff Pension
+Balance at the beginning of the year 
+55,123
+            
+Deduction in the year
+2,947
+              
+Remittance in the year
+(123)
+                
+57,947
+            
+16
+EMPLOYEE BENEFITS LIABILITIES
+(a)
+(i)
+Less than 2 years of meritorious service                 -
+Nil
+(ii)
+2-9 years of meritoriuos service                               -
+150% of monthly gross salary
+(iii) 10-20 years of meritoriuos service                          -
+200% of monthly gross salary
+(iv) More than 20 years                                                   -
+250% of monthly gross salary
+(b)
+(c )
+%
+Discount rate
+-
+                  
+Rate of salary increase
+-
+                  
+rate of inflation
+-
+                  
+(d)
+is as follows:
+Balance at the beginning of the year
+60,002.0
+         
+Current service cost
+-
+                  
+Interest cost
+-
+                  
+Benefit paid
+-
+                  
+Actuarial loss - change in assumption
+-
+                  
+Actuarial loss - experience adjustment
+-
+                  
+Curtailment
+-
+                  
+Balance as at year end
+60,002
+            
+(e ) Statement of Other Comprehensive Income
+Actuarial loss on liability during the year due to:
+Change in assumption
+-
+                  
+Experience adjustment
+-
+                  
+-
+                  
+17
+SHARE CAPITAL 
+(a)
+Issued and fully paid
+NUMBER
+VALUE
+Ordinary share of 50 kobo each
+273,346
+                                                 
+136,673
+          
+Addition during the year
+-
+                                                          
+-
+                  
+Balance at the end of the year
+273,346
+                                                 
+136,673
+          
+(b)
+Share Premium
+Balance at the beginning of the year
+-
+                                                          
+250,638
+          
+18
+ACTUARIAL RESERVE
+Balance at the beginning of the year
+-
+                                                          
+65,692
+            
+Gains for the year
+-
+                  
+Balance at the end of the year
+-
+                                                          
+65,692
+            
+19
+REVENUE RESERVE
+Balance at the beginning of the year
+1,881,180
+-       
+Profit/ (Loss) for the year
+26,266
+            
+Balance at the end of the year
+-
+                                                          
+(1,854,914)
+     
+The company operates a gratuity scheme in line with the provision of the agreements entered into with Nigeria Labour Congress (NLC)
+The benefits payable to members based on the completed number of years served are as follows:
+The most recent actuarial valuation of the present value of the defined benefit obligation were carried out at 31 December 2020 by
+Bestwole Developments Limited and the report was signed by the Managing Director of the company Mr. Wole Ogunkoya (FRC/2013/
+NAS/00000000986). The present value of the defined benefit obligation, and the related current service cost and past service cost, 
+were measured using the Projected Unit Credit. The company did not undertake any actuarial valuation in the year.
+The principal assumptions used for the purpose of the actuarial valuations were as follows:
+Reconciliation of change in benefit obligation
+The amount included in the statement of financial position arising from the entity's obligation in respect of its defined benefit plans 
+9
+
+UNION DICON SALT PLC
+FINANCIAL STATEMENTS 30TH JUNE 2026
+FIVE YEARS FINANCIAL SUMMARY
+2026
+2025
+2024
+2023
+2022
+                   N'000
+                   N'000
+                   N'000
+                   N'000
+                   N'000
+REVENUE
+4,487
+                      
+-
+                          
+-
+                          
+-
+                          
+-
+                          
+Profit before taxation
+1,208
+                      
+61,567
+                    
+17,858
+                    
+94,222
+                    
+44,959
+-                    
+Taxation
+-
+                          
+-
+                          
+32,982
+-                    
+33,523
+                    
+Profit after taxation
+1,208
+                      
+61,567
+                    
+17,858
+                    
+61,240
+                    
+11,436
+-                    
+FUNDS EMPLOYED
+Share Capital
+136,673
+                  
+136,673
+                  
+136,673
+                  
+136,673
+                  
+136,673
+                  
+Share premium
+250,638
+                  
+250,638
+                  
+250,638
+                  
+250,638
+                  
+250,638
+                  
+Retain Earnings
+1,799,181
+-              
+1,854,914
+-              
+1,881,180
+-              
+1,777,419
+-              
+1,838,659
+-              
+Actuarial valuation reserve
+65,692
+                    
+65,692
+                    
+65,692
+                    
+65,692
+                    
+65,692
+                    
+Equity
+1,346,178
+-              
+1,401,911
+-              
+1,815,488
+-              
+1,324,416
+-              
+1,385,656
+-              
+EMPLOYMENT OF CAPITAL
+Property, Plant and Equipments
+259,312
+                  
+255,850
+                  
+47,461
+                    
+45,728
+                    
+43,546
+                    
+Investment in subsidiary
+-
+                          
+-
+                          
+-
+                          
+-
+                          
+53,981
+                    
+Current Assets
+13,988,440
+            
+367,865
+                  
+728,298
+                  
+67,130
+                    
+95,142
+                    
+Total Liabilities
+15,370,402
+-            
+2,025,626
+-              
+2,203,936
+-              
+1,437,274
+-              
+1,578,326
+-              
+Total Net Liabilities
+1,346,178
+-              
+1,401,911
+-              
+1,428,177
+-              
+1,324,416
+-              
+1,385,657
+-              
+
+
+Unit
+Percentage
+Unit
+Percentage
+Issued Share Capital
+273,346,000
+100%
+273,346,000
+100%
+Substantial Shareholdings (5% and above)
+Lt. General (Rtd) T.Y. Danjuma (GCON)
+33,473,291
+        
+12.25%
+33,473,291
+            
+12.25%
+CROSS GROUP (NOT REPRESENTED)
+64,000,000
+        
+23.41%
+64,000,000
+            
+23.41%
+Mr. Bekuochi Nwawudu
+34,596,362
+        
+12.66%
+34,596,362
+            
+12.66%
+Maj. Gen. B.I. Alaya
+Dr. Ibrahim Abubakar Kana
+Total Substantial Shareholdings
+176,069,653
+64.41%
+176,069,653
+64.41%
+Lt. General (Rtd) T.Y. Danjuma (GCON)
+37,277,386
+        
+21.17%
+37,277,386
+            
+21.17%
+Total Directors' Shareholdings
+37,277,386
+13.64%
+37,277,386
+13.64%
+Free Float in Units and Percentage
+59,998,961
+21.95%
+59,998,961
+21.95%
+Free Float in Value
+Declaration:  
+Directors' Shareholdings (direct and indirect), excluding directors with substantial interests
+₦ 485,991,584.10
+₦ 536,990,700.95
+(A)   UNION DICON SALT Plc with a free float percentage of 21.95% as at 30 June 2026, is compliant with The Exchange's free 
+float requirements for companies listed on the Main Board.
+(B)  UNION DICON SALT Plc with a free float value of N485,991,584 as at 30 June 2026, is compliant with The Exchange's free 
+float requirements for companies listed on the Main Board.
+Shareholding Structure/Free Float Status
+Description
+30-Jun-26
+30-Jun-25
+44,000,000
+        
+16.10%
+44,000,000
+            
+16.10%
+

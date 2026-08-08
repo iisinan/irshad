@@ -30,10 +30,20 @@ const LOADING_STEPS = [
 const fmt = (val) => {
   if (!val && val !== 0) return '—';
   const n = parseFloat(val); if (isNaN(n)) return '—';
+  if (n >= 1e12) return '₦' + (n/1e12).toFixed(2) + 'T';
   if (n >= 1e9)  return '₦' + (n/1e9).toFixed(2) + 'B';
   if (n >= 1e6)  return '₦' + (n/1e6).toFixed(2) + 'M';
   if (n >= 1e3)  return '₦' + (n/1e3).toFixed(2) + 'K';
   return '₦' + n.toFixed(2);
+};
+const fmtCount = (val) => {
+  if (!val && val !== 0) return '—';
+  const n = parseFloat(val); if (isNaN(n)) return '—';
+  if (n >= 1e12) return (n/1e12).toFixed(2) + 'T';
+  if (n >= 1e9)  return (n/1e9).toFixed(2) + 'B';
+  if (n >= 1e6)  return (n/1e6).toFixed(2) + 'M';
+  if (n >= 1e3)  return (n/1e3).toFixed(2) + 'K';
+  return n.toLocaleString();
 };
 const fmtRaw = (val) => { const n=parseFloat(val); return isNaN(n)?'—':`₦${n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}`; };
 const fmtDate  = (d) => {
@@ -113,25 +123,25 @@ const RatioBar = ({ title, subtitle, ratio, threshold, numLabel, numVal, denLabe
 
   return (
     <div onClick={clickable?()=>onInspect({title,ratio:rv,threshold:`≤ ${threshold}%`,formula,numLabel,numVal,denLabel,denVal}):undefined}
-      className={clickable?'hover-card':''} style={{ background:'var(--bg)',borderRadius:14,padding:'15px 20px',marginBottom:10,border:`1px solid ${ok?'rgba(16,185,129,0.15)':'rgba(239,68,68,0.15)'}`,cursor:clickable?'pointer':'default',transition:'all 0.22s',display:'grid',gridTemplateColumns:'175px 1fr 118px',gap:18,alignItems:'center' }}>
+      className={clickable?'hover-lift':''} style={{ background:'var(--bg)',borderRadius:14,padding:'16px 20px',marginBottom:12,border:`1px solid ${ok?'rgba(16,185,129,0.15)':'rgba(239,68,68,0.15)'}`,cursor:clickable?'pointer':'default',transition:'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',display:'grid',gridTemplateColumns:'180px 1fr 118px',gap:20,alignItems:'center', boxShadow:'0 2px 8px rgba(0,0,0,0.02)' }}>
       <div>
-        <div style={{ display:'flex',alignItems:'center',gap:6,marginBottom:2 }}>
-          {num&&<span style={{ width:18,height:18,borderRadius:5,background:ok?'rgba(16,185,129,0.12)':'rgba(239,68,68,0.12)',color:ok?'var(--halal)':'var(--non-halal)',fontSize:'0.64rem',fontWeight:900,display:'inline-flex',alignItems:'center',justifyContent:'center' }}>{num}</span>}
-          <span style={{ fontWeight:800,color:'var(--text-dark)',fontSize:'0.86rem' }}>{name}</span>
-          {clickable&&<span style={{ fontSize:'0.56rem',padding:'1px 4px',borderRadius:100,background:'var(--bg-section)',color:'var(--text-muted)',fontWeight:700,border:'1px solid var(--border)' }}>↗</span>}
+        <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:4 }}>
+          {num&&<span style={{ width:20,height:20,borderRadius:6,background:ok?'rgba(16,185,129,0.12)':'rgba(239,68,68,0.12)',color:ok?'var(--halal)':'var(--non-halal)',fontSize:'0.68rem',fontWeight:900,display:'inline-flex',alignItems:'center',justifyContent:'center' }}>{num}</span>}
+          <span style={{ fontWeight:800,color:'var(--text-dark)',fontSize:'0.9rem', letterSpacing:'-0.3px' }}>{name}</span>
+          {clickable&&<span style={{ fontSize:'0.56rem',padding:'2px 6px',borderRadius:100,background:'var(--bg-section)',color:'var(--text-muted)',fontWeight:800,border:'1px solid var(--border)' }}>↗</span>}
         </div>
-        <div style={{ fontSize:'0.67rem',color:'var(--text-muted)',lineHeight:1.4 }}>{subtitle}</div>
+        <div style={{ fontSize:'0.7rem',color:'var(--text-muted)',lineHeight:1.4, fontWeight:500 }}>{subtitle}</div>
       </div>
-      <div style={{ position:'relative',height:9,background:'rgba(0,0,0,0.06)',borderRadius:100,overflow:'visible' }}>
-        <div style={{ position:'absolute',top:0,left:0,height:'100%',width:`${fill}%`,background:grad,borderRadius:100,boxShadow:ok?'0 0 8px rgba(16,185,129,0.25)':'0 0 8px rgba(239,68,68,0.25)',transition:'width 0.9s cubic-bezier(0.4,0,0.2,1)' }}/>
-        <div style={{ position:'absolute',top:-4,bottom:-4,left:`${pin}%`,width:2.5,background:'var(--non-halal)',borderRadius:2,boxShadow:'0 0 5px rgba(239,68,68,0.5)' }}/>
-        <div style={{ position:'absolute',top:14,left:`${pin}%`,transform:'translateX(-50%)' }}>
-          <span style={{ fontSize:'0.57rem',fontWeight:800,color:'var(--non-halal)',background:'rgba(239,68,68,0.06)',border:'1px solid rgba(239,68,68,0.18)',padding:'1px 4px',borderRadius:4,whiteSpace:'nowrap' }}>{threshold}% limit</span>
+      <div style={{ position:'relative',height:10,background:'rgba(0,0,0,0.06)',borderRadius:100,overflow:'visible' }}>
+        <div style={{ position:'absolute',top:0,left:0,height:'100%',width:`${fill}%`,background:grad,borderRadius:100,boxShadow:ok?'0 0 10px rgba(16,185,129,0.3)':'0 0 10px rgba(239,68,68,0.3)',transition:'width 0.9s cubic-bezier(0.4,0,0.2,1)' }}/>
+        <div style={{ position:'absolute',top:-5,bottom:-5,left:`${pin}%`,width:3,background:'var(--non-halal)',borderRadius:2,boxShadow:'0 0 6px rgba(239,68,68,0.5)' }}/>
+        <div style={{ position:'absolute',top:16,left:`${pin}%`,transform:'translateX(-50%)' }}>
+          <span style={{ fontSize:'0.6rem',fontWeight:800,color:'var(--non-halal)',background:'rgba(239,68,68,0.08)',border:'1px solid rgba(239,68,68,0.2)',padding:'2px 6px',borderRadius:6,whiteSpace:'nowrap' }}>{threshold}% limit</span>
         </div>
       </div>
       <div style={{ textAlign:'right' }}>
-        <div style={{ fontSize:'1.28rem',fontWeight:900,color:col,letterSpacing:'-0.5px',fontVariantNumeric:'tabular-nums',lineHeight:1.1 }}>{rv.toFixed(2)}%</div>
-        <div style={{ display:'inline-flex',alignItems:'center',gap:2,fontSize:'0.6rem',fontWeight:800,color:col,marginTop:4,padding:'2px 6px',borderRadius:100,background:ok?'rgba(16,185,129,0.08)':'rgba(239,68,68,0.08)',border:ok?'1px solid rgba(16,185,129,0.2)':'1px solid rgba(239,68,68,0.2)' }}>
+        <div style={{ fontSize:'1.35rem',fontWeight:900,color:col,letterSpacing:'-0.5px',fontVariantNumeric:'tabular-nums',lineHeight:1.1 }}>{rv.toFixed(2)}%</div>
+        <div style={{ display:'inline-flex',alignItems:'center',gap:4,fontSize:'0.65rem',fontWeight:800,color:col,marginTop:6,padding:'3px 8px',borderRadius:100,background:ok?'rgba(16,185,129,0.08)':'rgba(239,68,68,0.08)',border:ok?'1px solid rgba(16,185,129,0.2)':'1px solid rgba(239,68,68,0.2)' }}>
           {ok?'✓':'✕'} {diff}pp {ok?'headroom':'excess'}
         </div>
       </div>
@@ -141,9 +151,9 @@ const RatioBar = ({ title, subtitle, ratio, threshold, numLabel, numVal, denLabe
 
 /* ─── Data chip ─────────────────────────────────────────── */
 const DataChip = ({ label, value, color, bg, border }) => (
-  <div style={{ background:bg||'var(--bg)',borderRadius:14,padding:'14px 18px',border:`1px solid ${border||'var(--border)'}` }}>
-    <div style={{ fontSize:'0.62rem',fontWeight:700,color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'0.6px',marginBottom:6 }}>{label}</div>
-    <div style={{ fontSize:'1.08rem',fontWeight:900,color:color||'var(--text-dark)',letterSpacing:'-0.3px',fontVariantNumeric:'tabular-nums' }}>{value}</div>
+  <div className="hover-lift" style={{ background:bg||'var(--bg)',borderRadius:14,padding:'16px 20px',border:`1px solid ${border||'var(--border)'}`, transition:'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+    <div style={{ fontSize:'0.65rem',fontWeight:800,color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'0.8px',marginBottom:8 }}>{label}</div>
+    <div style={{ fontSize:'1.15rem',fontWeight:900,color:color||'var(--text-dark)',letterSpacing:'-0.3px',fontVariantNumeric:'tabular-nums' }}>{value}</div>
   </div>
 );
 
@@ -310,67 +320,64 @@ const AaoifiScreening = () => {
       <div style={{ flex:1,minWidth:0 }}>
 
         {/* ── Top action bar ── */}
-        <div style={{ display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:18,gap:12,flexWrap:'wrap' }}>
-          <Link to="/portfolio" style={{ display:'flex',alignItems:'center',gap:7,padding:'7px 14px 7px 10px',background:'var(--bg-section)',border:'1px solid var(--border)',borderRadius:100,color:'var(--text-dark)',textDecoration:'none',fontWeight:700,fontSize:'0.8rem',transition:'all 0.18s' }}
-            onMouseOver={e=>e.currentTarget.style.background='var(--border)'}
-            onMouseOut={e=>e.currentTarget.style.background='var(--bg-section)'}>
-            <ArrowLeft size={15}/> Screener
+        <div style={{ display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:24,gap:12,flexWrap:'wrap' }}>
+          <Link to="/portfolio" className="hover-lift" style={{ display:'flex',alignItems:'center',gap:7,padding:'8px 16px 8px 12px',background:'var(--bg)',border:'1px solid var(--border)',borderRadius:100,color:'var(--text-dark)',textDecoration:'none',fontWeight:700,fontSize:'0.8rem',transition:'all 0.2s',boxShadow:'var(--shadow-sm)' }}>
+            <ArrowLeft size={16}/> Screener
           </Link>
-          <div style={{ display:'flex',gap:8 }}>
-            <button onClick={()=>{ alert("Alert preferences opened"); }} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background:'var(--bg-section)',border:'1px solid var(--border)',borderRadius:10,cursor:'pointer',fontWeight:700,color:'var(--text-dark)',fontSize:'0.8rem' }}>
-              <Bell size={14}/> Set Alert
+          <div style={{ display:'flex',gap:10 }}>
+            <button className="hover-lift" onClick={()=>{ alert("Alert preferences opened"); }} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background:'var(--bg)',border:'1px solid var(--border)',borderRadius:12,cursor:'pointer',fontWeight:700,color:'var(--text-dark)',fontSize:'0.8rem',boxShadow:'var(--shadow-sm)' }}>
+              <Bell size={15}/> Set Alert
             </button>
-            {user?.role==='admin'&&(<button onClick={openOverride} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background:'linear-gradient(135deg,#065F46,#047857)',border:'none',borderRadius:10,cursor:'pointer',fontWeight:800,color:'#fff',fontSize:'0.8rem',transition:'all 0.2s',boxShadow:'0 4px 12px rgba(6,78,59,0.22)' }}
-              onMouseEnter={e=>e.currentTarget.style.transform='translateY(-1px)'} onMouseLeave={e=>e.currentTarget.style.transform='none'}>
-              <ShieldCheck size={14}/> Edit Data
+            {user?.role==='admin'&&(<button className="hover-lift" onClick={openOverride} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background:'linear-gradient(135deg,var(--primary),var(--primary-dark))',border:'none',borderRadius:12,cursor:'pointer',fontWeight:800,color:'#fff',fontSize:'0.8rem',transition:'all 0.25s',boxShadow:'0 4px 12px rgba(91,41,113,0.25)' }}>
+              <ShieldCheck size={15}/> Edit Data
             </button>)}
-            <button onClick={()=>window.print()} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background:'var(--bg-section)',border:'1px solid var(--border)',borderRadius:10,cursor:'pointer',fontWeight:700,color:'var(--text-dark)',fontSize:'0.8rem' }}>
-              <Download size={14}/> Export
+            <button className="hover-lift" onClick={()=>window.print()} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background:'var(--bg)',border:'1px solid var(--border)',borderRadius:12,cursor:'pointer',fontWeight:700,color:'var(--text-dark)',fontSize:'0.8rem',boxShadow:'var(--shadow-sm)' }}>
+              <Download size={15}/> Export
             </button>
           </div>
         </div>
 
         {/* ── Company header ── */}
-        <div style={{ background:'var(--bg-section)',border:'1px solid var(--border)',borderRadius:18,padding:'24px',marginBottom:16 }}>
+        <div style={{ background:'var(--bg)',border:'1px solid var(--border)',borderRadius:18,padding:'24px',marginBottom:16,boxShadow:'var(--shadow-sm)' }}>
           <div style={{ display:'flex',alignItems:'center',justifyContent:'space-between',gap:16,flexWrap:'wrap' }}>
-            <div style={{ display:'flex',alignItems:'center',gap:14 }}>
+            <div style={{ display:'flex',alignItems:'center',gap:16 }}>
               <div style={{ position:'relative' }}>
-                <CompanyLogo symbol={symbol} logoUrl={stock?.logo_url} size={46} radius={14}/>
-                <div style={{ position:'absolute',bottom:-3,right:-3,width:14,height:14,borderRadius:'50%',background:finalStatus==='halal'?'var(--halal)':finalStatus==='non-halal'?'var(--non-halal)':'#D97706',border:'2.5px solid var(--bg-section)' }}/>
+                <CompanyLogo symbol={symbol} logoUrl={stock?.logo_url} size={52} radius={14}/>
+                <div style={{ position:'absolute',bottom:-4,right:-4,width:16,height:16,borderRadius:'50%',background:finalStatus==='halal'?'var(--halal)':finalStatus==='non-halal'?'var(--non-halal)':'#D97706',border:'3px solid var(--bg)',boxShadow:'0 2px 4px rgba(0,0,0,0.1)' }}/>
               </div>
               <div>
                 <div style={{ display:'flex',alignItems:'center',gap:8,flexWrap:'wrap' }}>
-                  <h1 style={{ margin:0,fontSize:'1.2rem',fontWeight:900,color:'var(--text-dark)',letterSpacing:'-0.4px' }}>{report.company_name||symbol}</h1>
+                  <h1 style={{ margin:0,fontSize:'1.35rem',fontWeight:900,color:'var(--text-dark)',letterSpacing:'-0.5px' }}>{report.company_name||symbol}</h1>
                 </div>
                 {(stock?.sector || report.sector) && (
-                  <p style={{ margin:'3px 0 0',fontSize:'0.72rem',color:'var(--text-muted)',fontWeight:500 }}>
+                  <p style={{ margin:'4px 0 0',fontSize:'0.75rem',color:'var(--text-muted)',fontWeight:600 }}>
                     {stock?.sector || report.sector} 
-                    {stock?.industry && <span style={{ opacity: 0.6, margin: '0 4px' }}>•</span>}
+                    {stock?.industry && <span style={{ opacity: 0.5, margin: '0 6px' }}>•</span>}
                     {stock?.industry}
                   </p>
                 )}
               </div>
             </div>
-            <div style={{ display:'flex',gap:28,flexWrap:'wrap',alignItems:'center' }}>
-              {latestPrice>0&&(<div style={{ textAlign:'left', paddingRight:24, borderRight:'1px solid rgba(0,0,0,0.08)' }}>
-                <div style={{ fontSize:'0.65rem',fontWeight:800,color:'#9A9386',textTransform:'uppercase',letterSpacing:'1.5px',marginBottom:6 }}>Last Price</div>
-                <div style={{ fontSize:'1.7rem',fontWeight:900,color:'#112A46',letterSpacing:'-0.5px',fontVariantNumeric:'tabular-nums',lineHeight:1 }}>
+            <div style={{ display:'flex',gap:32,flexWrap:'wrap',alignItems:'center' }}>
+              {latestPrice>0&&(<div style={{ textAlign:'left', paddingRight:32, borderRight:'1px dashed var(--border)' }}>
+                <div style={{ fontSize:'0.65rem',fontWeight:800,color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'1px',marginBottom:6 }}>Last Price</div>
+                <div style={{ fontSize:'1.8rem',fontWeight:900,color:'var(--text-dark)',letterSpacing:'-0.5px',fontVariantNumeric:'tabular-nums',lineHeight:1 }}>
                   ₦{latestPrice.toLocaleString('en-US', {maximumFractionDigits: 2})}
                 </div>
-                <div style={{ display:'flex',alignItems:'center',gap:4,marginTop:8 }}>
-                  <span style={{ fontSize:'0.75rem',fontWeight:800,color: priceChangePct >= 0 ? 'var(--halal)' : 'var(--non-halal)' }}>
+                <div style={{ display:'flex',alignItems:'center',gap:6,marginTop:8 }}>
+                  <span style={{ fontSize:'0.8rem',fontWeight:800,color: priceChangePct >= 0 ? 'var(--halal)' : 'var(--non-halal)' }}>
                     {priceChangePct >= 0 ? '▲' : '▼'} {Math.abs(priceChangePct).toFixed(2)}%
                   </span>
-                  <span style={{ fontSize:'0.75rem',fontWeight:500,color:'#9A9386' }}>today</span>
+                  <span style={{ fontSize:'0.75rem',fontWeight:600,color:'var(--text-muted)' }}>today</span>
                 </div>
               </div>)}
-              {marketCap>0&&(<div style={{ textAlign:'center' }}>
-                <div style={{ fontSize:'0.6rem',fontWeight:700,color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'0.5px',marginBottom:2 }}>Market Cap</div>
-                <div style={{ fontSize:'1.18rem',fontWeight:900,color:'var(--text-dark)',letterSpacing:'-0.4px',fontVariantNumeric:'tabular-nums' }}>{fmt(marketCap)}</div>
+              {marketCap>0&&(<div style={{ textAlign:'left', paddingRight:report.sector?32:0, borderRight:report.sector?'1px dashed var(--border)':'none' }}>
+                <div style={{ fontSize:'0.65rem',fontWeight:800,color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'1px',marginBottom:6 }}>Market Cap</div>
+                <div style={{ fontSize:'1.25rem',fontWeight:900,color:'var(--text-dark)',letterSpacing:'-0.4px',fontVariantNumeric:'tabular-nums' }}>{fmt(marketCap)}</div>
               </div>)}
-              {report.sector&&(<div style={{ textAlign:'center' }}>
-                <div style={{ fontSize:'0.6rem',fontWeight:700,color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'0.5px',marginBottom:4 }}>Sector</div>
-                <div style={{ display:'inline-flex',alignItems:'center',gap:5,padding:'4px 10px',borderRadius:100,background:'var(--bg)',border:'1px solid var(--border)',fontSize:'0.72rem',fontWeight:700,color:'var(--text-dark)' }}>{report.sector}</div>
+              {report.sector&&(<div style={{ textAlign:'left' }}>
+                <div style={{ fontSize:'0.65rem',fontWeight:800,color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'1px',marginBottom:6 }}>Sector</div>
+                <div style={{ display:'inline-flex',alignItems:'center',gap:5,padding:'5px 12px',borderRadius:100,background:'var(--bg-section)',border:'1px solid var(--border)',fontSize:'0.75rem',fontWeight:700,color:'var(--text-dark)' }}>{report.sector}</div>
               </div>)}
             </div>
           </div>
@@ -378,37 +385,38 @@ const AaoifiScreening = () => {
 
         {/* ══ VERDICT CARD ══ */}
         <div style={{ borderRadius:18,background:sc.bg,border:`1px solid ${sc.border}`,marginBottom:16,position:'relative',overflow:'hidden' }}>
-          <div style={{ display:'flex',gap:0,flexWrap:'wrap' }}>
-            <div style={{ flex:'1 1 280px',padding:'24px 28px',borderRight:`1px solid ${sc.border}`,display:'flex',flexDirection:'column',justifyContent:'center',gap:12 }}>
+          <StatusIcon size={260} color={sc.color} style={{ position:'absolute', right:'-30px', top:'-40px', opacity:0.04, transform:'rotate(-15deg)', pointerEvents:'none' }} />
+          <div style={{ display:'flex',gap:0,flexWrap:'wrap', position:'relative', zIndex:1 }}>
+            <div style={{ flex:'1 1 280px',padding:'24px 28px',borderRight:`1px dashed ${sc.border}`,display:'flex',flexDirection:'column',justifyContent:'center',gap:12 }}>
               <div style={{ fontSize:'0.65rem',fontWeight:800,textTransform:'uppercase',letterSpacing:'1.5px',color:sc.color }}>AAOIFI Compliance Verdict</div>
-              <div style={{ display:'flex',alignItems:'flex-start',gap:12,flexWrap:'wrap',marginTop:2 }}>
+              <div style={{ display:'flex',alignItems:'flex-start',gap:14,flexWrap:'wrap',marginTop:2 }}>
                 <div style={{ marginTop:4 }}>
-                  <StatusIcon size={32} color={sc.color} strokeWidth={2}/>
+                  <StatusIcon size={36} color={sc.color} strokeWidth={2}/>
                 </div>
                 <div>
                   <div style={{ display:'flex',alignItems:'center',gap:12,flexWrap:'wrap' }}>
-                    <h2 style={{ fontFamily:'"Georgia", "Times New Roman", serif',fontSize:'clamp(2rem,4vw,2.4rem)',fontWeight:700,color:sc.color,margin:0,letterSpacing:'0px',lineHeight:1 }}>{sc.label}</h2>
-                    {hasPurification&&(<span style={{ fontSize:'0.7rem',fontWeight:700,color:'#D97706',display:'inline-flex',alignItems:'center',gap:4,background:'rgba(245,158,11,0.1)',border:'1px solid rgba(245,158,11,0.25)',padding:'4px 10px',borderRadius:100 }}><Droplets size={12} color="#D97706"/> With Purification ({purPct}%)</span>)}
+                    <h2 style={{ fontFamily:'"Georgia", "Times New Roman", serif',fontSize:'clamp(2rem,4vw,2.4rem)',fontWeight:700,color:sc.color,margin:0,letterSpacing:'-0.5px',lineHeight:1 }}>{sc.label}</h2>
+                    {hasPurification&&(<span style={{ fontSize:'0.7rem',fontWeight:700,color:'#D97706',display:'inline-flex',alignItems:'center',gap:5,background:'rgba(245,158,11,0.1)',border:'1px solid rgba(245,158,11,0.25)',padding:'5px 12px',borderRadius:100 }}><Droplets size={12} color="#D97706"/> With Purification ({purPct}%)</span>)}
                   </div>
-                  <div style={{ fontSize:'0.75rem',fontWeight:600,color:'var(--text-muted)',marginTop:6 }}>{sc.tag}</div>
+                  <div style={{ fontSize:'0.8rem',fontWeight:700,color:'var(--text-dark)',marginTop:8, opacity:0.8 }}>{sc.tag}</div>
                 </div>
               </div>
-              <p style={{ color:'var(--text-muted)',fontSize:'0.85rem',lineHeight:1.6,margin:'8px 0 0',maxWidth:520 }}>{cleanStatusReason||'Screened in accordance with AAOIFI Shariah Standard No. 21.'}</p>
-              {(report.reporting_period||report.reporting_year)&&(<div style={{ display:'inline-flex',alignItems:'center',gap:6,padding:'4px 12px',background:'rgba(0,0,0,0.04)',borderRadius:100,fontSize:'0.65rem',color:'var(--text-muted)',fontWeight:700,border:'1px solid var(--border)',width:'fit-content',marginTop:4 }}><Calendar size={10}/> {report.reporting_period} {report.reporting_year?`(${report.reporting_year})`:''}</div>)}
+              <p style={{ color:'var(--text-muted)',fontSize:'0.85rem',lineHeight:1.6,margin:'8px 0 0',maxWidth:540, fontWeight:500 }}>{cleanStatusReason||'Screened in accordance with AAOIFI Shariah Standard No. 21.'}</p>
+              {(report.reporting_period||report.reporting_year)&&(<div style={{ display:'inline-flex',alignItems:'center',gap:6,padding:'5px 14px',background:'var(--bg)',borderRadius:100,fontSize:'0.65rem',color:'var(--text-muted)',fontWeight:800,border:'1px solid var(--border)',width:'fit-content',marginTop:6 }}><Calendar size={11}/> {report.reporting_period} {report.reporting_year?`(${report.reporting_year})`:''}</div>)}
             </div>
             {hasPurification&&(<div style={{ flex:'0 0 240px',padding:'24px',display:'flex',flexDirection:'column',justifyContent:'center',gap:16,background:'rgba(245,158,11,0.02)' }}>
               <div>
-                <div style={{ fontSize:'0.6rem',fontWeight:800,textTransform:'uppercase',letterSpacing:'1px',color:'#D97706',marginBottom:6 }}>Purification</div>
-                <div style={{ fontSize:'0.85rem',color:'var(--text-dark)',fontWeight:600,lineHeight:1.4 }}>Donate <strong style={{ color:'#D97706' }}>{purPct}%</strong> of dividend income to charity</div>
+                <div style={{ fontSize:'0.65rem',fontWeight:800,textTransform:'uppercase',letterSpacing:'1px',color:'#D97706',marginBottom:6 }}>Purification</div>
+                <div style={{ fontSize:'0.9rem',color:'var(--text-dark)',fontWeight:700,lineHeight:1.4 }}>Donate <strong style={{ color:'#D97706' }}>{purPct}%</strong> of dividend income to charity</div>
               </div>
-              <Link to="/portfolio" style={{ display:'inline-flex',alignItems:'center',justifyContent:'center',gap:5,padding:'10px 16px',borderRadius:12,background:'rgba(245,158,11,0.1)',border:'1px solid rgba(245,158,11,0.25)',color:'#D97706',fontSize:'0.8rem',fontWeight:700,textDecoration:'none',marginTop:4 }}>Purify in Portfolio <ChevronRight size={14}/></Link>
+              <Link to="/portfolio" className="hover-lift" style={{ display:'inline-flex',alignItems:'center',justifyContent:'center',gap:5,padding:'12px 20px',borderRadius:12,background:'rgba(245,158,11,0.15)',border:'1px solid rgba(245,158,11,0.3)',color:'#D97706',fontSize:'0.8rem',fontWeight:800,textDecoration:'none',marginTop:4, transition:'all 0.2s' }}>Purify in Portfolio <ChevronRight size={14}/></Link>
             </div>)}
             {isNonHalal&&(<div style={{ flex:'0 0 240px',padding:'24px',display:'flex',flexDirection:'column',justifyContent:'center',gap:12,background:'rgba(239,68,68,0.02)' }}>
               <div style={{ fontSize:'0.65rem',fontWeight:800,textTransform:'uppercase',letterSpacing:'1.5px',color:'var(--non-halal)' }}>Screening Result</div>
               <div style={{ display:'flex',alignItems:'center',gap:10 }}><XCircle size={32} color="var(--non-halal)" strokeWidth={2}/>
-                <div><div style={{ fontSize:'1.1rem',fontWeight:900,color:'var(--non-halal)' }}>EXCLUDED</div><div style={{ fontSize:'0.7rem',color:'var(--text-muted)',fontWeight:600 }}>Not suitable for Islamic investment</div></div>
+                <div><div style={{ fontSize:'1.1rem',fontWeight:900,color:'var(--non-halal)' }}>EXCLUDED</div><div style={{ fontSize:'0.7rem',color:'var(--text-muted)',fontWeight:700 }}>Not suitable for Islamic investment</div></div>
               </div>
-              <div style={{ fontSize:'0.85rem',color:'var(--text-muted)',lineHeight:1.5 }}>{businessFailed?'Primary business activities violate Shariah principles.':'Financial ratios exceed AAOIFI thresholds.'}</div>
+              <div style={{ fontSize:'0.85rem',color:'var(--text-muted)',lineHeight:1.5, fontWeight:500 }}>{businessFailed?'Primary business activities violate Shariah principles.':'Financial ratios exceed AAOIFI thresholds.'}</div>
             </div>)}
           </div>
         </div>
@@ -437,8 +445,8 @@ const AaoifiScreening = () => {
                 <div style={{ fontSize:'1.2rem',fontWeight:900,color:'#EF4444' }}>{pct(report.stage1?.haram_revenue_percent)}</div>
               </div>
             </div>)}
-            <div style={{ display:'flex',alignItems:'center',gap:6,fontWeight:800,color:'var(--text-dark)',fontSize:'0.79rem',marginBottom:8 }}><Brain size={13} color="var(--primary)"/> Screening Reasoning</div>
-            <div style={{ fontSize:'0.86rem',lineHeight:1.78,color:'var(--text-dark)',padding:'14px 18px',background:'var(--bg)',borderRadius:12,border:'1px solid var(--border)',borderLeft:'3px solid var(--primary)' }}>
+            <div style={{ display:'flex',alignItems:'center',gap:6,fontWeight:800,color:'var(--text-dark)',fontSize:'0.82rem',marginBottom:10 }}><Brain size={14} color="var(--primary)"/> Screening Reasoning</div>
+            <div className="ai-markdown" style={{ fontSize:'0.86rem',lineHeight:1.78,color:'var(--text-dark)',padding:'18px 24px',background:'var(--bg)',borderRadius:16,border:'1px solid var(--border)',borderLeft:'4px solid var(--primary)',boxShadow:'var(--shadow-sm)' }}>
               {cleanStage1Reason||'No reasoning provided.'}
             </div>
           </div>
@@ -461,9 +469,9 @@ const AaoifiScreening = () => {
               )}
               <RatioBar title={symbol === 'JAIZBANK' ? '2. Impure revenue' : '3. Impure revenue'} subtitle="Impure Income / Total Revenue × 100"         ratio={report.impermissible_income_ratio} threshold={5}  numLabel="Impure Income"    numVal={interestIncome} denLabel="Total Revenue" denVal={totalRevenue}  formula="Impure Income / Total Revenue × 100"    onInspect={setModalData}/>
             </div>
-            <div style={{ padding:'12px 16px',background:'rgba(124,58,237,0.04)',border:'1px solid rgba(124,58,237,0.15)',borderRadius:11,display:'flex',alignItems:'flex-start',gap:9 }}>
-              <Info size={13} color="#7C3AED" style={{ flexShrink:0,marginTop:2 }}/>
-              <div style={{ fontSize:'0.78rem',color:'var(--text-muted)',lineHeight:1.5 }}><strong style={{ color:'var(--text-dark)' }}>AAOIFI strict thresholds apply:</strong> Even at 30.01% the debt ratio fails. Click any bar to see the full calculation breakdown.</div>
+            <div style={{ padding:'16px 20px',background:'var(--primary-50)',border:'1px dashed var(--primary-100)',borderRadius:16,display:'flex',alignItems:'flex-start',gap:12, boxShadow:'var(--shadow-sm)' }}>
+              <Info size={16} color="var(--primary)" style={{ flexShrink:0,marginTop:2 }}/>
+              <div style={{ fontSize:'0.8rem',color:'var(--text-muted)',lineHeight:1.5, fontWeight:500 }}><strong style={{ color:'var(--text-dark)', fontWeight:800 }}>AAOIFI strict thresholds apply:</strong> Even at 30.01% the debt ratio fails. Click any bar to see the full calculation breakdown.</div>
             </div>
           </div>
         </Section>)}
@@ -485,15 +493,15 @@ const AaoifiScreening = () => {
               const desc  = item.description||item.summary||item.snippet||item.excerpt||null;
               const date  = item.date||item.published_at||item.publishedAt||null;
               return (
-                <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="hover-card"
-                  style={{ display:'flex',alignItems:'flex-start',gap:12,padding:'14px 16px',background:'var(--bg)',border:'1px solid var(--border)',borderRadius:14,textDecoration:'none',transition:'all 0.2s' }}>
-                  <div style={{ width:36,height:36,borderRadius:10,background:'rgba(37,99,235,0.08)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0 }}><Newspaper size={15} color="#2563EB"/></div>
+                <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="hover-lift"
+                  style={{ display:'flex',alignItems:'flex-start',gap:16,padding:'18px 20px',background:'var(--bg)',border:'1px solid var(--border)',borderRadius:16,textDecoration:'none',transition:'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',boxShadow:'var(--shadow-sm)' }}>
+                  <div style={{ width:42,height:42,borderRadius:12,background:'rgba(37,99,235,0.08)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,color:'#2563EB' }}><Newspaper size={18} strokeWidth={2}/></div>
                   <div style={{ flex:1,minWidth:0 }}>
-                    <div style={{ fontWeight:700,color:'var(--text-dark)',fontSize:'0.86rem',marginBottom:3,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>{title}</div>
-                    {desc&&<div style={{ fontSize:'0.73rem',color:'var(--text-muted)',lineHeight:1.4,display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden' }}>{desc}</div>}
-                    {date&&<div style={{ fontSize:'0.63rem',color:'var(--text-muted)',marginTop:5,display:'flex',alignItems:'center',gap:4,fontWeight:600 }}><Clock size={10}/>{fmtDate(date)}</div>}
+                    <div style={{ fontWeight:800,color:'var(--text-dark)',fontSize:'0.9rem',marginBottom:4,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',letterSpacing:'-0.3px' }}>{title}</div>
+                    {desc&&<div style={{ fontSize:'0.75rem',color:'var(--text-muted)',lineHeight:1.4,fontWeight:500,display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden' }}>{desc}</div>}
+                    {date&&<div style={{ fontSize:'0.65rem',color:'var(--text-muted)',marginTop:6,display:'flex',alignItems:'center',gap:4,fontWeight:700 }}><Clock size={11}/>{fmtDate(date)}</div>}
                   </div>
-                  <ExternalLink size={13} color="var(--text-muted)" style={{ flexShrink:0,marginTop:2 }}/>
+                  <ExternalLink size={14} color="var(--text-muted)" style={{ flexShrink:0,marginTop:2 }}/>
                 </a>
               );
             })}
@@ -510,45 +518,47 @@ const AaoifiScreening = () => {
       <div style={{ width:308,flexShrink:0,position:'sticky',top:20,marginTop:52,maxHeight:'calc(100vh - 40px)',display:'flex',flexDirection:'column',gap:16 }}>
         
         {/* PRICE DATA WIDGET */}
-        <div style={{ borderRadius:18,border:'1px solid var(--border)',background:'var(--bg-section)',padding:'24px',boxShadow:'0 2px 10px rgba(0,0,0,0.02)' }}>
-          <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:16 }}>
-            <BarChart2 size={16} color="var(--text-muted)" />
-            <div style={{ fontSize:'0.75rem',fontWeight:700,letterSpacing:'1px',color:'var(--text-muted)' }}>PRICE DATA</div>
+        <div style={{ borderRadius:18,border:'1px solid var(--border)',background:'var(--bg)',padding:'24px',boxShadow:'var(--shadow-sm)' }}>
+          <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:20 }}>
+            <div style={{ width:'32px', height:'32px', borderRadius:'10px', background:'var(--primary-50)', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--primary)' }}>
+              <BarChart2 size={16} strokeWidth={2.5} />
+            </div>
+            <div style={{ fontSize:'0.8rem',fontWeight:800,letterSpacing:'0.5px',color:'var(--text-dark)' }}>PRICE DATA</div>
           </div>
-          <div style={{ display:'flex',flexDirection:'column',gap:12 }}>
-            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px solid var(--border)',paddingBottom:8 }}>
-              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)' }}>Open</span>
-              <span style={{ fontSize:'0.9rem',fontWeight:600,color:'var(--text-dark)',fontFamily:'monospace' }}>
+          <div style={{ display:'flex',flexDirection:'column',gap:16 }}>
+            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px dashed var(--border)',paddingBottom:12 }}>
+              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:500 }}>Open</span>
+              <span style={{ fontSize:'0.9rem',fontWeight:700,color:'var(--text-dark)' }}>
                 {stock?.open ? `₦${stock.open.toLocaleString(undefined,{minimumFractionDigits:2})}` : '—'}
               </span>
             </div>
-            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px solid var(--border)',paddingBottom:8 }}>
-              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)' }}>Previous Close</span>
-              <span style={{ fontSize:'0.9rem',fontWeight:600,color:'var(--text-dark)',fontFamily:'monospace' }}>
+            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px dashed var(--border)',paddingBottom:12 }}>
+              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:500 }}>Previous Close</span>
+              <span style={{ fontSize:'0.9rem',fontWeight:700,color:'var(--text-dark)' }}>
                 {stock?.previous_close ? `₦${stock.previous_close.toLocaleString(undefined,{minimumFractionDigits:2})}` : '—'}
               </span>
             </div>
-            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px solid var(--border)',paddingBottom:8 }}>
-              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)' }}>Day High</span>
-              <span style={{ fontSize:'0.9rem',fontWeight:600,color:'var(--text-dark)',fontFamily:'monospace' }}>
+            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px dashed var(--border)',paddingBottom:12 }}>
+              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:500 }}>Day High</span>
+              <span style={{ fontSize:'0.9rem',fontWeight:700,color:'var(--text-dark)' }}>
                 {stock?.day_high ? `₦${stock.day_high.toLocaleString(undefined,{minimumFractionDigits:2})}` : '—'}
               </span>
             </div>
-            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px solid var(--border)',paddingBottom:8 }}>
-              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)' }}>Day Low</span>
-              <span style={{ fontSize:'0.9rem',fontWeight:600,color:'var(--text-dark)',fontFamily:'monospace' }}>
+            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px dashed var(--border)',paddingBottom:12 }}>
+              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:500 }}>Day Low</span>
+              <span style={{ fontSize:'0.9rem',fontWeight:700,color:'var(--text-dark)' }}>
                 {stock?.day_low ? `₦${stock.day_low.toLocaleString(undefined,{minimumFractionDigits:2})}` : '—'}
               </span>
             </div>
-            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px solid var(--border)',paddingBottom:8 }}>
-              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)' }}>52W High</span>
-              <span style={{ fontSize:'0.9rem',fontWeight:600,color:'var(--text-dark)',fontFamily:'monospace' }}>
+            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px dashed var(--border)',paddingBottom:12 }}>
+              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:500 }}>52W High</span>
+              <span style={{ fontSize:'0.9rem',fontWeight:700,color:'var(--text-dark)' }}>
                 {stock?.week_52_high ? `₦${stock.week_52_high.toLocaleString(undefined,{minimumFractionDigits:2})}` : '—'}
               </span>
             </div>
             <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center' }}>
-              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)' }}>52W Low</span>
-              <span style={{ fontSize:'0.9rem',fontWeight:600,color:'var(--text-dark)',fontFamily:'monospace' }}>
+              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:500 }}>52W Low</span>
+              <span style={{ fontSize:'0.9rem',fontWeight:700,color:'var(--text-dark)' }}>
                 {stock?.week_52_low ? `₦${stock.week_52_low.toLocaleString(undefined,{minimumFractionDigits:2})}` : '—'}
               </span>
             </div>
@@ -556,63 +566,65 @@ const AaoifiScreening = () => {
         </div>
 
         {/* MARKET DATA WIDGET */}
-        <div style={{ borderRadius:18,border:'1px solid var(--border)',background:'var(--bg-section)',padding:'24px',boxShadow:'0 2px 10px rgba(0,0,0,0.02)' }}>
-          <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:16 }}>
-            <TrendingUp size={16} color="var(--text-muted)" />
-            <div style={{ fontSize:'0.75rem',fontWeight:700,letterSpacing:'1px',color:'var(--text-muted)' }}>MARKET DATA</div>
+        <div style={{ borderRadius:18,border:'1px solid var(--border)',background:'var(--bg)',padding:'24px',boxShadow:'var(--shadow-sm)' }}>
+          <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:20 }}>
+            <div style={{ width:'32px', height:'32px', borderRadius:'10px', background:'var(--primary-50)', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--primary)' }}>
+              <TrendingUp size={16} strokeWidth={2.5} />
+            </div>
+            <div style={{ fontSize:'0.8rem',fontWeight:800,letterSpacing:'0.5px',color:'var(--text-dark)' }}>MARKET DATA</div>
           </div>
-          <div style={{ display:'flex',flexDirection:'column',gap:12 }}>
-            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px solid var(--border)',paddingBottom:8 }}>
-              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)' }}>Market Cap</span>
-              <span style={{ fontSize:'0.9rem',fontWeight:600,color:'var(--text-dark)',fontFamily:'monospace' }}>
-                {stock?.market_cap ? (stock.market_cap.toString().includes('T') || stock.market_cap.toString().includes('B') ? `₦${stock.market_cap}` : `₦${stock.market_cap}`) : '—'}
+          <div style={{ display:'flex',flexDirection:'column',gap:16 }}>
+            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px dashed var(--border)',paddingBottom:12 }}>
+              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:500 }}>Market Cap</span>
+              <span style={{ fontSize:'0.9rem',fontWeight:700,color:'var(--text-dark)' }}>
+                {stock?.market_cap ? fmt(stock.market_cap) : '—'}
               </span>
             </div>
-            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px solid var(--border)',paddingBottom:8 }}>
-              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)' }}>Shares Outstanding</span>
-              <span style={{ fontSize:'0.9rem',fontWeight:600,color:'var(--text-dark)',fontFamily:'monospace' }}>
-                {stock?.shares_outstanding ? `₦${stock.shares_outstanding}` : '—'}
+            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px dashed var(--border)',paddingBottom:12 }}>
+              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:500 }}>Shares Outstanding</span>
+              <span style={{ fontSize:'0.9rem',fontWeight:700,color:'var(--text-dark)' }}>
+                {stock?.shares_outstanding ? fmtCount(stock.shares_outstanding) : '—'}
               </span>
             </div>
-            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px solid var(--border)',paddingBottom:8 }}>
-              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)' }}>Volume Today</span>
-              <span style={{ fontSize:'0.9rem',fontWeight:600,color:'var(--text-dark)',fontFamily:'monospace' }}>
-                {stock?.volume ? `₦${stock.volume}` : '—'}
+            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px dashed var(--border)',paddingBottom:12 }}>
+              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:500 }}>Volume Today</span>
+              <span style={{ fontSize:'0.9rem',fontWeight:700,color:'var(--text-dark)' }}>
+                {stock?.volume ? fmtCount(stock.volume) : '—'}
               </span>
             </div>
-            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px solid var(--border)',paddingBottom:8 }}>
-              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)' }}>P/E Ratio</span>
-              <span style={{ fontSize:'0.9rem',fontWeight:600,color:'var(--text-dark)',fontFamily:'monospace' }}>
+            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px dashed var(--border)',paddingBottom:12 }}>
+              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:500 }}>P/E Ratio</span>
+              <span style={{ fontSize:'0.9rem',fontWeight:700,color:'var(--text-dark)' }}>
                 {stock?.pe_ratio ? stock.pe_ratio : '—'}
               </span>
             </div>
-            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px solid var(--border)',paddingBottom:8 }}>
-              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)' }}>EPS</span>
-              <span style={{ fontSize:'0.9rem',fontWeight:600,color:'var(--text-dark)',fontFamily:'monospace' }}>
+            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px dashed var(--border)',paddingBottom:12 }}>
+              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:500 }}>EPS</span>
+              <span style={{ fontSize:'0.9rem',fontWeight:700,color:'var(--text-dark)' }}>
                 {stock?.eps ? stock.eps : '—'}
               </span>
             </div>
-            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px solid var(--border)',paddingBottom:8 }}>
+            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px dashed var(--border)',paddingBottom:12 }}>
               <div>
-                <div style={{ fontSize:'0.85rem',color:'var(--text-muted)' }}>Last Dividend</div>
-                {stock?.last_paid_dividend?.pay_date && <div style={{ fontSize:'0.65rem',color:'var(--text-muted)',marginTop:2 }}>{new Date(stock.last_paid_dividend.pay_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})}</div>}
+                <div style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:500 }}>Last Dividend</div>
+                {stock?.last_paid_dividend?.pay_date && <div style={{ fontSize:'0.65rem',color:'var(--text-light)',marginTop:2, fontWeight:600 }}>{new Date(stock.last_paid_dividend.pay_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})}</div>}
               </div>
-              <span style={{ fontSize:'0.9rem',fontWeight:600,color:'var(--text-dark)',fontFamily:'monospace' }}>
+              <span style={{ fontSize:'0.9rem',fontWeight:700,color:'var(--text-dark)' }}>
                 {stock?.last_paid_dividend ? `₦${Number(stock.last_paid_dividend.amount).toFixed(2)}` : '—'}
               </span>
             </div>
-            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px solid var(--border)',paddingBottom:8 }}>
+            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px dashed var(--border)',paddingBottom:12 }}>
               <div>
-                <div style={{ fontSize:'0.85rem',color:'var(--text-muted)' }}>Upcoming Dividend</div>
-                {stock?.upcoming_dividend?.pay_date && <div style={{ fontSize:'0.65rem',color:'var(--text-muted)',marginTop:2 }}>{new Date(stock.upcoming_dividend.pay_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})}</div>}
+                <div style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:500 }}>Upcoming Dividend</div>
+                {stock?.upcoming_dividend?.pay_date && <div style={{ fontSize:'0.65rem',color:'var(--text-light)',marginTop:2, fontWeight:600 }}>{new Date(stock.upcoming_dividend.pay_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})}</div>}
               </div>
-              <span style={{ fontSize:'0.9rem',fontWeight:600,color:'var(--text-dark)',fontFamily:'monospace' }}>
+              <span style={{ fontSize:'0.9rem',fontWeight:700,color:'var(--text-dark)' }}>
                 {stock?.upcoming_dividend ? `₦${Number(stock.upcoming_dividend.amount).toFixed(2)}` : '—'}
               </span>
             </div>
             <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center' }}>
-              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)' }}>Dividend Yield</span>
-              <span style={{ fontSize:'0.9rem',fontWeight:600,color:'var(--text-dark)',fontFamily:'monospace' }}>
+              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:500 }}>Dividend Yield</span>
+              <span style={{ fontSize:'0.9rem',fontWeight:700,color:'var(--text-dark)' }}>
                 {stock?.div_yield ? `${stock.div_yield}%` : '—'}
               </span>
             </div>

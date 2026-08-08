@@ -1,0 +1,664 @@
+=== PAGE 0 ===
+ 
+TOTALENERGIES MARKETING NIGERIA PLC
+UNAUDITED FINANCIAL STATEMENTS
+30 JUNE 2026
+
+=== PAGE 1 ===
+TOTALENERGIES MARKETING NIGERIA PLC
+RESULTS AT A GLANCE
+FOR THE PERIOD ENDED 
+30 June
+30 June
+2026
+2025
+Change
+₦'000
+₦'000
+    %
+Revenue
+       443,990,701 
+       423,896,706 
+             5 
+Profit/(loss) before income taxation  
+            6,708,746 
+          (1,689,008)
+        497 
+Profit/(loss) for the period
+            4,950,597 
+          (2,855,896)
+        273 
+Total comprehensive income/(loss) for the period
+            4,950,597 
+          (2,855,896)
+        273 
+Share capital
+               169,761 
+               169,761 
+-
+Shareholders' funds
+          52,490,498 
+          58,644,268 
+         (10)
+30 June
+30 June
+2026
+2025
+Change
+PER SHARE DATA:
+    %
+Based on 339,521,837 ordinary shares of 50 kobo each:
+Earnings/(Loss) per 50 kobo share (Naira) - basic
+                    14.58 
+                    (8.41)
+        273 
+Stock exchange quotation (Naira)
+                 640.00 
+                 705.00 
+           (9)
+Number of staff
+406
+417
+           (3)
+1 
+
+=== PAGE 2 ===
+TOTALENERGIES MARKETING NIGERIA PLC
+STATEMENT OF FINANCIAL POSITION
+AS AT
+30 June
+31 December
+2026
+2025
+Notes
+₦'000
+₦'000
+Non-current assets
+Property, plant and equipment
+16
+                  59,044,526       62,038,414 
+Right-of-use assets
+17 (i)
+                  12,785,884         9,772,313 
+Intangible assets
+15
+                         45,834              74,426 
+Trade and other receivables
+19.1
+                    4,560,249         6,021,005 
+Total non-current assets
+                  76,436,493       77,906,158 
+Current Assets
+Inventories
+18
+                121,650,110     133,460,192 
+Withholding tax receivables
+11.2.1
+                    1,465,943            845,156 
+Trade and other receivables
+19
+                161,180,900     129,575,047 
+Prepayments 
+20
+                    3,669,678         1,979,387 
+Cash and cash equivalents
+27
+                  38,605,766       44,784,443 
+Total current assets
+                326,572,397     310,644,225 
+Total assets
+                403,008,890     388,550,383 
+Equity
+26
+                       169,761            169,761 
+                  52,320,737       47,370,140 
+Total equity
+                  52,490,498       47,539,901 
+Non-current liabilities
+Deferred tax liabilities
+11.3
+                    6,828,953         6,416,452 
+Lease liabilities
+22
+                       901,899            343,925 
+Employee benefits
+12
+                    4,017,492         3,456,959 
+Total non-current liabilities
+                  11,748,344       10,217,336 
+Current liabilities
+Current tax liabilities
+11.2
+                       766,758         3,695,036 
+Loans and borrowings 
+21
+                  73,863,651       84,671,515 
+Trade and other payables
+24
+                260,046,823     236,527,566 
+Deferred income
+25
+                    3,162,950          5,544,439 
+Lease liabilities
+22
+                       929,866             354,590 
+Total current liabilities
+                338,770,048     330,793,146 
+                350,518,392     341,010,482 
+Total equity and liabilities
+                403,008,890     388,550,383 
+Wilfried Konde - Managing Director
+Olubunmi Popoola-Mordi - Executive Director
+Additionally certified by:
+Samson Eghwerehe - Head of Finance
+FRC/2018/ICAN/00000018952
+The accompanying notes form an integral part of these financial statements.
+Share capital
+Retained earnings
+Total liabilities
+These financial statements were approved and authorised for issue by the Board of Directors of the Company on
+28th July 2026 and signed on behalf of the Board by:
+FRC/2013/IODN/00000002084
+FRC/2013/ICSAN/00000002042
+2 
+
+=== PAGE 3 ===
+TOTALENERGIES MARKETING NIGERIA PLC
+STATEMENT OF PROFIT OR LOSS AND OTHER COMPREHENSIVE INCOME
+FOR THE PERIOD ENDED 
+30 June
+30 June
+30 June
+30 June
+2026
+2025
+2026
+2025
+Notes
+₦'000
+₦'000
+₦'000
+₦'000
+Revenue
+6
+     246,810,465      202,275,499          443,990,701         423,896,706 
+7
+   (217,263,809)   (178,316,110)       (387,491,417)      (375,428,999)
+Gross profit
+     29,546,656       23,959,389          56,499,284         48,467,707 
+8.1
+       2,369,136           3,073,062            4,347,585           5,466,273 
+8.1.2
+                    -                           -                 (16,334)                (6,586)
+10.1
+      (2,754,891)        (2,347,992)
+         (5,001,190)         (4,552,106)
+10.2
+    (20,820,356)    (21,341,109)
+       (41,274,141)       (39,050,573)
+30 (iv)
+               (8,916)
+8,906
+              
+                 (32,828)                  (8,189)
+Operating profit
+       8,331,629         3,352,256          14,522,376         10,316,526 
+9
+          428,022              989,944                  918,945             1,976,923 
+9
+      (3,964,767)      (7,153,159)            (8,732,575)        (13,982,457)
+Net finance costs
+      (3,536,745)      (6,163,215)
+         (7,813,630)       (12,005,534)
+Profit/(loss) before income taxation
+       4,794,884       (2,810,959)
+           6,708,746          (1,689,008)
+11.1.1
+      (1,015,584)             75,090          (1,758,149)         (1,166,888)
+       3,779,300       (2,735,869)
+           4,950,597          (2,855,896)
+Earnings per share
+Basic and diluted earnings/(loss) per share
+14
+              11.13                (8.06)
+                  14.58                   (8.41)
+The accompanying notes form an integral part of these financial statements.
+Total comprehensive income/(loss) for the period
+For the three months ended
+For the six months ended
+Cost of sales
+Other income
+Other expenses
+Selling & distribution costs
+Administrative expenses
+Net impairment (loss)/gain on financial assets
+Finance income
+Finance costs
+Income taxation
+3
+
+=== PAGE 4 ===
+TOTALENERGIES MARKETING NIGERIA PLC
+STATEMENT OF CHANGES IN EQUITY 
+Share 
+capital
+Retained 
+earnings 
+Total 
+equity
+₦'000
+₦'000
+₦'000
+Notes
+Balance at 1 January 2026
+        169,761 
+       47,370,140 
+     47,539,901 
+14
+                   -   
+         4,950,597 
+       4,950,597 
+       169,761 
+      52,320,737 
+     52,490,498 
+Share 
+capital
+Retained 
+earnings 
+Total 
+equity
+₦'000
+₦'000
+₦'000
+Notes
+Balance as at 1 January 2025
+        169,761 
+       74,911,277 
+     75,081,038 
+14
+                   -   
+        (2,855,896)
+      (2,855,896)
+                -   
+       (2,855,896)
+      (2,855,896)
+13.1
+                   -         (13,580,873)
+    (13,580,873)
+Total transactions with owners of the Company
+                   -         (13,580,873)
+    (13,580,873)
+       169,761 
+      58,474,507 
+     58,644,268 
+Balance at 30 June 2026
+for the year ended 30 June 2025
+Total comprehensive loss for the period
+Transactions with owners of the Company:
+Contributions and Distributions
+Prior year final dividend
+Balance at 30 June 2025
+The accompanying notes form an integral part of these financial statements.
+Loss for the period
+for the year ended 30 June 2026
+Profit for the period
+4
+
+=== PAGE 5 ===
+TOTALENERGIES MARKETING NIGERIA PLC
+STATEMENT OF CASH FLOWS
+FOR THE PERIOD ENDED 
+30 June
+30 June
+2026
+2025
+Note
+₦'000
+₦'000
+Profit/(loss) for the period
+        4,950,597        (2,855,896)
+Adjustments for:
+Depreciation of property, plant and equipment
+16
+        6,219,244 
+         4,135,644 
+Depreciation of right-of-use asset
+17 (i)
+        1,215,874 
+         1,339,987 
+Amortisation of intangible assets
+15
+             28,592 
+              29,109 
+Provision for employee benefits
+12 (i)
+           606,757 
+         1,013,000 
+Net impairment write-back on financial assets
+19 (a)
+             32,828 
+                8,189 
+Write back of inventory (Net)
+18 (a)
+        1,492,232 
+            150,000 
+Loss on disposal of property, plant and equipment
+8.1
+             16,334 
+                6,586 
+Net foreign exchange gain
+8.2
+         (786,934)
+       (1,681,835)
+Net finance costs
+9
+        7,813,630 
+       12,005,534 
+Income taxation
+11.1.1
+        1,758,149 
+         1,166,888 
+      23,347,304 
+       15,317,206 
+ Changes in: 
+  - Inventories 
+18 (a)
+      10,317,850 
+       44,143,405 
+  - Trade and other receivables 
+19.1 (a)
+    (31,674,277)
+     (34,077,449)
+  - Prepayments 
+20 (a)
+      (1,690,291)
+          (156,352)
+  - Trade and other payables 
+24 (a)
+      27,576,028    (116,593,409)
+  - Withholding tax credit notes recovered 
+11.1.1
+                     -               700,000 
+  - Withholding tax credit note utilized 
+11.2.1
+         (620,787)
+            329,117 
+  - Deferred income 
+25 (a)
+      (2,381,489)
+       (1,058,472)
+Cash generated from/(used in) operating activities
+      24,874,338      (91,395,954)
+Payment for employee benefits
+12 (i)
+           (46,224)
+            (49,598)
+Interest received on staff loans 
+9
+           123,911 
+            137,991 
+Interest paid on lease liabilities
+9
+         (377,853)
+            (93,789)
+Tax paid
+11.2
+      (4,273,926)
+     (13,712,848)
+Withholding tax paid
+11.2
+                     -          (1,039,609)
+Net cash generated from/(used in) operating activities
+      20,300,246    (106,153,807)
+Cash flows from investing activities
+Additions to right-of-use asset
+17 (iii)
+      (4,229,445)
+       (2,283,083)
+Purchase of property, plant and equipment
+16
+      (3,243,046)
+       (2,326,363)
+Interest received on deposits for unclaimed dividend
+9
+             89,316 
+              43,774 
+Decrease/(increase) in long term receivables
+19.1 (a)
+        1,460,756 
+         1,647,582 
+New leases
+23
+        1,774,154 
+            (46,558)
+Interest received on deposits
+9
+           705,718 
+         1,795,158 
+Proceeds from disposal of property, plant and equipment
+16.2
+               1,356 
+                     - 
+Net cash used in investing activities
+      (3,441,192)
+       (1,169,489)
+Cash flows from financing activities
+Interest paid on bank overdraft
+9
+      (8,354,722)
+     (13,888,668)
+Payment on lease liabilities
+23
+         (640,904)
+          (312,930)
+Dividends paid
+13.1
+             (9,799)
+     (12,742,635)
+Net cash used in financing activities
+      (9,005,425)
+     (26,944,233)
+Net decrease in cash and cash equivalents
+        7,853,629    (134,267,530)
+Cash and cash equivalents at 1 January
+    (39,887,072)
+     (24,387,135)
+Effect of movement in exchange rates on cash held
+8.2
+      (3,224,442)
+     124,935,345 
+27
+    (35,257,885)
+     (33,719,320)
+     (39,887,072)
+Cash and cash equivalents as at period ended 30 June
+Cash and cash equivalents as at year ended 31 December
+The accompanying notes form an integral part of these financial statements.
+5 
+
+=== PAGE 6 ===
+TOTALENERGIES MARKETING NIGERIA PLC
+NOTES TO THE FINANCIAL STATEMENTS
+1
+The Company
+Legal form:
+Number
+Holdings
+Number
+Holdings
+'000
+%
+'000
+%
+TotalEnergies Marketing Service
+                  209,560 
+               61.72 
+              209,560 
+                61.72 
+Other shareholders
+                  129,962 
+               38.28 
+              129,962 
+                38.28 
+    
+ 
+                339,522 
+            100.00 
+              339,522 
+              100.00 
+Shareholding Structure/Free Float Status
+Unit
+Percentage
+Unit
+Percentage
+Issued Share Capital
+339,521,837
+100.00%
+339,521,837
+100.00%
+Substantial Shareholdings (5% and above)
+Total Marketing & Services
+209,559,630
+61.72%       209,559,630 
+61.72%
+Total Substantial Shareholdings
+209,559,630
+61.72%       209,559,630 
+61.72%
+Directors Shareholdings (direct and indirect), excluding directors with substantial interests
+Ms. T. Ibru
+902,903
+0.27%              902,903 
+0.27%
+Mrs. T. Ibru (Indirect - Representing Mas Mackoy Limited)
+43,135
+0.01%                43,135 
+0.01%
+Dr. J.E Nnamani (direct)
+10,812
+0.00%                10,812 
+0.00%
+Total Directors Shareholdings
+956,850
+0.28%
+956,850
+              
+0.28%
+Free Float in Units and Percentage
+129,005,357
+38.00%       129,005,357 
+38.00%
+Free Float in Value
+Declaration:
+(A)
+(B)
+Principal activities
+Description of business
+2
+Basis of preparation
+TotalEnergies Marketing Nigeria Plc. ("the Company") is a subsidiary of TotalEnergies Marketing Services ("the Parent Company") in France
+and operates in the petroleum marketing and distribution business in Nigeria. The Company's registered office is situated at:
+Plot 1415-E, Adetokunbo Ademola Street 
+Victoria Island
+Lagos State
+These financial statements have been prepared in accordance with the International Financial Reporting Standards (IFRS Accounting
+Standards) as issued by the International Accounting Standards Board (IASB) and interpretations issued by the IFRS Interpretations Committee
+(IFRIC). The financial statements comply with IFRS Accounting Standards Board as issued, applicable to companies reporting under IFRS
+Accounting Standards, in the manner required by the Financial Reporting Council (FRC) of Nigeria (Amendment) Act, 2023 and the Companies
+and Allied Matters Act (CAMA), 2020. 
+The principal activity of the Company is the blending of lubricants, sales and marketing of refined petroleum products and solar products.
+The Company was incorporated in Nigeria as a private limited liability company in 1956 and was converted to a public company in 1978. The
+merger of the Company with Elf Oil Nigeria Limited which commenced globally in November 1999 was completed in Nigeria in 2002. With this
+development, the authorised, issued and fully paid share capital was ₦148,541,000 made up of 297,082,000 ordinary shares of 50k each. In
+2003, to mark the completion of its corporate mergers, Total Group worldwide reverted to its former name Total and adopted a new logo with a
+unifying design to express its corporate ambition.
+With the capitalisation of the bonus issue of 42,440,228 ordinary shares of 50k each in March 2004, the authorised share capital became 
+₦169,760,918 made up of 339,521,837 ordinary shares of 50k each. 61.72% of the Company's ordinary shares were held by Total Societe
+Anonyme up until 2013 when a restructuring was concluded and Total Raffinage Marketing became the shareholders of 61.72% of Total
+Nigeria Plc (now TotalEnergies Marketing Nigeria Plc) while the remaining 38.28% are held by some members of the general public. Total
+Raffinage Marketing is now called TotalEnergies Marketing Services.
+In 2021, Total Group worldwide changed its name to TotalEnergies and adopted a new logo, thereby anchoring the transformation into a broad
+energy business within the Company’s identity. Accordingly, the Company changed its name from Total Nigeria Plc to TotalEnergies Marketing
+Nigeria Plc in the same period.
+30 June 2026
+31 December 2025
+No shareholder, except as disclosed above, held more than 5% of the issued share capital of the Company as at 30 June 2026 (2025: nil).
+₦82,563,428,480.00
+₦90,948,776,685.00
+TotalEnergies Marketing Nigeria Plc, with a free float percentage of 38% as at 30th June 2026, is compliant with The NGX's free float 
+requirements for companies listed on the Main Board.
+TotalEnergies Marketing Nigeria Plc, with a free float value of ₦82,563,428,480.00 as at 30th June 2026 is compliant with The NGX's free 
+float requirements for companies listed on the Main Board.
+Description
+30 June 2026
+30 June 2025
+6 
+
+=== PAGE 7 ===
+TOTALENERGIES MARKETING NIGERIA PLC
+NOTES TO THE FINANCIAL STATEMENTS
+2.2 Basis of measurement
+2.3 Functional and presentation currency
+2.4
+2.5
+2.6
+2.7
+(a)
+Judgement
+(i)
+Lease term - Note 17 (iv)
+(ii)
+Asset retirement - Note 17 (iv)
+(b)
+Assumptions and estimation uncertainties
+(i)
+Measurement of defined benefit obligation: Key actuarial assumptions
+(ii)
+(iii)
+(iv)
+(v)
+(vi)
+The amount recognised in note 12 of the financial statements as employee benefits - measurement of the Company's employee benefits.
+This estimate relates to the discount rate, withdrawal, mortality and inflation rate applied in the computation of the Company's liabilities.
+Measurement of Expected Credit Loss (ECL) allowance - Note 30(iv)
+Information about measurement of trade receivables and contract assets: Key assumptions in determining the weighted-average loss
+rate.
+Measurement of contingencies  - Note 28
+Recognition of contingencies - key assumptions about likelihood and magnitude of an outflow of resources.
+Estimation of the applicable borrowing rates for lease liability.
+Depreciation is based on management’s estimates of asset useful lives and residual values, which may change over time.
+Depreciation
+Income and deferred tax - Note 11
+The determination of income and deferred tax requires management judgement in estimating taxable profits and the recoverability of
+deferred tax assets.
+Incremental borrowing rate - Note 23
+Information about assumptions and estimation uncertainties at 30 June 2026 that have a significant risk of resulting in a material
+adjustment to the carrying amounts of assets and liabilities in the next financial period includes:
+Other than events already disclosed in the relevant notes, there are no other significant events in the period that are required to be disclosed.
+Use of estimates and judgments
+In preparing these financial statements, the directors have made certain judgements, estimates and assumptions that affect the application of
+the Company's accounting policies and the reported amounts of assets, liabilities, income and expenses. Actual results may differ from these
+estimates.
+Estimates and underlying assumptions are reviewed on an on-going basis. Revisions to accounting estimates are recognised prospectively.
+Information about judgements made in applying accounting policies that have the most significant effects on amounts recognised in the
+financial statements are as follows:
+In determining the lease term, management considers all facts and circumstances that create an economic incentive to exercise an
+extension option, or not exercise a termination option. Extension options (or years after termination options) are only included in the lease
+term if the lease is reasonably certain to be extended (or not terminated).
+Management is required to estimate asset retirement obligations relating to the dismantling and the restoration of leased sites. These
+estimates involve significant judgement regarding the expected costs and timing of decommissioning activities. Based on current
+assessments, the financial impact of these obligations are considered immaterial.
+Significant events and transactions
+These financial statements have been prepared under the going concern and historical cost convention except for defined benefit liability
+measured using the projected unit credit method and lease liability measured at the present value of future lease payments.
+These financial statements are presented in Nigerian Naira (NGN), which is the Company's functional currency. All financial information
+presented in Nigerian Naira has been rounded to the nearest thousand except otherwise stated.
+Financial period
+These financial statements cover the financial period from 01 January 2026 to 30 June 2026, with corresponding figures for the financial period
+from 01 January, 2025 to 30 June, 2025 and 01 January 2025 to 31 December, 2025 where applicable.
+Going concern
+The directors have undertaken a review of the Company's business activities and have concluded that the Company will still be able to realise
+its assets and settle its obligations as they fall due and, as such, these financial statements have been prepared on the basis applicable to a
+going concern.
+7 
+

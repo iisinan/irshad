@@ -23,8 +23,6 @@ class Financial extends Model
         'profit_margin',
         'cash_and_equivalents',
         'interest_bearing_securities',
-        'accounts_receivable',
-        'illiquid_assets',
         'net_income',
         'reporting_period',
         'source_url',

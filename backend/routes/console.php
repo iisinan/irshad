@@ -46,3 +46,6 @@ Schedule::command('app:send-zakat-reminders')->dailyAt('08:00')->withoutOverlapp
 // Prune old NGXPulse audit logs daily
 Schedule::command('irshad:prune-audits')->daily()->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
 
+// Sync financial and market data from NGXPulse (10 AM and 10 PM)
+Schedule::command('pulse:sync-data')->twiceDaily(10, 22)->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
+

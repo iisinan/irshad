@@ -1,0 +1,716 @@
+==================== PAGE 0 ====================
+UNION DICON SALT PLC
+UNAUDITED ACCOUNTS
+FOR THE 2ND QUARTER
+2026
+
+==================== PAGE 1 ====================
+UNION DICON SALT PLC
+STATEMENT OF COMPREHENSIVE INCOME 
+FOR THE PERIOD ENDED 30TH JUNE, 2026
+NOTE
+2026
+2025
+2026
+2025
+ =N='000
+ =N='000
+ =N='000
+ =N='000
+Revenue 
+7
+4,487
+                      
+-
+                          
+13,005
+                   
+-
+                         
+Less: Cost of Sales
+8
+(6,870)
+                     
+-
+                          
+955
+                         
+-
+                         
+Gross Profit
+11,357
+                    
+-
+                          
+13,960
+                   
+-
+                         
+Other Operating Income
+9
+38,852
+                    
+75,000
+                    
+110,954
+                 
+102,250
+                 
+Admimistrative Expenses
+10
+(49,001)
+                   
+(65,597)
+                   
+(130,163)
+                
+(75,985)
+                  
+Profit/(Loss) before tax
+1,208
+                      
+9,403
+                      
+9,575
+                     
+26,265
+                   
+Income Tax Expenses
+11 (i)
+-
+                               
+-
+                               
+-
+                              
+-
+                              
+Profit/(Loss) for the year
+1,208
+                      
+9,403
+                      
+9,575
+                     
+26,265
+                   
+Other Comprehensive Income
+-
+                          
+-
+                          
+Item that will be reclassified to profit or loss
+Item that may not be reclassified to profit or loss:
+  Actuarial gain on gratuity
+16 (e)
+-
+                          
+-
+                          
+-
+                         
+-
+                         
+Total Comprehensive Profit/(loss) for the year Net of Tax
+1,208
+                      
+9,403
+                      
+9,575
+                     
+26,265
+                   
+QUARTER 2
+YEAR TILL DATE
+ 1
+
+==================== PAGE 2 ====================
+UNION DICON SALT PLC
+STATEMENT OF FINANCIAL POSITION
+AS AT 30TH JUNE, 2026
+YEAR TILL DATE
+Notes
+2026
+2025
+2026
+ASSET
+ =N='000
+ =N='000
+ =N='000
+Property, Plant and Equipment
+12
+5,167,233
+          
+255,850
+             
+5,426,545
+          
+Investment in subsidiary
+-
+                      
+-
+                      
+-
+                      
+5,167,233
+          
+255,850
+             
+5,426,545
+          
+CURRENT ASSET
+Trade and Other Receivables
+13
+359,446
+             
+73,245
+                
+721,342
+             
+Cash and Cash Equivalents
+14
+8,057,187
+          
+294,620
+             
+19,563,626
+        
+8,416,633
+          
+10,536,738
+        
+13,583,866
+        
+367,865
+             
+13,583,866
+        
+CURRENT LIABILITIES
+Trade and Other Payables
+15
+14,772,679
+        
+2,011,084
+          
+14,772,679
+        
+Current Tax liabilities
+11 (iii)
+85,957
+                
+85,957
+                
+85,957
+                
+14,858,636
+        
+(2,097,041)
+         
+14,858,636
+        
+NET CURRENT LIABILITIES
+TOTAL ASSETS LESS CURRENT LIABILITIES
+(1,274,770)
+         
+(1,473,326)
+         
+(1,274,770)
+         
+ 
+ 
+ 
+NON-CURRENT LIABILITIES
+Employee Benefit Liabilities
+16 (d)
+60,002
+                
+60,002
+                
+60,002
+                
+Deferred Tax Liabilities
+11 (v)
+11,413
+                
+11,413
+                
+11,413
+                
+71,415
+               
+71,415
+               
+71,415
+               
+NET LIABILITIES
+(1,346,185)
+         
+(1,401,911)
+         
+(1,346,185)
+         
+EQUITY
+Share Capital
+17 (a)
+136,673
+             
+136,673
+             
+136,673
+             
+Share Premium
+17 (b)
+250,638
+             
+250,638
+             
+250,638
+             
+Actuarial Valuation Reserve
+18
+65,692
+                
+65,692
+                
+65,692
+                
+Revenue Reserve
+19
+(1,799,188)
+         
+(1,854,914)
+         
+(1,799,188)
+         
+TOTAL EQUITY
+(1,346,185)
+         
+(1,401,911)
+         
+(1,346,185)
+         
+The financial statements were approved by the Board of Directors on, 13th July,2026 and signed
+ on its behalf by:
+(i)   LT. General T.Y Danjuma (RTD), GCON
+(ii) Florence S. Iroye 
+Ag. Managing Director
+ 
+(iii) Peter A. Adelowo
+FRC/2025/PRO/ICAN/001/208881
+QUARTER 2
+HEAD, ACCOUNTS
+Chairman
+ 2 
+
+==================== PAGE 3 ====================
+UNION DICON SALT PLC
+CASHFLOW STATEMENT
+FOR THE PERIOD ENDED 30TH JUNE, 2026
+NOTES
+2026
+2025
+ =N='000
+ =N='000
+CASH FLOW FROM OPERATING ACTIVITIES
+Profit/(loss) before taxation YTD
+1,208
+                     
+35,668
+                   
+Adjustment for non cash items
+Depreciation of property, plant and equipment
+14
+3,149
+                     
+6,672
+                     
+Accruals
+-
+                         
+-
+                         
+Post balancesheet adjustement
+-
+                         
+-
+                         
+Income Tax Expense
+13(i)
+-
+                         
+-
+                         
+Operating profit before capital changes
+4,357
+                     
+42,340
+                   
+Changes in working capital
+(Increase)/Decrease in other receivables
+16
+(359,446)
+               
+(92,475)
+                  
+(Decrease)/Increase in Employee Benefit Liabilities 
+19(d)
+-
+                             
+-
+                             
+Increase/(Decrease) in Trade and other payables
+18
+14,072,679
+           
+(32,655)
+                  
+Decrease in Tax Liabilities
+Tax paid
+13
+-
+                             
+-
+                             
+NET CASH FLOW FROM OPERATING ACTIVITIES
+13,717,590
+           
+(82,790)
+                 
+CASH FLOW FROM INVESTING ACTIVITIES
+Purchase of PPE
+14
+(5,021,000)
+            
+(7,700)
+                    
+Pre-Operation Factory expenses
+(84,822)
+                  
+Investment in subsidiary
+15
+-
+                         
+-
+                         
+Net cash flow from investing activities
+(5,021,000)
+            
+(92,522)
+                 
+Net increase/decrease in cash and equivalents 
+(5,570,355)
+            
+(136,552)
+               
+cash and cash equivalent at beginning
+13,627,542
+           
+431,172
+                 
+cash and cash equivalent at the end of the quarter
+14
+8,057,187
+             
+294,620
+                
+REPRESENTED BY:
+BANK BALANCE AS AT 30TH JUNE 2026
+2,007,187
+             
+294,620
+                 
+Bank(Term Deposit)
+6,050,000
+             
+-
+                         
+8,057,187
+             
+294,620
+                
+QUARTER 2
+ 3
+
+==================== PAGE 4 ====================
+UNION DICON SALT PLC
+STATEMENT OF CHANGE IN EQUITY
+FOR THE PERIOD ENDED 30TH JUNE, 2026
+Share 
+Share
+Reserve For
+Retained
+Total
+Capital
+Premium
+Actuarial Valuation
+Earnings
+Equity
+ =N='000
+ =N='000
+ =N='000
+ =N='000
+ =N='000
+Balance as at 1 April 2026
+136,673
+             
+250,638
+                  
+65,692
+                   
+(1,881,181)
+               
+(1,428,178)
+             
+Comprehensive Income for the year
+-
+                      
+-
+                           
+-
+                          
+-
+                             
+-
+                           
+Profit for the year
+-
+                      
+-
+                           
+-
+                          
+(34,569)
+                     
+(34,569)
+                   
+Other comprehensive income
+-
+                      
+-
+                           
+-
+                          
+-
+                             
+-
+                           
+Total comprehensive income for the year
+-
+                      
+-
+                           
+-
+                          
+(34,569)
+                     
+(34,569)
+                   
+Transaction with owners recorded directly in equity
+Balance at 30th June 2026
+136,673
+             
+250,638
+                  
+65,692
+                   
+(1,915,750)
+               
+(1,915,750)
+             
+Balance as at 1 April 2025
+136,673.00
+       
+250,638.00
+             
+65,692.00
+              
+1,881,181.00
+-           
+(1,428,178)
+             
+Comprehensive Income for the year
+-
+                      
+-
+                           
+-
+                          
+-
+                             
+-
+                           
+Profit for the year
+-
+                      
+-
+                           
+-
+                          
+26,265
+                      
+26,265
+                    
+Other comprehensive income
+-
+                      
+-
+                           
+-
+                          
+-
+                             
+-
+                           
+Total comprehensive income for the year
+-
+                      
+-
+                           
+-
+                          
+26,265
+                      
+26,265
+                    
+Transaction with owners recorded directly in equity
+Balance at 30th June 2025
+136,673
+             
+250,638
+                  
+65,692
+                   
+(1,854,916)
+               
+(1,401,913)
+             
+ 4 
+
+==================== PAGE 5 ====================
+UNION DICON SALT PLC
+8
+FOR THE PERIOD ENDED 30TH JUNE, 2026
+NOTES TO THE FINANCIAL STATEMENTS
+1)
+Corporate information and principal activities
+Its registered office is at Phase 2, NPA Kirikiri Lighter Terminal Apapa Lagos.
+2)
+Basis of preparation
+a
+Statement of compliance
+b
+Basis of measurement
+c
+Functional and presentation currency
+d
+Use of estimates and judgement
+3
+New standards, interpretations and amendments
+(a)
+New standards, interpretations and amendments adopted from 1 January 2022
+Date Issued by IASB
+Effective date periods beginning on or 
+after
+IAS 37
+Onerous Contracts – Cost of
+Fulfilling a Contract
+14 May 2022
+1 January 2022
+Amendments to IFRS 1, IFRS 9, IFRS 16 
+and IAS
+41
+Annual Improvements to IFRS Standards 2018–2020
+14 May 2020
+1 January 2022
+IAS 16
+Property, Plant and Equipment —
+Proceeds before Intended Use (Amendments to IAS 16)
+14 May 2020
+1 January 2022
+(b)
+IFRS 3
+Reference to the Conceptual Framework
+14 May 2020
+1 January 2022
+New standards effective for adoption in the annual financial statements for the year ended 31 December 2022 but had no significant effect or impact 
+Standard/Interpretation
+The following are the new standards and interpretations that have been issued, but are not mandatory for the financial year ended 31 December 2022.
+They have not been adopted in preparing the financial statements for the year ended 31 December 2022.
+In terms of International Financial Reporting Standards, the company is required to include in its financial statements disclosure about the future
+impact of standards and interpretations issued but not yet effective at reporting date.
+At the date of authorisation of the financial statements of the Company for the year ended 31 December 2022, the following standards and
+interpretations were in issue but not yet effective:
+Dicon Salt Limited and Union Salt Limited were incorporated as private limited liability companies on 11 October 1984 and 30 May 1991 respectively. 
+The principal activity of the Company is the processing of crude salt. The issued share capital of the Company is held thus: 28% by Aims Limited, 19% by 
+The financial statements have been prepared in accordance with International Financial Reporting Standards (IFRS) as issued by the International
+Accounting Standards Board (IASB) and in compliance with the requirements of the Companies and Allied Matters Act, 2020 and Financial Reporting
+Council of Nigeria Act No 6, 2011. 
+The financial statements have been prepared under the historical cost concept except for certain financial instruments which were measured at fair 
+The Company's functional and presentation currency is the Nigerian Naira. The financial statements are presented in Nigerian Naira and have been
+rounded up to the nearest thousand except where otherwise stated.
+The preparation of ﬁnancial statements in conformity with IFRS requires the use of certain critical accounting estimates and judgments. It also requires
+management to exercise its judgement in the process of applying the Company’s accounting policies. The areas involving a higher degree of judgement
+or complexity, or areas where assumptions and estimates are signiﬁcant to the ﬁnancial statements are disclosed in note 4.
+
+==================== PAGE 6 ====================
+UNION DICON SALT PLC
+9
+FINANCIAL STATEMENTS, 31 JUNE 2026
+NOTES TO THE FINANCIAL STATEMENTS
+Date issued by IASB
+Effective date periods beginning on or 
+after
+IAS 1
+Disclosure of Accounting Policies
+(Amendments to IAS 1 and IFRS Practice Statement 2)
+12 February 2021
+1 January 2023
+IAS 8
+Definition of Accounting
+Estimates (Amendments to IAS 8)
+12 February 2021
+1 January 2023
+IAS 12
+Deferred Tax related to Assets and Liabilities arising from 
+a single Transaction (Amendments to IAS
+12)
+7 May 2021
+1 January 2023
+IFRS 16
+Lease liability in a Sale and Leaseback (Amendments to 
+IFRS
+16)
+22 September 2022
+1 January 2024
+IAS 1
+Non-current liabilities with
+covenants
+31 October 2022
+1 January 2024
+IAS 1
+Classification of liabilities as
+current or non-current
+31 October 2022
+1 January 2024
+4)
+Critical accounting estimates and judgements
+i)
+Legal proceedings
+ii)
+Income and deferred taxation
+*All standards and interpretations will be adopted at their effective date (except for those standards and interpretations that are not applicable to the
+Entity).
+The Company makes certain estimates and assumptions regarding the future. Estimates and judgements are continually evaluated based on historical
+experience as well as other factors, including expectations of future events that are believed to be reasonable under the circumstances. In the future, 
+The Company reviews outstanding legal cases following developments in the legal proceedings and at each reporting date, in order to assess the need
+for provisions and disclosures in its financial statements. Among the factors considered in making decisions on provisions are the nature of litigation,
+claim or assessment, the legal process and potential level of damages in the jurisdiction in which the litigation, claim or assessment has been brought,
+the progress of the case (including the progress after the date of the financial statements but before those statements are issued), the opinions or views
+of legal advisers, experience on similar cases and any decision of the Company's management as to how it will respond to the litigation, claim or
+assessment.
+The Company incurs corporate tax liability and recognises changes to deferred tax assets and deferred tax liabilities, all of which are based on
+management’s interpretations of applicable laws and regulations. The quality of these estimates is highly dependent upon management’s ability to
+properly apply at times a very complex sets of rules to recognise changes in applicable rules and in the case of deferred tax assets, management’s ability
+to project future earnings from activities that may apply loss carry forward positions against future income taxes.
+Standard/Interpretation
+

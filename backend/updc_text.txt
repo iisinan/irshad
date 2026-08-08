@@ -1,0 +1,1402 @@
+==================== PAGE 0 ====================
+Unaudited Financial Statements
+for the Period ended
+30 June 2026 (H1 2026)
+
+==================== PAGE 1 ====================
+TABLE OF CONTENT
+PAGE
+Financial Highlights
+-
+3
+Consolidated Statement of Comprehensive Income
+-
+4
+Consolidated Statement of Financial Position
+-
+5
+Consolidated Statement of Cash Flows 
+-
+6
+Consolidated Statement of Changes in Equity
+-
+7
+Notes to unaudited Consolidated Financial Statements
+-
+8-32
+Shareholding Structure/Free Float Status
+-
+33
+1
+2
+
+==================== PAGE 2 ====================
+UPDC Plc
+Financial Statements
+For the period ended 30 June 2026
+Financial Highlights
+2026
+2025
+%
+2026
+2025
+%
+N'000
+N'000
+Change
+N'000
+N'000
+Change
+Revenue
+8,012,582
+         
+6,431,707
+     
+25
+          
+1,207,483
+       
+633,047
+            
+91
+         
+Operating profit/(loss)
+893,317
+            
+1,109,640
+     
+(19)
+         
+(21,016)
+            
+(278,764)
+          
+(92)
+        
+Net finance Income
+555,318
+            
+800,799
+        
+(31)
+         
+(329,168)
+         
+99,104
+              
+(432)
+      
+Profit /(loss) before taxation
+1,448,635
+         
+1,910,438
+     
+(24)
+         
+(350,184)
+         
+(179,661)
+          
+95
+         
+Taxation 
+(433,154)
+           
+(701,225)
+       
+38
+          
+(19,876)
+            
+(3,165)
+               
+(528)
+      
+Total comprehensive profit/(loss)  for the 
+period
+1,395,709
+         
+1,382,651
+     
+1
+             
+10,168
+             
+(9,388)
+               
+(208)
+      
+Total Equity
+12,661,678
+       
+11,451,569
+   
+11
+          
+848,595
+           
+1,024,027
+        
+(17)
+        
+Total equity and liabilities
+25,484,435
+       
+29,989,374
+   
+(15)
+         
+14,112,019
+     
+13,327,167
+      
+6
+           
+Cash and Cash equivalents
+8,591,278
+         
+10,197,862
+   
+(16)
+         
+3,964,478
+       
+1,612,225
+        
+146
+       
+Basic Earnings Per Share (Kobo)
+5
+                         
+7
+                     
+(16)
+         
+(2)
+                      
+(1)
+                       
+102
+       
+NSE quotation as at June 30 (kobo) 
+320
+                    
+159
+                
+101
+        
+320
+                  
+159
+                    
+101
+       
+Number of shares in issue ('000)
+18,559,970
+       
+18,559,970
+   
+18,559,970
+     
+18,559,970
+      
+Market capitalisation as at June 30  (N'000)
+59,391,904
+       
+29,510,352
+   
+59,391,904
+     
+29,510,352
+      
+The Group
+The Company
+3
+
+==================== PAGE 3 ====================
+UPDC Plc
+Consolidated and Separate Statement of Profit or Loss and Other Comprehensive Income
+For the period ended 30 June 2026
+3 Months
+3 Months
+6 Months
+6 Months
+3 Months
+3 Months
+6 Months
+6 Months
+ended 30 Junended 30 June ended 30 June ended 30 Juneended 30 June
+ended Juneended 30 June
+ended June
+2026
+2025
+2026
+2025
+2026
+2025
+2026
+2025
+Notes
+N'000
+N'000
+N'000
+N'000
+N'000
+N'000
+N'000
+N'000
+Revenue
+5
+5,352,958
+           
+4,250,655
+     
+8,012,582
+         
+6,431,707
+         
+839,958
+          
+270,642
+            
+1,207,483
+       
+633,047
+            
+Cost of sales
+7(i)
+(4,030,654)
+          
+(2,760,627)
+    
+(5,853,688)
+        
+(4,139,243)
+       
+(314,987)
+         
+(102,417)
+          
+(496,586)
+         
+(297,400)
+          
+Gross profit 
+1,322,304
+        
+1,490,028
+  
+2,158,894
+      
+2,292,464
+      
+524,971
+        
+168,225
+         
+710,897
+        
+335,647
+         
+Selling and distribution expenses
+7 (ii)
+(63,839)
+                
+(25,505)
+          
+(110,894)
+           
+(88,243)
+             
+(28,431)
+           
+(48,251)
+             
+(67,459)
+           
+(69,725)
+             
+Administrative expenses
+7 (iii)
+(676,151)
+             
+(805,082)
+        
+(1,355,757)
+        
+(1,285,054)
+       
+(322,330)
+         
+(396,496)
+          
+(695,176)
+         
+(619,789)
+          
+Other  Operating income
+6
+95,805
+                 
+108,050
+         
+207,075
+            
+196,474
+            
+15,387
+             
+47,232
+              
+30,722
+             
+75,103
+              
+Credit loss expenses
+9
+(3,000)
+                  
+(3,000)
+            
+(6,000)
+                
+(6,000)
+               
+-
+                        
+-
+                         
+-
+                        
+-
+                         
+Operating profit/(loss)
+675,119
+            
+764,491
+      
+893,317
+          
+1,109,640
+      
+189,597
+        
+(229,290)
+        
+(21,016)
+         
+(278,764)
+        
+Finance income
+8
+343,315
+              
+558,450
+         
+717,866
+            
+1,052,024
+         
+163,288
+          
+141,381
+            
+200,340
+          
+350,329
+            
+Finance cost
+8
+(73,108)
+                
+(117,061)
+        
+(162,548)
+           
+(251,225)
+           
+(268,069)
+         
+(117,061)
+          
+(529,508)
+         
+(251,225)
+          
+Net finance income
+270,207
+            
+441,389
+      
+555,318
+          
+800,799
+          
+(104,781)
+      
+24,320
+            
+(329,168)
+      
+99,104
+            
+Profit /(loss) before taxation
+945,326
+            
+1,205,879
+  
+1,448,635
+      
+1,910,438
+      
+84,816
+          
+(204,970)
+        
+(350,184)
+      
+(179,661)
+        
+Taxation 
+10
+(332,492)
+             
+(478,404)
+        
+(433,154)
+           
+(701,225)
+           
+(9,938)
+              
+(1,353)
+               
+(19,876)
+           
+(3,165)
+               
+Profit/(loss) after Taxation
+612,834
+            
+727,475
+      
+1,015,481
+      
+1,209,213
+      
+74,878
+          
+(206,323)
+        
+(370,060)
+      
+(182,826)
+        
+Other comprehensive income:
+Net changes in fair value (loss)/gain on financial assets
+16
+366,887
+              
+173,438
+         
+380,228
+            
+173,438
+            
+366,887
+          
+173,438
+            
+380,228
+          
+173,438
+            
+Total comprehensive profit/(loss)  for the period
+366,887
+            
+900,912
+      
+1,395,709
+      
+1,382,651
+      
+441,765
+        
+(32,885)
+          
+10,168
+          
+(9,388)
+             
+Profit/(loss)  attributable to:
+Equity holders of the parent
+67,249
+                 
+1,811,773
+     
+352,898
+            
+1,903,839
+         
+74,878
+             
+(206,323)
+          
+(370,060)
+         
+(182,826)
+          
+Non controlling interest
+299,638
+              
+(910,859)
+        
+662,583
+            
+(694,626)
+           
+-
+                         
+-
+                        
+-
+                         
+Total profit 
+366,887
+            
+900,913
+      
+1,015,481
+      
+1,209,212
+      
+74,878
+          
+(206,323)
+        
+(370,060)
+      
+(182,826)
+        
+Total comprehensive profit attributable to:
+Equity holders of the parent
+67,249
+                 
+1,811,773
+     
+733,127
+            
+2,077,276
+         
+441,765
+          
+(32,885)
+             
+10,168
+             
+(9,388)
+               
+Non controlling interests*
+299,638
+              
+(910,859)
+        
+662,583
+            
+(694,626)
+           
+-
+                         
+-
+                        
+-
+                         
+Total comprehensive profit attributable to:
+366,887
+            
+900,914
+      
+1,395,709
+      
+1,382,651
+      
+441,765
+        
+(32,885)
+          
+10,168
+          
+(9,388)
+             
+From continuing operations
+10
+                   
+5
+                         
+7
+                         
+(0)
+                       
+(2)
+                      
+(1)
+                       
+Diluted Profit Per Share (Kobo)
+From continuing operations
+-
+                       
+10
+                   
+5
+                         
+7
+                         
+(0)
+                       
+(2)
+                      
+(1)
+                       
+The accompanying notes and accounting policies on pages 8 to 32 form an integral part of these consolidated and separate financial statements.
+The Group
+The Company
+4
+
+==================== PAGE 4 ====================
+UPDC Plc
+Consolidated and Separate Statement of Financial Position
+As at June 30 2026
+30 June 
+2026
+31 Dec 2025
+30 June  2026
+31 Dec 2025
+Notes
+N'000
+N'000
+N'000
+N'000
+Assets
+Non-current assets
+Property, plant and equipment
+13
+       8,358,235        8,450,096              221,251              240,213 
+Intangible assets
+14
+             75,908              74,680                   1,915                  3,056 
+Investments in joint ventures
+15
+           112,182           112,182              111,378              111,378 
+16
+       1,300,782           920,552           1,300,782              920,552 
+Investments in subsidiaries
+17
+                        -                         -           1,617,207           1,617,207 
+     9,847,107      9,557,510         3,252,533        2,892,407 
+Current assets
+Inventories
+18
+1,249,195
+       
+3,219,099
+       
+891,739
+             
+888,905
+             
+Trade and other receivables
+19
+       5,469,729 
+6,687,775
+       
+5,791,917
+          
+7,722,279
+         
+Current tax assets
+10 (i)
+327,127
+          
+327,127
+          
+211,350
+             
+211,350
+             
+Cash and cash equivalents
+20
+8,591,278
+       
+10,197,862
+    
+3,964,478
+          
+1,612,225
+         
+15,637,329
+  
+20,431,863
+ 
+10,859,484
+    
+10,434,759
+    
+Total assets
+  25,484,435   29,989,374      14,112,019      13,327,167 
+Equity 
+Share capital
+25
+       9,279,985        9,279,985           9,279,985           9,279,985 
+Share premium
+25 (i)
+       8,971,551        8,971,551           8,971,551           8,971,551 
+Fair value reserve of financial assets at FVOCI
+25 (iii)
+           613,569           233,341              613,569              233,341 
+Retained earnings
+25 (ii)
+      (8,192,569)      (8,359,868)      (18,016,510)      (17,460,850)
+  10,672,536   10,125,009            848,595        1,024,027 
+Non controlling interest
+       1,989,142        1,326,560                            -                           - 
+Total equity  
+  12,661,678   11,451,569            848,595        1,024,027 
+Liabilities
+Non-current liabilities
+21
+       1,511,370        2,015,168           5,511,370           5,502,925 
+Deferred taxation liabilities
+24
+           207,144           207,144              192,743              192,743 
+     1,718,514      2,222,312         5,704,113        5,695,668 
+Current liabilities
+Trade and other payables
+22
+     10,321,948      14,965,201           6,981,298           6,381,786 
+Current income tax liabilities
+10
+           721,579        1,271,255                 91,092                87,406 
+21
+             60,716              79,038              486,921              138,282 
+  11,104,243   16,315,494         7,559,311        6,607,473 
+Total liabilities
+  12,822,757   18,537,806      13,263,424      12,303,141 
+Total equity and liabilities
+  25,484,435   29,989,374      14,112,019      13,327,167 
+Wole Oshin
+Odunayo Ojo
+Francis Falola
+Chairman
+Chief Executive Officer
+Chief Financial Officer
+FRC/2013/PRO/FORM CO7/003/00000003054
+FRC/2016/NIESV/00000014322
+FRC/2025/PRO/ICAN/001/105473
+The Company
+Equity instrument at fair value
+Interest bearing Loans and Borrowings
+Interest bearing Loans and Borrowings
+Equity attributable to equity holders of the Company
+The Group
+The Consolidated and Seperate financial statements were approved by the board of directors on 23rd July 2026
+and signed on its behalf by:
+5
+
+==================== PAGE 5 ====================
+UPDC Plc
+Consolidated Statement of Cash Flows
+For the period ended 30 June 2026
+2026
+2025
+2026
+2025
+Notes
+N'000
+N'000
+N'000
+N'000
+Profit before tax
+1,448,635
+      
+3,245,396
+    
+(350,184)
+       
+(268,713)
+     
+Adjustment for non cash items:
+Depreciation
+13
+144,601
+            
+316,858
+          
+20,823
+             
+55,689
+           
+Amortization of intangible asset
+14
+7,668
+                 
+8,666
+               
+1,141
+               
+2,414
+              
+Share of loss from investment in Joint Venture
+6
+-
+                          
+7,959
+               
+-
+                        
+7,959
+              
+  Investment income
+6
+-
+                          
+(62,678)
+           
+-
+                        
+(62,678)
+          
+Finance cost
+8
+162,548
+            
+461,659
+          
+529,508
+          
+520,903
+         
+Finance income
+8
+(717,866)
+           
+(2,328,997)
+     
+(200,340)
+         
+(528,352)
+        
+Exchange gains
+6
+3,655
+                 
+11,376
+            
+1,686
+               
+1,342
+              
+Withholding tax utilized for tax
+10
+-
+                          
+-
+                        
+-
+                        
+-
+                       
+1,049,240
+      
+1,660,240
+    
+2,634
+             
+(271,436)
+     
+Changes in working capital:
+Decrease/(increase) in inventories
+18
+1,969,904
+         
+5,510,900
+      
+(2,834)
+              
+190,163
+         
+(Increase)/decrease in trade and other receivables
+19
+1,217,763
+         
+(5,357,736)
+     
+1,930,079
+       
+(5,188,494)
+    
+(Decrease)/increase in trade and other payables
+22
+(4,643,253)
+        
+(2,823,760)
+     
+599,512
+          
+503,494
+         
+Decrease in deferred revenue
+25
+-
+                          
+-
+                        
+-
+                        
+-
+                       
+ Cash flow from operating activities 
+(406,345)
+         
+(1,010,356)
+   
+2,529,391
+    
+(4,766,272)
+ 
+Tax paid
+10
+(982,831)
+           
+(443,112)
+         
+(16,190)
+           
+(10,127)
+          
+ Net cash (outflow)/inflow from operating activities 
+(1,389,176)
+     
+(1,453,469)
+   
+2,513,201
+    
+(4,776,399)
+ 
+Cash flow from investing activities
+Purchase of property, plant & equipment
+13
+(59,188)
+              
+(514,220)
+         
+(8,308)
+              
+(234,783)
+        
+Purchase of intangible asset
+14
+(8,897)
+                
+(27,044)
+           
+-
+                        
+-
+                       
+Proceed from dsiposal of  property, plant & equipment
+6,731
+                 
+-
+                        
+6,731
+               
+Dividend received
+6
+-
+                          
+62,678
+            
+-
+                        
+62,678
+           
+Investment in subsidiary
+17
+-
+                          
+-
+                        
+-
+                        
+(20)
+                  
+Interest received
+8
+717,866
+            
+2,328,997
+      
+200,340
+          
+528,352
+         
+ Net cash flow from investing activities 
+656,512
+          
+1,850,412
+    
+198,762
+        
+356,227
+       
+Cash flow from financing activities
+Proceed from right issue
+-
+                          
+-
+                        
+-
+                        
+-
+                       
+Repayment of borrowings 
+21
+(503,798)
+           
+(1,007,606)
+     
+(503,798)
+         
+(1,007,606)
+    
+Addition to borrowing
+-
+                          
+-
+                        
+512,243
+          
+3,487,757
+     
+Interest paid
+21
+(180,870)
+           
+(499,196)
+         
+(180,870)
+         
+(499,196)
+        
+Dividend paid 
+(185,600)
+           
+(185,600)
+         
+(185,600)
+         
+(185,600)
+        
+ Net cash (outflows)/inflow from financing activities 
+(870,267)
+         
+(1,692,402)
+   
+(358,024)
+       
+1,795,355
+   
+Net increase  in cash and cash equivalents
+(1,602,931)
+        
+(1,295,458)
+     
+2,353,939
+       
+(2,624,818)
+    
+Effect of foreign exchange gains
+6
+(3,655)
+                
+(11,376)
+           
+(1,686)
+              
+(1,342)
+            
+Cash and cash equivalents at the beginning of the year
+20
+10,197,862
+       
+11,504,698
+    
+1,612,225
+       
+4,238,385
+     
+Cash and cash equivalents for the period
+20
+8,591,277
+       
+10,197,862
+ 
+3,964,478
+     
+1,612,225
+   
+The Group
+The Company
+The accompanying notes and accounting policies on pages 8 to 32 form an integral part of these consolidated and separate financial
+statements.
+6
+
+==================== PAGE 6 ====================
+UPDC Plc
+Consolidated and Separate Statement of Changes in Equity
+For the period ended 30 June 2026
+Non-Controlling
+Non
+Share
+Share 
+Retained 
+Controlling
+Capital
+Premium
+earnings
+Total
+interest
+Total
+N'000
+N'000
+N'000
+N'000
+N'000
+N'000
+N'000
+Balance at 1 January 2026
+9,279,985
+       
+8,971,551
+       
+(8,359,868)
+            
+233,341
+              
+10,125,009
+          
+1,326,560
+       
+11,451,569
+       
+Profit for the year
+-
+                       
+-
+                       
+352,898
+                
+-
+                           
+352,898
+                
+662,583
+           
+1,015,481
+         
+Net changes in fair value of financial assets through other 
+comprehensive income
+-
+                       
+-
+                       
+-
+                              
+380,228
+              
+380,228
+                
+-
+                        
+380,228
+             
+Dividend paid
+-
+                       
+-
+                       
+(185,600)
+               
+-
+                           
+(185,600)
+               
+-
+                        
+(185,600)
+           
+Balance at June 30 2026
+9,279,985
+    
+8,971,551
+    
+(8,192,569)
+         
+613,569
+            
+10,672,536
+       
+1,989,142
+    
+12,661,678
+    
+Balance at 1 January 2025
+9,279,985
+       
+8,971,551
+       
+(9,148,885)
+            
+100,060
+              
+9,202,711
+             
+282,842
+           
+9,485,553
+         
+Profit for the year
+-
+                       
+-
+                       
+974,617
+                
+-
+                           
+974,617
+                
+1,043,718
+       
+2,018,334
+         
+Dividend paid
+-
+                       
+-
+                       
+(185,600)
+               
+(185,600)
+               
+(185,600)
+           
+Net changes in fair value of financial assets through other 
+comprehensive income
+-
+                       
+-
+                       
+-
+                              
+133,281
+              
+133,281
+                
+-
+                        
+133,281
+             
+Balance at June 30 2025
+9,279,985
+  
+8,971,551
+  
+(8,359,868)
+      
+233,341
+         
+10,125,009
+     
+1,326,560
+  
+11,451,569
+ 
+Share
+Share 
+Revenue
+Capital
+Premium
+Reserve
+Total
+N'000
+N'000
+N'000
+N'000
+N'000
+Balance at 1 January 2026
+       9,279,985 
+       8,971,551           (17,460,850)
+              233,341 
+             1,024,027 
+Dividend paid
+                        - 
+               (185,600)
+                            -                (185,600)
+Profit for the year
+                        - 
+                        -                (370,060)
+                            -                (370,060)
+Net changes in fair value of financial assets through other 
+comprehensive income
+                        - 
+                        -                               - 
+              380,228 
+                380,228 
+Balance at June 30 2026
+     9,279,985 
+     8,971,551        (18,016,510)
+            613,569 
+              848,595 
+Balance at 1 January 2025
+       9,279,985 
+       8,971,551           (16,966,787)
+              100,060 
+             1,384,809 
+Profit for the year
+                        - 
+                        -                (308,464)
+                            -                (308,464)
+Net changes in fair value of financial assets through other 
+comprehensive income
+                        - 
+                        -                               - 
+              133,281 
+                133,281 
+Dividend paid
+               (185,600)
+               (185,600)
+Loan from equity holder*
+                        - 
+                        -                               -                             - 
+                              - 
+Balance at June 30 2025
+     9,279,985 
+     8,971,551        (17,460,850)
+            233,341 
+           1,024,029 
+The Group
+Attributable to owners of the Company
+Attributable to owners of the Company
+Fair value 
+reserve of 
+financial assets 
+at FVOCI
+Fair value 
+reserve of 
+financial assets 
+at FVOCI
+The Company
+The accompanying notes and accounting policies on pages 8 to 32 form an integral part of these consolidated and separate financial statements.
+7
+

@@ -1,0 +1,1080 @@
+==================== PAGE 15 ====================
+NOTES TO THE FINANCIAL STATEMENTS
+FOR THE QUARTER ENDED 30 JUNE 2026
+4. Application of new and revised IFRS Accounting Standards (Continued)
+42 New and revised IFSs that are not mandatorily effective (but allow early application) for the year ended 31 March 2025.
+The following revisions to accounting standards and pronouncements were Issued but not effective at the reporting period (Earlier
+application Is permitted in some cases).
+Pronouncement
+Nature of change
+Required to be
+Implemented for
+perlods
+beginning on or
+after
+1 January 2027
+IFRS 18
+Presentation and
+Disclosure In
+Financial
+Statements
+IFRS 18 replaces IAS 1 Presentation of Financial Statements, The major changes
+in the requirements are summarised below.
+A more structured statement of profit or loss
+IFRS 18 introduces newly defined operating profit and 'profit or loss before
+financing and income tax' subtotals and a requirement for all income and expenses
+to be allocated between three new distinct categories based on a company's main
+business activities: operating investing and financing
+Under IFRS 18, companies are no longer permitted to disclose operating
+expenses only in the notes. A company presents operating expenses in a way
+that provides the 'most useful structured summary' of its expenses by elther:
+• nature;
+• function; or
+• using a mixed presentation.
+Ifany operating expenses are presented by function, then new disclosures
+apply.
+MPMs - Disclosed and subject to audit IFRS 18 also requires some 'non-
+GAAP' measures to be reported in the financial statements, It introduces a
+narrow definition for Management Performance Measures ("MPMs"), requiring
+them to be:
+• a subtotal of income and expenses;
+• used in public communications outside the financial statements; and
+reflective
+of
+performance.
+For each MPM presented, companies need to explain in a single note to the
+financial statements why the measure provides useful information, how it is
+calculated and reconcile it to an amount determined under IPRS Accounting
+Standards.
+Greater disaggregation of information
+The new standard Includes enhanced guidance on how companies group
+information in the financial statements. This includes guidance on whether
+information is included in the primary financial statements or is further
+disaggregated in the notes.
+Companies are discouraged from labelling items as 'other' and are required to
+disclose more information if they continue to do so.
+-
+THOMAS WYATT NIGERIA PLC
+RC: 663
+2026 FINANCIAL STATEMENTS
+14
+==================== PAGE 16 ====================
+NOTES TO THE FINANCIAL STATEMENTS
+FOR THE QUARTER ENDED 30 JUNE 2026
+4. Application of new and revised IFRS Accounting Standards (Continued)
+4.2 New and revised IFSs that are not mandatorily effective (but allow early application) for the year
+ended 31 March 2025.
+The following revisions to accounting standards and pronouncements were issued but not effective at
+the
+reporting period (Earlier application is permitted in some cases).
+Pronouncement
+Nature of change
+Required to be
+implemented for
+periods
+beginning on or
+after
+1 January 2027
+IFRS 19 Subsidiaries
+without
+Public
+Accountability:
+Disclosures
+IFRS 19 allows eligible subsidiaries to apply IFRS
+Accounting Standards with
+the reduced disclosure requirements of IRS 19.
+A subsidiary may choose to apply the new standard in
+its consolidated, separate
+or individual financial statements provided that, at the
+reporting date:
+• it does not have public accountability;
+• its parent produces consolidated financial statements
+under
+IFRS Accounting Standards.
+A subsidiary applying IFRS 19 is required to clearly
+state in
+its explicit and unreserved statement of
+compliance with IFRS Accounting Standards that IFRS
+19 has been adopted.
+THOMAS WYATT NIGERIA PLC
+RC: 663
+2026 FINANCIAL STATEMENTS
+15
+==================== PAGE 17 ====================
+NOTES TO THE FINANCIAL STATEMENTS
+FOR THE QUARTER ENDED 30 JUNE
+2026
+5
+Material accounting policies
+5.1 Interest
+Interest income and expense for all interest bearing financial instruments are recognised in income statement
+within "interest income" and "interest expense" using the effective interest method.
+The effective interest rate is the rate that exactly discounts the estimated future cash payments and receipts through
+the expected life of the financial asset or liability (or, where appropriate, the next re-pricing date) to the
+carrying amount of the financial asset or liability. When calculating the effective interest rate, the Company
+estimates future cash flows considering all contractual terms of the financial instruments but not future credit
+losses.
+5.2
+Fees and commissions
+Fees and commission income and expenses that are integral to the effective interest rate on a financial asset or
+liability are included in the measurement of the effective interest rate. Other fees and commission income, including
+account servicing fees, investment management and other fiduciary activity fees, sales commission, placement fees
+and syndication fees, are recognised as the related services are performed.
+When a loan commitment is not expected to result in the draw-down of a loan, loan commitment fees are
+recognised on a straightline basis over the commitment period.
+5.3
+Foreign currency
+The financial statements are prepared in Naira which is the Group's functional currency. In preparing the
+financial statements, transactions in currencies other than the Group's functional currency (foreign currencies)
+are recorded at the rates of exchange prevailing on the dates of the transactions.
+Monetary
+assets and liabilities that
+are denominated in foreign currencies are retranslated at the rates
+prevailing at each reporting date. Non-monetary items carried at fair value that are denominated in foreign
+currencies are translated at the rates prevailing at the date when the fair value was determined.
+Any resulting exchange differences are included in the statement of profit or loss under other gains and losses,
+except for differences on available-for-sale non-monetary financial assets, which are included in the available-
+for-sale reserve in other comprehensive income. Non-monetary items of historic cost, that are denominated in
+foreign currency, are translated at the date of the original transaction, and are not re-translated.
+Exchange differences arising on the settlement of monetary items are included in the statement of profit or loss
+for the year.
+5.4 Property, plant and equipment
+a)
+Recognition and measurement
+Items of property, plant and equipment are initially measured at cost. The cost of leasehold land and building
+was determined by reference to a previous GAAP revaluation (carried out in June 23, 2005).Thomas Wyatt Nigeria
+Plc elected to apply the optional exemption to use this previous revaluation as deemed cost at 1 April 2011, the date
+of transion. The plant and equipment are subsequently measured at cost less accumulated depreciation and
+accumulated impairment losses with the exception of leasehold land and building which are subsequently measured
+at fair value.
+Cost includes
+expenditure that is directly attributable to the acquisition of the asset. The cost of self-
+constructed assets includes the following:
+- the cost of materials and direct labour;
+- any other costs directly attributable to bringing the assets to a working condition for their intended use;
+- When the Group has an obligation to remove the asset or restore the site, an estimate of the costs of
+dismantling and removing the items and restoring the site on which they are located; and
+- borrowing costs
+THOMAS WYATT NIGERIA PLC
+RC: 663
+2026 FINANCIAL STATEMENTS
+16
+==================== PAGE 18 ====================
+NOTES TO THE FINANCIAL STATEMENTS
+FOR THE QUARTER ENDED 30 JUNE 2026
+5.4
+Property, plant and equipment (continued)
+Any gain or loss on disposal of an item of property, plant and equipment (calculated as the difference
+between the net proceeds from disposal and the carrying amount of the item is recognised in the profit or
+loss.
+b)
+Subsequent costs
+Subsequent expenditure is capitalised only when it is probable that the future economic benefits associated
+with the expenditure will flow to the Group, Ongoing repairs and maintenance is expensed as incurred.
+c)
+Depreciation
+Items of property, plant and equipment are depreciated on straight-line basis in the profit or loss over the
+estimated useful lives of each component. Land is not depreciated.
+Items of property, plant and equipment are depreciated from the date that they are installed and are ready
+for use, or in respect of internally constructed assets, from the date the asset is completed and ready for use.
+The following annual rates used to calculate the depreciation:
+%
+Useful life (years)
+Freehold land
+0
+2
+Building
+10
+Leasehold generator
+10
+Furniture and fittings
+10
+Plant and machinery
+10
+50
+10
+10
+10
+10
+Office equipment
+Motor vehicles
+25
+PPE are derecognized on disposal or when no future economic benefits are expected
+from its use. Gains or
+losses arising from the derecognision of PPE are measure as the difference between the net disposal proceeds and
+the carrying amount of the asset and are recognized in profit or loss and other comprehensive income when
+the asset is derecognized.
+Work in progress consist of items of Property, Plants and Equipment that are not yet available for use.
+Capital work in progress is not depreciated but carried at cost less any required impairment.
+Depreciation starts when assets are available for use. Once the items are available for use, they are
+transferred to relevant classes of Property, Plant and Equipment as appropriate.
+5.5
+Inangible assets
+An intangible asset is an identifiable, non-monetary asset without physical substance. An intangible asset is
+recognised when it is identifiable, the Company has control over the asset, the cost of the intangible asset can
+be measured reliably and from which future economic benefits are expected to flow to the Company.
+Intangible assets are initially recognised at cost. Any gain or loss on disposal of an item of intangible asset
+(calculated as the difference between the net proceeds from disposal and the carrying amount of the item) is
+recognised in the profit or loss. Subsequent measurement is at cost less accumulated amortization.
+An intangible asset is derecognized where it is certain that there would be no future flow of economic benefit.
+Amortisation methods, useful life and residual values are reviewed at each reporting date and adjusted if
+appropriate.
+5.5.1 Computer Software
+Computer software are acquired separately and are carried at cost less accumulated amotisation and accumulated
+impairment lossess. Amortisation is recognised
+on a straight-line basis
+estimated useful life and amortisation method are reviewed at the end of each reporting period, with the
+effect of any changes in estimate being accounted for on a prospective basis.
+THOMAS WYATT NIGERIA PLC
+RC: 663
+2026 FINANCIAL STATEMENTS
+17
+==================== PAGE 19 ====================
+NOTES TO THE FINANCIAL STATEMENTS
+FOR THE QUARTER ENDED 30 JUNE 2026
+a)
+Subsequent costs
+Subsequent expenditure is capitalised only when it is probable that the future economic benefits associated with the
+expenditure will flow to the Company and the cost can be measured reliably. Ongoing repairs and maintenance is
+expensed as incurred.
+b)
+Items of Intangible assets are amortised on straight-line basis in the profit or loss over the estimated useful lives of each
+component.
+Items of Intangible assets are amortised from the date that they are installed and are ready for use, or acquired, from the
+date the asset is completed and ready for use
+The following annual rate used to calculate the amortisation:
+Computer software
+Years
+3
+5.6 Impairment of tangible and intangible assets (excluding goodwill)
+At each balance sheet date, the Group reviews the carrying amounts of its tangible and intangible assets to determine
+whether there is any indication of impairment. If such indication exists, the recoverable amount of the asset is estimated
+to determine the extent of the impairment loss (If any). Where the asset does not generate independent cash flows from
+other assets, the company estimates the recoverable amount of the cash-generating unit to which the asset belongs.
+Recoverable amount is the higher of fair value less costs to sell and value in use. In assessing value in use, the estimated
+future cash flows are discounted to their present value using a pre-tax discount rate that reflects current market
+assessments of the time value of money and the risks specific to the asset for which the estimates of future cash flows
+have not been adjusted. If the recoverable amount of an asset is estimated to be less than its carrying amount, the carrying
+amount of the asset or cash generating unit is reduced to its recoverable amount. An impairment loss is recognised
+immediately in profit or loss, unless the relevant asset is carried at a re-valued amount, in which case the impairment loss
+is treated as a revaluation decrease. Where an impairment loss subsequently reverses, the carrying amount of the asset
+is increased to the revised estimate of its recoverable amount, but so that the increased carrying amount does not exceed
+the carrying amount that would have been determined had no impairment loss been recognised for the asset (or cash-
+generating unit) in prior years. A reversal of an impairment loss is recognised immediately in profit or loss, unless the
+relevant asset is carried at a re-valued amount, in which case the reversal of the impairment loss is treated as a revaluation
+increase.
+5.7
+Leases
+Group as a leasee
+The Group assesses whether a contract is or contains a lease at inception of the contract. This assessment involves the exercise
+of judgement about whether it depends on a specified asset, whether the Group obtains substantially all the economic benefits
+from the asset and whether the Group has the right to direct the use of the asset.
+The Group recognises a right-of-use (ROU) asset and a lease liability at the lease commencement date, except for short
+term leases of 12 months or less which are expensed in the income statement on a straight line - basis over the lease term.
+The lease liability is initially measured at the present value of the lease payments that are not paid at the
+commencement date, discounted using the interest rate implicit in the lease. If this rate cannot be readily determined,
+the Group uses an incremental borrowing rate specific to the country, term and currency of the contract. Lease payments
+can include fixed payments; variable payments that depend on an index rate known at commencement date; and
+extension option payments or purchase options which the Group is reasonable certain to exercise. The lease liability is
+subsequently measured at mortised cost using the effective interest rate method and remeasured (with a corresponding
+adjustments to the related ROU asset) when there is a change in future lease payments in case of renogotiation, charges
+THOMAS WYATT NIGERIA PLC
+RC: 663
+2026 FINANCIAL STATEMENTS
+18
+==================== PAGE 20 ====================
+NOTES TO THE FINANCIAL STATEMENTS
+FOR THE QUARTER ENDED 30 JUNE 2026
+5.7
+Leases
+Group as a leasee (cont'd)
+At inception, the ROU asset comprises the initial lease liability, Initial direct costs and the obligations to refurbish
+the asset, less any incentives granted by the lessors. The ROU asset is depreciated over the shorter of the lease term
+or the useful life of the underlying asset. The ROU asset is subject to testing for impairment if there is an indicator
+for impairment, as for owned assets.
+ROU assets are included in the heading property, plant and equipment and the lease liability is inclued in the
+headings current and non-current financial liabilities.
+Group as a leasor
+Leases where the Group does not transfer substantially all of the risks and benefits of ownership of the assets are
+classified as operating leases.
+Under a finance lease, all the risks and rewards incidental to legal ownership are substantially transferred to the
+lessee
+The Group operates a contributory pension scheme, in line with the provision of the Pension Reform Act 2014.
+Under the scheme,
+the employer and employee each respectively contribute 10% and 8% of pensionable
+emoluments. The Group's contributions are charged to profit or loss account.
+Short-term benefits consist of salaries and wages. Short-term employee benefits are measured on an undiscounted
+basis and are expensed as the related services are provided. They are included in personnel expenses in the profit
+or loss. A Liability is recognized for the amount expected to be paid under short-term cash benefits.
+5.9
+a)
+b)
+Taxation
+Tax expense represents the sum of tax currently payable and deferred tax.
+Current and deferred tax are recognised in statement of profit or loss, except when they relate to items that are
+recognised in other comprehensive income or directly in equity, in which case, the current and deferred tax are also
+recognised in other comprehensive income or directly in equity respectively.
+The charge for taxation in these accounts is based on:
+- The Companies Income Tax Act CAP C21 LN 2004 as amended to date;
+• Education Tax Act CAP E4 LFN 2004 as amended to date; and
+- Provision for irrecoverable withholding tax.
+The Income tax and education tax currently payable for the year are based on taxable and assessable profits respectively
+at the current statutory rates. Taxable profit differs from profit before tax as reported in the statement of profit or
+loss because of items of income or expense that are taxable or deductible in other years and items that are never
+taxable or deductible.
+Deferred tax
+Deferred tax is recognised on temporary differences between the carrying amounts of assets and liabilities in the
+financial statements and the corresponding tax bases used in the computation of taxable profit, and is accounted
+for using the liability method.
+Deferred tax is calculated at the tax rates that are expected to apply in the period when the liability is settled or the asset
+is realised based on tax laws and rates that have been enacted or substantively enacted by the end of the reporting period.
+Deferred tax liabilities are generally recognised for all taxable temporary differences and deferred tax assets are
+recognised to the extent that it is probable that taxable profits will be available against which deductible temporary
+differences can be utilised.
+The carrying amount of deferred tax assets is reviewed at each reporting date and reduced to the extent that it is no
+longer probable that sufficient taxable profits will be available to allow all or part of the asset to be recovered.
+Deferred tax assets and liabilities are offset when there is a legally enforceable right to offset.
+THOMAS WYATT NIGERIA PLC
+RC: 663
+2026 FINANCIAL STATEMENTS
+19
+==================== PAGE 21 ====================
+NOTES TO THE FINANCIAL STATEMENTS
+FOR THE QUARTER ENDED 30 JUNE 2026
+5.10
+5.12
+a)
+Earnings per share
+Earnings per share is calculated by dividing net income by the number of ordinary shares outstanding during the period.
+Diluted earnings per share are calculated by dividing net income by the fully-diluted number of ordinary shares
+outstanding during the period.
+Provisions are recognised when the Group has a present obligation (legal or constructive) as a result of a past event, and
+it is probable that the Group will be required to settle that obligation and a reliable estimate can be made of the amount of
+the obligation.
+The amount recognised as provisions is the best estimate of the consideration required to settle the present obligation at
+the reporting date, taking into account the risks and uncertainties surrounding the obligation. When a provision is
+measured using the cashflows estimated to settle the present obligation, its carrying amount is the present value of these
+cashflows (when the effect of the time value of money is material).
+When some or all of the economic benefits required to settle a provision are expected to be recovered from a third party, a
+receivable is recognised as an asset if it is virtually certain that reimbursement will be received and the amount of the receivable
+can be measured reliably.
+Financial instruments
+IFRS 9 provides guidance on the recognition, classification and measurement of financial assets and financial liabilities;
+derecognition of financial instruments; impairment of financial assets and hedge accounting. IFS 9 also significantly
+amends other standards dealing with financial instruments such as IFRS 7 Financial Instruments: Disclosures.
+Classification and measurement
+It is the Group's policy to initially recognise financial asset at fair value plus transaction costs, except in the case of
+Classification and subsequent measurement are dependent on the Group's business model for managing the asset and the
+cash flow characteristics of the asset. On this basis, the Group may classify its financial instruments at amortised cost, fair
+value through profit or loss and at fair value through other comprehensive income.
+At initial recognition, the Group classifies its financial instruments in the following categories:
+All the Group's financial assets as at 31 March 2025 satisfy the conditions for classification at amortised cost under IFRS 9
+b)
+the Group's financial assets include trade receivables, cash and bank balances. They are included in current assets, except
+for maturities greater than 12 months after the reporting date. Interest income from these assets is included in finance income
+using the effective interest rate method. Any gain or loss arising on derecognition is recognised directly in profit or loss
+and presented in finance income/cost.
+Financial liabilities
+Financial liabilities of the Group are classified and measured at fair value on initial recognition and subsequently at
+amortised cost net of directly attributable transaction.
+Fair value gains or losses for financial liabilities designated at fair value through profit or loss are accounted for in profit
+or loss except for the amount of change that is attributable to changes in the Group's own credit risk which is presented in other
+comprehensive income. The remaining amount of change in the fair value of the liability is presented in profit or
+loss. the Group's financial liabilities include trade and other payables and interest bearing loans and borrowings.
+Impairment of financial assets
+The Group recognises a loss allowance for expected credit losses on investments in debt instruments that are
+measured at amortised cost or at fair value through other comprehensive income. The amount of expected credit losses is
+updated at each reporting date to reflect changes in credit risk since initial recognition of the respectivefinancial instrument.The
+Group always recognises life time ECL for trade receivables. The expected credit losses on these financial assets are estimated
+using a provision matrix based on the Group's historical credit loss experience, adjusted for factors, that are specific to the
+debtors general economic conditions and an assessment of both the current as well as the forecast
+direction of conditions at the reporting date where appropriate.
+Forall other financial instruments, the Group recognises life time ECL when there has been a significant increase in credit
+risk since initial recognition.
+However, if the credit risk on the financial instrument had not increased significantly since instant recognition, the Group
+measure the loss allowance for that instrument at an amount equal to 12-month ECL
+THOMAS WYATT NIGERIA PLC
+RC: 663
+2026 FINANCIAL STATEMENTS
+20
+==================== PAGE 22 ====================
+NOTES TO THE FINANCIAL STATEMENTS
+FOR THE QUARTER ENDED 30 JUNE 2026
+5.12
+c)
+d)
+Financial instruments (continued)
+The three-stage approach assesses impairment based on changes in credit risk since initial recognition
+using the past due criterion and other qualitative indicators such as increase in political concerns or other
+macroeconomic factors and the risk oflegal action, sanction or other regulatory penalties that may impair future
+financial performance.
+Financial assets classified as stage 1 have their ECL measured as a proportion of their lifetime ECL that
+results from possible default events that can occur within one year, while assets in stage 2 or 3 have their
+ECL measured on a lifetime basis.
+Under the three-stage approach, the ECL is determined by projecting the probability of default (PD), loss
+given default (LD) and exposure at default (EAD) for each ageing bucket and for each individual exposure.
+The PD is based on default rates determined by external rating agencies for the counterparties. The LGD is
+determined based on management's estimate of expected cash recoveries after considering the historical
+pattern of the receivable, and it assesses the portion of the outstanding receivable that is deemed to be
+irrecoverable at the reporting period.
+The EAD is the total amount of outstanding receivable at the reporting period. These three components are
+multiplied together and adjusted for forward-looking information, which includes the gross domestic
+product (GDP) in Nigeria and crude oil prices, to arrive at an ECL which is then discounted back to the
+reporting date and summed. The discount rate used in the ECL calculation is the original effective interest
+rate or an approximation thereof.
+Loss allowances for financial assets measured at amortised cost are deducted from the gross carrying
+amount of the related financial assets and the amount of the loss is recognised in profit or loss.
+Derecognition
+The Group derecognises a financial asset when the contractual rights to the cash flows from the financial
+asset expire or when it transfers the financial asset and the transfer qualifies for derecognition. Gains or
+losses on derecognition of financial assets are recognised as finance income/cost.
+Financial liabilities
+The Group derecognises a financial liability when it is extinguished ie. when the obligation specified in
+the contract is discharged or cancelled or expires. When an existing financial liability is replaced by
+another from the same lender on substantially different terms, or the terms of an existing liability are
+substantially modified, such an exchange or modification is treated as a derecognition of the original
+liability and
+the recognition of a new liability. The difference in the respective carrying amounts is
+recognised immediately in the statement of profit or loss.
+In the context of IBOR reform, the Group's assessment of whether a change to an amortised cost financial
+instrument is substantial, is made after applying the practical expedient introduced by IBOR reform Phase
+2. This requires the transition from an IBOR to an RFR to be treated as a change to a floating interest rate,
+as described in Note 3.1.2.
+Offsetting of financial assets and financial liabilities
+Financial assets and liabilities are offset and the net amount reported in the statement of financial position when
+and only when there is legally enforceable right to offset the recognised amount, and there is an intention to
+settle on a net basis or realise the asset and settle the liability simultaneously. The legally enforceable right is
+not contingent on future events and is enforceable in the normal course of business,
+and in the event of default, insolvency or bankruptcy of the Group or the counterparty.
+THOMAS WYATT NIGERIA PLC
+RC: 663
+2026 FINANCIAL STATEMENTS
+21
+==================== PAGE 23 ====================
+NOTES TO THE FINANCIAL STATEMENTS
+FOR THE QUARTER ENDED 30 JUNE 2026
+5.13
+Inventories
+Inventories are measured at the lower of cost and net realisable value. Cost, includes all purchase costs,
+conversion costs and other costs incurred in bringing the inventories to their present condition and
+The net realisable value is the expected selling price of the inventory less the estimated
+costs of
+completion and sale. Cost is calculated using the weighted average method.
+Spare parts and servicing equipment are usually carried as inventory and recognized in profit or loss as
+consumed. However, major spare parts and stand-by equipment qualify as property, plant and equipment
+when the Group expects to use them during more than one period. Similarly, if the spare parts and servicing
+equipment can be used only in connection with an item of property, plant and equipment, they are
+accounted for as property, plant and equipment. Such classified spares are depreciated as property, plant
+and equipment over the useful life on a straight line basis. Good-in-transit are carried at purchase cost to
+date.
+5.14
+Borrowing costs
+Capitalisation of borrowing costs commences when expenditure for the asset is being incurred, borrowing
+Capitalisation of borrowing costs ceases when substantially all the activities that are necessary to get the
+asset ready for use are complete.
+Capitalisation of borrowing costs is suspended during extended periods in which active development is
+interrupted
+5.15
+Revenue recognition
+Revenue is measured at the fair value of the consideration received or receivable. Revenue is reduced with
+estimated
+customer returns, rebates and other similar allowances. Revenue is recognised when the
+amount of revenue can be measured reliably and it is probable that the economic benefits associated with
+the transaction will flow to the Group. However, when an uncertainty arises about the collectability of an
+amount already included in revenue, the uncollectible amount, or the amount in respect of which
+recovery has ceased to be probable, is recognised as an expense
+5.16
+Cash and cash equivalents
+Cash and cash equivalents comprise cash on hand, demand deposits and other short term highly liquid
+investments that are readily convertible to a known amount of cash and are subject to an insignificant risk
+of changes in value. Bank overdrafts are not offset against positive bank balances unless a legally
+enforceable right of offset exists, and there is an intention to settle the overdraft and realise the cash
+simultaneously, or to settle on a net basis. All short term cash investments are invested with major
+financial institutions in order to manage credit risk
+5.17
+Contingent liabilities
+The management is required to exercise significant judgement during the evaluation of whether certain
+liabilities represent contingent liabilities or provisions.
+Based on current information available to
+management as disclosed in Note 33, no provisions or contingent liabilities were deemed necessary.
+5.18
+Contingent assets
+Contingent assets are possible assets whose
+will be confirmed by the occurrence or
+nonoccurrence of uncertain future events that are not wholly within the control of the Group.
+Management does not recognise contingent assets but are disclosed in Note 33 when it is more likely than
+not that an inflow of benefits will occur.
+5.19
+Related party transactions
+All transactions with related parties identified in Note 29 are at arm's length. The management reviews
+each related party transaction to determine whether the terms of the transaction are in line with the arm's
+length principle adopted by the Group and to also identify any related party interests.
+THOMAS WYATT NIGERIA PLC
+RC: 663
+2026 FINANCIAL STATEMENTS
+22
+==================== PAGE 24 ====================
+NOTES TO THE FINANCIAL STATEMENTS
+FOR THE QUARTER ENDED 30 JUNE 2026
+6.1 Segment reporting
+6.1.1 Services from which reportable segments derive their revenues
+This is the measure reported to the Chief Operating Decision Maker (CODM) for the purpose
+of resource allocation and assessment of segment performance. The Management of the
+Group is the Group's chief operating decision maker and determines segments based on the
+information reviewed by it for the purposes of allocating resources and assessing
+performance. Management assesses the performance of the segments based on a measure
+of profit before taxation. As at 31 March 2025, the Group has one main segment;
+manufacturing and marketing of school excercise books, hard cover note books,
+pads,drawing books and enevelops.
+6.1.2 Business and geographical segments
+The Group operates mainly in one geographical area - Nigeria. The revenue of the Group is wholly
+derived in Nigeria.
+24
+==================== PAGE 25 ====================
+NOTE 13
+PROPERTY PLANT AND EQUIPMENT- THE COMPANY
+2026
+THOMAS WYATT NIGERIA PLC
+PROPERTY, PLANT AND EQUIPMENT
+COST
+At 1 April, 2025
+Additions
+Transfer to Completed Works
+Disposal
+At 31st March 2026
+DEPRECIATION
+At 1 April, 2025
+Charged for the year
+Disposal
+At 31st March 2026
+NET BOOK VALUE
+At 31st March 2026
+At 31 March 2025
+Leasehold
+land
+N'000
+213,280
+Building
+N'000
+159,852
+Leasehold
+Generator
+N'O00
+-
+213,280
+:
+-
+213,280
+213,280
+159,852
+55,644
+3,197
+58,842
+101,010
+104,208
+-
+-
+Plant and
+machinery
+N'OOO
+163,551
+-
+(17,507)
+146,044
+146,227
+3,425
+(17,506)
+132,146
+13,898
+17,324
+Notes to the Financial Statements
+For the quarter ended 30th June 2026
+Motor
+Vehicles
+N'000
+644
+Furniture
+Capital Work
+and office
+in- Progress
+equipment
+CWIP
+Nº000
+N'000
+4,776
+-
+:
+644
+644
+644
+0
+0
+4,776
+4,786
+(14)
+4,772
+4
+4
+-
+-
+-
+Total
+N'000
+542,103
+(17,507)
+524,596
+207,301
+6,608
+(17,506)
+196,403
+328,193
+334,816
+25
+==================== PAGE 26 ====================
+NOTE 13
+PROPERTY ,PLANT AND EQUIPMENT THE COMPANY
+2026
+PROPERTY, PLANT AND EQUIPMENT - THE COMPANY
+Leasehold
+land
+COST
+At 1 April, 2026
+Additions
+Disposals
+At 30th June 2026
+DEPRECIATION
+At 1 April, 2025
+Charged for the year
+Disposal
+At 30th June 2026
+NET BOOK VALUE
+At 30th June 2026
+At 31 March 2026
+Nº000
+213,280
+-
+213,280
+:
+213,280
+213,280
+THOMAS WYATT NIGERIA PLC
+Building
+N'000
+159,852
+Leasehold
+Generator
+N'000
+159,852
+55,644
+799
+56,443
+103,409
+104,208
+-
+:
+-
+Notes to the Financial Statements
+For the quarter ended 30th June 2026
+Plant and
+Motor
+machinery
+Vehicles
+N'000
+N'000
+146,044
+644
+Furniture Capital Work
+and office in- Progress
+equipment CWIP
+N'000
+N'000
+4,776
+2,750
+15,030
+146,044
+146,227
+856
+-
+147.083
+(1,039)
+17,324
+644
+644
+644
+-
+7,526
+4,772
+4,772
+2,754
+4
+15,030
+15,030
+Total
+N'000
+524,596
+17,780
+-
+542,376
+207,287
+1,656
+208,943
+333,433
+334,816
+25b
+==================== PAGE 27 ====================
+NOTE 13
+2026
+PROPERTY, PLANT AND EQUIPMENT- THE GROUP
+Leasehold
+land
+COST
+At 1 April, 2025
+Additions
+Transfer
+Disposal
+At 31st March 2026
+DEPRECIATION
+At 1 April, 2025
+Charged for the period
+Disposal
+At 31st March 2026
+NET BOOK VALUE
+At 31st March 2026
+At 31 March 2025
+N'000
+604,720
+-
+604,720
+:
+-
+604,720
+604,720
+THOMAS WYATT NIGERIA PLC
+Building
+N'000
+420,812
+Leasehold
+Generator
+N'000
+420,812
+76,521
+8,416
+84,937
+335,875
+344,291
+-
+:
+Notes to the Financial Statements
+For the year ended 30th June 2026
+Plant and
+Motor
+machinery
+Vehicles
+N'000
+N'000
+163,633
+644
+-
+Furniture
+Capital Work
+and office
+in- Progress
+equipment WIP
+N'000
+N'000
+5,153
+-
+(17,507)
+146,126
+146,310
+3,425
+(17,506)
+132,229
+13,897
+17,323
+644
+644
+644
+5,153
+5,148
+5,148
+5
+5
+-
+-
+Total
+N'000
+1,194,962
+(17,507)
+1,177,455
+228,623
+11,841
+(17,506)
+222,958
+954,497
+966,339
+26
+==================== PAGE 28 ====================
+NOTE 13
+2026
+PROPERTY, PLANT AND EQUIPMENT- GROUP
+Leasehold
+land
+COST
+At 1 April, 2026
+Additions
+Disposal
+At 30th June 2026
+DEPRECIATION
+At 1 April, 2026
+Charged for the year
+Disposal
+At 30th June 2026
+Carrying Amount
+At 30th June 2026
+Carrying Amount
+At 31 March 2026
+N'000
+604,720
+604,720
+604,720
+604,720
+THOMAS WYATT NIGERIA PLC
+Building
+N'000
+420,812
+Leasehold
+Generator
+N'O00
+:
+Notes to the Financial Statements
+For the quarter ended 30th June 2026
+Plant and Motor
+machinery Vehicles
+N'000
+Nº000
+146,126
+644
+-
+-
+Furniture
+and office
+equipment
+N'000
+5,153
+2,750
+Capital Work
+in- Progress
+CWIP
+N'000
+-
+15,030
+420,812
+84,937
+4,502
+89,439
+331,373
+335,875
+146,126
+132,229
+856
+644
+644
+-
+7,903
+5,148
+15,030
+-
+-
+133,085
+13,041
+13,897
+644
+5,148
+2,755
+5
+15,030
+Total
+Nº000
+1,177,455
+17,780
+1,195,235
+222,958
+5,358
+228,316
+966,919
+954,497
+26b
+==================== PAGE 29 ====================
+THOMAS WYATT NIGERIA PLC
+Schedules to the financial statement
+As at 30th June 2026
+Notes
+Schedule 1
+COST OF SALES
+Raw materials
+Outsource/Design
+Depreciation
+7
+Schedule 2
+DISTRIBUTION EXPENSES
+Commission/Discount
+Newspaper and periodicals
+Carriage and sales expenses
+10
+Schedule 3
+ADMINISTRATION EXPENSES
+Directors emoluments:
+Fees
+Others
+Salaries and wages
+Leave Allowance and Staff Welfare
+Staff medical expenses
+Travelling
+Locat Transport
+Entertainment
+Petrol Generator
+Audit fees
+Repair and maintenance
+Diesel Oil Expenses
+Telephone, cables, Newspapers and postages
+Legal and professional charges
+Depreciation and amortisation
+Printing and stationery
+Web Site
+Pension fund employer's contribution
+Subscription
+Industrial training fund
+Registration Fee- FRC
+Fines
+Rental Charges
+Rates and general cleaning
+Agency Fee
+Security expenses
+Bank charges
+General And Other Expenses
+Staff welfare expenses
+Advert and Promotion
+9
+Schedule 4
+FINANCE COST
+Loan interest expense
+TOTAL
+THE GROUP
+JUNE
+2026
+N'000
+9,124
+479
+9,604
+1,656
+1,274
+310
+1,584
+6,550
+760
+8,632
+816
+933
+191
+184
+504
+1,450
+2,948
+2,521
+127
+25,815
+264
+410
+263
+1,114
+328
+1,500
+790
+154
+19
+276
+962
+20
+56
+57,586
+68,774
+JUNE
+2025
+N'000
+21,806
+695
+1,656
+24,157
+3,031
+705
+3,736
+4,152
+81
+185
+395
+566
+1,625
+178
+188
+35
+90
+70
+7,565
+35,458
+THE COMPANY
+JUNE
+2026
+N'000
+9,124
+479
+9,604
+1,656
+1,274
+-
+310
+1,584
+6,550
+760
+8,632
+816
+933
+191
+184
+504
+1,450
+2,948
+2,521
+127
+25,815
+19
+276
+962
+20
+56
+57,586
+68,774
+JUNE
+2025
+N'000
+21,806
+695
+1,656
+24,157
+3,031
+705
+3,736
+4,152
+81
+185
+395
+566
+1,625
+178
+188
+35
+90
+70
+7,565
+35,458
+27
