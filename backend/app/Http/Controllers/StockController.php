@@ -135,6 +135,13 @@ class StockController extends Controller
                 $stockArray = array_merge($stockArray, $company->marketData->toArray());
                 unset($stockArray['market_data']);
             }
+            
+            // Map eps and pe_ratio to root from financials for the UI
+            if ($company->financials && $company->financials->count() > 0) {
+                $financial = $company->financials->first();
+                $stockArray['pe_ratio'] = $stockArray['pe_ratio'] ?? $financial->pe_ratio;
+                $stockArray['eps'] = $stockArray['eps'] ?? $financial->eps;
+            }
 
             // Fetch dividends + AAOIFI in a single pass (all still inside the cache closure)
             $dividends = Dividend::where('ticker', $symbol)
