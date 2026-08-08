@@ -4858,3 +4858,27 @@ html, body {
     flex-wrap: wrap !important;
   }
 }
+
+@media (max-width: 640px) {
+  .stats-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .stats-grid > div:nth-child(2) {
+    border-right: none !important;
+  }
+  .stats-grid > div:nth-child(1), .stats-grid > div:nth-child(2) {
+    border-bottom: 1px solid var(--border-strong);
+  }
+}
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .stats-grid > div {
+    border-right: none !important;
+    border-bottom: 1px solid var(--border-strong);
+  }
+  .stats-grid > div:last-child {
+    border-bottom: none;
+  }
+}

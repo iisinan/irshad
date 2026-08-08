@@ -308,7 +308,7 @@ export default function LandingPage() {
         
         {/* Stats strip */}
         <Reveal>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 0, border: '1.5px solid var(--border-strong)', borderRadius: 18, overflow: 'hidden', boxShadow: '0 4px 20px rgba(91, 41, 113,0.05)' }}>
+          <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 0, border: '1.5px solid var(--border-strong)', borderRadius: 18, overflow: 'hidden', boxShadow: '0 4px 20px rgba(91, 41, 113,0.05)' }}>
             {statItems.map((s, i) => (
               <div key={i} style={{ background: 'var(--bg)', padding: '20px 22px', borderRight: i < statItems.length - 1 ? '1px solid var(--border-strong)' : 'none', transition: 'background 0.2s' }}
                 onMouseEnter={e => e.currentTarget.style.background = 'rgba(91, 41, 113,0.03)'}

@@ -258,7 +258,7 @@ export const RegisterPage = () => {
 
         {/* Form */}
         <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+          <div className="mobile-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
             <FormField label="First Name *" name="firstName" placeholder="Omar" value={firstName} onChange={e => setFirstName(e.target.value)} required />
             <FormField label="Last Name *" name="lastName" placeholder="Bello" value={lastName} onChange={e => setLastName(e.target.value)} required />
           </div>
@@ -273,7 +273,7 @@ export const RegisterPage = () => {
             required
           />
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+          <div className="mobile-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
             <FormField label="Phone Number" name="phoneNumber" placeholder="+234 800 000 0000" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} />
             <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
               <label className="auth-label">Country of Residence</label>
@@ -298,7 +298,7 @@ export const RegisterPage = () => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+          <div className="mobile-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
               <label className="auth-label">Investor Type</label>
               <select name="investorType" className="auth-input" value={investorType} onChange={e => setInvestorType(e.target.value)}>
@@ -331,7 +331,7 @@ export const RegisterPage = () => {
             </select>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+          <div className="mobile-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
             <FormField
               label="Password *"
               name="password"
