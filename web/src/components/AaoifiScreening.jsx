@@ -13,9 +13,10 @@ import {
   ChevronDown, ChevronUp, MessageSquare, DollarSign, Percent,
   Info, TrendingDown, Award, BookOpen, Zap, Bell, Search
 } from 'lucide-react';
-import { fetchAaoifiScreening, fetchStockDetails, updateAaoifiData, chatAboutStock, fetchNgxStocks, fetchPortfolio } from '../services/api';
+import { fetchAaoifiScreening, fetchStockDetails, updateAaoifiData, chatAboutStock, fetchNgxStocks, fetchPortfolio, addToWatchlist } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { formatAppJustification } from '../utils/screeningFormatter';
+import { toastSuccess, toastError } from '../utils/toast';
 import CompanyLogo from './CompanyLogo';
 
 /* ─── Loading steps ─────────────────────────────────────── */
@@ -242,6 +243,19 @@ const AaoifiScreening = () => {
     setMessages([{ role:'assistant', text:`I'm Irshad AI. Ask me anything about ${report.company_name||symbol} — the verdict rationale, what each ratio means, how purification is calculated, or how it compares to its sector.` }]);
   },[report]);
 
+  const [alertLoading, setAlertLoading] = useState(false);
+  const handleSetAlert = async () => {
+    try {
+      setAlertLoading(true);
+      await addToWatchlist(symbol, false, false);
+      toastSuccess(`Added ${symbol} to watchlist`);
+    } catch (err) {
+      toastError(err?.response?.data?.message || err.message || `Failed to add ${symbol} to watchlist`);
+    } finally {
+      setAlertLoading(false);
+    }
+  };
+
   const openOverride = () => {
     const fd=report?.financial_data_used||{};
     let ev=report?.evidence_link||[]; if(typeof ev==='string'){try{ev=JSON.parse(ev);}catch{ev=[ev];}} if(!Array.isArray(ev)||!ev.length)ev=[''];
@@ -419,9 +433,9 @@ const AaoifiScreening = () => {
                 <Search size={15}/> Screener
               </button>
             )}
-            <Link to="/portfolio#watchlist" state={{ action: 'alert', targetSymbol: symbol }} className="hover-lift" style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background:'var(--bg)',border:'1px solid var(--border)',borderRadius:12,cursor:'pointer',fontWeight:700,color:'var(--text-dark)',fontSize:'0.8rem',boxShadow:'var(--shadow-sm)',textDecoration:'none' }}>
-              <Bell size={15}/> Set Alert
-            </Link>
+            <button className="hover-lift" onClick={handleSetAlert} disabled={alertLoading} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background:'var(--bg)',border:'1px solid var(--border)',borderRadius:12,cursor:alertLoading ? 'not-allowed' : 'pointer',fontWeight:700,color:'var(--text-dark)',fontSize:'0.8rem',boxShadow:'var(--shadow-sm)', opacity: alertLoading ? 0.7 : 1 }}>
+              <Bell size={15}/> {alertLoading ? 'Adding...' : 'Set Alert'}
+            </button>
             {user?.role==='admin'&&(<button className="hover-lift" onClick={openOverride} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background:'var(--primary)',border:'none',borderRadius:12,cursor:'pointer',fontWeight:800,color:'#fff',fontSize:'0.8rem',transition:'all 0.25s',boxShadow:'0 4px 12px rgba(91,41,113,0.3)' }}>
               <ShieldCheck size={15}/> Edit Data
             </button>)}
