@@ -626,16 +626,16 @@ const AaoifiScreening = () => {
           </div>
           <div style={{ display:'flex',flexDirection:'column',gap:18 }}>
             {[
-              { label: 'Open', value: stock?.open_price ? fmtRaw(stock.open_price) : '—' },
-              { label: 'Previous Close', value: stock?.previous_close ? fmtRaw(stock.previous_close) : '—' },
-              { label: 'Day High', value: stock?.day_high ? fmtRaw(stock.day_high) : '—' },
-              { label: 'Day Low', value: stock?.day_low ? fmtRaw(stock.day_low) : '—' },
-              { label: '52W High', value: stock?.fifty_two_week_high ? fmtRaw(stock.fifty_two_week_high) : '—' },
-              { label: '52W Low', value: stock?.fifty_two_week_low ? fmtRaw(stock.fifty_two_week_low) : '—', noBorder: true }
-            ].map((item, idx) => (
-              <div key={idx} style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:item.noBorder?'none':'1px solid rgba(91,41,113,0.06)',paddingBottom:item.noBorder?0:14 }}>
+              { label: 'Open', value: stock?.open_price, fmt: fmtRaw },
+              { label: 'Previous Close', value: stock?.previous_close, fmt: fmtRaw },
+              { label: 'Day High', value: stock?.day_high, fmt: fmtRaw },
+              { label: 'Day Low', value: stock?.day_low, fmt: fmtRaw },
+              { label: '52W High', value: stock?.fifty_two_week_high, fmt: fmtRaw },
+              { label: '52W Low', value: stock?.fifty_two_week_low, fmt: fmtRaw }
+            ].filter(item => item.value != null && item.value !== '').map((item, idx, arr) => (
+              <div key={idx} style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:idx === arr.length - 1 ? 'none' : '1px solid rgba(91,41,113,0.06)',paddingBottom:idx === arr.length - 1 ? 0 : 14 }}>
                 <span style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:600 }}>{item.label}</span>
-                <span style={{ fontSize:'0.95rem',fontWeight:800,color:'var(--text-dark)',letterSpacing:'-0.3px',fontVariantNumeric:'tabular-nums' }}>{item.value}</span>
+                <span style={{ fontSize:'0.95rem',fontWeight:800,color:'var(--text-dark)',letterSpacing:'-0.3px',fontVariantNumeric:'tabular-nums' }}>{item.fmt ? item.fmt(item.value) : item.value}</span>
               </div>
             ))}
           </div>
@@ -651,21 +651,21 @@ const AaoifiScreening = () => {
           </div>
           <div style={{ display:'flex',flexDirection:'column',gap:18 }}>
             {[
-              { label: 'Market Cap', value: stock?.market_cap ? fmt(stock.market_cap) : '—' },
-              { label: 'Shares Out.', value: stock?.shares_outstanding ? fmtCount(stock.shares_outstanding) : '—' },
-              { label: 'Volume Today', value: stock?.volume ? fmtCount(stock.volume) : '—' },
-              { label: 'P/E Ratio', value: stock?.pe_ratio ? stock.pe_ratio : '—' },
-              { label: 'EPS', value: stock?.eps ? stock.eps : '—' },
-              { label: 'Last Div.', sub: stock?.last_paid_dividend?.pay_date && new Date(stock.last_paid_dividend.pay_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}), value: stock?.last_paid_dividend ? `₦${Number(stock.last_paid_dividend.amount).toFixed(2)}` : '—' },
-              { label: 'Next Div.', sub: stock?.upcoming_dividend?.pay_date && new Date(stock.upcoming_dividend.pay_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}), value: stock?.upcoming_dividend ? `₦${Number(stock.upcoming_dividend.amount).toFixed(2)}` : '—' },
-              { label: 'Div. Yield', value: stock?.div_yield ? `${stock.div_yield}%` : '—', noBorder: true }
-            ].map((item, idx) => (
-              <div key={idx} style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:item.noBorder?'none':'1px solid rgba(91,41,113,0.06)',paddingBottom:item.noBorder?0:14 }}>
+              { label: 'Market Cap', value: stock?.market_cap, fmt: fmt },
+              { label: 'Shares Out.', value: stock?.shares_outstanding, fmt: fmtCount },
+              { label: 'Volume Today', value: stock?.volume, fmt: fmtCount },
+              { label: 'P/E Ratio', value: stock?.pe_ratio },
+              { label: 'EPS', value: stock?.eps },
+              { label: 'Last Div.', sub: stock?.last_paid_dividend?.pay_date && new Date(stock.last_paid_dividend.pay_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}), value: stock?.last_paid_dividend ? `₦${Number(stock.last_paid_dividend.amount).toFixed(2)}` : null },
+              { label: 'Next Div.', sub: stock?.upcoming_dividend?.pay_date && new Date(stock.upcoming_dividend.pay_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}), value: stock?.upcoming_dividend ? `₦${Number(stock.upcoming_dividend.amount).toFixed(2)}` : null },
+              { label: 'Div. Yield', value: stock?.div_yield ? `${stock.div_yield}%` : null }
+            ].filter(item => item.value != null && item.value !== '').map((item, idx, arr) => (
+              <div key={idx} style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:idx === arr.length - 1 ? 'none' : '1px solid rgba(91,41,113,0.06)',paddingBottom:idx === arr.length - 1 ? 0 : 14 }}>
                 <div>
                   <div style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:600 }}>{item.label}</div>
                   {item.sub && <div style={{ fontSize:'0.65rem',color:'var(--primary)',marginTop:4, fontWeight:700 }}>{item.sub}</div>}
                 </div>
-                <span style={{ fontSize:'0.95rem',fontWeight:800,color:'var(--text-dark)',letterSpacing:'-0.3px',fontVariantNumeric:'tabular-nums' }}>{item.value}</span>
+                <span style={{ fontSize:'0.95rem',fontWeight:800,color:'var(--text-dark)',letterSpacing:'-0.3px',fontVariantNumeric:'tabular-nums' }}>{item.fmt ? item.fmt(item.value) : item.value}</span>
               </div>
             ))}
           </div>
