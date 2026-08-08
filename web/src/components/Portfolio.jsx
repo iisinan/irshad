@@ -281,7 +281,7 @@ export default function Portfolio() {
           )}
           {mountedTabs.includes('purification') && (
             <div style={{ display: activeTab === 'purification' ? 'block' : 'none' }}>
-              <PurificationTab data={data} />
+              <PurificationTab data={data} initialSymbol={initialHoldingSymbol} />
             </div>
           )}
           {mountedTabs.includes('lectures') && (

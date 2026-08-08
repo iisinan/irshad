@@ -417,10 +417,17 @@ function PurificationCard({ h, onPurify, onStatClick }) {
 }
 
 /* ─── Main Tab ──────────────────────────────────────────────── */
-export default function PurificationTab({ data }) {
+export default function PurificationTab({ data, refreshData, initialSymbol }) {
   const [purifiedSymbols, setPurifiedSymbols] = useState([]);
   const [selectedHolding, setSelectedHolding] = useState(null);
   const [activeStatTarget, setActiveStatTarget] = useState(null);
+
+  useEffect(() => {
+    if (initialSymbol && data?.holdings) {
+      const target = data.holdings.find(h => h.symbol === initialSymbol);
+      if (target) setSelectedHolding(target);
+    }
+  }, [initialSymbol, data?.holdings]);
 
   const holdings = data?.holdings || [];
   const needsPurification = holdings.filter(h => h.purification_due > 0 && !purifiedSymbols.includes(h.symbol));
