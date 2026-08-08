@@ -69,6 +69,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/news', [NewsController::class, 'index']);
         Route::get('/stocks/{symbol}/analysis', [StockController::class, 'getAiAnalysis']);
         Route::get('/stocks/{symbol}/aaoifi-screening', [StockController::class, 'aaoifiScreening']);
+        Route::post('/stocks/{symbol}/chat', [StockController::class, 'chatAboutStock']);
     });
 
     // ── Public Overview / Landing Page ──

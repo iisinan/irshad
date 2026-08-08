@@ -360,4 +360,63 @@ class PerplexityAiService
             throw $e; // Rethrow so the controller knows it failed
         }
     }
+
+    /**
+     * Free-form chat about a specific company's Shariah screening.
+     */
+    public function chatAboutStock($company, $screening, string $question): string
+    {
+        if (empty($this->apiKey)) {
+            return "I'm sorry, the AI service is not configured. Please contact the administrator.";
+        }
+
+        $symbol  = $company->symbol;
+        $name    = $company->name ?? $symbol;
+        $sector  = $company->sector ?? 'Unknown';
+        $status  = $company->current_status ?? 'unknown';
+
+        $context = "You are Irshad AI, an expert Islamic finance assistant embedded in the Irshad stock screening platform. ";
+        $context .= "You help users understand Shariah compliance screening for Nigerian Exchange (NGX) listed stocks. ";
+        $context .= "Always be concise, factual, and cite AAOIFI standards where relevant. Do not mention Qistal.\n\n";
+        $context .= "Company context:\n";
+        $context .= "- Name: {$name} ({$symbol})\n";
+        $context .= "- Sector: {$sector}\n";
+        $context .= "- Current Shariah Status: {$status}\n";
+
+        if ($screening) {
+            $context .= "- Business Status: ".($screening->business_status ?? 'N/A')."\n";
+            $context .= "- Debt Ratio: ".round($screening->debt_ratio ?? 0, 2)."%  (AAOIFI limit: 30%)\n";
+            $context .= "- Cash Ratio: ".round($screening->cash_ratio ?? 0, 2)."%  (AAOIFI limit: 30%)\n";
+            $context .= "- Impermissible Income Ratio: ".round($screening->impermissible_income_ratio ?? 0, 2)."%  (AAOIFI limit: 5%)\n";
+            $fd = is_string($screening->financial_data_used)
+                ? json_decode($screening->financial_data_used, true)
+                : ($screening->financial_data_used ?? []);
+            if ($fd) {
+                $context .= "- Reporting Period: ".($fd['reporting_period'] ?? 'N/A')."\n";
+            }
+        }
+
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer '.$this->apiKey,
+                'Content-Type'  => 'application/json',
+            ])->timeout(30)->post($this->baseUrl, [
+                'model'    => $this->model,
+                'messages' => [
+                    ['role' => 'system', 'content' => $context],
+                    ['role' => 'user',   'content' => $question],
+                ],
+                'temperature' => 0.3,
+            ]);
+
+            if ($response->successful()) {
+                return $response->json()['choices'][0]['message']['content'] ?? 'No response generated.';
+            }
+
+            return 'The AI service is temporarily unavailable. Please try again shortly.';
+        } catch (\Exception $e) {
+            Log::error('Irshad AI chat error: '.$e->getMessage());
+            return 'An error occurred while processing your question. Please try again.';
+        }
+    }
 }

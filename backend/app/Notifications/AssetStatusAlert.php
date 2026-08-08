@@ -93,7 +93,7 @@ class AssetStatusAlert extends Notification implements ShouldQueue
             ->line('We are writing to inform you of an important change affecting an asset on your Watchlist.')
             ->line($contextLine)
             ->line($actionLine)
-            ->action('View on Irshad', url('/watchlist'))
+            ->action('View on Irshad', config('app.frontend_url') . '/watchlist')
             ->line('May Allah bless your wealth and keep your finances pure.')
             ->salutation('Jazakallah Khair, The Irshad Team');
     }

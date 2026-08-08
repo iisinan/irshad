@@ -472,6 +472,21 @@ class StockController extends Controller
     }
 
     /**
+     * Free-form chat about a specific company's Shariah screening.
+     */
+    public function chatAboutStock(Request $request, string $symbol, PerplexityAiService $aiService): JsonResponse
+    {
+        $request->validate(['question' => 'required|string|max:500']);
+
+        $company   = Company::where('symbol', $symbol)->firstOrFail();
+        $screening = \App\Models\AaoifiScreening::where('company_id', $company->id)->first();
+
+        $answer = $aiService->chatAboutStock($company, $screening, $request->input('question'));
+
+        return $this->success(['answer' => $answer]);
+    }
+
+    /**
      * Execute or retrieve the AAOIFI detailed screening for a stock.
      */
     public function aaoifiScreening(string $symbol): JsonResponse
@@ -563,33 +578,39 @@ class StockController extends Controller
             }
 
             $mapped = [
-                'company_id' => $company->id,
+                'company_id'    => $company->id,
+                'company_name'  => $company->name,
+                'ticker'        => $company->symbol,
+                'sector'        => $company->sector,
+                'industry'      => $company->industry ?? $company->sector,
+                'latest_price'  => $company->latest_price,
+                'market_cap'    => $company->market_cap,
                 'stage1' => [
-                    'status' => $aaoifiScreening->business_status === 'pass' ? 'halal' : 'non-halal',
-                    'haram_revenue_percent' => round($calculatedIncomeRatio, 4),
-                    'purification_required' => $calculatedIncomeRatio > 0 && $calculatedIncomeRatio <= 5,
-                    'reason' => $aaoifiScreening->business_reasoning,
+                    'status'               => $aaoifiScreening->business_status === 'pass' ? 'halal' : ($aaoifiScreening->business_status === 'doubtful' ? 'doubtful' : 'non-halal'),
+                    'haram_revenue_percent'=> round($calculatedIncomeRatio, 4),
+                    'purification_required'=> $calculatedIncomeRatio > 0 && $calculatedIncomeRatio <= 5,
+                    'reason'               => $aaoifiScreening->business_reasoning,
                 ],
-                'business_status' => $aaoifiScreening->business_status,
-                'business_reasoning' => $aaoifiScreening->business_reasoning,
-                'debt_ratio' => $aaoifiScreening->debt_ratio,
-                'debt_status' => $aaoifiScreening->debt_status,
-                'cash_ratio' => $aaoifiScreening->cash_ratio,
-                'cash_status' => $aaoifiScreening->cash_status,
-                'impermissible_income_ratio' => $calculatedIncomeRatio,
+                'business_status'             => $aaoifiScreening->business_status,
+                'business_reasoning'          => $aaoifiScreening->business_reasoning,
+                'debt_ratio'                  => $aaoifiScreening->debt_ratio,
+                'debt_status'                 => $aaoifiScreening->debt_status,
+                'cash_ratio'                  => $aaoifiScreening->cash_ratio,
+                'cash_status'                 => $aaoifiScreening->cash_status,
+                'impermissible_income_ratio'  => $calculatedIncomeRatio,
                 'impermissible_income_status' => $calculatedIncomeRatio <= 5 ? 'pass' : 'fail',
-                'illiquid_ratio' => $aaoifiScreening->illiquid_ratio,
-                'illiquid_status' => $aaoifiScreening->illiquid_status,
-                'receivables_ratio' => $aaoifiScreening->receivables_ratio,
-                'receivables_status' => $aaoifiScreening->receivables_status,
-                'final_status' => $finalStatus,
-                'published_date' => $aaoifiScreening->published_date,
-                'reporting_period' => $aaoifiScreening->reporting_period,
-                'reporting_year' => $aaoifiScreening->reporting_year,
-                'news_sources' => $aaoifiScreening->news_sources ?? [],
-                'financial_data_used' => $frontendFinData,
-                'ai_explanation' => $aaoifiScreening->business_reasoning ?? $company->activity_reason,
-                'status_reason' => $statusReason,
+                'illiquid_ratio'              => $aaoifiScreening->illiquid_ratio,
+                'illiquid_status'             => $aaoifiScreening->illiquid_status,
+                'receivables_ratio'           => $aaoifiScreening->receivables_ratio,
+                'receivables_status'          => $aaoifiScreening->receivables_status,
+                'final_status'                => $finalStatus,
+                'published_date'              => $aaoifiScreening->published_date,
+                'reporting_period'            => $aaoifiScreening->reporting_period,
+                'reporting_year'              => $aaoifiScreening->reporting_year,
+                'news_sources'                => $aaoifiScreening->news_sources ?? [],
+                'financial_data_used'         => $frontendFinData,
+                'ai_explanation'              => $aaoifiScreening->business_reasoning ?? $company->activity_reason,
+                'status_reason'               => $statusReason,
             ];
 
             return $this->success($mapped);

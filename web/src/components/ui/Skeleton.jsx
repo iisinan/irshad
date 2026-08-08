@@ -8,7 +8,7 @@ export default function Skeleton({ width, height, borderRadius, style, className
         width: width || '100%',
         height: height || '20px',
         borderRadius: borderRadius || '6px',
-        backgroundColor: 'var(--bg-section, #e2e8f0)',
+        backgroundColor: 'var(--bg-section, var(--border))',
         animation: 'skeleton-pulse 1.5s ease-in-out infinite',
         ...style
       }}

@@ -16,7 +16,7 @@ The automated NGX daily market sweep and AAOIFI Shariah screening has successful
 
 All results are now live on the Irshad platform. You may review updated AAOIFI screenings and market data from the dashboard.
 
-@component('mail::button', ['url' => config('app.url')])
+@component('mail::button', ['url' => config('app.frontend_url')])
 Go to Dashboard
 @endcomponent
 

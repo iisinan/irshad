@@ -127,7 +127,7 @@ export const LoginPage = () => {
             onChange={e => setPassword(e.target.value)}
           />
 
-          {error && <div style={{ background: '#fef2f2', color: '#dc2626', padding: '12px', borderRadius: '8px', fontSize: '0.79rem', border: '1px solid #f87171' }}>{error}</div>}
+          {error && <div style={{ background: 'var(--non-halal-bg)', color: '#dc2626', padding: '12px', borderRadius: '8px', fontSize: '0.79rem', border: '1px solid #f87171' }}>{error}</div>}
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.79rem', color: 'var(--text-muted)' }}>
@@ -371,7 +371,7 @@ export const RegisterPage = () => {
             </span>
           </label>
 
-          {error && <div style={{ background: '#fef2f2', color: '#dc2626', padding: '12px', borderRadius: '8px', fontSize: '0.79rem', border: '1px solid #f87171' }}>{error}</div>}
+          {error && <div style={{ background: 'var(--non-halal-bg)', color: '#dc2626', padding: '12px', borderRadius: '8px', fontSize: '0.79rem', border: '1px solid #f87171' }}>{error}</div>}
 
           <button type="submit" disabled={!agreed || loading} className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '14px', marginTop: '4px', fontSize: '0.88rem', opacity: (agreed && !loading) ? 1 : 0.55 }}>
             {loading ? 'Creating Account...' : 'Create My Account'}
@@ -456,8 +456,8 @@ export const ForgotPasswordPage = () => {
             onChange={e => setEmail(e.target.value)}
           />
 
-          {error && <div style={{ background: '#fef2f2', color: '#dc2626', padding: '12px', borderRadius: '8px', fontSize: '0.79rem', border: '1px solid #f87171' }}>{error}</div>}
-          {message && <div style={{ background: '#ecfdf5', color: '#059669', padding: '12px', borderRadius: '8px', fontSize: '0.79rem', border: '1px solid #6ee7b7' }}>{message}</div>}
+          {error && <div style={{ background: 'var(--non-halal-bg)', color: '#dc2626', padding: '12px', borderRadius: '8px', fontSize: '0.79rem', border: '1px solid #f87171' }}>{error}</div>}
+          {message && <div style={{ background: 'var(--halal-bg)', color: '#059669', padding: '12px', borderRadius: '8px', fontSize: '0.79rem', border: '1px solid #6ee7b7' }}>{message}</div>}
 
           <button onClick={handleSubmit} disabled={loading || !email} className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '14px', marginTop: '4px', fontSize: '0.88rem', opacity: (loading || !email) ? 0.7 : 1 }}>
             {loading ? 'Sending...' : 'Send Reset Link'}
@@ -557,8 +557,8 @@ export const ResetPasswordPage = () => {
             onChange={e => setPasswordConfirmation(e.target.value)}
           />
 
-          {error && <div style={{ background: '#fef2f2', color: '#dc2626', padding: '12px', borderRadius: '8px', fontSize: '0.79rem', border: '1px solid #f87171' }}>{error}</div>}
-          {message && <div style={{ background: '#ecfdf5', color: '#059669', padding: '12px', borderRadius: '8px', fontSize: '0.79rem', border: '1px solid #6ee7b7' }}>{message}</div>}
+          {error && <div style={{ background: 'var(--non-halal-bg)', color: '#dc2626', padding: '12px', borderRadius: '8px', fontSize: '0.79rem', border: '1px solid #f87171' }}>{error}</div>}
+          {message && <div style={{ background: 'var(--halal-bg)', color: '#059669', padding: '12px', borderRadius: '8px', fontSize: '0.79rem', border: '1px solid #6ee7b7' }}>{message}</div>}
 
           <button onClick={handleSubmit} disabled={loading || !password} className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '14px', marginTop: '4px', fontSize: '0.88rem', opacity: (loading || !password) ? 0.7 : 1 }}>
             {loading ? 'Resetting...' : 'Reset Password'}

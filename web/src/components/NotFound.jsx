@@ -12,7 +12,7 @@ const NotFound = () => {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#F8FAFC',
+      backgroundColor: 'var(--body-bg)',
       padding: '24px',
       textAlign: 'center'
     }}>
@@ -48,7 +48,7 @@ const NotFound = () => {
               borderRadius: '12px',
               fontWeight: 800,
               cursor: 'pointer',
-              boxShadow: '0 4px 16px rgba(201, 149, 42, 0.25)',
+              boxShadow: '0 4px 16px rgba(209, 165, 98, 0.25)',
               transition: 'all 0.2s'
             }}
             onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'var(--primary-hover)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
@@ -75,7 +75,7 @@ const NotFound = () => {
               cursor: 'pointer',
               transition: 'all 0.2s'
             }}
-            onMouseOver={(e) => { e.target.style.backgroundColor = '#F1F5F9'; e.target.style.color = 'var(--text-dark)'; }}
+            onMouseOver={(e) => { e.target.style.backgroundColor = 'var(--body-bg)'; e.target.style.color = 'var(--text-dark)'; }}
             onMouseOut={(e) => { e.target.style.backgroundColor = 'transparent'; e.target.style.color = '#475569'; }}
           >
             <ArrowLeft size={18} />

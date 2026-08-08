@@ -120,7 +120,7 @@ const DigestBanner = () => {
 
   return (
     <div style={{
-      background: 'linear-gradient(135deg, rgba(118,88,122,0.06) 0%, rgba(212,160,23,0.06) 100%)',
+      background: 'linear-gradient(135deg, rgba(91, 41, 113,0.06) 0%, rgba(209, 165, 98,0.06) 100%)',
       border: '1px solid var(--primary-100)',
       borderRadius: '20px',
       padding: '24px',
@@ -129,8 +129,8 @@ const DigestBanner = () => {
       overflow: 'hidden',
     }}>
       {/* Decorative blobs */}
-      <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '100px', height: '100px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(212,160,23,0.12) 0%, transparent 70%)', pointerEvents: 'none', animation: 'float 6s ease-in-out infinite' }} />
-      <div style={{ position: 'absolute', bottom: '-30px', left: '-10px', width: '120px', height: '120px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(118,88,122,0.08) 0%, transparent 70%)', pointerEvents: 'none', animation: 'float 8s ease-in-out infinite reverse' }} />
+      <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '100px', height: '100px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(209, 165, 98,0.12) 0%, transparent 70%)', pointerEvents: 'none', animation: 'float 6s ease-in-out infinite' }} />
+      <div style={{ position: 'absolute', bottom: '-30px', left: '-10px', width: '120px', height: '120px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(91, 41, 113,0.08) 0%, transparent 70%)', pointerEvents: 'none', animation: 'float 8s ease-in-out infinite reverse' }} />
       
       <div style={{ position: 'relative', zIndex: 1 }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
@@ -233,7 +233,7 @@ const ComplianceCard = ({ item }) => {
       alignItems: 'flex-start',
       cursor: 'pointer',
     }}
-      onClick={() => navigate(`/market/${item.symbol}`)}
+      onClick={() => navigate(`/market/${item.symbol}/aaoifi`)}
       onMouseEnter={e => { e.currentTarget.style.boxShadow = 'var(--shadow-md)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = isWorsening ? 'var(--non-halal)' : isImproving ? 'var(--halal)' : 'var(--primary-100)'; }}
       onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderColor = isWorsening ? 'var(--non-halal-border)' : isImproving ? 'var(--halal-border)' : 'var(--border)'; }}
     >
@@ -287,7 +287,7 @@ const BusinessCard = ({ item }) => {
 
   return (
     <div className="animate-slide-up" style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '16px', padding: '18px', display: 'flex', gap: '14px', alignItems: 'flex-start', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', cursor: 'pointer' }}
-      onClick={() => navigate(`/market/${item.symbol}`)}
+      onClick={() => navigate(`/market/${item.symbol}/aaoifi`)}
       onMouseEnter={e => { e.currentTarget.style.boxShadow = 'var(--shadow-md)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = 'var(--primary-100)'; }}
       onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderColor = 'var(--border)'; }}
     >
@@ -344,7 +344,7 @@ const MarketCard = ({ item }) => {
 
   return (
     <div className="animate-slide-up" style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px 18px', display: 'flex', gap: '12px', alignItems: 'flex-start', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', cursor: item.symbol ? 'pointer' : 'default' }}
-      onClick={() => item.symbol && navigate(`/market/${item.symbol}`)}
+      onClick={() => item.symbol && navigate(`/market/${item.symbol}/aaoifi`)}
       onMouseEnter={e => { e.currentTarget.style.boxShadow = 'var(--shadow-md)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = 'var(--primary-100)'; }}
       onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderColor = 'var(--border)'; }}
     >

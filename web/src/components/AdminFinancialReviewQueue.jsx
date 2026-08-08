@@ -127,7 +127,7 @@ export default function AdminFinancialReviewQueue() {
   return (
     <div className="admin-page-container" style={{ padding: '32px', maxWidth: '1200px', margin: '0 auto' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
-        <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'var(--gold-grad)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(212, 175, 55, 0.3)' }}>
+        <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'var(--gold-grad)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(209, 165, 98, 0.3)' }}>
           <Inbox size={24} color="#fff" />
         </div>
         <div>
@@ -141,7 +141,7 @@ export default function AdminFinancialReviewQueue() {
           <div className="spinner" />
         </div>
       ) : error ? (
-        <div style={{ padding: '24px', background: '#FEF2F2', color: '#DC2626', borderRadius: '12px', border: '1px solid #FECACA' }}>
+        <div style={{ padding: '24px', background: 'var(--non-halal-bg)', color: '#DC2626', borderRadius: '12px', border: '1px solid var(--non-halal-border)' }}>
           {error}
         </div>
       ) : queue.length === 0 ? (

@@ -58,9 +58,9 @@ const Toast = ({ toast }) => toast ? (
   <div style={{
     position: 'fixed', top: 20, right: 20, zIndex: 9999,
     padding: '13px 18px', borderRadius: 14, fontWeight: 700, fontSize: '0.86rem',
-    background: toast.type === 'error' ? '#FEF2F2' : '#ECFDF5',
+    background: toast.type === 'error' ? 'var(--non-halal-bg)' : 'var(--halal-bg)',
     color: toast.type === 'error' ? '#DC2626' : '#059669',
-    border: `1px solid ${toast.type === 'error' ? '#FECACA' : '#A7F3D0'}`,
+    border: `1px solid ${toast.type === 'error' ? 'var(--non-halal-border)' : '#A7F3D0'}`,
     boxShadow: '0 8px 24px rgba(0,0,0,.12)',
     display: 'flex', alignItems: 'center', gap: 10,
     animation: 'slideIn .25s ease',
@@ -406,7 +406,7 @@ export default function AdminComplianceReviews() {
       {/* ── Error ───────────────────────────────────────────── */}
       {error && (
         <div style={{
-          background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA',
+          background: 'var(--non-halal-bg)', color: '#DC2626', border: '1px solid var(--non-halal-border)',
           padding: '13px 16px', borderRadius: 12, marginBottom: 20,
           display: 'flex', alignItems: 'center', gap: 10, fontWeight: 600, fontSize: '0.86rem'
         }}>

@@ -29,8 +29,8 @@ const DisclosurePage = () => {
             gap: '16px',
             marginBottom: '40px'
           }}>
-            <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '18px', padding: '24px' }}>
-              <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', color: '#d97706' }}>
+            <div style={{ background: 'var(--doubtful-bg)', border: '1px solid var(--doubtful-border)', borderRadius: '18px', padding: '24px' }}>
+              <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(209, 165, 98, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', color: '#d97706' }}>
                 <TrendingDown size={20} />
               </div>
               <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#92400e', marginBottom: '6px' }}>Capital Risk</h3>

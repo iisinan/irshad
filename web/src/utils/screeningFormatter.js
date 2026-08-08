@@ -8,6 +8,12 @@ export const formatAppJustification = (text, isNonHalal = false) => {
 
   // 0. Strip manual override prefixes (e.g. "Manual override applied", "Manual override:", etc.)
   let cleanText = text.replace(/^Manual override(?:\s+applied)?[:\s,.-]*/i, '').trim();
+  
+  // Strip sector prefix e.g. "Oil & gas production/marketing - permissible core activity" -> "permissible core activity"
+  if (cleanText.includes(' - ')) {
+    cleanText = cleanText.split(' - ').slice(1).join(' - ').trim();
+  }
+
   if (cleanText.length > 0) {
     cleanText = cleanText.charAt(0).toUpperCase() + cleanText.slice(1);
   }

@@ -60,10 +60,10 @@ export default function ActivityTab() {
     <div className="animate-fade-in stagger-1" style={{ background: 'var(--bg)', borderRadius:'24px', padding:'0', boxShadow:'var(--shadow-sm)', border:'1px solid var(--border)', overflow:'hidden' }}>
       
       {/* Header */}
-      <div style={{ background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, #3C2D3E 100%)', padding: '32px', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px', borderBottom: '1px solid rgba(201, 149, 42, 0.15)' }}>
-        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(201, 149, 42, 0.08)', borderRadius: '50%' }} />
+      <div style={{ background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, var(--text-dark) 100%)', padding: '32px', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px', borderBottom: '1px solid rgba(209, 165, 98, 0.15)' }}>
+        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(209, 165, 98, 0.08)', borderRadius: '50%' }} />
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', zIndex: 1 }}>
-          <div style={{ width: '56px', height: '56px', background: 'rgba(201, 149, 42, 0.12)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', border: '1px solid rgba(201, 149, 42, 0.35)' }}>
+          <div style={{ width: '56px', height: '56px', background: 'rgba(209, 165, 98, 0.12)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', border: '1px solid rgba(209, 165, 98, 0.35)' }}>
             <Activity size={28} />
           </div>
           <div>
@@ -72,7 +72,7 @@ export default function ActivityTab() {
           </div>
         </div>
         <div style={{ position: 'relative', zIndex: 1 }}>
-          <span style={{ color: 'var(--primary)', fontSize: '0.78rem', fontWeight: 800, background: 'rgba(201, 149, 42, 0.12)', padding: '8px 16px', borderRadius: '12px', border: '1px solid rgba(201, 149, 42, 0.3)', backdropFilter: 'blur(10px)' }}>
+          <span style={{ color: 'var(--primary)', fontSize: '0.78rem', fontWeight: 800, background: 'rgba(209, 165, 98, 0.12)', padding: '8px 16px', borderRadius: '12px', border: '1px solid rgba(209, 165, 98, 0.3)', backdropFilter: 'blur(10px)' }}>
             {history.length} {history.length === 1 ? 'Record' : 'Records'}
           </span>
         </div>
@@ -128,7 +128,8 @@ export default function ActivityTab() {
                   key={item.id || i}
                   onClick={() => {
                     if (isStock) {
-                      navigate(`/market/${item.detail.symbol}`);
+                      navigate(`/market/${item.detail.symbol}/aaoifi`);
+
                     }
                   }}
                   className={`roll-in-anim ${isStock ? 'hover-lift' : ''}`}

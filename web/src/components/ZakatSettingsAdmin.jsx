@@ -153,7 +153,7 @@ export default function ZakatSettingsAdmin() {
 
         <button
           type="submit" disabled={saving}
-          style={{ width: '100%', padding: '15px', borderRadius: '14px', background: saving ? 'var(--primary-hover)' : 'var(--primary)', color: 'var(--primary-text, #2A1A2E)', border: 'none', fontWeight: 800, fontSize: '0.9rem', cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '9px', boxShadow: '0 8px 24px rgba(201, 149, 42, 0.25)', transition: 'all 0.2s' }}
+          style={{ width: '100%', padding: '15px', borderRadius: '14px', background: saving ? 'var(--primary-hover)' : 'var(--primary)', color: 'white', border: 'none', fontWeight: 800, fontSize: '0.9rem', cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '9px', boxShadow: '0 8px 24px rgba(209, 165, 98, 0.25)', transition: 'all 0.2s' }}
           onMouseEnter={e => !saving && (e.currentTarget.style.transform = 'translateY(-1px)')}
           onMouseLeave={e => (e.currentTarget.style.transform = 'translateY(0)')}
         >

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, AlertCircle } from 'lucide-react';
 import AdminSidebar from './AdminSidebar';
-import { useLocation, Navigate } from 'react-router-dom';
+import { useLocation, Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-export default function AdminLayout({ children }) {
+export default function AdminLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [linkSent, setLinkSent] = useState(false);
@@ -30,8 +30,7 @@ export default function AdminLayout({ children }) {
       display: 'flex',
       alignItems: 'flex-start',
       minHeight: '100vh',
-      background: 'var(--bg)',
-      backgroundImage: 'radial-gradient(at 0% 0%, rgba(201, 149, 42, 0.03) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(201, 149, 42, 0.03) 0px, transparent 50%)',
+      background: 'var(--body-bg)',
     }}>
       {/* Mobile Overlay */}
       {mobileOpen && (
@@ -87,7 +86,7 @@ export default function AdminLayout({ children }) {
             justifyContent: 'space-between',
             flexWrap: 'wrap',
             gap: '12px',
-            borderBottom: '1px solid #fecaca'
+            borderBottom: '1px solid var(--non-halal-border)'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <AlertCircle size={18} />
@@ -128,7 +127,7 @@ export default function AdminLayout({ children }) {
           </div>
         )}
 
-        {children}
+        <Outlet />
       </main>
     </div>
   );

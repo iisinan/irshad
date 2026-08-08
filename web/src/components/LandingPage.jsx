@@ -158,10 +158,10 @@ export default function LandingPage() {
       {/* ── HERO ────────────────────────────────── */}
       <section style={{ position: 'relative', padding: 'clamp(96px,14vw,152px) 20px clamp(80px,10vw,120px)', overflow: 'hidden' }}>
         {/* Background glows */}
-        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 90% 70% at 50% -15%, rgba(118,88,122,0.1) 0%, transparent 60%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', top: '-5%', right: '-5%', width: 700, height: 700, borderRadius: '50%', background: 'radial-gradient(circle, rgba(212,175,55,0.08) 0%, transparent 65%)', pointerEvents: 'none', filter: 'blur(56px)' }} />
-        <div style={{ position: 'absolute', top: '15%', left: '-8%', width: 440, height: 440, borderRadius: '50%', background: 'radial-gradient(circle, rgba(118,88,122,0.09) 0%, transparent 65%)', pointerEvents: 'none', filter: 'blur(36px)' }} />
-        <div style={{ position: 'absolute', bottom: '10%', right: '20%', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(212,175,55,0.05) 0%, transparent 70%)', pointerEvents: 'none', filter: 'blur(30px)' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 90% 70% at 50% -15%, rgba(91, 41, 113,0.1) 0%, transparent 60%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: '-5%', right: '-5%', width: 700, height: 700, borderRadius: '50%', background: 'radial-gradient(circle, rgba(209, 165, 98,0.08) 0%, transparent 65%)', pointerEvents: 'none', filter: 'blur(56px)' }} />
+        <div style={{ position: 'absolute', top: '15%', left: '-8%', width: 440, height: 440, borderRadius: '50%', background: 'radial-gradient(circle, rgba(91, 41, 113,0.09) 0%, transparent 65%)', pointerEvents: 'none', filter: 'blur(36px)' }} />
+        <div style={{ position: 'absolute', bottom: '10%', right: '20%', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(209, 165, 98,0.05) 0%, transparent 70%)', pointerEvents: 'none', filter: 'blur(30px)' }} />
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, transparent 0%, var(--border-strong) 25%, var(--border-strong) 75%, transparent 100%)' }} />
 
         <div style={{ position: 'relative', maxWidth: 1260, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 480px), 1fr))', gap: 'clamp(40px, 8vw, 80px)', alignItems: 'center' }}>
@@ -169,7 +169,7 @@ export default function LandingPage() {
           {/* Left: Copy */}
           <div>
             {/* Eyebrow badge */}
-            <div className="animate-slide-up" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.25)', padding: '6px 16px', borderRadius: 40, color: 'var(--gold)', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '1.1px', textTransform: 'uppercase', marginBottom: 28 }}>
+            <div className="animate-slide-up" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(209, 165, 98,0.08)', border: '1px solid rgba(209, 165, 98,0.25)', padding: '6px 16px', borderRadius: 40, color: 'var(--gold)', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '1.1px', textTransform: 'uppercase', marginBottom: 28 }}>
               <div style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--gold)', animation: 'pulse 2.5s infinite' }} />
               AAOIFI-Certified Shariah Screening · NGX
             </div>
@@ -178,7 +178,7 @@ export default function LandingPage() {
             <h1 className="animate-slide-up stagger-1" style={{ fontSize: 'clamp(2.6rem, 5.2vw, 4.6rem)', fontWeight: 900, lineHeight: 1.03, letterSpacing: '-2.5px', color: 'var(--text-dark)', marginBottom: 22 }}>
               The Intelligent Platform<br />
               for{' '}
-              <span style={{ background: 'linear-gradient(130deg, var(--primary) 0%, #C9952A 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+              <span style={{ background: 'linear-gradient(130deg, var(--primary) 0%, var(--gold) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                 Islamic Investing
               </span>
             </h1>
@@ -190,7 +190,7 @@ export default function LandingPage() {
 
             {/* CTAs */}
             <div className="animate-slide-up stagger-3" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 48 }}>
-              <Link to="/portfolio" className="btn-primary hover-lift" style={{ padding: '15px 36px', fontSize: '0.95rem', borderRadius: 13, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 8, boxShadow: '0 8px 28px rgba(118,88,122,0.24)', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+              <Link to="/portfolio" className="btn-primary hover-lift" style={{ padding: '15px 36px', fontSize: '0.95rem', borderRadius: 13, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 8, boxShadow: '0 8px 28px rgba(91, 41, 113,0.24)', textDecoration: 'none', whiteSpace: 'nowrap' }}>
                 Explore Equities <ArrowRight size={17} />
               </Link>
               <Link to="/shariah" style={{ padding: '15px 36px', fontSize: '0.95rem', borderRadius: 13, fontWeight: 600, color: 'var(--text-body)', border: '1.5px solid var(--border-strong)', background: 'transparent', display: 'inline-flex', alignItems: 'center', gap: 8, transition: 'border-color 0.22s, color 0.22s', textDecoration: 'none', whiteSpace: 'nowrap' }}
@@ -253,7 +253,7 @@ export default function LandingPage() {
           
           {/* Right: Phone Visual */}
           <div className="animate-slide-up stagger-2" style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <div style={{ position: 'absolute', width: 280, height: 280, borderRadius: '50%', background: 'radial-gradient(circle, rgba(118,88,122,0.13) 0%, transparent 70%)', filter: 'blur(44px)', pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', width: 280, height: 280, borderRadius: '50%', background: 'radial-gradient(circle, rgba(91, 41, 113,0.13) 0%, transparent 70%)', filter: 'blur(44px)', pointerEvents: 'none' }} />
             <div style={{ position: 'relative', width: 'min(290px, 100%)', aspectRatio: '9/16.5' }}>
               <div style={{ position: 'absolute', inset: 0, background: 'var(--bg)', borderRadius: 40, border: '1.5px solid var(--border-strong)', boxShadow: '0 40px 80px rgba(0,0,0,0.14), 0 0 0 6px var(--bg), 0 0 0 7.5px var(--border-strong)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ padding: '14px 20px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
@@ -308,10 +308,10 @@ export default function LandingPage() {
         
         {/* Stats strip */}
         <Reveal>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 0, border: '1.5px solid var(--border-strong)', borderRadius: 18, overflow: 'hidden', boxShadow: '0 4px 20px rgba(118,88,122,0.05)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 0, border: '1.5px solid var(--border-strong)', borderRadius: 18, overflow: 'hidden', boxShadow: '0 4px 20px rgba(91, 41, 113,0.05)' }}>
             {statItems.map((s, i) => (
               <div key={i} style={{ background: 'var(--bg)', padding: '20px 22px', borderRight: i < statItems.length - 1 ? '1px solid var(--border-strong)' : 'none', transition: 'background 0.2s' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(118,88,122,0.03)'}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(91, 41, 113,0.03)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'var(--bg)'}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
                   <s.icon size={13} color={s.color} style={{ opacity: 0.8 }} />
@@ -329,7 +329,7 @@ export default function LandingPage() {
         <Reveal delay={0.06}>
           <div style={{ position: 'relative' }}>
             <div style={{ background: 'var(--bg)', border: '1.5px solid var(--border-strong)', borderRadius: 100, padding: '10px 10px 10px 26px', display: 'flex', alignItems: 'center', gap: 12, boxShadow: '0 4px 24px rgba(0,0,0,0.04)', transition: 'box-shadow 0.3s, border-color 0.3s' }}
-              onFocusCapture={e => { e.currentTarget.style.boxShadow = '0 0 0 4px rgba(118,88,122,0.1), 0 4px 24px rgba(0,0,0,0.06)'; e.currentTarget.style.borderColor = 'var(--primary)'; }}
+              onFocusCapture={e => { e.currentTarget.style.boxShadow = '0 0 0 4px rgba(91, 41, 113,0.1), 0 4px 24px rgba(0,0,0,0.06)'; e.currentTarget.style.borderColor = 'var(--primary)'; }}
               onBlurCapture={e => { e.currentTarget.style.boxShadow = '0 4px 24px rgba(0,0,0,0.04)'; e.currentTarget.style.borderColor = 'var(--border-strong)'; }}>
               <SearchIcon size={18} color="var(--text-muted)" style={{ flexShrink: 0 }} />
               <form onSubmit={handleSearch} style={{ flex: 1, display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -365,8 +365,9 @@ export default function LandingPage() {
               {loading
                 ? [0,1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 72, borderRadius: 14 }} />)
                 : recent.slice(0, 4).map((co) => (
-                  <Link key={co.id} to={`/market/${co.symbol}`} style={{ padding: '16px', background: 'var(--bg)', border: '1.5px solid var(--border-strong)', borderRadius: 14, display: 'flex', flexDirection: 'column', gap: 14, textDecoration: 'none', transition: 'border-color 0.2s, box-shadow 0.2s, transform 0.2s' }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(118,88,122,0.35)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(118,88,122,0.09)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                  <Link key={co.id} to={`/market/${co.symbol}/aaoifi`} style={{ padding: '16px', background: 'var(--bg)', border: '1.5px solid var(--border-strong)', borderRadius: 14, display: 'flex', flexDirection: 'column', gap: 14, textDecoration: 'none', transition: 'border-color 0.2s, box-shadow 0.2s, transform 0.2s' }}
+
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(91, 41, 113,0.35)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(91, 41, 113,0.09)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-strong)'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <CompanyAvatar symbol={co.symbol} size={42} />
@@ -406,7 +407,7 @@ export default function LandingPage() {
               </Link>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: 0, border: '1.5px solid var(--border-strong)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 8px 32px rgba(118,88,122,0.07)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: 0, border: '1.5px solid var(--border-strong)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 8px 32px rgba(91, 41, 113,0.07)' }}>
               {features.map((f, i) => (
                 <Reveal key={i} delay={i * 0.07}>
                   <div style={{
@@ -418,12 +419,12 @@ export default function LandingPage() {
                     height: '100%', boxSizing: 'border-box',
                     position: 'relative', overflow: 'hidden',
                   }}
-                    onMouseEnter={e => { e.currentTarget.style.background = 'linear-gradient(160deg, rgba(118,88,122,0.04) 0%, rgba(118,88,122,0.01) 100%)'; }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'linear-gradient(160deg, rgba(91, 41, 113,0.04) 0%, rgba(91, 41, 113,0.01) 100%)'; }}
                     onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg)'; }}>
                     {/* Subtle step number */}
                     <div style={{ position: 'absolute', top: 20, right: 24, fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-light)', letterSpacing: '1px', opacity: 0.5 }}>0{i + 1}</div>
                     {/* Icon */}
-                    <div style={{ width: 48, height: 48, borderRadius: 14, background: 'linear-gradient(135deg, var(--primary) 0%, #C9952A 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', marginBottom: 22, boxShadow: '0 6px 18px rgba(118,88,122,0.25)' }}>
+                    <div style={{ width: 48, height: 48, borderRadius: 14, background: 'linear-gradient(135deg, var(--primary) 0%, var(--gold) 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', marginBottom: 22, boxShadow: '0 6px 18px rgba(91, 41, 113,0.25)' }}>
                       <f.icon size={21} />
                     </div>
                     <div style={{ fontWeight: 800, fontSize: '0.97rem', color: 'var(--text-dark)', marginBottom: 10, letterSpacing: '-0.3px' }}>{f.title}</div>
@@ -437,9 +438,9 @@ export default function LandingPage() {
 
         {/* Pipeline */}
         <Reveal delay={0.05}>
-          <div style={{ position: 'relative', borderRadius: 26, overflow: 'hidden', border: '1.5px solid var(--border-strong)', boxShadow: '0 8px 32px rgba(118,88,122,0.06)' }}>
+          <div style={{ position: 'relative', borderRadius: 26, overflow: 'hidden', border: '1.5px solid var(--border-strong)', boxShadow: '0 8px 32px rgba(91, 41, 113,0.06)' }}>
             {/* Header strip */}
-            <div style={{ padding: 'clamp(32px,5vw,52px) clamp(28px,5vw,52px) 0', background: 'linear-gradient(160deg, rgba(118,88,122,0.05) 0%, rgba(118,88,122,0.01) 100%)' }}>
+            <div style={{ padding: 'clamp(32px,5vw,52px) clamp(28px,5vw,52px) 0', background: 'linear-gradient(160deg, rgba(91, 41, 113,0.05) 0%, rgba(91, 41, 113,0.01) 100%)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 16, marginBottom: 40 }}>
                 <div>
                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
@@ -463,12 +464,12 @@ export default function LandingPage() {
               {pipeline.map((s, i) => (
                 <Reveal key={i} delay={i * 0.08}>
                   <div style={{ background: 'var(--bg)', padding: '32px 28px 36px', borderRight: i < pipeline.length - 1 ? '1px solid var(--border-strong)' : 'none', height: '100%', boxSizing: 'border-box', transition: 'background 0.25s', position: 'relative' }}
-                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(118,88,122,0.03)'}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(91, 41, 113,0.03)'}
                     onMouseLeave={e => e.currentTarget.style.background = 'var(--bg)'}>
                     {/* Step number — large background accent */}
                     <div style={{ fontSize: '2.8rem', fontWeight: 900, color: 'var(--primary)', opacity: 0.07, lineHeight: 1, marginBottom: -16, letterSpacing: '-3px', userSelect: 'none' }}>{s.n}</div>
                     {/* Icon */}
-                    <div style={{ width: 44, height: 44, borderRadius: 13, background: 'linear-gradient(135deg, var(--primary) 0%, #C9952A 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', marginBottom: 18, boxShadow: '0 6px 18px rgba(118,88,122,0.25)' }}>
+                    <div style={{ width: 44, height: 44, borderRadius: 13, background: 'linear-gradient(135deg, var(--primary) 0%, var(--gold) 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', marginBottom: 18, boxShadow: '0 6px 18px rgba(91, 41, 113,0.25)' }}>
                       <s.icon size={19} />
                     </div>
                     <div style={{ fontWeight: 800, fontSize: '0.92rem', color: 'var(--text-dark)', marginBottom: 9, letterSpacing: '-0.2px' }}>{s.title}</div>
@@ -488,15 +489,15 @@ export default function LandingPage() {
 
         {/* CTA Banner */}
         <Reveal delay={0.04}>
-          <div style={{ position: 'relative', borderRadius: 26, overflow: 'hidden', background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, #3C2D3E 100%)', padding: 'clamp(44px,7vw,76px)', display: 'flex', flexWrap: 'wrap', gap: 40, alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 24px 60px rgba(0,0,0,0.35)', border: '1px solid rgba(201, 149, 42, 0.2)' }}>
+          <div style={{ position: 'relative', borderRadius: 26, overflow: 'hidden', background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, var(--text-dark) 100%)', padding: 'clamp(44px,7vw,76px)', display: 'flex', flexWrap: 'wrap', gap: 40, alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 24px 60px rgba(0,0,0,0.35)', border: '1px solid rgba(209, 165, 98, 0.2)' }}>
             {/* Decorative blobs */}
-            <div style={{ position: 'absolute', right: -80, top: -80, width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(201, 149, 42, 0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', left: -60, bottom: -100, width: 280, height: 280, borderRadius: '50%', background: 'radial-gradient(circle, rgba(201, 149, 42, 0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', right: -80, top: -80, width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(209, 165, 98, 0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', left: -60, bottom: -100, width: 280, height: 280, borderRadius: '50%', background: 'radial-gradient(circle, rgba(209, 165, 98, 0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
             {/* Radial spotlight */}
             <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 60% 80% at 20% 50%, rgba(255,255,255,0.02) 0%, transparent 60%)', pointerEvents: 'none' }} />
 
             <div style={{ position: 'relative', maxWidth: 540 }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: '0.68rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--primary)', border: '1px solid rgba(201, 149, 42, 0.3)', padding: '4px 13px', borderRadius: 20, marginBottom: 18, background: 'rgba(201, 149, 42, 0.08)' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: '0.68rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--primary)', border: '1px solid rgba(209, 165, 98, 0.3)', padding: '4px 13px', borderRadius: 20, marginBottom: 18, background: 'rgba(209, 165, 98, 0.08)' }}>
                 <Shield size={11} />
                 AAOIFI Standard No. 21
               </div>
@@ -509,7 +510,7 @@ export default function LandingPage() {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, position: 'relative', minWidth: 200 }}>
-              <Link to="/portfolio" className="hover-lift" style={{ padding: '14px 32px', background: 'var(--primary)', color: 'white', fontWeight: 800, fontSize: '0.92rem', borderRadius: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: '0 8px 24px rgba(118,88,122,0.28)', textDecoration: 'none' }}>
+              <Link to="/portfolio" className="hover-lift" style={{ padding: '14px 32px', background: 'var(--primary)', color: 'white', fontWeight: 800, fontSize: '0.92rem', borderRadius: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: '0 8px 24px rgba(91, 41, 113,0.28)', textDecoration: 'none' }}>
                 Start Screening <ArrowRight size={15} />
               </Link>
               <Link to="/shariah" style={{ padding: '13px 32px', border: '1px solid rgba(255,255,255,0.16)', color: 'rgba(255,255,255,0.82)', fontWeight: 600, fontSize: '0.9rem', borderRadius: 13, textDecoration: 'none', transition: 'border-color 0.2s, color 0.2s', textAlign: 'center', display: 'block' }}

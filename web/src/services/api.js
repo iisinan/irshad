@@ -203,6 +203,11 @@ export const fetchAiAnalysis = async (symbol) => {
   return response.data;
 };
 
+export const chatAboutStock = async (symbol, question) => {
+  const response = await api.post(`/stocks/${symbol}/chat`, { question });
+  return response.data;
+};
+
 export const fetchComplianceChanges = async () => {
   const response = await api.get('/stocks/compliance-changes');
   return response.data;

@@ -35,8 +35,7 @@ export default function DashboardLayout({ children }) {
       display: 'flex',
       alignItems: 'flex-start',
       minHeight: '100vh',
-      background: 'var(--bg)',
-      backgroundImage: 'radial-gradient(at 0% 0%, rgba(201, 149, 42, 0.03) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(201, 149, 42, 0.03) 0px, transparent 50%)',
+      background: 'var(--body-bg)',
     }}>
       {/* Mobile Overlay */}
       {mobileOpen && (
@@ -94,7 +93,7 @@ export default function DashboardLayout({ children }) {
             justifyContent: 'space-between',
             flexWrap: 'wrap',
             gap: '12px',
-            borderBottom: '1px solid #fecaca'
+            borderBottom: '1px solid var(--non-halal-border)'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <AlertCircle size={18} />

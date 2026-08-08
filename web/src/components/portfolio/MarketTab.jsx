@@ -60,29 +60,29 @@ const TH = ({ children, right, center }) => (
   </th>
 );
 
-/* ─── Stock table row ────────────────────────────────────────────────────── */
 const StockRow = React.memo(({ stock, idx, isWatched, onToggle }) => {
   const isPos  = Number(stock.price_change_pct ?? 0) >= 0;
 
   return (
     <tr
-      onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-section)'}
+      onMouseEnter={e => e.currentTarget.style.background = 'var(--primary-50)'}
       onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
       style={{ borderBottom: '1px solid var(--border)', transition: 'background 0.15s' }}
     >
       {/* Rank */}
-      <td style={{ padding: '10px 8px 10px 16px', color: 'var(--text-light)', fontSize: '0.72rem', fontWeight: 700 }}>
+      <td style={{ padding: '12px 8px 12px 20px', color: 'var(--text-light)', fontSize: '0.72rem', fontWeight: 700 }}>
         {idx + 1}
       </td>
 
       {/* Company */}
-      <td style={{ padding: '10px 12px' }}>
+      <td style={{ padding: '12px 12px' }}>
         <Link
-          to={`/market/${stock.symbol}`}
+          to={`/market/${stock.symbol}/aaoifi`}
+
           state={{ stock }}
           style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px' }}
         >
-          <CompanyLogo symbol={stock.symbol} logoUrl={stock.logo_url} size={38} radius={10} />
+          <CompanyLogo symbol={stock.symbol} logoUrl={stock.logo_url} size={42} radius={12} />
           <div>
             <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.86rem', lineHeight: 1.2, letterSpacing: '-0.2px' }}>
               {stock.symbol}
@@ -95,12 +95,12 @@ const StockRow = React.memo(({ stock, idx, isWatched, onToggle }) => {
       </td>
 
       {/* Price */}
-      <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.84rem', fontVariantNumeric: 'tabular-nums' }}>
+      <td style={{ padding: '12px 12px', textAlign: 'right', fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.84rem', fontVariantNumeric: 'tabular-nums' }}>
         ₦{fmtPrice(stock.latest_price)}
       </td>
 
       {/* Change */}
-      <td style={{ padding: '10px 12px', textAlign: 'right' }}>
+      <td style={{ padding: '12px 12px', textAlign: 'right' }}>
         <span style={{
           display: 'inline-flex', alignItems: 'center', gap: '4px',
           fontSize: '0.72rem', fontWeight: 800,
@@ -109,36 +109,36 @@ const StockRow = React.memo(({ stock, idx, isWatched, onToggle }) => {
           padding: '4px 9px', borderRadius: '8px',
           fontVariantNumeric: 'tabular-nums'
         }}>
-          {isPos ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
+          {isPos ? <TrendingUp size={11} strokeWidth={2.5} /> : <TrendingDown size={11} strokeWidth={2.5} />}
           {isPos ? '+' : ''}{Number(stock.price_change_pct ?? 0).toFixed(2)}%
         </span>
       </td>
 
       {/* Mkt Cap */}
-      <td style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--text-muted)', fontSize: '0.78rem', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
+      <td style={{ padding: '12px 12px', textAlign: 'right', color: 'var(--text-muted)', fontSize: '0.78rem', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
         {fmtCap(stock.market_cap)}
       </td>
 
       {/* P/E */}
-      <td style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--text-muted)', fontSize: '0.78rem', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
+      <td style={{ padding: '12px 12px', textAlign: 'right', color: 'var(--text-muted)', fontSize: '0.78rem', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
         {stock.pe_ratio ? Number(stock.pe_ratio).toFixed(1) : '—'}
       </td>
 
       {/* Star */}
-      <td style={{ padding: '10px 16px 10px 8px', textAlign: 'right' }}>
+      <td style={{ padding: '12px 20px 12px 8px', textAlign: 'right' }}>
         <button
           onClick={() => onToggle(stock.symbol, isWatched)}
           style={{
             background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
-            color: isWatched ? 'var(--gold)' : 'var(--border)',
+            color: isWatched ? 'var(--primary)' : 'var(--border)',
             transition: 'color 0.15s, transform 0.15s',
             display: 'inline-flex', alignItems: 'center', justifyContent: 'center'
           }}
           title={isWatched ? 'Remove from watchlist' : 'Add to watchlist'}
-          onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.25)'}
-          onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+          onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.25)'; if (!isWatched) e.currentTarget.style.color = 'var(--primary-300)'; }}
+          onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.color = isWatched ? 'var(--primary)' : 'var(--border)'; }}
         >
-          <Star size={17} fill={isWatched ? 'currentColor' : 'none'} />
+          <Star size={18} fill={isWatched ? 'currentColor' : 'none'} strokeWidth={2} />
         </button>
       </td>
     </tr>
@@ -270,94 +270,75 @@ export default function MarketTab() {
 
       {/* ── Header Hero Banner ─────────────────────────────────────── */}
       <div style={{ 
-        background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, #3C2D3E 100%)', 
-        borderRadius: '20px', padding: '20px', 
-        boxShadow: '0 16px 40px rgba(0,0,0,0.3)', 
-        border: '1px solid rgba(201, 149, 42, 0.2)', marginBottom: '16px', 
+        background: 'linear-gradient(135deg, var(--primary) 0%, #4A215D 100%)', 
+        borderRadius: '20px', padding: '24px 28px', 
+        boxShadow: '0 12px 32px rgba(91, 41, 113, 0.25)', 
+        border: '1px solid rgba(255, 255, 255, 0.1)', marginBottom: '16px', 
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
-        position: 'relative', overflow: 'hidden', flexWrap: 'wrap', gap: '16px' 
+        position: 'relative', overflow: 'hidden', flexWrap: 'wrap', gap: '20px' 
       }}>
-        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '150px', height: '150px', background: 'rgba(201, 149, 42, 0.08)', borderRadius: '50%' }} />
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', position: 'relative', zIndex: 1 }}>
-          <div style={{ width: '48px', height: '48px', background: 'rgba(201, 149, 42, 0.12)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', border: '1px solid rgba(201, 149, 42, 0.35)' }}>
-            <BarChart2 size={24} />
+        {/* Decorative Background Elements */}
+        <div style={{ position: 'absolute', top: '-60px', right: '-40px', width: '250px', height: '250px', background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: '-40px', left: '20%', width: '150px', height: '150px', background: 'radial-gradient(circle, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
+        
+        {/* Large Decorative Icon on the right */}
+        <div style={{ position: 'absolute', right: '-10px', top: '50%', transform: 'translateY(-50%) rotate(10deg)', opacity: 0.15, pointerEvents: 'none' }}>
+           <TrendingUp size={140} strokeWidth={1} color="white" />
+        </div>
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', zIndex: 1 }}>
+          <div style={{ width: '52px', height: '52px', background: 'rgba(255, 255, 255, 0.15)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', border: '1px solid rgba(255, 255, 255, 0.2)', backdropFilter: 'blur(8px)', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+            <BarChart2 size={24} strokeWidth={2.5} />
           </div>
           <div>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'white', letterSpacing: '-0.5px', margin: 0 }}>Market Screener</h2>
-            <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.75rem', marginTop: '2px', margin: 0 }}>Nigerian Exchange (NGX) · AAOIFI Shariah Standard No. 21</p>
-          </div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', position: 'relative', zIndex: 1 }}>
-          <div style={{ color: 'var(--primary)', fontSize: '0.79rem', fontWeight: 800, background: 'rgba(201, 149, 42, 0.12)', padding: '10px 16px', borderRadius: '12px', border: '1px solid rgba(201, 149, 42, 0.3)', backdropFilter: 'blur(10px)' }}>
-            {actualStocks.length} Companies
-          </div>
-          <div style={{ color: '#10B981', fontSize: '0.79rem', fontWeight: 800, background: 'rgba(16,185,129,0.15)', padding: '10px 16px', borderRadius: '12px', border: '1px solid rgba(16,185,129,0.3)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <ShieldCheck size={14} /> {halalCount} Halal
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 850, color: 'white', letterSpacing: '-0.5px', margin: 0, textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>Market Screener</h2>
+            <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.8rem', marginTop: '4px', margin: 0, fontWeight: 500 }}>Nigerian Exchange (NGX) · AAOIFI Shariah Standard No. 21</p>
           </div>
         </div>
       </div>
 
       {/* ── Filter Card ─────────────────────────────────────── */}
       <div style={{
-        background: 'var(--bg)', padding: '12px',
+        background: 'var(--bg)', padding: '20px',
         borderRadius: '16px 16px 0 0', border: '1px solid var(--border)', borderBottom: 'none',
-        display: 'flex', flexDirection: 'column', gap: '10px'
+        display: 'flex', flexDirection: 'column', gap: '16px'
       }}>
-        <div className="market-filter-row" style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
-          {/* Search */}
-          <div className="market-search-bar" style={{ position: 'relative', flex: '1 1 200px', maxWidth: '100%' }}>
-            <Search size={14} color="var(--text-light)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
-            <input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Search ticker or name…"
-              style={{
-                width: '100%', paddingLeft: '32px', paddingRight: search ? '32px' : '12px',
-                paddingTop: '8px', paddingBottom: '8px',
-                borderRadius: '10px', border: '1px solid var(--border)',
-                background: 'var(--bg-section)', fontSize: '0.75rem',
-                color: 'var(--text-dark)', outline: 'none', fontFamily: 'inherit',
-                boxSizing: 'border-box', transition: 'border-color 0.2s',
-              }}
-              onFocus={e  => e.target.style.borderColor = 'var(--primary)'}
-              onBlur={e   => e.target.style.borderColor = 'var(--border)'}
-            />
-            {search && (
-              <button onClick={() => setSearch('')} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
-                <X size={14} />
-              </button>
-            )}
-          </div>
+        {/* Search - Prominent Top Row */}
+        <div className="market-search-bar" style={{ position: 'relative', width: '100%' }}>
+          <Search size={18} color="var(--primary)" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search for any company or ticker..."
+            style={{
+              width: '100%', paddingLeft: '44px', paddingRight: search ? '40px' : '16px',
+              paddingTop: '14px', paddingBottom: '14px',
+              borderRadius: '14px', border: '2px solid transparent',
+              background: 'var(--bg-section)', fontSize: '0.95rem', fontWeight: 600,
+              color: 'var(--text-dark)', outline: 'none', fontFamily: 'inherit',
+              boxSizing: 'border-box', transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+              boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
+            }}
+            onFocus={e => {
+              e.target.style.borderColor = 'var(--primary)';
+              e.target.style.background = 'white';
+              e.target.style.boxShadow = '0 8px 24px rgba(91, 41, 113, 0.08)';
+            }}
+            onBlur={e => {
+              e.target.style.borderColor = 'transparent';
+              e.target.style.background = 'var(--bg-section)';
+              e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)';
+            }}
+          />
+          {search && (
+            <button onClick={() => setSearch('')} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'var(--border)', border: 'none', borderRadius: '50%', width: '24px', height: '24px', cursor: 'pointer', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background='var(--text-light)'} onMouseLeave={e => e.currentTarget.style.background='var(--border)'}>
+              <X size={14} strokeWidth={3} />
+            </button>
+          )}
+        </div>
 
-          {/* Shariah Status Segmented Pills */}
-          <div style={{ display: 'flex', background: 'var(--bg-section)', borderRadius: '12px', padding: '4px', border: '1px solid var(--border)' }}>
-            {[
-              { key: 'all', label: 'All' },
-              { key: 'halal', label: 'Halal' },
-              { key: 'non-halal', label: 'Non-Halal' },
-              { key: 'doubtful', label: 'Doubtful' }
-            ].map(tab => (
-              <button
-                key={tab.key}
-                onClick={() => setStatusF(tab.key)}
-                style={{
-                  padding: '7px 14px',
-                  borderRadius: '9px',
-                  border: 'none',
-                  background: statusF === tab.key ? 'var(--bg)' : 'transparent',
-                  color: statusF === tab.key ? 'var(--text-dark)' : 'var(--text-muted)',
-                  fontWeight: statusF === tab.key ? 800 : 600,
-                  fontSize: '0.74rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  boxShadow: statusF === tab.key ? '0 2px 6px rgba(0,0,0,0.06)' : 'none'
-                }}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
+        {/* Filters Row */}
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'nowrap', overflowX: 'auto', paddingBottom: '4px' }}>
           {/* Sector Filter */}
           <select value={sectorF} onChange={e => { setSectorF(e.target.value); setIndustryF('all'); }} style={selectStyle(sectorF !== 'all')}>
             <option value="all">All Sectors</option>
@@ -396,9 +377,9 @@ export default function MarketTab() {
             </button>
           )}
 
-          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
             <span style={{ fontSize: '0.74rem', fontWeight: 800, color: 'var(--text-muted)', background: 'var(--bg-section)', padding: '6px 12px', borderRadius: '100px', border: '1px solid var(--border)' }}>
-              {filtered.length} {filtered.length === 1 ? 'Company' : 'Companies'}
+              {filtered.length} Companies
             </span>
           </div>
         </div>

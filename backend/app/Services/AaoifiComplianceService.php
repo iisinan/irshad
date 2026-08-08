@@ -130,19 +130,21 @@ class AaoifiComplianceService
             );
         }
 
+        $extraNotes = $screening && $screening->business_reasoning ? ' Notes: ' . $screening->business_reasoning : '';
+
         // PIPELINE RESULT PROCESSING (ALL STAGES PASSED)
         if ($purificationFactor > 0) {
             return $this->saveStatus(
                 $company,
                 'halal',
-                'Stock passes all screens. Status is Halal with an active dividend purification factor of '.round($purificationFactor * 100, 2).'%.'
+                'Stock passes all screens. Status is Halal with an active dividend purification factor of '.round($purificationFactor * 100, 2).'%.' . $extraNotes
             );
         }
 
         return $this->saveStatus(
             $company,
             'halal',
-            'Stock passes all screens cleanly. Status is 100% Halal and Shariah-compliant.'
+            'Stock passes all screens cleanly. Status is 100% Halal and Shariah-compliant.' . $extraNotes
         );
     }
 

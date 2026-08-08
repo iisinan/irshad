@@ -3,10 +3,10 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import {
-  BarChart2, Star, Activity,
+  BarChart2, Activity,
   HeartHandshake, Calculator, BookOpen,
   User, LogOut, ChevronLeft, ChevronRight,
-  X, Moon, Sun, Shield, FileText, Bell, HelpCircle
+  X, Moon, Sun, Shield, FileText, Bell, HelpCircle, Star
 } from 'lucide-react';
 
 export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
@@ -17,166 +17,154 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
 
   const NAV_ITEMS = [
     { section: 'Main' },
-    { label: 'Holdings',       icon: Activity,         to: '/portfolio#holdings' },
-    { label: 'Market Screener', icon: BarChart2,        to: '/portfolio#market' },
-    { label: 'Alert',          icon: Star,             to: '/portfolio#watchlist' },
-    { label: 'Updates',        icon: Bell,             to: '/portfolio#updates' },
-    { label: 'Help & Guide',   icon: HelpCircle,       to: '/portfolio#guide' },
+    { label: 'Holdings',         icon: Activity,       to: '/portfolio#holdings' },
+    { label: 'Market Screener',  icon: BarChart2,      to: '/portfolio#market' },
+    { label: 'Alert',            icon: Star,           to: '/portfolio#watchlist' },
+    { label: 'Updates',          icon: Bell,           to: '/portfolio#updates' },
+    { label: 'Help & Guide',     icon: HelpCircle,     to: '/portfolio#guide' },
     { section: 'Islamic Finance' },
-    { label: 'Purification',   icon: HeartHandshake,   to: '/portfolio#purification' },
-    { label: 'Zakat',          icon: Calculator,        to: '/portfolio#zakat' },
-    { label: 'Resources',      icon: BookOpen,          to: '/portfolio#lectures' },
+    { label: 'Purification',     icon: HeartHandshake, to: '/portfolio#purification' },
+    { label: 'Zakat',            icon: Calculator,     to: '/portfolio#zakat' },
+    { label: 'Resources',        icon: BookOpen,       to: '/portfolio#lectures' },
     { section: 'Account' },
-    { label: 'Statements',      icon: FileText,         to: '/portfolio#statement' },
-    { label: 'Profile & Settings', icon: User,              to: '/profile' },
+    { label: 'Statements',       icon: FileText,       to: '/portfolio#statement' },
+    { label: 'Profile & Settings', icon: User,         to: '/profile' },
     ...(user?.role === 'admin' ? [
       { label: 'Admin Dashboard', icon: Shield, to: '/admin' },
-      { label: 'Users', icon: User, to: '/admin/users' }
     ] : []),
   ];
 
-  // On mobile, the drawer is ALWAYS fully expanded (text visible).
   const isCollapsed = collapsed && !mobileOpen;
 
   const isActive = (to) => {
     const toPath = to.split('#')[0];
     const toHash = to.split('#')[1] ? '#' + to.split('#')[1] : '';
-
     if (toPath === '/portfolio' || toPath === '/profile') {
       if (location.pathname !== toPath) return false;
       const currentHash = location.hash || (toPath === '/portfolio' ? '#holdings' : '');
       if (toHash) return currentHash === toHash;
       return currentHash === '';
     }
-
     return location.pathname === toPath || (toPath !== '/' && location.pathname.startsWith(toPath));
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
+  const handleLogout = () => { logout(); navigate('/'); };
 
   return (
-    <aside aria-label="Dashboard Navigation" className={`dashboard-sidebar-container ${mobileOpen ? 'open' : ''}`} style={{
-      width: isCollapsed ? '80px' : '260px',
-      background: 'var(--bg)',
-      borderRight: '1px solid var(--border)',
-      boxShadow: 'var(--shadow-lg)',
-      display: 'flex',
-      flexDirection: 'column',
-      transition: 'width 0.4s cubic-bezier(0.16,1,0.3,1), transform 0.4s cubic-bezier(0.16,1,0.3,1)',
-    }}>
-
-      {/* ── Brand ── */}
+    <aside
+      aria-label="Dashboard Navigation"
+      className={`dashboard-sidebar-container ${mobileOpen ? 'open' : ''}`}
+      style={{
+        width: isCollapsed ? '72px' : '248px',
+        minWidth: isCollapsed ? '72px' : '248px',
+        background: 'var(--bg)',
+        boxShadow: '2px 0 20px rgba(0,0,0,0.06)',
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'width 0.35s cubic-bezier(0.16,1,0.3,1), min-width 0.35s cubic-bezier(0.16,1,0.3,1)',
+        zIndex: 40,
+        overflow: 'hidden',
+      }}
+    >
+      {/* ── Brand header ── */}
       <div style={{
-        padding: isCollapsed ? '24px 0' : '24px',
+        padding: isCollapsed ? '18px 0' : '18px 16px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: isCollapsed ? 'center' : 'space-between',
         borderBottom: '1px solid var(--border)',
-        minHeight: '80px',
         flexShrink: 0,
+        minHeight: '68px',
       }}>
-        {!isCollapsed && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{
-              width: '40px', height: '40px', borderRadius: '12px',
-              background: 'var(--gold-grad)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontWeight: 900, fontSize: '0.95rem', color: '#2A1A2E',
-              flexShrink: 0,
-              boxShadow: '0 4px 14px rgba(201, 149, 42, 0.35)'
-            }}>إ</div>
-            <span style={{ 
-              fontWeight: 800, 
-              fontSize: '1.25rem', 
-              color: '#C9952A', 
-              letterSpacing: '-0.2px', 
-              fontFamily: 'var(--serif), var(--sans)',
-              textShadow: '0 2px 10px rgba(201, 149, 42, 0.2)'
+        {/* Logo mark + wordmark */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden' }}>
+          <div style={{
+            width: '36px', height: '36px', borderRadius: '10px',
+            background: 'var(--primary)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontWeight: 900, fontSize: '0.9rem', color: '#FFFFFF',
+            flexShrink: 0,
+          }}>إ</div>
+          {!isCollapsed && (
+            <span style={{
+              fontWeight: 800, fontSize: '1.15rem', color: 'var(--text-dark)',
+              letterSpacing: '-0.3px', whiteSpace: 'nowrap',
+              fontFamily: 'var(--sans)',
             }}>
               Irshad
             </span>
-          </div>
-        )}
-        {isCollapsed && (
-          <div style={{
-            width: '40px', height: '40px', borderRadius: '12px',
-            background: 'var(--gold-grad)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: 900, fontSize: '0.95rem', color: '#2A1A2E',
-            boxShadow: '0 4px 14px rgba(201, 149, 42, 0.35)'
-          }}>إ</div>
-        )}
+          )}
+        </div>
+
+        {/* Collapse toggle (desktop) */}
         {!isCollapsed && (
           <button
             onClick={() => setCollapsed(true)}
+            className="desktop-only-btn"
             style={{
-              width: '32px', height: '32px', borderRadius: '10px',
-              background: 'var(--primary-50)', 
-              border: 'none',
-              display: 'none', 
-              alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', color: 'var(--text-dark)',
-              flexShrink: 0,
-              transition: 'all 0.2s ease'
+              width: '28px', height: '28px', borderRadius: '8px',
+              background: 'var(--primary-50)', border: 'none',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', color: 'var(--text-muted)',
+              flexShrink: 0, transition: 'all 0.2s',
             }}
-            className="desktop-only-btn hover-bg-darker"
-            onMouseEnter={e => { e.currentTarget.style.background = 'var(--primary-100)'; e.currentTarget.style.color = '#FFFFFF'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'var(--primary-50)'; e.currentTarget.style.color = 'var(--text-dark)'; }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'var(--primary-100)'; e.currentTarget.style.color = 'var(--primary)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'var(--primary-50)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
           >
-            <ChevronLeft size={16} />
+            <ChevronLeft size={14} />
           </button>
         )}
-        
-        {/* Mobile Close Button */}
+
+        {/* Expand (collapsed desktop) */}
+        {isCollapsed && (
+          <button
+            onClick={() => setCollapsed(false)}
+            className="desktop-only-btn"
+            title="Expand"
+            style={{
+              position: 'absolute', bottom: '50%',
+              width: '20px', height: '20px', borderRadius: '50%',
+              background: 'var(--bg)', border: '1px solid var(--border)',
+              display: 'none', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', color: 'var(--text-muted)', right: '-10px',
+              boxShadow: 'var(--shadow-sm)', zIndex: 10,
+            }}
+          >
+            <ChevronRight size={10} />
+          </button>
+        )}
+
+        {/* Mobile close */}
         <button
           onClick={() => setMobileOpen(false)}
+          className="mobile-only-btn"
           style={{
-            width: '32px', height: '32px', borderRadius: '10px',
+            width: '28px', height: '28px', borderRadius: '8px',
             background: 'var(--primary-50)', border: 'none',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', color: 'var(--text-dark)',
-            flexShrink: 0,
+            cursor: 'pointer', color: 'var(--text-muted)',
           }}
-          className="mobile-only-btn"
         >
-          <X size={18} />
+          <X size={15} />
         </button>
       </div>
 
-      {/* ── Expand button when collapsed ── */}
-      {isCollapsed && (
-        <div style={{ padding: '16px 0', display: 'flex', justifyContent: 'center', borderBottom: '1px solid var(--border)' }}>
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            aria-label="Expand sidebar"
-            style={{
-              width: '40px', height: '40px', borderRadius: '12px',
-              background: 'var(--primary-50)', border: 'none',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', color: 'var(--text-dark)',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'var(--primary-100)'; e.currentTarget.style.color = '#C9952A'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'var(--primary-50)'; e.currentTarget.style.color = 'var(--text-dark)'; }}
-          >
-            <ChevronRight size={18} />
-          </button>
-        </div>
-      )}
-
-      {/* ── Nav Items ── */}
-      <nav style={{ flex: 1, padding: isCollapsed ? '16px 0' : '20px 16px', overflowY: 'auto' }} className="hide-scrollbar">
+      {/* ── Nav ── */}
+      <nav
+        style={{ flex: 1, padding: isCollapsed ? '12px 8px' : '12px 10px', overflowY: 'auto' }}
+        className="hide-scrollbar"
+      >
         {NAV_ITEMS.map((item, i) => {
           if (item.section) {
-            if (isCollapsed) return null;
+            if (isCollapsed) return (
+              <div key={i} style={{ height: '1px', background: 'var(--border)', margin: '10px 4px' }} />
+            );
             return (
               <div key={i} style={{
-                fontSize: '0.65rem', fontWeight: 800, letterSpacing: '1.4px',
-                textTransform: 'uppercase', color: 'var(--text-dark)', opacity: 0.6,
-                padding: '20px 12px 8px', fontFamily: 'var(--sans)'
+                fontSize: '0.6rem', fontWeight: 800, letterSpacing: '1.5px',
+                textTransform: 'uppercase', color: 'var(--text-muted)',
+                padding: '16px 8px 6px', fontFamily: 'var(--sans)',
+                userSelect: 'none',
               }}>
                 {item.section}
               </div>
@@ -189,7 +177,6 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
           return (
             <Link
               key={i}
-              id={item.id}
               to={item.to}
               title={isCollapsed ? item.label : undefined}
               onClick={(e) => {
@@ -203,45 +190,47 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '14px',
-                padding: isCollapsed ? '12px 0' : '12px 16px',
-                marginBottom: '6px',
-                borderRadius: isCollapsed ? 0 : '12px',
+                gap: '10px',
+                padding: isCollapsed ? '10px' : '9px 10px',
+                marginBottom: '2px',
+                borderRadius: '10px',
                 justifyContent: isCollapsed ? 'center' : 'flex-start',
-                background: active
-                  ? 'rgba(201, 149, 42, 0.14)'
-                  : 'transparent',
-                color: active ? '#C9952A' : 'var(--text-dark)',
+                background: active ? 'var(--primary-50)' : 'transparent',
+                color: active ? 'var(--primary)' : 'var(--text-body)',
                 textDecoration: 'none',
-                fontWeight: active ? 800 : 600,
-                fontSize: '0.84rem',
+                fontWeight: active ? 700 : 500,
+                fontSize: '0.835rem',
                 fontFamily: 'var(--sans)',
-                transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)',
-                borderLeft: active ? '3px solid #C9952A' : '3px solid transparent',
-                boxShadow: active && !isCollapsed ? '0 4px 20px rgba(201, 149, 42, 0.15)' : 'none'
+                transition: 'all 0.15s ease',
+                position: 'relative',
               }}
               onMouseEnter={e => {
                 if (!active) {
                   e.currentTarget.style.background = 'var(--primary-50)';
                   e.currentTarget.style.color = 'var(--text-dark)';
-                  if (isCollapsed) e.currentTarget.style.borderLeft = '3px solid rgba(201, 149, 42, 0.5)';
                 }
               }}
               onMouseLeave={e => {
                 if (!active) {
                   e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.color = 'var(--text-dark)';
-                  if (isCollapsed) e.currentTarget.style.borderLeft = '3px solid transparent';
+                  e.currentTarget.style.color = 'var(--text-body)';
                 }
               }}
             >
-              <Icon size={isCollapsed ? 22 : 18} style={{ flexShrink: 0, opacity: active ? 1 : 0.8, color: active ? '#C9952A' : 'currentColor' }} />
-              {!isCollapsed && <span>{item.label}</span>}
+              <Icon
+                size={16}
+                style={{
+                  flexShrink: 0,
+                  color: active ? 'var(--primary)' : 'var(--text-muted)',
+                  transition: 'color 0.15s',
+                }}
+              />
+              {!isCollapsed && <span style={{ flex: 1 }}>{item.label}</span>}
+              {/* Active dot */}
               {!isCollapsed && active && (
                 <div style={{
-                  marginLeft: 'auto', width: '6px', height: '6px',
-                  borderRadius: '50%', background: '#C9952A',
-                  boxShadow: '0 0 10px #C9952A'
+                  width: '5px', height: '5px', borderRadius: '50%',
+                  background: 'var(--primary)', flexShrink: 0,
                 }} />
               )}
             </Link>
@@ -249,93 +238,100 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
         })}
       </nav>
 
-      {/* ── User Profile Footer ── */}
+      {/* ── Footer ── */}
       <div style={{
         borderTop: '1px solid var(--border)',
-        padding: isCollapsed ? '20px 0' : '20px',
+        padding: isCollapsed ? '12px 8px' : '12px',
         flexShrink: 0,
-        background: 'transparent',
       }}>
         {!isCollapsed ? (
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-              <button 
-                onClick={toggleTheme}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '8px',
-                  background: 'var(--primary-50)', 
-                  border: '1px solid var(--border-strong)',
-                  color: '#C9952A', fontSize: '0.72rem', fontWeight: 600,
-                  padding: '10px 14px', borderRadius: '10px', cursor: 'pointer',
-                  width: '100%', justifyContent: 'center',
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(201, 149, 42, 0.15)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'var(--primary-50)'; e.currentTarget.style.transform = 'translateY(0)'; }}
-              >
-                {isDark ? <Sun size={15} /> : <Moon size={15} />}
-                <span>{isDark ? 'Switch to Light' : 'Switch to Dark'}</span>
-              </button>
-            </div>
-            <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none', marginBottom: '14px', padding: '6px', borderRadius: '12px', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--primary-50)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+          <>
+            {/* Theme toggle */}
+            <button
+              onClick={toggleTheme}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '8px',
+                background: 'var(--primary-50)',
+                border: '1px solid var(--border)',
+                color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600,
+                padding: '8px 14px', borderRadius: '10px', cursor: 'pointer',
+                width: '100%', justifyContent: 'center',
+                transition: 'all 0.2s', marginBottom: '10px',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'var(--primary-100)'; e.currentTarget.style.color = 'var(--primary)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'var(--primary-50)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
+            >
+              {isDark ? <Sun size={14} /> : <Moon size={14} />}
+              <span>{isDark ? 'Switch to Light' : 'Switch to Dark'}</span>
+            </button>
+
+            {/* User row */}
+            <Link
+              to="/profile"
+              style={{
+                display: 'flex', alignItems: 'center', gap: '10px',
+                textDecoration: 'none', padding: '8px', borderRadius: '10px',
+                transition: 'background 0.15s', marginBottom: '4px',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = 'var(--primary-50)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            >
               <div style={{
-                width: '42px', height: '42px', borderRadius: '50%',
-                background: 'var(--gold-grad)',
+                width: '34px', height: '34px', borderRadius: '50%',
+                background: 'var(--primary)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#2A1A2E', fontWeight: 800, fontSize: '1rem',
+                color: '#FFFFFF', fontWeight: 800, fontSize: '0.85rem',
                 flexShrink: 0,
-                boxShadow: '0 4px 12px rgba(201, 149, 42, 0.3)'
               }}>
                 {(user?.first_name || user?.name || 'U').charAt(0).toUpperCase()}
               </div>
-              <div style={{ overflow: 'hidden' }}>
-                <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-dark)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontFamily: 'var(--sans)' }}>
+              <div style={{ overflow: 'hidden', flex: 1 }}>
+                <div style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-dark)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {user?.first_name || user?.name || 'User'}
                 </div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-body)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '2px' }}>
-                  {user?.email || 'user@iirshad.com'}
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '1px' }}>
+                  {user?.email || ''}
                 </div>
               </div>
             </Link>
+
+            {/* Logout */}
             <button
               onClick={handleLogout}
               style={{
                 display: 'flex', alignItems: 'center', gap: '8px',
-                width: '100%', padding: '10px', borderRadius: '10px',
+                width: '100%', padding: '8px 10px', borderRadius: '10px',
                 background: 'none', border: 'none',
-                color: 'var(--text-body)', fontSize: '0.75rem', fontWeight: 600,
-                cursor: 'pointer', transition: 'all 0.2s', justifyContent: 'center'
+                color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600,
+                cursor: 'pointer', transition: 'all 0.2s', justifyContent: 'center',
               }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.12)'; e.currentTarget.style.color = '#EF4444'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--text-body)'; }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.08)'; e.currentTarget.style.color = '#EF4444'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--text-muted)'; }}
             >
-              <LogOut size={16} /> Log Out
+              <LogOut size={14} /> Log Out
             </button>
-          </div>
+          </>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-            <button 
-                onClick={toggleTheme}
-                title={isDark ? "Light Mode" : "Dark Mode"}
-                style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: 'var(--primary-50)', 
-                  border: '1px solid var(--border-strong)',
-                  color: '#C9952A', width: '42px', height: '42px',
-                  borderRadius: '12px', cursor: 'pointer',
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
-                }}
-              >
-                {isDark ? <Sun size={18} /> : <Moon size={18} />}
+          /* Collapsed footer */
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+            <button
+              onClick={toggleTheme}
+              title={isDark ? 'Light Mode' : 'Dark Mode'}
+              style={{
+                width: '38px', height: '38px', borderRadius: '10px',
+                background: 'var(--primary-50)', border: '1px solid var(--border)',
+                color: 'var(--text-muted)', display: 'flex', alignItems: 'center',
+                justifyContent: 'center', cursor: 'pointer',
+              }}
+            >
+              {isDark ? <Sun size={16} /> : <Moon size={16} />}
             </button>
             <Link to="/profile" title="Profile" style={{ textDecoration: 'none' }}>
               <div style={{
-                width: '42px', height: '42px', borderRadius: '12px',
-                background: 'var(--gold-grad)',
+                width: '38px', height: '38px', borderRadius: '50%',
+                background: 'var(--primary)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#2A1A2E', fontWeight: 800, fontSize: '1rem',
-                boxShadow: '0 4px 12px rgba(201, 149, 42, 0.3)'
+                color: '#FFFFFF', fontWeight: 800, fontSize: '0.9rem',
               }}>
                 {(user?.first_name || user?.name || 'U').charAt(0).toUpperCase()}
               </div>
@@ -343,17 +339,16 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
             <button
               onClick={handleLogout}
               title="Log Out"
-              aria-label="Log Out"
               style={{
-                width: '42px', height: '42px', borderRadius: '12px',
+                width: '38px', height: '38px', borderRadius: '10px',
                 background: 'none', border: 'none',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'var(--text-body)', cursor: 'pointer',
+                color: 'var(--text-muted)', cursor: 'pointer', transition: 'all 0.2s',
               }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.12)'; e.currentTarget.style.color = '#EF4444'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--text-body)'; }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.08)'; e.currentTarget.style.color = '#EF4444'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--text-muted)'; }}
             >
-              <LogOut size={18} />
+              <LogOut size={16} />
             </button>
           </div>
         )}

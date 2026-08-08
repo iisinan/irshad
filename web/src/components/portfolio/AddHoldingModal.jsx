@@ -21,8 +21,8 @@ function ZakatDatePrompt({ purchaseDate, onYes, onNo }) {
     <div className="zakat-prompt-overlay animate-fade-in" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200000, padding: '24px' }}>
       <div className="zakat-prompt-box" style={{ background: 'var(--bg)', borderRadius: '24px', width: '100%', maxWidth: '440px', boxShadow: '0 32px 80px rgba(0,0,0,0.2)', overflow: 'hidden', animation: 'slideUpFade 0.35s cubic-bezier(0.16,1,0.3,1)' }}>
         {/* Icon Header */}
-        <div style={{ background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, #3C2D3E 100%)', padding: '32px 28px 24px', textAlign: 'center', borderBottom: '1px solid rgba(201, 149, 42, 0.15)' }}>
-          <div style={{ width: '60px', height: '60px', borderRadius: '18px', background: 'rgba(201, 149, 42, 0.12)', border: '1px solid rgba(201, 149, 42, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: 'var(--primary)' }}>
+        <div style={{ background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, var(--text-dark) 100%)', padding: '32px 28px 24px', textAlign: 'center', borderBottom: '1px solid rgba(209, 165, 98, 0.15)' }}>
+          <div style={{ width: '60px', height: '60px', borderRadius: '18px', background: 'rgba(209, 165, 98, 0.12)', border: '1px solid rgba(209, 165, 98, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: 'var(--primary)' }}>
             <Calendar size={28} />
           </div>
           <h3 style={{ color: 'white', fontWeight: 900, fontSize: '1.1rem', margin: '0 0 6px', letterSpacing: '-0.3px' }}>Set Your Zakat Date?</h3>
@@ -38,7 +38,7 @@ function ZakatDatePrompt({ purchaseDate, onYes, onNo }) {
           </p>
 
           <div style={{ background: 'var(--bg-section)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '24px' }}>
-            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(201, 149, 42, 0.1)', border: '1px solid rgba(201, 149, 42, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(209, 165, 98, 0.1)', border: '1px solid rgba(209, 165, 98, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <Bell size={18} color="var(--primary)" />
             </div>
             <div>
@@ -59,7 +59,7 @@ function ZakatDatePrompt({ purchaseDate, onYes, onNo }) {
             </button>
             <button
               onClick={onYes}
-              style={{ flex: 2, padding: '14px', borderRadius: '12px', background: 'var(--primary)', border: 'none', color: 'var(--primary-text, #2A1A2E)', fontWeight: 800, fontSize: '0.84rem', cursor: 'pointer', boxShadow: '0 8px 20px rgba(201, 149, 42, 0.25)', transition: 'all 0.2s' }}
+              style={{ flex: 2, padding: '14px', borderRadius: '12px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.84rem', cursor: 'pointer', boxShadow: '0 8px 20px rgba(209, 165, 98, 0.25)', transition: 'all 0.2s' }}
               onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
               onMouseLeave={e => e.currentTarget.style.transform = 'none'}
             >
@@ -107,10 +107,10 @@ function ZakatConfirmation({ purchaseDate, onDone }) {
                 {new Date(purchaseDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
               </div>
             </div>
-            <div style={{ background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)', borderRadius: '14px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <Bell size={20} color="#d4af37" />
+            <div style={{ background: 'rgba(209, 165, 98,0.08)', border: '1px solid rgba(209, 165, 98,0.2)', borderRadius: '14px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <Bell size={20} color="var(--gold)" />
               <div>
-                <div style={{ fontSize: '0.63rem', fontWeight: 800, color: '#b89326', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '4px' }}>Zakat Due Date</div>
+                <div style={{ fontSize: '0.63rem', fontWeight: 800, color: 'var(--gold)', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '4px' }}>Zakat Due Date</div>
                 <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-dark)' }}>{zakatDueDate}</div>
               </div>
             </div>
@@ -505,7 +505,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
               </form>
             ) : tab === 'broker' ? (
               <div style={{ padding: '0', display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-                <div style={{ padding: '40px 32px 32px', textAlign: 'center', background: '#FAFAFA' }}>
+                <div style={{ padding: '40px 32px 32px', textAlign: 'center', background: 'var(--bg)' }}>
                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 16px', background: 'var(--halal-bg)', color: 'var(--halal)', borderRadius: '24px', fontSize: '0.75rem', fontWeight: 800, marginBottom: '24px' }}><ShieldCheck size={16} /> End-to-End Encrypted</div>
                   <h4 style={{ fontSize: '1.41rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 16px', letterSpacing: '-0.5px' }}>Link your Broker</h4>
                   <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: '0 auto', lineHeight: 1.6, maxWidth: '320px' }}>Connect your brokerage account to Irshad to seamlessly track your Shariah-compliant investments.</p>
@@ -515,7 +515,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
                   <p style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '20px' }}>Select an Institution</p>
                   <div className="broker-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                     {['Meristem', 'Stanbic IBTC', 'CSCS', 'Risevest'].map((broker) => (
-                      <div key={broker} onClick={() => setBrokerName(broker)} className="broker-card" style={{ padding: '24px', borderRadius: '16px', border: brokerName === broker ? '2px solid var(--primary)' : '2px solid var(--border)', background: brokerName === broker ? 'var(--primary-50)' : 'var(--bg)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', transition: 'all 0.2s', boxShadow: brokerName === broker ? '0 8px 24px rgba(201, 149, 42, 0.15)' : 'none' }}>
+                      <div key={broker} onClick={() => setBrokerName(broker)} className="broker-card" style={{ padding: '24px', borderRadius: '16px', border: brokerName === broker ? '2px solid var(--primary)' : '2px solid var(--border)', background: brokerName === broker ? 'var(--primary-50)' : 'var(--bg)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', transition: 'all 0.2s', boxShadow: brokerName === broker ? '0 8px 24px rgba(209, 165, 98, 0.15)' : 'none' }}>
                         <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: brokerName === broker ? 'var(--bg)' : 'var(--bg-section)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.23rem', fontWeight: 800, color: 'var(--text-dark)' }}>{broker.charAt(0)}</div>
                         <span style={{ fontSize: '0.84rem', fontWeight: 800, color: 'var(--text-dark)', textAlign: 'center' }}>{broker}</span>
                       </div>
@@ -523,14 +523,14 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
                   </div>
                 </div>
                 <div className="modal-footer" style={{ padding: '24px 32px', borderTop: '1px solid var(--border)', background: 'var(--bg)' }}>
-                  <button type="button" onClick={handleLinkBroker} disabled={linking || !brokerName} style={{ width: '100%', padding: '16px', borderRadius: '16px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.88rem', cursor: (linking || !brokerName) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 8px 24px rgba(118,88,122,0.25)', opacity: (linking || !brokerName) ? 0.7 : 1, transition: 'all 0.2s' }}>
+                  <button type="button" onClick={handleLinkBroker} disabled={linking || !brokerName} style={{ width: '100%', padding: '16px', borderRadius: '16px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.88rem', cursor: (linking || !brokerName) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 8px 24px rgba(91, 41, 113,0.25)', opacity: (linking || !brokerName) ? 0.7 : 1, transition: 'all 0.2s' }}>
                     {linking ? <div className="spinner" style={{ width: '20px', height: '20px', borderTopColor: 'white' }} /> : 'Continue'}
                   </button>
                 </div>
               </div>
             ) : (
               <div style={{ padding: '0', display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-                <div style={{ padding: '40px 32px 32px', textAlign: 'center', background: '#FAFAFA' }}>
+                <div style={{ padding: '40px 32px 32px', textAlign: 'center', background: 'var(--bg)' }}>
                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 16px', background: 'var(--primary-50)', color: 'var(--primary)', borderRadius: '24px', fontSize: '0.75rem', fontWeight: 800, marginBottom: '24px' }}><FileText size={16} /> Bulk Import</div>
                   <h4 style={{ fontSize: '1.41rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 16px', letterSpacing: '-0.5px' }}>Upload Statement</h4>
                   <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: '0 auto', lineHeight: 1.6, maxWidth: '320px' }}>Upload your trade log or portfolio statement (PDF/CSV) to automatically extract your holdings.</p>

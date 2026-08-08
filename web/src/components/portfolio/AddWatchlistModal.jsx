@@ -98,7 +98,7 @@ export default function AddWatchlistModal({ onClose, onAdded, allStocks, watchli
         }
       `}</style>
       <div className="modal-overlay animate-fade-in" style={{ position: 'fixed', inset: 0, background: 'rgba(6, 9, 14, 0.65)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999, padding: '24px' }}>
-        <div className="modal-box" style={{ background: 'var(--bg)', borderRadius: '28px', width: '100%', maxWidth: '640px', boxShadow: '0 32px 80px rgba(0,0,0,0.35), 0 0 0 1px rgba(201, 149, 42, 0.15) inset', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '85vh', animation: 'slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+        <div className="modal-box" style={{ background: 'var(--bg)', borderRadius: '28px', width: '100%', maxWidth: '640px', boxShadow: '0 32px 80px rgba(0,0,0,0.35), 0 0 0 1px rgba(209, 165, 98, 0.15) inset', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '85vh', animation: 'slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>
           
           {/* Header */}
           <div className="modal-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px 32px', borderBottom: '1px solid var(--border)' }}>
@@ -121,7 +121,7 @@ export default function AddWatchlistModal({ onClose, onAdded, allStocks, watchli
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{ width: '100%', padding: '16px 16px 16px 48px', borderRadius: '16px', border: '2px solid transparent', fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-dark)', outline: 'none', background: 'var(--bg)', transition: 'all 0.2s', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}
-                onFocus={e => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 8px 24px rgba(201, 149, 42, 0.15)'; }}
+                onFocus={e => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 8px 24px rgba(209, 165, 98, 0.15)'; }}
                 onBlur={e => { e.target.style.borderColor = 'transparent'; e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.02)'; }}
               />
             </div>
@@ -147,7 +147,7 @@ export default function AddWatchlistModal({ onClose, onAdded, allStocks, watchli
                       background: isSelected ? 'var(--primary-10)' : 'var(--bg)', 
                       border: isSelected ? '2px solid var(--primary)' : '2px solid var(--border)', 
                       borderRadius: '16px', cursor: 'pointer', transition: 'all 0.2s',
-                      boxShadow: isSelected ? '0 8px 24px rgba(201, 149, 42, 0.12)' : '0 2px 8px rgba(0,0,0,0.02)'
+                      boxShadow: isSelected ? '0 8px 24px rgba(209, 165, 98, 0.12)' : '0 2px 8px rgba(0,0,0,0.02)'
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -161,7 +161,7 @@ export default function AddWatchlistModal({ onClose, onAdded, allStocks, watchli
                     </div>
 
                     <div style={{ width: '24px', height: '24px', borderRadius: '6px', border: isSelected ? 'none' : '2px solid var(--text-light)', background: isSelected ? 'var(--primary)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
-                      {isSelected && <CheckCircle2 size={16} color="var(--primary-text, #2A1A2E)" />}
+                      {isSelected && <CheckCircle2 size={16} color="white" />}
                     </div>
                   </div>
                 );
@@ -179,12 +179,12 @@ export default function AddWatchlistModal({ onClose, onAdded, allStocks, watchli
             onClick={handleSubmit}
             disabled={selectedSymbols.length === 0 || isAdding}
             style={{ 
-              padding: '16px 32px', borderRadius: '16px', background: 'var(--primary)', border: 'none', color: 'var(--primary-text, #2A1A2E)', fontWeight: 800, fontSize: '0.88rem', 
+              padding: '16px 32px', borderRadius: '16px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.88rem', 
               cursor: selectedSymbols.length === 0 || isAdding ? 'not-allowed' : 'pointer', 
-              display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 8px 24px rgba(201, 149, 42, 0.25)', opacity: selectedSymbols.length === 0 || isAdding ? 0.7 : 1, transition: 'all 0.2s'
+              display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 8px 24px rgba(209, 165, 98, 0.25)', opacity: selectedSymbols.length === 0 || isAdding ? 0.7 : 1, transition: 'all 0.2s'
             }}
           >
-            {isAdding ? <div className="spinner" style={{ width: '20px', height: '20px', borderTopColor: 'var(--primary-text, #2A1A2E)' }} /> : 'Add to Watchlist'}
+            {isAdding ? <div className="spinner" style={{ width: '20px', height: '20px', borderTopColor: 'white' }} /> : 'Add to Watchlist'}
           </button>
         </div>
       </div>

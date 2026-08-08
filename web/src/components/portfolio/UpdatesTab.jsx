@@ -65,10 +65,10 @@ export default function UpdatesTab() {
                 padding: '16px 18px',
                 borderRadius: '16px',
                 background: isActive 
-                  ? 'linear-gradient(135deg, rgba(118,88,122,0.08) 0%, rgba(212,160,23,0.05) 100%)'
+                  ? 'linear-gradient(135deg, rgba(91, 41, 113,0.08) 0%, rgba(209, 165, 98,0.05) 100%)'
                   : 'var(--bg-section)',
                 border: isActive 
-                  ? '1px solid rgba(212,160,23,0.3)' 
+                  ? '1px solid rgba(209, 165, 98,0.3)' 
                   : '1px solid var(--border)',
                 color: isActive ? 'var(--primary)' : 'var(--text-muted)',
                 fontWeight: isActive ? 800 : 600,
@@ -77,7 +77,7 @@ export default function UpdatesTab() {
                 cursor: 'pointer',
                 transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
                 textAlign: 'left',
-                boxShadow: isActive ? '0 8px 24px rgba(118,88,122,0.12)' : 'none',
+                boxShadow: isActive ? '0 8px 24px rgba(91, 41, 113,0.12)' : 'none',
                 position: 'relative',
                 overflow: 'hidden',
                 transform: isActive ? 'translateY(-2px)' : 'translateY(0)',

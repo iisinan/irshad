@@ -77,7 +77,7 @@ const TermsPage = () => {
               <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: 1.75, marginBottom: '12px' }}>
                 Irshad is an Islamic financial technology information service. We extract public corporate disclosures from Nigerian Exchange (NGX) listed companies and apply computational screening logic in accordance with Accounting and Auditing Organization for Islamic Financial Institutions (AAOIFI) Shariah Standard No. 21.
               </p>
-              <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '12px', padding: '16px', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+              <div style={{ background: 'var(--doubtful-bg)', border: '1px solid var(--doubtful-border)', borderRadius: '12px', padding: '16px', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
                 <AlertTriangle size={20} color="#d97706" style={{ flexShrink: 0, marginTop: '2px' }} />
                 <div style={{ fontSize: '0.82rem', color: '#92400e', lineHeight: 1.6 }}>
                   <strong>Important Regulatory Disclaimer:</strong> Irshad does NOT offer investment recommendations, portfolio management, stock broking, or personalized financial advice. You are solely responsible for evaluating the risks and merits associated with the use of any information provided.

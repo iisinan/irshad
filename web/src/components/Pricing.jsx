@@ -107,10 +107,10 @@ const Pricing = () => {
               
               <div style={{ 
                 position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)', 
-                background: 'var(--gold-grad, linear-gradient(135deg, #d4af37 0%, #b89326 100%))',
+                background: 'var(--gold-grad, linear-gradient(135deg, var(--gold) 0%, var(--gold) 100%))',
                 color: '#0F172A', padding: '6px 20px', borderRadius: '20px', 
                 fontSize: '0.72rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '6px', letterSpacing: '1px', textTransform: 'uppercase',
-                boxShadow: '0 4px 16px rgba(212,175,55,0.4)'
+                boxShadow: '0 4px 16px rgba(209, 165, 98,0.4)'
               }}>
                 <Star size={14} fill="currentColor" /> Recommended
               </div>
@@ -134,7 +134,7 @@ const Pricing = () => {
                   'One-Click PDF/CSV Audit Reports'
                 ].map((feature, i) => (
                   <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', color: 'rgba(255,255,255,0.92)', fontWeight: 600, fontSize: '0.88rem' }}>
-                    <CheckCircle2 size={18} color="var(--gold, #d4af37)" style={{ flexShrink: 0 }} /> {feature}
+                    <CheckCircle2 size={18} color="var(--gold, var(--gold))" style={{ flexShrink: 0 }} /> {feature}
                   </li>
                 ))}
               </ul>
@@ -144,10 +144,10 @@ const Pricing = () => {
                 disabled={loading}
                 style={{ 
                   width: '100%', padding: '16px', borderRadius: '14px',
-                  background: 'var(--gold-grad, linear-gradient(135deg, #d4af37 0%, #b89326 100%))', 
+                  background: 'var(--gold-grad, linear-gradient(135deg, var(--gold) 0%, var(--gold) 100%))', 
                   border: 'none', color: '#0F172A', fontWeight: 900, fontSize: '0.92rem', cursor: loading ? 'not-allowed' : 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', opacity: loading ? 0.7 : 1,
-                  boxShadow: '0 8px 24px rgba(212, 175, 55, 0.35)', transition: 'all 0.2s', position: 'relative', zIndex: 1
+                  boxShadow: '0 8px 24px rgba(209, 165, 98, 0.35)', transition: 'all 0.2s', position: 'relative', zIndex: 1
                 }}
                 className="hover-lift"
               >

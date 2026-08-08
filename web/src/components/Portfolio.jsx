@@ -4,7 +4,7 @@ import { fetchPortfolio, removeHolding } from '../services/api';
 import { toastError, toastSuccess } from '../utils/toast';
 import { useAuth } from '../context/AuthContext';
 import localforage from 'localforage';
-import { Search, BarChart2, Star, Calculator, ShieldCheck, BookOpen, Briefcase, Activity, FileText, Rss } from 'lucide-react';
+import { Search, BarChart2, Star, Calculator, ShieldCheck, BookOpen, Briefcase, Activity, FileText, Rss, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
 import PortfolioTab from './portfolio/PortfolioTab';
@@ -163,7 +163,7 @@ export default function Portfolio() {
   const summary = data?.summary || {};
   const totalBalance = summary.total_balance || 0;
   
-  const PIE_COLORS = ['#C9952A', '#E5B53B', '#C69220', '#6366F1', '#3B82F6', '#10B981'];
+  const PIE_COLORS = ['var(--primary)', '#7A3B91', '#8A5C9B', '#4A215D', '#A07891', '#C6A9CE'];
   const pieData = (holdings || []).slice(0,6).map((h,i) => ({
     name: h.symbol, value: h.total_value || 0, color: PIE_COLORS[i % PIE_COLORS.length],
   }));
@@ -222,12 +222,12 @@ export default function Portfolio() {
               padding: '12px 22px', borderRadius: '14px',
               background: 'var(--primary)', color: 'white', border: 'none',
               fontWeight: 800, fontSize: '0.79rem', cursor: 'pointer',
-              boxShadow: '0 8px 24px rgba(201, 149, 42, 0.25)',
+              boxShadow: 'var(--shadow-sm)',
               transition: 'transform 0.2s, box-shadow 0.2s',
               flexShrink: 0,
             }}
-            onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 14px 32px rgba(201, 149, 42, 0.35)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='0 8px 24px rgba(201, 149, 42, 0.25)'; }}
+            onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 14px 32px rgba(91, 41, 113, 0.35)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='var(--shadow-sm)'; }}
           >
             <Search size={15} style={{ display: 'none' }} /> <span style={{ fontSize: '0.97rem', lineHeight: 1 }}>+</span> Add Holding
           </button>
@@ -303,13 +303,10 @@ export default function Portfolio() {
           <div style={{ background: 'var(--bg)', border:'1px solid var(--border)', borderRadius:'24px', padding:'26px', boxShadow:'var(--shadow-sm)', transition:'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', position:'relative', overflow:'hidden' }}
             onMouseEnter={e => { e.currentTarget.style.boxShadow='var(--shadow-md)'; e.currentTarget.style.transform='translateY(-2px)'; }}
             onMouseLeave={e => { e.currentTarget.style.boxShadow='var(--shadow-sm)'; e.currentTarget.style.transform='none'; }}>
-            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'20px', position:'relative', zIndex:1 }}>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'10px', position:'relative', zIndex:1 }}>
               <h3 style={{ fontSize: '0.88rem', fontWeight:800, color:'var(--text-dark)', display:'flex', alignItems:'center', gap:'8px' }}>
                 <div style={{ width:'10px', height:'10px', borderRadius:'50%', background:'var(--primary)' }}/> Allocation
               </h3>
-              {holdings.length > 0 && (
-                <span style={{ fontSize: '0.66rem', fontWeight:800, color:'var(--text-muted)' }}>{fmtK(totalBalance)}</span>
-              )}
             </div>
             {holdings.length === 0 ? (
               <div style={{ height:'180px', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', color:'var(--text-muted)', fontSize: '0.79rem', fontWeight:600, background:'linear-gradient(180deg, var(--bg-section) 0%, #ffffff 100%)', borderRadius:'16px', border:'1.5px dashed var(--border)' }}>
@@ -318,28 +315,32 @@ export default function Portfolio() {
               </div>
             ) : (
               <>
-                <div style={{ height:'160px', position:'relative' }}>
+                <div style={{ height:'200px', position:'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ position: 'absolute', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>Total</span>
+                    <span style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text-dark)' }}>{fmtK(totalBalance)}</span>
+                  </div>
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
-                      <Pie data={pieData} dataKey="value" cx="50%" cy="50%" innerRadius={48} outerRadius={72} paddingAngle={3}>
-                        {pieData.map((entry,i) => <Cell key={i} fill={entry.color}/>)}
+                      <Pie data={pieData.filter(d => d.value > 0).length > 0 ? pieData.filter(d => d.value > 0) : [{name: 'Empty', value: 1, color: 'var(--border)'}]} dataKey="value" cx="50%" cy="50%" innerRadius={70} outerRadius={90} paddingAngle={4} cornerRadius={6} stroke="none">
+                        {(pieData.filter(d => d.value > 0).length > 0 ? pieData.filter(d => d.value > 0) : [{name: 'Empty', value: 1, color: 'var(--border)'}]).map((entry,i) => <Cell key={i} fill={entry.color} style={{ filter: 'drop-shadow(0px 4px 6px rgba(0,0,0,0.06))' }}/>)}
                       </Pie>
-                      <Tooltip formatter={(v) => [fmtK(v),'Value']} contentStyle={{ borderRadius:'10px', border:'1px solid var(--border)', fontSize: '0.69rem', fontWeight:700 }}/>
+                      <Tooltip formatter={(v) => [fmtK(v),'Value']} contentStyle={{ borderRadius:'12px', border:'1px solid var(--border)', fontSize: '0.75rem', fontWeight:800, boxShadow: 'var(--shadow-md)', padding: '8px 12px' }}/>
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
-                <div style={{ display:'flex', flexDirection:'column', gap:'7px', marginTop:'18px' }}>
+                <div style={{ display:'flex', flexDirection:'column', gap:'8px', marginTop:'16px' }}>
                   {pieData.map((d,i) => (
-                    <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-                      <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-                        <div style={{ width:'10px', height:'10px', borderRadius:'3px', background:d.color, flexShrink:0 }}/>
-                        <span style={{ fontSize: '0.7rem', fontWeight:700, color:'var(--text-dark)' }}>{d.name}</span>
+                    <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding: '6px 0', borderBottom: i !== pieData.length - 1 ? '1px solid var(--border-light)' : 'none' }}>
+                      <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+                        <div style={{ width:'12px', height:'12px', borderRadius:'4px', background:d.color, flexShrink:0 }}/>
+                        <span style={{ fontSize: '0.75rem', fontWeight:700, color:'var(--text-dark)' }}>{d.name}</span>
                       </div>
-                      <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-                        <div style={{ width:'50px', height:'4px', borderRadius:'2px', background:'var(--bg-section)', overflow:'hidden' }}>
-                          <div style={{ width:`${totalBalance > 0 ? ((d.value / totalBalance)*100) : 0}%`, height:'100%', background:d.color, borderRadius:'2px' }}/>
+                      <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+                        <div style={{ width:'50px', height:'6px', borderRadius:'3px', background:'var(--bg-section)', overflow:'hidden' }}>
+                          <div style={{ width:`${totalBalance > 0 ? ((d.value / totalBalance)*100) : 0}%`, height:'100%', background:d.color, borderRadius:'3px' }}/>
                         </div>
-                        <span style={{ fontSize: '0.69rem', fontWeight:800, color:'var(--text-muted)', minWidth:'32px', textAlign:'right' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight:800, color:'var(--text-muted)', minWidth:'36px', textAlign:'right' }}>
                           {totalBalance > 0 ? `${((d.value / totalBalance)*100).toFixed(0)}%` : '—'}
                         </span>
                       </div>
@@ -360,29 +361,39 @@ export default function Portfolio() {
             
 
 
-            <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
+            <div style={{ display:'flex', flexDirection:'column', gap:'12px' }}>
               {[
-                { label: 'Halal Holdings',   value: halalCount,    color: 'var(--halal)',     bg: 'var(--halal-bg)',     border: 'var(--halal-border)',     action: () => { setActiveFilter('halal'); handleTabChange('holdings'); } },
-                { label: 'Non-Halal',        value: nonHalalCount, color: 'var(--non-halal)', bg: 'var(--non-halal-bg)', border: 'var(--non-halal-border)', action: () => { setActiveFilter('nonhalal'); handleTabChange('holdings'); } },
-                { label: 'Need Purification',value: needsPurif,    color: 'var(--doubtful)',  bg: 'var(--doubtful-bg)',  border: 'var(--doubtful-border)',  action: () => { setActiveFilter('purify'); handleTabChange('holdings'); } },
+                { label: 'Halal Holdings',   value: halalCount,    icon: ShieldCheck,   color: 'var(--halal)',     bg: 'rgba(34,197,94,0.06)', action: () => { setActiveFilter('halal'); handleTabChange('holdings'); } },
+                { label: 'Non-Halal',        value: nonHalalCount, icon: XCircle,       color: 'var(--non-halal)', bg: 'rgba(239,68,68,0.06)', action: () => { setActiveFilter('nonhalal'); handleTabChange('holdings'); } },
+                { label: 'Need Purification',value: needsPurif,    icon: AlertTriangle, color: 'var(--doubtful)',  bg: 'rgba(234,179,8,0.06)', action: () => { setActiveFilter('purify'); handleTabChange('holdings'); } },
               ].map(row => (
                 <div 
                   key={row.label} 
                   onClick={row.action}
-                  style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 14px', borderRadius:'12px', background:row.bg, border:`1px solid ${row.border}`, cursor:'pointer', transition:'all 0.2s' }}
-                  onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
-                  onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                  style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'14px 16px', borderRadius:'14px', background:row.bg, cursor:'pointer', transition:'all 0.2s', border: '1px solid transparent' }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = row.color; e.currentTarget.style.boxShadow = `0 4px 12px ${row.bg}`; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.boxShadow = 'none'; }}
                 >
-                  <span style={{ fontSize: '0.72rem', fontWeight:700, color:row.color }}>{row.label}</span>
-                  <span style={{ fontSize: '0.97rem', fontWeight:900, color:row.color }}>{row.value}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: row.color, boxShadow: 'var(--shadow-sm)' }}>
+                      <row.icon size={16} strokeWidth={2.5} />
+                    </div>
+                    <span style={{ fontSize: '0.8rem', fontWeight:700, color:'var(--text-dark)' }}>{row.label}</span>
+                  </div>
+                  <span style={{ fontSize: '1.05rem', fontWeight:900, color:row.color }}>{row.value}</span>
                 </div>
               ))}
             </div>
             
             {activeTab !== 'market' && (
-              <button onClick={() => handleTabChange('market')} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginTop:'14px', padding:'12px 14px', borderRadius:'12px', background:'var(--primary-50)', color:'var(--primary)', border:'1px solid var(--primary-100)', width:'100%', cursor:'pointer', transition:'all 0.2s' }}>
-                <span style={{ fontSize: '0.75rem', fontWeight:800 }}>Screen more stocks</span>
-                <BarChart2 size={14} />
+              <button 
+                onClick={() => handleTabChange('market')} 
+                style={{ display:'flex', alignItems:'center', justifyContent:'center', gap: '8px', marginTop:'16px', padding:'14px 16px', borderRadius:'14px', background:'var(--primary)', color:'#FFFFFF', border:'none', width:'100%', cursor:'pointer', transition:'all 0.2s', boxShadow: 'var(--shadow-sm)' }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(91, 41, 113, 0.25)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'var(--shadow-sm)'; }}
+              >
+                <span style={{ fontSize: '0.8rem', fontWeight:800 }}>Screen More Stocks</span>
+                <BarChart2 size={16} strokeWidth={2.5} />
               </button>
             )}
           </div>

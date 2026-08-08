@@ -3,10 +3,9 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import {
-  Activity,
-  HeartHandshake, BookOpen,
-  LogOut, ChevronLeft, ChevronRight,
-  X, Moon, Sun, LayoutDashboard, Shield, Users, ArrowLeft, Inbox
+  Activity, HeartHandshake, BookOpen,
+  LogOut, ChevronLeft, X, Moon, Sun,
+  LayoutDashboard, Shield, Users, ArrowLeft, Inbox
 } from 'lucide-react';
 
 export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
@@ -15,20 +14,19 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
   const { user, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
 
-    const ADMIN_NAV_ITEMS = [
+  const ADMIN_NAV_ITEMS = [
     { section: 'Admin' },
-    { label: 'Overview', icon: LayoutDashboard, to: '/admin' },
-    { label: 'Alerts & Stocks', icon: Activity, to: '/admin/alerts' },
-    { label: 'Compliance Reviews', icon: Shield, to: '/admin/compliance-reviews' },
-    { label: 'Registered Users', icon: Users, to: '/admin/users' },
-    { label: 'Resources', icon: BookOpen, to: '/admin/resources' },
-    { label: 'Financial Data Queue', icon: Inbox, to: '/admin/financial-queue' },
-    { label: 'Zakat Settings', icon: HeartHandshake, to: '/admin/zakat-settings' },
+    { label: 'Overview',            icon: LayoutDashboard, to: '/admin' },
+    { label: 'Alerts & Stocks',     icon: Activity,        to: '/admin/alerts' },
+    { label: 'Compliance Reviews',  icon: Shield,          to: '/admin/compliance-reviews' },
+    { label: 'Registered Users',    icon: Users,           to: '/admin/users' },
+    { label: 'Resources',           icon: BookOpen,        to: '/admin/resources' },
+    { label: 'Financial Data Queue',icon: Inbox,           to: '/admin/financial-queue' },
+    { label: 'Zakat Settings',      icon: HeartHandshake,  to: '/admin/zakat-settings' },
     { section: 'Exit' },
-    { label: 'Back to App', icon: ArrowLeft, to: '/portfolio' }
+    { label: 'Back to App',         icon: ArrowLeft,       to: '/portfolio' },
   ];
 
-  // On mobile, the drawer is ALWAYS fully expanded (text visible).
   const isCollapsed = collapsed && !mobileOpen;
 
   const isActive = (to) => {
@@ -36,155 +34,122 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
     const toPath = url.pathname;
     const toHash = url.hash;
     const toSearch = url.search;
-
     if (toPath === '/portfolio' || toPath === '/profile') {
       if (location.pathname !== toPath) return false;
       const currentHash = location.hash || (toPath === '/portfolio' ? '#holdings' : '');
       if (toHash) return currentHash === toHash;
       return currentHash === '';
     }
-
     if (location.pathname !== toPath) {
-      if (toPath === '/admin') return false; // Strict match for base /admin
+      if (toPath === '/admin') return false;
       return location.pathname.startsWith(toPath);
     }
-
-    if (toSearch) {
-      return location.search.includes(toSearch.replace('?', ''));
-    }
-
-    if (toPath === '/admin' && location.search.includes('tab=')) {
-      return false; // Don't highlight base admin if we're in a specific tab
-    }
-
+    if (toSearch) return location.search.includes(toSearch.replace('?', ''));
+    if (toPath === '/admin' && location.search.includes('tab=')) return false;
     return true;
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
+  const handleLogout = () => { logout(); navigate('/'); };
 
   return (
-    <aside aria-label="Dashboard Navigation" className={`dashboard-sidebar-container ${mobileOpen ? 'open' : ''}`} style={{
-      width: isCollapsed ? '80px' : '260px',
-      background: 'var(--bg-alt)',
-      borderRight: '1px solid var(--border)',
-      boxShadow: 'var(--shadow-lg)',
-      display: 'flex',
-      flexDirection: 'column',
-      transition: 'width 0.4s cubic-bezier(0.16,1,0.3,1), transform 0.4s cubic-bezier(0.16,1,0.3,1)',
-    }}>
-
-      {/* ── Brand ── */}
+    <aside
+      aria-label="Admin Navigation"
+      className={`dashboard-sidebar-container ${mobileOpen ? 'open' : ''}`}
+      style={{
+        width: isCollapsed ? '72px' : '248px',
+        minWidth: isCollapsed ? '72px' : '248px',
+        background: 'var(--bg)',
+        boxShadow: '2px 0 20px rgba(0,0,0,0.06)',
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'width 0.35s cubic-bezier(0.16,1,0.3,1), min-width 0.35s cubic-bezier(0.16,1,0.3,1)',
+        zIndex: 40,
+        overflow: 'hidden',
+      }}
+    >
+      {/* ── Brand header ── */}
       <div style={{
-        padding: isCollapsed ? '24px 0' : '24px',
+        padding: isCollapsed ? '18px 0' : '18px 16px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: isCollapsed ? 'center' : 'space-between',
         borderBottom: '1px solid var(--border)',
-        minHeight: '80px',
         flexShrink: 0,
+        minHeight: '68px',
       }}>
-        {!isCollapsed && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{
-              width: '40px', height: '40px', borderRadius: '12px',
-              background: 'var(--gold-grad)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontWeight: 900, fontSize: '0.95rem', color: '#2A1A2E',
-              flexShrink: 0,
-              boxShadow: '0 4px 14px rgba(201, 149, 42, 0.35)'
-            }}>إ</div>
-            <span style={{ 
-              fontWeight: 800, 
-              fontSize: '1.25rem', 
-              color: '#C9952A', 
-              letterSpacing: '-0.2px', 
-              fontFamily: 'var(--serif), var(--sans)',
-              textShadow: '0 2px 10px rgba(201, 149, 42, 0.2)'
-            }}>
-              Irshad
-            </span>
-          </div>
-        )}
-        {isCollapsed && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden' }}>
           <div style={{
-            width: '40px', height: '40px', borderRadius: '12px',
-            background: 'var(--gold-grad)',
+            width: '36px', height: '36px', borderRadius: '10px',
+            background: 'var(--primary)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: 900, fontSize: '0.95rem', color: '#2A1A2E',
-            boxShadow: '0 4px 14px rgba(201, 149, 42, 0.35)'
+            fontWeight: 900, fontSize: '0.9rem', color: '#FFFFFF',
+            flexShrink: 0,
           }}>إ</div>
-        )}
+          {!isCollapsed && (
+            <div>
+              <div style={{
+                fontWeight: 800, fontSize: '1.1rem', color: 'var(--text-dark)',
+                letterSpacing: '-0.3px', fontFamily: 'var(--sans)', lineHeight: 1.1,
+              }}>Irshad</div>
+              <div style={{
+                fontSize: '0.6rem', fontWeight: 700, letterSpacing: '1.2px',
+                textTransform: 'uppercase', color: 'var(--primary)',
+                fontFamily: 'var(--sans)',
+              }}>Admin</div>
+            </div>
+          )}
+        </div>
+
+        {/* Collapse toggle */}
         {!isCollapsed && (
           <button
             onClick={() => setCollapsed(true)}
+            className="desktop-only-btn"
             style={{
-              width: '32px', height: '32px', borderRadius: '10px',
-              background: 'var(--primary-50)', 
-              border: 'none',
-              display: 'none', 
-              alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', color: 'var(--text-body)',
-              flexShrink: 0,
-              transition: 'all 0.2s ease'
+              width: '28px', height: '28px', borderRadius: '8px',
+              background: 'var(--primary-50)', border: 'none',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', color: 'var(--text-muted)',
+              flexShrink: 0, transition: 'all 0.2s',
             }}
-            className="desktop-only-btn hover-bg-darker"
-            onMouseEnter={e => { e.currentTarget.style.background = 'var(--primary-100)'; e.currentTarget.style.color = '#FFFFFF'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'var(--primary-50)'; e.currentTarget.style.color = 'var(--text-body)'; }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'var(--primary-100)'; e.currentTarget.style.color = 'var(--primary)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'var(--primary-50)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
           >
-            <ChevronLeft size={16} />
+            <ChevronLeft size={14} />
           </button>
         )}
-        
-        {/* Mobile Close Button */}
+
+        {/* Mobile close */}
         <button
           onClick={() => setMobileOpen(false)}
+          className="mobile-only-btn"
           style={{
-            width: '32px', height: '32px', borderRadius: '10px',
+            width: '28px', height: '28px', borderRadius: '8px',
             background: 'var(--primary-50)', border: 'none',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', color: 'var(--text-dark)',
-            flexShrink: 0,
+            cursor: 'pointer', color: 'var(--text-muted)',
           }}
-          className="mobile-only-btn"
         >
-          <X size={18} />
+          <X size={15} />
         </button>
       </div>
 
-      {/* ── Expand button when collapsed ── */}
-      {isCollapsed && (
-        <div style={{ padding: '16px 0', display: 'flex', justifyContent: 'center', borderBottom: '1px solid var(--border)' }}>
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            aria-label="Expand sidebar"
-            style={{
-              width: '40px', height: '40px', borderRadius: '12px',
-              background: 'var(--primary-50)', border: 'none',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', color: 'var(--text-body)',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'var(--primary-100)'; e.currentTarget.style.color = '#C9952A'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'var(--primary-50)'; e.currentTarget.style.color = 'var(--text-body)'; }}
-          >
-            <ChevronRight size={18} />
-          </button>
-        </div>
-      )}
-
-      {/* ── Nav Items ── */}
-      <nav style={{ flex: 1, padding: isCollapsed ? '16px 0' : '20px 16px', overflowY: 'auto' }} className="hide-scrollbar">
-        {ADMIN_NAV_ITEMS.map((item, index) => {
+      {/* ── Nav ── */}
+      <nav
+        style={{ flex: 1, padding: isCollapsed ? '12px 8px' : '12px 10px', overflowY: 'auto' }}
+        className="hide-scrollbar"
+      >
+        {ADMIN_NAV_ITEMS.map((item, i) => {
           if (item.section) {
-            if (isCollapsed) return null;
+            if (isCollapsed) return (
+              <div key={i} style={{ height: '1px', background: 'var(--border)', margin: '10px 4px' }} />
+            );
             return (
-              <div key={index} style={{
-                fontSize: '0.65rem', fontWeight: 800, letterSpacing: '1.4px',
-                textTransform: 'uppercase', color: 'var(--text-body)',
-                padding: '20px 12px 8px', fontFamily: 'var(--sans)'
+              <div key={i} style={{
+                fontSize: '0.6rem', fontWeight: 800, letterSpacing: '1.5px',
+                textTransform: 'uppercase', color: 'var(--text-muted)',
+                padding: '16px 8px 6px', fontFamily: 'var(--sans)',
+                userSelect: 'none',
               }}>
                 {item.section}
               </div>
@@ -193,54 +158,55 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
 
           const active = isActive(item.to);
           const Icon = item.icon;
+          const isExit = item.label === 'Back to App';
 
           return (
             <Link
-              key={index}
+              key={i}
               to={item.to}
               title={isCollapsed ? item.label : undefined}
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '14px',
-                padding: isCollapsed ? '12px 0' : '12px 16px',
-                marginBottom: '6px',
-                borderRadius: isCollapsed ? 0 : '12px',
+                gap: '10px',
+                padding: isCollapsed ? '10px' : '9px 10px',
+                marginBottom: '2px',
+                borderRadius: '10px',
                 justifyContent: isCollapsed ? 'center' : 'flex-start',
-                background: active
-                  ? 'rgba(201, 149, 42, 0.14)'
-                  : 'transparent',
-                color: active ? '#C9952A' : 'var(--text-body)',
+                background: active ? 'var(--primary-50)' : 'transparent',
+                color: active ? 'var(--primary)' : isExit ? 'var(--text-muted)' : 'var(--text-body)',
                 textDecoration: 'none',
                 fontWeight: active ? 700 : 500,
-                fontSize: '0.84rem',
+                fontSize: '0.835rem',
                 fontFamily: 'var(--sans)',
-                transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)',
-                borderLeft: active ? '3px solid #C9952A' : '3px solid transparent',
-                boxShadow: active && !isCollapsed ? '0 4px 20px rgba(201, 149, 42, 0.15)' : 'none'
+                transition: 'all 0.15s ease',
               }}
               onMouseEnter={e => {
                 if (!active) {
-                  e.currentTarget.style.background = 'var(--primary-50)';
-                  e.currentTarget.style.color = '#FFFFFF';
-                  if (isCollapsed) e.currentTarget.style.borderLeft = '3px solid rgba(201, 149, 42, 0.5)';
+                  e.currentTarget.style.background = isExit ? 'rgba(239,68,68,0.06)' : 'var(--primary-50)';
+                  e.currentTarget.style.color = isExit ? '#EF4444' : 'var(--text-dark)';
                 }
               }}
               onMouseLeave={e => {
                 if (!active) {
                   e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.color = 'var(--text-body)';
-                  if (isCollapsed) e.currentTarget.style.borderLeft = '3px solid transparent';
+                  e.currentTarget.style.color = isExit ? 'var(--text-muted)' : 'var(--text-body)';
                 }
               }}
             >
-              <Icon size={isCollapsed ? 22 : 18} style={{ flexShrink: 0, opacity: active ? 1 : 0.8, color: active ? '#C9952A' : 'currentColor' }} />
-              {!isCollapsed && <span>{item.label}</span>}
+              <Icon
+                size={16}
+                style={{
+                  flexShrink: 0,
+                  color: active ? 'var(--primary)' : isExit ? 'var(--text-muted)' : 'var(--text-muted)',
+                  transition: 'color 0.15s',
+                }}
+              />
+              {!isCollapsed && <span style={{ flex: 1 }}>{item.label}</span>}
               {!isCollapsed && active && (
                 <div style={{
-                  marginLeft: 'auto', width: '6px', height: '6px',
-                  borderRadius: '50%', background: '#C9952A',
-                  boxShadow: '0 0 10px #C9952A'
+                  width: '5px', height: '5px', borderRadius: '50%',
+                  background: 'var(--primary)', flexShrink: 0,
                 }} />
               )}
             </Link>
@@ -248,98 +214,109 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
         })}
       </nav>
 
-      {/* ── User Profile Footer ── */}
+      {/* ── Footer ── */}
       <div style={{
         borderTop: '1px solid var(--border)',
-        padding: isCollapsed ? '20px 0' : '20px',
+        padding: isCollapsed ? '12px 8px' : '12px',
         flexShrink: 0,
-        background: 'transparent',
       }}>
         {!isCollapsed ? (
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-              <button 
-                onClick={toggleTheme}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '8px',
-                  background: 'var(--primary-50)', 
-                  border: '1px solid var(--border-strong)',
-                  color: '#C9952A', fontSize: '0.72rem', fontWeight: 600,
-                  padding: '10px 14px', borderRadius: '10px', cursor: 'pointer',
-                  width: '100%', justifyContent: 'center',
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(201, 149, 42, 0.15)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'var(--primary-50)'; e.currentTarget.style.transform = 'translateY(0)'; }}
-              >
-                {isDark ? <Sun size={15} /> : <Moon size={15} />}
-                <span>{isDark ? 'Switch to Light' : 'Switch to Dark'}</span>
-              </button>
-            </div>
-            <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none', marginBottom: '14px', padding: '6px', borderRadius: '12px', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--primary-50)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+          <>
+            {/* Theme toggle */}
+            <button
+              onClick={toggleTheme}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '8px',
+                background: 'var(--primary-50)',
+                border: '1px solid var(--border)',
+                color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600,
+                padding: '8px 14px', borderRadius: '10px', cursor: 'pointer',
+                width: '100%', justifyContent: 'center',
+                transition: 'all 0.2s', marginBottom: '10px',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'var(--primary-100)'; e.currentTarget.style.color = 'var(--primary)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'var(--primary-50)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
+            >
+              {isDark ? <Sun size={14} /> : <Moon size={14} />}
+              <span>{isDark ? 'Switch to Light' : 'Switch to Dark'}</span>
+            </button>
+
+            {/* User row */}
+            <Link
+              to="/profile"
+              style={{
+                display: 'flex', alignItems: 'center', gap: '10px',
+                textDecoration: 'none', padding: '8px', borderRadius: '10px',
+                transition: 'background 0.15s', marginBottom: '4px',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = 'var(--primary-50)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            >
               <div style={{
-                width: '42px', height: '42px', borderRadius: '50%',
-                background: 'var(--gold-grad)',
+                width: '34px', height: '34px', borderRadius: '50%',
+                background: 'var(--primary)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#2A1A2E', fontWeight: 800, fontSize: '1rem',
+                color: '#FFFFFF', fontWeight: 800, fontSize: '0.85rem',
                 flexShrink: 0,
-                boxShadow: '0 4px 12px rgba(201, 149, 42, 0.3)'
               }}>
                 {(user?.first_name || user?.name || 'U').charAt(0).toUpperCase()}
               </div>
               <div style={{ overflow: 'hidden', flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-dark)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontFamily: 'var(--sans)' }}>
+                  <span style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-dark)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {user?.first_name || user?.name || 'User'}
-                  </div>
+                  </span>
                   {user?.role === 'admin' && (
-                    <span style={{ fontSize: '0.6rem', fontWeight: 800, color: '#2A1A2E', background: '#C9952A', padding: '2px 6px', borderRadius: '4px', letterSpacing: '0.5px' }}>ADMIN</span>
+                    <span style={{
+                      fontSize: '0.55rem', fontWeight: 800,
+                      color: '#FFFFFF', background: 'var(--primary)',
+                      padding: '1px 5px', borderRadius: '4px', letterSpacing: '0.5px',
+                      textTransform: 'uppercase', flexShrink: 0,
+                    }}>Admin</span>
                   )}
                 </div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-body)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '2px' }}>
-                  {user?.email || 'user@iirshad.com'}
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '1px' }}>
+                  {user?.email || ''}
                 </div>
               </div>
             </Link>
+
+            {/* Logout */}
             <button
               onClick={handleLogout}
               style={{
                 display: 'flex', alignItems: 'center', gap: '8px',
-                width: '100%', padding: '10px', borderRadius: '10px',
+                width: '100%', padding: '8px 10px', borderRadius: '10px',
                 background: 'none', border: 'none',
-                color: 'var(--text-body)', fontSize: '0.75rem', fontWeight: 600,
-                cursor: 'pointer', transition: 'all 0.2s', justifyContent: 'center'
+                color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600,
+                cursor: 'pointer', transition: 'all 0.2s', justifyContent: 'center',
               }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.12)'; e.currentTarget.style.color = '#EF4444'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--text-body)'; }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.08)'; e.currentTarget.style.color = '#EF4444'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--text-muted)'; }}
             >
-              <LogOut size={16} /> Log Out
+              <LogOut size={14} /> Log Out
             </button>
-          </div>
+          </>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-            <button 
-                onClick={toggleTheme}
-                title={isDark ? "Light Mode" : "Dark Mode"}
-                style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: 'var(--primary-50)', 
-                  border: '1px solid var(--border-strong)',
-                  color: '#C9952A', width: '42px', height: '42px',
-                  borderRadius: '12px', cursor: 'pointer',
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
-                }}
-              >
-                {isDark ? <Sun size={18} /> : <Moon size={18} />}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+            <button
+              onClick={toggleTheme}
+              title={isDark ? 'Light Mode' : 'Dark Mode'}
+              style={{
+                width: '38px', height: '38px', borderRadius: '10px',
+                background: 'var(--primary-50)', border: '1px solid var(--border)',
+                color: 'var(--text-muted)', display: 'flex', alignItems: 'center',
+                justifyContent: 'center', cursor: 'pointer',
+              }}
+            >
+              {isDark ? <Sun size={16} /> : <Moon size={16} />}
             </button>
             <Link to="/profile" title="Profile" style={{ textDecoration: 'none' }}>
               <div style={{
-                width: '42px', height: '42px', borderRadius: '12px',
-                background: 'var(--gold-grad)',
+                width: '38px', height: '38px', borderRadius: '50%',
+                background: 'var(--primary)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#2A1A2E', fontWeight: 800, fontSize: '1rem',
-                boxShadow: '0 4px 12px rgba(201, 149, 42, 0.3)'
+                color: '#FFFFFF', fontWeight: 800, fontSize: '0.9rem',
               }}>
                 {(user?.first_name || user?.name || 'U').charAt(0).toUpperCase()}
               </div>
@@ -347,17 +324,16 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
             <button
               onClick={handleLogout}
               title="Log Out"
-              aria-label="Log Out"
               style={{
-                width: '42px', height: '42px', borderRadius: '12px',
+                width: '38px', height: '38px', borderRadius: '10px',
                 background: 'none', border: 'none',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'var(--text-body)', cursor: 'pointer',
+                color: 'var(--text-muted)', cursor: 'pointer', transition: 'all 0.2s',
               }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.12)'; e.currentTarget.style.color = '#EF4444'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--text-body)'; }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.08)'; e.currentTarget.style.color = '#EF4444'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--text-muted)'; }}
             >
-              <LogOut size={18} />
+              <LogOut size={16} />
             </button>
           </div>
         )}

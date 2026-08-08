@@ -1,5 +1,5 @@
 import React, { useEffect, useState, Suspense } from 'react';
-import { Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
+import { Routes, Route, Link, useLocation, Navigate, useParams } from 'react-router-dom';
 import { Shield, Home, Scale, Info, BookOpen, Settings, LayoutDashboard, Moon, Sun } from 'lucide-react';
 import DashboardLayout from './components/DashboardLayout';
 import AdminLayout from './components/AdminLayout';
@@ -294,6 +294,12 @@ const TopNavbar = () => {
 
 
 /* ─── App Shell ──────────────────────────────────────────── */
+// Redirect /market/:symbol → /market/:symbol/aaoifi seamlessly
+const NavigateToAaoifi = () => {
+  const { symbol } = useParams();
+  return <Navigate to={`/market/${symbol}/aaoifi`} replace />;
+};
+
 function App() {
   const { loading: authLoading } = useAuth();
 
@@ -345,76 +351,30 @@ function App() {
                   <Route path="/disclosure" element={<DisclosurePage />} />
                   <Route path="/disclosures" element={<Navigate to="/disclosure" replace />} />
                   <Route path="/market" element={<Navigate to="/portfolio" replace />} />
-                  <Route path="/market/:symbol" element={
-                    <DashboardLayout><StockDetails /></DashboardLayout>
-                  } />
+                  <Route path="/market/:symbol" element={<NavigateToAaoifi />} />
                   <Route path="/market/:symbol/aaoifi" element={
                     <DashboardLayout><AaoifiScreening /></DashboardLayout>
                   } />
-                  <Route path="/admin" element={
+                  <Route element={
                     <ProtectedRoute adminOnly={true}>
-                      <AdminLayout>
-                        <AdminOverview />
-                      </AdminLayout>
+                      <AdminLayout />
                     </ProtectedRoute>
-                  } />
-                  <Route path="/admin/alerts" element={
-                    <ProtectedRoute adminOnly={true}>
-                      <AdminLayout>
-                        <AdminDashboard />
-                      </AdminLayout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/admin/compliance-reviews" element={
-                    <ProtectedRoute adminOnly={true}>
-                      <AdminLayout>
-                        <AdminComplianceReviews />
-                      </AdminLayout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/admin/users" element={
-                    <ProtectedRoute adminOnly={true}>
-                      <AdminLayout>
-                        <AdminUsers />
-                      </AdminLayout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/admin/resources" element={
-                    <ProtectedRoute adminOnly={true}>
-                      <AdminLayout>
-                        <ResourcesPage />
-                      </AdminLayout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/admin/zakat-settings" element={
-                    <ProtectedRoute adminOnly={true}>
-                      <AdminLayout>
-                        <ZakatSettingsAdmin />
-                      </AdminLayout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/admin/financial-queue" element={
-                    <ProtectedRoute adminOnly={true}>
-                      <AdminLayout>
-                        <AdminFinancialReviewQueue />
-                      </AdminLayout>
-                    </ProtectedRoute>
-                  } />
+                  }>
+                    <Route path="/admin" element={<AdminOverview />} />
+                    <Route path="/admin/alerts" element={<AdminDashboard />} />
+                    <Route path="/admin/compliance-reviews" element={<AdminComplianceReviews />} />
+                    <Route path="/admin/users" element={<AdminUsers />} />
+                    <Route path="/admin/resources" element={<ResourcesPage />} />
+                    <Route path="/admin/zakat-settings" element={<ZakatSettingsAdmin />} />
+                    <Route path="/admin/financial-queue" element={<AdminFinancialReviewQueue />} />
+                    <Route path="/admin/tickers/:symbol" element={<AdminTickerEditor />} />
+                    <Route path="/admin/tickers/:symbol/view" element={<StockDetails />} />
+                  </Route>
                   <Route path="/portfolio" element={
                     <DashboardLayout><Portfolio /></DashboardLayout>
                   } />
                   <Route path="/profile" element={
                     <DashboardLayout><Profile /></DashboardLayout>
-                  } />
-                  <Route path="/admin/tickers/:symbol" element={
-                    <ProtectedRoute adminOnly={true}>
-                      <AdminLayout><AdminTickerEditor /></AdminLayout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/admin/tickers/:symbol/view" element={
-                    <ProtectedRoute adminOnly={true}>
-                      <AdminLayout><StockDetails /></AdminLayout>
-                    </ProtectedRoute>
                   } />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/register" element={<RegisterPage />} />

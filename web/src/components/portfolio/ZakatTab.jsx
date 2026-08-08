@@ -223,7 +223,7 @@ export default function ZakatTab({ data }) {
           .no-print { display: none !important; }
           .print-only { display: block !important; }
           .zakat-print-body { display: block !important; }
-          .print-card { box-shadow: none !important; border: 1px solid #e2e8f0 !important; break-inside: avoid; margin-bottom: 20px; }
+          .print-card { box-shadow: none !important; border: 1px solid var(--border) !important; break-inside: avoid; margin-bottom: 20px; }
           .zakat-two-col { flex-direction: column !important; }
           .zakat-right-col { position: static !important; }
           .zakat-hero { display: none !important; }
@@ -245,14 +245,14 @@ export default function ZakatTab({ data }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <img src="/logo.svg" alt="Irshad" style={{ height: '44px', width: 'auto' }} />
             <div>
-              <div style={{ fontSize: '22px', fontWeight: 900, color: '#2A1A2E', letterSpacing: '-0.5px', lineHeight: 1 }}>Irshad</div>
-              <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase', marginTop: '2px' }}>Shariah-Compliant Portfolio</div>
+              <div style={{ fontSize: '22px', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-0.5px', lineHeight: 1 }}>Irshad</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase', marginTop: '2px' }}>Shariah-Compliant Portfolio</div>
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '24px', fontWeight: 900, color: '#2A1A2E', letterSpacing: '-0.5px' }}>Zakat Statement</div>
-            <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px', fontWeight: 500 }}>Generated: {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
-            {hawlDate && <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 500 }}>Hawl started: {new Date(hawlDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</div>}
+            <div style={{ fontSize: '24px', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-0.5px' }}>Zakat Statement</div>
+            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px', fontWeight: 500 }}>Generated: {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
+            {hawlDate && <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 500 }}>Hawl started: {new Date(hawlDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</div>}
           </div>
         </div>
 
@@ -261,7 +261,7 @@ export default function ZakatTab({ data }) {
           <div>
             <div style={{ fontSize: '11px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Prepared For</div>
             <div style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a' }}>{user?.first_name || user?.name || 'Valued Client'} {user?.last_name || ''}</div>
-            <div style={{ fontSize: '13px', color: '#64748b' }}>{user?.email || ''}</div>
+            <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>{user?.email || ''}</div>
           </div>
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: '11px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Statement ID</div>
@@ -270,70 +270,70 @@ export default function ZakatTab({ data }) {
         </div>
 
         {/* ── Gold accent rule ── */}
-        <div style={{ height: '4px', background: 'linear-gradient(90deg, #2A1A2E, #C69220, #C9952A)', borderRadius: '2px', marginBottom: '32px', position: 'relative', zIndex: 1 }} />
+        <div style={{ height: '4px', background: 'linear-gradient(90deg, #2A1A2E, var(--gold), var(--gold))', borderRadius: '2px', marginBottom: '32px', position: 'relative', zIndex: 1 }} />
 
         {/* ── Nisab Configuration ── */}
-        <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '18px 24px', marginBottom: '28px', position: 'relative', zIndex: 1 }}>
-          <div style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px' }}>Nisab Thresholds Applied</div>
+        <div style={{ background: 'var(--body-bg)', border: '1px solid var(--border)', borderRadius: '10px', padding: '18px 24px', marginBottom: '28px', position: 'relative', zIndex: 1 }}>
+          <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px' }}>Nisab Thresholds Applied</div>
           <div style={{ display: 'flex', gap: '40px', flexWrap: 'wrap' }}>
-            <div><span style={{ fontSize: '12px', color: '#64748b' }}>Standard: </span><span style={{ fontSize: '13px', fontWeight: 700 }}>{nisabStandard === 'gold' ? 'Gold (85g)' : 'Silver (595g)'}</span></div>
-            <div><span style={{ fontSize: '12px', color: '#64748b' }}>Financial Nisab: </span><span style={{ fontSize: '13px', fontWeight: 700, color: '#C69220' }}>₦{financialNisab.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span></div>
-            <div><span style={{ fontSize: '12px', color: '#64748b' }}>Livestock (Sheep): </span><span style={{ fontSize: '13px', fontWeight: 700 }}>40 head</span></div>
-            <div><span style={{ fontSize: '12px', color: '#64748b' }}>Livestock (Cows): </span><span style={{ fontSize: '13px', fontWeight: 700 }}>30 head</span></div>
-            <div><span style={{ fontSize: '12px', color: '#64748b' }}>Agriculture: </span><span style={{ fontSize: '13px', fontWeight: 700 }}>653 kg (5 Awsuq)</span></div>
+            <div><span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Standard: </span><span style={{ fontSize: '13px', fontWeight: 700 }}>{nisabStandard === 'gold' ? 'Gold (85g)' : 'Silver (595g)'}</span></div>
+            <div><span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Financial Nisab: </span><span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--gold)' }}>₦{financialNisab.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span></div>
+            <div><span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Livestock (Sheep): </span><span style={{ fontSize: '13px', fontWeight: 700 }}>40 head</span></div>
+            <div><span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Livestock (Cows): </span><span style={{ fontSize: '13px', fontWeight: 700 }}>30 head</span></div>
+            <div><span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Agriculture: </span><span style={{ fontSize: '13px', fontWeight: 700 }}>653 kg (5 Awsuq)</span></div>
           </div>
         </div>
 
         {/* ── Financial Wealth Section ── */}
         <div style={{ marginBottom: '28px' }}>
-          <div style={{ fontSize: '14px', fontWeight: 800, color: '#2A1A2E', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ display: 'inline-block', width: '4px', height: '16px', background: '#C69220', borderRadius: '2px' }} />
+          <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-dark)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ display: 'inline-block', width: '4px', height: '16px', background: 'var(--gold)', borderRadius: '2px' }} />
             Financial Wealth
           </div>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
             <thead>
-              <tr style={{ background: '#f1f5f9' }}>
+              <tr style={{ background: 'var(--body-bg)' }}>
                 <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700, color: '#475569', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Asset</th>
                 <th style={{ padding: '10px 14px', textAlign: 'right', fontWeight: 700, color: '#475569', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Value (₦)</th>
                 <th style={{ padding: '10px 14px', textAlign: 'center', fontWeight: 700, color: '#475569', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Status</th>
               </tr>
             </thead>
             <tbody>
-              <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+              <tr style={{ borderBottom: '1px solid var(--body-bg)' }}>
                 <td style={{ padding: '11px 14px', color: 'var(--text-body)' }}>📈 Stock Portfolio</td>
                 <td style={{ padding: '11px 14px', textAlign: 'right', fontWeight: 700 }}>₦{portfolioValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                 <td style={{ padding: '11px 14px', textAlign: 'center' }}><span style={{ background: '#dcfce7', color: '#16a34a', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 700 }}>Auto-synced</span></td>
               </tr>
-              <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+              <tr style={{ borderBottom: '1px solid var(--body-bg)' }}>
                 <td style={{ padding: '11px 14px', color: 'var(--text-body)' }}>💵 Cash & Savings</td>
                 <td style={{ padding: '11px 14px', textAlign: 'right', fontWeight: 700 }}>₦{cashNum.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                 <td style={{ padding: '11px 14px', textAlign: 'center' }}>—</td>
               </tr>
-              <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+              <tr style={{ borderBottom: '1px solid var(--body-bg)' }}>
                 <td style={{ padding: '11px 14px', color: 'var(--text-body)' }}>🥇 Gold Held ({Number(goldGrams) || 0}g @ ₦{goldPrice.toLocaleString()}/g)</td>
                 <td style={{ padding: '11px 14px', textAlign: 'right', fontWeight: 700 }}>₦{goldNum.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                 <td style={{ padding: '11px 14px', textAlign: 'center' }}>—</td>
               </tr>
-              <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+              <tr style={{ borderBottom: '1px solid var(--body-bg)' }}>
                 <td style={{ padding: '11px 14px', color: 'var(--text-body)' }}>🥈 Silver Held ({Number(silverGrams) || 0}g @ ₦{silverPrice.toLocaleString()}/g)</td>
                 <td style={{ padding: '11px 14px', textAlign: 'right', fontWeight: 700 }}>₦{silverNum.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                 <td style={{ padding: '11px 14px', textAlign: 'center' }}>—</td>
               </tr>
-              <tr style={{ background: financialEligible ? '#fefce8' : '#fafafa', fontWeight: 800 }}>
-                <td style={{ padding: '12px 14px', color: '#2A1A2E', fontSize: '14px' }}>Total Wealth</td>
-                <td style={{ padding: '12px 14px', textAlign: 'right', color: '#2A1A2E', fontSize: '14px' }}>₦{totalWealth.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+              <tr style={{ background: financialEligible ? '#fefce8' : 'var(--bg)', fontWeight: 800 }}>
+                <td style={{ padding: '12px 14px', color: 'var(--text-dark)', fontSize: '14px' }}>Total Wealth</td>
+                <td style={{ padding: '12px 14px', textAlign: 'right', color: 'var(--text-dark)', fontSize: '14px' }}>₦{totalWealth.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                 <td style={{ padding: '12px 14px', textAlign: 'center' }}>
                   {financialEligible
-                    ? <span style={{ background: '#C69220', color: '#fff', padding: '3px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 800 }}>Nisab Reached ✓</span>
-                    : <span style={{ background: '#fee2e2', color: '#dc2626', padding: '3px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 800 }}>Below Nisab</span>}
+                    ? <span style={{ background: 'var(--gold)', color: '#fff', padding: '3px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 800 }}>Nisab Reached ✓</span>
+                    : <span style={{ background: 'var(--non-halal-bg)', color: '#dc2626', padding: '3px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 800 }}>Below Nisab</span>}
                 </td>
               </tr>
             </tbody>
           </table>
           {financialEligible && (
             <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '16px' }}>
-              <span style={{ fontSize: '13px', color: '#64748b' }}>Zakat due @ 2.5%:</span>
-              <span style={{ fontSize: '22px', fontWeight: 900, color: '#C69220', letterSpacing: '-0.5px' }}>₦{financialZakatDue.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+              <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Zakat due @ 2.5%:</span>
+              <span style={{ fontSize: '22px', fontWeight: 900, color: 'var(--gold)', letterSpacing: '-0.5px' }}>₦{financialZakatDue.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
             </div>
           )}
         </div>
@@ -356,18 +356,18 @@ export default function ZakatTab({ data }) {
               </thead>
               <tbody>
                 {sheepNum > 0 && (
-                  <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                  <tr style={{ borderBottom: '1px solid var(--body-bg)' }}>
                     <td style={{ padding: '11px 14px', color: 'var(--text-body)' }}>🐑 Sheep & Goats</td>
                     <td style={{ padding: '11px 14px', textAlign: 'center', fontWeight: 700 }}>{sheepNum}</td>
-                    <td style={{ padding: '11px 14px', textAlign: 'center', color: '#64748b' }}>40 head</td>
+                    <td style={{ padding: '11px 14px', textAlign: 'center', color: 'var(--text-muted)' }}>40 head</td>
                     <td style={{ padding: '11px 14px', textAlign: 'right', fontWeight: 800, color: sheepNum >= 40 ? '#16a34a' : '#94a3b8' }}>{sheepZakat}</td>
                   </tr>
                 )}
                 {cowNum > 0 && (
-                  <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                  <tr style={{ borderBottom: '1px solid var(--body-bg)' }}>
                     <td style={{ padding: '11px 14px', color: 'var(--text-body)' }}>🐄 Cows & Buffaloes</td>
                     <td style={{ padding: '11px 14px', textAlign: 'center', fontWeight: 700 }}>{cowNum}</td>
-                    <td style={{ padding: '11px 14px', textAlign: 'center', color: '#64748b' }}>30 head</td>
+                    <td style={{ padding: '11px 14px', textAlign: 'center', color: 'var(--text-muted)' }}>30 head</td>
                     <td style={{ padding: '11px 14px', textAlign: 'right', fontWeight: 800, color: cowNum >= 30 ? '#16a34a' : '#94a3b8' }}>{cowZakat}</td>
                   </tr>
                 )}
@@ -385,7 +385,7 @@ export default function ZakatTab({ data }) {
             </div>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
               <thead>
-                <tr style={{ background: '#fffbeb' }}>
+                <tr style={{ background: 'var(--doubtful-bg)' }}>
                   <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700, color: '#475569', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Crop</th>
                   <th style={{ padding: '10px 14px', textAlign: 'center', fontWeight: 700, color: '#475569', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Harvest</th>
                   <th style={{ padding: '10px 14px', textAlign: 'center', fontWeight: 700, color: '#475569', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Irrigation</th>
@@ -397,7 +397,7 @@ export default function ZakatTab({ data }) {
                 <tr>
                   <td style={{ padding: '11px 14px', color: 'var(--text-body)' }}>🌾 Grains & Fruits</td>
                   <td style={{ padding: '11px 14px', textAlign: 'center', fontWeight: 700 }}>{harvestNum.toLocaleString()} kg</td>
-                  <td style={{ padding: '11px 14px', textAlign: 'center', color: '#64748b' }}>{irrigation === 'natural' ? 'Natural / Rain' : 'Artificial / Bought'}</td>
+                  <td style={{ padding: '11px 14px', textAlign: 'center', color: 'var(--text-muted)' }}>{irrigation === 'natural' ? 'Natural / Rain' : 'Artificial / Bought'}</td>
                   <td style={{ padding: '11px 14px', textAlign: 'center', fontWeight: 700 }}>{irrigation === 'natural' ? '10%' : '5%'}</td>
                   <td style={{ padding: '11px 14px', textAlign: 'right', fontWeight: 800, color: agriEligible ? '#d97706' : '#94a3b8' }}>{agriZakatDue > 0 ? `${agriZakatDue.toLocaleString(undefined, { maximumFractionDigits: 1 })} kg` : 'Below Nisab'}</td>
                 </tr>
@@ -408,13 +408,13 @@ export default function ZakatTab({ data }) {
 
         {/* ── Consolidated Summary ── */}
         <div style={{ marginTop: '36px', marginBottom: '32px', border: '2px solid #2A1A2E', borderRadius: '12px', overflow: 'hidden' }}>
-          <div style={{ background: '#2A1A2E', color: '#C9952A', padding: '14px 20px', fontSize: '15px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>
+          <div style={{ background: '#2A1A2E', color: 'var(--gold)', padding: '14px 20px', fontSize: '15px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>
             Summary of Zakat Payable
           </div>
-          <div style={{ padding: '20px', background: '#f8fafc', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ padding: '20px', background: 'var(--body-bg)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-body)' }}>Financial Wealth Zakat</span>
-              <span style={{ fontSize: '16px', fontWeight: 800, color: financialEligible ? '#C69220' : '#94a3b8' }}>
+              <span style={{ fontSize: '16px', fontWeight: 800, color: financialEligible ? 'var(--gold)' : '#94a3b8' }}>
                 {financialEligible ? `₦${financialZakatDue.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : '—'}
               </span>
             </div>
@@ -440,7 +440,7 @@ export default function ZakatTab({ data }) {
             )}
             
             {(!financialEligible && (!sheepNum || sheepNum < 40) && (!cowNum || cowNum < 30) && (!harvestNum || harvestNum < 653)) && (
-              <div style={{ padding: '12px 0', borderTop: '1px dashed #cbd5e1', textAlign: 'center', color: '#64748b', fontSize: '14px', fontWeight: 600 }}>
+              <div style={{ padding: '12px 0', borderTop: '1px dashed #cbd5e1', textAlign: 'center', color: 'var(--text-muted)', fontSize: '14px', fontWeight: 600 }}>
                 No Zakat is currently due across your registered asset classes.
               </div>
             )}
@@ -449,7 +449,7 @@ export default function ZakatTab({ data }) {
 
         {/* ── Hawl Date ── */}
         {hawlDate && (
-          <div style={{ background: '#fffbeb', border: '1px solid #fcd34d', borderRadius: '8px', padding: '14px 20px', marginBottom: '28px', display: 'flex', gap: '32px' }}>
+          <div style={{ background: 'var(--doubtful-bg)', border: '1px solid #fcd34d', borderRadius: '8px', padding: '14px 20px', marginBottom: '28px', display: 'flex', gap: '32px' }}>
             <div><span style={{ fontSize: '11px', color: '#92400e', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Hawl Started</span><br /><span style={{ fontSize: '14px', fontWeight: 700 }}>{new Date(hawlDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</span></div>
             {hawlDueDate && <div><span style={{ fontSize: '11px', color: '#92400e', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Next Due Date</span><br /><span style={{ fontSize: '14px', fontWeight: 700 }}>{hawlDueDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</span></div>}
             {daysUntilDue !== null && <div><span style={{ fontSize: '11px', color: '#92400e', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Days Remaining</span><br /><span style={{ fontSize: '14px', fontWeight: 700, color: daysUntilDue <= 30 ? '#dc2626' : '#16a34a' }}>{daysUntilDue > 0 ? `${daysUntilDue} days` : 'Due Now!'}</span></div>}
@@ -457,12 +457,12 @@ export default function ZakatTab({ data }) {
         )}
 
         {/* ── Disclaimer ── */}
-        <div style={{ marginTop: '32px', padding: '16px 20px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '11px', color: '#64748b', lineHeight: 1.6, position: 'relative', zIndex: 1 }}>
+        <div style={{ marginTop: '32px', padding: '16px 20px', background: 'var(--body-bg)', border: '1px solid var(--border)', borderRadius: '8px', fontSize: '11px', color: 'var(--text-muted)', lineHeight: 1.6, position: 'relative', zIndex: 1 }}>
           <strong style={{ color: 'var(--text-body)' }}>Disclaimer:</strong> This Zakat statement is generated based on data entered by the user and live market prices at the time of generation. It is provided as a tool to assist in Zakat calculation and is not a substitute for professional Islamic financial advice. Nisab values are calculated using {nisabStandard === 'gold' ? 'Gold (85g)' : 'Silver (595g)'} standard.
         </div>
 
         {/* ── Footer ── */}
-        <div style={{ marginTop: '40px', paddingTop: '20px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+        <div style={{ marginTop: '40px', paddingTop: '20px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <img src="/logo.svg" alt="Irshad" style={{ height: '22px', width: 'auto', opacity: 0.6 }} />
             <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600 }}>iirshad.com</span>
@@ -473,11 +473,11 @@ export default function ZakatTab({ data }) {
       </div>
       
       {/* Hero Banner */}
-      <div className="no-print zakat-hero" style={{ background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, #3C2D3E 100%)', borderRadius:'24px', padding:'32px 24px', boxShadow:'0 20px 40px rgba(0,0,0,0.3)', border:'1px solid rgba(201, 149, 42, 0.2)', marginBottom: '36px', display: 'flex', alignItems: 'center', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'radial-gradient(circle at 80% 0%, rgba(201, 149, 42, 0.12) 0%, transparent 50%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(201, 149, 42, 0.08)', borderRadius: '50%', filter: 'blur(30px)' }} />
+      <div className="no-print zakat-hero" style={{ background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, var(--text-dark) 100%)', borderRadius:'24px', padding:'32px 24px', boxShadow:'0 20px 40px rgba(0,0,0,0.3)', border:'1px solid rgba(209, 165, 98, 0.2)', marginBottom: '36px', display: 'flex', alignItems: 'center', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'radial-gradient(circle at 80% 0%, rgba(209, 165, 98, 0.12) 0%, transparent 50%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(209, 165, 98, 0.08)', borderRadius: '50%', filter: 'blur(30px)' }} />
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px', position: 'relative', zIndex: 1 }}>
-          <div style={{ width: '72px', height: '72px', background: 'rgba(201, 149, 42, 0.12)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', border: '1px solid rgba(201, 149, 42, 0.35)', backdropFilter: 'blur(12px)', boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}>
+          <div style={{ width: '72px', height: '72px', background: 'rgba(209, 165, 98, 0.12)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', border: '1px solid rgba(209, 165, 98, 0.35)', backdropFilter: 'blur(12px)', boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}>
             <Scale size={36} strokeWidth={1.5} />
           </div>
           <div>
@@ -489,17 +489,17 @@ export default function ZakatTab({ data }) {
 
       {/* ─── Hawl (Zakat) Date Banner ─── */}
       {hawlDate && !editingHawl ? (
-        <div className="no-print" style={{ background: 'linear-gradient(135deg, rgba(212,175,55,0.08) 0%, rgba(212,175,55,0.04) 100%)', border: '1px solid rgba(212,175,55,0.25)', borderRadius: '20px', padding: '24px', marginBottom: '28px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div className="no-print" style={{ background: 'linear-gradient(135deg, rgba(209, 165, 98,0.08) 0%, rgba(209, 165, 98,0.04) 100%)', border: '1px solid rgba(209, 165, 98,0.25)', borderRadius: '20px', padding: '24px', marginBottom: '28px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <Bell size={20} color="#d4af37" />
+              <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'rgba(209, 165, 98,0.15)', border: '1px solid rgba(209, 165, 98,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Bell size={20} color="var(--gold)" />
               </div>
               <div>
-                <div style={{ fontSize: '0.63rem', fontWeight: 800, color: '#b89326', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <div style={{ fontSize: '0.63rem', fontWeight: 800, color: 'var(--gold)', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                   Your Zakat (Hawl) Date
                   <div className="fiqh-tooltip">
-                    <Info size={12} color="#b89326" />
+                    <Info size={12} color="var(--gold)" />
                     <span className="tooltip-text">A lunar year (354 days). Zakat is only due if your wealth remains above the Nisab threshold for this entire period.</span>
                   </div>
                 </div>
@@ -518,20 +518,20 @@ export default function ZakatTab({ data }) {
                 </div>
               </div>
             </div>
-            <button onClick={() => { setHawlInput(hawlDate); setEditingHawl(true); }} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 16px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text-muted)', fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer', transition: 'all 0.2s', flexShrink: 0 }} onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(212,175,55,0.4)'} onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}>
+            <button onClick={() => { setHawlInput(hawlDate); setEditingHawl(true); }} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 16px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text-muted)', fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer', transition: 'all 0.2s', flexShrink: 0 }} onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(209, 165, 98,0.4)'} onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}>
               <Edit2 size={13} /> Edit Date
             </button>
           </div>
           
           {/* Hawl Progress Bar */}
-          <div style={{ width: '100%', height: '8px', background: 'rgba(212,175,55,0.15)', borderRadius: '10px', overflow: 'hidden' }}>
-            <div style={{ width: `${Math.min(100, Math.max(0, ((354 - Math.max(0, daysUntilDue)) / 354) * 100))}%`, height: '100%', background: daysUntilDue <= 30 ? '#dc2626' : daysUntilDue <= 90 ? '#d97706' : 'linear-gradient(90deg, #d4af37 0%, #b89326 100%)', transition: 'width 1s cubic-bezier(0.22,1,0.36,1)' }} />
+          <div style={{ width: '100%', height: '8px', background: 'rgba(209, 165, 98,0.15)', borderRadius: '10px', overflow: 'hidden' }}>
+            <div style={{ width: `${Math.min(100, Math.max(0, ((354 - Math.max(0, daysUntilDue)) / 354) * 100))}%`, height: '100%', background: daysUntilDue <= 30 ? '#dc2626' : daysUntilDue <= 90 ? '#d97706' : 'linear-gradient(90deg, var(--gold) 0%, var(--gold) 100%)', transition: 'width 1s cubic-bezier(0.22,1,0.36,1)' }} />
           </div>
         </div>
       ) : !hawlDate || editingHawl ? (
-        <div className="no-print" style={{ background: 'var(--bg)', border: '2px dashed rgba(212,175,55,0.35)', borderRadius: '20px', padding: '22px 28px', marginBottom: '28px' }}>
+        <div className="no-print" style={{ background: 'var(--bg)', border: '2px dashed rgba(209, 165, 98,0.35)', borderRadius: '20px', padding: '22px 28px', marginBottom: '28px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: editingHawl ? '16px' : '0', flexWrap: 'wrap' }}>
-            <Calendar size={18} color="#d4af37" />
+            <Calendar size={18} color="var(--gold)" />
             <span style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-dark)' }}>Set your Hawl (Zakat start) date</span>
             <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>— The date you first owned zakatable wealth</span>
           </div>
@@ -544,7 +544,7 @@ export default function ZakatTab({ data }) {
             </div>
           )}
           {!editingHawl && (
-            <button onClick={() => setEditingHawl(true)} style={{ marginTop: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '10px', background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.25)', color: '#b89326', fontWeight: 800, fontSize: '0.75rem', cursor: 'pointer', transition: 'all 0.2s' }}>
+            <button onClick={() => setEditingHawl(true)} style={{ marginTop: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '10px', background: 'rgba(209, 165, 98,0.1)', border: '1px solid rgba(209, 165, 98,0.25)', color: 'var(--gold)', fontWeight: 800, fontSize: '0.75rem', cursor: 'pointer', transition: 'all 0.2s' }}>
               <Calendar size={13} /> Set Date
             </button>
           )}
@@ -585,7 +585,7 @@ export default function ZakatTab({ data }) {
                 </div>
 
                 {fetchError && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#ef4444', background: '#fef2f2', padding: '12px', borderRadius: '12px', marginBottom: '20px', fontSize: '0.79rem', fontWeight: 600 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#ef4444', background: 'var(--non-halal-bg)', padding: '12px', borderRadius: '12px', marginBottom: '20px', fontSize: '0.79rem', fontWeight: 600 }}>
                     <AlertCircle size={16} /> {fetchError}
                   </div>
                 )}
@@ -670,11 +670,11 @@ export default function ZakatTab({ data }) {
               </div>
 
               {/* Gold */}
-              <div style={{ background: 'linear-gradient(135deg, rgba(212,175,55,0.06) 0%, rgba(212,175,55,0.14) 100%)', borderRadius: '16px', padding: '18px', border: '1px solid rgba(212,175,55,0.25)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <label style={{ display:'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', fontWeight:700, color:'#b89326', textTransform: 'uppercase', letterSpacing: '0.5px' }}>🥇 Gold Held (Grams)</label>
+              <div style={{ background: 'linear-gradient(135deg, rgba(209, 165, 98,0.06) 0%, rgba(209, 165, 98,0.14) 100%)', borderRadius: '16px', padding: '18px', border: '1px solid rgba(209, 165, 98,0.25)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <label style={{ display:'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', fontWeight:700, color:'var(--gold)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>🥇 Gold Held (Grams)</label>
                 <div style={{ position:'relative' }}>
-                  <input type="number" value={goldGrams} onChange={e => setGoldGrams(e.target.value)} placeholder="0" style={{ width:'100%', padding:'12px 40px 12px 14px', borderRadius:'10px', border:'1.5px solid rgba(212,175,55,0.3)', fontSize: '1.05rem', fontWeight:800, color:'var(--gold)', outline:'none', background: 'var(--bg)', boxSizing: 'border-box' }} />
-                  <span style={{ position:'absolute', right:'14px', top:'50%', transform:'translateY(-50%)', color:'#b89326', fontWeight:800, fontSize: '0.85rem' }}>g</span>
+                  <input type="number" value={goldGrams} onChange={e => setGoldGrams(e.target.value)} placeholder="0" style={{ width:'100%', padding:'12px 40px 12px 14px', borderRadius:'10px', border:'1.5px solid rgba(209, 165, 98,0.3)', fontSize: '1.05rem', fontWeight:800, color:'var(--gold)', outline:'none', background: 'var(--bg)', boxSizing: 'border-box' }} />
+                  <span style={{ position:'absolute', right:'14px', top:'50%', transform:'translateY(-50%)', color:'var(--gold)', fontWeight:800, fontSize: '0.85rem' }}>g</span>
                 </div>
                 {goldNum > 0 && (
                   <span style={{ fontSize: '0.75rem', color:'var(--gold)', fontWeight: 700 }}>≈ ₦{goldNum.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
@@ -683,13 +683,13 @@ export default function ZakatTab({ data }) {
 
               {/* Silver */}
               <div style={{ background: 'linear-gradient(135deg, rgba(148,163,184,0.06) 0%, rgba(148,163,184,0.14) 100%)', borderRadius: '16px', padding: '18px', border: '1px solid rgba(148,163,184,0.25)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <label style={{ display:'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', fontWeight:700, color:'#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>🥈 Silver Held (Grams)</label>
+                <label style={{ display:'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', fontWeight:700, color:'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>🥈 Silver Held (Grams)</label>
                 <div style={{ position:'relative' }}>
                   <input type="number" value={silverGrams} onChange={e => setSilverGrams(e.target.value)} placeholder="0" style={{ width:'100%', padding:'12px 40px 12px 14px', borderRadius:'10px', border:'1.5px solid rgba(148,163,184,0.3)', fontSize: '1.05rem', fontWeight:800, color:'#475569', outline:'none', background: 'var(--bg)', boxSizing: 'border-box' }} />
-                  <span style={{ position:'absolute', right:'14px', top:'50%', transform:'translateY(-50%)', color:'#64748b', fontWeight:800, fontSize: '0.85rem' }}>g</span>
+                  <span style={{ position:'absolute', right:'14px', top:'50%', transform:'translateY(-50%)', color:'var(--text-muted)', fontWeight:800, fontSize: '0.85rem' }}>g</span>
                 </div>
                 {silverNum > 0 && (
-                  <span style={{ fontSize: '0.75rem', color:'#64748b', fontWeight: 700 }}>≈ ₦{silverNum.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                  <span style={{ fontSize: '0.75rem', color:'var(--text-muted)', fontWeight: 700 }}>≈ ₦{silverNum.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
                 )}
               </div>
             </div>
@@ -824,13 +824,13 @@ export default function ZakatTab({ data }) {
                 <h3 style={{ fontSize: '1.14rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}><Wheat size={20} color="var(--gold)" /> Agriculture & Grains</h3>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginBottom: '24px', fontWeight: 500 }}>Nisab is 653 kg (5 Awsuq). Zakat rate is 10% (Naturally Irrigated).</p>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
-                  <div style={{ background: 'linear-gradient(135deg, rgba(212,175,55,0.05) 0%, rgba(212,175,55,0.15) 100%)', borderRadius: '16px', padding: '18px', border: '1px solid rgba(212,175,55,0.25)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    <label style={{ fontSize: '0.75rem', fontWeight:800, color:'#b89326', textTransform: 'uppercase', letterSpacing: '0.5px' }}>🌾 Harvest Weight</label>
+                  <div style={{ background: 'linear-gradient(135deg, rgba(209, 165, 98,0.05) 0%, rgba(209, 165, 98,0.15) 100%)', borderRadius: '16px', padding: '18px', border: '1px solid rgba(209, 165, 98,0.25)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <label style={{ fontSize: '0.75rem', fontWeight:800, color:'var(--gold)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>🌾 Harvest Weight</label>
                     <div style={{ display:'flex', alignItems: 'baseline', gap: '6px' }}>
-                      <input type="number" value={harvestWeight} onChange={e => setHarvestWeight(e.target.value)} placeholder="0" style={{ width:'100%', border:'none', borderBottom: '2px solid rgba(212,175,55,0.3)', fontSize: '1.6rem', fontWeight:900, color:'var(--gold)', outline:'none', background: 'transparent', padding: '4px 0', boxSizing: 'border-box' }} />
-                      <span style={{ color:'#b89326', fontWeight:800, fontSize: '1rem' }}>kg</span>
+                      <input type="number" value={harvestWeight} onChange={e => setHarvestWeight(e.target.value)} placeholder="0" style={{ width:'100%', border:'none', borderBottom: '2px solid rgba(209, 165, 98,0.3)', fontSize: '1.6rem', fontWeight:900, color:'var(--gold)', outline:'none', background: 'transparent', padding: '4px 0', boxSizing: 'border-box' }} />
+                      <span style={{ color:'var(--gold)', fontWeight:800, fontSize: '1rem' }}>kg</span>
                     </div>
-                    {harvestNum > 0 && <span style={{ fontSize: '0.75rem', color: agriEligible ? '#16a34a' : '#b89326', fontWeight: 700 }}>{agriEligible ? '✓ Above Nisab' : `${(agriNisab - harvestNum).toLocaleString()} kg more needed`}</span>}
+                    {harvestNum > 0 && <span style={{ fontSize: '0.75rem', color: agriEligible ? '#16a34a' : 'var(--gold)', fontWeight: 700 }}>{agriEligible ? '✓ Above Nisab' : `${(agriNisab - harvestNum).toLocaleString()} kg more needed`}</span>}
                   </div>
                 </div>
               </div>
@@ -843,7 +843,7 @@ export default function ZakatTab({ data }) {
         <div className="zakat-right-col" style={{ flex: '1 1 300px', position: 'sticky', top: '24px' }}>
           <div className="print-card" style={{ background: 'var(--bg)', borderRadius: '24px', padding: '32px', boxShadow: '0 16px 48px rgba(0,0,0,0.07)', border: '1px solid var(--border)', position: 'relative', overflow: 'hidden' }}>
             {/* Top accent bar */}
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'linear-gradient(90deg, var(--primary) 0%, #22c5b0 50%, #d4af37 100%)' }} />
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'linear-gradient(90deg, var(--primary) 0%, #22c5b0 50%, var(--gold) 100%)' }} />
 
             <h3 style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px', letterSpacing: '-0.3px' }}>
               <Calculator size={18} color="var(--primary)" /> Zakat Summary
@@ -885,9 +885,9 @@ export default function ZakatTab({ data }) {
 
             {/* Agriculture Summary */}
             {(showAdvancedAssets || harvestNum > 0) && (
-              <div style={{ background: 'linear-gradient(135deg, rgba(212,175,55,0.05) 0%, rgba(212,175,55,0.12) 100%)', borderRadius: '18px', padding: '20px', marginBottom: '16px', border: '1px solid rgba(212,175,55,0.2)' }}>
+              <div style={{ background: 'linear-gradient(135deg, rgba(209, 165, 98,0.05) 0%, rgba(209, 165, 98,0.12) 100%)', borderRadius: '18px', padding: '20px', marginBottom: '16px', border: '1px solid rgba(209, 165, 98,0.2)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#b89326', textTransform: 'uppercase', letterSpacing: '0.5px' }}>🌾 Agriculture Zakat</span>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--gold)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>🌾 Agriculture Zakat</span>
                   <span style={{ fontSize: '1.3rem', fontWeight: 900, color: agriEligible ? 'var(--gold)' : 'var(--text-light)', letterSpacing: '-0.5px' }}>
                     {agriZakatDue > 0 ? `${agriZakatDue.toLocaleString(undefined, { maximumFractionDigits: 1 })} kg` : '—'}
                   </span>

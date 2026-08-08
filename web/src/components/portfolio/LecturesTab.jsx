@@ -46,12 +46,12 @@ export default function LecturesTab() {
       <div className="animate-fade-in stagger-1" style={{ background: 'var(--bg)', borderRadius: '24px', padding: '0', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--border)', overflow: 'hidden' }}>
         
         {/* Header Banner */}
-        <div style={{ background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, #3C2D3E 100%)', padding: '32px', position: 'relative', overflow: 'hidden', borderBottom: '1px solid rgba(201, 149, 42, 0.15)' }}>
-          <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(201, 149, 42, 0.08)', borderRadius: '50%' }} />
-          <div style={{ position: 'absolute', bottom: '-60px', left: '30%', width: '150px', height: '150px', background: 'rgba(201, 149, 42, 0.04)', borderRadius: '50%' }} />
+        <div style={{ background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, var(--text-dark) 100%)', padding: '32px', position: 'relative', overflow: 'hidden', borderBottom: '1px solid rgba(209, 165, 98, 0.15)' }}>
+          <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(209, 165, 98, 0.08)', borderRadius: '50%' }} />
+          <div style={{ position: 'absolute', bottom: '-60px', left: '30%', width: '150px', height: '150px', background: 'rgba(209, 165, 98, 0.04)', borderRadius: '50%' }} />
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <div style={{ width: '52px', height: '52px', background: 'rgba(201, 149, 42, 0.12)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', backdropFilter: 'blur(4px)', border: '1px solid rgba(201, 149, 42, 0.35)' }}>
+              <div style={{ width: '52px', height: '52px', background: 'rgba(209, 165, 98, 0.12)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', backdropFilter: 'blur(4px)', border: '1px solid rgba(209, 165, 98, 0.35)' }}>
                 <BookOpen size={26} fill="currentColor" />
               </div>
               <div>
@@ -140,7 +140,7 @@ export default function LecturesTab() {
                   </div>
                 ) : (
                   <div style={{ width: '100%', height: '180px', background: 'linear-gradient(145deg, var(--primary-50) 0%, var(--bg-section) 100%)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', borderBottom: '1px solid var(--border)' }}>
-                    <div style={{ width: '60px', height: '60px', background: 'var(--primary-50)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px', border: '1px solid var(--primary-100)', boxShadow: '0 8px 20px rgba(201, 149, 42, 0.15)' }}>
+                    <div style={{ width: '60px', height: '60px', background: 'var(--primary-50)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px', border: '1px solid var(--primary-100)', boxShadow: '0 8px 20px rgba(209, 165, 98, 0.15)' }}>
                       <FileText size={28} strokeWidth={1.5} color="var(--primary)" />
                     </div>
                     <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--primary)', letterSpacing: '0.5px', textTransform: 'uppercase' }}>PDF Document</span>

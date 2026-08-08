@@ -82,7 +82,7 @@ class AaoifiScreeningService
 
         if ($businessStatus === 'fail' || $debtStatus === 'fail' || $cashStatus === 'fail' || $impIncomeStatus === 'fail') {
             $finalStatus = 'non-halal';
-        } elseif ($businessStatus === 'warning' || $debtStatus === 'insufficient_data' || $cashStatus === 'insufficient_data') {
+        } elseif ($businessStatus === 'warning' || $businessStatus === 'doubtful' || $debtStatus === 'insufficient_data' || $cashStatus === 'insufficient_data') {
             $finalStatus = 'doubtful';
         }
 
@@ -128,9 +128,14 @@ class AaoifiScreeningService
             $oldStatus = $company->current_status;
             $company->update(['current_status' => $finalStatus]);
 
-            $reason = $finalStatus === 'non-halal'
-                ? ($businessStatus === 'fail' ? 'Failed Rule 1: Non-compliant business activity.' : 'Failed AAOIFI financial ratio screening.')
-                : 'Stock passes all screens cleanly. Status is 100% Halal and Shariah-compliant.';
+            $reason = 'Stock passes all screens cleanly. Status is 100% Halal and Shariah-compliant.';
+            if ($finalStatus === 'non-halal') {
+                $reason = ($businessStatus === 'fail' ? 'Failed Rule 1: Business Activity Check. ' . ($aiResult ?? 'The stock failed due to non-compliant business activities.') : 'Failed AAOIFI financial ratio screening.');
+            } elseif ($finalStatus === 'doubtful') {
+                $reason = ($businessStatus === 'doubtful' || $businessStatus === 'warning') ? 'Doubtful Rule 1: Business Activity Check. ' . ($aiResult ?? 'Requires scholar review.') : 'Doubtful AAOIFI financial ratio screening (insufficient data).';
+            } else {
+                $reason = 'Stock passes all screens cleanly. Status is 100% Halal and Shariah-compliant.' . ($aiResult ? ' Notes: ' . $aiResult : '');
+            }
 
             StockStatus::updateOrCreate(
                 ['company_id' => $company->id],

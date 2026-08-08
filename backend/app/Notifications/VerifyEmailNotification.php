@@ -63,7 +63,7 @@ class VerifyEmailNotification extends Notification implements ShouldQueue
         );
 
         // Map it to the frontend URL
-        $frontendUrl = config('app.frontend_url', env('FRONTEND_URL', 'http://localhost:5173'));
+        $frontendUrl = config('app.frontend_url', env('FRONTEND_URL', 'https://iirshad.com'));
 
         // Pass the signed API URL as a query parameter to the frontend
         return rtrim($frontendUrl, '/').'/verify-email?url='.urlencode($apiUrl);

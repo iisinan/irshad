@@ -34,23 +34,23 @@ const ShariahPage = () => (
 
       {/* ─── Hero ─── */}
       <div style={{
-        background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, #3C2D3E 100%)',
+        background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, var(--text-dark) 100%)',
         borderRadius: '28px', padding: '64px 56px', marginBottom: '48px',
         position: 'relative', overflow: 'hidden', textAlign: 'center',
-        boxShadow: '0 20px 50px rgba(0,0,0,0.3)', border: '1px solid rgba(201, 149, 42, 0.2)'
+        boxShadow: '0 20px 50px rgba(0,0,0,0.3)', border: '1px solid rgba(209, 165, 98, 0.2)'
       }}>
         {/* Decorative orbs */}
-        <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: '260px', height: '260px', background: 'rgba(201, 149, 42, 0.08)', borderRadius: '50%' }} />
-        <div style={{ position: 'absolute', bottom: '-80px', left: '-40px', width: '200px', height: '200px', background: 'rgba(201, 149, 42, 0.04)', borderRadius: '50%' }} />
+        <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: '260px', height: '260px', background: 'rgba(209, 165, 98, 0.08)', borderRadius: '50%' }} />
+        <div style={{ position: 'absolute', bottom: '-80px', left: '-40px', width: '200px', height: '200px', background: 'rgba(209, 165, 98, 0.04)', borderRadius: '50%' }} />
 
         <div style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(201, 149, 42, 0.12)', border: '1px solid rgba(201, 149, 42, 0.3)', padding: '6px 18px', borderRadius: '40px', marginBottom: '24px' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(209, 165, 98, 0.12)', border: '1px solid rgba(209, 165, 98, 0.3)', padding: '6px 18px', borderRadius: '40px', marginBottom: '24px' }}>
             <BookOpen size={14} color="var(--primary)" />
             <span style={{ fontSize: '0.69rem', fontWeight: 800, color: 'var(--primary)', letterSpacing: '1px', textTransform: 'uppercase' }}>Our Methodology</span>
           </div>
           <h1 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 900, letterSpacing: '-1px', color: 'white', lineHeight: 1.1, marginBottom: '20px' }}>
             AAOIFI Screening<br />
-            <span style={{ background: 'linear-gradient(90deg, var(--gold), #F5D06A)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+            <span style={{ background: 'linear-gradient(90deg, var(--gold), var(--gold))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
               Standards
             </span>
           </h1>
@@ -98,7 +98,7 @@ const ShariahPage = () => (
       <div style={{ background: 'var(--bg)', borderRadius: '24px', padding: '40px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-md)', marginBottom: '24px', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: 'var(--non-halal)', borderRadius: '4px 0 0 4px' }} />
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
-          <div style={{ width: '52px', height: '52px', background: '#fee2e2', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: '1px solid #fecaca' }}>
+          <div style={{ width: '52px', height: '52px', background: 'var(--non-halal-bg)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: '1px solid var(--non-halal-border)' }}>
             <XCircle size={26} color="var(--non-halal)" />
           </div>
           <div>
@@ -124,7 +124,7 @@ const ShariahPage = () => (
           ].map(item => (
             <div key={item} style={{
               display: 'flex', alignItems: 'center', gap: '12px',
-              background: '#fff5f5', border: '1px solid #fecaca',
+              background: 'var(--non-halal-bg)', border: '1px solid var(--non-halal-border)',
               borderRadius: '12px', padding: '12px 16px',
             }}>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--non-halal)', flexShrink: 0 }} />
@@ -172,15 +172,15 @@ const ShariahPage = () => (
 
       {/* ─── Phase 3: Purification ─── */}
       <div style={{
-        background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, #3C2D3E 100%)',
+        background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, var(--text-dark) 100%)',
         borderRadius: '24px', padding: '40px', boxShadow: '0 16px 40px rgba(0,0,0,0.3)',
-        border: '1px solid rgba(201, 149, 42, 0.2)',
+        border: '1px solid rgba(209, 165, 98, 0.2)',
         position: 'relative', overflow: 'hidden', marginBottom: '24px'
       }}>
-        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '180px', height: '180px', background: 'rgba(201, 149, 42, 0.08)', borderRadius: '50%' }} />
+        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '180px', height: '180px', background: 'rgba(209, 165, 98, 0.08)', borderRadius: '50%' }} />
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px', position: 'relative', zIndex: 1 }}>
-          <div style={{ width: '52px', height: '52px', background: 'rgba(201, 149, 42, 0.12)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: '1px solid rgba(201, 149, 42, 0.35)' }}>
+          <div style={{ width: '52px', height: '52px', background: 'rgba(209, 165, 98, 0.12)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: '1px solid rgba(209, 165, 98, 0.35)' }}>
             <Sparkles size={26} color="var(--primary)" />
           </div>
           <div>

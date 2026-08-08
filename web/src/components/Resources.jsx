@@ -108,12 +108,12 @@ export default function ResourcesPage() {
           <div className="animate-fade-in stagger-1" style={{ background: 'var(--bg)', borderRadius: '24px', padding: '0', boxShadow: '0 24px 64px rgba(0,0,0,0.06)', border: '1px solid var(--border)', overflow: 'hidden' }}>
             
             {/* Header Banner */}
-            <div style={{ background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, #3C2D3E 100%)', padding: '32px', position: 'relative', overflow: 'hidden', borderBottom: '1px solid rgba(201, 149, 42, 0.15)' }}>
-              <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(201, 149, 42, 0.08)', borderRadius: '50%', pointerEvents: 'none' }} />
-              <div style={{ position: 'absolute', bottom: '-60px', left: '30%', width: '150px', height: '150px', background: 'rgba(201, 149, 42, 0.04)', borderRadius: '50%', pointerEvents: 'none' }} />
+            <div style={{ background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, var(--text-dark) 100%)', padding: '32px', position: 'relative', overflow: 'hidden', borderBottom: '1px solid rgba(209, 165, 98, 0.15)' }}>
+              <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(209, 165, 98, 0.08)', borderRadius: '50%', pointerEvents: 'none' }} />
+              <div style={{ position: 'absolute', bottom: '-60px', left: '30%', width: '150px', height: '150px', background: 'rgba(209, 165, 98, 0.04)', borderRadius: '50%', pointerEvents: 'none' }} />
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px', position: 'relative', zIndex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <div style={{ width: '52px', height: '52px', background: 'rgba(201, 149, 42, 0.12)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', backdropFilter: 'blur(4px)', border: '1px solid rgba(201, 149, 42, 0.3)' }}>
+                  <div style={{ width: '52px', height: '52px', background: 'rgba(209, 165, 98, 0.12)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', backdropFilter: 'blur(4px)', border: '1px solid rgba(209, 165, 98, 0.3)' }}>
                     <BookOpen size={26} fill="currentColor" />
                   </div>
                   <div>
@@ -231,7 +231,7 @@ export default function ResourcesPage() {
                       </div>
                     ) : (
                       <div style={{ width: '100%', height: '180px', background: 'linear-gradient(145deg, var(--primary-50) 0%, var(--bg-section) 100%)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', borderBottom: '1px solid var(--border)' }}>
-                        <div style={{ width: '60px', height: '60px', background: 'var(--primary-50)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px', border: '1px solid var(--primary-100)', boxShadow: '0 8px 20px rgba(201, 149, 42, 0.15)' }}>
+                        <div style={{ width: '60px', height: '60px', background: 'var(--primary-50)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px', border: '1px solid var(--primary-100)', boxShadow: '0 8px 20px rgba(209, 165, 98, 0.15)' }}>
                           <FileText size={28} strokeWidth={1.5} color="var(--primary)" />
                         </div>
                         <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--primary)', letterSpacing: '0.5px', textTransform: 'uppercase' }}>PDF Document</span>
@@ -283,7 +283,7 @@ export default function ResourcesPage() {
                             background: categoryFilter === cat ? 'var(--primary)' : 'var(--bg-section)',
                             color: categoryFilter === cat ? 'white' : 'var(--text-dark)',
                             fontSize: '0.82rem', fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s',
-                            boxShadow: categoryFilter === cat ? '0 4px 12px rgba(201, 149, 42, 0.25)' : 'none'
+                            boxShadow: categoryFilter === cat ? '0 4px 12px rgba(209, 165, 98, 0.25)' : 'none'
                           }}
                         >
                           {cat}
@@ -459,7 +459,7 @@ export default function ResourcesPage() {
               {/* Actions */}
               <div style={{ display: 'flex', gap: '12px', paddingTop: '8px', borderTop: '1px solid var(--border)', marginTop: '8px' }}>
                 <button type="button" onClick={() => setShowManageModal(false)} style={{ flex: 1, padding: '13px', borderRadius: '12px', background: 'var(--bg-section)', border: 'none', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer', fontSize: '0.88rem' }}>Cancel</button>
-                <button type="submit" disabled={manageLoading} style={{ flex: 2, padding: '13px', borderRadius: '12px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 800, cursor: manageLoading ? 'not-allowed' : 'pointer', fontSize: '0.88rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(118,88,122,0.22)' }}>
+                <button type="submit" disabled={manageLoading} style={{ flex: 2, padding: '13px', borderRadius: '12px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 800, cursor: manageLoading ? 'not-allowed' : 'pointer', fontSize: '0.88rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(91, 41, 113,0.22)' }}>
                   {manageLoading ? <div className="spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', borderColor: 'rgba(255,255,255,0.3)', borderTopColor: 'white' }} /> : (manageData.id ? 'Save Changes' : 'Add Resource')}
                 </button>
               </div>

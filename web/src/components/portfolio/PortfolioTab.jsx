@@ -62,7 +62,7 @@ function EditHoldingModal({ holding, onClose, onSuccess }) {
   };
   return createPortal(
     <div className="animate-fade-in" style={{ position:'fixed', inset:0, background:'rgba(6, 9, 14, 0.65)', backdropFilter:'blur(12px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:100000, padding:'24px' }}>
-      <div style={{ background: 'var(--bg)', borderRadius:'28px', width:'100%', maxWidth:'500px', boxShadow:'0 32px 80px rgba(0,0,0,0.35), 0 0 0 1px rgba(201, 149, 42, 0.15) inset', overflow:'hidden', animation:'slideUpFade 0.4s cubic-bezier(0.16,1,0.3,1)' }}>
+      <div style={{ background: 'var(--bg)', borderRadius:'28px', width:'100%', maxWidth:'500px', boxShadow:'0 32px 80px rgba(0,0,0,0.35), 0 0 0 1px rgba(209, 165, 98, 0.15) inset', overflow:'hidden', animation:'slideUpFade 0.4s cubic-bezier(0.16,1,0.3,1)' }}>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'24px 28px 16px', borderBottom:'1px solid rgba(0,0,0,0.04)' }}>
           <div>
             <div style={{ fontWeight:900, fontSize: '0.97rem', color:'var(--text-dark)', letterSpacing: '-0.3px' }}>Edit {holding.symbol}</div>
@@ -84,7 +84,7 @@ function EditHoldingModal({ holding, onClose, onSuccess }) {
           </div>
           <div style={{ display:'flex', gap:'12px' }}>
             <button type="button" onClick={onClose} style={{ flex:1, padding:'14px', borderRadius:'14px', background: 'var(--bg)', border:'2px solid var(--border)', fontWeight:800, fontSize: '0.79rem', cursor:'pointer', color:'var(--text-dark)', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background='var(--bg-section)'} onMouseLeave={e => e.currentTarget.style.background='var(--bg)'}>Cancel</button>
-            <button type="submit" disabled={loading} style={{ flex:1.5, padding:'14px', borderRadius:'14px', background:'var(--gold-grad)', color:'var(--bg)', border:'none', fontWeight:800, fontSize: '0.79rem', cursor:loading?'not-allowed':'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', boxShadow:'0 8px 24px rgba(212,175,55,0.3)', transition: 'transform 0.2s' }} onMouseEnter={e => e.currentTarget.style.transform='translateY(-2px)'} onMouseLeave={e => e.currentTarget.style.transform='none'}>
+            <button type="submit" disabled={loading} style={{ flex:1.5, padding:'14px', borderRadius:'14px', background:'var(--gold-grad)', color:'var(--bg)', border:'none', fontWeight:800, fontSize: '0.79rem', cursor:loading?'not-allowed':'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', boxShadow:'0 8px 24px rgba(209, 165, 98,0.3)', transition: 'transform 0.2s' }} onMouseEnter={e => e.currentTarget.style.transform='translateY(-2px)'} onMouseLeave={e => e.currentTarget.style.transform='none'}>
               {loading ? <div className="spinner" style={{ width:'16px', height:'16px', borderTopColor:'white' }}/> : 'Save Changes'}
             </button>
           </div>
@@ -116,7 +116,7 @@ function HoldingRow({ holding, onDelete, onEdit }) {
   return (
     <div
       className="hover-card"
-      onClick={() => navigate(`/market/${holding.symbol}`, { state: { stock: holding } })}
+      onClick={() => navigate(`/market/${holding.symbol}/aaoifi`, { state: { stock: holding } })}
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => { setHov(false); setMenuOpen(false); }}
       style={{
@@ -128,7 +128,7 @@ function HoldingRow({ holding, onDelete, onEdit }) {
         transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
         position: 'relative',
         cursor: 'pointer',
-        boxShadow: hov ? '0 12px 32px rgba(0,0,0,0.05)' : '0 4px 16px rgba(0,0,0,0.02)'
+        boxShadow: hov ? '0 12px 32px rgba(91, 41, 113, 0.08)' : '0 4px 16px rgba(0,0,0,0.02)'
       }}
     >
       {/* Indicator */}
@@ -144,12 +144,12 @@ function HoldingRow({ holding, onDelete, onEdit }) {
               {badge.text}
             </span>
             {Number(holding.total_dividends || 0) > 0 && (
-              <span style={{ padding: '2px 6px', borderRadius: '4px', background: 'rgba(212,175,55,0.12)', color: 'var(--gold, #D4AF37)', fontSize: '0.48rem', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+              <span style={{ padding: '2px 6px', borderRadius: '4px', background: 'var(--primary-50)', color: 'var(--primary)', fontSize: '0.48rem', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
                 ₦{Number(holding.total_dividends).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Divs
               </span>
             )}
             {Number(holding.purification_due || 0) > 0 && (
-              <span style={{ padding: '2px 6px', borderRadius: '4px', background: 'rgba(245,158,11,0.12)', color: '#D97706', fontSize: '0.48rem', fontWeight: 800 }}>
+              <span style={{ padding: '2px 6px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--non-halal)', fontSize: '0.48rem', fontWeight: 800 }}>
                 ₦{Number(holding.purification_due).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} to purify
               </span>
             )}
@@ -181,7 +181,7 @@ function HoldingRow({ holding, onDelete, onEdit }) {
         <button 
           onClick={() => onEdit(holding)}
           style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-dark)', cursor: 'pointer', padding: '8px 12px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, fontSize: '0.7rem', transition: 'all 0.2s' }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(212,175,55,0.1)'; e.currentTarget.style.borderColor = 'rgba(212,175,55,0.3)'; e.currentTarget.style.color = 'var(--gold)'; }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'var(--primary-50)'; e.currentTarget.style.borderColor = 'var(--primary-100)'; e.currentTarget.style.color = 'var(--primary)'; }}
           onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-dark)'; }}
         >
           <Edit2 size={13} /> Edit
@@ -237,121 +237,124 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
         />
       )}
 
-      {/* ─── DASHBOARD HERO ─── */}
-      <div className="stagger-1 hover-card" style={{ 
-        background: 'linear-gradient(135deg, rgba(201, 149, 42, 0.04) 0%, rgba(198,146,32,0.02) 100%)', 
-        border: '1px solid rgba(201, 149, 42, 0.15)',
-        borderRadius: '24px', 
-        padding: '28px 36px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '12px',
-        position: 'relative',
-        overflow: 'hidden',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.03)'
-      }}>
-        {/* Background Mesh */}
-        <div style={{ position: 'absolute', top: '-50%', left: '-20%', width: '100%', height: '200%', background: 'radial-gradient(ellipse at center, rgba(201, 149, 42, 0.05) 0%, transparent 60%)', zIndex: 0, pointerEvents: 'none' }} />
-        
-        {/* Left: Value & Stats */}
-        <div style={{ zIndex: 1, flex: 1, minWidth: '260px' }}>
-          {/* Header Row */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-            <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.2px', color: 'var(--text-muted)' }}>Total Balance</span>
-            <button
-              onClick={handleRefresh}
-              style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '6px', cursor: 'pointer', color: 'var(--text-muted)', padding: '3px 5px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', transition: 'all 0.15s' }}
-              title="Refresh portfolio"
-            >
-              <RefreshCw size={11} style={{ animation: refreshing ? 'spin 0.8s linear infinite' : 'none' }}/>
-            </button>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '2px 7px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '20px' }}>
-              <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#22c55e', animation: 'pulse 2s ease infinite' }}/>
-              <span style={{ fontSize: '0.52rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Live</span>
-            </div>
-          </div>
-
-          {/* Value + Avg Return Badge in a unified line */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '8px' }}>
-            <div style={{ fontSize: 'clamp(1.75rem, 4vw, 2.4rem)', fontWeight: 950, color: 'var(--text-dark)', letterSpacing: '-1.2px', lineHeight: 1 }}>
-              <AnimCounter target={totalBalance}/>
-            </div>
-
-            {totalGainPct !== null && (
-              <div style={{ 
-                display: 'inline-flex', 
-                alignItems: 'center', 
-                gap: '4px', 
-                padding: '3px 8px', 
-                borderRadius: '8px', 
-                background: isPortfolioUp ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
-                border: isPortfolioUp ? '1px solid rgba(34,197,94,0.2)' : '1px solid rgba(239,68,68,0.2)'
-              }}>
-                {isPortfolioUp ? <ArrowUpRight size={12} color="#16a34a"/> : <ArrowDownRight size={12} color="#dc2626"/>}
-                <span style={{ fontSize: '0.68rem', fontWeight: 800, color: isPortfolioUp ? '#16a34a' : '#dc2626' }}>
-                  {isPortfolioUp ? '+' : ''}{totalGainPct}% Avg Return
-                </span>
+      {/* ─── STICKY HEADER ─── */}
+      <div style={{ position: 'sticky', top: '16px', zIndex: 30, display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        {/* ─── DASHBOARD HERO ─── */}
+        <div className="stagger-1 hover-card" style={{ 
+          background: 'linear-gradient(135deg, var(--bg-section) 0%, var(--bg) 100%)', 
+          border: '1px solid var(--border)',
+          borderRadius: '24px', 
+          padding: '28px 36px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '12px',
+          position: 'relative',
+          overflow: 'hidden',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.03)'
+        }}>
+          {/* Background Mesh */}
+          <div style={{ position: 'absolute', top: '-50%', left: '-20%', width: '100%', height: '200%', background: 'radial-gradient(ellipse at center, var(--primary-50) 0%, transparent 60%)', zIndex: 0, pointerEvents: 'none' }} />
+          
+          {/* Left: Value & Stats */}
+          <div style={{ zIndex: 1, flex: 1, minWidth: '260px' }}>
+            {/* Header Row */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.2px', color: 'var(--text-muted)' }}>Total Balance</span>
+              <button
+                onClick={handleRefresh}
+                style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '6px', cursor: 'pointer', color: 'var(--text-muted)', padding: '3px 5px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', transition: 'all 0.15s' }}
+                title="Refresh portfolio"
+              >
+                <RefreshCw size={11} style={{ animation: refreshing ? 'spin 0.8s linear infinite' : 'none' }}/>
+              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '2px 7px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '20px' }}>
+                <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#22c55e', animation: 'pulse 2s ease infinite' }}/>
+                <span style={{ fontSize: '0.52rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Live</span>
               </div>
-            )}
+            </div>
+
+            {/* Value + Avg Return Badge in a unified line */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '8px' }}>
+              <div style={{ fontSize: 'clamp(1.75rem, 4vw, 2.4rem)', fontWeight: 950, color: 'var(--text-dark)', letterSpacing: '-1.2px', lineHeight: 1 }}>
+                <AnimCounter target={totalBalance}/>
+              </div>
+
+              {totalGainPct !== null && (
+                <div style={{ 
+                  display: 'inline-flex', 
+                  alignItems: 'center', 
+                  gap: '4px', 
+                  padding: '3px 8px', 
+                  borderRadius: '8px', 
+                  background: isPortfolioUp ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
+                  border: isPortfolioUp ? '1px solid rgba(34,197,94,0.2)' : '1px solid rgba(239,68,68,0.2)'
+                }}>
+                  {isPortfolioUp ? <ArrowUpRight size={12} color="#16a34a"/> : <ArrowDownRight size={12} color="#dc2626"/>}
+                  <span style={{ fontSize: '0.68rem', fontWeight: 800, color: isPortfolioUp ? '#16a34a' : '#dc2626' }}>
+                    {isPortfolioUp ? '+' : ''}{totalGainPct}% Avg Return
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Mini Stats Pills */}
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              {[
+                { lbl: 'Halal', val: halalCount, color: '#16a34a' },
+                { lbl: 'Non-Halal', val: nonHalalCount, color: '#dc2626' }
+              ].map(stat => (
+                <div key={stat.lbl} style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '6px', 
+                  background: 'var(--bg)', 
+                  padding: '4px 10px', 
+                  borderRadius: '100px', 
+                  border: '1px solid var(--border)', 
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.02)' 
+                }}>
+                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: stat.color }} />
+                  <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{stat.lbl}</span>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 900, color: 'var(--text-dark)' }}>{stat.val}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Mini Stats Pills */}
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+        </div>
+
+        {/* ─── ACTION BAR & FILTERS ─── */}
+        <div className="stagger-2" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', background: 'var(--bg)', padding: '16px 24px', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 2px 12px rgba(0,0,0,0.02)' }}>
+          
+          {/* Filters */}
+          <div style={{ display:'flex', background:'var(--bg-section)', borderRadius:'12px', padding:'4px', gap:'4px' }}>
             {[
-              { lbl: 'Halal', val: halalCount, color: '#16a34a' },
-              { lbl: 'Non-Halal', val: nonHalalCount, color: '#dc2626' }
-            ].map(stat => (
-              <div key={stat.lbl} style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '6px', 
-                background: 'var(--bg)', 
-                padding: '4px 10px', 
-                borderRadius: '100px', 
-                border: '1px solid var(--border)', 
-                boxShadow: '0 1px 4px rgba(0,0,0,0.02)' 
-              }}>
-                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: stat.color }} />
-                <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{stat.lbl}</span>
-                <span style={{ fontSize: '0.72rem', fontWeight: 900, color: 'var(--text-dark)' }}>{stat.val}</span>
-              </div>
+              { id:'all', label:'All Holdings' },
+              { id:'halal', label:'Halal' },
+              { id:'nonhalal', label:'Non-Halal' }
+            ].map(f => (
+              <button key={f.id} onClick={() => setActiveFilter(f.id)} style={{
+                padding:'8px 16px', borderRadius:'8px', fontSize: '0.7rem', fontWeight:700, cursor:'pointer', border:'none', transition:'all 0.2s cubic-bezier(0.16,1,0.3,1)',
+                background: activeFilter === f.id ? 'var(--bg)' : 'transparent',
+                color:      activeFilter === f.id ? 'var(--text-dark)' : 'var(--text-muted)',
+                boxShadow:  activeFilter === f.id ? 'var(--shadow-sm)' : 'none',
+              }}>{f.label}</button>
             ))}
           </div>
-        </div>
 
-      </div>
-
-      {/* ─── ACTION BAR & FILTERS ─── */}
-      <div className="stagger-2" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', background: 'var(--bg)', padding: '16px 24px', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 2px 12px rgba(0,0,0,0.02)' }}>
-        
-        {/* Filters */}
-        <div style={{ display:'flex', background:'var(--bg-section)', borderRadius:'12px', padding:'4px', gap:'4px' }}>
-          {[
-            { id:'all', label:'All Holdings' },
-            { id:'halal', label:'Halal' },
-            { id:'nonhalal', label:'Non-Halal' }
-          ].map(f => (
-            <button key={f.id} onClick={() => setActiveFilter(f.id)} style={{
-              padding:'8px 16px', borderRadius:'8px', fontSize: '0.7rem', fontWeight:700, cursor:'pointer', border:'none', transition:'all 0.2s cubic-bezier(0.16,1,0.3,1)',
-              background: activeFilter === f.id ? 'var(--bg)' : 'transparent',
-              color:      activeFilter === f.id ? 'var(--text-dark)' : 'var(--text-muted)',
-              boxShadow:  activeFilter === f.id ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
-            }}>{f.label}</button>
-          ))}
-        </div>
-
-        {/* Actions */}
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button
-            onClick={() => setShowAddModal('manual')}
-            style={{ display:'flex', alignItems:'center', gap:'8px', padding:'10px 20px', borderRadius:'12px', background:'var(--gold-grad)', color:'var(--bg)', border:'none', fontWeight:800, fontSize: '0.75rem', cursor:'pointer', boxShadow:'0 8px 20px rgba(212,175,55,0.3)', transition:'all 0.2s' }}
-            onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 12px 24px rgba(212,175,55,0.4)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='0 8px 20px rgba(212,175,55,0.3)'; }}
-          >
-            <Plus size={16}/> Add Holding
-          </button>
+          {/* Actions */}
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              onClick={() => setShowAddModal('manual')}
+              style={{ display:'flex', alignItems:'center', gap:'8px', padding:'10px 20px', borderRadius:'12px', background:'var(--primary)', color:'#FFFFFF', border:'none', fontWeight:800, fontSize: '0.75rem', cursor:'pointer', boxShadow:'var(--shadow-sm)', transition:'all 0.2s' }}
+              onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 8px 24px rgba(91, 41, 113, 0.3)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='var(--shadow-sm)'; }}
+            >
+              <Plus size={16}/> Add Holding
+            </button>
+          </div>
         </div>
       </div>
 
@@ -384,7 +387,7 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
               {activeFilter==='all' ? 'Start tracking your investments and ensure they align with Islamic financial principles.' : 'Try adjusting your filters to view other assets.'}
             </p>
             {activeFilter==='all' && (
-              <button onClick={() => setShowAddModal(true)} style={{ display:'inline-flex', alignItems:'center', gap:'8px', padding:'14px 28px', borderRadius:'14px', background:'var(--gold-grad)', color:'var(--bg)', border:'none', fontWeight:800, fontSize: '0.84rem', cursor:'pointer', boxShadow:'0 8px 24px rgba(212,175,55,0.3)', transition:'all 0.2s' }} onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; }} onMouseLeave={e => { e.currentTarget.style.transform='none'; }}>
+              <button onClick={() => setShowAddModal(true)} style={{ display:'inline-flex', alignItems:'center', gap:'8px', padding:'14px 28px', borderRadius:'14px', background:'var(--primary)', color:'#FFFFFF', border:'none', fontWeight:800, fontSize: '0.84rem', cursor:'pointer', boxShadow:'var(--shadow-sm)', transition:'all 0.2s' }} onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 8px 24px rgba(91, 41, 113, 0.3)'; }} onMouseLeave={e => { e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='var(--shadow-sm)'; }}>
                 <Plus size={18}/> Add Your First Asset
               </button>
             )}

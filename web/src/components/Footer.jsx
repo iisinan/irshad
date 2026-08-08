@@ -1,78 +1,115 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Mail } from 'lucide-react';
+import { Mail, Shield, Globe, ArrowUpRight } from 'lucide-react';
+
+const NAV = [
+  {
+    title: 'Platform',
+    links: [
+      { label: 'Market Explorer', to: '/portfolio#market' },
+      { label: 'Portfolio Tracker', to: '/portfolio' },
+      { label: 'Halal Baskets', to: '/portfolio#market' },
+      { label: 'Purification Calc', to: '/portfolio#market' },
+    ],
+  },
+  {
+    title: 'Company',
+    links: [
+      { label: 'Our Story', to: '/about' },
+      { label: 'Shariah Method', to: '/shariah' },
+      { label: 'Pricing', to: '/pricing' },
+      { label: 'Resources', to: '/resources' },
+    ],
+  },
+  {
+    title: 'Legal',
+    links: [
+      { label: 'Terms of Service', to: '/terms' },
+      { label: 'Privacy Policy', to: '/privacy' },
+      { label: 'Shariah Standards', to: '/shariah' },
+      { label: 'Disclosures', to: '/disclosure' },
+    ],
+  },
+];
 
 const Footer = () => (
   <footer className="site-footer">
+    {/* Top shimmer line */}
+    <div className="footer-shimmer-line" />
+
     <div className="footer-inner">
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-        <div className="footer-logo-area">
-          <img
-            src="/logo.svg"
-            alt="Irshad"
-            style={{
-              height: '48px',
-              width: 'auto',
-              filter: 'brightness(0) invert(1)',
-              opacity: 0.95,
-            }}
-          />
+      {/* ── Brand column ── */}
+      <div className="footer-brand-col">
+        {/* Logo mark */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+          <div style={{
+            width: '40px', height: '40px', borderRadius: '12px',
+            background: 'var(--gold-grad)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontWeight: 900, fontSize: '1.1rem', color: '#1A0E00',
+            flexShrink: 0,
+          }}>إ</div>
+          <span style={{ fontWeight: 900, fontSize: '1.2rem', color: 'white', letterSpacing: '-0.5px' }}>
+            Irshad
+          </span>
         </div>
+
         <p className="footer-desc">
-          The premier platform for Shariah-compliant stock screening and market analytics on the Nigerian Exchange.
+          Nigeria's premier platform for Shariah-compliant stock screening and market analytics on the NGX.
         </p>
-        
-        <div style={{ display: 'flex', gap: '16px', marginTop: '32px' }}>
-          <a href="mailto:hello@iirshad.com" style={{ color: '#9CA3AF', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '8px' }} onMouseEnter={e => e.currentTarget.style.color = 'white'} onMouseLeave={e => e.currentTarget.style.color = '#9CA3AF'}>
-            <Mail size={18} />
-            <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Contact Us</span>
-          </a>
+
+        {/* Contact */}
+        <a
+          href="mailto:hello@iirshad.com"
+          className="footer-contact-link"
+        >
+          <Mail size={15} />
+          hello@iirshad.com
+        </a>
+
+        {/* Trust badges */}
+        <div style={{ display: 'flex', gap: '8px', marginTop: '28px', flexWrap: 'wrap' }}>
+          <span className="footer-badge">
+            <Shield size={12} />
+            AAOIFI Compliant
+          </span>
+          <span className="footer-badge">
+            <Globe size={12} />
+            Nigeria
+          </span>
         </div>
       </div>
 
-      <div className="footer-col">
-        <h4>Platform</h4>
-        <ul>
-          <li><Link to="/portfolio#market">Market Explorer</Link></li>
-          <li><Link to="/portfolio">Portfolio Tracker</Link></li>
-          <li><Link to="/portfolio#market">Halal Baskets</Link></li>
-          <li><Link to="/portfolio#market">Purification Calc</Link></li>
-        </ul>
-      </div>
-
-      <div className="footer-col">
-        <h4>Company</h4>
-        <ul>
-          <li><Link to="/about">Our Story</Link></li>
-          <li><Link to="/shariah">Shariah Method</Link></li>
-          <li><Link to="/pricing">Pricing</Link></li>
-        </ul>
-      </div>
-
-      <div className="footer-col">
-        <h4>Legal</h4>
-        <ul>
-          <li><Link to="/terms">Terms of Service</Link></li>
-          <li><Link to="/privacy">Privacy Policy</Link></li>
-          <li><Link to="/shariah">Shariah Standards</Link></li>
-          <li><Link to="/disclosure">Disclosures</Link></li>
-        </ul>
-      </div>
+      {/* ── Nav columns ── */}
+      {NAV.map(col => (
+        <div key={col.title} className="footer-col">
+          <h4>{col.title}</h4>
+          <ul>
+            {col.links.map(l => (
+              <li key={l.label}>
+                <Link to={l.to} className="footer-link">
+                  {l.label}
+                  <ArrowUpRight size={12} className="footer-link-icon" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
     </div>
-    
-    <div style={{ marginTop: '30px', padding: '16px 0', borderTop: '1px solid rgba(255,255,255,0.05)', fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', lineHeight: 1.6, textAlign: 'center' }}>
+
+    {/* Disclaimer */}
+    <div className="footer-disclaimer">
       Disclaimer: Irshad provides AAOIFI screening based on publicly available information and audited financial statements. It is intended for informational purposes only and does not constitute financial or investment advice.
     </div>
 
-    <div className="footer-bottom" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', borderTop: 'none', paddingTop: '10px' }}>
-      <span style={{ fontSize: '0.75rem' }}>© {new Date().getFullYear()} Irshad Financial Services Ltd. All rights reserved.</span>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <span style={{ padding: '6px 12px', background: 'rgba(255,255,255,0.05)', borderRadius: '20px', fontSize: '0.66rem', fontWeight: 700, color: 'var(--gold)' }}>
-          AAOIFI Compliant
-        </span>
-        <span style={{ padding: '6px 12px', background: 'rgba(255,255,255,0.05)', borderRadius: '20px', fontSize: '0.66rem', fontWeight: 700 }}>
-          Nigeria
-        </span>
+    {/* Bottom bar */}
+    <div className="footer-bottom">
+      <span>© {new Date().getFullYear()} Irshad Financial Services Ltd. All rights reserved.</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <Link to="/privacy" className="footer-bottom-link">Privacy</Link>
+        <Link to="/terms" className="footer-bottom-link">Terms</Link>
+        <Link to="/disclosure" className="footer-bottom-link">Disclosure</Link>
       </div>
     </div>
   </footer>
