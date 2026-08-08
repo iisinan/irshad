@@ -208,7 +208,7 @@ const AaoifiScreening = () => {
     staleTime: 5 * 60 * 1000
   });
   
-  const hasBought = portfolioRes?.holdings?.some(h => h.symbol === symbol);
+  const hasBought = portfolioRes?.data?.holdings?.some(h => h.symbol === symbol);
 
   /* ── UI state ── */
   const [modalData,       setModalData]       = useState(null);
