@@ -36,7 +36,7 @@ class ModalErrorBoundary extends Component {
   }
 }
 
-export default function WatchlistTab() {
+export default function WatchlistTab({ initialSymbol }) {
   const [watchlistItems, setWatchlistItems] = useState(() => {
     try {
       const cached = localStorage.getItem('irshad_watchlist_items_cache_v3');
@@ -64,6 +64,15 @@ export default function WatchlistTab() {
     return [];
   });
   const [loading, setLoading] = useState(allStocks.length === 0);
+
+  useEffect(() => {
+    if (initialSymbol && allStocks.length > 0) {
+      const target = allStocks.find(s => s.symbol === initialSymbol);
+      if (target) {
+        setActiveAlertStock(target);
+      }
+    }
+  }, [initialSymbol, allStocks]);
 
   const loadData = async () => {
     try {

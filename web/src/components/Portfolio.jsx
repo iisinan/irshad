@@ -277,7 +277,7 @@ export default function Portfolio() {
           )}
           {mountedTabs.includes('watchlist') && (
             <div style={{ display: activeTab === 'watchlist' ? 'block' : 'none' }}>
-              <WatchlistTab />
+              <WatchlistTab data={data} refreshData={loadData} initialSymbol={initialHoldingSymbol} />
             </div>
           )}
           {mountedTabs.includes('zakat') && (
