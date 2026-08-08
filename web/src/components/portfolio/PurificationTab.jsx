@@ -319,11 +319,11 @@ function PurificationCard({ h, onPurify, onStatClick }) {
     <div
       onClick={() => onPurify(h)}
       style={{ borderRadius: '20px', border: '1px solid var(--border)', background: 'var(--bg)', overflow: 'hidden', cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.16,1,0.3,1)', position: 'relative' }}
-      onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(139,92,246,0.4)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(139,92,246,0.1)'; e.currentTarget.style.transform = 'translateY(-4px)'; }}
+      onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary-100)'; e.currentTarget.style.boxShadow = '0 16px 40px var(--primary-50)'; e.currentTarget.style.transform = 'translateY(-4px)'; }}
       onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)'; }}
     >
-      {/* Top purple accent bar */}
-      <div style={{ height: '4px', background: 'linear-gradient(90deg, #8B5CF6, #A78BFA, rgba(139,92,246,0.2))' }} />
+      {/* Top accent bar */}
+      <div style={{ height: '4px', background: 'linear-gradient(90deg, var(--primary), var(--primary-hover), var(--primary-100))' }} />
 
       <div style={{ padding: '22px 24px' }}>
         {/* Top row: logo + name + badge + chevron */}
@@ -337,9 +337,9 @@ function PurificationCard({ h, onPurify, onStatClick }) {
           </div>
 
           {/* Status pill */}
-          <div style={{ background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.2)', borderRadius: '99px', padding: '6px 14px', display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, backdropFilter: 'blur(4px)', boxShadow: '0 4px 12px rgba(139,92,246,0.05)' }}>
-            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#8B5CF6', boxShadow: '0 0 8px rgba(139,92,246,0.8)' }} />
-            <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#8B5CF6', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Purify</span>
+          <div style={{ background: 'var(--primary-50)', border: '1px solid var(--primary-100)', borderRadius: '99px', padding: '6px 14px', display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, backdropFilter: 'blur(4px)', boxShadow: '0 4px 12px var(--primary-50)' }}>
+            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--primary)', boxShadow: '0 0 8px var(--primary-50)' }} />
+            <span style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Purify</span>
           </div>
 
           <ChevronRight size={20} color="var(--text-muted)" style={{ flexShrink: 0, opacity: 0.6 }} />
@@ -365,10 +365,10 @@ function PurificationCard({ h, onPurify, onStatClick }) {
                 overflow: 'hidden'
               }}
               onMouseEnter={e => {
-                e.currentTarget.style.borderColor = '#8B5CF6';
-                e.currentTarget.style.background = 'rgba(139,92,246,0.03)';
+                e.currentTarget.style.borderColor = 'var(--primary-100)';
+                e.currentTarget.style.background = 'var(--primary-50)';
                 e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 16px rgba(139,92,246,0.06)';
+                e.currentTarget.style.boxShadow = '0 6px 16px var(--primary-50)';
               }}
               onMouseLeave={e => {
                 e.currentTarget.style.borderColor = 'var(--border)';
@@ -379,9 +379,9 @@ function PurificationCard({ h, onPurify, onStatClick }) {
             >
               <div style={{ fontSize: '0.62rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span>{s.label}</span>
-                <span style={{ fontSize: '0.65rem', opacity: 0.5, color: '#8B5CF6' }}>↗</span>
+                <span style={{ fontSize: '0.65rem', opacity: 0.5, color: 'var(--primary)' }}>↗</span>
               </div>
-              <div style={{ fontSize: '0.9rem', fontWeight: 900, color: s.warn ? '#8B5CF6' : 'var(--text-dark)' }}>{s.value}</div>
+              <div style={{ fontSize: '0.9rem', fontWeight: 900, color: s.warn ? 'var(--primary)' : 'var(--text-dark)' }}>{s.value}</div>
               <div style={{ fontSize: '0.62rem', color: 'var(--text-muted)', marginTop: '4px', fontWeight: 500 }}>{s.sub}</div>
             </div>
           ))}
@@ -390,12 +390,12 @@ function PurificationCard({ h, onPurify, onStatClick }) {
         {/* Bottom row: amount to purify */}
         <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
           {/* Amount to purify + hint */}
-          <div style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.08), rgba(167,139,250,0.03))', border: '1px solid rgba(139,92,246,0.15)', borderRadius: '16px', padding: '12px 20px', flex: '1 1 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', backdropFilter: 'blur(8px)' }}>
+          <div style={{ background: 'var(--primary-50)', border: '1px solid var(--primary-100)', borderRadius: '16px', padding: '12px 20px', flex: '1 1 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', backdropFilter: 'blur(8px)' }}>
             <div>
-              <div style={{ fontSize: '0.62rem', fontWeight: 800, color: '#8B5CF6', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '2px' }}>Amount to Purify</div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#7C3AED', letterSpacing: '-0.5px', textShadow: '0 2px 8px rgba(139,92,246,0.15)' }}>{fmt(due)}</div>
+              <div style={{ fontSize: '0.62rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '2px' }}>Amount to Purify</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--primary)', letterSpacing: '-0.5px', textShadow: '0 2px 8px var(--primary-50)' }}>{fmt(due)}</div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#8B5CF6', fontSize: '0.72rem', fontWeight: 700, borderLeft: '1px solid rgba(139,92,246,0.2)', paddingLeft: '16px', opacity: 0.8, cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={e => e.currentTarget.style.opacity = 1} onMouseLeave={e => e.currentTarget.style.opacity = 0.8}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--primary)', fontSize: '0.72rem', fontWeight: 700, borderLeft: '1px solid var(--primary-100)', paddingLeft: '16px', opacity: 0.8, cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={e => e.currentTarget.style.opacity = 1} onMouseLeave={e => e.currentTarget.style.opacity = 0.8}>
               <Calculator size={14} />
               View calc
             </div>
@@ -449,30 +449,30 @@ export default function PurificationTab({ data, refreshData, initialSymbol }) {
       )}
 
       {/* ─ Header Banner ─ */}
-      <div style={{ background: 'linear-gradient(135deg, #2A1A3B 0%, #1a0f26 100%)', borderRadius: '24px', padding: '32px', boxShadow: '0 16px 40px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.05)', border: '1px solid rgba(139,92,246,0.15)', marginBottom: '24px', position: 'relative', overflow: 'hidden' }}>
-        {/* Dynamic purple accent glow circles */}
-        <div style={{ position: 'absolute', top: '-100px', right: '-50px', width: '300px', height: '300px', background: 'radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: '-80px', left: '20%', width: '250px', height: '250px', background: 'radial-gradient(circle, rgba(91,41,113,0.2) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
+      <div style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%)', borderRadius: '24px', padding: '32px', boxShadow: '0 16px 40px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.05)', border: '1px solid var(--primary-100)', marginBottom: '24px', position: 'relative', overflow: 'hidden' }}>
+        {/* Dynamic accent glow circles */}
+        <div style={{ position: 'absolute', top: '-100px', right: '-50px', width: '300px', height: '300px', background: 'radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: '-80px', left: '20%', width: '250px', height: '250px', background: 'radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
 
         <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
-            <div style={{ width: '58px', height: '58px', background: 'rgba(139,92,246,0.1)', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(139,92,246,0.2)', backdropFilter: 'blur(8px)', boxShadow: '0 8px 16px rgba(0,0,0,0.2)' }}>
-              {purificationDue > 0 ? <ShieldAlert size={28} color="#A78BFA" /> : <CheckCircle size={28} color="#34D399" />}
+            <div style={{ width: '58px', height: '58px', background: 'rgba(255,255,255,0.1)', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)', boxShadow: '0 8px 16px rgba(0,0,0,0.1)' }}>
+              {purificationDue > 0 ? <ShieldAlert size={28} color="white" /> : <CheckCircle size={28} color="#34D399" />}
             </div>
             <div>
-              <h2 style={{ fontSize: '1.35rem', fontWeight: 900, color: 'white', letterSpacing: '-0.5px', marginBottom: '4px', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>Dividend Purification</h2>
-              <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.82rem', margin: 0, fontWeight: 500 }}>Cleanse your portfolio of non-compliant income</p>
+              <h2 style={{ fontSize: '1.35rem', fontWeight: 900, color: 'white', letterSpacing: '-0.5px', marginBottom: '4px', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>Dividend Purification</h2>
+              <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.82rem', margin: 0, fontWeight: 500 }}>Cleanse your portfolio of non-compliant income</p>
             </div>
           </div>
 
           {purificationDue > 0 && (
             <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-              <div style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', padding: '12px 20px', backdropFilter: 'blur(12px)', boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.05)' }}>
-                <div style={{ fontSize: '0.62rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>Total Due</div>
-                <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#FCD34D', textShadow: '0 2px 10px rgba(245,158,11,0.2)' }}>₦{purificationDue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+              <div style={{ background: 'rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '12px 20px', backdropFilter: 'blur(12px)', boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.05)' }}>
+                <div style={{ fontSize: '0.62rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>Total Due</div>
+                <div style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--gold)', textShadow: '0 2px 10px rgba(0,0,0,0.2)' }}>₦{purificationDue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
               </div>
-              <div style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', padding: '12px 20px', backdropFilter: 'blur(12px)', boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.05)' }}>
-                <div style={{ fontSize: '0.62rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>Dividends</div>
+              <div style={{ background: 'rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '12px 20px', backdropFilter: 'blur(12px)', boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.05)' }}>
+                <div style={{ fontSize: '0.62rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>Dividends</div>
                 <div style={{ fontSize: '1.2rem', fontWeight: 900, color: 'white' }}>₦{totalDivs.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
               </div>
             </div>

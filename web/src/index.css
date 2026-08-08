@@ -4838,3 +4838,23 @@ html, body {
   color: var(--primary);
   font-weight: 800;
 }
+
+/* ===================================================
+   Mobile Responsiveness Utilities
+   =================================================== */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .mobile-col {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .mobile-wrap {
+    flex-wrap: wrap !important;
+  }
+}

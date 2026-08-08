@@ -102,7 +102,7 @@ const StatusBadge = ({ status }) => {
 const RatioBar = ({ title, subtitle, ratio, threshold, numLabel, numVal, denLabel, denVal, formula, onInspect }) => {
   if (ratio === null || ratio === undefined || isNaN(parseFloat(ratio))) {
     return (
-      <div style={{ background:'var(--bg)',borderRadius:14,padding:'15px 20px',marginBottom:10,border:'1px solid var(--border)',display:'grid',gridTemplateColumns:'1fr 1fr auto',gap:16,alignItems:'center' }}>
+      <div className="mobile-col" style={{ background:'var(--bg)',borderRadius:14,padding:'15px 20px',marginBottom:10,border:'1px solid var(--border)',display:'grid',gridTemplateColumns:'1fr 1fr auto',gap:16,alignItems:'center' }}>
         <div><div style={{ fontWeight:800,color:'var(--text-dark)',fontSize:'0.88rem',marginBottom:2 }}>{title}</div><div style={{ fontSize:'0.7rem',color:'var(--text-muted)' }}>{subtitle}</div></div>
         <div style={{ height:9,background:'rgba(0,0,0,0.06)',borderRadius:100 }}/>
         <div style={{ textAlign:'right',fontSize:'1.2rem',fontWeight:900,color:'var(--text-muted)' }}>N/A</div>
@@ -124,7 +124,7 @@ const RatioBar = ({ title, subtitle, ratio, threshold, numLabel, numVal, denLabe
 
   return (
     <div onClick={clickable?()=>onInspect({title,ratio:rv,threshold:`≤ ${threshold}%`,formula,numLabel,numVal,denLabel,denVal}):undefined}
-      className={clickable?'hover-lift':''} style={{ background:'var(--bg)',borderRadius:14,padding:'16px 20px',marginBottom:12,border:`1px solid ${ok?'rgba(16,185,129,0.15)':'rgba(239,68,68,0.15)'}`,cursor:clickable?'pointer':'default',transition:'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',display:'grid',gridTemplateColumns:'180px 1fr 118px',gap:20,alignItems:'center', boxShadow:'0 2px 8px rgba(0,0,0,0.02)' }}>
+      className={clickable?'hover-lift mobile-col':'mobile-col'} style={{ background:'var(--bg)',borderRadius:14,padding:'16px 20px',marginBottom:12,border:`1px solid ${ok?'rgba(16,185,129,0.15)':'rgba(239,68,68,0.15)'}`,cursor:clickable?'pointer':'default',transition:'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',display:'grid',gridTemplateColumns:'180px 1fr 118px',gap:20,alignItems:'center', boxShadow:'0 2px 8px rgba(0,0,0,0.02)' }}>
       <div>
         <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:4 }}>
           {num&&<span style={{ width:20,height:20,borderRadius:6,background:ok?'rgba(16,185,129,0.12)':'rgba(239,68,68,0.12)',color:ok?'var(--halal)':'var(--non-halal)',fontSize:'0.68rem',fontWeight:900,display:'inline-flex',alignItems:'center',justifyContent:'center' }}>{num}</span>}
@@ -752,7 +752,7 @@ const AaoifiScreening = () => {
             </div>
             <form onSubmit={submitOverride} style={{ padding:'20px 22px',overflowY:'auto',display:'flex',flexDirection:'column',gap:14 }}>
               {overrideError&&<div style={{ background:'var(--non-halal-bg)',color:'var(--non-halal)',padding:'10px 14px',borderRadius:9,fontSize:'0.82rem' }}>{overrideError}</div>}
-              <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:12 }}>
+              <div className="mobile-col" style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:12 }}>
                 {[['Total Assets','total_assets'],['Total Revenue','total_revenue'],['Market Cap','market_cap'],['Total Debt','total_debt'],['Cash & Equivalents','cash'],['Interest Income','interest_income']].map(([lbl,key])=>(
                   <div key={key}><label style={{ display:'block',fontSize:'0.67rem',fontWeight:700,color:'var(--text-muted)',marginBottom:5 }}>{lbl}</label>
                   <input required type="number" step="any" value={overrideData[key]} onChange={e=>setOverrideData({...overrideData,[key]:e.target.value})} style={{ width:'100%',padding:'9px 11px',borderRadius:10,border:'1px solid var(--border)',background:'var(--bg-section)',fontSize:'0.84rem',outline:'none',boxSizing:'border-box' }}/></div>

@@ -80,7 +80,7 @@ export default function WatchlistAlertModal({ stock, watchlistData, onClose, onU
       <div style={{ background: 'var(--bg)', borderRadius: '24px', width: '100%', maxWidth: '480px', overflow: 'hidden', boxShadow: '0 24px 48px rgba(0,0,0,0.2)' }} className="animate-scale-in">
         <div style={{ padding: '24px 24px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ width: '40px', height: '40px', background: 'var(--primary-10)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
+            <div style={{ width: '40px', height: '40px', background: 'var(--primary-50)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
               <Bell size={20} />
             </div>
             <div>
@@ -154,9 +154,9 @@ export default function WatchlistAlertModal({ stock, watchlistData, onClose, onU
 
         <div style={{ padding: '24px', borderTop: '1px solid var(--border)', background: 'var(--bg-section)' }}>
           <button 
-            onClick={handleSave}
             disabled={saving}
-            style={{ width: '100%', padding: '14px', borderRadius: '16px', background: 'var(--gold-grad)', color: 'var(--bg)', border: 'none', fontWeight: 800, fontSize: '0.9rem', cursor: saving ? 'not-allowed' : 'pointer', boxShadow: '0 8px 24px rgba(201,168,76,0.3)', opacity: saving ? 0.7 : 1 }}
+            onClick={handleSave}
+            style={{ width: '100%', padding: '14px', borderRadius: '16px', background: 'var(--primary)', color: 'var(--bg)', border: 'none', fontWeight: 800, fontSize: '0.9rem', cursor: saving ? 'not-allowed' : 'pointer', boxShadow: '0 8px 24px var(--primary-50)', opacity: saving ? 0.7 : 1 }}
           >
             {saving ? 'Saving...' : 'Save Alert Settings'}
           </button>

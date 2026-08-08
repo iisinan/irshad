@@ -21,8 +21,8 @@ function ZakatDatePrompt({ purchaseDate, onYes, onNo }) {
     <div className="zakat-prompt-overlay animate-fade-in" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200000, padding: '24px' }}>
       <div className="zakat-prompt-box" style={{ background: 'var(--bg)', borderRadius: '24px', width: '100%', maxWidth: '440px', boxShadow: '0 32px 80px rgba(0,0,0,0.2)', overflow: 'hidden', animation: 'slideUpFade 0.35s cubic-bezier(0.16,1,0.3,1)' }}>
         {/* Icon Header */}
-        <div style={{ background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, var(--text-dark) 100%)', padding: '32px 28px 24px', textAlign: 'center', borderBottom: '1px solid rgba(209, 165, 98, 0.15)' }}>
-          <div style={{ width: '60px', height: '60px', borderRadius: '18px', background: 'rgba(209, 165, 98, 0.12)', border: '1px solid rgba(209, 165, 98, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: 'var(--primary)' }}>
+        <div style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%)', padding: '32px 28px 24px', textAlign: 'center', borderBottom: '1px solid var(--primary-100)' }}>
+          <div style={{ width: '60px', height: '60px', borderRadius: '18px', background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: 'white' }}>
             <Calendar size={28} />
           </div>
           <h3 style={{ color: 'white', fontWeight: 900, fontSize: '1.1rem', margin: '0 0 6px', letterSpacing: '-0.3px' }}>Set Your Zakat Date?</h3>
@@ -38,7 +38,7 @@ function ZakatDatePrompt({ purchaseDate, onYes, onNo }) {
           </p>
 
           <div style={{ background: 'var(--bg-section)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '24px' }}>
-            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(209, 165, 98, 0.1)', border: '1px solid rgba(209, 165, 98, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--primary-50)', border: '1px solid var(--primary-100)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <Bell size={18} color="var(--primary)" />
             </div>
             <div>
@@ -59,7 +59,7 @@ function ZakatDatePrompt({ purchaseDate, onYes, onNo }) {
             </button>
             <button
               onClick={onYes}
-              style={{ flex: 2, padding: '14px', borderRadius: '12px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.84rem', cursor: 'pointer', boxShadow: '0 8px 20px rgba(209, 165, 98, 0.25)', transition: 'all 0.2s' }}
+              style={{ flex: 2, padding: '14px', borderRadius: '12px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.84rem', cursor: 'pointer', boxShadow: '0 8px 20px var(--primary-50)', transition: 'all 0.2s' }}
               onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
               onMouseLeave={e => e.currentTarget.style.transform = 'none'}
             >
@@ -107,10 +107,10 @@ function ZakatConfirmation({ purchaseDate, onDone }) {
                 {new Date(purchaseDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
               </div>
             </div>
-            <div style={{ background: 'rgba(209, 165, 98,0.08)', border: '1px solid rgba(209, 165, 98,0.2)', borderRadius: '14px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <Bell size={20} color="var(--gold)" />
+            <div style={{ background: 'var(--primary-50)', border: '1px solid var(--primary-100)', borderRadius: '14px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <Bell size={20} color="var(--primary)" />
               <div>
-                <div style={{ fontSize: '0.63rem', fontWeight: 800, color: 'var(--gold)', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '4px' }}>Zakat Due Date</div>
+                <div style={{ fontSize: '0.63rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '4px' }}>Zakat Due Date</div>
                 <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-dark)' }}>{zakatDueDate}</div>
               </div>
             </div>
@@ -424,7 +424,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
                       </div>
 
                       {/* Inputs */}
-                      <div className="holding-inputs-grid" style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1.2fr', gap: '12px', alignItems: 'flex-start' }}>
+                      <div className="holding-inputs-grid mobile-col" style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1.2fr', gap: '12px', alignItems: 'flex-start' }}>
                         {/* Ticker */}
                         <div>
                           <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '10px' }}>Ticker Symbol</label>
@@ -513,9 +513,9 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
                 <div className="modal-body" style={{ padding: '32px', flex: 1, overflowY: 'auto' }}>
                   {linkMessage && (<div style={{ marginBottom: '24px', padding: '16px', borderRadius: '12px', background: linkMessage.includes('successfully') ? 'var(--halal-bg)' : 'var(--non-halal-bg)', color: linkMessage.includes('successfully') ? 'var(--halal)' : 'var(--non-halal)', fontSize: '0.84rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '10px' }}><CheckCircle2 size={18} /> {linkMessage}</div>)}
                   <p style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '20px' }}>Select an Institution</p>
-                  <div className="broker-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  <div className="broker-grid mobile-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                     {['Meristem', 'Stanbic IBTC', 'CSCS', 'Risevest'].map((broker) => (
-                      <div key={broker} onClick={() => setBrokerName(broker)} className="broker-card" style={{ padding: '24px', borderRadius: '16px', border: brokerName === broker ? '2px solid var(--primary)' : '2px solid var(--border)', background: brokerName === broker ? 'var(--primary-50)' : 'var(--bg)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', transition: 'all 0.2s', boxShadow: brokerName === broker ? '0 8px 24px rgba(209, 165, 98, 0.15)' : 'none' }}>
+                      <div key={broker} onClick={() => setBrokerName(broker)} className="broker-card" style={{ padding: '24px', borderRadius: '16px', border: brokerName === broker ? '2px solid var(--primary)' : '2px solid var(--border)', background: brokerName === broker ? 'var(--primary-50)' : 'var(--bg)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', transition: 'all 0.2s', boxShadow: brokerName === broker ? '0 8px 24px var(--primary-50)' : 'none' }}>
                         <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: brokerName === broker ? 'var(--bg)' : 'var(--bg-section)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.23rem', fontWeight: 800, color: 'var(--text-dark)' }}>{broker.charAt(0)}</div>
                         <span style={{ fontSize: '0.84rem', fontWeight: 800, color: 'var(--text-dark)', textAlign: 'center' }}>{broker}</span>
                       </div>
