@@ -81,6 +81,16 @@ export default function Portfolio() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [activeFilter, setActiveFilter] = useState('all');
+  const [initialHoldingSymbol, setInitialHoldingSymbol] = useState(null);
+
+  // Auto-open add modal if navigated with state
+  useEffect(() => {
+    if (location.state?.addHolding) {
+      setInitialHoldingSymbol(location.state.addHolding);
+      setShowAddModal('manual');
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   // Sync tab with URL hash if it changes
   useEffect(() => {
@@ -188,6 +198,7 @@ export default function Portfolio() {
       {showAddModal && (
         <AddHoldingModal 
           initialTab={typeof showAddModal === 'string' ? showAddModal : 'manual'}
+          initialSymbol={initialHoldingSymbol}
           onClose={() => setShowAddModal(false)} 
           onAdd={handleAdd} 
           isAdding={isAdding} 

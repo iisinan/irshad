@@ -138,9 +138,9 @@ function ZakatConfirmation({ purchaseDate, onDone }) {
 const ZAKAT_DATE_KEY = 'irshad_zakat_hawl_date';
 const ZAKAT_ASKED_KEY = 'irshad_zakat_date_asked';
 
-export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLinked, initialTab }) {
+export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLinked, initialTab, initialSymbol }) {
   const [tab, setTab] = useState(initialTab || 'manual');
-  const [rows, setRows] = useState([{ id: Date.now(), sym: '', sh: '', pr: '', date: '' }]);
+  const [rows, setRows] = useState([{ id: Date.now(), sym: initialSymbol || '', sh: '', pr: '', date: '' }]);
   const [activeRowId, setActiveRowId] = useState(null);
   const [allStocks, setAllStocks] = useState([]);
   const [filteredStocks, setFilteredStocks] = useState([]);
