@@ -72,6 +72,11 @@ class Company extends Model
         return $this->hasOne(StockStatus::class);
     }
 
+    public function marketData(): HasOne
+    {
+        return $this->hasOne(MarketData::class);
+    }
+
     public function dataSources(): HasMany
     {
         return $this->hasMany(DataSource::class);

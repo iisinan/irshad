@@ -89,7 +89,7 @@ class StockController extends Controller
     public function show(string $symbol): JsonResponse
     {
         $stock = $this->safeTaggedCache(['stocks'])->remember("stocks.show.{$symbol}", 300, function () use ($symbol) {
-            $company = Company::with(['status', 'financials' => fn ($q) => $q->latest(), 'dailyPrices' => fn ($q) => $q->latest('date'), 'news'])->where('symbol', $symbol)->firstOrFail();
+            $company = Company::with(['status', 'marketData', 'financials' => fn ($q) => $q->latest(), 'dailyPrices' => fn ($q) => $q->latest('date'), 'news'])->where('symbol', $symbol)->firstOrFail();
 
             // Map the FinancialScreening into financials for legacy mobile app compatibility
             $existingScreening = FinancialScreening::where('company_ticker', $symbol)
@@ -139,6 +139,10 @@ class StockController extends Controller
             ->first();
 
         $stockArray = $stock->toArray();
+        if ($stock->marketData) {
+            $stockArray = array_merge($stockArray, $stock->marketData->toArray());
+            unset($stockArray['market_data']);
+        }
         $stockArray['upcoming_dividend'] = $upcomingDividend ? [
             'amount' => $upcomingDividend->amount,
             'currency' => $upcomingDividend->currency,
