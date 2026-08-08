@@ -63,9 +63,16 @@ const DASHBOARD_ROUTES = ['/portfolio', '/profile', '/admin'];
 /* ─── Animated Routes Wrapper ─────────────────────────────── */
 const AnimatedRoutes = ({ children }) => {
   const location = useLocation();
-  // Using location.pathname as a key triggers a re-render and animation on route change
+  
+  // Use a stable key for the AAOIFI screening route so the component doesn't unmount
+  // when simply changing the stock ticker, allowing smooth inline loading transitions.
+  let routeKey = location.pathname;
+  if (routeKey.match(/^\/market\/.*\/aaoifi/)) {
+    routeKey = '/market/aaoifi';
+  }
+
   return (
-    <div key={location.pathname} className="route-fade-wrapper">
+    <div key={routeKey} className="route-fade-wrapper">
       <Routes location={location}>
         {children}
       </Routes>

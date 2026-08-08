@@ -459,13 +459,9 @@ const AaoifiScreening = () => {
                   <span style={{ fontSize:'0.65rem',fontWeight:600,color:'var(--text-muted)' }}>today</span>
                 </div>
               </div>)}
-              {marketCap>0&&(<div style={{ textAlign:'left', paddingRight:report.sector?20:0, borderRight:report.sector?'1px solid rgba(91,41,113,0.08)':'none' }}>
+              {marketCap>0&&(<div style={{ textAlign:'left' }}>
                 <div style={{ fontSize:'0.6rem',fontWeight:800,color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'1px',marginBottom:4 }}>Market Cap</div>
                 <div style={{ fontSize:'1rem',fontWeight:900,color:'var(--text-dark)',letterSpacing:'-0.3px',fontVariantNumeric:'tabular-nums' }}>{fmt(marketCap)}</div>
-              </div>)}
-              {report.sector&&(<div style={{ textAlign:'left' }}>
-                <div style={{ fontSize:'0.6rem',fontWeight:800,color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'1px',marginBottom:4 }}>Sector</div>
-                <div style={{ display:'inline-flex',alignItems:'center',gap:5,padding:'3px 8px',borderRadius:100,background:'var(--bg)',border:'1px solid rgba(91,41,113,0.1)',fontSize:'0.7rem',fontWeight:800,color:'var(--primary)' }}>{report.sector}</div>
               </div>)}
             </div>
           </div>
