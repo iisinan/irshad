@@ -49,3 +49,5 @@ Schedule::command('irshad:prune-audits')->daily()->withoutOverlapping()->emailOu
 // Sync financial and market data from NGXPulse (10 AM and 10 PM)
 Schedule::command('pulse:sync-data')->twiceDaily(10, 22)->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
 
+// Warm cache every hour so cold starts never happen
+Schedule::command('cache:warm')->hourly()->withoutOverlapping();
