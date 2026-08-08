@@ -4,8 +4,9 @@ import localforage from 'localforage';
 
 // Force use of the Railway backend since Cloudflare Pages has the old Render URL cached in VITE_API_URL
 const PROD_API = 'https://irshad-backend-production.up.railway.app/api/v1';
+const API_BASE = import.meta.env.VITE_API_URL || PROD_API;
 const api = axios.create({
-  baseURL: PROD_API,
+  baseURL: API_BASE,
   headers: {
     'Accept': 'application/json',
     'Content-Type': 'application/json',

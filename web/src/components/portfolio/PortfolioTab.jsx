@@ -118,7 +118,7 @@ function HoldingRow({ holding, onDelete, onEdit }) {
       className="hover-card"
       onClick={() => navigate(`/market/${holding.symbol}/aaoifi`, { state: { stock: holding } })}
       onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => { setHov(false); setMenuOpen(false); }}
+      onMouseLeave={() => setHov(false)}
       style={{
         display: 'flex', alignItems: 'center', padding: '20px 24px',
         background: 'linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%)',

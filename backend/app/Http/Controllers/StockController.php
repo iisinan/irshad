@@ -88,8 +88,16 @@ class StockController extends Controller
      */
     public function show(string $symbol): JsonResponse
     {
-        $stock = $this->safeTaggedCache(['stocks'])->remember("stocks.show.{$symbol}", 300, function () use ($symbol) {
-            $company = Company::with(['status', 'marketData', 'financials' => fn ($q) => $q->latest(), 'dailyPrices' => fn ($q) => $q->latest('date'), 'news'])->where('symbol', $symbol)->firstOrFail();
+        $fullCacheKey = "stocks.show.full.{$symbol}";
+
+        $stockArray = $this->safeTaggedCache(['stocks'])->remember($fullCacheKey, 300, function () use ($symbol) {
+            // Single eager-loaded query for company + all relations
+            $company = Company::with([
+                'status',
+                'marketData',
+                'financials' => fn ($q) => $q->latest()->limit(1),
+                'news' => fn ($q) => $q->latest()->limit(10),
+            ])->where('symbol', $symbol)->firstOrFail();
 
             // Map the FinancialScreening into financials for legacy mobile app compatibility
             $existingScreening = FinancialScreening::where('company_ticker', $symbol)
@@ -97,19 +105,19 @@ class StockController extends Controller
                 ->first();
 
             if ($existingScreening) {
-                $calc = $existingScreening->calculation_results ?? [];
+                $calc   = $existingScreening->calculation_results ?? [];
                 $ratios = $calc['ratios'] ?? [];
 
                 $simulatedFinancial = [
-                    'overall_financial_pass' => $calc['overall_financial_pass'] ?? true,
-                    'interest_income_ratio' => $ratios['non_permissible_income_ratio'] ?? 0,
-                    'interest_bearing_debt_ratio' => $ratios['interest_bearing_debt_ratio'] ?? 0,
-                    'cash_and_equivalents_ratio' => $ratios['cash_and_equivalents_ratio'] ?? 0,
-                    'non_compliant_income_ratio' => $ratios['non_permissible_income_ratio'] ?? 0,
-                    'evidence_link' => $existingScreening->evidence_links,
-                    'report_quarter' => $existingScreening->report_quarter,
-                    'published_date' => $existingScreening->published_date,
-                    'financial_year' => $existingScreening->financial_year,
+                    'overall_financial_pass'      => $calc['overall_financial_pass'] ?? true,
+                    'interest_income_ratio'        => $ratios['non_permissible_income_ratio'] ?? 0,
+                    'interest_bearing_debt_ratio'  => $ratios['interest_bearing_debt_ratio'] ?? 0,
+                    'cash_and_equivalents_ratio'   => $ratios['cash_and_equivalents_ratio'] ?? 0,
+                    'non_compliant_income_ratio'   => $ratios['non_permissible_income_ratio'] ?? 0,
+                    'evidence_link'                => $existingScreening->evidence_links,
+                    'report_quarter'               => $existingScreening->report_quarter,
+                    'published_date'               => $existingScreening->published_date,
+                    'financial_year'               => $existingScreening->financial_year,
                 ];
 
                 if ($company->financials && $company->financials->count() > 0) {
@@ -122,73 +130,69 @@ class StockController extends Controller
                 }
             }
 
-            return $company;
-        });
-
-        // Append dividend data (latest upcoming + last paid) — not cached so always fresh
-        $dividendData = null;
-        $upcomingDividend = Dividend::where('ticker', $symbol)
-            ->where('status', 'upcoming')
-            ->whereNotNull('ex_date')
-            ->orderBy('ex_date', 'asc')
-            ->first();
-
-        $lastPaidDividend = Dividend::where('ticker', $symbol)
-            ->where('status', 'paid')
-            ->orderBy('pay_date', 'desc')
-            ->first();
-
-        $stockArray = $stock->toArray();
-        if ($stock->marketData) {
-            $stockArray = array_merge($stockArray, $stock->marketData->toArray());
-            unset($stockArray['market_data']);
-        }
-        $stockArray['upcoming_dividend'] = $upcomingDividend ? [
-            'amount' => $upcomingDividend->amount,
-            'currency' => $upcomingDividend->currency,
-            'dividend_type' => $upcomingDividend->dividend_type,
-            'ex_date' => $upcomingDividend->ex_date?->toDateString(),
-            'record_date' => $upcomingDividend->record_date?->toDateString(),
-            'pay_date' => $upcomingDividend->pay_date?->toDateString(),
-            'status' => $upcomingDividend->status,
-        ] : null;
-
-        $stockArray['last_paid_dividend'] = $lastPaidDividend ? [
-            'amount' => $lastPaidDividend->amount,
-            'currency' => $lastPaidDividend->currency,
-            'dividend_type' => $lastPaidDividend->dividend_type,
-            'ex_date' => $lastPaidDividend->ex_date?->toDateString(),
-            'pay_date' => $lastPaidDividend->pay_date?->toDateString(),
-            'status' => $lastPaidDividend->status,
-        ] : null;
-
-        // Expose business_status so the frontend can hide analysis/metrics/news
-        // for stocks that failed qualitative business activity screening.
-        // Also inject purification_required into the status object so the frontend
-        // can show the "HALAL WITH PURIFICATION" banner.
-        $aaoifiScreening = AaoifiScreening::where('company_id', $stock->id)
-            ->select('business_status', 'impermissible_income_ratio', 'impermissible_income_status')
-            ->first();
-        $stockArray['business_status'] = $aaoifiScreening?->business_status ?? null;
-
-        // Inject purification flag into the status object
-        if (isset($stockArray['status']) && is_array($stockArray['status'])) {
-            $ratio = (float) ($aaoifiScreening?->impermissible_income_ratio ?? 0);
-            
-            // Fallback: Calculate dynamically from financials if ratio is 0
-            if ($ratio == 0 && $stock->financials && $stock->financials->count() > 0) {
-                $financial = $stock->financials->first();
-                if ($financial->total_revenue > 0) {
-                    $ratio = ($financial->interest_income / $financial->total_revenue) * 100;
-                }
+            $stockArray = $company->toArray();
+            if ($company->marketData) {
+                $stockArray = array_merge($stockArray, $company->marketData->toArray());
+                unset($stockArray['market_data']);
             }
 
-            $stockArray['status']['purification_required'] = ($stockArray['status']['status'] ?? '') === 'halal' && $ratio > 0;
-            $stockArray['status']['haram_revenue_percent'] = round($ratio, 4);
-        }
+            // Fetch dividends + AAOIFI in a single pass (all still inside the cache closure)
+            $dividends = Dividend::where('ticker', $symbol)
+                ->whereIn('status', ['upcoming', 'paid'])
+                ->orderByRaw("CASE WHEN status = 'upcoming' THEN 0 ELSE 1 END, pay_date DESC")
+                ->limit(5)
+                ->get();
+
+            $upcomingDividend  = $dividends->where('status', 'upcoming')->whereNotNull('ex_date')->sortBy('ex_date')->first();
+            $lastPaidDividend  = $dividends->where('status', 'paid')->sortByDesc('pay_date')->first();
+
+            $stockArray['upcoming_dividend'] = $upcomingDividend ? [
+                'amount'        => $upcomingDividend->amount,
+                'currency'      => $upcomingDividend->currency,
+                'dividend_type' => $upcomingDividend->dividend_type,
+                'ex_date'       => $upcomingDividend->ex_date?->toDateString(),
+                'record_date'   => $upcomingDividend->record_date?->toDateString(),
+                'pay_date'      => $upcomingDividend->pay_date?->toDateString(),
+                'status'        => $upcomingDividend->status,
+            ] : null;
+
+            $stockArray['last_paid_dividend'] = $lastPaidDividend ? [
+                'amount'        => $lastPaidDividend->amount,
+                'currency'      => $lastPaidDividend->currency,
+                'dividend_type' => $lastPaidDividend->dividend_type,
+                'ex_date'       => $lastPaidDividend->ex_date?->toDateString(),
+                'pay_date'      => $lastPaidDividend->pay_date?->toDateString(),
+                'status'        => $lastPaidDividend->status,
+            ] : null;
+
+            // AAOIFI business_status + purification flags
+            $aaoifiScreening = AaoifiScreening::where('company_id', $company->id)
+                ->select('business_status', 'impermissible_income_ratio', 'impermissible_income_status')
+                ->first();
+
+            $stockArray['business_status'] = $aaoifiScreening?->business_status ?? null;
+
+            if (isset($stockArray['status']) && is_array($stockArray['status'])) {
+                $ratio = (float) ($aaoifiScreening?->impermissible_income_ratio ?? 0);
+
+                if ($ratio == 0 && $company->financials && $company->financials->count() > 0) {
+                    $financial = $company->financials->first();
+                    if ($financial->total_revenue > 0) {
+                        $ratio = ($financial->interest_income / $financial->total_revenue) * 100;
+                    }
+                }
+
+                $stockArray['status']['purification_required'] = ($stockArray['status']['status'] ?? '') === 'halal' && $ratio > 0;
+                $stockArray['status']['haram_revenue_percent'] = round($ratio, 4);
+            }
+
+            return $stockArray;
+        });
 
         return $this->success($stockArray);
     }
+
+
 
     public function search(Request $request): JsonResponse
     {
@@ -495,6 +499,12 @@ class StockController extends Controller
      */
     public function aaoifiScreening(string $symbol): JsonResponse
     {
+        $cacheKey = "aaoifi.screening.{$symbol}";
+        $cached = $this->safeTaggedCache(['stocks'])->get($cacheKey);
+        if ($cached !== null) {
+            return $this->success($cached);
+        }
+
         $company = Company::where('symbol', $symbol)->firstOrFail();
 
         $aaoifiScreening = AaoifiScreening::where('company_id', $company->id)->first();
@@ -616,6 +626,8 @@ class StockController extends Controller
                 'ai_explanation'              => $aaoifiScreening->business_reasoning ?? $company->activity_reason,
                 'status_reason'               => $statusReason,
             ];
+
+            $this->safeTaggedCache(['stocks'])->put($cacheKey, $mapped, 300);
 
             return $this->success($mapped);
         }

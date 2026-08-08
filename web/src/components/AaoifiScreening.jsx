@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { createPortal } from 'react-dom';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import {
   ArrowLeft, CheckCircle, XCircle, AlertTriangle,
@@ -11,9 +11,9 @@ import {
   Trash2, Sliders, Brain, Sparkles, Send, Plus, Star,
   BrainCircuit, BarChart2, Newspaper, Clock, RefreshCw,
   ChevronDown, ChevronUp, MessageSquare, DollarSign, Percent,
-  Info, TrendingDown, Award, BookOpen, Zap, Bell
+  Info, TrendingDown, Award, BookOpen, Zap, Bell, Search
 } from 'lucide-react';
-import { fetchAaoifiScreening, fetchStockDetails, updateAaoifiData, chatAboutStock } from '../services/api';
+import { fetchAaoifiScreening, fetchStockDetails, updateAaoifiData, chatAboutStock, fetchNgxStocks } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { formatAppJustification } from '../utils/screeningFormatter';
 import CompanyLogo from './CompanyLogo';
@@ -164,13 +164,26 @@ const AaoifiScreening = () => {
   const { symbol } = useParams();
   const { user }   = useAuth();
   const navigate   = useNavigate();
+  const location   = useLocation();
   const chatEndRef = useRef(null);
+  
+  const isInlineSearch = location.state?.inlineSearch;
+  
+  /* ── Search State ── */
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = useRef(null);
+
+  useEffect(() => {
+    if (isSearchOpen && searchInputRef.current) searchInputRef.current.focus();
+  }, [isSearchOpen]);
 
   /* ── Queries ── */
-  const { data:res, isLoading:queryLoading, error:queryError } = useQuery({
+  const { data:res, isLoading:queryLoading, error:queryError, isFetching } = useQuery({
     queryKey:['aaoifi',symbol],
     queryFn: ()=>fetchAaoifiScreening(symbol),
     staleTime:5*60*1000,
+    placeholderData: keepPreviousData,
     refetchInterval:(q)=>q.state.data?.status==='processing'?10000:false,
   });
   const { data:stockRes } = useQuery({
@@ -179,6 +192,15 @@ const AaoifiScreening = () => {
     staleTime:5*60*1000,
     enabled: !!symbol,
   });
+  const { data: allStocksRes } = useQuery({
+    queryKey: ['marketData', 'v2'],
+    queryFn: async () => {
+      const r = await fetchNgxStocks();
+      return Array.isArray(r) ? r : (r?.data || []);
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+  const allStocks = Array.isArray(allStocksRes) ? allStocksRes : [];
 
   /* ── UI state ── */
   const [modalData,       setModalData]       = useState(null);
@@ -200,7 +222,11 @@ const AaoifiScreening = () => {
 
   const report  = res?.data;
   const stock   = stockRes?.data;
-  const error   = queryError?(queryError.response?.data?.message||queryError.message||'Error'):null;
+  const error   = queryError 
+    ? (queryError.response?.status === 404 
+        ? `Stock ticker "${symbol}" was not found. Please verify the symbol and try again.` 
+        : (queryError.response?.data?.message || queryError.message || 'Error')) 
+    : null;
 
   /* Init chat */
   useEffect(()=>{
@@ -253,7 +279,7 @@ const AaoifiScreening = () => {
       <div style={{ width:72,height:72,margin:'0 auto 20px',background:'var(--non-halal-bg)',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center' }}><AlertTriangle size={36} color="var(--non-halal)"/></div>
       <h2 style={{ fontSize:'1.4rem',fontWeight:900,marginBottom:10,color:'var(--text-dark)' }}>Screening Error</h2>
       <p style={{ color:'var(--text-muted)',fontSize:'0.88rem',lineHeight:1.6,marginBottom:28 }}>{error}</p>
-      <Link to="/portfolio" style={{ display:'inline-flex',alignItems:'center',gap:8,padding:'10px 22px',background:'var(--bg)',color:'var(--text-dark)',fontWeight:700,textDecoration:'none',borderRadius:100,border:'1px solid var(--border)' }}><ArrowLeft size={16}/> Back to Screener</Link>
+      <Link to="/portfolio#market" style={{ display:'inline-flex',alignItems:'center',gap:8,padding:'10px 22px',background:'var(--bg)',color:'var(--text-dark)',fontWeight:700,textDecoration:'none',borderRadius:100,border:'1px solid var(--border)' }}><ArrowLeft size={16}/> Back to Screener</Link>
     </div>
   );
 
@@ -321,10 +347,70 @@ const AaoifiScreening = () => {
 
         {/* ── Top action bar ── */}
         <div style={{ display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:24,gap:12,flexWrap:'wrap' }}>
-          <Link to="/portfolio" className="hover-lift" style={{ display:'flex',alignItems:'center',gap:7,padding:'8px 16px 8px 12px',background:'var(--bg)',border:'1px solid var(--border)',borderRadius:100,color:'var(--text-dark)',textDecoration:'none',fontWeight:700,fontSize:'0.8rem',transition:'all 0.2s',boxShadow:'var(--shadow-sm)' }}>
-            <ArrowLeft size={16}/> Screener
+          <Link to="/portfolio#market" className="hover-lift" style={{ display:'flex',alignItems:'center',justifyContent:'center',width:36,height:36,background:'var(--bg)',border:'1px solid var(--border)',borderRadius:'50%',color:'var(--text-dark)',textDecoration:'none',transition:'all 0.2s',boxShadow:'var(--shadow-sm)' }}>
+            <ArrowLeft size={18}/>
           </Link>
           <div style={{ display:'flex',gap:10 }}>
+            {isSearchOpen ? (
+              <div style={{ position:'relative' }}>
+                <form 
+                  onSubmit={(e) => { 
+                    e.preventDefault(); 
+                    if(searchQuery.trim()) { 
+                      navigate(`/market/${searchQuery.trim().toUpperCase()}/aaoifi`, { state: { inlineSearch: true } }); 
+                      setIsSearchOpen(false); 
+                      setSearchQuery('');
+                    } 
+                  }}
+                  style={{ display:'flex',alignItems:'center',background:'var(--bg)',border:'1px solid var(--primary)',borderRadius:12,padding:'4px 12px',boxShadow:'0 0 0 3px rgba(91,41,113,0.1)', transition:'all 0.2s' }}
+                >
+                  <Search size={15} color="var(--primary)"/>
+                  <input 
+                    ref={searchInputRef}
+                    type="text" 
+                    placeholder="Search stock..." 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{ border:'none',background:'transparent',outline:'none',padding:'4px 8px',fontSize:'0.8rem',width:'160px',color:'var(--text-dark)' }}
+                  />
+                  <X size={15} color="var(--text-muted)" style={{ cursor:'pointer' }} onClick={() => { setIsSearchOpen(false); setSearchQuery(''); }}/>
+                </form>
+                
+                {searchQuery.length > 0 && (
+                  <div style={{ position:'absolute', top:'100%', right:0, marginTop:8, width:260, background:'var(--bg)', border:'1px solid var(--border)', borderRadius:12, boxShadow:'var(--shadow-md)', zIndex:100, overflow:'hidden' }}>
+                    {allStocks.filter(s => s.symbol.toLowerCase().includes(searchQuery.toLowerCase()) || s.name?.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 5).map(s => (
+                      <div 
+                        key={s.symbol}
+                        onClick={() => {
+                          navigate(`/market/${s.symbol}/aaoifi`, { state: { inlineSearch: true } }); 
+                          setIsSearchOpen(false); 
+                          setSearchQuery('');
+                        }}
+                        style={{ padding:'10px 14px', cursor:'pointer', borderBottom:'1px solid var(--border)', display:'flex', flexDirection:'column' }}
+                        className="hover-bg"
+                        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-section)'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'var(--bg)'}
+                      >
+                        <span style={{ fontWeight:800, fontSize:'0.85rem', color:'var(--primary)' }}>{s.symbol}</span>
+                        <span style={{ fontSize:'0.75rem', color:'var(--text-muted)' }}>{s.name}</span>
+                      </div>
+                    ))}
+                    {allStocks.filter(s => s.symbol.toLowerCase().includes(searchQuery.toLowerCase()) || s.name?.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
+                      <div style={{ padding:'12px', textAlign:'center', color:'var(--text-muted)', fontSize:'0.8rem' }}>No matches found</div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : (isFetching && isInlineSearch) ? (
+              <div style={{ display:'flex',alignItems:'center',gap:8,padding:'8px 16px',background:'var(--bg)',border:'1px solid var(--primary)',borderRadius:12,fontWeight:700,color:'var(--primary)',fontSize:'0.8rem',boxShadow:'0 0 0 3px rgba(91,41,113,0.1)' }}>
+                <div style={{ width:14, height:14, borderRadius:'50%', border:'2px solid var(--primary)', borderTopColor:'transparent', animation:'spin 1s linear infinite' }}/>
+                Screening {symbol}...
+              </div>
+            ) : (
+              <button className="hover-lift" onClick={() => setIsSearchOpen(true)} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background:'var(--bg)',border:'1px solid var(--border)',borderRadius:12,cursor:'pointer',fontWeight:700,color:'var(--text-dark)',fontSize:'0.8rem',boxShadow:'var(--shadow-sm)' }}>
+                <Search size={15}/> Screener
+              </button>
+            )}
             <button className="hover-lift" onClick={()=>{ alert("Alert preferences opened"); }} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background:'var(--bg)',border:'1px solid var(--border)',borderRadius:12,cursor:'pointer',fontWeight:700,color:'var(--text-dark)',fontSize:'0.8rem',boxShadow:'var(--shadow-sm)' }}>
               <Bell size={15}/> Set Alert
             </button>
@@ -453,11 +539,7 @@ const AaoifiScreening = () => {
               <StatusBadge status={stage1Status}/>
             </div>}/>
           <div style={{ padding:'24px' }}>
-            {hasPurification&&finalStatus==='halal'&&(<div style={{ display:'flex',alignItems:'center',gap:12,padding:'12px 16px',background:'rgba(217,119,6,0.05)',border:'1px solid rgba(217,119,6,0.18)',borderRadius:12,marginBottom:14 }}>
-              <div style={{ width:30,height:30,borderRadius:9,background:'rgba(217,119,6,0.12)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0 }}><Droplets size={15} color="#D97706"/></div>
-              <div style={{ flex:1,fontSize:'0.83rem',color:'var(--text-dark)',fontWeight:500 }}><strong style={{ color:'#D97706' }}>Purification required:</strong> Donate <strong style={{ color:'#D97706' }}>{purPct}%</strong> of dividend income to charity.</div>
-              <div style={{ textAlign:'center' }}><div style={{ fontSize:'1.2rem',fontWeight:900,color:'#D97706',lineHeight:1 }}>{purPct}%</div><div style={{ fontSize:'0.57rem',color:'var(--text-muted)',fontWeight:700,marginTop:1 }}>to purify</div></div>
-            </div>)}
+
             {stage1Status==='non-halal' && report.stage1?.haram_revenue_percent > 0.05 && (<div style={{ background:'rgba(239,68,68,0.04)',padding:'14px 18px',borderRadius:12,border:'1px solid rgba(239,68,68,0.18)',borderLeft:'3px solid #EF4444',display:'flex',alignItems:'center',justifyContent:'space-between',gap:14,flexWrap:'wrap',marginBottom:14 }}>
               <div style={{ flex:'1 1 220px' }}><div style={{ display:'flex',alignItems:'center',gap:6,marginBottom:4 }}><AlertTriangle size={14} color="#EF4444"/><span style={{ fontWeight:800,color:'#EF4444',fontSize:'0.84rem' }}>Prohibited Activities Detected</span></div>
               <p style={{ margin:0,color:'var(--text-muted)',fontSize:'0.79rem',lineHeight:1.6 }}>Non-compliant revenue (<strong style={{ color:'#EF4444' }}>{pct(report.stage1?.haram_revenue_percent)}</strong>) exceeds the 5% AAOIFI tolerance.</p></div>
