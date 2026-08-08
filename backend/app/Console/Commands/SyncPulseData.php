@@ -42,7 +42,7 @@ class SyncPulseData extends Command
         foreach ($companies as $company) {
             try {
                 $url = "https://ngxpulse.ng/stocks/" . $company->symbol;
-                $response = Http::timeout(10)->get($url);
+                $response = Http::timeout(30)->get($url);
 
                 if ($response->successful()) {
                     $html = $response->body();

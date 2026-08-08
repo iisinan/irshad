@@ -52,6 +52,12 @@ class WarmCache extends Command
                             $stockArray = array_merge($stockArray, $comp->marketData->toArray());
                             unset($stockArray['market_data']);
                         }
+                        
+                        if ($comp->financials && $comp->financials->count() > 0) {
+                            $financial = $comp->financials->first();
+                            $stockArray['pe_ratio'] = $stockArray['pe_ratio'] ?? $financial->pe_ratio;
+                            $stockArray['eps'] = $stockArray['eps'] ?? $financial->eps;
+                        }
 
                         $dividends = Dividend::where('ticker', $symbol)
                             ->whereIn('status', ['upcoming', 'paid'])
