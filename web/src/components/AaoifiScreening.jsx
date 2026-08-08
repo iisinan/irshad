@@ -328,7 +328,7 @@ const AaoifiScreening = () => {
             <button className="hover-lift" onClick={()=>{ alert("Alert preferences opened"); }} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background:'var(--bg)',border:'1px solid var(--border)',borderRadius:12,cursor:'pointer',fontWeight:700,color:'var(--text-dark)',fontSize:'0.8rem',boxShadow:'var(--shadow-sm)' }}>
               <Bell size={15}/> Set Alert
             </button>
-            {user?.role==='admin'&&(<button className="hover-lift" onClick={openOverride} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background:'linear-gradient(135deg,var(--primary),var(--primary-dark))',border:'none',borderRadius:12,cursor:'pointer',fontWeight:800,color:'#fff',fontSize:'0.8rem',transition:'all 0.25s',boxShadow:'0 4px 12px rgba(91,41,113,0.25)' }}>
+            {user?.role==='admin'&&(<button className="hover-lift" onClick={openOverride} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background:'var(--primary)',border:'none',borderRadius:12,cursor:'pointer',fontWeight:800,color:'#fff',fontSize:'0.8rem',transition:'all 0.25s',boxShadow:'0 4px 12px rgba(91,41,113,0.3)' }}>
               <ShieldCheck size={15}/> Edit Data
             </button>)}
             <button className="hover-lift" onClick={()=>window.print()} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background:'var(--bg)',border:'1px solid var(--border)',borderRadius:12,cursor:'pointer',fontWeight:700,color:'var(--text-dark)',fontSize:'0.8rem',boxShadow:'var(--shadow-sm)' }}>
@@ -338,85 +338,106 @@ const AaoifiScreening = () => {
         </div>
 
         {/* ── Company header ── */}
-        <div style={{ background:'var(--bg)',border:'1px solid var(--border)',borderRadius:18,padding:'24px',marginBottom:16,boxShadow:'var(--shadow-sm)' }}>
+        <div style={{ background:'linear-gradient(145deg, var(--bg) 0%, rgba(91,41,113,0.04) 100%)',border:'1px solid rgba(91,41,113,0.1)',borderRadius:16,padding:'16px 20px',marginBottom:20,boxShadow:'0 4px 16px rgba(91,41,113,0.04), inset 0 1px 0 rgba(255,255,255,0.8)' }}>
           <div style={{ display:'flex',alignItems:'center',justifyContent:'space-between',gap:16,flexWrap:'wrap' }}>
-            <div style={{ display:'flex',alignItems:'center',gap:16 }}>
-              <div style={{ position:'relative' }}>
-                <CompanyLogo symbol={symbol} logoUrl={stock?.logo_url} size={52} radius={14}/>
-                <div style={{ position:'absolute',bottom:-4,right:-4,width:16,height:16,borderRadius:'50%',background:finalStatus==='halal'?'var(--halal)':finalStatus==='non-halal'?'var(--non-halal)':'#D97706',border:'3px solid var(--bg)',boxShadow:'0 2px 4px rgba(0,0,0,0.1)' }}/>
+            <div style={{ display:'flex',alignItems:'center',gap:14 }}>
+              <div style={{ position:'relative', padding: '2px', background: '#fff', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+                <CompanyLogo symbol={symbol} logoUrl={stock?.logo_url} size={42} radius={10}/>
+                <div style={{ position:'absolute',bottom:-2,right:-2,width:14,height:14,borderRadius:'50%',background:finalStatus==='halal'?'var(--halal)':finalStatus==='non-halal'?'var(--non-halal)':'#D97706',border:'2px solid #fff',boxShadow:'0 2px 4px rgba(0,0,0,0.1)' }}/>
               </div>
               <div>
                 <div style={{ display:'flex',alignItems:'center',gap:8,flexWrap:'wrap' }}>
-                  <h1 style={{ margin:0,fontSize:'1.35rem',fontWeight:900,color:'var(--text-dark)',letterSpacing:'-0.5px' }}>{report.company_name||symbol}</h1>
+                  <h1 style={{ margin:0,fontSize:'1.15rem',fontWeight:900,color:'var(--text-dark)',letterSpacing:'-0.3px' }}>{report.company_name||symbol}</h1>
                 </div>
                 {(stock?.sector || report.sector) && (
-                  <p style={{ margin:'4px 0 0',fontSize:'0.75rem',color:'var(--text-muted)',fontWeight:600 }}>
+                  <p style={{ margin:'2px 0 0',fontSize:'0.65rem',color:'var(--text-muted)',fontWeight:600 }}>
                     {stock?.sector || report.sector} 
-                    {stock?.industry && <span style={{ opacity: 0.5, margin: '0 6px' }}>•</span>}
+                    {stock?.industry && <span style={{ opacity: 0.4, margin: '0 6px' }}>•</span>}
                     {stock?.industry}
                   </p>
                 )}
               </div>
             </div>
-            <div style={{ display:'flex',gap:32,flexWrap:'wrap',alignItems:'center' }}>
-              {latestPrice>0&&(<div style={{ textAlign:'left', paddingRight:32, borderRight:'1px dashed var(--border)' }}>
-                <div style={{ fontSize:'0.65rem',fontWeight:800,color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'1px',marginBottom:6 }}>Last Price</div>
-                <div style={{ fontSize:'1.8rem',fontWeight:900,color:'var(--text-dark)',letterSpacing:'-0.5px',fontVariantNumeric:'tabular-nums',lineHeight:1 }}>
+            
+            {/* Embedded Stats Container */}
+            <div style={{ display:'flex',gap:20,flexWrap:'wrap',alignItems:'center', background:'rgba(255,255,255,0.6)', padding:'10px 16px', borderRadius:12, border:'1px solid rgba(91,41,113,0.06)', backdropFilter:'blur(10px)', boxShadow:'0 2px 8px rgba(0,0,0,0.02)' }}>
+              {latestPrice>0&&(<div style={{ textAlign:'left', paddingRight:20, borderRight:'1px solid rgba(91,41,113,0.08)' }}>
+                <div style={{ fontSize:'0.6rem',fontWeight:800,color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'1px',marginBottom:4 }}>Last Price</div>
+                <div style={{ fontSize:'1.25rem',fontWeight:900,color:'var(--text-dark)',letterSpacing:'-0.5px',fontVariantNumeric:'tabular-nums',lineHeight:1 }}>
                   ₦{latestPrice.toLocaleString('en-US', {maximumFractionDigits: 2})}
                 </div>
-                <div style={{ display:'flex',alignItems:'center',gap:6,marginTop:8 }}>
-                  <span style={{ fontSize:'0.8rem',fontWeight:800,color: priceChangePct >= 0 ? 'var(--halal)' : 'var(--non-halal)' }}>
+                <div style={{ display:'flex',alignItems:'center',gap:4,marginTop:6 }}>
+                  <span style={{ fontSize:'0.7rem',fontWeight:800,color: priceChangePct >= 0 ? 'var(--halal)' : 'var(--non-halal)' }}>
                     {priceChangePct >= 0 ? '▲' : '▼'} {Math.abs(priceChangePct).toFixed(2)}%
                   </span>
-                  <span style={{ fontSize:'0.75rem',fontWeight:600,color:'var(--text-muted)' }}>today</span>
+                  <span style={{ fontSize:'0.65rem',fontWeight:600,color:'var(--text-muted)' }}>today</span>
                 </div>
               </div>)}
-              {marketCap>0&&(<div style={{ textAlign:'left', paddingRight:report.sector?32:0, borderRight:report.sector?'1px dashed var(--border)':'none' }}>
-                <div style={{ fontSize:'0.65rem',fontWeight:800,color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'1px',marginBottom:6 }}>Market Cap</div>
-                <div style={{ fontSize:'1.25rem',fontWeight:900,color:'var(--text-dark)',letterSpacing:'-0.4px',fontVariantNumeric:'tabular-nums' }}>{fmt(marketCap)}</div>
+              {marketCap>0&&(<div style={{ textAlign:'left', paddingRight:report.sector?20:0, borderRight:report.sector?'1px solid rgba(91,41,113,0.08)':'none' }}>
+                <div style={{ fontSize:'0.6rem',fontWeight:800,color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'1px',marginBottom:4 }}>Market Cap</div>
+                <div style={{ fontSize:'1rem',fontWeight:900,color:'var(--text-dark)',letterSpacing:'-0.3px',fontVariantNumeric:'tabular-nums' }}>{fmt(marketCap)}</div>
               </div>)}
               {report.sector&&(<div style={{ textAlign:'left' }}>
-                <div style={{ fontSize:'0.65rem',fontWeight:800,color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'1px',marginBottom:6 }}>Sector</div>
-                <div style={{ display:'inline-flex',alignItems:'center',gap:5,padding:'5px 12px',borderRadius:100,background:'var(--bg-section)',border:'1px solid var(--border)',fontSize:'0.75rem',fontWeight:700,color:'var(--text-dark)' }}>{report.sector}</div>
+                <div style={{ fontSize:'0.6rem',fontWeight:800,color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'1px',marginBottom:4 }}>Sector</div>
+                <div style={{ display:'inline-flex',alignItems:'center',gap:5,padding:'3px 8px',borderRadius:100,background:'var(--bg)',border:'1px solid rgba(91,41,113,0.1)',fontSize:'0.7rem',fontWeight:800,color:'var(--primary)' }}>{report.sector}</div>
               </div>)}
             </div>
           </div>
         </div>
 
         {/* ══ VERDICT CARD ══ */}
-        <div style={{ borderRadius:18,background:sc.bg,border:`1px solid ${sc.border}`,marginBottom:16,position:'relative',overflow:'hidden' }}>
-          <StatusIcon size={260} color={sc.color} style={{ position:'absolute', right:'-30px', top:'-40px', opacity:0.04, transform:'rotate(-15deg)', pointerEvents:'none' }} />
+        <div className="hover-lift" style={{ borderRadius:24,background:`linear-gradient(135deg, ${sc.color}35 0%, ${sc.color}15 100%)`,border:`1px solid ${sc.color}`,marginBottom:24,position:'relative',overflow:'hidden', boxShadow:`0 16px 40px -10px ${sc.color}25, 0 8px 24px -5px ${sc.color}15, inset 0 2px 4px rgba(255,255,255,1)` }}>
+          
+          <div style={{ position:'absolute', inset: 0, backgroundImage: `radial-gradient(${sc.color}15 1px, transparent 1px)`, backgroundSize: '24px 24px', opacity: 0.6, pointerEvents: 'none' }} />
+          
+          <div style={{ position:'absolute', left:'10%', top:'-30%', width:'300px', height:'300px', background: `radial-gradient(circle, ${sc.color}15 0%, transparent 70%)`, filter: 'blur(40px)', pointerEvents:'none' }} />
+
+          <div style={{ position:'absolute', right:'-5%', top:'-30%', opacity:0.03, transform:'rotate(-10deg) scale(1.1)', pointerEvents:'none', mixBlendMode:'multiply' }}>
+            <StatusIcon size={280} color={sc.color} />
+          </div>
+
           <div style={{ display:'flex',gap:0,flexWrap:'wrap', position:'relative', zIndex:1 }}>
-            <div style={{ flex:'1 1 280px',padding:'24px 28px',borderRight:`1px dashed ${sc.border}`,display:'flex',flexDirection:'column',justifyContent:'center',gap:12 }}>
-              <div style={{ fontSize:'0.65rem',fontWeight:800,textTransform:'uppercase',letterSpacing:'1.5px',color:sc.color }}>AAOIFI Compliance Verdict</div>
-              <div style={{ display:'flex',alignItems:'flex-start',gap:14,flexWrap:'wrap',marginTop:2 }}>
-                <div style={{ marginTop:4 }}>
-                  <StatusIcon size={36} color={sc.color} strokeWidth={2}/>
+            <div style={{ flex:'1 1 280px',padding:'24px 32px',borderRight:`1px solid ${sc.color}15`,display:'flex',flexDirection:'column',justifyContent:'center',gap:12 }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize:'0.7rem',fontWeight:900,textTransform:'uppercase',letterSpacing:'2px',color:sc.color, background: `linear-gradient(90deg, ${sc.color}15 0%, ${sc.color}05 100%)`, padding: '6px 12px', borderRadius: 100, width: 'fit-content', border: `1px solid ${sc.color}20` }}>
+                <Activity size={12} strokeWidth={2.5}/> AAOIFI Compliance Verdict
+              </div>
+              
+              <div style={{ display:'flex',alignItems:'flex-start',gap:16,flexWrap:'wrap',marginTop:4 }}>
+                <div style={{ marginTop:4, background: 'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%)', borderRadius: 16, padding: 10, boxShadow: `0 8px 24px ${sc.color}30, inset 0 2px 0 #fff`, border: `1px solid ${sc.color}20` }}>
+                  <StatusIcon size={38} color={sc.color} strokeWidth={2.5}/>
                 </div>
                 <div>
                   <div style={{ display:'flex',alignItems:'center',gap:12,flexWrap:'wrap' }}>
-                    <h2 style={{ fontFamily:'"Georgia", "Times New Roman", serif',fontSize:'clamp(2rem,4vw,2.4rem)',fontWeight:700,color:sc.color,margin:0,letterSpacing:'-0.5px',lineHeight:1 }}>{sc.label}</h2>
-                    {hasPurification&&(<span style={{ fontSize:'0.7rem',fontWeight:700,color:'#D97706',display:'inline-flex',alignItems:'center',gap:5,background:'rgba(245,158,11,0.1)',border:'1px solid rgba(245,158,11,0.25)',padding:'5px 12px',borderRadius:100 }}><Droplets size={12} color="#D97706"/> With Purification ({purPct}%)</span>)}
+                    <h2 style={{ fontFamily:'"Georgia", "Times New Roman", serif',fontSize:'clamp(2rem,4vw,2.8rem)',fontWeight:900,color:sc.color,margin:0,letterSpacing:'-1px',lineHeight:1, textShadow: `0 4px 16px ${sc.color}30` }}>{sc.label}</h2>
+                    {hasPurification&&(<span style={{ fontSize:'0.75rem',fontWeight:900,color:'#D97706',display:'inline-flex',alignItems:'center',gap:6,background:'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 100%)',border:'1px solid rgba(245,158,11,0.3)',padding:'6px 14px',borderRadius:100, boxShadow: '0 4px 16px rgba(245,158,11,0.2)' }}><Droplets size={14} color="#D97706" fill="rgba(245,158,11,0.2)"/> With Purification ({purPct}%)</span>)}
                   </div>
-                  <div style={{ fontSize:'0.8rem',fontWeight:700,color:'var(--text-dark)',marginTop:8, opacity:0.8 }}>{sc.tag}</div>
+                  <div style={{ fontSize:'0.9rem',fontWeight:800,color:'var(--text-dark)',marginTop:8, opacity:0.8, letterSpacing: '-0.3px', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Sparkles size={14} color={sc.color} /> {sc.tag}
+                  </div>
                 </div>
               </div>
-              <p style={{ color:'var(--text-muted)',fontSize:'0.85rem',lineHeight:1.6,margin:'8px 0 0',maxWidth:540, fontWeight:500 }}>{cleanStatusReason||'Screened in accordance with AAOIFI Shariah Standard No. 21.'}</p>
-              {(report.reporting_period||report.reporting_year)&&(<div style={{ display:'inline-flex',alignItems:'center',gap:6,padding:'5px 14px',background:'var(--bg)',borderRadius:100,fontSize:'0.65rem',color:'var(--text-muted)',fontWeight:800,border:'1px solid var(--border)',width:'fit-content',marginTop:6 }}><Calendar size={11}/> {report.reporting_period} {report.reporting_year?`(${report.reporting_year})`:''}</div>)}
+
+              <div style={{ padding: '16px 20px', background: 'rgba(255,255,255,0.85)', borderRadius: 16, border: '1px solid #fff', marginTop: 4, boxShadow: '0 4px 16px rgba(0,0,0,0.04), inset 0 2px 4px rgba(255,255,255,1)', backdropFilter: 'blur(20px)' }}>
+                <p style={{ color:'var(--text-dark)',fontSize:'0.9rem',lineHeight:1.6,margin:0, fontWeight:600 }}>{cleanStatusReason||'Screened in accordance with AAOIFI Shariah Standard No. 21.'}</p>
+              </div>
+              
+              {(report.reporting_period||report.reporting_year)&&(<div style={{ display:'inline-flex',alignItems:'center',gap:6,padding:'6px 16px',background:'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%)',borderRadius:100,fontSize:'0.7rem',color:'var(--text-muted)',fontWeight:800,border:`1px solid ${sc.color}20`,width:'fit-content',marginTop:4, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}><Calendar size={12} color={sc.color}/> {report.reporting_period} {report.reporting_year?`(${report.reporting_year})`:''}</div>)}
             </div>
-            {hasPurification&&(<div style={{ flex:'0 0 240px',padding:'24px',display:'flex',flexDirection:'column',justifyContent:'center',gap:16,background:'rgba(245,158,11,0.02)' }}>
+            
+            {hasPurification&&(<div style={{ flex:'0 0 280px',padding:'24px 32px',display:'flex',flexDirection:'column',justifyContent:'center',gap:16,background:'linear-gradient(135deg, rgba(245,158,11,0.02) 0%, rgba(245,158,11,0.08) 100%)' }}>
               <div>
-                <div style={{ fontSize:'0.65rem',fontWeight:800,textTransform:'uppercase',letterSpacing:'1px',color:'#D97706',marginBottom:6 }}>Purification</div>
-                <div style={{ fontSize:'0.9rem',color:'var(--text-dark)',fontWeight:700,lineHeight:1.4 }}>Donate <strong style={{ color:'#D97706' }}>{purPct}%</strong> of dividend income to charity</div>
+                <div style={{ fontSize:'0.7rem',fontWeight:900,textTransform:'uppercase',letterSpacing:'1.5px',color:'#D97706',marginBottom:8, display:'flex', alignItems:'center', gap: 6 }}><Droplets size={14} strokeWidth={2.5}/> Purification Needed</div>
+                <div style={{ fontSize:'1rem',color:'var(--text-dark)',fontWeight:800,lineHeight:1.4 }}>Donate <strong style={{ color:'#D97706', fontSize:'1.3rem', padding: '0 2px' }}>{purPct}%</strong> of dividend income to charity</div>
               </div>
-              <Link to="/portfolio" className="hover-lift" style={{ display:'inline-flex',alignItems:'center',justifyContent:'center',gap:5,padding:'12px 20px',borderRadius:12,background:'rgba(245,158,11,0.15)',border:'1px solid rgba(245,158,11,0.3)',color:'#D97706',fontSize:'0.8rem',fontWeight:800,textDecoration:'none',marginTop:4, transition:'all 0.2s' }}>Purify in Portfolio <ChevronRight size={14}/></Link>
+              <Link to="/portfolio" className="hover-lift" style={{ display:'inline-flex',alignItems:'center',justifyContent:'center',gap:6,padding:'12px 20px',borderRadius:16,background:'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 100%)',border:'1px solid rgba(245,158,11,0.3)',color:'#D97706',fontSize:'0.85rem',fontWeight:900,textDecoration:'none',marginTop:8, transition:'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: '0 8px 24px rgba(245,158,11,0.15), inset 0 2px 4px #fff' }}>Purify in Portfolio <ChevronRight size={16}/></Link>
             </div>)}
-            {isNonHalal&&(<div style={{ flex:'0 0 240px',padding:'24px',display:'flex',flexDirection:'column',justifyContent:'center',gap:12,background:'rgba(239,68,68,0.02)' }}>
-              <div style={{ fontSize:'0.65rem',fontWeight:800,textTransform:'uppercase',letterSpacing:'1.5px',color:'var(--non-halal)' }}>Screening Result</div>
-              <div style={{ display:'flex',alignItems:'center',gap:10 }}><XCircle size={32} color="var(--non-halal)" strokeWidth={2}/>
-                <div><div style={{ fontSize:'1.1rem',fontWeight:900,color:'var(--non-halal)' }}>EXCLUDED</div><div style={{ fontSize:'0.7rem',color:'var(--text-muted)',fontWeight:700 }}>Not suitable for Islamic investment</div></div>
+            
+            {isNonHalal&&(<div style={{ flex:'0 0 280px',padding:'24px 32px',display:'flex',flexDirection:'column',justifyContent:'center',gap:16,background:'linear-gradient(135deg, rgba(239,68,68,0.02) 0%, rgba(239,68,68,0.08) 100%)' }}>
+              <div style={{ fontSize:'0.7rem',fontWeight:900,textTransform:'uppercase',letterSpacing:'1.5px',color:'var(--non-halal)', display:'flex', alignItems:'center', gap:6 }}><AlertTriangle size={14} strokeWidth={2.5}/> Screening Result</div>
+              <div style={{ display:'flex',alignItems:'center',gap:14, background: 'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 100%)', padding: '16px', borderRadius: 16, boxShadow: '0 8px 24px rgba(239,68,68,0.15), inset 0 2px 4px #fff', border: '1px solid rgba(239,68,68,0.2)' }}>
+                <XCircle size={36} color="var(--non-halal)" strokeWidth={2.5}/>
+                <div><div style={{ fontSize:'1.1rem',fontWeight:900,color:'var(--non-halal)' }}>EXCLUDED</div><div style={{ fontSize:'0.75rem',color:'var(--text-muted)',fontWeight:700 }}>Not suitable for investment</div></div>
               </div>
-              <div style={{ fontSize:'0.85rem',color:'var(--text-muted)',lineHeight:1.5, fontWeight:500 }}>{businessFailed?'Primary business activities violate Shariah principles.':'Financial ratios exceed AAOIFI thresholds.'}</div>
             </div>)}
           </div>
         </div>
@@ -518,116 +539,57 @@ const AaoifiScreening = () => {
       <div style={{ width:308,flexShrink:0,position:'sticky',top:20,marginTop:52,maxHeight:'calc(100vh - 40px)',display:'flex',flexDirection:'column',gap:16 }}>
         
         {/* PRICE DATA WIDGET */}
-        <div style={{ borderRadius:18,border:'1px solid var(--border)',background:'var(--bg)',padding:'24px',boxShadow:'var(--shadow-sm)' }}>
-          <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:20 }}>
-            <div style={{ width:'32px', height:'32px', borderRadius:'10px', background:'var(--primary-50)', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--primary)' }}>
-              <BarChart2 size={16} strokeWidth={2.5} />
+        <div style={{ borderRadius:24,border:'1px solid rgba(91,41,113,0.08)',background:'var(--bg)',padding:'28px 32px',boxShadow:'0 12px 40px rgba(91,41,113,0.04)' }}>
+          <div style={{ display:'flex',alignItems:'center',gap:12,marginBottom:28 }}>
+            <div style={{ width:'40px', height:'40px', borderRadius:'14px', background:'var(--primary-50)', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--primary)', boxShadow:'0 4px 12px rgba(91,41,113,0.1)' }}>
+              <BarChart2 size={20} strokeWidth={2.5} />
             </div>
-            <div style={{ fontSize:'0.8rem',fontWeight:800,letterSpacing:'0.5px',color:'var(--text-dark)' }}>PRICE DATA</div>
+            <div style={{ fontSize:'0.9rem',fontWeight:900,letterSpacing:'1px',color:'var(--text-dark)' }}>PRICE DATA</div>
           </div>
-          <div style={{ display:'flex',flexDirection:'column',gap:16 }}>
-            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px dashed var(--border)',paddingBottom:12 }}>
-              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:500 }}>Open</span>
-              <span style={{ fontSize:'0.9rem',fontWeight:700,color:'var(--text-dark)' }}>
-                {stock?.open ? `₦${stock.open.toLocaleString(undefined,{minimumFractionDigits:2})}` : '—'}
-              </span>
-            </div>
-            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px dashed var(--border)',paddingBottom:12 }}>
-              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:500 }}>Previous Close</span>
-              <span style={{ fontSize:'0.9rem',fontWeight:700,color:'var(--text-dark)' }}>
-                {stock?.previous_close ? `₦${stock.previous_close.toLocaleString(undefined,{minimumFractionDigits:2})}` : '—'}
-              </span>
-            </div>
-            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px dashed var(--border)',paddingBottom:12 }}>
-              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:500 }}>Day High</span>
-              <span style={{ fontSize:'0.9rem',fontWeight:700,color:'var(--text-dark)' }}>
-                {stock?.day_high ? `₦${stock.day_high.toLocaleString(undefined,{minimumFractionDigits:2})}` : '—'}
-              </span>
-            </div>
-            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px dashed var(--border)',paddingBottom:12 }}>
-              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:500 }}>Day Low</span>
-              <span style={{ fontSize:'0.9rem',fontWeight:700,color:'var(--text-dark)' }}>
-                {stock?.day_low ? `₦${stock.day_low.toLocaleString(undefined,{minimumFractionDigits:2})}` : '—'}
-              </span>
-            </div>
-            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px dashed var(--border)',paddingBottom:12 }}>
-              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:500 }}>52W High</span>
-              <span style={{ fontSize:'0.9rem',fontWeight:700,color:'var(--text-dark)' }}>
-                {stock?.week_52_high ? `₦${stock.week_52_high.toLocaleString(undefined,{minimumFractionDigits:2})}` : '—'}
-              </span>
-            </div>
-            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center' }}>
-              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:500 }}>52W Low</span>
-              <span style={{ fontSize:'0.9rem',fontWeight:700,color:'var(--text-dark)' }}>
-                {stock?.week_52_low ? `₦${stock.week_52_low.toLocaleString(undefined,{minimumFractionDigits:2})}` : '—'}
-              </span>
-            </div>
+          <div style={{ display:'flex',flexDirection:'column',gap:18 }}>
+            {[
+              { label: 'Open', value: stock?.open ? `₦${stock.open.toLocaleString(undefined,{minimumFractionDigits:2})}` : '—' },
+              { label: 'Previous Close', value: stock?.previous_close ? `₦${stock.previous_close.toLocaleString(undefined,{minimumFractionDigits:2})}` : '—' },
+              { label: 'Day High', value: stock?.day_high ? `₦${stock.day_high.toLocaleString(undefined,{minimumFractionDigits:2})}` : '—' },
+              { label: 'Day Low', value: stock?.day_low ? `₦${stock.day_low.toLocaleString(undefined,{minimumFractionDigits:2})}` : '—' },
+              { label: '52W High', value: stock?.week_52_high ? `₦${stock.week_52_high.toLocaleString(undefined,{minimumFractionDigits:2})}` : '—' },
+              { label: '52W Low', value: stock?.week_52_low ? `₦${stock.week_52_low.toLocaleString(undefined,{minimumFractionDigits:2})}` : '—', noBorder: true }
+            ].map((item, idx) => (
+              <div key={idx} style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:item.noBorder?'none':'1px solid rgba(91,41,113,0.06)',paddingBottom:item.noBorder?0:14 }}>
+                <span style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:600 }}>{item.label}</span>
+                <span style={{ fontSize:'0.95rem',fontWeight:800,color:'var(--text-dark)',letterSpacing:'-0.3px',fontVariantNumeric:'tabular-nums' }}>{item.value}</span>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* MARKET DATA WIDGET */}
-        <div style={{ borderRadius:18,border:'1px solid var(--border)',background:'var(--bg)',padding:'24px',boxShadow:'var(--shadow-sm)' }}>
-          <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:20 }}>
-            <div style={{ width:'32px', height:'32px', borderRadius:'10px', background:'var(--primary-50)', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--primary)' }}>
-              <TrendingUp size={16} strokeWidth={2.5} />
+        <div style={{ borderRadius:24,border:'1px solid rgba(91,41,113,0.08)',background:'var(--bg)',padding:'28px 32px',boxShadow:'0 12px 40px rgba(91,41,113,0.04)' }}>
+          <div style={{ display:'flex',alignItems:'center',gap:12,marginBottom:28 }}>
+            <div style={{ width:'40px', height:'40px', borderRadius:'14px', background:'var(--primary-50)', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--primary)', boxShadow:'0 4px 12px rgba(91,41,113,0.1)' }}>
+              <TrendingUp size={20} strokeWidth={2.5} />
             </div>
-            <div style={{ fontSize:'0.8rem',fontWeight:800,letterSpacing:'0.5px',color:'var(--text-dark)' }}>MARKET DATA</div>
+            <div style={{ fontSize:'0.9rem',fontWeight:900,letterSpacing:'1px',color:'var(--text-dark)' }}>MARKET DATA</div>
           </div>
-          <div style={{ display:'flex',flexDirection:'column',gap:16 }}>
-            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px dashed var(--border)',paddingBottom:12 }}>
-              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:500 }}>Market Cap</span>
-              <span style={{ fontSize:'0.9rem',fontWeight:700,color:'var(--text-dark)' }}>
-                {stock?.market_cap ? fmt(stock.market_cap) : '—'}
-              </span>
-            </div>
-            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px dashed var(--border)',paddingBottom:12 }}>
-              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:500 }}>Shares Outstanding</span>
-              <span style={{ fontSize:'0.9rem',fontWeight:700,color:'var(--text-dark)' }}>
-                {stock?.shares_outstanding ? fmtCount(stock.shares_outstanding) : '—'}
-              </span>
-            </div>
-            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px dashed var(--border)',paddingBottom:12 }}>
-              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:500 }}>Volume Today</span>
-              <span style={{ fontSize:'0.9rem',fontWeight:700,color:'var(--text-dark)' }}>
-                {stock?.volume ? fmtCount(stock.volume) : '—'}
-              </span>
-            </div>
-            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px dashed var(--border)',paddingBottom:12 }}>
-              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:500 }}>P/E Ratio</span>
-              <span style={{ fontSize:'0.9rem',fontWeight:700,color:'var(--text-dark)' }}>
-                {stock?.pe_ratio ? stock.pe_ratio : '—'}
-              </span>
-            </div>
-            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px dashed var(--border)',paddingBottom:12 }}>
-              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:500 }}>EPS</span>
-              <span style={{ fontSize:'0.9rem',fontWeight:700,color:'var(--text-dark)' }}>
-                {stock?.eps ? stock.eps : '—'}
-              </span>
-            </div>
-            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px dashed var(--border)',paddingBottom:12 }}>
-              <div>
-                <div style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:500 }}>Last Dividend</div>
-                {stock?.last_paid_dividend?.pay_date && <div style={{ fontSize:'0.65rem',color:'var(--text-light)',marginTop:2, fontWeight:600 }}>{new Date(stock.last_paid_dividend.pay_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})}</div>}
+          <div style={{ display:'flex',flexDirection:'column',gap:18 }}>
+            {[
+              { label: 'Market Cap', value: stock?.market_cap ? fmt(stock.market_cap) : '—' },
+              { label: 'Shares Out.', value: stock?.shares_outstanding ? fmtCount(stock.shares_outstanding) : '—' },
+              { label: 'Volume Today', value: stock?.volume ? fmtCount(stock.volume) : '—' },
+              { label: 'P/E Ratio', value: stock?.pe_ratio ? stock.pe_ratio : '—' },
+              { label: 'EPS', value: stock?.eps ? stock.eps : '—' },
+              { label: 'Last Div.', sub: stock?.last_paid_dividend?.pay_date && new Date(stock.last_paid_dividend.pay_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}), value: stock?.last_paid_dividend ? `₦${Number(stock.last_paid_dividend.amount).toFixed(2)}` : '—' },
+              { label: 'Next Div.', sub: stock?.upcoming_dividend?.pay_date && new Date(stock.upcoming_dividend.pay_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}), value: stock?.upcoming_dividend ? `₦${Number(stock.upcoming_dividend.amount).toFixed(2)}` : '—' },
+              { label: 'Div. Yield', value: stock?.div_yield ? `${stock.div_yield}%` : '—', noBorder: true }
+            ].map((item, idx) => (
+              <div key={idx} style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:item.noBorder?'none':'1px solid rgba(91,41,113,0.06)',paddingBottom:item.noBorder?0:14 }}>
+                <div>
+                  <div style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:600 }}>{item.label}</div>
+                  {item.sub && <div style={{ fontSize:'0.65rem',color:'var(--primary)',marginTop:4, fontWeight:700 }}>{item.sub}</div>}
+                </div>
+                <span style={{ fontSize:'0.95rem',fontWeight:800,color:'var(--text-dark)',letterSpacing:'-0.3px',fontVariantNumeric:'tabular-nums' }}>{item.value}</span>
               </div>
-              <span style={{ fontSize:'0.9rem',fontWeight:700,color:'var(--text-dark)' }}>
-                {stock?.last_paid_dividend ? `₦${Number(stock.last_paid_dividend.amount).toFixed(2)}` : '—'}
-              </span>
-            </div>
-            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px dashed var(--border)',paddingBottom:12 }}>
-              <div>
-                <div style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:500 }}>Upcoming Dividend</div>
-                {stock?.upcoming_dividend?.pay_date && <div style={{ fontSize:'0.65rem',color:'var(--text-light)',marginTop:2, fontWeight:600 }}>{new Date(stock.upcoming_dividend.pay_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})}</div>}
-              </div>
-              <span style={{ fontSize:'0.9rem',fontWeight:700,color:'var(--text-dark)' }}>
-                {stock?.upcoming_dividend ? `₦${Number(stock.upcoming_dividend.amount).toFixed(2)}` : '—'}
-              </span>
-            </div>
-            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center' }}>
-              <span style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:500 }}>Dividend Yield</span>
-              <span style={{ fontSize:'0.9rem',fontWeight:700,color:'var(--text-dark)' }}>
-                {stock?.div_yield ? `${stock.div_yield}%` : '—'}
-              </span>
-            </div>
+            ))}
           </div>
         </div>
 

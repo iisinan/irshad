@@ -270,29 +270,23 @@ export default function MarketTab() {
 
       {/* ── Header Hero Banner ─────────────────────────────────────── */}
       <div style={{ 
-        background: 'linear-gradient(135deg, var(--primary) 0%, #4A215D 100%)', 
-        borderRadius: '20px', padding: '24px 28px', 
-        boxShadow: '0 12px 32px rgba(91, 41, 113, 0.25)', 
-        border: '1px solid rgba(255, 255, 255, 0.1)', marginBottom: '16px', 
+        padding: '16px 20px', marginBottom: '16px', 
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
         position: 'relative', overflow: 'hidden', flexWrap: 'wrap', gap: '20px' 
       }}>
-        {/* Decorative Background Elements */}
-        <div style={{ position: 'absolute', top: '-60px', right: '-40px', width: '250px', height: '250px', background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: '-40px', left: '20%', width: '150px', height: '150px', background: 'radial-gradient(circle, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
         
         {/* Large Decorative Icon on the right */}
-        <div style={{ position: 'absolute', right: '-10px', top: '50%', transform: 'translateY(-50%) rotate(10deg)', opacity: 0.15, pointerEvents: 'none' }}>
-           <TrendingUp size={140} strokeWidth={1} color="white" />
+        <div style={{ position: 'absolute', right: '-20px', top: '50%', transform: 'translateY(-50%) rotate(10deg)', opacity: 0.03, pointerEvents: 'none' }}>
+           <TrendingUp size={160} strokeWidth={1.5} color="var(--primary)" />
         </div>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', zIndex: 1 }}>
-          <div style={{ width: '52px', height: '52px', background: 'rgba(255, 255, 255, 0.15)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', border: '1px solid rgba(255, 255, 255, 0.2)', backdropFilter: 'blur(8px)', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+          <div style={{ width: '48px', height: '48px', background: 'rgba(91, 41, 113, 0.06)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', border: '1px solid rgba(91, 41, 113, 0.1)', boxShadow: '0 4px 12px rgba(91, 41, 113, 0.05)' }}>
             <BarChart2 size={24} strokeWidth={2.5} />
           </div>
           <div>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 850, color: 'white', letterSpacing: '-0.5px', margin: 0, textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>Market Screener</h2>
-            <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.8rem', marginTop: '4px', margin: 0, fontWeight: 500 }}>Nigerian Exchange (NGX) · AAOIFI Shariah Standard No. 21</p>
+            <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-0.5px', margin: 0 }}>Market Screener</h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '4px', margin: 0, fontWeight: 600 }}>Nigerian Exchange (NGX) · AAOIFI Shariah Standard No. 21</p>
           </div>
         </div>
       </div>
