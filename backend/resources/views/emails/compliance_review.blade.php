@@ -148,7 +148,7 @@
         <table>
             <tr>
                 <td>Company</td>
-                <td><strong>{{ $review->company->name ?? 'Unknown' }}</strong> &nbsp;<span style="color:#94a3b8;">({{ $review->company->symbol ?? 'N/A' }})</span></td>
+                <td><strong>{{ $review->company?->name ?? 'Unknown' }}</strong> &nbsp;<span style="color:#94a3b8;">({{ $review->company?->symbol ?? 'N/A' }})</span></td>
             </tr>
             <tr>
                 <td>Previous Status</td>
@@ -192,11 +192,11 @@
         </p>
 
         <div class="actions">
-            <a href="{{ config('app.url') }}/api/admin/compliance-reviews/{{ $review->id }}/approve-link" class="btn btn-approve">✅ &nbsp;Approve Change</a>
-            <a href="{{ config('app.url') }}/api/admin/compliance-reviews/{{ $review->id }}/reject-link"  class="btn btn-reject">❌ &nbsp;Reject &amp; Keep Current</a>
+            <a href="{{ config('app.url') }}/api/v1/admin/compliance-reviews/{{ $review->id }}/approve-link" class="btn btn-approve">✅ &nbsp;Approve Change</a>
+            <a href="{{ config('app.url') }}/api/v1/admin/compliance-reviews/{{ $review->id }}/reject-link"  class="btn btn-reject">❌ &nbsp;Reject &amp; Keep Current</a>
         </div>
 
-        <p class="hint">Or log in to the <a href="{{ config('app.url') }}/admin/compliance-reviews" style="color:#6366f1;">Admin Dashboard → Compliance Reviews</a> to review with full context and history.</p>
+        <p class="hint">Or log in to the <a href="{{ config('app.frontend_url') }}/admin/compliance-reviews" style="color:#6366f1;">Admin Dashboard → Compliance Reviews</a> to review with full context and history.</p>
 
     </div>
 
