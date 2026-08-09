@@ -89,7 +89,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
         {/* Top strip with subtle pattern */}
         <div style={{
           height: '5px',
-          background: 'linear-gradient(90deg, var(--primary), #9b3dbe, var(--gold))',
+          background: 'var(--primary)',
           borderRadius: '24px 24px 0 0',
         }} />
 
@@ -248,7 +248,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
               {isActive && (
                 <div style={{
                   position: 'absolute', top: 0, left: 0, right: 0, height: '3px',
-                  background: 'linear-gradient(90deg, var(--primary), #9b3dbe)',
+                  background: 'var(--primary)',
                   borderRadius: '16px 16px 0 0',
                   boxShadow: '0 0 12px var(--primary)',
                 }} />
