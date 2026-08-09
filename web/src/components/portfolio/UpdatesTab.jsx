@@ -121,7 +121,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
     },
     {
       id: 'digest',
-      label: 'Weekly Digest',
+      label: 'Irshad Digest',
       icon: Mail,
       description: 'Portfolio compliance status summary',
     },

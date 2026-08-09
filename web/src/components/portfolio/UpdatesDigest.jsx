@@ -28,7 +28,7 @@ export default function UpdatesDigest() {
       setSaving(true);
       const res = await updateDigestPreference(next);
       setPref(res.data);
-      toastSuccess(isEnabled ? 'Weekly Digest disabled' : 'Weekly Digest enabled');
+      toastSuccess(isEnabled ? 'Irshad Digest disabled' : 'Irshad Digest enabled');
     } catch {
       setPref(oldPref); // Revert on failure
       toastError('Failed to update preference');
@@ -107,7 +107,7 @@ export default function UpdatesDigest() {
           </div>
           <div>
             <h2 style={{ fontSize: '1.7rem', fontWeight: 900, color: 'var(--primary)', margin: '0 0 4px', letterSpacing: '-0.5px', textShadow: '0 1px 2px rgba(255,255,255,0.8)' }}>
-              Irshad Weekly Digest
+              Irshad Digest
             </h2>
             <p style={{ fontSize: '0.9rem', color: 'var(--text-body)', margin: 0, fontWeight: 600, maxWidth: '400px', lineHeight: 1.5 }}>
               Stay effortlessly informed. We deliver your portfolio's Shariah compliance status straight to you.
