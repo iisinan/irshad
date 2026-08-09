@@ -49,9 +49,9 @@ function CalcModal({ h, onClose, onPurify }) {
       </div>
       <div style={{ background: 'var(--bg)' }}>
         {rows.map((row, i) => (
-          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px', padding: '12px 16px', borderTop: i > 0 ? '1px solid var(--border)' : 'none', background: row.highlight ? 'linear-gradient(135deg, rgba(217,119,6,0.05), rgba(245,158,11,0.02))' : 'transparent' }}>
+          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px', padding: '12px 16px', borderTop: i > 0 ? '1px solid var(--border)' : 'none', background: row.highlight ? 'var(--primary-50)' : 'transparent' }}>
             <span style={{ fontSize: '0.78rem', color: row.highlight ? 'var(--text-dark)' : 'var(--text-muted)', fontWeight: row.highlight ? 700 : 500, flex: 1, minWidth: '120px' }}>{row.label}</span>
-            <span style={{ fontSize: row.highlight ? '0.92rem' : '0.82rem', fontWeight: row.highlight ? 900 : 700, color: row.highlight ? '#D97706' : 'var(--text-dark)' }}>{row.value}</span>
+            <span style={{ fontSize: row.highlight ? '0.92rem' : '0.82rem', fontWeight: row.highlight ? 900 : 700, color: row.highlight ? 'var(--primary)' : 'var(--text-dark)' }}>{row.value}</span>
           </div>
         ))}
       </div>
@@ -69,8 +69,8 @@ function CalcModal({ h, onClose, onPurify }) {
         style={{ background: 'var(--bg)', borderRadius: '28px', width: '100%', maxWidth: '520px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 40px 100px rgba(0,0,0,0.25)', animation: 'slideUpFade 0.35s cubic-bezier(0.16,1,0.3,1)', position: 'relative' }}
       >
         {/* Header */}
-        <div style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)', padding: '24px 20px', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '120px', height: '120px', background: 'rgba(217,119,6,0.15)', borderRadius: '50%', pointerEvents: 'none' }} />
+        <div style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%)', padding: '24px 20px', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '120px', height: '120px', background: 'rgba(255,255,255,0.08)', borderRadius: '50%', pointerEvents: 'none' }} />
           <button onClick={onClose} style={{ position: 'absolute', top: '16px', right: '16px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'white', zIndex: 1 }}>
             <X size={15} />
           </button>
@@ -86,7 +86,7 @@ function CalcModal({ h, onClose, onPurify }) {
             </div>
             <div style={{ textAlign: 'right', flex: '1 1 100px' }}>
               <div style={{ fontSize: '0.6rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Amount Due</div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#F59E0B', letterSpacing: '-1px', lineHeight: 1 }}>{fmt(due)}</div>
+              <div style={{ fontSize: '1.8rem', fontWeight: 900, color: 'var(--gold)', letterSpacing: '-1px', lineHeight: 1 }}>{fmt(due)}</div>
             </div>
           </div>
 
@@ -94,10 +94,10 @@ function CalcModal({ h, onClose, onPurify }) {
           <div style={{ marginTop: '20px', position: 'relative', zIndex: 1 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
               <span style={{ fontSize: '0.65rem', fontWeight: 600, color: 'rgba(255,255,255,0.5)' }}>Impure portion of dividends</span>
-              <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#F59E0B' }}>{duePct.toFixed(2)}%</span>
+              <span style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--gold)' }}>{duePct.toFixed(2)}%</span>
             </div>
             <div style={{ height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '99px', overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${Math.max(1, duePct)}%`, background: 'linear-gradient(90deg, #F59E0B, #D97706)', borderRadius: '99px', transition: 'width 1s cubic-bezier(0.16,1,0.3,1)', boxShadow: '0 0 12px rgba(245,158,11,0.6)' }} />
+              <div style={{ height: '100%', width: `${Math.max(1, duePct)}%`, background: 'var(--gold)', borderRadius: '99px', transition: 'width 1s cubic-bezier(0.16,1,0.3,1)', boxShadow: '0 0 12px rgba(255,215,0,0.6)' }} />
             </div>
           </div>
         </div>
@@ -107,7 +107,7 @@ function CalcModal({ h, onClose, onPurify }) {
             title="Purification Calculation"
             formulaText="Total Dividends Received × Impure Ratio"
             formulaCalc={`${fmt(dividends)} × ${ratio.toFixed(4)}% = ${fmt(due)}`}
-            accent="#D97706"
+            accent="var(--primary)"
             rows={[
               { label: 'Total dividends received (12M)', value: fmt(dividends) },
               { label: 'Impure revenue ratio', value: `${ratio.toFixed(4)}%` },
@@ -120,9 +120,9 @@ function CalcModal({ h, onClose, onPurify }) {
             <button
               onClick={handlePurify}
               disabled={payLoading}
-              style={{ width: '100%', padding: '17px', borderRadius: '16px', background: 'linear-gradient(135deg, #D97706, #B45309)', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.95rem', cursor: payLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 10px 28px rgba(217,119,6,0.35)', transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)' }}
-              onMouseEnter={e => { if (!payLoading) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 32px rgba(217,119,6,0.45)'; } }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 28px rgba(217,119,6,0.35)'; }}
+              style={{ width: '100%', padding: '17px', borderRadius: '16px', background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.95rem', cursor: payLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 10px 28px rgba(91,41,113,0.35)', transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)' }}
+              onMouseEnter={e => { if (!payLoading) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 32px rgba(91,41,113,0.45)'; } }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 28px rgba(91,41,113,0.35)'; }}
             >
               {payLoading
                 ? <div className="spinner" style={{ width: '18px', height: '18px', borderTopColor: 'white' }} />
