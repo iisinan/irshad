@@ -246,11 +246,6 @@ const AaoifiScreening = () => {
         : (queryError.response?.data?.message || queryError.message || 'Error')) 
     : null;
 
-  /* Init chat */
-  useEffect(()=>{
-    if(!report||messages!==null)return;
-    setMessages([{ role:'assistant', text:`I'm Irshad AI. Ask me anything about ${report.company_name||symbol} — the verdict rationale, what each ratio means, how purification is calculated, or how it compares to its sector.` }]);
-  },[report]);
 
   const [alertLoading, setAlertLoading] = useState(false);
   const handleSetAlert = async () => {
@@ -328,11 +323,14 @@ const AaoifiScreening = () => {
   const interestIncome = parseFloat(fd.interest_income)||0;
   const debtRatioRaw   = marketCap>0?(totalDebt/marketCap)*100:null;
   const debtRatioAssets = totalAssets>0?(totalDebt/totalAssets)*100:null;
-  const debtRatio = report.debt_ratio !== null && report.debt_ratio !== undefined ? parseFloat(report.debt_ratio) : debtRatioRaw;
+  const debtRatio = report.debt_ratio !== null && report.debt_ratio !== undefined ? parseFloat(report.debt_ratio) * 100 : debtRatioRaw;
 
   const cashRatioRaw   = marketCap>0?(cashAndSec/marketCap)*100:null;
   const cashRatioAssets = totalAssets>0?(cashAndSec/totalAssets)*100:null;
-  const cashRatio = report.cash_ratio !== null && report.cash_ratio !== undefined ? parseFloat(report.cash_ratio) : cashRatioRaw;
+  const cashRatio = report.cash_ratio !== null && report.cash_ratio !== undefined ? parseFloat(report.cash_ratio) * 100 : cashRatioRaw;
+
+  const impureRatioRaw = totalRevenue>0?(interestIncome/totalRevenue)*100:null;
+  const impureRatio = report.impermissible_income_ratio !== null && report.impermissible_income_ratio !== undefined ? parseFloat(report.impermissible_income_ratio) * 100 : impureRatioRaw;
 
   // Determine Denominator
   const usedTotalAssets = report.denominator_used === 'Total Assets' || (!report.denominator_used && debtRatio !== null && debtRatioAssets !== null && Math.abs(debtRatio - debtRatioAssets) < 0.1);
@@ -642,7 +640,7 @@ const AaoifiScreening = () => {
               {symbol !== 'JAIZBANK' && (
                 <RatioBar title="2. Cash ratio"     subtitle={`(Cash + Securities) / ${denLabelText} × 100`}      ratio={cashRatio}                        threshold={30} numLabel="Cash & Securities" numVal={cashAndSec}   denLabel={denLabelText}    denVal={denValAmount}     formula={`(Cash + Sec.) / ${denLabelText} × 100`}       onInspect={setModalData}/>
               )}
-              <RatioBar title={symbol === 'JAIZBANK' ? '2. Impure revenue' : '3. Impure revenue'} subtitle="Impure Income / Total Revenue × 100"         ratio={report.impermissible_income_ratio} threshold={5}  numLabel="Impure Income"    numVal={interestIncome} denLabel="Total Revenue" denVal={totalRevenue}  formula="Impure Income / Total Revenue × 100"    onInspect={setModalData}/>
+              <RatioBar title={symbol === 'JAIZBANK' ? '2. Impure revenue' : '3. Impure revenue'} subtitle="Impure Income / Total Revenue × 100"         ratio={impureRatio} threshold={5}  numLabel="Impure Income"    numVal={interestIncome} denLabel="Total Revenue" denVal={totalRevenue}  formula="Impure Income / Total Revenue × 100"    onInspect={setModalData}/>
             </div>
             <div style={{ padding:'16px 20px',background:'var(--primary-50)',border:'1px dashed var(--primary-100)',borderRadius:16,display:'flex',alignItems:'flex-start',gap:12, boxShadow:'var(--shadow-sm)' }}>
               <Info size={16} color="var(--primary)" style={{ flexShrink:0,marginTop:2 }}/>
