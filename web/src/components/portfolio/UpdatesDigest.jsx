@@ -16,15 +16,21 @@ export default function UpdatesDigest() {
   const isEnabled = pref?.email_enabled || pref?.in_app_enabled;
 
   const handleToggle = async () => {
+    const oldPref = { ...pref };
+    const next = isEnabled
+      ? { email_enabled: false, in_app_enabled: false }
+      : { email_enabled: false, in_app_enabled: true };
+
+    // Optimistic Update
+    setPref({ ...pref, ...next });
+    
     try {
       setSaving(true);
-      const next = isEnabled
-        ? { email_enabled: false, in_app_enabled: false }
-        : { email_enabled: false, in_app_enabled: true };
       const res = await updateDigestPreference(next);
       setPref(res.data);
       toastSuccess(isEnabled ? 'Weekly Digest disabled' : 'Weekly Digest enabled');
     } catch {
+      setPref(oldPref); // Revert on failure
       toastError('Failed to update preference');
     } finally {
       setSaving(false);
@@ -32,11 +38,16 @@ export default function UpdatesDigest() {
   };
 
   const handleFrequency = async (freq) => {
+    const oldPref = { ...pref };
+    // Optimistic Update
+    setPref({ ...pref, frequency: freq });
+
     try {
       setSaving(true);
       const res = await updateDigestPreference({ ...pref, frequency: freq });
       setPref(res.data);
     } catch {
+      setPref(oldPref); // Revert on failure
       toastError('Failed to update preference');
     } finally {
       setSaving(false);
@@ -44,11 +55,18 @@ export default function UpdatesDigest() {
   };
 
   const handleDelivery = async (field) => {
+    const oldPref = { ...pref };
+    const newPref = { ...pref, [field]: !pref[field] };
+    
+    // Optimistic Update
+    setPref(newPref);
+
     try {
       setSaving(true);
-      const res = await updateDigestPreference({ ...pref, [field]: !pref[field] });
+      const res = await updateDigestPreference(newPref);
       setPref(res.data);
     } catch {
+      setPref(oldPref); // Revert on failure
       toastError('Failed to update preference');
     } finally {
       setSaving(false);
