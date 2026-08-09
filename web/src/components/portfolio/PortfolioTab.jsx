@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import {
-  Wallet,
+  Wallet, Layers, ShieldAlert, AlertTriangle, Sparkles, Target,
   Plus, X, Trash2, ArrowUpRight, ArrowDownRight,
   RefreshCw, Edit2, ShieldCheck
 } from 'lucide-react';
@@ -245,10 +245,12 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
 
         {/* ─── DASHBOARD HERO ─── */}
         <div className="stagger-1 hover-card" style={{ 
-          background: 'linear-gradient(135deg, var(--bg-section) 0%, var(--bg) 100%)', 
+          background: 'linear-gradient(135deg, var(--bg) 0%, var(--bg-section) 100%)',
+          backgroundImage: 'radial-gradient(circle at top right, rgba(91, 41, 113, 0.03) 0%, transparent 60%), linear-gradient(135deg, var(--bg) 0%, var(--bg-section) 100%), linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px)',
+          backgroundSize: '100% 100%, 100% 100%, 30px 30px, 30px 30px',
           border: '1px solid var(--border)',
-          borderRadius: '24px', 
-          padding: '28px 36px',
+          borderRadius: '16px', 
+          padding: '12px 20px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -256,96 +258,110 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
           gap: '12px',
           position: 'relative',
           overflow: 'hidden',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
-          marginBottom: '20px'
+          boxShadow: '0 12px 40px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,1)',
+          marginBottom: '20px',
+          color: 'var(--text-dark)'
         }}>
-          {/* Background Mesh */}
-          <div style={{ position: 'absolute', top: '-50%', left: '-20%', width: '100%', height: '200%', background: 'radial-gradient(ellipse at center, var(--primary-50) 0%, transparent 60%)', zIndex: 0, pointerEvents: 'none' }} />
+          {/* Decorative Glowing Orbs */}
+          <div style={{ position: 'absolute', bottom: '-40%', left: '5%', width: '300px', height: '300px', background: 'radial-gradient(circle, rgba(91, 41, 113, 0.03) 0%, transparent 70%)', zIndex: 0, pointerEvents: 'none' }} />
           
           {/* Left: Value & Stats */}
-          <div style={{ zIndex: 1, flex: 1, minWidth: '260px' }}>
-            {/* Header Row */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.2px', color: 'var(--text-muted)' }}>Total Balance</span>
+          <div style={{ zIndex: 1, flex: 1, minWidth: '260px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            
+            {/* Header Row: Label & Controls */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Total Balance</span>
               <button
                 onClick={handleRefresh}
-                style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '6px', cursor: 'pointer', color: 'var(--text-muted)', padding: '3px 5px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', transition: 'all 0.15s' }}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0', display: 'flex', alignItems: 'center', transition: 'color 0.2s' }}
                 title="Refresh portfolio"
+                onMouseEnter={e => e.currentTarget.style.color = 'var(--primary)'}
+                onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
               >
-                <RefreshCw size={11} style={{ animation: refreshing ? 'spin 0.8s linear infinite' : 'none' }}/>
+                <RefreshCw size={14} style={{ animation: refreshing ? 'spin 0.8s linear infinite' : 'none' }}/>
               </button>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '2px 7px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '20px' }}>
-                <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#22c55e', animation: 'pulse 2s ease infinite' }}/>
-                <span style={{ fontSize: '0.52rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Live</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '2px 8px', background: 'rgba(34,197,94,0.1)', borderRadius: '12px' }}>
+                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', animation: 'pulse 2s ease infinite' }}/>
+                <span style={{ fontSize: '0.6rem', fontWeight: 800, color: '#16a34a', letterSpacing: '0.5px' }}>LIVE</span>
               </div>
             </div>
 
-            {/* Value + Avg Return Badge in a unified line */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '8px' }}>
-              <div style={{ fontSize: 'clamp(1.75rem, 4vw, 2.4rem)', fontWeight: 950, color: 'var(--text-dark)', letterSpacing: '-1.2px', lineHeight: 1 }}>
+            {/* Value + Avg Return Row */}
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '16px', flexWrap: 'wrap' }}>
+              <div style={{ 
+                fontSize: 'clamp(2rem, 6vw, 2.8rem)', 
+                fontWeight: 900, 
+                letterSpacing: '-1px', 
+                lineHeight: 1,
+                color: 'var(--text-dark)',
+                display: 'inline-block'
+              }}>
                 <AnimCounter target={totalBalance}/>
               </div>
 
               {totalGainPct !== null && (
-                <div style={{ 
-                  display: 'inline-flex', 
-                  alignItems: 'center', 
-                  gap: '4px', 
-                  padding: '3px 8px', 
-                  borderRadius: '8px', 
-                  background: isPortfolioUp ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
-                  border: isPortfolioUp ? '1px solid rgba(34,197,94,0.2)' : '1px solid rgba(239,68,68,0.2)'
-                }}>
-                  {isPortfolioUp ? <ArrowUpRight size={12} color="#16a34a"/> : <ArrowDownRight size={12} color="#dc2626"/>}
-                  <span style={{ fontSize: '0.68rem', fontWeight: 800, color: isPortfolioUp ? '#16a34a' : '#dc2626' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: isPortfolioUp ? '#16a34a' : '#dc2626' }}>
+                  {isPortfolioUp ? <ArrowUpRight size={18} strokeWidth={3} /> : <ArrowDownRight size={18} strokeWidth={3} />}
+                  <span style={{ fontSize: '0.9rem', fontWeight: 800 }}>
                     {isPortfolioUp ? '+' : ''}{totalGainPct}% Avg Return
                   </span>
                 </div>
               )}
             </div>
 
-            {/* Mini Stats Pills */}
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              {[
-                { lbl: 'Halal', val: halalCount, color: '#16a34a' },
-                { lbl: 'Non-Halal', val: nonHalalCount, color: '#dc2626' }
-              ].map(stat => (
-                <div key={stat.lbl} style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '6px', 
-                  background: 'var(--bg)', 
-                  padding: '4px 10px', 
-                  borderRadius: '100px', 
-                  border: '1px solid var(--border)', 
-                  boxShadow: '0 1px 4px rgba(0,0,0,0.02)' 
-                }}>
-                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: stat.color }} />
-                  <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{stat.lbl}</span>
-                  <span style={{ fontSize: '0.72rem', fontWeight: 900, color: 'var(--text-dark)' }}>{stat.val}</span>
-                </div>
-              ))}
+            {/* Halal / Non-Halal Summary */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '4px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <ShieldCheck size={16} color="#16a34a" />
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Halal <strong style={{ color: 'var(--text-dark)', fontWeight: 800, marginLeft: '4px' }}>{halalCount}</strong></span>
+              </div>
+              <div style={{ width: '1px', height: '14px', background: 'var(--border)' }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <AlertTriangle size={16} color="#dc2626" />
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Non-Halal <strong style={{ color: 'var(--text-dark)', fontWeight: 800, marginLeft: '4px' }}>{nonHalalCount}</strong></span>
+              </div>
             </div>
           </div>
 
+          {/* Right side abstract graphic - Elegant Glass Rings */}
+          <div style={{ position: 'absolute', right: '-1%', top: '50%', transform: 'translateY(-50%)', zIndex: 0, opacity: 0.8, pointerEvents: 'none' }}>
+             <svg width="120" height="120" viewBox="0 0 280 280" fill="none">
+                <circle cx="140" cy="140" r="90" stroke="url(#ring1)" strokeWidth="30" opacity="0.15" />
+                <circle cx="200" cy="80" r="60" stroke="url(#ring2)" strokeWidth="20" opacity="0.25" />
+                <defs>
+                  <linearGradient id="ring1" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#5b2971" />
+                    <stop offset="100%" stopColor="#5b2971" stopOpacity="0" />
+                  </linearGradient>
+                  <linearGradient id="ring2" x1="100%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#16a34a" />
+                    <stop offset="100%" stopColor="#16a34a" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+             </svg>
+          </div>
         </div>
 
         {/* ─── ACTION BAR & FILTERS ─── */}
-        <div className="stagger-2" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', background: 'var(--bg)', padding: '16px 24px', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 2px 12px rgba(0,0,0,0.02)' }}>
+        <div className="stagger-2" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', background: 'var(--bg)', padding: '16px 24px', borderRadius: '20px', border: '1px solid var(--border)', boxShadow: '0 8px 32px rgba(0,0,0,0.03)' }}>
           
-          {/* Filters */}
-          <div style={{ display:'flex', background:'var(--bg-section)', borderRadius:'12px', padding:'4px', gap:'4px' }}>
+          {/* Filters (Segmented Control style) */}
+          <div style={{ display:'flex', background:'var(--body-bg)', borderRadius:'14px', padding:'6px', gap:'8px', border: '1px solid var(--border)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)' }}>
             {[
-              { id:'all', label:'All Holdings' },
-              { id:'halal', label:'Halal' },
-              { id:'nonhalal', label:'Non-Halal' }
+              { id:'all', label:'All Assets', icon: Layers },
+              { id:'halal', label:'Halal', icon: ShieldCheck },
+              { id:'nonhalal', label:'Non-Halal', icon: AlertTriangle }
             ].map(f => (
               <button key={f.id} onClick={() => setActiveFilter(f.id)} style={{
-                padding:'8px 16px', borderRadius:'8px', fontSize: '0.7rem', fontWeight:700, cursor:'pointer', border:'none', transition:'all 0.2s cubic-bezier(0.16,1,0.3,1)',
+                display: 'flex', alignItems: 'center', gap: '8px',
+                padding:'10px 24px', borderRadius:'10px', fontSize: '0.78rem', fontWeight:800, cursor:'pointer', border:'none', transition:'all 0.3s cubic-bezier(0.16,1,0.3,1)',
                 background: activeFilter === f.id ? 'var(--bg)' : 'transparent',
-                color:      activeFilter === f.id ? 'var(--text-dark)' : 'var(--text-muted)',
-                boxShadow:  activeFilter === f.id ? 'var(--shadow-sm)' : 'none',
-              }}>{f.label}</button>
+                color:      activeFilter === f.id ? 'var(--primary)' : 'var(--text-muted)',
+                boxShadow:  activeFilter === f.id ? '0 4px 12px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.05)' : 'none',
+              }}>
+                <f.icon size={16} color={activeFilter === f.id ? (f.id === 'halal' ? '#16a34a' : f.id === 'nonhalal' ? '#dc2626' : 'var(--primary)') : 'var(--text-muted)'} />
+                {f.label}
+              </button>
             ))}
           </div>
 
@@ -353,18 +369,18 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
           <div style={{ display: 'flex', gap: '10px' }}>
             <button
               onClick={() => setShowAddModal('manual')}
-              style={{ display:'flex', alignItems:'center', gap:'8px', padding:'10px 20px', borderRadius:'12px', background:'var(--primary)', color:'#FFFFFF', border:'none', fontWeight:800, fontSize: '0.75rem', cursor:'pointer', boxShadow:'var(--shadow-sm)', transition:'all 0.2s' }}
-              onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 8px 24px rgba(91, 41, 113, 0.3)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='var(--shadow-sm)'; }}
+              style={{ display:'flex', alignItems:'center', gap:'8px', padding:'12px 24px', borderRadius:'14px', background:'linear-gradient(135deg, var(--primary) 0%, #3a164a 100%)', color:'#FFFFFF', border:'none', fontWeight:800, fontSize: '0.8rem', cursor:'pointer', boxShadow:'0 8px 24px rgba(91, 41, 113, 0.25)', transition:'all 0.2s' }}
+              onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 12px 32px rgba(91, 41, 113, 0.35)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='0 8px 24px rgba(91, 41, 113, 0.25)'; }}
             >
-              <Plus size={16}/> Add Holding
+              <Plus size={18}/> Add Holding
             </button>
           </div>
         </div>
         
         {/* Header */}
         {displayHoldings.length > 0 && (
-          <div style={{ position: 'relative', marginTop: '20px', padding: '16px 24px 16px 24px', background: 'var(--body-bg)', zIndex: 20 }}>
+          <div style={{ position: 'relative', marginTop: '12px', padding: '8px 24px', background: 'var(--body-bg)', zIndex: 20 }}>
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <div style={{ flex: 1.5, fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', paddingLeft: '62px' }}>Asset</div>
               <div style={{ flex: 1, textAlign: 'right', fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Value / Shares</div>
