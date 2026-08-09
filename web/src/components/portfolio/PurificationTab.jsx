@@ -258,9 +258,9 @@ function StatDetailModal({ holding: h, statKey, onClose, onOpenPurification }) {
             </div>
             <div style={{ background: 'var(--bg)' }}>
               {config.rows.map((row, i) => (
-                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', borderTop: i > 0 ? '1px solid var(--border)' : 'none', background: row.highlight ? 'rgba(245,158,11,0.06)' : 'transparent' }}>
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', borderTop: i > 0 ? '1px solid var(--border)' : 'none', background: row.highlight ? 'var(--primary-50)' : 'transparent' }}>
                   <span style={{ fontSize: '0.8rem', color: row.highlight ? 'var(--text-dark)' : 'var(--text-muted)', fontWeight: row.highlight ? 800 : 500 }}>{row.label}</span>
-                  <span style={{ fontSize: row.highlight ? '0.96rem' : '0.84rem', fontWeight: row.highlight ? 900 : 700, color: row.highlight ? '#D97706' : 'var(--text-dark)' }}>{row.value}</span>
+                  <span style={{ fontSize: row.highlight ? '0.96rem' : '0.84rem', fontWeight: row.highlight ? 900 : 700, color: row.highlight ? 'var(--primary)' : 'var(--text-dark)' }}>{row.value}</span>
                 </div>
               ))}
             </div>
@@ -269,7 +269,7 @@ function StatDetailModal({ holding: h, statKey, onClose, onOpenPurification }) {
           <div style={{ display: 'flex', gap: '10px' }}>
             <button
               onClick={() => { onClose(); onOpenPurification(h); }}
-              style={{ flex: 1, padding: '13px', borderRadius: '14px', background: 'linear-gradient(135deg, #D97706, #B45309)', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 8px 20px rgba(217,119,6,0.3)' }}
+              style={{ flex: 1, padding: '13px', borderRadius: '14px', background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 8px 20px rgba(91,41,113,0.3)' }}
             >
               <Calculator size={15} /> View Purification Breakdown
             </button>
