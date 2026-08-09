@@ -113,7 +113,7 @@ const NotifCard = ({ notif, onRead, onArchive, onDelete }) => {
           </span>
           <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto', flexWrap: 'wrap' }}>
             {notif.action_url && notif.action_url.startsWith('/') ? (
-              <Link to={notif.action_url} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.69rem', fontWeight: 800, color: 'var(--primary)', textDecoration: 'none' }}>
+              <Link to={notif.action_url.replace(/^\/stock\//, '/market/')} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.69rem', fontWeight: 800, color: 'var(--primary)', textDecoration: 'none' }}>
                 {notif.action_label || 'View'} <ChevronRight size={11} />
               </Link>
             ) : notif.action_url ? (

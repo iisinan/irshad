@@ -86,7 +86,7 @@ class DetectComplianceChanges extends Command
             UserNotification::notify($userId, $title, $message, [
                 'icon' => $icon,
                 'category' => 'screening',
-                'action_url' => "/stock/{$company->symbol}",
+                'action_url' => "/market/{$company->symbol}",
                 'action_label' => 'View Report',
                 'meta' => [
                     'symbol' => $company->symbol,
