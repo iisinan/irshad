@@ -1,0 +1,737 @@
+             Unaudited
+    Interim Financial Statements
+                for the
+
+    1st Quarter Ended June 30, 2026
+
+
+`
+              HONEYWELL FLOUR MILLS PLC
+Unaudited Interim Financial Statements - 1st quarter ended June 30, 2026.
+
+
+
+Contents
+
+
+
+                                                                            Page
+
+1     Director certification report                                            1
+2     Financial summary                                                        2
+3     Statement of financial position                                          3
+4     Income statement                                                         4
+5     Statement of comprehensive income                                        5
+6     Statement of changes in equity                                           6
+7     Statement of cash flows                                                  7
+8     Notes to the interim financial statements                             8 - 17
+CERTIFICATION PURSUANT TO SECTION 60(2) OF THE INVESTMENTS AND SECURITIES ACT, NO. 29, 2007 -
+QUARTERLY REPORT
+
+We, who are the responsible officers of Honeywell Flour Mills Plc., in compliance with Section 60 (2) of the
+Investments and Securities Act of 2007, wish to certify as follows;
+
+That we have reviewed the Unaudited Financial Statements for the 1st Quarter ended 30th June, 2026 under
+review.
+
+That based on our knowledge, the report does not contain:
+i) Any untrue statement of a material fact, or
+ii) Omission to state a material fact, which will make the statement misleading in the light of the circumstances
+under which such statement was made;
+
+That based on our knowledge, the financial statements and other financial information included in the report fairly
+presents in all material respects the financial condition and results of operations of the company as of, and for the
+periods presented in the report.
+
+We:
+i) Are responsible for establishing and maintaining internal controls.
+ii) Have designed such internal controls to ensure that material information relating to the company is made
+known to such officers and others within those entities particularly during the period in which the periodic reports
+are being prepared;
+iii) Have evaluated the effectiveness of the company's internal controls as of date and within 90 days prior to the
+report;
+iv) Have presented in the report our conclusions about the effectiveness of our internal controls based on our
+evaluation as of that date;
+
+Although these reports have not been audited, we have taken care to review:
+i) All significant deficiency in the design or operation of internal control which would adversely affect the
+company's ability to record, process, summarized and report financial data
+ii) Any fraud, whether or not material, that involves management or other employees who have significant role in
+the company's internal controls;
+
+We have identified in the report whether or not there were significant changes in internal controls or other factors
+that could significantly affect internal controls subsequent to the date of our evaluation, including any corrective
+actions with regards to significant deficiencies and material weaknesses.
+
+
+
+
+Nassib Raffoul                                                    Imran Moid
+Managing Director                                                 Chief Financial Officer
+FRC/2024/PRO/DIR/003/551851                                       FRC/2026/PRO/ANAN/001/437595
+
+
+
+
+                                                     1
+                               HONEYWELL FLOUR MILLS PLC
+
+
+The Board of Directors of Honeywell Flour Mills Plc hereby presents the following unaudited results for the
+1st Quarter ended June 30, 2026
+
+                                       Group                          Company             Group      Company
+
+                                  3 months ended                   3 months ended
+
+                                 30-Jun-26      30-Jun-25        30-Jun-26   30-Jun-25         %          %
+                                      N'm            N'm              N'm         N'm      Change     Change
+Revenue                           112,867          67,487         105,145       67,487        67%        56%
+
+
+Profit/(Loss) Before Tax             9,812          3,382          10,207        3,382       190%       202%
+Taxation                            (2,858)          (760)         (2,858)        (760)      -276%      -276%
+Profit/(Loss) for the Period         6,954          2,622           7,349        2,622       165%       180%
+
+
+
+
+By Order of the Board
+
+
+
+
+Osomomen L.Olukoya
+FRC/2022/PRO/NBA/004/451605
+Company Secretary
+
+
+
+
+                                                             2
+                                 HONEYWELL FLOUR MILLS PLC
+Statement of Financial Position
+as at June 30, 2026
+                                                                  Group                                Company
+                                                                as at    as at                        as at      as at
+                                                           30-Jun-26 31-Mar-26                   30-Jun-26   31-Mar-26
+Assets                                        Notes              N'm      N'm                          N'm        N'm
+Non-current assets
+Property, plant and equipment                    5           112,597            99,267               23,507                23,929
+Right-of -use assets                             5b              660               667                  660                   667
+Intangible assets                                4               415               423                   13                    17
+Deferred tax assets                              14              -                 -                    158                   157
+Investments in subsidiaries                                      -                 -                    300                   300
+                                                             113,672           100,357               24,638                25,070
+Current assets
+Inventories                                      6            56,787            31,457              32,412                22,484
+Trade and other receivables                      7            64,123            28,792             105,291                77,579
+Prepayments                                      8             4,999             5,737               2,616                 1,539
+Short term loans receivables                      9           56,821            40,556              56,821                40,660
+Cash and cash equivalents                        10           13,778             9,810              13,773                 8,330
+                                                             196,508           116,352             210,913               150,592
+Total assets                                                 310,180           216,709             235,551               175,662
+Equity and Liabilities
+Equity
+Share capital                                    16            10,427            10,427              10,427                10,427
+Reserves                                                       19,388            19,388              19,388                19,388
+Retained earnings                                              31,071            24,117              35,263                27,914
+                                                               60,886            53,932              65,078                57,729
+Liabilities
+Non-current liabilities
+Borrowings                                       11            13,195            27,023              13,195                27,023
+Deferred tax                                     14             2,871             2,870                 -                       -
+Lease liabilities                                5b               836               223                 836                   223
+Long service award                                                249               233                 196                   187
+Deferred income                                  12               771               717                 771                   717
+                                                               17,922            31,066              14,998                28,150
+Current liabilities
+Trade and other payables                         13          172,701            97,985              96,863                56,117
+Borrowings                                       11           28,778             5,459              28,778                 5,459
+Current tax payable                              14           11,520             8,662              11,461                 8,603
+Contract liability                                            17,762            18,168              17,762                18,168
+Lease liabilities                                5b              179               763                 179                   763
+Deferred income                                  12              432               674                 432                   673
+                                                             231,372           131,711             155,475                89,783
+Total liabilities                                            249,294           162,777             170,473               117,933
+
+Total Equity and Liabilities                                 310,180           216,709             235,551               175,662
+
+The unaudited financial statements and notes on pages 3 to 17 were approved by the directors on 29th July, 2026 and signed on its
+behalf by:
+
+
+
+Nassib Raffoul                                                                               Imran Moid
+Managing Director                                                                            Chief Financial Officer
+                                                                          3
+FRC/2024/PRO/DIR/003/551851                                                                  FRC/2026/PRO/ANAN/001/437595
+                 HONEYWELL FLOUR MILLS PLC
+Income Statement
+for the period ended June 30, 2026
+                                                 Group                 Company
+                                           3 months ended          3 months ended
+                                         30-Jun-26 30-Jun-25      30-Jun-26 30-Jun-25
+                                   Notes       N'm         N'm          N'm       N'm
+Revenue                                    112,867      67,487     105,145     67,487
+Cost of sales                             (101,670)    (60,292)     (93,512)  (60,292)
+Gross profit                                11,197       7,195       11,633     7,195
+Selling and administration expenses         (3,242)     (4,648)      (3,074)   (4,648)
+Net operating gains and (losses)    17         658         166          335       166
+Operating profit                             8,613
+                                               -         2,713
+                                                           -          8,894     2,713
+                                                                                  -
+Finance cost                                (1,166)     (1,068)      (1,156)   (1,068)
+Finance income                               2,127         729        2,127       729
+Foreign Exchange Gain/(Loss)                   238       1,008          342     1,008
+Net finance income/(expense)                 1,199         669        1,313       669
+
+Profit/(Loss) before taxation                9,812      3,382       10,207      3,382
+Taxation                             14     (2,858)      (760)      (2,858)      (760)
+
+Profit/(Loss) for the period                6,954       2,622        7,349      2,622
+
+Basic Earnings per share (kobo)             87.69       33.06        92.67      33.06
+
+
+
+
+                                            4
+                         HONEYWELL FLOUR MILLS PLC
+Statement of Comprehensive Income
+for the period ended June 30, 2026
+                                                            Group                 Company
+                                                        3 months ended          3 months ended
+                                                     30-Jun-26    30-Jun-25   30-Jun-26 30-Jun-25
+                                                          N'm          N'm         N'm        N'm
+Profit /(Loss)for the period recognised in the
+income statement                                         6954         2603        7349       2622
+Revaluation reserves                                      -            -           -          -
+
+Total comprehensive income                               6954         2603        7349       2622
+
+ Attributable to the owners of the company               6,954        2,603       7,349     2,622
+
+Total comprehensive income for the period               6,954        2,603       7,349      2,622
+
+
+
+
+                                                 5
+                                            HONEYWELL FLOUR MILLS PLC
+
+Statement of Changes in Equity
+as at June 30, 2026
+Group
+                                               Issued       Share          Total   Revaluation     Total   Retained    Total
+                                                share    premium          share        reserve   reserve    income    equity
+                                               capital    account        capital
+as at June 30, 2026                               N'm         N'm           N'm           N'm       N'm        N'm       N'm
+1-Apr-26                                        3,965       6,462       10,427         19,388    19,388     24,117    53,932
+Total comprehensive income for the period           -           -             -             -         -      6,954     6,954
+30-Jun-26                                       3,965       6,462       10,427         19,388    19,388     31,071    60,886
+
+
+as at June 30, 2025                              N'm         N'm           N'm            N'm       N'm        N'm       N'm
+1-Apr-25                                       3,965       6,462        10,427         19,388    19,388      7,823    37,638
+Total comprehensive income for the period          -           -             -              -         -      2,603     2,603
+30-Jun-25                                      3,965       6,462        10,427         19,388    19,388     10,426    40,241
+
+Company
+as at June 30, 2026                              N'm         N'm           N'm            N'm       N'm        N'm       N'm
+1-Apr-26                                       3,965       6,462        10,427         19,388    19,388     27,914    57,729
+Total comprehensive income for the period          -           -             -              -         -      7,349     7,349
+Dividends on ordinary share capital                -           -             -              -         -        -           -
+30-Jun-26                                      3,965       6,462        10,427         19,388    19,388     35,263    65,078
+
+
+as at June 30, 2025                              N'm         N'm           N'm            N'm       N'm        N'm       N'm
+1-Apr-25                                       3,965       6,462        10,427         19,388    19,388      7,823    37,638
+Total comprehensive income for the period          -           -             -              -         -      2,622     2,622
+Dividends on ordinary share capital                -           -             -              -         -          -         -
+30-Jun-25                                      3,965       6,462        10,427         19,388    19,388     10,445    40,260
+
+
+
+
+                                                                    6
+                        HONEYWELL FLOUR MILLS PLC
+Statement of Cash Flows
+as at June 30, 2026
+                                                                  Group              Company
+                                                             3 months ended      3 Months ended
+                                                           30-Jun-26 30-Jun-25 30-Jun-26 30-Jun-25
+                                                                 N'm       N'm       N'm        N'm
+Net profit/(Loss)                                              6,954     2,603     7,349      2,622
+Adjustments for:
+Tax expense                                                   2,858        760      2,858        760
+Finance cost                                                  1,166      1,068      1,156      1,068
+Finance income                                               (2,127)    (1,737)    (2,127)    (1,737)
+Unrealised (gain)/ losses on foreign exchange                  (238)    (1,008)      (342)    (1,008)
+Depreciation, amortisation and impairment                     1,175      1,369        567      1,369
+                                                              9,788      3,055      9,461      3,074
+Changes in working capital:
+   Inventories                                              (25,330)       800     (9,928)       800
+   Trade and other current receivables                      (50,620)   (10,846)   (44,609)   (10,870)
+   Trade payables and other liabilities                      74,168     11,902     40,191     11,907
+Cash flow from operating activities                           8,006      4,911     (4,885)     4,911
+Income tax paid                                                 -          -          -          -
+Net cash flow from operating activities                       8,006      4,911     (4,885)     4,911
+Interest received                                             2,127     1,737      2,127      1,737
+Purchase of property, plant and equipment                   (14,490)     (133)      (134)      (133)
+Net cash flow (used in)/from investing activities           (12,363)    1,604      1,993      1,604
+Interest paid                                                (1,166)    (1,068)    (1,156)    (1,068)
+Net change in borrowings                                      9,491     (1,635)     9,491     (1,635)
+Net cash flow (used in)/from financing activities             8,325     (2,703)     8,335     (2,703)
+Net increase/(decrease) in cash and cash equivalents          3,968     3,812      5,443      3,812
+Cash and cash equivalents at the beginning of the period      9,810     5,265      8,330      5,265
+Cash and cash equivalents at the end of the period           13,778     9,077     13,773      9,077
+
+
+
+
+                                                     7
+                                HONEYWELL FLOUR MILLS PLC
+
+
+
+                                                                           Notes to the interim financial statements
+                                                                                            for the period ended June 30, 2026
+1 REPORTING ENTITY
+  Honeywell Flour Mills Plc was initially registered as Gateway Honeywell Flour Mills Limited on 21 June, 1983. A change in
+  the Company's ownership structure led to a change of the name to Honeywell Flour Mills Limited in June, 1995. The
+  Company was converted to a Public Liability Company in 2008. Its shares were listed on the Nigeria Stock Exchange (NSE)
+  in 2009.
+
+
+    Honeywell Flour Mills Plc is a company domiciled in Nigeria. The Group and Company is principally engaged in the
+    manufacturing and marketing of wheat-based products including Flour, Semolina, Whole Wheat Meal, Noodles and
+    Pasta.Shagamu site was licenced by NEPZA on 1st July 2024 as a free trade zone entity.It started operations in October
+    2025 with it's assets and liability carved out of Honeywell Flour Mills Plc.
+
+ 2 BASIS OF PREPARATION
+(a) Statement of compliance
+    These interim financial statements have been prepared in accordance with IFRS as issued by the IASB applicable to the
+    preparation of interim financial statements, including IAS 34, Interim Financial Reporting. The interim financial statements
+    should be read in conjunction with the annual financial statements for the year ended 31st March 2026, which have been
+    prepared in accordance with IFRS as issued by the IASB, and in the manner required by the Companies and Allied Matters
+    Act 2020 and Financial Reporting Council of Nigeria (Amendment Act), 2023. Selected explanatory notes are included to
+    explain events and transactions that are significant to an understanding of the changes in financial position and
+    performance of the Group since the last consolidated financial statements as at and for the year ended 31 March 2026.
+
+(b) Basis of measurement
+    The financial statements have been prepared on the historical cost convention, unless otherwise stated in the accounting
+    policies which follow and incorporate the principal accounting policies set out below.
+
+
+(c) Functional and presentation currency
+    The financial statements are are presented in Naira, which is the Group and Coompany's functional currency. All financial
+    information presented in Naira has been rounded to the nearest million.
+(d) Use of estimates and judgements
+    The preparation of the interim financial report requires Management to make judgements, estimates and assumptions that
+    affect the application of accounting policies and the reported amounts of assets and liabilities, income and expense. Actual
+    results may differ from these estimates.
+    In preparing this condensed consolidated and separate interim financial report, significant judgements made by
+    Management in applying the Group's accounting policies and the key sources of estimation uncertainty were the same as
+    those that applied to the consolidated financial statements as at and for the year ended 31 March 2026.
+
+3. SIGNIFICANT ACCOUNTING POLICIES
+   The accounting policies applied by the Group in this condensed consolidated and separate interim financial report are the
+   same as those applied by the Group in its consolidated statements as at and for the year ended 31 March 2026.
+
+
+
+
+                                                              8
+Notes to the Interim Financial Statements
+for the period ended 30 June 2026
+
+4.Intangible assets
+                                                      Group
+                                  Jun-26            Total       Mar-26              Total
+                                 N'm        N'm      N'm       N'm           N'm     N'm
+                            Computer Declaration          Computer    Declaration
+                             Software   License            Software      License
+Cost                                                  -                               -
+Balance as at 1 April            296        406     702       296           -       296
+Additions                        -          -         -       -             406     406
+Disposals                        -          -         -       -             -         -
+closing                          296        406     702       296           406     702
+Amortization
+Balance as at 1 April            279                279       258           -       258
+Amortisation for the year          4          4       8        21           -        21
+closing                          283          4     287       279           -       279
+Net Carrying Amount               13        402     415        17           406     423
+
+
+
+                                                    Company
+                                  Jun-26            Total       Mar-26              Total
+                                 N'm        N'm      N'm       N'm           N'm     N'm
+                            Computer Declaration          Computer    Declaration
+                             Software   License            Software      License
+Cost                                                  -                               -
+Balance as at 1 April            296        -       296       296            -      296
+Disposals                        -          -         -                               -
+closing                          296        -       296       296            -      296
+Amortization
+Balance as at 1 April            279        -       279       258            -      258
+Amortisation for the year          4        -         4        21            -       21
+closing                          283        -       283       279            -      279
+Net Carrying Amount               13        -        13        17            -       17
+
+
+
+
+                                                9
+                                      HONEYWELL FLOUR MILLS PLC
+
+
+
+Notes to the Interim Financial Statements
+for the period ended 30 June 2026
+
+5. Property, plant and equipment
+Group                                                                                        Office
+                                                             Plant and                              Construction
+                                     Land       Buildings              Motor Vehicle   Equipment &                    Total
+                                                            Machinery                                in Progress
+                                                                                          Furniture
+                                       N'm           N'm          N'm           N'm            N'm          N'm        N'm
+
+Cost/Valuation
+01-Apr-26                            8,500        27,676      78,049          2,399          1,103       33,323    151,051
+Additions                                                                                                14,490     14,490
+Disposals                                                                                                                -
+30-Jun-26                            8,500        27,676      78,049          2,399          1,103       47,813    165,541
+Depreciation
+01-Apr-26                                   -     (6,640)     (42,045)       (2,125)         (974)            -    (51,784)
+Depreciation charge for the period                  (143)        (996)           (4)          (17)                  (1,160)
+Disposals                                                                                                                -
+30-Jun-26                                -        (6,783)     (43,041)       (2,129)         (991)            -    (52,944)
+Net Carrying Amount                  8,500        20,893       35,008           270           112        47,813    112,597
+
+
+
+
+Company                                                                                      Office
+                                                             Plant and                              Construction
+                                     Land       Buildings              Motor Vehicle   Equipment &                    Total
+                                                            Machinery                                in Progress
+                                                                                          Furniture
+                                       N'm           N'm          N'm           N'm            N'm          N'm        N'm
+
+Cost/Valuation
+01-Apr-26                               0         16,276      38,028          2,182           893         1,162     58,541
+ Additions                                                       -                             47            87        134
+30-Jun-26                                   -     16,276      38,028          2,182           940         1,249     58,675
+
+Depreciation
+01-Apr-26                                   -     (4,680)     (27,201)       (1,909)         (821)            -    (34,611)
+Depreciation charge for the period                   (80)        (417)          (19)          (41)                    (557)
+30-Jun-26                                   -     (4,760)     (27,618)       (1,928)         (862)            -    (35,168)
+Net Carrying Amount                         -     11,516       10,410           254            78         1,249     23,507
+
+
+
+
+                                                             10
+                                      HONEYWELL FLOUR MILLS PLC
+
+
+
+Notes to the Interim Financial Statements
+for the period ended 30 June 2026
+
+5. Property, plant and equipment
+Group                                                                                        Office
+                                                             Plant and                              Construction
+                                      Land      Buildings              Motor Vehicle   Equipment &                     Total
+                                                            Machinery                                in Progress
+                                                                                          Furniture
+                                        N'm          N'm          N'm           N'm            N'm          N'm         N'm
+
+Cost/Valuation
+01-Apr-25                            8,500        27,402      78,034          2,399          1,087           55     117,477
+Additions                                            274           -                            31       33,268      33,574
+Transfers                                                         15                           (15)                       -
+Disposals                                                                                                                 -
+31-Mar-26                            8,500        27,676      78,049          2,399          1,103       33,323     151,051
+Depreciation
+01-Apr-25                                   -     (6,077)     (37,607)       (2,044)          (945)            -    (46,673)
+Depreciation charge for the period                  (563)      (4,423)          (81)           (44)                  (5,111)
+Disposals                                                                                                                 -
+Other adjustments/Reclassification                                (15)                          15                        -
+31-Mar-26                                -        (6,640)     (42,045)       (2,125)          (974)           -     (51,784)
+Net Carrying Amount                  8,500        21,036       36,004           274            129       33,323      99,267
+
+
+
+
+5. Property, plant and equipment
+Company                                                                                      Office
+                                                             Plant and                              Construction
+                                      Land      Buildings              Motor Vehicle   Equipment &                     Total
+                                                            Machinery                                in Progress
+                                                                                          Furniture
+                                        N'm          N'm          N'm           N'm            N'm          N'm         N'm
+
+Cost/Valuation
+01-Apr-25                            8,500        27,401      78,034          2,399          1,087           55     117,476
+Additions                                            108                          -             10        6,694       6,812
+Reclassification                                                   15                          (15)                       -
+Disposals                            (8,500)     (11,233)     (40,021)         (217)          (189)       (5,587)   (65,747)
+31-Mar-26                                 -       16,276       38,028         2,182            893         1,162     58,541
+Depreciation
+01-Apr-25                                   -     (6,076)     (37,607)       (2,045)          (945)           -     (46,673)
+Depreciation charge for the period                  (439)      (3,177)          (81)           (37)           -      (3,734)
+Disposals                                              -          (15)            -             15            -           -
+Other adjustments/Reclassification                 1,835       13,597           217            146            -      15,795
+31-Mar-26                                   -     (4,680)     (27,202)       (1,909)          (821)           -     (34,612)
+Net Carrying Amount                         -     11,596       10,826           273             72        1,162      23,929
+
+
+
+
+                                                             11
+                HONEYWELL FLOUR MILLS PLC
+
+
+Notes to the Interim Financial Statements
+for the period ended 30 June 2026
+
+5. Right of use assets (Group and Company)
+
+                                                 Group and Company
+                                                 30-Jun-26    31-Mar-26
+Cost                                                  N'm          N'm
+At 1 April 2026                                       873          873
+Additions                                                -            -
+Prepaid lease                                            -            -
+Modifications                                            -            -
+Balance as at end of period                           873          873
+Accumulated depreciation
+At 1 April 2026                                      206           181
+Depreciation charged                                   7            25
+Modifications                                        -               -
+Balance as at end of period                          213           206
+
+Carrying Amount                                      660           667
+
+
+Lease liabilities                                Group and Company
+                                                 30-Jun-26    31-Mar-26
+                                                      N'm          N'm
+At 1 April 2026                                       871          857
+Additions                                                -            -
+Interest expenses                                      86          116
+                                                      957          973
+Less:Payment                                             -        (102)
+                                                      957          871
+Analysed into:
+Non-current liabilities                                836          769
+Current liabilities                                   179           102
+Carrying Amount                                     1,015          871
+
+
+
+
+                                            12
+                        HONEYWELL FLOUR MILLS PLC
+Notes to the Interim Financial Statements
+for the period ended 30 June 2026
+6. Inventories
+                                                           Group                  Company
+                                                     30-Jun-26 31-Mar-26    30-Jun-26 31-Mar-26
+                                                           N'm       N'm          N'm        N'm
+Raw and packaging materials                              6,467   14,193         5,863     13,588
+Work-in-progress                                           810       335          772        335
+Finished goods                                           7,805     7,506        3,729      4,538
+Consumables and maintenance spares                     11,711    10,991         7,258      5,631
+Goods in transit                                       31,910         79      16,692           -
+Inventory write down                                    (1,916)   (1,647)      (1,902)    (1,607)
+                                                       56,787    31,457       32,412      22,485
+
+7. Trade and other current receivables
+
+Trade receivables                                       2,795      4,195       2,795       4,195
+Receivables due from related party companies           61,263     23,289     102,431      72,050
+Other receivables                                          65      1,306          65       1,334
+                                                       64,123     28,790     105,291      77,579
+8. Prepayments
+
+Deposit for Letter of Credit                            4,261      4,149       2,013          86
+Prepaid expenses                                          252      1,329         117       1,193
+Withholding tax receivables                               486        259         486         259
+                                                        4,999      5,737       2,616       1,538
+
+
+9. Short term loans receivables
+Intercompany loan receivables                          56,821     40,556      56,821      40,660
+                                                       56,821     40,556      56,821      40,660
+
+10. Cash and cash equivalent
+Cash in hand                                                -          -           -           -
+Bank balances                                          13,778      9,810      13,773       8,329
+Cash and Deposits                                      13,778      9,810      13,773       8,329
+
+Cash and cash equivalents reconciliation to the cash flow statement
+Cash and cash equivalents per balance sheet             13,778      9,810     13,773       8,329
+Cash and cash equivalents per cash flow statement       13,778      9,810     13,773       8,329
+
+
+
+
+                                                13
+             HONEYWELL FLOUR MILLS PLC
+Notes to the Interim Financial Statements
+for the period ended 30 June 2026
+
+11. Borrowings
+                                                        Group and Company
+                                                   Current Non-Current                 Total
+as at June 30, 2026                                   N'm          N'm                  N'm
+Bank loans and overdrafts                          15,553       13,195               28,748
+Intercompany loan                                  13,225            -               13,225
+                                                   28,778       13,195               41,973
+
+
+                                                         Group and Company
+                                                   Current Non-Current                 Total
+as at March 31, 2026                                  N'm         N'm                   N'm
+Bank loans and overdrafts                           5,459      27,023                32,482
+                                                    5,459      27,023                32,482
+
+
+12. Deferred income
+                                               Group and Company
+                                              30-Jun-26   31-Mar-26
+                                                 N'm         N'm
+Government grants -long term                         771         717
+Government grants -short term                        432         673
+                                                   1,203       1,390
+The deferred income relates to government grants arising from the benefit received from below-market-interest
+
+
+
+
+                                              14
+                       HONEYWELL FLOUR MILLS PLC
+Notes to the Interim Financial Statements
+for the period ended 30 June 2026
+13. Trade payables and other current liabilities
+                                                            Group                 Company
+                                                   30-Jun-26     31-Mar-26    30-Jun-26   31-Mar-26
+Due within one year                                     N'm          N'm           N'm        N'm
+Trade payables                                       52,365          6,441      28,394       2,960
+Unclaimed dividend                                      173            173         173         173
+Accruals and other payables                           3,891         18,460       1,600      17,420
+Output Vat payables                                   2,580          3,044       1,320       1,350
+Witholding Tax Payable                                  183            172         166         165
+Due to related parties                              113,509         69,695      65,210      34,049
+                                                    172,701         97,985      96,863      56,117
+
+14 Taxation
+Tax payable
+At 1 April                                               8,662       4,415       8,603       4,415
+Charge for the period                                    2,858       9,169       2,858       9,110
+ Under/over provision in prior year                          -         964           -         965
+                                                        11,520      14,548      11,461      14,490
+Payment during the period                                    -      (5,886)          -      (5,887)
+At closing                                              11,520       8,662      11,461       8,603
+
+
+Gross movement in deferred tax during the quarter
+At 1 April                                          2,871            5,343       2,871       7,595
+ Under/over provision in prior year                (2,713)           2,252      (2,713)     (4,724)
+At closing                                       27 158              7,595         158       2,871
+
+
+
+
+                                                   15
+                    HONEYWELL FLOUR MILLS PLC
+Notes to the Interim Financial Statements
+for the period ended 30 June 2026
+
+15 Equity
+                                                      Group                   Company
+                                               30-Jun-26 31-Mar-26       30-Jun-26 31-Mar-26
+Consolidated statement of changes in equity         N'm      N'm              N'm      N'm
+Retained earnings at beginning                     24,117       7,630      27,914     7,823
+Total comprehensive income for the year             6,954      16,487       7,349    20,091
+Equity at closing                                  31,071      24,117      35,263    27,914
+
+16 .Share capital
+                                                     Mar 31 2026
+                                                   Number      Amount
+Authorised share capital                              N'm          N'm
+Ordinary shares of 50k each                         8,000        4,000
+Total authorised share capital                      8,000        4,000
+Issued and fully paid:
+Ordinary shares of 50k each                         7,930       3,965
+Total Issued share capital                          7,930       3,965
+
+Total Issued share capital                          7,930       3,965
+
+Issued
+Ordinary                                            3,965       3,965
+Share premium                                       6,462       6,462
+                                                   10,427      10,427
+
+
+
+
+                                              16
+                                   HONEYWELL FLOUR MILLS PLC
+Notes to the Interim Financial Statements
+for the period ended 30 June 2026
+17. Net operating gains and (losses)
+                                                                        Group                      Company
+                                                                30-Jun-26        30-Jun-25    30-Jun-26   30-Jun-25
+                                                                     N'm              N'm          N'm         N'm
+Sundry (loss)/income                                                 658              166          335         166
+                                                                       658              166        335         166
+18. Segment information
+                                                                                 Group
+                                                                   Tincan          Sagamu        *Total
+for the period ended June 30, 2026                                   N'm             N'm          N'm
+Revenue                                                           105,145           21,054     112,867
+Cost of sales                                                     (93,512)         (21,151)   (101,670)
+Gross profit                                                       11,633              (97)     11,197
+Selling and administration expenses                                (3,074)            (123)     (3,242)
+Net operating gains and (losses)                                      335              324         658
+Segment operating (loss)/profit                                     8,894              104       8,613
+*Intercompany transaction between the Tincan and Shagamu has been eliminated at the group.
+
+                                                                     Company
+                                                                   Tincan       Total
+for the period ended June 30, 2026                                   N'm        N'm
+Revenue                                                           105,145    105,145
+Cost of sales                                                     (93,512)   (93,512)
+Gross profit                                                       11,633     11,633
+Net Operating Gains/Losses                                            335        335
+Selling and admin expenses                                         (3,074)    (3,074)
+Segment operating (loss)/profit                                     8,894      8,894
+
+                                                                                  Group
+                                                                   Tincan          Sagamu         Total
+for the period ended June 30, 2025                                   N'm             N'm          N'm
+Revenue                                                            62,624            4,863      67,487
+Cost of sales                                                     (54,904)          (5,388)    (60,292)
+Gross profit                                                        7,720             (525)      7,195
+Net Operating Gains/Losses                                            -                166         166
+Selling and admin expenses                                         (4,438)            (210)     (4,648)
+Segment operating (loss)/profit                                     3,282             (569)      2,713
+
+                                                                     Company
+                                                                   Tincan       Total
+for the period ended June 30, 2025                                   N'm        N'm
+Revenue                                                            62,624     62,624
+Cost of sales                                                     (54,904)   (54,904)
+Gross profit                                                        7,720      7,720
+Selling and admin expenses                                         (4,438)    (4,438)
+Segment operating (loss)/profit                                     3,282      3,282
+                                                                       17
+

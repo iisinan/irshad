@@ -1,0 +1,85 @@
+GEREGU POWER PLC // UNAUDITED INTERIM FINANCIAL STATEMENTS // FOR THE PERIOD 30 JUNE 2026
+
+NOTES TO THE UNAUDITED INTERIM FINANCIAL STATEMENTS
+FOR THE PERIOD ENDED 30 JUNE 2026
+
+16 Inventories
+
+‘Spares, tools and consumables” 1,314,923
+9,374,923
+
+16.1 Inventories include spare parts, tools and consumables in stores and is measured at the lower of cost and net realisable value (NRV).
+
+17. Trade and oer receivables 00023
+Trade receivables” 90,949,051 227,245,013
+impairment on trade receivables (Note 17,1) (10,175,258) (26,291,984)
+Net trade receivables 80,773,793 200,953,030
+Due from related party 26,120,631 130,787
+Insurance claim receivable 5,310 29,934
+Impairment on other receivables (note 17.2) (5,310) (5,310)
+
+106,894,425 201, 108.440
+“Other trade receivables will be recognised on cash basis in due course
+
+17.1 Movement in impairment of trade receivables
+Att January 26,291,984 16,216,569
+impairment (reversal) oss (note 10) 46,116,725) 10,075,415.
+
+10, 26,291,984
+
+17.2. Movement in impairment of other receivables
+‘Att January
+Writeback during the period(note 10)
+
+18, Other current assets
+Advance Payments
+Interest receivable 4,237,866 4,548,958
+‘Withholding tax receivable on interest income 1,739,934 1,567,619
+Prepaid staff expenses 51,904 28,092
+
+8,023,047 7,694,345
+Advance payment written off 2 (59,519)
+Net other current assets 8,023,047 7,634,826
+
+19. Cash and cash equivalents
+Cash at bank 27,145,248 17,633,
+Short term deposit 29,583,507 31,769,082
+
+588 31,846,715
+
+19.1 Reconciliation of cash and cash equivalent jun-26
+Cash and cash equivalents 65,588,679 31,846,715
+Bank overdraft {850.975 (5,447,949)
+
+20. Long term employee benefits
+
+Po 31Dec25 |
+The movement in the present value of the long term employee benefits was as follows:
+Gratuity liability at 1 January 431,580 364,786
+Charged to profit and loss 135,058 402,875
+Defined benefit plan actuarial loss - (62,577)
+Gratuity Payment during the period/year (103,576) (273,504)
+Gratuity liability at 30 June 463,062 431.580
+Planned asset at 1 January 481,852 376.773
+Inflow from returns on planned asset (25,586) -
+Additional funding during the period/year - 39,662
+Actual return on planned assets reinvested 40,767 65.417
+Balance at period/year end over funded position 33,977 B0.272
+
+[31-0025]
+Expenses recognised in the statement of profit or loss (note 9.1)
+Current service costs 135,058 402,875
+
+Retum on planned assets (40,767) (65.417)
+
+94,290 337.4:
+Current service costs and the actual returns on planned assets are recognised in the administrative expense of the statement of profit or loss while the
+remeasurement gain or loss are recognised in the statement of other comprehensive income.
+
+‘The actuarial valuation report was signed in January 2026 and was carried out in line with IAS 19 requirements by Wole Ogunkoya
+(FRC/2013/NAS/0000000986) of MIP Financial Solutions(FRC/2014/00000003234) a Fellow of the Society of Actuaries, USA
+
+‘The funded planned assets with Asset management at 30 June 2026 was N497,033,000 (31 December 2025; N481,852,000),
+
+SS. Sm
+

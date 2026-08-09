@@ -179,7 +179,7 @@ export default function Portfolio() {
   const summary = data?.summary || {};
   const totalBalance = summary.total_balance || 0;
   
-  const PIE_COLORS = ['var(--primary)', '#7A3B91', '#8A5C9B', '#4A215D', '#A07891', '#C6A9CE'];
+  const PIE_COLORS = ['var(--primary)', '#06b6d4', '#f59e0b', '#f43f5e', '#3b82f6', '#10b981', '#8b5cf6', '#ec4899'];
   const pieData = (holdings || []).slice(0,6).map((h,i) => ({
     name: h.symbol, value: h.total_value || 0, color: PIE_COLORS[i % PIE_COLORS.length],
   }));

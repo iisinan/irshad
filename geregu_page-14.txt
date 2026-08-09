@@ -1,0 +1,64 @@
+GEREGU POWER PLC // UNAUDITED INTERIM FINANCIAL STATEMENTS // FOR THE PERIOD 30 JUNE 2026
+
+NOTES TO THE UNAUDITED INTERIM FINANCIAL STATEMENTS
+FOR THE PERIOD ENDED 30 JUNE 2026
+
+Profit before income tax 3,566,611 26,406,275
+Tax calculated using the domestic corporation tax rate of 30% x 716,17
+
+Effect of non-<deductible expenses 3,144,076 3,375,938
+Effect of non-taxable income (2,758,072) (24,297)
+Effect of balancing charge and capital allowance (386,004) (3,351,641)
+Effect of education tax . 412,549
+Effect of police trust fund levy - 1,316
+
+Effect of deferred tax (abatement)charge
+Total tax charge to profit or loss
+
+6,129,975
+
+The tax rate used for the period/year reconciliation given above is at the Current statutory rate, which is payable by corporate entities on
+taxable profits under tax law in its jurisdiction,
+
+12.3 Current income tax liability N’'000 N’000
+Liability at 1 January 37,416,567 19,970,405
+Income tax for the period/year 542,657 15,744,651
+Education tax - 1,949,412
+Police trust fund levy . 2,099
+Development levy - =
+Payment during the period/year - -
+Back duty - (250,000)
+
+37,959,224 37,416,567
+
+12.4 Deferred tax liabilities
+
+Deferred tax liabilities (4,018,115) (6.979.747)
+Abatement during the period/year = 3,658,120
+Charge during the period/year (519,438) (696.488)
+
+33) (4,018,115)
+
+13. Earnings per share
+
+13.1 Basic earnings per share
+The company’s basic eamings per share of N1 (30 June 2026; N8.07 Kobo) is based on the profit attributable to ordinary shareholders of N2,504,516,000
+(30 June 2025: N9,749,937,000), and on the 2,500,000,000 (30 June 2025 :2,500,000,000) ordinary shares of 50 Kobo each, being the weighted average
+
+number of ordinary shares in issue during the current and preceding period.
+s Ended r Ended
+Jun-25 1-Doc-25
+
+N’000 000 N’000
+
+Profit attributable to ordinary shareholders
+
+Profit for the period 400,139 2,504,516 9,749,937 20,181,365 27,250,503
+Profit attributable to ordinary shareholders 400,139 2,504,516 9,749,937 20,181,365 27,250,503
+Issued ordinary shares
+
+Issued ordinary shares at 1 January 2,500,000 2,500,000 2,500,000 2,500,000 2,500,000
+Issued ordinary shares as at 30 June 2,500,000 2,500,000 2,500,000 2,500,000 2,500,000
+Basic earnings per share in (Naira) 0.16 1.00 3.90 8.07 10.90
+Diluted earnings per share in (Naira) 0.16 1.00 3.90 8.07 10.90
+

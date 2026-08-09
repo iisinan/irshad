@@ -1,0 +1,75 @@
+GEREGU POWER PLC // UNAUDITED INTERIM FINANCIAL STATEMENTS // FOR THE PERIOD ENDED 30 JUNE 2026
+
+NOTES TO THE UNAUDITED INTERIM FINANCIAL STATEMENTS.
+FOR THE PERIOD ENDED 30 JUNE 2026
+
+21. Equity Ps1-Dec-25 |
+21.1 Share Capital
+Authorised, issued and fully paid 2.5bn ordinary shares of 50k each 1,250,000 1,250,000
+21.2 Retained erninge a SC
+Balance at 1 January 57,344,831 51,344,328
+Profit for the period/year 2,504,516 27,250,503
+Dividend (22,500,000) (21,250,000)
+37,349,347 57.344, 831
+213 Actuarial reserves
+Balance at 1 January 33,169 (29,408)
+Defined benefit plan actuarial loss = 62,577
+33,169 33,169
+22 Trade and other payables =
+‘N‘000 N'00K
+Gas accounts payable 80,307,196 122,907,069
+“Other payables 16,091,575 13,948,571
+96,398,774 136,855,640
+
+“Included in other payables is N11bn for the completion of GT12 & GT13 major overhaul
+
+23, Borrowings
+This note provides information about the contractual terms of the company’s interest-bearing loans and borrowings which are measure at amortised
+
+cost.
+=
+Term loans (23.1) N’000 N’
+At 1 January 28,492,038 23,166,150
+Addition - 13,849,133
+Interest 1,665,115 6,371,059
+Repayment (2,778,960) (14,894 304)
+27,378,193 28,492,038
+Bank Overdraft 8,859,925 5,447,949
+36,238,118 33,939,987
+Non-current 1,764,706 4,013,538
+Current 34,473,412 29,926,449
+36,238,118 33,939,987
+
+23.1 The collateral for the loan from First Bank are: all assets debenture of the Group Parent Company and domiciliation of all the Company's receivables.
+account to First bank while the facility subsists.
+
+24 Bond Payable Se
+
+At 1 January 34,147,078 42,654,125
+Interest 2,101,479 5,026,045
+Repayment (6,391,836) 13,533,092)
+72 34,147,078
+
+Non-current 18,863,492 24,180,959
+Current 10,993,229 9,966,119
+29,856,721 34,147,078
+
+24.1 In July 2022, the company issued N40_085billion unsecured corporate bond for a 7-period tenor and at a coupon and effective interest rate of 14.5%
+and 14.70% respectively,
+
+Borrowings are initially measured at fair value, net of transaction costs incurred, Borrowings are subsequently measured at amortised cost. Any
+difference between the proceeds (net of transaction casts) and the redemption values is recognised in the statement of profit or loss over the periods
+af the borrowings using the effective interest method. The carrying values of borrowings approximate their fair value.
+
+The issuer's convenants include the below clauses amongst other:
+
+‘The Issuer covenants that for so long as any of the Series 1 Bonds remain outstanding in any period, no dividends, distributions or other payments.
+shail be made to the Shareholders of the issuer in that period, unless the Issuer has fully discharged its payment obligations under this Deed to the
+Bondholders in respect of that period
+
+The Issuer covenants with the Trustees that until such time when all outstanding Bonds have been fully redeemed and the Issuer's liability has been
+discharged, it shall not without the prior written consent of the Trustees (such consent not to be unreasonably withheld, delayed or conditioned) borrow
+or raise funds or procure any person to borrow or raise funds on its behalf, by any means whatsoever except by the issuance of bonds under the
+Programme Trust Deed or this Series Trust Deed.
+
+SS Sm

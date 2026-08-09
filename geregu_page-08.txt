@@ -1,0 +1,24 @@
+GEREGU POWER PLC // UNAUDITED INTERIM FINANCIAL STATEMENTS // FOR THE PERIOD ENDED 30 JUNE 2026
+
+UNAUDITED INTERIM STATEMENT OF CHANGES IN EQUITY
+FOR THE PERIOD ENDED 30 JUNE 2026
+
+Retained
+Share capital earnings Other reserves Total equity
+
+N’000 N’000 N’000 N’000
+Balance at 1 January 2025 1,250,000 51,344,327 (29,408) 52,564,919
+Changes in equity for the period:
+Profit for the period - 20,276,300 : 20,276,300
+Amount attributable to equity holders 1,250,000 71,620,627 (29,408) 72,841,219
+Transactions with owners, recorded directly in equity *
+Dividend to equity holders - (21,250,000) - (21,250,000)
+Balance at 30 June 2025 1,250,000 50,370,627 (29,408) 51,591,219
+Balance at 1 January 2026 1,250,000 57,344,831 33,169 58,628,000
+Changes in equity for the period:
+Profit for the period : 2,504,516 2,504,516
+Amount attributable to equity holders 1,250,000 59,849,347 33,169 61,132,516
+Dividend to equity holders(note 20) « (22,500,000) « (22,500,000)
+Balance at 30 June 2026 1,250,000 37,349,347 33,169 38,632,516
+
+The accompanying notes and significant accounting policies form an integral part of these interim financial statements.

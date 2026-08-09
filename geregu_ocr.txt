@@ -1,0 +1,1173 @@
+Whee
+
+Wien
+ee
+GEREGU
+POWER PLC
+
+UNAUDITED
+
+INTERIM
+FINANCIAL
+
+.geregupowerplic.com
+www.geregupowerplc.com
+
+STATEMENTS
+eS See S44 X
+
+GEREGU POWER PLC // UNAUDITED INTERIM FINANCIAL STATEMENTS // FOR THE PERIOD ENDED 30 JUNE 2026
+
+Contents
+
+Statement of directors’ responsibilities in relation to the interim financial statements 1
+Unaudited Interim statement of financial position 2
+Unaudited Interim statement of profit or loss and other comprehensive income 3
+Unaudited Interim statement of changes in equity 4
+Unaudited Interim statement of cash flows 6
+
+Notes to the unaudited interim financial statements 6
+
+[Shareholding Structure and Free Float Status
+[Company Name: Geregu Power Pic
+Board Listed: Main Board
+Period End: 30-Jun-26
+Reporting Period: Ended June 30, 2026
+Share Price at endo repring pag [517-40 Gune 30, 20257 NITALSO]
+
+30 June 2026 30 June 2025
+Description Unit Percentage Unit Percentage
+issued Share Capital 2,500,000,000) 100%] 2,500,000,000 100%]
+Substantial Shareholdings (5% and above)
+|AMPERION POWER DISTRIBUTION COMPANY LIMITED (INDI 1,925,000,000 77.00%| 1,921,744,273 76.87%
+LIBREVILLE POWER LIMITED 125,000,000] 5.00%) 125,000,000 5.00%
+Directors’ Sharcholdings (direct and indirect), excluding directors with substantial interests
+Mr Femi Otedola CON 0 0.0000000% 0 {0.00004 98%]
+Mr Akin Akinfemiwa 0 0.000% 2,174,245 0.0870%|
+Mr Julius B. Omodayo-Owotuga NiL 0,00%| Nil 0.00%
+Mr Christopher Adeyemi 0 0.000000%%| 950 0.000038%|
+Mr Anil Dua NIL 0.00% NIL 0.00%
+Ms Otedola Olawunmi Christine 0 0.0000000%) 1.245 0.00004 98%
+Mr Doron Grupper NIL 0.00% Nit 0.00%
+Mr John Robert Lee NiL 0.00%) NiL f)
+Senator Abdul-Aziz Abubakar Yari NIL 0.00%) NIL 0%)
+[Abdulkadcer Babangida Njiddah NIL 0.00% NIL 0.00%)
+Usman Gur Mohammed NIL 0.00%) NIL 0.00%
+Mohammed Sani Jaafaru NIL 0.00% NiL 0.00%]
+INeka Uzoamaka Adogu 3535710 CES 0 O.0142%
+Mahmud Abubakar Magaji, SAN NIL 0.00% Nik 0.00%
+Chief Olukunle Oyewole NIL 0.00% ‘NIL 0.00%
+Dr Abdullahi Abdulkarim Tsafe NIL 0.00%) NIL. 0.00%]
+Other Influential Shareholdings
+
+Free Float in Units and Percentage
+
+Free Float in Value
+
+Declaration:
+
+(A) Geregu Power Pic with a free float value of N412,503,671,646 (17.99% in volume) as at 30 June 2026 is compliant with the
+Exchange's free float requirements for companies listed on the Main Board.
+
+(A) Geregu Power Plc with a free float percentage of 18.04% as at 30 June 2025, value as N514,907,006,110.50 is compliant
+with The Exchange's free float requirements for companies listed on the Main Board.
+
+GEREGU POWER PLC // UNAUDITED INTERIM FINANCIAL STATEMENTS // FOR THE PERIOD ENDED 30 JUNE 2026
+
+STATEMENT OF DIRECTORS’ RESPONSIBILITIES IN RELATION TO THE
+UNAUDITED INTERIM FINANCIAL STATEMENTS FOR THE PERIOD ENDED 30 JUNE 2026
+
+In accordance with the provisions of the Companies and Allied Matters Act, the directors are responsible for the preparation of
+financial statements which give a true and fair view of the state of affairs of the Company at the end of the period and its profit or loss.
+
+The responsibilities include ensuring that:
+i. The Company keeps proper accounting records that disclose, with reasonable accuracy, the financial position of the company and
+comply with the requirements of the Companies and Allied Matters Act.
+
+ii Appropriate and adequate internal controls are established to safeguard its assets and to prevent and detect fraud and other
+irregularities;
+
+iii The Company prepares its financial statements using suitable accounting policies supported by reasonable and prudent
+judgments and estimates that are consistently applied; and
+
+iv Itis appropriate for the financial statements to be prepared on a going concern basis.
+
+The directors accept responsibility for the financial statements which have been prepared using appropriate accounting policies
+supported by reasonable and prudent judgments and estimates in conformity with the International Financial Reporting Standards, in
+compliance with Financial Reporting Council of Nigeria Act and the requirements of the Companies and Allied Matters Act
+
+The directors are of the opinion that the financial statements give a true and fair view of the state of the financial affairs of the
+Company and of its profit and cash flows for the period.
+
+The directors further accept responsibility for the maintenance of accounting records that may be relied upon in the preparation of
+financial statements, as well as adequate systems of internal financial control.
+
+Nothing has come to the attention of the directors to indicate that the Company will not remain a going concern for at least twelve
+months from the date of this statement.
+
+Signed on behalf af thi ard of Directors by:
+
+Dr.“Abdullahl Abdulkarim Tsafe Dr. Abdulkadeer Nijddah
+
+Director Director
+FRC/2025/PRO/DIR/003/195160 FRC/2013/PRO/ICAN/004/00000003412
+Dated: 30 July 2026 Dated: 30 July 2026
+GEREGU POWER PLC // UNAUDITED INTERIM FINANCIAL STATEMENTS // FOR THE PERIOD ENDED 30 JUNE 2026
+
+UNAUDITED INTERIM STATEMENT OF FINANCIAL POSITION
+
+AT 30 JUNE 2026
+
+Notes Pe 31-Dec:25 |
+
+N‘000 N'000
+
+Assets
+Non-current assets
+Property, plant and equipment 14. 61,975,635 63,050,211
+Long term employee benefits 20. 33,971 50,272
+Total non-current assets 62,009,606 63,100,483
+Current assets
+Inventories 16 1,107,145 1,314,923
+Trade and other receivables | 106,894,425 201,108,440
+Other current assets 18. 8,023,047 7,634,826
+Cash and cash equivalents 19. 65,588,679 31,846,715
+Total current assets 181,613,296 241,904,904
+Total assets 243,622,903 305,005,387
+Equity
+Share Capital 21. 1,250,000 1,250,000
+Retained earings 21. 37,349,347 57,344,831
+Actuarial reserves 21. 33,169 33,169
+Total equity 38,632,516 58,628,000
+Liabilities
+Non-current liabilities
+Deferred tax liabilities 12. 4,537,553 4,018,115
+Borrowings 23. 1,764,706 4,013,538
+Bond Payable 24. 18,863,492 24,180,959
+
+Total non-current li: 25,165,751 32,212,612
+
+Current liabilities
+
+Trade and other payables 22 96,398,771 136,855,640
+Current tax payable 12. 37,959,224 37,416,567
+Borrowings 23. 34,473,412 29,926,449
+Bond Payable 24. 10,993,229 9,966,119
+Total current liabilities 179,824,636 214,164,775
+Total liabilities 204,990,387 246,377,387
+Total equity and liabilities 243,622,903 305,005,389
+These interim financial statements were approved by the Board of Directors on 30 July 2026 and signed on its behalf
+by: y
+
+T
+Dr. Abdullahi Abdulkarim Tsafe Dr. AbdulKadeer Nijddah
+Director Director
+FRC/2025/PRO/DIR/003/195160 FRC/2013/PRO/ICAN/004/00000003412
+
+The accompanying notes and significant accounting policies form an integral part of these interim financial statements.
+
+Ee
+GEREGU POWER PLC // UNAUDITED INTERIM FINANCIAL STATEMENTS // FOR THE PERIOD ENDED 30 JUNE 2026
+
+“sjusWAje}s jerouUeUY WUEU! asey) jo Led jeJGeju! Ue Wo) seoyod BunUNosoe yueoylUsis pue sejou Buiduedwooce eyy
+
+o6'0L 4b8 06'e 00} oro “eb (N) U] exeys sed sBujwes painyig
+06'OL 4s ose 00'L oro eb (N) ur eueys Jed sGuiwes o1seg
+
+eseys sod sBujwieg
+og0'eLEe' Lz O0e'942'02 = B66 FL'6 9LS'P0S'z 6Eb'00r 4eef jpoiied ayy Joy awooU} aarsuayasduiod je}0)
+LL9'29 = * ¥ * “Oz SSO] j|BUENjoe URId yeuUEG PeuyeEg
+
+2880] 40 yyoid 0} Aquonbesqns poy!ssejsou aq you jm Jey} SW9y)
+}@WODU! aAISUaYyaIdWOD 4284IO.
+
+e0s'0sz' Zz 00f'922'02 6666 ots'pos'z 6eL‘oor seek/poped ayy 405 101d
+(ogs'pez'pL) — (sz6'6zt'9) — (g9g'srs'e) —(s60'z90"L) sv0'ss Ze qyeueg/(esuedxe) xe} ewoou}
+e£0'Se6' ly SLz'90r'9z —-L09'96z'eL bE9'99s'e s60'sie Xe} @UNODU! a10Jaq IOld
+LLp'pot'9) 612 3809 BoueUY JEN
+(sps'ess'z1) —_(9z0°808'9) ub yso9 @oueUly
+eeL'ser'o 9g0'8zs'e be @wooUu! souleUly
+yrb'6yl'ay z9z'9a9'6z__¢99'0z0'S| _—g68'9z¥'8 £96'S02'¢ qyoud Bunesedo
+(Zoz'9v0'01) (922088) (ezz's80'9)— Szz'9b tb SzZ'OLL'OL “OL sjsse jeoueUy Uo{sso))) jesienes jueuUIEd.|
+(sgg'zie'2t) — (ses‘ear's) (Ors'se9'z) (ape 'eas'yt) (van'vos'Zt) 6 sesuadxe anjensiuUpy
+96e"poe't (eoe'z1) (eL9'r) £08'z phe 8 (sso))/ewooul 16410,
+026'80z"bL ges'ers'se _EvS'9rl'ez sb ‘uz6'9 10°26 woud ssoip,
+(ege'ezz'ort) (St0'vea'ts) Toro'eet ze) (9ez'oez'th) (eLy'9ze) 2 S828 JO }S0D)
+eos'ses'pst  vO6'ZE9'48 = ogs'pze8'sS —_LOL'BS9'8L 9zL'6Ly 9 anuanay
+
+9202 SNNP O€ G30N3 GOldad SHL HOS
+SIWOONI SAISNSHSANdWOD YSHLO GNV SSOT HO LIdOUd JO LNSWSLVLS WId3SLNI GSLIGNYNN
+GEREGU POWER PLC // UNAUDITED INTERIM FINANCIAL STATEMENTS // FOR THE PERIOD ENDED 30 JUNE 2026
+
+UNAUDITED INTERIM STATEMENT OF CHANGES IN EQUITY
+FOR THE PERIOD ENDED 30 JUNE 2026
+
+Retained
+Share capital earnings Other reserves Total equity
+
+N’000 N’000 N’000 N’000
+Balance at 1 January 2025 1,250,000 51,344,327 (29,408) 52,564,919
+Changes in equity for the period:
+Profit for the period - 20,276,300 : 20,276,300
+Amount attributable to equity holders 1,250,000 71,620,627 (29,408) 72,841,219
+Transactions with owners, recorded directly in equity *
+Dividend to equity holders - (21,250,000) - (21,250,000)
+Balance at 30 June 2025 1,250,000 50,370,627 (29,408) 51,591,219
+Balance at 1 January 2026 1,250,000 57,344,831 33,169 58,628,000
+Changes in equity for the period:
+Profit for the period : 2,504,516 2,504,516
+Amount attributable to equity holders 1,250,000 59,849,347 33,169 61,132,516
+Dividend to equity holders(note 20) « (22,500,000) « (22,500,000)
+Balance at 30 June 2026 1,250,000 37,349,347 33,169 38,632,516
+
+The accompanying notes and significant accounting policies form an integral part of these interim financial statements.
+GEREGU POWER PLC // UNAUDITED INTERIM FINANCIAL STATEMENTS // FOR THE PERIOD ENDED 30 JUNE 2026
+
+UNAUDITED INTERIM STATEMENT OF CASH FLOWS
+
+FOR THE PERIOD ENDED 30 JUNE 2026
+
+Cash flows (used in)/ generated from operating activities
+
+Changes in:
+
+Inventories
+
+Trade and other receivables
+
+Other current assets
+
+Interest paid
+
+Net interest received/(paid) on related party loan
+Inflow from returns on planned asset
+
+Actual return on planned assets reinvested
+Payment for funding of long term employee benefits
+Trade and other payables
+
+Net changes in working Capital
+
+Income tax paid
+
+Gratuity paid and accrued during the period/year
+Net cash generated from operating activities
+
+Cash flows from investing activities
+
+Purchase of property, plant and equipment
+Proceeds from sale of property, plant and equipment
+Interest received
+
+Net cash generated from investing activities
+
+Cash flows from financing activities
+Dividend paid
+
+Repayment of long term borrowings
+Proceeds from borrowings
+
+Repayment of bond principal
+Repayment of bond coupon
+Repayment of related party loan
+Additions to related party loan
+
+Loan from related party
+
+Net cash used in financing activities
+
+Net (decrease)/increase in cash and cash equivalents
+
+Analysis of changes in cash and cash equivalents:
+Cash and cash equivalents at 1 January
+
+Increase /(Decrease) in cash and cash equivalents
+Effect of exchange rate movement on cash balances
+Cash and cash equivalents at 30 June
+
+25.
+
+16
+
+6 Months Ended [jm 6 Months E Year Ended
+Notes 3 6 30-Jun-25 q jec-25
+N'000 N'000 N'000
+(6,096,015) 35,829,060 72,081,701
+207,778 (200,215) (691,248)
+135,340,553 (29,623,124) (89,859,724)
+(699,314) 1,521,359 726,618
+(3,576,010) - (919,034)
+980,033 (139,167) 173,088
+25,586 - -
+(40,767) (24,056) (65,417)
+- (32,146) (39,662)
+(40,456,869) 22,131,496 38,720,564
+91,780,989 (6,365,853) — (51,954,815)
+- - (250,000)
+(103,576) (862) (273,504)
+85,581,398 29,462,345 19,603,381
+(291,414) (1,161,056) (1,409,324)
+8,335 - -
+1,763,381 2,234,139 3,765,501
+1,480,302 1,073,082 2,356,177
+(22,500,000) (21,250,000) — (21,250,000)
+(2,778,960) (14,705,483) (14,894,304)
+- 11,900,000 13,849,133
+(4,008,500) (4,008,500) (8,017,000)
+(2,383,336) (2,961,991) (5,516,092)
+(1,850,000) 18,737,472 18,591,851
+(25,009,811) (18,598,305) (18,239,950)
+1,850,000 - :
+(56,680,607) (30,886,806) (35,476,363)
+26,398,766 39,935,627 39,935,627
+30,381,093 (351,379) (13,516,805)
+(51,103) (12,303) (20,056)
+56,728,755 39,571,946 26,398,766
+
+The accompanying notes and significant accounting policies form an integral part of these interim financial statements.
+GEREGU POWER PLC // UNAUDITED INTERIM FINANCIAL STATEMENTS // FOR THE PERIOD ENDED 30 JUNE 2026
+
+NOTES TO THE UNAUDITED INTERIM FINANCIAL STATEMENTS
+FOR THE PERIOD ENDED 30 JUNE 2026
+
+14
+
+1.2
+
+3.1
+
+3.2
+
+3.3
+
+General Information
+
+Reporting Entity
+Geregu Power Plc (‘the Company") is a registered Company domiciled in Nigeria. The registered office of the
+company is Itobe-Ajaokuta Express Road, Ajaokuta, Kogi State, Nigeria.
+
+Principal activities
+The Company is principally engaged in the business of electric power generation and sale of electric power through
+the National Grid of the Transmission Company of Nigeria (TCN) to the Nigerian Bulk Electricity Trading Pic (NBET).
+
+Security and trading policy
+
+The Board has established an Insider Trading Policy designed to prohibit dealing in Geregu Power Plc. shares or
+securities on the basis of potentially price sensitive information that is not yet in the public domain. This is in line
+with the Rules of the NGX, the Investment and Securities Act (ISA) 2007 and the SEC Rules and Regulations.
+Having enquired, we can confirm that all Directors complied with the Insider Trading Policy during the period under
+review,
+
+Basis of preparation
+
+Statement of compliance
+These unaudited interim financial statements have been prepared in accordance with the International Financial
+Reporting Standards (IFRSs) as issued by International Accounting Standard Board (IASB), and in compliance with
+Financial Reporting Council of Nigeria Act No 6, 2011. Additional information required by national regulations are
+included where appropriate.
+
+The unaudited interim financial statements comprise the statement of financial position, statement of profit or loss
+and other comprehensive income, the statement of changes in equity, cash flows and the related notes to the
+interim financial statements.
+
+The unaudited interim financial statements have been prepared in accordance with the going concern principle
+under the historical cost convention, as modified by actual valuation of staff gratutity financial instruments measured
+at fair value.
+
+Functional and presentation currency
+
+These unaudited interim financial statements are presented in Naira, which is the Company's functional currency.
+Except as indicated in these unaudited interim financial statements,financial information presented in Naira has
+been rounded to the nearest thousand.
+
+Basis of measurement
+
+These unaudited interim financial statements are prepared on the historical cost basis except as modified by
+actuarial valuation of staff gratuity and fair valuation of financial assets and liabilities where applicable. There are
+other assets and liabilities measured at amortised cost.
+GEREGU POWER PLC // UNAUDITED INTERIM FINANCIAL STATEMENTS // FOR THE PERIOD ENDED 30 JUNE 2026
+
+3.4
+
+5.
+5.1
+
+5.2
+
+Use of estimates and judgements
+
+The estimates and underlying assumptions are reviewed on an ongoing basis. Revisions to accounting estimates
+are recognised in the period in which the estimates are revised, if the revision affects only that period, or in the
+period of the revision and future periods, if the revision affects both current and future periods.
+
+In particular, the Company has identified certain areas where significant judgements, estimates and assumptions
+are required. Changes in these assumptions may materially affect the financial position or financial results reported
+in future periods. Further information on each of these areas and how they impact the various accounting policies
+are described in the accounting policies and also in the relevant notes to the interim financial statements:
+
+Standards, interpretations and amendments adopted by the Company
+
+Several amendments and interpretations apply for the first time in 2024, but do not have an impact on the unaudited
+interim financial statements of the Company. The Company has not early adopted any standards, interpretations or
+amendments that have been issued but are not yet effective.
+
+Significant accounting policies
+
+General
+
+The accounting policies applied in these unaudited interim financial statements are the same as those applied in the
+company’s audited financial statements as at and for the year ended 31 December 2025.This can be downloaded
+from our website www.geregupowerplc.com
+
+Income tax
+Income tax expenses are recognised based on management's best estimation of the weighted average expected full
+year effective income tax rate.
+GEREGU POWER PLC // UNAUDITED INTERIM FINANCIAL STATEMENTS // FOR THE PERIOD ENDED 30 JUNE 2026
+
+NOTES TO THE UNAUDITED INTERIM FINANCIAL STATEMENTS
+FOR THE PERIOD ENDED 30 JUNE 2026
+
+Months Ended
+3
+6. Revenue ‘000 0 "000 N’000
+Energy sold 284,413 12,455,577 35,881,447 56,767,403 120,811,976
+Capacity charge 134,713 6,202,530 19,993,113 30,865,501 64,123,827
+479,126 A 55,874,560 632, 184,935,603
+7. Cost of sales
+Gas supply and transportation 276,310 10,525,195 29,546,820 46,873,013 100,416,543
+Plant depreciation (note 14.1) 50,109 1,205,601 2,581,196 5,011,002 10,310,340
+
+326,419 11,730,796 32,128,016 51,884,015 110,726,883
+
+Gross profit ‘92,707 6,927,311 23,746,543 35,748,889 74,208,920
+
+3 Months Ended BG Mi 3 Months Ended ii 6M Year Ended
+8. Other income/(loss) 30-Jun-26 0-J 30-Jun-25 31-Dec-25
+‘N’000 N'000 N’000 N'000
+
+Unrealized foreign exchange loss (50,626) (51,103) (4,613) (12,303) (20,056)
+
+Insurance claim 51,340 51,340 - - 1,818,087
+Disposal of scraps . ©: : 2 6,865
+
+Gain on disposal of Motor vechicle - 2,566 -
+
+2,803 (4, GE (12, 303) 1,804,896
+
+Year Ended
+
+Dec
+N'000
+9. Administrative expenses
+
+Repair and maintenance of plant and machinery* 1,303,185 1,526,960 362,376 839,300 1,064,554
+Energy import and regulatory charges 4,364 7,725 6,188 10,606 15,114
+Personnel cost (Note 9.1) 451,073 895,049 510,860 1,033,360 7,119,232
+Training and recruitment expenses 306,264 450,753 168,419 321,569 1,177,500
+Depreciation expenses(note 14.1) 75,109 152,055 97,421 196,532 403.241
+Plant and machinery insurance 126,647 253,294 126,646 253,294 506,586
+Postages, printing and stationery 4,029 10,191 6,804 14,268 23,217
+Rent and rates and N-HYPPADEC charges** 310,446 547,151 277,040 464,254 846,649
+Other repairs and maintenance expenses: 468,428 507,871 73,988 120,802 219,399
+Telephone and internet expenses 18,182 45,496 58,173 97,801 173,941
+Legal and listing expenses 82,457 161,739 87,160 166,980 326,520
+Public relations and promotions 1,022,258 1,038,165 37,830 58,403 1,314,308
+Transport, travel costs and entertainment 188,429 506,138 238,746 480,668 1,000,661
+Cleaning, safety and security expenses 71,008 141,117 81,724 147,569 293,242
+Audit fees*** 20,156 40,313 20,107 40,213 76,500
+Board meeting expenses 38,184 48,007 2,800 5,650 90,826
+Annual general meeting expenses 76,444 76,444 7,912 139,219 148,033
+Professional and consultancy fees 6,499,155 6,622,100 254,342 404,649 831,188
+Other insurance expenses 19,076 37,226 28,775 57,664 115,679
+Bank charges 45,420 45,701 66,582 76,198 163,673
+Directors’ fees and allowances 1,373,871 1,456,451 121,648 240,597 1,848,083
+Advance payment writen-off - - . 59,519
+
+12,504,184 14,569,946 2,635,540 5,169,595 17,817,665
+
+“included in the repair and maintenance of plant and machinery are spare parts, tools and consumables issued _
+**N-HYPPADEC expenses relates to the new levy introduced by the electricity act 2023 for all Gencos.
+“**Our auditor PwC did not provide any non-audit services in the period under review
+
+eS SS.
+GEREGU POWER PLC // UNAUDITED INTERIM FINANCIAL STATEMENTS // FOR THE PERIOD
+
+NOTES TO THE UNAUDITED INTERIM FINANCIAL STATEMENTS
+FOR THE PERIOD ENDED 30 JUNE 2026
+
+jonths Ended Year Ended
+31-Dec-25
+
+9.1 Personnel expenses
+
+N’000 N'000 N’000 N'000 N'000
+Salaries, wages and allowances 256,789 521,520 330,228 659,330 1,381,710
+Medical expenses 21,460 38,576 19,009 40,227 94,317
+Contributions to pension fund scheme 15,987 32,665 20,568 41,049 81,825
+Defined benefit plan (note 20) 67,314 94,290 13,267 25,215 337,459
+End of service benefit* : : * : 4,659,542
+Contract manpower 46,795 97,895 82,603 168,728 342.648
+Other personnel expenses 5,487 204 UT 14,209 29,654
+Canteen Expenses 37,243 98,899 38.068 84,601 192,077
+
+451,073 895,049 510,860 1,033,360 7,119,232
+
+10 Impairment (reversal)/loss on financial assets
+Impairment (reversal) ‘loss on trade receivables (note 17.1) (16,116,725) (16,116,725) 6,114,436 909,436 10,075,415
+
+Impairment reversal on other receivables (note 17.2) * * (28,708) (28,708) (28,708)
+116,116,725) 116,116,725) 6,085,728 880,728 70.046.707
+11, Net finance incomel(cost)
+
+Finance income
+
+Interest income on bank deposits 661,882 1,452,288 1,653,206 3,433,154 6,324,815
+
+Interest income on related party recievables 1,043,077 1,046,039 cd 94,934 100.318
+
+1,704,959 2,498,327 1,653,206 3,528,088 6,425,133
+
+Finance cost
+
+Interest expense on borrowings (Note 23) (701,618) (1,665,115) (1,954,808) (3,896,608) (6,371,059)
+
+Interest expense on overdraft (297,082) (572,693) - < (919,034)
+
+Interest expense on bond (Note 24) (1,034,128) (2,101,479) (1,323,947) (2,677,367) (5,026,045)
+
+Interest expense on related party payables-Amperion (59,684) (66,006) (3,574) (234,101) (273,406)
+
+Interest expense on discounted Nbet Bond (3,003,317) (3,003,317) - = 3
+(5,095,828) (7,408,609) (3,377,262) (6,808,076) (12,589,544)
+
+Net finance cost 13,390,869) 14,910,282) (1,724,056) 13,279,988) 16,164,411)
+
+12. Company income and deffered tax
+
+1-De
+
+12.1 Current income tax N'000 N00
+Income tax 103,358 $42,657 5,716,111 15,744,651
+Education tax : - 412,549 1,949,412
+Police trust fund levy bes * 1,316 2,099
+Development levy (188,403) ° - .
+Current tax 185,045) 542,657 6128075 77,606,163
+Deferred tax (Note 12.4) - $19,438 - (2,961,632)
+Total charge to profit or loss (85,045) 1,062,095 6,129,975 14,734,530
+
+GEREGU POWER PLC // UNAUDITED INTERIM FINANCIAL STATEMENTS // FOR THE PERIOD 30 JUNE 2026
+
+NOTES TO THE UNAUDITED INTERIM FINANCIAL STATEMENTS
+FOR THE PERIOD ENDED 30 JUNE 2026
+
+Profit before income tax 3,566,611 26,406,275
+Tax calculated using the domestic corporation tax rate of 30% x 716,17
+
+Effect of non-<deductible expenses 3,144,076 3,375,938
+Effect of non-taxable income (2,758,072) (24,297)
+Effect of balancing charge and capital allowance (386,004) (3,351,641)
+Effect of education tax . 412,549
+Effect of police trust fund levy - 1,316
+
+Effect of deferred tax (abatement)charge
+Total tax charge to profit or loss
+
+6,129,975
+
+The tax rate used for the period/year reconciliation given above is at the Current statutory rate, which is payable by corporate entities on
+taxable profits under tax law in its jurisdiction,
+
+12.3 Current income tax liability N’'000 N’000
+Liability at 1 January 37,416,567 19,970,405
+Income tax for the period/year 542,657 15,744,651
+Education tax - 1,949,412
+Police trust fund levy . 2,099
+Development levy - =
+Payment during the period/year - -
+Back duty - (250,000)
+
+37,959,224 37,416,567
+
+12.4 Deferred tax liabilities
+
+Deferred tax liabilities (4,018,115) (6.979.747)
+Abatement during the period/year = 3,658,120
+Charge during the period/year (519,438) (696.488)
+
+33) (4,018,115)
+
+13. Earnings per share
+
+13.1 Basic earnings per share
+The company’s basic eamings per share of N1 (30 June 2026; N8.07 Kobo) is based on the profit attributable to ordinary shareholders of N2,504,516,000
+(30 June 2025: N9,749,937,000), and on the 2,500,000,000 (30 June 2025 :2,500,000,000) ordinary shares of 50 Kobo each, being the weighted average
+
+number of ordinary shares in issue during the current and preceding period.
+s Ended r Ended
+Jun-25 1-Doc-25
+
+N’000 000 N’000
+
+Profit attributable to ordinary shareholders
+
+Profit for the period 400,139 2,504,516 9,749,937 20,181,365 27,250,503
+Profit attributable to ordinary shareholders 400,139 2,504,516 9,749,937 20,181,365 27,250,503
+Issued ordinary shares
+
+Issued ordinary shares at 1 January 2,500,000 2,500,000 2,500,000 2,500,000 2,500,000
+Issued ordinary shares as at 30 June 2,500,000 2,500,000 2,500,000 2,500,000 2,500,000
+Basic earnings per share in (Naira) 0.16 1.00 3.90 8.07 10.90
+Diluted earnings per share in (Naira) 0.16 1.00 3.90 8.07 10.90
+
+GEREGU POWER PLC // UNAUDITED INTERIM FINANCIAL STATEMENTS // FOR THE PERIOD 30 JUNE 2026
+
+3Z0z OuNP D€ te Se sjesse axyGuEIU) $AUEdWOD ayI Jo AUE UO Yay OU Sem a.0U, ESE
+(WN :9202 8UNT OS) BINS! awoour errsuayaudivOD ZaLRO PUB $80) Jo ZyOUd Jo UEWAIEIS oy UI SesUEdxe BAYEASIUIUpE ep Ul PasrUBODe) sjesse aqGuEI) JO VONESOWE BY, ZEE
+Auedwos ayy Aq posn aemyos J9;NdwWoo ay) Asexto Sjosse aIQIGUEIU) ESL
+
+—_—_—_—_—_—_—_——— pus seof/poyied ye eouejeg
+
+ez swunowe Burkues
+
+oge'es = pus seak/poyed ye eouejeg
+gees z Arenuer | ye soueleg,
+‘s9S$0) juoULJedu pu LoNeSOUY
+
+ores, = pus 1e94jpoued ye aaucieg:
+eoves 5 Avenuer | ye Soue|eg,
+309
+
+:smojjoy Se Sem poued ayy BuUNP yuNCODE SRA UO aWVAAOW at,
+syosse oqiBueyy “SE
+
+‘SUNowe Buves wens Sy UEY] JEMO| Bq IM JUNOWE BPgeIeACOe ,S]SSSE lp JEU] VORED!pUI OU SEM ese4) SE POUed ey GuUNP jUeWdinbs ue yUENd ‘Ayedod uo eieyo weuuledWION g*yy
+SZOZ eunr O¢ 38 Se qUaWUdiNdS puE JER “Ayedoud 5 AUEdWOD au Jo AUE UO Sy OU SEM SUBYL  ZPE
+
+ees 40zs as o'ese'b
+ZOOS ——bosTSOz"E Li 200) seurgim se6 0} Buyeyas atueu> uogeIoedag
+
+2eS'96L ss0'7St (6 9104) Sd J8u10 0) Bugera ativeys UoqeIaidag = +p
+92-uNf-OF
+
+seg'sse'ts — str'soc’s 0g6'6y epee Sree £20'964 seo'soz't §=—_22z'90b gbo'PaZ tS 9202 ounr oF 1 soueIEg
+closes §«SiY'SOes = LZB'ER seeooz 86 zee ‘SIS'P9L SpO'rre | = ZEE'90E 249°696'2S 9202 Alenuer | 18 souejeg
+squnowe Buikue3
+seeestor  ~ zest bO'RE (SUZ 9tL'995 see'zes SHS'9L b9s"20e'rr 920z ounr of ¥e souEIeg
+(g6c'a9) * - 2 “ (eee's9) E ™ * sesodsiq:
+isgiseL =~ zee'c ze0'8r ere'e vre'6y ofo'oe 659 so9'soz't (UPL Siou)poued @4y 40) uogereideg
+929'698'ry - 09L'¥ez oce'see BLE Pe 6828S s08'9ss sse'st 096'Lor'er 920z Auenuer | ye eouejeg
+wonersesdeg
+
+——
+O.s'ver'eOL Ste'soe's = zez's0e = ek'6OL = L08'992 ose'o0g'+ §=—L8z'22h 11S'420°96 ‘9202 eune o¢ ye aueIeR
+(eez'ou) (eez'oz) yesodsiq
+zs 7 = = " 5 ¢ - : s9jsuelL
+Pheer ssv'oz soz'cot vov'on Le8'b6 : - * ‘suonippY
+6ae'616' LOL Siy'soc’s 1es'8ez S98'SrS Once coL'bsd ose'ooe't = £82'2Z4 L25'120'96 9202 Auenuer | ye eouejeg
+y09,
+
+SMOI!O) SE SEM BZO SUN OF PapUs ia pobed on buunp juewdnba pue weld ‘Aadoid auy u) JUaWeAoW ous
+jueuldinbs pue werd Ayedoig “pL
+
+9202 ANNF Of GA0N3 GOld3ad 3HL YOI
+SLNAWALVLS TVIONVNId WIMASLNI GALIGNYNN 3HL OL S3LON
+GEREGU POWER PLC // UNAUDITED INTERIM FINANCIAL STATEMENTS // FOR THE PERIOD 30 JUNE 2026
+
+NOTES TO THE UNAUDITED INTERIM FINANCIAL STATEMENTS
+FOR THE PERIOD ENDED 30 JUNE 2026
+
+16 Inventories
+
+‘Spares, tools and consumables” 1,314,923
+9,374,923
+
+16.1 Inventories include spare parts, tools and consumables in stores and is measured at the lower of cost and net realisable value (NRV).
+
+17. Trade and oer receivables 00023
+Trade receivables” 90,949,051 227,245,013
+impairment on trade receivables (Note 17,1) (10,175,258) (26,291,984)
+Net trade receivables 80,773,793 200,953,030
+Due from related party 26,120,631 130,787
+Insurance claim receivable 5,310 29,934
+Impairment on other receivables (note 17.2) (5,310) (5,310)
+
+106,894,425 201, 108.440
+“Other trade receivables will be recognised on cash basis in due course
+
+17.1 Movement in impairment of trade receivables
+Att January 26,291,984 16,216,569
+impairment (reversal) oss (note 10) 46,116,725) 10,075,415.
+
+10, 26,291,984
+
+17.2. Movement in impairment of other receivables
+‘Att January
+Writeback during the period(note 10)
+
+18, Other current assets
+Advance Payments
+Interest receivable 4,237,866 4,548,958
+‘Withholding tax receivable on interest income 1,739,934 1,567,619
+Prepaid staff expenses 51,904 28,092
+
+8,023,047 7,694,345
+Advance payment written off 2 (59,519)
+Net other current assets 8,023,047 7,634,826
+
+19. Cash and cash equivalents
+Cash at bank 27,145,248 17,633,
+Short term deposit 29,583,507 31,769,082
+
+588 31,846,715
+
+19.1 Reconciliation of cash and cash equivalent jun-26
+Cash and cash equivalents 65,588,679 31,846,715
+Bank overdraft {850.975 (5,447,949)
+
+20. Long term employee benefits
+
+Po 31Dec25 |
+The movement in the present value of the long term employee benefits was as follows:
+Gratuity liability at 1 January 431,580 364,786
+Charged to profit and loss 135,058 402,875
+Defined benefit plan actuarial loss - (62,577)
+Gratuity Payment during the period/year (103,576) (273,504)
+Gratuity liability at 30 June 463,062 431.580
+Planned asset at 1 January 481,852 376.773
+Inflow from returns on planned asset (25,586) -
+Additional funding during the period/year - 39,662
+Actual return on planned assets reinvested 40,767 65.417
+Balance at period/year end over funded position 33,977 B0.272
+
+[31-0025]
+Expenses recognised in the statement of profit or loss (note 9.1)
+Current service costs 135,058 402,875
+
+Retum on planned assets (40,767) (65.417)
+
+94,290 337.4:
+Current service costs and the actual returns on planned assets are recognised in the administrative expense of the statement of profit or loss while the
+remeasurement gain or loss are recognised in the statement of other comprehensive income.
+
+‘The actuarial valuation report was signed in January 2026 and was carried out in line with IAS 19 requirements by Wole Ogunkoya
+(FRC/2013/NAS/0000000986) of MIP Financial Solutions(FRC/2014/00000003234) a Fellow of the Society of Actuaries, USA
+
+‘The funded planned assets with Asset management at 30 June 2026 was N497,033,000 (31 December 2025; N481,852,000),
+
+SS. Sm
+
+GEREGU POWER PLC // UNAUDITED INTERIM FINANCIAL STATEMENTS // FOR THE PERIOD ENDED 30 JUNE 2026
+
+NOTES TO THE UNAUDITED INTERIM FINANCIAL STATEMENTS.
+FOR THE PERIOD ENDED 30 JUNE 2026
+
+21. Equity Ps1-Dec-25 |
+21.1 Share Capital
+Authorised, issued and fully paid 2.5bn ordinary shares of 50k each 1,250,000 1,250,000
+21.2 Retained erninge a SC
+Balance at 1 January 57,344,831 51,344,328
+Profit for the period/year 2,504,516 27,250,503
+Dividend (22,500,000) (21,250,000)
+37,349,347 57.344, 831
+213 Actuarial reserves
+Balance at 1 January 33,169 (29,408)
+Defined benefit plan actuarial loss = 62,577
+33,169 33,169
+22 Trade and other payables =
+‘N‘000 N'00K
+Gas accounts payable 80,307,196 122,907,069
+“Other payables 16,091,575 13,948,571
+96,398,774 136,855,640
+
+“Included in other payables is N11bn for the completion of GT12 & GT13 major overhaul
+
+23, Borrowings
+This note provides information about the contractual terms of the company’s interest-bearing loans and borrowings which are measure at amortised
+
+cost.
+=
+Term loans (23.1) N’000 N’
+At 1 January 28,492,038 23,166,150
+Addition - 13,849,133
+Interest 1,665,115 6,371,059
+Repayment (2,778,960) (14,894 304)
+27,378,193 28,492,038
+Bank Overdraft 8,859,925 5,447,949
+36,238,118 33,939,987
+Non-current 1,764,706 4,013,538
+Current 34,473,412 29,926,449
+36,238,118 33,939,987
+
+23.1 The collateral for the loan from First Bank are: all assets debenture of the Group Parent Company and domiciliation of all the Company's receivables.
+account to First bank while the facility subsists.
+
+24 Bond Payable Se
+
+At 1 January 34,147,078 42,654,125
+Interest 2,101,479 5,026,045
+Repayment (6,391,836) 13,533,092)
+72 34,147,078
+
+Non-current 18,863,492 24,180,959
+Current 10,993,229 9,966,119
+29,856,721 34,147,078
+
+24.1 In July 2022, the company issued N40_085billion unsecured corporate bond for a 7-period tenor and at a coupon and effective interest rate of 14.5%
+and 14.70% respectively,
+
+Borrowings are initially measured at fair value, net of transaction costs incurred, Borrowings are subsequently measured at amortised cost. Any
+difference between the proceeds (net of transaction casts) and the redemption values is recognised in the statement of profit or loss over the periods
+af the borrowings using the effective interest method. The carrying values of borrowings approximate their fair value.
+
+The issuer's convenants include the below clauses amongst other:
+
+‘The Issuer covenants that for so long as any of the Series 1 Bonds remain outstanding in any period, no dividends, distributions or other payments.
+shail be made to the Shareholders of the issuer in that period, unless the Issuer has fully discharged its payment obligations under this Deed to the
+Bondholders in respect of that period
+
+The Issuer covenants with the Trustees that until such time when all outstanding Bonds have been fully redeemed and the Issuer's liability has been
+discharged, it shall not without the prior written consent of the Trustees (such consent not to be unreasonably withheld, delayed or conditioned) borrow
+or raise funds or procure any person to borrow or raise funds on its behalf, by any means whatsoever except by the issuance of bonds under the
+Programme Trust Deed or this Series Trust Deed.
+
+SS Sm
+GEREGU POWER PLC // UNAUDITED INTERIM FINANCIAL STATEMENTS // FOR THE PERIOD ENDED 30 JUNE 2026
+
+NOTES TO THE UNAUDITED INTERIM FINANCIAL STATEMENTS
+FOR THE PERIOD ENDED 30 JUNE 2026
+
+25.
+
+26.2
+
+Cash generated from operating activities
+
+Cash flows from operating activities
+Profit for the period
+
+Adjustment for non-cash operating items:
+
+Foreign exchange loss (note 8)
+
+Depreciation of property, plant and equipment(note 14)
+Interest Income (note 11)
+
+Interest Expense (note 11)
+
+impairment( reversal) / loss on trade receivables (note 10)
+Impairment reversal on other receivables(note 10)
+
+Current service costs (note 20)
+
+Income taxes (current tax and back duty)note 12.1
+
+Cash from Operating activities before working capital changes
+
+Financial instruments
+
+Credit risk
+
+Exposure to credit risk
+
+The carrying amount of financial assets represents the maximum credit exposure.
+The maximum exposure to credit risk at the reporting date was:
+
+Cash and cash equivalents (Note 19)
+Trade and other receivables (Note 17)
+
+The aging of trade and other receivables at the reporting date was:
+0-2 months
+
+2-3 months
+
+3-6 months
+
+6-12 months
+
+More than 12 months
+
+Market risk
+Foreign exchange exposure
+Bank balances denominated in other currencies
+
+——
+
+2,504,516 20,181,365
+51,103 12,303
+4,357,657 5,200,493
+(2,498,327) (3,433,154)
+7,408,609 6,808,076
+(16,116,725) 909,436
+- (28,708)
+135,058 49,271
+542,657 6,129,975
+16,096,015) 35,829,060
+
+——
+
+65,588,679 31,846,715
+106,894,425 201,108.440
+172,483,104 232,955,154
+26,120,631 29,024,393
+
+288,419 14,512,196
+
+10,706,846 35,708,503
+59,698,202 58,269,695
+10,080,326 89,730,226
+
+—osanaeas 22 28,013
+3,934 19,615
+3,934 19,615
+
+GEREGU POWER PLC // UNAUDITED INTERIM FINANCIAL STATEMENTS // FOR THE PERIOD ENDED 30 JUNE 2026
+
+‘squnoWe yUaseyip AqueayuBis ye Jo “Jala AUBdyIUBIS 1NDV0 PiNod siSAjeUe AY} UI PEpNjoU} SMOY YSeO B\y JeUL Pa}edK~a YOU Sf yy
+
+i BOE ZLE CE gse'zS0'aL S66'819'be £96'986'6 298'L82'222 SOL'2r6'PO2
+ovg'ssa'9eL Opg'sse'9et ‘sejgeAed soyjo pue oper,
+vOS'Lpo'r BaS'SZ1'9 OSp'pas'st gee'6se's 6r8'092'6z 296'66'EE Sued] yUeQ paundes:
+SOb'L29'82 962'L88'LL SbS'pe0'6 Sza'Les'9 ELE'S9L'9S 820'LPL've puog wa} WiNIpayW
+
+‘SoMuIge!| [eIOUBUY eAREALOP-LON
+
+syyuoU 9
+
+sueak ¢
+ue a0;
+
+: Ses"LEO'eL 1es'eStZb viz'ee9'Ob 2e9°6£0'8E BL6'2SZ'OLL O1g'eer'z9L
+* +22'86°96 122°86¢'96 ‘so\qeAed soyjo pue apesy
+: 2L1'600'2 zee'9ee't zbe‘eez'ze gop'6ss'ze SLL‘eez'9e sueo} ueq panes
+ves'Leo'eL Sp9'SpL'oL ev9'96z'L ozz's08's ZrL'6Lz'98 tzz'9g9'6z Puog Wu9} winipay,
+sonmiaent
+Je}QUeUYy GAEALEP-UON
+9Z-UNT-OF
+
+000.N 000.N 000.N 000.N 000.N O00.N 000.N
+
+SyUOW Z}-9 $$8] 40 SMOY ysed qyunowe
+
+syuoW 9 jenyoequoa Burke
+
+ssjuewees6e Bunjeu jo
+peduy ey) Bulpnjoxe pue syuawAed jseseyu payewyse Guypnjour ‘seqyiqey jeoUeU) so SenUNjeW jeNjSeAU0S ey) exe BuyMo}o; EYL
+su Aypinbry <4
+
+9202 ANN Of GAGN3 GOad SH NOS
+SLNAW3LVLS TWIONVNId WINSLNI G3SLIGNYNN 3HL OL SSLON
+28.2
+
+GEREGU POWER PLC // UNAUDITED INTERIM FINANCIAL STATEMENTS // FOR THE PERIOD ENDED 30 JUNE 2026
+
+NOTES TO THE UNAUDITED INTERIM FINANCIAL STATEMENTS
+FOR THE PERIOD ENDED 30 JUNE 2026
+
+28.1 Directors’ emoluments
+
+Chairman
+Directors
+
+Executive Diretors are not entitled to and do not get paid diretors’ fees.
+
+Directors earned fees in the following ranges:
+N
+
+250,000
+801,000
+
+Chief Execuctive Officer
+Deputy Chief Executive
+
+Chief Technical Officer
+Chief Financial Officer
+Head, Bussiness Assurance
+
+Transactions with key management personnel
+
+Key management personnel and compensation
+The company has 94 employees as at 30 June 2026 (30 June 2025: 135 employees)
+
+Sean Manley
+
+Shehu Malami Bello
+
+N'000
+1,456,451 240,597
+500,000 500
+956,451 240,097
+1,456,451 240,597
+
+a
+9 £
+
+1 1
+
+Akin Akinfemiwa
+
+JB Omodayo-Owotuga
+Ezeh Ferdinand
+Ganiyu Lamidi Adisa
+lyimola Akinbola
+
+Key management of the company are the 2 management staff stated above. Key management personnel remuneration include
+
+the following expenses:
+
+Key management personnel compensation comprised:
+
+Short - term employee benefits:
+
+Short - term employee benefits:
+
+Post-employment benefits:
+
+Defined contribution to compulsory pension fund scheme
+
+Defined benefit gratuity scheme
+
+Staff numbers and costs:
+
+The average number of persons employed (excluding Directors) in the
+Company during the period were as follows:
+
+Management
+Senior
+Junior
+
+Ln
+
+154,695 259,135
+154,695 259,135
+7,886 17,200
+11,564 21,595
+174,142 297,930
+
+P Number Number |
+3
+
+1 15
+37 42
+44 78
+94 135
+
+GEREGU POWER PLC // UNAUDITED INTERIM FINANCIAL STATEMENTS // FOR THE PERIOD ENDED 30 JUNE 2026
+
+‘papue
+
+uey) pouad ay} JO) synsaJ sj! Jo Sayep Guquoda ay) ye UON}!sod jeioueUY Ss AUedWOD a4} JO VORBYASaud 41BJ JO JSasayU! AY} UI S}UALUA]E}S /eIOUeL, asayy Ul PaUOUaW aq
+0} SPp99U YOIUM JO SEP Jey) IE SJUEWO]E}S EOUEL!) @S9Yy) UO JOYS jeEVO}eW e Pey @Aey PjNod YyoIUM ‘aJep Huysode, ey) eoUIS pe.JNDI0 Sey UONIESUEL] JO JUBAG JOURO ON
+yep UoN!sod jeroueuy a4) 19Ye S}UBAR
+
+WIN
+:$z0z 9UNr OE) ‘9Z0z 9UNT O€ Je SE SsaUIsNq Jo asunoo AueUIPIO Wo. Buse YORE jeBa; pue UOReBAI WO} SoNyIqer| JoUJO PU WIE; Oj payeiqns jou s| AUEdWOD ey,
+
+920Z 'B 4290}90 Jo pouiad AIPHIEA YUM Pay] SaRIPOWULOD O4B[ed JO INOAB; UI aa}UEJENd YUE -0O'PSL'9ZP'090'SN :@PNjou! sjuewjwuLUOD jenjoegUOD
+
+‘suonesedo wo. peyeseueb
+
+Yyseo Woy PaoUeuy aq O} Si BoUejeq %EZ Pue pamjas Ajjempoe.juOD UBAq Sey }SO9 PA}BUUN}SA AU} JO %// “UOIIIIG Jp’ LGN 3S09 0} payewNsa si |NeyaAd Jofew BuloBuo ay)
+syueunwod jenjDeUOD
+
+quowAeday
+(04 910u) esuedxe ysouoquy
+(01 @10U) ewoou! jsexe]u}
+
+- o00‘0s8"t Aued pajejs wos Moyur
+os6'6ez'eL +b8°600'sz uoRIppY
+$iL'ss9 98Z‘OeL ueoj quale Auenuer 1 yyw
+9Z-JEW-LE uonoesuey diysuonelas
+| joaumen = jo. BINYEN PIT Auedwion uoynquisig semog uoueduiy
+Aued payeioy
+Seb v6
+ly ze enoge pue = - —00'000'8
+8r Ww 000'000'8 = - ~—$00'000'r
+se SL 000'000'r + - —.00'000'2
+8 000'000'2 = - ~—«L00'000'E
+& U ooo'o00'L = iL
+JoqunN N N
+gz-unr-oF
+2M} Paes
+
+ie
+
+Spueg aly UILAIM 19) YoIUM pu pousd ey) GuUNP 000'000'EN 4240 petuee OYm (sso}eNIG UEYI Z8YI0) AUEdWOD ey) Jo Seao|dwe jo JequUNU ey SMOYS MOIeG FI9e) 941 E-gz
+GEREGU POWER PLC // UNAUDITED INTERIM FINANCIAL STATEMENTS // FOR THE PERIOD ENDED 30 JUNE 2026
+
+UNAUDITED INTERIM STATEMENT OF VALUE ADDED
+
+FOR THE PERIOD ENDED 30 JUNE 2026
+
+Notes
+Turnover 6
+Other income/(loss) 8
+Finance income 11.1
+Brought in material and services - local
+Value added
+Applied as follows:
+To pay employees:
+Salaries, welfare and staff retirement benefits 9.1
+To pay Government:
+Taxation 12.1
+Interest on borrowings 11
+
+To provide for replacement of assets & growth:
+
+~ Depreciation of property plant and equipment 14.1
+- Profit for the period 13.1
+Value added
+
+N'000 % N'000 %
+18,658,107 87,632,904
+2,803 (12,303)
+2,498,327 3,433,154
+21,159,237 91,053,754
+(13,102,112) (54,283,344)
+8,057,125 100 36,770,410 100
+895,049 11 1,354,929 4
+1,062,095 13 6,129,975 17
+2,237,809 28 3,896,608 11
+1,357,656 17 5,207,533 14
+2,504,516 31 20,181,365 55
+8,057,125 100 36,770,410 100
+
+Valued added represents the additional wealth created by the Company during the period. This statement shows the
+allocation of that wealth among employees, shareholder, capital providers, and that retained for the future creation of
+
+more wealth,
+GEREGU POWER PLC // UNAUDITED INTERIM FINANCIAL STATEMENTS // FOR THE PERIOD ENDED 30 JUNE 2026
+
+FINANCIAL SUMMARY
+N’000 N‘o00 N'000 N'000, N‘000
+
+Funds employed
+Share capital 1,250,000 1,250,000 1,250,000 1,250,000 1,250,000
+Retained earnings 37,349,347 57,344,831 51,344,328 43,919,258 47,866,532
+Other reserves 33,169 33,169 (29,408) (15,350) (13,261)
+Shareholder’s fund 38,632,516 58,628,000 52,564,920 45,153,908 49,103,271
+Current liabilities 179,824,636 214,164,775 150,564,909 70,936,787 48,448 681
+Non-current liabilities 25,165,751 32,212,612 40,340,594 65,951,853 76,478,456
+
+243,622,903 305,005,387 243,470,422 182,042,548 174, 07
+Assets employed
+Non-current assets 62,009,606 63,100,483 72,669,749 36,353,989 37,999,441
+Current assets 181,613,296 241,904,904 170,800,674 — 145,688,559 136,030,966
+
+243,622,903 305,005,387 —_243,470.424 182,042,548 174,030,407
+
+N‘000 N’000 N'000, N'000
+
+Revenue 18,658,107 184,935,803 137,126,532 82,908,807 47,619,370
+Operating profit 8,476,893 48,149,444 42,952,724 31,139,640 14,820,314
+Profit before income tax 3,566,611 41,985,033 41,266,089 24,389,919 15,168,471
+Profit after tax 2,504,516 27,250,503 27,425,070 16,052,728 10,171,455
+Basic & diluted earnings per share in (N) 1.00 10.90 10.97 6.42 1,017.15
+GEREGU
+
+POWER PLC
+
+6, Onega Street, Off Gana Street, Maitama, Abuja, F.C.T
+T: +234 01280 2049
+E: info@geregupowerple.com
+W: www.geregupowerplc.com
+
