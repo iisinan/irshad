@@ -46,22 +46,23 @@ export default function UpdatesTab({ unreadCount = 0 }) {
     <div>
       {/* ── Greeting Banner ── */}
       <div style={{
-        background: 'linear-gradient(135deg, var(--primary) 0%, #9b3dbe 60%, #c084fc 100%)',
+        background: 'var(--bg)',
+        border: '1px solid var(--border)',
         borderRadius: '20px',
         padding: '28px 28px 24px',
         marginBottom: '28px',
         position: 'relative',
         overflow: 'hidden',
+        boxShadow: 'var(--shadow-sm)',
       }}>
-        {/* Decorative elements */}
-        <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '180px', height: '180px', borderRadius: '50%', background: 'rgba(255,255,255,0.06)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: '-40px', right: '60px', width: '120px', height: '120px', borderRadius: '50%', background: 'rgba(255,255,255,0.04)', pointerEvents: 'none' }} />
-        <Moon size={80} style={{ position: 'absolute', right: '24px', top: '50%', transform: 'translateY(-50%)', opacity: 0.07, pointerEvents: 'none' }} color="white" />
+        {/* Subtle left accent bar */}
+        <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '4px', background: 'var(--primary)', borderRadius: '20px 0 0 20px' }} />
+        <Moon size={90} style={{ position: 'absolute', right: '20px', top: '50%', transform: 'translateY(-50%)', opacity: 0.04, pointerEvents: 'none' }} color="var(--primary)" />
 
-        <div style={{ position: 'relative', zIndex: 1 }}>
+        <div style={{ position: 'relative', zIndex: 1, paddingLeft: '8px' }}>
           {/* Arabic greeting */}
           <div style={{
-            fontSize: '0.75rem', fontWeight: 800, color: 'rgba(255,255,255,0.75)',
+            fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)',
             letterSpacing: '0.5px', marginBottom: '6px',
             fontFamily: 'var(--sans)',
           }}>
@@ -72,7 +73,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
           <h1 style={{
             fontSize: 'clamp(1.3rem, 4vw, 1.75rem)',
             fontWeight: 900,
-            color: '#ffffff',
+            color: 'var(--text-dark)',
             margin: '0 0 4px',
             letterSpacing: '-0.5px',
             lineHeight: 1.2,
@@ -82,23 +83,23 @@ export default function UpdatesTab({ unreadCount = 0 }) {
 
           <p style={{
             fontSize: '0.82rem',
-            color: 'rgba(255,255,255,0.72)',
+            color: 'var(--text-muted)',
             margin: 0,
             fontWeight: 600,
           }}>
             Here's what's happening with your halal portfolio today.
           </p>
 
-          {/* Stats row */}
+          {/* Unread badge */}
           {unreadCount > 0 && (
             <div style={{
               display: 'inline-flex', alignItems: 'center', gap: '7px',
-              marginTop: '14px', background: 'rgba(255,255,255,0.15)',
+              marginTop: '14px', background: 'var(--primary-50)',
+              border: '1px solid var(--primary-100)',
               borderRadius: '30px', padding: '6px 14px',
-              backdropFilter: 'blur(10px)',
             }}>
-              <Bell size={13} color="white" />
-              <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'white' }}>
+              <Bell size={13} color="var(--primary)" />
+              <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--primary)' }}>
                 {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
               </span>
             </div>
