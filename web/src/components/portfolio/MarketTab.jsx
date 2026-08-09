@@ -44,7 +44,7 @@ const getStatusConfig = (company) => {
 };
 
 /* ─── Table header cell — defined OUTSIDE to avoid re-mounting ───────────── */
-const TH = ({ children, right, center }) => (
+const TH = ({ children, right, center, style }) => (
   <th style={{
     padding: '10px 12px',
     fontSize: '0.65rem', fontWeight: 800,
@@ -55,6 +55,7 @@ const TH = ({ children, right, center }) => (
     borderBottom: '1px solid var(--border)',
     whiteSpace: 'nowrap',
     position: 'sticky', top: 0, zIndex: 2,
+    ...style
   }}>
     {children}
   </th>
@@ -121,27 +122,8 @@ const StockRow = React.memo(({ stock, idx, isWatched, onToggle }) => {
       </td>
 
       {/* P/E */}
-      <td style={{ padding: '12px 12px', textAlign: 'right', color: 'var(--text-muted)', fontSize: '0.78rem', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
+      <td style={{ padding: '12px 32px 12px 12px', textAlign: 'right', color: 'var(--text-muted)', fontSize: '0.78rem', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
         {stock.pe_ratio ? Number(stock.pe_ratio).toFixed(1) : '—'}
-      </td>
-
-      {/* Star */}
-      <td style={{ padding: '12px 20px 12px 8px', textAlign: 'right' }}>
-        <button
-          onClick={() => onToggle(stock.symbol, isWatched)}
-          style={{
-            background: 'none', border: 'none', cursor: 'pointer', padding: '10px',
-            color: isWatched ? 'var(--primary)' : 'var(--border)',
-            transition: 'color 0.15s, transform 0.15s',
-            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-            minWidth: 44, minHeight: 44
-          }}
-          title={isWatched ? 'Remove from watchlist' : 'Add to watchlist'}
-          onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.25)'; if (!isWatched) e.currentTarget.style.color = 'var(--primary-300)'; }}
-          onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.color = isWatched ? 'var(--primary)' : 'var(--border)'; }}
-        >
-          <Star size={18} fill={isWatched ? 'currentColor' : 'none'} strokeWidth={2} />
-        </button>
       </td>
     </tr>
   );
@@ -183,14 +165,6 @@ const MobileStockCard = React.memo(({ stock, idx, isWatched, onToggle }) => {
           {isPos ? '+' : ''}{Number(stock.price_change_pct ?? 0).toFixed(2)}%
         </span>
       </div>
-
-      {/* Star */}
-      <button
-        onClick={() => onToggle(stock.symbol, isWatched)}
-        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '10px', color: isWatched ? 'var(--primary)' : 'var(--border)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 44, minHeight: 44 }}
-      >
-        <Star size={20} fill={isWatched ? 'currentColor' : 'none'} strokeWidth={2} />
-      </button>
     </div>
   );
 });
@@ -311,10 +285,10 @@ export default function MarketTab() {
   const clearAll   = () => { setSearch(''); setStatusF('all'); setSectorF('all'); setIndustryF('all'); setSortBy('default'); };
 
   const selectStyle = (active) => ({
-    padding: '9px 14px', borderRadius: '12px', outline: 'none', cursor: 'pointer',
-    fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-dark)', fontFamily: 'inherit',
-    border: active ? '1.5px solid var(--primary)' : '1px solid var(--border)',
-    background: active ? 'var(--primary-50)' : 'var(--bg-section)',
+    padding: '8px 32px 8px 16px', borderRadius: '10px', outline: 'none', cursor: 'pointer',
+    fontSize: '0.75rem', fontWeight: 700, color: active ? 'var(--primary)' : 'var(--text-muted)', fontFamily: 'inherit',
+    border: active ? '1px solid var(--primary-100)' : '1px solid transparent',
+    background: active ? 'var(--primary-50)' : 'var(--body-bg)',
     transition: 'all 0.2s',
   });
 
@@ -345,9 +319,9 @@ export default function MarketTab() {
       </div>
 
       {/* ── Filter Card ─────────────────────────────────────── */}
-      <div style={{
-        background: 'var(--bg)', padding: '20px',
-        borderRadius: '16px 16px 0 0', border: '1px solid var(--border)', borderBottom: 'none',
+      <div className="stagger-2" style={{
+        background: 'var(--bg)', padding: '16px 24px',
+        borderRadius: '20px', border: '1px solid var(--border)', boxShadow: '0 8px 32px rgba(0,0,0,0.03)',
         display: 'flex', flexDirection: 'column', gap: '16px'
       }}>
         {/* Search - Prominent Top Row */}
@@ -359,21 +333,21 @@ export default function MarketTab() {
             placeholder="Search for any company or ticker..."
             style={{
               width: '100%', paddingLeft: '44px', paddingRight: search ? '40px' : '16px',
-              paddingTop: '14px', paddingBottom: '14px',
-              borderRadius: '14px', border: '2px solid transparent',
-              background: 'var(--bg-section)', fontSize: '0.95rem', fontWeight: 600,
+              paddingTop: '12px', paddingBottom: '12px',
+              borderRadius: '12px', border: '1px solid transparent',
+              background: 'var(--body-bg)', fontSize: '0.85rem', fontWeight: 600,
               color: 'var(--text-dark)', outline: 'none', fontFamily: 'inherit',
-              boxSizing: 'border-box', transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+              boxSizing: 'border-box', transition: 'all 0.2s ease',
               boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
             }}
             onFocus={e => {
-              e.target.style.borderColor = 'var(--primary)';
-              e.target.style.background = 'white';
-              e.target.style.boxShadow = '0 8px 24px rgba(91, 41, 113, 0.08)';
+              e.target.style.background = 'var(--bg)';
+              e.target.style.borderColor = 'var(--border)';
+              e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.04)';
             }}
             onBlur={e => {
               e.target.style.borderColor = 'transparent';
-              e.target.style.background = 'var(--bg-section)';
+              e.target.style.background = 'var(--body-bg)';
               e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)';
             }}
           />
@@ -431,19 +405,21 @@ export default function MarketTab() {
             <button
               onClick={clearAll}
               style={{
-                padding: '9px 14px', borderRadius: '12px', border: '1px solid var(--border)',
-                background: 'var(--bg)', fontSize: '0.74rem', fontWeight: 700,
+                padding: '8px 12px', borderRadius: '10px', border: 'none',
+                background: 'transparent', fontSize: '0.74rem', fontWeight: 700,
                 color: 'var(--text-muted)', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', gap: '6px',
-                transition: 'all 0.2s'
+                display: 'flex', alignItems: 'center', gap: '4px',
+                transition: 'color 0.2s'
               }}
+              onMouseEnter={e => e.currentTarget.style.color='var(--text-dark)'}
+              onMouseLeave={e => e.currentTarget.style.color='var(--text-muted)'}
             >
-              <X size={13} /> Reset
+              <X size={14} /> Reset
             </button>
           )}
 
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-            <span style={{ fontSize: '0.74rem', fontWeight: 800, color: 'var(--text-muted)', background: 'var(--bg-section)', padding: '6px 12px', borderRadius: '100px', border: '1px solid var(--border)' }}>
+            <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', background: 'var(--body-bg)', padding: '6px 12px', borderRadius: '100px', letterSpacing: '0.5px' }}>
               {filtered.length} Companies
             </span>
           </div>
@@ -496,8 +472,7 @@ export default function MarketTab() {
                     <TH right>Price</TH>
                     <TH right>24h Change</TH>
                     <TH right>Mkt Cap</TH>
-                    <TH right>P/E</TH>
-                    <TH right>Watch</TH>
+                    <TH right style={{ paddingRight: '32px' }}>P/E</TH>
                   </tr>
                 </thead>
                 <tbody>
