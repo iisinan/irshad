@@ -1,0 +1,541 @@
+[
+    {
+        "symbol": "ABCTRANS",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "ACADEMY",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "AIRTELAFRI",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "ALEX",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Not currently Trading"
+    },
+    {
+        "symbol": "ARADEL",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "AUSTINLAZ",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "BAPLC",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Not currently Trading"
+    },
+    {
+        "symbol": "BERGER",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "BUACEMENT",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "BUAFOODS",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "CADBURY",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "CAP",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "CAVERTON",
+        "db_status": "non-halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "CHAMS",
+        "db_status": "non-halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "CHELLARAM",
+        "db_status": "non-halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "CILEASING",
+        "db_status": "non-halal",
+        "excel_derived": "doubtful",
+        "excel_biz": "DOUBTFUL",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "CONOIL",
+        "db_status": "non-halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "CUTIX",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "CWG",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "DANGCEM",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "EKOCORP",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Not currently Trading"
+    },
+    {
+        "symbol": "ENAMELWA",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "ETERNA",
+        "db_status": "non-halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "ETRANZACT",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "EUNISELL",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "FIDSON",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "FTNCOCOA",
+        "db_status": "non-halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "GEREGU",
+        "db_status": "non-halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "HBMNG",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "HMCALL",
+        "db_status": "halal",
+        "excel_derived": "doubtful",
+        "excel_biz": "DOUBTFUL",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "HONYFLOUR",
+        "db_status": "non-halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "IMG",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "JAIZBANK",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "OK - Shari'ah Compliant Stock"
+    },
+    {
+        "symbol": "JAPAULGOLD",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "JBERGER",
+        "db_status": "non-halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "JOHNHOLT",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "JULI",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "LEARNAFRCA",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "LEGENDINT",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "MAYBAKER",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "MCNICHOLS",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "MECURE",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "MEYER",
+        "db_status": "non-halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "MORISON",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "MTNN",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "MULTITREX",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Not currently Trading"
+    },
+    {
+        "symbol": "MULTIVERSE",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "NAHCO",
+        "db_status": "halal",
+        "excel_derived": "doubtful",
+        "excel_biz": "DOUBTFUL",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "NEIMETH",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "NESTLE",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "NNFM",
+        "db_status": "non-halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "NREIT",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "OK - Shari'ah Compliant Stock"
+    },
+    {
+        "symbol": "OANDO",
+        "db_status": "non-halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "OKOMUOIL",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "OMATEK",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "PHARMDEKO",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Not currently Trading"
+    },
+    {
+        "symbol": "PREMPAINTS",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "PRESCO",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "PZ",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "REDSTAREX",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "RONCHESS",
+        "db_status": "non-halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Not currently Trading"
+    },
+    {
+        "symbol": "RTBRISCOE",
+        "db_status": "non-halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "SCOA",
+        "db_status": "non-halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "SEPLAT",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "SKYAVN",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "THOMASWY",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "TIP",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "TOTAL",
+        "db_status": "non-halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "TRANSEXPR",
+        "db_status": "non-halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "TRANSPOWER",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "TRIPPLEG",
+        "db_status": "non-halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "UACN",
+        "db_status": "non-halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "UNILEVER",
+        "db_status": "non-halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "UNIONDICON",
+        "db_status": "non-halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "UPDC",
+        "db_status": "non-halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "UPL",
+        "db_status": "non-halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    },
+    {
+        "symbol": "VITAFOAM",
+        "db_status": "halal",
+        "excel_derived": "pending",
+        "excel_biz": "PASS",
+        "excel_fin": "Needs data"
+    }
+]
