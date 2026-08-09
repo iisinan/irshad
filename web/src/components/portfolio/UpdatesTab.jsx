@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Newspaper, Bell, Sparkles, Moon } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Newspaper, Bell, Moon, Clock } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import UpdatesNews    from './UpdatesNews';
 import UpdatesInbox   from './UpdatesInbox';
@@ -22,9 +22,19 @@ function getFirstName(user) {
    ══════════════════════════════════════════════════════════════ */
 export default function UpdatesTab({ unreadCount = 0 }) {
   const [activeSubTab, setActiveSubTab] = useState('news');
+  const [now, setNow] = useState(new Date());
   const { user } = useAuth();
   const greeting = getGreeting();
   const firstName = getFirstName(user);
+
+  // Live clock — tick every second
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const dateStr = now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
   const tabs = [
     {
@@ -59,7 +69,23 @@ export default function UpdatesTab({ unreadCount = 0 }) {
         <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '4px', background: 'var(--primary)', borderRadius: '20px 0 0 20px' }} />
         <Moon size={90} style={{ position: 'absolute', right: '20px', top: '50%', transform: 'translateY(-50%)', opacity: 0.04, pointerEvents: 'none' }} color="var(--primary)" />
 
-        <div style={{ position: 'relative', zIndex: 1, paddingLeft: '8px' }}>
+        {/* Date & Time — top right */}
+        <div style={{
+          position: 'absolute', top: '20px', right: '24px',
+          display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <Clock size={11} color="var(--primary)" />
+            <span style={{ fontSize: '1rem', fontWeight: 900, color: 'var(--text-dark)', fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.3px' }}>
+              {timeStr}
+            </span>
+          </div>
+          <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+            {dateStr}
+          </span>
+        </div>
+
+        <div style={{ position: 'relative', zIndex: 1, paddingLeft: '8px', paddingRight: '160px' }}>
           {/* Arabic greeting */}
           <div style={{
             fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)',
