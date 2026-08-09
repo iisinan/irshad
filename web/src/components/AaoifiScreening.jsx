@@ -339,8 +339,18 @@ const AaoifiScreening = () => {
   const cashAndSec     = (parseFloat(fd.cash)||0)+(parseFloat(fd.interest_bearing_securities)||0);
   const totalRevenue   = parseFloat(fd.total_revenue)||0;
   const interestIncome = parseFloat(fd.interest_income)||0;
-  const debtRatio      = marketCap>0?(totalDebt/marketCap)*100:null;
-  const cashRatio      = marketCap>0?(cashAndSec/marketCap)*100:null;
+  const debtRatioRaw   = marketCap>0?(totalDebt/marketCap)*100:null;
+  const debtRatioAssets = totalAssets>0?(totalDebt/totalAssets)*100:null;
+  const debtRatio = report.debt_ratio !== null && report.debt_ratio !== undefined ? parseFloat(report.debt_ratio) : debtRatioRaw;
+
+  const cashRatioRaw   = marketCap>0?(cashAndSec/marketCap)*100:null;
+  const cashRatioAssets = totalAssets>0?(cashAndSec/totalAssets)*100:null;
+  const cashRatio = report.cash_ratio !== null && report.cash_ratio !== undefined ? parseFloat(report.cash_ratio) : cashRatioRaw;
+
+  // Determine Denominator
+  const usedTotalAssets = (debtRatio !== null && debtRatioAssets !== null && Math.abs(debtRatio - debtRatioAssets) < 0.1) || (debtRatioRaw !== null && debtRatio !== null && Math.abs(debtRatio - debtRatioRaw) > 0.1);
+  const denLabelText = usedTotalAssets ? "Total Assets" : "Market Cap";
+  const denValAmount = usedTotalAssets ? totalAssets : marketCap;
   const hasPurification= finalStatus==='halal'&&!!report.stage1?.purification_required;
   const purPct         = (parseFloat(report.stage1?.haram_revenue_percent)||0).toFixed(2);
   const stage1Status   = report.stage1?.status||(businessFailed?'non-halal':'halal');
@@ -637,13 +647,13 @@ const AaoifiScreening = () => {
             accent="linear-gradient(90deg,#7C3AED,rgba(139,92,246,0.1),transparent)"
             right={<div style={{ display:'flex',alignItems:'center',gap:6,background:'var(--bg)',border:'1px solid var(--border)',borderRadius:9,padding:'5px 10px' }}>
               <Sliders size={11} color="var(--primary)"/>
-              <span style={{ color:'var(--text-muted)',fontSize:'0.7rem',fontWeight:700 }}>Denominator: Market Cap</span>
+              <span style={{ color:'var(--text-muted)',fontSize:'0.7rem',fontWeight:700 }}>Denominator: {denLabelText}</span>
             </div>}/>
           <div style={{ padding:'24px' }}>
             <div style={{ marginBottom:28 }}>
-              <RatioBar title="1. Debt ratio"     subtitle="Total Debt / Market Cap × 100"               ratio={debtRatio}                        threshold={30} numLabel="Total Debt"        numVal={totalDebt}    denLabel="Market Cap"    denVal={marketCap}     formula="Total Debt / Market Cap × 100"          onInspect={setModalData}/>
+              <RatioBar title="1. Debt ratio"     subtitle={`Total Debt / ${denLabelText} × 100`}               ratio={debtRatio}                        threshold={30} numLabel="Total Debt"        numVal={totalDebt}    denLabel={denLabelText}    denVal={denValAmount}     formula={`Total Debt / ${denLabelText} × 100`}          onInspect={setModalData}/>
               {symbol !== 'JAIZBANK' && (
-                <RatioBar title="2. Cash ratio"     subtitle="(Cash + Securities) / Market Cap × 100"      ratio={cashRatio}                        threshold={30} numLabel="Cash & Securities" numVal={cashAndSec}   denLabel="Market Cap"    denVal={marketCap}     formula="(Cash + Sec.) / Market Cap × 100"       onInspect={setModalData}/>
+                <RatioBar title="2. Cash ratio"     subtitle={`(Cash + Securities) / ${denLabelText} × 100`}      ratio={cashRatio}                        threshold={30} numLabel="Cash & Securities" numVal={cashAndSec}   denLabel={denLabelText}    denVal={denValAmount}     formula={`(Cash + Sec.) / ${denLabelText} × 100`}       onInspect={setModalData}/>
               )}
               <RatioBar title={symbol === 'JAIZBANK' ? '2. Impure revenue' : '3. Impure revenue'} subtitle="Impure Income / Total Revenue × 100"         ratio={report.impermissible_income_ratio} threshold={5}  numLabel="Impure Income"    numVal={interestIncome} denLabel="Total Revenue" denVal={totalRevenue}  formula="Impure Income / Total Revenue × 100"    onInspect={setModalData}/>
             </div>
