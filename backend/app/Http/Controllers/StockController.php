@@ -529,14 +529,20 @@ class StockController extends Controller
                 $bReasonRaw = $aaoifiScreening->business_reasoning;
                 $businessReason = '';
                 if (is_array($bReasonRaw)) {
-                    $businessReason = $bReasonRaw['reasoning'] ?? $bReasonRaw['evidence'] ?? json_encode($bReasonRaw);
+                    $businessReason = $bReasonRaw['justification'] ?? $bReasonRaw['reason'] ?? $bReasonRaw['reasoning'] ?? $bReasonRaw['evidence'] ?? json_encode($bReasonRaw);
                 } elseif (is_string($bReasonRaw)) {
                     $decoded = json_decode($bReasonRaw, true);
-                    if (is_array($decoded) && isset($decoded['reasoning'])) {
-                        $businessReason = $decoded['reasoning'];
+                    if (is_array($decoded) && (isset($decoded['justification']) || isset($decoded['reason']) || isset($decoded['reasoning']))) {
+                        $businessReason = $decoded['justification'] ?? $decoded['reason'] ?? $decoded['reasoning'];
                     } else {
                         $businessReason = $bReasonRaw;
                     }
+                }
+                $businessReason = trim($businessReason);
+                
+                $finalStage1Reason = $businessReason;
+                if ($aaoifiScreening->business_status === 'pass' && $finalStatus !== 'doubtful') {
+                    $finalStage1Reason = 'Permissible core activity.';
                 }
                 $businessReason = trim($businessReason);
 
@@ -611,10 +617,10 @@ class StockController extends Controller
                     'status'               => $aaoifiScreening->business_status === 'pass' ? 'halal' : ($aaoifiScreening->business_status === 'doubtful' ? 'doubtful' : 'non-halal'),
                     'haram_revenue_percent'=> round($calculatedIncomeRatio, 4),
                     'purification_required'=> $calculatedIncomeRatio > 0 && $calculatedIncomeRatio <= 5,
-                    'reason'               => $aaoifiScreening->business_reasoning,
+                    'reason'               => $finalStage1Reason,
                 ],
                 'business_status'             => $aaoifiScreening->business_status,
-                'business_reasoning'          => $aaoifiScreening->business_reasoning,
+                'business_reasoning'          => $finalStage1Reason,
                 'debt_ratio'                  => $aaoifiScreening->debt_ratio,
                 'debt_status'                 => $aaoifiScreening->debt_status,
                 'cash_ratio'                  => $aaoifiScreening->cash_ratio,

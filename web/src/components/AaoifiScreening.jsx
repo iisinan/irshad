@@ -346,10 +346,17 @@ const AaoifiScreening = () => {
   const stage1Status   = report.stage1?.status||(businessFailed?'non-halal':'halal');
   const showFinancials = (finalStatus==='halal'||report.business_status==='pass')&&(debtRatio!==null||report.impermissible_income_ratio!=null||cashRatio!==null);
   const latestPrice    = parseFloat(stock?.latest_price||report.latest_price)||0;
+  let stage1ReasonRaw = report.stage1?.reason || report.business_reasoning;
+  if (typeof stage1ReasonRaw === 'object' && stage1ReasonRaw !== null) {
+    stage1ReasonRaw = stage1ReasonRaw.justification || stage1ReasonRaw.reason || '';
+  }
+  let cleanStage1Reason = formatAppJustification(stage1ReasonRaw, isNonHalal);
+  if (!businessFailed && finalStatus !== 'doubtful') {
+    cleanStage1Reason = "Permissible core activity.";
+  }
+
   const priceChangePct = parseFloat(stock?.price_change_pct)||0;
   const newsItems      = Array.isArray(stock?.news) ? stock.news : [];
-
-  const cleanStage1Reason = formatAppJustification(report.stage1?.reason||report.business_reasoning,isNonHalal);
 
   let cleanStatusReason;
   if (finalStatus === 'halal') {
