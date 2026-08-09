@@ -225,8 +225,16 @@ const AaoifiScreening = () => {
   const [purShares,       setPurShares]       = useState('');
   const [purDividend,     setPurDividend]     = useState('');
   const [showNewsAll,     setShowNewsAll]     = useState(false);
+  const [isInitialLoad,   setIsInitialLoad]   = useState(true);
 
-  useEffect(()=>{ if(!queryLoading)return; const t=setInterval(()=>setStepIndex(p=>p<LOADING_STEPS.length-1?p+1:p),340); return()=>clearInterval(t); },[queryLoading]);
+  useEffect(() => {
+    if (!queryLoading && !isFetching) {
+      const timer = setTimeout(() => setIsInitialLoad(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [queryLoading, isFetching]);
+
+  useEffect(()=>{ if(!isInitialLoad)return; const t=setInterval(()=>setStepIndex(p=>p<LOADING_STEPS.length-1?p+1:p),340); return()=>clearInterval(t); },[isInitialLoad]);
   useEffect(()=>{ chatEndRef.current?.scrollIntoView({behavior:'smooth'}); },[messages]);
 
   const report  = res?.data;
@@ -277,7 +285,7 @@ const AaoifiScreening = () => {
   };
 
   /* ── Loading ── */
-  if(queryLoading) return (
+  if(isInitialLoad) return (
     <div style={{ maxWidth:720,margin:'0 auto',padding:'80px 24px',textAlign:'center',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',minHeight:'65vh' }}>
       <div style={{ position:'relative',width:90,height:90,display:'flex',alignItems:'center',justifyContent:'center',marginBottom:32 }}>
         <div style={{ position:'absolute',inset:-12,background:'var(--primary)',opacity:0.06,borderRadius:'50%',animation:'ping 2s cubic-bezier(0,0,0.2,1) infinite' }}/>

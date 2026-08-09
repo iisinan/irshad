@@ -71,15 +71,15 @@ const StockDetails = ({ symbol: propSymbol }) => {
 
   // Turn off simulated loading when real data is ready and minimum time has passed
   useEffect(() => {
-    if (!queryLoading && stock) {
+    if (!queryLoading && !isFetching && stock) {
       const minTimer = setTimeout(() => {
         setSimulatedLoading(false);
       }, 1000);
       return () => clearTimeout(minTimer);
-    } else if (!queryLoading && !stock) {
+    } else if (!queryLoading && !isFetching && !stock) {
       setSimulatedLoading(false);
     }
-  }, [queryLoading, stock]);
+  }, [queryLoading, isFetching, stock]);
 
   const loading = queryLoading || simulatedLoading;
 
