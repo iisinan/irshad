@@ -194,10 +194,14 @@ export default function UpdatesTab({ unreadCount = 0 }) {
 
       {/* ── Sub-tab Navigation ── */}
       <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-        gap: '10px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
         marginBottom: '24px',
+        borderBottom: '1px solid var(--border)',
+        paddingBottom: '16px',
+        overflowX: 'auto',
+        WebkitOverflowScrolling: 'touch',
       }}>
         {tabs.map((tab, index) => {
           const Icon = tab.icon;
@@ -210,94 +214,46 @@ export default function UpdatesTab({ unreadCount = 0 }) {
               className={`animate-slide-up stagger-${index + 1}`}
               style={{
                 display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
+                alignItems: 'center',
                 gap: '8px',
-                padding: '16px 18px',
-                borderRadius: '16px',
-                background: isActive
-                  ? 'linear-gradient(135deg, rgba(91,41,113,0.07) 0%, rgba(209,165,98,0.04) 100%)'
-                  : 'var(--bg-section)',
-                border: isActive
-                  ? '1px solid rgba(91,41,113,0.22)'
-                  : '1px solid var(--border)',
+                padding: '10px 18px',
+                borderRadius: '30px',
+                background: isActive ? 'var(--primary)' : 'var(--bg-section)',
+                border: isActive ? '1px solid var(--primary)' : '1px solid var(--border)',
+                color: isActive ? 'white' : 'var(--text-dark)',
+                fontWeight: 700,
+                fontSize: '0.85rem',
                 cursor: 'pointer',
-                transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                textAlign: 'left',
-                boxShadow: isActive ? '0 8px 24px rgba(91,41,113,0.1)' : 'none',
-                position: 'relative',
-                overflow: 'hidden',
-                transform: isActive ? 'translateY(-2px)' : 'translateY(0)',
+                transition: 'all 0.2s',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
               }}
               onMouseEnter={e => {
-                if (!isActive) {
-                  e.currentTarget.style.borderColor = 'var(--primary-100)';
-                  e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                }
+                if (!isActive) e.currentTarget.style.borderColor = 'var(--primary-100)';
               }}
               onMouseLeave={e => {
-                if (!isActive) {
-                  e.currentTarget.style.borderColor = 'var(--border)';
-                  e.currentTarget.style.boxShadow = 'none';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }
+                if (!isActive) e.currentTarget.style.borderColor = 'var(--border)';
               }}
             >
-              {/* Active top bar */}
-              {isActive && (
-                <div style={{
-                  position: 'absolute', top: 0, left: 0, right: 0, height: '3px',
-                  background: 'var(--primary)',
-                  borderRadius: '16px 16px 0 0',
-                  boxShadow: '0 0 12px var(--primary)',
-                }} />
+              <Icon size={16} />
+              {tab.label}
+              
+              {/* Badge */}
+              {tab.badge > 0 && (
+                <span style={{
+                  background: isActive ? 'white' : 'var(--primary)',
+                  color: isActive ? 'var(--primary)' : 'white',
+                  fontSize: '0.65rem',
+                  fontWeight: 900,
+                  padding: '3px 8px',
+                  borderRadius: '20px',
+                  marginLeft: '4px',
+                  lineHeight: 1,
+                  boxShadow: isActive ? 'none' : '0 2px 8px rgba(91,41,113,0.3)',
+                }}>
+                  {tab.badge > 99 ? '99+' : tab.badge}
+                </span>
               )}
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%' }}>
-                <div style={{
-                  width: '34px', height: '34px', borderRadius: '10px',
-                  background: isActive ? 'var(--primary)' : 'var(--bg)',
-                  border: `1px solid ${isActive ? 'transparent' : 'var(--border)'}`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  transition: 'all 0.2s', flexShrink: 0,
-                  boxShadow: isActive ? '0 4px 10px rgba(91,41,113,0.3)' : 'none',
-                }}>
-                  <Icon size={15} color={isActive ? 'white' : 'var(--text-muted)'} />
-                </div>
-
-                {/* Badge */}
-                {tab.badge > 0 && (
-                  <span style={{
-                    marginLeft: 'auto',
-                    fontSize: '0.63rem', fontWeight: 900,
-                    padding: '3px 8px', borderRadius: '20px',
-                    background: 'var(--primary)', color: 'white',
-                    lineHeight: 1, animation: 'pulse 2s infinite',
-                    boxShadow: '0 2px 8px rgba(91,41,113,0.4)',
-                  }}>
-                    {tab.badge > 99 ? '99+' : tab.badge}
-                  </span>
-                )}
-              </div>
-
-              <div>
-                <div style={{
-                  fontSize: '0.82rem', fontWeight: 900,
-                  color: isActive ? 'var(--primary)' : 'var(--text-dark)',
-                  marginBottom: '3px', lineHeight: 1.2,
-                }}>
-                  {tab.label}
-                </div>
-                <div style={{
-                  fontSize: '0.66rem', color: 'var(--text-muted)',
-                  fontWeight: 600, lineHeight: 1.4,
-                  display: '-webkit-box', WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical', overflow: 'hidden',
-                }}>
-                  {tab.description}
-                </div>
-              </div>
             </button>
           );
         })}
