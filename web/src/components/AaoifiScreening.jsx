@@ -878,7 +878,7 @@ const AaoifiScreening = () => {
               {m.role === 'user' ? <User size={16} color="var(--text-muted)" /> : <Sparkles size={16} color="var(--primary)" />}
             </div>
             <div style={{ background: m.role === 'user' ? 'var(--bg-section)' : 'var(--primary-50)', color: m.role === 'user' ? 'var(--text-dark)' : 'var(--primary)', padding: '12px 16px', borderRadius: 16, fontSize: '0.85rem', lineHeight: 1.5, border: `1px solid ${m.role === 'user' ? 'var(--border)' : 'var(--primary-100)'}` }}>
-              <ReactMarkdown className="ai-markdown">{m.text}</ReactMarkdown>
+              <div className="ai-markdown"><ReactMarkdown>{m.text}</ReactMarkdown></div>
             </div>
           </div>
         ))}
