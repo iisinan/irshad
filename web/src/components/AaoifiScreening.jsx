@@ -187,7 +187,7 @@ const AaoifiScreening = () => {
     placeholderData: keepPreviousData,
     refetchInterval:(q)=>q.state.data?.status==='processing'?10000:false,
   });
-  const { data:stockRes } = useQuery({
+  const { data:stockRes, isFetching: isStockFetching } = useQuery({
     queryKey:['stock',symbol],
     queryFn: ()=>fetchStockDetails(symbol),
     staleTime:5*60*1000,
@@ -431,7 +431,7 @@ const AaoifiScreening = () => {
                   </div>
                 )}
               </div>
-            ) : (isFetching && isInlineSearch) ? (
+            ) : ((isFetching || isStockFetching) && isInlineSearch) ? (
               <div style={{ display:'flex',alignItems:'center',gap:8,padding:'8px 16px',background:'var(--bg)',border:'1px solid var(--primary)',borderRadius:12,fontWeight:700,color:'var(--primary)',fontSize:'0.8rem',boxShadow:'0 0 0 3px rgba(91,41,113,0.1)' }}>
                 <div style={{ width:14, height:14, borderRadius:'50%', border:'2px solid var(--primary)', borderTopColor:'transparent', animation:'spin 1s linear infinite' }}/>
                 Screening {symbol}...
