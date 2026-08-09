@@ -348,7 +348,7 @@ const AaoifiScreening = () => {
   const cashRatio = report.cash_ratio !== null && report.cash_ratio !== undefined ? parseFloat(report.cash_ratio) : cashRatioRaw;
 
   // Determine Denominator
-  const usedTotalAssets = (debtRatio !== null && debtRatioAssets !== null && Math.abs(debtRatio - debtRatioAssets) < 0.1) || (debtRatioRaw !== null && debtRatio !== null && Math.abs(debtRatio - debtRatioRaw) > 0.1);
+  const usedTotalAssets = report.denominator_used === 'Total Assets' || (!report.denominator_used && debtRatio !== null && debtRatioAssets !== null && Math.abs(debtRatio - debtRatioAssets) < 0.1);
   const denLabelText = usedTotalAssets ? "Total Assets" : "Market Cap";
   const denValAmount = usedTotalAssets ? totalAssets : marketCap;
   const hasPurification= finalStatus==='halal'&&!!report.stage1?.purification_required;

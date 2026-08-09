@@ -11,6 +11,7 @@ use App\Traits\ApiResponder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class PortfolioController extends Controller
 {
@@ -21,104 +22,111 @@ class PortfolioController extends Controller
      */
     public function index(): JsonResponse
     {
-        $holdings = Holding::with([
-            'company.financials:id,company_id,total_revenue,interest_income',
-            'company.latestDividend',
-            'company.dividends' => function ($query) {
-                $query->where('status', 'paid')
-                    ->where('pay_date', '>=', now()->subMonths(12));
-            },
-        ])
-            ->where('user_id', Auth::id())
-            ->get();
+        $userId = Auth::id();
+        $cacheKey = "portfolio_data_{$userId}";
 
-        $portfolioData = $holdings->map(function ($holding) {
-            $company = $holding->company;
-            $currentPrice = (float) ($company->latest_price ?? 0);
-            $status = $company->current_status ?? 'doubtful';
+        $data = Cache::remember($cacheKey, now()->addMinutes(15), function () use ($userId) {
+            $holdings = Holding::with([
+                'company.financials:id,company_id,total_revenue,interest_income',
+                'company.latestDividend',
+                'company.dividends' => function ($query) {
+                    $query->where('status', 'paid')
+                        ->where('pay_date', '>=', now()->subMonths(12));
+                },
+            ])
+                ->where('user_id', $userId)
+                ->get();
 
-            // Financials relationship returns a collection, take first
-            $financials = $company?->financials?->first();
-            $nonCompliantRatio = $financials?->non_compliant_income_ratio ?? 0;
+            $portfolioData = $holdings->map(function ($holding) {
+                $company = $holding->company;
+                $currentPrice = (float) ($company->latest_price ?? 0);
+                $status = $company->current_status ?? 'doubtful';
 
-            $totalValue = $holding->shares * $currentPrice;
+                // Financials relationship returns a collection, take first
+                $financials = $company?->financials?->first();
+                $nonCompliantRatio = $financials?->non_compliant_income_ratio ?? 0;
 
-            $isHalal = strtolower($status) === 'halal' || strtolower($status) === 'compliant';
+                $totalValue = $holding->shares * $currentPrice;
 
-            // Calculate Purification Due based on paid dividends in the trailing 12 months
-            $trailingDividendsPerShare = $company?->dividends?->sum('amount') ?? 0;
-            $totalDividendsReceived = $holding->shares * $trailingDividendsPerShare;
-            $purificationDue = $isHalal ? $totalDividendsReceived * ($nonCompliantRatio / 100) : 0;
+                $isHalal = strtolower($status) === 'halal' || strtolower($status) === 'compliant';
 
-            // Calculate return
-            $returnPercentage = 0;
-            if ($holding->average_buy_price && $holding->average_buy_price > 0) {
-                $returnPercentage = (($currentPrice - $holding->average_buy_price) / $holding->average_buy_price) * 100;
+                // Calculate Purification Due based on paid dividends in the trailing 12 months
+                $trailingDividendsPerShare = $company?->dividends?->sum('amount') ?? 0;
+                $totalDividendsReceived = $holding->shares * $trailingDividendsPerShare;
+                $purificationDue = $isHalal ? $totalDividendsReceived * ($nonCompliantRatio / 100) : 0;
+
+                // Calculate return
+                $returnPercentage = 0;
+                if ($holding->average_buy_price && $holding->average_buy_price > 0) {
+                    $returnPercentage = (($currentPrice - $holding->average_buy_price) / $holding->average_buy_price) * 100;
+                }
+
+                return [
+                    'id' => $holding->id,
+                    'symbol' => $company->symbol ?? $holding->symbol,
+                    'name' => $company->name ?? $holding->symbol,
+                    'sector' => $company->sector ?? 'Equities',
+                    'shares' => $holding->shares,
+                    'average_buy_price' => $holding->average_buy_price,
+                    'current_price' => $currentPrice,
+                    'total_value' => $totalValue,
+                    'return_percentage' => round($returnPercentage, 2),
+                    'status' => strtolower($status),
+                    'is_halal' => $isHalal,
+                    'purification_due' => round($purificationDue, 2),
+                    'total_dividends' => round($totalDividendsReceived, 2),
+                    'latest_dividend' => $company->latestDividend ? [
+                        'amount' => $company->latestDividend->amount,
+                        'pay_date' => $company->latestDividend->pay_date?->toISOString(),
+                        'status' => $company->latestDividend->status,
+                    ] : null,
+                    'non_compliant_ratio' => round($nonCompliantRatio, 2),
+                    'logo_url' => $company->logo_url ?? null,
+                    'purchase_date' => $holding->purchase_date,
+                    'created_at' => $holding->created_at?->toISOString(),
+                    'updated_at' => $holding->updated_at?->toISOString(),
+                ];
+            });
+
+            // Get Brokerage Cash
+            $brokerage = BrokerageAccount::where('user_id', $userId)->first();
+            $cashBalance = $brokerage?->cash_balance ?? 0.0;
+
+            // Summary
+            $stocksBalance = $portfolioData->sum('total_value');
+            $totalBalance = $stocksBalance + $cashBalance;
+            $totalPurification = $portfolioData->sum('purification_due');
+
+            $halalValue = $portfolioData->where('is_halal', true)->sum('total_value');
+            $healthPercentage = $stocksBalance > 0 ? round(($halalValue / $stocksBalance) * 100, 1) : 100;
+
+            // Fetch trailing 30 days of history
+            $history = PortfolioSnapshot::where('user_id', $userId)
+                ->where('date', '>=', now()->subDays(30)->toDateString())
+                ->orderBy('date', 'asc')
+                ->get(['date', 'total_balance as value']);
+
+            // If today isn't in history yet, append current balance
+            if ($history->isEmpty() || $history->last()->date->toDateString() !== now()->toDateString()) {
+                $history->push([
+                    'date' => now()->toDateString(),
+                    'value' => $totalBalance,
+                ]);
             }
 
             return [
-                'id' => $holding->id,
-                'symbol' => $company->symbol ?? $holding->symbol,
-                'name' => $company->name ?? $holding->symbol,
-                'sector' => $company->sector ?? 'Equities',
-                'shares' => $holding->shares,
-                'average_buy_price' => $holding->average_buy_price,
-                'current_price' => $currentPrice,
-                'total_value' => $totalValue,
-                'return_percentage' => round($returnPercentage, 2),
-                'status' => strtolower($status),
-                'is_halal' => $isHalal,
-                'purification_due' => round($purificationDue, 2),
-                'total_dividends' => round($totalDividendsReceived, 2),
-                'latest_dividend' => $company->latestDividend ? [
-                    'amount' => $company->latestDividend->amount,
-                    'pay_date' => $company->latestDividend->pay_date?->toISOString(),
-                    'status' => $company->latestDividend->status,
-                ] : null,
-                'non_compliant_ratio' => round($nonCompliantRatio, 2),
-                'logo_url' => $company->logo_url ?? null,
-                'purchase_date' => $holding->purchase_date,
-                'created_at' => $holding->created_at?->toISOString(),
-                'updated_at' => $holding->updated_at?->toISOString(),
+                'holdings' => $portfolioData,
+                'summary' => [
+                    'cash_balance' => $cashBalance,
+                    'total_balance' => $totalBalance,
+                    'purification_due' => $totalPurification,
+                    'health_percentage' => $healthPercentage,
+                ],
+                'history' => $history,
             ];
         });
 
-        // Get Brokerage Cash
-        $brokerage = BrokerageAccount::where('user_id', Auth::id())->first();
-        $cashBalance = $brokerage?->cash_balance ?? 0.0;
-
-        // Summary
-        $stocksBalance = $portfolioData->sum('total_value');
-        $totalBalance = $stocksBalance + $cashBalance;
-        $totalPurification = $portfolioData->sum('purification_due');
-
-        $halalValue = $portfolioData->where('is_halal', true)->sum('total_value');
-        $healthPercentage = $stocksBalance > 0 ? round(($halalValue / $stocksBalance) * 100, 1) : 100;
-
-        // Fetch trailing 30 days of history
-        $history = PortfolioSnapshot::where('user_id', Auth::id())
-            ->where('date', '>=', now()->subDays(30)->toDateString())
-            ->orderBy('date', 'asc')
-            ->get(['date', 'total_balance as value']);
-
-        // If today isn't in history yet, append current balance
-        if ($history->isEmpty() || $history->last()->date->toDateString() !== now()->toDateString()) {
-            $history->push([
-                'date' => now()->toDateString(),
-                'value' => $totalBalance,
-            ]);
-        }
-
-        return $this->success([
-            'holdings' => $portfolioData,
-            'summary' => [
-                'cash_balance' => $cashBalance,
-                'total_balance' => $totalBalance,
-                'purification_due' => $totalPurification,
-                'health_percentage' => $healthPercentage,
-            ],
-            'history' => $history,
-        ]);
+        return $this->success($data);
     }
 
     /**
@@ -143,6 +151,8 @@ class PortfolioController extends Controller
             ]
         );
 
+        Cache::forget("portfolio_data_" . Auth::id());
+
         return $this->success($holding, 'Holding added to portfolio successfully.');
     }
 
@@ -164,6 +174,8 @@ class PortfolioController extends Controller
             'average_buy_price' => $request->average_buy_price,
         ]);
 
+        Cache::forget("portfolio_data_" . Auth::id());
+
         return $this->success($holding, 'Holding updated successfully.');
     }
 
@@ -179,6 +191,8 @@ class PortfolioController extends Controller
         }
 
         $holding->delete();
+
+        Cache::forget("portfolio_data_" . Auth::id());
 
         return $this->success(null, 'Holding removed from portfolio.');
     }
@@ -218,6 +232,8 @@ class PortfolioController extends Controller
             ['shares', 'average_buy_price', 'purchase_date', 'updated_at'] // Columns to update if exists
         );
 
+        Cache::forget("portfolio_data_" . $userId);
+
         return $this->success(null, 'Holdings added to portfolio successfully.');
     }
 
@@ -228,26 +244,31 @@ class PortfolioController extends Controller
     {
         $userId = Auth::id();
 
-        $holdingSymbols = Holding::where('user_id', $userId)->pluck('symbol')->toArray();
-        $watchlistSymbols = Watchlist::where('user_id', $userId)->pluck('symbol')->toArray();
+        $data = Cache::remember("portfolio_movers_{$userId}", now()->addMinutes(15), function () use ($userId) {
+            $holdingSymbols = Holding::where('user_id', $userId)->pluck('symbol')->toArray();
+            $watchlistSymbols = Watchlist::where('user_id', $userId)->pluck('symbol')->toArray();
 
-        $allSymbols = array_unique(array_merge($holdingSymbols, $watchlistSymbols));
+            $allSymbols = array_unique(array_merge($holdingSymbols, $watchlistSymbols));
 
-        if (empty($allSymbols)) {
-            return $this->success(['gainers' => [], 'losers' => []]);
-        }
+            if (empty($allSymbols)) {
+                return ['gainers' => [], 'losers' => []];
+            }
 
-        $companies = Company::select(['id', 'symbol', 'name', 'latest_price', 'price_change_pct', 'logo_url'])
-            ->whereIn('symbol', $allSymbols)
-            ->whereNotNull('price_change_pct')
-            ->get();
+            $companies = Company::select(['id', 'symbol', 'name', 'latest_price', 'price_change_pct', 'logo_url'])
+                ->whereIn('symbol', $allSymbols)
+                ->whereNotNull('price_change_pct')
+                ->get();
 
-        $gainers = $companies->where('price_change_pct', '>', 0)->sortByDesc('price_change_pct')->take(3)->values();
-        $losers = $companies->where('price_change_pct', '<', 0)->sortBy('price_change_pct')->take(3)->values();
+            $gainers = $companies->where('price_change_pct', '>', 0)->sortByDesc('price_change_pct')->take(3)->values();
+            $losers = $companies->where('price_change_pct', '<', 0)->sortBy('price_change_pct')->take(3)->values();
 
-        return $this->success([
-            'gainers' => $gainers,
-            'losers' => $losers,
-        ]);
+            return [
+                'gainers' => $gainers,
+                'losers' => $losers,
+            ];
+        });
+
+        return $this->success($data);
     }
 }
+

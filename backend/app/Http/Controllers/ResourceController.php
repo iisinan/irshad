@@ -9,24 +9,30 @@ class ResourceController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Resource::query();
+        $search = $request->input('search', '');
+        $type = $request->input('type', 'all');
+        $page = $request->input('page', 1);
 
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('scholar', 'like', "%{$search}%");
-            });
-        }
+        $cacheKey = "resources_search_{$search}_type_{$type}_page_{$page}";
 
-        if ($request->filled('type') && $request->input('type') !== 'all') {
-            $query->where('type', $request->input('type'));
-        }
+        $data = \Illuminate\Support\Facades\Cache::remember($cacheKey, now()->addHours(1), function () use ($search, $type) {
+            $query = Resource::query();
 
-        // Return latest resources first, paginated
-        return response()->json(
-            $query->latest()->paginate(20)
-        );
+            if (!empty($search)) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('title', 'like', "%{$search}%")
+                        ->orWhere('scholar', 'like', "%{$search}%");
+                });
+            }
+
+            if ($type !== 'all') {
+                $query->where('type', $type);
+            }
+
+            return $query->latest()->paginate(20);
+        });
+
+        return response()->json($data);
     }
 
     public function store(Request $request)
