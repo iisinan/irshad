@@ -523,8 +523,10 @@ class StockController extends Controller
             $finalStatus = $dbStatus ?? $aaoifiScreening->final_status;
 
             $statusReason = null;
+            $finalStage1Reason = '';
             if ($isScholarVerified) {
-                $statusReason = $company->status->reason;
+                $statusReason = $company->status->reason ?? 'Verified by scholar.';
+                $finalStage1Reason = $company->status->reason ?? 'Verified by scholar.';
             } else {
                 $bReasonRaw = $aaoifiScreening->business_reasoning;
                 $businessReason = '';
