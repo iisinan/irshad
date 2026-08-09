@@ -195,7 +195,7 @@ export const searchStocks = async (query) => {
 
 
 export const fetchStockDetails = async (symbol) => {
-  const response = await api.get(`/stocks/${symbol}`);
+  const response = await api.get(`/stocks/${symbol}`, { params: { _cb: Date.now() } });
   return response.data;
 };
 
