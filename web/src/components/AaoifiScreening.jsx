@@ -13,7 +13,7 @@ import {
   ChevronDown, ChevronUp, MessageSquare, DollarSign, Percent,
   Info, TrendingDown, Award, BookOpen, Zap, Bell, Search
 } from 'lucide-react';
-import { fetchAaoifiScreening, fetchStockDetails, updateAaoifiData, chatAboutStock, fetchNgxStocks, fetchPortfolio, addToWatchlist } from '../services/api';
+import { fetchAaoifiScreening, fetchStockDetails, updateAaoifiData, chatAboutStock, fetchNgxStocks, fetchPortfolio, addToWatchlist, fetchWatchlist, removeFromWatchlist } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { formatAppJustification } from '../utils/screeningFormatter';
 import { toastSuccess, toastError } from '../utils/toast';
@@ -203,6 +203,13 @@ const AaoifiScreening = () => {
   });
   const allStocks = Array.isArray(allStocksRes) ? allStocksRes : [];
 
+  const { data: watchlistRes, refetch: refetchWatchlist } = useQuery({
+    queryKey: ['watchlist'],
+    queryFn: fetchWatchlist,
+    staleTime: 5 * 60 * 1000,
+  });
+  const hasAlert = Array.isArray(watchlistRes) ? watchlistRes.some(w => w.symbol === symbol) : false;
+
   const { data: portfolioRes } = useQuery({
     queryKey: ['portfolio'],
     queryFn: fetchPortfolio,
@@ -255,10 +262,16 @@ const AaoifiScreening = () => {
   const handleSetAlert = async () => {
     try {
       setAlertLoading(true);
-      await addToWatchlist(symbol, false, false);
-      toastSuccess(`Added ${symbol} to watchlist`);
+      if (hasAlert) {
+        await removeFromWatchlist(symbol);
+        toastSuccess(`Removed alert for ${symbol}`);
+      } else {
+        await addToWatchlist(symbol, false, false);
+        toastSuccess(`Added alert for ${symbol}`);
+      }
+      refetchWatchlist();
     } catch (err) {
-      toastError(err?.response?.data?.message || err.message || `Failed to add ${symbol} to watchlist`);
+      toastError(err?.response?.data?.message || err.message || `Failed to update alert for ${symbol}`);
     } finally {
       setAlertLoading(false);
     }
@@ -441,8 +454,8 @@ const AaoifiScreening = () => {
                 <Search size={15}/> Screener
               </button>
             )}
-            <button className="hover-lift" onClick={handleSetAlert} disabled={alertLoading} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background:'var(--bg)',border:'1px solid var(--border)',borderRadius:12,cursor:alertLoading ? 'not-allowed' : 'pointer',fontWeight:700,color:'var(--text-dark)',fontSize:'0.8rem',boxShadow:'var(--shadow-sm)', opacity: alertLoading ? 0.7 : 1 }}>
-              <Bell size={15}/> {alertLoading ? 'Adding...' : 'Set Alert'}
+            <button className="hover-lift" onClick={handleSetAlert} disabled={alertLoading} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background: hasAlert ? 'var(--primary-50)' : 'var(--bg)',border:'1px solid ' + (hasAlert ? 'var(--primary)' : 'var(--border)'),borderRadius:12,cursor:alertLoading ? 'not-allowed' : 'pointer',fontWeight:700,color: hasAlert ? 'var(--primary)' : 'var(--text-dark)',fontSize:'0.8rem',boxShadow: hasAlert ? '0 4px 12px var(--primary-50)' : 'var(--shadow-sm)', opacity: alertLoading ? 0.7 : 1 }}>
+              <Bell size={15} fill={hasAlert ? "currentColor" : "none"}/> {alertLoading ? 'Updating...' : (hasAlert ? 'Alert Set' : 'Set Alert')}
             </button>
             {user?.role==='admin'&&(<button className="hover-lift" onClick={openOverride} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background:'var(--primary)',border:'none',borderRadius:12,cursor:'pointer',fontWeight:800,color:'#fff',fontSize:'0.8rem',transition:'all 0.25s',boxShadow:'0 4px 12px rgba(91,41,113,0.3)' }}>
               <ShieldCheck size={15}/> Edit Data

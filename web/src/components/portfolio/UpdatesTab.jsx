@@ -1,27 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Newspaper, Inbox } from 'lucide-react';
+import React, { useState } from 'react';
+import { Newspaper } from 'lucide-react';
 import UpdatesNews  from './UpdatesNews';
-import UpdatesInbox from './UpdatesInbox';
-import { fetchUnreadCount } from '../../services/api';
 
 /* ══════════════════════════════════════════════════════════════
    UpdatesTab — Container for News & Insights, Help & Guide, Inbox
    ══════════════════════════════════════════════════════════════ */
 export default function UpdatesTab() {
   const [activeSubTab, setActiveSubTab] = useState('news');
-  const [unreadCount, setUnreadCount] = useState(0);
-
-  // Poll unread count every 60s for the badge
-  useEffect(() => {
-    const fetch = () => {
-      fetchUnreadCount()
-        .then(r => setUnreadCount(r?.data?.count || 0))
-        .catch(() => {});
-    };
-    fetch();
-    const interval = setInterval(fetch, 60_000);
-    return () => clearInterval(interval);
-  }, []);
 
   const tabs = [
     {
@@ -29,14 +14,7 @@ export default function UpdatesTab() {
       label: 'News & Insights',
       icon: Newspaper,
       description: 'Compliance changes, business activity & market intelligence',
-    },
-    {
-      id: 'inbox',
-      label: 'Inbox',
-      icon: Inbox,
-      description: 'Your notifications and alerts',
-      badge: unreadCount,
-    },
+    }
   ];
 
   return (
@@ -154,7 +132,6 @@ export default function UpdatesTab() {
       {/* Tab Content with staggered fade up */}
       <div className="animate-slide-up stagger-3" key={activeSubTab} style={{ minHeight: '400px' }}>
         {activeSubTab === 'news'  && <UpdatesNews />}
-        {activeSubTab === 'inbox' && <UpdatesInbox />}
       </div>
     </div>
   );

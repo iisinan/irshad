@@ -146,11 +146,12 @@ export default function WatchlistTab({ initialSymbol }) {
         const cfg = getStatusConfig(s);
         if (filter === 'halal') return cfg.label === 'HALAL';
         if (filter === 'non-halal') return cfg.label === 'NON-HALAL';
+        if (filter === 'doubtful') return cfg.label === 'DOUBTFUL';
         return true;
       });
     }
-    return allStocks.filter(s => watchlistSymbols.includes(s.symbol));
-  }, [allStocks, watchlistSymbols]);
+    return stocks;
+  }, [allStocks, watchlistSymbols, filter]);
 
   return (
     <div className="animate-fade-in stagger-1 watchlist-tab-card" style={{ background: 'var(--bg)', borderRadius:'24px', padding:'32px 24px', boxShadow:'0 4px 20px rgba(0,0,0,0.05)', border:'1px solid var(--border)' }}>
@@ -181,65 +182,36 @@ export default function WatchlistTab({ initialSymbol }) {
       </div>
 
       <div className="watchlist-action-bar" style={{ display: 'flex', gap: '16px', marginBottom: '32px', position: 'relative', zIndex: 10, flexWrap: 'wrap', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', gap: '12px' }}>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', background: 'var(--bg-section)', borderRadius: '16px', padding: '6px', border: '1px solid var(--border)' }}>
-            <button
-              onClick={() => setActiveView('assets')}
-              style={{
-                padding: '10px 16px', borderRadius: '10px', border: 'none',
-                background: activeView === 'assets' ? 'var(--bg)' : 'transparent',
-                color: activeView === 'assets' ? 'var(--text-dark)' : 'var(--text-muted)',
-                fontWeight: activeView === 'assets' ? 800 : 600, fontSize: '0.75rem', cursor: 'pointer',
-                transition: 'all 0.2s', boxShadow: activeView === 'assets' ? '0 2px 8px rgba(0,0,0,0.05)' : 'none'
-              }}
-            >
-              My Assets
-            </button>
-            <button
-              onClick={() => setActiveView('inbox')}
-              style={{
-                padding: '10px 16px', borderRadius: '10px', border: 'none',
-                background: activeView === 'inbox' ? 'var(--bg)' : 'transparent',
-                color: activeView === 'inbox' ? 'var(--text-dark)' : 'var(--text-muted)',
-                fontWeight: activeView === 'inbox' ? 800 : 600, fontSize: '0.75rem', cursor: 'pointer',
-                transition: 'all 0.2s', boxShadow: activeView === 'inbox' ? '0 2px 8px rgba(0,0,0,0.05)' : 'none'
-              }}
-            >
-              Inbox
-            </button>
+            {['all', 'halal', 'doubtful', 'non-halal'].map(f => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                style={{
+                  padding: '10px 16px', borderRadius: '10px', border: 'none',
+                  background: filter === f ? 'var(--bg)' : 'transparent',
+                  color: filter === f ? 'var(--text-dark)' : 'var(--text-muted)',
+                  fontWeight: filter === f ? 800 : 600, fontSize: '0.75rem', cursor: 'pointer',
+                  transition: 'all 0.2s', boxShadow: filter === f ? '0 2px 8px rgba(0,0,0,0.05)' : 'none',
+                  textTransform: 'capitalize'
+                }}
+              >
+                {f}
+              </button>
+            ))}
           </div>
-          {activeView === 'assets' && (
-            <button 
-              onClick={() => setShowAddModal(true)}
-              style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '14px 24px', borderRadius: '16px', background: 'var(--primary)', color: 'white', border: 'none', fontWeight: 800, fontSize: '0.84rem', cursor: 'pointer', transition: 'all 0.2s', boxShadow: 'var(--shadow-sm)' }}
-              className="hover-lift"
-            >
-              <Plus size={18} strokeWidth={2.5} /> Add Assets
-            </button>
-          )}
+          <button 
+            onClick={() => setShowAddModal(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '14px 24px', borderRadius: '16px', background: 'var(--primary)', color: 'white', border: 'none', fontWeight: 800, fontSize: '0.84rem', cursor: 'pointer', transition: 'all 0.2s', boxShadow: 'var(--shadow-sm)' }}
+            className="hover-lift"
+          >
+            <Plus size={18} strokeWidth={2.5} /> Add Assets
+          </button>
         </div>
       </div>
 
-      {activeView === 'inbox' ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {[
-            { id: 1, title: 'Compliance Status Changed', message: 'DANGSUGAR is now classified as NON-HALAL.', time: '2 hours ago', type: 'danger', icon: <AlertCircle size={20} /> },
-            { id: 2, title: 'Price Alert Triggered', message: 'MTNN has dropped below ₦250.00.', time: '5 hours ago', type: 'warning', icon: <TrendingDown size={20} /> },
-            { id: 3, title: 'Weekly Digest Available', message: 'Your weekly Shariah compliance digest is ready to view.', time: '1 day ago', type: 'info', icon: <Mail size={20} /> }
-          ].map(alert => (
-            <div key={alert.id} className="hover-lift" style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', padding: '20px', background: 'var(--bg)', borderRadius: '16px', border: `1px solid var(--border)`, boxShadow: 'var(--shadow-sm)', cursor: 'pointer', transition: 'all 0.2s' }}>
-              <div style={{ width: '40px', height: '40px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: alert.type === 'danger' ? 'var(--non-halal-bg)' : alert.type === 'warning' ? 'var(--doubtful-bg)' : 'var(--primary-50)', color: alert.type === 'danger' ? 'var(--non-halal)' : alert.type === 'warning' ? 'var(--doubtful)' : 'var(--primary)', flexShrink: 0 }}>
-                {alert.icon}
-              </div>
-              <div>
-                <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-dark)', marginBottom: '4px' }}>{alert.title}</div>
-                <div style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginBottom: '8px' }}>{alert.message}</div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-light)', fontWeight: 600 }}>{alert.time}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : loading ? (
+      {loading ? (
         <div style={{ padding: '80px 20px', textAlign: 'center' }}>
           <div style={{ maxWidth: '400px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <Skeleton height="60px" borderRadius="12px" />
