@@ -639,59 +639,75 @@ const AaoifiScreening = () => {
       <div className="w-full-mobile" style={{ width:308,flexShrink:0,position:'sticky',top:20,marginTop:52,maxHeight:'calc(100vh - 40px)',display:'flex',flexDirection:'column',gap:16 }}>
         
         {/* PRICE DATA WIDGET */}
-        <div style={{ borderRadius:24,border:'1px solid rgba(91,41,113,0.08)',background:'var(--bg)',padding:'28px 32px',boxShadow:'0 12px 40px rgba(91,41,113,0.04)' }}>
-          <div style={{ display:'flex',alignItems:'center',gap:12,marginBottom:28 }}>
-            <div style={{ width:'40px', height:'40px', borderRadius:'14px', background:'var(--primary-50)', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--primary)', boxShadow:'0 4px 12px rgba(91,41,113,0.1)' }}>
-              <BarChart2 size={20} strokeWidth={2.5} />
-            </div>
-            <div style={{ fontSize:'0.9rem',fontWeight:900,letterSpacing:'1px',color:'var(--text-dark)' }}>PRICE DATA</div>
-          </div>
-          <div style={{ display:'flex',flexDirection:'column',gap:18 }}>
-            {[
-              { label: 'Open', value: stock?.open_price, fmt: fmtRaw },
-              { label: 'Previous Close', value: stock?.previous_close, fmt: fmtRaw },
-              { label: 'Day High', value: stock?.day_high, fmt: fmtRaw },
-              { label: 'Day Low', value: stock?.day_low, fmt: fmtRaw },
-              { label: '52W High', value: stock?.fifty_two_week_high, fmt: fmtRaw },
-              { label: '52W Low', value: stock?.fifty_two_week_low, fmt: fmtRaw }
-            ].filter(item => item.value != null && item.value !== '').map((item, idx, arr) => (
-              <div key={idx} style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:idx === arr.length - 1 ? 'none' : '1px solid rgba(91,41,113,0.06)',paddingBottom:idx === arr.length - 1 ? 0 : 14 }}>
-                <span style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:600 }}>{item.label}</span>
-                <span style={{ fontSize:'0.95rem',fontWeight:800,color:'var(--text-dark)',letterSpacing:'-0.3px',fontVariantNumeric:'tabular-nums' }}>{item.fmt ? item.fmt(item.value) : item.value}</span>
+        {(() => {
+          const priceDataItems = [
+            { label: 'Open', value: stock?.open_price, fmt: fmtRaw },
+            { label: 'Previous Close', value: stock?.previous_close, fmt: fmtRaw },
+            { label: 'Day High', value: stock?.day_high, fmt: fmtRaw },
+            { label: 'Day Low', value: stock?.day_low, fmt: fmtRaw },
+            { label: '52W High', value: stock?.fifty_two_week_high, fmt: fmtRaw },
+            { label: '52W Low', value: stock?.fifty_two_week_low, fmt: fmtRaw }
+          ].filter(item => item.value != null && item.value !== '');
+
+          if (priceDataItems.length === 0) return null;
+
+          return (
+            <div style={{ borderRadius:24,border:'1px solid rgba(91,41,113,0.08)',background:'var(--bg)',padding:'28px 32px',boxShadow:'0 12px 40px rgba(91,41,113,0.04)' }}>
+              <div style={{ display:'flex',alignItems:'center',gap:12,marginBottom:28 }}>
+                <div style={{ width:'40px', height:'40px', borderRadius:'14px', background:'var(--primary-50)', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--primary)', boxShadow:'0 4px 12px rgba(91,41,113,0.1)' }}>
+                  <BarChart2 size={20} strokeWidth={2.5} />
+                </div>
+                <div style={{ fontSize:'0.9rem',fontWeight:900,letterSpacing:'1px',color:'var(--text-dark)' }}>PRICE DATA</div>
               </div>
-            ))}
-          </div>
-        </div>
+              <div style={{ display:'flex',flexDirection:'column',gap:18 }}>
+                {priceDataItems.map((item, idx, arr) => (
+                  <div key={idx} style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:idx === arr.length - 1 ? 'none' : '1px solid rgba(91,41,113,0.06)',paddingBottom:idx === arr.length - 1 ? 0 : 14 }}>
+                    <span style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:600 }}>{item.label}</span>
+                    <span style={{ fontSize:'0.95rem',fontWeight:800,color:'var(--text-dark)',letterSpacing:'-0.3px',fontVariantNumeric:'tabular-nums' }}>{item.fmt ? item.fmt(item.value) : item.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* MARKET DATA WIDGET */}
-        <div style={{ borderRadius:24,border:'1px solid rgba(91,41,113,0.08)',background:'var(--bg)',padding:'28px 32px',boxShadow:'0 12px 40px rgba(91,41,113,0.04)' }}>
-          <div style={{ display:'flex',alignItems:'center',gap:12,marginBottom:28 }}>
-            <div style={{ width:'40px', height:'40px', borderRadius:'14px', background:'var(--primary-50)', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--primary)', boxShadow:'0 4px 12px rgba(91,41,113,0.1)' }}>
-              <TrendingUp size={20} strokeWidth={2.5} />
-            </div>
-            <div style={{ fontSize:'0.9rem',fontWeight:900,letterSpacing:'1px',color:'var(--text-dark)' }}>MARKET DATA</div>
-          </div>
-          <div style={{ display:'flex',flexDirection:'column',gap:18 }}>
-            {[
-              { label: 'Market Cap', value: stock?.market_cap, fmt: fmt },
-              { label: 'Shares Out.', value: stock?.shares_outstanding, fmt: fmtCount },
-              { label: 'Volume Today', value: stock?.volume, fmt: fmtCount },
-              { label: 'P/E Ratio', value: stock?.pe_ratio },
-              { label: 'EPS', value: stock?.eps },
-              { label: 'Last Div.', sub: stock?.last_paid_dividend?.pay_date && new Date(stock.last_paid_dividend.pay_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}), value: stock?.last_paid_dividend ? `₦${Number(stock.last_paid_dividend.amount).toFixed(2)}` : null },
-              { label: 'Next Div.', sub: stock?.upcoming_dividend?.pay_date && new Date(stock.upcoming_dividend.pay_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}), value: stock?.upcoming_dividend ? `₦${Number(stock.upcoming_dividend.amount).toFixed(2)}` : null },
-              { label: 'Div. Yield', value: stock?.div_yield ? `${stock.div_yield}%` : null }
-            ].filter(item => item.value != null && item.value !== '').map((item, idx, arr) => (
-              <div key={idx} style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:idx === arr.length - 1 ? 'none' : '1px solid rgba(91,41,113,0.06)',paddingBottom:idx === arr.length - 1 ? 0 : 14 }}>
-                <div>
-                  <div style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:600 }}>{item.label}</div>
-                  {item.sub && <div style={{ fontSize:'0.65rem',color:'var(--primary)',marginTop:4, fontWeight:700 }}>{item.sub}</div>}
+        {(() => {
+          const marketDataItems = [
+            { label: 'Market Cap', value: stock?.market_cap, fmt: fmt },
+            { label: 'Shares Out.', value: stock?.shares_outstanding, fmt: fmtCount },
+            { label: 'Volume Today', value: stock?.volume, fmt: fmtCount },
+            { label: 'P/E Ratio', value: stock?.pe_ratio },
+            { label: 'EPS', value: stock?.eps },
+            { label: 'Last Div.', sub: stock?.last_paid_dividend?.pay_date && new Date(stock.last_paid_dividend.pay_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}), value: stock?.last_paid_dividend ? `₦${Number(stock.last_paid_dividend.amount).toFixed(2)}` : null },
+            { label: 'Next Div.', sub: stock?.upcoming_dividend?.pay_date && new Date(stock.upcoming_dividend.pay_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}), value: stock?.upcoming_dividend ? `₦${Number(stock.upcoming_dividend.amount).toFixed(2)}` : null },
+            { label: 'Div. Yield', value: stock?.div_yield ? `${stock.div_yield}%` : null }
+          ].filter(item => item.value != null && item.value !== '');
+
+          if (marketDataItems.length === 0) return null;
+
+          return (
+            <div style={{ borderRadius:24,border:'1px solid rgba(91,41,113,0.08)',background:'var(--bg)',padding:'28px 32px',boxShadow:'0 12px 40px rgba(91,41,113,0.04)' }}>
+              <div style={{ display:'flex',alignItems:'center',gap:12,marginBottom:28 }}>
+                <div style={{ width:'40px', height:'40px', borderRadius:'14px', background:'var(--primary-50)', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--primary)', boxShadow:'0 4px 12px rgba(91,41,113,0.1)' }}>
+                  <TrendingUp size={20} strokeWidth={2.5} />
                 </div>
-                <span style={{ fontSize:'0.95rem',fontWeight:800,color:'var(--text-dark)',letterSpacing:'-0.3px',fontVariantNumeric:'tabular-nums' }}>{item.fmt ? item.fmt(item.value) : item.value}</span>
+                <div style={{ fontSize:'0.9rem',fontWeight:900,letterSpacing:'1px',color:'var(--text-dark)' }}>MARKET DATA</div>
               </div>
-            ))}
-          </div>
-        </div>
+              <div style={{ display:'flex',flexDirection:'column',gap:18 }}>
+                {marketDataItems.map((item, idx, arr) => (
+                  <div key={idx} style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:idx === arr.length - 1 ? 'none' : '1px solid rgba(91,41,113,0.06)',paddingBottom:idx === arr.length - 1 ? 0 : 14 }}>
+                    <div>
+                      <div style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:600 }}>{item.label}</div>
+                      {item.sub && <div style={{ fontSize:'0.65rem',color:'var(--primary)',marginTop:4, fontWeight:700 }}>{item.sub}</div>}
+                    </div>
+                    <span style={{ fontSize:'0.95rem',fontWeight:800,color:'var(--text-dark)',letterSpacing:'-0.3px',fontVariantNumeric:'tabular-nums' }}>{item.fmt ? item.fmt(item.value) : item.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
 
         </div>
 
