@@ -266,32 +266,32 @@ export default function WatchlistTab({ initialSymbol }) {
                 key={stock.symbol}
                 className="watchlist-card hover-lift"
                 style={{ 
-                  display: 'flex', alignItems: 'center', padding: '16px 20px', background: 'var(--bg)', 
-                  borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+                  display: 'flex', alignItems: 'center', padding: '12px 16px', background: 'var(--bg)', 
+                  borderRadius: '14px', border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
                   transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', cursor: 'pointer',
-                  animationDelay: `${(i % 10) * 0.04}s`, flexWrap: 'wrap', gap: '20px'
+                  animationDelay: `${(i % 10) * 0.04}s`, flexWrap: 'wrap', gap: '16px'
                 }}
                 onClick={() => navigate(`/market/${stock.symbol}/aaoifi`, { state: { stock } })}
               >
-                <div className="watchlist-card-main" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '16px', minWidth: '200px' }}>
-                  <CompanyLogo symbol={stock.symbol} logoUrl={stock.logo_url} size={40} radius={12} />
+                <div className="watchlist-card-main" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px', minWidth: '180px' }}>
+                  <CompanyLogo symbol={stock.symbol} logoUrl={stock.logo_url} size={32} radius={10} />
                   <div>
-                    <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.95rem', letterSpacing: '-0.2px' }}>
+                    <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.85rem', letterSpacing: '-0.2px' }}>
                       {stock.symbol}
                     </div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px', fontWeight: 500 }}>{stock.name}</div>
+                    <div style={{ fontSize: '0.70rem', color: 'var(--text-muted)', marginTop: '2px', fontWeight: 500 }}>{stock.name}</div>
                   </div>
                 </div>
 
-                <div className="watchlist-price-col" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: '120px' }}>
-                  <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '1.0rem' }}>₦{price.toFixed(2)}</div>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.7rem', fontWeight: 700, color: isPos ? 'var(--halal)' : 'var(--non-halal)', marginTop: '4px', background: isPos ? 'var(--halal-bg)' : 'var(--non-halal-bg)', padding: '4px 8px', borderRadius: '10px' }}>
-                    {isPos ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+                <div className="watchlist-price-col" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: '100px' }}>
+                  <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.90rem' }}>₦{price.toFixed(2)}</div>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.65rem', fontWeight: 700, color: isPos ? 'var(--halal)' : 'var(--non-halal)', marginTop: '4px', background: isPos ? 'var(--halal-bg)' : 'var(--non-halal-bg)', padding: '3px 6px', borderRadius: '8px' }}>
+                    {isPos ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                     {isPos ? '+' : ''}{change.toFixed(2)}%
                   </div>
                 </div>
 
-                <div className="watchlist-card-actions" style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                <div className="watchlist-card-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: 'auto' }} onClick={(e) => e.stopPropagation()}>
                   <button 
                     type="button"
                     onClick={(e) => {
@@ -302,20 +302,20 @@ export default function WatchlistTab({ initialSymbol }) {
                     className={`alert-btn-wide ${hasAlerts ? 'active-alert' : ''}`}
                     title={hasAlerts ? 'Alerts Active' : 'Set Alerts'}
                   >
-                    <Bell size={14} fill={hasAlerts ? "currentColor" : "none"} />
-                    <span style={{ fontSize: '0.7rem', fontWeight: 700 }}>{hasAlerts ? 'Alerts On' : 'Alerts'}</span>
+                    <Bell size={12} fill={hasAlerts ? "currentColor" : "none"} />
+                    <span style={{ fontSize: '0.65rem', fontWeight: 700 }}>{hasAlerts ? 'Alerts On' : 'Alerts'}</span>
                   </button>
                   
-                  <div style={{ width: '1px', height: '32px', background: 'var(--border)' }}></div>
+                  <div style={{ width: '1px', height: '24px', background: 'var(--border)' }}></div>
                   
                   <button 
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleRemove(stock.symbol); }}
                     className="remove-btn"
                     title="Remove from Watchlist"
                   >
-                    <Trash2 size={18} />
+                    <Trash2 size={16} />
                   </button>
-                  <ChevronRight size={20} color="var(--text-light)" style={{ marginLeft: '4px' }} />
+                  <ChevronRight size={18} color="var(--text-light)" style={{ marginLeft: '2px' }} />
                 </div>
               </div>
             );
@@ -355,8 +355,8 @@ export default function WatchlistTab({ initialSymbol }) {
         }
         .alert-btn:hover { background: white; border-color: var(--primary); color: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         .alert-btn-wide {
-          padding: 8px 16px; border-radius: 12px; background: var(--bg-section); border: 1px solid var(--border);
-          display: flex; align-items: center; gap: 8px; color: var(--text-muted); cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+          padding: 6px 12px; border-radius: 10px; background: var(--bg-section); border: 1px solid var(--border);
+          display: flex; align-items: center; gap: 6px; color: var(--text-muted); cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .alert-btn-wide:hover { background: white; border-color: var(--primary); color: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         
@@ -367,7 +367,7 @@ export default function WatchlistTab({ initialSymbol }) {
         .active-email:hover { background: var(--primary-hover) !important; }
 
         .remove-btn {
-          width: 44px; height: 44px; border-radius: 12px; background: transparent; border: none;
+          width: 36px; height: 36px; border-radius: 10px; background: transparent; border: none;
           display: flex; align-items: center; justify-content: center; color: var(--text-muted); cursor: pointer; transition: all 0.2s;
         }
         .remove-btn:hover { background: var(--non-halal-bg); color: var(--non-halal); transform: scale(1.05); }
@@ -382,10 +382,10 @@ export default function WatchlistTab({ initialSymbol }) {
           to { opacity: 1; transform: translateY(0); }
         }
         @media (min-width: 768px) {
-          .watchlist-price-col { border-right: 1px solid var(--border); padding-right: 32px !important; }
+          .watchlist-price-col { border-right: 1px solid var(--border); padding-right: 24px !important; }
         }
         @media (max-width: 768px) {
-          .watchlist-card { padding: 16px !important; }
+          .watchlist-card { padding: 12px !important; }
           .watchlist-price-col { align-items: flex-start !important; padding-right: 0 !important; }
         }
       `}} />
