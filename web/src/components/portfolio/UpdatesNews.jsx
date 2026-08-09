@@ -254,7 +254,7 @@ export default function UpdatesNews() {
   useEffect(() => { load(); }, []);
 
   const sections = [
-    { id: 'compliance',  label: 'Compliance Changes',  icon: Shield,    color: 'var(--non-halal)' },
+    { id: 'compliance',  label: 'Compliance Changes',  icon: Shield,    color: 'var(--primary)' },
     { id: 'business',    label: 'Business Activity',   icon: Zap,       color: 'var(--doubtful)' },
     { id: 'market',      label: 'Market Intelligence', icon: BarChart2,  color: 'var(--primary)' },
   ];
