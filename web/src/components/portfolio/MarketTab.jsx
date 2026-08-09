@@ -62,6 +62,7 @@ const TH = ({ children, right, center }) => (
 
 const StockRow = React.memo(({ stock, idx, isWatched, onToggle }) => {
   const isPos  = Number(stock.price_change_pct ?? 0) >= 0;
+  const cfg = getStatusConfig(stock);
 
   return (
     <tr
@@ -129,10 +130,11 @@ const StockRow = React.memo(({ stock, idx, isWatched, onToggle }) => {
         <button
           onClick={() => onToggle(stock.symbol, isWatched)}
           style={{
-            background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
+            background: 'none', border: 'none', cursor: 'pointer', padding: '10px',
             color: isWatched ? 'var(--primary)' : 'var(--border)',
             transition: 'color 0.15s, transform 0.15s',
-            display: 'inline-flex', alignItems: 'center', justifyContent: 'center'
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            minWidth: 44, minHeight: 44
           }}
           title={isWatched ? 'Remove from watchlist' : 'Add to watchlist'}
           onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.25)'; if (!isWatched) e.currentTarget.style.color = 'var(--primary-300)'; }}
@@ -142,6 +144,54 @@ const StockRow = React.memo(({ stock, idx, isWatched, onToggle }) => {
         </button>
       </td>
     </tr>
+  );
+});
+
+/* ─── Mobile Stock Card — shown on small screens ────────── */
+const MobileStockCard = React.memo(({ stock, idx, isWatched, onToggle }) => {
+  const isPos = Number(stock.price_change_pct ?? 0) >= 0;
+  const cfg = getStatusConfig(stock);
+  const statusColors = {
+    HALAL: { color: 'var(--halal)', bg: 'var(--halal-bg)', border: 'rgba(16,185,129,0.2)' },
+    'NON-HALAL': { color: 'var(--non-halal)', bg: 'var(--non-halal-bg)', border: 'rgba(239,68,68,0.2)' },
+    DOUBTFUL: { color: '#D97706', bg: 'rgba(245,158,11,0.08)', border: 'rgba(245,158,11,0.2)' },
+  };
+  const sc = statusColors[cfg.label] || statusColors.DOUBTFUL;
+
+  return (
+    <div style={{ borderBottom: '1px solid var(--border)', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
+      {/* Logo */}
+      <Link to={`/market/${stock.symbol}/aaoifi`} state={{ stock }} style={{ textDecoration: 'none', flexShrink: 0 }}>
+        <CompanyLogo symbol={stock.symbol} logoUrl={stock.logo_url} size={44} radius={12} />
+      </Link>
+
+      {/* Main info */}
+      <Link to={`/market/${stock.symbol}/aaoifi`} state={{ stock }} style={{ textDecoration: 'none', flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+          <span style={{ fontWeight: 900, color: 'var(--text-dark)', fontSize: '0.92rem', letterSpacing: '-0.3px' }}>{stock.symbol}</span>
+          <span style={{ fontSize: '0.62rem', fontWeight: 800, color: sc.color, background: sc.bg, border: `1px solid ${sc.border}`, padding: '2px 7px', borderRadius: 100, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{cfg.label}</span>
+        </div>
+        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '180px' }}>{stock.name}</div>
+        <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: 2, fontWeight: 600 }}>{normSector(stock.sector)}</div>
+      </Link>
+
+      {/* Price + change */}
+      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+        <div style={{ fontWeight: 900, color: 'var(--text-dark)', fontSize: '0.95rem', letterSpacing: '-0.3px', fontVariantNumeric: 'tabular-nums' }}>₦{fmtPrice(stock.latest_price)}</div>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: '0.72rem', fontWeight: 800, color: isPos ? 'var(--halal)' : 'var(--non-halal)', background: isPos ? 'var(--halal-bg)' : 'var(--non-halal-bg)', padding: '3px 8px', borderRadius: 8, marginTop: 4, fontVariantNumeric: 'tabular-nums' }}>
+          {isPos ? <TrendingUp size={10} strokeWidth={2.5} /> : <TrendingDown size={10} strokeWidth={2.5} />}
+          {isPos ? '+' : ''}{Number(stock.price_change_pct ?? 0).toFixed(2)}%
+        </span>
+      </div>
+
+      {/* Star */}
+      <button
+        onClick={() => onToggle(stock.symbol, isWatched)}
+        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '10px', color: isWatched ? 'var(--primary)' : 'var(--border)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 44, minHeight: 44 }}
+      >
+        <Star size={20} fill={isWatched ? 'currentColor' : 'none'} strokeWidth={2} />
+      </button>
+    </div>
   );
 });
 
@@ -275,7 +325,7 @@ export default function MarketTab() {
       <div style={{ 
         padding: '16px 20px', marginBottom: '16px', 
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
-        position: 'relative', overflow: 'hidden', flexWrap: 'wrap', gap: '20px' 
+        position: 'relative', overflow: 'hidden', flexWrap: 'wrap', gap: '16px' 
       }}>
         
         {/* Large Decorative Icon on the right */}
@@ -333,6 +383,24 @@ export default function MarketTab() {
             </button>
           )}
         </div>
+
+          {/* Mobile status filter pills */}
+          <div className="market-status-pills hide-scrollbar" style={{ display: 'none', overflowX: 'auto', gap: 8, paddingBottom: 2 }}>
+            {[['all', 'All'], ['halal', '✓ Halal'], ['non-halal', '✗ Non-Halal'], ['doubtful', '? Doubtful']].map(([val, label]) => (
+              <button
+                key={val}
+                onClick={() => setStatusF(val)}
+                style={{
+                  flexShrink: 0, padding: '10px 16px', borderRadius: 100, border: '1.5px solid',
+                  borderColor: statusF === val ? 'var(--primary)' : 'var(--border)',
+                  background: statusF === val ? 'var(--primary)' : 'var(--bg-section)',
+                  color: statusF === val ? 'white' : 'var(--text-muted)',
+                  fontSize: '0.78rem', fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap',
+                  minHeight: 44, display: 'flex', alignItems: 'center'
+                }}
+              >{label}</button>
+            ))}
+          </div>
 
         {/* Filters Row */}
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'nowrap', overflowX: 'auto', paddingBottom: '4px' }}>
@@ -417,32 +485,48 @@ export default function MarketTab() {
             </button>
           </div>
         ) : (
-          <div style={{ overflowX: 'auto', maxHeight: '72vh' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'auto' }}>
-              <thead>
-                <tr>
-                  <TH>#</TH>
-                  <TH>Company</TH>
-                  <TH right>Price</TH>
-                  <TH right>24h Change</TH>
-                  <TH right>Mkt Cap</TH>
-                  <TH right>P/E</TH>
-                  <TH right>Watch</TH>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((stock, i) => (
-                  <StockRow
-                    key={stock.symbol}
-                    stock={stock}
-                    idx={i}
-                    isWatched={watchlist.includes(stock.symbol)}
-                    onToggle={handleToggle}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <>
+            {/* Desktop table */}
+            <div className="market-table-desktop" style={{ overflowX: 'auto', maxHeight: '72vh' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'auto' }}>
+                <thead>
+                  <tr>
+                    <TH>#</TH>
+                    <TH>Company</TH>
+                    <TH right>Price</TH>
+                    <TH right>24h Change</TH>
+                    <TH right>Mkt Cap</TH>
+                    <TH right>P/E</TH>
+                    <TH right>Watch</TH>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((stock, i) => (
+                    <StockRow
+                      key={stock.symbol}
+                      stock={stock}
+                      idx={i}
+                      isWatched={watchlist.includes(stock.symbol)}
+                      onToggle={handleToggle}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile cards */}
+            <div className="market-cards-mobile">
+              {filtered.map((stock, i) => (
+                <MobileStockCard
+                  key={stock.symbol}
+                  stock={stock}
+                  idx={i}
+                  isWatched={watchlist.includes(stock.symbol)}
+                  onToggle={handleToggle}
+                />
+              ))}
+            </div>
+          </>
         )}
       </div>
 

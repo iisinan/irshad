@@ -75,10 +75,12 @@ export default function DashboardLayout({ children }) {
             onClick={() => setMobileOpen(true)}
             style={{ 
               background: 'none', border: 'none', 
-              color: 'var(--text-dark)', padding: '4px' 
+              color: 'var(--text-dark)', padding: '10px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              minWidth: 44, minHeight: 44, cursor: 'pointer', borderRadius: 8
             }}
           >
-            <Menu size={24} />
+            <Menu size={22} />
           </button>
         </header>
 
@@ -120,11 +122,14 @@ export default function DashboardLayout({ children }) {
                   background: 'var(--bg)',
                   color: 'var(--non-halal)',
                   border: '1px solid var(--non-halal)',
-                  padding: '6px 12px',
+                  padding: '10px 16px',
                   borderRadius: '8px',
-                  fontSize: '0.7rem',
+                  fontSize: '0.8rem',
                   fontWeight: 700,
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  minHeight: '44px',
+                  display: 'flex',
+                  alignItems: 'center',
                 }}
               >
                 Resend Link

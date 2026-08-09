@@ -62,7 +62,7 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
         display: 'flex',
         flexDirection: 'column',
         transition: 'width 0.35s cubic-bezier(0.16,1,0.3,1), min-width 0.35s cubic-bezier(0.16,1,0.3,1)',
-        zIndex: 40,
+        zIndex: 1001,
         overflow: 'hidden',
       }}
     >
