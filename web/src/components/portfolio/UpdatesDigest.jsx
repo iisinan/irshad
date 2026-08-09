@@ -136,8 +136,8 @@ export default function UpdatesDigest() {
               <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '16px' }}>Delivery Methods</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {[{ key: 'email_enabled', label: 'Email Notifications' }, { key: 'in_app_enabled', label: 'In-App Alerts' }].map(({ key, label }) => (
-                  <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
-                    <div onClick={() => handleDelivery(key)} style={{ width: '44px', height: '24px', borderRadius: '12px', background: pref[key] ? 'var(--primary)' : 'var(--border)', position: 'relative', cursor: 'pointer', transition: 'background 0.2s', flexShrink: 0 }}>
+                  <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.6 : 1 }}>
+                    <div onClick={() => { if (!saving) handleDelivery(key); }} style={{ width: '44px', height: '24px', borderRadius: '12px', background: pref[key] ? 'var(--primary)' : 'var(--border)', position: 'relative', cursor: saving ? 'not-allowed' : 'pointer', transition: 'background 0.2s', flexShrink: 0 }}>
                       <div style={{ position: 'absolute', top: '2px', left: pref[key] ? '22px' : '2px', width: '20px', height: '20px', borderRadius: '50%', background: 'white', transition: 'left 0.2s', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }} />
                     </div>
                     <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-body)' }}>{label}</span>
@@ -150,7 +150,7 @@ export default function UpdatesDigest() {
               <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '16px' }}>Frequency</div>
               <div style={{ display: 'flex', gap: '12px' }}>
                 {['weekly', 'monthly'].map(f => (
-                  <button key={f} onClick={() => handleFrequency(f)} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: pref.frequency === f ? 'var(--primary-50)' : 'var(--bg)', border: `1px solid ${pref.frequency === f ? 'var(--primary-100)' : 'var(--border)'}`, borderRadius: '12px', padding: '12px', cursor: 'pointer', transition: 'all 0.2s' }}>
+                  <button key={f} disabled={saving} onClick={() => handleFrequency(f)} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: pref.frequency === f ? 'var(--primary-50)' : 'var(--bg)', border: `1px solid ${pref.frequency === f ? 'var(--primary-100)' : 'var(--border)'}`, borderRadius: '12px', padding: '12px', cursor: saving ? 'not-allowed' : 'pointer', transition: 'all 0.2s', opacity: saving ? 0.6 : 1 }}>
                     <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: `2px solid ${pref.frequency === f ? 'var(--primary)' : 'var(--text-muted)'}`, background: pref.frequency === f ? 'var(--primary)' : 'transparent', flexShrink: 0 }} />
                     <span style={{ fontSize: '0.85rem', fontWeight: 700, color: pref.frequency === f ? 'var(--primary)' : 'var(--text-muted)', textTransform: 'capitalize' }}>{f}</span>
                   </button>

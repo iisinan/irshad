@@ -31,18 +31,10 @@ function getHijriDate() {
   }
 }
 
-/* ══════════════════════════════════════════════════════════════
-   UpdatesTab — Greeting banner + News & Inbox sub-tabs
-   ══════════════════════════════════════════════════════════════ */
-export default function UpdatesTab({ unreadCount = 0 }) {
-  const [activeSubTab, setActiveSubTab] = useState('news');
-  const [now, setNow]                   = useState(new Date());
-  const { user }    = useAuth();
-  const greeting    = getGreeting();
-  const firstName   = getFirstName(user);
-  const hijriDate   = getHijriDate();
+/* ── Live Clock Component ── */
+function LiveClock({ hijriDate }) {
+  const [now, setNow] = useState(new Date());
 
-  // Live clock — tick every second
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(t);
@@ -56,6 +48,62 @@ export default function UpdatesTab({ unreadCount = 0 }) {
   const dateStr = now.toLocaleDateString('en-GB', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
   });
+
+  return (
+    <div style={{
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      background: 'var(--bg-section)',
+      border: '1px solid var(--border)',
+      borderRadius: '18px',
+      padding: '16px 22px',
+      minWidth: '140px',
+      gap: '4px',
+      flexShrink: 0,
+    }}>
+      {/* Time digits */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: '2px',
+        fontFamily: 'var(--mono, monospace)',
+        fontVariantNumeric: 'tabular-nums',
+      }}>
+        {/* HH */}
+        <span style={{ fontSize: '1.9rem', fontWeight: 900, color: 'var(--text-dark)', lineHeight: 1, letterSpacing: '-1px' }}>{hh}</span>
+        <span style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--primary)', lineHeight: 1, margin: '0 1px', opacity: 0.7 }}>:</span>
+        {/* MM */}
+        <span style={{ fontSize: '1.9rem', fontWeight: 900, color: 'var(--text-dark)', lineHeight: 1, letterSpacing: '-1px' }}>{mm}</span>
+        <span style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--primary)', lineHeight: 1, margin: '0 1px', opacity: 0.7 }}>:</span>
+        {/* SS */}
+        <span style={{ fontSize: '1.9rem', fontWeight: 900, color: 'var(--text-muted)', lineHeight: 1, letterSpacing: '-1px', opacity: 0.65 }}>{ss}</span>
+      </div>
+
+      {/* Gregorian date */}
+      <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.4 }}>
+        {dateStr}
+      </div>
+
+      {/* Hijri date */}
+      {hijriDate && (
+        <div style={{
+          fontSize: '0.62rem', fontWeight: 800, color: 'var(--primary)',
+          background: 'var(--primary-50)', borderRadius: '6px',
+          padding: '2px 8px', marginTop: '4px', textAlign: 'center',
+        }}>
+          {hijriDate}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════
+   UpdatesTab — Greeting banner + News & Inbox sub-tabs
+   ══════════════════════════════════════════════════════════════ */
+export default function UpdatesTab({ unreadCount = 0 }) {
+  const [activeSubTab, setActiveSubTab] = useState('news');
+  const { user }    = useAuth();
+  const greeting    = getGreeting();
+  const firstName   = getFirstName(user);
+  const hijriDate   = getHijriDate();
 
   const tabs = [
     {
@@ -153,48 +201,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
             </div>
 
             {/* Right: clock card */}
-            <div style={{
-              display: 'flex', flexDirection: 'column', alignItems: 'center',
-              background: 'var(--bg-section)',
-              border: '1px solid var(--border)',
-              borderRadius: '18px',
-              padding: '16px 22px',
-              minWidth: '140px',
-              gap: '4px',
-              flexShrink: 0,
-            }}>
-              {/* Time digits */}
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: '2px',
-                fontFamily: 'var(--mono, monospace)',
-                fontVariantNumeric: 'tabular-nums',
-              }}>
-                {/* HH */}
-                <span style={{ fontSize: '1.9rem', fontWeight: 900, color: 'var(--text-dark)', lineHeight: 1, letterSpacing: '-1px' }}>{hh}</span>
-                <span style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--primary)', lineHeight: 1, margin: '0 1px', opacity: 0.7 }}>:</span>
-                {/* MM */}
-                <span style={{ fontSize: '1.9rem', fontWeight: 900, color: 'var(--text-dark)', lineHeight: 1, letterSpacing: '-1px' }}>{mm}</span>
-                <span style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--primary)', lineHeight: 1, margin: '0 1px', opacity: 0.7 }}>:</span>
-                {/* SS */}
-                <span style={{ fontSize: '1.9rem', fontWeight: 900, color: 'var(--text-muted)', lineHeight: 1, letterSpacing: '-1px', opacity: 0.65 }}>{ss}</span>
-              </div>
-
-              {/* Gregorian date */}
-              <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.4 }}>
-                {dateStr}
-              </div>
-
-              {/* Hijri date */}
-              {hijriDate && (
-                <div style={{
-                  fontSize: '0.62rem', fontWeight: 800, color: 'var(--primary)',
-                  background: 'var(--primary-50)', borderRadius: '6px',
-                  padding: '2px 8px', marginTop: '4px', textAlign: 'center',
-                }}>
-                  {hijriDate}
-                </div>
-              )}
-            </div>
+            <LiveClock hijriDate={hijriDate} />
           </div>
         </div>
       </div>
