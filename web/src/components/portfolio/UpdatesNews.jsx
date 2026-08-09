@@ -8,6 +8,7 @@ import {
 import { fetchUpdatesNews } from '../../services/api';
 import { toastSuccess, toastError } from '../../utils/toast';
 import CompanyLogo from '../CompanyLogo';
+import localforage from 'localforage';
 
 /* ── Skeleton ── */
 const CardSkeleton = () => {
@@ -238,20 +239,30 @@ export default function UpdatesNews() {
   const [error, setError] = useState(null);
   const [activeSection, setActiveSection] = useState('compliance');
 
-  const load = async () => {
+  const load = async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       setError(null);
       const res = await fetchUpdatesNews();
       setData(res.data);
+      localforage.setItem('irshad_updates_news_cache', res.data);
     } catch (err) {
-      setError(err?.response?.data?.message || 'Failed to load news & insights.');
+      if (!data && !silent) setError(err?.response?.data?.message || 'Failed to load news & insights.');
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    localforage.getItem('irshad_updates_news_cache').then(cached => {
+      if (cached && !data) {
+        setData(cached);
+        setLoading(false);
+      }
+    }).catch(() => {});
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const sections = [
     { id: 'compliance',  label: 'Compliance Changes',  icon: Shield,    color: 'var(--primary)' },

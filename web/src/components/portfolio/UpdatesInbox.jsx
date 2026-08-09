@@ -9,6 +9,7 @@ import {
   archiveNotification, deleteNotification
 } from '../../services/api';
 import { toastSuccess, toastError } from '../../utils/toast';
+import localforage from 'localforage';
 import { Link } from 'react-router-dom';
 
 /* ── Skeleton ── */
@@ -171,6 +172,14 @@ export default function UpdatesInbox() {
       setNotifications(prev => append ? [...prev, ...newItems] : newItems);
       setUnreadCount(res.unread_count || 0);
       setPagination(res.pagination);
+
+      if (!append && activeCategory === 'all' && !search && !showUnreadOnly && (!params.page || params.page === 1)) {
+        localforage.setItem('irshad_updates_inbox_cache', {
+          notifications: newItems,
+          unread_count: res.unread_count || 0,
+          pagination: res.pagination
+        });
+      }
     } catch {
       if (!append) {
         setNotifications([]);
@@ -183,7 +192,17 @@ export default function UpdatesInbox() {
   }, [activeCategory, search, showUnreadOnly]);
 
   useEffect(() => {
+    let isInitialMount = true;
+    localforage.getItem('irshad_updates_inbox_cache').then(cached => {
+      if (cached && activeCategory === 'all' && !search && !showUnreadOnly && isInitialMount) {
+        setNotifications(prev => prev.length ? prev : cached.notifications);
+        setUnreadCount(prev => prev > 0 ? prev : cached.unread_count);
+        setPagination(prev => prev ? prev : cached.pagination);
+        setLoading(false);
+      }
+    }).catch(() => {});
     load();
+    return () => { isInitialMount = false; };
   }, [load]);
 
   // Poll for new notifications every 60 seconds

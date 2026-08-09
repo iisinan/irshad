@@ -6,6 +6,7 @@ import {
   Trash2, User, Monitor, LogOut, AlertCircle, Award, Save
 } from 'lucide-react';
 import { fetchProfile, updateProfile, deleteAccount } from '../services/api';
+import localforage from 'localforage';
 
 
 
@@ -41,11 +42,20 @@ export default function Profile() {
     const loadData = async () => {
       if (!user) return;
       try {
+        const cached = await localforage.getItem('irshad_profile_cache');
+        if (cached && !profileUser) {
+          setProfileUser(cached);
+          setIsLoading(false);
+        }
+      } catch (e) {}
+
+      try {
         const [profileData] = await Promise.all([
           fetchProfile().catch(() => ({ data: null }))
         ]);
         
         setProfileUser(profileData.data);
+        localforage.setItem('irshad_profile_cache', profileData.data);
       } catch (err) {
         console.error("Failed to fetch profile data", err);
       } finally {
