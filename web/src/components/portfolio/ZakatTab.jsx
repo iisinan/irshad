@@ -476,16 +476,30 @@ export default function ZakatTab({ data }) {
       </div>
       
       {/* Hero Banner */}
-      <div className="no-print zakat-hero" style={{ background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, var(--text-dark) 100%)', borderRadius:'24px', padding:'32px 24px', boxShadow:'0 20px 40px rgba(0,0,0,0.3)', border:'1px solid rgba(209, 165, 98, 0.2)', marginBottom: '36px', display: 'flex', alignItems: 'center', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'radial-gradient(circle at 80% 0%, rgba(209, 165, 98, 0.12) 0%, transparent 50%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(209, 165, 98, 0.08)', borderRadius: '50%', filter: 'blur(30px)' }} />
-        <div style={{ display: 'flex', alignItems: 'center', gap: '24px', position: 'relative', zIndex: 1 }}>
-          <div style={{ width: '72px', height: '72px', background: 'rgba(209, 165, 98, 0.12)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', border: '1px solid rgba(209, 165, 98, 0.35)', backdropFilter: 'blur(12px)', boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}>
-            <Scale size={36} strokeWidth={1.5} />
+      <div className="no-print zakat-hero" style={{ background: 'linear-gradient(135deg, var(--primary) 0%, #301f42 100%)', borderRadius:'24px', padding:'24px 28px', boxShadow:'0 20px 40px rgba(15,82,87,0.15)', border:'1px solid rgba(209, 165, 98, 0.3)', marginBottom: '36px', display: 'flex', alignItems: 'center', position: 'relative', overflow: 'hidden' }}>
+        {/* Dynamic Background Elements */}
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'radial-gradient(circle at 85% 20%, rgba(209, 165, 98, 0.15) 0%, transparent 60%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: '-60px', right: '-40px', width: '250px', height: '250px', background: 'rgba(209, 165, 98, 0.08)', borderRadius: '50%', filter: 'blur(40px)' }} />
+        <div style={{ position: 'absolute', bottom: '-40px', right: '15%', width: '150px', height: '150px', background: 'rgba(255,255,255, 0.05)', borderRadius: '50%', filter: 'blur(20px)' }} />
+        
+        {/* Decorative Right Edge Icon */}
+        <div style={{ position: 'absolute', right: '-20px', top: '50%', transform: 'translateY(-50%) rotate(-15deg)', opacity: 0.06, pointerEvents: 'none', zIndex: 0 }}>
+          <Scale size={220} color="var(--gold)" strokeWidth={1} />
+        </div>
+
+        {/* Decorative Grid Overlay */}
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '20px 20px', opacity: 0.5, pointerEvents: 'none' }} />
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', position: 'relative', zIndex: 1, width: '100%', flexWrap: 'wrap' }}>
+          <div style={{ width: '64px', height: '64px', background: 'linear-gradient(135deg, rgba(209, 165, 98, 0.2) 0%, rgba(209, 165, 98, 0.05) 100%)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gold)', border: '1px solid rgba(209, 165, 98, 0.4)', backdropFilter: 'blur(16px)', boxShadow: '0 12px 32px rgba(0,0,0,0.2), inset 0 2px 0 rgba(255,255,255,0.1)' }}>
+            <Scale size={32} strokeWidth={1.5} />
           </div>
-          <div>
-            <h2 style={{ fontSize: '1.8rem', fontWeight: 900, color: 'white', letterSpacing: '-0.5px', margin: 0 }}>Comprehensive Zakat</h2>
-            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.95rem', marginTop: '8px', margin: 0, fontWeight: 500 }}>A simple, smart calculator for all your asset classes.</p>
+          <div style={{ flex: 1, position: 'relative', zIndex: 2 }}>
+            <span style={{ display: 'inline-block', padding: '4px 10px', background: 'rgba(209, 165, 98, 0.15)', border: '1px solid rgba(209, 165, 98, 0.3)', borderRadius: '100px', color: 'var(--gold)', fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>
+              Wealth Purification
+            </span>
+            <h2 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'white', letterSpacing: '-0.5px', margin: 0, textShadow: '0 2px 10px rgba(0,0,0,0.2)' }}>Comprehensive Zakat</h2>
+            <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.85rem', marginTop: '6px', margin: 0, fontWeight: 500, maxWidth: '450px', lineHeight: 1.5 }}>A simple, smart calculator covering all your asset classes, based on real-time market data.</p>
           </div>
         </div>
       </div>
@@ -651,7 +665,7 @@ export default function ZakatTab({ data }) {
             </div>
 
             {/* Stock Portfolio — read-only display card */}
-            <div style={{ background: 'linear-gradient(135deg, var(--primary-10) 0%, rgba(15,82,87,0.12) 100%)', borderRadius: '16px', padding: '18px', border: '1px solid var(--primary-50)', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ background: 'var(--primary-10)', borderRadius: '16px', padding: '18px', border: '1px solid var(--primary-50)', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <span style={{ display:'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', fontWeight:700, color:'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>📈 Stock Portfolio</span>
                 <div style={{ fontSize: '1.35rem', fontWeight: 900, color: 'var(--primary)', letterSpacing: '-0.5px' }}>₦{portfolioValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
@@ -726,7 +740,7 @@ export default function ZakatTab({ data }) {
                         <span style={{ fontSize: '1rem', fontWeight: 900, color: financialEligible ? '#16a34a' : 'var(--gold)', letterSpacing: '-0.5px' }}>{pct}%</span>
                       </div>
                       <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.06)', borderRadius: '100px', overflow: 'hidden' }}>
-                        <div style={{ width: `${pct}%`, height: '100%', background: financialEligible ? 'linear-gradient(90deg, #22c5b0, #16a34a)' : 'linear-gradient(90deg, #f59e0b, #d97706)', borderRadius: '100px', transition: 'width 0.9s cubic-bezier(0.22,1,0.36,1)', boxShadow: financialEligible ? '0 0 8px rgba(34,197,94,0.4)' : 'none' }} />
+                        <div style={{ width: `${pct}%`, height: '100%', background: financialEligible ? 'linear-gradient(90deg, var(--primary-100), var(--primary))' : 'linear-gradient(90deg, var(--gold), #d97706)', borderRadius: '100px', transition: 'width 0.9s cubic-bezier(0.22,1,0.36,1)', boxShadow: financialEligible ? '0 0 8px var(--primary-50)' : 'none' }} />
                       </div>
                     </div>
                   );
@@ -746,7 +760,7 @@ export default function ZakatTab({ data }) {
                         <span style={{ fontSize: '1rem', fontWeight: 900, color: met ? '#16a34a' : 'var(--gold)', letterSpacing: '-0.5px' }}>{pct}%</span>
                       </div>
                       <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.06)', borderRadius: '100px', overflow: 'hidden' }}>
-                        <div style={{ width: `${pct}%`, height: '100%', background: met ? 'linear-gradient(90deg, #22c5b0, #16a34a)' : 'linear-gradient(90deg, #f59e0b, #d97706)', borderRadius: '100px', transition: 'width 0.9s cubic-bezier(0.22,1,0.36,1)', boxShadow: met ? '0 0 8px rgba(34,197,94,0.4)' : 'none' }} />
+                        <div style={{ width: `${pct}%`, height: '100%', background: met ? 'linear-gradient(90deg, var(--primary-100), var(--primary))' : 'linear-gradient(90deg, var(--gold), #d97706)', borderRadius: '100px', transition: 'width 0.9s cubic-bezier(0.22,1,0.36,1)', boxShadow: met ? '0 0 8px var(--primary-50)' : 'none' }} />
                       </div>
                     </div>
                   );
@@ -766,7 +780,7 @@ export default function ZakatTab({ data }) {
                         <span style={{ fontSize: '1rem', fontWeight: 900, color: met ? '#16a34a' : 'var(--gold)', letterSpacing: '-0.5px' }}>{pct}%</span>
                       </div>
                       <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.06)', borderRadius: '100px', overflow: 'hidden' }}>
-                        <div style={{ width: `${pct}%`, height: '100%', background: met ? 'linear-gradient(90deg, #22c5b0, #16a34a)' : 'linear-gradient(90deg, #f59e0b, #d97706)', borderRadius: '100px', transition: 'width 0.9s cubic-bezier(0.22,1,0.36,1)', boxShadow: met ? '0 0 8px rgba(34,197,94,0.4)' : 'none' }} />
+                        <div style={{ width: `${pct}%`, height: '100%', background: met ? 'linear-gradient(90deg, var(--primary-100), var(--primary))' : 'linear-gradient(90deg, var(--gold), #d97706)', borderRadius: '100px', transition: 'width 0.9s cubic-bezier(0.22,1,0.36,1)', boxShadow: met ? '0 0 8px var(--primary-50)' : 'none' }} />
                       </div>
                     </div>
                   );
@@ -785,7 +799,7 @@ export default function ZakatTab({ data }) {
                         <span style={{ fontSize: '1rem', fontWeight: 900, color: agriEligible ? '#16a34a' : 'var(--gold)', letterSpacing: '-0.5px' }}>{pct}%</span>
                       </div>
                       <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.06)', borderRadius: '100px', overflow: 'hidden' }}>
-                        <div style={{ width: `${pct}%`, height: '100%', background: agriEligible ? 'linear-gradient(90deg, #22c5b0, #16a34a)' : 'linear-gradient(90deg, #f59e0b, #d97706)', borderRadius: '100px', transition: 'width 0.9s cubic-bezier(0.22,1,0.36,1)', boxShadow: agriEligible ? '0 0 8px rgba(34,197,94,0.4)' : 'none' }} />
+                        <div style={{ width: `${pct}%`, height: '100%', background: agriEligible ? 'linear-gradient(90deg, var(--primary-100), var(--primary))' : 'linear-gradient(90deg, var(--gold), #d97706)', borderRadius: '100px', transition: 'width 0.9s cubic-bezier(0.22,1,0.36,1)', boxShadow: agriEligible ? '0 0 8px var(--primary-50)' : 'none' }} />
                       </div>
                     </div>
                   );
@@ -846,7 +860,7 @@ export default function ZakatTab({ data }) {
         <div className="zakat-right-col" style={{ flex: '1 1 300px', position: 'sticky', top: '24px' }}>
           <div className="print-card" style={{ background: 'var(--bg)', borderRadius: '24px', padding: '32px', boxShadow: '0 16px 48px rgba(0,0,0,0.07)', border: '1px solid var(--border)', position: 'relative', overflow: 'hidden' }}>
             {/* Top accent bar */}
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'linear-gradient(90deg, var(--primary) 0%, #22c5b0 50%, var(--gold) 100%)' }} />
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-hover) 50%, var(--gold) 100%)' }} />
 
             <h3 style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px', letterSpacing: '-0.3px' }}>
               <Calculator size={18} color="var(--primary)" /> Zakat Summary
@@ -901,7 +915,7 @@ export default function ZakatTab({ data }) {
               </div>
             )}
 
-            <button onClick={handlePrint} className="no-print hover-lift" style={{ marginTop: '8px', width: '100%', background: 'linear-gradient(135deg, var(--primary) 0%, #22c5b0 100%)', color: 'white', border: 'none', padding: '16px', borderRadius: '16px', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 8px 24px rgba(15,82,87,0.25)', fontSize: '0.9rem', letterSpacing: '0.2px' }}>
+            <button onClick={handlePrint} className="no-print hover-lift" style={{ marginTop: '8px', width: '100%', background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%)', color: 'white', border: 'none', padding: '16px', borderRadius: '16px', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 8px 24px var(--primary-50)', fontSize: '0.9rem', letterSpacing: '0.2px' }}>
               <Download size={16} /> Print Zakat Statement
             </button>
           </div>

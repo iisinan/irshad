@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Play, FileText, Download, BookOpen, Search, X } from 'lucide-react';
 import api from '../../services/api';
+import localforage from 'localforage';
 
 export default function LecturesTab() {
   const [search, setSearch] = useState('');
@@ -13,23 +14,36 @@ export default function LecturesTab() {
   const firstRender = useRef(true);
 
   useEffect(() => {
-    const fetchResources = async () => {
-      setLoading(true);
+    const fetchResources = async (isBackground = false) => {
+      if (!isBackground) setLoading(true);
       try {
         const response = await api.get('/resources', {
           params: { search, type: filter }
         });
         setResources(response.data.data);
+        if (!search && filter === 'all') {
+          localforage.setItem('irshad_resources_cache', response.data.data);
+        }
       } catch (err) {
         console.error('Failed to fetch resources:', err);
       } finally {
-        setLoading(false);
+        if (!isBackground) setLoading(false);
       }
     };
 
     if (firstRender.current) {
       firstRender.current = false;
-      fetchResources();
+      localforage.getItem('irshad_resources_cache').then(cached => {
+        if (cached && Array.isArray(cached) && cached.length > 0) {
+          setResources(cached);
+          setLoading(false);
+          fetchResources(true); // background refresh
+        } else {
+          fetchResources();
+        }
+      }).catch(() => {
+        fetchResources();
+      });
       return;
     }
 
@@ -46,17 +60,28 @@ export default function LecturesTab() {
       <div className="animate-fade-in stagger-1" style={{ background: 'var(--bg)', borderRadius: '24px', padding: '0', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--border)', overflow: 'hidden' }}>
         
         {/* Header Banner */}
-        <div style={{ background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, var(--text-dark) 100%)', padding: '32px', position: 'relative', overflow: 'hidden', borderBottom: '1px solid rgba(209, 165, 98, 0.15)' }}>
-          <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(209, 165, 98, 0.08)', borderRadius: '50%' }} />
-          <div style={{ position: 'absolute', bottom: '-60px', left: '30%', width: '150px', height: '150px', background: 'rgba(209, 165, 98, 0.04)', borderRadius: '50%' }} />
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <div style={{ width: '52px', height: '52px', background: 'rgba(209, 165, 98, 0.12)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', backdropFilter: 'blur(4px)', border: '1px solid rgba(209, 165, 98, 0.35)' }}>
-                <BookOpen size={26} fill="currentColor" />
+        <div style={{ background: 'linear-gradient(135deg, var(--primary) 0%, #301f42 100%)', padding: '32px', position: 'relative', overflow: 'hidden', borderBottom: '1px solid rgba(209, 165, 98, 0.2)' }}>
+          {/* Dynamic Background Elements */}
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'radial-gradient(circle at 85% 20%, rgba(209, 165, 98, 0.15) 0%, transparent 60%)', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(209, 165, 98, 0.08)', borderRadius: '50%', filter: 'blur(30px)' }} />
+          <div style={{ position: 'absolute', bottom: '-60px', left: '20%', width: '150px', height: '150px', background: 'rgba(255,255,255, 0.05)', borderRadius: '50%', filter: 'blur(20px)' }} />
+          
+          {/* Decorative Right Edge Icon */}
+          <div style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%) rotate(10deg)', opacity: 0.06, pointerEvents: 'none', zIndex: 0 }}>
+            <BookOpen size={180} color="var(--gold)" strokeWidth={1} />
+          </div>
+
+          {/* Decorative Grid Overlay */}
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '20px 20px', opacity: 0.5, pointerEvents: 'none' }} />
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px', position: 'relative', zIndex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+              <div style={{ width: '56px', height: '56px', background: 'linear-gradient(135deg, rgba(209, 165, 98, 0.2) 0%, rgba(209, 165, 98, 0.05) 100%)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gold)', backdropFilter: 'blur(16px)', border: '1px solid rgba(209, 165, 98, 0.4)', boxShadow: '0 12px 32px rgba(0,0,0,0.2), inset 0 2px 0 rgba(255,255,255,0.1)' }}>
+                <BookOpen size={28} strokeWidth={1.5} />
               </div>
               <div>
-                <h2 style={{ fontSize: '1.41rem', fontWeight: 900, color: 'white', letterSpacing: '-0.5px' }}>Islamic Finance Library</h2>
-                <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.84rem', marginTop: '2px' }}>Verified scholars · AAOIFI-aligned content</p>
+                <h2 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'white', letterSpacing: '-0.5px', margin: 0, textShadow: '0 2px 10px rgba(0,0,0,0.2)' }}>Islamic Finance Library</h2>
+                <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.85rem', marginTop: '4px', margin: 0, fontWeight: 500 }}>Verified scholars · AAOIFI-aligned content</p>
               </div>
             </div>
 
