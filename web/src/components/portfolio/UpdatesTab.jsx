@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Newspaper, Bell, Moon, Clock, Star } from 'lucide-react';
+import { Newspaper, Bell, Moon, Clock, Star, Mail } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import UpdatesNews    from './UpdatesNews';
 import UpdatesInbox   from './UpdatesInbox';
+import UpdatesDigest  from './UpdatesDigest';
 
 /* ── Greeting helpers ── */
 function getGreeting() {
@@ -69,6 +70,12 @@ export default function UpdatesTab({ unreadCount = 0 }) {
       icon: Bell,
       badge: unreadCount,
       description: 'Your personal notifications & alerts',
+    },
+    {
+      id: 'digest',
+      label: 'Weekly Digest',
+      icon: Mail,
+      description: 'Portfolio compliance status summary',
     },
   ];
 
@@ -261,8 +268,9 @@ export default function UpdatesTab({ unreadCount = 0 }) {
 
       {/* ── Tab Content ── */}
       <div className="animate-slide-up stagger-3" key={activeSubTab} style={{ minHeight: '400px' }}>
-        {activeSubTab === 'news'  && <UpdatesNews />}
-        {activeSubTab === 'inbox' && <UpdatesInbox />}
+        {activeSubTab === 'news'   && <UpdatesNews />}
+        {activeSubTab === 'inbox'  && <UpdatesInbox />}
+        {activeSubTab === 'digest' && <UpdatesDigest />}
       </div>
     </div>
   );

@@ -5,7 +5,7 @@ import {
   ExternalLink, RefreshCw, Mail, Bell, ChevronRight,
   ArrowRight, Newspaper, Zap, Shield, Star
 } from 'lucide-react';
-import { fetchUpdatesNews, fetchDigestPreference, updateDigestPreference } from '../../services/api';
+import { fetchUpdatesNews } from '../../services/api';
 import { toastSuccess, toastError } from '../../utils/toast';
 import CompanyLogo from '../CompanyLogo';
 
@@ -64,201 +64,6 @@ const SectionHeader = ({ icon: Icon, title, count, color = 'var(--primary)' }) =
   </div>
 );
 
-/* ── Weekly Digest Banner ── */
-const DigestBanner = () => {
-  const [pref, setPref] = useState(null);
-  const [saving, setSaving] = useState(false);
-  const [expanded, setExpanded] = useState(false);
-  const [bannerExpanded, setBannerExpanded] = useState(false);
-
-  useEffect(() => {
-    fetchDigestPreference()
-      .then(r => setPref(r.data))
-      .catch(() => setPref({ email_enabled: false, in_app_enabled: true, frequency: 'weekly', enabled: false }));
-  }, []);
-
-  const isEnabled = pref?.email_enabled || pref?.in_app_enabled;
-
-  const handleToggle = async (e) => {
-    e.stopPropagation(); // prevent accordion toggle
-    try {
-      setSaving(true);
-      const next = isEnabled
-        ? { email_enabled: false, in_app_enabled: false }
-        : { email_enabled: false, in_app_enabled: true };
-      const res = await updateDigestPreference(next);
-      setPref(res.data);
-      toastSuccess(isEnabled ? 'Weekly Digest disabled' : 'Weekly Digest enabled');
-      if (!isEnabled) setExpanded(true); // Auto expand settings when enabling
-    } catch {
-      toastError('Failed to update preference');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleFrequency = async (freq) => {
-    try {
-      setSaving(true);
-      const res = await updateDigestPreference({ ...pref, frequency: freq });
-      setPref(res.data);
-    } catch {
-      toastError('Failed to update preference');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleDelivery = async (field) => {
-    try {
-      setSaving(true);
-      const res = await updateDigestPreference({ ...pref, [field]: !pref[field] });
-      setPref(res.data);
-    } catch {
-      toastError('Failed to update preference');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <div style={{
-      background: bannerExpanded ? 'var(--bg-section)' : 'var(--bg)',
-      border: '1px solid var(--border)',
-      borderRadius: '16px',
-      marginBottom: '32px',
-      position: 'relative',
-      overflow: 'hidden',
-      transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-      cursor: bannerExpanded ? 'default' : 'pointer',
-    }}
-      onClick={() => { if (!bannerExpanded) setBannerExpanded(true); }}
-    >
-      {/* Sleek closed header */}
-      <div 
-        style={{ 
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
-          padding: '16px 20px', cursor: 'pointer',
-          borderBottom: bannerExpanded ? '1px solid var(--border)' : 'none',
-        }}
-        onClick={(e) => {
-          if (bannerExpanded) {
-            e.stopPropagation();
-            setBannerExpanded(false);
-          }
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'var(--gold-50)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Mail size={16} color="var(--gold)" />
-          </div>
-          <div>
-            <h3 style={{ fontSize: '0.88rem', fontWeight: 900, color: 'var(--text-dark)', margin: 0 }}>
-              Irshad Weekly Digest
-            </h3>
-            {!bannerExpanded && (
-              <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', margin: 0, marginTop: '2px' }}>
-                Stay informed about your portfolio's Shariah compliance status.
-              </p>
-            )}
-          </div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          {!bannerExpanded && isEnabled && (
-            <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--halal)', background: 'var(--halal-bg)', padding: '2px 8px', borderRadius: '20px' }}>
-              Enabled
-            </span>
-          )}
-          <ChevronRight size={18} color="var(--text-muted)" style={{ transform: bannerExpanded ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
-        </div>
-      </div>
-
-      {/* Expanded Content */}
-      {bannerExpanded && (
-        <div style={{ padding: '24px 20px', background: 'linear-gradient(135deg, rgba(91,41,113,0.03) 0%, rgba(209,165,98,0.03) 100%)' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
-            <div style={{ flex: 1 }}>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-body)', margin: '0 0 16px', lineHeight: 1.5, fontWeight: 500 }}>
-                Get a comprehensive weekly summary of your portfolio. We'll track and notify you about:
-              </p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '10px' }}>
-                {['New Halal stocks', 'Non-Halal changes', 'Business activity', 'Market intelligence', 'Portfolio insights'].map(item => (
-                  <span key={item} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', fontWeight: 700, color: 'var(--primary)' }}>
-                    <CheckCircle2 size={12} color="var(--halal)" /> {item}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'flex-end', minWidth: '130px' }}>
-              <button
-                onClick={handleToggle}
-                disabled={saving}
-                style={{
-                  padding: '10px 20px',
-                  borderRadius: '12px',
-                  border: 'none',
-                  background: isEnabled ? 'var(--bg)' : 'var(--primary)',
-                  border: isEnabled ? '1px solid var(--border)' : '1px solid var(--primary)',
-                  color: isEnabled ? 'var(--text-dark)' : 'white',
-                  fontWeight: 800,
-                  fontSize: '0.75rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                  boxShadow: isEnabled ? 'none' : '0 4px 12px rgba(91,41,113,0.2)',
-                }}
-              >
-                {isEnabled ? <><CheckCircle2 size={14} color="var(--halal)" /> Enabled</> : <><Bell size={14} /> Enable</>}
-              </button>
-              
-              {isEnabled && (
-                <button 
-                  onClick={() => setExpanded(!expanded)} 
-                  style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
-                >
-                  Settings <ChevronRight size={12} style={{ transform: expanded ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Expanded settings inside the accordion */}
-          {isEnabled && expanded && pref && (
-            <div className="animate-slide-up" style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid var(--border)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
-              <div>
-                <div style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '12px' }}>Delivery Methods</div>
-                {[{ key: 'email_enabled', label: 'Email Notifications' }, { key: 'in_app_enabled', label: 'In-App Alerts' }].map(({ key, label }) => (
-                  <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px', cursor: 'pointer' }}>
-                    <div onClick={() => handleDelivery(key)} style={{ width: '38px', height: '22px', borderRadius: '12px', background: pref[key] ? 'var(--primary)' : 'var(--border)', position: 'relative', cursor: 'pointer', transition: 'background 0.2s', flexShrink: 0 }}>
-                      <div style={{ position: 'absolute', top: '2px', left: pref[key] ? '18px' : '2px', width: '18px', height: '18px', borderRadius: '50%', background: 'white', transition: 'left 0.2s', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }} />
-                    </div>
-                    <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-body)' }}>{label}</span>
-                  </label>
-                ))}
-              </div>
-              <div>
-                <div style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '12px' }}>Frequency</div>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  {['weekly', 'monthly'].map(f => (
-                    <button key={f} onClick={() => handleFrequency(f)} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: pref.frequency === f ? 'var(--primary-50)' : 'var(--bg)', border: `1px solid ${pref.frequency === f ? 'var(--primary-100)' : 'var(--border)'}`, borderRadius: '10px', padding: '8px 12px', cursor: 'pointer', transition: 'all 0.2s' }}>
-                      <div style={{ width: '12px', height: '12px', borderRadius: '50%', border: `2px solid ${pref.frequency === f ? 'var(--primary)' : 'var(--text-muted)'}`, background: pref.frequency === f ? 'var(--primary)' : 'transparent', flexShrink: 0 }} />
-                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: pref.frequency === f ? 'var(--primary)' : 'var(--text-muted)', textTransform: 'capitalize' }}>{f}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-};
 
 /* ── Compliance Change Card ── */
 const ComplianceCard = ({ item }) => {
@@ -460,8 +265,6 @@ export default function UpdatesNews() {
 
   return (
     <div>
-      {/* Weekly Digest */}
-      <DigestBanner />
 
       {/* Section Pills */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', flexWrap: 'wrap' }}>
