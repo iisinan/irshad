@@ -181,17 +181,18 @@ class StockController extends Controller
             $stockArray['business_status'] = $aaoifiScreening?->business_status ?? null;
 
             if (isset($stockArray['status']) && is_array($stockArray['status'])) {
-                $ratio = (float) ($aaoifiScreening?->impermissible_income_ratio ?? 0);
+                $dbRatio = (float) ($aaoifiScreening?->impermissible_income_ratio ?? 0);
 
-                if ($ratio == 0 && $company->financials && $company->financials->count() > 0) {
+                if ($dbRatio == 0 && $company->financials && $company->financials->count() > 0) {
                     $financial = $company->financials->first();
                     if ($financial->total_revenue > 0) {
-                        $ratio = ($financial->interest_income / $financial->total_revenue) * 100;
+                        $dbRatio = ($financial->interest_income / $financial->total_revenue);
                     }
                 }
 
-                $stockArray['status']['purification_required'] = ($stockArray['status']['status'] ?? '') === 'halal' && $ratio > 0;
-                $stockArray['status']['haram_revenue_percent'] = round($ratio, 4);
+                $ratioPct = $dbRatio * 100;
+                $stockArray['status']['purification_required'] = ($stockArray['status']['status'] ?? '') === 'halal' && $ratioPct > 0;
+                $stockArray['status']['haram_revenue_percent'] = round($ratioPct, 4);
             }
 
             return $stockArray;
@@ -602,10 +603,8 @@ class StockController extends Controller
                 'market_cap' => ($company->market_cap ?? 0) ?: ($companyFin->market_cap ?? 0),
             ]);
 
-            $calculatedIncomeRatio = 0;
-            if ($frontendFinData['total_revenue'] > 0) {
-                $calculatedIncomeRatio = ($frontendFinData['interest_income'] / $frontendFinData['total_revenue']) * 100;
-            }
+            $dbIncomeRatio = (float) ($aaoifiScreening->impermissible_income_ratio ?? 0);
+            $incomePct = $dbIncomeRatio * 100;
 
             $mapped = [
                 'company_id'    => $company->id,
@@ -617,8 +616,8 @@ class StockController extends Controller
                 'market_cap'    => $company->market_cap,
                 'stage1' => [
                     'status'               => $aaoifiScreening->business_status === 'pass' ? 'halal' : ($aaoifiScreening->business_status === 'doubtful' ? 'doubtful' : 'non-halal'),
-                    'haram_revenue_percent'=> round($calculatedIncomeRatio, 4),
-                    'purification_required'=> $calculatedIncomeRatio > 0 && $calculatedIncomeRatio <= 5,
+                    'haram_revenue_percent'=> round($incomePct, 4),
+                    'purification_required'=> $incomePct > 0 && $incomePct <= 5,
                     'reason'               => $finalStage1Reason,
                 ],
                 'business_status'             => $aaoifiScreening->business_status,
@@ -627,8 +626,8 @@ class StockController extends Controller
                 'debt_status'                 => $aaoifiScreening->debt_status,
                 'cash_ratio'                  => $aaoifiScreening->cash_ratio,
                 'cash_status'                 => $aaoifiScreening->cash_status,
-                'impermissible_income_ratio'  => $calculatedIncomeRatio,
-                'impermissible_income_status' => $calculatedIncomeRatio <= 5 ? 'pass' : 'fail',
+                'impermissible_income_ratio'  => $aaoifiScreening->impermissible_income_ratio,
+                'impermissible_income_status' => $aaoifiScreening->impermissible_income_status,
                 'illiquid_ratio'              => $aaoifiScreening->illiquid_ratio,
                 'illiquid_status'             => $aaoifiScreening->illiquid_status,
                 'receivables_ratio'           => $aaoifiScreening->receivables_ratio,
