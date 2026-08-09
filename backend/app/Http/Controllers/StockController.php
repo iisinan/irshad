@@ -43,11 +43,12 @@ class StockController extends Controller
                 ->orderBy('symbol', 'asc')
                 ->get()
                 ->map(function ($company) {
-                    $ratio = $company->aaoifiScreening ? $company->aaoifiScreening->impermissible_income_ratio : 0;
+                    $ratio = $company->aaoifiScreening ? (float) $company->aaoifiScreening->impermissible_income_ratio : 0;
+                    $ratioPct = $ratio * 100;
                     $company->status = $company->current_status ? [
                         'status' => $company->current_status,
-                        'purification_required' => $company->current_status === 'halal' && $ratio > 0,
-                        'haram_revenue_percent' => $ratio,
+                        'purification_required' => $company->current_status === 'halal' && $ratioPct > 0,
+                        'haram_revenue_percent' => round($ratioPct, 4),
                     ] : null;
                     unset($company->aaoifiScreening);
 
