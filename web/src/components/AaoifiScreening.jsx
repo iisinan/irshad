@@ -349,8 +349,17 @@ const AaoifiScreening = () => {
   const priceChangePct = parseFloat(stock?.price_change_pct)||0;
   const newsItems      = Array.isArray(stock?.news) ? stock.news : [];
 
-  let cleanStatusReason = formatAppJustification(report.status_reason,isNonHalal);
-  if(isNonHalal&&!businessFailed){ const ind=(report.industry||'its sector').toLowerCase(); cleanStatusReason=`Although the company passes the Shariah business activity screening because its core operations in ${ind} are permissible, it fails the required quantitative financial benchmarks.`; }
+  let cleanStatusReason = formatAppJustification(report.status_reason, isNonHalal);
+  if (finalStatus === 'halal') {
+    if (hasPurification) {
+      cleanStatusReason = "Permissible to hold. A small portion of any dividend must be purified to charity.";
+    } else {
+      cleanStatusReason = "Permissible core activity. Additionally, it passes all AAOIFI quantitative financial screening ratios.";
+    }
+  } else if (isNonHalal && !businessFailed) {
+    const ind = (report.industry || 'its sector').toLowerCase(); 
+    cleanStatusReason = `Although the company passes the Shariah business activity screening because its core operations in ${ind} are permissible, it fails the required quantitative financial benchmarks.`; 
+  }
   const cleanStage1Reason = formatAppJustification(report.stage1?.reason||report.business_reasoning,isNonHalal);
 
   const SC = {
