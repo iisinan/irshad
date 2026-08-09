@@ -116,13 +116,44 @@ export default function Portfolio() {
     window.history.replaceState(null, '', `#${tabId}`);
   };
 
-  const loadData = (silent = false) => {
+  const loadData = async (silent = false) => {
     if (!data && !silent) setLoading(true);
     if (!silent) setError(null);
-    fetchPortfolio()
-      .then(r => setData(r.data))
-      .catch(e => { if (!data && !silent) setError(e?.message || 'Failed to load portfolio'); })
-      .finally(() => { if(!silent) setLoading(false); });
+    
+    try {
+      const { fetchUpdatesNews, fetchNgxStocks } = await import('../services/api');
+      const api = (await import('../services/api')).default;
+
+      const [portfolioRes, newsRes, resourcesRes, marketRes] = await Promise.allSettled([
+        fetchPortfolio(),
+        fetchUpdatesNews(),
+        api.get('/resources'),
+        fetchNgxStocks(),
+      ]);
+
+      if (portfolioRes.status === 'fulfilled') {
+        setData(portfolioRes.value.data);
+      } else {
+        if (!data && !silent) setError(portfolioRes.reason?.message || 'Failed to load portfolio');
+      }
+
+      // Pre-warm caches so tabs render instantly
+      if (newsRes.status === 'fulfilled') {
+        localforage.setItem('irshad_updates_news_cache', newsRes.value.data);
+      }
+      if (resourcesRes.status === 'fulfilled') {
+        localforage.setItem('irshad_resources_cache', resourcesRes.value.data.data);
+      }
+      if (marketRes.status === 'fulfilled') {
+        const val = Array.isArray(marketRes.value) ? marketRes.value : (marketRes.value?.data || []);
+        localStorage.setItem('irshad_market_v2', JSON.stringify(val));
+      }
+
+    } catch (e) {
+      if (!data && !silent) setError(e?.message || 'Failed to load data');
+    } finally {
+      if (!silent) setLoading(false);
+    }
   };
 
   useEffect(() => { 
