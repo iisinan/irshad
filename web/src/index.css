@@ -4857,6 +4857,10 @@ html, body {
   .mobile-wrap {
     flex-wrap: wrap !important;
   }
+  .w-full-mobile {
+    width: 100% !important;
+    max-width: none !important;
+  }
 }
 
 @media (max-width: 640px) {

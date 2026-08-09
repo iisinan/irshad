@@ -362,7 +362,7 @@ const AaoifiScreening = () => {
      ║                      RENDER                          ║
      ╚═══════════════════════════════════════════════════════╝ */
   return (
-    <div style={{ width:'100%',padding:'20px 20px 80px',display:'flex',gap:22,alignItems:'flex-start' }}>
+    <div className="mobile-col" style={{ width:'100%',padding:'20px 20px 80px',display:'flex',gap:22,alignItems:'flex-start' }}>
 
       {/* ═══════════ LEFT MAIN CONTENT ═══════════ */}
       <div style={{ flex:1,minWidth:0 }}>
@@ -636,7 +636,7 @@ const AaoifiScreening = () => {
       </div> {/* end left column */}
 
       {/* ═══════════ RIGHT: METRICS & AI COPILOT ═══════════ */}
-      <div style={{ width:308,flexShrink:0,position:'sticky',top:20,marginTop:52,maxHeight:'calc(100vh - 40px)',display:'flex',flexDirection:'column',gap:16 }}>
+      <div className="w-full-mobile" style={{ width:308,flexShrink:0,position:'sticky',top:20,marginTop:52,maxHeight:'calc(100vh - 40px)',display:'flex',flexDirection:'column',gap:16 }}>
         
         {/* PRICE DATA WIDGET */}
         <div style={{ borderRadius:24,border:'1px solid rgba(91,41,113,0.08)',background:'var(--bg)',padding:'28px 32px',boxShadow:'0 12px 40px rgba(91,41,113,0.04)' }}>
