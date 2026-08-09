@@ -461,30 +461,36 @@ export default function UpdatesNews() {
           {activeSection === 'compliance' && (
             <>
               <SectionHeader icon={Shield} title="Compliance Status Changes" count={complianceChanges.length} color="var(--non-halal)" />
-              {complianceChanges.length === 0
-                ? <EmptyState icon={CheckCircle2} title="No Recent Changes" subtitle="No companies have changed compliance status recently. You're all clear!" color="var(--halal)" />
-                : complianceChanges.map(item => <ComplianceCard key={item.id} item={item} />)
-              }
+              <div style={{ maxHeight: '600px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingRight: '6px' }} className="custom-scrollbar">
+                {complianceChanges.length === 0
+                  ? <EmptyState icon={CheckCircle2} title="No Recent Changes" subtitle="No companies have changed compliance status recently. You're all clear!" color="var(--halal)" />
+                  : complianceChanges.map(item => <ComplianceCard key={item.id} item={item} />)
+                }
+              </div>
             </>
           )}
 
           {activeSection === 'business' && (
             <>
               <SectionHeader icon={Zap} title="Business Activity Updates" count={businessUpdates.length} color="var(--doubtful)" />
-              {businessUpdates.length === 0
-                ? <EmptyState icon={Zap} title="No Business Updates" subtitle="No new business activities have been detected from your followed companies." color="var(--doubtful)" />
-                : businessUpdates.map(item => <BusinessCard key={item.id} item={item} />)
-              }
+              <div style={{ maxHeight: '600px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingRight: '6px' }} className="custom-scrollbar">
+                {businessUpdates.length === 0
+                  ? <EmptyState icon={Zap} title="No Business Updates" subtitle="No new business activities have been detected from your followed companies." color="var(--doubtful)" />
+                  : businessUpdates.map(item => <BusinessCard key={item.id} item={item} />)
+                }
+              </div>
             </>
           )}
 
           {activeSection === 'market' && (
             <>
               <SectionHeader icon={BarChart2} title="Islamic Market Intelligence" count={marketIntelligence.length} color="var(--primary)" />
-              {marketIntelligence.length === 0
-                ? <EmptyState icon={Newspaper} title="No Market News" subtitle="No market intelligence articles available right now. Check back soon." color="var(--primary)" />
-                : marketIntelligence.map(item => <MarketCard key={item.id} item={item} />)
-              }
+              <div style={{ maxHeight: '600px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingRight: '6px' }} className="custom-scrollbar">
+                {marketIntelligence.length === 0
+                  ? <EmptyState icon={Newspaper} title="No Market News" subtitle="No market intelligence articles available right now. Check back soon." color="var(--primary)" />
+                  : marketIntelligence.map(item => <MarketCard key={item.id} item={item} />)
+                }
+              </div>
             </>
           )}
         </div>

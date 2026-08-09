@@ -95,6 +95,7 @@ class StockController extends Controller
             $company = Company::with([
                 'status',
                 'marketData',
+                'dailyPrices' => fn ($q) => $q->orderBy('date', 'desc')->limit(30),
                 'financials' => fn ($q) => $q->latest()->limit(1),
                 'news' => fn ($q) => $q->latest()->limit(10),
             ])->where('symbol', $symbol)->firstOrFail();

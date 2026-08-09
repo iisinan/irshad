@@ -399,7 +399,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
           gap: '28px',
           transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
         }}
-        className="hover-card"
+        className="hover-card mobile-col"
         >
           {/* Left: Primary Verdict */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
@@ -769,7 +769,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
                       </div>
                     </div>
                     {/* Dates row */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                    <div className="mobile-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
                       {[
                         { label: 'Ex-Date', val: stock.upcoming_dividend.ex_date },
                         { label: 'Record Date', val: stock.upcoming_dividend.record_date },

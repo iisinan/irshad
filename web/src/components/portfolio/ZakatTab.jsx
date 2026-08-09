@@ -377,8 +377,8 @@ export default function ZakatTab({ data }) {
               </tbody>
             </table>
           </div>
+          </div>
         )}
-
         {/* ── Agriculture Section ── */}
         {harvestNum > 0 && (
           <div style={{ marginBottom: '28px' }}>
