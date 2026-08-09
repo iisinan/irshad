@@ -11,7 +11,7 @@ import {
   Trash2, Sliders, Brain, Sparkles, Send, Plus, Star,
   BrainCircuit, BarChart2, Newspaper, Clock, RefreshCw,
   ChevronDown, ChevronUp, MessageSquare, DollarSign, Percent,
-  Info, TrendingDown, Award, BookOpen, Zap, Bell, Search
+  Info, TrendingDown, Award, BookOpen, Zap, Bell, Search, User
 } from 'lucide-react';
 import { fetchAaoifiScreening, fetchStockDetails, updateAaoifiData, chatAboutStock, fetchNgxStocks, fetchPortfolio, addToWatchlist, fetchWatchlist, removeFromWatchlist } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -54,8 +54,8 @@ const fmtDate  = (d) => {
 const pct = (n) => isNaN(parseFloat(n))?'—':`${parseFloat(n).toFixed(2)}%`;
 
 /* ─── Section wrapper ───────────────────────────────────── */
-const Section = ({ children, style }) => (
-  <div style={{ background:'var(--bg-section)',borderRadius:18,border:'1px solid var(--border)',overflow:'hidden',marginBottom:16,...style }}>
+const Section = ({ children, style, className }) => (
+  <div className={className} style={{ background:'var(--bg-section)',borderRadius:18,border:'1px solid var(--border)',overflow:'hidden',marginBottom:16,...style }}>
     {children}
   </div>
 );
@@ -402,10 +402,27 @@ const AaoifiScreening = () => {
      ║                      RENDER                          ║
      ╚═══════════════════════════════════════════════════════╝ */
   return (
-    <div className="mobile-col" style={{ width:'100%',padding:'20px 20px 80px',display:'flex',gap:22,alignItems:'flex-start' }}>
+    <>
+    {/* ══ STICKY MOBILE HEADER ══ */}
+    <div className="aaoifi-sticky-header" style={{ display: 'none' }}>
+      <Link to="/portfolio#market" style={{ display:'flex',alignItems:'center',color:'var(--text-dark)',textDecoration:'none',gap:8 }}>
+        <ArrowLeft size={18}/>
+        <span style={{ fontWeight:900,fontSize:'0.95rem' }}>{symbol}</span>
+      </Link>
+      <div style={{ display:'flex',flexDirection:'column',alignItems:'flex-end' }}>
+        <span style={{ fontWeight:800,fontSize:'0.9rem',color:'var(--text-dark)' }}>
+          ₦{latestPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
+        </span>
+        <span style={{ fontSize:'0.65rem',fontWeight:800,color:sc.color,display:'flex',alignItems:'center',gap:3,textTransform:'uppercase' }}>
+          <StatusIcon size={10} color={sc.color} strokeWidth={3}/> {sc.label}
+        </span>
+      </div>
+    </div>
+
+    <div className="mobile-col aaoifi-container" style={{ width:'100%',padding:'20px 20px 80px',display:'flex',gap:22,alignItems:'flex-start' }}>
 
       {/* ═══════════ LEFT MAIN CONTENT ═══════════ */}
-      <div style={{ flex:1,minWidth:0 }}>
+      <div className="aaoifi-left" style={{ flex:1,minWidth:0 }}>
 
         {/* ── Top action bar ── */}
         <div style={{ display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:24,gap:12,flexWrap:'wrap' }}>
@@ -486,7 +503,7 @@ const AaoifiScreening = () => {
         </div>
 
         {/* ── Company header ── */}
-        <div style={{ background:'linear-gradient(145deg, var(--bg) 0%, rgba(91,41,113,0.04) 100%)',border:'1px solid rgba(91,41,113,0.1)',borderRadius:16,padding:'16px 20px',marginBottom:20,boxShadow:'0 4px 16px rgba(91,41,113,0.04), inset 0 1px 0 rgba(255,255,255,0.8)' }}>
+        <div className="aaoifi-header" style={{ background:'linear-gradient(145deg, var(--bg) 0%, rgba(91,41,113,0.04) 100%)',border:'1px solid rgba(91,41,113,0.1)',borderRadius:16,padding:'16px 20px',marginBottom:20,boxShadow:'0 4px 16px rgba(91,41,113,0.04), inset 0 1px 0 rgba(255,255,255,0.8)' }}>
           <div style={{ display:'flex',alignItems:'center',justifyContent:'space-between',gap:16,flexWrap:'wrap' }}>
             <div style={{ display:'flex',alignItems:'center',gap:14 }}>
               <div style={{ position:'relative', padding: '2px', background: '#fff', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
@@ -530,7 +547,7 @@ const AaoifiScreening = () => {
         </div>
 
         {/* ══ VERDICT CARD ══ */}
-        <div className="hover-lift" style={{ borderRadius:24,background:`linear-gradient(135deg, ${sc.color}35 0%, ${sc.color}15 100%)`,border:`1px solid ${sc.color}`,marginBottom:24,position:'relative',overflow:'hidden', boxShadow:`0 16px 40px -10px ${sc.color}25, 0 8px 24px -5px ${sc.color}15, inset 0 2px 4px rgba(255,255,255,1)` }}>
+        <div className="hover-lift aaoifi-verdict" style={{ borderRadius:24,background:`linear-gradient(135deg, ${sc.color}35 0%, ${sc.color}15 100%)`,border:`1px solid ${sc.color}`,marginBottom:24,position:'relative',overflow:'hidden', boxShadow:`0 16px 40px -10px ${sc.color}25, 0 8px 24px -5px ${sc.color}15, inset 0 2px 4px rgba(255,255,255,1)` }}>
           
           <div style={{ position:'absolute', inset: 0, backgroundImage: `radial-gradient(${sc.color}15 1px, transparent 1px)`, backgroundSize: '24px 24px', opacity: 0.6, pointerEvents: 'none' }} />
           
@@ -588,7 +605,7 @@ const AaoifiScreening = () => {
 
 
         {/* ══ STAGE 1: BUSINESS ACTIVITY ══ */}
-        <Section>
+        <Section className="aaoifi-stage1">
           <SectionHead icon={Building2} title="Business Activity Screening" subtitle="Stage 1 · Qualitative analysis of core revenue streams"
             iconColor="var(--primary)" iconBg="rgba(6,78,59,0.08)" iconBorder="rgba(6,78,59,0.18)"
             accent={stage1Status==='halal'?'linear-gradient(90deg,#10B981,rgba(16,185,129,0.1),transparent)':stage1Status==='doubtful'?'linear-gradient(90deg,#D97706,rgba(245,158,11,0.1),transparent)':'linear-gradient(90deg,#EF4444,rgba(239,68,68,0.1),transparent)'}
@@ -614,7 +631,7 @@ const AaoifiScreening = () => {
         </Section>
 
         {/* ══ STAGE 2: FINANCIAL RATIOS ══ */}
-        {showFinancials&&(<Section>
+        {showFinancials&&(<Section className="aaoifi-stage2">
           <SectionHead icon={BarChart3} title="Quantitative Financial Ratios" subtitle="Stage 2 · The three AAOIFI financial screening thresholds"
             iconColor="#7C3AED" iconBg="rgba(139,92,246,0.08)" iconBorder="rgba(139,92,246,0.18)"
             accent="linear-gradient(90deg,#7C3AED,rgba(139,92,246,0.1),transparent)"
@@ -640,7 +657,7 @@ const AaoifiScreening = () => {
 
 
         {/* ══ NEWS & DISCLOSURES ══ */}
-        {newsItems.length>0&&(<Section>
+        {newsItems.length>0&&(<Section className="aaoifi-news">
           <SectionHead icon={Newspaper} title="News & Disclosures" subtitle="Sources reviewed during the AAOIFI screening process"
             iconColor="#2563EB" iconBg="rgba(37,99,235,0.08)" iconBorder="rgba(37,99,235,0.18)"
             accent="linear-gradient(90deg,#2563EB,rgba(37,99,235,0.1),transparent)"
@@ -676,7 +693,7 @@ const AaoifiScreening = () => {
       </div> {/* end left column */}
 
       {/* ═══════════ RIGHT: METRICS & AI COPILOT ═══════════ */}
-      <div className="w-full-mobile" style={{ width:308,flexShrink:0,position:'sticky',top:20,marginTop:52,maxHeight:'calc(100vh - 40px)',display:'flex',flexDirection:'column',gap:16 }}>
+      <div className="w-full-mobile aaoifi-right" style={{ width:308,flexShrink:0,position:'sticky',top:20,marginTop:52,maxHeight:'calc(100vh - 40px)',display:'flex',flexDirection:'column',gap:16 }}>
         
         {/* PRICE DATA WIDGET */}
         {(() => {
@@ -692,7 +709,7 @@ const AaoifiScreening = () => {
           if (priceDataItems.length === 0) return null;
 
           return (
-            <div style={{ borderRadius:24,border:'1px solid rgba(91,41,113,0.08)',background:'var(--bg)',padding:'28px 32px',boxShadow:'0 12px 40px rgba(91,41,113,0.04)' }}>
+            <div className="aaoifi-price" style={{ borderRadius:24,border:'1px solid rgba(91,41,113,0.08)',background:'var(--bg)',padding:'28px 32px',boxShadow:'0 12px 40px rgba(91,41,113,0.04)' }}>
               <div style={{ display:'flex',alignItems:'center',gap:12,marginBottom:28 }}>
                 <div style={{ width:'40px', height:'40px', borderRadius:'14px', background:'var(--primary-50)', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--primary)', boxShadow:'0 4px 12px rgba(91,41,113,0.1)' }}>
                   <BarChart2 size={20} strokeWidth={2.5} />
@@ -727,7 +744,7 @@ const AaoifiScreening = () => {
           if (marketDataItems.length === 0) return null;
 
           return (
-            <div style={{ borderRadius:24,border:'1px solid rgba(91,41,113,0.08)',background:'var(--bg)',padding:'28px 32px',boxShadow:'0 12px 40px rgba(91,41,113,0.04)' }}>
+            <div className="aaoifi-market" style={{ borderRadius:24,border:'1px solid rgba(91,41,113,0.08)',background:'var(--bg)',padding:'28px 32px',boxShadow:'0 12px 40px rgba(91,41,113,0.04)' }}>
               <div style={{ display:'flex',alignItems:'center',gap:12,marginBottom:28 }}>
                 <div style={{ width:'40px', height:'40px', borderRadius:'14px', background:'var(--primary-50)', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--primary)', boxShadow:'0 4px 12px rgba(91,41,113,0.1)' }}>
                   <TrendingUp size={20} strokeWidth={2.5} />
@@ -837,6 +854,57 @@ const AaoifiScreening = () => {
       )}
 
     </div>
+
+    {/* AI FAB (Mobile Only) */}
+    <div className="ai-fab" onClick={() => setShowCopilot(true)}>
+      <Sparkles size={24} />
+    </div>
+
+    {/* AI Copilot Drawer (Mobile Only) */}
+    <div className={`ai-drawer ${showCopilot ? 'open' : ''}`}>
+      <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--primary-50)', borderTopLeftRadius: 24, borderTopRightRadius: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 32, height: 32, borderRadius: 10, background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Sparkles size={16} color="white" />
+          </div>
+          <span style={{ fontWeight: 800, color: 'var(--primary)', fontSize: '0.95rem' }}>Irshad Copilot</span>
+        </div>
+        <button onClick={() => setShowCopilot(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)' }}><X size={20} /></button>
+      </div>
+      <div style={{ flex: 1, overflowY: 'auto', padding: 20 }}>
+        {messages?.map((m, i) => (
+          <div key={i} style={{ marginBottom: 16, display: 'flex', alignItems: 'flex-start', gap: 12, flexDirection: m.role === 'user' ? 'row-reverse' : 'row' }}>
+            <div style={{ width: 32, height: 32, borderRadius: 10, background: m.role === 'user' ? 'var(--bg-section)' : 'var(--primary-50)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              {m.role === 'user' ? <User size={16} color="var(--text-muted)" /> : <Sparkles size={16} color="var(--primary)" />}
+            </div>
+            <div style={{ background: m.role === 'user' ? 'var(--bg-section)' : 'var(--primary-50)', color: m.role === 'user' ? 'var(--text-dark)' : 'var(--primary)', padding: '12px 16px', borderRadius: 16, fontSize: '0.85rem', lineHeight: 1.5, border: `1px solid ${m.role === 'user' ? 'var(--border)' : 'var(--primary-100)'}` }}>
+              <ReactMarkdown className="ai-markdown">{m.text}</ReactMarkdown>
+            </div>
+          </div>
+        ))}
+        {chatLoading && (
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+            <div style={{ width: 32, height: 32, borderRadius: 10, background: 'var(--primary-50)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Sparkles size={16} color="var(--primary)" />
+            </div>
+            <div style={{ background: 'var(--primary-50)', padding: '12px 16px', borderRadius: 16 }}>
+              <div className="spinner" style={{ width: 16, height: 16, borderWidth: 2, borderColor: 'var(--primary-100)', borderTopColor: 'var(--primary)' }} />
+            </div>
+          </div>
+        )}
+        <div ref={chatEndRef} />
+      </div>
+      <div style={{ padding: 16, borderTop: '1px solid var(--border)' }}>
+        <form onSubmit={e => { e.preventDefault(); sendChat(); }} style={{ display: 'flex', gap: 8 }}>
+          <input type="text" placeholder="Ask about this stock..." value={chatInput} onChange={e => setChatInput(e.target.value)} style={{ flex: 1, padding: '12px 16px', borderRadius: 100, border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.9rem', outline: 'none' }} />
+          <button type="submit" disabled={!chatInput.trim() || chatLoading} style={{ width: 44, height: 44, borderRadius: 22, background: 'var(--primary)', color: 'white', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: (!chatInput.trim() || chatLoading) ? 0.5 : 1 }}>
+            <Send size={18} />
+          </button>
+        </form>
+      </div>
+    </div>
+    
+    </>
   );
 };
 
