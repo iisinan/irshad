@@ -318,87 +318,79 @@ function PurificationCard({ h, onPurify, onStatClick }) {
   return (
     <div
       onClick={() => onPurify(h)}
-      style={{ borderRadius: '20px', border: '1px solid var(--border)', background: 'var(--bg)', overflow: 'hidden', cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.16,1,0.3,1)', position: 'relative' }}
-      onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary-100)'; e.currentTarget.style.boxShadow = '0 16px 40px var(--primary-50)'; e.currentTarget.style.transform = 'translateY(-4px)'; }}
-      onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)'; }}
+      className="hover-lift"
+      style={{ borderRadius: '16px', border: '1px solid var(--border)', background: 'var(--bg)', overflow: 'hidden', cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.16,1,0.3,1)', position: 'relative' }}
     >
-      {/* Top accent bar */}
-      <div style={{ height: '4px', background: 'linear-gradient(90deg, var(--primary), var(--primary-hover), var(--primary-100))' }} />
-
-      <div style={{ padding: '22px 24px' }}>
-        {/* Top row: logo + name + badge + chevron */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '22px' }}>
-          <CompanyLogo symbol={h.symbol} logoUrl={h.logo_url} size={46} radius={14} />
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 900, fontSize: '1.1rem', color: 'var(--text-dark)', letterSpacing: '-0.3px' }}>{h.symbol}</div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '3px', fontWeight: 500 }}>
-              {shares.toLocaleString()} shares · {fmt(h.average_buy_price)} avg cost
+      <div style={{ height: '3px', background: 'linear-gradient(90deg, var(--primary), var(--primary-hover), var(--primary-100))' }} />
+      <div style={{ padding: '16px 20px' }}>
+        {/* Top row: logo + name + amount to purify + action */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+          
+          {/* Left: Logo & Info */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <CompanyLogo symbol={h.symbol} logoUrl={h.logo_url} size={36} radius={10} />
+            <div>
+              <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-dark)', letterSpacing: '-0.2px' }}>{h.symbol}</div>
+              <div style={{ fontSize: '0.70rem', color: 'var(--text-muted)', marginTop: '2px', fontWeight: 500 }}>
+                {shares.toLocaleString()} shs · {fmt(h.average_buy_price)} avg
+              </div>
             </div>
           </div>
 
-          {/* Status pill */}
-          <div style={{ background: 'var(--primary-50)', border: '1px solid var(--primary-100)', borderRadius: '99px', padding: '6px 14px', display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, backdropFilter: 'blur(4px)', boxShadow: '0 4px 12px var(--primary-50)' }}>
-            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--primary)', boxShadow: '0 0 8px var(--primary-50)' }} />
-            <span style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Purify</span>
-          </div>
+          {/* Right: Amount & Purify Button */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ textAlign: 'right' }}>
+               <div style={{ fontSize: '0.62rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '2px' }}>Amount to Purify</div>
+               <div style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--primary)' }}>{fmt(due)}</div>
+            </div>
 
-          <ChevronRight size={20} color="var(--text-muted)" style={{ flexShrink: 0, opacity: 0.6 }} />
+            <div style={{ background: 'var(--primary)', color: 'white', borderRadius: '10px', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.70rem', fontWeight: 800, boxShadow: '0 4px 12px var(--primary-50)' }}>
+              Purify <ChevronRight size={14} />
+            </div>
+          </div>
         </div>
 
-        {/* Stats row - interactive cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '12px', marginBottom: '20px' }}>
+        {/* Stats row - super compact horizontal scroll */}
+        <div style={{ display: 'flex', gap: '8px', marginTop: '16px', overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: '4px' }}>
           {statItems.map((s, i) => (
-            <div
+             <div
               key={i}
-              onClick={(e) => {
-                e.stopPropagation();
-                onStatClick(h, s.key);
-              }}
+              onClick={(e) => { e.stopPropagation(); onStatClick(h, s.key); }}
               style={{
+                flexShrink: 0,
                 background: 'var(--bg-section)',
-                borderRadius: '14px',
-                padding: '12px 14px',
+                borderRadius: '10px',
+                padding: '8px 12px',
                 border: '1px solid var(--border)',
                 cursor: 'pointer',
-                transition: 'all 0.25s cubic-bezier(0.16,1,0.3,1)',
-                position: 'relative',
-                overflow: 'hidden'
+                display: 'flex', flexDirection: 'column', gap: '2px',
+                minWidth: '120px'
               }}
-              onMouseEnter={e => {
-                e.currentTarget.style.borderColor = 'var(--primary-100)';
-                e.currentTarget.style.background = 'var(--primary-50)';
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 16px var(--primary-50)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.borderColor = 'var(--border)';
-                e.currentTarget.style.background = 'var(--bg-section)';
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
-            >
-              <div style={{ fontSize: '0.62rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span>{s.label}</span>
-                <span style={{ fontSize: '0.65rem', opacity: 0.5, color: 'var(--primary)' }}>↗</span>
-              </div>
-              <div style={{ fontSize: '0.9rem', fontWeight: 900, color: s.warn ? 'var(--primary)' : 'var(--text-dark)' }}>{s.value}</div>
-              <div style={{ fontSize: '0.62rem', color: 'var(--text-muted)', marginTop: '4px', fontWeight: 500 }}>{s.sub}</div>
-            </div>
+              className="hover-lift"
+             >
+                <div style={{ fontSize: '0.62rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', display: 'flex', justifyContent: 'space-between' }}>
+                  {s.label} <span style={{ opacity: 0.5, color: 'var(--primary)' }}>↗</span>
+                </div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-dark)' }}>{s.value}</div>
+             </div>
           ))}
-        </div>
-
-        {/* Bottom row: amount to purify */}
-        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-          {/* Amount to purify + hint */}
-          <div style={{ background: 'var(--primary-50)', border: '1px solid var(--primary-100)', borderRadius: '16px', padding: '12px 20px', flex: '1 1 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', backdropFilter: 'blur(8px)' }}>
-            <div>
-              <div style={{ fontSize: '0.62rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '2px' }}>Amount to Purify</div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--primary)', letterSpacing: '-0.5px', textShadow: '0 2px 8px var(--primary-50)' }}>{fmt(due)}</div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--primary)', fontSize: '0.72rem', fontWeight: 700, borderLeft: '1px solid var(--primary-100)', paddingLeft: '16px', opacity: 0.8, cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={e => e.currentTarget.style.opacity = 1} onMouseLeave={e => e.currentTarget.style.opacity = 0.8}>
-              <Calculator size={14} />
-              View calc
-            </div>
+          
+          <div
+             onClick={(e) => { e.stopPropagation(); onPurify(h); }}
+             style={{
+               flexShrink: 0,
+               background: 'var(--primary-50)',
+               borderRadius: '10px',
+               padding: '8px 12px',
+               border: '1px dashed var(--primary-100)',
+               cursor: 'pointer',
+               display: 'flex', flexDirection: 'column', gap: '4px',
+               alignItems: 'center', justifyContent: 'center'
+             }}
+             className="hover-lift"
+          >
+            <Calculator size={14} color="var(--primary)" />
+            <div style={{ fontSize: '0.62rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase' }}>View Calc</div>
           </div>
         </div>
       </div>
