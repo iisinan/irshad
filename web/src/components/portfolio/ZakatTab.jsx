@@ -476,30 +476,35 @@ export default function ZakatTab({ data }) {
       </div>
       
       {/* Hero Banner */}
-      <div className="no-print zakat-hero" style={{ background: 'linear-gradient(135deg, var(--primary) 0%, #301f42 100%)', borderRadius:'24px', padding:'24px 28px', boxShadow:'0 20px 40px rgba(15,82,87,0.15)', border:'1px solid rgba(209, 165, 98, 0.3)', marginBottom: '36px', display: 'flex', alignItems: 'center', position: 'relative', overflow: 'hidden' }}>
-        {/* Dynamic Background Elements */}
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'radial-gradient(circle at 85% 20%, rgba(209, 165, 98, 0.15) 0%, transparent 60%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', top: '-60px', right: '-40px', width: '250px', height: '250px', background: 'rgba(209, 165, 98, 0.08)', borderRadius: '50%', filter: 'blur(40px)' }} />
-        <div style={{ position: 'absolute', bottom: '-40px', right: '15%', width: '150px', height: '150px', background: 'rgba(255,255,255, 0.05)', borderRadius: '50%', filter: 'blur(20px)' }} />
-        
+      {/* Hero Banner */}
+      <div className="no-print zakat-hero" style={{ 
+        background: 'linear-gradient(to right, var(--bg) 40%, var(--primary-50) 100%)', 
+        padding: '28px 32px', 
+        position: 'relative', 
+        overflow: 'hidden', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'space-between', 
+        flexWrap: 'wrap', 
+        gap: '20px', 
+        borderBottom: '1px solid var(--border)',
+        marginBottom: '24px'
+      }}>
         {/* Decorative Right Edge Icon */}
-        <div style={{ position: 'absolute', right: '-20px', top: '50%', transform: 'translateY(-50%) rotate(-15deg)', opacity: 0.06, pointerEvents: 'none', zIndex: 0 }}>
-          <Scale size={220} color="var(--gold)" strokeWidth={1} />
+        <div style={{ position: 'absolute', right: '-10px', top: '50%', transform: 'translateY(-50%) rotate(-5deg)', opacity: 0.08, pointerEvents: 'none' }}>
+           <Scale size={180} strokeWidth={1} color="var(--primary)" />
         </div>
 
-        {/* Decorative Grid Overlay */}
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '20px 20px', opacity: 0.5, pointerEvents: 'none' }} />
-
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px', position: 'relative', zIndex: 1, width: '100%', flexWrap: 'wrap' }}>
-          <div style={{ width: '64px', height: '64px', background: 'linear-gradient(135deg, rgba(209, 165, 98, 0.2) 0%, rgba(209, 165, 98, 0.05) 100%)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gold)', border: '1px solid rgba(209, 165, 98, 0.4)', backdropFilter: 'blur(16px)', boxShadow: '0 12px 32px rgba(0,0,0,0.2), inset 0 2px 0 rgba(255,255,255,0.1)' }}>
-            <Scale size={32} strokeWidth={1.5} />
+          <div style={{ width: '56px', height: '56px', background: 'var(--bg)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', border: '1px solid var(--border)', boxShadow: '0 8px 24px rgba(138, 76, 158, 0.12)' }}>
+            <Scale size={26} strokeWidth={2.5} />
           </div>
           <div style={{ flex: 1, position: 'relative', zIndex: 2 }}>
-            <span style={{ display: 'inline-block', padding: '4px 10px', background: 'rgba(209, 165, 98, 0.15)', border: '1px solid rgba(209, 165, 98, 0.3)', borderRadius: '100px', color: 'var(--gold)', fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>
+            <span style={{ display: 'inline-block', padding: '4px 10px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '100px', color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
               Wealth Purification
             </span>
-            <h2 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'white', letterSpacing: '-0.5px', margin: 0, textShadow: '0 2px 10px rgba(0,0,0,0.2)' }}>Comprehensive Zakat</h2>
-            <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.85rem', marginTop: '6px', margin: 0, fontWeight: 500, maxWidth: '450px', lineHeight: 1.5 }}>A simple, smart calculator covering all your asset classes, based on real-time market data.</p>
+            <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-dark)', letterSpacing: '-0.5px', margin: 0 }}>Comprehensive Zakat</h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '6px', margin: 0, fontWeight: 500, maxWidth: '450px', lineHeight: 1.5 }}>A simple, smart calculator covering all your asset classes, based on real-time market data.</p>
           </div>
         </div>
       </div>

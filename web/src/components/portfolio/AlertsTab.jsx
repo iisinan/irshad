@@ -52,19 +52,21 @@ export default function AlertsTab() {
     <div className="animate-fade-in stagger-1" style={{ background: 'var(--bg)', borderRadius:'24px', padding:'0', boxShadow:'var(--shadow-sm)', border:'1px solid var(--border)', overflow:'hidden' }}>
       
       {/* Header */}
-      <div style={{ background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, var(--text-dark) 100%)', padding: '32px', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px', borderBottom: '1px solid rgba(209, 165, 98, 0.15)' }}>
-        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(209, 165, 98, 0.08)', borderRadius: '50%' }} />
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', zIndex: 1 }}>
-          <div style={{ width: '56px', height: '56px', background: 'rgba(209, 165, 98, 0.12)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', border: '1px solid rgba(209, 165, 98, 0.35)' }}>
-            <Bell size={28} />
+      <div style={{ background: 'linear-gradient(to right, var(--bg) 40%, var(--primary-50) 100%)', padding: '28px 32px', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px', borderBottom: '1px solid var(--border)' }}>
+        <div style={{ position: 'absolute', right: '-10px', top: '50%', transform: 'translateY(-50%) rotate(-5deg)', opacity: 0.08, pointerEvents: 'none' }}>
+           <Bell size={180} strokeWidth={1} color="var(--primary)" />
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', position: 'relative', zIndex: 1 }}>
+          <div style={{ width: '56px', height: '56px', background: 'var(--bg)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', border: '1px solid var(--border)', boxShadow: '0 8px 24px rgba(138, 76, 158, 0.12)' }}>
+            <Bell size={26} strokeWidth={2.5} />
           </div>
           <div>
-            <h2 style={{ fontSize: '1.23rem', fontWeight: 800, color: 'white', letterSpacing: '-0.5px', margin: 0 }}>Price Alerts</h2>
-            <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.79rem', marginTop: '4px', margin: 0 }}>Real-time notifications for target market price thresholds</p>
+            <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-dark)', letterSpacing: '-0.5px', margin: 0 }}>Active Alerts</h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '6px', margin: 0 }}>Track assets & receive instant status alerts</p>
           </div>
         </div>
         <div style={{ position: 'relative', zIndex: 1 }}>
-          <span style={{ color: 'var(--primary)', fontSize: '0.78rem', fontWeight: 800, background: 'rgba(209, 165, 98, 0.12)', padding: '8px 16px', borderRadius: '12px', border: '1px solid rgba(209, 165, 98, 0.3)', backdropFilter: 'blur(10px)' }}>
+          <span style={{ color: 'var(--text-dark)', fontSize: '0.78rem', fontWeight: 800, background: 'var(--body-bg)', padding: '8px 16px', borderRadius: '12px', border: '1px solid var(--border)' }}>
             {alerts.length} {alerts.length === 1 ? 'Alert' : 'Alerts'}
           </span>
         </div>

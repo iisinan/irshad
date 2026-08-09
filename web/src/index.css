@@ -17,11 +17,11 @@
 
   --bg-section:   #FFFFFF;
 
-  /* Primary: vibrant purple */
-  --primary:      #5B2971;
-  --primary-hover:#4A215D;
-  --primary-50:   rgba(91, 41, 113, 0.07);
-  --primary-100:  rgba(91, 41, 113, 0.14);
+  /* Primary: Lighter Soft Purple */
+  --primary:      #8A4C9E;
+  --primary-hover:#743B87;
+  --primary-50:   rgba(138, 76, 158, 0.07);
+  --primary-100:  rgba(138, 76, 158, 0.14);
 
   /* Secondary lavender */
   --secondary:    var(--text-light);
@@ -69,7 +69,7 @@
   --shadow-md: 0 8px 24px rgba(20, 25, 40, 0.05);
   --shadow-lg: 0 16px 48px rgba(20, 25, 40, 0.08);
   --shadow-gold: 0 12px 40px rgba(209, 165, 98, 0.15);
-  --shadow-purple: 0 12px 40px rgba(91, 41, 113, 0.12);
+  --shadow-purple: 0 12px 40px rgba(138, 76, 158, 0.12);
 
   --radius-sm:  12px;
   --radius-md:  16px;

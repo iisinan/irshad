@@ -60,61 +60,54 @@ export default function LecturesTab() {
       <div className="animate-fade-in stagger-1" style={{ background: 'var(--bg)', borderRadius: '24px', padding: '0', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--border)', overflow: 'hidden' }}>
         
         {/* Header Banner */}
-        <div style={{ background: 'linear-gradient(135deg, var(--primary) 0%, #301f42 100%)', padding: '32px', position: 'relative', overflow: 'hidden', borderBottom: '1px solid rgba(209, 165, 98, 0.2)' }}>
-          {/* Dynamic Background Elements */}
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'radial-gradient(circle at 85% 20%, rgba(209, 165, 98, 0.15) 0%, transparent 60%)', pointerEvents: 'none' }} />
-          <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(209, 165, 98, 0.08)', borderRadius: '50%', filter: 'blur(30px)' }} />
-          <div style={{ position: 'absolute', bottom: '-60px', left: '20%', width: '150px', height: '150px', background: 'rgba(255,255,255, 0.05)', borderRadius: '50%', filter: 'blur(20px)' }} />
-          
+        <div style={{ background: 'linear-gradient(to right, var(--bg) 40%, var(--primary-50) 100%)', padding: '28px 32px', position: 'relative', overflow: 'hidden', borderBottom: '1px solid var(--border)' }}>
           {/* Decorative Right Edge Icon */}
-          <div style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%) rotate(10deg)', opacity: 0.06, pointerEvents: 'none', zIndex: 0 }}>
-            <BookOpen size={180} color="var(--gold)" strokeWidth={1} />
+          <div style={{ position: 'absolute', right: '-10px', top: '50%', transform: 'translateY(-50%) rotate(-5deg)', opacity: 0.08, pointerEvents: 'none', zIndex: 0 }}>
+            <BookOpen size={180} color="var(--primary)" strokeWidth={1} />
           </div>
-
-          {/* Decorative Grid Overlay */}
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '20px 20px', opacity: 0.5, pointerEvents: 'none' }} />
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px', position: 'relative', zIndex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-              <div style={{ width: '56px', height: '56px', background: 'linear-gradient(135deg, rgba(209, 165, 98, 0.2) 0%, rgba(209, 165, 98, 0.05) 100%)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gold)', backdropFilter: 'blur(16px)', border: '1px solid rgba(209, 165, 98, 0.4)', boxShadow: '0 12px 32px rgba(0,0,0,0.2), inset 0 2px 0 rgba(255,255,255,0.1)' }}>
-                <BookOpen size={28} strokeWidth={1.5} />
+              <div style={{ width: '56px', height: '56px', background: 'var(--bg)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', border: '1px solid var(--border)', boxShadow: '0 8px 24px rgba(138, 76, 158, 0.12)' }}>
+                <BookOpen size={26} strokeWidth={2.5} />
               </div>
               <div>
-                <h2 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'white', letterSpacing: '-0.5px', margin: 0, textShadow: '0 2px 10px rgba(0,0,0,0.2)' }}>Islamic Finance Library</h2>
-                <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.85rem', marginTop: '4px', margin: 0, fontWeight: 500 }}>Verified scholars · AAOIFI-aligned content</p>
+                <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-dark)', letterSpacing: '-0.5px', margin: 0 }}>Islamic Finance Library</h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '6px', margin: 0, fontWeight: 500 }}>Verified scholars · AAOIFI-aligned content</p>
               </div>
             </div>
 
             {/* Filters & Search */}
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
               <div style={{ position: 'relative' }}>
-                <Search size={14} color="rgba(255,255,255,0.6)" style={{ position: 'absolute', left: '12px', top: '11px' }} />
+                <Search size={14} color="var(--text-muted)" style={{ position: 'absolute', left: '12px', top: '11px' }} />
                 <input 
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   placeholder="Search resources..." 
                   style={{
                     padding: '10px 14px 10px 34px', borderRadius: '12px',
-                    border: '1.5px solid rgba(255,255,255,0.2)',
-                    background: 'rgba(255,255,255,0.12)',
-                    color: 'white', fontSize: '0.79rem', outline: 'none', width: '210px',
-                    backdropFilter: 'blur(4px)',
+                    border: '1px solid var(--border)',
+                    background: 'var(--body-bg)',
+                    color: 'var(--text-dark)', fontSize: '0.79rem', outline: 'none', width: '210px',
                   }}
                 />
               </div>
-              <div style={{ display: 'flex', background: 'rgba(255,255,255,0.12)', borderRadius: '10px', padding: '3px', gap: '2px', border: '1px solid rgba(255,255,255,0.15)' }}>
+              <div style={{ display: 'flex', background: 'var(--body-bg)', borderRadius: '14px', padding: '4px', border: '1px solid var(--border)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.03)' }}>
                 {[['all','All'],['video','Videos'],['document','Docs']].map(([val, lbl]) => (
                   <button
                     key={val}
                     onClick={() => setFilter(val)}
                     style={{
-                      padding: '6px 14px', borderRadius: '8px', border: 'none', cursor: 'pointer',
-                      fontSize: '0.72rem', fontWeight: 700, transition: 'all 0.2s',
+                      padding: '8px 18px', borderRadius: '10px', border: filter === val ? '1px solid rgba(0,0,0,0.04)' : '1px solid transparent',
                       background: filter === val ? 'var(--bg)' : 'transparent',
-                      color: filter === val ? 'var(--primary)' : 'rgba(255,255,255,0.8)',
-                      boxShadow: filter === val ? 'var(--shadow-sm)' : 'none',
+                      color: filter === val ? 'var(--text-dark)' : 'var(--text-muted)',
+                      fontWeight: filter === val ? 800 : 600, fontSize: '0.8rem', cursor: 'pointer',
+                      transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: filter === val ? '0 4px 12px rgba(0,0,0,0.06)' : 'none',
                     }}
-                  >{lbl}</button>
+                  >
+                    {lbl}
+                  </button>
                 ))}
               </div>
             </div>

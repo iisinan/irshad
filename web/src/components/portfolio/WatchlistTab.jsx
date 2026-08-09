@@ -154,46 +154,44 @@ export default function WatchlistTab({ initialSymbol }) {
   }, [allStocks, watchlistSymbols, filter]);
 
   return (
-    <div className="animate-fade-in stagger-1 watchlist-tab-card" style={{ background: 'var(--bg)', borderRadius:'24px', padding:'32px 24px', boxShadow:'0 4px 20px rgba(0,0,0,0.05)', border:'1px solid var(--border)' }}>
+    <div className="animate-fade-in stagger-1 watchlist-tab-card" style={{ background: 'var(--bg)', borderRadius:'24px', padding:'0', boxShadow:'0 4px 20px rgba(0,0,0,0.05)', border:'1px solid var(--border)', overflow:'hidden' }}>
       
       <div style={{ 
-        background: 'linear-gradient(135deg, var(--primary) 0%, #4A215D 100%)', 
-        borderRadius: '20px', padding: '24px 28px', 
-        boxShadow: '0 12px 32px rgba(91, 41, 113, 0.25)', 
-        border: '1px solid rgba(255, 255, 255, 0.1)', marginBottom: '16px', 
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
-        position: 'relative', overflow: 'hidden', flexWrap: 'wrap', gap: '20px' 
+        background: 'linear-gradient(to right, var(--bg) 40%, var(--primary-50) 100%)', padding: '28px 32px', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px', borderBottom: '1px solid var(--border)' 
       }}>
-        <div style={{ position: 'absolute', top: '-60px', right: '-40px', width: '200px', height: '200px', background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', zIndex: 1 }}>
-          <div style={{ width: '56px', height: '56px', background: 'rgba(255, 255, 255, 0.15)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', border: '1px solid rgba(255, 255, 255, 0.2)', backdropFilter: 'blur(8px)', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
-            <Eye size={28} fill="currentColor" />
+        <div style={{ position: 'absolute', right: '-10px', top: '50%', transform: 'translateY(-50%) rotate(-5deg)', opacity: 0.08, pointerEvents: 'none' }}>
+           <Eye size={180} strokeWidth={1} color="var(--primary)" />
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', position: 'relative', zIndex: 1 }}>
+          <div style={{ width: '56px', height: '56px', background: 'var(--bg)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', border: '1px solid var(--border)', boxShadow: '0 8px 24px rgba(138, 76, 158, 0.12)' }}>
+            <Eye size={26} strokeWidth={2.5} />
           </div>
           <div>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 850, color: 'white', letterSpacing: '-0.5px', margin: 0, textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>Alerts</h2>
-            <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.8rem', marginTop: '4px', margin: 0, fontWeight: 500 }}>Track assets & receive instant status alerts</p>
+            <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-dark)', letterSpacing: '-0.5px', margin: 0 }}>Watchlist & Alerts</h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '6px', margin: 0 }}>Track assets & receive instant status alerts</p>
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', zIndex: 1 }}>
-          <div style={{ color: 'white', fontSize: '0.8rem', fontWeight: 800, background: 'rgba(255, 255, 255, 0.15)', padding: '10px 18px', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.2)', backdropFilter: 'blur(10px)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+          <div style={{ color: 'var(--primary)', fontSize: '0.85rem', fontWeight: 800, background: 'var(--bg)', padding: '10px 20px', borderRadius: '14px', border: '1px solid var(--border)', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
             {watchlistSymbols.length} {watchlistSymbols.length === 1 ? 'Asset' : 'Assets'}
           </div>
         </div>
       </div>
 
-      <div className="watchlist-action-bar" style={{ display: 'flex', gap: '16px', marginBottom: '32px', position: 'relative', zIndex: 10, flexWrap: 'wrap', justifyContent: 'space-between' }}>
+      <div style={{ padding: '24px 32px 32px 32px' }}>
+        <div className="watchlist-action-bar" style={{ display: 'flex', gap: '16px', marginBottom: '32px', position: 'relative', zIndex: 10, flexWrap: 'wrap', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', background: 'var(--bg-section)', borderRadius: '16px', padding: '6px', border: '1px solid var(--border)' }}>
+          <div style={{ display: 'flex', background: 'var(--body-bg)', borderRadius: '14px', padding: '4px', border: '1px solid var(--border)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.03)' }}>
             {['all', 'halal', 'doubtful', 'non-halal'].map(f => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
                 style={{
-                  padding: '10px 16px', borderRadius: '10px', border: 'none',
+                  padding: '8px 18px', borderRadius: '10px', border: filter === f ? '1px solid rgba(0,0,0,0.04)' : '1px solid transparent',
                   background: filter === f ? 'var(--bg)' : 'transparent',
                   color: filter === f ? 'var(--text-dark)' : 'var(--text-muted)',
-                  fontWeight: filter === f ? 800 : 600, fontSize: '0.75rem', cursor: 'pointer',
-                  transition: 'all 0.2s', boxShadow: filter === f ? '0 2px 8px rgba(0,0,0,0.05)' : 'none',
+                  fontWeight: filter === f ? 800 : 600, fontSize: '0.8rem', cursor: 'pointer',
+                  transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: filter === f ? '0 4px 12px rgba(0,0,0,0.06)' : 'none',
                   textTransform: 'capitalize'
                 }}
               >
@@ -252,7 +250,7 @@ export default function WatchlistTab({ initialSymbol }) {
           </button>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div className="custom-scrollbar" style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '600px', overflowY: 'auto', paddingRight: '8px' }}>
           {watchedStocks.map((stock, i) => {
             const cfg = getStatusConfig(stock);
             const price = parseFloat(stock.latest_price ?? 0);
@@ -322,6 +320,7 @@ export default function WatchlistTab({ initialSymbol }) {
           })}
         </div>
       )}
+      </div>
 
       {showAddModal && (
         <AddWatchlistModal 

@@ -150,20 +150,20 @@ export default function Profile() {
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 20px 80px' }} className="animate-fade-in">
       {/* ── Hero Banner ── */}
-      <div className="animate-slide-up stagger-1 profile-hero" style={{ background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, var(--text-dark) 100%)', borderRadius: '28px', padding: '36px 40px', marginBottom: '28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', position: 'relative', overflow: 'hidden', boxShadow: '0 16px 40px rgba(0,0,0,0.3)', border: '1px solid rgba(209, 165, 98, 0.2)', gap: '20px' }}>
-        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', borderRadius: '50%', background: 'rgba(209, 165, 98, 0.08)' }} />
+      <div className="animate-slide-up stagger-1 profile-hero" style={{ background: 'linear-gradient(to right, var(--bg) 40%, var(--primary-50) 100%)', borderRadius: '24px', padding: '36px 40px', marginBottom: '28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', position: 'relative', overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid var(--border)', gap: '20px' }}>
+        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', borderRadius: '50%', background: 'var(--primary-100)', opacity: 0.5 }} />
         <div style={{ display: 'flex', alignItems: 'center', gap: '28px', zIndex: 1 }}>
-          <div style={{ width: '88px', height: '88px', borderRadius: '22px', background: 'rgba(209, 165, 98, 0.12)', backdropFilter: 'blur(10px)', border: '2px solid rgba(209, 165, 98, 0.35)', color: 'var(--primary)', fontSize: '1.76rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, letterSpacing: '-1px', boxShadow: '0 8px 32px rgba(0,0,0,0.2)', fontFamily: 'var(--serif)' }}>{initials}</div>
+          <div style={{ width: '88px', height: '88px', borderRadius: '22px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--primary)', fontSize: '1.76rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, letterSpacing: '-1px', boxShadow: '0 8px 32px rgba(138, 76, 158, 0.12)', fontFamily: 'var(--serif)' }}>{initials}</div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-              <h1 style={{ margin: 0, fontSize: '1.76rem', fontWeight: 800, color: 'white', letterSpacing: '-0.5px' }}>{displayName}</h1>
-              {user.premium && <span style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(209, 165, 98, 0.15)', border: '1px solid rgba(209, 165, 98, 0.4)', color: 'var(--primary)', padding: '4px 10px', borderRadius: '12px', fontSize: '0.66rem', fontWeight: 800 }}><Award size={13} /> PREMIUM</span>}
+              <h1 style={{ margin: 0, fontSize: '1.76rem', fontWeight: 800, color: 'var(--text-dark)', letterSpacing: '-0.5px' }}>{displayName}</h1>
+              {user.premium && <span style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--body-bg)', border: '1px solid var(--border)', color: 'var(--primary)', padding: '4px 10px', borderRadius: '12px', fontSize: '0.66rem', fontWeight: 800 }}><Award size={13} /> PREMIUM</span>}
             </div>
-            <p style={{ margin: '6px 0 16px', color: 'rgba(255,255,255,0.65)', fontSize: '0.84rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>{user.email} <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'rgba(255,255,255,0.3)' }} /> Member since '23</p>
+            <p style={{ margin: '6px 0 16px', color: 'var(--text-muted)', fontSize: '0.84rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>{user.email} <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--border)' }} /> Member since '23</p>
             <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><CheckCircle size={14} color="var(--gold)" /></div>
-                <div><div style={{ fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'rgba(255,255,255,0.5)', fontWeight: 800 }}>Screened</div><div style={{ color: 'white', fontWeight: 700, fontSize: '0.79rem' }}>{currentUser.screened_count || '0'}</div></div>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--body-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)' }}><CheckCircle size={14} color="var(--primary)" /></div>
+                <div><div style={{ fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', fontWeight: 800 }}>Screened</div><div style={{ color: 'var(--text-dark)', fontWeight: 700, fontSize: '0.79rem' }}>{currentUser.screened_count || '0'}</div></div>
               </div>
             </div>
           </div>
