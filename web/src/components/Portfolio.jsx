@@ -214,41 +214,45 @@ export default function Portfolio() {
 
       {/* Header & Tabs */}
       <div style={{ marginBottom: '32px' }}>
-        <div className="portfolio-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
-          <div>
-            <h1 className="portfolio-title" style={{ fontSize: 'clamp(1.6rem, 5vw, 2.46rem)', fontWeight: 900, letterSpacing: '-1.5px', color: 'var(--text-dark)', lineHeight: 1.1 }}>
-              {{
-                holdings: 'Holdings',
-                market: 'Market Screener',
-                watchlist: 'Alert',
-                updates: 'Updates',
-                guide: 'Help & Guide',
-                zakat: 'Zakat',
-                purification: 'Purification',
-                lectures: 'Resources',
-                statement: 'Statements'
-              }[activeTab] || 'Holdings'}
-            </h1>
+        {activeTab !== 'updates' && (
+          <div className="portfolio-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
+            <div>
+              <h1 className="portfolio-title" style={{ fontSize: 'clamp(1.6rem, 5vw, 2.46rem)', fontWeight: 900, letterSpacing: '-1.5px', color: 'var(--text-dark)', lineHeight: 1.1 }}>
+                {{
+                  holdings: 'Holdings',
+                  market: 'Market Screener',
+                  watchlist: 'Alert',
+                  updates: 'Updates',
+                  guide: 'Help & Guide',
+                  zakat: 'Zakat',
+                  purification: 'Purification',
+                  lectures: 'Resources',
+                  statement: 'Statements'
+                }[activeTab] || 'Holdings'}
+              </h1>
 
+            </div>
+            {activeTab === 'holdings' && (
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="mobile-full-width"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '8px',
+                  padding: '12px 22px', borderRadius: '14px',
+                  background: 'var(--primary)', color: 'white', border: 'none',
+                  fontWeight: 800, fontSize: '0.79rem', cursor: 'pointer',
+                  boxShadow: 'var(--shadow-sm)',
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                  flexShrink: 0,
+                }}
+                onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 14px 32px rgba(91, 41, 113, 0.35)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='var(--shadow-sm)'; }}
+              >
+                <Search size={15} style={{ display: 'none' }} /> <span style={{ fontSize: '0.97rem', lineHeight: 1 }}>+</span> Add Holding
+              </button>
+            )}
           </div>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="mobile-full-width"
-            style={{
-              display: 'flex', alignItems: 'center', gap: '8px',
-              padding: '12px 22px', borderRadius: '14px',
-              background: 'var(--primary)', color: 'white', border: 'none',
-              fontWeight: 800, fontSize: '0.79rem', cursor: 'pointer',
-              boxShadow: 'var(--shadow-sm)',
-              transition: 'transform 0.2s, box-shadow 0.2s',
-              flexShrink: 0,
-            }}
-            onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 14px 32px rgba(91, 41, 113, 0.35)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='var(--shadow-sm)'; }}
-          >
-            <Search size={15} style={{ display: 'none' }} /> <span style={{ fontSize: '0.97rem', lineHeight: 1 }}>+</span> Add Holding
-          </button>
-        </div>
+        )}
 
 
       </div>
