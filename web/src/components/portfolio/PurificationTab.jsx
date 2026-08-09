@@ -40,12 +40,10 @@ function CalcModal({ h, onClose, onPurify }) {
     }, 1200);
   };
 
-  const Section = ({ title, formulaText, formulaCalc, rows, accent }) => (
+  const Section = ({ title, rows, accent }) => (
     <div style={{ marginBottom: '16px', borderRadius: '16px', border: `1px solid ${accent || 'var(--border)'}`, overflow: 'hidden' }}>
       <div style={{ padding: '12px 16px', background: accent ? `${accent}12` : 'var(--bg-section)', borderBottom: `1px solid ${accent || 'var(--border)'}` }}>
         <div style={{ fontSize: '0.65rem', fontWeight: 700, color: accent || 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>{title}</div>
-        {formulaText && <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '4px' }}>{formulaText}</div>}
-        {formulaCalc && <div style={{ fontFamily: 'monospace', fontSize: '0.82rem', color: 'var(--text-dark)', fontWeight: 800 }}>{formulaCalc}</div>}
       </div>
       <div style={{ background: 'var(--bg)' }}>
         {rows.map((row, i) => (
@@ -105,8 +103,6 @@ function CalcModal({ h, onClose, onPurify }) {
         <div style={{ padding: '20px' }}>
           <Section
             title="Purification Calculation"
-            formulaText="Total Dividends Received × Impure Ratio"
-            formulaCalc={`${fmt(dividends)} × ${ratio.toFixed(4)}% = ${fmt(due)}`}
             accent="var(--primary)"
             rows={[
               { label: 'Total dividends received (12M)', value: fmt(dividends) },
@@ -398,11 +394,11 @@ function PurificationCard({ h, onPurify, onStatClick }) {
   );
 }
 
-/* ─── Main Tab ──────────────────────────────────────────────── */
 export default function PurificationTab({ data, refreshData, initialSymbol }) {
   const [purifiedSymbols, setPurifiedSymbols] = useState([]);
   const [selectedHolding, setSelectedHolding] = useState(null);
   const [activeStatTarget, setActiveStatTarget] = useState(null);
+  const [payAllLoading, setPayAllLoading] = useState(false);
 
   useEffect(() => {
     if (initialSymbol && data?.holdings) {
@@ -419,6 +415,14 @@ export default function PurificationTab({ data, refreshData, initialSymbol }) {
   const handleSuccess = (symbol) => {
     setPurifiedSymbols(prev => [...prev, symbol]);
     setSelectedHolding(null);
+  };
+
+  const handleDonateAll = () => {
+    setPayAllLoading(true);
+    setTimeout(() => {
+      setPurifiedSymbols(prev => [...prev, ...needsPurification.map(h => h.symbol)]);
+      setPayAllLoading(false);
+    }, 1500);
   };
 
   return (
@@ -458,15 +462,30 @@ export default function PurificationTab({ data, refreshData, initialSymbol }) {
           </div>
 
           {purificationDue > 0 && (
-            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-              <div style={{ background: 'rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '12px 20px', backdropFilter: 'blur(12px)', boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.05)' }}>
-                <div style={{ fontSize: '0.62rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>Total Due</div>
-                <div style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--gold)', textShadow: '0 2px 10px rgba(0,0,0,0.2)' }}>₦{purificationDue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <div style={{ background: 'rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '12px 16px', backdropFilter: 'blur(12px)', boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.05)' }}>
+                  <div style={{ fontSize: '0.62rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>Total Due</div>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--gold)', textShadow: '0 2px 10px rgba(0,0,0,0.2)' }}>₦{purificationDue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                </div>
+                <div style={{ background: 'rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '12px 16px', backdropFilter: 'blur(12px)', boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.05)' }}>
+                  <div style={{ fontSize: '0.62rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>Dividends</div>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 900, color: 'white' }}>₦{totalDivs.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                </div>
               </div>
-              <div style={{ background: 'rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '12px 20px', backdropFilter: 'blur(12px)', boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.05)' }}>
-                <div style={{ fontSize: '0.62rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>Dividends</div>
-                <div style={{ fontSize: '1.2rem', fontWeight: 900, color: 'white' }}>₦{totalDivs.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-              </div>
+              
+              <button
+                onClick={handleDonateAll}
+                disabled={payAllLoading}
+                style={{ padding: '14px 20px', borderRadius: '16px', background: 'var(--gold)', border: 'none', color: '#451a03', fontWeight: 800, fontSize: '0.9rem', cursor: payAllLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 8px 20px rgba(0,0,0,0.2)', transition: 'all 0.2s', height: '100%' }}
+                className="hover-lift"
+              >
+                {payAllLoading ? (
+                  <div className="spinner" style={{ width: '16px', height: '16px', borderTopColor: '#451a03' }} />
+                ) : (
+                  <><Heart size={16} fill="currentColor" /> Donate All</>
+                )}
+              </button>
             </div>
           )}
         </div>
