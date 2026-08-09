@@ -211,7 +211,7 @@ export default function Portfolio() {
   const totalBalance = summary.total_balance || 0;
   
   const PIE_COLORS = ['var(--primary)', '#06b6d4', '#f59e0b', '#f43f5e', '#3b82f6', '#10b981', '#8b5cf6', '#ec4899'];
-  const pieData = (holdings || []).slice(0,6).map((h,i) => ({
+  const pieData = (holdings || []).map((h,i) => ({
     name: h.symbol, value: h.total_value || 0, color: PIE_COLORS[i % PIE_COLORS.length],
   }));
   if (pieData.length === 0) pieData.push({ name: 'No Holdings', value: 1, color: 'var(--border)' });
@@ -338,9 +338,13 @@ export default function Portfolio() {
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
-                <div style={{ display:'flex', flexDirection:'column', gap:'8px', marginTop:'16px' }}>
+                <div className="custom-scroll-container" style={{ 
+                  display:'flex', flexDirection:'column', gap:'8px', marginTop:'16px', maxHeight:'280px', paddingRight:'6px', paddingBottom: '30px',
+                  WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)',
+                  maskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)'
+                }}>
                   {pieData.map((d,i) => (
-                    <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding: '6px 0', borderBottom: i !== pieData.length - 1 ? '1px solid var(--border-light)' : 'none' }}>
+                    <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding: '6px 0', borderBottom: i !== pieData.length - 1 ? '1px solid var(--border-light)' : 'none', flexShrink: 0 }}>
                       <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
                         <div style={{ width:'12px', height:'12px', borderRadius:'4px', background:d.color, flexShrink:0 }}/>
                         <span style={{ fontSize: '0.75rem', fontWeight:700, color:'var(--text-dark)' }}>{d.name}</span>

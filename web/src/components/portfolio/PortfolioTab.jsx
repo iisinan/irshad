@@ -238,7 +238,11 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
       )}
 
       {/* ─── STICKY HEADER ─── */}
-      <div style={{ position: 'sticky', top: '16px', zIndex: 30, display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <div style={{ position: 'sticky', top: '0px', zIndex: 30, display: 'flex', flexDirection: 'column', paddingTop: '16px' }}>
+        
+        {/* Solid background to cover scrolled items */}
+        <div style={{ position: 'absolute', inset: '0 0 -30px 0', background: 'var(--body-bg)', zIndex: -1 }} />
+
         {/* ─── DASHBOARD HERO ─── */}
         <div className="stagger-1 hover-card" style={{ 
           background: 'linear-gradient(135deg, var(--bg-section) 0%, var(--bg) 100%)', 
@@ -252,7 +256,8 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
           gap: '12px',
           position: 'relative',
           overflow: 'hidden',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.03)'
+          boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
+          marginBottom: '20px'
         }}>
           {/* Background Mesh */}
           <div style={{ position: 'absolute', top: '-50%', left: '-20%', width: '100%', height: '200%', background: 'radial-gradient(ellipse at center, var(--primary-50) 0%, transparent 60%)', zIndex: 0, pointerEvents: 'none' }} />
@@ -356,23 +361,27 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
             </button>
           </div>
         </div>
-      </div>
-
-      {/* ─── HOLDINGS LIST ─── */}
-      <div className="stagger-3" style={{ marginTop: '24px' }}>
         
         {/* Header */}
         {displayHoldings.length > 0 && (
-          <div style={{ display: 'flex', alignItems: 'center', padding: '0 24px 16px 24px' }}>
-            <div style={{ flex: 1.5, fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', paddingLeft: '62px' }}>Asset</div>
-            <div style={{ flex: 1, textAlign: 'right', fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Value / Shares</div>
-            <div style={{ flex: 0.8, textAlign: 'right', fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', paddingLeft: '20px' }}>Total Return</div>
-            <div style={{ paddingLeft: '24px', display: 'flex', gap: '8px' }}>
-              <div style={{ width: '71px' }} />
-              <div style={{ width: '85px' }} />
+          <div style={{ position: 'relative', marginTop: '20px', padding: '16px 24px 16px 24px', background: 'var(--body-bg)', zIndex: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <div style={{ flex: 1.5, fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', paddingLeft: '62px' }}>Asset</div>
+              <div style={{ flex: 1, textAlign: 'right', fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Value / Shares</div>
+              <div style={{ flex: 0.8, textAlign: 'right', fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', paddingLeft: '20px' }}>Total Return</div>
+              <div style={{ paddingLeft: '24px', display: 'flex', gap: '8px' }}>
+                <div style={{ width: '71px' }} />
+                <div style={{ width: '85px' }} />
+              </div>
             </div>
+            {/* Diminishing fade shadow effect that covers the scrolled items below it */}
+            <div style={{ position: 'absolute', bottom: '-24px', left: 0, right: 0, height: '24px', background: 'linear-gradient(to bottom, var(--body-bg) 0%, transparent 100%)', pointerEvents: 'none', zIndex: 21 }} />
           </div>
         )}
+      </div>
+
+      {/* ─── HOLDINGS LIST ─── */}
+      <div className="stagger-3" style={{ marginTop: '0px' }}>
 
         {/* Rows */}
         {displayHoldings.length === 0 ? (
@@ -393,7 +402,13 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
             )}
           </div>
         ) : (
-          <div>
+          <div 
+            className="custom-scroll-container" 
+            style={{ 
+              paddingRight: '12px',
+              paddingBottom: '60px'
+            }}
+          >
             {displayHoldings.map((h) => (
               <HoldingRow key={h.id} holding={h} onDelete={handleDelete} onEdit={setEditingHolding}/>
             ))}
