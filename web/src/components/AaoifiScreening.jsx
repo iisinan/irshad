@@ -166,7 +166,6 @@ const AaoifiScreening = () => {
   const { user }   = useAuth();
   const navigate   = useNavigate();
   const location   = useLocation();
-  const chatEndRef = useRef(null);
   
   const isInlineSearch = location.state?.inlineSearch;
   
@@ -225,10 +224,6 @@ const AaoifiScreening = () => {
   const [overrideLoading, setOverrideLoading] = useState(false);
   const [overrideError,   setOverrideError]   = useState('');
   const [stepIndex,       setStepIndex]       = useState(0);
-  const [messages,        setMessages]        = useState(null);
-  const [chatInput,       setChatInput]       = useState('');
-  const [chatLoading,     setChatLoading]     = useState(false);
-  const [showCopilot,     setShowCopilot]     = useState(false); // mobile toggle
   const [purShares,       setPurShares]       = useState('');
   const [purDividend,     setPurDividend]     = useState('');
   const [showNewsAll,     setShowNewsAll]     = useState(false);
@@ -242,7 +237,6 @@ const AaoifiScreening = () => {
   }, [queryLoading, isFetching]);
 
   useEffect(()=>{ if(!isInitialLoad)return; const t=setInterval(()=>setStepIndex(p=>p<LOADING_STEPS.length-1?p+1:p),340); return()=>clearInterval(t); },[isInitialLoad]);
-  useEffect(()=>{ chatEndRef.current?.scrollIntoView({behavior:'smooth'}); },[messages]);
 
   const report  = res?.data;
   const stock   = stockRes?.data;
@@ -288,13 +282,6 @@ const AaoifiScreening = () => {
     try { await updateAaoifiData(symbol,overrideData); setShowOverride(false); window.location.reload(); }
     catch(err){ setOverrideError(err.response?.data?.message||'Failed'); }
     finally { setOverrideLoading(false); }
-  };
-  const sendChat = async (q) => {
-    const question=(q||chatInput).trim(); if(!question||chatLoading)return;
-    setChatInput(''); setMessages(prev=>[...prev,{role:'user',text:question}]); setChatLoading(true);
-    try { const r=await chatAboutStock(symbol,question); setMessages(prev=>[...prev,{role:'assistant',text:r.data?.answer||'No answer returned.'}]); }
-    catch { setMessages(prev=>[...prev,{role:'assistant',text:'Sorry, I could not process your question. Please try again.'}]); }
-    finally { setChatLoading(false); }
   };
 
   /* ── Loading ── */
@@ -865,55 +852,6 @@ const AaoifiScreening = () => {
 
     </div>
 
-    {/* AI FAB (Mobile Only) */}
-    <div className="ai-fab" onClick={() => setShowCopilot(true)}>
-      <Sparkles size={24} />
-    </div>
-
-    {/* AI Copilot Drawer (Mobile Only) */}
-    <div className={`ai-drawer ${showCopilot ? 'open' : ''}`}>
-      <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--primary-50)', borderTopLeftRadius: 24, borderTopRightRadius: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 10, background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Sparkles size={16} color="white" />
-          </div>
-          <span style={{ fontWeight: 800, color: 'var(--primary)', fontSize: '0.95rem' }}>Irshad Copilot</span>
-        </div>
-        <button onClick={() => setShowCopilot(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)' }}><X size={20} /></button>
-      </div>
-      <div style={{ flex: 1, overflowY: 'auto', padding: 20 }}>
-        {messages?.map((m, i) => (
-          <div key={i} style={{ marginBottom: 16, display: 'flex', alignItems: 'flex-start', gap: 12, flexDirection: m.role === 'user' ? 'row-reverse' : 'row' }}>
-            <div style={{ width: 32, height: 32, borderRadius: 10, background: m.role === 'user' ? 'var(--bg-section)' : 'var(--primary-50)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              {m.role === 'user' ? <User size={16} color="var(--text-muted)" /> : <Sparkles size={16} color="var(--primary)" />}
-            </div>
-            <div style={{ background: m.role === 'user' ? 'var(--bg-section)' : 'var(--primary-50)', color: m.role === 'user' ? 'var(--text-dark)' : 'var(--primary)', padding: '12px 16px', borderRadius: 16, fontSize: '0.85rem', lineHeight: 1.5, border: `1px solid ${m.role === 'user' ? 'var(--border)' : 'var(--primary-100)'}` }}>
-              <div className="ai-markdown"><ReactMarkdown>{m.text}</ReactMarkdown></div>
-            </div>
-          </div>
-        ))}
-        {chatLoading && (
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 10, background: 'var(--primary-50)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Sparkles size={16} color="var(--primary)" />
-            </div>
-            <div style={{ background: 'var(--primary-50)', padding: '12px 16px', borderRadius: 16 }}>
-              <div className="spinner" style={{ width: 16, height: 16, borderWidth: 2, borderColor: 'var(--primary-100)', borderTopColor: 'var(--primary)' }} />
-            </div>
-          </div>
-        )}
-        <div ref={chatEndRef} />
-      </div>
-      <div style={{ padding: 16, borderTop: '1px solid var(--border)' }}>
-        <form onSubmit={e => { e.preventDefault(); sendChat(); }} style={{ display: 'flex', gap: 8 }}>
-          <input type="text" placeholder="Ask about this stock..." value={chatInput} onChange={e => setChatInput(e.target.value)} style={{ flex: 1, padding: '12px 16px', borderRadius: 100, border: '1px solid var(--border)', background: 'var(--bg-section)', fontSize: '0.9rem', outline: 'none' }} />
-          <button type="submit" disabled={!chatInput.trim() || chatLoading} style={{ width: 44, height: 44, borderRadius: 22, background: 'var(--primary)', color: 'white', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: (!chatInput.trim() || chatLoading) ? 0.5 : 1 }}>
-            <Send size={18} />
-          </button>
-        </form>
-      </div>
-    </div>
-    
     </>
   );
 };

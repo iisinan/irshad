@@ -4942,47 +4942,7 @@ button, a.nav-link, a.btn-primary, a.btn-secondary, .mobile-col > div[style*="cu
 }
 
 
-/* AI Copilot FAB — mobile only */
-.ai-fab {
-  position: fixed;
-  bottom: calc(80px + env(safe-area-inset-bottom));
-  right: 16px;
-  width: 56px;
-  height: 56px;
-  border-radius: 28px;
-  background: var(--primary);
-  color: white;
-  display: none; /* hidden by default, shown on mobile */
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 8px 24px rgba(91,41,113,0.4);
-  z-index: 990;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.ai-fab:active {
-  transform: scale(0.95);
-}
 
-.ai-drawer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 80vh;
-  background: var(--bg);
-  border-top-left-radius: 24px;
-  border-top-right-radius: 24px;
-  box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
-  z-index: 1002;
-  display: flex;
-  flex-direction: column;
-  transform: translateY(100%);
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.ai-drawer.open {
-  transform: translateY(0);
-}
 
 /* Market table: desktop only; mobile cards: mobile only */
 .market-cards-mobile {
@@ -4995,10 +4955,7 @@ button, a.nav-link, a.btn-primary, a.btn-secondary, .mobile-col > div[style*="cu
     display: flex;
   }
 
-  /* Show AI FAB on mobile */
-  .ai-fab {
-    display: flex;
-  }
+
 
   /* Market screener: hide table, show cards */
   .market-table-desktop {
