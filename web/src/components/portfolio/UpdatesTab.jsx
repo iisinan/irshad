@@ -1,30 +1,117 @@
 import React, { useState } from 'react';
-import { Newspaper } from 'lucide-react';
-import UpdatesNews  from './UpdatesNews';
+import { Newspaper, Bell, Sparkles, Moon } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import UpdatesNews    from './UpdatesNews';
+import UpdatesInbox   from './UpdatesInbox';
+
+/* ── Greeting helpers ── */
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 12)  return { arabic: 'صباح الخير', english: 'Good morning' };
+  if (h < 17)  return { arabic: 'مساء الخير', english: 'Good afternoon' };
+  return          { arabic: 'مساء الخير', english: 'Good evening' };
+}
+
+function getFirstName(user) {
+  if (!user) return 'there';
+  return user.first_name || user.name?.split(' ')[0] || 'there';
+}
 
 /* ══════════════════════════════════════════════════════════════
-   UpdatesTab — Container for News & Insights, Help & Guide, Inbox
+   UpdatesTab — Greeting banner + News & Inbox sub-tabs
    ══════════════════════════════════════════════════════════════ */
-export default function UpdatesTab() {
+export default function UpdatesTab({ unreadCount = 0 }) {
   const [activeSubTab, setActiveSubTab] = useState('news');
+  const { user } = useAuth();
+  const greeting = getGreeting();
+  const firstName = getFirstName(user);
 
   const tabs = [
     {
       id: 'news',
       label: 'News & Insights',
       icon: Newspaper,
-      description: 'Compliance changes, business activity & market intelligence',
-    }
+      description: 'Compliance updates, business activity & market intelligence',
+    },
+    {
+      id: 'inbox',
+      label: 'Inbox',
+      icon: Bell,
+      badge: unreadCount,
+      description: 'Your personal notifications & alerts',
+    },
   ];
 
   return (
     <div>
-      {/* Sub-tab Navigation */}
+      {/* ── Greeting Banner ── */}
+      <div style={{
+        background: 'linear-gradient(135deg, var(--primary) 0%, #9b3dbe 60%, #c084fc 100%)',
+        borderRadius: '20px',
+        padding: '28px 28px 24px',
+        marginBottom: '28px',
+        position: 'relative',
+        overflow: 'hidden',
+      }}>
+        {/* Decorative elements */}
+        <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '180px', height: '180px', borderRadius: '50%', background: 'rgba(255,255,255,0.06)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: '-40px', right: '60px', width: '120px', height: '120px', borderRadius: '50%', background: 'rgba(255,255,255,0.04)', pointerEvents: 'none' }} />
+        <Moon size={80} style={{ position: 'absolute', right: '24px', top: '50%', transform: 'translateY(-50%)', opacity: 0.07, pointerEvents: 'none' }} color="white" />
+
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          {/* Arabic greeting */}
+          <div style={{
+            fontSize: '0.75rem', fontWeight: 800, color: 'rgba(255,255,255,0.75)',
+            letterSpacing: '0.5px', marginBottom: '6px',
+            fontFamily: 'var(--sans)',
+          }}>
+            السلام عليكم ورحمة الله وبركاته
+          </div>
+
+          {/* Main greeting */}
+          <h1 style={{
+            fontSize: 'clamp(1.3rem, 4vw, 1.75rem)',
+            fontWeight: 900,
+            color: '#ffffff',
+            margin: '0 0 4px',
+            letterSpacing: '-0.5px',
+            lineHeight: 1.2,
+          }}>
+            {greeting.english}, {firstName} 👋
+          </h1>
+
+          <p style={{
+            fontSize: '0.82rem',
+            color: 'rgba(255,255,255,0.72)',
+            margin: 0,
+            fontWeight: 600,
+          }}>
+            Here's what's happening with your halal portfolio today.
+          </p>
+
+          {/* Stats row */}
+          {unreadCount > 0 && (
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: '7px',
+              marginTop: '14px', background: 'rgba(255,255,255,0.15)',
+              borderRadius: '30px', padding: '6px 14px',
+              backdropFilter: 'blur(10px)',
+            }}>
+              <Bell size={13} color="white" />
+              <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'white' }}>
+                {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── Sub-tab Navigation ── */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
         gap: '10px',
-        marginBottom: '28px',
+        marginBottom: '24px',
       }}>
         {tabs.map((tab, index) => {
           const Icon = tab.icon;
@@ -42,11 +129,11 @@ export default function UpdatesTab() {
                 gap: '8px',
                 padding: '16px 18px',
                 borderRadius: '16px',
-                background: isActive 
-                  ? 'linear-gradient(135deg, rgba(91, 41, 113,0.08) 0%, rgba(209, 165, 98,0.05) 100%)'
+                background: isActive
+                  ? 'linear-gradient(135deg, rgba(91,41,113,0.08) 0%, rgba(209,165,98,0.05) 100%)'
                   : 'var(--bg-section)',
-                border: isActive 
-                  ? '1px solid rgba(209, 165, 98,0.3)' 
+                border: isActive
+                  ? '1px solid rgba(91,41,113,0.25)'
                   : '1px solid var(--border)',
                 color: isActive ? 'var(--primary)' : 'var(--text-muted)',
                 fontWeight: isActive ? 800 : 600,
@@ -55,7 +142,7 @@ export default function UpdatesTab() {
                 cursor: 'pointer',
                 transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
                 textAlign: 'left',
-                boxShadow: isActive ? '0 8px 24px rgba(91, 41, 113,0.12)' : 'none',
+                boxShadow: isActive ? '0 8px 24px rgba(91,41,113,0.12)' : 'none',
                 position: 'relative',
                 overflow: 'hidden',
                 transform: isActive ? 'translateY(-2px)' : 'translateY(0)',
@@ -74,33 +161,34 @@ export default function UpdatesTab() {
                 }
               }}
             >
-              {/* Active indicator glowing bar */}
+              {/* Active indicator bar */}
               {isActive && (
                 <div style={{
                   position: 'absolute', top: 0, left: 0, right: 0, height: '3px',
                   background: 'var(--primary)', borderRadius: '16px 16px 0 0',
-                  boxShadow: '0 0 10px var(--primary)'
+                  boxShadow: '0 0 10px var(--primary)',
                 }} />
               )}
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%' }}>
                 <div style={{
                   width: '32px', height: '32px', borderRadius: '10px',
-                  background: isActive ? 'var(--primary)' : 'var(--bg-section)',
+                  background: isActive ? 'var(--primary)' : 'var(--bg)',
+                  border: '1px solid var(--border)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   transition: 'all 0.2s', flexShrink: 0,
                 }}>
                   <Icon size={15} color={isActive ? 'white' : 'var(--text-muted)'} />
                 </div>
 
-                {/* Inbox badge */}
+                {/* Badge */}
                 {tab.badge > 0 && (
                   <span style={{
                     marginLeft: 'auto',
                     fontSize: '0.63rem', fontWeight: 900,
                     padding: '2px 7px', borderRadius: '20px',
                     background: 'var(--primary)', color: 'white',
-                    lineHeight: '16px',
+                    lineHeight: '16px', animation: 'pulse 2s infinite',
                   }}>
                     {tab.badge > 99 ? '99+' : tab.badge}
                   </span>
@@ -109,7 +197,7 @@ export default function UpdatesTab() {
 
               <div>
                 <div style={{
-                  fontSize: '0.79rem', fontWeight: 900,
+                  fontSize: '0.82rem', fontWeight: 900,
                   color: isActive ? 'var(--primary)' : 'var(--text-dark)',
                   marginBottom: '3px', lineHeight: 1.2,
                 }}>
@@ -129,9 +217,10 @@ export default function UpdatesTab() {
         })}
       </div>
 
-      {/* Tab Content with staggered fade up */}
+      {/* ── Tab Content ── */}
       <div className="animate-slide-up stagger-3" key={activeSubTab} style={{ minHeight: '400px' }}>
         {activeSubTab === 'news'  && <UpdatesNews />}
+        {activeSubTab === 'inbox' && <UpdatesInbox />}
       </div>
     </div>
   );
