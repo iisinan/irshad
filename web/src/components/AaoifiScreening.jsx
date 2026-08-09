@@ -349,7 +349,9 @@ const AaoifiScreening = () => {
   const priceChangePct = parseFloat(stock?.price_change_pct)||0;
   const newsItems      = Array.isArray(stock?.news) ? stock.news : [];
 
-  let cleanStatusReason = formatAppJustification(report.status_reason, isNonHalal);
+  const cleanStage1Reason = formatAppJustification(report.stage1?.reason||report.business_reasoning,isNonHalal);
+
+  let cleanStatusReason;
   if (finalStatus === 'halal') {
     if (hasPurification) {
       cleanStatusReason = "Permissible to hold. A small portion of any dividend must be purified to charity.";
@@ -359,8 +361,9 @@ const AaoifiScreening = () => {
   } else if (isNonHalal && !businessFailed) {
     const ind = (report.industry || 'its sector').toLowerCase(); 
     cleanStatusReason = `Although the company passes the Shariah business activity screening because its core operations in ${ind} are permissible, it fails the required quantitative financial benchmarks.`; 
+  } else {
+    cleanStatusReason = cleanStage1Reason;
   }
-  const cleanStage1Reason = formatAppJustification(report.stage1?.reason||report.business_reasoning,isNonHalal);
 
   const SC = {
     halal:       { color:'var(--halal)',     icon:hasPurification?Droplets:CheckCircle, bg:'linear-gradient(135deg,rgba(16,185,129,0.09),rgba(16,185,129,0.03))',  border:'rgba(16,185,129,0.28)',  label:'HALAL',     tag:'Shariah Compliant'    },
@@ -622,7 +625,7 @@ const AaoifiScreening = () => {
             </div>
             <div style={{ padding:'16px 20px',background:'var(--primary-50)',border:'1px dashed var(--primary-100)',borderRadius:16,display:'flex',alignItems:'flex-start',gap:12, boxShadow:'var(--shadow-sm)' }}>
               <Info size={16} color="var(--primary)" style={{ flexShrink:0,marginTop:2 }}/>
-              <div style={{ fontSize:'0.8rem',color:'var(--text-muted)',lineHeight:1.5, fontWeight:500 }}><strong style={{ color:'var(--text-dark)', fontWeight:800 }}>AAOIFI strict thresholds apply:</strong> Even at 30.01% the debt ratio fails. Click any bar to see the full calculation breakdown.</div>
+              <div style={{ fontSize:'0.8rem',color:'var(--text-muted)',lineHeight:1.5, fontWeight:500 }}><strong style={{ color:'var(--text-dark)', fontWeight:800 }}>Important:</strong> AAOIFI applies strict thresholds with no buffer zones. A company at 30.01% debt is non-halal. Click any bar to see the full calculation breakdown.</div>
             </div>
           </div>
         </Section>)}
