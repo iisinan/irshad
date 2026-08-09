@@ -214,7 +214,7 @@ export default function Portfolio() {
 
       {/* Header & Tabs */}
       <div style={{ marginBottom: '32px' }}>
-        {activeTab !== 'updates' && (
+        {activeTab !== 'updates' && activeTab !== 'holdings' && (
           <div className="portfolio-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
             <div>
               <h1 className="portfolio-title" style={{ fontSize: 'clamp(1.6rem, 5vw, 2.46rem)', fontWeight: 900, letterSpacing: '-1.5px', color: 'var(--text-dark)', lineHeight: 1.1 }}>
