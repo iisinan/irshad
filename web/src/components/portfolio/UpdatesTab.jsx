@@ -153,7 +153,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
 
             {/* Left: greeting */}
-            <div>
+            <div style={{ flex: '1 1 200px' }}>
               {/* Arabic */}
               <div style={{
                 fontSize: '0.72rem', fontWeight: 800, color: 'var(--primary)',
@@ -238,14 +238,22 @@ export default function UpdatesTab({ unreadCount = 0 }) {
                 fontWeight: 700,
                 fontSize: '0.85rem',
                 cursor: 'pointer',
-                transition: 'all 0.2s',
+                transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
                 whiteSpace: 'nowrap',
                 flexShrink: 0,
+                boxShadow: isActive ? '0 4px 14px rgba(91,41,113,0.3)' : 'none',
               }}
               onMouseEnter={e => {
                 if (!isActive) e.currentTarget.style.borderColor = 'var(--primary-100)';
               }}
+              onMouseDown={e => {
+                e.currentTarget.style.transform = 'scale(0.96)';
+              }}
+              onMouseUp={e => {
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
               onMouseLeave={e => {
+                e.currentTarget.style.transform = 'scale(1)';
                 if (!isActive) e.currentTarget.style.borderColor = 'var(--border)';
               }}
             >

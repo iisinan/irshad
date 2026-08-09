@@ -330,25 +330,31 @@ export default function UpdatesInbox() {
           {[1, 2, 3, 4].map(i => <NotifSkeleton key={i} />)}
         </div>
       ) : displayedNotifications.length === 0 ? (
-        <div className="animate-slide-up" style={{ textAlign: 'center', padding: '60px 24px', background: 'var(--bg-section)', borderRadius: '16px', border: '1.5px dashed var(--border)' }}>
-          <div style={{ width: '60px', height: '60px', borderRadius: '18px', background: 'var(--primary-50)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', animation: 'float 6s ease-in-out infinite' }}>
-            <Inbox size={26} color="var(--primary)" style={{ opacity: 0.7 }} />
+        <div className="animate-slide-up" style={{ textAlign: 'center', padding: '80px 24px', background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
+          <div style={{ position: 'relative', width: '80px', height: '80px', margin: '0 auto 24px', animation: 'float 6s ease-in-out infinite' }}>
+            <div style={{ position: 'absolute', inset: 0, background: 'var(--primary-50)', borderRadius: '24px', transform: 'rotate(-10deg)', transition: 'all 0.3s' }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'var(--bg-section)', borderRadius: '24px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', transform: 'rotate(5deg)', transition: 'all 0.3s' }}>
+              <Inbox size={32} color="var(--primary)" style={{ opacity: 0.8 }} />
+            </div>
           </div>
-          <div style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '6px' }}>
-            {search || showUnreadOnly || activeCategory !== 'all' ? 'No Matching Notifications' : 'Your Inbox is Empty'}
+          <div style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '8px', letterSpacing: '-0.5px' }}>
+            {search || showUnreadOnly || activeCategory !== 'all' ? 'No Matches Found' : 'You\'re All Caught Up!'}
           </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.6, maxWidth: '280px', margin: '0 auto', fontWeight: 500 }}>
             {search || showUnreadOnly || activeCategory !== 'all'
-              ? 'Try adjusting your filters or search query.'
-              : 'Irshad will notify you about compliance changes, portfolio updates, and market alerts here.'
+              ? 'Try adjusting your filters or search query to find what you are looking for.'
+              : 'Irshad will notify you about compliance changes, portfolio updates, and market alerts right here.'
             }
           </div>
           {(search || showUnreadOnly || activeCategory !== 'all') && (
             <button
               onClick={() => { setSearch(''); setShowUnreadOnly(false); setActiveCategory('all'); }}
-              style={{ marginTop: '16px', padding: '8px 18px', borderRadius: '10px', border: 'none', background: 'var(--primary)', color: 'white', fontWeight: 800, fontSize: '0.75rem', cursor: 'pointer' }}
+              style={{ marginTop: '24px', padding: '10px 20px', borderRadius: '12px', border: 'none', background: 'var(--primary)', color: 'white', fontWeight: 800, fontSize: '0.8rem', cursor: 'pointer', transition: 'transform 0.2s' }}
+              onMouseDown={e => e.currentTarget.style.transform = 'scale(0.95)'}
+              onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
             >
-              Clear Filters
+              Clear All Filters
             </button>
           )}
         </div>
