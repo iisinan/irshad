@@ -793,10 +793,10 @@ const AaoifiScreening = () => {
                     <div style={{ textAlign:'center',paddingTop:5 }}><div style={{ fontSize:'0.63rem',color:'var(--text-muted)',fontWeight:600 }}>{modalData.denLabel}</div><div style={{ fontSize:'0.9rem',fontWeight:800,color:'var(--text-dark)',fontVariantNumeric:'tabular-nums' }}>₦{(parseFloat(modalData.denVal)||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</div></div>
                   </div>
                   <div style={{ fontSize:'0.95rem',fontWeight:800,color:'var(--text-muted)' }}>× 100 =</div>
-                  <div style={{ fontSize:'1.5rem',fontWeight:900,color:modalData.ratio<=parseFloat(modalData.threshold)?'var(--halal)':'var(--non-halal)',fontVariantNumeric:'tabular-nums' }}>{modalData.ratio.toFixed(2)}%</div>
+                  <div style={{ fontSize:'1.5rem',fontWeight:900,color:modalData.ratio<=parseFloat(modalData.threshold.replace(/[^\d.]/g, ''))?'var(--halal)':'var(--non-halal)',fontVariantNumeric:'tabular-nums' }}>{modalData.ratio.toFixed(2)}%</div>
                 </div>
               </div>
-              {(()=>{ const thr=parseFloat(modalData.threshold);const ok=modalData.ratio<=thr;const delta=Math.abs(thr-modalData.ratio).toFixed(2); return (
+              {(()=>{ const thr=parseFloat(modalData.threshold.replace(/[^\d.]/g, ''));const ok=modalData.ratio<=thr;const delta=Math.abs(thr-modalData.ratio).toFixed(2); return (
                 <div style={{ background:ok?'rgba(16,185,129,0.07)':'rgba(239,68,68,0.07)',padding:'18px 22px',borderRadius:16,textAlign:'center',border:ok?'1px solid rgba(16,185,129,0.2)':'1px solid rgba(239,68,68,0.2)' }}>
                   <div style={{ fontSize:'0.65rem',fontWeight:800,color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'0.8px',marginBottom:7 }}>Screening Assessment</div>
                   <div style={{ fontSize:'2.5rem',fontWeight:950,color:ok?'var(--halal)':'var(--non-halal)',lineHeight:1,letterSpacing:'-1.5px',fontVariantNumeric:'tabular-nums' }}>{modalData.ratio.toFixed(2)}%</div>
