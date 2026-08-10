@@ -546,7 +546,11 @@ class StockController extends Controller
                 
                 $finalStage1Reason = $businessReason;
                 if ($aaoifiScreening->business_status === 'pass' && $finalStatus !== 'doubtful') {
-                    $finalStage1Reason = 'Permissible core activity.';
+                    if (empty($businessReason)) {
+                        $finalStage1Reason = 'Permissible core activity.';
+                    } else {
+                        $finalStage1Reason = $businessReason;
+                    }
                 }
                 $businessReason = trim($businessReason);
 

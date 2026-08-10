@@ -347,24 +347,28 @@ const AaoifiScreening = () => {
   }
   let cleanStage1Reason = formatAppJustification(stage1ReasonRaw, isNonHalal);
   if (!businessFailed && finalStatus !== 'doubtful') {
-    cleanStage1Reason = "Permissible core activity.";
+    if (!cleanStage1Reason || cleanStage1Reason.toLowerCase().trim() === "permissible core activity.") {
+      cleanStage1Reason = "Permissible core activity.";
+    }
   }
 
   const priceChangePct = parseFloat(stock?.price_change_pct)||0;
   const newsItems      = Array.isArray(stock?.news) ? stock.news : [];
 
-  let cleanStatusReason;
-  if (finalStatus === 'halal') {
-    if (hasPurification) {
-      cleanStatusReason = "Permissible to hold. A small portion of any dividend must be purified to charity.";
+  let cleanStatusReason = report.status_reason;
+  if (!cleanStatusReason) {
+    if (finalStatus === 'halal') {
+      if (hasPurification) {
+        cleanStatusReason = "Permissible to hold. A small portion of any dividend must be purified to charity.";
+      } else {
+        cleanStatusReason = "Permissible core activity. Additionally, it passes all AAOIFI quantitative financial screening ratios.";
+      }
+    } else if (isNonHalal && !businessFailed) {
+      const ind = (report.industry || 'its sector').toLowerCase(); 
+      cleanStatusReason = `Although the company passes the Shariah business activity screening because its core operations in ${ind} are permissible, it fails the required quantitative financial benchmarks.`; 
     } else {
-      cleanStatusReason = "Permissible core activity. Additionally, it passes all AAOIFI quantitative financial screening ratios.";
+      cleanStatusReason = cleanStage1Reason;
     }
-  } else if (isNonHalal && !businessFailed) {
-    const ind = (report.industry || 'its sector').toLowerCase(); 
-    cleanStatusReason = `Although the company passes the Shariah business activity screening because its core operations in ${ind} are permissible, it fails the required quantitative financial benchmarks.`; 
-  } else {
-    cleanStatusReason = cleanStage1Reason;
   }
 
   const SC = {
