@@ -545,7 +545,7 @@ class StockController extends Controller
                 $businessReason = trim($businessReason);
                 
                 $finalStage1Reason = $businessReason;
-                if ($aaoifiScreening->business_status === 'pass' && $finalStatus !== 'doubtful') {
+                if (in_array(strtolower($aaoifiScreening->business_status), ['pass', 'halal']) && $finalStatus !== 'doubtful') {
                     if (empty($businessReason)) {
                         $finalStage1Reason = 'Permissible core activity.';
                     } else {
@@ -556,7 +556,7 @@ class StockController extends Controller
 
                 if (in_array($aaoifiScreening->business_status, ['fail', 'doubtful'])) {
                     $statusReason = $businessReason ?: 'Fails qualitative business screening.';
-                } elseif ($aaoifiScreening->business_status === 'pass') {
+                } elseif (in_array(strtolower($aaoifiScreening->business_status), ['pass', 'halal'])) {
                     if ($finalStatus === 'halal') {
                         $statusReason = $businessReason ? ($businessReason.' Additionally, it passes all AAOIFI quantitative financial screening ratios.') : 'Passes both qualitative business and quantitative financial Shariah compliance checks.';
                     } else {
@@ -620,7 +620,7 @@ class StockController extends Controller
                 'latest_price'  => $company->latest_price,
                 'market_cap'    => $company->market_cap,
                 'stage1' => [
-                    'status'               => $aaoifiScreening->business_status === 'pass' ? 'halal' : ($aaoifiScreening->business_status === 'doubtful' ? 'doubtful' : 'non-halal'),
+                    'status'               => in_array(strtolower($aaoifiScreening->business_status), ['pass', 'halal']) ? 'halal' : ($aaoifiScreening->business_status === 'doubtful' ? 'doubtful' : 'non-halal'),
                     'haram_revenue_percent'=> round($incomePct, 4),
                     'purification_required'=> $incomePct > 0 && $incomePct <= 5,
                     'reason'               => $finalStage1Reason,

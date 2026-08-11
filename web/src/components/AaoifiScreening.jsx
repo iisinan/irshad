@@ -323,14 +323,14 @@ const AaoifiScreening = () => {
   const interestIncome = parseFloat(fd.interest_income)||0;
   const debtRatioRaw   = marketCap>0?(totalDebt/marketCap)*100:null;
   const debtRatioAssets = totalAssets>0?(totalDebt/totalAssets)*100:null;
-  const debtRatio = report.debt_ratio !== null && report.debt_ratio !== undefined ? parseFloat(report.debt_ratio) * 100 : debtRatioRaw;
+  const debtRatio = report.debt_ratio !== null && report.debt_ratio !== undefined ? parseFloat(report.debt_ratio) : debtRatioRaw;
 
   const cashRatioRaw   = marketCap>0?(cashAndSec/marketCap)*100:null;
   const cashRatioAssets = totalAssets>0?(cashAndSec/totalAssets)*100:null;
-  const cashRatio = report.cash_ratio !== null && report.cash_ratio !== undefined ? parseFloat(report.cash_ratio) * 100 : cashRatioRaw;
+  const cashRatio = report.cash_ratio !== null && report.cash_ratio !== undefined ? parseFloat(report.cash_ratio) : cashRatioRaw;
 
   const impureRatioRaw = totalRevenue>0?(interestIncome/totalRevenue)*100:null;
-  const impureRatio = report.impermissible_income_ratio !== null && report.impermissible_income_ratio !== undefined ? parseFloat(report.impermissible_income_ratio) * 100 : impureRatioRaw;
+  const impureRatio = report.impermissible_income_ratio !== null && report.impermissible_income_ratio !== undefined ? parseFloat(report.impermissible_income_ratio) : impureRatioRaw;
 
   // Determine Denominator
   const usedTotalAssets = report.denominator_used === 'Total Assets' || (!report.denominator_used && debtRatio !== null && debtRatioAssets !== null && Math.abs(debtRatio - debtRatioAssets) < 0.1);
@@ -339,7 +339,7 @@ const AaoifiScreening = () => {
   const hasPurification= finalStatus==='halal'&&!!report.stage1?.purification_required;
   const purPct         = (parseFloat(report.stage1?.haram_revenue_percent)||0).toFixed(2);
   const stage1Status   = report.stage1?.status||(businessFailed?'non-halal':'halal');
-  const showFinancials = (finalStatus==='halal'||report.business_status==='pass')&&(debtRatio!==null||report.impermissible_income_ratio!=null||cashRatio!==null);
+  const showFinancials = (finalStatus==='halal'||['pass','halal'].includes(report.business_status?.toLowerCase()))&&(debtRatio!==null||report.impermissible_income_ratio!=null||cashRatio!==null);
   const latestPrice    = parseFloat(stock?.latest_price||report.latest_price)||0;
   let stage1ReasonRaw = report.stage1?.reason || report.business_reasoning;
   if (typeof stage1ReasonRaw === 'object' && stage1ReasonRaw !== null) {
