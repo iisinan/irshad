@@ -248,30 +248,26 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
         {/* Solid background to cover scrolled items */}
         <div style={{ position: 'absolute', inset: '0 0 -30px 0', background: 'var(--body-bg)', zIndex: -1 }} />
 
-        {/* ─── DASHBOARD HERO ─── */}
+        {/* ─── DASHBOARD HERO & FILTERS COMBINED ─── */}
         <div className="stagger-1 hover-card" style={{ 
           background: 'linear-gradient(135deg, var(--bg) 0%, var(--bg-section) 100%)',
           backgroundImage: 'radial-gradient(circle at top right, rgba(91, 41, 113, 0.03) 0%, transparent 60%), linear-gradient(135deg, var(--bg) 0%, var(--bg-section) 100%), linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px)',
           backgroundSize: '100% 100%, 100% 100%, 30px 30px, 30px 30px',
           border: '1px solid var(--border)',
           borderRadius: '16px', 
-          padding: '12px 20px',
           display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '12px',
+          flexDirection: 'column',
           position: 'relative',
           overflow: 'hidden',
           boxShadow: '0 12px 40px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,1)',
-          marginBottom: '20px',
+          marginBottom: '16px',
           color: 'var(--text-dark)'
         }}>
           {/* Decorative Glowing Orbs */}
           <div style={{ position: 'absolute', bottom: '-40%', left: '5%', width: '300px', height: '300px', background: 'radial-gradient(circle, rgba(91, 41, 113, 0.03) 0%, transparent 70%)', zIndex: 0, pointerEvents: 'none' }} />
           
-          {/* Left: Value & Stats */}
-          <div style={{ zIndex: 1, flex: 1, minWidth: '260px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {/* Top Section: Balance & Stats */}
+          <div style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', position: 'relative', zIndex: 1 }}>
             
             {/* Header Row: Label & Controls */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -345,13 +341,13 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
                 </defs>
              </svg>
           </div>
-        </div>
-
-        {/* ─── ACTION BAR & FILTERS ─── */}
-        <div className="stagger-2" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', background: 'var(--bg)', padding: '16px 24px', borderRadius: '20px', border: '1px solid var(--border)', boxShadow: '0 8px 32px rgba(0,0,0,0.03)' }}>
-          
-          {/* Filters (Segmented Control style) */}
-          <div className="hide-scrollbar" style={{ display:'flex', background:'var(--body-bg)', borderRadius:'14px', padding:'6px', gap:'8px', border: '1px solid var(--border)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)', overflowX: 'auto', maxWidth: '100%' }}>
+          </div>
+        
+          {/* Bottom Section: Action Bar & Filters */}
+          <div className="stagger-2" style={{ borderTop: '1px solid rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', background: 'rgba(255,255,255,0.3)', padding: '12px 20px', position: 'relative', zIndex: 1 }}>
+            
+            {/* Filters (Segmented Control style) */}
+            <div className="hide-scrollbar" style={{ display:'flex', background:'var(--body-bg)', borderRadius:'14px', padding:'6px', gap:'8px', border: '1px solid rgba(0,0,0,0.03)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)', overflowX: 'auto', maxWidth: '100%' }}>
             {[
               { id:'all', label:'All', icon: Layers, activeColor: 'var(--primary)' },
               { id:'halal', label: 'Compliant', icon: ShieldCheck, activeColor: '#16a34a' },
