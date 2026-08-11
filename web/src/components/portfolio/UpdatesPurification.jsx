@@ -1,5 +1,5 @@
 import React from 'react';
-import { Droplet, Info, BookOpen, HandHeart, AlertCircle, ArrowRight, CheckCircle2, ShieldCheck, Scale, Sparkles, AlertTriangle, X } from 'lucide-react';
+import { Droplet, Info, BookOpen, HandHeart, AlertCircle, ArrowRight, CheckCircle2, ShieldCheck, Scale, Sparkles, AlertTriangle, X, Calculator } from 'lucide-react';
 
 export default function UpdatesPurification() {
   return (
