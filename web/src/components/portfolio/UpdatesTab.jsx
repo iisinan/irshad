@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Newspaper, Bell, Moon, Clock, Star, Mail } from 'lucide-react';
+import { Newspaper, Bell, Moon, Clock, Star, Mail, Droplet } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import UpdatesNews    from './UpdatesNews';
 import UpdatesInbox   from './UpdatesInbox';
@@ -125,6 +125,12 @@ export default function UpdatesTab({ unreadCount = 0 }) {
       icon: Mail,
       description: 'Portfolio compliance status summary',
     },
+    {
+      id: 'purification',
+      label: 'Purification',
+      icon: Droplet,
+      isExternal: true,
+    },
   ];
 
   return (
@@ -224,7 +230,13 @@ export default function UpdatesTab({ unreadCount = 0 }) {
             <button
               key={tab.id}
               id={`updates-tab-${tab.id}`}
-              onClick={() => setActiveSubTab(tab.id)}
+              onClick={() => {
+                if (tab.isExternal) {
+                  window.location.hash = tab.id;
+                } else {
+                  setActiveSubTab(tab.id);
+                }
+              }}
               className={`animate-slide-up stagger-${index + 1}`}
               style={{
                 display: 'flex',
