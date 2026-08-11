@@ -207,7 +207,7 @@ const AaoifiScreening = () => {
     queryFn: fetchWatchlist,
     staleTime: 5 * 60 * 1000,
   });
-  const hasAlert = Array.isArray(watchlistRes) ? watchlistRes.some(w => w.symbol === symbol) : false;
+  const hasAlert = Array.isArray(watchlistRes) ? watchlistRes.some(w => w.symbol?.toLowerCase() === symbol?.toLowerCase()) : false;
 
   const { data: portfolioRes } = useQuery({
     queryKey: ['portfolio'],
@@ -635,9 +635,9 @@ const AaoifiScreening = () => {
                   }}
                   disabled={alertLoading}
                   className="hover-lift"
-                  style={{ display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8,padding:'12px 20px',borderRadius:12,background: hasAlert ? 'var(--non-halal)' : 'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 100%)',border: hasAlert ? '1px solid var(--non-halal)' : '1px solid rgba(239,68,68,0.3)',color: hasAlert ? '#fff' : 'var(--non-halal)',fontSize:'0.85rem',fontWeight:800,cursor:alertLoading?'not-allowed':'pointer',marginTop:12, transition:'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: hasAlert ? '0 8px 20px rgba(239,68,68,0.25)' : '0 8px 24px rgba(239,68,68,0.12), inset 0 2px 4px #fff' }}
+                  style={{ display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8,padding:'10px 16px',borderRadius:12,background: hasAlert ? 'rgba(239,68,68,0.08)' : 'var(--body-bg)',border: hasAlert ? '1px solid rgba(239,68,68,0.2)' : '1px solid var(--border)',color: hasAlert ? 'var(--non-halal)' : 'var(--text-dark)',fontSize:'0.8rem',fontWeight:800,cursor:alertLoading?'not-allowed':'pointer',marginTop:12, transition:'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: hasAlert ? 'inset 0 0 0 1px rgba(239,68,68,0.1)' : 'var(--shadow-sm)' }}
                 >
-                  {alertLoading ? <RefreshCw size={16} className="spin" /> : (hasAlert ? <CheckCircle size={16} strokeWidth={2.5}/> : <Bell size={16} strokeWidth={2.5}/>)} {hasAlert ? 'Alert Set' : 'Alert me when it changes'}
+                  {alertLoading ? <RefreshCw size={16} className="spin" /> : (hasAlert ? <CheckCircle size={16} strokeWidth={2.5}/> : <Bell size={16} strokeWidth={2.5}/>)} {hasAlert ? 'Alert Active' : 'Set Alert'}
                 </button>
               )}
             </div>)}
