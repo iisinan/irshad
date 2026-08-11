@@ -44,7 +44,7 @@ class StockController extends Controller
                 ->get()
                 ->map(function ($company) {
                     $ratio = $company->aaoifiScreening ? (float) $company->aaoifiScreening->impermissible_income_ratio : 0;
-                    $ratioPct = $ratio * 100;
+                    $ratioPct = $ratio;
                     $company->status = $company->current_status ? [
                         'status' => $company->current_status,
                         'purification_required' => $company->current_status === 'halal' && $ratioPct > 0,
@@ -182,16 +182,17 @@ class StockController extends Controller
             $stockArray['business_status'] = $aaoifiScreening?->business_status ?? null;
 
             if (isset($stockArray['status']) && is_array($stockArray['status'])) {
-                $dbRatio = (float) ($aaoifiScreening?->impermissible_income_ratio ?? 0);
-
-                if ($dbRatio == 0 && $company->financials && $company->financials->count() > 0) {
+                $ratioPct = 0;
+                if ($aaoifiScreening && $aaoifiScreening->impermissible_income_ratio !== null) {
+                    $ratioPct = (float) $aaoifiScreening->impermissible_income_ratio;
+                } else if ($company->financials && $company->financials->count() > 0) {
                     $financial = $company->financials->first();
                     if ($financial->total_revenue > 0) {
                         $dbRatio = ($financial->interest_income / $financial->total_revenue);
+                        $ratioPct = $dbRatio * 100;
                     }
                 }
 
-                $ratioPct = $dbRatio * 100;
                 $stockArray['status']['purification_required'] = ($stockArray['status']['status'] ?? '') === 'halal' && $ratioPct > 0;
                 $stockArray['status']['haram_revenue_percent'] = round($ratioPct, 4);
             }
@@ -609,7 +610,7 @@ class StockController extends Controller
             ]);
 
             $dbIncomeRatio = (float) ($aaoifiScreening->impermissible_income_ratio ?? 0);
-            $incomePct = $dbIncomeRatio * 100;
+            $incomePct = $dbIncomeRatio;
 
             $mapped = [
                 'company_id'    => $company->id,
