@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Wallet, Layers, ShieldAlert, AlertTriangle, Sparkles, Target,
   Plus, X, Trash2, ArrowUpRight, ArrowDownRight,
-  RefreshCw, Edit2, ShieldCheck
+  RefreshCw, Edit2, ShieldCheck, Droplet, HelpCircle
 } from 'lucide-react';
 
 import { updateHolding } from '../../services/api';
@@ -219,9 +219,14 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
   };
 
   const filterFn = h => {
-    if (activeFilter === 'halal')    return isHoldingHalal(h) && !(h.purification_due);
+    const statusRaw = h.status ? h.status.toLowerCase() : (h.is_halal ? 'halal' : 'non-halal');
+    const finalStatus = ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(h.symbol) ? 'halal' : statusRaw;
+    const isHalal = finalStatus === 'halal' || finalStatus === 'compliant';
+    
+    if (activeFilter === 'halal')    return isHalal && !(h.purification_due);
     if (activeFilter === 'purify')   return (h.purification_due||0) > 0;
-    if (activeFilter === 'nonhalal') return !isHoldingHalal(h);
+    if (activeFilter === 'doubtful') return finalStatus === 'doubtful';
+    if (activeFilter === 'nonhalal') return !isHalal && finalStatus !== 'doubtful';
     return true;
   };
   const displayHoldings = [...holdings].filter(filterFn).sort((a,b) => (b.total_value||0) - (a.total_value||0));
@@ -346,20 +351,22 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
         <div className="stagger-2" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', background: 'var(--bg)', padding: '16px 24px', borderRadius: '20px', border: '1px solid var(--border)', boxShadow: '0 8px 32px rgba(0,0,0,0.03)' }}>
           
           {/* Filters (Segmented Control style) */}
-          <div style={{ display:'flex', background:'var(--body-bg)', borderRadius:'14px', padding:'6px', gap:'8px', border: '1px solid var(--border)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)' }}>
+          <div className="hide-scrollbar" style={{ display:'flex', background:'var(--body-bg)', borderRadius:'14px', padding:'6px', gap:'8px', border: '1px solid var(--border)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)', overflowX: 'auto', maxWidth: '100%' }}>
             {[
-              { id:'all', label:'All Assets', icon: Layers },
-              { id:'halal', label: 'Shariah Compliant', icon: ShieldCheck },
-              { id:'nonhalal', label: 'Shariah Non-Compliant', icon: AlertTriangle }
+              { id:'all', label:'All', icon: Layers, activeColor: 'var(--primary)' },
+              { id:'halal', label: 'Compliant', icon: ShieldCheck, activeColor: '#16a34a' },
+              { id:'purify', label: 'Purify', icon: Droplet, activeColor: '#eab308' },
+              { id:'doubtful', label: 'Doubtful', icon: HelpCircle, activeColor: '#d97706' },
+              { id:'nonhalal', label: 'Non-Compliant', icon: AlertTriangle, activeColor: '#dc2626' }
             ].map(f => (
               <button key={f.id} onClick={() => setActiveFilter(f.id)} style={{
-                display: 'flex', alignItems: 'center', gap: '8px',
-                padding:'10px 24px', borderRadius:'10px', fontSize: '0.78rem', fontWeight:800, cursor:'pointer', border:'none', transition:'all 0.3s cubic-bezier(0.16,1,0.3,1)',
+                display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0,
+                padding:'10px 18px', borderRadius:'10px', fontSize: '0.78rem', fontWeight:800, cursor:'pointer', border:'none', transition:'all 0.3s cubic-bezier(0.16,1,0.3,1)',
                 background: activeFilter === f.id ? 'var(--bg)' : 'transparent',
-                color:      activeFilter === f.id ? 'var(--primary)' : 'var(--text-muted)',
+                color:      activeFilter === f.id ? f.activeColor : 'var(--text-muted)',
                 boxShadow:  activeFilter === f.id ? '0 4px 12px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.05)' : 'none',
               }}>
-                <f.icon size={16} color={activeFilter === f.id ? (f.id === 'halal' ? '#16a34a' : f.id === 'nonhalal' ? '#dc2626' : 'var(--primary)') : 'var(--text-muted)'} />
+                <f.icon size={16} color={activeFilter === f.id ? f.activeColor : 'var(--text-muted)'} />
                 {f.label}
               </button>
             ))}
