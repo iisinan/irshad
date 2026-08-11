@@ -33,12 +33,12 @@ const getStatusConfig = (company) => {
   const rawStatus = company.status;
   if (typeof rawStatus === 'object' && rawStatus !== null) {
     const s = rawStatus.status?.toLowerCase();
-    if (s === 'halal' || s === 'compliant') { statusStr = 'HALAL'; cls = 'status-halal'; icon = <CheckCircle size={11} />; }
-    else if (s === 'non-halal' || s === 'non_compliant') { statusStr = 'NON-HALAL'; cls = 'status-non-halal'; icon = <AlertCircle size={11} />; }
+    if (s === 'halal' || s === 'compliant') { statusStr = 'SHARIAH COMPLIANT'; cls = 'status-halal'; icon = <CheckCircle size={11} />; }
+    else if (s === 'non-halal' || s === 'non_compliant') { statusStr = 'SHARIAH NON-COMPLIANT'; cls = 'status-non-halal'; icon = <AlertCircle size={11} />; }
   } else if (typeof rawStatus === 'string') {
     const s = rawStatus.toLowerCase();
-    if (s === 'compliant' || s === 'halal') { statusStr = 'HALAL'; cls = 'status-halal'; icon = <CheckCircle size={11} />; }
-    else if (s === 'non-halal' || s === 'non_compliant') { statusStr = 'NON-HALAL'; cls = 'status-non-halal'; icon = <AlertCircle size={11} />; }
+    if (s === 'compliant' || s === 'halal') { statusStr = 'SHARIAH COMPLIANT'; cls = 'status-halal'; icon = <CheckCircle size={11} />; }
+    else if (s === 'non-halal' || s === 'non_compliant') { statusStr = 'SHARIAH NON-COMPLIANT'; cls = 'status-non-halal'; icon = <AlertCircle size={11} />; }
   }
   return { label: statusStr, cls, icon, raw: statusStr.toLowerCase() };
 };
@@ -134,9 +134,9 @@ const MobileStockCard = React.memo(({ stock, idx, isWatched, onToggle }) => {
   const isPos = Number(stock.price_change_pct ?? 0) >= 0;
   const cfg = getStatusConfig(stock);
   const statusColors = {
-    HALAL: { color: 'var(--halal)', bg: 'var(--halal-bg)', border: 'rgba(16,185,129,0.2)' },
-    'NON-HALAL': { color: 'var(--non-halal)', bg: 'var(--non-halal-bg)', border: 'rgba(239,68,68,0.2)' },
-    DOUBTFUL: { color: '#D97706', bg: 'rgba(245,158,11,0.08)', border: 'rgba(245,158,11,0.2)' },
+    'SHARIAH COMPLIANT': { bg: 'rgba(34, 197, 94, 0.1)', color: '#16a34a' },
+    'SHARIAH NON-COMPLIANT': { bg: 'rgba(239, 68, 68, 0.1)', color: '#dc2626' },
+    'DOUBTFUL': { bg: 'rgba(245, 158, 11, 0.1)', color: '#d97706' }
   };
   const sc = statusColors[cfg.label] || statusColors.DOUBTFUL;
 
@@ -151,7 +151,7 @@ const MobileStockCard = React.memo(({ stock, idx, isWatched, onToggle }) => {
       <Link to={`/market/${stock.symbol}/aaoifi`} state={{ stock }} style={{ textDecoration: 'none', flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
           <span style={{ fontWeight: 900, color: 'var(--text-dark)', fontSize: '0.92rem', letterSpacing: '-0.3px' }}>{stock.symbol}</span>
-          <span style={{ fontSize: '0.62rem', fontWeight: 800, color: sc.color, background: sc.bg, border: `1px solid ${sc.border}`, padding: '2px 7px', borderRadius: 100, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{cfg.label}</span>
+          <span style={{ fontSize: '0.62rem', fontWeight: 800, color: sc.color, background: sc.bg, border: `1px solid ${sc.color}`, padding: '2px 7px', borderRadius: 100, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{cfg.label}</span>
         </div>
         <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '180px' }}>{stock.name}</div>
         <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: 2, fontWeight: 600 }}>{normSector(stock.sector)}</div>
@@ -250,7 +250,7 @@ export default function MarketTab() {
 
 
   const halalCount = useMemo(() => {
-    return actualStocks.filter(s => getStatusConfig(s).label === 'HALAL').length;
+    return actualStocks.filter(s => getStatusConfig(s).label === 'SHARIAH COMPLIANT').length;
   }, [actualStocks]);
 
   const filtered = useMemo(() => {
@@ -259,8 +259,8 @@ export default function MarketTab() {
       if (q && !s.symbol?.toLowerCase().includes(q) && !s.name?.toLowerCase().includes(q)) return false;
       if (statusF !== 'all') {
         const cfg = getStatusConfig(s);
-        if (statusF === 'halal' && cfg.label !== 'HALAL') return false;
-        if (statusF === 'non-halal' && cfg.label !== 'NON-HALAL') return false;
+        if (statusF === 'halal' && cfg.label !== 'SHARIAH COMPLIANT') return false;
+        if (statusF === 'non-halal' && cfg.label !== 'SHARIAH NON-COMPLIANT') return false;
         if (statusF === 'doubtful' && cfg.label !== 'DOUBTFUL') return false;
       }
       if (sectorF !== 'all' && normSector(s.sector) !== sectorF) return false;
@@ -352,7 +352,7 @@ export default function MarketTab() {
 
           {/* Mobile status filter pills */}
           <div className="market-status-pills hide-scrollbar" style={{ display: 'none', overflowX: 'auto', gap: 8, paddingBottom: 2 }}>
-            {[['all', 'All'], ['halal', '✓ Halal'], ['non-halal', '✗ Non-Halal'], ['doubtful', '? Doubtful']].map(([val, label]) => (
+            {[['all', 'All'], ['halal', '✓ Shariah Compliant'], ['non-halal', '✗ Shariah Non-Compliant'], ['doubtful', '? Doubtful']].map(([val, label]) => (
               <button
                 key={val}
                 onClick={() => setStatusF(val)}

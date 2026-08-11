@@ -106,8 +106,8 @@ function HoldingRow({ holding, onDelete, onEdit }) {
   const finalStatus = ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(holding.symbol) ? 'halal' : statusRaw;
   
   const getBadgeStyle = (status) => {
-    if (status === 'halal' || status === 'compliant') return { bg: 'rgba(34, 197, 94, 0.1)', color: 'var(--halal)', text: 'Halal' };
-    if (status === 'non-halal' || status === 'non_halal' || status === 'non-compliant' || status === 'fail') return { bg: 'rgba(239, 68, 68, 0.1)', color: 'var(--non-halal)', text: 'Non-Halal' };
+    if (status === 'halal' || status === 'compliant') return { bg: 'rgba(34, 197, 94, 0.1)', color: 'var(--halal)', text: 'Shariah Compliant' };
+    if (status === 'non-halal' || status === 'non_halal' || status === 'non-compliant' || status === 'fail') return { bg: 'rgba(239, 68, 68, 0.1)', color: 'var(--non-halal)', text: 'Shariah Non-Compliant' };
     return { bg: 'rgba(245, 158, 11, 0.1)', color: 'var(--questionable)', text: 'Doubtful' };
   };
   const badge = getBadgeStyle(finalStatus);
@@ -313,12 +313,12 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '4px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <ShieldCheck size={16} color="#16a34a" />
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Halal <strong style={{ color: 'var(--text-dark)', fontWeight: 800, marginLeft: '4px' }}>{halalCount}</strong></span>
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Shariah Compliant <strong style={{ color: 'var(--text-dark)', fontWeight: 800, marginLeft: '4px' }}>{halalCount}</strong></span>
               </div>
               <div style={{ width: '1px', height: '14px', background: 'var(--border)' }} />
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <AlertTriangle size={16} color="#dc2626" />
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Non-Halal <strong style={{ color: 'var(--text-dark)', fontWeight: 800, marginLeft: '4px' }}>{nonHalalCount}</strong></span>
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Shariah Non-Compliant <strong style={{ color: 'var(--text-dark)', fontWeight: 800, marginLeft: '4px' }}>{nonHalalCount}</strong></span>
               </div>
             </div>
           </div>

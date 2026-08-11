@@ -307,7 +307,7 @@ export default function Portfolio() {
 
         {/* ── Right Sidebar (Only Visible on Holdings) ── */}
         {activeTab === 'holdings' && (
-          <div className="stagger-3" style={{ display:'flex', flexDirection:'column', gap:'18px' }}>
+          <div className="stagger-3" style={{ display:'flex', flexDirection:'column', gap:'18px', position:'sticky', top:'24px' }}>
             {/* Pie Chart */}
           <div style={{ background: 'var(--bg)', border:'1px solid var(--border)', borderRadius:'24px', padding:'26px', boxShadow:'var(--shadow-sm)', transition:'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', position:'relative', overflow:'hidden' }}
             onMouseEnter={e => { e.currentTarget.style.boxShadow='var(--shadow-md)'; e.currentTarget.style.transform='translateY(-2px)'; }}
