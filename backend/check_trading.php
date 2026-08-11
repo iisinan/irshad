@@ -2,6 +2,5 @@
 require __DIR__.'/vendor/autoload.php';
 $app = require_once __DIR__.'/bootstrap/app.php';
 $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
-
-$c = \App\Models\Company::where('symbol', 'HONYFLOUR')->first();
-print_r($c->aaoifiScreening->toArray());
+$first = \App\Models\Company::first();
+echo json_encode(array_keys($first->toArray())) . "\n";

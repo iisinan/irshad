@@ -221,7 +221,7 @@ export const fetchPortfolioMovers = async () => {
 
 export const fetchAaoifiScreening = async (symbol) => {
   try {
-    const response = await api.get(`/stocks/${symbol}/aaoifi-screening`);
+    const response = await api.get(`/stocks/${symbol}/aaoifi-screening`, { params: { _cb: Date.now() } });
     return response.data;
   } catch (error) {
     console.error(`Error fetching AAOIFI screening for ${symbol}:`, error);

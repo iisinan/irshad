@@ -6,3 +6,9 @@ storage/framework/sessions
 storage/logs
 .git
 tests
+venv
+*.pdf
+ai-engine
+scratch
+rr
+

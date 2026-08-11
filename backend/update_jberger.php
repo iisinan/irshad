@@ -5,41 +5,34 @@ $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
 app()->instance('verdict.unlock', true);
 
-$c = \App\Models\Company::where('symbol', 'GEREGU')->with('aaoifiScreening', 'status')->first();
+$c = \App\Models\Company::where('symbol', 'JBERGER')->with('aaoifiScreening', 'status')->first();
 
 if (!$c) {
-    echo "GEREGU not found.\n";
+    echo "JBERGER not found.\n";
     exit;
 }
 
-// Q2 2026 (YTD) data
 $marketCap = $c->market_cap ?: 0;
-$totalAssets = 243622903000;
-// Borrowings (Non-current + Current) + Bonds (Non-current + Current)
-$totalDebt = 1764706000 + 18863492000 + 34473412000 + 10993229000; 
-$cash = 65588679000;
+$totalAssets = 1071272602000;
+$totalDebt = 56354027000;
+$cash = 168804545000;
 $interestBearingSecurities = 0;
-// YTD 2026 Revenue
-$totalRevenue = 55874560000;
-// YTD 2026 Finance Income
-$impermissibleIncome = 3528088000;
+$totalRevenue = 424562607000;
+$impermissibleIncome = 8984939000;
 
 $denominator = $marketCap;
 
 $debtRatio = $totalDebt / $denominator;
 $cashRatio = ($cash + $interestBearingSecurities) / $denominator;
-// Some scholars divide by Total Income (Revenue + Impermissible Income) if it's not part of Revenue.
-// We use Revenue to be conservative or Total Income. Either way, it exceeds 5%.
 $impermissibleIncomeRatio = $totalRevenue > 0 ? $impermissibleIncome / $totalRevenue : 0;
 
 $debtStatus = $debtRatio <= 0.30 ? 'pass' : 'fail';
 $cashStatus = $cashRatio <= 0.30 ? 'pass' : 'fail';
 $impermissibleIncomeStatus = $impermissibleIncomeRatio <= 0.05 ? 'pass' : 'fail';
 
-$businessStatus = 'pass';
-$finalStatus = ($businessStatus == 'pass' && $debtStatus == 'pass' && $cashStatus == 'pass' && $impermissibleIncomeStatus == 'pass') ? 'halal' : 'non-halal';
+$businessStatus = 'halal'; // Construction is halal
+$finalStatus = ($businessStatus == 'halal' && $debtStatus == 'pass' && $cashStatus == 'pass' && $impermissibleIncomeStatus == 'pass') ? 'halal' : 'non-halal';
 
-echo "Total Debt: " . number_format($totalDebt) . "\n";
 echo "Debt Ratio: " . number_format($debtRatio * 100, 2) . "% ($debtStatus)\n";
 echo "Cash Ratio: " . number_format($cashRatio * 100, 2) . "% ($cashStatus)\n";
 echo "Impermissible Income Ratio: " . number_format($impermissibleIncomeRatio * 100, 2) . "% ($impermissibleIncomeStatus)\n";
@@ -51,7 +44,7 @@ if (!$c->aaoifiScreening) {
 }
 
 $c->aaoifiScreening->business_status = $businessStatus;
-$c->aaoifiScreening->business_reasoning = ["Geregu Power Plc is engaged in power generation. Power generation is a permissible core activity."];
+$c->aaoifiScreening->business_reasoning = ["Julius Berger Nigeria Plc is a construction company offering civil works, building, and facility management services, which are permissible business activities."];
 $c->aaoifiScreening->debt_ratio = $debtRatio;
 $c->aaoifiScreening->debt_status = $debtStatus;
 $c->aaoifiScreening->cash_ratio = $cashRatio;
@@ -59,9 +52,11 @@ $c->aaoifiScreening->cash_status = $cashStatus;
 $c->aaoifiScreening->impermissible_income_ratio = $impermissibleIncomeRatio;
 $c->aaoifiScreening->impermissible_income_status = $impermissibleIncomeStatus;
 $c->aaoifiScreening->final_status = $finalStatus;
+$c->aaoifiScreening->reporting_period = 'Q2';
+$c->aaoifiScreening->reporting_year = 2026;
 
 $c->aaoifiScreening->financial_data_used = [
-    'source' => 'https://doclib.ngxgroup.com/Financial_NewsDocs/47726_GEREGU_POWER_PLC-_QUARTER_2_-_FINANCIAL_STATEMENT_FOR_2026_FINANCIAL_STATEMENTS_JULY_2026.pdf',
+    'source' => 'https://doclib.ngxgroup.com/Financial_NewsDocs/47621_JULIUS_BERGER_NIGERIA_PLC-_QUARTER_2_-_FINANCIAL_STATEMENT_FOR_2026_FINANCIAL_STATEMENTS_JULY_2026.pdf',
     'market_cap' => $marketCap,
     'total_assets' => $totalAssets,
     'total_debt' => $totalDebt,
@@ -72,8 +67,7 @@ $c->aaoifiScreening->financial_data_used = [
     'reporting_period' => 'Q2',
     'financial_year' => 2026
 ];
-$c->aaoifiScreening->reporting_period = 'Q2';
-$c->aaoifiScreening->reporting_year = 2026;
+
 $c->aaoifiScreening->save();
 
 $c->current_status = $finalStatus;
@@ -85,3 +79,5 @@ if ($c->status) {
 } else {
     $c->status()->create(['status' => $finalStatus, 'verified_by_scholar' => false]);
 }
+
+echo "Successfully updated JBERGER.\n";

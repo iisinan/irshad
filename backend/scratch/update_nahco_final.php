@@ -1,0 +1,26 @@
+<?php
+require __DIR__ . '/../vendor/autoload.php';
+$app = require_once __DIR__ . '/../bootstrap/app.php';
+$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+$kernel->bootstrap();
+
+use App\Models\Company;
+use App\Models\StockStatus;
+use Illuminate\Support\Facades\DB;
+
+$company = Company::where('symbol', 'NAHCO')->first();
+if ($company) {
+    // 1. Update Justification Summary in stock_statuses
+    $statusRecord = StockStatus::where('company_id', $company->id)->first();
+    if ($statusRecord) {
+        $statusRecord->reason = "Permissible core activity. Additionally, it passes all AAOIFI quantitative financial screening ratios.";
+        $statusRecord->save();
+        echo "Updated Justification Summary (stock_statuses.reason).\n";
+    }
+
+    // 2. Update Business Activity Screening in aaoifi_screenings
+    DB::table('aaoifi_screenings')
+        ->where('company_id', $company->id)
+        ->update(['business_reasoning' => 'Permissible core activity.']);
+    echo "Updated Business Activity Screening (aaoifi_screenings.business_reasoning).\n";
+}

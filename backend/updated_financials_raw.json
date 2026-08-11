@@ -1,0 +1,314 @@
+{
+  "NASCON": {
+    "market_cap": 513461157550.0,
+    "total_debt": 64737000.0,
+    "cash_and_equivalents": 46817960000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 81158775000.0,
+    "interest_income": 5347101000.0
+  },
+  "DANGSUGAR": {
+    "market_cap": 955959317409.3,
+    "total_debt": 375261584000.0,
+    "cash_and_equivalents": 29166697000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 391854524000.0,
+    "interest_income": 2948858000.0
+  },
+  "NAHCO": {
+    "market_cap": 345262500000.0,
+    "total_debt": 4554952000.0,
+    "cash_and_equivalents": 4132500000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 35355866000.0,
+    "interest_income": 649235000.0
+  },
+  "HBMNG": {
+    "market_cap": 5847129846723.0,
+    "total_debt": 0.0,
+    "cash_and_equivalents": 393684397000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 678410621000.0,
+    "interest_income": 27007477000.0
+  },
+  "DANGCEM": {
+    "market_cap": 17321727791258.0,
+    "total_debt": 581044000000.0,
+    "cash_and_equivalents": 796276000000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 2513932000000.0,
+    "interest_income": 16246000000.0
+  },
+  "MTNN": {
+    "market_cap": 15116803274160.0,
+    "total_debt": 342591000000.0,
+    "cash_and_equivalents": 952022000000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 2993064000000.0,
+    "interest_income": 46797000000.0
+  },
+  "CHAMS": {
+    "market_cap": 21060000000.0,
+    "total_debt": 0.0,
+    "cash_and_equivalents": 5597266000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 9788763000.0,
+    "interest_income": 538787000.0
+  },
+  "MCNICHOLS": {
+    "market_cap": 6421560491.75,
+    "total_debt": 0.0,
+    "cash_and_equivalents": 407950102000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 3195172844000.0,
+    "interest_income": 0
+  },
+  "TIP": {
+    "market_cap": 54000000000.0,
+    "total_debt": 0.0,
+    "cash_and_equivalents": 0.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 0,
+    "interest_income": 0
+  },
+  "ARADEL": {
+    "market_cap": 6158816880300.0,
+    "total_debt": 1811587252000.0,
+    "cash_and_equivalents": 1765086751000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 2491454085000.0,
+    "interest_income": 23674798000.0
+  },
+  "CWG": {
+    "market_cap": 50496527180.0,
+    "total_debt": 5986000.0,
+    "cash_and_equivalents": 7402836000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 44396801000.0,
+    "interest_income": 0.0
+  },
+  "NESTLE": {
+    "market_cap": 2229345708750.0,
+    "total_debt": 445011833000.0,
+    "cash_and_equivalents": 5615063000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 650759475000.0,
+    "interest_income": 1123090000.0
+  },
+  "CAVERTON": {
+    "market_cap": 16752548795.0,
+    "total_debt": 77066744000.0,
+    "cash_and_equivalents": 2457294000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 14681464000.0,
+    "interest_income": 17014000.0
+  },
+  "UACN": {
+    "market_cap": 585080024417.25,
+    "total_debt": 307039604000.0,
+    "cash_and_equivalents": 50092640000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 364970145000.0,
+    "interest_income": 3199414000.0
+  },
+  "NEIMETH": {
+    "market_cap": 45722219294.899994,
+    "total_debt": 9337776000.0,
+    "cash_and_equivalents": 1188139000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 3664888000.0,
+    "interest_income": 75827000.0
+  },
+  "TOTAL": {
+    "market_cap": 217293975680.0,
+    "total_debt": 73863651000.0,
+    "cash_and_equivalents": 38605766000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 443990701000.0,
+    "interest_income": 918945000.0
+  },
+  "SEPLAT": {
+    "market_cap": 6817709996747.899,
+    "total_debt": 1109593000000.0,
+    "cash_and_equivalents": 782930000000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 2502181000000.0,
+    "interest_income": 9133000000.0
+  },
+  "PRESCO": {
+    "market_cap": 2683333334100.0,
+    "total_debt": 119520614000.0,
+    "cash_and_equivalents": 129856486000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 198750419000.0,
+    "interest_income": 9016528000.0
+  },
+  "BUAFOODS": {
+    "market_cap": 16902000000000.0,
+    "total_debt": 338895378000.0,
+    "cash_and_equivalents": 149518920000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 765119203000.0,
+    "interest_income": 495690000.0
+  },
+  "CADBURY": {
+    "market_cap": 153919211782.5,
+    "total_debt": 18759727000.0,
+    "cash_and_equivalents": 9985485000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 83348545000.0,
+    "interest_income": 161452000.0
+  },
+  "CAP": {
+    "market_cap": 101843500000.0,
+    "total_debt": 0.0,
+    "cash_and_equivalents": 9542126000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 22410462000.0,
+    "interest_income": 770053000.0
+  },
+  "MAYBAKER": {
+    "market_cap": 69009395440.0,
+    "total_debt": 2908696000.0,
+    "cash_and_equivalents": 8242811000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 19280367000.0,
+    "interest_income": 483104000.0
+  },
+  "MECURE": {
+    "market_cap": 379600000000.0,
+    "total_debt": 66166764000.0,
+    "cash_and_equivalents": 7335911000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 44845076000.0,
+    "interest_income": 0.0
+  },
+  "MEYER": {
+    "market_cap": 8312050302.099999,
+    "total_debt": 1813000.0,
+    "cash_and_equivalents": 2118134000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 2374451000.0,
+    "interest_income": 171887000.0
+  },
+  "MORISON": {
+    "market_cap": 15840864000.0,
+    "total_debt": 203073000.0,
+    "cash_and_equivalents": 164863000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 274084000.0,
+    "interest_income": 2995000.0
+  },
+  "OKOMU": {
+    "market_cap": 1352644380000.0,
+    "total_debt": 6104158000.0,
+    "cash_and_equivalents": 21404765000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 125285940000.0,
+    "interest_income": 622474000.0
+  },
+  "OANDO": {
+    "market_cap": 355035734256.60004,
+    "total_debt": 2695370098000.0,
+    "cash_and_equivalents": 506889811000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 3180090462000.0,
+    "interest_income": 288032431000.0
+  },
+  "BUACEMENT": {
+    "market_cap": 10701135882960.0,
+    "total_debt": 663210363000.0,
+    "cash_and_equivalents": 303562937000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 728925338000.0,
+    "interest_income": 18730157000.0
+  },
+  "PZ": {
+    "market_cap": 329549594735.0,
+    "total_debt": 5900000000.0,
+    "cash_and_equivalents": 40966971000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 260456428000.0,
+    "interest_income": 1224444000.0
+  },
+  "SKYAVN": {
+    "market_cap": 231732895999.99997,
+    "total_debt": 3249634000.0,
+    "cash_and_equivalents": 3858489000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 23012466000.0,
+    "interest_income": 133905000.0
+  },
+  "VITAFOAM": {
+    "market_cap": 242663748416.0,
+    "total_debt": 2271909000.0,
+    "cash_and_equivalents": 14293909000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 91212764000.0,
+    "interest_income": 427741000.0
+  },
+  "BERGER": {
+    "market_cap": 42690993743.100006,
+    "total_debt": 141545000.0,
+    "cash_and_equivalents": 2311550000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 6926137000.0,
+    "interest_income": 147316000.0
+  },
+  "UNILEVER": {
+    "market_cap": 804300758380.0,
+    "total_debt": 2121839000.0,
+    "cash_and_equivalents": 97152745000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 119923255000.0,
+    "interest_income": 6513195000.0
+  },
+  "RTBRISCOE": {
+    "market_cap": 11704702957.199999,
+    "total_debt": 18576441000.0,
+    "cash_and_equivalents": 334841000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 24595456000.0,
+    "interest_income": 1003000.0
+  },
+  "SCOA": {
+    "market_cap": 21476738228.25,
+    "total_debt": 12408715940.0,
+    "cash_and_equivalents": 746437170.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 4929340350.0,
+    "interest_income": 269933630.0
+  },
+  "AIRTELAFRI": {
+    "market_cap": 21167591385600.0,
+    "total_debt": 2980932000000.0,
+    "cash_and_equivalents": 1175751000000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 8739796000000.0,
+    "interest_income": 36785000000.0
+  },
+  "CONOIL": {
+    "market_cap": 145729944570.0,
+    "total_debt": 72046498000.0,
+    "cash_and_equivalents": 14714512000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 179896949000.0,
+    "interest_income": 0.0
+  },
+  "ABCTRANS": {
+    "market_cap": 17944663305.0,
+    "total_debt": 1203922000.0,
+    "cash_and_equivalents": 1726110000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 8266844000.0,
+    "interest_income": 23897000.0
+  },
+  "ACADEMY": {
+    "market_cap": 7938000000.0,
+    "total_debt": 586231000.0,
+    "cash_and_equivalents": 422132000.0,
+    "interest_bearing_securities": 0,
+    "total_revenue": 771538000.0,
+    "interest_income": 0.0
+  }
+}

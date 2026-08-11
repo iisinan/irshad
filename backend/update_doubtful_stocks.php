@@ -1,57 +1,58 @@
 <?php
 require __DIR__.'/vendor/autoload.php';
 $app = require_once __DIR__.'/bootstrap/app.php';
-$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
-$kernel->bootstrap();
+$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
-$updates = [
-    'AFROMEDIA' => "Afromedia operates in outdoor advertising and media. The company is marked as doubtful pending verification of its client mix, specifically the revenue share derived from advertising impermissible products such as alcohol or betting.",
-    'BETAGLAS' => "Beta Glass manufactures glass bottles and containers. While the core product is permissible, major clients include prominent breweries and spirits producers. A customer-revenue breakdown is required to confirm if revenue from impermissible alcohol-industry clients exceeds acceptable thresholds.",
-    'CILEASING' => "C&I Leasing engages in equipment leasing. While ijara-style leasing is permissible, the company is marked as doubtful pending verification that its lease financing structures do not involve conventional interest-bearing (riba) mechanics.",
-    'DAARCOMM' => "DAAR Communications operates in broadcast media. The company is doubtful pending a review of its programming and advertising content mix to ensure compliance regarding impermissible entertainment standards and advertisements (e.g., alcohol, betting).",
-    'HMCALL' => "Haldane McCall operates a mix of real estate and hospitality businesses. Its hotel and resort operations may involve impermissible revenue streams, such as alcohol sales from bars, which requires verification.",
-    'NCR' => "NCR's core business involves hardware and technology vending (ATMs, POS, software). However, the company serves the gaming industry as a named vertical. Segment data is needed to confirm the revenue share attributable to gaming and betting-sector clients.",
-    'NGXGROUP' => "NGX Group's core operations (exchange, regulation) are fee-based and permissible. However, its Strategic Investment segment holds stakes in FMDQ Securities Exchange, a market dedicated to conventional bond and money-market trading. The exact stake size and FMDQ's revenue mix must be confirmed.",
-    'SCOA' => "SCOA Nigeria is a diversified trading conglomerate dealing in vehicles and equipment. It is marked as doubtful pending a detailed breakdown of its segment revenue mix to rule out impermissible activities.",
-    'SFSREIT' => "SFS REIT's core real estate business is permissible. However, its allocation rules and risk disclosures indicate structural exposure to interest-bearing mortgage and debt instruments (up to 25% of the portfolio). This presents a disclosed financial-ratio concern.",
-    'TANTALIZER' => "Tantalizers' core quick-service restaurant business is permissible. However, its subsidiary Tantainment Limited operates a 'live-game show' platform. Direct verification is needed to determine whether this involves real-money wagering or is simply a production-funded entertainment format.",
-    'TRANSCORP' => "Transcorp is a diversified conglomerate spanning power, oil/gas, and hospitality (Transcorp Hilton). It is marked as doubtful pending a segment breakdown, specifically regarding hotel bar revenue and alcohol sales.",
-    'UHOMREIT' => "Union Homes REIT is managed by a subsidiary of Union Bank. The fund's portfolio includes direct investments in mortgage assets alongside property, with explicit interest-bearing loan accounting on its books, presenting a financial-ratio concern.",
-    'NEWGOLD' => "NewGold ETF represents a claim on physical gold bullion, which is a permissible asset. However, AAOIFI standards require immediate possession and same-session settlement for gold trades. The fund's custodial and settlement structure requires confirmation to ensure compliance.",
-    'VETGOODS' => "Vetiva Consumer Goods ETF tracks the NGX Consumer Goods Index. This sector historically includes breweries alongside permissible food companies. Constituent weights must be verified to ensure the fund meets compliance thresholds.",
-    'VETINDETF' => "Vetiva Industrial ETF tracks the NGX Industrial Index. While dominated by permissible cement and building-materials manufacturers, the exact constituent list and weights require verification to warrant a full pass.",
-    'MERGROWTH' => "Meristem Growth ETF tracks a growth-oriented basket of equities. Growth indices historically span multiple sectors, including conventional financial services. Sector exposure and constituent weights require verification.",
-    'MERVALUE' => "Meristem Value ETF tracks a value-oriented basket of equities. The constituent sector mix and exposure to non-permissible industries require verification before a compliance ruling can be made."
+$doubtful_stocks = [
+    'AFROMEDIA' => "Outdoor advertising/media - Concerns with client mix (alcohol/betting ad revenue share).",
+    'BETAGLAS' => "Manufactures generic glass bottles/containers - the product itself (glass packaging) is not alcohol, and clients span soft drinks, pharma, food and cosmetics too. However, named major customers explicitly include Nigerian Breweries (Heineken), AB InBev, and Guinness Nigeria - breweries and spirits producers appear to be a dominant, not incidental, part of the customer base. Concerns with revenue source mix.",
+    'CILEASING' => "Equipment leasing - ijara-style leasing is permissible in principle. Concerns with conventional lease financing structure.",
+    'DAARCOMM' => "Broadcast media. Concerns with revenue sources from programming content mix (advertising for alcohol/betting, entertainment content standards).",
+    'HMCALL' => "Real estate + hospitality mix - hotel/resort operations. Concerns with revenue source mix as it owns and operates budget hotels, predominantly under the Suru Express Hotel brand in Lagos.",
+    'NCR' => "Core business is hardware/technology vending - ATMs, POS terminals, self-service kiosks, software - not a gaming operator itself. However, company literature explicitly names 'gaming' as one of its served industry verticals alongside financial services, retail, hospitality, healthcare, and travel. This is a vendor-to-mixed-clients profile (comparable to leasing to varied tenants) rather than a direct activity exclusion, but the revenue share attributable to gaming/betting-sector clients is unconfirmed. Concerns with revenue source mix.",
+    'NGXGROUP' => "Own operated business (NGX Exchange, NGX RegCo, NGX RelCo) is fee-based - listing/trading fees, market data, regulation, real estate - not itself riba, comparable to how most global exchange operators are treated. Complication sits in the Strategic Investment segment: NGX Group holds equity stakes in CSCS and NASD (fine, fee-based) but also in FMDQ Securities Exchange, a market dedicated almost entirely to conventional bond/money-market/FX trading. Concerns with revenue source mix.",
+    'SFSREIT' => "Core business (acquiring, leasing, managing commercial/residential real estate) is genuinely permissible - Nigeria's first listed REIT. However, its own governing allocation rules typically invest 75% in real estate and 25% in real estate related investments such as mortgages, real estate backed securities and real estate related equities, plus a 10% cash buffer, and its own risk disclosures confirm exposure to unfavorable Interest Rate fluctuations due to the sensitivity of its financial instruments. Up to a quarter of the portfolio is structurally earmarked for interest-bearing mortgage/debt instruments - This is a disclosed financial-ratio concern.",
+    'TANTALIZER' => "Core quick-service restaurant business remains clean (verify no alcohol sales at any outlet, as previously noted). However, wholly owned subsidiary Tantainment Limited runs a 'live-game show' platform called 'Chances by Tantainment' (Q2 2026 launch, ~N30bn valuation, 10% stake sold to RGM Materials Solutions for N2bn). Public disclosures don't clarify whether 'Chances' involves real-money wagering/betting by viewers or is a production-funded prize/entertainment format - the name, emphasis on 'regulatory and compliance frameworks,' and 'tech-driven platform' framing create concerns with revenue source mix.",
+    'TRANSCORP' => "Diversified conglomerate spanning power, oil/gas, and hospitality (Transcorp Hilton) - Concerns with segment and revenue source mix.",
+    'UHOMREIT' => "Core business (acquiring/developing/managing/selling real estate) is genuinely permissible. However, managed by Union Homes Savings & Loans Plc, a subsidiary of Union Bank of Nigeria Plc, and the Fund Managers spread the portfolio mix across commercial and residential property investment and mortgage assets - i.e., the fund directly holds mortgage assets, not just property. Its own financial statements state the investment strategy is to invest in equity and debt securities, with loans and receivables measured at amortised cost using the effective interest method - explicit interest-bearing loan accounting on the fund's books. This is a clear disclosed financial-ratio concern.",
+    'UPDCREIT' => "Real estate investment trust  also raises concerns on investment sources and results.",
+    'NEWGOLD' => "NewGold ETF - each unit represents a claim on physical gold bullion held in a vault, and gold itself is a permissible asset. However, AAOIFI Shariah Standard No. 57 requires immediate/constructive possession and same-session settlement for gold trades to avoid riba al-fadl/gharar. This raises concerns on NewGold's custodial and settlement structure (allocated vs unallocated bullion, T+ settlement cycle).",
+    'VETGOODS' => "Vetiva Consumer Goods ETF - tracks the NGX Consumer Goods Index (top 15 Food/Beverage/Tobacco companies by market cap). Index composition sector historically includes brewers (Nigerian Breweries, Guinness, International Breweries) alongside permissible food/personal-care names - thus constituent weights raise concerns with buisness case mix.",
+    'VETINDETF' => "Vetiva Industrial ETF - tracks the NGX Industrial Index (top 10 Industrial Goods companies). The sector is dominated by cement, paints, and building-materials manufacturers that generally pass a standalone business-activity screen, but concerns with regards exact verdict of constituent and the weights of each.",
+    'MERGROWTH' => "Meristem Growth ETF - tracks a growth-oriented basket of NGX-listed equities (Meristem Growth Index). Contain companies that historically spanned multiple sectors including financial services, so concerns are with regards exact verdict of constituent companies and the weights of each.",
+    'MERVALUE' => "Meristem Value ETF - tracks a value-oriented basket of NGX-listed equities (Meristem Value Index); concerns are with regards exact verdict of constituent companies and the weights of each."
 ];
 
-$count = 0;
-foreach ($updates as $ticker => $reason) {
-    // Also updating StockStatus if it exists, as well as the Company model.
-    $company = \App\Models\Company::where('symbol', $ticker)->first();
+foreach ($doubtful_stocks as $symbol => $rationale) {
+    $company = \App\Models\Company::where('symbol', $symbol)->first();
     if ($company) {
-        $company->current_status = 'doubtful';
-        $company->activity_reason = $reason;
-        
-        // I will just use try-catch in case it doesn't.
-        try {
-        } catch (\Exception $e) {}
-        
-        $company->save();
-        
-        // Also update StockStatus table which is commonly used in this project
-        $stockStatus = \App\Models\StockStatus::where('company_id', $company->id)->first();
-        if (!$stockStatus) {
-            $stockStatus = new \App\Models\StockStatus();
-            $stockStatus->company_id = $company->id;
+        $screening = \App\Models\AaoifiScreening::where('company_id', $company->id)->first();
+        if ($screening) {
+            $screening->business_status = 'doubtful';
+            $screening->business_reasoning = [$rationale];
+            $screening->final_status = 'doubtful';
+            $screening->save();
+            
+            $company->current_status = 'doubtful';
+            $company->save();
+            
+            $status = $company->status;
+            if ($status) {
+                $status->status = 'doubtful';
+                $status->reason = $rationale;
+                $status->save();
+            } else {
+                $company->status()->create([
+                    'status' => 'doubtful',
+                    'reason' => $rationale,
+                    'verified_by_scholar' => false
+                ]);
+            }
+            echo "Updated $symbol -> doubtful\n";
+        } else {
+            echo "Screening not found for $symbol\n";
         }
-        $stockStatus->status = 'doubtful';
-        $stockStatus->reason = $reason;
-        $stockStatus->save();
-        
-        echo "Updated $ticker\n";
-        $count++;
     } else {
-        echo "Company $ticker not found in DB.\n";
+        echo "Company $symbol not found\n";
     }
 }
-echo "Total updated: $count\n";
