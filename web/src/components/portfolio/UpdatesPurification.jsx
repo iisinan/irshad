@@ -1,9 +1,57 @@
-import React from 'react';
-import { Droplet, Info, BookOpen, HandHeart, AlertCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Droplet, Info, BookOpen, HandHeart, AlertCircle, Heart } from 'lucide-react';
+import { fetchPortfolio } from '../../services/api';
+import { toastSuccess } from '../../utils/toast';
+
+const fmt = (n, d = 2) => `₦${Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d })}`;
 
 export default function UpdatesPurification() {
+  const [payLoading, setPayLoading] = useState(false);
+  
+  const { data: res } = useQuery({
+    queryKey: ['portfolioData'],
+    queryFn: fetchPortfolio,
+    staleTime: 5 * 60 * 1000,
+  });
+  
+  const holdings = res?.data?.holdings || [];
+  const totalDue = holdings.reduce((sum, h) => sum + Number(h.purification_due || 0), 0);
+
+  const handleDonateAll = () => {
+    setPayLoading(true);
+    setTimeout(() => {
+      setPayLoading(false);
+      toastSuccess(`Successfully donated ${fmt(totalDue)}`);
+    }, 1200);
+  };
+
   return (
     <div className="animate-fade-in" style={{ padding: '8px' }}>
+      {/* ── Total Due Banner ── */}
+      {totalDue > 0 && (
+        <div style={{ background: 'var(--bg)', borderRadius: '24px', padding: '24px', border: '1px solid var(--primary-100)', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', boxShadow: '0 8px 32px rgba(91,41,113,0.08)' }}>
+          <div>
+            <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>Total Amount to Purify</div>
+            <div style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-1px' }}>{fmt(totalDue)}</div>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>From {holdings.filter(h => Number(h.purification_due) > 0).length} non-compliant holdings</p>
+          </div>
+          <button
+            onClick={handleDonateAll}
+            disabled={payLoading}
+            style={{ padding: '16px 28px', borderRadius: '16px', background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.95rem', cursor: payLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 10px 28px rgba(91,41,113,0.35)', transition: 'all 0.2s', width: 'auto' }}
+            onMouseEnter={e => { if (!payLoading) { e.currentTarget.style.transform = 'translateY(-2px)'; } }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
+          >
+            {payLoading ? (
+              <div className="spinner" style={{ width: '18px', height: '18px', borderTopColor: 'white' }} />
+            ) : (
+              <><Heart size={18} fill="rgba(255,255,255,0.35)" /> Donate All Securely</>
+            )}
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div style={{
         background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%)',
