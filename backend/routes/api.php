@@ -83,7 +83,18 @@ Route::prefix('v1')->group(function () {
     Route::get('/admin/compliance-reviews/{id}/reject-link', [AdminComplianceController::class, 'rejectViaLink']);
 
     // ── Protected Routes ─────────────────────────────────────────────────
-    Route::middleware('auth:sanctum')->group(function () {
+    
+// Keep-Alive Ping Route
+Route::get('/ping', function () {
+    try {
+        \Illuminate\Support\Facades\DB::select('SELECT 1');
+        return response()->json(['status' => 'alive', 'db' => 'connected', 'time' => now()]);
+    } catch (\Exception $e) {
+        return response()->json(['status' => 'alive', 'db' => 'disconnected', 'error' => $e->getMessage()], 500);
+    }
+});
+
+Route::middleware('auth:sanctum')->group(function () {
 
         // Admin Compliance Routes (requires login — for dashboard use)
         Route::get('/admin/stats', [AdminComplianceController::class, 'getStats']);
