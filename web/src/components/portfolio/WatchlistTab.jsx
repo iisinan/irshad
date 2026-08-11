@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, Component } from 'react';
-import { Eye, BarChart2, Star, TrendingUp, TrendingDown, Trash2, AlertCircle, HelpCircle, CheckCircle, ChevronRight, Mail, Plus, Bell } from 'lucide-react';
+import { Eye, BarChart2, Star, TrendingUp, TrendingDown, Trash2, AlertCircle, HelpCircle, CheckCircle, ChevronRight, Mail, Plus, Bell, Layers, ShieldCheck, Droplet, AlertTriangle } from 'lucide-react';
 import { fetchWatchlist, removeFromWatchlist, fetchNgxStocks } from '../../services/api';
 import CompanyLogo from '../CompanyLogo';
 import { toastError, toastSuccess } from '../../utils/toast';
@@ -128,14 +128,14 @@ export default function WatchlistTab({ initialSymbol }) {
     const rawStatus = company.status;
     if (typeof rawStatus === 'object' && rawStatus !== null) {
       const s = rawStatus.status?.toLowerCase();
-      if (s === 'halal') { statusStr = 'HALAL'; cls = 'status-halal'; icon = <CheckCircle size={12} />; }
-      else if (s === 'non-halal') { statusStr = 'NON-HALAL'; cls = 'status-non-halal'; icon = <AlertCircle size={12} />; }
+      if (s === 'halal' || s === 'compliant') { statusStr = 'SHARIAH COMPLIANT'; cls = 'status-halal'; icon = <CheckCircle size={12} />; }
+      else if (s === 'non-halal' || s === 'non_compliant') { statusStr = 'SHARIAH NON-COMPLIANT'; cls = 'status-non-halal'; icon = <AlertCircle size={12} />; }
     } else if (typeof rawStatus === 'string') {
       const s = rawStatus.toLowerCase();
-      if (s === 'compliant' || s === 'halal') { statusStr = 'HALAL'; cls = 'status-halal'; icon = <CheckCircle size={12} />; }
-      else if (s === 'non-halal') { statusStr = 'NON-HALAL'; cls = 'status-non-halal'; icon = <AlertCircle size={12} />; }
+      if (s === 'compliant' || s === 'halal') { statusStr = 'SHARIAH COMPLIANT'; cls = 'status-halal'; icon = <CheckCircle size={12} />; }
+      else if (s === 'non-halal' || s === 'non_compliant') { statusStr = 'SHARIAH NON-COMPLIANT'; cls = 'status-non-halal'; icon = <AlertCircle size={12} />; }
     }
-    return { label: statusStr, cls, icon };
+    return { label: statusStr, cls, icon, raw: statusStr.toLowerCase() };
   };
 
   // Filter full stock objects that match the watchlist symbols
@@ -144,9 +144,10 @@ export default function WatchlistTab({ initialSymbol }) {
     if (filter !== 'all') {
       stocks = stocks.filter(s => {
         const cfg = getStatusConfig(s);
-        if (filter === 'halal') return cfg.label === 'HALAL';
-        if (filter === 'non-halal') return cfg.label === 'NON-HALAL';
+        if (filter === 'halal') return cfg.label === 'SHARIAH COMPLIANT';
+        if (filter === 'nonhalal') return cfg.label === 'SHARIAH NON-COMPLIANT';
         if (filter === 'doubtful') return cfg.label === 'DOUBTFUL';
+        if (filter === 'purify') return false; // Watchlist items do not track purification yet
         return true;
       });
     }
@@ -181,21 +182,27 @@ export default function WatchlistTab({ initialSymbol }) {
       <div style={{ padding: '24px 32px 32px 32px' }}>
         <div className="watchlist-action-bar" style={{ display: 'flex', gap: '16px', marginBottom: '32px', position: 'relative', zIndex: 10, flexWrap: 'wrap', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', background: 'var(--body-bg)', borderRadius: '14px', padding: '4px', border: '1px solid var(--border)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.03)' }}>
-            {['all', 'halal', 'doubtful', 'non-halal'].map(f => (
+          <div className="hide-scrollbar" style={{ display:'flex', background:'var(--body-bg)', borderRadius:'14px', padding:'6px', gap:'8px', border: '1px solid var(--border)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)', overflowX: 'auto', maxWidth: '100%' }}>
+            {[
+              { id:'all', label:'All', icon: Layers, activeColor: 'var(--primary)' },
+              { id:'halal', label: 'Compliant', icon: ShieldCheck, activeColor: '#16a34a' },
+              { id:'purify', label: 'Purify', icon: Droplet, activeColor: '#eab308' },
+              { id:'doubtful', label: 'Doubtful', icon: HelpCircle, activeColor: '#d97706' },
+              { id:'nonhalal', label: 'Non-Compliant', icon: AlertTriangle, activeColor: '#dc2626' }
+            ].map(f => (
               <button
-                key={f}
-                onClick={() => setFilter(f)}
+                key={f.id}
+                onClick={() => setFilter(f.id)}
                 style={{
-                  padding: '8px 18px', borderRadius: '10px', border: filter === f ? '1px solid rgba(0,0,0,0.04)' : '1px solid transparent',
-                  background: filter === f ? 'var(--bg)' : 'transparent',
-                  color: filter === f ? 'var(--text-dark)' : 'var(--text-muted)',
-                  fontWeight: filter === f ? 800 : 600, fontSize: '0.8rem', cursor: 'pointer',
-                  transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: filter === f ? '0 4px 12px rgba(0,0,0,0.06)' : 'none',
-                  textTransform: 'capitalize'
+                  display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0,
+                  padding:'10px 18px', borderRadius:'10px', fontSize: '0.78rem', fontWeight:800, cursor:'pointer', border:'none', transition:'all 0.3s cubic-bezier(0.16,1,0.3,1)',
+                  background: filter === f.id ? 'var(--bg)' : 'transparent',
+                  color:      filter === f.id ? f.activeColor : 'var(--text-muted)',
+                  boxShadow:  filter === f.id ? '0 4px 12px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.05)' : 'none',
                 }}
               >
-                {f}
+                <f.icon size={16} color={filter === f.id ? f.activeColor : 'var(--text-muted)'} />
+                {f.label}
               </button>
             ))}
           </div>
