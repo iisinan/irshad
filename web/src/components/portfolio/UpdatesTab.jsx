@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import UpdatesNews    from './UpdatesNews';
 import UpdatesInbox   from './UpdatesInbox';
 import UpdatesDigest  from './UpdatesDigest';
+import UpdatesPurification from './UpdatesPurification';
 
 /* ── Greeting helpers ── */
 function getGreeting() {
@@ -129,7 +130,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
       id: 'purification',
       label: 'Purification',
       icon: Droplet,
-      isExternal: true,
+      description: 'Understanding stock purification and AAOIFI standards',
     },
   ];
 
@@ -294,9 +295,10 @@ export default function UpdatesTab({ unreadCount = 0 }) {
 
       {/* ── Tab Content ── */}
       <div className="animate-slide-up stagger-3" key={activeSubTab} style={{ minHeight: '400px' }}>
-        {activeSubTab === 'news'   && <UpdatesNews />}
-        {activeSubTab === 'inbox'  && <UpdatesInbox />}
-        {activeSubTab === 'digest' && <UpdatesDigest />}
+        {activeSubTab === 'news'         && <UpdatesNews />}
+        {activeSubTab === 'inbox'        && <UpdatesInbox />}
+        {activeSubTab === 'digest'       && <UpdatesDigest />}
+        {activeSubTab === 'purification' && <UpdatesPurification />}
       </div>
     </div>
   );
