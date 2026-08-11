@@ -220,8 +220,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
         marginBottom: '24px',
         borderBottom: '1px solid var(--border)',
         paddingBottom: '16px',
-        overflowX: 'auto',
-        WebkitOverflowScrolling: 'touch',
+        flexWrap: 'wrap',
       }}>
         {tabs.map((tab, index) => {
           const Icon = tab.icon;
