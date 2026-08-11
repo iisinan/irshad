@@ -376,7 +376,7 @@ export default function Portfolio() {
 
             <div style={{ display:'flex', flexDirection:'column', gap:'12px' }}>
               {[
-                { label: 'Halal Holdings',   value: halalCount,    icon: ShieldCheck,   color: 'var(--halal)',     bg: 'rgba(34,197,94,0.06)', action: () => { setActiveFilter('halal'); handleTabChange('holdings'); } },
+                { label: 'Shariah Compliant',   value: halalCount,    icon: ShieldCheck,   color: 'var(--halal)',     bg: 'rgba(34,197,94,0.06)', action: () => { setActiveFilter('halal'); handleTabChange('holdings'); } },
                 { label: 'Shariah Non-Compliant',        value: nonHalalCount, icon: XCircle,       color: 'var(--non-halal)', bg: 'rgba(239,68,68,0.06)', action: () => { setActiveFilter('nonhalal'); handleTabChange('holdings'); } },
                 { label: 'Need Purification',value: needsPurif,    icon: AlertTriangle, color: 'var(--doubtful)',  bg: 'rgba(234,179,8,0.06)', action: () => { setActiveFilter('purify'); handleTabChange('holdings'); } },
               ].map(row => (
