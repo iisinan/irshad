@@ -618,19 +618,26 @@ const AaoifiScreening = () => {
                   onClick={async () => {
                     try {
                       setAlertLoading(true);
-                      await addToWatchlist(symbol, false, true);
-                      toastSuccess('Added to alerts! You will be emailed when the status changes.');
+                      if (hasAlert) {
+                        await removeFromWatchlist(symbol);
+                        await refetchWatchlist();
+                        toastSuccess('Alert removed.');
+                      } else {
+                        await addToWatchlist(symbol, false, true);
+                        await refetchWatchlist();
+                        toastSuccess('Added to alerts! You will be emailed when the status changes.');
+                      }
                     } catch (err) {
-                      toastError('Failed to add alert.');
+                      toastError(hasAlert ? 'Failed to remove alert.' : 'Failed to add alert.');
                     } finally {
                       setAlertLoading(false);
                     }
                   }}
                   disabled={alertLoading}
                   className="hover-lift"
-                  style={{ display:'inline-flex',alignItems:'center',justifyContent:'center',gap:6,padding:'12px 20px',borderRadius:16,background:'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 100%)',border:'1px solid rgba(239,68,68,0.3)',color:'var(--non-halal)',fontSize:'0.85rem',fontWeight:900,cursor:alertLoading?'not-allowed':'pointer',marginTop:8, transition:'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: '0 8px 24px rgba(239,68,68,0.15), inset 0 2px 4px #fff' }}
+                  style={{ display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8,padding:'12px 20px',borderRadius:12,background: hasAlert ? 'var(--non-halal)' : 'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 100%)',border: hasAlert ? '1px solid var(--non-halal)' : '1px solid rgba(239,68,68,0.3)',color: hasAlert ? '#fff' : 'var(--non-halal)',fontSize:'0.85rem',fontWeight:800,cursor:alertLoading?'not-allowed':'pointer',marginTop:12, transition:'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: hasAlert ? '0 8px 20px rgba(239,68,68,0.25)' : '0 8px 24px rgba(239,68,68,0.12), inset 0 2px 4px #fff' }}
                 >
-                  {alertLoading ? <RefreshCw size={16} className="spin" /> : <Bell size={16}/>} Alert me when it changes
+                  {alertLoading ? <RefreshCw size={16} className="spin" /> : (hasAlert ? <CheckCircle size={16} strokeWidth={2.5}/> : <Bell size={16} strokeWidth={2.5}/>)} {hasAlert ? 'Alert Set' : 'Alert me when it changes'}
                 </button>
               )}
             </div>)}
