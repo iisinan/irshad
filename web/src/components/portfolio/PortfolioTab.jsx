@@ -349,8 +349,8 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
           <div style={{ display:'flex', background:'var(--body-bg)', borderRadius:'14px', padding:'6px', gap:'8px', border: '1px solid var(--border)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)' }}>
             {[
               { id:'all', label:'All Assets', icon: Layers },
-              { id:'halal', label:'Halal', icon: ShieldCheck },
-              { id:'nonhalal', label:'Non-Halal', icon: AlertTriangle }
+              { id:'halal', label: 'Shariah Compliant', icon: ShieldCheck },
+              { id:'nonhalal', label: 'Shariah Non-Compliant', icon: AlertTriangle }
             ].map(f => (
               <button key={f.id} onClick={() => setActiveFilter(f.id)} style={{
                 display: 'flex', alignItems: 'center', gap: '8px',

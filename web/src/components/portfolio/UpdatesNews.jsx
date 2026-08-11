@@ -33,8 +33,8 @@ const CardSkeleton = () => {
 /* ── Status badge ── */
 const StatusBadge = ({ status }) => {
   const cfg = {
-    halal:     { bg: 'var(--halal-bg)',     border: 'var(--halal-border)',     color: 'var(--halal)',     label: 'Halal' },
-    non_halal: { bg: 'var(--non-halal-bg)', border: 'var(--non-halal-border)', color: 'var(--non-halal)', label: 'Non-Halal' },
+    halal:     { bg: 'var(--halal-bg)',     border: 'var(--halal-border)',     color: 'var(--halal)',     label: 'Shariah Compliant' },
+    non_halal: { bg: 'var(--non-halal-bg)', border: 'var(--non-halal-border)', color: 'var(--non-halal)', label: 'Shariah Non-Compliant' },
     doubtful:  { bg: 'var(--doubtful-bg)',  border: 'var(--doubtful-border)',  color: 'var(--doubtful)',  label: 'Doubtful' },
     watchlist: { bg: 'var(--review-bg)',    border: 'var(--review-border)',    color: 'var(--review)',    label: 'Watchlist' },
   };

@@ -13,8 +13,8 @@ import ZakatSettingsAdmin from './ZakatSettingsAdmin';
 // ─── Status Badge ────────────────────────────────────────
 function StatusBadge({ status }) {
   const map = {
-    halal:     { color: 'var(--halal)',     bg: 'var(--halal-bg)',     label: 'Halal' },
-    'non-halal': { color: 'var(--non-halal)', bg: 'var(--non-halal-bg)', label: 'Non-Halal' },
+    halal:     { color: 'var(--halal)',     bg: 'var(--halal-bg)',     label: 'Shariah Compliant' },
+    'non-halal': { color: 'var(--non-halal)', bg: 'var(--non-halal-bg)', label: 'Shariah Non-Compliant' },
     doubtful:  { color: 'var(--doubtful)',  bg: 'var(--doubtful-bg)',  label: 'Doubtful' },
     review:    { color: 'var(--review)',    bg: 'var(--review-bg)',    label: 'Under Review' },
   };
@@ -367,9 +367,9 @@ const AdminDashboard = () => {
                 }}
               >
                 <option value="all">All Verdicts</option>
-                <option value="halal">Halal</option>
+                <option value="halal">Shariah Compliant</option>
                 <option value="doubtful">Doubtful</option>
-                <option value="non-halal">Non-Halal</option>
+                <option value="non-halal">Shariah Non-Compliant</option>
               </select>
             )}
             

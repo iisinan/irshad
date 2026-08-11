@@ -11,8 +11,8 @@ import {
 
 /* ─── helpers ──────────────────────────────────────────────── */
 const STATUS_CFG = {
-  halal:      { label: 'HALAL',      bg: 'rgba(16,185,129,.12)', color: '#059669', border: 'rgba(16,185,129,.3)' },
-  'non-halal':{ label: 'NON-HALAL',  bg: 'rgba(239,68,68,.10)',  color: '#DC2626', border: 'rgba(239,68,68,.3)'  },
+  halal:      { label: 'SHARIAH COMPLIANT',      bg: 'rgba(16,185,129,.12)', color: '#059669', border: 'rgba(16,185,129,.3)' },
+  'non-halal':{ label: 'SHARIAH NON-COMPLIANT',  bg: 'rgba(239,68,68,.10)',  color: '#DC2626', border: 'rgba(239,68,68,.3)'  },
   doubtful:   { label: 'DOUBTFUL',   bg: 'rgba(245,158,11,.12)', color: '#D97706', border: 'rgba(245,158,11,.3)' },
 };
 
@@ -318,8 +318,8 @@ export default function AdminComplianceReviews() {
       {tab === 'pending' && (
         <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
           <StatCard icon={Clock}        label="Pending"        value={reviews.meta?.total || reviews.data.length}                 color="#F59E0B" />
-          <StatCard icon={TrendingUp}   label="→ Halal"        value={reviews.data.filter(r=>r.new_status==='halal').length}      color="#059669" />
-          <StatCard icon={TrendingDown} label="→ Non-Halal"    value={reviews.data.filter(r=>r.new_status==='non-halal').length}  color="#DC2626" />
+          <StatCard icon={TrendingUp}   label="→ Shariah Compliant"        value={reviews.data.filter(r=>r.new_status==='halal').length}      color="#059669" />
+          <StatCard icon={TrendingDown} label="→ Shariah Non-Compliant"    value={reviews.data.filter(r=>r.new_status==='non-halal').length}  color="#DC2626" />
           <StatCard icon={History}      label="Resolved"       value={history.meta?.total || '—'}                                 color="#6366F1"
             sub="Click History tab to view" />
         </div>
@@ -548,8 +548,8 @@ export default function AdminComplianceReviews() {
                                   onChange={e => setEditForm({ ...editForm, new_status: e.target.value })}
                                   style={{ width: '100%', padding: '9px 11px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-section)', color: 'var(--text-dark)', fontWeight: 700, fontSize: '0.86rem', outline: 'none' }}
                                 >
-                                  <option value="halal">Halal</option>
-                                  <option value="non-halal">Non-Halal</option>
+                                  <option value="halal">Shariah Compliant</option>
+                                  <option value="non-halal">Shariah Non-Compliant</option>
                                   <option value="doubtful">Doubtful</option>
                                 </select>
                               </div>
