@@ -222,7 +222,6 @@ export default function MarketTab() {
   const [search,    setSearch]    = useState('');
   const [statusF,   setStatusF]   = useState('all');
   const [sectorF,   setSectorF]   = useState('all');
-  const [industryF, setIndustryF] = useState('all');
   const [sortBy,    setSortBy]    = useState('default');
 
   // Safely extract from potentially stale cache shapes
@@ -248,13 +247,7 @@ export default function MarketTab() {
     [actualStocks, sectorMap]
   );
 
-  const availableIndustries = useMemo(() => {
-    if (sectorF === 'all') {
-      const all = Object.values(sectorMap).flat();
-      return [...new Set(all)].sort();
-    }
-    return sectorMap[sectorF] || [];
-  }, [sectorF, sectorMap]);
+
 
   const halalCount = useMemo(() => {
     return actualStocks.filter(s => getStatusConfig(s).label === 'HALAL').length;
@@ -271,7 +264,6 @@ export default function MarketTab() {
         if (statusF === 'doubtful' && cfg.label !== 'DOUBTFUL') return false;
       }
       if (sectorF !== 'all' && normSector(s.sector) !== sectorF) return false;
-      if (industryF !== 'all' && s.business_type !== industryF) return false;
       return true;
     });
     if (sortBy === 'gainers')  list = [...list].sort((a, b) => (b.price_change_pct || 0) - (a.price_change_pct || 0));
@@ -279,10 +271,10 @@ export default function MarketTab() {
     if (sortBy === 'cap_high') list = [...list].sort((a, b) => (b.market_cap || 0) - (a.market_cap || 0));
     if (sortBy === 'pe_low')   list = [...list].sort((a, b) => (a.pe_ratio > 0 ? a.pe_ratio : 999) - (b.pe_ratio > 0 ? b.pe_ratio : 999));
     return list;
-  }, [actualStocks, search, statusF, sectorF, industryF, sortBy]);
+  }, [actualStocks, search, statusF, sectorF, sortBy]);
 
-  const hasFilters = search || statusF !== 'all' || sectorF !== 'all' || industryF !== 'all' || sortBy !== 'default';
-  const clearAll   = () => { setSearch(''); setStatusF('all'); setSectorF('all'); setIndustryF('all'); setSortBy('default'); };
+  const hasFilters = search || statusF !== 'all' || sectorF !== 'all' || sortBy !== 'default';
+  const clearAll   = () => { setSearch(''); setStatusF('all'); setSectorF('all'); setSortBy('default'); };
 
   const selectStyle = (active) => ({
     padding: '8px 32px 8px 16px', borderRadius: '10px', outline: 'none', cursor: 'pointer',
@@ -379,18 +371,10 @@ export default function MarketTab() {
         {/* Filters Row */}
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'nowrap', overflowX: 'auto', paddingBottom: '4px' }}>
           {/* Sector Filter */}
-          <select value={sectorF} onChange={e => { setSectorF(e.target.value); setIndustryF('all'); }} style={selectStyle(sectorF !== 'all')}>
+          <select value={sectorF} onChange={e => setSectorF(e.target.value)} style={selectStyle(sectorF !== 'all')}>
             <option value="all">All Sectors</option>
             {uniqueSectors.map(s => <option key={s} value={s}>{normSector(s)}</option>)}
           </select>
-
-          {/* Industry Filter */}
-          {availableIndustries.length > 0 && (
-            <select value={industryF} onChange={e => setIndustryF(e.target.value)} style={selectStyle(industryF !== 'all')}>
-              <option value="all">All Industries</option>
-              {availableIndustries.map(i => <option key={i} value={i}>{i}</option>)}
-            </select>
-          )}
 
           {/* Sort By */}
           <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={selectStyle(sortBy !== 'default')}>
