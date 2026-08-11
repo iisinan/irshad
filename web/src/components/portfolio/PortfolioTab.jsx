@@ -267,27 +267,7 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
           <div style={{ position: 'absolute', bottom: '-40%', left: '5%', width: '300px', height: '300px', background: 'radial-gradient(circle, rgba(91, 41, 113, 0.03) 0%, transparent 70%)', zIndex: 0, pointerEvents: 'none' }} />
           
           {/* Top Section: Balance & Stats */}
-          <div style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', position: 'relative', zIndex: 1 }}>
-            
-            {/* Header Row: Label & Controls */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Total Balance</span>
-              <button
-                onClick={handleRefresh}
-                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0', display: 'flex', alignItems: 'center', transition: 'color 0.2s' }}
-                title="Refresh portfolio"
-                onMouseEnter={e => e.currentTarget.style.color = 'var(--primary)'}
-                onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
-              >
-                <RefreshCw size={14} style={{ animation: refreshing ? 'spin 0.8s linear infinite' : 'none' }}/>
-              </button>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '2px 8px', background: 'rgba(34,197,94,0.1)', borderRadius: '12px' }}>
-                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', animation: 'pulse 2s ease infinite' }}/>
-                <span style={{ fontSize: '0.6rem', fontWeight: 800, color: '#16a34a', letterSpacing: '0.5px' }}>LIVE</span>
-              </div>
-            </div>
-
-            {/* Value + Avg Return Row */}
+          <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '10px', position: 'relative', zIndex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '16px', flexWrap: 'wrap' }}>
               <div style={{ 
                 fontSize: 'clamp(2rem, 6vw, 2.8rem)', 
