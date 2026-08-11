@@ -373,10 +373,16 @@ const AaoifiScreening = () => {
 
   let doubtfulTag = 'Requires Further Review';
   if (finalStatus === 'doubtful' && cleanStatusReason) {
-    const concernsMatch = cleanStatusReason.match(/(Concerns with.*)$/i);
-    if (concernsMatch) {
-      doubtfulTag = concernsMatch[1];
-      cleanStatusReason = cleanStatusReason.replace(/(Concerns with.*)$/i, '').trim();
+    if (cleanStatusReason.includes('|||')) {
+      const parts = cleanStatusReason.split('|||');
+      cleanStatusReason = parts[0].trim();
+      doubtfulTag = parts[1].trim();
+    } else {
+      const concernsMatch = cleanStatusReason.match(/(Concerns with.*)$/i);
+      if (concernsMatch) {
+        doubtfulTag = concernsMatch[1];
+        cleanStatusReason = cleanStatusReason.replace(/(Concerns with.*)$/i, '').trim();
+      }
     }
   }
 
