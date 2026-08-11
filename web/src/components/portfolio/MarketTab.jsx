@@ -447,7 +447,7 @@ export default function MarketTab() {
         ) : (
           <>
             {/* Desktop table */}
-            <div className="market-table-desktop" style={{ overflowX: 'auto', maxHeight: '72vh' }}>
+            <div className="market-table-desktop" style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'auto' }}>
                 <thead>
                   <tr>

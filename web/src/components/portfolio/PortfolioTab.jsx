@@ -419,7 +419,7 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
           </div>
         ) : (
           <div 
-            className="custom-scroll-container" 
+            className="" 
             style={{ 
               paddingRight: '12px',
               paddingBottom: '60px'
