@@ -611,8 +611,28 @@ const AaoifiScreening = () => {
               <div style={{ fontSize:'0.7rem',fontWeight:900,textTransform:'uppercase',letterSpacing:'1.5px',color:'var(--non-halal)', display:'flex', alignItems:'center', gap:6 }}><AlertTriangle size={14} strokeWidth={2.5}/> Screening Result</div>
               <div style={{ display:'flex',alignItems:'center',gap:14, background: 'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 100%)', padding: '16px', borderRadius: 16, boxShadow: '0 8px 24px rgba(239,68,68,0.15), inset 0 2px 4px #fff', border: '1px solid rgba(239,68,68,0.2)' }}>
                 <XCircle size={36} color="var(--non-halal)" strokeWidth={2.5}/>
-                <div><div style={{ fontSize:'1.1rem',fontWeight:900,color:'var(--non-halal)' }}>EXCLUDED</div><div style={{ fontSize:'0.75rem',color:'var(--text-muted)',fontWeight:700 }}>Not suitable for investment</div></div>
+                <div><div style={{ fontSize:'1.1rem',fontWeight:900,color:'var(--non-halal)' }}>EXCLUDED</div><div style={{ fontSize:'0.75rem',color:'var(--text-muted)',fontWeight:700 }}>{(!businessFailed && isNonHalal) ? 'Not suitable for investment now' : 'Not suitable for investment'}</div></div>
               </div>
+              {(!businessFailed && isNonHalal) && (
+                <button 
+                  onClick={async () => {
+                    try {
+                      setAlertLoading(true);
+                      await addToWatchlist(symbol, false, true);
+                      toastSuccess('Added to alerts! You will be emailed when the status changes.');
+                    } catch (err) {
+                      toastError('Failed to add alert.');
+                    } finally {
+                      setAlertLoading(false);
+                    }
+                  }}
+                  disabled={alertLoading}
+                  className="hover-lift"
+                  style={{ display:'inline-flex',alignItems:'center',justifyContent:'center',gap:6,padding:'12px 20px',borderRadius:16,background:'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 100%)',border:'1px solid rgba(239,68,68,0.3)',color:'var(--non-halal)',fontSize:'0.85rem',fontWeight:900,cursor:alertLoading?'not-allowed':'pointer',marginTop:8, transition:'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: '0 8px 24px rgba(239,68,68,0.15), inset 0 2px 4px #fff' }}
+                >
+                  {alertLoading ? <RefreshCw size={16} className="spin" /> : <Bell size={16}/>} Alert me when it changes
+                </button>
+              )}
             </div>)}
           </div>
         </div>
