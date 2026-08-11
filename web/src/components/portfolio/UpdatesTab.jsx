@@ -9,11 +9,11 @@ import UpdatesPurification from './UpdatesPurification';
 /* ── Greeting helpers ── */
 function getGreeting() {
   const h = new Date().getHours();
-  if (h < 5)  return { emoji: '🌙', english: 'Good night' };
+  if (h < 5)  return { emoji: '🌙', english: 'Good evening' };
   if (h < 12) return { emoji: '☀️', english: 'Good morning' };
   if (h < 17) return { emoji: '🌤️', english: 'Good afternoon' };
   if (h < 21) return { emoji: '🌇', english: 'Good evening' };
-  return        { emoji: '🌙', english: 'Good night' };
+  return        { emoji: '🌙', english: 'Good evening' };
 }
 
 function getFirstName(user) {
@@ -163,10 +163,12 @@ export default function UpdatesTab({ unreadCount = 0 }) {
             <div style={{ flex: '1 1 200px' }}>
               {/* Arabic */}
               <div style={{
-                fontSize: '0.72rem', fontWeight: 800, color: 'var(--primary)',
-                letterSpacing: '0.5px', marginBottom: '5px',
+                fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary)',
+                marginBottom: '6px',
+                fontFamily: '"Amiri", "Scheherazade New", "Traditional Arabic", serif',
+                direction: 'rtl', textAlign: 'left', opacity: 0.9,
               }}>
-                السلام عليكم ورحمة الله وبركاته
+                ٱلسَّلَامُ عَلَيْكُمْ وَرَحْمَةُ ٱللَّٰهِ وَبَرَكَاتُهُ
               </div>
 
               {/* Name line */}
