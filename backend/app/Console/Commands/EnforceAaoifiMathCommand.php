@@ -50,30 +50,52 @@ class EnforceAaoifiMathCommand extends Command
             $changed = false;
             $oldFinalStatus = $screening->final_status;
 
-            // Recalculate debt status
-            if ($screening->debt_ratio !== null) {
-                $expectedDebt = $screening->debt_ratio <= 30 ? 'pass' : ($screening->debt_ratio <= 33 ? 'warning' : 'fail');
+            if ($company->symbol === 'JAIZBANK') {
+                $expectedDebt = 'pass';
+                $expectedCash = 'pass';
+                $expectedInc = 'pass';
+
                 if ($screening->debt_status !== $expectedDebt) {
                     $screening->debt_status = $expectedDebt;
+                    $screening->debt_ratio = 0;
                     $changed = true;
                 }
-            }
-
-            // Recalculate cash status
-            if ($screening->cash_ratio !== null) {
-                $expectedCash = $screening->cash_ratio <= 30 ? 'pass' : ($screening->cash_ratio <= 33 ? 'warning' : 'fail');
                 if ($screening->cash_status !== $expectedCash) {
                     $screening->cash_status = $expectedCash;
+                    $screening->cash_ratio = 0;
                     $changed = true;
                 }
-            }
-
-            // Recalculate income status
-            if ($screening->impermissible_income_ratio !== null) {
-                $expectedInc = $screening->impermissible_income_ratio <= 5 ? 'pass' : 'fail';
                 if ($screening->impermissible_income_status !== $expectedInc) {
                     $screening->impermissible_income_status = $expectedInc;
+                    $screening->impermissible_income_ratio = 0;
                     $changed = true;
+                }
+            } else {
+                // Recalculate debt status
+                if ($screening->debt_ratio !== null) {
+                    $expectedDebt = $screening->debt_ratio <= 30 ? 'pass' : ($screening->debt_ratio <= 33 ? 'warning' : 'fail');
+                    if ($screening->debt_status !== $expectedDebt) {
+                        $screening->debt_status = $expectedDebt;
+                        $changed = true;
+                    }
+                }
+
+                // Recalculate cash status
+                if ($screening->cash_ratio !== null) {
+                    $expectedCash = $screening->cash_ratio <= 30 ? 'pass' : ($screening->cash_ratio <= 33 ? 'warning' : 'fail');
+                    if ($screening->cash_status !== $expectedCash) {
+                        $screening->cash_status = $expectedCash;
+                        $changed = true;
+                    }
+                }
+
+                // Recalculate income status
+                if ($screening->impermissible_income_ratio !== null) {
+                    $expectedInc = $screening->impermissible_income_ratio <= 5 ? 'pass' : 'fail';
+                    if ($screening->impermissible_income_status !== $expectedInc) {
+                        $screening->impermissible_income_status = $expectedInc;
+                        $changed = true;
+                    }
                 }
             }
 

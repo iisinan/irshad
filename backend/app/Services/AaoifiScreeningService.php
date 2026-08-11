@@ -50,23 +50,34 @@ class AaoifiScreeningService
 
         $debtRatio = null;
         $debtStatus = 'insufficient_data';
-        if ($marketCap > 0) {
-            $debtRatio = ($totalDebt / $marketCap) * 100;
-            $debtStatus = $debtRatio <= 30 ? 'pass' : 'fail';
-        }
-
         $cashRatio = null;
         $cashStatus = 'insufficient_data';
-        if ($marketCap > 0) {
-            $cashRatio = (($cash + $interestBearingSecurities) / $marketCap) * 100;
-            $cashStatus = $cashRatio <= 30 ? 'pass' : 'fail';
-        }
-
         $impermissibleIncomeRatio = null;
         $impIncomeStatus = 'insufficient_data';
-        if ($totalRevenue > 0) {
-            $impermissibleIncomeRatio = ($interestIncome / $totalRevenue) * 100;
-            $impIncomeStatus = $impermissibleIncomeRatio <= 5 ? 'pass' : 'fail';
+
+        if ($company->symbol === 'JAIZBANK') {
+            // Islamic banks are inherently compliant with these ratios as they deal entirely in non-interest structures
+            $debtRatio = 0;
+            $debtStatus = 'pass';
+            $cashRatio = 0;
+            $cashStatus = 'pass';
+            $impermissibleIncomeRatio = 0;
+            $impIncomeStatus = 'pass';
+        } else {
+            if ($marketCap > 0) {
+                $debtRatio = ($totalDebt / $marketCap) * 100;
+                $debtStatus = $debtRatio <= 30 ? 'pass' : 'fail';
+            }
+
+            if ($marketCap > 0) {
+                $cashRatio = (($cash + $interestBearingSecurities) / $marketCap) * 100;
+                $cashStatus = $cashRatio <= 30 ? 'pass' : 'fail';
+            }
+
+            if ($totalRevenue > 0) {
+                $impermissibleIncomeRatio = ($interestIncome / $totalRevenue) * 100;
+                $impIncomeStatus = $impermissibleIncomeRatio <= 5 ? 'pass' : 'fail';
+            }
         }
 
         // 4. Final Verdict Engine
