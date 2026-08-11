@@ -68,15 +68,15 @@ class SyncCompanyStatus extends Command
                 $impureRatio = ($interestIncome / $totalRevenue) * 100;
             }
 
-            // Debt ratio
-            $debtRatio = ! empty($ratios['interest_bearing_debt_ratio']) ? $ratios['interest_bearing_debt_ratio'] * 100 : null;
-            if ($debtRatio === null && $marketCap > 0) {
+            // Debt ratio: Strictly recalculate using Market Cap to override any AI fallback to Total Assets
+            $debtRatio = null;
+            if ($marketCap > 0) {
                 $debtRatio = ($totalDebt / $marketCap) * 100;
             }
 
-            // Cash ratio
-            $cashRatio = ! empty($ratios['cash_and_equivalents_ratio']) ? $ratios['cash_and_equivalents_ratio'] * 100 : null;
-            if ($cashRatio === null && $marketCap > 0) {
+            // Cash ratio: Strictly recalculate using Market Cap to override any AI fallback to Total Assets
+            $cashRatio = null;
+            if ($marketCap > 0) {
                 $cashRatio = ($cash / $marketCap) * 100;
             }
 

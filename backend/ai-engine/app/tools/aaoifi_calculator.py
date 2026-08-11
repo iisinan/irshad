@@ -36,9 +36,9 @@ class AAOIFICalculator:
         interest_income = get_val("interest_income") * unit_multiplier
 
         market_cap = float(market_cap)
-        # Determine denominator: prefer market cap, fall back to total assets
-        denominator      = market_cap if market_cap > 0 else total_assets
-        denominator_type = "Market Capitalization" if market_cap > 0 else "Total Assets"
+        # Determine denominator: strictly use market cap per AAOIFI Standard 21 (Irshad override)
+        denominator      = market_cap
+        denominator_type = "Market Capitalization"
 
         # ── Debt Ratio ──────────────────────────────────────────────────────────
         # For banks: customer deposits are NOT debt under AAOIFI screening.
