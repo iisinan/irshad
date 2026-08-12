@@ -194,7 +194,6 @@ export default function Portfolio() {
     }
   };
 
-  if (loading) return <Skeleton />;
   if (user && !user.email_verified_at) {
     return (
       <div style={{ textAlign:'center', padding:'100px 20px', animation: 'fadeIn 0.3s ease-out' }}>
@@ -208,6 +207,9 @@ export default function Portfolio() {
       </div>
     );
   }
+  
+  if (loading) return <Skeleton />;
+  
   if (error) return (
     <div style={{ textAlign:'center', padding:'100px 20px' }}>
       <h3 style={{ color:'var(--non-halal)', marginBottom:'10px' }}>Error Loading Portfolio</h3>

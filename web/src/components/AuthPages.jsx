@@ -604,9 +604,11 @@ export const VerifyEmailPage = () => {
           
           // Refresh user profile so the app knows we are verified without a hard reload
           try {
-            const profile = await api.get('/profile');
-            if (profile.data) {
-              setUser(profile.data);
+            const resProfile = await api.get('/profile');
+            const userData = resProfile.data?.data || resProfile.data;
+            if (userData) {
+              setUser(userData);
+              localStorage.setItem('auth_user', JSON.stringify(userData));
             }
           } catch (e) {
             console.error("Failed to refresh profile after verification", e);
