@@ -195,6 +195,19 @@ export default function Portfolio() {
   };
 
   if (loading) return <Skeleton />;
+  if (user && !user.email_verified_at) {
+    return (
+      <div style={{ textAlign:'center', padding:'100px 20px', animation: 'fadeIn 0.3s ease-out' }}>
+        <div style={{ background: 'var(--primary-50)', width: 64, height: 64, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+          <AlertTriangle size={32} color="var(--primary)" />
+        </div>
+        <h3 style={{ color:'var(--text-dark)', marginBottom:'10px' }}>Verification Required</h3>
+        <p style={{ color:'var(--text-muted)', marginBottom:'24px', maxWidth: '400px', margin: '0 auto 24px', lineHeight: 1.5, fontSize: '0.95rem' }}>
+          Please verify your email address to unlock your portfolio and access market data. Check your inbox for the verification link.
+        </p>
+      </div>
+    );
+  }
   if (error) return (
     <div style={{ textAlign:'center', padding:'100px 20px' }}>
       <h3 style={{ color:'var(--non-halal)', marginBottom:'10px' }}>Error Loading Portfolio</h3>
