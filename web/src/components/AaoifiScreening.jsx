@@ -505,7 +505,7 @@ const AaoifiScreening = () => {
               </button>
             )}
             <button className="hover-lift" onClick={handleSetAlert} disabled={alertLoading} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background: hasAlert ? 'var(--primary-50)' : 'var(--bg)',border:'1px solid ' + (hasAlert ? 'var(--primary)' : 'var(--border)'),borderRadius:12,cursor:alertLoading ? 'not-allowed' : 'pointer',fontWeight:700,color: hasAlert ? 'var(--primary)' : 'var(--text-dark)',fontSize:'0.8rem',boxShadow: hasAlert ? '0 4px 12px var(--primary-50)' : 'var(--shadow-sm)', opacity: alertLoading ? 0.7 : 1 }}>
-              <Bell size={15} fill={hasAlert ? "currentColor" : "none"}/> {alertLoading ? 'Updating...' : (hasAlert ? 'Alert Set' : 'Set Alert')}
+              <Bell size={15} fill={hasAlert ? "currentColor" : "none"}/> {alertLoading ? 'Updating...' : (hasAlert ? 'Alert Set' : 'Alert me when it changes')}
             </button>
             {user?.role==='admin'&&(<button className="hover-lift" onClick={openOverride} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background:'var(--primary)',border:'none',borderRadius:12,cursor:'pointer',fontWeight:800,color:'#fff',fontSize:'0.8rem',transition:'all 0.25s',boxShadow:'0 4px 12px rgba(91,41,113,0.3)' }}>
               <ShieldCheck size={15}/> Edit Data
@@ -637,7 +637,7 @@ const AaoifiScreening = () => {
                   className="hover-lift"
                   style={{ display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8,padding:'10px 16px',borderRadius:12,background: hasAlert ? 'rgba(239,68,68,0.08)' : 'var(--body-bg)',border: hasAlert ? '1px solid rgba(239,68,68,0.2)' : '1px solid var(--border)',color: hasAlert ? 'var(--non-halal)' : 'var(--text-dark)',fontSize:'0.8rem',fontWeight:800,cursor:alertLoading?'not-allowed':'pointer',marginTop:12, transition:'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: hasAlert ? 'inset 0 0 0 1px rgba(239,68,68,0.1)' : 'var(--shadow-sm)' }}
                 >
-                  {alertLoading ? <RefreshCw size={16} className="spin" /> : (hasAlert ? <CheckCircle size={16} strokeWidth={2.5}/> : <Bell size={16} strokeWidth={2.5}/>)} {hasAlert ? 'Alert Active' : 'Set Alert'}
+                  {alertLoading ? <RefreshCw size={16} className="spin" /> : (hasAlert ? <CheckCircle size={16} strokeWidth={2.5}/> : <Bell size={16} strokeWidth={2.5}/>)} {hasAlert ? 'Alert Active' : 'Alert me when it changes'}
                 </button>
               )}
             </div>)}
