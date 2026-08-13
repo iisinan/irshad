@@ -56,7 +56,7 @@ export default function AlertsTab() {
         <div style={{ position: 'absolute', right: '-10px', top: '50%', transform: 'translateY(-50%) rotate(-5deg)', opacity: 0.08, pointerEvents: 'none' }}>
            <Bell size={180} strokeWidth={1} color="var(--primary)" />
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', position: 'relative', zIndex: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', position: 'relative', zIndex: 1, flexWrap: 'wrap' }}>
           <div style={{ width: '56px', height: '56px', background: 'var(--bg)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', border: '1px solid var(--border)', boxShadow: '0 8px 24px rgba(138, 76, 158, 0.12)' }}>
             <Bell size={26} strokeWidth={2.5} />
           </div>
@@ -75,7 +75,7 @@ export default function AlertsTab() {
       <div className="alert-body" style={{ padding: '32px' }}>
         {loading ? (
           <div style={{ padding: '20px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', maxWidth: '800px', margin: '0 auto' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '16px', maxWidth: '800px', margin: '0 auto' }}>
               <Skeleton height="120px" borderRadius="16px" />
               <Skeleton height="120px" borderRadius="16px" />
               <Skeleton height="120px" borderRadius="16px" />
@@ -114,7 +114,7 @@ export default function AlertsTab() {
             </button>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: '16px' }}>
             {alerts.map((alert, i) => {
               const isAbove = alert.condition === 'above';
               const targetFormatted = Number(alert.target_price || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -130,7 +130,7 @@ export default function AlertsTab() {
                     boxShadow: 'var(--shadow-sm)'
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <CompanyLogo symbol={alert.symbol} logoUrl={alert.logo_url} size={44} radius={12} />
                       <div>
@@ -152,7 +152,7 @@ export default function AlertsTab() {
                     </button>
                   </div>
                   
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-section)', padding: '14px 18px', borderRadius: '14px', border: '1px solid var(--border)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-section)', padding: '14px 18px', borderRadius: '14px', border: '1px solid var(--border)', flexWrap: 'wrap', gap: '12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: isAbove ? 'var(--halal-bg)' : 'var(--non-halal-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {isAbove ? <ArrowUpRight size={16} color="var(--halal)" /> : <ArrowDownRight size={16} color="var(--non-halal)" />}
