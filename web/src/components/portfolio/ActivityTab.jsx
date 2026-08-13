@@ -137,7 +137,7 @@ export default function ActivityTab() {
                     animationDelay: `${(i % 15) * 0.03}s`,
                     background: 'var(--bg)', borderRadius: '16px', padding: '18px 20px', border: '1px solid var(--border)',
                     cursor: isStock ? 'pointer' : 'default', transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)', 
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px'
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap'
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>

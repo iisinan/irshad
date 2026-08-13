@@ -49,7 +49,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     bool isNonHalal = status == 'non-halal';
     Color statusColor = isHalal ? context.halal : (isNonHalal ? context.haram : context.questionable);
     Color badgeBg = isHalal ? context.halalBg : (isNonHalal ? context.haramBg : context.questionableBg);
-    String statusLabel = isHalal ? 'CERTIFIED HALAL' : (isNonHalal ? 'NOT HALAL' : 'QUESTIONABLE');
+    String statusLabel = isHalal ? 'CERTIFIED HALAL' : (isNonHalal ? 'NOT HALAL' : 'DOUBTFUL');
 
     return Scaffold(
       backgroundColor: context.bg,

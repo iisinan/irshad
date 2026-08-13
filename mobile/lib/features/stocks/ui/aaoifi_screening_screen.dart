@@ -186,7 +186,7 @@ class _AaoifiScreeningScreenState extends State<AaoifiScreeningScreen> with Sing
               Icon(statusIcon, color: statusColor, size: 72),
               const SizedBox(height: 12),
               Text(
-                finalStatus.toString().toUpperCase(),
+                finalStatus == 'halal' ? 'SHARIAH COMPLIANT' : (finalStatus == 'non-halal' ? 'SHARIAH NON-COMPLIANT' : 'DOUBTFUL'),
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w900,

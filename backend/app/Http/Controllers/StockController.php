@@ -195,6 +195,8 @@ class StockController extends Controller
 
                 $stockArray['status']['purification_required'] = ($stockArray['status']['status'] ?? '') === 'halal' && $ratioPct > 0;
                 $stockArray['status']['haram_revenue_percent'] = round($ratioPct, 4);
+                // Always expose verified_by_scholar so the mobile app knows not to override a scholar-verified verdict
+                $stockArray['status']['verified_by_scholar'] = (bool) ($stockArray['status']['verified_by_scholar'] ?? false);
             }
 
             return $stockArray;

@@ -22,9 +22,9 @@ class RegisterRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'unique:users,email', 'max:255'],
+            'email' => ['required', 'email:rfc,dns', 'unique:users,email', 'max:255'],
             'phone_number' => ['nullable', 'string', 'regex:/^\+?[0-9\s\-\(\)]+$/', 'max:20'],
-            'password' => ['required', 'confirmed', Password::min(8)->letters()->mixedCase()->numbers()->symbols()->uncompromised()],
+            'password' => ['required', 'confirmed', Password::min(8)->letters()->mixedCase()->numbers()->symbols()->uncompromised(3)],
             'location' => ['nullable', 'string', 'max:255'],
             'investor_type' => ['nullable', 'string', 'max:255'],
             'primary_use_case' => ['nullable', 'string', 'max:255'],

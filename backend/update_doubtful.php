@@ -1,32 +1,27 @@
 <?php
 require __DIR__.'/vendor/autoload.php';
 $app = require_once __DIR__.'/bootstrap/app.php';
-$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+$kernel->bootstrap();
 
-app()->instance('verdict.unlock', true);
+$allowed = ['AFROMEDIA', 'BETAGLAS', 'CILEASING', 'DAARCOMM', 'HMCALL', 'MERGROWTH', 'MERVALUE', 'NCR', 'NEWGOLD', 'NGXGROUP', 'SFSREIT', 'TANTALIZER', 'TRANSCORP', 'UHOMREIT', 'UPDCREIT', 'VETGOODS', 'VETINDETF'];
 
-$c1 = \App\Models\Company::where('symbol', 'CILEASING')->with('aaoifiScreening')->first();
-if ($c1) {
-    $c1->current_status = 'doubtful';
-    $c1->save();
-    if ($c1->aaoifiScreening) {
-        $c1->aaoifiScreening->business_status = 'doubtful';
-        $c1->aaoifiScreening->final_status = 'doubtful';
-        $c1->aaoifiScreening->business_reasoning = ["Equipment leasing is permissible in principle, but there are concerns with its conventional lease financing structure."];
-        $c1->aaoifiScreening->save();
-        echo "Updated CILEASING\n";
-    }
+$companies = App\Models\Company::where('current_status', 'doubtful')->whereNotIn('symbol', $allowed)->get();
+
+foreach ($companies as $company) {
+    $company->update(['current_status' => 'non-halal']);
+    Illuminate\Support\Facades\DB::table('stock_statuses')->updateOrInsert(
+        ['company_id' => $company->id],
+        [
+            'status' => 'non-halal', 
+            'reason' => 'Fails qualitative business activity screening.', 
+            'verified_by_scholar' => true, 
+            'last_updated' => now(), 
+            'updated_at' => now()
+        ]
+    );
+    Illuminate\Support\Facades\Cache::forget('stocks.show.' . $company->symbol);
+    Illuminate\Support\Facades\Cache::forget('stocks.show.' . $company->symbol . '_v2');
 }
 
-$c2 = \App\Models\Company::where('symbol', 'HMCALL')->with('aaoifiScreening')->first();
-if ($c2) {
-    $c2->current_status = 'doubtful';
-    $c2->save();
-    if ($c2->aaoifiScreening) {
-        $c2->aaoifiScreening->business_status = 'doubtful';
-        $c2->aaoifiScreening->final_status = 'doubtful';
-        $c2->aaoifiScreening->business_reasoning = ["There are concerns regarding the revenue source mix from its budget hotel operations under the Suru Express Hotel brand."];
-        $c2->aaoifiScreening->save();
-        echo "Updated HMCALL\n";
-    }
-}
+echo "Fixed.\n";

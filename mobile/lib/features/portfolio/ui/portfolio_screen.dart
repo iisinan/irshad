@@ -3,14 +3,9 @@ import 'package:provider/provider.dart';
 import '../../../core/api/api_service.dart';
 import 'tabs/portfolio_overview_tab.dart';
 import 'tabs/purification_tab.dart';
-import 'tabs/shariah_tab.dart';
 import 'tabs/resources_tab.dart'; 
-import 'tabs/updates_tab.dart'; // Added
-import 'tabs/guide_tab.dart'; // Added
+import 'tabs/guide_tab.dart';
 import 'zakat_calculator_screen.dart';
-import '../../stocks/ui/ngx_market_screen.dart';
-import '../../profile/ui/favorites_screen.dart';
-import '../../profile/ui/history_screen.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 
 class PortfolioScreen extends StatefulWidget {
@@ -24,7 +19,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 10, // Changed to 10
+      length: 5,
       child: Scaffold(
         backgroundColor: context.bg,
         appBar: AppBar(
@@ -48,31 +43,21 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
             dividerColor: Colors.transparent,
             splashBorderRadius: BorderRadius.circular(20),
             tabs: [
-              Tab(text: 'Overview'),
-              Tab(text: 'Updates'), // Added
-              Tab(text: 'Market'),
-              Tab(text: 'Watchlist'),
-              Tab(text: 'Activity'),
-              Tab(text: 'Zakat'),
+              Tab(text: 'Holdings'),
               Tab(text: 'Purification'),
-              Tab(text: 'Shariah'),
+              Tab(text: 'Zakat'),
               Tab(text: 'Resources'),
-              Tab(text: 'Guide'), // Added
+              Tab(text: 'Guide'),
             ],
           ),
         ),
         body: const TabBarView(
           children: [
             PortfolioOverviewTab(),
-            UpdatesTab(), // Added
-            NgxMarketScreen(isTab: true),
-            FavoritesScreen(isTab: true),
-            HistoryScreen(isTab: true),
-            ZakatCalculatorScreen(isTab: true),
             PurificationTab(),
-            ShariahTab(),
+            ZakatCalculatorScreen(isTab: true),
             ResourcesTab(),
-            GuideTab(), // Added
+            GuideTab(),
           ],
         ),
       ),

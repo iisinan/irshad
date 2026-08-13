@@ -82,45 +82,45 @@ class AppColors extends ThemeExtension<AppColors> {
 
 class AppTheme {
   // Core Palette
-  static const Color primary = Color(0xFF10B981); // Emerald Green
-  static const Color primaryHover = Color(0xFF059669);
-  static const Color accent = Color(0xFF10B981); 
+  static const Color primary = Color(0xFF8A4C9E); // Mauve Bloom
+  static const Color primaryHover = Color(0xFF743B87);
+  static const Color accent = Color(0xFFD1A562); // Antique Gold
 
   // Dark Colors
-  static const Color darkBg = Color(0xFF111111);
-  static const Color darkBgAlt = Color(0xFF1A1A1A);
-  static const Color darkBgSection = Color(0xFF1F1F1F);
-  static const Color darkDivider = Color(0xFF2A2A2A);
+  static const Color darkBg = Color(0xFF1E1420);
+  static const Color darkBgAlt = Color(0xFF281C2C);
+  static const Color darkBgSection = Color(0xFF332537);
+  static const Color darkDivider = Color(0xFF433047);
   static const Color darkText = Color(0xFFFFFFFF);
-  static const Color darkTextBody = Color(0xFFE5E7EB);
+  static const Color darkTextBody = Color(0xFFD1D5DB);
   static const Color darkTextMuted = Color(0xFF9CA3AF);
   static const Color darkTextDisabled = Color(0xFF4B5563);
-  static const Color darkAccentSoft = Color(0xFF062C1B); 
+  static const Color darkAccentSoft = Color(0xFF3A2E22); 
 
   // Light Colors
   static const Color lightBg = Color(0xFFFFFFFF);
-  static const Color lightBgAlt = Color(0xFFF9FAFB);
-  static const Color lightBgSection = Color(0xFFF3F4F6);
+  static const Color lightBgAlt = Color(0xFFF0F3F7);
+  static const Color lightBgSection = Color(0xFFFFFFFF);
   static const Color lightDivider = Color(0xFFE5E7EB);
-  static const Color lightText = Color(0xFF111827);
-  static const Color lightTextBody = Color(0xFF374151);
-  static const Color lightTextMuted = Color(0xFF6B7280);
-  static const Color lightTextDisabled = Color(0xFF9CA3AF);
-  static const Color lightAccentSoft = Color(0xFFD1FAE5); 
+  static const Color lightText = Color(0xFF1F2937);
+  static const Color lightTextBody = Color(0xFF4B5563);
+  static const Color lightTextMuted = Color(0xFF9CA3AF);
+  static const Color lightTextDisabled = Color(0xFFD1D5DB);
+  static const Color lightAccentSoft = Color(0xFFF9F2E8); 
 
   // Shared Status Colors
-  static const Color halal = Color(0xFF10B981);
-  static const Color questionable = Color(0xFFF59E0B);
-  static const Color haram = Color(0xFFEF4444);
-  static const Color review = Color(0xFF3B82F6);
+  static const Color halal = Color(0xFF059669);
+  static const Color questionable = Color(0xFFD1A562);
+  static const Color haram = Color(0xFFDC2626);
+  static const Color review = Color(0xFF2563EB);
 
   static const _darkColors = AppColors(
     halal: halal,
-    halalBg: Color(0xFF062C1B),
+    halalBg: Color(0xFF053D2A),
     questionable: questionable,
-    questionableBg: Color(0xFF3D2B15),
+    questionableBg: Color(0xFF3A2E22),
     haram: haram,
-    haramBg: Color(0xFF451A1A),
+    haramBg: Color(0xFF4B1B1B),
     review: review,
     accentSoft: darkAccentSoft,
     bgSection: darkBgSection,
@@ -131,11 +131,11 @@ class AppTheme {
 
   static const _lightColors = AppColors(
     halal: halal,
-    halalBg: Color(0xFFD1FAE5),
+    halalBg: Color(0xFFE6F4F0),
     questionable: questionable,
-    questionableBg: Color(0xFFFEF3C7),
+    questionableBg: Color(0xFFF9F2E8),
     haram: haram,
-    haramBg: Color(0xFFFEE2E2),
+    haramBg: Color(0xFFFCE9E9),
     review: review,
     accentSoft: lightAccentSoft,
     bgSection: lightBgSection,

@@ -22,6 +22,53 @@ class SyncCompanyStatus extends Command
         foreach ($companies as $company) {
             $symbol = $company->symbol;
 
+            // --- Stage 1: Business Activity ---
+            // Business activity status is now strictly derived from the AaoifiScreening database (which is seeded by Excel).
+            $existingScreening = AaoifiScreening::where('company_id', $company->id)->first();
+            $stage1Pass = false;
+            $stage1 = ['status' => 'unknown', 'reason' => ''];
+            
+            if ($existingScreening) {
+                if (strtolower($existingScreening->business_status) === 'pass' || strtolower($existingScreening->business_status) === 'halal') {
+                    $stage1Pass = true;
+                    $stage1['status'] = 'pass';
+                } else {
+                    $stage1['status'] = 'fail';
+                    // extract reason from JSON if it exists
+                    $reasoning = $existingScreening->business_reasoning;
+                    if (is_string($reasoning)) {
+                        $reasoning = json_decode($reasoning, true);
+                    }
+                    $stage1['reason'] = $reasoning['justification'] ?? 'Fails qualitative business activity screening.';
+                }
+            }
+
+            $stockStatus = DB::table('stock_statuses')
+                ->where('company_id', $company->id)
+                ->first();
+
+            // Admin override flag
+            $isVerified = $stockStatus && $stockStatus->verified_by_scholar;
+
+            // If business activity explicitly failed, and there's no override, mark as non-halal immediately
+            if (!$stage1Pass && $stage1['status'] === 'fail' && !$isVerified) {
+                DB::table('companies')->where('id', $company->id)->update(['current_status' => 'non-halal']);
+                DB::table('stock_statuses')->updateOrInsert(
+                    ['company_id' => $company->id],
+                    [
+                        'status' => 'non-halal',
+                        'reason' => $stage1['reason'] ?? 'Fails qualitative business activity screening.',
+                        'last_updated' => now(),
+                        'updated_at' => now(),
+                    ]
+                );
+                Cache::forget("stocks.show.{$symbol}");
+                Cache::forget("stocks.show.{$symbol}_v2");
+                $this->warn("  {$symbol}: business activity FAILS -> non-halal (no financial data needed)");
+                $updatedCount++;
+                continue;
+            }
+
             // Get latest financial screening
             $fin = DB::table('financial_screenings')
                 ->where('company_ticker', $symbol)
@@ -30,8 +77,10 @@ class SyncCompanyStatus extends Command
 
             if (! $fin) {
                 // No financial data yet -> mark doubtful only if not scholar-verified
-                $stockStatus = DB::table('stock_statuses')->where('company_id', $company->id)->first();
-                if (! $stockStatus || ! $stockStatus->verified_by_scholar) {
+                if ($isVerified) {
+                    DB::table('companies')->where('id', $company->id)->update(['current_status' => $stockStatus->status]);
+                    $this->info("  {$symbol}: no financial data but scholar override -> {$stockStatus->status}");
+                } else {
                     DB::table('companies')->where('id', $company->id)->update(['current_status' => 'doubtful']);
                     DB::table('stock_statuses')->updateOrInsert(
                         ['company_id' => $company->id],
@@ -80,14 +129,7 @@ class SyncCompanyStatus extends Command
                 $cashRatio = ($cash / $marketCap) * 100;
             }
 
-            // --- Stage 1: Business Activity ---
-            // Business activity status is now strictly derived from the AaoifiScreening database (which is seeded by Excel).
-            $existingScreening = AaoifiScreening::where('company_id', $company->id)->first();
-            $stage1Pass = false;
 
-            if ($existingScreening && $existingScreening->business_status) {
-                $stage1Pass = $existingScreening->business_status === 'pass';
-            }
 
             // --- Stage 2: Financial Ratios ---
             // If ratio data is missing, assume pass (same as StockController line 394-396)
@@ -143,8 +185,14 @@ class SyncCompanyStatus extends Command
             $updatedCount++;
         }
 
-        // Clear global stock listing caches
-        Cache::tags(['stocks'])->flush();
+        // Clear global stock listing caches (fallback to full flush if tags not supported)
+        try {
+            Cache::tags(['stocks'])->flush();
+        } catch (\Exception $e) {
+            // Fallback for file/database cache drivers that don't support tags
+            // We just let the individual item caches (cleared above) suffice, or flush entirely
+            Cache::flush();
+        }
         $this->info("Done. Synced {$updatedCount} companies. All caches cleared.");
     }
 }

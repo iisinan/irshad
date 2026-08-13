@@ -27,6 +27,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
   late Map<String, dynamic> _currentStock;
   bool _isLoading = false;
   bool _isFavoriting = false;
+  bool _isLoadingDetails = true; // True until full status data (incl. purification) is confirmed
   final TextEditingController _purificationController = TextEditingController();
   double _purificationResult = 0;
   bool _isAlreadyFavorited = false;
@@ -74,14 +75,23 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
 
   void _fetchFullDetails() async {
     try {
+      // Always bypass cache for the details page to ensure purification_required,
+      // haram_revenue_percent and verified_by_scholar are always accurate.
       final fullData = await _stockRepository.getStockDetails(_currentStock['symbol']);
       if (fullData != null && mounted) {
         setState(() {
+          // Replace status entirely from fullData (never merge shallow list status)
           _currentStock = {..._currentStock, ...fullData};
+          if (fullData['status'] != null) {
+            _currentStock['status'] = fullData['status'];
+          }
+          _isLoadingDetails = false;
         });
+      } else {
+        if (mounted) setState(() => _isLoadingDetails = false);
       }
     } catch (e) {
-      // ignore silently
+      if (mounted) setState(() => _isLoadingDetails = false);
     }
   }
 
@@ -145,31 +155,58 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final rawStatus = _currentStock['status'];
-    String status = 'halal';
-    String reason = 'The core business operations of this company have been verified to be in a Halal industry, with no significant involvement in prohibited activities like conventional finance, alcohol, gambling, or tobacco.';
+    String status = 'doubtful';
+    String reason = 'This stock is currently under review or lacks sufficient data for a definitive Shariah ruling.';
+    bool isScholarVerified = false;
 
     if (rawStatus is Map) {
-      status = rawStatus['status']?.toString().toLowerCase() ?? 'halal';
+      status = rawStatus['status']?.toString().toLowerCase() ?? 'doubtful';
+      isScholarVerified = rawStatus['verified_by_scholar'] == true;
       if (status == 'non-halal') {
         reason = rawStatus['reason'] ?? 'The core business operations involve non-compliant activities.';
+      } else if (status == 'doubtful') {
+        reason = rawStatus['reason'] ?? 'This stock is currently under review or lacks sufficient data for a definitive Shariah ruling.';
       } else {
         status = 'halal';
-        reason = rawStatus['reason'] ?? reason;
+        reason = rawStatus['reason'] ?? 'The core business operations of this company have been verified to be in a Halal industry, with no significant involvement in prohibited activities like conventional finance, alcohol, gambling, or tobacco.';
       }
     } else if (rawStatus is String) {
       if (rawStatus.toLowerCase() == 'non-halal') {
         status = 'non-halal';
         reason = 'Automated business activity analysis.';
+      } else if (rawStatus.toLowerCase() == 'doubtful') {
+        status = 'doubtful';
+        reason = 'This stock is currently under review or lacks sufficient data for a definitive Shariah ruling.';
       } else {
         status = 'halal';
       }
     }
-    
+
+    // NOTE: We do NOT recalculate/override the verdict locally from financial ratios.
+    // The backend is the single source of truth for verdicts — especially for scholar-verified statuses.
+    // Financial data below is used only for the AAOIFI breakdown display panel, never to change the verdict.
+
     bool isHalal = status == 'halal';
     bool isNonHalal = status == 'non-halal';
     Color statusColor = isHalal ? context.halal : (isNonHalal ? context.haram : context.questionable);
     Color badgeBg = isHalal ? context.halalBg : (isNonHalal ? context.haramBg : context.questionableBg);
-    String statusLabel = isHalal ? 'HALAL' : (isNonHalal ? 'NON-HALAL' : 'QUESTIONABLE');
+    
+    bool purificationRequired = false;
+    double haramRevenuePercent = 0.0;
+    if (rawStatus is Map) {
+      purificationRequired = rawStatus['purification_required'] == true || rawStatus['purification_required'] == 'true';
+      haramRevenuePercent = double.tryParse(rawStatus['haram_revenue_percent']?.toString() ?? '0') ?? 0.0;
+    }
+
+    String statusLabel = 'DOUBTFUL';
+    if (_isLoadingDetails) {
+      // Don't commit to purification label until full details confirmed
+      statusLabel = isHalal ? 'SHARIAH COMPLIANT' : (isNonHalal ? 'SHARIAH NON-COMPLIANT' : 'DOUBTFUL');
+    } else if (isHalal) {
+      statusLabel = 'SHARIAH COMPLIANT';
+    } else if (isNonHalal) {
+      statusLabel = 'SHARIAH NON-COMPLIANT';
+    }
 
     final financials = _currentStock['financials'];
     final latestFin = (financials != null && financials is List && financials.isNotEmpty) ? financials[0] : null;
@@ -289,7 +326,10 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
         child: Column(
           children: [
             // Status Header
-            _buildStatusHeader(statusColor, badgeBg, statusLabel),
+            _buildStatusHeader(statusColor, badgeBg, statusLabel, 
+              purificationRequired: !_isLoadingDetails && purificationRequired, 
+              percent: haramRevenuePercent, 
+              scholarVerified: isScholarVerified),
             
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -298,10 +338,42 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                 children: [
                   const SizedBox(height: 12),
                   // Price Chart
-                  if ((_currentStock['daily_prices'] ?? []).isNotEmpty) ...[
+                  if ((_currentStock['daily_prices'] ?? []).isNotEmpty &&
+                      (_currentStock['daily_prices'] as List).any((p) => (double.tryParse(p['price']?.toString() ?? '0') ?? 0) > 0)) ...[
                     _buildPriceChart(),
                     const SizedBox(height: 32),
                   ],
+
+                  // Shariah Justification Summary
+                  _buildSectionHeader('Shariah Justification'),
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: badgeBg,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: statusColor.withValues(alpha: 0.3)),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          isHalal ? Icons.check_circle_outline_rounded : isNonHalal ? Icons.cancel_outlined : Icons.info_outline_rounded,
+                          color: statusColor,
+                          size: 22,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            reason,
+                            style: TextStyle(color: context.textDark, fontSize: 13, height: 1.5, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 32),
 
                   // About Company
                   if (_currentStock['overview'] != null && _currentStock['overview'].toString().trim().isNotEmpty) ...[
@@ -501,60 +573,149 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
   }
 
   Widget _buildSectionHeader(String title) {
-    return Text(
-      title.toUpperCase(),
-      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: context.textMuted, letterSpacing: 1),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Container(
+          width: 4,
+          height: 12,
+          decoration: BoxDecoration(
+            color: context.primary,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          title.toUpperCase(),
+          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: context.textMuted, letterSpacing: 1),
+        ),
+      ],
     );
   }
 
-  Widget _buildStatusHeader(Color color, Color bg, String label) {
+  Widget _buildStatusHeader(Color color, Color bg, String label, {bool purificationRequired = false, double percent = 0.0, bool scholarVerified = false}) {
     final latestPrice = num.tryParse(_currentStock['latest_price']?.toString() ?? '0') ?? 0.0;
     final priceChange = _currentStock['price_change_pct'] != null ? double.tryParse(_currentStock['price_change_pct'].toString()) : null;
+    final isUp = (priceChange ?? 0) >= 0;
+
+    String mainLabel = label;
+    String subLabel = '';
+    
+    if (purificationRequired) {
+      mainLabel = 'SHARIAH COMPLIANT';
+      subLabel = 'WITH PURIFICATION (${percent.toStringAsFixed(2)}%)';
+    }
 
     return Container(
       width: double.infinity,
       color: context.bg,
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(_currentStock['name'] ?? '', style: TextStyle(color: context.textMuted, fontSize: 14, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
-          Text('₦${latestPrice.toStringAsFixed(2)}', style: TextStyle(fontSize: 40, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -1)),
-          if (priceChange != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                '${priceChange >= 0 ? '+' : ''}$priceChange%',
-                style: TextStyle(
-                  fontSize: 16, 
-                  fontWeight: FontWeight.w700, 
-                  color: priceChange >= 0 ? context.primary : context.haram
-                )
+          // Company name
+          Text(
+            _currentStock['name'] ?? '',
+            style: TextStyle(color: context.textMuted, fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 10),
+          // Price
+          Text(
+            '₦${latestPrice.toStringAsFixed(2)}',
+            style: TextStyle(fontSize: 42, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -1.5),
+          ),
+          if (priceChange != null) ...[
+            const SizedBox(height: 8),
+            // Change pill
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+              decoration: BoxDecoration(
+                color: (isUp ? context.halal : context.haram).withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(100),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    isUp ? Icons.arrow_drop_up_rounded : Icons.arrow_drop_down_rounded,
+                    size: 20,
+                    color: isUp ? context.halal : context.haram,
+                  ),
+                  Text(
+                    '${isUp ? '+' : ''}${priceChange.toStringAsFixed(2)}%',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: isUp ? context.halal : context.haram,
+                    ),
+                  ),
+                ],
               ),
             ),
-          const SizedBox(height: 16),
+          ],
+          const SizedBox(height: 18),
+          // Verdict badge
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
             decoration: BoxDecoration(
               color: bg,
-              borderRadius: BorderRadius.circular(100), // Large Pill badge
+              borderRadius: BorderRadius.circular(100),
               border: Border.all(color: color.withValues(alpha: 0.4), width: 2),
               boxShadow: [
-                BoxShadow(color: color.withValues(alpha: 0.15), blurRadius: 16, offset: const Offset(0, 8)),
+                BoxShadow(color: color.withValues(alpha: 0.18), blurRadius: 20, offset: const Offset(0, 8)),
               ],
             ),
-            child: Row(
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  label == 'HALAL' ? Icons.check_circle_rounded : 
-                  label == 'NON-HALAL' ? Icons.cancel_rounded : Icons.help_rounded,
-                  color: color, 
-                  size: 20
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      mainLabel.contains('COMPLIANT') && !mainLabel.contains('NON') ? Icons.check_circle_rounded :
+                      mainLabel.contains('NON-COMPLIANT') ? Icons.cancel_rounded : Icons.help_rounded,
+                      color: color,
+                      size: 22,
+                    ),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        mainLabel,
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: color, letterSpacing: 0.3),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 10),
-                Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: color, letterSpacing: 0.5)),
+                if (purificationRequired) ...[
+                  const SizedBox(height: 7),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      subLabel,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: color, letterSpacing: 0.2),
+                    ),
+                  ),
+                ],
+                if (scholarVerified) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.verified_rounded, size: 13, color: color.withValues(alpha: 0.75)),
+                      const SizedBox(width: 4),
+                      Text(
+                        'SCHOLAR VERIFIED',
+                        style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: color.withValues(alpha: 0.75), letterSpacing: 0.5),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
@@ -706,6 +867,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
           decoration: BoxDecoration(
             color: context.bgAlt,
             borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: context.divider.withValues(alpha: 0.5)),
           ),
           child: Column(
             children: [
@@ -755,6 +917,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
           decoration: BoxDecoration(
             color: context.bgAlt,
             borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: context.divider.withValues(alpha: 0.5)),
           ),
           child: Column(
             children: [
@@ -773,10 +936,18 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     final rating = _currentStock['analysts_rating'] ?? 'N/A';
     if (rating == 'N/A') return const SizedBox.shrink();
     
-    Color ratingColor = Colors.grey;
-    if (rating.toLowerCase().contains('buy')) ratingColor = Colors.green;
-    if (rating.toLowerCase().contains('sell')) ratingColor = Colors.red;
-    if (rating.toLowerCase().contains('hold')) ratingColor = Colors.orange;
+    Color ratingColor;
+    IconData ratingIcon;
+    if (rating.toLowerCase().contains('buy') || rating.toLowerCase().contains('strong buy')) {
+      ratingColor = context.halal;
+      ratingIcon = Icons.thumb_up_rounded;
+    } else if (rating.toLowerCase().contains('sell')) {
+      ratingColor = context.haram;
+      ratingIcon = Icons.thumb_down_rounded;
+    } else {
+      ratingColor = context.questionable;
+      ratingIcon = Icons.drag_handle_rounded;
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -784,18 +955,33 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
         _buildSectionHeader('Analysts Rating'),
         const SizedBox(height: 12),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.all(20),
           width: double.infinity,
           decoration: BoxDecoration(
-            color: ratingColor.withOpacity(0.1),
+            color: ratingColor.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: ratingColor.withOpacity(0.3)),
+            border: Border.all(color: ratingColor.withValues(alpha: 0.25)),
           ),
-          child: Column(
+          child: Row(
             children: [
-              Text('Consensus', style: TextStyle(color: ratingColor, fontSize: 12, fontWeight: FontWeight.w600)),
-              const SizedBox(height: 4),
-              Text(rating.toUpperCase(), style: TextStyle(color: ratingColor, fontSize: 20, fontWeight: FontWeight.w900)),
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: ratingColor.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(ratingIcon, color: ratingColor, size: 24),
+              ),
+              const SizedBox(width: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('CONSENSUS', style: TextStyle(color: ratingColor.withValues(alpha: 0.7), fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.8)),
+                  const SizedBox(height: 4),
+                  Text(rating.toUpperCase(), style: TextStyle(color: ratingColor, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
+                ],
+              ),
             ],
           ),
         ),
@@ -816,11 +1002,19 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     final divYield = _currentStock['div_yield'] != null ? '${_currentStock['div_yield']}%' : '—';
     final roe = _currentStock['roe']?.toString() ?? '—';
 
+    String formatMcap(double amt) {
+      if (amt == 0) return '—';
+      if (amt >= 1e12) return '₦${(amt / 1e12).toStringAsFixed(2)}T';
+      if (amt >= 1e9) return '₦${(amt / 1e9).toStringAsFixed(2)}B';
+      if (amt >= 1e6) return '₦${(amt / 1e6).toStringAsFixed(2)}M';
+      return '₦${amt.toStringAsFixed(0)}';
+    }
+
     List<Widget> availableMetrics = [];
-    if (mcap > 0) availableMetrics.add(_buildMetricCard('MARKET CAP', '₦ ${formatAmt(mcap)}'));
-    if (pe != '—') availableMetrics.add(_buildMetricCard('P/E RATIO', pe));
-    if (divYield != '—') availableMetrics.add(_buildMetricCard('DIVIDEND YIELD', divYield));
-    if (roe != '—') availableMetrics.add(_buildMetricCard('ROE', roe != '—' && !roe.contains('%') ? '$roe%' : roe));
+    if (mcap > 0) availableMetrics.add(_buildMetricCard('MARKET CAP', formatMcap(mcap), icon: Icons.pie_chart_outline_rounded));
+    if (pe != '—') availableMetrics.add(_buildMetricCard('P/E RATIO', pe, icon: Icons.bar_chart_rounded));
+    if (divYield != '—') availableMetrics.add(_buildMetricCard('DIV. YIELD', divYield, icon: Icons.savings_outlined));
+    if (roe != '—') availableMetrics.add(_buildMetricCard('ROE', roe != '—' && !roe.contains('%') ? '$roe%' : roe, icon: Icons.show_chart_rounded));
 
     if (availableMetrics.isEmpty) return const SizedBox.shrink();
 
@@ -831,17 +1025,17 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
           children: [
             Expanded(child: availableMetrics[i]),
             if (i + 1 < availableMetrics.length) ...[
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               Expanded(child: availableMetrics[i + 1]),
             ] else ...[
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               const Spacer(),
             ],
           ],
         ),
       );
       if (i + 2 < availableMetrics.length) {
-        rows.add(const SizedBox(height: 16));
+        rows.add(const SizedBox(height: 12));
       }
     }
 
@@ -858,36 +1052,20 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     final valuation = _currentStock['valuation_info'] ?? 'N/A';
     final growth = _currentStock['growth_info'] ?? 'N/A';
     
-    Widget buildCard(String title, String value) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: context.bgAlt,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: TextStyle(color: context.textMuted, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
-            const SizedBox(height: 4),
-            Text(value, style: TextStyle(color: context.textDark, fontSize: 14, fontWeight: FontWeight.w700)),
-          ],
-        ),
-      );
-    }
-    
-    List<Widget> cards = [];
-    cards.add(Expanded(child: buildCard('VALUATION', valuation)));
-    cards.add(Expanded(child: buildCard('GROWTH FORECAST', growth)));
-
-    Widget metricsRow = Row(children: [cards[0], const SizedBox(width: 16), cards[1]]);
+    if (valuation == 'N/A' && growth == 'N/A') return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeader('Advanced Metrics'),
         const SizedBox(height: 12),
-        metricsRow,
+        Row(
+          children: [
+            Expanded(child: _buildMetricCard('VALUATION', valuation, icon: Icons.analytics_outlined)),
+            const SizedBox(width: 12),
+            Expanded(child: _buildMetricCard('GROWTH FORECAST', growth, icon: Icons.rocket_launch_outlined)),
+          ],
+        ),
         const SizedBox(height: 32),
       ],
     );
@@ -923,76 +1101,107 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     return Container(
       decoration: BoxDecoration(
         color: context.bgAlt,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: context.divider.withValues(alpha: 0.5)),
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
         child: ListView.separated(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: _news.length,
           separatorBuilder: (ctx, i) => Divider(color: context.divider, height: 1, indent: 16, endIndent: 16),
-        itemBuilder: (ctx, i) {
-          final article = _news[i];
-          final date = DateTime.tryParse(article['published_at'] ?? '');
-          final dateStr = date != null ? '${date.day}/${date.month}/${date.year}' : 'Recent';
-          
-          return InkWell(
-            onTap: () {
-              // Open URL logic could go here
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: context.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(article['source']?.toUpperCase() ?? 'NEWS', 
-                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: context.primary)),
+          itemBuilder: (ctx, i) {
+            final article = _news[i];
+            final date = DateTime.tryParse(article['published_at'] ?? '');
+            final now = DateTime.now();
+            String dateStr;
+            if (date != null) {
+              final diff = now.difference(date);
+              if (diff.inHours < 24) dateStr = '${diff.inHours}h ago';
+              else if (diff.inDays < 7) dateStr = '${diff.inDays}d ago';
+              else dateStr = '${date.day}/${date.month}/${date.year}';
+            } else {
+              dateStr = 'Recent';
+            }
+
+            return InkWell(
+              onTap: () {},
+              borderRadius: BorderRadius.circular(20),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: context.primary.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  article['source']?.toUpperCase() ?? 'NEWS',
+                                  style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: context.primary),
+                                ),
+                              ),
+                              const Spacer(),
+                              Text(dateStr, style: TextStyle(fontSize: 11, color: context.textMuted, fontWeight: FontWeight.w500)),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            article['title'] ?? '',
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: context.textDark, height: 1.4),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
-                      Text(dateStr, style: TextStyle(fontSize: 11, color: context.textMuted, fontWeight: FontWeight.w600)),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text(article['title'] ?? '', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: context.textDark, height: 1.4)),
-                  if (article['excerpt'] != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Text(article['excerpt'], maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13, color: context.textMuted, height: 1.5)),
                     ),
-                ],
+                    const SizedBox(width: 12),
+                    Icon(Icons.arrow_forward_ios_rounded, size: 14, color: context.textMuted),
+                  ],
+                ),
               ),
-            ),
-          );
-        },
-      ),
+            );
+          },
+        ),
       ),
     );
   }
 
 
 
-  Widget _buildMetricCard(String label, String value) {
+  Widget _buildMetricCard(String label, String value, {IconData? icon, Color? valueColor}) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: context.bgAlt,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: context.divider.withValues(alpha: 0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: TextStyle(color: context.textMuted, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
-          const SizedBox(height: 4),
-          Text(value, style: TextStyle(color: context.textDark, fontSize: 14, fontWeight: FontWeight.w700)),
+          Row(
+            children: [
+              if (icon != null) ...[
+                Icon(icon, size: 13, color: context.textMuted),
+                const SizedBox(width: 5),
+              ],
+              Expanded(
+                child: Text(label, style: TextStyle(color: context.textMuted, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.5), maxLines: 1, overflow: TextOverflow.ellipsis),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(value, style: TextStyle(color: valueColor ?? context.textDark, fontSize: 15, fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis),
         ],
       ),
     );
@@ -1008,26 +1217,35 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     final interest = _parseDouble(latest?['interest_income']);
 
     String formatAmt(double amt) {
-      if (amt == 0) return '0';
-      String s = amt.toStringAsFixed(0);
-      return s.replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},');
+      if (amt == 0) return 'N/A';
+      if (amt >= 1e12) return '₦${(amt / 1e12).toStringAsFixed(2)}T';
+      if (amt >= 1e9) return '₦${(amt / 1e9).toStringAsFixed(2)}B';
+      if (amt >= 1e6) return '₦${(amt / 1e6).toStringAsFixed(2)}M';
+      return '₦${amt.toStringAsFixed(0)}';
     }
+
+    // Debt is a warning if high
+    final marketCap = _parseDouble(latest?['market_cap']);
+    final debtRatio = marketCap > 0 ? (debt / marketCap) * 100 : 0.0;
+    final interestRatio = revenue > 0 ? (interest / revenue) * 100 : 0.0;
+    final debtColor = debtRatio > 30 ? context.haram : (debtRatio > 20 ? context.questionable : null);
+    final interestColor = interestRatio > 5 ? context.haram : (interestRatio > 3 ? context.questionable : null);
 
     return Column(
       children: [
         Row(
           children: [
-            Expanded(child: _buildMetricCard('TOTAL ASSETS', assets > 0 ? '₦ ${formatAmt(assets)}' : 'N/A')),
-            const SizedBox(width: 16),
-            Expanded(child: _buildMetricCard('TOTAL DEBT', debt > 0 ? '₦ ${formatAmt(debt)}' : '0')),
+            Expanded(child: _buildMetricCard('TOTAL ASSETS', assets > 0 ? formatAmt(assets) : 'N/A', icon: Icons.account_balance_outlined)),
+            const SizedBox(width: 12),
+            Expanded(child: _buildMetricCard('TOTAL DEBT', debt > 0 ? formatAmt(debt) : '₦0', icon: Icons.credit_card_outlined, valueColor: debtColor)),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         Row(
           children: [
-            Expanded(child: _buildMetricCard('TOTAL REVENUE', revenue > 0 ? '₦ ${formatAmt(revenue)}' : 'N/A')),
-            const SizedBox(width: 16),
-            Expanded(child: _buildMetricCard('INTEREST INCOME', interest > 0 ? '₦ ${formatAmt(interest)}' : '0')),
+            Expanded(child: _buildMetricCard('TOTAL REVENUE', revenue > 0 ? formatAmt(revenue) : 'N/A', icon: Icons.trending_up_rounded)),
+            const SizedBox(width: 12),
+            Expanded(child: _buildMetricCard('INTEREST INCOME', interest > 0 ? formatAmt(interest) : '₦0', icon: Icons.percent_rounded, valueColor: interestColor)),
           ],
         ),
       ],
@@ -1190,8 +1408,10 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                     children: [
                       Icon(isHalal ? Icons.check_circle : (isNonHalal ? Icons.cancel : Icons.info), color: statusColor, size: 12),
                       const SizedBox(width: 4),
-                      Text(isHalal ? 'HALAL' : (isNonHalal ? 'NON-HALAL' : 'UNDER REVIEW'), 
-                        style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.w800)),
+                      Flexible(
+                        child: Text(label, 
+                          style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.w800), textAlign: TextAlign.center),
+                      ),
                     ],
                   ),
                 ),
@@ -1614,14 +1834,24 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     final overview = _currentStock['overview'] ?? '$name operates within the $sector sector. Its primary business activities include the production, provision, and distribution of goods and services specific to the $sector industry. As a publicly traded entity on the Nigerian Exchange, it focuses on delivering sustainable value to its stakeholders.';
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: context.bgAlt,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: context.divider.withValues(alpha: 0.5)),
       ),
-      child: Text(
-        overview,
-        style: TextStyle(color: context.textMuted, height: 1.6, fontSize: 14),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.business_rounded, color: context.primary.withValues(alpha: 0.7), size: 22),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              overview,
+              style: TextStyle(color: context.textDark, height: 1.6, fontSize: 13, fontWeight: FontWeight.w500),
+            ),
+          ),
+        ],
       ),
     );
   }

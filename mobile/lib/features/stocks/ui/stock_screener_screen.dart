@@ -157,7 +157,7 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
                           children: ['halal', 'doubtful', 'non-halal'].map((status) {
                             final isSelected = tempStatuses.contains(status);
                             return FilterChip(
-                              label: Text(status.toUpperCase(), style: TextStyle(color: isSelected ? Colors.black : context.textMuted, fontSize: 12, fontWeight: FontWeight.bold)),
+                              label: Text(status == 'halal' ? 'SHARIAH COMPLIANT' : (status == 'non-halal' ? 'SHARIAH NON-COMPLIANT' : 'DOUBTFUL'), style: TextStyle(color: isSelected ? Colors.black : context.textMuted, fontSize: 12, fontWeight: FontWeight.bold)),
                               selected: isSelected,
                               selectedColor: context.primary,
                               backgroundColor: context.bg,
@@ -425,7 +425,7 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
                 ),
                 child: Row(
                   children: [
-                    Text(_selectedStatuses.join(', ').toUpperCase(), style: TextStyle(color: context.textDark, fontSize: 11, fontWeight: FontWeight.bold)),
+                    Text(_selectedStatuses.map((s) => s == 'halal' ? 'SHARIAH COMPLIANT' : (s == 'non-halal' ? 'SHARIAH NON-COMPLIANT' : 'DOUBTFUL')).join(', '), style: TextStyle(color: context.textDark, fontSize: 11, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),

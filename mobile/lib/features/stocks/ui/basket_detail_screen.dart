@@ -441,8 +441,10 @@ class _BasketDetailScreenState extends State<BasketDetailScreen> {
 
   Widget _buildStockCard(dynamic company, int index) {
     final statusObj = company['status'];
-    final statusStr = statusObj != null ? statusObj['status'].toString().toUpperCase() : 'QUESTIONABLE';
-    final isCompliant = statusStr == 'HALAL';
+    final rawStatusStr = statusObj != null ? statusObj['status'].toString().toUpperCase() : 'DOUBTFUL';
+    final isCompliant = rawStatusStr == 'HALAL';
+    final isNonCompliant = rawStatusStr == 'NON-HALAL';
+    final statusStr = isCompliant ? 'SHARIAH COMPLIANT' : (isNonCompliant ? 'SHARIAH NON-COMPLIANT' : 'DOUBTFUL');
     
     final latestPrice = num.tryParse(company['latest_price']?.toString() ?? '0') ?? 0.0;
     final isPositive = (double.tryParse(company['price_change']?.toString() ?? '0') ?? 0) >= 0;

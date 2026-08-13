@@ -249,22 +249,28 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
   }
 
   Widget _buildStockCard(Map<String, dynamic> stock) {
+    final isPending = stock['_verdict_pending'] == true;
     final status = stock['status']?['status'] ?? 'doubtful';
     
     Color statusColor;
     IconData statusIcon;
-    switch (status) {
-      case 'halal':
-        statusColor = context.halal; // Green
-        statusIcon = Icons.check_circle_rounded;
-        break;
-      case 'non-halal':
-        statusColor = const Color(0xFFDC2626); // Red
-        statusIcon = Icons.cancel_rounded;
-        break;
-      default:
-        statusColor = context.questionable; // Orange
-        statusIcon = Icons.help_rounded;
+    if (isPending) {
+      statusColor = Colors.grey.shade400;
+      statusIcon = Icons.hourglass_empty_rounded;
+    } else {
+      switch (status) {
+        case 'halal':
+          statusColor = context.halal;
+          statusIcon = Icons.check_circle_rounded;
+          break;
+        case 'non-halal':
+          statusColor = const Color(0xFFDC2626);
+          statusIcon = Icons.cancel_rounded;
+          break;
+        default:
+          statusColor = context.questionable;
+          statusIcon = Icons.help_rounded;
+      }
     }
 
     return InkWell(
@@ -354,22 +360,33 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
   }
 
   Widget _buildGridCard(Map<String, dynamic> stock) {
+    final isPending = stock['_verdict_pending'] == true;
     final status = stock['status']?['status'] ?? 'doubtful';
     
     Color statusColor;
     IconData statusIcon;
-    switch (status) {
-      case 'halal':
-        statusColor = context.halal;
-        statusIcon = Icons.check_circle_rounded;
-        break;
-      case 'non-halal':
-        statusColor = const Color(0xFFDC2626);
-        statusIcon = Icons.cancel_rounded;
-        break;
-      default:
-        statusColor = context.questionable;
-        statusIcon = Icons.help_rounded;
+    String statusLabel;
+    if (isPending) {
+      statusColor = Colors.grey.shade400;
+      statusIcon = Icons.hourglass_empty_rounded;
+      statusLabel = 'VERIFYING...';
+    } else {
+      switch (status) {
+        case 'halal':
+          statusColor = context.halal;
+          statusIcon = Icons.check_circle_rounded;
+          statusLabel = 'SHARIAH COMPLIANT';
+          break;
+        case 'non-halal':
+          statusColor = const Color(0xFFDC2626);
+          statusIcon = Icons.cancel_rounded;
+          statusLabel = 'SHARIAH NON-COMPLIANT';
+          break;
+        default:
+          statusColor = context.questionable;
+          statusIcon = Icons.help_rounded;
+          statusLabel = 'DOUBTFUL';
+      }
     }
 
     return InkWell(
@@ -428,7 +445,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
                   Icon(statusIcon, size: 12, color: statusColor),
                   const SizedBox(width: 4),
                   Text(
-                    status.toUpperCase(),
+                    statusLabel,
                     style: TextStyle(
                       color: statusColor,
                       fontSize: 10,

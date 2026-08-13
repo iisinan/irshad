@@ -232,7 +232,7 @@ class _CreateBasketScreenState extends State<CreateBasketScreen> {
                                           color: context.halal.withValues(alpha: 0.1),
                                           borderRadius: BorderRadius.circular(6),
                                         ),
-                                        child: Text('HALAL', style: TextStyle(color: context.halal, fontSize: 10, fontWeight: FontWeight.w900)),
+                                        child: Text('SHARIAH COMPLIANT', style: TextStyle(color: context.halal, fontSize: 10, fontWeight: FontWeight.w900)),
                                       )
                                     ],
                                   ),

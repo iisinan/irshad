@@ -15,7 +15,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 final List<Map<String, String>> _onboardingData = [
     {
       'title': 'Stock Screening',
-      'subtitle': 'We analyze hundreds of companies. Easily spot fully compliant, questionable, and haram investments.',
+      'subtitle': 'We analyze hundreds of companies. Easily spot fully compliant, doubtful, and haram investments.',
       'image': 'assets/onboarding_search.png',
       'icon': 'search',
     },

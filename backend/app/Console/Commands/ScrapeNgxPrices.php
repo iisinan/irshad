@@ -67,6 +67,35 @@ class ScrapeNgxPrices extends Command
                 throw new \Exception('NGX JSON Structure has changed! The required keys (symbol, current_price, volume) were not found.');
             }
 
+            // Fetch ETFs and merge into stocksList
+            $etfsUrl = 'https://ngxpulse.ng/api/ngxdata/etfs';
+            $etfsResponse = Http::withHeaders([
+                'accept' => 'application/json',
+                'X-API-Key' => $apiKey,
+                'Referer' => 'https://ngxpulse.ng/',
+                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+            ])->timeout(30)->get($etfsUrl);
+
+            if ($etfsResponse->successful()) {
+                $etfsData = $etfsResponse->json();
+                $etfsList = $etfsData['data'] ?? [];
+                
+                foreach ($etfsList as $etf) {
+                    $stocksList[] = [
+                        'symbol' => $etf['symbol'] ?? null,
+                        'name' => $etf['name'] ?? null,
+                        'current_price' => (!empty($etf['close']) && $etf['close'] > 0) ? $etf['close'] : ($etf['previous_close'] ?? 0),
+                        'previous_close' => $etf['previous_close'] ?? 0,
+                        'change_percent' => $etf['change_percentage'] ?? 0,
+                        'volume' => $etf['volume'] ?? 0,
+                        'shares_outstanding' => null,
+                        'sector' => $etf['sector'] ?? 'Exchange Traded Funds',
+                        'industry' => $etf['instrument_type'] ?? 'ETF',
+                        'market_cap' => null,
+                    ];
+                }
+            }
+
             $updatesCount = 0;
             $missingSymbols = [];
             $today = now()->format('Y-m-d');
@@ -116,48 +145,33 @@ class ScrapeNgxPrices extends Command
                 $company = Company::where('symbol', $symbol)->first();
 
                 if (! $company) {
-                    // Create the company if it's missing using NGX data
-                    $company = Company::create([
-                        'symbol' => $symbol,
-                        'name' => trim($stock['name'] ?? $symbol),
-                        'sector' => $sector,
-                        'industry' => $industry,
-                        'business_type' => 'Unknown',
-                        'description' => 'A publicly listed company on the Nigerian Exchange (NGX).',
-                        'latest_price' => $closePrice,
-                        'price_change' => $change,
-                        'price_change_pct' => $changePct,
-                        'logo_url' => $logoUrl,
-                        'market_cap' => $marketCap,
-                        'shares_outstanding' => $sharesOutstanding,
-                        'volume_today' => $volume,
-                        'is_active' => true,
-                    ]);
-                    $missingSymbols[] = $symbol; // still keep track to log what was added
-                } else {
-                    // Update denormalized fields including sector and industry if ngxpulse is the source
-                    $updateData = [
-                        'latest_price' => $closePrice,
-                        'price_change' => $change,
-                        'price_change_pct' => $changePct,
-                        'market_cap' => $marketCap,
-                        'shares_outstanding' => $sharesOutstanding,
-                        'volume_today' => $volume,
-                        'is_active' => true,
-                    ];
-
-                    if ($logoUrl) {
-                        $updateData['logo_url'] = $logoUrl;
-                    }
-                    if ($sector !== 'Unknown') {
-                        $updateData['sector'] = $sector;
-                    }
-                    if ($industry) {
-                        $updateData['industry'] = $industry;
-                    }
-
-                    $company->update($updateData);
+                    // Skip companies not already in our database
+                    $missingSymbols[] = $symbol;
+                    continue;
                 }
+                
+                // Update denormalized fields including sector and industry if ngxpulse is the source
+                $updateData = [
+                    'latest_price' => $closePrice,
+                    'price_change' => $change,
+                    'price_change_pct' => $changePct,
+                    'market_cap' => $marketCap,
+                    'shares_outstanding' => $sharesOutstanding,
+                    'volume_today' => $volume,
+                    'is_active' => true,
+                ];
+
+                if ($logoUrl) {
+                    $updateData['logo_url'] = $logoUrl;
+                }
+                if ($sector !== 'Unknown') {
+                    $updateData['sector'] = $sector;
+                }
+                if ($industry) {
+                    $updateData['industry'] = $industry;
+                }
+
+                $company->update($updateData);
 
                 // Update or create daily price
                 DB::table('daily_prices')->updateOrInsert(
@@ -190,15 +204,27 @@ class ScrapeNgxPrices extends Command
             $this->info($details);
 
             // Fire Success Email
-            Mail::to($adminEmail)->send(new ScraperAlert('success', $details));
+            try {
+                Mail::to($adminEmail)->send(new ScraperAlert('success', $details));
+            } catch (\Throwable $mailException) {
+                $this->error('Failed to send success email: ' . $mailException->getMessage());
+            }
 
         } catch (Throwable $e) {
-            DB::rollBack();
+            try {
+                DB::rollBack();
+            } catch (\Throwable $dbException) {
+                // Ignore rollback failure if connection was lost
+            }
             $this->error('Scraper Failed: '.$e->getMessage());
 
             // Fire Error Email
-            $errorDetails = "Scraper Exception: \n".$e->getMessage()."\n\nFile: ".$e->getFile().' on line '.$e->getLine();
-            Mail::to($adminEmail)->send(new ScraperAlert('error', $errorDetails));
+            try {
+                $errorDetails = "Scraper Exception: \n".$e->getMessage()."\n\nFile: ".$e->getFile().' on line '.$e->getLine();
+                Mail::to($adminEmail)->send(new ScraperAlert('error', $errorDetails));
+            } catch (\Throwable $mailException) {
+                $this->error('Failed to send error email: ' . $mailException->getMessage());
+            }
 
             return Command::FAILURE;
         }
