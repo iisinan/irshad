@@ -326,7 +326,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
                 {!stock.is_active && (
                   <>
                     <span>·</span>
-                    <span style={{ background: 'rgba(156, 163, 175, 0.15)', color: '#D1D5DB', border: '1px solid rgba(156, 163, 175, 0.4)', padding: '2px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '4px', boxShadow: '0 0 10px rgba(156, 163, 175, 0.15)' }}>
+                    <span style={{ background: '#4B5563', color: '#FFFFFF', border: '1px solid #6B7280', padding: '2px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '4px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)' }}>
                       <AlertCircle size={12} /> Not Trading
                     </span>
                   </>
@@ -520,7 +520,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
                 <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <Scale size={14} color="var(--gold, var(--gold))" /> NGX Trading Board
                 </span>
-                <span style={{ fontSize: '1.02rem', color: !stock.is_active ? '#9CA3AF' : 'var(--text-dark)', fontWeight: 850 }}>
+                <span style={{ fontSize: '1.02rem', color: !stock.is_active ? '#6B7280' : 'var(--text-dark)', fontWeight: 850 }}>
                   {!stock.is_active ? 'Suspended / Not Trading' : (stock.board || stock.ngx_board || (stock.symbol === 'JAIZBANK' || stock.symbol === 'TAJBANK' || stock.symbol === 'LOTUS' || stock.symbol === 'NREIT' ? 'Non-Interest Board' : 'Equity Board / Main'))}
                 </span>
               </div>
