@@ -61,36 +61,62 @@ function EditHoldingModal({ holding, onClose, onSuccess }) {
     finally { setLoading(false); }
   };
   return createPortal(
-    <div className="animate-fade-in" style={{ position:'fixed', inset:0, background:'rgba(6, 9, 14, 0.65)', backdropFilter:'blur(12px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:100000, padding:'24px' }}>
-      <div style={{ background: 'var(--bg)', borderRadius:'28px', width:'100%', maxWidth:'500px', boxShadow:'0 32px 80px rgba(0,0,0,0.35), 0 0 0 1px rgba(209, 165, 98, 0.15) inset', overflow:'hidden', animation:'slideUpFade 0.4s cubic-bezier(0.16,1,0.3,1)' }}>
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'24px 28px 16px', borderBottom:'1px solid rgba(0,0,0,0.04)' }}>
-          <div>
-            <div style={{ fontWeight:900, fontSize: '0.97rem', color:'var(--text-dark)', letterSpacing: '-0.3px' }}>Edit {holding.symbol}</div>
-            <div style={{ fontSize: '0.7rem', color:'var(--text-muted)', marginTop:'4px' }}>Adjust your position size and average price</div>
+    <>
+      <style>{`
+        @media (max-width: 640px) {
+          .modal-overlay {
+            padding: 0 !important;
+            align-items: flex-end !important;
+          }
+          
+          .modal-box {
+            max-width: 100% !important;
+            width: 100% !important;
+            border-radius: 24px 24px 0 0 !important;
+            max-height: 90vh !important;
+            box-shadow: none !important;
+          }
+          
+          .modal-header {
+            padding: 20px 20px 16px !important;
+          }
+          
+          .modal-body {
+            padding: 16px !important;
+          }
+        }
+      `}</style>
+      <div className="modal-overlay animate-fade-in" style={{ position:'fixed', inset:0, background:'rgba(6, 9, 14, 0.65)', backdropFilter:'blur(12px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:100000, padding:'24px' }}>
+        <div className="modal-box" style={{ background: 'var(--bg)', borderRadius:'28px', width:'100%', maxWidth:'500px', boxShadow:'0 32px 80px rgba(0,0,0,0.35), 0 0 0 1px rgba(209, 165, 98, 0.15) inset', overflow:'hidden', animation:'slideUpFade 0.4s cubic-bezier(0.16,1,0.3,1)' }}>
+          <div className="modal-header" style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'24px 28px 16px', borderBottom:'1px solid rgba(0,0,0,0.04)' }}>
+            <div>
+              <div style={{ fontWeight:900, fontSize: '0.97rem', color:'var(--text-dark)', letterSpacing: '-0.3px' }}>Edit {holding.symbol}</div>
+              <div style={{ fontSize: '0.7rem', color:'var(--text-muted)', marginTop:'4px' }}>Adjust your position size and average price</div>
+            </div>
+            <button onClick={onClose} style={{ background:'var(--bg-section)', border:'none', width:'36px', height:'36px', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', color:'var(--text-muted)', transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.background='rgba(0,0,0,0.05)'} onMouseLeave={e => e.currentTarget.style.background='var(--bg-section)'}><X size={16}/></button>
           </div>
-          <button onClick={onClose} style={{ background:'var(--bg-section)', border:'none', width:'36px', height:'36px', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', color:'var(--text-muted)', transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.background='rgba(0,0,0,0.05)'} onMouseLeave={e => e.currentTarget.style.background='var(--bg-section)'}><X size={16}/></button>
+          <form onSubmit={submit} className="modal-body" style={{ padding:'24px 28px' }}>
+            <div className="mobile-col" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px', marginBottom:'24px' }}>
+              {[['Shares', sh, setSh, '0'], ['Avg Price (₦)', pr, setPr, '0.00']].map(([lbl, val, fn, ph]) => (
+                <div key={lbl}>
+                  <label style={{ display:'block', fontSize: '0.66rem', fontWeight:800, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.8px', marginBottom:'8px' }}>{lbl}</label>
+                  <input type="number" value={val} onChange={e => fn(e.target.value)} placeholder={ph}
+                    style={{ width:'100%', padding:'12px 16px', borderRadius:'14px', border:'2px solid var(--border)', fontSize: '0.92rem', fontWeight:700, outline:'none', transition:'border-color 0.2s', background: 'var(--bg-section)', color: 'var(--text-dark)' }}
+                    onFocus={e => e.target.style.borderColor='var(--primary)'}
+                    onBlur={e => e.target.style.borderColor='var(--border)'} />
+                </div>
+              ))}
+            </div>
+            <div style={{ display:'flex', gap:'12px' }}>
+              <button type="button" onClick={onClose} style={{ flex:1, padding:'14px', borderRadius:'14px', background: 'var(--bg)', border:'2px solid var(--border)', fontWeight:800, fontSize: '0.79rem', cursor:'pointer', color:'var(--text-dark)', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background='var(--bg-section)'} onMouseLeave={e => e.currentTarget.style.background='var(--bg)'}>Cancel</button>
+              <button type="submit" disabled={loading} style={{ flex:1.5, padding:'14px', borderRadius:'14px', background:'var(--gold-grad)', color:'var(--bg)', border:'none', fontWeight:800, fontSize: '0.79rem', cursor:loading?'not-allowed':'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', boxShadow:'0 8px 24px rgba(209, 165, 98,0.3)', transition: 'transform 0.2s' }} onMouseEnter={e => e.currentTarget.style.transform='translateY(-2px)'} onMouseLeave={e => e.currentTarget.style.transform='none'}>
+                {loading ? <div className="spinner" style={{ width:'16px', height:'16px', borderTopColor:'white' }}/> : 'Save Changes'}
+              </button>
+            </div>
+          </form>
         </div>
-        <form onSubmit={submit} style={{ padding:'24px 28px' }}>
-          <div className="mobile-col" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px', marginBottom:'24px' }}>
-            {[['Shares', sh, setSh, '0'], ['Avg Price (₦)', pr, setPr, '0.00']].map(([lbl, val, fn, ph]) => (
-              <div key={lbl}>
-                <label style={{ display:'block', fontSize: '0.66rem', fontWeight:800, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.8px', marginBottom:'8px' }}>{lbl}</label>
-                <input type="number" value={val} onChange={e => fn(e.target.value)} placeholder={ph}
-                  style={{ width:'100%', padding:'12px 16px', borderRadius:'14px', border:'2px solid var(--border)', fontSize: '0.92rem', fontWeight:700, outline:'none', transition:'border-color 0.2s', background: 'var(--bg-section)', color: 'var(--text-dark)' }}
-                  onFocus={e => e.target.style.borderColor='var(--primary)'}
-                  onBlur={e => e.target.style.borderColor='var(--border)'} />
-              </div>
-            ))}
-          </div>
-          <div style={{ display:'flex', gap:'12px' }}>
-            <button type="button" onClick={onClose} style={{ flex:1, padding:'14px', borderRadius:'14px', background: 'var(--bg)', border:'2px solid var(--border)', fontWeight:800, fontSize: '0.79rem', cursor:'pointer', color:'var(--text-dark)', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background='var(--bg-section)'} onMouseLeave={e => e.currentTarget.style.background='var(--bg)'}>Cancel</button>
-            <button type="submit" disabled={loading} style={{ flex:1.5, padding:'14px', borderRadius:'14px', background:'var(--gold-grad)', color:'var(--bg)', border:'none', fontWeight:800, fontSize: '0.79rem', cursor:loading?'not-allowed':'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', boxShadow:'0 8px 24px rgba(209, 165, 98,0.3)', transition: 'transform 0.2s' }} onMouseEnter={e => e.currentTarget.style.transform='translateY(-2px)'} onMouseLeave={e => e.currentTarget.style.transform='none'}>
-              {loading ? <div className="spinner" style={{ width:'16px', height:'16px', borderTopColor:'white' }}/> : 'Save Changes'}
-            </button>
-          </div>
-        </form>
       </div>
-    </div>,
+    </>,
     document.body
   );
 }
@@ -115,7 +141,7 @@ function HoldingRow({ holding, onDelete, onEdit }) {
 
   return (
     <div
-      className="hover-card"
+      className="hover-card holding-row"
       onClick={() => navigate(`/market/${holding.symbol}/aaoifi`, { state: { stock: holding } })}
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
@@ -363,7 +389,7 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
         
         {/* Header */}
         {displayHoldings.length > 0 && (
-          <div style={{ position: 'relative', marginTop: '12px', padding: '8px 24px', background: 'var(--body-bg)', zIndex: 20 }}>
+          <div className="desktop-only" style={{ position: 'relative', marginTop: '12px', padding: '8px 24px', background: 'var(--body-bg)', zIndex: 20 }}>
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <div style={{ flex: 1.5, fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', paddingLeft: '62px' }}>Asset</div>
               <div style={{ flex: 1, textAlign: 'right', fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Value / Shares</div>

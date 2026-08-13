@@ -108,7 +108,7 @@ const ShariahPage = () => (
         </div>
 
         <p style={{ color: 'var(--text-muted)', lineHeight: 1.8, fontSize: '0.88rem', marginBottom: '28px' }}>
-          Before analyzing financial ratios, we examine a company's core operations. A company is immediately marked as <strong style={{ color: 'var(--non-halal)' }}>NON-HALAL</strong> if its primary business involves:
+          Before analyzing financial ratios, we examine a company's core operations. A company is immediately marked as <strong style={{ color: 'var(--non-halal)' }}>Shariah Non-Compliant</strong> if its primary business involves:
         </p>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '10px' }}>

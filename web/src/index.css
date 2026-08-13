@@ -4823,6 +4823,13 @@ html, body {
 }
 
 @media (max-width: 768px) {
+  .desktop-only {
+    display: none !important;
+  }
+  .holding-row {
+    flex-wrap: wrap !important;
+    gap: 16px !important;
+  }
   .mobile-col {
     display: flex !important;
     flex-direction: column !important;

@@ -190,60 +190,82 @@ export default function LecturesTab() {
       </div>
       {/* Resource Modal */}
       {selectedItem && createPortal(
-        <div className="animate-fade-in" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }} onClick={() => setSelectedItem(null)}>
-          <div style={{ background: 'var(--bg)', borderRadius: '24px', width: '100%', maxWidth: '900px', height: '80vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 24px 64px rgba(0,0,0,0.2)', animation: 'slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }} onClick={e => e.stopPropagation()}>
-            
-            {/* Header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid var(--border)' }}>
-              <div>
-                <h3 style={{ fontSize: '1.06rem', fontWeight: 800, color: 'var(--text-dark)' }}>{selectedItem.title}</h3>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.79rem', marginTop: '4px', fontWeight: 600 }}>By {selectedItem.scholar}</p>
+        <>
+          <style>{`
+            @media (max-width: 640px) {
+              .modal-overlay {
+                padding: 0 !important;
+                align-items: flex-end !important;
+              }
+              
+              .modal-box {
+                max-width: 100% !important;
+                width: 100% !important;
+                border-radius: 24px 24px 0 0 !important;
+                max-height: 90vh !important;
+                box-shadow: none !important;
+              }
+              
+              .modal-header {
+                padding: 20px 20px 16px !important;
+              }
+            }
+          `}</style>
+          <div className="modal-overlay animate-fade-in" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }} onClick={() => setSelectedItem(null)}>
+            <div className="modal-box" style={{ background: 'var(--bg)', borderRadius: '24px', width: '100%', maxWidth: '900px', height: '80vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 24px 64px rgba(0,0,0,0.2)', animation: 'slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }} onClick={e => e.stopPropagation()}>
+              
+              {/* Header */}
+              <div className="modal-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid var(--border)' }}>
+                <div>
+                  <h3 style={{ fontSize: '1.06rem', fontWeight: 800, color: 'var(--text-dark)' }}>{selectedItem.title}</h3>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.79rem', marginTop: '4px', fontWeight: 600 }}>By {selectedItem.scholar}</p>
+                </div>
+                <button onClick={() => setSelectedItem(null)} style={{ background: 'var(--bg-section)', border: 'none', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', cursor: 'pointer', transition: 'all 0.2s' }}>
+                  <X size={18} />
+                </button>
               </div>
-              <button onClick={() => setSelectedItem(null)} style={{ background: 'var(--bg-section)', border: 'none', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', cursor: 'pointer', transition: 'all 0.2s' }}>
-                <X size={18} />
-              </button>
-            </div>
 
-            {/* Content Area */}
-            <div style={{ flex: 1, overflow: 'hidden', background: 'var(--bg-section)', display: 'flex', flexDirection: 'column' }}>
-              {selectedItem.type === 'video' ? (
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ width: '100%', flex: 1, background: 'black', position: 'relative' }}>
-                    <iframe 
-                      src={selectedItem.url} 
-                      title={selectedItem.title}
-                      style={{ width: '100%', height: '100%', border: 'none' }}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                      allowFullScreen
-                    ></iframe>
+              {/* Content Area */}
+              <div style={{ flex: 1, overflow: 'hidden', background: 'var(--bg-section)', display: 'flex', flexDirection: 'column' }}>
+                {selectedItem.type === 'video' ? (
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ width: '100%', flex: 1, background: 'black', position: 'relative' }}>
+                      <iframe 
+                        src={selectedItem.url} 
+                        title={selectedItem.title}
+                        style={{ width: '100%', height: '100%', border: 'none' }}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowFullScreen
+                      ></iframe>
+                    </div>
+                    <div style={{ padding: '24px', background: 'var(--bg)', borderTop: '1px solid var(--border)' }}>
+                      <h4 style={{ fontSize: '0.97rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '8px' }}>Description</h4>
+                      <p style={{ color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                        This is an educational video provided by our Islamic Finance partners. Please note that the content is for educational purposes and should not be taken as direct financial advice.
+                      </p>
+                    </div>
                   </div>
-                  <div style={{ padding: '24px', background: 'var(--bg)', borderTop: '1px solid var(--border)' }}>
-                    <h4 style={{ fontSize: '0.97rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '8px' }}>Description</h4>
-                    <p style={{ color: 'var(--text-muted)', lineHeight: 1.6 }}>
-                      This is an educational video provided by our Islamic Finance partners. Please note that the content is for educational purposes and should not be taken as direct financial advice.
-                    </p>
+                ) : (
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                    <div style={{ padding: '16px 24px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <h4 style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--text-dark)' }}>Document Viewer</h4>
+                      <a href={selectedItem.url} target="_blank" rel="noreferrer" className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', fontSize: '0.75rem' }}>
+                        <Download size={16} /> Download PDF
+                      </a>
+                    </div>
+                    <div style={{ flex: 1, width: '100%' }}>
+                      <iframe 
+                        src={selectedItem.url} 
+                        title={selectedItem.title}
+                        style={{ width: '100%', height: '100%', border: 'none' }}
+                      ></iframe>
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                  <div style={{ padding: '16px 24px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h4 style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--text-dark)' }}>Document Viewer</h4>
-                    <a href={selectedItem.url} target="_blank" rel="noreferrer" className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', fontSize: '0.75rem' }}>
-                      <Download size={16} /> Download PDF
-                    </a>
-                  </div>
-                  <div style={{ flex: 1, width: '100%' }}>
-                    <iframe 
-                      src={selectedItem.url} 
-                      title={selectedItem.title}
-                      style={{ width: '100%', height: '100%', border: 'none' }}
-                    ></iframe>
-                  </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        </>
       , document.body)}
     </>
   );

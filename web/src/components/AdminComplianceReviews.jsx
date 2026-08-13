@@ -365,7 +365,7 @@ export default function AdminComplianceReviews() {
               >
                 <option value="all">All changes</option>
                 <option value="to-halal">→ Halal only</option>
-                <option value="to-nonhalal">→ Non-Halal only</option>
+                <option value="to-nonhalal">→ Shariah Non-Compliant only</option>
               </select>
               <ChevronDown size={13} color="var(--text-muted)" style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
             </div>

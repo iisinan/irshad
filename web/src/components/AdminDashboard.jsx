@@ -552,7 +552,7 @@ const AdminDashboard = () => {
                   <option value="">Select new status…</option>
                   <option value="halal">✅ Halal</option>
                   <option value="doubtful">⚠️ Doubtful</option>
-                  <option value="non-halal">❌ Non-Halal</option>
+                  <option value="non-halal">❌ Shariah Non-Compliant</option>
                 </select>
               </div>
 
