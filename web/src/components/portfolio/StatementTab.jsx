@@ -112,7 +112,7 @@ export default function StatementTab({ data }) {
             </div>
 
             {dateRange === 'custom' && (
-              <div className="fade-in" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', background: 'var(--bg-section)', padding: '16px', borderRadius: '12px' }}>
+              <div className="fade-in mobile-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', background: 'var(--bg-section)', padding: '16px', borderRadius: '12px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '6px' }}>Start Date</label>
                   <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-dark)', outline: 'none' }} />

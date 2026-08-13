@@ -388,7 +388,7 @@ const AaoifiScreening = () => {
 
   const SC = {
     halal:       { color:'var(--halal)',     icon:hasPurification?Droplets:CheckCircle, bg:'linear-gradient(135deg,rgba(16,185,129,0.09),rgba(16,185,129,0.03))',  border:'rgba(16,185,129,0.28)',  label:'SHARIAH COMPLIANT',     tag:'Halal'    },
-    'non-halal': { color:'var(--non-halal)', icon:XCircle,                              bg:'linear-gradient(135deg,rgba(239,68,68,0.1),rgba(239,68,68,0.03))',    border:'rgba(239,68,68,0.28)',   label:'SHARIAH NON-COMPLIANT', tag: 'Shariah Non-Compliant'  },
+    'non-halal': { color:'var(--non-halal)', icon:XCircle,                              bg:'linear-gradient(135deg,rgba(239,68,68,0.1),rgba(239,68,68,0.03))',    border:'rgba(239,68,68,0.28)',   label:'SHARIAH NON-COMPLIANT', tag: 'Non-Halal'  },
     doubtful:    { color:'#D97706',          icon:AlertTriangle,                        bg:'linear-gradient(135deg,rgba(245,158,11,0.1),rgba(245,158,11,0.03))',   border:'rgba(245,158,11,0.28)', label:'DOUBTFUL',  tag: doubtfulTag  },
   };
   const sc=SC[finalStatus]||SC.doubtful; const StatusIcon=sc.icon;

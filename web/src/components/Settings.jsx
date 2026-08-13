@@ -211,7 +211,7 @@ export default function Settings() {
               </div>
               <div style={{ height: '1px', background: 'var(--border)' }} />
               
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <div className="mobile-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '8px' }}>Full Name</label>
                   <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--border)', fontSize: '0.84rem', outline: 'none' }} />
@@ -232,7 +232,7 @@ export default function Settings() {
               <div>
                 <h3 style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 16px' }}>Investor Profile</h3>
                 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '16px' }}>
+                <div className="mobile-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '16px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '8px' }}>Investor Type</label>
                     <select name="investor_type" value={formData.investor_type} onChange={e => setFormData({...formData, investor_type: e.target.value})} style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--border)', fontSize: '0.84rem', outline: 'none', backgroundColor: 'var(--bg)', color: 'var(--text-dark)' }}>
