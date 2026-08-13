@@ -537,7 +537,7 @@ const AaoifiScreening = () => {
                 )}
                 {(stock?.is_active === false || stock?.is_active === 0 || stock?.is_active === '0') && (
                   <div style={{ marginTop: '8px' }}>
-                    <span style={{ background: '#4B5563', color: '#ef4444', border: '1px solid #6B7280', padding: '2px 8px', borderRadius: '6px', fontSize: '0.65rem', fontWeight: 800, textTransform: 'none', letterSpacing: '0.5px', display: 'inline-flex', alignItems: 'center', gap: '4px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }}>
+                    <span style={{ background: '#FFFFFF', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '2px 8px', borderRadius: '6px', fontSize: '0.65rem', fontWeight: 800, textTransform: 'none', letterSpacing: '0.5px', display: 'inline-flex', alignItems: 'center', gap: '4px', boxShadow: '0 2px 8px rgba(239, 68, 68, 0.05)' }}>
                       <AlertCircle size={10} /> currently not trading on ngx
                     </span>
                   </div>
