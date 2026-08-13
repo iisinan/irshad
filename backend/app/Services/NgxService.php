@@ -24,7 +24,10 @@ class NgxService
             $response = Http::withHeaders([
                 'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
                 'Accept' => 'application/json',
-            ])->timeout(20)->get(self::NGX_API.'/statistics/ticker', [
+            ])->withOptions([
+                'connect_timeout' => 5,
+                'timeout' => 10,
+            ])->get(self::NGX_API.'/statistics/ticker', [
                 '$filter' => "TickerType eq 'EQUITIES'",
             ]);
 

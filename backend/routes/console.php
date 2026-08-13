@@ -9,15 +9,16 @@ Artisan::command('inspire', function () {
 
 use Illuminate\Support\Facades\Schedule;
 
-Schedule::command('app:scrape-ngx-prices')->dailyAt('03:00')->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
+Schedule::command('app:sync-market-data')->timezone('Africa/Lagos')->dailyAt('15:30')->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
+Schedule::command('app:sync-market-data')->twiceDaily(10, 22)->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
 
-Schedule::command('news:aggregate')->hourly()->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
+
 Schedule::command('news:scrape-stocks')->everyTwoHours()->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
 Schedule::command('app:snapshot-portfolios')->dailyAt('17:00')->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
 // DEACTIVATED: Schedule::command('alerts:process')->everyMinute();
 
 
-Schedule::command('irshad:market-data')->twiceDaily(0, 12)->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
+// DEACTIVATED: Schedule::command('irshad:market-data')->twiceDaily(0, 12)->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
 
 
 
@@ -32,8 +33,8 @@ Schedule::command('irshad:send-updates-digest')->weeklyOn(5, '15:00')->withoutOv
 
 
 
-// NGX Pulse Dividend Calendar — scrape & update every morning at 9:00 AM
-Schedule::command('dividends:update')->dailyAt('09:00')->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
+// Unified in app:sync-market-data
+// Schedule::command('dividends:update')->dailyAt('09:00')->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
 
 // Send Zakat Reminders daily at 8:00 AM
 Schedule::command('app:send-zakat-reminders')->dailyAt('08:00')->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
@@ -41,8 +42,8 @@ Schedule::command('app:send-zakat-reminders')->dailyAt('08:00')->withoutOverlapp
 // Prune old NGXPulse audit logs daily
 Schedule::command('irshad:prune-audits')->daily()->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
 
-// Sync financial and market data from NGXPulse (10 AM and 10 PM)
-Schedule::command('pulse:sync-data')->twiceDaily(10, 22)->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
+// Unified in app:sync-market-data
+// Schedule::command('pulse:sync-data')->twiceDaily(10, 22)->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
 
 // Warm cache every hour so cold starts never happen
 Schedule::command('cache:warm')->hourly()->withoutOverlapping();

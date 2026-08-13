@@ -50,8 +50,22 @@ class PortfolioController extends Controller
 
                 $isHalal = strtolower($status) === 'halal' || strtolower($status) === 'compliant';
 
-                // Calculate Purification Due based on paid dividends in the trailing 12 months
-                $trailingDividendsPerShare = $company?->dividends?->sum('amount') ?? 0;
+                // Fetch latest purification date for this symbol
+                $latestPurificationDate = \App\Models\Purification::where('user_id', $userId)
+                    ->where('symbol', $holding->symbol)
+                    ->latest()
+                    ->value('created_at');
+
+                // Calculate Purification Due based on paid dividends in the trailing 12 months,
+                // but only count dividends paid AFTER the latest purification date.
+                $trailingDividendsPerShare = $company?->dividends?->filter(function ($dividend) use ($latestPurificationDate) {
+                    if (!$latestPurificationDate) return true;
+                    // If no pay_date, fallback to ex_date or created_at
+                    $dividendDt = $dividend->pay_date ? \Carbon\Carbon::parse($dividend->pay_date) : 
+                                  ($dividend->ex_date ? \Carbon\Carbon::parse($dividend->ex_date) : $dividend->created_at);
+                    return $dividendDt->isAfter($latestPurificationDate);
+                })->sum('amount') ?? 0;
+                
                 $totalDividendsReceived = $holding->shares * $trailingDividendsPerShare;
                 $purificationDue = $isHalal ? $totalDividendsReceived * ($nonCompliantRatio / 100) : 0;
 
@@ -114,6 +128,11 @@ class PortfolioController extends Controller
                 ]);
             }
 
+            // Fetch purifications history
+            $purifications = \App\Models\Purification::where('user_id', $userId)
+                ->orderBy('created_at', 'desc')
+                ->get();
+
             return [
                 'holdings' => $portfolioData,
                 'summary' => [
@@ -123,6 +142,7 @@ class PortfolioController extends Controller
                     'health_percentage' => $healthPercentage,
                 ],
                 'history' => $history,
+                'purifications' => $purifications,
             ];
         });
 
@@ -269,6 +289,75 @@ class PortfolioController extends Controller
         });
 
         return $this->success($data);
+    public function purify(Request $request): JsonResponse
+    {
+        $request->validate([
+            'symbol' => 'nullable|string',
+            'all' => 'nullable|boolean'
+        ]);
+
+        $userId = Auth::id();
+        $symbolsToPurify = [];
+
+        if ($request->all) {
+            $symbolsToPurify = Holding::where('user_id', $userId)->pluck('symbol')->toArray();
+        } elseif ($request->symbol) {
+            $symbolsToPurify = [$request->symbol];
+        } else {
+            return $this->error('Must provide a symbol or all=true', 400);
+        }
+
+        $purifiedCount = 0;
+
+        foreach ($symbolsToPurify as $symbol) {
+            $holding = Holding::where('user_id', $userId)->where('symbol', $symbol)->first();
+            if (!$holding) continue;
+
+            $company = Company::with(['dividends', 'financials'])->where('symbol', $symbol)->first();
+            if (!$company) continue;
+
+            $status = $company->current_status ?? 'doubtful';
+            $isHalal = strtolower($status) === 'halal' || strtolower($status) === 'compliant';
+            
+            if (!$isHalal) continue;
+
+            $financials = $company->financials->first();
+            $nonCompliantRatio = $financials?->non_compliant_income_ratio ?? 0;
+
+            if ($nonCompliantRatio <= 0) continue;
+
+            // Fetch latest purification date
+            $latestPurificationDate = \App\Models\Purification::where('user_id', $userId)
+                ->where('symbol', $symbol)
+                ->latest()
+                ->value('created_at');
+
+            // Calculate Purification Due
+            $trailingDividendsPerShare = $company->dividends->filter(function ($dividend) use ($latestPurificationDate) {
+                if (!$latestPurificationDate) return true;
+                $dividendDt = $dividend->pay_date ? \Carbon\Carbon::parse($dividend->pay_date) : 
+                              ($dividend->ex_date ? \Carbon\Carbon::parse($dividend->ex_date) : $dividend->created_at);
+                return $dividendDt->isAfter($latestPurificationDate);
+            })->sum('amount') ?? 0;
+
+            $totalDividendsReceived = $holding->shares * $trailingDividendsPerShare;
+            $purificationDue = $totalDividendsReceived * ($nonCompliantRatio / 100);
+
+            if ($purificationDue > 0) {
+                \App\Models\Purification::create([
+                    'user_id' => $userId,
+                    'symbol' => $symbol,
+                    'amount' => round($purificationDue, 2)
+                ]);
+                $purifiedCount++;
+            }
+        }
+
+        if ($purifiedCount > 0) {
+            Cache::forget("portfolio_data_" . $userId);
+            return $this->success(null, "Purification recorded successfully.");
+        }
+
+        return $this->success(null, "No purification due.");
     }
 }
-

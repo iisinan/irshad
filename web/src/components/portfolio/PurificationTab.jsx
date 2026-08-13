@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { ShieldAlert, ArrowRight, Heart, CheckCircle, Sparkles, X, ChevronRight, Calculator } from 'lucide-react';
+import { ShieldAlert, ArrowRight, Heart, CheckCircle, Sparkles, X, ChevronRight, Calculator, Loader2 } from 'lucide-react';
 import CompanyLogo from '../CompanyLogo';
+import api from '../../services/api';
+import { toastSuccess, toastError } from '../../utils/toast';
 
 const fmt = (n, d = 2) => `₦${Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d })}`;
 
@@ -62,7 +64,7 @@ const CHARITIES = [
   }
 ];
 
-function CharitiesModal({ onClose, onConfirm, amountDue }) {
+function CharitiesModal({ onClose, onConfirm, amountDue, isSubmitting }) {
   const [loading, setLoading] = useState(false);
 
   const handleConfirm = () => {
@@ -531,7 +533,7 @@ function PurificationCard({ h, onPurify, onStatClick }) {
   );
 }
 
-export default function PurificationTab({ data, refreshData, initialSymbol }) {
+export default function PurificationTab({ data, initialSymbol, refreshData }) {
   const [purifiedSymbols, setPurifiedSymbols] = useState([]);
   const [selectedHolding, setSelectedHolding] = useState(null);
   const [activeStatTarget, setActiveStatTarget] = useState(null);
@@ -558,13 +560,29 @@ export default function PurificationTab({ data, refreshData, initialSymbol }) {
     setCharityModalTarget({ type: 'all', amount: purificationDue });
   };
 
-  const handleConfirmPurify = () => {
-    if (charityModalTarget?.type === 'all') {
-      setPurifiedSymbols(prev => [...prev, ...needsPurification.map(h => h.symbol)]);
-    } else if (charityModalTarget?.type === 'single') {
-      setPurifiedSymbols(prev => [...prev, charityModalTarget.symbol]);
+  const [isPurifying, setIsPurifying] = useState(false);
+
+  const handleConfirmPurify = async () => {
+    setIsPurifying(true);
+    try {
+      if (charityModalTarget?.type === 'all') {
+        await api.post('/portfolio/purify', { all: true });
+        setPurifiedSymbols(prev => [...prev, ...needsPurification.map(h => h.symbol)]);
+      } else if (charityModalTarget?.type === 'single') {
+        await api.post('/portfolio/purify', { symbol: charityModalTarget.symbol });
+        setPurifiedSymbols(prev => [...prev, charityModalTarget.symbol]);
+      }
+      toastSuccess('Purification recorded successfully');
+      setCharityModalTarget(null);
+      if (refreshData) {
+        refreshData();
+      }
+    } catch (err) {
+      console.error('Error purifying:', err);
+      toastError('Failed to record purification. Please try again.');
+    } finally {
+      setIsPurifying(false);
     }
-    setCharityModalTarget(null);
   };
 
   return (
@@ -574,6 +592,7 @@ export default function PurificationTab({ data, refreshData, initialSymbol }) {
           amountDue={charityModalTarget.amount} 
           onClose={() => setCharityModalTarget(null)} 
           onConfirm={handleConfirmPurify} 
+          isSubmitting={isPurifying}
         />
       )}
 

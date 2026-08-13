@@ -148,6 +148,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
             // Portfolio & Trading
             Route::get('/portfolio', [PortfolioController::class, 'index']);
+            Route::post('/portfolio/purify', [PortfolioController::class, 'purify']);
             Route::get('/portfolio/movers', [PortfolioController::class, 'movers']);
             Route::post('/broker/link', [TradeController::class, 'linkBroker']);
             Route::post('/broker/trade', [TradeController::class, 'executeTrade']);

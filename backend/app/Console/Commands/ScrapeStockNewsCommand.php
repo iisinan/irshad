@@ -43,12 +43,20 @@ class ScrapeStockNewsCommand extends Command
             $url = "https://news.google.com/rss/search?q={$query}&hl=en-NG&gl=NG&ceid=NG:en";
 
             try {
-                $response = Http::timeout(10)
-                    ->withHeaders(['User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'])
-                    ->get($url);
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, $url);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)');
+                curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+                curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+                curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 
-                if ($response->successful()) {
-                    $xml = simplexml_load_string($response->body(), 'SimpleXMLElement', LIBXML_NOCDATA);
+                $responseBody = curl_exec($ch);
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                $curlError = curl_error($ch);
+
+                if ($responseBody !== false && $httpCode >= 200 && $httpCode < 300) {
+                    $xml = simplexml_load_string($responseBody, 'SimpleXMLElement', LIBXML_NOCDATA | LIBXML_NONET);
 
                     if ($xml && isset($xml->channel->item)) {
                         $count = 0;
@@ -98,7 +106,8 @@ class ScrapeStockNewsCommand extends Command
                         $this->info(" -> Added {$count} new articles for {$company->symbol}.");
                     }
                 } else {
-                    $this->error(' -> HTTP request failed. Status: '.$response->status());
+                    $errorMsg = $responseBody === false ? $curlError : "HTTP Code: $httpCode";
+                    $this->error(" -> HTTP request failed. $errorMsg");
                 }
             } catch (\Exception $e) {
                 $this->error(' -> Failed to fetch/parse: '.$e->getMessage());
