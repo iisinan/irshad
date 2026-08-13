@@ -18,7 +18,12 @@ export const TourProvider = ({ children }) => {
     // Determine if the tour should run based on the cached preferences in the user object
     if (user) {
       const prefs = user.preferences || {};
-      if (!prefs.has_completed_tour) {
+      
+      // Check if user is a new user (account created within the last 24 hours)
+      const isNewUser = user.created_at ? (new Date() - new Date(user.created_at)) < 24 * 60 * 60 * 1000 : true;
+      
+      // Only auto-start for new users who haven't completed the tour, and only on the portfolio page
+      if (isNewUser && !prefs.has_completed_tour && window.location.pathname.startsWith('/portfolio')) {
         
         // Fetch or load cached tour data
         const fetchTourData = async () => {
