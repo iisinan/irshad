@@ -80,11 +80,12 @@ export const AuthProvider = ({ children }) => {
   const register = async (data) => {
     try {
       const res = await registerUser(data);
-      if (res.data && res.data.access_token) {
+      const payload = res.data?.data || res.data;
+      if (payload && payload.access_token) {
         localforage.removeItem('irshad_portfolio_cache');
-        localStorage.setItem('auth_token', res.data.access_token);
-        localStorage.setItem('auth_user', JSON.stringify(res.data.user));
-        setUser(res.data.user);
+        localStorage.setItem('auth_token', payload.access_token);
+        localStorage.setItem('auth_user', JSON.stringify(payload.user));
+        setUser(payload.user);
         return { success: true };
       }
       return { success: false, error: 'Invalid response from server' };
