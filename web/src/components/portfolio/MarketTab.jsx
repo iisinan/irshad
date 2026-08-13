@@ -151,7 +151,6 @@ const MobileStockCard = React.memo(({ stock, idx, isWatched, onToggle }) => {
       <Link to={`/market/${stock.symbol}/aaoifi`} state={{ stock }} style={{ textDecoration: 'none', flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
           <span style={{ fontWeight: 900, color: 'var(--text-dark)', fontSize: '0.92rem', letterSpacing: '-0.3px' }}>{stock.symbol}</span>
-          <span style={{ fontSize: '0.62rem', fontWeight: 800, color: sc.color, background: sc.bg, border: `1px solid ${sc.color}`, padding: '2px 7px', borderRadius: 100, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{cfg.label}</span>
         </div>
         <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '180px' }}>{stock.name}</div>
         <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: 2, fontWeight: 600 }}>{normSector(stock.sector)}</div>
