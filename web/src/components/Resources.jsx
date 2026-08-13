@@ -108,7 +108,7 @@ export default function ResourcesPage() {
           <div className="animate-fade-in stagger-1" style={{ background: 'var(--bg)', borderRadius: '24px', padding: '0', boxShadow: '0 24px 64px rgba(0,0,0,0.06)', border: '1px solid var(--border)', overflow: 'hidden' }}>
             
             {/* Header Banner */}
-            <div style={{ background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, var(--text-dark) 100%)', padding: '32px', position: 'relative', overflow: 'hidden', borderBottom: '1px solid rgba(209, 165, 98, 0.15)' }}>
+            <div className="alert-header" style={{ background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, var(--text-dark) 100%)', padding: '32px', position: 'relative', overflow: 'hidden', borderBottom: '1px solid rgba(209, 165, 98, 0.15)' }}>
               <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'rgba(209, 165, 98, 0.08)', borderRadius: '50%', pointerEvents: 'none' }} />
               <div style={{ position: 'absolute', bottom: '-60px', left: '30%', width: '150px', height: '150px', background: 'rgba(209, 165, 98, 0.04)', borderRadius: '50%', pointerEvents: 'none' }} />
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px', position: 'relative', zIndex: 1 }}>
@@ -174,7 +174,7 @@ export default function ResourcesPage() {
               </div>
             </div>
 
-            <div style={{ padding: '32px' }}>
+            <div className="alert-body" style={{ padding: '32px' }}>
 
             {/* Grid */}
             {loading ? (

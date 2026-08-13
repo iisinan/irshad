@@ -38,8 +38,8 @@ class ScrapeStockNewsCommand extends Command
         foreach ($companies as $company) {
             $this->info("Fetching news for {$company->symbol} ({$company->name})...");
 
-            // Create a focused search query prioritizing BusinessDay and general Nigerian Stock news
-            $query = urlencode("\"{$company->name}\" OR \"{$company->symbol}\" (site:businessday.ng OR \"Nigeria Stock\")");
+            // Create a focused search query prioritizing exact matches in the title
+            $query = urlencode("intitle:\"{$company->name}\" OR intitle:\"{$company->symbol}\"");
             $url = "https://news.google.com/rss/search?q={$query}&hl=en-NG&gl=NG&ceid=NG:en";
 
             try {

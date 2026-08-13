@@ -60,7 +60,7 @@ export default function LecturesTab() {
       <div className="animate-fade-in stagger-1" style={{ background: 'var(--bg)', borderRadius: '24px', padding: '0', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--border)', overflow: 'hidden' }}>
         
         {/* Header Banner */}
-        <div style={{ background: 'linear-gradient(to right, var(--bg) 40%, var(--primary-50) 100%)', padding: '28px 32px', position: 'relative', overflow: 'hidden', borderBottom: '1px solid var(--border)' }}>
+        <div className="alert-header" style={{ background: 'linear-gradient(to right, var(--bg) 40%, var(--primary-50) 100%)', padding: '28px 32px', position: 'relative', overflow: 'hidden', borderBottom: '1px solid var(--border)' }}>
           {/* Decorative Right Edge Icon */}
           <div style={{ position: 'absolute', right: '-10px', top: '50%', transform: 'translateY(-50%) rotate(-5deg)', opacity: 0.08, pointerEvents: 'none', zIndex: 0 }}>
             <BookOpen size={180} color="var(--primary)" strokeWidth={1} />
@@ -114,7 +114,7 @@ export default function LecturesTab() {
           </div>
         </div>
 
-        <div style={{ padding: '32px' }}>
+        <div className="alert-body" style={{ padding: '32px' }}>
 
         {/* Grid */}
         {loading ? (
