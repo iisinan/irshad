@@ -5,6 +5,150 @@ import CompanyLogo from '../CompanyLogo';
 
 const fmt = (n, d = 2) => `₦${Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d })}`;
 
+const CHARITIES = [
+  {
+    id: 1,
+    name: "Voice of Bazawara",
+    bank: "Gt Bank: 0869251235",
+    contact: "Whatsapp- 08145201878",
+    ig: "https://www.instagram.com/voice_of_bazawara/?utm_source=ig_web_button_share_sheet"
+  },
+  {
+    id: 2,
+    name: "Sadqa Drive Foundation",
+    bank: "Zenith bank: 1221960210",
+    ig: "https://www.instagram.com/sadaqahdrivefoundation_?igsh=MTcycnU1MmJvMGpwOQ=="
+  },
+  {
+    id: 3,
+    name: "Domin Marayu Charity Org",
+    bank: "Zenith Bank: 1213408773",
+    contact: "Whatsapp-08032896206",
+    ig: "https://www.instagram.com/dominmarayucharityfoundation?utm_source=ig_web_button_share_sheet&igsh=ZDNiZDc0MzlxNw=="
+  },
+  {
+    id: 4,
+    name: "Protect the Needy Foundation",
+    bank: "Premium Trust Bank: 0040249382",
+    contact: "Whatsapp- 08030754510, 08034530100"
+  },
+  {
+    id: 5,
+    name: "Al-Maheer Int'l qur'anic Science Academy",
+    bank: "Taj Bank: 0009931326",
+    contact: "Whatsapp- 09121526431"
+  },
+  {
+    id: 6,
+    name: "Ummahatil Yateema Foundation",
+    bank: "Unity Bank: 0023098745",
+    contact: "Whatsapp- 08033685115"
+  },
+  {
+    id: 7,
+    name: "JADAFIA (Jamaatud Da'awah -Fou'ad Labadidi)",
+    bank: "Jaiz: 1000239373",
+    contact: "Whatsapp- 08033334393"
+  },
+  {
+    id: 8,
+    name: "Sunnah TV Programmes Sponsorship (Sunnah Global Media Ltd)",
+    bank: "Stanbic IBTC: 0006740998"
+  },
+  {
+    id: 9,
+    name: "Al-Ansar Educational Welfare and First Aid",
+    bank: "Jaiz Bank: 0001046218"
+  }
+];
+
+function CharitiesModal({ onClose, onConfirm, amountDue }) {
+  const [loading, setLoading] = useState(false);
+
+  const handleConfirm = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      onConfirm();
+    }, 1200);
+  };
+
+  return createPortal(
+    <div className="animate-fade-in" onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200000, padding: '20px' }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: 'var(--bg)', borderRadius: '28px', width: '100%', maxWidth: '600px', maxHeight: '90vh', display: 'flex', flexDirection: 'column', boxShadow: '0 40px 100px rgba(0,0,0,0.25)', animation: 'slideUpFade 0.35s cubic-bezier(0.16,1,0.3,1)' }}>
+        
+        {/* Header */}
+        <div style={{ padding: '24px 28px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+          <div>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text-dark)', margin: 0, letterSpacing: '-0.5px' }}>Verifiable Charities</h3>
+            <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>Donate your purification amount of {fmt(amountDue)} directly.</p>
+          </div>
+          <button onClick={onClose} style={{ background: 'var(--bg-section)', border: 'none', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)' }}>
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Warning Banner */}
+        <div style={{ padding: '16px 28px', background: 'rgba(245,158,11,0.1)', borderBottom: '1px solid rgba(245,158,11,0.2)', display: 'flex', gap: '12px', alignItems: 'flex-start', flexShrink: 0 }}>
+          <ShieldAlert size={18} color="#D97706" style={{ marginTop: '2px', flexShrink: 0 }} />
+          <p style={{ margin: 0, fontSize: '0.78rem', color: '#B45309', lineHeight: 1.5, fontWeight: 500 }}>
+            <strong style={{ fontWeight: 800 }}>Note:</strong> We are not affiliated with any of these charities and organisations. Please do your own verification.
+          </p>
+        </div>
+
+        {/* List */}
+        <div style={{ padding: '20px 28px', overflowY: 'auto', flex: 1 }}>
+          <div style={{ display: 'grid', gap: '16px' }}>
+            {CHARITIES.map((c) => (
+              <div key={c.id} style={{ background: 'var(--bg-section)', border: '1px solid var(--border)', borderRadius: '16px', padding: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                  <div style={{ width: '28px', height: '28px', background: 'var(--primary-50)', color: 'var(--primary)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.8rem', flexShrink: 0 }}>
+                    {c.id}
+                  </div>
+                  <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-dark)' }}>{c.name}</h4>
+                </div>
+                
+                <div style={{ paddingLeft: '40px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', width: '60px', flexShrink: 0 }}>Bank:</span>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-dark)' }}>{c.bank}</span>
+                  </div>
+                  {c.contact && (
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', width: '60px', flexShrink: 0 }}>Contact:</span>
+                      <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-dark)' }}>{c.contact}</span>
+                    </div>
+                  )}
+                  {c.ig && (
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', width: '60px', flexShrink: 0 }}>Instagram:</span>
+                      <a href={c.ig} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--primary)', textDecoration: 'none', wordBreak: 'break-all' }}>View Profile ↗</a>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer Action */}
+        <div style={{ padding: '24px 28px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
+          <button
+            onClick={handleConfirm}
+            disabled={loading}
+            style={{ width: '100%', padding: '16px', borderRadius: '16px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.95rem', cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', transition: 'all 0.2s', boxShadow: '0 8px 24px rgba(138, 76, 158, 0.25)' }}
+            className="hover-lift"
+          >
+            {loading ? <div className="spinner" style={{ width: '18px', height: '18px', borderTopColor: 'white' }} /> : <><CheckCircle size={18} /> Mark as Purified</>}
+          </button>
+        </div>
+        
+      </div>
+    </div>,
+    document.body
+  );
+}
+
 /* ─── Calculation Detail Modal ──────────────────────────────── */
 function CalcModal({ h, onClose, onPurify }) {
   const [payLoading, setPayLoading] = useState(false);
@@ -32,12 +176,8 @@ function CalcModal({ h, onClose, onPurify }) {
   }
 
   const handlePurify = () => {
-    setPayLoading(true);
-    setTimeout(() => {
-      setPayLoading(false);
-      onPurify(h);
-      onClose();
-    }, 1200);
+    onPurify(h);
+    onClose();
   };
 
   const Section = ({ title, rows, accent }) => (
@@ -115,14 +255,11 @@ function CalcModal({ h, onClose, onPurify }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '4px' }}>
             <button
               onClick={handlePurify}
-              disabled={payLoading}
-              style={{ width: '100%', padding: '17px', borderRadius: '16px', background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.95rem', cursor: payLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 10px 28px rgba(91,41,113,0.35)', transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)' }}
-              onMouseEnter={e => { if (!payLoading) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 32px rgba(91,41,113,0.45)'; } }}
+              style={{ width: '100%', padding: '17px', borderRadius: '16px', background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.95rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 10px 28px rgba(91,41,113,0.35)', transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)' }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 32px rgba(91,41,113,0.45)'; }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 28px rgba(91,41,113,0.35)'; }}
             >
-              {payLoading
-                ? <div className="spinner" style={{ width: '18px', height: '18px', borderTopColor: 'white' }} />
-                : <><Heart size={17} fill="rgba(255,255,255,0.35)" /> Donate {fmt(due)} Securely</>}
+              <Heart size={17} fill="rgba(255,255,255,0.35)" /> Donate {fmt(due)} Securely
             </button>
             <button
               onClick={onClose}
@@ -398,7 +535,7 @@ export default function PurificationTab({ data, refreshData, initialSymbol }) {
   const [purifiedSymbols, setPurifiedSymbols] = useState([]);
   const [selectedHolding, setSelectedHolding] = useState(null);
   const [activeStatTarget, setActiveStatTarget] = useState(null);
-  const [payAllLoading, setPayAllLoading] = useState(false);
+  const [charityModalTarget, setCharityModalTarget] = useState(null);
 
   useEffect(() => {
     if (initialSymbol && data?.holdings) {
@@ -418,20 +555,33 @@ export default function PurificationTab({ data, refreshData, initialSymbol }) {
   };
 
   const handleDonateAll = () => {
-    setPayAllLoading(true);
-    setTimeout(() => {
+    setCharityModalTarget({ type: 'all', amount: purificationDue });
+  };
+
+  const handleConfirmPurify = () => {
+    if (charityModalTarget?.type === 'all') {
       setPurifiedSymbols(prev => [...prev, ...needsPurification.map(h => h.symbol)]);
-      setPayAllLoading(false);
-    }, 1500);
+    } else if (charityModalTarget?.type === 'single') {
+      setPurifiedSymbols(prev => [...prev, charityModalTarget.symbol]);
+    }
+    setCharityModalTarget(null);
   };
 
   return (
     <div className="animate-fade-in stagger-1 purification-tab-outer">
+      {charityModalTarget && (
+        <CharitiesModal 
+          amountDue={charityModalTarget.amount} 
+          onClose={() => setCharityModalTarget(null)} 
+          onConfirm={handleConfirmPurify} 
+        />
+      )}
+
       {selectedHolding && (
         <CalcModal
           h={selectedHolding}
           onClose={() => setSelectedHolding(null)}
-          onPurify={(h) => { handleSuccess(h.symbol); }}
+          onPurify={(h) => { setCharityModalTarget({ type: 'single', symbol: h.symbol, amount: h.purification_due }); }}
         />
       )}
 
@@ -484,15 +634,10 @@ export default function PurificationTab({ data, refreshData, initialSymbol }) {
               
               <button
                 onClick={handleDonateAll}
-                disabled={payAllLoading}
-                style={{ padding: '14px 20px', borderRadius: '16px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.9rem', cursor: payAllLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s', height: '100%' }}
+                style={{ padding: '14px 20px', borderRadius: '16px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s', height: '100%' }}
                 className="hover-lift"
               >
-                {payAllLoading ? (
-                  <div className="spinner" style={{ width: '16px', height: '16px', borderTopColor: '#451a03' }} />
-                ) : (
-                  <><Heart size={16} fill="currentColor" /> Donate All</>
-                )}
+                <Heart size={16} fill="currentColor" /> Donate All
               </button>
             </div>
           )}
