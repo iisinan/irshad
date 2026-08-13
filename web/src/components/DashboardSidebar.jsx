@@ -17,13 +17,13 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
 
   const NAV_ITEMS = [
     { section: 'Main' },
-    { label: 'Updates',          icon: Bell,           to: '/portfolio#updates' },
-    { label: 'Holdings',         icon: Activity,       to: '/portfolio#holdings' },
-    { label: 'Market Screener',  icon: BarChart2,      to: '/portfolio#market' },
+    { label: 'Updates',          icon: Bell,           to: '/portfolio#updates', className: 'tour-updates-tab' },
+    { label: 'Holdings',         icon: Activity,       to: '/portfolio#holdings', className: 'tour-portfolio-tab' },
+    { label: 'Market Screener',  icon: BarChart2,      to: '/portfolio#market', className: 'tour-market-tab' },
     { label: 'Alert',            icon: Star,           to: '/portfolio#watchlist' },
     { section: 'Islamic Finance' },
-    { label: 'Purification',     icon: HeartHandshake, to: '/portfolio#purification' },
-    { label: 'Zakat',            icon: Calculator,     to: '/portfolio#zakat' },
+    { label: 'Purification',     icon: HeartHandshake, to: '/portfolio#purification', className: 'tour-purification-tab' },
+    { label: 'Zakat',            icon: Calculator,     to: '/portfolio#zakat', className: 'tour-zakat-tab' },
     { label: 'Resources',        icon: BookOpen,       to: '/portfolio#lectures' },
     { section: 'Account' },
     { label: 'Statements',       icon: FileText,       to: '/portfolio#statement' },
@@ -178,6 +178,7 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
             <Link
               key={i}
               to={item.to}
+              className={item.className || ''}
               title={isCollapsed ? item.label : undefined}
               onClick={(e) => {
                 const [toPath, toHash] = item.to.split('#');

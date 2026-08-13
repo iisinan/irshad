@@ -4,6 +4,7 @@ import './index.css'
 import App from './App.jsx'
 import { AuthProvider } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
+import { TourProvider } from './context/TourContext'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 
 import { BrowserRouter as Router } from 'react-router-dom';
@@ -35,9 +36,11 @@ createRoot(document.getElementById('root')).render(
       <Router>
         <AuthProvider>
           <ThemeProvider>
-            <QueryClientProvider client={queryClient}>
-              <App />
-            </QueryClientProvider>
+            <TourProvider>
+              <QueryClientProvider client={queryClient}>
+                <App />
+              </QueryClientProvider>
+            </TourProvider>
           </ThemeProvider>
         </AuthProvider>
       </Router>

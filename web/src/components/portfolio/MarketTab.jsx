@@ -67,6 +67,7 @@ const StockRow = React.memo(({ stock, idx, isWatched, onToggle }) => {
 
   return (
     <tr
+      className="tour-screener-item"
       onMouseEnter={e => e.currentTarget.style.background = 'var(--primary-50)'}
       onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
       style={{ borderBottom: '1px solid var(--border)', transition: 'background 0.15s' }}
@@ -141,7 +142,7 @@ const MobileStockCard = React.memo(({ stock, idx, isWatched, onToggle }) => {
   const sc = statusColors[cfg.label] || statusColors.DOUBTFUL;
 
   return (
-    <div style={{ borderBottom: '1px solid var(--border)', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
+    <div className="tour-screener-item" style={{ borderBottom: '1px solid var(--border)', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
       {/* Logo */}
       <Link to={`/market/${stock.symbol}/aaoifi`} state={{ stock }} style={{ textDecoration: 'none', flexShrink: 0 }}>
         <CompanyLogo symbol={stock.symbol} logoUrl={stock.logo_url} size={44} radius={12} />
@@ -316,7 +317,7 @@ export default function MarketTab() {
         display: 'flex', flexDirection: 'column', gap: '16px'
       }}>
         {/* Search - Prominent Top Row */}
-        <div className="market-search-bar" style={{ position: 'relative', width: '100%' }}>
+        <div className="market-search-bar tour-search-bar" style={{ position: 'relative', width: '100%' }}>
           <Search size={18} color="var(--primary)" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
           <input
             value={search}

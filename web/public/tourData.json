@@ -1,0 +1,39 @@
+[
+  {
+    "target": "body",
+    "placement": "center",
+    "title": "Welcome to Irshad!",
+    "content": "Let's take a quick tour to help you navigate your halal investments and understand the platform's features.",
+    "disableBeacon": true
+  },
+  {
+    "target": ".tour-portfolio-tab",
+    "placement": "right",
+    "title": "Your Portfolio",
+    "content": "Track your holdings, view your overall performance, and monitor halal compliance all in one place."
+  },
+  {
+    "target": ".tour-market-tab",
+    "placement": "right",
+    "title": "Market Screener",
+    "content": "Filter, sort, and discover new shariah-compliant companies across the entire stock market, and click on any stock to view its detailed AAOIFI Stage 1 and Stage 2 compliance breakdown."
+  },
+  {
+    "target": ".tour-purification-tab",
+    "placement": "right",
+    "title": "Dividend Purification",
+    "content": "Easily calculate and manage the purification of impure dividends using our built-in tracker."
+  },
+  {
+    "target": ".tour-zakat-tab",
+    "placement": "right",
+    "title": "Zakat Calculator",
+    "content": "Keep track of your Zakat obligations based on your liquid assets and active holdings."
+  },
+  {
+    "target": ".tour-updates-tab",
+    "placement": "right",
+    "title": "Updates & News",
+    "content": "Stay informed with the latest market news, notifications, and platform updates."
+  }
+]

@@ -7,14 +7,14 @@ import {
 } from 'lucide-react';
 import { fetchProfile, updateProfile, deleteAccount } from '../services/api';
 import localforage from 'localforage';
-
-
+import { useTour } from '../context/TourContext';
 
 /* ─── Sub-components ────────────────────────────────── */
 
 /* ─── Main Profile Component ───────────────────────── */
 export default function Profile() {
   const { user, loading: authLoading, logout } = useAuth();
+  const { startTour } = useTour();
   const navigate = useNavigate();
 
   const [activeSection, setActiveSection] = useState('profile');
@@ -301,6 +301,22 @@ export default function Profile() {
                       <option value="light">Light Mode</option>
                       <option value="dark">Dark Mode</option>
                     </select>
+                  </div>
+                  
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', background: 'var(--bg-section)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                    <div><h3 style={{ margin: '0 0 4px', fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-dark)' }}>Product Tour</h3><p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--text-muted)' }}>Restart the onboarding tour for a quick overview.</p></div>
+                    <button 
+                      onClick={() => {
+                        navigate('/portfolio');
+                        // Wait for portfolio to mount before starting the tour
+                        setTimeout(startTour, 300);
+                      }}
+                      style={{ padding: '10px 16px', borderRadius: '8px', background: 'var(--primary)', color: '#FFFFFF', border: 'none', fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer', transition: 'transform 0.2s' }}
+                      onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
+                      onMouseLeave={e => e.currentTarget.style.transform = 'none'}
+                    >
+                      Replay Tour
+                    </button>
                   </div>
                 </div>
               )}
