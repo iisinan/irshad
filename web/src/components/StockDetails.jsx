@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, CheckCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2, Brain, Globe, Newspaper, Bell, X, ShieldCheck, Activity, ChevronDown, ChevronUp, Briefcase, Scale, Landmark, Droplets } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, XCircle, AlertCircle, HelpCircle, BarChart2, TrendingUp, TrendingDown, Building2, Brain, Globe, Newspaper, Bell, X, ShieldCheck, Activity, ChevronDown, ChevronUp, Briefcase, Scale, Landmark, Droplets } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import api, { fetchStockDetails, fetchAiAnalysis, setPriceAlert, fetchWatchlist, addToWatchlist, removeFromWatchlist } from '../services/api';
 import { useQuery } from '@tanstack/react-query';
@@ -219,6 +219,33 @@ const StockDetails = ({ symbol: propSymbol }) => {
   // ─── Financial ratios ─────────────────────────────
   const financials = stock.financials;
   const latest = Array.isArray(financials) && financials.length > 0 ? financials[0] : null;
+
+  // ─── AAOIFI Quantitative Ratios (mirrors AaoifiScreening.jsx logic exactly) ──
+  const report = aaoifiData || {};
+  const fd = report.financial_data_used || {};
+  const _marketCap = parseFloat(report.market_cap || fd.market_cap) || 0;
+  const _totalAssets = parseFloat(fd.total_assets) || 0;
+  const _totalRevenue = parseFloat(fd.total_revenue) || 0;
+  const _interestIncome = parseFloat(fd.interest_income) || 0;
+  const _totalDebt = parseFloat(fd.total_debt) || 0;
+  const _cashAndSec = (parseFloat(fd.cash) || 0) + (parseFloat(fd.interest_bearing_securities) || 0);
+
+  const _usedTotalAssets = report.denominator_used === 'Total Assets' || (
+    !report.denominator_used && _totalAssets > 0 && _marketCap > 0 &&
+    Math.abs((_totalDebt / _marketCap) * 100 - (_totalDebt / _totalAssets) * 100) < 0.1
+  );
+  const _denVal = _usedTotalAssets ? _totalAssets : _marketCap;
+
+  const debtRatioRaw   = _denVal > 0 ? (_totalDebt / _denVal) * 100 : null;
+  const cashRatioRaw   = _denVal > 0 ? (_cashAndSec / _denVal) * 100 : null;
+  const impureRatioRaw = _totalRevenue > 0 ? (_interestIncome / _totalRevenue) * 100 : null;
+
+  const aDebtRatio   = report.debt_ratio   != null ? parseFloat(report.debt_ratio)                  : debtRatioRaw;
+  const aCashRatio   = report.cash_ratio   != null ? parseFloat(report.cash_ratio)                  : cashRatioRaw;
+  const aImpureRatio = report.impermissible_income_ratio != null ? parseFloat(report.impermissible_income_ratio) : impureRatioRaw;
+
+  const aBusinessFailed = report.business_status === 'fail' || stock.business_status === 'fail' || isFailedBusinessActivity;
+  const showAaoifiPanel = !!(aDebtRatio != null || aCashRatio != null || aImpureRatio != null || report.business_status);
 
   const marketCap = parseFloat(latest?.market_cap) || 0;
   const safeMarketCap = marketCap > 0 ? marketCap : 1;
@@ -573,6 +600,68 @@ const StockDetails = ({ symbol: propSymbol }) => {
             </div>
           </div>
 
+          {/* AAOIFI Quantitative Screening Details */}
+          {showAaoifiPanel && (
+          <div className="detail-panel" style={{ padding: '24px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '24px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)', marginBottom: '24px' }}>
+            {/* Panel header */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+              <div style={{ background: 'rgba(209,165,98,0.12)', padding: '8px', borderRadius: '10px', display: 'flex' }}>
+                <ShieldCheck size={16} color="var(--gold)" />
+              </div>
+              <div>
+                <div style={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--text-dark)', letterSpacing: '-0.2px' }}>AAOIFI Quantitative Screening</div>
+                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600, marginTop: 1 }}>Stage 2 · Three AAOIFI financial thresholds</div>
+              </div>
+            </div>
+
+            {/* Business Activity row — always shown */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderRadius: '14px', background: aBusinessFailed ? 'rgba(239,68,68,0.06)' : 'rgba(16,185,129,0.06)', border: `1px solid ${aBusinessFailed ? 'rgba(239,68,68,0.18)' : 'rgba(16,185,129,0.18)'}`, marginBottom: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.6px', color: 'var(--text-muted)' }}>Business Activity</span>
+              </div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 12px', borderRadius: 100, background: aBusinessFailed ? 'var(--non-halal-bg)' : 'var(--halal-bg)', color: aBusinessFailed ? 'var(--non-halal)' : 'var(--halal)', fontSize: '0.69rem', fontWeight: 900, letterSpacing: '0.8px' }}>
+                {aBusinessFailed ? <><XCircle size={11}/> FAIL</> : <><CheckCircle size={11}/> PASS</>}
+              </div>
+            </div>
+
+            {/* Ratio rows */}
+            {[
+              { label: 'Debt Ratio',    threshold: 30, value: aDebtRatio,   formula: 'Total Debt / Market Cap × 100' },
+              { label: 'Cash Ratio',    threshold: 30, value: aCashRatio,   formula: '(Cash + Securities) / Market Cap × 100' },
+              { label: 'Impure Revenue',threshold: 5,  value: aImpureRatio, formula: 'Impure Income / Total Revenue × 100' },
+            ].map(({ label, threshold, value, formula }) => {
+              if (value == null) return null;
+              const pass = value <= threshold;
+              const barPct = Math.min((value / (threshold * 2)) * 100, 100);
+              return (
+                <div key={label} style={{ padding: '16px', borderRadius: '14px', background: 'var(--bg-section)', border: '1px solid var(--border)', marginBottom: '10px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                    <div>
+                      <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dark)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</div>
+                      <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', marginTop: '2px' }}>{formula}</div>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                      <span style={{ fontSize: '1.2rem', fontWeight: 900, color: pass ? 'var(--halal)' : 'var(--non-halal)', fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>
+                        {value.toFixed(2)}%
+                      </span>
+                      <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)' }}>threshold: ≤{threshold}%</span>
+                    </div>
+                  </div>
+                  {/* Progress bar */}
+                  <div style={{ height: '6px', borderRadius: '100px', background: 'var(--border)', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${barPct}%`, borderRadius: '100px', background: pass ? 'var(--halal)' : 'var(--non-halal)', transition: 'width 0.6s ease' }} />
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '5px' }}>
+                    <span style={{ fontSize: '0.58rem', color: 'var(--text-muted)' }}>0%</span>
+                    <span style={{ fontSize: '0.58rem', color: pass ? 'var(--halal)' : 'var(--non-halal)', fontWeight: 700 }}>{pass ? '✓ PASS' : '✗ FAIL'}</span>
+                    <span style={{ fontSize: '0.58rem', color: 'var(--text-muted)' }}>limit: {threshold}%</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          )}
+
           {/* Irshad Shariah Analysis — hidden for business activity failures */}
           {!isFailedBusinessActivity && (
           <div className="detail-panel hover-card" style={{ 
@@ -867,7 +956,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
             </div>
           ) : stock.news && stock.news.length > 0 ? (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-              {stock.news.slice(0, 6).map((article, i) => (
+              {stock.news.slice(0, 3).map((article, i) => (
                 <a key={i} href={article.url} target="_blank" rel="noopener noreferrer" className="hover-card" style={{ display: 'flex', flexDirection: 'column', padding: '0', border: '1px solid var(--border)', borderRadius: '16px', textDecoration: 'none', background: 'linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%)', overflow: 'hidden', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: '0 4px 16px rgba(0,0,0,0.02)' }}>
                   {article.thumbnail_url && (
                     <div style={{ height: '140px', width: '100%', overflow: 'hidden', background: 'var(--bg-section)' }}>
