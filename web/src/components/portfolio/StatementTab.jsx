@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { FileText, Download, Filter, Building2 } from 'lucide-react';
+import { FileText, Download, Filter, Building2, Heart } from 'lucide-react';
 import { toastSuccess, toastInfo } from '../../utils/toast';
 
 export default function StatementTab({ data }) {
@@ -32,6 +32,20 @@ export default function StatementTab({ data }) {
           amount: val,
           icon: Building2,
           color: 'var(--primary)'
+        });
+      });
+    }
+
+    if (data?.purifications && data.purifications.length > 0) {
+      data.purifications.forEach(p => {
+        trxs.push({
+          id: `PUR-${p.id}`,
+          date: new Date(p.created_at).toISOString(),
+          desc: `Dividend Purification - ${p.symbol}`,
+          type: 'purification',
+          amount: -Number(p.amount), // Negative because it's a payment/deduction
+          icon: Heart,
+          color: 'var(--danger, #ef4444)'
         });
       });
     }

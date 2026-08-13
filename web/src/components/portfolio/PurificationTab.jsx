@@ -133,15 +133,15 @@ function CharitiesModal({ onClose, onConfirm, amountDue, isSubmitting }) {
           </div>
         </div>
 
-        {/* Footer Action */}
-        <div style={{ padding: '24px 28px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
-          <button
-            onClick={handleConfirm}
-            disabled={loading}
-            style={{ width: '100%', padding: '16px', borderRadius: '16px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.95rem', cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', transition: 'all 0.2s', boxShadow: '0 8px 24px rgba(138, 76, 158, 0.25)' }}
-            className="hover-lift"
+        {/* Actions */}
+        <div style={{ padding: '20px', borderTop: '1px solid var(--border)', background: 'var(--bg)', borderRadius: '0 0 28px 28px' }}>
+          <button 
+            onClick={onConfirm}
+            disabled={isSubmitting}
+            style={{ width: '100%', padding: '16px', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '16px', fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', opacity: isSubmitting ? 0.7 : 1, transition: 'all 0.2s' }}
           >
-            {loading ? <div className="spinner" style={{ width: '18px', height: '18px', borderTopColor: 'white' }} /> : <><CheckCircle size={18} /> Mark as Purified</>}
+            {isSubmitting ? <Loader2 size={18} className="spin" /> : <CheckCircle size={18} />}
+            {isSubmitting ? 'Recording...' : 'Mark as Purified'}
           </button>
         </div>
         
