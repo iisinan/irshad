@@ -42,6 +42,10 @@ services:
         value: redis://127.0.0.1:6379
       - key: LOG_CHANNEL
         value: stderr
+      - key: MAIL_MAILER
+        value: resend
+      - key: RESEND_API_KEY
+        sync: false # Render will ask you to fill this in manually, or you can add it in the dashboard
       - key: PORT
         value: 8080
       - key: AI_ENGINE_URL
