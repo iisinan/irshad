@@ -4607,6 +4607,22 @@ html, body {
 
 /* ── StockDetails: tab bar (Overview / Financials / News) ── */
 @media (max-width: 640px) {
+  /* Fix color separation and paddings in StockDetails mobile */
+  .stock-hero-banner {
+    padding: 24px 20px !important;
+  }
+  .verdict-banner {
+    padding: 24px 20px !important;
+    gap: 20px !important;
+  }
+  .verdict-summary {
+    border-left: none !important;
+    padding-left: 0 !important;
+    border-top: 1px solid rgba(255,255,255,0.12) !important;
+    padding-top: 24px !important;
+    margin-top: 4px !important;
+  }
+
   /* Make the stock details page top nav pill row scrollable */
   div[style*="display: 'flex'"][style*="gap: '6px'"][style*="overflowX: 'auto'"] {
     white-space: nowrap !important;

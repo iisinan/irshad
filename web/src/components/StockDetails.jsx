@@ -407,7 +407,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
           gap: '28px',
           transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
         }}
-        className="hover-card mobile-col"
+        className="hover-card mobile-col verdict-banner"
         >
           {/* Left: Primary Verdict */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
@@ -461,7 +461,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
           </div>
 
           {/* Right: Summary of Justification */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', borderLeft: '1px solid rgba(255,255,255,0.12)', paddingLeft: '28px' }}>
+          <div className="verdict-summary" style={{ display: 'flex', flexDirection: 'column', gap: '10px', borderLeft: '1px solid rgba(255,255,255,0.12)', paddingLeft: '28px' }}>
             <span style={{ fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--gold, var(--gold))', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <ShieldCheck size={14} color="var(--gold, var(--gold))" /> SCREENING JUSTIFICATION SUMMARY
             </span>
