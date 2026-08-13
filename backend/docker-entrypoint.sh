@@ -1,18 +1,7 @@
 #!/bin/sh
 set -e
 
-# Start Redis first so it's available when Laravel boots
-redis-server --daemonize yes --logfile /tmp/redis.log
 
-# Wait for Redis to be ready (up to 10 seconds)
-for i in $(seq 1 10); do
-    if redis-cli ping 2>/dev/null | grep -q PONG; then
-        echo "Redis is ready."
-        break
-    fi
-    echo "Waiting for Redis... ($i)"
-    sleep 1
-done
 
 # Run migrations
 php artisan migrate --force
