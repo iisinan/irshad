@@ -53,11 +53,13 @@ function Skeleton() {
 
 /* ─── Main Hub ─────────────────────────────────────────────── */
 export default function Portfolio() {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   
   // Try to hydrate from localforage cache for instant render
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [resendingEmail, setResendingEmail] = useState(false);
+  const [resendMessage, setResendMessage] = useState('');
 
   useEffect(() => {
     localforage.getItem('irshad_portfolio_cache').then(cached => {
@@ -194,6 +196,19 @@ export default function Portfolio() {
     }
   };
 
+  const handleResend = async () => {
+    setResendingEmail(true);
+    setResendMessage('');
+    try {
+      const api = (await import('../services/api')).default;
+      const res = await api.post('/email/resend');
+      setResendMessage(res.data?.message || 'Verification link sent! Check your inbox.');
+    } catch (err) {
+      setResendMessage(err.response?.data?.message || 'Failed to resend. Please try again.');
+    }
+    setResendingEmail(false);
+  };
+
   if (user && !user.email_verified_at) {
     return (
       <div style={{ textAlign:'center', padding:'100px 20px', animation: 'fadeIn 0.3s ease-out' }}>
@@ -204,6 +219,20 @@ export default function Portfolio() {
         <p style={{ color:'var(--text-muted)', marginBottom:'24px', maxWidth: '400px', margin: '0 auto 24px', lineHeight: 1.5, fontSize: '0.95rem' }}>
           Please verify your email address to unlock your portfolio and access market data. Check your inbox for the verification link.
         </p>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+          <button 
+            onClick={handleResend} 
+            disabled={resendingEmail}
+            className="btn-primary"
+          >
+            {resendingEmail ? 'Sending...' : 'Resend Verification Email'}
+          </button>
+          {resendMessage && (
+            <p style={{ fontSize: '0.85rem', color: resendMessage.includes('Failed') ? 'var(--non-halal)' : 'var(--primary)', margin: 0 }}>
+              {resendMessage}
+            </p>
+          )}
+        </div>
       </div>
     );
   }

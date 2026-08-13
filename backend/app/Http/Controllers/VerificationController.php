@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Traits\ApiResponder;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class VerificationController extends Controller
 {
@@ -25,6 +26,7 @@ class VerificationController extends Controller
 
         if ($user->markEmailAsVerified()) {
             event(new Verified($user));
+            Cache::tags(['users'])->forget("user.profile.{$user->id}");
         }
 
         return response()->json(['message' => 'Email has been verified']);
