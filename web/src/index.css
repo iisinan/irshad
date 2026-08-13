@@ -5048,4 +5048,13 @@ button, a.nav-link, a.btn-primary, a.btn-secondary, .mobile-col > div[style*="cu
   .dashboard-main-content {
     padding-bottom: calc(70px + env(safe-area-inset-bottom)) !important;
   }
+
+  /* Alerts Tab */
+  .alert-header {
+    padding: 24px 16px !important;
+  }
+  .alert-body {
+    padding: 20px 16px !important;
+  }
 }
+
