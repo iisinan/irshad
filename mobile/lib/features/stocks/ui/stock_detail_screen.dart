@@ -31,6 +31,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
   final TextEditingController _purificationController = TextEditingController();
   double _purificationResult = 0;
   bool _isAlreadyFavorited = false;
+  int _selectedTab = 1;
   List<dynamic> _news = [];
   bool _isLoadingNews = true;
 
@@ -337,43 +338,6 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 12),
-                  // Price Chart
-                  if ((_currentStock['daily_prices'] ?? []).isNotEmpty &&
-                      (_currentStock['daily_prices'] as List).any((p) => (double.tryParse(p['price']?.toString() ?? '0') ?? 0) > 0)) ...[
-                    _buildPriceChart(),
-                    const SizedBox(height: 32),
-                  ],
-
-                  // Shariah Justification Summary
-                  _buildSectionHeader('Shariah Justification'),
-                  const SizedBox(height: 12),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: badgeBg,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: statusColor.withValues(alpha: 0.3)),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          isHalal ? Icons.check_circle_outline_rounded : isNonHalal ? Icons.cancel_outlined : Icons.info_outline_rounded,
-                          color: statusColor,
-                          size: 22,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            reason,
-                            style: TextStyle(color: context.textDark, fontSize: 13, height: 1.5, fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 32),
 
                   // About Company
                   if (_currentStock['overview'] != null && _currentStock['overview'].toString().trim().isNotEmpty) ...[
@@ -383,25 +347,56 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                     const SizedBox(height: 32),
                   ],
 
-                  // Company Metadata
-                  _buildDetailedOverview(),
-                  _buildCompanyInfo(),
+                  if (_selectedTab == 0) ...[
+                    const SizedBox(height: 16),
+                    _buildDetailedOverview(),
+                    _buildCompanyInfo(),
+                  ],
                   
-                  // AAOIFI Screening Breakdown
-                  if ((_currentStock['financials'] ?? []).isNotEmpty) ...[
-                    _buildSectionHeader('AAOIFI Screening Breakdown'),
-                    const SizedBox(height: 12),
-                    _buildAaoifiBreakdown(statusColor, badgeBg, statusLabel, reason, isHalal, isNonHalal),
+                  if (_selectedTab == 1) ...[
+                    const SizedBox(height: 24),
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: statusColor.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(100),
+                          border: Border.all(color: statusColor.withOpacity(0.6), width: 1.5),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              statusLabel.contains('COMPLIANT') && !statusLabel.contains('NON') ? Icons.verified_rounded :
+                              statusLabel.contains('NON-COMPLIANT') ? Icons.cancel_rounded : Icons.help_rounded,
+                              color: statusColor,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              statusLabel,
+                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: statusColor, letterSpacing: 0.3),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 32),
+                    if ((_currentStock['financials'] ?? []).isNotEmpty) ...[
+                      _buildSectionHeader('Shariah Compliance Dashboard'),
+                      const SizedBox(height: 12),
+                      _buildComplianceDashboard(statusColor, badgeBg, statusLabel, reason, isHalal, isNonHalal),
+                      const SizedBox(height: 32),
+                    ],
+                  ],
+                  
+                  if (_selectedTab == 2) ...[
+                    const SizedBox(height: 32),
+                    Center(
+                      child: Text('Performance data & Historical metrics', style: TextStyle(color: context.textMuted)),
+                    ),
                   ],
 
-                  // Financial Highlights
-                  if (hasFinancialHighlights) ...[
-                    _buildSectionHeader('Financial Highlights'),
-                    const SizedBox(height: 12),
-                    _buildFinancialHighlights(),
-                    const SizedBox(height: 32),
-                  ],
 
                   // Advanced Metrics (SWS)
                   _buildAdvancedMetrics(),
@@ -424,7 +419,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                   const SizedBox(height: 24),
                   
                   // News Section
-                  if (_isLoadingNews || _news.isNotEmpty) ...[
+                  if (_selectedTab == 3 && (_isLoadingNews || _news.isNotEmpty)) ...[
                     _buildSectionHeader('Latest News'),
                     const SizedBox(height: 12),
                     _buildNewsSection(),
@@ -593,136 +588,98 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     );
   }
 
+
+  Widget _buildTabItem(int index, String title) {
+    bool isSelected = _selectedTab == index;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedTab = index;
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.only(bottom: 6),
+        decoration: isSelected 
+            ? BoxDecoration(border: Border(bottom: BorderSide(color: context.textDark, width: 2)))
+            : null,
+        child: Text(
+          title, 
+          style: TextStyle(
+            color: isSelected ? context.textDark : context.textMuted, 
+            fontSize: 13, 
+            fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700
+          ),
+        ),
+      ),
+    );
+  }
   Widget _buildStatusHeader(Color color, Color bg, String label, {bool purificationRequired = false, double percent = 0.0, bool scholarVerified = false}) {
     final latestPrice = num.tryParse(_currentStock['latest_price']?.toString() ?? '0') ?? 0.0;
     final priceChange = _currentStock['price_change_pct'] != null ? double.tryParse(_currentStock['price_change_pct'].toString()) : null;
     final isUp = (priceChange ?? 0) >= 0;
+    
+    final absChangeStr = _currentStock['price_change']?.toString() ?? '0.00';
+    final pctChangeStr = priceChange?.toStringAsFixed(2) ?? '0.00';
 
     String mainLabel = label;
-    String subLabel = '';
-    
     if (purificationRequired) {
       mainLabel = 'SHARIAH COMPLIANT';
-      subLabel = 'WITH PURIFICATION (${percent.toStringAsFixed(2)}%)';
     }
 
     return Container(
       width: double.infinity,
       color: context.bg,
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Company name
-          Text(
-            _currentStock['name'] ?? '',
-            style: TextStyle(color: context.textMuted, fontSize: 14, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 10),
-          // Price
-          Text(
-            '₦${latestPrice.toStringAsFixed(2)}',
-            style: TextStyle(fontSize: 42, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -1.5),
-          ),
-          if (priceChange != null) ...[
-            const SizedBox(height: 8),
-            // Change pill
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-              decoration: BoxDecoration(
-                color: (isUp ? context.halal : context.haram).withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(100),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    isUp ? Icons.arrow_drop_up_rounded : Icons.arrow_drop_down_rounded,
-                    size: 20,
-                    color: isUp ? context.halal : context.haram,
-                  ),
+                  Text(_currentStock['symbol'] ?? '', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
+                  const SizedBox(height: 2),
+                  Text(_currentStock['name'] ?? '', style: TextStyle(color: context.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text('₦${latestPrice.toStringAsFixed(2)}', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
+                  const SizedBox(height: 2),
                   Text(
-                    '${isUp ? '+' : ''}${priceChange.toStringAsFixed(2)}%',
+                    '${isUp ? '+' : '-'}₦$absChangeStr (${isUp ? '+' : ''}$pctChangeStr%)',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 13,
                       fontWeight: FontWeight.w800,
                       color: isUp ? context.halal : context.haram,
                     ),
                   ),
                 ],
               ),
-            ),
-          ],
-          const SizedBox(height: 18),
-          // Verdict badge
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-            decoration: BoxDecoration(
-              color: bg,
-              borderRadius: BorderRadius.circular(100),
-              border: Border.all(color: color.withValues(alpha: 0.4), width: 2),
-              boxShadow: [
-                BoxShadow(color: color.withValues(alpha: 0.18), blurRadius: 20, offset: const Offset(0, 8)),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      mainLabel.contains('COMPLIANT') && !mainLabel.contains('NON') ? Icons.check_circle_rounded :
-                      mainLabel.contains('NON-COMPLIANT') ? Icons.cancel_rounded : Icons.help_rounded,
-                      color: color,
-                      size: 22,
-                    ),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        mainLabel,
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: color, letterSpacing: 0.3),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ],
-                ),
-                if (purificationRequired) ...[
-                  const SizedBox(height: 7),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      subLabel,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: color, letterSpacing: 0.2),
-                    ),
-                  ),
-                ],
-                if (scholarVerified) ...[
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.verified_rounded, size: 13, color: color.withValues(alpha: 0.75)),
-                      const SizedBox(width: 4),
-                      Text(
-                        'SCHOLAR VERIFIED',
-                        style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: color.withValues(alpha: 0.75), letterSpacing: 0.5),
-                      ),
-                    ],
-                  ),
-                ],
-              ],
-            ),
+            ],
           ),
+          const SizedBox(height: 24),
+          if ((_currentStock['daily_prices'] ?? []).isNotEmpty && (_currentStock['daily_prices'] as List).any((p) => (double.tryParse(p['price']?.toString() ?? '0') ?? 0) > 0))
+            _buildPriceChart(),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildTabItem(0, 'Summary'),
+              _buildTabItem(1, 'Shariah'),
+              _buildTabItem(2, 'Performance'),
+              _buildTabItem(3, 'News'),
+            ],
+          ),
+
         ],
       ),
     );
   }
+
 
   Widget _buildPriceChart() {
     List<dynamic> pricesRaw = _currentStock['daily_prices'] ?? [];
@@ -1207,438 +1164,138 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     );
   }
 
-  Widget _buildFinancialHighlights() {
+
+  Widget _buildComplianceDashboard(Color statusColor, Color bg, String label, String reason, bool isHalal, bool isNonHalal) {
     final financials = _currentStock['financials'];
     final latest = (financials != null && financials is List && financials.isNotEmpty) ? financials[0] : null;
 
-    final assets = _parseDouble(latest?['total_assets']);
-    final debt = _parseDouble(latest?['total_debt']);
-    final revenue = _parseDouble(latest?['total_revenue']);
-    final interest = _parseDouble(latest?['interest_income']);
-
-    String formatAmt(double amt) {
-      if (amt == 0) return 'N/A';
-      if (amt >= 1e12) return '₦${(amt / 1e12).toStringAsFixed(2)}T';
-      if (amt >= 1e9) return '₦${(amt / 1e9).toStringAsFixed(2)}B';
-      if (amt >= 1e6) return '₦${(amt / 1e6).toStringAsFixed(2)}M';
-      return '₦${amt.toStringAsFixed(0)}';
+    final debtRatio = latest != null && latest['interest_bearing_debt_ratio'] != null 
+        ? (double.tryParse(latest['interest_bearing_debt_ratio'].toString()) ?? 0.0)
+        : 0.0;
+        
+    final interestRatio = latest != null && latest['interest_income_ratio'] != null 
+        ? (double.tryParse(latest['interest_income_ratio'].toString()) ?? 0.0)
+        : 0.0;
+        
+    final cashRatio = latest != null && latest['cash_and_equivalents_ratio'] != null 
+        ? (double.tryParse(latest['cash_and_equivalents_ratio'].toString()) ?? 0.0)
+        : 0.0;
+        
+    Widget buildGauge(String title, double value, double limit) {
+      bool isPass = value <= limit;
+      Color gaugeColor = isPass ? context.halal : context.haram;
+      double percentage = value / limit;
+      if (percentage > 1.0) percentage = 1.0;
+      if (percentage < 0.0) percentage = 0.0;
+      
+      return Expanded(
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
+          decoration: BoxDecoration(
+            color: context.bgAlt,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: context.divider.withOpacity(0.5)),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5)),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                height: 70,
+                width: 70,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    CircularProgressIndicator(
+                      value: 1.0,
+                      backgroundColor: Colors.transparent,
+                      color: context.divider.withOpacity(0.2),
+                      strokeWidth: 6,
+                    ),
+                    CircularProgressIndicator(
+                      value: percentage,
+                      backgroundColor: Colors.transparent,
+                      color: gaugeColor,
+                      strokeWidth: 6,
+                      strokeCap: StrokeCap.round,
+                    ),
+                    Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('${value.toStringAsFixed(1)}%', style: TextStyle(color: context.textDark, fontWeight: FontWeight.w900, fontSize: 13)),
+                          Text('<${limit.toStringAsFixed(0)}%', style: TextStyle(color: context.textMuted, fontSize: 9, fontWeight: FontWeight.w800)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(title, style: TextStyle(color: context.textMuted, fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: 0.5), textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isPass ? context.halalBg : context.haramBg,
+                  borderRadius: BorderRadius.circular(100),
+                ),
+                child: Text(
+                  isPass ? 'PASS' : 'FAIL',
+                  style: TextStyle(color: isPass ? context.halal : context.haram, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 0.5),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
     }
-
-    // Debt is a warning if high
-    final marketCap = _parseDouble(latest?['market_cap']);
-    final debtRatio = marketCap > 0 ? (debt / marketCap) * 100 : 0.0;
-    final interestRatio = revenue > 0 ? (interest / revenue) * 100 : 0.0;
-    final debtColor = debtRatio > 30 ? context.haram : (debtRatio > 20 ? context.questionable : null);
-    final interestColor = interestRatio > 5 ? context.haram : (interestRatio > 3 ? context.questionable : null);
 
     return Column(
       children: [
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(child: _buildMetricCard('TOTAL ASSETS', assets > 0 ? formatAmt(assets) : 'N/A', icon: Icons.account_balance_outlined)),
+            buildGauge('DEBT', debtRatio, 30.0),
             const SizedBox(width: 12),
-            Expanded(child: _buildMetricCard('TOTAL DEBT', debt > 0 ? formatAmt(debt) : '₦0', icon: Icons.credit_card_outlined, valueColor: debtColor)),
+            buildGauge('CASH', cashRatio, 30.0),
+            const SizedBox(width: 12),
+            buildGauge('INCOME', interestRatio, 5.0),
           ],
         ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(child: _buildMetricCard('TOTAL REVENUE', revenue > 0 ? formatAmt(revenue) : 'N/A', icon: Icons.trending_up_rounded)),
-            const SizedBox(width: 12),
-            Expanded(child: _buildMetricCard('INTEREST INCOME', interest > 0 ? formatAmt(interest) : '₦0', icon: Icons.percent_rounded, valueColor: interestColor)),
-          ],
+        const SizedBox(height: 24),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: statusColor.withOpacity(0.3)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.feed_outlined, color: statusColor, size: 20),
+                  const SizedBox(width: 8),
+                  Text('Compliance Justification', style: TextStyle(color: context.textDark, fontSize: 14, fontWeight: FontWeight.w900)),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                reason,
+                style: TextStyle(color: context.textDark.withOpacity(0.8), fontSize: 13, height: 1.6, fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildAaoifiBreakdown(Color statusColor, Color bg, String label, String reason, bool isHalal, bool isNonHalal) {
-    final financials = _currentStock['financials'];
-    final latest = (financials != null && financials is List && financials.isNotEmpty) ? financials[0] : null;
-    
-    final debt = _parseDouble(latest?['total_debt']);
-    final marketCap = _parseDouble(latest?['market_cap']);
-    final safeMarketCap = marketCap > 0 ? marketCap : 1.0;
-    
-    final interest = _parseDouble(latest?['interest_income']);
-    final rawRevenue = _parseDouble(latest?['total_revenue']);
-    final revenue = rawRevenue > 0.0 ? rawRevenue : safeMarketCap;
-    
-    final cashAndEquivalents = _parseDouble(latest?['cash_and_equivalents']);
-    final interestBearingSecurities = _parseDouble(latest?['interest_bearing_securities']);
-    final cash = cashAndEquivalents + interestBearingSecurities;
-
-    final debtRatio = marketCap > 0 ? (debt / marketCap) * 100 : 0.0;
-    final interestRatio = revenue > 0 ? (interest / revenue) * 100 : 0.0;
-    final cashRatio = marketCap > 0 ? (cash / marketCap) * 100 : 0.0;
-
-    String formatAmt(double amt) {
-      if (amt == 0) return '0';
-      String s = amt.toStringAsFixed(0);
-      return s.replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},');
-    }
-
-    final rawDebtFail = debtRatio > 30.0;
-    final rawInterestFail = interestRatio > 5.0;
-    final rawCashFail = cashRatio > 30.0;
-
-    final lowerReason = reason.toLowerCase();
-    final isDebtFail = rawDebtFail || lowerReason.contains('rule 2') || lowerReason.contains('debt limit');
-    final isInterestFail = rawInterestFail || lowerReason.contains('rule 4') || lowerReason.contains('interest income');
-    final isCashFail = rawCashFail || lowerReason.contains('rule 3') || lowerReason.contains('cash & securities');
-
-    final isBusinessFail = lowerReason.contains('rule 1') ||
-        lowerReason.contains('business activity') ||
-        lowerReason.contains('sector check') ||
-        lowerReason.contains('prohibited') ||
-        lowerReason.contains('banking') ||
-        lowerReason.contains('financial business') ||
-        lowerReason.contains('alcohol') ||
-        (isNonHalal && !isDebtFail && !isInterestFail && !isCashFail);
-
-    Widget buildCalculationCard(String numLabel, String denLabel, String numVal, String denVal) {
-      return Column(
-        children: [
-          Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: context.bg,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.orangeAccent.withValues(alpha: 0.3)),
-            ),
-            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-            child: Column(
-              children: [
-                Text('CALCULATION', style: TextStyle(color: context.textMuted, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.2)),
-                const SizedBox(height: 16),
-                Text(numLabel, style: TextStyle(color: context.textDark, fontSize: 14, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 8),
-                Container(height: 1, width: 200, color: context.divider),
-                const SizedBox(height: 8),
-                Text(denLabel, style: TextStyle(color: context.textDark, fontSize: 14, fontWeight: FontWeight.w600)),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(numLabel, style: TextStyle(color: context.textMuted, fontSize: 13)),
-              Text('₦$numVal', style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800, fontSize: 13)),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Divider(color: context.divider, height: 1),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(denLabel, style: TextStyle(color: context.textMuted, fontSize: 13)),
-              Text('₦$denVal', style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800, fontSize: 13)),
-            ],
-          ),
-        ],
-      );
-    }
-
-    final nonCompliantRev = latest != null && latest['non_compliant_income_ratio'] != null 
-        ? _parseDouble(latest['non_compliant_income_ratio']) 
-        : (isNonHalal ? 100.0 : 0.0);
-    final compliantRev = 100.0 - nonCompliantRev;
-
-    Widget buildSegmentStat(String title, double val, Color color) {
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(width: 4, height: 32, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(4))),
-          const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: TextStyle(color: context.textMuted, fontSize: 10, fontWeight: FontWeight.w800)),
-              const SizedBox(height: 2),
-              Text('${val.toStringAsFixed(2)}%', style: TextStyle(color: context.textDark, fontWeight: FontWeight.w900, fontSize: 14)),
-            ],
-          ),
-        ],
-      );
-    }
-
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: context.bgAlt,
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Row(
-                    children: [
-                      Icon(Icons.shield_rounded, color: Colors.orangeAccent, size: 22),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'AAOIFI Screening Breakdown',
-                          style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800, fontSize: 13),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: bg.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(30),
-                    border: Border.all(color: bg.withValues(alpha: 0.3)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(isHalal ? Icons.check_circle : (isNonHalal ? Icons.cancel : Icons.info), color: statusColor, size: 12),
-                      const SizedBox(width: 4),
-                      Flexible(
-                        child: Text(label, 
-                          style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.w800), textAlign: TextAlign.center),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Divider(color: context.divider, height: 1),
-
-          // Referenced Financial Data Used
-          Container(
-            width: double.infinity,
-            margin: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: context.bg,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: context.divider),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.analytics_outlined, color: context.primary, size: 16),
-                    const SizedBox(width: 6),
-                    Text('REFERENCED FINANCIAL DATA USED', style: TextStyle(color: context.textMuted, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.8)),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Market Cap', style: TextStyle(color: context.textMuted, fontSize: 11, fontWeight: FontWeight.w600)),
-                          const SizedBox(height: 2),
-                          Text(marketCap > 0 ? '₦${(marketCap/1000000000).toStringAsFixed(2)}B' : 'N/A', style: TextStyle(color: context.textDark, fontSize: 13, fontWeight: FontWeight.w800)),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Total Debt', style: TextStyle(color: context.textMuted, fontSize: 11, fontWeight: FontWeight.w600)),
-                          const SizedBox(height: 2),
-                          Text(debt > 0 ? '₦${(debt/1000000000).toStringAsFixed(2)}B' : '₦0', style: TextStyle(color: context.textDark, fontSize: 13, fontWeight: FontWeight.w800)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Cash & Sec.', style: TextStyle(color: context.textMuted, fontSize: 11, fontWeight: FontWeight.w600)),
-                          const SizedBox(height: 2),
-                          Text(cash > 0 ? '₦${(cash/1000000000).toStringAsFixed(2)}B' : '₦0', style: TextStyle(color: context.textDark, fontSize: 13, fontWeight: FontWeight.w800)),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Total Revenue', style: TextStyle(color: context.textMuted, fontSize: 11, fontWeight: FontWeight.w600)),
-                          const SizedBox(height: 2),
-                          Text(rawRevenue > 0 ? '₦${(rawRevenue/1000000000).toStringAsFixed(2)}B' : 'N/A', style: TextStyle(color: context.textDark, fontSize: 13, fontWeight: FontWeight.w800)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-
-          // A. Business Activity
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('A. Business Activity', style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800, fontSize: 15)),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: isBusinessFail ? context.haram.withValues(alpha: 0.15) : context.halal.withValues(alpha: 0.15), 
-                        borderRadius: BorderRadius.circular(20)
-                      ),
-                      child: Text(isBusinessFail ? 'FAIL' : 'PASS', 
-                        style: TextStyle(
-                          color: isBusinessFail ? context.haram : context.halal, 
-                          fontSize: 10, 
-                          fontWeight: FontWeight.w900
-                        )
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  isBusinessFail
-                      ? reason
-                      : "The core business operations of this company have been verified to be in a Halal industry, with no significant involvement in prohibited activities like conventional finance, alcohol, gambling, or tobacco.",
-                  style: TextStyle(color: context.textMuted, fontSize: 13, height: 1.5),
-                ),
-              ],
-            ),
-          ),
-          Divider(color: context.divider, height: 1, indent: 24, endIndent: 24),
-
-          // B. Financial Screen (Impermissible Income)
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Row(
-                        children: [
-                          Icon(isInterestFail ? Icons.cancel : Icons.check_circle, color: isInterestFail ? context.haram : context.halal, size: 20),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text('Financial Screen (Impermissible Income)', style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800, fontSize: 14)),
-                          ),
-                        ]
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text('${interestRatio.toStringAsFixed(2)}%', style: TextStyle(color: isInterestFail ? context.haram : context.halal, fontWeight: FontWeight.w900, fontSize: 15)),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                _buildAaoifiProgressBar(interestRatio, 5.0, isInterestFail),
-                const SizedBox(height: 16),
-                Text('Measures how much of a company\'s income is derived from impermissible sources like interest. According to AAOIFI standards, this should not exceed 5%.', style: TextStyle(color: context.textMuted, fontSize: 13, height: 1.5)),
-                const SizedBox(height: 24),
-                buildCalculationCard('Interest Income', 'Total Revenue', formatAmt(interest), formatAmt(rawRevenue)),
-              ],
-            ),
-          ),
-          Divider(color: context.divider, height: 1, indent: 24, endIndent: 24),
-
-          // C. Interest Bearing Debt
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Row(
-                        children: [
-                          Icon(isDebtFail ? Icons.cancel : Icons.check_circle, color: isDebtFail ? context.haram : context.halal, size: 20),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text('Interest-bearing Debt', style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800, fontSize: 14)),
-                          ),
-                        ]
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text('${debtRatio.toStringAsFixed(2)}%', style: TextStyle(color: isDebtFail ? context.haram : context.halal, fontWeight: FontWeight.w900, fontSize: 15)),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                _buildAaoifiProgressBar(debtRatio, 30.0, isDebtFail),
-                const SizedBox(height: 16),
-                Text('Measures the company\'s exposure to interest-bearing debt relative to its market capitalization. A lower ratio indicates less reliance on debt financing. According to AAOIFI standards, this should not exceed 30%.', style: TextStyle(color: context.textMuted, fontSize: 13, height: 1.5)),
-                const SizedBox(height: 24),
-                buildCalculationCard('Total Debt', 'Market Cap', formatAmt(debt), formatAmt(marketCap)),
-              ],
-            ),
-          ),
-          Divider(color: context.divider, height: 1, indent: 24, endIndent: 24),
-
-          // D. Cash & Securities
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Row(
-                        children: [
-                          Icon(isCashFail ? Icons.cancel : Icons.check_circle, color: isCashFail ? context.haram : context.halal, size: 20),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text('Cash & Securities', style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800, fontSize: 14)),
-                          ),
-                        ]
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text('${cashRatio.toStringAsFixed(2)}%', style: TextStyle(color: isCashFail ? context.haram : context.halal, fontWeight: FontWeight.w900, fontSize: 15)),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                _buildAaoifiProgressBar(cashRatio, 30.0, isCashFail),
-                const SizedBox(height: 16),
-                Text('Measures the company\'s liquid cash and interest-bearing securities relative to its market capitalization. According to AAOIFI standards, this should not exceed 30%.', style: TextStyle(color: context.textMuted, fontSize: 13, height: 1.5)),
-                const SizedBox(height: 24),
-                buildCalculationCard('Cash & Securities', 'Market Cap', formatAmt(cash), formatAmt(marketCap)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildAaoifiProgressBar(double value, double limit, bool isFail) {
     final progress = (value / (limit * 1.5)).clamp(0.0, 1.0);

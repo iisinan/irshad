@@ -18,40 +18,7 @@ class CompanyAvatar extends StatelessWidget {
     this.borderRadius = 12.0,
   });
 
-  @override
-  Widget build(BuildContext context) {
-    if (logoUrl != null && logoUrl!.isNotEmpty) {
-      final isSvg = logoUrl!.toLowerCase().endsWith('.svg');
-      
-      return Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(borderRadius),
-          border: Border.all(color: context.divider, width: 1),
-          image: isSvg ? null : DecorationImage(
-            image: NetworkImage(logoUrl!),
-            fit: BoxFit.contain,
-          ),
-        ),
-        child: isSvg 
-            ? ClipRRect(
-                borderRadius: BorderRadius.circular(borderRadius - 1),
-                child: Padding(
-                  padding: const EdgeInsets.all(2.0),
-                  child: SvgPicture.network(
-                    logoUrl!,
-                    fit: BoxFit.contain,
-                    placeholderBuilder: (context) => const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                  ),
-                ),
-              )
-            : null,
-      );
-    }
-
-    // Deterministic color based on symbol
+  Widget _buildInitials(BuildContext context) {
     final colors = [
       const Color(0xFF6366F1), // Indigo
       const Color(0xFF14B8A6), // Teal
@@ -62,13 +29,12 @@ class CompanyAvatar extends StatelessWidget {
       const Color(0xFF10B981), // Emerald
       const Color(0xFFEF4444), // Red
     ];
-    
+
     int hash = 0;
     for (int i = 0; i < symbol.length; i++) {
       hash = symbol.codeUnitAt(i) + ((hash << 5) - hash);
     }
-    final colorIndex = hash.abs() % colors.length;
-    final bgColor = colors[colorIndex];
+    final bgColor = colors[hash.abs() % colors.length];
     final initials = symbol.length >= 2 ? symbol.substring(0, 2) : symbol;
 
     return Container(
@@ -88,5 +54,59 @@ class CompanyAvatar extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (logoUrl != null && logoUrl!.isNotEmpty) {
+      final isSvg = logoUrl!.toLowerCase().endsWith('.svg');
+
+      if (isSvg) {
+        return Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(borderRadius),
+            border: Border.all(color: context.divider, width: 1),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(borderRadius - 1),
+            child: Padding(
+              padding: const EdgeInsets.all(2.0),
+              child: SvgPicture.network(
+                logoUrl!,
+                fit: BoxFit.contain,
+                placeholderBuilder: (context) =>
+                    const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+              ),
+            ),
+          ),
+        );
+      }
+
+      // PNG / raster image — use Image.network with errorBuilder so 404s
+      // fall back silently to the initials avatar without throwing exceptions.
+      return SizedBox(
+        width: size,
+        height: size,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(borderRadius),
+          child: Image.network(
+            logoUrl!,
+            width: size,
+            height: size,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) => _buildInitials(context),
+            loadingBuilder: (context, child, progress) {
+              if (progress == null) return child;
+              return _buildInitials(context);
+            },
+          ),
+        ),
+      );
+    }
+
+    return _buildInitials(context);
   }
 }

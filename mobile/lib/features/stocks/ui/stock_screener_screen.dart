@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/api/api_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/company_avatar.dart';
 import 'stock_detail_screen.dart';
+import '../providers/stock_provider.dart';
 
 class StockScreenerScreen extends StatefulWidget {
   const StockScreenerScreen({super.key});
@@ -26,11 +28,20 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
   bool _hasMore = true;
   final ScrollController _scrollController = ScrollController();
 
+  bool get _isDefaultFilter =>
+      _selectedStatuses.isEmpty &&
+      _selectedSectors.isEmpty &&
+      _minMarketCap == null &&
+      _maxPe == null;
+
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    _applyFilters();
+    // If it's default, we don't need to apply filters, the Provider handles it.
+    if (!_isDefaultFilter) {
+      _applyFilters();
+    }
   }
 
   @override
@@ -42,8 +53,15 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
 
   void _onScroll() {
     if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
-      if (!_isLoading && _hasMore) {
-        _loadMore();
+      if (_isDefaultFilter) {
+        final provider = Provider.of<StockProvider>(context, listen: false);
+        if (!provider.isLoading) {
+          provider.fetchNgxStocks(loadMore: true);
+        }
+      } else {
+        if (!_isLoading && _hasMore) {
+          _loadMore();
+        }
       }
     }
   }
@@ -76,13 +94,21 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
   }
 
   Future<void> _applyFilters() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = '';
-      _currentPage = 1;
-      _hasMore = true;
-      _results.clear();
-    });
+    if (_isDefaultFilter) {
+      // Just rely on StockProvider, trigger a refresh if needed
+      Provider.of<StockProvider>(context, listen: false).fetchNgxStocks();
+      return;
+    }
+
+    if (mounted) {
+      setState(() {
+        _errorMessage = '';
+        _currentPage = 1;
+        _hasMore = true;
+        _results.clear();
+        _isLoading = true;
+      });
+    }
 
     try {
       final Map<String, dynamic> queryParams = {'page': _currentPage, 'per_page': 10};
@@ -94,19 +120,19 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
       final response = await ApiService().get('stocks/ngx', queryParameters: queryParams);
       if (response.statusCode == 200 && response.data['status'] == 'success') {
         final data = response.data['data']?['data'] ?? response.data['data'] ?? [];
+        
         if (mounted) {
           setState(() {
             _results = data;
-            // Filter out 0 prices just in case
             _results = _results.where((s) => (double.tryParse(s['latest_price']?.toString() ?? '0') ?? 0.0) > 0).toList();
             _hasMore = data.length >= 10;
           });
         }
       } else {
-        if (mounted) setState(() => _errorMessage = 'Failed to load screener data.');
+        if (mounted && _results.isEmpty) setState(() => _errorMessage = 'Failed to load screener data.');
       }
     } catch (e) {
-      if (mounted) setState(() => _errorMessage = 'Error: $e');
+      if (mounted && _results.isEmpty) setState(() => _errorMessage = 'Error: $e');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -273,27 +299,33 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<StockProvider>(context);
+    final displayList = _isDefaultFilter ? provider.ngxStocks : _results;
+    final isLoading = _isDefaultFilter ? (provider.isLoading && provider.ngxStocks.isEmpty) : (_isLoading && _results.isEmpty);
+    final errorMessage = _isDefaultFilter ? (provider.error ?? '') : _errorMessage;
+    final hasMore = _isDefaultFilter ? true : _hasMore; // provider handles its own pagination
+
     return Column(
       children: [
         _buildFilterBar(),
         Divider(height: 1, thickness: 1, color: context.divider),
         Expanded(
-          child: _isLoading && _results.isEmpty
+          child: isLoading
               ? Center(child: CircularProgressIndicator(color: context.primary))
-              : _errorMessage.isNotEmpty
-                  ? Center(child: Text(_errorMessage, style: TextStyle(color: context.haram)))
-                  : _results.isEmpty
+              : errorMessage.isNotEmpty
+                  ? Center(child: Text(errorMessage, style: TextStyle(color: context.haram)))
+                  : displayList.isEmpty
                       ? _buildEmptyState()
                       : RefreshIndicator(
-                          onRefresh: _applyFilters,
+                          onRefresh: _isDefaultFilter ? () => provider.fetchNgxStocks() : _applyFilters,
                           color: context.primary,
                           backgroundColor: context.bgAlt,
                           child: ListView.builder(
                             controller: _scrollController,
-                            itemCount: _results.length + (_hasMore ? 1 : 0),
+                            itemCount: displayList.length + ((!_isDefaultFilter && hasMore) || (_isDefaultFilter && provider.isLoading) ? 1 : 0),
                             padding: const EdgeInsets.only(bottom: 100, top: 4),
                             itemBuilder: (context, index) {
-                              if (index == _results.length) {
+                              if (index == displayList.length) {
                                 return Center(child: Padding(padding: const EdgeInsets.all(16), child: CircularProgressIndicator(color: context.primary)));
                               }
                               return TweenAnimationBuilder(
@@ -309,7 +341,7 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
                                     ),
                                   );
                                 },
-                                child: _buildStockItem(_results[index]),
+                                child: _buildStockItem(displayList[index]),
                               );
                             },
                           ),

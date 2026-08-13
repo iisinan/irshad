@@ -289,6 +289,7 @@ class PortfolioController extends Controller
         });
 
         return $this->success($data);
+    }
     public function purify(Request $request): JsonResponse
     {
         $request->validate([

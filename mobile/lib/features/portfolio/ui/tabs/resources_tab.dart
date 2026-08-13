@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 import 'package:irshad_mobile/core/api/api_service.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:hive/hive.dart';
+import 'dart:convert';
 
 class ResourcesTab extends StatefulWidget {
   const ResourcesTab({super.key});
@@ -23,17 +25,46 @@ class _ResourcesTabState extends State<ResourcesTab> {
   }
 
   Future<void> _fetchResources() async {
+    // 1. Try cache first
+    try {
+      final box = await Hive.openBox('resourcesBox');
+      final cachedStr = box.get('resources_data');
+      if (cachedStr != null) {
+        final Map<String, dynamic> cached = jsonDecode(cachedStr);
+        final int expiry = cached['expiry'] ?? 0;
+        if (DateTime.now().millisecondsSinceEpoch < expiry) {
+          if (mounted) {
+            setState(() {
+              _resources = cached['data'] ?? [];
+              _isLoading = false;
+            });
+          }
+        }
+      }
+    } catch (_) {}
+
+    // 2. Fetch live data silently
     try {
       final response = await ApiService().get('resources');
       if (response.statusCode == 200) {
         if (mounted) {
+          final data = response.data['data'] ?? [];
+          
+          try {
+            final box = await Hive.openBox('resourcesBox');
+            await box.put('resources_data', jsonEncode({
+              'data': data,
+              'expiry': DateTime.now().add(const Duration(hours: 24)).millisecondsSinceEpoch
+            }));
+          } catch (_) {}
+
           setState(() {
-            _resources = response.data['data'] ?? [];
+            _resources = data;
             _isLoading = false;
           });
         }
       } else {
-        if (mounted) {
+        if (mounted && _resources.isEmpty) {
           setState(() {
             _error = 'Failed to fetch resources. Status: ${response.statusCode}';
             _isLoading = false;
@@ -41,7 +72,7 @@ class _ResourcesTabState extends State<ResourcesTab> {
         }
       }
     } catch (e) {
-      if (mounted) {
+      if (mounted && _resources.isEmpty) {
         setState(() {
           _error = 'Error loading resources: $e';
           _isLoading = false;

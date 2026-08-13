@@ -59,11 +59,17 @@ class StockRepository {
     try {
       final response = await _apiService.get('stocks/ngx?page=$page');
       if (response.statusCode == 200) {
-        // Return the whole pagination object wrapped in data
-        return response.data['data'];
+        final data = response.data['data'];
+        if (data is List) {
+          // The backend returned a flat list of all stocks
+          return {'data': data, 'last_page': 1};
+        } else if (data is Map<String, dynamic>) {
+          // The backend returned a Laravel paginated object
+          return data;
+        }
       }
     } catch (e) {
-      // Handle error
+      debugPrint('Error fetching ngx stocks: $e');
     }
     return {'data': [], 'last_page': 1};
   }

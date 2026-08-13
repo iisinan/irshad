@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 import 'package:irshad_mobile/core/api/api_service.dart';
+import 'package:hive/hive.dart';
+import 'dart:convert';
 
 class UpdatesTab extends StatefulWidget {
   const UpdatesTab({super.key});
@@ -21,17 +23,46 @@ class _UpdatesTabState extends State<UpdatesTab> {
   }
 
   Future<void> _fetchNews() async {
+    // 1. Try cache first
+    try {
+      final box = await Hive.openBox('updatesBox');
+      final cachedStr = box.get('news_data');
+      if (cachedStr != null) {
+        final Map<String, dynamic> cached = jsonDecode(cachedStr);
+        final int expiry = cached['expiry'] ?? 0;
+        if (DateTime.now().millisecondsSinceEpoch < expiry) {
+          if (mounted) {
+            setState(() {
+              _news = cached['data'] ?? [];
+              _isLoading = false;
+            });
+          }
+        }
+      }
+    } catch (_) {}
+
+    // 2. Fetch live data silently
     try {
       final response = await ApiService().get('updates/news');
       if (response.statusCode == 200) {
         if (mounted) {
+          final data = response.data['data'] ?? [];
+          
+          try {
+            final box = await Hive.openBox('updatesBox');
+            await box.put('news_data', jsonEncode({
+              'data': data,
+              'expiry': DateTime.now().add(const Duration(hours: 1)).millisecondsSinceEpoch
+            }));
+          } catch (_) {}
+
           setState(() {
-            _news = response.data['data'] ?? [];
+            _news = data;
             _isLoading = false;
           });
         }
       } else {
-        if (mounted) {
+        if (mounted && _news.isEmpty) {
           setState(() {
             _error = 'Failed to fetch news';
             _isLoading = false;
@@ -39,7 +70,7 @@ class _UpdatesTabState extends State<UpdatesTab> {
         }
       }
     } catch (e) {
-      if (mounted) {
+      if (mounted && _news.isEmpty) {
         setState(() {
           _error = 'Error loading news';
           _isLoading = false;

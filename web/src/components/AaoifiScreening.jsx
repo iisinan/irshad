@@ -339,7 +339,8 @@ const AaoifiScreening = () => {
   const hasPurification= finalStatus==='halal'&&!!report.stage1?.purification_required;
   const purPct         = (parseFloat(report.stage1?.haram_revenue_percent)||0).toFixed(2);
   const stage1Status   = report.stage1?.status||(businessFailed?'non-halal':'halal');
-  const showFinancials = (finalStatus==='halal'||['pass','halal'].includes(report.business_status?.toLowerCase()))&&(debtRatio!==null||report.impermissible_income_ratio!=null||cashRatio!==null);
+  const hasFinancialData = fd && Object.keys(fd).length > 0 && (totalAssets > 0 || totalDebt > 0 || totalRevenue > 0 || cashAndSec > 0 || (parseFloat(fd.market_cap)||0) > 0);
+  const showFinancials = hasFinancialData && (finalStatus==='halal'||['pass','halal'].includes(report.business_status?.toLowerCase()))&&(debtRatio!==null||report.impermissible_income_ratio!=null||cashRatio!==null);
   const latestPrice    = parseFloat(stock?.latest_price||report.latest_price)||0;
   let stage1ReasonRaw = report.stage1?.reason || report.business_reasoning;
   if (typeof stage1ReasonRaw === 'object' && stage1ReasonRaw !== null) {

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:hive/hive.dart';
+import 'dart:convert';
 import '../../../../core/api/api_service.dart';
 
 class PortfolioProvider extends ChangeNotifier {
@@ -38,8 +40,27 @@ class PortfolioProvider extends ChangeNotifier {
     _isLoading = true;
     _error = null;
     _isGuest = false;
-    notifyListeners();
+    
+    // 1. Load instantly from cache
+    try {
+      final box = await Hive.openBox('portfolioBox');
+      final cachedStr = box.get('portfolio_data');
+      if (cachedStr != null) {
+        final Map<String, dynamic> cached = jsonDecode(cachedStr);
+        final int expiry = cached['expiry'] ?? 0;
+        if (DateTime.now().millisecondsSinceEpoch < expiry) {
+          final data = cached['data'];
+          _summary = Map<String, dynamic>.from(data['summary'] ?? {});
+          _holdings = List<dynamic>.from(data['holdings'] ?? []);
+          _isLoading = false;
+          notifyListeners();
+        }
+      }
+    } catch (_) {}
 
+    if (_isLoading) notifyListeners(); // only notify if we didn't just notify from cache
+
+    // 2. Fetch live data silently
     try {
       final response = await ApiService().get('portfolio');
       if (response.data['status'] == 'success') {
@@ -51,11 +72,20 @@ class PortfolioProvider extends ChangeNotifier {
           'health_percentage': num.tryParse(summaryData['health_percentage']?.toString() ?? '100')?.toDouble() ?? 100.0,
         };
         _holdings = response.data['data']['holdings'] ?? [];
+        
+        // Save to cache
+        try {
+          final box = await Hive.openBox('portfolioBox');
+          await box.put('portfolio_data', jsonEncode({
+            'data': response.data['data'],
+            'expiry': DateTime.now().add(const Duration(minutes: 30)).millisecondsSinceEpoch
+          }));
+        } catch (_) {}
       } else {
-        _error = response.data['message'] ?? 'Failed to fetch portfolio';
+        if (_holdings.isEmpty) _error = response.data['message'] ?? 'Failed to fetch portfolio';
       }
     } catch (e) {
-      _error = e.toString();
+      if (_holdings.isEmpty) _error = e.toString();
     } finally {
       _isLoading = false;
       notifyListeners();

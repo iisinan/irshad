@@ -70,9 +70,11 @@ class ScrapeStockNewsCommand extends Command
 
                             // Clean up title (remove the " - Source" suffix if it exists)
                             $title = preg_replace('/ - '.preg_quote($sourceName, '/').'$/', '', $title);
+                            $title = mb_convert_encoding($title, 'UTF-8', 'UTF-8');
 
                             $description = strip_tags((string) $item->description);
                             $excerpt = substr($description, 0, 200).(strlen($description) > 200 ? '...' : '');
+                            $excerpt = mb_convert_encoding($excerpt, 'UTF-8', 'UTF-8');
 
                             $publishedAt = null;
                             try {
