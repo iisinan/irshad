@@ -37,15 +37,7 @@ export const TourProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    // Determine if the tour should auto-start based on user preferences
-    if (user && steps.length > 0) {
-      const prefs = user.preferences || {};
-      
-      if (!prefs.has_completed_tour && window.location.pathname.startsWith('/portfolio')) {
-        const timer = setTimeout(() => setRun(true), 1500);
-        return () => clearTimeout(timer);
-      }
-    }
+    // Auto-start disabled per user request
   }, [user, steps.length]);
 
   const handleJoyrideCallback = async (data) => {
