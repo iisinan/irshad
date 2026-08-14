@@ -15,42 +15,39 @@ export const TourProvider = ({ children }) => {
   const [steps, setSteps] = useState([]);
 
   useEffect(() => {
-    // Determine if the tour should run based on the cached preferences in the user object
-    if (user) {
+    // Always fetch tour data so it's ready if the user manually triggers it
+    const fetchTourData = async () => {
+      try {
+        const cachedData = localStorage.getItem('irshad_tour_data');
+        if (cachedData) {
+          setSteps(JSON.parse(cachedData));
+        }
+
+        const response = await fetch('/tourData.json');
+        const data = await response.json();
+        
+        setSteps(data);
+        localStorage.setItem('irshad_tour_data', JSON.stringify(data));
+      } catch (error) {
+        console.error('Failed to load tour data:', error);
+      }
+    };
+
+    fetchTourData();
+  }, []);
+
+  useEffect(() => {
+    // Determine if the tour should auto-start based on user preferences
+    if (user && steps.length > 0) {
       const prefs = user.preferences || {};
-      
-      // Check if user is a new user (account created within the last 24 hours)
       const isNewUser = user.created_at ? (new Date() - new Date(user.created_at)) < 24 * 60 * 60 * 1000 : true;
       
-      // Only auto-start for new users who haven't completed the tour, and only on the portfolio page
       if (isNewUser && !prefs.has_completed_tour && window.location.pathname.startsWith('/portfolio')) {
-        
-        // Fetch or load cached tour data
-        const fetchTourData = async () => {
-          try {
-            const cachedData = localStorage.getItem('irshad_tour_data');
-            if (cachedData) {
-              setSteps(JSON.parse(cachedData));
-            }
-
-            // Always fetch in background to keep cache fresh without blocking
-            const response = await fetch('/tourData.json');
-            const data = await response.json();
-            
-            setSteps(data);
-            localStorage.setItem('irshad_tour_data', JSON.stringify(data));
-          } catch (error) {
-            console.error('Failed to load tour data:', error);
-          }
-        };
-
-        fetchTourData().then(() => {
-          // Start tour after a brief delay to allow UI to render completely
-          setTimeout(() => setRun(true), 1500);
-        });
+        const timer = setTimeout(() => setRun(true), 1500);
+        return () => clearTimeout(timer);
       }
     }
-  }, [user]);
+  }, [user, steps.length]);
 
   const handleJoyrideCallback = async (data) => {
     const { status } = data;
