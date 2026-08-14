@@ -50,6 +50,7 @@ Route::prefix('v1')->group(function () {
     Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])->name('verification.verify');
     Route::get('/clear-cache-temp', function () {
         Artisan::call('cache:clear');
+        Cache::tags(['stocks'])->flush();
 
         return 'Cache cleared';
     });

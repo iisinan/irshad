@@ -381,6 +381,10 @@ const AaoifiScreening = () => {
     }
   }
 
+  if (cleanStatusReason) {
+    cleanStatusReason = cleanStatusReason.replace(/^Scholar Override:\s*/i, '');
+  }
+
   let doubtfulTag = 'Requires Further Review';
   if (finalStatus === 'doubtful' && cleanStatusReason) {
     if (cleanStatusReason.includes('|||')) {
