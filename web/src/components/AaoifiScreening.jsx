@@ -265,6 +265,8 @@ const AaoifiScreening = () => {
     }
   };
 
+  const [alertLoading, setAlertLoading] = useState(false);
+
   const handleSetAlert = async () => {
     try {
       setAlertLoading(true);
