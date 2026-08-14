@@ -414,9 +414,11 @@ class _AaoifiScreeningScreenState extends State<AaoifiScreeningScreen> with Sing
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildDetailRow("Principal Business", aiData['principal_business']?.toString() ?? "N/A"),
-          const SizedBox(height: 8),
-          if (aiData['prohibited_activities'] != null && (aiData['prohibited_activities'] as List).isNotEmpty) ...[
+          if (aiData is Map && aiData['principal_business'] != null) ...[
+            _buildDetailRow("Principal Business", aiData['principal_business']?.toString() ?? "N/A"),
+            const SizedBox(height: 8),
+          ],
+          if (aiData is Map && aiData['prohibited_activities'] != null && (aiData['prohibited_activities'] as List).isNotEmpty) ...[
             const Text(
               "Prohibited Activities Found:",
               style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
@@ -433,7 +435,12 @@ class _AaoifiScreeningScreenState extends State<AaoifiScreeningScreen> with Sing
           ],
           const Text("Reasoning:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
           const SizedBox(height: 4),
-          Text(aiData['reasoning']?.toString() ?? "N/A", style: const TextStyle(fontSize: 13, height: 1.4)),
+          Text(
+            (aiData is String) 
+                ? aiData 
+                : (aiData is Map ? (aiData['summary']?.toString() ?? aiData['reasoning']?.toString() ?? "N/A") : "N/A"),
+            style: const TextStyle(fontSize: 13, height: 1.4),
+          ),
         ],
       ),
     );
@@ -598,7 +605,7 @@ class _AaoifiScreeningScreenState extends State<AaoifiScreeningScreen> with Sing
         leading: Icon(Icons.plagiarism_outlined, color: context.primary),
         tilePadding: EdgeInsets.zero,
         children: [
-          _buildDetailRow("Irshad Confidence Score", "${_report!['business_reasoning']?['confidence_score'] ?? 'N/A'}%"),
+          _buildDetailRow("Irshad Confidence Score", "${(_report!['business_reasoning'] is Map) ? (_report!['business_reasoning']['confidence_score'] ?? 'N/A') : 'N/A'}%"),
           const SizedBox(height: 16),
           if (_report!['financial_data_used']?['source_links'] != null && 
               (_report!['financial_data_used']['source_links'] as List).isNotEmpty) ...[

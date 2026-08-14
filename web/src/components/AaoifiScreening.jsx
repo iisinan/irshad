@@ -239,7 +239,7 @@ const AaoifiScreening = () => {
   useEffect(()=>{ if(!isInitialLoad)return; const t=setInterval(()=>setStepIndex(p=>p<LOADING_STEPS.length-1?p+1:p),340); return()=>clearInterval(t); },[isInitialLoad]);
 
   const report  = res?.data;
-  const stock   = stockRes?.data;
+  const stock   = stockRes?.data?.data || stockRes?.data;
   const error   = queryError 
     ? (queryError.response?.status === 404 
         ? `Stock ticker "${symbol}" was not found. Please verify the symbol and try again.` 
@@ -343,8 +343,17 @@ const AaoifiScreening = () => {
   const showFinancials = hasFinancialData && (finalStatus==='halal'||['pass','halal'].includes(report.business_status?.toLowerCase()))&&(debtRatio!==null||report.impermissible_income_ratio!=null||cashRatio!==null);
   const latestPrice    = parseFloat(stock?.latest_price||report.latest_price)||0;
   let stage1ReasonRaw = report.stage1?.reason || report.business_reasoning;
+  if (typeof stage1ReasonRaw === 'string' && stage1ReasonRaw.trim().startsWith('{')) {
+    try {
+      const parsed = JSON.parse(stage1ReasonRaw);
+      stage1ReasonRaw = parsed.summary || parsed.justification || parsed.reason || stage1ReasonRaw;
+    } catch (e) {}
+  }
   if (typeof stage1ReasonRaw === 'object' && stage1ReasonRaw !== null) {
-    stage1ReasonRaw = stage1ReasonRaw.justification || stage1ReasonRaw.reason || '';
+    stage1ReasonRaw = stage1ReasonRaw.summary || stage1ReasonRaw.justification || stage1ReasonRaw.reason || '';
+  }
+  if (typeof stage1ReasonRaw === 'string') {
+    stage1ReasonRaw = stage1ReasonRaw.replace(/Note:s*This company is currently not trading on the NGX.?/gi, '').trim();
   }
   let cleanStage1Reason = formatAppJustification(stage1ReasonRaw, isNonHalal);
   if (!businessFailed && finalStatus !== 'doubtful') {

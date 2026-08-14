@@ -102,9 +102,14 @@ class StockController extends Controller
             ])->where('symbol', $symbol)->firstOrFail();
 
             // Map the FinancialScreening into financials for legacy mobile app compatibility
-            $existingScreening = FinancialScreening::where('company_ticker', $symbol)
-                ->orderBy('created_at', 'desc')
-                ->first();
+            $existingScreening = null;
+            try {
+                $existingScreening = FinancialScreening::where('company_ticker', $symbol)
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+            } catch (\Throwable $e) {
+                // Table might not exist, ignore
+            }
 
             if ($existingScreening) {
                 $calc   = $existingScreening->calculation_results ?? [];
@@ -174,9 +179,9 @@ class StockController extends Controller
                 'status'        => $lastPaidDividend->status,
             ] : null;
 
-            // AAOIFI business_status + purification flags
+            // AAOIFI business_status + purification flags + reasoning
             $aaoifiScreening = AaoifiScreening::where('company_id', $company->id)
-                ->select('business_status', 'impermissible_income_ratio', 'impermissible_income_status')
+                ->select('business_status', 'impermissible_income_ratio', 'impermissible_income_status', 'business_reasoning')
                 ->first();
 
             $stockArray['business_status'] = $aaoifiScreening?->business_status ?? null;
@@ -195,6 +200,20 @@ class StockController extends Controller
 
                 $stockArray['status']['purification_required'] = ($stockArray['status']['status'] ?? '') === 'halal' && $ratioPct > 0;
                 $stockArray['status']['haram_revenue_percent'] = round($ratioPct, 4);
+                
+                $bReason = $aaoifiScreening?->business_reasoning;
+                if (is_array($bReason)) {
+                    $bReason = $bReason['summary'] ?? $bReason['justification'] ?? $bReason['reason'] ?? $bReason['reasoning'] ?? json_encode($bReason);
+                } elseif (is_string($bReason)) {
+                    $decoded = json_decode($bReason, true);
+                    if (is_array($decoded) && (isset($decoded['summary']) || isset($decoded['justification']) || isset($decoded['reason']) || isset($decoded['reasoning']))) {
+                        $bReason = $decoded['summary'] ?? $decoded['justification'] ?? $decoded['reason'] ?? $decoded['reasoning'];
+                    }
+                }
+                if (empty($stockArray['status']['reason']) && !empty($bReason)) {
+                    $stockArray['status']['reason'] = (string) $bReason;
+                }
+
                 // Always expose verified_by_scholar so the mobile app knows not to override a scholar-verified verdict
                 $stockArray['status']['verified_by_scholar'] = (bool) ($stockArray['status']['verified_by_scholar'] ?? false);
             }
@@ -536,11 +555,11 @@ class StockController extends Controller
                 $bReasonRaw = $aaoifiScreening->business_reasoning;
                 $businessReason = '';
                 if (is_array($bReasonRaw)) {
-                    $businessReason = $bReasonRaw['justification'] ?? $bReasonRaw['reason'] ?? $bReasonRaw['reasoning'] ?? $bReasonRaw['evidence'] ?? json_encode($bReasonRaw);
+                    $businessReason = $bReasonRaw['justification'] ?? $bReasonRaw['reason'] ?? $bReasonRaw['reasoning'] ?? $bReasonRaw['summary'] ?? $bReasonRaw['evidence'] ?? json_encode($bReasonRaw);
                 } elseif (is_string($bReasonRaw)) {
                     $decoded = json_decode($bReasonRaw, true);
-                    if (is_array($decoded) && (isset($decoded['justification']) || isset($decoded['reason']) || isset($decoded['reasoning']))) {
-                        $businessReason = $decoded['justification'] ?? $decoded['reason'] ?? $decoded['reasoning'];
+                    if (is_array($decoded) && (isset($decoded['justification']) || isset($decoded['reason']) || isset($decoded['reasoning']) || isset($decoded['summary']))) {
+                        $businessReason = $decoded['justification'] ?? $decoded['reason'] ?? $decoded['reasoning'] ?? $decoded['summary'];
                     } else {
                         $businessReason = $bReasonRaw;
                     }
