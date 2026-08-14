@@ -122,7 +122,7 @@ function EditHoldingModal({ holding, onClose, onSuccess }) {
 }
 
 /* ─── Holding Card (Sleek List Item) ────────────────────────── */
-function HoldingRow({ holding, onDelete, onEdit }) {
+function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
   const navigate = useNavigate();
   const [hov, setHov] = useState(false);
 
@@ -210,14 +210,23 @@ function HoldingRow({ holding, onDelete, onEdit }) {
       {/* Actions */}
       <div style={{ display: 'flex', gap: '8px', paddingLeft: '24px' }} onClick={e => e.stopPropagation()}>
         {badge.text === 'Shariah Compliant w/ Purification' && (
-          <button 
-            onClick={() => navigate('/portfolio#purification', { state: { action: 'purify', targetSymbol: holding.symbol } })}
-            style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.1) 0%, rgba(245,158,11,0.2) 100%)', border: '1px solid rgba(245,158,11,0.3)', color: '#D97706', cursor: 'pointer', padding: '8px 12px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, fontSize: '0.7rem', transition: 'all 0.2s' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(245,158,11,0.2)'; e.currentTarget.style.borderColor = 'rgba(245,158,11,0.4)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'linear-gradient(135deg, rgba(245,158,11,0.1) 0%, rgba(245,158,11,0.2) 100%)'; e.currentTarget.style.borderColor = 'rgba(245,158,11,0.3)'; }}
-          >
-            <Droplet size={13} /> Purify Now
-          </button>
+          Number(holding.purification_due || 0) === 0 && hasBeenPurified ? (
+            <button 
+              disabled
+              style={{ background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.3)', color: 'var(--halal)', cursor: 'default', padding: '8px 12px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, fontSize: '0.7rem' }}
+            >
+              <ShieldCheck size={13} /> Purified
+            </button>
+          ) : (
+            <button 
+              onClick={(e) => { e.stopPropagation(); navigate('/portfolio#purification', { state: { action: 'purify', targetSymbol: holding.symbol } }); }}
+              style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.1) 0%, rgba(245,158,11,0.2) 100%)', border: '1px solid rgba(245,158,11,0.3)', color: '#D97706', cursor: 'pointer', padding: '8px 12px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, fontSize: '0.7rem', transition: 'all 0.2s' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(245,158,11,0.2)'; e.currentTarget.style.borderColor = 'rgba(245,158,11,0.4)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'linear-gradient(135deg, rgba(245,158,11,0.1) 0%, rgba(245,158,11,0.2) 100%)'; e.currentTarget.style.borderColor = 'rgba(245,158,11,0.3)'; }}
+            >
+              <Droplet size={13} /> Purify Now
+            </button>
+          )
         )}
         <button 
           onClick={() => onEdit(holding)}
@@ -246,6 +255,7 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
 
   const summary         = data?.summary || {};
   const holdings        = data?.holdings || [];
+  const purifications   = data?.purifications || [];
   const totalBalance    = summary.total_balance    || 0;
   const compliance      = summary.health_percentage ?? 100;
   const isHoldingHalal = h => !!h.is_halal || ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(h.symbol);
@@ -479,7 +489,7 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
             }}
           >
             {displayHoldings.map((h) => (
-              <HoldingRow key={h.id} holding={h} onDelete={handleDelete} onEdit={setEditingHolding}/>
+              <HoldingRow key={h.id} holding={h} onDelete={handleDelete} onEdit={setEditingHolding} hasBeenPurified={purifications.some(p => p.symbol === h.symbol)} />
             ))}
           </div>
         )}
