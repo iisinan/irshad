@@ -40,9 +40,8 @@ export const TourProvider = ({ children }) => {
     // Determine if the tour should auto-start based on user preferences
     if (user && steps.length > 0) {
       const prefs = user.preferences || {};
-      const isNewUser = user.created_at ? (new Date() - new Date(user.created_at)) < 24 * 60 * 60 * 1000 : true;
       
-      if (isNewUser && !prefs.has_completed_tour && window.location.pathname.startsWith('/portfolio')) {
+      if (!prefs.has_completed_tour && window.location.pathname.startsWith('/portfolio')) {
         const timer = setTimeout(() => setRun(true), 1500);
         return () => clearTimeout(timer);
       }
