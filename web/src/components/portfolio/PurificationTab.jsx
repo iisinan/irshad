@@ -42,9 +42,9 @@ const CHARITIES = [
   },
   {
     id: 6,
-    name: "Ummahatil Yateema Foundation",
-    bank: "Unity Bank: 0023098745",
-    contact: "Whatsapp- 08033685115"
+    name: "Ummahatul Yateem Foundation",
+    bank: "Providus/Unity: 0023098745",
+    contact: "Whatsapp- 07057323225"
   },
   {
     id: 7,
