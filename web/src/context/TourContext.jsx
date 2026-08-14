@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Joyride, STATUS } from 'react-joyride';
 import { useAuth } from './AuthContext';
-import axios from 'axios';
+import { updateProfile } from '../services/api';
 import { Compass } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -72,7 +72,7 @@ export const TourProvider = ({ children }) => {
           if (!user.preferences) user.preferences = {};
           user.preferences.has_completed_tour = true;
           
-          await axios.put('/api/profile', {
+          await updateProfile({
             preferences: { has_completed_tour: true }
           });
         } catch (error) {
