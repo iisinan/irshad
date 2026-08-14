@@ -545,8 +545,9 @@ const AaoifiScreening = () => {
             <button className="hover-lift" onClick={handleSetAlert} disabled={alertLoading} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background: hasAlert ? 'var(--primary-50)' : 'var(--bg)',border:'1px solid ' + (hasAlert ? 'var(--primary)' : 'var(--border)'),borderRadius:12,cursor:alertLoading ? 'not-allowed' : 'pointer',fontWeight:700,color: hasAlert ? 'var(--primary)' : 'var(--text-dark)',fontSize:'0.8rem',boxShadow: hasAlert ? '0 4px 12px var(--primary-50)' : 'var(--shadow-sm)', opacity: alertLoading ? 0.7 : 1 }}>
               <Bell size={15} fill={hasAlert ? "currentColor" : "none"}/> {alertLoading ? 'Updating...' : (hasAlert ? 'Alert Set' : 'Set Alert')}
             </button>
-            <button className="hover-lift" onClick={() => setShowAddHolding(true)} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background:'var(--bg)',border:'1px solid var(--border)',borderRadius:12,cursor:'pointer',fontWeight:700,color:'var(--text-dark)',fontSize:'0.8rem',boxShadow:'var(--shadow-sm)' }}>
-              <Plus size={15}/> Add to holdings
+            <button className="hover-lift" onClick={() => setShowAddHolding(true)} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background: hasBought ? 'rgba(6, 78, 59, 0.05)' : 'var(--bg)',border: hasBought ? '1px solid var(--primary)' : '1px solid var(--border)',borderRadius:12,cursor:'pointer',fontWeight:700,color: hasBought ? 'var(--primary)' : 'var(--text-dark)',fontSize:'0.8rem',boxShadow: hasBought ? 'none' : 'var(--shadow-sm)' }}>
+              {hasBought ? <CheckCircle size={15} color="var(--primary)"/> : <Plus size={15}/>} 
+              {hasBought ? 'Added to holdings' : 'Add to holdings'}
             </button>
             {user?.role==='admin'&&(<button className="hover-lift" onClick={openOverride} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background:'var(--primary)',border:'none',borderRadius:12,cursor:'pointer',fontWeight:800,color:'#fff',fontSize:'0.8rem',transition:'all 0.25s',boxShadow:'0 4px 12px rgba(91,41,113,0.3)' }}>
               <ShieldCheck size={15}/> Edit Data
@@ -652,7 +653,9 @@ const AaoifiScreening = () => {
                 <div style={{ fontSize:'0.7rem',fontWeight:900,textTransform:'uppercase',letterSpacing:'1.5px',color:'#D97706',marginBottom:8, display:'flex', alignItems:'center', gap: 6 }}><Droplets size={14} strokeWidth={2.5}/> Purification Needed</div>
                 <div style={{ fontSize:'1rem',color:'var(--text-dark)',fontWeight:800,lineHeight:1.4 }}>Donate <strong style={{ color:'#D97706', fontSize:'1.3rem', padding: '0 2px' }}>{purPct}%</strong> of dividend income to charity</div>
               </div>
-              <Link to={hasBought ? "/portfolio#purification" : "/portfolio#holdings"} state={{ action: hasBought ? 'purify' : 'add', targetSymbol: symbol }} className="hover-lift" style={{ display:'inline-flex',alignItems:'center',justifyContent:'center',gap:6,padding:'12px 20px',borderRadius:16,background:'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 100%)',border:'1px solid rgba(245,158,11,0.3)',color:'#D97706',fontSize:'0.85rem',fontWeight:900,textDecoration:'none',marginTop:8, transition:'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: '0 8px 24px rgba(245,158,11,0.15), inset 0 2px 4px #fff' }}>{hasBought ? 'Purify in Portfolio' : 'Add to Portfolio'} <ChevronRight size={16}/></Link>
+              {hasBought && (
+                <Link to="/portfolio#purification" state={{ action: 'purify', targetSymbol: symbol }} className="hover-lift" style={{ display:'inline-flex',alignItems:'center',justifyContent:'center',gap:6,padding:'12px 20px',borderRadius:16,background:'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 100%)',border:'1px solid rgba(245,158,11,0.3)',color:'#D97706',fontSize:'0.85rem',fontWeight:900,textDecoration:'none',marginTop:8, transition:'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: '0 8px 24px rgba(245,158,11,0.15), inset 0 2px 4px #fff' }}>Purify Now <ChevronRight size={16}/></Link>
+              )}
             </div>)}
             
             {isNonHalal&&(<div style={{ flex:'0 0 280px',padding:'24px 32px',display:'flex',flexDirection:'column',justifyContent:'center',gap:16,background:'linear-gradient(135deg, rgba(239,68,68,0.02) 0%, rgba(239,68,68,0.08) 100%)' }}>
