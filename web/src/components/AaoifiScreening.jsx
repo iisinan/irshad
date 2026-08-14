@@ -219,7 +219,7 @@ const AaoifiScreening = () => {
   const hasBought = portfolioRes?.data?.holdings?.some(h => h.symbol === symbol);
 
   /* ── UI state ── */
-  const [alertLoading, setAlertLoading] = useState(false);
+  const [modalData, setModalData] = useState(null);
   const [showOverride, setShowOverride] = useState(false);
   const [showAddHolding, setShowAddHolding] = useState(false);
   const [isAddingHolding, setIsAddingHolding] = useState(false);
