@@ -156,6 +156,10 @@ class SyncMarketDataCommand extends Command
                             }
                             $financial->save();
                         }
+                        
+                        $company->eps = $fundamentals['eps'] ?? $company->eps;
+                        $company->pe_ratio = $fundamentals['pe_ratio'] ?? $company->pe_ratio;
+                        $company->div_yield = $fundamentals['dividend_yield'] ?? $company->div_yield;
                     }
 
                     if ($stockData) {
@@ -186,7 +190,18 @@ class SyncMarketDataCommand extends Command
                                 ->where('date', $todayStr)
                                 ->update(['volume' => $stockData['volume']]);
                         }
+                        
+                        // Update the company table directly for the API/frontend
+                        $company->latest_price = $stockData['current_price'] ?? $company->latest_price;
+                        $company->price_change = $stockData['change'] ?? $company->price_change;
+                        $company->price_change_pct = $stockData['change_percent'] ?? $company->price_change_pct;
+                        $company->market_cap = $stockData['market_cap'] ?? $company->market_cap;
+                        $company->shares_outstanding = $stockData['shares_outstanding'] ?? $company->shares_outstanding;
+                        $company->{'52w_high'} = $stockData['high_52w'] ?? $company->{'52w_high'};
+                        $company->{'52w_low'} = $stockData['low_52w'] ?? $company->{'52w_low'};
                     }
+                    
+                    $company->save();
                 }
             } catch (Exception $e) {
                 // Silently continue to next company on timeout or error so the whole job doesn't crash
