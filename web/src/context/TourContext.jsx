@@ -10,7 +10,7 @@ const TourContext = createContext();
 export const useTour = () => useContext(TourContext);
 
 export const TourProvider = ({ children }) => {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const [run, setRun] = useState(false);
   const [steps, setSteps] = useState([]);
 
@@ -69,8 +69,9 @@ export const TourProvider = ({ children }) => {
       if (user && !user.preferences?.has_completed_tour) {
         try {
           // Update local state optimisticly
-          if (!user.preferences) user.preferences = {};
-          user.preferences.has_completed_tour = true;
+          const updatedUser = { ...user, preferences: { ...user.preferences, has_completed_tour: true } };
+          if (setUser) setUser(updatedUser);
+          localStorage.setItem('auth_user', JSON.stringify(updatedUser));
           
           await updateProfile({
             preferences: { has_completed_tour: true }
