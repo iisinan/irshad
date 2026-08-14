@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use App\Models\Company;
 use App\Models\DailyPrice;
 use App\Models\MarketData;
@@ -213,6 +214,18 @@ class SyncMarketDataCommand extends Command
 
         $bar->finish();
         $this->newLine(2);
+
+        // Clear the cache to ensure the APIs return the fresh data
+        try {
+            if (Cache::supportsTags()) {
+                Cache::tags(['stocks'])->flush();
+            } else {
+                \Illuminate\Support\Facades\Artisan::call('cache:clear');
+            }
+            $this->info('Cache cleared successfully.');
+        } catch (Exception $e) {
+            $this->warn('Failed to clear cache automatically: ' . $e->getMessage());
+        }
         
         $this->info('✓ Unified Market Data Sync Complete!');
         return Command::SUCCESS;
