@@ -18,6 +18,7 @@ import { useAuth } from '../context/AuthContext';
 import { formatAppJustification } from '../utils/screeningFormatter';
 import { toastSuccess, toastError } from '../utils/toast';
 import CompanyLogo from './CompanyLogo';
+import AddHoldingModal from './portfolio/AddHoldingModal';
 
 /* ─── Loading steps ─────────────────────────────────────── */
 const LOADING_STEPS = [
@@ -218,8 +219,10 @@ const AaoifiScreening = () => {
   const hasBought = portfolioRes?.data?.holdings?.some(h => h.symbol === symbol);
 
   /* ── UI state ── */
-  const [modalData,       setModalData]       = useState(null);
-  const [showOverride,    setShowOverride]     = useState(false);
+  const [alertLoading, setAlertLoading] = useState(false);
+  const [showOverride, setShowOverride] = useState(false);
+  const [showAddHolding, setShowAddHolding] = useState(false);
+  const [isAddingHolding, setIsAddingHolding] = useState(false);
   const [overrideData,    setOverrideData]     = useState({ total_debt:'',cash:'',interest_income:'',total_assets:'',market_cap:'',total_revenue:'',evidence_links:[''] });
   const [overrideLoading, setOverrideLoading] = useState(false);
   const [overrideError,   setOverrideError]   = useState('');
@@ -247,7 +250,21 @@ const AaoifiScreening = () => {
     : null;
 
 
-  const [alertLoading, setAlertLoading] = useState(false);
+  const handleAddHolding = async (payload) => {
+    try {
+      setIsAddingHolding(true);
+      const { addBulkHoldings } = await import('../services/api');
+      await addBulkHoldings(payload);
+      toastSuccess('Holdings added to portfolio');
+      return true;
+    } catch (err) {
+      toastError(err?.message || 'Failed to add holdings');
+      return false;
+    } finally {
+      setIsAddingHolding(false);
+    }
+  };
+
   const handleSetAlert = async () => {
     try {
       setAlertLoading(true);
@@ -525,6 +542,9 @@ const AaoifiScreening = () => {
             )}
             <button className="hover-lift" onClick={handleSetAlert} disabled={alertLoading} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background: hasAlert ? 'var(--primary-50)' : 'var(--bg)',border:'1px solid ' + (hasAlert ? 'var(--primary)' : 'var(--border)'),borderRadius:12,cursor:alertLoading ? 'not-allowed' : 'pointer',fontWeight:700,color: hasAlert ? 'var(--primary)' : 'var(--text-dark)',fontSize:'0.8rem',boxShadow: hasAlert ? '0 4px 12px var(--primary-50)' : 'var(--shadow-sm)', opacity: alertLoading ? 0.7 : 1 }}>
               <Bell size={15} fill={hasAlert ? "currentColor" : "none"}/> {alertLoading ? 'Updating...' : (hasAlert ? 'Alert Set' : 'Set Alert')}
+            </button>
+            <button className="hover-lift" onClick={() => setShowAddHolding(true)} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background:'var(--bg)',border:'1px solid var(--border)',borderRadius:12,cursor:'pointer',fontWeight:700,color:'var(--text-dark)',fontSize:'0.8rem',boxShadow:'var(--shadow-sm)' }}>
+              <Plus size={15}/> Add to holdings
             </button>
             {user?.role==='admin'&&(<button className="hover-lift" onClick={openOverride} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background:'var(--primary)',border:'none',borderRadius:12,cursor:'pointer',fontWeight:800,color:'#fff',fontSize:'0.8rem',transition:'all 0.25s',boxShadow:'0 4px 12px rgba(91,41,113,0.3)' }}>
               <ShieldCheck size={15}/> Edit Data
