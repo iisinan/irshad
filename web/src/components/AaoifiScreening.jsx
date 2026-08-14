@@ -210,13 +210,14 @@ const AaoifiScreening = () => {
   });
   const hasAlert = Array.isArray(watchlistRes) ? watchlistRes.some(w => w.symbol?.toLowerCase() === symbol?.toLowerCase()) : false;
 
-  const { data: portfolioRes } = useQuery({
+  const { data: portfolioRes, refetch: refetchPortfolio } = useQuery({
     queryKey: ['portfolio'],
     queryFn: fetchPortfolio,
     staleTime: 5 * 60 * 1000
   });
   
-  const hasBought = portfolioRes?.data?.holdings?.some(h => h.symbol === symbol);
+  const userHoldingsForSymbol = portfolioRes?.data?.holdings?.filter(h => h.symbol === symbol) || [];
+  const hasBought = userHoldingsForSymbol.length > 0;
 
   /* ── UI state ── */
   const [modalData, setModalData] = useState(null);
@@ -256,12 +257,30 @@ const AaoifiScreening = () => {
       const { addBulkHoldings } = await import('../services/api');
       await addBulkHoldings(payload);
       toastSuccess('Holdings added to portfolio');
+      refetchPortfolio();
       return true;
     } catch (err) {
       toastError(err?.message || 'Failed to add holdings');
       return false;
     } finally {
       setIsAddingHolding(false);
+    }
+  };
+
+  const handleDeleteHolding = async () => {
+    if (!window.confirm(`Are you sure you want to remove ${symbol} from your portfolio?`)) return;
+    try {
+      setAlertLoading(true);
+      const { removeHolding } = await import('../services/api');
+      for (const holding of userHoldingsForSymbol) {
+        await removeHolding(holding.id);
+      }
+      toastSuccess(`${symbol} removed from portfolio`);
+      refetchPortfolio();
+    } catch (err) {
+      toastError(err?.message || `Failed to remove ${symbol}`);
+    } finally {
+      setAlertLoading(false);
     }
   };
 
@@ -545,7 +564,7 @@ const AaoifiScreening = () => {
             <button className="hover-lift" onClick={handleSetAlert} disabled={alertLoading} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background: hasAlert ? 'var(--primary-50)' : 'var(--bg)',border:'1px solid ' + (hasAlert ? 'var(--primary)' : 'var(--border)'),borderRadius:12,cursor:alertLoading ? 'not-allowed' : 'pointer',fontWeight:700,color: hasAlert ? 'var(--primary)' : 'var(--text-dark)',fontSize:'0.8rem',boxShadow: hasAlert ? '0 4px 12px var(--primary-50)' : 'var(--shadow-sm)', opacity: alertLoading ? 0.7 : 1 }}>
               <Bell size={15} fill={hasAlert ? "currentColor" : "none"}/> {alertLoading ? 'Updating...' : (hasAlert ? 'Alert Set' : 'Set Alert')}
             </button>
-            <button className="hover-lift" onClick={() => setShowAddHolding(true)} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background: hasBought ? 'rgba(6, 78, 59, 0.05)' : 'var(--bg)',border: hasBought ? '1px solid var(--primary)' : '1px solid var(--border)',borderRadius:12,cursor:'pointer',fontWeight:700,color: hasBought ? 'var(--primary)' : 'var(--text-dark)',fontSize:'0.8rem',boxShadow: hasBought ? 'none' : 'var(--shadow-sm)' }}>
+            <button className="hover-lift" onClick={() => hasBought ? handleDeleteHolding() : setShowAddHolding(true)} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background: hasBought ? 'rgba(6, 78, 59, 0.05)' : 'var(--bg)',border: hasBought ? '1px solid var(--primary)' : '1px solid var(--border)',borderRadius:12,cursor:'pointer',fontWeight:700,color: hasBought ? 'var(--primary)' : 'var(--text-dark)',fontSize:'0.8rem',boxShadow: hasBought ? 'none' : 'var(--shadow-sm)' }}>
               {hasBought ? <CheckCircle size={15} color="var(--primary)"/> : <Plus size={15}/>} 
               {hasBought ? 'Added to holdings' : 'Add to holdings'}
             </button>
