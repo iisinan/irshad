@@ -131,12 +131,17 @@ function HoldingRow({ holding, onDelete, onEdit }) {
   const statusRaw = holding.status ? holding.status.toLowerCase() : (holding.is_halal ? 'halal' : 'non-halal');
   const finalStatus = ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(holding.symbol) ? 'halal' : statusRaw;
   
-  const getBadgeStyle = (status) => {
-    if (status === 'halal' || status === 'compliant') return { bg: 'rgba(34, 197, 94, 0.1)', color: 'var(--halal)', text: 'Shariah Compliant' };
+  const getBadgeStyle = (status, purificationDue, nonCompliantRatio) => {
+    if (status === 'halal' || status === 'compliant') {
+      if (Number(purificationDue || 0) > 0 || Number(nonCompliantRatio || 0) > 0) {
+        return { bg: 'rgba(234, 179, 8, 0.1)', color: '#eab308', text: 'Shariah Compliant w/ Purification' };
+      }
+      return { bg: 'rgba(34, 197, 94, 0.1)', color: 'var(--halal)', text: 'Shariah Compliant' };
+    }
     if (status === 'non-halal' || status === 'non_halal' || status === 'non-compliant' || status === 'fail') return { bg: 'rgba(239, 68, 68, 0.1)', color: 'var(--non-halal)', text: 'Shariah Non-Compliant' };
     return { bg: 'rgba(245, 158, 11, 0.1)', color: 'var(--questionable)', text: 'Doubtful' };
   };
-  const badge = getBadgeStyle(finalStatus);
+  const badge = getBadgeStyle(finalStatus, holding.purification_due, holding.non_compliant_ratio);
   const accentColor = badge.color;
 
   return (
@@ -234,8 +239,10 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
   const totalBalance    = summary.total_balance    || 0;
   const compliance      = summary.health_percentage ?? 100;
   const isHoldingHalal = h => !!h.is_halal || ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(h.symbol);
-  const halalCount      = holdings.filter(isHoldingHalal).length;
-  const nonHalalCount   = holdings.filter(h => !isHoldingHalal(h)).length;
+  const needsPurif = holdings.filter(h => isHoldingHalal(h) && (Number(h.purification_due || 0) > 0 || Number(h.non_compliant_ratio || 0) > 0)).length;
+  const halalCount = holdings.filter(isHoldingHalal).length - needsPurif;
+  const nonHalalCount = holdings.filter(h => !isHoldingHalal(h) && h.status !== 'doubtful').length;
+  const doubtfulCount = holdings.filter(h => h.status === 'doubtful').length;
   const totalGainPct    = holdings.length ? (holdings.reduce((s,h) => s + (h.return_percentage||0), 0) / holdings.length).toFixed(2) : null;
   const isPortfolioUp   = totalGainPct !== null ? Number(totalGainPct) >= 0 : true;
 
@@ -249,8 +256,10 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
     const finalStatus = ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(h.symbol) ? 'halal' : statusRaw;
     const isHalal = finalStatus === 'halal' || finalStatus === 'compliant';
     
-    if (activeFilter === 'halal')    return isHalal && !(h.purification_due);
-    if (activeFilter === 'purify')   return (h.purification_due||0) > 0;
+    const needsPurification = Number(h.purification_due || 0) > 0 || Number(h.non_compliant_ratio || 0) > 0;
+
+    if (activeFilter === 'halal')    return isHalal && !needsPurification;
+    if (activeFilter === 'purify')   return isHalal && needsPurification;
     if (activeFilter === 'doubtful') return finalStatus === 'doubtful';
     if (activeFilter === 'nonhalal') return !isHalal && finalStatus !== 'doubtful';
     return true;
@@ -316,17 +325,42 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
               )}
             </div>
 
-            {/* Halal / Non-Halal Summary */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '4px' }}>
+            {/* Status Summary */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '4px', flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <ShieldCheck size={16} color="#16a34a" />
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Shariah Compliant <strong style={{ color: 'var(--text-dark)', fontWeight: 800, marginLeft: '4px' }}>{halalCount}</strong></span>
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Compliant <strong style={{ color: 'var(--text-dark)', fontWeight: 800, marginLeft: '4px' }}>{halalCount}</strong></span>
               </div>
-              <div style={{ width: '1px', height: '14px', background: 'var(--border)' }} />
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <AlertTriangle size={16} color="#dc2626" />
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Shariah Non-Compliant <strong style={{ color: 'var(--text-dark)', fontWeight: 800, marginLeft: '4px' }}>{nonHalalCount}</strong></span>
-              </div>
+              
+              {needsPurif > 0 && (
+                <>
+                  <div style={{ width: '1px', height: '14px', background: 'var(--border)' }} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Droplet size={16} color="#eab308" />
+                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Purify <strong style={{ color: 'var(--text-dark)', fontWeight: 800, marginLeft: '4px' }}>{needsPurif}</strong></span>
+                  </div>
+                </>
+              )}
+
+              {doubtfulCount > 0 && (
+                <>
+                  <div style={{ width: '1px', height: '14px', background: 'var(--border)' }} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <HelpCircle size={16} color="#d97706" />
+                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Doubtful <strong style={{ color: 'var(--text-dark)', fontWeight: 800, marginLeft: '4px' }}>{doubtfulCount}</strong></span>
+                  </div>
+                </>
+              )}
+
+              {nonHalalCount > 0 && (
+                <>
+                  <div style={{ width: '1px', height: '14px', background: 'var(--border)' }} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <AlertTriangle size={16} color="#dc2626" />
+                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Non-Compliant <strong style={{ color: 'var(--text-dark)', fontWeight: 800, marginLeft: '4px' }}>{nonHalalCount}</strong></span>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -357,7 +391,7 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
             {[
               { id:'all', label:'All', icon: Layers, activeColor: 'var(--primary)' },
               { id:'halal', label: 'Compliant', icon: ShieldCheck, activeColor: '#16a34a' },
-              { id:'purify', label: 'Purify', icon: Droplet, activeColor: '#eab308' },
+              { id:'purify', label: 'Compliant (Purify)', icon: Droplet, activeColor: '#eab308' },
               { id:'doubtful', label: 'Doubtful', icon: HelpCircle, activeColor: '#d97706' },
               { id:'nonhalal', label: 'Non-Compliant', icon: AlertTriangle, activeColor: '#dc2626' }
             ].map(f => (

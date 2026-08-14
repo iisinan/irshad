@@ -28,6 +28,7 @@ class PortfolioController extends Controller
         $data = Cache::remember($cacheKey, now()->addMinutes(15), function () use ($userId) {
             $holdings = Holding::with([
                 'company.financials:id,company_id,total_revenue,interest_income',
+                'company.aaoifiScreening:id,company_id,impermissible_income_ratio',
                 'company.latestDividend',
                 'company.dividends' => function ($query) {
                     $query->where('status', 'paid')
@@ -42,9 +43,8 @@ class PortfolioController extends Controller
                 $currentPrice = (float) ($company->latest_price ?? 0);
                 $status = $company->current_status ?? 'doubtful';
 
-                // Financials relationship returns a collection, take first
-                $financials = $company?->financials?->first();
-                $nonCompliantRatio = $financials?->non_compliant_income_ratio ?? 0;
+                $screening = $company?->aaoifiScreening;
+                $nonCompliantRatio = $screening?->impermissible_income_ratio ?? 0;
 
                 $totalValue = $holding->shares * $currentPrice;
 
@@ -314,7 +314,7 @@ class PortfolioController extends Controller
             $holding = Holding::where('user_id', $userId)->where('symbol', $symbol)->first();
             if (!$holding) continue;
 
-            $company = Company::with(['dividends', 'financials'])->where('symbol', $symbol)->first();
+            $company = Company::with(['dividends', 'aaoifiScreening'])->where('symbol', $symbol)->first();
             if (!$company) continue;
 
             $status = $company->current_status ?? 'doubtful';
@@ -322,8 +322,8 @@ class PortfolioController extends Controller
             
             if (!$isHalal) continue;
 
-            $financials = $company->financials->first();
-            $nonCompliantRatio = $financials?->non_compliant_income_ratio ?? 0;
+            $screening = $company->aaoifiScreening;
+            $nonCompliantRatio = $screening?->impermissible_income_ratio ?? 0;
 
             if ($nonCompliantRatio <= 0) continue;
 

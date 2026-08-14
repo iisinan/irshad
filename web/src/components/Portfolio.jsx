@@ -4,7 +4,7 @@ import { fetchPortfolio, removeHolding } from '../services/api';
 import { toastError, toastSuccess } from '../utils/toast';
 import { useAuth } from '../context/AuthContext';
 import localforage from 'localforage';
-import { Search, BarChart2, Star, Calculator, ShieldCheck, BookOpen, Briefcase, Activity, FileText, Rss, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
+import { Search, BarChart2, Star, Calculator, ShieldCheck, BookOpen, Briefcase, Activity, FileText, Rss, CheckCircle2, XCircle, AlertTriangle, Droplet, HelpCircle } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
 import PortfolioTab from './portfolio/PortfolioTab';
@@ -261,9 +261,10 @@ export default function Portfolio() {
   if (pieData.length === 0) pieData.push({ name: 'No Holdings', value: 1, color: 'var(--border)' });
 
   const isHoldingHalal = h => !!h.is_halal || ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(h.symbol);
-  const halalCount    = holdings.filter(isHoldingHalal).length;
-  const nonHalalCount = holdings.filter(h => !isHoldingHalal(h)).length;
-  const needsPurif    = holdings.filter(h => h.purification_due > 0).length;
+  const needsPurif = holdings.filter(h => isHoldingHalal(h) && (Number(h.purification_due || 0) > 0 || Number(h.non_compliant_ratio || 0) > 0)).length;
+  const halalCount = holdings.filter(isHoldingHalal).length - needsPurif;
+  const doubtfulCount = holdings.filter(h => h.status === 'doubtful').length;
+  const nonHalalCount = holdings.filter(h => !isHoldingHalal(h) && h.status !== 'doubtful').length;
 
 
   const fmtK = (n) => {
@@ -421,9 +422,10 @@ export default function Portfolio() {
             <div style={{ display:'flex', flexDirection:'column', gap:'12px' }}>
               {[
                 { label: 'Shariah Compliant',   value: halalCount,    icon: ShieldCheck,   color: 'var(--halal)',     bg: 'rgba(34,197,94,0.06)', action: () => { setActiveFilter('halal'); handleTabChange('holdings'); } },
-                { label: 'Shariah Non-Compliant',        value: nonHalalCount, icon: XCircle,       color: 'var(--non-halal)', bg: 'rgba(239,68,68,0.06)', action: () => { setActiveFilter('nonhalal'); handleTabChange('holdings'); } },
-                { label: 'Need Purification',value: needsPurif,    icon: AlertTriangle, color: 'var(--doubtful)',  bg: 'rgba(234,179,8,0.06)', action: () => { setActiveFilter('purify'); handleTabChange('holdings'); } },
-              ].map(row => (
+                { label: 'Compliant (Purify)',value: needsPurif,    icon: Droplet, color: 'var(--doubtful)',  bg: 'rgba(234,179,8,0.06)', action: () => { setActiveFilter('purify'); handleTabChange('holdings'); } },
+                { label: 'Doubtful',value: doubtfulCount,    icon: HelpCircle, color: '#d97706',  bg: 'rgba(245,158,11,0.06)', action: () => { setActiveFilter('doubtful'); handleTabChange('holdings'); } },
+                { label: 'Non-Compliant',        value: nonHalalCount, icon: XCircle,       color: 'var(--non-halal)', bg: 'rgba(239,68,68,0.06)', action: () => { setActiveFilter('nonhalal'); handleTabChange('holdings'); } },
+              ].filter(r => r.value > 0).map(row => (
                 <div 
                   key={row.label} 
                   onClick={row.action}
