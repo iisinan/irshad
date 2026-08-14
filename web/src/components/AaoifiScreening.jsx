@@ -901,6 +901,16 @@ const AaoifiScreening = () => {
         document.body
       )}
 
+      {showAddHolding && (
+        <AddHoldingModal 
+          onClose={() => setShowAddHolding(false)}
+          onAdd={handleAddHolding}
+          isAdding={isAddingHolding}
+          initialTab="manual"
+          initialSymbol={symbol}
+        />
+      )}
+
       {/* ══ ADMIN OVERRIDE MODAL ══ */}
       {showOverride&&createPortal(
         <div style={{ position:'fixed',inset:0,backgroundColor:'rgba(0,0,0,0.55)',backdropFilter:'blur(12px)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:100000,padding:24 }}>
