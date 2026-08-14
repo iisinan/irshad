@@ -209,6 +209,16 @@ function HoldingRow({ holding, onDelete, onEdit }) {
 
       {/* Actions */}
       <div style={{ display: 'flex', gap: '8px', paddingLeft: '24px' }} onClick={e => e.stopPropagation()}>
+        {badge.text === 'Shariah Compliant w/ Purification' && (
+          <button 
+            onClick={() => navigate('/portfolio#purification', { state: { action: 'purify', targetSymbol: holding.symbol } })}
+            style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.1) 0%, rgba(245,158,11,0.2) 100%)', border: '1px solid rgba(245,158,11,0.3)', color: '#D97706', cursor: 'pointer', padding: '8px 12px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, fontSize: '0.7rem', transition: 'all 0.2s' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(245,158,11,0.2)'; e.currentTarget.style.borderColor = 'rgba(245,158,11,0.4)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'linear-gradient(135deg, rgba(245,158,11,0.1) 0%, rgba(245,158,11,0.2) 100%)'; e.currentTarget.style.borderColor = 'rgba(245,158,11,0.3)'; }}
+          >
+            <Droplet size={13} /> Purify Now
+          </button>
+        )}
         <button 
           onClick={() => onEdit(holding)}
           style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-dark)', cursor: 'pointer', padding: '8px 12px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, fontSize: '0.7rem', transition: 'all 0.2s' }}
