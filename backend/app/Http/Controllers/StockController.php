@@ -348,7 +348,7 @@ class StockController extends Controller
             ['company_id' => $company->id],
             [
                 'status' => $request->status,
-                'reason' => 'Scholar Override'.($request->reason ? ': '.$request->reason : ''),
+                'reason' => $request->reason ?: 'Manual classification.',
                 'verified_by_scholar' => true,
                 'last_updated' => now(),
             ]
@@ -365,7 +365,7 @@ class StockController extends Controller
             'company_id' => $company->id,
             'old_status' => $oldStatus,
             'new_status' => $request->status,
-            'reason' => 'Scholar Override'.($request->reason ? ': '.$request->reason : ''),
+            'reason' => $request->reason ?: 'Manual classification.',
             'changed_at' => now(),
         ]);
 
@@ -545,27 +545,35 @@ class StockController extends Controller
             $isScholarVerified = $company->status && $company->status->verified_by_scholar;
             $dbStatus = $company->status ? $company->status->status : null;
             $finalStatus = $dbStatus ?? $aaoifiScreening->final_status;
-
             $statusReason = null;
             $finalStage1Reason = '';
-            if ($isScholarVerified) {
-                $statusReason = $company->status->reason ?? 'Verified by scholar.';
-                $finalStage1Reason = $company->status->reason ?? 'Verified by scholar.';
-            } else {
-                $bReasonRaw = $aaoifiScreening->business_reasoning;
-                $businessReason = '';
-                if (is_array($bReasonRaw)) {
-                    $businessReason = $bReasonRaw['justification'] ?? $bReasonRaw['reason'] ?? $bReasonRaw['reasoning'] ?? $bReasonRaw['summary'] ?? $bReasonRaw['evidence'] ?? json_encode($bReasonRaw);
-                } elseif (is_string($bReasonRaw)) {
-                    $decoded = json_decode($bReasonRaw, true);
-                    if (is_array($decoded) && (isset($decoded['justification']) || isset($decoded['reason']) || isset($decoded['reasoning']) || isset($decoded['summary']))) {
-                        $businessReason = $decoded['justification'] ?? $decoded['reason'] ?? $decoded['reasoning'] ?? $decoded['summary'];
-                    } else {
-                        $businessReason = $bReasonRaw;
-                    }
+
+            // Extract business reasoning first
+            $bReasonRaw = $aaoifiScreening->business_reasoning;
+            $businessReason = '';
+            if (is_array($bReasonRaw)) {
+                $businessReason = $bReasonRaw['justification'] ?? $bReasonRaw['reason'] ?? $bReasonRaw['reasoning'] ?? $bReasonRaw['summary'] ?? $bReasonRaw['evidence'] ?? (is_string($bReasonRaw) ? $bReasonRaw : json_encode($bReasonRaw));
+            } elseif (is_string($bReasonRaw)) {
+                $decoded = json_decode($bReasonRaw, true);
+                if (is_array($decoded) && (isset($decoded['justification']) || isset($decoded['reason']) || isset($decoded['reasoning']) || isset($decoded['summary']))) {
+                    $businessReason = $decoded['justification'] ?? $decoded['reason'] ?? $decoded['reasoning'] ?? $decoded['summary'];
+                } else {
+                    $businessReason = $bReasonRaw;
                 }
-                $businessReason = trim($businessReason);
+            }
+            $businessReason = trim($businessReason);
+
+            if ($isScholarVerified) {
+                $overrideReason = trim($company->status->reason ?? '');
                 
+                if (empty($overrideReason) || strtolower($overrideReason) === 'manual classification.') {
+                    $statusReason = $businessReason ?: 'Verified by scholar.';
+                    $finalStage1Reason = $businessReason ?: 'Verified by scholar.';
+                } else {
+                    $statusReason = $overrideReason;
+                    $finalStage1Reason = $overrideReason;
+                }
+            } else {
                 $finalStage1Reason = $businessReason;
                 if (in_array(strtolower($aaoifiScreening->business_status), ['pass', 'halal']) && $finalStatus !== 'doubtful') {
                     if (empty($businessReason)) {
@@ -574,9 +582,8 @@ class StockController extends Controller
                         $finalStage1Reason = $businessReason;
                     }
                 }
-                $businessReason = trim($businessReason);
 
-                if (in_array($aaoifiScreening->business_status, ['fail', 'doubtful'])) {
+                if (in_array(strtolower($aaoifiScreening->business_status), ['fail', 'doubtful'])) {
                     $statusReason = $businessReason ?: 'Fails qualitative business screening.';
                 } elseif (in_array(strtolower($aaoifiScreening->business_status), ['pass', 'halal'])) {
                     if ($finalStatus === 'halal') {
