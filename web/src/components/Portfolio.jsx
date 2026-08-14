@@ -314,7 +314,7 @@ export default function Portfolio() {
           )}
           {mountedTabs.includes('watchlist') && (
             <div style={{ display: activeTab === 'watchlist' ? 'block' : 'none' }}>
-              <WatchlistTab data={data} refreshData={loadData} initialSymbol={initialHoldingSymbol} />
+              <WatchlistTab data={data} refreshData={loadData} initialSymbol={initialHoldingSymbol} onClearInitialSymbol={() => setInitialHoldingSymbol(null)} />
             </div>
           )}
           {mountedTabs.includes('zakat') && (
@@ -324,7 +324,7 @@ export default function Portfolio() {
           )}
           {mountedTabs.includes('purification') && (
             <div style={{ display: activeTab === 'purification' ? 'block' : 'none' }}>
-              <PurificationTab data={data} initialSymbol={initialHoldingSymbol} refreshData={fetchPortfolio} />
+              <PurificationTab data={data} initialSymbol={initialHoldingSymbol} refreshData={loadData} onClearInitialSymbol={() => setInitialHoldingSymbol(null)} />
             </div>
           )}
           {mountedTabs.includes('lectures') && (

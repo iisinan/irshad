@@ -533,7 +533,7 @@ function PurificationCard({ h, onPurify, onStatClick }) {
   );
 }
 
-export default function PurificationTab({ data, initialSymbol, refreshData }) {
+export default function PurificationTab({ data, initialSymbol, refreshData, onClearInitialSymbol }) {
   const [purifiedSymbols, setPurifiedSymbols] = useState([]);
   const [selectedHolding, setSelectedHolding] = useState(null);
   const [activeStatTarget, setActiveStatTarget] = useState(null);
@@ -558,6 +558,11 @@ export default function PurificationTab({ data, initialSymbol, refreshData }) {
 
   const handleDonateAll = () => {
     setCharityModalTarget({ type: 'all', amount: purificationDue });
+  };
+
+  const handleCloseCalcModal = () => {
+    setSelectedHolding(null);
+    if (onClearInitialSymbol) onClearInitialSymbol();
   };
 
   const [isPurifying, setIsPurifying] = useState(false);
@@ -599,7 +604,7 @@ export default function PurificationTab({ data, initialSymbol, refreshData }) {
       {selectedHolding && (
         <CalcModal
           h={selectedHolding}
-          onClose={() => setSelectedHolding(null)}
+          onClose={handleCloseCalcModal}
           onPurify={(h) => { setCharityModalTarget({ type: 'single', symbol: h.symbol, amount: h.purification_due }); }}
         />
       )}

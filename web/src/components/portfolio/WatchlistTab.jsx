@@ -36,7 +36,7 @@ class ModalErrorBoundary extends Component {
   }
 }
 
-export default function WatchlistTab({ initialSymbol }) {
+export default function WatchlistTab({ initialSymbol, onClearInitialSymbol }) {
   const [watchlistItems, setWatchlistItems] = useState(() => {
     try {
       const cached = localStorage.getItem('irshad_watchlist_items_cache_v3');
@@ -153,6 +153,11 @@ export default function WatchlistTab({ initialSymbol }) {
     }
     return stocks;
   }, [allStocks, watchlistSymbols, filter]);
+
+  const handleCloseAlertModal = () => {
+    setActiveAlertStock(null);
+    if (onClearInitialSymbol) onClearInitialSymbol();
+  };
 
   return (
     <div className="animate-fade-in stagger-1 watchlist-tab-card" style={{ background: 'var(--bg)', borderRadius:'24px', padding:'0', boxShadow:'0 4px 20px rgba(0,0,0,0.05)', border:'1px solid var(--border)', overflow:'hidden' }}>
@@ -341,11 +346,11 @@ export default function WatchlistTab({ initialSymbol }) {
       )}
 
       {activeAlertStock && (
-        <ModalErrorBoundary onClose={() => setActiveAlertStock(null)}>
+        <ModalErrorBoundary onClose={handleCloseAlertModal}>
           <WatchlistAlertModal
             stock={activeAlertStock}
             watchlistData={watchlistItems.find(w => w.symbol === activeAlertStock.symbol) || {}}
-            onClose={() => setActiveAlertStock(null)}
+            onClose={handleCloseAlertModal}
             onUpdated={handleAlertUpdate}
           />
         </ModalErrorBoundary>
