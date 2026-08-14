@@ -385,6 +385,11 @@ const AaoifiScreening = () => {
     cleanStatusReason = cleanStatusReason.replace(/^Scholar Override:\s*/i, '');
   }
 
+  const isNotTrading = stock?.is_active === false || stock?.is_active === 0 || stock?.is_active === '0';
+  if (isNotTrading && cleanStatusReason) {
+    cleanStatusReason = cleanStatusReason.replace(/\s*Additionally, it passes all AAOIFI quantitative financial screening ratios\.?/gi, '');
+  }
+
   let doubtfulTag = 'Requires Further Review';
   if (finalStatus === 'doubtful' && cleanStatusReason) {
     if (cleanStatusReason.includes('|||')) {
