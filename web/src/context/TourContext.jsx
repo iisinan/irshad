@@ -49,10 +49,10 @@ export const TourProvider = ({ children }) => {
   }, [user, steps.length]);
 
   const handleJoyrideCallback = async (data) => {
-    const { status } = data;
+    const { status, action } = data;
     const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
 
-    if (finishedStatuses.includes(status)) {
+    if (finishedStatuses.includes(status) || action === 'close') {
       setRun(false);
       
       // Trigger confetti only if the user actually finished the tour
@@ -91,6 +91,7 @@ export const TourProvider = ({ children }) => {
     step,
     backProps,
     closeProps,
+    skipProps,
     primaryProps,
     tooltipProps,
     isLastStep,
@@ -222,7 +223,7 @@ export const TourProvider = ({ children }) => {
           <div style={{ display: 'flex', gap: '8px' }}>
             {!isLastStep && (
               <button
-                {...closeProps}
+                {...skipProps}
                 style={{
                   background: 'transparent',
                   border: 'none',
