@@ -37,7 +37,7 @@ class PortfolioController extends Controller
                 ->where('user_id', $userId)
                 ->get();
 
-            $portfolioData = $holdings->map(function ($holding) {
+            $portfolioData = $holdings->map(function ($holding) use ($userId) {
                 $company = $holding->company;
                 $currentPrice = (float) ($company->latest_price ?? 0);
                 $status = $company->current_status ?? 'doubtful';
