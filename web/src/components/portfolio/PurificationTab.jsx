@@ -43,7 +43,7 @@ const CHARITIES = [
   {
     id: 6,
     name: "Ummahatul Yateem Foundation",
-    bank: "Providus/Unity: 0023098745",
+    bank: "Providus/Unity: 8900510157",
     contact: "Whatsapp- 07057323225"
   },
   {
