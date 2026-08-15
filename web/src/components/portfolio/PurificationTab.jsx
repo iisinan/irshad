@@ -36,8 +36,8 @@ const CHARITIES = [
   },
   {
     id: 5,
-    name: "Al-Maheer Int'l qur'anic Science Academy",
-    bank: "Taj Bank: 0009931326",
+    name: "Al-Maheer Charity and Endowment Foundation",
+    bank: "Taj Bank: 0015604766",
     contact: "Whatsapp- 09121526431"
   },
   {
