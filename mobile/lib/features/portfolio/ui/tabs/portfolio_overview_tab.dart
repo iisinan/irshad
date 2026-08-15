@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/api/api_service.dart';
@@ -396,73 +397,140 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
   }
 
   Widget _buildHoldingItem(BuildContext context, dynamic holding, int index) {
-    bool isHalal = holding['is_halal'] ?? false;
+    final symbol = holding['symbol'] ?? 'S';
+    final statusRaw = holding['status']?.toString().toLowerCase() ?? (holding['is_halal'] == true ? 'halal' : 'non-halal');
+    final finalStatus = ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].contains(symbol) ? 'halal' : statusRaw;
+    
+    final purificationDue = num.tryParse(holding['purification_due']?.toString() ?? '0')?.toDouble() ?? 0.0;
+    final nonCompliantRatio = num.tryParse(holding['non_compliant_ratio']?.toString() ?? '0')?.toDouble() ?? 0.0;
+    final totalDividends = num.tryParse(holding['total_dividends']?.toString() ?? '0')?.toDouble() ?? 0.0;
+    
+    Color badgeColor;
+    Color badgeBg;
+    String badgeText;
+    
+    if (finalStatus == 'halal' || finalStatus == 'compliant') {
+      if (purificationDue > 0 || nonCompliantRatio > 0) {
+        badgeBg = const Color(0x1AEAB308); // 0.1 opacity
+        badgeColor = const Color(0xFFEAB308);
+        badgeText = 'Shariah Compliant w/ Purification';
+      } else {
+        badgeBg = context.halal.withOpacity(0.1);
+        badgeColor = context.halal;
+        badgeText = 'Shariah Compliant';
+      }
+    } else if (finalStatus == 'non-halal' || finalStatus == 'non_halal' || finalStatus == 'non-compliant' || finalStatus == 'fail') {
+      badgeBg = context.haram.withOpacity(0.1);
+      badgeColor = context.haram;
+      badgeText = 'Shariah Non-Compliant';
+    } else {
+      badgeBg = const Color(0x1AF59E0B);
+      badgeColor = const Color(0xFFF59E0B);
+      badgeText = 'Doubtful';
+    }
+
     double returnPct = num.tryParse(holding['return_percentage']?.toString() ?? '0')?.toDouble() ?? 0.0;
     double val = num.tryParse(holding['total_value']?.toString() ?? '0')?.toDouble() ?? 0.0;
+    double shares = num.tryParse(holding['shares']?.toString() ?? '0')?.toDouble() ?? 0.0;
+    double returnValue = (val * returnPct) / 100; // rough approximation
 
     return GestureDetector(
       onTap: () => _showEditHoldingSheet(context, holding),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        margin: const EdgeInsets.only(bottom: 8),
         decoration: BoxDecoration(
           color: context.bgAlt,
-          border: Border(bottom: BorderSide(color: context.divider, width: 1)),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: context.divider),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 16, offset: const Offset(0, 4))],
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                CompanyAvatar(
-                  logoUrl: holding['logo_url'],
-                  symbol: holding['symbol'] ?? 'S',
-                  size: 40,
-                  borderRadius: 12,
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                width: 6,
+                decoration: BoxDecoration(
+                  color: badgeColor,
+                  borderRadius: const BorderRadius.horizontal(left: Radius.circular(20)),
                 ),
-                const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          holding['symbol'],
-                          style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, fontSize: 16),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Row(
+                    children: [
+                      CompanyAvatar(
+                        logoUrl: holding['logo_url'],
+                        symbol: symbol,
+                        size: 44,
+                        borderRadius: 12,
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Wrap(
+                              spacing: 6,
+                              runSpacing: 4,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: [
+                                Text(symbol, style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, fontSize: 16)),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(color: badgeBg, borderRadius: BorderRadius.circular(4)),
+                                  child: Text(badgeText.toUpperCase(), style: TextStyle(color: badgeColor, fontSize: 8, fontWeight: FontWeight.w900)),
+                                ),
+                                if (totalDividends > 0)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(color: context.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(4)),
+                                    child: Text('₦${totalDividends.toStringAsFixed(2)} DIVS', style: TextStyle(color: context.primary, fontSize: 8, fontWeight: FontWeight.w900)),
+                                  ),
+                                if (purificationDue > 0)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(color: context.haram.withOpacity(0.1), borderRadius: BorderRadius.circular(4)),
+                                    child: Text('₦${purificationDue.toStringAsFixed(2)} TO PURIFY', style: TextStyle(color: context.haram, fontSize: 8, fontWeight: FontWeight.w900)),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text(holding['name'] ?? symbol, style: TextStyle(color: context.textMuted, fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          ],
                         ),
-                        if (!isHalal) ...[
-                          const SizedBox(width: 6),
-                          Icon(Icons.warning_rounded, color: context.haram, size: 14),
-                        ]
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${holding['shares']} shares',
-                      style: TextStyle(color: context.textMuted, fontSize: 13),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  '₦ ${val.toStringAsFixed(2)}',
-                  style: TextStyle(fontWeight: FontWeight.w800, color: context.textDark, fontSize: 15),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${returnPct >= 0 ? '+' : ''}${returnPct.toStringAsFixed(2)}%',
-                  style: TextStyle(
-                    color: returnPct >= 0 ? context.primary : context.haram, 
-                    fontWeight: FontWeight.w700, 
-                    fontSize: 13
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('₦${val.toStringAsFixed(0)}', style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, fontSize: 15)),
+                          const SizedBox(height: 2),
+                          Text('${shares.toStringAsFixed(0)} shares', style: TextStyle(color: context.textMuted, fontSize: 11, fontWeight: FontWeight.w600)),
+                        ],
+                      ),
+                      const SizedBox(width: 20),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (returnPct != 0)
+                            Text('${returnPct >= 0 ? '+' : ''}${returnPct.toStringAsFixed(2)}%', style: TextStyle(color: returnPct >= 0 ? context.primary : context.haram, fontWeight: FontWeight.w900, fontSize: 15)),
+                          if (returnPct == 0)
+                            Text('-', style: TextStyle(color: context.textMuted, fontWeight: FontWeight.w900, fontSize: 15)),
+                          const SizedBox(height: 2),
+                          if (returnValue != 0)
+                            Text('₦${returnValue.abs().toStringAsFixed(0)}', style: TextStyle(color: context.textMuted, fontSize: 11, fontWeight: FontWeight.w600)),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -484,97 +552,155 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: context.bgAlt,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (bottomSheetContext) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(bottomSheetContext).viewInsets.bottom, left: 24, right: 24, top: 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      backgroundColor: context.bg,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
+      builder: (bottomSheetContext) {
+        bool isSaving = false;
+        return StatefulBuilder(builder: (ctx, setState) {
+          return Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(bottomSheetContext).viewInsets.bottom),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Edit ${holding['symbol']}', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: context.textDark)),
-                IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(bottomSheetContext)),
-              ],
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: qtyController,
-              decoration: const InputDecoration(labelText: 'Quantity', border: OutlineInputBorder()),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: priceController,
-              decoration: const InputDecoration(labelText: 'Average Buy Price', border: OutlineInputBorder()),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () async {
-                      try {
-                        await ApiService().delete('portfolio/${holding['id']}');
-                        if (mounted) Navigator.pop(bottomSheetContext);
-                        if (mounted) Provider.of<PortfolioProvider>(context, listen: false).fetchPortfolio();
-                      } catch (e) {
-                        if (mounted) {
-                          ScaffoldMessenger.of(bottomSheetContext).showSnackBar(
-                            SnackBar(content: Text('Failed to delete: $e'), backgroundColor: context.haram),
-                          );
-                        }
-                      }
-                    },
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: context.haram,
-                      side: BorderSide(color: context.haram),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-                      minimumSize: const Size(0, 56),
-                    ),
-                    child: const Text('Delete', style: TextStyle(fontWeight: FontWeight.w800)),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(28, 24, 28, 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Edit ${holding['symbol']}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.3)),
+                          const SizedBox(height: 4),
+                          Text('Adjust your position size and average price', style: TextStyle(fontSize: 12, color: context.textMuted)),
+                        ],
+                      ),
+                      GestureDetector(
+                        onTap: () => Navigator.pop(bottomSheetContext),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(color: context.bgAlt, shape: BoxShape.circle),
+                          child: Icon(Icons.close, size: 16, color: context.textMuted),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      try {
-                        final shares = double.tryParse(qtyController.text) ?? 0.0;
-                        final price = double.tryParse(priceController.text) ?? 0.0;
-                        await ApiService().put('portfolio/${holding['id']}', {
-                          'shares': shares,
-                          'average_buy_price': price,
-                        });
-                        if (mounted) Navigator.pop(bottomSheetContext);
-                        if (mounted) Provider.of<PortfolioProvider>(context, listen: false).fetchPortfolio();
-                      } catch (e) {
-                        if (mounted) {
-                          ScaffoldMessenger.of(bottomSheetContext).showSnackBar(
-                            SnackBar(content: Text('Failed to save: $e'), backgroundColor: context.haram),
-                          );
-                        }
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: context.primary, 
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-                      elevation: 0,
-                      minimumSize: const Size(0, 56),
-                    ),
-                    child: const Text('Save', style: TextStyle(fontWeight: FontWeight.w800)),
+                Divider(color: context.divider, height: 1),
+                Padding(
+                  padding: const EdgeInsets.all(28),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('SHARES', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: context.textMuted, letterSpacing: 0.8)),
+                                const SizedBox(height: 8),
+                                TextField(
+                                  controller: qtyController,
+                                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                  style: TextStyle(fontWeight: FontWeight.w800, color: context.textDark, fontSize: 16),
+                                  decoration: InputDecoration(
+                                    filled: true,
+                                    fillColor: context.bgAlt,
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: context.divider, width: 2)),
+                                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: context.divider, width: 2)),
+                                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: context.primary, width: 2)),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('AVG PRICE (₦)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: context.textMuted, letterSpacing: 0.8)),
+                                const SizedBox(height: 8),
+                                TextField(
+                                  controller: priceController,
+                                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                  style: TextStyle(fontWeight: FontWeight.w800, color: context.textDark, fontSize: 16),
+                                  decoration: InputDecoration(
+                                    filled: true,
+                                    fillColor: context.bgAlt,
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: context.divider, width: 2)),
+                                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: context.divider, width: 2)),
+                                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: context.primary, width: 2)),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => Navigator.pop(bottomSheetContext),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: context.textDark,
+                                side: BorderSide(color: context.divider, width: 2),
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                              ),
+                              child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.w800)),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            flex: 2,
+                            child: ElevatedButton(
+                              onPressed: isSaving ? null : () async {
+                                setState(() => isSaving = true);
+                                try {
+                                  final provider = Provider.of<PortfolioProvider>(context, listen: false);
+                                  final shares = double.tryParse(qtyController.text) ?? 0.0;
+                                  final price = double.tryParse(priceController.text) ?? 0.0;
+                                  if (shares == 0) {
+                                    await ApiService().delete('portfolio/${holding['id']}');
+                                    await provider.fetchPortfolio();
+                                  } else {
+                                    await provider.updateHolding(holding['id'], shares, price);
+                                  }
+                                  if (mounted) Navigator.pop(bottomSheetContext);
+                                } catch (e) {
+                                  if (mounted) ScaffoldMessenger.of(bottomSheetContext).showSnackBar(SnackBar(content: Text('Failed to save: $e'), backgroundColor: context.haram));
+                                } finally {
+                                  setState(() => isSaving = false);
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: context.primary,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                elevation: 0,
+                              ),
+                              child: isSaving 
+                                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                                : const Text('Save Changes', style: TextStyle(fontWeight: FontWeight.w800)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 32),
-          ],
-        ),
-      ),
+          );
+        });
+      },
     );
   }
 }
@@ -606,6 +732,8 @@ class _AddHoldingBottomSheetState extends State<_AddHoldingBottomSheet> with Sin
   final List<_HoldingFormData> _holdings = [];
   double _estimatedTotal = 0.0;
   bool _isSubmitting = false;
+  String? _brokerName;
+  bool _isLinking = false;
 
   @override
   void initState() {
@@ -669,12 +797,141 @@ class _AddHoldingBottomSheetState extends State<_AddHoldingBottomSheet> with Sin
     setState(() => _isSubmitting = false);
 
     if (success) {
-      if (mounted) Navigator.pop(context);
+      final prefs = await SharedPreferences.getInstance();
+      final hasZakatDate = prefs.getString('ZAKAT_DATE_KEY') != null;
+      if (!hasZakatDate) {
+        String firstPurchaseDate = payload.firstWhere((p) => p['purchase_date'] != null, orElse: () => {'purchase_date': DateTime.now().toString().substring(0, 10)})['purchase_date'];
+        if (mounted) _showZakatDatePrompt(firstPurchaseDate);
+      } else {
+        if (mounted) Navigator.pop(context);
+      }
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(provider.error ?? 'Failed to add holdings.'), backgroundColor: context.haram));
       }
     }
+  }
+
+  void _showZakatDatePrompt(String purchaseDate) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => Dialog(
+        backgroundColor: context.bg,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(color: context.bgAlt, shape: BoxShape.circle),
+                child: Icon(Icons.calculate_outlined, color: context.primary, size: 32),
+              ),
+              const SizedBox(height: 24),
+              Text('Set Zakat Hawl Date?', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
+              const SizedBox(height: 16),
+              Text(
+                'We noticed you haven\'t set a Zakat Hawl Date. Based on your purchase, would you like to set your Hawl date to $purchaseDate?',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: context.textMuted, fontSize: 14, height: 1.6),
+              ),
+              const SizedBox(height: 32),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        if (mounted) Navigator.pop(this.context);
+                      },
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: context.textDark,
+                        side: BorderSide(color: context.divider),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      child: const Text('Not Now', style: TextStyle(fontWeight: FontWeight.w800)),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        final provider = Provider.of<PortfolioProvider>(this.context, listen: false);
+                        bool updated = await provider.updateZakatDate(purchaseDate);
+                        if (updated) {
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.setString('ZAKAT_DATE_KEY', purchaseDate);
+                        }
+                        if (mounted) Navigator.pop(ctx);
+                        if (mounted) _showZakatConfirmation(purchaseDate);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: context.primary,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        elevation: 0,
+                      ),
+                      child: const Text('Yes, Set Date', style: TextStyle(fontWeight: FontWeight.w800)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showZakatConfirmation(String date) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => Dialog(
+        backgroundColor: context.bg,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(color: context.halal.withOpacity(0.1), shape: BoxShape.circle),
+                child: Icon(Icons.check_circle_outline, color: context.halal, size: 32),
+              ),
+              const SizedBox(height: 24),
+              Text('Zakat Hawl Set', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
+              const SizedBox(height: 16),
+              Text(
+                'Your Zakat Hawl Date has been successfully set to $date. We will calculate your due Zakat starting from this date.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: context.textMuted, fontSize: 14, height: 1.6),
+              ),
+              const SizedBox(height: 32),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  if (mounted) Navigator.pop(this.context);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: context.primary,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 56),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  elevation: 0,
+                ),
+                child: const Text('Awesome', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -738,8 +995,8 @@ class _AddHoldingBottomSheetState extends State<_AddHoldingBottomSheet> with Sin
               controller: _tabController,
               children: [
                 _buildManualEntryTab(),
-                _buildPlaceholderTab('Import Statement feature coming soon.'),
-                _buildPlaceholderTab('Link Broker feature coming soon.'),
+                _buildImportTab(),
+                _buildBrokerTab(),
               ],
             ),
           ),
@@ -875,7 +1132,36 @@ class _AddHoldingBottomSheetState extends State<_AddHoldingBottomSheet> with Sin
             children: [
               Expanded(child: _buildTextField('Avg Price (₦)', controller: form.price, hint: '0.00', keyboardType: TextInputType.numberWithOptions(decimal: true))),
               const SizedBox(width: 16),
-              Expanded(child: _buildTextField('Purchase Date', controller: form.date, hint: 'yyyy-mm-dd', suffixIcon: Icons.calendar_today_outlined)),
+              Expanded(child: _buildTextField(
+                'Purchase Date', 
+                controller: form.date, 
+                hint: 'yyyy-mm-dd', 
+                suffixIcon: Icons.calendar_today_outlined,
+                readOnly: true,
+                onTap: () async {
+                  DateTime? picked = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime.now(),
+                    builder: (context, child) {
+                      return Theme(
+                        data: Theme.of(context).copyWith(
+                          colorScheme: ColorScheme.light(
+                            primary: context.primary,
+                            onPrimary: Colors.white,
+                            onSurface: context.textDark,
+                          ),
+                        ),
+                        child: child!,
+                      );
+                    },
+                  );
+                  if (picked != null) {
+                    form.date.text = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+                  }
+                },
+              )),
             ],
           ),
         ],
@@ -943,8 +1229,6 @@ class _AddHoldingBottomSheetState extends State<_AddHoldingBottomSheet> with Sin
                         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
                         child: Row(
                           children: [
-                            CompanyAvatar(symbol: option['symbol'] ?? '', logoUrl: option['logo_url'], size: 28),
-                            const SizedBox(width: 14),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -955,8 +1239,6 @@ class _AddHoldingBottomSheetState extends State<_AddHoldingBottomSheet> with Sin
                                 ],
                               ),
                             ),
-                            const SizedBox(width: 8),
-                            Text('₦${option['latest_price'] ?? '0.00'}', style: TextStyle(fontWeight: FontWeight.w800, color: context.primary, fontSize: 14)),
                           ],
                         ),
                       ),
@@ -971,7 +1253,7 @@ class _AddHoldingBottomSheetState extends State<_AddHoldingBottomSheet> with Sin
     );
   }
 
-  Widget _buildTextField(String label, {required TextEditingController controller, FocusNode? focusNode, String? hint, IconData? prefixIcon, IconData? suffixIcon, TextInputType? keyboardType}) {
+  Widget _buildTextField(String label, {required TextEditingController controller, FocusNode? focusNode, String? hint, IconData? prefixIcon, IconData? suffixIcon, TextInputType? keyboardType, bool readOnly = false, VoidCallback? onTap}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -981,6 +1263,8 @@ class _AddHoldingBottomSheetState extends State<_AddHoldingBottomSheet> with Sin
           controller: controller,
           focusNode: focusNode,
           keyboardType: keyboardType,
+          readOnly: readOnly,
+          onTap: onTap,
           style: TextStyle(color: context.textDark, fontWeight: FontWeight.w700),
           decoration: InputDecoration(
             hintText: hint,
@@ -999,7 +1283,177 @@ class _AddHoldingBottomSheetState extends State<_AddHoldingBottomSheet> with Sin
     );
   }
 
-  Widget _buildPlaceholderTab(String msg) {
-    return Center(child: Text(msg, style: TextStyle(color: context.textMuted)));
+  Widget _buildImportTab() {
+    return Padding(
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: context.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.file_upload_outlined, color: context.primary, size: 16),
+                const SizedBox(width: 8),
+                Text('Bulk Import', style: TextStyle(color: context.primary, fontWeight: FontWeight.w800, fontSize: 12)),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text('Upload Statement', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
+          const SizedBox(height: 16),
+          Text(
+            'Upload your trade log or portfolio statement (PDF/CSV) to automatically extract your holdings.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: context.textMuted, fontSize: 14, height: 1.6),
+          ),
+          const SizedBox(height: 32),
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: const Text('File selected', style: TextStyle(fontWeight: FontWeight.bold)),
+                    content: const Text('Parsing logic will connect to the backend here.'),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    actions: [
+                      TextButton(onPressed: () { Navigator.pop(context); Navigator.pop(this.context); }, child: Text('OK', style: TextStyle(color: context.primary, fontWeight: FontWeight.bold))),
+                    ],
+                  ),
+                );
+              },
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: context.bgAlt,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: context.divider, style: BorderStyle.solid, width: 2),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(color: context.bg, shape: BoxShape.circle),
+                      child: Icon(Icons.cloud_upload_outlined, size: 28, color: context.textMuted),
+                    ),
+                    const SizedBox(height: 16),
+                    Text('Tap to Browse Files', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: context.textDark)),
+                    const SizedBox(height: 4),
+                    Text('Supports .pdf, .csv, and .xlsx', style: TextStyle(fontSize: 12, color: context.textMuted)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBrokerTab() {
+    return Padding(
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: context.halal.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.verified_user_outlined, color: context.halal, size: 16),
+                const SizedBox(width: 8),
+                Text('End-to-End Encrypted', style: TextStyle(color: context.halal, fontWeight: FontWeight.w800, fontSize: 12)),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text('Link your Broker', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
+          const SizedBox(height: 16),
+          Text(
+            'Connect your brokerage account to Irshad to seamlessly track your Shariah-compliant investments.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: context.textMuted, fontSize: 14, height: 1.6),
+          ),
+          const SizedBox(height: 32),
+          Text('SELECT AN INSTITUTION', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: context.textMuted, letterSpacing: 1.0)),
+          const SizedBox(height: 16),
+          Expanded(
+            child: GridView.count(
+              crossAxisCount: 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 1.2,
+              children: ['Meristem', 'Stanbic IBTC', 'CSCS', 'Risevest'].map((broker) {
+                bool isSelected = _brokerName == broker;
+                return GestureDetector(
+                  onTap: () => setState(() => _brokerName = broker),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    decoration: BoxDecoration(
+                      color: isSelected ? context.primary.withOpacity(0.1) : context.bgAlt,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: isSelected ? context.primary : context.divider, width: 2),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: isSelected ? context.bg : context.bgAlt,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(broker[0], style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: context.textDark)),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(broker, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: context.textDark)),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: (_isLinking || _brokerName == null) ? null : () async {
+              setState(() => _isLinking = true);
+              final provider = Provider.of<PortfolioProvider>(context, listen: false);
+              bool success = await provider.linkBroker(_brokerName!);
+              setState(() => _isLinking = false);
+              if (success) {
+                if (mounted) Navigator.pop(context);
+                if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$_brokerName linked successfully.'), backgroundColor: context.halal));
+              } else {
+                if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(provider.error ?? 'Failed to link broker.'), backgroundColor: context.haram));
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: context.primary,
+              foregroundColor: Colors.white,
+              minimumSize: const Size(double.infinity, 56),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              elevation: 0,
+            ),
+            child: _isLinking
+              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+              : const Text('Continue', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+          ),
+        ],
+      ),
+    );
   }
 }

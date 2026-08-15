@@ -170,6 +170,45 @@ class PortfolioProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+  Future<bool> updateHolding(int id, double shares, double averageBuyPrice) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final response = await ApiService().put('portfolio/$id', {
+        'shares': shares,
+        'average_buy_price': averageBuyPrice,
+      });
+
+      if (response.data['status'] == 'success') {
+        await fetchPortfolio();
+        return true;
+      } else {
+        _error = response.data['message'] ?? 'Failed to update holding';
+        return false;
+      }
+    } catch (e) {
+      _error = e.toString();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> updateZakatDate(String date) async {
+    try {
+      final response = await ApiService().put('profile', {
+        'preferences': {'zakat_hawl_date': date}
+      });
+      return response.data['status'] == 'success';
+    } catch (e) {
+      debugPrint('Failed to update zakat date: $e');
+      return false;
+    }
+  }
+
 
   void clear() {
     _summary = {
