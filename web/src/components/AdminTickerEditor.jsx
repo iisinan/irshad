@@ -177,7 +177,7 @@ export default function AdminTickerEditor() {
   const currentStatus = stock.status?.status || 'review';
   const statusColors = {
     halal: { color: 'var(--halal)', bg: 'var(--halal-bg)' },
-    'non-halal': { color: 'var(--non-halal)', bg: 'var(--non-halal-bg)' },
+    'non-compliant': { color: 'var(--non-compliant)', bg: 'var(--non-compliant-bg)' },
     doubtful: { color: 'var(--doubtful)', bg: 'var(--doubtful-bg)' },
     review: { color: 'var(--review)', bg: 'var(--review-bg)' },
   };
@@ -269,7 +269,7 @@ export default function AdminTickerEditor() {
                   {[
                     { val: 'halal', label: '✅ Halal', color: 'var(--halal)', bg: 'var(--halal-bg)', border: 'var(--halal-border)' },
                     { val: 'doubtful', label: '⚠️ Doubtful', color: 'var(--doubtful)', bg: 'var(--doubtful-bg)', border: 'rgba(245,158,11,0.25)' },
-                    { val: 'non-halal', label: '❌ Non-Halal', color: 'var(--non-halal)', bg: 'var(--non-halal-bg)', border: 'var(--non-halal-border)' },
+                    { val: 'non-compliant', label: '❌ Non-Compliant', color: 'var(--non-compliant)', bg: 'var(--non-compliant-bg)', border: 'var(--non-compliant-border)' },
                   ].map(s => (
                     <button key={s.val} type="button"
                       onClick={() => setVerdictForm({...verdictForm, status: s.val})}
@@ -385,10 +385,10 @@ export default function AdminTickerEditor() {
                     const pct = parseFloat(r.value);
                     const pass = pct <= r.threshold;
                     return (
-                      <div key={r.label} style={{ padding: '16px 20px', borderRadius: '14px', border: `1px solid ${pass ? 'var(--halal-border)' : 'var(--non-halal-border)'}`, background: pass ? 'var(--halal-bg)' : 'var(--non-halal-bg)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div key={r.label} style={{ padding: '16px 20px', borderRadius: '14px', border: `1px solid ${pass ? 'var(--halal-border)' : 'var(--non-compliant-border)'}`, background: pass ? 'var(--halal-bg)' : 'var(--non-compliant-bg)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div>
-                          <div style={{ fontSize: '0.7rem', fontWeight: 700, color: pass ? 'var(--halal)' : 'var(--non-halal)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{r.label}</div>
-                          <div style={{ fontSize: '1.5rem', fontWeight: 900, color: pass ? 'var(--halal)' : 'var(--non-halal)', lineHeight: 1.1, marginTop: '4px' }}>{r.value}%</div>
+                          <div style={{ fontSize: '0.7rem', fontWeight: 700, color: pass ? 'var(--halal)' : 'var(--non-compliant)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{r.label}</div>
+                          <div style={{ fontSize: '1.5rem', fontWeight: 900, color: pass ? 'var(--halal)' : 'var(--non-compliant)', lineHeight: 1.1, marginTop: '4px' }}>{r.value}%</div>
                         </div>
                         <div style={{ fontSize: '1.5rem' }}>{pass ? '✅' : '❌'}</div>
                       </div>
@@ -460,7 +460,7 @@ export default function AdminTickerEditor() {
                       {financialsForm.evidence_links.length > 1 && (
                         <button type="button"
                           onClick={() => setFinancialsForm({...financialsForm, evidence_links: financialsForm.evidence_links.filter((_, i) => i !== idx)})}
-                          style={{ width: '42px', height: '42px', borderRadius: '10px', background: 'var(--non-halal-bg)', color: 'var(--non-halal)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                          style={{ width: '42px', height: '42px', borderRadius: '10px', background: 'var(--non-compliant-bg)', color: 'var(--non-compliant)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
                         ><Trash2 size={15} /></button>
                       )}
                     </div>
@@ -513,7 +513,7 @@ export default function AdminTickerEditor() {
                       </div>
                       <button onClick={() => handleDeleteNews(n.id)}
                         style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, transition: 'all 0.2s' }}
-                        onMouseEnter={e => { e.currentTarget.style.background = 'var(--non-halal-bg)'; e.currentTarget.style.color = 'var(--non-halal)'; e.currentTarget.style.borderColor = 'var(--non-halal)'; }}
+                        onMouseEnter={e => { e.currentTarget.style.background = 'var(--non-compliant-bg)'; e.currentTarget.style.color = 'var(--non-compliant)'; e.currentTarget.style.borderColor = 'var(--non-compliant)'; }}
                         onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg)'; e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
                       >
                         <Trash2 size={14} />

@@ -34,7 +34,7 @@ const CardSkeleton = () => {
 const StatusBadge = ({ status }) => {
   const cfg = {
     halal:     { bg: 'var(--halal-bg)',     border: 'var(--halal-border)',     color: 'var(--halal)',     label: 'Shariah Compliant' },
-    non_halal: { bg: 'var(--non-halal-bg)', border: 'var(--non-halal-border)', color: 'var(--non-halal)', label: 'Shariah Non-Compliant' },
+    non_compliant: { bg: 'var(--non-compliant-bg)', border: 'var(--non-compliant-border)', color: 'var(--non-compliant)', label: 'Shariah Non-Compliant' },
     doubtful:  { bg: 'var(--doubtful-bg)',  border: 'var(--doubtful-border)',  color: 'var(--doubtful)',  label: 'Doubtful' },
     watchlist: { bg: 'var(--review-bg)',    border: 'var(--review-border)',    color: 'var(--review)',    label: 'Watchlist' },
   };
@@ -68,14 +68,14 @@ const SectionHeader = ({ icon: Icon, title, count, color = 'var(--primary)' }) =
 
 /* ── Compliance Change Card ── */
 const ComplianceCard = ({ item }) => {
-  const isWorsening = item.new_status === 'non_halal' || item.new_status === 'non-halal';
-  const isImproving = (item.new_status === 'halal') && (item.previous_status === 'non_halal' || item.previous_status === 'non-halal');
+  const isWorsening = item.new_status === 'non_compliant' || item.new_status === 'non-compliant';
+  const isImproving = (item.new_status === 'halal') && (item.previous_status === 'non_compliant' || item.previous_status === 'non-compliant');
   const navigate = useNavigate();
 
   return (
     <div className="animate-slide-up" style={{
       background: 'var(--bg)',
-      border: `1px solid ${isWorsening ? 'var(--non-halal-border)' : isImproving ? 'var(--halal-border)' : 'var(--border)'}`,
+      border: `1px solid ${isWorsening ? 'var(--non-compliant-border)' : isImproving ? 'var(--halal-border)' : 'var(--border)'}`,
       borderRadius: '16px',
       padding: '18px',
       transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
@@ -85,8 +85,8 @@ const ComplianceCard = ({ item }) => {
       cursor: 'pointer',
     }}
       onClick={() => navigate(`/market/${item.symbol}/aaoifi`)}
-      onMouseEnter={e => { e.currentTarget.style.boxShadow = 'var(--shadow-md)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = isWorsening ? 'var(--non-halal)' : isImproving ? 'var(--halal)' : 'var(--primary-100)'; }}
-      onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderColor = isWorsening ? 'var(--non-halal-border)' : isImproving ? 'var(--halal-border)' : 'var(--border)'; }}
+      onMouseEnter={e => { e.currentTarget.style.boxShadow = 'var(--shadow-md)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = isWorsening ? 'var(--non-compliant)' : isImproving ? 'var(--halal)' : 'var(--primary-100)'; }}
+      onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderColor = isWorsening ? 'var(--non-compliant-border)' : isImproving ? 'var(--halal-border)' : 'var(--border)'; }}
     >
       <div style={{ flexShrink: 0 }}>
         <CompanyLogo symbol={item.symbol} logoUrl={item.logo_url} size={40} />
@@ -104,7 +104,7 @@ const ComplianceCard = ({ item }) => {
           </div>
         </div>
         {item.reason && (
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-body)', lineHeight: 1.5, marginBottom: '10px', padding: '8px 12px', background: isWorsening ? 'var(--non-halal-bg)' : 'var(--bg-section)', borderRadius: '10px' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-body)', lineHeight: 1.5, marginBottom: '10px', padding: '8px 12px', background: isWorsening ? 'var(--non-compliant-bg)' : 'var(--bg-section)', borderRadius: '10px' }}>
             <span style={{ fontWeight: 700 }}>Reason: </span>{item.reason}
           </div>
         )}
@@ -129,7 +129,7 @@ const BusinessCard = ({ item }) => {
     acquisition:         { color: 'var(--primary)',   bg: 'var(--primary-50)' },
     new_business:        { color: 'var(--review)',     bg: 'var(--review-bg)' },
     disposal:            { color: 'var(--doubtful)',   bg: 'var(--doubtful-bg)' },
-    prohibited_activity: { color: 'var(--non-halal)', bg: 'var(--non-halal-bg)' },
+    prohibited_activity: { color: 'var(--non-compliant)', bg: 'var(--non-compliant-bg)' },
     islamic_finance:     { color: 'var(--halal)',      bg: 'var(--halal-bg)' },
     regulatory:          { color: '#7C3AED',           bg: 'rgba(124,58,237,0.1)' },
   };
@@ -314,12 +314,12 @@ export default function UpdatesNews() {
           {[1, 2, 3].map(i => <CardSkeleton key={i} />)}
         </div>
       ) : error ? (
-        <EmptyState icon={AlertTriangle} title="Failed to Load" subtitle={error} color="var(--non-halal)" />
+        <EmptyState icon={AlertTriangle} title="Failed to Load" subtitle={error} color="var(--non-compliant)" />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {activeSection === 'compliance' && (
             <>
-              <SectionHeader icon={Shield} title="Compliance Status Changes" count={complianceChanges.length} color="var(--non-halal)" />
+              <SectionHeader icon={Shield} title="Compliance Status Changes" count={complianceChanges.length} color="var(--non-compliant)" />
               <div style={{ maxHeight: '600px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingRight: '6px' }} className="custom-scrollbar">
                 {complianceChanges.length === 0
                   ? <EmptyState icon={CheckCircle2} title="No Recent Changes" subtitle="No companies have changed compliance status recently. You're all clear!" color="var(--halal)" />

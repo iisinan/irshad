@@ -40,12 +40,51 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
             return _buildGuestView(context);
           }
 
+          int halalCount = 0;
+          int needsPurif = 0;
+          int nonHalalCount = 0;
+          int doubtfulCount = 0;
+          double totalReturn = 0;
+
+          for (var h in provider.holdings) {
+            final symbol = h['symbol'] ?? 'S';
+            final statusRaw = h['status']?.toString().toLowerCase() ?? (h['is_halal'] == true ? 'halal' : 'non-halal');
+            final finalStatus = ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].contains(symbol) ? 'halal' : statusRaw;
+            final isHalal = finalStatus == 'halal' || finalStatus == 'compliant';
+            
+            final purificationDue = num.tryParse(h['purification_due']?.toString() ?? '0')?.toDouble() ?? 0.0;
+            final nonCompliantRatio = num.tryParse(h['non_compliant_ratio']?.toString() ?? '0')?.toDouble() ?? 0.0;
+            final needsPurification = purificationDue > 0 || nonCompliantRatio > 0;
+            
+            if (isHalal) {
+              if (needsPurification) needsPurif++;
+              else halalCount++;
+            } else if (finalStatus == 'doubtful') {
+              doubtfulCount++;
+            } else {
+              nonHalalCount++;
+            }
+
+            totalReturn += num.tryParse(h['return_percentage']?.toString() ?? '0')?.toDouble() ?? 0.0;
+          }
+
+          double avgReturn = provider.holdings.isNotEmpty ? totalReturn / provider.holdings.length : 0.0;
+
           List<dynamic> filteredHoldings = provider.holdings.where((h) {
-            bool isHalal = h['is_halal'] ?? false;
+            final symbol = h['symbol'] ?? 'S';
+            final statusRaw = h['status']?.toString().toLowerCase() ?? (h['is_halal'] == true ? 'halal' : 'non-halal');
+            final finalStatus = ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].contains(symbol) ? 'halal' : statusRaw;
+            final isHalal = finalStatus == 'halal' || finalStatus == 'compliant';
+            
+            final purificationDue = num.tryParse(h['purification_due']?.toString() ?? '0')?.toDouble() ?? 0.0;
+            final nonCompliantRatio = num.tryParse(h['non_compliant_ratio']?.toString() ?? '0')?.toDouble() ?? 0.0;
+            final needsPurification = purificationDue > 0 || nonCompliantRatio > 0;
+
             if (_selectedFilter == 'All') return true;
-            if (_selectedFilter == 'Compliant') return isHalal;
-            if (_selectedFilter == 'Non-Compliant') return !isHalal;
-            // Purify and Doubtful could be handled if we have data for it. For now map to true/false.
+            if (_selectedFilter == 'Compliant') return isHalal && !needsPurification;
+            if (_selectedFilter == 'Compliant (Purify)') return isHalal && needsPurification;
+            if (_selectedFilter == 'Doubtful') return finalStatus == 'doubtful';
+            if (_selectedFilter == 'Non-Compliant') return !isHalal && finalStatus != 'doubtful';
             return true;
           }).toList();
 
@@ -60,7 +99,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildBalanceCard(context, provider),
+                    _buildBalanceCard(context, provider, halalCount, needsPurif, nonHalalCount, doubtfulCount, avgReturn),
                     const SizedBox(height: 24),
                     _buildFilterTabs(context),
                     const SizedBox(height: 24),
@@ -255,39 +294,51 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
     );
   }
 
-  Widget _buildBalanceCard(BuildContext context, PortfolioProvider provider) {
+  Widget _buildBalanceCard(BuildContext context, PortfolioProvider provider, int halalCount, int needsPurif, int nonHalalCount, int doubtfulCount, double avgReturn) {
+    bool isUp = avgReturn >= 0;
     return Container(
       width: double.infinity,
-      height: 140,
-      clipBehavior: Clip.hardEdge,
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: context.bgAlt,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: context.divider.withOpacity(0.5)),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 24, offset: const Offset(0, 8)),
+        ],
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [context.bg, context.bgAlt],
+        ),
       ),
       child: Stack(
         children: [
           Positioned(
-            right: -30,
-            top: -40,
+            right: -50,
+            top: -50,
             child: Container(
-              width: 140,
-              height: 140,
+              width: 180,
+              height: 180,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: context.halal.withOpacity(0.1), width: 16),
+                gradient: RadialGradient(
+                  colors: [context.primary.withOpacity(0.08), Colors.transparent],
+                ),
               ),
             ),
           ),
           Positioned(
-            right: 40,
-            bottom: -50,
+            left: 10,
+            bottom: -60,
             child: Container(
-              width: 120,
-              height: 120,
+              width: 200,
+              height: 200,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: context.primary.withOpacity(0.05), width: 14),
+                gradient: RadialGradient(
+                  colors: [context.primary.withOpacity(0.06), Colors.transparent],
+                ),
               ),
             ),
           ),
@@ -295,39 +346,85 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
             padding: const EdgeInsets.all(24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  '₦${provider.summary['total_balance'].toStringAsFixed(0)}',
-                  style: TextStyle(
-                    color: context.textDark,
-                    fontSize: 42,
-                    fontWeight: FontWeight.w900,
-                    height: 1.0,
-                    letterSpacing: -1.5,
-                  ),
-                ),
-                const SizedBox(height: 16),
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
                   children: [
-                    Icon(Icons.verified_user_outlined, color: context.halal, size: 18),
-                    const SizedBox(width: 8),
                     Text(
-                      'Compliant ',
-                      style: TextStyle(color: context.textMuted, fontSize: 15, fontWeight: FontWeight.w600),
+                      '₦${provider.summary['total_balance'].toStringAsFixed(0)}',
+                      style: TextStyle(
+                        color: context.textDark,
+                        fontSize: 36,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -1.0,
+                      ),
                     ),
-                    Text(
-                      provider.holdings.where((h) => h['is_halal'] == true).length.toString(),
-                      style: TextStyle(color: context.textDark, fontSize: 16, fontWeight: FontWeight.w900),
-                    ),
+                    const SizedBox(width: 12),
+                    if (provider.holdings.isNotEmpty)
+                      Row(
+                        children: [
+                          Icon(isUp ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded, color: isUp ? context.halal : context.haram, size: 16),
+                          Text(
+                            '${isUp ? '+' : ''}${avgReturn.toStringAsFixed(2)}% Avg Return',
+                            style: TextStyle(color: isUp ? context.halal : context.haram, fontSize: 13, fontWeight: FontWeight.w800),
+                          ),
+                        ],
+                      ),
                   ],
                 ),
-              ],
-            ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 16,
+            runSpacing: 8,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.verified_user_outlined, color: context.halal, size: 16),
+                  const SizedBox(width: 4),
+                  Text('Halal: ', style: TextStyle(color: context.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
+                  Text(halalCount.toString(), style: TextStyle(color: context.textDark, fontSize: 14, fontWeight: FontWeight.w800)),
+                ],
+              ),
+              if (needsPurif > 0)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.water_drop_outlined, color: const Color(0xFFEAB308), size: 16),
+                    const SizedBox(width: 4),
+                    Text('Purify: ', style: TextStyle(color: context.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
+                    Text(needsPurif.toString(), style: TextStyle(color: context.textDark, fontSize: 14, fontWeight: FontWeight.w800)),
+                  ],
+                ),
+              if (nonHalalCount > 0)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.warning_amber_rounded, color: context.haram, size: 16),
+                    const SizedBox(width: 4),
+                    Text('Haram: ', style: TextStyle(color: context.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
+                    Text(nonHalalCount.toString(), style: TextStyle(color: context.textDark, fontSize: 14, fontWeight: FontWeight.w800)),
+                  ],
+                ),
+              if (doubtfulCount > 0)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.help_outline, color: const Color(0xFFF59E0B), size: 16),
+                    const SizedBox(width: 4),
+                    Text('Doubtful: ', style: TextStyle(color: context.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
+                    Text(doubtfulCount.toString(), style: TextStyle(color: context.textDark, fontSize: 14, fontWeight: FontWeight.w800)),
+                  ],
+                ),
+            ],
           ),
-        ],
-      ),
-    );
+        ], // closes Column children
+      ), // closes Column
+    ), // closes Padding
+  ], // closes Stack children
+), // closes Stack
+    ); // closes Container
   }
 
   Widget _buildPieChart(BuildContext context, List<dynamic> holdings) {
@@ -405,6 +502,8 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
     final nonCompliantRatio = num.tryParse(holding['non_compliant_ratio']?.toString() ?? '0')?.toDouble() ?? 0.0;
     final totalDividends = num.tryParse(holding['total_dividends']?.toString() ?? '0')?.toDouble() ?? 0.0;
     
+    final hasBeenPurified = context.read<PortfolioProvider>().purifications.any((p) => p['symbol'] == symbol);
+    
     Color badgeColor;
     Color badgeBg;
     String badgeText;
@@ -458,73 +557,124 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(20),
-                  child: Row(
+                  child: Column(
                     children: [
-                      CompanyAvatar(
-                        logoUrl: holding['logo_url'],
-                        symbol: symbol,
-                        size: 44,
-                        borderRadius: 12,
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Wrap(
-                              spacing: 6,
-                              runSpacing: 4,
-                              crossAxisAlignment: WrapCrossAlignment.center,
+                      Row(
+                        children: [
+                          CompanyAvatar(
+                            logoUrl: holding['logo_url'],
+                            symbol: symbol,
+                            size: 44,
+                            borderRadius: 12,
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text(symbol, style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, fontSize: 16)),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                  decoration: BoxDecoration(color: badgeBg, borderRadius: BorderRadius.circular(4)),
-                                  child: Text(badgeText.toUpperCase(), style: TextStyle(color: badgeColor, fontSize: 8, fontWeight: FontWeight.w900)),
+                                Wrap(
+                                  spacing: 6,
+                                  runSpacing: 4,
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  children: [
+                                    Text(symbol, style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, fontSize: 16)),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(color: badgeBg, borderRadius: BorderRadius.circular(4)),
+                                      child: Text(badgeText.toUpperCase(), style: TextStyle(color: badgeColor, fontSize: 8, fontWeight: FontWeight.w900)),
+                                    ),
+                                    if (totalDividends > 0)
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(color: context.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(4)),
+                                        child: Text('₦${totalDividends.toStringAsFixed(2)} DIVS', style: TextStyle(color: context.primary, fontSize: 8, fontWeight: FontWeight.w900)),
+                                      ),
+                                    if (purificationDue > 0)
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(color: context.haram.withOpacity(0.1), borderRadius: BorderRadius.circular(4)),
+                                        child: Text('₦${purificationDue.toStringAsFixed(2)} TO PURIFY', style: TextStyle(color: context.haram, fontSize: 8, fontWeight: FontWeight.w900)),
+                                      ),
+                                  ],
                                 ),
-                                if (totalDividends > 0)
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                    decoration: BoxDecoration(color: context.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(4)),
-                                    child: Text('₦${totalDividends.toStringAsFixed(2)} DIVS', style: TextStyle(color: context.primary, fontSize: 8, fontWeight: FontWeight.w900)),
-                                  ),
-                                if (purificationDue > 0)
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                    decoration: BoxDecoration(color: context.haram.withOpacity(0.1), borderRadius: BorderRadius.circular(4)),
-                                    child: Text('₦${purificationDue.toStringAsFixed(2)} TO PURIFY', style: TextStyle(color: context.haram, fontSize: 8, fontWeight: FontWeight.w900)),
-                                  ),
+                                const SizedBox(height: 4),
+                                Text(holding['name'] ?? symbol, style: TextStyle(color: context.textMuted, fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
                               ],
                             ),
-                            const SizedBox(height: 4),
-                            Text(holding['name'] ?? symbol, style: TextStyle(color: context.textMuted, fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
-                          ],
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text('₦${val.toStringAsFixed(0)}', style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, fontSize: 15)),
+                              const SizedBox(height: 2),
+                              Text('${shares.toStringAsFixed(0)} shares', style: TextStyle(color: context.textMuted, fontSize: 11, fontWeight: FontWeight.w600)),
+                            ],
+                          ),
+                          const SizedBox(width: 20),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              if (returnPct != 0)
+                                Text('${returnPct >= 0 ? '+' : ''}${returnPct.toStringAsFixed(2)}%', style: TextStyle(color: returnPct >= 0 ? context.primary : context.haram, fontWeight: FontWeight.w900, fontSize: 15)),
+                              if (returnPct == 0)
+                                Text('-', style: TextStyle(color: context.textMuted, fontWeight: FontWeight.w900, fontSize: 15)),
+                              const SizedBox(height: 2),
+                              if (returnValue != 0)
+                                Text('₦${returnValue.abs().toStringAsFixed(0)}', style: TextStyle(color: context.textMuted, fontSize: 11, fontWeight: FontWeight.w600)),
+                            ],
+                          ),
+                        ],
+                      ),
+                      if (badgeText == 'Shariah Compliant w/ Purification')
+                        Padding(
+                          padding: const EdgeInsets.only(top: 16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              if (purificationDue == 0 && hasBeenPurified)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: context.divider.withOpacity(0.5),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.check_circle_outline, size: 14, color: context.textMuted),
+                                      const SizedBox(width: 6),
+                                      Text('Purified', style: TextStyle(color: context.textMuted, fontSize: 11, fontWeight: FontWeight.w800)),
+                                    ],
+                                  ),
+                                )
+                              else
+                                GestureDetector(
+                                  onTap: () {
+                                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Purification feature coming soon.'), backgroundColor: context.primary));
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF59E0B).withOpacity(0.1),
+                                      border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.3)),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.water_drop_outlined, size: 14, color: const Color(0xFFD97706)),
+                                        const SizedBox(width: 6),
+                                        Text('Purify Now', style: TextStyle(color: const Color(0xFFD97706), fontSize: 11, fontWeight: FontWeight.w800)),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('₦${val.toStringAsFixed(0)}', style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, fontSize: 15)),
-                          const SizedBox(height: 2),
-                          Text('${shares.toStringAsFixed(0)} shares', style: TextStyle(color: context.textMuted, fontSize: 11, fontWeight: FontWeight.w600)),
-                        ],
-                      ),
-                      const SizedBox(width: 20),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          if (returnPct != 0)
-                            Text('${returnPct >= 0 ? '+' : ''}${returnPct.toStringAsFixed(2)}%', style: TextStyle(color: returnPct >= 0 ? context.primary : context.haram, fontWeight: FontWeight.w900, fontSize: 15)),
-                          if (returnPct == 0)
-                            Text('-', style: TextStyle(color: context.textMuted, fontWeight: FontWeight.w900, fontSize: 15)),
-                          const SizedBox(height: 2),
-                          if (returnValue != 0)
-                            Text('₦${returnValue.abs().toStringAsFixed(0)}', style: TextStyle(color: context.textMuted, fontSize: 11, fontWeight: FontWeight.w600)),
-                        ],
-                      ),
                     ],
                   ),
                 ),

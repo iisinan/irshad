@@ -175,7 +175,7 @@ export default function GuideTab() {
     { icon: Star,        title: 'Alert (Watchlist)', description: 'Monitor companies you are interested in. Set price alerts and receive notifications on status changes.', color: 'var(--gold)' },
     { icon: FileText,    title: 'Statement',         description: 'View a detailed financial statement of your portfolio activity and holdings over time.',                color: '#0ea5e9' },
     { icon: Calculator,  title: 'Zakat',             description: 'Automatically calculate your Zakat obligation based on your current portfolio holdings.',               color: 'var(--doubtful)' },
-    { icon: ShieldCheck, title: 'Purification',      description: 'Calculate and track income purification amounts for any Non-Halal revenue earned from your investments.', color: 'var(--halal)' },
+    { icon: ShieldCheck, title: 'Purification',      description: 'Calculate and track income purification amounts for any Non-Compliant revenue earned from your investments.', color: 'var(--halal)' },
     { icon: BookOpen,    title: 'Resources',         description: 'Access Islamic finance educational content, lectures, and scholarship resources.',                      color: '#ec4899' },
     { icon: Bell,        title: 'Updates',           description: 'Stay informed with compliance changes, business activity updates, market intelligence and your inbox.',  color: 'var(--review)' },
     { icon: Settings,    title: 'Settings',          description: 'Manage notifications, account preferences, and personalise your Irshad experience.',                   color: 'var(--text-muted)' },
@@ -299,7 +299,7 @@ export default function GuideTab() {
               <Step number={2} title="Business Activity Screen (Rule 3/4/1)" description="Algorithmic review of revenue by business segments to verify exclusion from conventional banking, alcohol, gambling, adult entertainment, tobacco, and arms." />
               <Step number={3} title="Quantitative Ratio Computation" description="Rigorous calculation of the 3 AAOIFI Standard 21 thresholds: Interest Debt ≤ 30% Market Cap, Cash & Securities ≤ 30% Market Cap, and Impure Revenue ≤ 5% Total Revenue." />
               <Step number={4} title="Purification Rate Extraction" description="Calculates the exact purification percentage (Impure Income ÷ Total Income) required to cleanse dividend distributions." />
-              <Step number={5} title="Live Verdict & Audit Trail" description="Assignments of Halal, Non-Halal, or Doubtful with full line-item math and linkable source filing evidence." />
+              <Step number={5} title="Live Verdict & Audit Trail" description="Assignments of Halal, Non-Compliant, or Doubtful with full line-item math and linkable source filing evidence." />
             </div>
           </div>
         </div>
@@ -323,7 +323,7 @@ export default function GuideTab() {
               {[
                 { title: '1. Removal of Hardship (Al-Mashaqqah Tajlib At-Taysir)', desc: 'Requiring 0.00% contact with conventional interest would lock the Muslim Ummah out of global capital markets and economic enterprise.' },
                 { title: '2. Majority-Halal Wealth (Ghalabat al-Halal)', desc: 'When 95%+ of revenue is generated through lawful trade, the company\'s wealth is predominantly halal and permissible to co-own.' },
-                { title: '3. Separation of Bargains (Tafriq al-Safqah)', desc: 'The permissible operating equity remains valid, while the subordinate non-halal income stream is isolated and purified.' },
+                { title: '3. Separation of Bargains (Tafriq al-Safqah)', desc: 'The permissible operating equity remains valid, while the subordinate non-compliant income stream is isolated and purified.' },
                 { title: '4. Subordinate Follows Primary (At-Tabi\' Tabi\')', desc: 'Incidental cash deposits and operating receivables are subordinate to the primary lawful commercial activity of the company.' },
               ].map((p, idx) => (
                 <div key={idx} style={{ background: 'var(--bg-section)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border)' }}>
@@ -344,7 +344,7 @@ export default function GuideTab() {
                   threshold: '0% Tolerance for Core Prohibited Activities',
                   formula: 'Core revenue must NOT be derived from Conventional Banking/Insurance, Alcohol, Pork, Gambling, Adult Media, Tobacco, or Arms.',
                   badge: 'Strict Qualitative Filter',
-                  color: 'var(--non-halal)'
+                  color: 'var(--non-compliant)'
                 },
                 {
                   rule: 'Stage 2A: Debt Ratio (Rule 3/4/2)',
@@ -387,7 +387,7 @@ export default function GuideTab() {
           {/* Prohibited Trading Practices */}
           <div style={{ background: 'linear-gradient(135deg, rgba(239,68,68,0.04) 0%, transparent 100%)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '18px', padding: '20px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-              <AlertTriangle size={16} color="var(--non-halal)" />
+              <AlertTriangle size={16} color="var(--non-compliant)" />
               <h4 style={{ fontSize: '0.84rem', fontWeight: 800, color: 'var(--text-dark)', margin: 0 }}>Prohibited Trading Practices (Standard 21)</h4>
             </div>
             <p style={{ fontSize: '0.76rem', color: 'var(--text-muted)', lineHeight: 1.6, margin: 0 }}>
@@ -449,7 +449,7 @@ export default function GuideTab() {
               title="Report an Issue"
               description="Found a bug or incorrect compliance data? Let us know immediately."
               buttonLabel="Report Issue"
-              color="var(--non-halal)"
+              color="var(--non-compliant)"
               onClick={() => window.open('mailto:support@irshad.app?subject=Bug Report', '_blank')}
             />
             <SupportCard

@@ -49,7 +49,7 @@ class ErrorBoundary extends React.Component {
           textAlign: 'center'
         }}>
           <div style={{
-            backgroundColor: 'var(--bg-section, var(--non-halal-bg))',
+            backgroundColor: 'var(--bg-section, var(--non-compliant-bg))',
             padding: '32px',
             borderRadius: '24px',
             maxWidth: '480px',
@@ -69,7 +69,7 @@ class ErrorBoundary extends React.Component {
                 : "We've encountered an unexpected error. Our team has been notified."}
             </p>
             {this.state.errorMessage && !isChunkError && (
-              <p style={{ fontFamily: 'monospace', fontSize: '0.72rem', background: 'var(--non-halal-bg)', color: '#7F1D1D', padding: '8px 12px', borderRadius: '6px', marginBottom: '16px', wordBreak: 'break-word', textAlign: 'left' }}>
+              <p style={{ fontFamily: 'monospace', fontSize: '0.72rem', background: 'var(--non-compliant-bg)', color: '#7F1D1D', padding: '8px 12px', borderRadius: '6px', marginBottom: '16px', wordBreak: 'break-word', textAlign: 'left' }}>
                 {this.state.errorMessage}
               </p>
             )}

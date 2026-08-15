@@ -34,11 +34,11 @@ const getStatusConfig = (company) => {
   if (typeof rawStatus === 'object' && rawStatus !== null) {
     const s = rawStatus.status?.toLowerCase();
     if (s === 'halal' || s === 'compliant') { statusStr = 'SHARIAH COMPLIANT'; cls = 'status-halal'; icon = <CheckCircle size={11} />; }
-    else if (s === 'non-halal' || s === 'non_compliant') { statusStr = 'SHARIAH NON-COMPLIANT'; cls = 'status-non-halal'; icon = <AlertCircle size={11} />; }
+    else if (s === 'non-compliant' || s === 'non_compliant') { statusStr = 'SHARIAH NON-COMPLIANT'; cls = 'status-non-compliant'; icon = <AlertCircle size={11} />; }
   } else if (typeof rawStatus === 'string') {
     const s = rawStatus.toLowerCase();
     if (s === 'compliant' || s === 'halal') { statusStr = 'SHARIAH COMPLIANT'; cls = 'status-halal'; icon = <CheckCircle size={11} />; }
-    else if (s === 'non-halal' || s === 'non_compliant') { statusStr = 'SHARIAH NON-COMPLIANT'; cls = 'status-non-halal'; icon = <AlertCircle size={11} />; }
+    else if (s === 'non-compliant' || s === 'non_compliant') { statusStr = 'SHARIAH NON-COMPLIANT'; cls = 'status-non-compliant'; icon = <AlertCircle size={11} />; }
   }
   return { label: statusStr, cls, icon, raw: statusStr.toLowerCase() };
 };
@@ -107,8 +107,8 @@ const StockRow = React.memo(({ stock, idx, isWatched, onToggle }) => {
         <span style={{
           display: 'inline-flex', alignItems: 'center', gap: '4px',
           fontSize: '0.72rem', fontWeight: 800,
-          color: isPos ? 'var(--halal)' : 'var(--non-halal)',
-          background: isPos ? 'var(--halal-bg)' : 'var(--non-halal-bg)',
+          color: isPos ? 'var(--halal)' : 'var(--non-compliant)',
+          background: isPos ? 'var(--halal-bg)' : 'var(--non-compliant-bg)',
           padding: '4px 9px', borderRadius: '8px',
           fontVariantNumeric: 'tabular-nums'
         }}>
@@ -160,7 +160,7 @@ const MobileStockCard = React.memo(({ stock, idx, isWatched, onToggle }) => {
       {/* Price + change */}
       <div style={{ textAlign: 'right', flexShrink: 0 }}>
         <div style={{ fontWeight: 900, color: 'var(--text-dark)', fontSize: '0.95rem', letterSpacing: '-0.3px', fontVariantNumeric: 'tabular-nums' }}>₦{fmtPrice(stock.latest_price)}</div>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: '0.72rem', fontWeight: 800, color: isPos ? 'var(--halal)' : 'var(--non-halal)', background: isPos ? 'var(--halal-bg)' : 'var(--non-halal-bg)', padding: '3px 8px', borderRadius: 8, marginTop: 4, fontVariantNumeric: 'tabular-nums' }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: '0.72rem', fontWeight: 800, color: isPos ? 'var(--halal)' : 'var(--non-compliant)', background: isPos ? 'var(--halal-bg)' : 'var(--non-compliant-bg)', padding: '3px 8px', borderRadius: 8, marginTop: 4, fontVariantNumeric: 'tabular-nums' }}>
           {isPos ? <TrendingUp size={10} strokeWidth={2.5} /> : <TrendingDown size={10} strokeWidth={2.5} />}
           {isPos ? '+' : ''}{Number(stock.price_change_pct ?? 0).toFixed(2)}%
         </span>
@@ -260,7 +260,7 @@ export default function MarketTab() {
       if (statusF !== 'all') {
         const cfg = getStatusConfig(s);
         if (statusF === 'halal' && cfg.label !== 'SHARIAH COMPLIANT') return false;
-        if (statusF === 'non-halal' && cfg.label !== 'SHARIAH NON-COMPLIANT') return false;
+        if (statusF === 'non-compliant' && cfg.label !== 'SHARIAH NON-COMPLIANT') return false;
         if (statusF === 'doubtful' && cfg.label !== 'DOUBTFUL') return false;
       }
       if (sectorF !== 'all' && normSector(s.sector) !== sectorF) return false;
@@ -352,7 +352,7 @@ export default function MarketTab() {
 
           {/* Mobile status filter pills */}
           <div className="market-status-pills hide-scrollbar" style={{ display: 'none', overflowX: 'auto', gap: 8, paddingBottom: 2 }}>
-            {[['all', 'All'], ['halal', '✓ Shariah Compliant'], ['non-halal', '✗ Shariah Non-Compliant'], ['doubtful', '? Doubtful']].map(([val, label]) => (
+            {[['all', 'All'], ['halal', '✓ Shariah Compliant'], ['non-compliant', '✗ Shariah Non-Compliant'], ['doubtful', '? Doubtful']].map(([val, label]) => (
               <button
                 key={val}
                 onClick={() => setStatusF(val)}
@@ -428,7 +428,7 @@ export default function MarketTab() {
           </div>
         ) : error ? (
           <div style={{ textAlign: 'center', padding: '80px 24px', color: 'var(--text-muted)' }}>
-            <BarChart2 size={44} strokeWidth={1.5} style={{ margin: '0 auto 16px', color: 'var(--non-halal)' }} />
+            <BarChart2 size={44} strokeWidth={1.5} style={{ margin: '0 auto 16px', color: 'var(--non-compliant)' }} />
             <h3 style={{ marginBottom: '8px', color: 'var(--text-dark)', fontWeight: 800 }}>Could not load market data</h3>
             <p style={{ marginBottom: '20px', fontSize: '0.8rem' }}>{error?.message || String(error)}</p>
             <button onClick={() => refetch()} className="btn-primary" style={{ padding: '12px 28px', borderRadius: '12px' }}>Try Again</button>

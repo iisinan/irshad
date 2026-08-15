@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 import '../../stocks/providers/stock_provider.dart';
 import '../providers/portfolio_provider.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
@@ -22,6 +24,8 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
   bool _isLoadingPortfolio = true;
   bool _isPortfolioMode = false;
   double _totalPortfolioZakat = 0.0;
+  
+  String? _hawlDate;
 
   @override
   void initState() {
@@ -31,6 +35,14 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
     
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadPortfolioData();
+      _loadHawlDate();
+    });
+  }
+
+  Future<void> _loadHawlDate() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _hawlDate = prefs.getString('ZAKAT_DATE_KEY');
     });
   }
 
@@ -111,6 +123,8 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (_hawlDate != null)
+              _buildHawlBanner(),
             Text(
               'Calculate Your Obligations',
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: context.textDark),
@@ -289,6 +303,139 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildHawlBanner() {
+    if (_hawlDate == null) return const SizedBox.shrink();
+    
+    DateTime hawlStart = DateTime.parse(_hawlDate!);
+    DateTime hawlDue = hawlStart.add(const Duration(days: 354));
+    int daysUntilDue = hawlDue.difference(DateTime.now()).inDays;
+    
+    double progress = (354 - daysUntilDue) / 354.0;
+    if (progress < 0) progress = 0;
+    if (progress > 1) progress = 1;
+    
+    Color progressColor = const Color(0xFFD1A562);
+    Color tagColor = const Color(0xFFD1A562);
+    String tagText = '${daysUntilDue > 0 ? daysUntilDue : 0} days remaining';
+    
+    if (daysUntilDue <= 30) {
+      progressColor = const Color(0xFFDC2626);
+      tagColor = const Color(0xFFDC2626);
+      if (daysUntilDue <= 0) tagText = 'Zakat Due Now!';
+    } else if (daysUntilDue <= 90) {
+      progressColor = const Color(0xFFD97706);
+      tagColor = const Color(0xFFD97706);
+    }
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            const Color(0xFFD1A562).withOpacity(0.08),
+            const Color(0xFFD1A562).withOpacity(0.04),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        border: Border.all(color: const Color(0xFFD1A562).withOpacity(0.25)),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD1A562).withOpacity(0.15),
+                  border: Border.all(color: const Color(0xFFD1A562).withOpacity(0.3)),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(Icons.notifications_active_outlined, color: Color(0xFFD1A562), size: 20),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'YOUR ZAKAT (HAWL) DATE',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFFD1A562),
+                        letterSpacing: 0.6,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 16,
+                      runSpacing: 8,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(text: 'Started: ', style: TextStyle(color: context.textMuted, fontWeight: FontWeight.w600, fontSize: 13)),
+                              TextSpan(text: DateFormat('d MMMM yyyy').format(hawlStart), style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800, fontSize: 13)),
+                            ],
+                          ),
+                        ),
+                        Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(text: 'Due: ', style: TextStyle(color: context.textMuted, fontWeight: FontWeight.w600, fontSize: 13)),
+                              TextSpan(text: DateFormat('d MMMM yyyy').format(hawlDue), style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800, fontSize: 13)),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: tagColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                          child: Text(
+                            tagText,
+                            style: TextStyle(color: tagColor, fontSize: 11, fontWeight: FontWeight.w800),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Container(
+            height: 8,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: const Color(0xFFD1A562).withOpacity(0.15),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: FractionallySizedBox(
+              alignment: Alignment.centerLeft,
+              widthFactor: progress,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: progressColor,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

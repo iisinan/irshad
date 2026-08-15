@@ -210,7 +210,7 @@ export default function StatementTab({ data }) {
                           </div>
                         </div>
                       </td>
-                      <td style={{ padding: '20px 32px', fontSize: '1rem', fontWeight: 800, textAlign: 'right', color: trx.amount > 0 ? 'var(--text-dark)' : 'var(--non-halal)' }}>
+                      <td style={{ padding: '20px 32px', fontSize: '1rem', fontWeight: 800, textAlign: 'right', color: trx.amount > 0 ? 'var(--text-dark)' : 'var(--non-compliant)' }}>
                         {trx.amount > 0 ? '+' : ''}{trx.amount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </td>
                       <td style={{ padding: '20px 32px', fontSize: '1rem', fontWeight: 700, textAlign: 'right', color: 'var(--text-muted)' }}>

@@ -151,7 +151,7 @@ export default function WatchlistAlertModal({ stock, watchlistData, onClose, onU
               field="alert_verdict_change" 
               icon={AlertTriangle} 
               title="Verdict Change" 
-              description="Status changes (e.g., Halal to Non-Halal)" 
+              description="Status changes (e.g., Halal to Non-Compliant)" 
               prefs={prefs}
               handleToggle={handleToggle}
             />

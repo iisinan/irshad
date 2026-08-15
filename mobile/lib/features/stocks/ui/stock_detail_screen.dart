@@ -969,16 +969,13 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                       }
                       
                       final used = _aaoifiData!['financial_data_used'];
-                      if (used != null) {
-                        if (_getDouble(used['total_assets']) > 0 || _getDouble(used['total_revenue']) > 0) {
-                          hasFinancials = true;
-                        }
-                      } else {
-                        if (_getDouble(_aaoifiData!['debt_ratio']) > 0 || 
-                            _getDouble(_aaoifiData!['cash_ratio']) > 0 || 
-                            _getDouble(_aaoifiData!['impermissible_income_ratio']) > 0) {
-                          hasFinancials = true;
-                        }
+                      if (used != null && (_getDouble(used['total_assets']) > 0 || _getDouble(used['total_revenue']) > 0)) {
+                        hasFinancials = true;
+                      }
+                      if (!hasFinancials && (_getDouble(_aaoifiData!['debt_ratio']) > 0 || 
+                          _getDouble(_aaoifiData!['cash_ratio']) > 0 || 
+                          _getDouble(_aaoifiData!['impermissible_income_ratio']) > 0)) {
+                        hasFinancials = true;
                       }
                     }
                     
@@ -1832,11 +1829,12 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
         
     Widget buildRatioCard(int number, String title, String formula, double value, double limit, String numLabel, String denLabel, String numValStr, String denValStr) {
       bool isPass = value <= limit;
+      bool isClickable = numValStr != '0' && numValStr != '0 + 0' && numValStr != '0.00' && numValStr != '—';
       
       return GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {
-          if (numValStr == '0') return;
+          if (!isClickable) return;
 
           showModalBottomSheet(
             context: context,
@@ -2051,8 +2049,10 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                       Row(
                         children: [
                           Flexible(child: Text(title, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: context.textDark))),
-                          const SizedBox(width: 4),
-                          Icon(Icons.arrow_outward, size: 10, color: context.textMuted),
+                          if (isClickable) ...[
+                            const SizedBox(width: 4),
+                            Icon(Icons.arrow_outward, size: 10, color: context.textMuted),
+                          ]
                         ]
                       ),
                       const SizedBox(height: 2),

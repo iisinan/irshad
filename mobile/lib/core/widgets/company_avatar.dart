@@ -77,25 +77,6 @@ class CompanyAvatar extends StatelessWidget {
             height: size,
             fit: BoxFit.contain,
             errorBuilder: (context, error, stackTrace) {
-              if (logoUrl != null && logoUrl!.isNotEmpty) {
-                final isSvg = logoUrl!.toLowerCase().endsWith('.svg');
-                if (isSvg) {
-                  return SvgPicture.network(
-                    logoUrl!,
-                    fit: BoxFit.contain,
-                    placeholderBuilder: (context) => const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                  );
-                }
-                return CachedNetworkImage(
-                  imageUrl: logoUrl!,
-                  width: size,
-                  height: size,
-                  fit: BoxFit.contain,
-                  errorWidget: (context, url, error) => _buildInitials(context),
-                  placeholder: (context, url) => _buildInitials(context),
-                  fadeInDuration: Duration.zero,
-                );
-              }
               return _buildInitials(context);
             },
           ),

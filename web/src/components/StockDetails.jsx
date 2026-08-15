@@ -103,7 +103,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
       .then(r => {
         const payload = r.data || r;
         const analysisText = payload?.reasoning || payload?.analysis || "No analysis returned.";
-        const isNonHalalReport = stock?.status?.status === 'non-halal' || stock?.status?.stage1?.status === 'non-halal' || stock?.current_status === 'non-halal';
+        const isNonHalalReport = stock?.status?.status === 'non-compliant' || stock?.status?.stage1?.status === 'non-compliant' || stock?.current_status === 'non-compliant';
         setAiAnalysis(formatAppJustification(analysisText, isNonHalalReport));
       })
       .catch(e => {
@@ -176,8 +176,8 @@ const StockDetails = ({ symbol: propSymbol }) => {
     const s = rawStatus.status?.toLowerCase();
     if (s === 'halal' || s === 'compliant') {
       statusStr = 'HALAL'; StatusIcon = CheckCircle; isHalal = true; isNonHalal = false;
-    } else if (s === 'non-halal' || s === 'non-compliant') {
-      statusStr = 'NON-HALAL'; StatusIcon = AlertCircle; isNonHalal = true; isHalal = false;
+    } else if (s === 'non-compliant' || s === 'non-compliant') {
+      statusStr = 'NON-COMPLIANT'; StatusIcon = AlertCircle; isNonHalal = true; isHalal = false;
     } else if (s === 'doubtful') {
       statusStr = 'DOUBTFUL'; StatusIcon = AlertCircle; isHalal = false; isNonHalal = false;
     }
@@ -186,8 +186,8 @@ const StockDetails = ({ symbol: propSymbol }) => {
     const s = rawStatus.toLowerCase();
     if (s === 'halal' || s === 'compliant') {
       statusStr = 'HALAL'; StatusIcon = CheckCircle; isHalal = true; isNonHalal = false;
-    } else if (s === 'non-halal' || s === 'non-compliant') {
-      statusStr = 'NON-HALAL'; StatusIcon = AlertCircle; isNonHalal = true; isHalal = false;
+    } else if (s === 'non-compliant' || s === 'non-compliant') {
+      statusStr = 'NON-COMPLIANT'; StatusIcon = AlertCircle; isNonHalal = true; isHalal = false;
     } else if (s === 'doubtful') {
       statusStr = 'DOUBTFUL'; StatusIcon = AlertCircle; isHalal = false; isNonHalal = false;
     }
@@ -204,7 +204,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
   }
 
   // ─── Business activity failure flag ──────────────────
-  // True when the stock is non-halal specifically because it failed the
+  // True when the stock is non-compliant specifically because it failed the
   const isFailedBusinessActivity = isNonHalal && (
     aaoifiData?.business_status === 'fail' ||
     stock?.business_status === 'fail' ||
@@ -561,7 +561,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
                   <span style={{ fontSize: '1.05rem', color: 'var(--text-dark)', fontWeight: 900 }}>
                     ₦ {latestPrice.toFixed(2)}
                   </span>
-                  <span style={{ fontSize: '0.74rem', fontWeight: 700, color: isPositive ? 'var(--halal)' : 'var(--non-halal)' }}>
+                  <span style={{ fontSize: '0.74rem', fontWeight: 700, color: isPositive ? 'var(--halal)' : 'var(--non-compliant)' }}>
                     ({isPositive ? '+' : ''}{priceChangePct.toFixed(2)}%)
                   </span>
                 </div>
@@ -619,7 +619,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.6px', color: 'var(--text-muted)' }}>Business Activity</span>
               </div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 12px', borderRadius: 100, background: aBusinessFailed ? 'var(--non-halal-bg)' : 'var(--halal-bg)', color: aBusinessFailed ? 'var(--non-halal)' : 'var(--halal)', fontSize: '0.69rem', fontWeight: 900, letterSpacing: '0.8px' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 12px', borderRadius: 100, background: aBusinessFailed ? 'var(--non-compliant-bg)' : 'var(--halal-bg)', color: aBusinessFailed ? 'var(--non-compliant)' : 'var(--halal)', fontSize: '0.69rem', fontWeight: 900, letterSpacing: '0.8px' }}>
                 {aBusinessFailed ? <><XCircle size={11}/> FAIL</> : <><CheckCircle size={11}/> PASS</>}
               </div>
             </div>
@@ -641,7 +641,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
                       <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', marginTop: '2px' }}>{formula}</div>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
-                      <span style={{ fontSize: '1.2rem', fontWeight: 900, color: pass ? 'var(--halal)' : 'var(--non-halal)', fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>
+                      <span style={{ fontSize: '1.2rem', fontWeight: 900, color: pass ? 'var(--halal)' : 'var(--non-compliant)', fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>
                         {value.toFixed(2)}%
                       </span>
                       <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)' }}>threshold: ≤{threshold}%</span>
@@ -649,11 +649,11 @@ const StockDetails = ({ symbol: propSymbol }) => {
                   </div>
                   {/* Progress bar */}
                   <div style={{ height: '6px', borderRadius: '100px', background: 'var(--border)', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${barPct}%`, borderRadius: '100px', background: pass ? 'var(--halal)' : 'var(--non-halal)', transition: 'width 0.6s ease' }} />
+                    <div style={{ height: '100%', width: `${barPct}%`, borderRadius: '100px', background: pass ? 'var(--halal)' : 'var(--non-compliant)', transition: 'width 0.6s ease' }} />
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '5px' }}>
                     <span style={{ fontSize: '0.58rem', color: 'var(--text-muted)' }}>0%</span>
-                    <span style={{ fontSize: '0.58rem', color: pass ? 'var(--halal)' : 'var(--non-halal)', fontWeight: 700 }}>{pass ? '✓ PASS' : '✗ FAIL'}</span>
+                    <span style={{ fontSize: '0.58rem', color: pass ? 'var(--halal)' : 'var(--non-compliant)', fontWeight: 700 }}>{pass ? '✓ PASS' : '✗ FAIL'}</span>
                     <span style={{ fontSize: '0.58rem', color: 'var(--text-muted)' }}>limit: {threshold}%</span>
                   </div>
                 </div>
@@ -700,7 +700,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
             
             <div style={{ position: 'relative', zIndex: 1 }}>
               {aiLoading && <div style={{ color: 'var(--text-muted)', fontSize: '0.84rem', fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: '8px' }}><div className="spinner" style={{width: '14px', height: '14px', borderWidth: '2px'}} /> Irshad is searching corporate disclosures & analyzing financials...</div>}
-              {aiError && <div style={{ color: 'var(--non-halal)', fontSize: '0.79rem' }}>{aiError}</div>}
+              {aiError && <div style={{ color: 'var(--non-compliant)', fontSize: '0.79rem' }}>{aiError}</div>}
               {aiAnalysis && isAiExpanded && (
                 <div className="animate-fade-in" style={{ background: 'rgba(255,255,255,0.03)', padding: '24px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', marginTop: '8px' }}>
                   <div style={{ color: 'var(--text-body)', lineHeight: 1.7, fontSize: '0.9rem' }}>
@@ -1075,7 +1075,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
                 <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '12px' }}>{stock.symbol} Calculation</div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', flexWrap: 'wrap', fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <span style={{ borderBottom: '2px solid var(--border)', paddingBottom: '6px', marginBottom: '6px', color: 'var(--non-halal)' }}>{interest > 0 ? `₦${interest.toLocaleString('en-NG', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : '₦0.00'}</span>
+                    <span style={{ borderBottom: '2px solid var(--border)', paddingBottom: '6px', marginBottom: '6px', color: 'var(--non-compliant)' }}>{interest > 0 ? `₦${interest.toLocaleString('en-NG', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : '₦0.00'}</span>
                     <span style={{ color: 'var(--primary)' }}>{rawRevenue > 0 ? `₦${rawRevenue.toLocaleString('en-NG', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : 'N/A'}</span>
                   </div>
                   <span>× 100</span>

@@ -5,8 +5,9 @@ import 'tabs/portfolio_overview_tab.dart';
 import 'tabs/purification_tab.dart';
 import 'tabs/resources_tab.dart'; 
 import 'tabs/guide_tab.dart';
-import 'zakat_calculator_screen.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
+import '../providers/portfolio_provider.dart';
+import 'zakat_calculator_screen.dart';
 
 class PortfolioScreen extends StatefulWidget {
   const PortfolioScreen({super.key});
@@ -15,7 +16,29 @@ class PortfolioScreen extends StatefulWidget {
   State<PortfolioScreen> createState() => _PortfolioScreenState();
 }
 
-class _PortfolioScreenState extends State<PortfolioScreen> {
+class _PortfolioScreenState extends State<PortfolioScreen> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<PortfolioProvider>().fetchPortfolio();
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      context.read<PortfolioProvider>().fetchPortfolio();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(

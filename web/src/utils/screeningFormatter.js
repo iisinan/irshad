@@ -28,7 +28,7 @@ export const formatAppJustification = (text, isNonHalal = false) => {
   clean = clean.replace(/excel\s+file/i, 'disclosures');
   clean = clean.replace(/excel/i, 'Shariah audit');
 
-  // 2. If it is non-halal or non-compliant, check if it's a business activity failure
+  // 2. If it is non-compliant or non-compliant, check if it's a business activity failure
   const isBusinessActivityFailure = 
     isNonHalal || 
     /\b(?:conventional bank|commercial bank|banking|lending|deposit|riba|alcohol|gambling|insurance|brewery|pork|tobacco|rule 1|qualitative|business activity|interest-based)\b/i.test(clean);

@@ -51,7 +51,7 @@ const Pricing = () => {
           )}
 
           {error && (
-            <div style={{ marginBottom: '32px', padding: '16px', borderRadius: '14px', background: 'var(--non-halal-bg)', color: 'var(--non-halal)', textAlign: 'center', fontWeight: 700, border: '1px solid rgba(239,68,68,0.2)' }}>
+            <div style={{ marginBottom: '32px', padding: '16px', borderRadius: '14px', background: 'var(--non-compliant-bg)', color: 'var(--non-compliant)', textAlign: 'center', fontWeight: 700, border: '1px solid rgba(239,68,68,0.2)' }}>
               {error}
             </div>
           )}
@@ -73,7 +73,7 @@ const Pricing = () => {
               
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 40px', flex: 1 }}>
                 {[
-                  'Full NGX Halal / Non-Halal Screener',
+                  'Full NGX Halal / Non-Compliant Screener',
                   'Basic AAOIFI Compliance Verdicts',
                   '1 Custom Portfolio Watchlist',
                   'Manual Dividend Purification Calculator',

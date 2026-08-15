@@ -52,9 +52,9 @@
   --halal-bg:     rgba(5, 150, 105, 0.10);
   --halal-border: rgba(5, 150, 105, 0.25);
 
-  --non-halal:    #DC2626;
-  --non-halal-bg: rgba(220, 38, 38, 0.10);
-  --non-halal-border: rgba(220, 38, 38, 0.25);
+  --non-compliant:    #DC2626;
+  --non-compliant-bg: rgba(220, 38, 38, 0.10);
+  --non-compliant-border: rgba(220, 38, 38, 0.25);
 
   --doubtful:     var(--gold);
   --doubtful-bg:  rgba(209, 165, 98, 0.12);
@@ -121,9 +121,9 @@
   --halal-bg:     rgba(52, 211, 153, 0.15);
   --halal-border: rgba(52, 211, 153, 0.30);
 
-  --non-halal:    #F87171;
-  --non-halal-bg: rgba(248, 113, 113, 0.15);
-  --non-halal-border: rgba(248, 113, 113, 0.30);
+  --non-compliant:    #F87171;
+  --non-compliant-bg: rgba(248, 113, 113, 0.15);
+  --non-compliant-border: rgba(248, 113, 113, 0.30);
 
   --doubtful:     #E0B040;
   --doubtful-bg:  rgba(224, 176, 64, 0.15);
@@ -507,10 +507,10 @@ textarea::placeholder {
   border: 1px solid var(--halal-border);
 }
 
-.status-non-halal {
-  background: var(--non-halal-bg);
-  color: var(--non-halal);
-  border: 1px solid var(--non-halal-border);
+.status-non-compliant {
+  background: var(--non-compliant-bg);
+  color: var(--non-compliant);
+  border: 1px solid var(--non-compliant-border);
 }
 
 .status-doubtful {
@@ -940,7 +940,7 @@ textarea::placeholder {
 
 .stock-change-pill.neg {
   color: #b91c1c;
-  background: var(--non-halal-bg);
+  background: var(--non-compliant-bg);
 }
 
 /* ── Badge + sector tag row ── */
@@ -1971,7 +1971,7 @@ textarea::placeholder {
 :root {
   --doubtful-bg:     rgba(230, 81, 0, 0.06);
   --doubtful-border: rgba(230, 81, 0, 0.2);
-  --non-halal-bg:    rgba(239, 68, 68, 0.08);
+  --non-compliant-bg:    rgba(239, 68, 68, 0.08);
   --halal-bg:        rgba(34, 197, 94, 0.08);
 }
 .portfolio-layout-grid {
@@ -4676,7 +4676,7 @@ html, body {
     flex: none !important;
   }
   .market-filter-row > div:nth-child(2) {
-    /* The Segmented control for Halal/Non-Halal */
+    /* The Segmented control for Halal/Non-Compliant */
     overflow-x: auto;
     white-space: nowrap;
     -webkit-overflow-scrolling: touch;

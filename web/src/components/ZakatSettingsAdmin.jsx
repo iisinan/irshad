@@ -82,7 +82,7 @@ export default function ZakatSettingsAdmin() {
 
       {/* Feedback message */}
       {message.text && (
-        <div style={{ padding: '13px 16px', borderRadius: '12px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', background: message.type === 'success' ? 'var(--halal-bg)' : 'var(--non-halal-bg)', color: message.type === 'success' ? 'var(--halal)' : 'var(--non-halal)', border: `1px solid ${message.type === 'success' ? 'var(--halal-border)' : 'var(--non-halal-border)'}`, fontSize: '0.85rem', fontWeight: 600 }}>
+        <div style={{ padding: '13px 16px', borderRadius: '12px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', background: message.type === 'success' ? 'var(--halal-bg)' : 'var(--non-compliant-bg)', color: message.type === 'success' ? 'var(--halal)' : 'var(--non-compliant)', border: `1px solid ${message.type === 'success' ? 'var(--halal-border)' : 'var(--non-compliant-border)'}`, fontSize: '0.85rem', fontWeight: 600 }}>
           {message.type === 'success' ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
           {message.text}
         </div>

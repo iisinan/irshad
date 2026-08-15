@@ -76,8 +76,8 @@ export default function AdminLayout() {
         {/* Email verification banner */}
         {user && !user.email_verified_at && (
           <div style={{
-            background: 'var(--non-halal-bg)',
-            color: 'var(--non-halal)',
+            background: 'var(--non-compliant-bg)',
+            color: 'var(--non-compliant)',
             padding: '12px 24px',
             fontSize: '0.79rem',
             fontWeight: 600,
@@ -86,7 +86,7 @@ export default function AdminLayout() {
             justifyContent: 'space-between',
             flexWrap: 'wrap',
             gap: '12px',
-            borderBottom: '1px solid var(--non-halal-border)'
+            borderBottom: '1px solid var(--non-compliant-border)'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <AlertCircle size={18} />
@@ -110,8 +110,8 @@ export default function AdminLayout() {
                 }}
                 style={{
                   background: 'var(--bg)',
-                  color: 'var(--non-halal)',
-                  border: '1px solid var(--non-halal)',
+                  color: 'var(--non-compliant)',
+                  border: '1px solid var(--non-compliant)',
                   padding: '6px 12px',
                   borderRadius: '8px',
                   fontSize: '0.7rem',

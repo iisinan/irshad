@@ -38,11 +38,11 @@ export default function AddWatchlistModal({ onClose, onAdded, allStocks, watchli
     if (typeof rawStatus === 'object' && rawStatus !== null) {
       const s = rawStatus.status?.toLowerCase();
       if (s === 'halal') { statusStr = 'HALAL'; cls = 'status-halal'; color = 'var(--halal)'; icon = <CheckCircle2 size={12} />; }
-      else if (s === 'non-halal') { statusStr = 'NON-HALAL'; cls = 'status-non-halal'; color = 'var(--non-halal)'; icon = <AlertCircle size={12} />; }
+      else if (s === 'non-compliant') { statusStr = 'NON-COMPLIANT'; cls = 'status-non-compliant'; color = 'var(--non-compliant)'; icon = <AlertCircle size={12} />; }
     } else if (typeof rawStatus === 'string') {
       const s = rawStatus.toLowerCase();
       if (s === 'compliant' || s === 'halal') { statusStr = 'HALAL'; cls = 'status-halal'; color = 'var(--halal)'; icon = <CheckCircle2 size={12} />; }
-      else if (s === 'non-halal') { statusStr = 'NON-HALAL'; cls = 'status-non-halal'; color = 'var(--non-halal)'; icon = <AlertCircle size={12} />; }
+      else if (s === 'non-compliant') { statusStr = 'NON-COMPLIANT'; cls = 'status-non-compliant'; color = 'var(--non-compliant)'; icon = <AlertCircle size={12} />; }
     }
     return { label: statusStr, cls, icon, color };
   };

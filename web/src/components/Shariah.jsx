@@ -96,26 +96,26 @@ const ShariahPage = () => (
 
       {/* ─── Phase 1: Business Activity ─── */}
       <div style={{ background: 'var(--bg)', borderRadius: '24px', padding: '40px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-md)', marginBottom: '24px', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: 'var(--non-halal)', borderRadius: '4px 0 0 4px' }} />
+        <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: 'var(--non-compliant)', borderRadius: '4px 0 0 4px' }} />
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
-          <div style={{ width: '52px', height: '52px', background: 'var(--non-halal-bg)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: '1px solid var(--non-halal-border)' }}>
-            <XCircle size={26} color="var(--non-halal)" />
+          <div style={{ width: '52px', height: '52px', background: 'var(--non-compliant-bg)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: '1px solid var(--non-compliant-border)' }}>
+            <XCircle size={26} color="var(--non-compliant)" />
           </div>
           <div>
-            <div style={{ fontSize: '0.63rem', fontWeight: 700, color: 'var(--non-halal)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Phase 1</div>
+            <div style={{ fontSize: '0.63rem', fontWeight: 700, color: 'var(--non-compliant)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Phase 1</div>
             <h2 style={{ fontSize: '1.41rem', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-0.5px' }}>Business Activity Screen</h2>
           </div>
         </div>
 
         <p style={{ color: 'var(--text-muted)', lineHeight: 1.8, fontSize: '0.88rem', marginBottom: '28px' }}>
-          Before analyzing financial ratios, we examine a company's core operations. A company is immediately marked as <strong style={{ color: 'var(--non-halal)' }}>Shariah Non-Compliant</strong> if its primary business involves:
+          Before analyzing financial ratios, we examine a company's core operations. A company is immediately marked as <strong style={{ color: 'var(--non-compliant)' }}>Shariah Non-Compliant</strong> if its primary business involves:
         </p>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '10px' }}>
           {[
             'Conventional Banking & Insurance',
             'Alcohol Production or Sales',
-            'Pork & Non-Halal Meat',
+            'Pork & Non-Compliant Meat',
             'Gambling & Casinos',
             'Adult Entertainment & Media',
             'Weapons & Defense Manufacturing',
@@ -124,10 +124,10 @@ const ShariahPage = () => (
           ].map(item => (
             <div key={item} style={{
               display: 'flex', alignItems: 'center', gap: '12px',
-              background: 'var(--non-halal-bg)', border: '1px solid var(--non-halal-border)',
+              background: 'var(--non-compliant-bg)', border: '1px solid var(--non-compliant-border)',
               borderRadius: '12px', padding: '12px 16px',
             }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--non-halal)', flexShrink: 0 }} />
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--non-compliant)', flexShrink: 0 }} />
               <span style={{ color: 'var(--text-dark)', fontWeight: 600, fontSize: '0.77rem' }}>{item}</span>
             </div>
           ))}
@@ -190,7 +190,7 @@ const ShariahPage = () => (
         </div>
 
         <p style={{ lineHeight: 1.8, fontSize: '0.88rem', color: 'rgba(255,255,255,0.8)', marginBottom: '20px', position: 'relative', zIndex: 1 }}>
-          Even compliant companies often earn trace interest from cash stored in conventional commercial banks. AAOIFI requires investors to <strong style={{ color: 'white' }}>purify</strong> their dividend earnings by donating the exact non-halal fraction to charity.
+          Even compliant companies often earn trace interest from cash stored in conventional commercial banks. AAOIFI requires investors to <strong style={{ color: 'white' }}>purify</strong> their dividend earnings by donating the exact non-compliant fraction to charity.
         </p>
         <p style={{ lineHeight: 1.8, fontSize: '0.88rem', color: 'rgba(255,255,255,0.8)', position: 'relative', zIndex: 1, marginBottom: '28px' }}>
           Irshad computes the exact <strong style={{ color: 'white' }}>Purification Rate</strong> (to two decimal places, e.g. 2.00%) for every stock on the NGX — removing guesswork so your returns remain 100% halal.
@@ -221,19 +221,19 @@ const ShariahPage = () => (
         </p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
           <div style={{ padding: '16px', background: 'var(--bg-section)', borderRadius: '14px', border: '1px solid var(--border)' }}>
-            <h4 style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--non-halal)', marginBottom: '6px' }}>No Short Selling</h4>
+            <h4 style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--non-compliant)', marginBottom: '6px' }}>No Short Selling</h4>
             <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)', lineHeight: 1.6, margin: 0 }}>
               Selling unowned borrowed shares (<em>Bay' ma la Yamlik</em>) is strictly prohibited. You may only sell shares you legitimately own.
             </p>
           </div>
           <div style={{ padding: '16px', background: 'var(--bg-section)', borderRadius: '14px', border: '1px solid var(--border)' }}>
-            <h4 style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--non-halal)', marginBottom: '6px' }}>No Margin Leverage</h4>
+            <h4 style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--non-compliant)', marginBottom: '6px' }}>No Margin Leverage</h4>
             <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)', lineHeight: 1.6, margin: 0 }}>
               Trading on borrowed funds with interest charges is prohibited. All equity purchases must be cash-funded.
             </p>
           </div>
           <div style={{ padding: '16px', background: 'var(--bg-section)', borderRadius: '14px', border: '1px solid var(--border)' }}>
-            <h4 style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--non-halal)', marginBottom: '6px' }}>No Options or Derivatives</h4>
+            <h4 style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--non-compliant)', marginBottom: '6px' }}>No Options or Derivatives</h4>
             <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)', lineHeight: 1.6, margin: 0 }}>
               Financial options, futures, and synthetic swaps contain excessive uncertainty (<em>Gharar</em>) and speculation.
             </p>

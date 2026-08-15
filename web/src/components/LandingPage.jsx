@@ -87,8 +87,8 @@ const StatusPill = ({ verdict }) => {
   const map = {
     halal:     { label: purif ? 'Halal w/ Purify' : 'Halal',     bg: purif ? 'rgba(245, 158, 11, 0.15)' : 'var(--halal-bg)',     color: purif ? '#f59e0b' : 'var(--halal)',     border: purif ? 'rgba(245, 158, 11, 0.4)' : 'var(--halal-border)'     },
     compliant: { label: purif ? 'Halal w/ Purify' : 'Halal',     bg: purif ? 'rgba(245, 158, 11, 0.15)' : 'var(--halal-bg)',     color: purif ? '#f59e0b' : 'var(--halal)',     border: purif ? 'rgba(245, 158, 11, 0.4)' : 'var(--halal-border)'     },
-    non_halal: { label: 'Shariah Non-Compliant', bg: 'var(--non-halal-bg)', color: 'var(--non-halal)', border: 'var(--non-halal-border)' },
-    'non-halal': { label: 'Shariah Non-Compliant', bg: 'var(--non-halal-bg)', color: 'var(--non-halal)', border: 'var(--non-halal-border)' },
+    non_compliant: { label: 'Shariah Non-Compliant', bg: 'var(--non-compliant-bg)', color: 'var(--non-compliant)', border: 'var(--non-compliant-border)' },
+    'non-compliant': { label: 'Shariah Non-Compliant', bg: 'var(--non-compliant-bg)', color: 'var(--non-compliant)', border: 'var(--non-compliant-border)' },
     doubtful:  { label: 'Doubtful',  bg: 'var(--doubtful-bg)',  color: 'var(--doubtful)',  border: 'var(--doubtful-border)'  },
   };
   const s = map[v?.toLowerCase()] || map.doubtful;
@@ -140,7 +140,7 @@ export default function LandingPage() {
 
   const features = [
     { icon: Shield,      title: 'AAOIFI Standard 21', desc: 'Screening built on the gold standard for Islamic equity trading — strictly enforcing 30% debt, 30% cash, and 5% impure revenue limits.' },
-    { icon: Sparkles,    title: 'Dividend Purification', desc: 'Automatic calculation of non-halal income fractions down to 2 decimal places so you can cleanse your dividends with precision.' },
+    { icon: Sparkles,    title: 'Dividend Purification', desc: 'Automatic calculation of non-compliant income fractions down to 2 decimal places so you can cleanse your dividends with precision.' },
     { icon: Lock,        title: 'NGX Filing Evidence', desc: 'Zero black-box ratings. Every verdict links to official, timestamped regulatory reports from NGX Pulse.' },
     { icon: CheckCircle, title: 'Continuous Monitoring', desc: 'Quarterly and annual financial statements trigger immediate recalculations and watchlist compliance alerts.' },
   ];
@@ -149,7 +149,7 @@ export default function LandingPage() {
     { n: '01', title: 'Regulatory Ingestion',  desc: 'Audited filings & quarterly reports fetched from NGX Pulse',          icon: Globe      },
     { n: '02', title: 'Business Purity Screen',desc: 'Rule 3/4/1 exclusion of conventional banking, alcohol & vice sectors',icon: Shield     },
     { n: '03', title: '30% / 5% Ratio Testing', desc: 'Strict quantitative assessment against live Market Capitalisation',   icon: FileDigit  },
-    { n: '04', title: 'Purification & Verdict', desc: 'Instant Halal / Non-Halal verdict with automated dividend cleansing', icon: Sparkles   },
+    { n: '04', title: 'Purification & Verdict', desc: 'Instant Halal / Non-Compliant verdict with automated dividend cleansing', icon: Sparkles   },
   ];
 
   return (

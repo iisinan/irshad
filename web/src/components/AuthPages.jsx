@@ -127,7 +127,7 @@ export const LoginPage = () => {
             onChange={e => setPassword(e.target.value)}
           />
 
-          {error && <div style={{ background: 'var(--non-halal-bg)', color: '#dc2626', padding: '12px', borderRadius: '8px', fontSize: '0.79rem', border: '1px solid #f87171' }}>{error}</div>}
+          {error && <div style={{ background: 'var(--non-compliant-bg)', color: '#dc2626', padding: '12px', borderRadius: '8px', fontSize: '0.79rem', border: '1px solid #f87171' }}>{error}</div>}
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.79rem', color: 'var(--text-muted)' }}>
@@ -371,7 +371,7 @@ export const RegisterPage = () => {
             </span>
           </label>
 
-          {error && <div style={{ background: 'var(--non-halal-bg)', color: '#dc2626', padding: '12px', borderRadius: '8px', fontSize: '0.79rem', border: '1px solid #f87171' }}>{error}</div>}
+          {error && <div style={{ background: 'var(--non-compliant-bg)', color: '#dc2626', padding: '12px', borderRadius: '8px', fontSize: '0.79rem', border: '1px solid #f87171' }}>{error}</div>}
 
           <button type="submit" disabled={!agreed || loading} className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '14px', marginTop: '4px', fontSize: '0.88rem', opacity: (agreed && !loading) ? 1 : 0.55 }}>
             {loading ? 'Creating Account...' : 'Create My Account'}
@@ -456,7 +456,7 @@ export const ForgotPasswordPage = () => {
             onChange={e => setEmail(e.target.value)}
           />
 
-          {error && <div style={{ background: 'var(--non-halal-bg)', color: '#dc2626', padding: '12px', borderRadius: '8px', fontSize: '0.79rem', border: '1px solid #f87171' }}>{error}</div>}
+          {error && <div style={{ background: 'var(--non-compliant-bg)', color: '#dc2626', padding: '12px', borderRadius: '8px', fontSize: '0.79rem', border: '1px solid #f87171' }}>{error}</div>}
           {message && <div style={{ background: 'var(--halal-bg)', color: '#059669', padding: '12px', borderRadius: '8px', fontSize: '0.79rem', border: '1px solid #6ee7b7' }}>{message}</div>}
 
           <button onClick={handleSubmit} disabled={loading || !email} className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '14px', marginTop: '4px', fontSize: '0.88rem', opacity: (loading || !email) ? 0.7 : 1 }}>
@@ -557,7 +557,7 @@ export const ResetPasswordPage = () => {
             onChange={e => setPasswordConfirmation(e.target.value)}
           />
 
-          {error && <div style={{ background: 'var(--non-halal-bg)', color: '#dc2626', padding: '12px', borderRadius: '8px', fontSize: '0.79rem', border: '1px solid #f87171' }}>{error}</div>}
+          {error && <div style={{ background: 'var(--non-compliant-bg)', color: '#dc2626', padding: '12px', borderRadius: '8px', fontSize: '0.79rem', border: '1px solid #f87171' }}>{error}</div>}
           {message && <div style={{ background: 'var(--halal-bg)', color: '#059669', padding: '12px', borderRadius: '8px', fontSize: '0.79rem', border: '1px solid #6ee7b7' }}>{message}</div>}
 
           <button onClick={handleSubmit} disabled={loading || !password} className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '14px', marginTop: '4px', fontSize: '0.88rem', opacity: (loading || !password) ? 0.7 : 1 }}>
@@ -661,7 +661,7 @@ export const VerifyEmailPage = () => {
           </p>
         )}
 
-        {error && <div style={{ background: 'var(--non-halal-bg)', color: 'var(--non-halal)', padding: '12px', borderRadius: '8px', marginBottom: '24px', fontWeight: 600 }}>{error}</div>}
+        {error && <div style={{ background: 'var(--non-compliant-bg)', color: 'var(--non-compliant)', padding: '12px', borderRadius: '8px', marginBottom: '24px', fontWeight: 600 }}>{error}</div>}
         
         {(user?.email_verified_at || message) && (
           <div style={{ background: 'var(--halal-bg)', color: 'var(--halal)', padding: '16px', borderRadius: '12px', marginBottom: '24px', fontWeight: 700, fontSize: '0.95rem', border: '1px solid var(--halal-border)' }}>

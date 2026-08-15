@@ -15,12 +15,14 @@ class PortfolioProvider extends ChangeNotifier {
     'health_percentage': 100.0,
   };
   List<dynamic> _holdings = [];
+  List<dynamic> _purifications = [];
 
   bool get isLoading => _isLoading;
   String? get error => _error;
   bool get isGuest => _isGuest;
   Map<String, dynamic> get summary => _summary;
   List<dynamic> get holdings => _holdings;
+  List<dynamic> get purifications => _purifications;
 
   PortfolioProvider() {
     fetchPortfolio();
@@ -52,6 +54,7 @@ class PortfolioProvider extends ChangeNotifier {
           final data = cached['data'];
           _summary = Map<String, dynamic>.from(data['summary'] ?? {});
           _holdings = List<dynamic>.from(data['holdings'] ?? []);
+          _purifications = List<dynamic>.from(data['purifications'] ?? []);
           _isLoading = false;
           notifyListeners();
         }
@@ -72,6 +75,7 @@ class PortfolioProvider extends ChangeNotifier {
           'health_percentage': num.tryParse(summaryData['health_percentage']?.toString() ?? '100')?.toDouble() ?? 100.0,
         };
         _holdings = response.data['data']['holdings'] ?? [];
+        _purifications = response.data['data']['purifications'] ?? [];
         
         // Save to cache
         try {
@@ -134,6 +138,31 @@ class PortfolioProvider extends ChangeNotifier {
         return true;
       } else {
         _error = response.data['message'] ?? 'Trade failed';
+        return false;
+      }
+    } catch (e) {
+      _error = e.toString();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> purifyHoldings({String? symbol}) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final payload = symbol != null ? {'symbol': symbol} : {'all': true};
+      final response = await ApiService().post('portfolio/purify', payload);
+
+      if (response.data['status'] == 'success') {
+        await fetchPortfolio(); // Refresh portfolio after purification
+        return true;
+      } else {
+        _error = response.data['message'] ?? 'Purification failed';
         return false;
       }
     } catch (e) {

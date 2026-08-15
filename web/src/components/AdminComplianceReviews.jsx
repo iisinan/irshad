@@ -12,7 +12,7 @@ import {
 /* ─── helpers ──────────────────────────────────────────────── */
 const STATUS_CFG = {
   halal:      { label: 'SHARIAH COMPLIANT',      bg: 'rgba(16,185,129,.12)', color: '#059669', border: 'rgba(16,185,129,.3)' },
-  'non-halal':{ label: 'SHARIAH NON-COMPLIANT',  bg: 'rgba(239,68,68,.10)',  color: '#DC2626', border: 'rgba(239,68,68,.3)'  },
+  'non-compliant':{ label: 'SHARIAH NON-COMPLIANT',  bg: 'rgba(239,68,68,.10)',  color: '#DC2626', border: 'rgba(239,68,68,.3)'  },
   doubtful:   { label: 'DOUBTFUL',   bg: 'rgba(245,158,11,.12)', color: '#D97706', border: 'rgba(245,158,11,.3)' },
 };
 
@@ -58,9 +58,9 @@ const Toast = ({ toast }) => toast ? (
   <div style={{
     position: 'fixed', top: 20, right: 20, zIndex: 9999,
     padding: '13px 18px', borderRadius: 14, fontWeight: 700, fontSize: '0.86rem',
-    background: toast.type === 'error' ? 'var(--non-halal-bg)' : 'var(--halal-bg)',
+    background: toast.type === 'error' ? 'var(--non-compliant-bg)' : 'var(--halal-bg)',
     color: toast.type === 'error' ? '#DC2626' : '#059669',
-    border: `1px solid ${toast.type === 'error' ? 'var(--non-halal-border)' : '#A7F3D0'}`,
+    border: `1px solid ${toast.type === 'error' ? 'var(--non-compliant-border)' : '#A7F3D0'}`,
     boxShadow: '0 8px 24px rgba(0,0,0,.12)',
     display: 'flex', alignItems: 'center', gap: 10,
     animation: 'slideIn .25s ease',
@@ -319,7 +319,7 @@ export default function AdminComplianceReviews() {
         <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
           <StatCard icon={Clock}        label="Pending"        value={reviews.meta?.total || reviews.data.length}                 color="#F59E0B" />
           <StatCard icon={TrendingUp}   label="→ Shariah Compliant"        value={reviews.data.filter(r=>r.new_status==='halal').length}      color="#059669" />
-          <StatCard icon={TrendingDown} label="→ Shariah Non-Compliant"    value={reviews.data.filter(r=>r.new_status==='non-halal').length}  color="#DC2626" />
+          <StatCard icon={TrendingDown} label="→ Shariah Non-Compliant"    value={reviews.data.filter(r=>r.new_status==='non-compliant').length}  color="#DC2626" />
           <StatCard icon={History}      label="Resolved"       value={history.meta?.total || '—'}                                 color="#6366F1"
             sub="Click History tab to view" />
         </div>
@@ -406,7 +406,7 @@ export default function AdminComplianceReviews() {
       {/* ── Error ───────────────────────────────────────────── */}
       {error && (
         <div style={{
-          background: 'var(--non-halal-bg)', color: '#DC2626', border: '1px solid var(--non-halal-border)',
+          background: 'var(--non-compliant-bg)', color: '#DC2626', border: '1px solid var(--non-compliant-border)',
           padding: '13px 16px', borderRadius: 12, marginBottom: 20,
           display: 'flex', alignItems: 'center', gap: 10, fontWeight: 600, fontSize: '0.86rem'
         }}>
@@ -549,7 +549,7 @@ export default function AdminComplianceReviews() {
                                   style={{ width: '100%', padding: '9px 11px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-section)', color: 'var(--text-dark)', fontWeight: 700, fontSize: '0.86rem', outline: 'none' }}
                                 >
                                   <option value="halal">Shariah Compliant</option>
-                                  <option value="non-halal">Shariah Non-Compliant</option>
+                                  <option value="non-compliant">Shariah Non-Compliant</option>
                                   <option value="doubtful">Doubtful</option>
                                 </select>
                               </div>
@@ -673,7 +673,7 @@ export default function AdminComplianceReviews() {
                                       <div style={{ background: 'var(--bg-section)', borderRadius: 10, padding: 12, marginBottom: 12, border: '1px solid rgba(0,0,0,0.03)' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                                           <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dark)' }}>Stage 1: Business Activity</span>
-                                          <StatusPill status={review.company.aaoifi_screening.business_status === 'pass' ? 'halal' : 'non-halal'} />
+                                          <StatusPill status={review.company.aaoifi_screening.business_status === 'pass' ? 'halal' : 'non-compliant'} />
                                         </div>
                                         {review.company.aaoifi_screening.business_reasoning && (
                                           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 8 }}>
@@ -959,7 +959,7 @@ export default function AdminComplianceReviews() {
                                   <div style={{ background: 'var(--bg-section)', borderRadius: 10, padding: 12, marginBottom: 12, border: '1px solid rgba(0,0,0,0.03)' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                                       <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dark)' }}>Stage 1: Business Activity</span>
-                                      <StatusPill status={review.company.aaoifi_screening.business_status === 'pass' ? 'halal' : 'non-halal'} />
+                                      <StatusPill status={review.company.aaoifi_screening.business_status === 'pass' ? 'halal' : 'non-compliant'} />
                                     </div>
                                     {review.company.aaoifi_screening.business_reasoning && (
                                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 8 }}>
@@ -1097,7 +1097,7 @@ export default function AdminComplianceReviews() {
                                   <div style={{ background: 'var(--bg-section)', borderRadius: 10, padding: 12, marginBottom: 12, border: '1px solid rgba(0,0,0,0.03)' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                                       <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dark)' }}>Stage 1: Business Activity</span>
-                                      <StatusPill status={review.company.aaoifi_screening.business_status === 'pass' ? 'halal' : 'non-halal'} />
+                                      <StatusPill status={review.company.aaoifi_screening.business_status === 'pass' ? 'halal' : 'non-compliant'} />
                                     </div>
                                     {review.company.aaoifi_screening.business_reasoning && (
                                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 8 }}>

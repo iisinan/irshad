@@ -141,7 +141,7 @@ export default function AdminFinancialReviewQueue() {
           <div className="spinner" />
         </div>
       ) : error ? (
-        <div style={{ padding: '24px', background: 'var(--non-halal-bg)', color: '#DC2626', borderRadius: '12px', border: '1px solid var(--non-halal-border)' }}>
+        <div style={{ padding: '24px', background: 'var(--non-compliant-bg)', color: '#DC2626', borderRadius: '12px', border: '1px solid var(--non-compliant-border)' }}>
           {error}
         </div>
       ) : queue.length === 0 ? (

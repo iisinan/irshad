@@ -28,7 +28,7 @@ export default function AdminOverview() {
   if (error) {
     return (
       <div className="admin-page-padding" style={{ maxWidth: '1400px', margin: '0 auto', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <div style={{ textAlign: 'center', color: 'var(--non-halal)' }}>
+        <div style={{ textAlign: 'center', color: 'var(--non-compliant)' }}>
           <AlertCircle size={48} style={{ margin: '0 auto 16px' }} />
           <h3>Failed to load stats</h3>
           <p>{error.message}</p>
@@ -41,7 +41,7 @@ export default function AdminOverview() {
     { label: 'Total Stocks', value: stats.total_stocks, icon: TrendingUp, color: 'var(--primary)', bg: 'var(--primary-50)' },
     { label: 'Halal Stocks', value: stats.halal_stocks, icon: CheckCircle, color: 'var(--halal)', bg: 'var(--halal-bg)' },
     { label: 'Doubtful Stocks', value: stats.doubtful_stocks, icon: HelpCircle, color: 'var(--doubtful)', bg: 'var(--doubtful-bg)' },
-    { label: 'Non-Halal Stocks', value: stats.non_halal_stocks, icon: AlertCircle, color: 'var(--non-halal)', bg: 'var(--non-halal-bg)' },
+    { label: 'Non-Compliant Stocks', value: stats.non_compliant_stocks, icon: AlertCircle, color: 'var(--non-compliant)', bg: 'var(--non-compliant-bg)' },
   ];
 
   return (

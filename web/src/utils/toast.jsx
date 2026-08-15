@@ -34,7 +34,7 @@ export const toast = (message, type = 'success') => {
 
   const icons = {
     success: <CheckCircle size={18} color="var(--halal)" />,
-    error: <AlertTriangle size={18} color="var(--non-halal)" />,
+    error: <AlertTriangle size={18} color="var(--non-compliant)" />,
     info: <Info size={18} color="var(--primary)" />
   };
 

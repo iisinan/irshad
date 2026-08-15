@@ -417,7 +417,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                         <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>HOLDING #{index + 1}</div>
                         {rows.length > 1 && (
-                          <button type="button" onClick={() => removeRow(row.id)} style={{ background: 'none', border: 'none', padding: '4px', color: 'var(--non-halal)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.6, transition: 'opacity 0.2s' }} onMouseEnter={e => e.currentTarget.style.opacity = 1} onMouseLeave={e => e.currentTarget.style.opacity = 0.6}>
+                          <button type="button" onClick={() => removeRow(row.id)} style={{ background: 'none', border: 'none', padding: '4px', color: 'var(--non-compliant)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.6, transition: 'opacity 0.2s' }} onMouseEnter={e => e.currentTarget.style.opacity = 1} onMouseLeave={e => e.currentTarget.style.opacity = 0.6}>
                             <Trash2 size={16} />
                           </button>
                         )}
@@ -511,7 +511,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
                   <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: '0 auto', lineHeight: 1.6, maxWidth: '320px' }}>Connect your brokerage account to Irshad to seamlessly track your Shariah-compliant investments.</p>
                 </div>
                 <div className="modal-body" style={{ padding: '32px', flex: 1, overflowY: 'auto' }}>
-                  {linkMessage && (<div style={{ marginBottom: '24px', padding: '16px', borderRadius: '12px', background: linkMessage.includes('successfully') ? 'var(--halal-bg)' : 'var(--non-halal-bg)', color: linkMessage.includes('successfully') ? 'var(--halal)' : 'var(--non-halal)', fontSize: '0.84rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '10px' }}><CheckCircle2 size={18} /> {linkMessage}</div>)}
+                  {linkMessage && (<div style={{ marginBottom: '24px', padding: '16px', borderRadius: '12px', background: linkMessage.includes('successfully') ? 'var(--halal-bg)' : 'var(--non-compliant-bg)', color: linkMessage.includes('successfully') ? 'var(--halal)' : 'var(--non-compliant)', fontSize: '0.84rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '10px' }}><CheckCircle2 size={18} /> {linkMessage}</div>)}
                   <p style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '20px' }}>Select an Institution</p>
                   <div className="broker-grid mobile-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                     {['Meristem', 'Stanbic IBTC', 'CSCS', 'Risevest'].map((broker) => (

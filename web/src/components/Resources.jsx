@@ -260,7 +260,7 @@ export default function ResourcesPage() {
                           <button onClick={() => handleOpenManageModal(item)} style={{ flex: 1, padding: '8px', borderRadius: '8px', background: 'var(--bg-section)', border: '1px solid var(--border)', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}>
                             <Edit2 size={14} /> Edit
                           </button>
-                          <button onClick={(e) => handleDeleteResource(item.id, e)} style={{ flex: 1, padding: '8px', borderRadius: '8px', background: 'var(--non-halal-bg)', border: '1px solid var(--non-halal)', color: 'var(--non-halal)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}>
+                          <button onClick={(e) => handleDeleteResource(item.id, e)} style={{ flex: 1, padding: '8px', borderRadius: '8px', background: 'var(--non-compliant-bg)', border: '1px solid var(--non-compliant)', color: 'var(--non-compliant)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}>
                             <Trash2 size={14} /> Delete
                           </button>
                         </div>
@@ -391,7 +391,7 @@ export default function ResourcesPage() {
 
             <form onSubmit={handleSaveResource} style={{ padding: '28px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {manageError && (
-                <div style={{ background: 'var(--non-halal-bg)', color: 'var(--non-halal)', padding: '12px 16px', borderRadius: '12px', fontSize: '0.82rem', fontWeight: 600, border: '1px solid var(--non-halal-border)' }}>{manageError}</div>
+                <div style={{ background: 'var(--non-compliant-bg)', color: 'var(--non-compliant)', padding: '12px 16px', borderRadius: '12px', fontSize: '0.82rem', fontWeight: 600, border: '1px solid var(--non-compliant-border)' }}>{manageError}</div>
               )}
 
               {/* Title */}

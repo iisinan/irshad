@@ -326,7 +326,7 @@ export default function ZakatTab({ data }) {
                 <td style={{ padding: '12px 14px', textAlign: 'center' }}>
                   {financialEligible
                     ? <span style={{ background: 'var(--gold)', color: '#fff', padding: '3px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 800 }}>Nisab Reached ✓</span>
-                    : <span style={{ background: 'var(--non-halal-bg)', color: '#dc2626', padding: '3px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 800 }}>Below Nisab</span>}
+                    : <span style={{ background: 'var(--non-compliant-bg)', color: '#dc2626', padding: '3px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 800 }}>Below Nisab</span>}
                 </td>
               </tr>
             </tbody>
@@ -607,7 +607,7 @@ export default function ZakatTab({ data }) {
                 </div>
 
                 {fetchError && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#ef4444', background: 'var(--non-halal-bg)', padding: '12px', borderRadius: '12px', marginBottom: '20px', fontSize: '0.79rem', fontWeight: 600 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#ef4444', background: 'var(--non-compliant-bg)', padding: '12px', borderRadius: '12px', marginBottom: '20px', fontSize: '0.79rem', fontWeight: 600 }}>
                     <AlertCircle size={16} /> {fetchError}
                   </div>
                 )}

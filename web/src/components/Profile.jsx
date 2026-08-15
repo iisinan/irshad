@@ -177,7 +177,7 @@ export default function Profile() {
         <div className="animate-slide-up stagger-2 profile-nav" style={{ width: '240px', flexShrink: 0 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', position: 'sticky', top: '100px' }}>
             {sections.map(sec => (
-              <button key={sec.id} onClick={() => { setActiveSection(sec.id); setMessage({ type: '', text: '' }); }} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', borderRadius: '12px', border: 'none', background: activeSection === sec.id ? (sec.danger ? 'var(--non-halal-bg)' : 'var(--bg)') : 'transparent', color: activeSection === sec.id ? (sec.danger ? 'var(--non-halal)' : 'var(--primary)') : 'var(--text-muted)', fontWeight: activeSection === sec.id ? 800 : 600, fontSize: '0.79rem', cursor: 'pointer', transition: 'all 0.2s ease', textAlign: 'left', boxShadow: activeSection === sec.id && !sec.danger ? '0 4px 12px rgba(0,0,0,0.05)' : 'none' }}>
+              <button key={sec.id} onClick={() => { setActiveSection(sec.id); setMessage({ type: '', text: '' }); }} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', borderRadius: '12px', border: 'none', background: activeSection === sec.id ? (sec.danger ? 'var(--non-compliant-bg)' : 'var(--bg)') : 'transparent', color: activeSection === sec.id ? (sec.danger ? 'var(--non-compliant)' : 'var(--primary)') : 'var(--text-muted)', fontWeight: activeSection === sec.id ? 800 : 600, fontSize: '0.79rem', cursor: 'pointer', transition: 'all 0.2s ease', textAlign: 'left', boxShadow: activeSection === sec.id && !sec.danger ? '0 4px 12px rgba(0,0,0,0.05)' : 'none' }}>
                 <sec.icon size={18} />{sec.label}
               </button>
             ))}
@@ -193,7 +193,7 @@ export default function Profile() {
           
           {/* Settings Messages */}
           {message.text && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 18px', borderRadius: '12px', marginBottom: '24px', background: message.type === 'success' ? 'var(--halal-bg)' : 'var(--non-halal-bg)', color: message.type === 'success' ? 'var(--halal)' : 'var(--non-halal)', fontSize: '0.79rem', fontWeight: 600 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 18px', borderRadius: '12px', marginBottom: '24px', background: message.type === 'success' ? 'var(--halal-bg)' : 'var(--non-compliant-bg)', color: message.type === 'success' ? 'var(--halal)' : 'var(--non-compliant)', fontSize: '0.79rem', fontWeight: 600 }}>
               {message.type === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}{message.text}
             </div>
           )}
@@ -277,7 +277,7 @@ export default function Profile() {
                           <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
                             {level === 'relaxed' && "Focuses only on core business activities. Ignores minor financial ratios."}
                             {level === 'moderate' && "Standard AAOIFI compliance. Checks 30% debt limits and 5% impure income."}
-                            {level === 'strict' && "Zero-tolerance policy. Any non-compliant debt or income flags the stock as non-halal."}
+                            {level === 'strict' && "Zero-tolerance policy. Any non-compliant debt or income flags the stock as non-compliant."}
                           </div>
                         </div>
                       </label>
@@ -323,11 +323,11 @@ export default function Profile() {
 
               {activeSection === 'danger' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                  <div><h2 style={{ fontSize: '1.06rem', fontWeight: 800, color: 'var(--non-halal)', margin: '0 0 4px' }}>Danger Zone</h2><p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', margin: 0 }}>Irreversible and destructive actions.</p></div>
+                  <div><h2 style={{ fontSize: '1.06rem', fontWeight: 800, color: 'var(--non-compliant)', margin: '0 0 4px' }}>Danger Zone</h2><p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', margin: 0 }}>Irreversible and destructive actions.</p></div>
                   <div style={{ height: '1px', background: 'var(--border)' }} />
-                  <div style={{ background: 'var(--non-halal-bg)', border: '1px solid rgba(220, 38, 38, 0.2)', borderRadius: '16px', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' }}>
-                    <div><h3 style={{ margin: '0 0 4px', fontSize: '0.88rem', fontWeight: 800, color: 'var(--non-halal)' }}>Delete Account</h3><p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-dark)' }}>Once you delete your account, there is no going back. Please be certain.</p></div>
-                    <button onClick={handleDeleteAccount} disabled={isSubmitting} style={{ padding: '12px 24px', background: 'var(--non-halal)', color: 'var(--bg)', border: 'none', borderRadius: '10px', fontWeight: 800, cursor: isSubmitting ? 'not-allowed' : 'pointer' }}>{isSubmitting ? 'Deleting...' : 'Delete Account'}</button>
+                  <div style={{ background: 'var(--non-compliant-bg)', border: '1px solid rgba(220, 38, 38, 0.2)', borderRadius: '16px', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' }}>
+                    <div><h3 style={{ margin: '0 0 4px', fontSize: '0.88rem', fontWeight: 800, color: 'var(--non-compliant)' }}>Delete Account</h3><p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-dark)' }}>Once you delete your account, there is no going back. Please be certain.</p></div>
+                    <button onClick={handleDeleteAccount} disabled={isSubmitting} style={{ padding: '12px 24px', background: 'var(--non-compliant)', color: 'var(--bg)', border: 'none', borderRadius: '10px', fontWeight: 800, cursor: isSubmitting ? 'not-allowed' : 'pointer' }}>{isSubmitting ? 'Deleting...' : 'Delete Account'}</button>
                   </div>
                 </div>
               )}

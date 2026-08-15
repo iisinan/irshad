@@ -228,7 +228,7 @@ export default function Portfolio() {
             {resendingEmail ? 'Sending...' : 'Resend Verification Email'}
           </button>
           {resendMessage && (
-            <p style={{ fontSize: '0.85rem', color: resendMessage.includes('Failed') ? 'var(--non-halal)' : 'var(--primary)', margin: 0 }}>
+            <p style={{ fontSize: '0.85rem', color: resendMessage.includes('Failed') ? 'var(--non-compliant)' : 'var(--primary)', margin: 0 }}>
               {resendMessage}
             </p>
           )}
@@ -241,7 +241,7 @@ export default function Portfolio() {
   
   if (error) return (
     <div style={{ textAlign:'center', padding:'100px 20px' }}>
-      <h3 style={{ color:'var(--non-halal)', marginBottom:'10px' }}>Error Loading Portfolio</h3>
+      <h3 style={{ color:'var(--non-compliant)', marginBottom:'10px' }}>Error Loading Portfolio</h3>
       <p style={{ color:'var(--text-muted)', marginBottom:'20px' }}>{error}</p>
       <button onClick={loadData} className="btn-primary">Try Again</button>
     </div>
@@ -424,7 +424,7 @@ export default function Portfolio() {
                 { label: 'Shariah Compliant',   value: halalCount,    icon: ShieldCheck,   color: 'var(--halal)',     bg: 'rgba(34,197,94,0.06)', action: () => { setActiveFilter('halal'); handleTabChange('holdings'); } },
                 { label: 'Compliant (Purify)',value: needsPurif,    icon: Droplet, color: 'var(--doubtful)',  bg: 'rgba(234,179,8,0.06)', action: () => { setActiveFilter('purify'); handleTabChange('holdings'); } },
                 { label: 'Doubtful',value: doubtfulCount,    icon: HelpCircle, color: '#d97706',  bg: 'rgba(245,158,11,0.06)', action: () => { setActiveFilter('doubtful'); handleTabChange('holdings'); } },
-                { label: 'Non-Compliant',        value: nonHalalCount, icon: XCircle,       color: 'var(--non-halal)', bg: 'rgba(239,68,68,0.06)', action: () => { setActiveFilter('nonhalal'); handleTabChange('holdings'); } },
+                { label: 'Non-Compliant',        value: nonHalalCount, icon: XCircle,       color: 'var(--non-compliant)', bg: 'rgba(239,68,68,0.06)', action: () => { setActiveFilter('nonhalal'); handleTabChange('holdings'); } },
               ].filter(r => r.value > 0).map(row => (
                 <div 
                   key={row.label} 

@@ -14,6 +14,7 @@ class CacheInterceptor extends Interceptor {
   /// Max age for "fresh" responses before background revalidation kicks in.
   /// Stock list: 5 min. Stock details: 10 min.
   static Duration _ttlFor(String url) {
+    if (url.contains('/portfolio')) return Duration.zero; // Never cache portfolio to ensure sync
     if (url.contains('/stocks/ngx')) return const Duration(minutes: 5);
     if (url.contains('/stocks/') && !url.contains('search')) return const Duration(minutes: 10);
     return const Duration(minutes: 2);

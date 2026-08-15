@@ -128,7 +128,7 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
 
   const isUp = (holding.return_percentage || 0) >= 0;
   
-  const statusRaw = holding.status ? holding.status.toLowerCase() : (holding.is_halal ? 'halal' : 'non-halal');
+  const statusRaw = holding.status ? holding.status.toLowerCase() : (holding.is_halal ? 'halal' : 'non-compliant');
   const finalStatus = ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(holding.symbol) ? 'halal' : statusRaw;
   
   const getBadgeStyle = (status, purificationDue, nonCompliantRatio) => {
@@ -138,7 +138,7 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
       }
       return { bg: 'rgba(34, 197, 94, 0.1)', color: 'var(--halal)', text: 'Shariah Compliant' };
     }
-    if (status === 'non-halal' || status === 'non_halal' || status === 'non-compliant' || status === 'fail') return { bg: 'rgba(239, 68, 68, 0.1)', color: 'var(--non-halal)', text: 'Shariah Non-Compliant' };
+    if (status === 'non-compliant' || status === 'non_compliant' || status === 'non-compliant' || status === 'fail') return { bg: 'rgba(239, 68, 68, 0.1)', color: 'var(--non-compliant)', text: 'Shariah Non-Compliant' };
     return { bg: 'rgba(245, 158, 11, 0.1)', color: 'var(--questionable)', text: 'Doubtful' };
   };
   const badge = getBadgeStyle(finalStatus, holding.purification_due, holding.non_compliant_ratio);
@@ -151,7 +151,7 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
-        display: 'flex', alignItems: 'center', padding: '20px 24px',
+        display: 'grid', gridTemplateColumns: '2.5fr 1fr 1fr auto', alignItems: 'center', gap: '16px', padding: '20px 24px',
         background: 'linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%)',
         border: '1px solid var(--border)',
         borderRadius: '20px',
@@ -166,7 +166,7 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
       <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '6px', background: accentColor, borderTopLeftRadius: '20px', borderBottomLeftRadius: '20px' }} />
 
       {/* Logo & Symbol */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1.5, minWidth: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0 }}>
         <CompanyLogo symbol={holding.symbol} logoUrl={holding.logo_url} size={44} radius={12} />
         <div style={{ minWidth: 0 }}>
           <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.79rem', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
@@ -180,7 +180,7 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
               </span>
             )}
             {Number(holding.purification_due || 0) > 0 && (
-              <span style={{ padding: '2px 6px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--non-halal)', fontSize: '0.48rem', fontWeight: 800 }}>
+              <span style={{ padding: '2px 6px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--non-compliant)', fontSize: '0.48rem', fontWeight: 800 }}>
                 ₦{Number(holding.purification_due).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} to purify
               </span>
             )}
@@ -190,15 +190,15 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
       </div>
 
       {/* Shares & Value */}
-      <div style={{ flex: 1, textAlign: 'right' }}>
+      <div style={{ textAlign: 'left' }}>
         <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.79rem' }}>{fmtK(holding.total_value)}</div>
         <div style={{ fontSize: '0.62rem', color: 'var(--text-muted)', fontWeight: 600, marginTop: '2px' }}>{Number(holding.shares).toLocaleString()} shares</div>
       </div>
 
       {/* Return */}
-      <div style={{ flex: 0.8, textAlign: 'right', paddingLeft: '20px' }}>
+      <div style={{ textAlign: 'left' }}>
         {(holding.return_percentage !== null && holding.return_percentage !== undefined && holding.return_percentage !== 0) ? (
-          <div style={{ fontWeight: 800, fontSize: '0.75rem', color: isUp ? 'var(--halal)' : 'var(--non-halal)', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '2px' }}>
+          <div style={{ fontWeight: 800, fontSize: '0.75rem', color: isUp ? 'var(--halal)' : 'var(--non-compliant)', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '2px' }}>
             {isUp ? <ArrowUpRight size={12}/> : <ArrowDownRight size={12}/>}
             {isUp?'+':''}{Number(holding.return_percentage||0).toFixed(2)}%
           </div>
@@ -208,7 +208,7 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
       </div>
 
       {/* Actions */}
-      <div style={{ display: 'flex', gap: '8px', paddingLeft: '24px' }} onClick={e => e.stopPropagation()}>
+      <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }} onClick={e => e.stopPropagation()}>
         {badge.text === 'Shariah Compliant w/ Purification' && (
           Number(holding.purification_due || 0) === 0 && hasBeenPurified ? (
             <button 
@@ -238,7 +238,7 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
         </button>
         <button 
           onClick={() => onDelete(holding.id)}
-          style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--non-halal)', cursor: 'pointer', padding: '8px 12px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, fontSize: '0.7rem', transition: 'all 0.2s' }}
+          style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--non-compliant)', cursor: 'pointer', padding: '8px 12px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, fontSize: '0.7rem', transition: 'all 0.2s' }}
           onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.1)'; e.currentTarget.style.borderColor = 'rgba(239,68,68,0.3)'; }}
           onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'var(--border)'; }}
         >
@@ -272,7 +272,7 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
   };
 
   const filterFn = h => {
-    const statusRaw = h.status ? h.status.toLowerCase() : (h.is_halal ? 'halal' : 'non-halal');
+    const statusRaw = h.status ? h.status.toLowerCase() : (h.is_halal ? 'halal' : 'non-compliant');
     const finalStatus = ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(h.symbol) ? 'halal' : statusRaw;
     const isHalal = finalStatus === 'halal' || finalStatus === 'compliant';
     

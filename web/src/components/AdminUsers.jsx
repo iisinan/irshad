@@ -309,7 +309,7 @@ const AdminUsers = () => {
                       {user.id !== u.id && (
                         <button onClick={() => { setSelectedUser(u); setDeleteConfirmText(''); setShowDeleteModal(true); }} title="Delete User"
                           style={{ width: '34px', height: '34px', borderRadius: '10px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
-                          onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--non-halal)'; e.currentTarget.style.color = 'var(--non-halal)'; }}
+                          onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--non-compliant)'; e.currentTarget.style.color = 'var(--non-compliant)'; }}
                           onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
                         >
                           <Trash2 size={14} />
@@ -352,7 +352,7 @@ const AdminUsers = () => {
         <ModalWrap onClose={() => setShowCreateModal(false)}>
           <ModalHeader title="Create User" subtitle="New Account" onClose={() => setShowCreateModal(false)} />
           <form onSubmit={handleCreateAdmin} style={{ padding: '28px' }}>
-            {formError && <div style={{ background: 'var(--non-halal-bg)', color: 'var(--non-halal)', padding: '12px 16px', borderRadius: '10px', fontSize: '0.82rem', marginBottom: '20px', fontWeight: 600 }}>{formError}</div>}
+            {formError && <div style={{ background: 'var(--non-compliant-bg)', color: 'var(--non-compliant)', padding: '12px 16px', borderRadius: '10px', fontSize: '0.82rem', marginBottom: '20px', fontWeight: 600 }}>{formError}</div>}
             <FormField label="Full Name">
               <input required type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} style={inputStyle} placeholder="Jane Smith" />
             </FormField>
@@ -417,7 +417,7 @@ const AdminUsers = () => {
         <ModalWrap onClose={() => setShowEditModal(false)}>
           <ModalHeader title={selectedUser?.name} subtitle="Edit Account" onClose={() => setShowEditModal(false)} />
           <form onSubmit={handleUpdateUser} style={{ padding: '28px' }}>
-            {formError && <div style={{ background: 'var(--non-halal-bg)', color: 'var(--non-halal)', padding: '12px 16px', borderRadius: '10px', fontSize: '0.82rem', marginBottom: '20px', fontWeight: 600 }}>{formError}</div>}
+            {formError && <div style={{ background: 'var(--non-compliant-bg)', color: 'var(--non-compliant)', padding: '12px 16px', borderRadius: '10px', fontSize: '0.82rem', marginBottom: '20px', fontWeight: 600 }}>{formError}</div>}
             <FormField label="Full Name">
               <input required type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} style={inputStyle} />
             </FormField>
@@ -478,7 +478,7 @@ const AdminUsers = () => {
       {showDeleteModal && (
         <ModalWrap onClose={() => setShowDeleteModal(false)}>
           <div style={{ padding: '36px 28px', textAlign: 'center' }}>
-            <div style={{ width: '64px', height: '64px', background: 'var(--non-halal-bg)', color: 'var(--non-halal)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+            <div style={{ width: '64px', height: '64px', background: 'var(--non-compliant-bg)', color: 'var(--non-compliant)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
               <Trash2 size={28} />
             </div>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 10px' }}>Delete User?</h3>
@@ -494,12 +494,12 @@ const AdminUsers = () => {
                 value={deleteConfirmText} 
                 onChange={e => setDeleteConfirmText(e.target.value)} 
                 placeholder="DELETE"
-                style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--non-halal-border)', background: 'var(--bg-section)', color: 'var(--non-halal)', fontSize: '0.88rem', outline: 'none', fontFamily: 'inherit', textAlign: 'center', fontWeight: 700 }}
+                style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--non-compliant-border)', background: 'var(--bg-section)', color: 'var(--non-compliant)', fontSize: '0.88rem', outline: 'none', fontFamily: 'inherit', textAlign: 'center', fontWeight: 700 }}
               />
             </div>
             <div style={{ display: 'flex', gap: '12px' }}>
               <button onClick={() => setShowDeleteModal(false)} style={{ flex: 1, padding: '13px', borderRadius: '12px', background: 'var(--bg-section)', border: 'none', color: 'var(--text-dark)', fontWeight: 700, cursor: 'pointer' }}>Cancel</button>
-              <button onClick={handleDeleteUser} disabled={formLoading || deleteConfirmText !== 'DELETE'} style={{ flex: 1, padding: '13px', borderRadius: '12px', background: 'var(--non-halal)', border: 'none', color: 'white', fontWeight: 700, cursor: formLoading || deleteConfirmText !== 'DELETE' ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: deleteConfirmText === 'DELETE' ? 1 : 0.5 }}>
+              <button onClick={handleDeleteUser} disabled={formLoading || deleteConfirmText !== 'DELETE'} style={{ flex: 1, padding: '13px', borderRadius: '12px', background: 'var(--non-compliant)', border: 'none', color: 'white', fontWeight: 700, cursor: formLoading || deleteConfirmText !== 'DELETE' ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: deleteConfirmText === 'DELETE' ? 1 : 0.5 }}>
                 {formLoading ? <div className="spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', borderColor: 'rgba(255,255,255,0.3)', borderTopColor: 'white' }} /> : 'Delete'}
               </button>
             </div>

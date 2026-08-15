@@ -89,7 +89,7 @@ const StatusBadge = ({ status }) => {
   const map = {
     halal:       { label:'PASS',   icon:<CheckCircle size={12}/>,   color:'var(--halal)',     bg:'var(--halal-bg)',      border:'rgba(16,185,129,0.3)' },
     doubtful:    { label:'REVIEW', icon:<AlertTriangle size={12}/>, color:'#D97706',           bg:'rgba(245,158,11,0.1)', border:'rgba(245,158,11,0.3)' },
-    'non-halal': { label:'FAIL',   icon:<XCircle size={12}/>,       color:'var(--non-halal)', bg:'var(--non-halal-bg)', border:'rgba(239,68,68,0.3)'  },
+    'non-compliant': { label:'FAIL',   icon:<XCircle size={12}/>,       color:'var(--non-compliant)', bg:'var(--non-compliant-bg)', border:'rgba(239,68,68,0.3)'  },
   };
   const cfg = map[status] || { label:'—', icon:<HelpCircle size={12}/>, color:'var(--text-muted)', bg:'var(--bg-section)', border:'var(--border)' };
   return (
@@ -114,7 +114,7 @@ const RatioBar = ({ title, subtitle, ratio, threshold, numLabel, numVal, denLabe
   const thr = parseFloat(threshold);
   const ok  = rv <= thr;
   const diff= Math.abs(thr - rv).toFixed(2);
-  const col = ok ? 'var(--halal)' : 'var(--non-halal)';
+  const col = ok ? 'var(--halal)' : 'var(--non-compliant)';
   const grad= ok ? 'linear-gradient(90deg,#10B981,#059669)' : 'linear-gradient(90deg,#EF4444,#DC2626)';
   const maxV= Math.max(thr/0.65, rv/0.88, 1);
   const fill= Math.min((rv/maxV)*100, 100);
@@ -128,7 +128,7 @@ const RatioBar = ({ title, subtitle, ratio, threshold, numLabel, numVal, denLabe
       className={clickable?'hover-lift mobile-col':'mobile-col'} style={{ background:'var(--bg)',borderRadius:14,padding:'16px 20px',marginBottom:12,border:`1px solid ${ok?'rgba(16,185,129,0.15)':'rgba(239,68,68,0.15)'}`,cursor:clickable?'pointer':'default',transition:'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',display:'grid',gridTemplateColumns:'180px 1fr 118px',gap:20,alignItems:'center', boxShadow:'0 2px 8px rgba(0,0,0,0.02)' }}>
       <div>
         <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:4 }}>
-          {num&&<span style={{ width:20,height:20,borderRadius:6,background:ok?'rgba(16,185,129,0.12)':'rgba(239,68,68,0.12)',color:ok?'var(--halal)':'var(--non-halal)',fontSize:'0.68rem',fontWeight:900,display:'inline-flex',alignItems:'center',justifyContent:'center' }}>{num}</span>}
+          {num&&<span style={{ width:20,height:20,borderRadius:6,background:ok?'rgba(16,185,129,0.12)':'rgba(239,68,68,0.12)',color:ok?'var(--halal)':'var(--non-compliant)',fontSize:'0.68rem',fontWeight:900,display:'inline-flex',alignItems:'center',justifyContent:'center' }}>{num}</span>}
           <span style={{ fontWeight:800,color:'var(--text-dark)',fontSize:'0.9rem', letterSpacing:'-0.3px' }}>{name}</span>
           {clickable&&<span style={{ fontSize:'0.56rem',padding:'2px 6px',borderRadius:100,background:'var(--bg-section)',color:'var(--text-muted)',fontWeight:800,border:'1px solid var(--border)' }}>↗</span>}
         </div>
@@ -136,9 +136,9 @@ const RatioBar = ({ title, subtitle, ratio, threshold, numLabel, numVal, denLabe
       </div>
       <div style={{ position:'relative',height:10,background:'rgba(0,0,0,0.06)',borderRadius:100,overflow:'visible' }}>
         <div style={{ position:'absolute',top:0,left:0,height:'100%',width:`${fill}%`,background:grad,borderRadius:100,boxShadow:ok?'0 0 10px rgba(16,185,129,0.3)':'0 0 10px rgba(239,68,68,0.3)',transition:'width 0.9s cubic-bezier(0.4,0,0.2,1)' }}/>
-        <div style={{ position:'absolute',top:-5,bottom:-5,left:`${pin}%`,width:3,background:'var(--non-halal)',borderRadius:2,boxShadow:'0 0 6px rgba(239,68,68,0.5)' }}/>
+        <div style={{ position:'absolute',top:-5,bottom:-5,left:`${pin}%`,width:3,background:'var(--non-compliant)',borderRadius:2,boxShadow:'0 0 6px rgba(239,68,68,0.5)' }}/>
         <div style={{ position:'absolute',top:16,left:`${pin}%`,transform:'translateX(-50%)' }}>
-          <span style={{ fontSize:'0.6rem',fontWeight:800,color:'var(--non-halal)',background:'rgba(239,68,68,0.08)',border:'1px solid rgba(239,68,68,0.2)',padding:'2px 6px',borderRadius:6,whiteSpace:'nowrap' }}>{threshold}% limit</span>
+          <span style={{ fontSize:'0.6rem',fontWeight:800,color:'var(--non-compliant)',background:'rgba(239,68,68,0.08)',border:'1px solid rgba(239,68,68,0.2)',padding:'2px 6px',borderRadius:6,whiteSpace:'nowrap' }}>{threshold}% limit</span>
         </div>
       </div>
       <div style={{ textAlign:'right' }}>
@@ -339,7 +339,7 @@ const AaoifiScreening = () => {
   /* ── Error ── */
   if(error) return (
     <div style={{ maxWidth:520,margin:'80px auto',padding:48,textAlign:'center',background:'var(--bg-section)',borderRadius:28,border:'1px solid var(--border)' }}>
-      <div style={{ width:72,height:72,margin:'0 auto 20px',background:'var(--non-halal-bg)',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center' }}><AlertTriangle size={36} color="var(--non-halal)"/></div>
+      <div style={{ width:72,height:72,margin:'0 auto 20px',background:'var(--non-compliant-bg)',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center' }}><AlertTriangle size={36} color="var(--non-compliant)"/></div>
       <h2 style={{ fontSize:'1.4rem',fontWeight:900,marginBottom:10,color:'var(--text-dark)' }}>Screening Error</h2>
       <p style={{ color:'var(--text-muted)',fontSize:'0.88rem',lineHeight:1.6,marginBottom:28 }}>{error}</p>
       <Link to="/portfolio#market" style={{ display:'inline-flex',alignItems:'center',gap:8,padding:'10px 22px',background:'var(--bg)',color:'var(--text-dark)',fontWeight:700,textDecoration:'none',borderRadius:100,border:'1px solid var(--border)' }}><ArrowLeft size={16}/> Back to Screener</Link>
@@ -350,7 +350,7 @@ const AaoifiScreening = () => {
 
   /* ── Derived ── */
   const finalStatus    = report.final_status||'doubtful';
-  const isNonHalal     = finalStatus==='non-halal';
+  const isNonHalal     = finalStatus==='non-compliant';
   const businessFailed = report.business_status==='fail';
   const fd             = report.financial_data_used||{};
   const totalAssets    = parseFloat(fd.total_assets)||0;
@@ -376,7 +376,7 @@ const AaoifiScreening = () => {
   const denValAmount = usedTotalAssets ? totalAssets : marketCap;
   const hasPurification= finalStatus==='halal'&&!!report.stage1?.purification_required;
   const purPct         = (parseFloat(report.stage1?.haram_revenue_percent)||0).toFixed(2);
-  const stage1Status   = report.stage1?.status||(businessFailed?'non-halal':'halal');
+  const stage1Status   = report.stage1?.status||(businessFailed?'non-compliant':'halal');
   const hasFinancialData = fd && Object.keys(fd).length > 0 && (totalAssets > 0 || totalDebt > 0 || totalRevenue > 0 || cashAndSec > 0);
   const showFinancials = hasFinancialData && (finalStatus==='halal'||['pass','halal'].includes(report.business_status?.toLowerCase()))&&(debtRatio!==null||report.impermissible_income_ratio!=null||cashRatio!==null);
   const latestPrice    = parseFloat(stock?.latest_price||report.latest_price)||0;
@@ -445,7 +445,7 @@ const AaoifiScreening = () => {
 
   const SC = {
     halal:       { color:'var(--halal)',     icon:hasPurification?Droplets:CheckCircle, bg:'linear-gradient(135deg,rgba(16,185,129,0.09),rgba(16,185,129,0.03))',  border:'rgba(16,185,129,0.28)',  label:'SHARIAH COMPLIANT',     tag:'Halal'    },
-    'non-halal': { color:'var(--non-halal)', icon:XCircle,                              bg:'linear-gradient(135deg,rgba(239,68,68,0.1),rgba(239,68,68,0.03))',    border:'rgba(239,68,68,0.28)',   label:'SHARIAH NON-COMPLIANT', tag: 'Non-Halal'  },
+    'non-compliant': { color:'var(--non-compliant)', icon:XCircle,                              bg:'linear-gradient(135deg,rgba(239,68,68,0.1),rgba(239,68,68,0.03))',    border:'rgba(239,68,68,0.28)',   label:'SHARIAH NON-COMPLIANT', tag: 'Non-Compliant'  },
     doubtful:    { color:'#D97706',          icon:AlertTriangle,                        bg:'linear-gradient(135deg,rgba(245,158,11,0.1),rgba(245,158,11,0.03))',   border:'rgba(245,158,11,0.28)', label:'DOUBTFUL',  tag: doubtfulTag  },
   };
   const sc=SC[finalStatus]||SC.doubtful; const StatusIcon=sc.icon;
@@ -583,7 +583,7 @@ const AaoifiScreening = () => {
             <div style={{ display:'flex',alignItems:'center',gap:14 }}>
               <div style={{ position:'relative', padding: '2px', background: '#fff', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
                 <CompanyLogo symbol={symbol} logoUrl={stock?.logo_url} size={42} radius={10}/>
-                <div style={{ position:'absolute',bottom:-2,right:-2,width:14,height:14,borderRadius:'50%',background:finalStatus==='halal'?'var(--halal)':finalStatus==='non-halal'?'var(--non-halal)':'#D97706',border:'2px solid #fff',boxShadow:'0 2px 4px rgba(0,0,0,0.1)' }}/>
+                <div style={{ position:'absolute',bottom:-2,right:-2,width:14,height:14,borderRadius:'50%',background:finalStatus==='halal'?'var(--halal)':finalStatus==='non-compliant'?'var(--non-compliant)':'#D97706',border:'2px solid #fff',boxShadow:'0 2px 4px rgba(0,0,0,0.1)' }}/>
               </div>
               <div>
                 <div style={{ display:'flex',alignItems:'center',gap:8,flexWrap:'wrap' }}>
@@ -614,7 +614,7 @@ const AaoifiScreening = () => {
                   ₦{latestPrice.toLocaleString('en-US', {maximumFractionDigits: 2})}
                 </div>
                 <div style={{ display:'flex',alignItems:'center',gap:4,marginTop:6 }}>
-                  <span style={{ fontSize:'0.7rem',fontWeight:800,color: priceChangePct >= 0 ? 'var(--halal)' : 'var(--non-halal)' }}>
+                  <span style={{ fontSize:'0.7rem',fontWeight:800,color: priceChangePct >= 0 ? 'var(--halal)' : 'var(--non-compliant)' }}>
                     {priceChangePct >= 0 ? '▲' : '▼'} {Math.abs(priceChangePct).toFixed(2)}%
                   </span>
                   <span style={{ fontSize:'0.65rem',fontWeight:600,color:'var(--text-muted)' }}>today</span>
@@ -678,10 +678,10 @@ const AaoifiScreening = () => {
             </div>)}
             
             {isNonHalal&&(<div style={{ flex:'0 0 280px',padding:'24px 32px',display:'flex',flexDirection:'column',justifyContent:'center',gap:16,background:'linear-gradient(135deg, rgba(239,68,68,0.02) 0%, rgba(239,68,68,0.08) 100%)' }}>
-              <div style={{ fontSize:'0.7rem',fontWeight:900,textTransform:'uppercase',letterSpacing:'1.5px',color:'var(--non-halal)', display:'flex', alignItems:'center', gap:6 }}><AlertTriangle size={14} strokeWidth={2.5}/> Screening Result</div>
+              <div style={{ fontSize:'0.7rem',fontWeight:900,textTransform:'uppercase',letterSpacing:'1.5px',color:'var(--non-compliant)', display:'flex', alignItems:'center', gap:6 }}><AlertTriangle size={14} strokeWidth={2.5}/> Screening Result</div>
               <div style={{ display:'flex',alignItems:'center',gap:14, background: 'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 100%)', padding: '16px', borderRadius: 16, boxShadow: '0 8px 24px rgba(239,68,68,0.15), inset 0 2px 4px #fff', border: '1px solid rgba(239,68,68,0.2)' }}>
-                <XCircle size={36} color="var(--non-halal)" strokeWidth={2.5}/>
-                <div><div style={{ fontSize:'1.1rem',fontWeight:900,color:'var(--non-halal)' }}>EXCLUDED</div><div style={{ fontSize:'0.75rem',color:'var(--text-muted)',fontWeight:700 }}>{(!businessFailed && isNonHalal) ? 'Not suitable for investment now' : 'Not suitable for investment'}</div></div>
+                <XCircle size={36} color="var(--non-compliant)" strokeWidth={2.5}/>
+                <div><div style={{ fontSize:'1.1rem',fontWeight:900,color:'var(--non-compliant)' }}>EXCLUDED</div><div style={{ fontSize:'0.75rem',color:'var(--text-muted)',fontWeight:700 }}>{(!businessFailed && isNonHalal) ? 'Not suitable for investment now' : 'Not suitable for investment'}</div></div>
               </div>
               {(!businessFailed && isNonHalal) && (
                 <button 
@@ -705,7 +705,7 @@ const AaoifiScreening = () => {
                   }}
                   disabled={alertLoading}
                   className="hover-lift"
-                  style={{ display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8,padding:'10px 16px',borderRadius:12,background: hasAlert ? 'rgba(239,68,68,0.08)' : 'var(--body-bg)',border: hasAlert ? '1px solid rgba(239,68,68,0.2)' : '1px solid var(--border)',color: hasAlert ? 'var(--non-halal)' : 'var(--text-dark)',fontSize:'0.8rem',fontWeight:800,cursor:alertLoading?'not-allowed':'pointer',marginTop:12, transition:'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: hasAlert ? 'inset 0 0 0 1px rgba(239,68,68,0.1)' : 'var(--shadow-sm)' }}
+                  style={{ display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8,padding:'10px 16px',borderRadius:12,background: hasAlert ? 'rgba(239,68,68,0.08)' : 'var(--body-bg)',border: hasAlert ? '1px solid rgba(239,68,68,0.2)' : '1px solid var(--border)',color: hasAlert ? 'var(--non-compliant)' : 'var(--text-dark)',fontSize:'0.8rem',fontWeight:800,cursor:alertLoading?'not-allowed':'pointer',marginTop:12, transition:'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: hasAlert ? 'inset 0 0 0 1px rgba(239,68,68,0.1)' : 'var(--shadow-sm)' }}
                 >
                   {alertLoading ? <RefreshCw size={16} className="spin" /> : (hasAlert ? <CheckCircle size={16} strokeWidth={2.5}/> : <Bell size={16} strokeWidth={2.5}/>)} {hasAlert ? 'Alert Active' : 'Alert me when it changes'}
                 </button>
@@ -726,7 +726,7 @@ const AaoifiScreening = () => {
             </div>}/>
           <div style={{ padding:'24px' }}>
 
-            {stage1Status==='non-halal' && report.stage1?.haram_revenue_percent > 5 && (<div style={{ background:'rgba(239,68,68,0.04)',padding:'14px 18px',borderRadius:12,border:'1px solid rgba(239,68,68,0.18)',borderLeft:'3px solid #EF4444',display:'flex',alignItems:'center',justifyContent:'space-between',gap:14,flexWrap:'wrap',marginBottom:14 }}>
+            {stage1Status==='non-compliant' && report.stage1?.haram_revenue_percent > 5 && (<div style={{ background:'rgba(239,68,68,0.04)',padding:'14px 18px',borderRadius:12,border:'1px solid rgba(239,68,68,0.18)',borderLeft:'3px solid #EF4444',display:'flex',alignItems:'center',justifyContent:'space-between',gap:14,flexWrap:'wrap',marginBottom:14 }}>
               <div style={{ flex:'1 1 220px' }}><div style={{ display:'flex',alignItems:'center',gap:6,marginBottom:4 }}><AlertTriangle size={14} color="#EF4444"/><span style={{ fontWeight:800,color:'#EF4444',fontSize:'0.84rem' }}>Prohibited Activities Detected</span></div>
               <p style={{ margin:0,color:'var(--text-muted)',fontSize:'0.79rem',lineHeight:1.6 }}>Non-compliant revenue (<strong style={{ color:'#EF4444' }}>{pct(report.stage1?.haram_revenue_percent)}</strong>) exceeds the 5% AAOIFI tolerance.</p></div>
               <div style={{ background:'var(--bg)',borderRadius:10,padding:'8px 16px',border:'1px solid rgba(239,68,68,0.18)',textAlign:'center' }}>
@@ -760,7 +760,7 @@ const AaoifiScreening = () => {
             </div>
             <div style={{ padding:'16px 20px',background:'var(--primary-50)',border:'1px dashed var(--primary-100)',borderRadius:16,display:'flex',alignItems:'flex-start',gap:12, boxShadow:'var(--shadow-sm)' }}>
               <Info size={16} color="var(--primary)" style={{ flexShrink:0,marginTop:2 }}/>
-              <div style={{ fontSize:'0.8rem',color:'var(--text-muted)',lineHeight:1.5, fontWeight:500 }}><strong style={{ color:'var(--text-dark)', fontWeight:800 }}>Important:</strong> AAOIFI applies strict thresholds with no buffer zones. For example, a company at 30.01% debt is non-halal. Click any bar to see the full calculation breakdown.</div>
+              <div style={{ fontSize:'0.8rem',color:'var(--text-muted)',lineHeight:1.5, fontWeight:500 }}><strong style={{ color:'var(--text-dark)', fontWeight:800 }}>Important:</strong> AAOIFI applies strict thresholds with no buffer zones. For example, a company at 30.01% debt is non-compliant. Click any bar to see the full calculation breakdown.</div>
             </div>
           </div>
         </Section>)}
@@ -905,14 +905,14 @@ const AaoifiScreening = () => {
                     <div style={{ textAlign:'center',paddingTop:5 }}><div style={{ fontSize:'0.63rem',color:'var(--text-muted)',fontWeight:600 }}>{modalData.denLabel}</div><div style={{ fontSize:'0.9rem',fontWeight:800,color:'var(--text-dark)',fontVariantNumeric:'tabular-nums' }}>₦{(parseFloat(modalData.denVal)||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</div></div>
                   </div>
                   <div style={{ fontSize:'0.95rem',fontWeight:800,color:'var(--text-muted)' }}>× 100 =</div>
-                  <div style={{ fontSize:'1.5rem',fontWeight:900,color:modalData.ratio<=parseFloat(modalData.threshold.replace(/[^\d.]/g, ''))?'var(--halal)':'var(--non-halal)',fontVariantNumeric:'tabular-nums' }}>{modalData.ratio.toFixed(2)}%</div>
+                  <div style={{ fontSize:'1.5rem',fontWeight:900,color:modalData.ratio<=parseFloat(modalData.threshold.replace(/[^\d.]/g, ''))?'var(--halal)':'var(--non-compliant)',fontVariantNumeric:'tabular-nums' }}>{modalData.ratio.toFixed(2)}%</div>
                 </div>
               </div>
               {(()=>{ const thr=parseFloat(modalData.threshold.replace(/[^\d.]/g, ''));const ok=modalData.ratio<=thr;const delta=Math.abs(thr-modalData.ratio).toFixed(2); return (
                 <div style={{ background:ok?'rgba(16,185,129,0.07)':'rgba(239,68,68,0.07)',padding:'18px 22px',borderRadius:16,textAlign:'center',border:ok?'1px solid rgba(16,185,129,0.2)':'1px solid rgba(239,68,68,0.2)' }}>
                   <div style={{ fontSize:'0.65rem',fontWeight:800,color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'0.8px',marginBottom:7 }}>Screening Assessment</div>
-                  <div style={{ fontSize:'2.5rem',fontWeight:950,color:ok?'var(--halal)':'var(--non-halal)',lineHeight:1,letterSpacing:'-1.5px',fontVariantNumeric:'tabular-nums' }}>{modalData.ratio.toFixed(2)}%</div>
-                  <div style={{ marginTop:10 }}><span style={{ display:'inline-flex',alignItems:'center',gap:5,padding:'4px 14px',borderRadius:100,fontSize:'0.69rem',fontWeight:800,textTransform:'uppercase',letterSpacing:'0.5px',background:ok?'var(--halal-bg)':'var(--non-halal-bg)',color:ok?'var(--halal)':'var(--non-halal)',border:ok?'1px solid rgba(16,185,129,0.25)':'1px solid rgba(239,68,68,0.25)' }}>
+                  <div style={{ fontSize:'2.5rem',fontWeight:950,color:ok?'var(--halal)':'var(--non-compliant)',lineHeight:1,letterSpacing:'-1.5px',fontVariantNumeric:'tabular-nums' }}>{modalData.ratio.toFixed(2)}%</div>
+                  <div style={{ marginTop:10 }}><span style={{ display:'inline-flex',alignItems:'center',gap:5,padding:'4px 14px',borderRadius:100,fontSize:'0.69rem',fontWeight:800,textTransform:'uppercase',letterSpacing:'0.5px',background:ok?'var(--halal-bg)':'var(--non-compliant-bg)',color:ok?'var(--halal)':'var(--non-compliant)',border:ok?'1px solid rgba(16,185,129,0.25)':'1px solid rgba(239,68,68,0.25)' }}>
                     {ok?`✓ Compliant · ${delta}pp Headroom`:`✕ Non-Compliant · ${delta}pp Excess`}
                   </span></div>
                 </div>
@@ -945,7 +945,7 @@ const AaoifiScreening = () => {
               <button onClick={()=>setShowOverride(false)} style={{ background:'var(--bg)',border:'1px solid var(--border)',borderRadius:'50%',width:30,height:30,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',color:'var(--text-muted)' }}><X size={15}/></button>
             </div>
             <form onSubmit={submitOverride} style={{ padding:'20px 22px',overflowY:'auto',display:'flex',flexDirection:'column',gap:14 }}>
-              {overrideError&&<div style={{ background:'var(--non-halal-bg)',color:'var(--non-halal)',padding:'10px 14px',borderRadius:9,fontSize:'0.82rem' }}>{overrideError}</div>}
+              {overrideError&&<div style={{ background:'var(--non-compliant-bg)',color:'var(--non-compliant)',padding:'10px 14px',borderRadius:9,fontSize:'0.82rem' }}>{overrideError}</div>}
               <div className="mobile-col" style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:12 }}>
                 {[['Total Assets','total_assets'],['Total Revenue','total_revenue'],['Market Cap','market_cap'],['Total Debt','total_debt'],['Cash & Equivalents','cash'],['Interest Income','interest_income']].map(([lbl,key])=>(
                   <div key={key}><label style={{ display:'block',fontSize:'0.67rem',fontWeight:700,color:'var(--text-muted)',marginBottom:5 }}>{lbl}</label>
@@ -959,7 +959,7 @@ const AaoifiScreening = () => {
                 </div>
                 {overrideData.evidence_links.map((link,idx)=>(<div key={idx} style={{ display:'flex',gap:7,marginBottom:7 }}>
                   <input required type="url" placeholder="https://..." value={link} onChange={e=>{const l=[...overrideData.evidence_links];l[idx]=e.target.value;setOverrideData({...overrideData,evidence_links:l});}} style={{ flex:1,padding:'9px 11px',borderRadius:10,border:'1px solid var(--border)',background:'var(--bg-section)',fontSize:'0.84rem',outline:'none' }}/>
-                  {overrideData.evidence_links.length>1&&(<button type="button" onClick={()=>setOverrideData({...overrideData,evidence_links:overrideData.evidence_links.filter((_,i)=>i!==idx)})} style={{ padding:'0 10px',background:'var(--non-halal-bg)',color:'var(--non-halal)',border:'none',borderRadius:10,cursor:'pointer' }}><Trash2 size={13}/></button>)}
+                  {overrideData.evidence_links.length>1&&(<button type="button" onClick={()=>setOverrideData({...overrideData,evidence_links:overrideData.evidence_links.filter((_,i)=>i!==idx)})} style={{ padding:'0 10px',background:'var(--non-compliant-bg)',color:'var(--non-compliant)',border:'none',borderRadius:10,cursor:'pointer' }}><Trash2 size={13}/></button>)}
                 </div>))}
               </div>
               <div style={{ display:'flex',gap:9,paddingTop:4 }}>

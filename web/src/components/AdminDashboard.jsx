@@ -14,7 +14,7 @@ import ZakatSettingsAdmin from './ZakatSettingsAdmin';
 function StatusBadge({ status }) {
   const map = {
     halal:     { color: 'var(--halal)',     bg: 'var(--halal-bg)',     label: 'Shariah Compliant' },
-    'non-halal': { color: 'var(--non-halal)', bg: 'var(--non-halal-bg)', label: 'Shariah Non-Compliant' },
+    'non-compliant': { color: 'var(--non-compliant)', bg: 'var(--non-compliant-bg)', label: 'Shariah Non-Compliant' },
     doubtful:  { color: 'var(--doubtful)',  bg: 'var(--doubtful-bg)',  label: 'Doubtful' },
     review:    { color: 'var(--review)',    bg: 'var(--review-bg)',    label: 'Under Review' },
   };
@@ -226,7 +226,7 @@ const AdminDashboard = () => {
   if (user?.role !== 'admin' && user?.role !== 'scholar') {
     return (
       <div style={{ padding: '80px', textAlign: 'center' }}>
-        <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: 'var(--non-halal-bg)', color: 'var(--non-halal)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+        <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: 'var(--non-compliant-bg)', color: 'var(--non-compliant)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
           <Shield size={36} />
         </div>
         <h2 style={{ color: 'var(--text-dark)', marginBottom: '8px' }}>Access Denied</h2>
@@ -308,21 +308,21 @@ const AdminDashboard = () => {
       {/* ── Alerts Section ───────────────────────── */}
       {alerts.length > 0 && (
         <div style={{ marginBottom: '32px' }}>
-          <h2 style={{ margin: '0 0 12px', fontSize: '0.88rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--non-halal)' }}>
+          <h2 style={{ margin: '0 0 12px', fontSize: '0.88rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--non-compliant)' }}>
             <AlertCircle size={16} /> {alerts.length} Action{alerts.length !== 1 ? 's' : ''} Required
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {alerts.map(alert => (
               <div key={alert.id} style={{
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                padding: '16px 20px', background: 'var(--non-halal-bg)',
-                border: '1px solid var(--non-halal-border)', borderRadius: '14px',
+                padding: '16px 20px', background: 'var(--non-compliant-bg)',
+                border: '1px solid var(--non-compliant-border)', borderRadius: '14px',
                 gap: '12px', flexWrap: 'wrap'
               }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--non-halal)', marginTop: '6px', flexShrink: 0 }} />
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--non-compliant)', marginTop: '6px', flexShrink: 0 }} />
                   <div>
-                    <div style={{ fontWeight: 700, color: 'var(--non-halal)', fontSize: '0.88rem', marginBottom: '2px' }}>
+                    <div style={{ fontWeight: 700, color: 'var(--non-compliant)', fontSize: '0.88rem', marginBottom: '2px' }}>
                       Conflict: {alert.company?.symbol || 'Unknown'}
                     </div>
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-body)' }}>{alert.message}</div>
@@ -330,8 +330,8 @@ const AdminDashboard = () => {
                 </div>
                 <div style={{ display: 'flex', gap: '10px', flexShrink: 0 }}>
                   <button
-                    onClick={() => { setSelectedItem({ type: 'stocks', data: alert.company }); setNewStatus('non-halal'); setReason('Overriding based on Excel screening failure'); }}
-                    style={{ padding: '8px 16px', borderRadius: '10px', background: 'var(--non-halal)', color: 'white', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '0.78rem' }}
+                    onClick={() => { setSelectedItem({ type: 'stocks', data: alert.company }); setNewStatus('non-compliant'); setReason('Overriding based on Excel screening failure'); }}
+                    style={{ padding: '8px 16px', borderRadius: '10px', background: 'var(--non-compliant)', color: 'white', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '0.78rem' }}
                   >
                     Override to Fail
                   </button>
@@ -369,7 +369,7 @@ const AdminDashboard = () => {
                 <option value="all">All Verdicts</option>
                 <option value="halal">Shariah Compliant</option>
                 <option value="doubtful">Doubtful</option>
-                <option value="non-halal">Shariah Non-Compliant</option>
+                <option value="non-compliant">Shariah Non-Compliant</option>
               </select>
             )}
             
@@ -399,7 +399,7 @@ const AdminDashboard = () => {
         <div style={{ background: 'var(--bg)', borderRadius: '20px', border: '1px solid var(--border)', overflow: 'hidden', boxShadow: 'var(--shadow-sm)' }}>
           {error ? (
             <div style={{ padding: '48px', textAlign: 'center' }}>
-              <AlertCircle size={32} color="var(--non-halal)" style={{ margin: '0 auto 12px' }} />
+              <AlertCircle size={32} color="var(--non-compliant)" style={{ margin: '0 auto 12px' }} />
               <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>{error}</p>
               <button onClick={loadData} style={{ marginTop: '12px', padding: '8px 20px', borderRadius: '10px', background: 'var(--primary)', color: 'white', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '0.82rem' }}>Retry</button>
             </div>
@@ -552,7 +552,7 @@ const AdminDashboard = () => {
                   <option value="">Select new status…</option>
                   <option value="halal">✅ Halal</option>
                   <option value="doubtful">⚠️ Doubtful</option>
-                  <option value="non-halal">❌ Shariah Non-Compliant</option>
+                  <option value="non-compliant">❌ Shariah Non-Compliant</option>
                 </select>
               </div>
 

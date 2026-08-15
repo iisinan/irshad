@@ -40,7 +40,7 @@ const CATEGORY_CONFIG = {
   business_activity: { icon: Zap,        color: 'var(--doubtful)',  bg: 'var(--doubtful-bg)',  label: 'Business Activity' },
   price_alerts:      { icon: Bell,       color: 'var(--gold)',      bg: 'var(--gold-50)',      label: 'Price Alerts' },
   system:            { icon: Settings,   color: 'var(--text-muted)', bg: 'var(--bg-section)', label: 'System' },
-  security:          { icon: Lock,       color: 'var(--non-halal)', bg: 'var(--non-halal-bg)', label: 'Security' },
+  security:          { icon: Lock,       color: 'var(--non-compliant)', bg: 'var(--non-compliant-bg)', label: 'Security' },
 };
 
 const ALL_CATEGORIES = ['all', ...Object.keys(CATEGORY_CONFIG)];
@@ -130,7 +130,7 @@ const NotifCard = ({ notif, onRead, onArchive, onDelete }) => {
             <button onClick={() => onArchive(notif.id)} title="Archive" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.66rem', fontWeight: 800, color: 'var(--text-muted)', background: 'var(--bg-section)', border: '1px solid var(--border)', borderRadius: '8px', padding: '3px 8px', cursor: 'pointer' }}>
               <Archive size={11} />
             </button>
-            <button onClick={() => onDelete(notif.id)} title="Delete" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.66rem', fontWeight: 800, color: 'var(--non-halal)', background: 'var(--non-halal-bg)', border: '1px solid var(--non-halal-border)', borderRadius: '8px', padding: '3px 8px', cursor: 'pointer' }}>
+            <button onClick={() => onDelete(notif.id)} title="Delete" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.66rem', fontWeight: 800, color: 'var(--non-compliant)', background: 'var(--non-compliant-bg)', border: '1px solid var(--non-compliant-border)', borderRadius: '8px', padding: '3px 8px', cursor: 'pointer' }}>
               <Trash2 size={11} />
             </button>
           </div>

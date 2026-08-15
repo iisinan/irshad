@@ -47,7 +47,7 @@ export default function WatchlistTab({ initialSymbol, onClearInitialSymbol }) {
   const [watchlistSymbols, setWatchlistSymbols] = useState(() => watchlistItems.map(i => i.symbol));
   const [showAddModal, setShowAddModal] = useState(false);
   const [activeAlertStock, setActiveAlertStock] = useState(null); // holds the stock object for alerts
-  const [filter, setFilter] = useState('all'); // all, halal, non-halal
+  const [filter, setFilter] = useState('all'); // all, halal, non-compliant
   const [activeView, setActiveView] = useState('assets'); // 'assets' | 'inbox'
   
   const navigate = useNavigate();
@@ -129,11 +129,11 @@ export default function WatchlistTab({ initialSymbol, onClearInitialSymbol }) {
     if (typeof rawStatus === 'object' && rawStatus !== null) {
       const s = rawStatus.status?.toLowerCase();
       if (s === 'halal' || s === 'compliant') { statusStr = 'SHARIAH COMPLIANT'; cls = 'status-halal'; icon = <CheckCircle size={12} />; }
-      else if (s === 'non-halal' || s === 'non_compliant') { statusStr = 'SHARIAH NON-COMPLIANT'; cls = 'status-non-halal'; icon = <AlertCircle size={12} />; }
+      else if (s === 'non-compliant' || s === 'non_compliant') { statusStr = 'SHARIAH NON-COMPLIANT'; cls = 'status-non-compliant'; icon = <AlertCircle size={12} />; }
     } else if (typeof rawStatus === 'string') {
       const s = rawStatus.toLowerCase();
       if (s === 'compliant' || s === 'halal') { statusStr = 'SHARIAH COMPLIANT'; cls = 'status-halal'; icon = <CheckCircle size={12} />; }
-      else if (s === 'non-halal' || s === 'non_compliant') { statusStr = 'SHARIAH NON-COMPLIANT'; cls = 'status-non-halal'; icon = <AlertCircle size={12} />; }
+      else if (s === 'non-compliant' || s === 'non_compliant') { statusStr = 'SHARIAH NON-COMPLIANT'; cls = 'status-non-compliant'; icon = <AlertCircle size={12} />; }
     }
     return { label: statusStr, cls, icon, raw: statusStr.toLowerCase() };
   };
@@ -295,7 +295,7 @@ export default function WatchlistTab({ initialSymbol, onClearInitialSymbol }) {
 
                 <div className="watchlist-price-col" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: '100px' }}>
                   <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.90rem' }}>₦{price.toFixed(2)}</div>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.65rem', fontWeight: 700, color: isPos ? 'var(--halal)' : 'var(--non-halal)', marginTop: '4px', background: isPos ? 'var(--halal-bg)' : 'var(--non-halal-bg)', padding: '3px 6px', borderRadius: '8px' }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.65rem', fontWeight: 700, color: isPos ? 'var(--halal)' : 'var(--non-compliant)', marginTop: '4px', background: isPos ? 'var(--halal-bg)' : 'var(--non-compliant-bg)', padding: '3px 6px', borderRadius: '8px' }}>
                     {isPos ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                     {isPos ? '+' : ''}{change.toFixed(2)}%
                   </div>
@@ -381,7 +381,7 @@ export default function WatchlistTab({ initialSymbol, onClearInitialSymbol }) {
           width: 36px; height: 36px; border-radius: 10px; background: transparent; border: none;
           display: flex; align-items: center; justify-content: center; color: var(--text-muted); cursor: pointer; transition: all 0.2s;
         }
-        .remove-btn:hover { background: var(--non-halal-bg); color: var(--non-halal); transform: scale(1.05); }
+        .remove-btn:hover { background: var(--non-compliant-bg); color: var(--non-compliant); transform: scale(1.05); }
 
         .watchlist-card {
           animation: slideUpFade 0.4s ease forwards;

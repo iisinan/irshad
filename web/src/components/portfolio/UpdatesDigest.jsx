@@ -125,7 +125,7 @@ export default function UpdatesDigest() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
             {[
               { label: 'New Halal stocks', icon: CheckCircle2, color: 'var(--halal)' },
-              { label: 'Non-Halal changes', icon: Bell, color: 'var(--non-halal)' },
+              { label: 'Non-Compliant changes', icon: Bell, color: 'var(--non-compliant)' },
               { label: 'Business activity', icon: ChevronRight, color: 'var(--doubtful)' },
               { label: 'Market insights', icon: CheckCircle2, color: 'var(--primary)' }
             ].map(item => (

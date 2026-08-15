@@ -53,12 +53,12 @@ class ApiService {
           final isAuthRoute = error.requestOptions.path.contains('login') || error.requestOptions.path.contains('register');
           if (!isAuthRoute) {
             debugPrint('401 Unauthorized encountered for ${error.requestOptions.path}');
-            // Temporarily disabled automatic logout to prevent issues during dev
-            // await _storage.delete(key: 'access_token');
-            // if (ApiService.navigatorKey.currentContext != null) {
-            //   Provider.of<AppStateProvider>(ApiService.navigatorKey.currentContext!, listen: false).setAuthenticated(false);
-            //   ApiService.navigatorKey.currentState?.pushNamedAndRemoveUntil('/main', (route) => false);
-            // }
+            // Re-enabling automatic logout to prevent stuck states with expired tokens
+            await _storage.delete(key: 'access_token');
+            if (ApiService.navigatorKey.currentContext != null) {
+              Provider.of<AppStateProvider>(ApiService.navigatorKey.currentContext!, listen: false).setAuthenticated(false);
+              ApiService.navigatorKey.currentState?.pushNamedAndRemoveUntil('/main', (route) => false);
+            }
           }
         }
         return handler.next(error);

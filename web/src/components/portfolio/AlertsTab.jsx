@@ -144,7 +144,7 @@ export default function AlertsTab() {
                     <button 
                       onClick={(e) => handleDelete(e, alert.id)}
                       style={{ background: 'var(--bg-section)', border: '1px solid var(--border)', color: 'var(--text-muted)', cursor: 'pointer', width: '32px', height: '32px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
-                      onMouseEnter={e => { e.currentTarget.style.color = 'var(--non-halal)'; e.currentTarget.style.borderColor = 'var(--non-halal)'; }}
+                      onMouseEnter={e => { e.currentTarget.style.color = 'var(--non-compliant)'; e.currentTarget.style.borderColor = 'var(--non-compliant)'; }}
                       onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
                       title="Delete alert"
                     >
@@ -154,8 +154,8 @@ export default function AlertsTab() {
                   
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-section)', padding: '14px 18px', borderRadius: '14px', border: '1px solid var(--border)', flexWrap: 'wrap', gap: '12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: isAbove ? 'var(--halal-bg)' : 'var(--non-halal-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {isAbove ? <ArrowUpRight size={16} color="var(--halal)" /> : <ArrowDownRight size={16} color="var(--non-halal)" />}
+                      <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: isAbove ? 'var(--halal-bg)' : 'var(--non-compliant-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {isAbove ? <ArrowUpRight size={16} color="var(--halal)" /> : <ArrowDownRight size={16} color="var(--non-compliant)" />}
                       </div>
                       <div>
                         <div style={{ fontSize: '0.64rem', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
