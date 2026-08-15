@@ -47,3 +47,6 @@ Schedule::command('irshad:prune-audits')->daily()->withoutOverlapping()->emailOu
 
 // Warm cache every hour so cold starts never happen
 Schedule::command('cache:warm')->hourly()->withoutOverlapping();
+
+// Scrape NGX Pulse for new financial disclosures twice a day at 7 AM and 7 PM
+Schedule::command('irshad:scrape-disclosures')->timezone('Africa/Lagos')->twiceDaily(7, 19)->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
