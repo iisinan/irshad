@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/stock_provider.dart';
+import 'stock_detail_screen.dart';
 
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 import '../../../core/widgets/company_avatar.dart';
@@ -275,7 +276,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
 
     return InkWell(
       onTap: () {
-        Navigator.pushNamed(context, '/stock-detail', arguments: stock);
+        StockDetailScreen.openWithLoading(context, stock);
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -391,7 +392,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
 
     return InkWell(
       onTap: () {
-        Navigator.pushNamed(context, '/stock-detail', arguments: stock);
+        StockDetailScreen.openWithLoading(context, stock);
       },
       child: Container(
         padding: const EdgeInsets.all(16),

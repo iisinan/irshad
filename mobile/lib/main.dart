@@ -202,8 +202,8 @@ class IrshadApp extends StatelessWidget {
           return MaterialPageRoute(builder: (context) => ProductDetailsScreen(product: product));
         }
         if (settings.name == '/stock_details') {
-          final stock = settings.arguments as Map<String, dynamic>;
-          return MaterialPageRoute(builder: (context) => StockDetailScreen(stock: stock));
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(builder: (context) => StockDetailScreen(args: args));
         }
         if (settings.name == '/basket_details') {
           final basket = settings.arguments;

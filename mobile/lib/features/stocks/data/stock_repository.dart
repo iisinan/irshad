@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../../../core/api/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:hive/hive.dart';
 
 class StockRepository {
   final ApiService _apiService = ApiService();
@@ -113,6 +114,19 @@ class StockRepository {
     } on DioException catch (e) {
       throw e.response?.data['message'] ?? 'Failed to fetch AAOIFI screening';
     }
+    return null;
+  }
+
+  Map<String, dynamic>? getCachedDataForUrl(String path) {
+    try {
+      final baseUrl = _apiService.dio.options.baseUrl;
+      final uri = Uri.parse(baseUrl).resolve(path).toString();
+      final box = Hive.box('api_cache');
+      final raw = box.get(uri);
+      if (raw != null) {
+        return jsonDecode(raw as String)['data'];
+      }
+    } catch (_) {}
     return null;
   }
 

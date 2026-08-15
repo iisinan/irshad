@@ -145,6 +145,32 @@ class PortfolioProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> bulkAddHoldings(List<Map<String, dynamic>> holdings) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final response = await ApiService().post('portfolio/bulk', {
+        'holdings': holdings,
+      });
+
+      if (response.data['status'] == 'success') {
+        await fetchPortfolio(); 
+        return true;
+      } else {
+        _error = response.data['message'] ?? 'Failed to add holdings';
+        return false;
+      }
+    } catch (e) {
+      _error = e.toString();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   void clear() {
     _summary = {
       'total_balance': 0.0,

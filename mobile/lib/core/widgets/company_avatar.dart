@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../theme/app_theme.dart';
 
 class CompanyAvatar extends StatelessWidget {
@@ -58,55 +59,48 @@ class CompanyAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (logoUrl != null && logoUrl!.isNotEmpty) {
-      final isSvg = logoUrl!.toLowerCase().endsWith('.svg');
-
-      if (isSvg) {
-        return Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(borderRadius),
-            border: Border.all(color: context.divider, width: 1),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(borderRadius - 1),
-            child: Padding(
-              padding: const EdgeInsets.all(2.0),
-              child: SvgPicture.network(
-                logoUrl!,
-                fit: BoxFit.contain,
-                placeholderBuilder: (context) =>
-                    const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-              ),
-            ),
-          ),
-        );
-      }
-
-      // PNG / raster image — use Image.network with errorBuilder so 404s
-      // fall back silently to the initials avatar without throwing exceptions.
-      return SizedBox(
-        width: size,
-        height: size,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(borderRadius),
-          child: Image.network(
-            logoUrl!,
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(borderRadius),
+        border: Border.all(color: context.divider, width: 1),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius - 1),
+        child: Padding(
+          padding: const EdgeInsets.all(2.0),
+          child: Image.asset(
+            'assets/logos/${symbol.toUpperCase()}.png',
             width: size,
             height: size,
             fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) => _buildInitials(context),
-            loadingBuilder: (context, child, progress) {
-              if (progress == null) return child;
+            errorBuilder: (context, error, stackTrace) {
+              if (logoUrl != null && logoUrl!.isNotEmpty) {
+                final isSvg = logoUrl!.toLowerCase().endsWith('.svg');
+                if (isSvg) {
+                  return SvgPicture.network(
+                    logoUrl!,
+                    fit: BoxFit.contain,
+                    placeholderBuilder: (context) => const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                  );
+                }
+                return CachedNetworkImage(
+                  imageUrl: logoUrl!,
+                  width: size,
+                  height: size,
+                  fit: BoxFit.contain,
+                  errorWidget: (context, url, error) => _buildInitials(context),
+                  placeholder: (context, url) => _buildInitials(context),
+                  fadeInDuration: Duration.zero,
+                );
+              }
               return _buildInitials(context);
             },
           ),
         ),
-      );
-    }
-
-    return _buildInitials(context);
+      ),
+    );
   }
 }

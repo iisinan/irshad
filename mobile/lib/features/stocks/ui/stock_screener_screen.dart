@@ -506,10 +506,7 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => StockDetailScreen(stock: stock)),
-            );
+            StockDetailScreen.openWithLoading(context, stock);
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
