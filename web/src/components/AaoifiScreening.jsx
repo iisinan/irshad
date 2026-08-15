@@ -413,7 +413,7 @@ const AaoifiScreening = () => {
       }
     } else if (isNonHalal && !businessFailed) {
       const ind = (report.industry || 'its sector').toLowerCase(); 
-      cleanStatusReason = `Although the company passes the Shariah business activity screening because its core operations in ${ind} are permissible, it fails the required quantitative financial benchmarks.`; 
+      cleanStatusReason = `Although the company successfully passes the Shariah business activity screening because its core operations in ${ind} are permissible, it fails to meet the required quantitative financial benchmarks.`; 
     } else {
       cleanStatusReason = cleanStage1Reason;
     }

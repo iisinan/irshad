@@ -65,17 +65,17 @@ class AaoifiScreeningService
             $impIncomeStatus = 'pass';
         } else {
             if ($marketCap > 0) {
-                $debtRatio = ($totalDebt / $marketCap) * 100;
+                $debtRatio = $this->tripleCheckCalc($totalDebt, $marketCap);
                 $debtStatus = $debtRatio <= 30 ? 'pass' : 'fail';
             }
 
             if ($marketCap > 0) {
-                $cashRatio = (($cash + $interestBearingSecurities) / $marketCap) * 100;
+                $cashRatio = $this->tripleCheckCalc($cash + $interestBearingSecurities, $marketCap);
                 $cashStatus = $cashRatio <= 30 ? 'pass' : 'fail';
             }
 
             if ($totalRevenue > 0) {
-                $impermissibleIncomeRatio = ($interestIncome / $totalRevenue) * 100;
+                $impermissibleIncomeRatio = $this->tripleCheckCalc($interestIncome, $totalRevenue);
                 $impIncomeStatus = $impermissibleIncomeRatio <= 5 ? 'pass' : 'fail';
             }
         }
@@ -156,5 +156,31 @@ class AaoifiScreeningService
         }
 
         return $screening;
+    }
+
+    private function tripleCheckCalc($num, $den): float
+    {
+        if ($den == 0 || $den == null) return 0.0;
+        
+        $numFloat = floatval($num);
+        $denFloat = floatval($den);
+        
+        // 1. Float calc
+        $calc1 = round(($numFloat / $denFloat) * 100, 4);
+        
+        // 2. BCMath calc (Arbitrary Precision)
+        $calc2 = round(floatval(bcdiv(bcmul(strval($num), '100', 8), strval($den), 8)), 4);
+        
+        // 3. Safe Scaled Math
+        $scale = 1000000;
+        $calc3 = round((($numFloat / $scale) / ($denFloat / $scale)) * 100, 4);
+        
+        // Compare with slight tolerance for floating point jitter
+        if (abs($calc1 - $calc2) > 0.001 || abs($calc2 - $calc3) > 0.001) {
+            Log::error("AAOIFI Math Mismatch: Float[$calc1] BCMath[$calc2] Scaled[$calc3] for $num / $den");
+            throw new \Exception("Triple check calculation failed for $num / $den. Mismatched results.");
+        }
+        
+        return $calc2;
     }
 }

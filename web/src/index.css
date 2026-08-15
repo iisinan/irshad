@@ -4170,6 +4170,10 @@ html, body {
     grid-template-columns: 1fr 1fr !important;
     gap: 12px !important;
   }
+  
+  .stats-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
 
   /* AdminUsers & AdminComplianceReviews tables */
   .admin-table-wrap {
@@ -5072,5 +5076,60 @@ button, a.nav-link, a.btn-primary, a.btn-secondary, .mobile-col > div[style*="cu
   .alert-body {
     padding: 20px 16px !important;
   }
+}
+
+/* ==========================================================================
+   MOBILE RESPONSIVENESS UTILITIES (Added via Implementation Plan)
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  /* Global Hide/Show */
+  .mobile-hide { display: none !important; }
+  .desktop-hide { display: block !important; }
+  
+  /* Stacking utility for flex rows that should become columns */
+  .mobile-stack {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  
+  /* Center alignments for stacked elements */
+  .mobile-center {
+    align-items: center !important;
+    text-align: center !important;
+    justify-content: center !important;
+  }
+
+  /* Padding overrides */
+  .dashboard-main-content {
+    padding: 16px 12px !important;
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+  
+  /* Make sure inputs and buttons fill the screen nicely */
+  .mobile-full-width {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  
+  /* Generic horizontal scroller for tables/wide content */
+  .mobile-scroll-x {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+  }
+
+  /* Modal responsive override */
+  .admin-modal-body, .modal-content {
+    width: 95% !important;
+    padding: 20px !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .desktop-hide { display: none !important; }
 }
 
