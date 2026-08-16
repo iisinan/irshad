@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, AlertCircle } from 'lucide-react';
 import DashboardSidebar from './DashboardSidebar';
-import BottomNavigation from './BottomNavigation';
 import { useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -142,9 +141,6 @@ export default function DashboardLayout({ children }) {
 
         {children}
       </main>
-      
-      {/* Mobile Bottom Navigation (Visible only on mobile via CSS) */}
-      <BottomNavigation />
     </div>
   );
 }

@@ -5065,10 +5065,7 @@ button, a.nav-link, a.btn-primary, a.btn-secondary, .mobile-col > div[style*="cu
     margin-bottom: 0;
   }
 
-  /* Bottom navigation padding for main content */
-  .dashboard-main-content {
-    padding-bottom: calc(70px + env(safe-area-inset-bottom)) !important;
-  }
+
 
   /* Alerts Tab */
   .alert-header {
