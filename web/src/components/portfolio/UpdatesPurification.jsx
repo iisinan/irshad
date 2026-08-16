@@ -194,7 +194,7 @@ export default function UpdatesPurification() {
       {/* ── 2. Why We Need Purification ── */}
       <div style={{ marginBottom: '40px' }}>
         <SectionHeading>Why Do We Need Purification?</SectionHeading>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '16px' }}>
           <InfoCard icon={Coins} iconColor="#8A4C9E" iconBg="var(--primary-50)" title="No Company is Perfectly Pure">
             In the modern economy, virtually every listed company keeps cash in conventional bank accounts that generate interest. This is unavoidable — even the most halal-intentioned business does it. The impure income is a by-product of participation in the global financial system.
           </InfoCard>
@@ -248,7 +248,7 @@ export default function UpdatesPurification() {
       </div>
 
       {/* ── 4. 5% Rule & Misconceptions ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '40px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: '20px', marginBottom: '40px' }}>
 
         {/* 5% Rule */}
         <div style={{ background: 'var(--bg)', borderRadius: '24px', padding: '28px', border: '1px solid var(--border)', boxShadow: '0 2px 16px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column', gap: '20px' }}>

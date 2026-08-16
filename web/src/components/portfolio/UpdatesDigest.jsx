@@ -189,7 +189,7 @@ export default function UpdatesDigest() {
             background: 'color-mix(in srgb, var(--bg-section) 80%, transparent)',
             backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
             border: '1px solid var(--border)', borderRadius: '16px',
-            display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '32px' 
+            display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', gap: '32px' 
           }}>
             <div>
               <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '16px' }}>Delivery Methods</div>

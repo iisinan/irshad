@@ -318,7 +318,7 @@ export default function UpdatesInbox() {
       </div>
 
       {/* Category Filter */}
-      <div className="hide-scrollbar" style={{ display: 'flex', gap: '6px', marginBottom: '20px', overflowX: 'auto', padding: '2px' }}>
+      <div className="hide-scrollbar" style={{ display: 'flex', gap: '6px', marginBottom: '20px', overflowX: 'auto', padding: '2px', maxWidth: '100%' }}>
         {ALL_CATEGORIES.map(cat => {
           const cfg = cat === 'all' ? { color: 'var(--primary)', bg: 'var(--primary-50)', label: 'All' } : { ...getCategoryConfig(cat), label: getCategoryConfig(cat).label };
           const isActive = activeCategory === cat;
