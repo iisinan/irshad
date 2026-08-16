@@ -64,19 +64,24 @@ class AaoifiScreeningService
             $impermissibleIncomeRatio = 0;
             $impIncomeStatus = 'pass';
         } else {
-            if ($marketCap > 0) {
-                $debtRatio = $this->tripleCheckCalc($totalDebt, $marketCap);
-                $debtStatus = $debtRatio <= 30 ? 'pass' : 'fail';
-            }
+            if (!$financials) {
+                // If there are no financial records, we cannot calculate ratios. 
+                // We leave them as their default 'insufficient_data'.
+            } else {
+                if ($marketCap > 0) {
+                    $debtRatio = $this->tripleCheckCalc($totalDebt, $marketCap);
+                    $debtStatus = $debtRatio <= 30 ? 'pass' : 'fail';
+                }
 
-            if ($marketCap > 0) {
-                $cashRatio = $this->tripleCheckCalc($cash + $interestBearingSecurities, $marketCap);
-                $cashStatus = $cashRatio <= 30 ? 'pass' : 'fail';
-            }
+                if ($marketCap > 0) {
+                    $cashRatio = $this->tripleCheckCalc($cash + $interestBearingSecurities, $marketCap);
+                    $cashStatus = $cashRatio <= 30 ? 'pass' : 'fail';
+                }
 
-            if ($totalRevenue > 0) {
-                $impermissibleIncomeRatio = $this->tripleCheckCalc($interestIncome, $totalRevenue);
-                $impIncomeStatus = $impermissibleIncomeRatio <= 5 ? 'pass' : 'fail';
+                if ($totalRevenue > 0) {
+                    $impermissibleIncomeRatio = $this->tripleCheckCalc($interestIncome, $totalRevenue);
+                    $impIncomeStatus = $impermissibleIncomeRatio <= 5 ? 'pass' : 'fail';
+                }
             }
         }
 
@@ -85,7 +90,7 @@ class AaoifiScreeningService
 
         if ($businessStatus === 'fail' || $debtStatus === 'fail' || $cashStatus === 'fail' || $impIncomeStatus === 'fail') {
             $finalStatus = 'non-halal';
-        } elseif ($businessStatus === 'warning' || $businessStatus === 'doubtful' || $debtStatus === 'insufficient_data' || $cashStatus === 'insufficient_data') {
+        } elseif ($businessStatus === 'warning' || $businessStatus === 'doubtful' || $debtStatus === 'insufficient_data' || $cashStatus === 'insufficient_data' || $impIncomeStatus === 'insufficient_data') {
             $finalStatus = 'doubtful';
         }
 
@@ -125,13 +130,16 @@ class AaoifiScreeningService
             $oldStatus = $company->current_status;
             $company->update(['current_status' => $finalStatus]);
 
-            $reason = 'Stock passes all screens cleanly. Status is 100% Halal and Shariah-compliant.';
             if ($finalStatus === 'non-halal') {
                 $reason = ($businessStatus === 'fail' ? 'Failed Rule 1: Business Activity Check. ' . ($aiResult ?? 'The stock failed due to non-compliant business activities.') : 'Failed AAOIFI financial ratio screening.');
             } elseif ($finalStatus === 'doubtful') {
                 $reason = ($businessStatus === 'doubtful' || $businessStatus === 'warning') ? 'Doubtful Rule 1: Business Activity Check. ' . ($aiResult ?? 'Requires scholar review.') : 'Doubtful AAOIFI financial ratio screening (insufficient data).';
             } else {
-                $reason = 'Stock passes all screens cleanly. Status is 100% Halal and Shariah-compliant.' . ($aiResult ? ' Notes: ' . $aiResult : '');
+                if ($impermissibleIncomeRatio > 0 && $impermissibleIncomeRatio <= 5) {
+                    $reason = 'Stock passes all screens. Status is Halal with an active dividend purification factor of ' . number_format($impermissibleIncomeRatio, 2) . '%.' . ($aiResult ? ' Notes: ' . $aiResult : '');
+                } else {
+                    $reason = 'Stock passes all screens cleanly. Status is 100% Halal and Shariah-compliant.' . ($aiResult ? ' Notes: ' . $aiResult : '');
+                }
             }
 
             StockStatus::updateOrCreate(

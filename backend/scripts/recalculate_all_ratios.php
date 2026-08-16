@@ -61,15 +61,12 @@ foreach ($screenings as $screening) {
 
     if (bccomp($denominator, '0', 4) === 1) {
         $debtRatioRaw = bcdiv($totalDebt, $denominator, 6);
-        $debtRatio = bcmul($debtRatioRaw, '100', 4); // Format as percentage not decimal?
-        // Wait, the original code didn't multiply by 100, it stored it as decimal (e.g. 0.30)
-        // If I keep decimal:
-        $debtRatio = $debtRatioRaw;
-        $debtStatus = bccomp($debtRatio, '0.3000', 4) <= 0 ? 'pass' : 'fail';
+        $debtRatio = bcmul($debtRatioRaw, '100', 4);
+        $debtStatus = bccomp($debtRatioRaw, '0.3000', 4) <= 0 ? 'pass' : 'fail';
         
         $cashRatioRaw = bcdiv($cashAndSecurities, $denominator, 6);
-        $cashRatio = $cashRatioRaw;
-        $cashStatus = bccomp($cashRatio, '0.3000', 4) <= 0 ? 'pass' : 'fail';
+        $cashRatio = bcmul($cashRatioRaw, '100', 4);
+        $cashStatus = bccomp($cashRatioRaw, '0.3000', 4) <= 0 ? 'pass' : 'fail';
     } else {
         // If denominator is missing/0, it automatically fails (infinite ratio)
         $debtStatus = 'fail';

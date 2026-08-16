@@ -85,7 +85,8 @@ class AaoifiComplianceService
         $marketCap = bccomp($liveMarketCap, '0', 4) === 1 ? $liveMarketCap : (bccomp($finMarketCap, '0', 4) === 1 ? $finMarketCap : '1');
 
         $totalAssets = (string) ($financials->total_assets > 0 ? $financials->total_assets : 0);
-        $denominator = bccomp($marketCap, $totalAssets, 4) === 1 ? $marketCap : ($totalAssets ?: '1');
+        // User instruction: "use market cap, dont ever use toal asset again"
+        $denominator = $marketCap;
 
         $totalRevenue = (string) ($financials->total_revenue > 0 ? $financials->total_revenue : 1);
 
