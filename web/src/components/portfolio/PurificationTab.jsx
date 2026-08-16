@@ -644,8 +644,8 @@ export default function PurificationTab({ data, initialSymbol, refreshData, onCl
           </div>
 
           {purificationDue > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap', flexWrap: 'wrap' }}>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'stretch', gap: '12px', flexWrap: 'wrap', flex: '1 1 340px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px', flex: '1 1 240px' }}>
                 <div style={{ background: 'var(--body-bg)', border: '1px solid var(--border)', borderRadius: '16px', padding: '12px 16px' }}>
                   <div style={{ fontSize: '0.62rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>Total Due</div>
                   <div style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--text-dark)' }}>₦{purificationDue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
@@ -658,7 +658,7 @@ export default function PurificationTab({ data, initialSymbol, refreshData, onCl
               
               <button
                 onClick={handleDonateAll}
-                style={{ padding: '14px 20px', borderRadius: '16px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s', height: '100%' }}
+                style={{ flex: '1 1 120px', padding: '14px 20px', borderRadius: '16px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s', minHeight: '52px' }}
                 className="hover-lift"
               >
                 <Heart size={16} fill="currentColor" /> Donate All
