@@ -350,24 +350,6 @@ export default function MarketTab() {
           )}
         </div>
 
-          {/* Mobile status filter pills */}
-          <div className="market-status-pills hide-scrollbar" style={{ display: 'none', overflowX: 'auto', gap: 8, paddingBottom: 2 }}>
-            {[['all', 'All'], ['halal', '✓ Shariah Compliant'], ['non-compliant', '✗ Shariah Non-Compliant'], ['doubtful', '? Doubtful']].map(([val, label]) => (
-              <button
-                key={val}
-                onClick={() => setStatusF(val)}
-                style={{
-                  flexShrink: 0, padding: '10px 16px', borderRadius: 100, border: '1.5px solid',
-                  borderColor: statusF === val ? 'var(--primary)' : 'var(--border)',
-                  background: statusF === val ? 'var(--primary)' : 'var(--bg-section)',
-                  color: statusF === val ? 'white' : 'var(--text-muted)',
-                  fontSize: '0.78rem', fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap',
-                  minHeight: 44, display: 'flex', alignItems: 'center'
-                }}
-              >{label}</button>
-            ))}
-          </div>
-
         {/* Filters Row */}
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'nowrap', overflowX: 'auto', paddingBottom: '4px' }}>
           {/* Sector Filter */}
