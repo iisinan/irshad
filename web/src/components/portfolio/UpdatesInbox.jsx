@@ -100,9 +100,9 @@ const NotifCard = ({ notif, onRead, onArchive, onDelete }) => {
       {/* Content */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', marginBottom: '4px' }}>
-          <div>
+          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
             <span style={{ fontSize: '0.82rem', fontWeight: isUnread ? 900 : 800, color: 'var(--text-dark)' }}>{notif.title}</span>
-            <span style={{ marginLeft: '8px', fontSize: '0.63rem', fontWeight: 800, padding: '2px 7px', borderRadius: '8px', background: cfg.bg, color: cfg.color }}>
+            <span style={{ fontSize: '0.63rem', fontWeight: 800, padding: '2px 7px', borderRadius: '8px', background: cfg.bg, color: cfg.color, whiteSpace: 'nowrap' }}>
               {getCategoryConfig(notif.category).label}
             </span>
           </div>
