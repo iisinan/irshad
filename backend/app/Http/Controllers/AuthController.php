@@ -78,8 +78,15 @@ class AuthController extends Controller
 
         $client = new \Google_Client(['client_id' => env('GOOGLE_CLIENT_ID')]);
         $payload = $client->verifyIdToken($request->credential);
+        
+        // Fallback to mobile client ID if web client ID fails
+        if (!$payload && env('GOOGLE_CLIENT_ID_MOBILE')) {
+            $mobileClient = new \Google_Client(['client_id' => env('GOOGLE_CLIENT_ID_MOBILE')]);
+            $payload = $mobileClient->verifyIdToken($request->credential);
+        }
 
-        if (! $payload) {
+        if (!$payload) {
+            \Log::error('Invalid Google token verification failed for credential: ' . $request->credential . ' with expected client id: ' . env('GOOGLE_CLIENT_ID'));
             return $this->unauthorized('Invalid Google token');
         }
 
