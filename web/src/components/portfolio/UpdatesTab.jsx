@@ -135,7 +135,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
   ];
 
   return (
-    <div>
+    <div style={{ width: '100%', maxWidth: '100%', overflowX: 'hidden', paddingBottom: '40px' }}>
       {/* ── Greeting Banner ── */}
       <div style={{
         background: 'var(--bg)',
@@ -216,14 +216,15 @@ export default function UpdatesTab({ unreadCount = 0 }) {
       </div>
 
       {/* ── Sub-tab Navigation ── */}
-      <div style={{
+      <div className="hide-scrollbar" style={{
         display: 'flex',
         alignItems: 'center',
         gap: '12px',
         marginBottom: '24px',
         borderBottom: '1px solid var(--border)',
         paddingBottom: '16px',
-        flexWrap: 'wrap',
+        overflowX: 'auto',
+        maxWidth: '100%',
       }}>
         {tabs.map((tab, index) => {
           const Icon = tab.icon;

@@ -253,7 +253,7 @@ export default function UpdatesInbox() {
   const displayedNotifications = notifications;
 
   return (
-    <div>
+    <div style={{ width: '100%', maxWidth: '100%' }}>
       {/* Header Bar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginBottom: '20px', flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
