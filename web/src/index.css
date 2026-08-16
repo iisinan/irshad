@@ -4847,7 +4847,9 @@ html, body {
     display: none !important;
   }
   .holding-row {
-    flex-wrap: wrap !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
     gap: 16px !important;
   }
   .mobile-col {
