@@ -388,7 +388,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
       `}</style>
       {createPortal(
         <div className="modal-overlay animate-fade-in" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000, padding: '24px' }}>
-          <div className="modal-box" ref={modalRef} style={{ background: 'var(--bg)', borderRadius: '24px', width: '100%', maxWidth: '720px', boxShadow: '0 24px 64px rgba(0,0,0,0.12)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh', animation: 'slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+          <div className="modal-box" ref={modalRef} style={{ background: 'var(--bg)', borderRadius: '24px', width: '100%', maxWidth: '720px', boxShadow: '0 24px 64px rgba(0,0,0,0.12)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: 'calc(100vh - 48px)', minHeight: 0, animation: 'slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>
 
             {/* Header */}
             <div className="modal-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '32px 32px 24px', background: 'var(--bg)' }}>
@@ -410,7 +410,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
 
             {tab === 'manual' ? (
               <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1 }}>
-                <div className="modal-body" style={{ padding: '32px', overflowY: 'auto', flex: 1, background: '#FFFFFF' }}>
+                <div className="modal-body" style={{ minHeight: 0, padding: '32px', flex: 1, overflowY: 'auto', background: '#FFFFFF' }}>
                   {rows.map((row, index) => (
                     <div key={row.id} className="holding-row-card" style={{ background: '#FFFFFF', padding: '24px', borderRadius: '16px', marginBottom: '24px', border: '1px solid var(--border)', position: 'relative' }}>
                       {/* Row Header & Delete */}
@@ -510,7 +510,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
                   <h4 style={{ fontSize: '1.41rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 16px', letterSpacing: '-0.5px' }}>Link your Broker</h4>
                   <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: '0 auto', lineHeight: 1.6, maxWidth: '320px' }}>Connect your brokerage account to Irshad to seamlessly track your Shariah-compliant investments.</p>
                 </div>
-                <div className="modal-body" style={{ padding: '32px', flex: 1, overflowY: 'auto' }}>
+                <div className="modal-body" style={{ minHeight: 0, padding: '32px', flex: 1, overflowY: 'auto' }}>
                   {linkMessage && (<div style={{ marginBottom: '24px', padding: '16px', borderRadius: '12px', background: linkMessage.includes('successfully') ? 'var(--halal-bg)' : 'var(--non-compliant-bg)', color: linkMessage.includes('successfully') ? 'var(--halal)' : 'var(--non-compliant)', fontSize: '0.84rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '10px' }}><CheckCircle2 size={18} /> {linkMessage}</div>)}
                   <p style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '20px' }}>Select an Institution</p>
                   <div className="broker-grid mobile-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
@@ -535,7 +535,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
                   <h4 style={{ fontSize: '1.41rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 16px', letterSpacing: '-0.5px' }}>Upload Statement</h4>
                   <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: '0 auto', lineHeight: 1.6, maxWidth: '320px' }}>Upload your trade log or portfolio statement (PDF/CSV) to automatically extract your holdings.</p>
                 </div>
-                <div className="modal-body" style={{ padding: '32px', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="modal-body" style={{ minHeight: 0, padding: '32px', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                   <div style={{ width: '100%', padding: '48px 24px', borderRadius: '20px', border: '2px dashed var(--border)', background: 'var(--bg)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.background = 'var(--primary-50)'; }} onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'var(--bg)'; }} onClick={() => document.getElementById('file-upload').click()}>
                     <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'var(--bg-section)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}><UploadCloud size={28} /></div>
                     <div>
