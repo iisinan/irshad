@@ -240,7 +240,7 @@ export default function GuideTab() {
               background: activeSection === s.id ? 'var(--primary)' : 'var(--bg)',
               color: activeSection === s.id ? 'white' : 'var(--text-muted)',
               fontWeight: 800, fontSize: '0.72rem', cursor: 'pointer',
-              transition: 'all 0.2s', whiteSpace: 'nowrap',
+              transition: 'all 0.2s', whiteSpace: 'nowrap', flexShrink: 0,
             }}
           >
             <s.icon size={13} />
