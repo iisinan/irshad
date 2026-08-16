@@ -459,7 +459,7 @@ function PurificationCard({ h, onPurify, onStatClick }) {
       <div style={{ height: '3px', background: 'linear-gradient(90deg, var(--primary), var(--primary-hover), var(--primary-100))' }} />
       <div style={{ padding: '16px 20px' }}>
         {/* Top row: logo + name + amount to purify + action */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap', justifyContent: 'space-between' }}>
           
           {/* Left: Logo & Info */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -473,33 +473,31 @@ function PurificationCard({ h, onPurify, onStatClick }) {
           </div>
 
           {/* Right: Amount & Purify Button */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-            <div style={{ textAlign: 'right' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', justifyContent: 'space-between', flex: '1 1 200px' }}>
+            <div style={{ textAlign: 'left' }}>
                <div style={{ fontSize: '0.62rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '2px' }}>Amount to Purify</div>
                <div style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--primary)' }}>{fmt(due)}</div>
             </div>
 
-            <div style={{ background: 'var(--primary)', color: 'white', borderRadius: '10px', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.70rem', fontWeight: 800, boxShadow: '0 4px 12px var(--primary-50)' }}>
+            <div style={{ background: 'var(--primary)', color: 'white', borderRadius: '10px', padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', fontWeight: 800, boxShadow: '0 4px 12px var(--primary-50)' }}>
               Purify <ChevronRight size={14} />
             </div>
           </div>
         </div>
 
-        {/* Stats row - super compact horizontal scroll */}
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '16px', overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: '4px' }}>
+        {/* Stats row - Grid Layout */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px', marginTop: '16px' }}>
           {statItems.map((s, i) => (
              <div
               key={i}
               onClick={(e) => { e.stopPropagation(); onStatClick(h, s.key); }}
               style={{
-                flexShrink: 0,
                 background: 'var(--bg-section)',
                 borderRadius: '10px',
-                padding: '8px 12px',
+                padding: '10px 14px',
                 border: '1px solid var(--border)',
                 cursor: 'pointer',
-                display: 'flex', flexDirection: 'column', gap: '2px',
-                minWidth: '120px'
+                display: 'flex', flexDirection: 'column', gap: '4px'
               }}
               className="hover-lift"
              >
@@ -513,18 +511,17 @@ function PurificationCard({ h, onPurify, onStatClick }) {
           <div
              onClick={(e) => { e.stopPropagation(); onPurify(h); }}
              style={{
-               flexShrink: 0,
                background: 'var(--primary-50)',
                borderRadius: '10px',
-               padding: '8px 12px',
+               padding: '10px 14px',
                border: '1px dashed var(--primary-100)',
                cursor: 'pointer',
-               display: 'flex', flexDirection: 'column', gap: '4px',
+               display: 'flex', flexDirection: 'column', gap: '6px',
                alignItems: 'center', justifyContent: 'center'
              }}
              className="hover-lift"
           >
-            <Calculator size={14} color="var(--primary)" />
+            <Calculator size={16} color="var(--primary)" />
             <div style={{ fontSize: '0.62rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase' }}>View Calc</div>
           </div>
         </div>
