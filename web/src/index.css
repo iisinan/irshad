@@ -2013,9 +2013,8 @@ textarea::placeholder {
 
 @media (max-width: 900px) {
   .portfolio-layout-grid {
-    grid-template-columns: minmax(0, 1fr);
-    display: flex;
-    flex-direction: column;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
   }
 }
 
