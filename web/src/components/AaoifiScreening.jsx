@@ -527,7 +527,7 @@ const AaoifiScreening = () => {
                 </form>
                 
                 {searchQuery.length > 0 && (
-                  <div style={{ position:'absolute', top:'100%', right:0, marginTop:8, width:260, background:'var(--bg)', border:'1px solid var(--border)', borderRadius:12, boxShadow:'var(--shadow-md)', zIndex:100, overflow:'hidden' }}>
+                  <div className="aaoifi-search-dropdown">
                     {allStocks.filter(s => s.symbol.toLowerCase().includes(searchQuery.toLowerCase()) || s.name?.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 5).map(s => (
                       <div 
                         key={s.symbol}

@@ -5131,3 +5131,26 @@ button, a.nav-link, a.btn-primary, a.btn-secondary, .mobile-col > div[style*="cu
   .desktop-hide { display: none !important; }
 }
 
+
+/* AAOIFI Search Dropdown */
+.aaoifi-search-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  width: 280px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  z-index: 100;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .aaoifi-search-dropdown {
+    right: auto;
+    left: 0;
+  }
+}
+

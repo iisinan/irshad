@@ -30,40 +30,56 @@ foreach ($screenings as $screening) {
         continue;
     }
 
-    $marketCap = (float) $company->market_cap;
-    $financials = $screening->financial_data_used ?? [];
+    $marketCap = (string) $company->market_cap;
+    $financials = $screening->financial_data_used;
+    if (is_string($financials)) {
+        $financials = json_decode($financials, true);
+    }
+    if (!is_array($financials)) {
+        $financials = [];
+    }
     
     // Fallback if market cap is 0 in companies table but somehow in financial_data
-    if ($marketCap <= 0 && isset($financials['market_cap'])) {
-        $marketCap = (float) $financials['market_cap'];
+    if (bccomp($marketCap, '0', 4) <= 0 && isset($financials['market_cap'])) {
+        $marketCap = (string) $financials['market_cap'];
     }
+    
+    $totalAssets = (string) ($financials['total_assets'] ?? 0);
+    $denominator = bccomp($marketCap, $totalAssets, 4) === 1 ? $marketCap : $totalAssets;
 
-    $totalDebt = (float) ($financials['total_debt'] ?? 0);
-    $cash = (float) ($financials['cash'] ?? 0);
-    $interestBearingSecurities = (float) ($financials['interest_bearing_securities'] ?? 0);
+    $totalDebt = (string) ($financials['total_debt'] ?? 0);
+    $cash = (string) ($financials['cash'] ?? 0);
+    $interestBearingSecurities = (string) ($financials['interest_bearing_securities'] ?? 0);
+    
+    $cashAndSecurities = bcadd($cash, $interestBearingSecurities, 4);
 
-    // Strictly enforce Market Cap math
+    // Strictly enforce Market Cap / Total Assets math using BCMath
     $debtRatio = null;
     $debtStatus = 'insufficient_data';
     $cashRatio = null;
     $cashStatus = 'insufficient_data';
 
-    if ($marketCap > 0) {
-        $debtRatio = ($totalDebt / $marketCap);
-        $debtStatus = $debtRatio <= 0.30 ? 'pass' : 'fail';
+    if (bccomp($denominator, '0', 4) === 1) {
+        $debtRatioRaw = bcdiv($totalDebt, $denominator, 6);
+        $debtRatio = bcmul($debtRatioRaw, '100', 4); // Format as percentage not decimal?
+        // Wait, the original code didn't multiply by 100, it stored it as decimal (e.g. 0.30)
+        // If I keep decimal:
+        $debtRatio = $debtRatioRaw;
+        $debtStatus = bccomp($debtRatio, '0.3000', 4) <= 0 ? 'pass' : 'fail';
         
-        $cashRatio = (($cash + $interestBearingSecurities) / $marketCap);
-        $cashStatus = $cashRatio <= 0.30 ? 'pass' : 'fail';
+        $cashRatioRaw = bcdiv($cashAndSecurities, $denominator, 6);
+        $cashRatio = $cashRatioRaw;
+        $cashStatus = bccomp($cashRatio, '0.3000', 4) <= 0 ? 'pass' : 'fail';
     } else {
-        // If market cap is missing/0, it automatically fails (infinite ratio)
+        // If denominator is missing/0, it automatically fails (infinite ratio)
         $debtStatus = 'fail';
         $cashStatus = 'fail';
     }
 
     // Save back to screening
-    $screening->debt_ratio = $debtRatio;
+    $screening->debt_ratio = $debtRatio === null ? null : (float) $debtRatio;
     $screening->debt_status = $debtStatus;
-    $screening->cash_ratio = $cashRatio;
+    $screening->cash_ratio = $cashRatio === null ? null : (float) $cashRatio;
     $screening->cash_status = $cashStatus;
     
     $impIncomeStatus = $screening->impermissible_income_status;
@@ -72,7 +88,7 @@ foreach ($screenings as $screening) {
     // Recalculate Final Status
     $finalStatus = 'halal';
     if ($businessStatus === 'fail' || $debtStatus === 'fail' || $cashStatus === 'fail' || $impIncomeStatus === 'fail') {
-        $finalStatus = 'non-halal';
+        $finalStatus = 'non-compliant';
     } elseif ($businessStatus === 'warning' || $businessStatus === 'doubtful' || $debtStatus === 'insufficient_data' || $cashStatus === 'insufficient_data') {
         $finalStatus = 'doubtful';
     }
@@ -80,8 +96,8 @@ foreach ($screenings as $screening) {
     $oldStatus = $screening->final_status;
     $screening->final_status = $finalStatus;
     
-    // Update financial_data_used to reflect strict market cap
-    $financials['market_cap'] = $marketCap;
+    // Update financial_data_used to reflect strict denominator logic
+    $financials['market_cap'] = (float) $marketCap;
     $screening->financial_data_used = $financials;
 
     $screening->save();
@@ -97,7 +113,7 @@ foreach ($screenings as $screening) {
             $company->update(['current_status' => $finalStatus]);
             
             $reason = "Status updated by strict Market Cap recalculation. ";
-            if ($finalStatus === 'non-halal') {
+            if ($finalStatus === 'non-compliant') {
                 $reason .= "Failed AAOIFI financial ratio screening.";
             }
 
