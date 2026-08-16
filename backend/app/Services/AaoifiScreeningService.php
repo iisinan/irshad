@@ -90,7 +90,7 @@ class AaoifiScreeningService
 
         if ($businessStatus === 'fail' || $debtStatus === 'fail' || $cashStatus === 'fail' || $impIncomeStatus === 'fail') {
             $finalStatus = 'non-halal';
-        } elseif ($businessStatus === 'warning' || $businessStatus === 'doubtful' || $debtStatus === 'insufficient_data' || $cashStatus === 'insufficient_data' || $impIncomeStatus === 'insufficient_data') {
+        } elseif ($businessStatus === 'warning' || $businessStatus === 'doubtful') {
             $finalStatus = 'doubtful';
         }
 
@@ -137,6 +137,8 @@ class AaoifiScreeningService
             } else {
                 if ($impermissibleIncomeRatio > 0 && $impermissibleIncomeRatio <= 5) {
                     $reason = 'Stock passes all screens. Status is Halal with an active dividend purification factor of ' . number_format($impermissibleIncomeRatio, 2) . '%.' . ($aiResult ? ' Notes: ' . $aiResult : '');
+                } elseif (!$financials) {
+                    $reason = 'Stock passes Business Activity Check. Status is Halal (Financial data pending).' . ($aiResult ? ' Notes: ' . $aiResult : '');
                 } else {
                     $reason = 'Stock passes all screens cleanly. Status is 100% Halal and Shariah-compliant.' . ($aiResult ? ' Notes: ' . $aiResult : '');
                 }
