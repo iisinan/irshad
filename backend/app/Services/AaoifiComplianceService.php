@@ -66,7 +66,7 @@ class AaoifiComplianceService
         if ($screening && $screening->business_status === 'fail') {
             return $this->saveStatus(
                 $company,
-                'non-halal',
+                'non-compliant',
                 'Failed Rule 1: Business Activity Check. ' . ($screening->business_reasoning ?? 'The stock failed due to non-compliant business activities.')
             );
         }
@@ -80,40 +80,49 @@ class AaoifiComplianceService
         }
 
         // Sync with frontend logic: Prefer LIVE market cap from the companies table, fallback to extracted financials market cap
-        $liveMarketCap = $company->market_cap > 0 ? $company->market_cap : 0;
-        $finMarketCap = $financials->market_cap > 0 ? $financials->market_cap : 0;
-        $marketCap = $liveMarketCap ?: ($finMarketCap ?: 1);
+        $liveMarketCap = (string) ($company->market_cap > 0 ? $company->market_cap : 0);
+        $finMarketCap = (string) ($financials->market_cap > 0 ? $financials->market_cap : 0);
+        $marketCap = bccomp($liveMarketCap, '0', 4) === 1 ? $liveMarketCap : (bccomp($finMarketCap, '0', 4) === 1 ? $finMarketCap : '1');
 
-        $totalRevenue = $financials->total_revenue > 0 ? $financials->total_revenue : 1;
+        $totalAssets = (string) ($financials->total_assets > 0 ? $financials->total_assets : 0);
+        $denominator = bccomp($marketCap, $totalAssets, 4) === 1 ? $marketCap : ($totalAssets ?: '1');
 
-        // Calculate NGX Financial Ratios
-        $debtToMarketCap = $financials->total_debt / $marketCap;
-        $cashAndSecurities = (float) $financials->cash_and_equivalents + (float) $financials->interest_bearing_securities;
-        $cashRatioToMarketCap = $cashAndSecurities / $marketCap;
-        $purificationFactor = $financials->interest_income / $totalRevenue;
+        $totalRevenue = (string) ($financials->total_revenue > 0 ? $financials->total_revenue : 1);
+
+        $totalDebt = (string) ($financials->total_debt ?: '0');
+        $cashAndEquiv = (string) ($financials->cash_and_equivalents ?: '0');
+        $interestSec = (string) ($financials->interest_bearing_securities ?: '0');
+        $interestIncome = (string) ($financials->interest_income ?: '0');
+
+        // Calculate NGX Financial Ratios using BCMath (6 decimals for division)
+        $debtToMarketCap = bcdiv($totalDebt, $denominator, 6);
+        $cashAndSecurities = bcadd($cashAndEquiv, $interestSec, 4);
+        $cashRatioToMarketCap = bcdiv($cashAndSecurities, $denominator, 6);
+        $purificationFactor = bcdiv($interestIncome, $totalRevenue, 6);
 
         // STAGE 2: RULE 2 (NGX Debt Limit Check)
-        if ($debtToMarketCap > self::MAX_DEBT_RATIO) {
+        if (bccomp($debtToMarketCap, '0.3000', 4) === 1) {
+            $debtPct = bcmul($debtToMarketCap, '100', 2);
             return $this->saveStatus(
                 $company,
-                'non-halal',
-                'Failed Rule 2: Debt Limit Check based on recent financial disclosure. Interest-bearing debt-to-market-cap ratio is '.round($debtToMarketCap * 100, 2).'% (Max permitted threshold is 30.00%).'
+                'non-compliant',
+                'Failed Rule 2: Debt Limit Check based on recent financial disclosure. Interest-bearing debt ratio is '.$debtPct.'% (Max permitted threshold is 30.00%).'
             );
         }
 
         // STAGE 3: RULE 3 (NGX Cash & Securities Limit Check)
-        // Using MAX_DEBT_RATIO here because AAOIFI dictates 30% for both.
-        if ($cashRatioToMarketCap > self::MAX_DEBT_RATIO) {
+        if (bccomp($cashRatioToMarketCap, '0.3000', 4) === 1) {
+            $cashPct = bcmul($cashRatioToMarketCap, '100', 2);
             return $this->saveStatus(
                 $company,
-                'non-halal',
-                'Failed Rule 3: Cash & Securities Check based on recent financial disclosure. Liquid cash and interest-bearing securities-to-market-cap ratio is '.round($cashRatioToMarketCap * 100, 2).'% (Max permitted threshold is 30.00%).'
+                'non-compliant',
+                'Failed Rule 3: Cash & Securities Check based on recent financial disclosure. Liquid cash and interest-bearing securities ratio is '.$cashPct.'% (Max permitted threshold is 30.00%).'
             );
         }
 
         // STAGE 4: RULE 4 (NGX Impermissible Income Limit Check)
         $reits = ['NESF', 'SKYESHELT', 'UHOMREIT', 'UPDC REIT', 'UPDCREIT'];
-        if ($purificationFactor > self::MAX_INTEREST_INCOME_RATIO) {
+        if (bccomp($purificationFactor, '0.0500', 4) === 1) {
             // Check if it's a REIT, they are exempted from the generic interest income check
             if (in_array(strtoupper($company->symbol), $reits)) {
                 return $this->saveStatus(
@@ -123,21 +132,23 @@ class AaoifiComplianceService
                 );
             }
 
+            $purPct = bcmul($purificationFactor, '100', 2);
             return $this->saveStatus(
                 $company,
-                'non-halal',
-                'Failed Rule 4: Impermissible Income Check based on recent financial disclosure. Impermissible income ratio is '.round($purificationFactor * 100, 2).'% (Max permitted threshold is 5.00%).'
+                'non-compliant',
+                'Failed Rule 4: Impermissible Income Check based on recent financial disclosure. Impermissible income ratio is '.$purPct.'% (Max permitted threshold is 5.00%).'
             );
         }
 
         $extraNotes = $screening && $screening->business_reasoning ? ' Notes: ' . $screening->business_reasoning : '';
 
         // PIPELINE RESULT PROCESSING (ALL STAGES PASSED)
-        if ($purificationFactor > 0) {
+        if (bccomp($purificationFactor, '0', 4) === 1) {
+            $purPct = bcmul($purificationFactor, '100', 2);
             return $this->saveStatus(
                 $company,
                 'halal',
-                'Stock passes all screens. Status is Halal with an active dividend purification factor of '.round($purificationFactor * 100, 2).'%.' . $extraNotes
+                'Stock passes all screens. Status is Halal with an active dividend purification factor of '.$purPct.'%.' . $extraNotes
             );
         }
 
@@ -179,9 +190,9 @@ class AaoifiComplianceService
         $oldStatus = $stockStatus ? $stockStatus->status : null;
 
         if ($oldStatus !== $status) {
-            // Auto-approve downgrades to non-halal if it failed Business Activity (Rule 1)
-            // But only if it was NOT halal before (e.g. from pending or doubtful). Any change from halal to non-halal must go to admin review.
-            if ($status === 'non-halal' && str_contains($reasonText, 'Rule 1') && $oldStatus !== 'halal') {
+            // Auto-approve downgrades to non-compliant if it failed Business Activity (Rule 1)
+            // But only if it was NOT halal before (e.g. from pending or doubtful). Any change from halal to non-compliant must go to admin review.
+            if ($status === 'non-compliant' && str_contains($reasonText, 'Rule 1') && $oldStatus !== 'halal') {
                 // Apply immediately
                 StockStatus::updateOrCreate(
                     ['company_id' => $company->id],
