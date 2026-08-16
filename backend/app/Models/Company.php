@@ -12,14 +12,7 @@ class Company extends Model
 {
     use HasFactory;
 
-    protected function logoUrl(): Attribute
-    {
-        return Attribute::make(
-            get: fn (?string $value) => ($value && ! str_starts_with($value, 'http'))
-                ? rtrim(config('app.url'), '/').'/'.ltrim($value, '/')
-                : $value,
-        );
-    }
+
 
     protected $fillable = [
         'name',
