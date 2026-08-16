@@ -120,11 +120,12 @@ export default function AddWatchlistModal({ onClose, onAdded, allStocks, watchli
             flexDirection: 'column', 
             maxHeight: 'calc(100vh - 48px)',
             minHeight: 0,
+            overflow: 'hidden',
             animation: 'slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards' 
           }}
         >
           {/* Header */}
-          <div className="modal-header" style={{ padding: '24px 32px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border)' }}>
+          <div className="modal-header" style={{ padding: '24px 32px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
             <div>
               <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-dark)', margin: 0, letterSpacing: '-0.3px' }}>Add to Watchlist</h3>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '4px 0 0 0', fontWeight: 500 }}>Select the assets you want to track.</p>

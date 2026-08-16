@@ -391,7 +391,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
           <div className="modal-box" ref={modalRef} style={{ background: 'var(--bg)', borderRadius: '24px', width: '100%', maxWidth: '720px', boxShadow: '0 24px 64px rgba(0,0,0,0.12)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: 'calc(100vh - 48px)', minHeight: 0, animation: 'slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>
 
             {/* Header */}
-            <div className="modal-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '32px 32px 24px', background: 'var(--bg)' }}>
+            <div className="modal-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '32px 32px 24px', background: 'var(--bg)', flexShrink: 0 }}>
               <div>
                 <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-dark)', margin: 0 }}>Add Holdings</h3>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '8px 0 0 0' }}>Update your portfolio tracking.</p>
@@ -490,7 +490,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
                 </div>
 
                 {/* Footer */}
-                <div className="modal-footer" style={{ padding: '24px 32px', borderTop: '1px solid var(--border)', background: '#FFFFFF' }}>
+                <div className="modal-footer" style={{ flexShrink: 0, padding: '24px 32px', borderTop: '1px solid var(--border)', background: '#FFFFFF' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                     <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-dark)' }}>Estimated Total</span>
                     <span style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--primary)' }}>₦{totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
@@ -522,7 +522,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
                     ))}
                   </div>
                 </div>
-                <div className="modal-footer" style={{ padding: '24px 32px', borderTop: '1px solid var(--border)', background: 'var(--bg)' }}>
+                <div className="modal-footer" style={{ flexShrink: 0, padding: '24px 32px', borderTop: '1px solid var(--border)', background: 'var(--bg)' }}>
                   <button type="button" onClick={handleLinkBroker} disabled={linking || !brokerName} style={{ width: '100%', padding: '16px', borderRadius: '16px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.88rem', cursor: (linking || !brokerName) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 8px 24px rgba(91, 41, 113,0.25)', opacity: (linking || !brokerName) ? 0.7 : 1, transition: 'all 0.2s' }}>
                     {linking ? <div className="spinner" style={{ width: '20px', height: '20px', borderTopColor: 'white' }} /> : 'Continue'}
                   </button>
