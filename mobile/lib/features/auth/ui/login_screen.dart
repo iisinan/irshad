@@ -73,7 +73,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         if (token != null) {
           if (mounted) {
             Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
-            Navigator.of(context, rootNavigator: true).pushReplacementNamed('/main');
+            Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/main', (route) => false);
           }
         } else {
           setState(() => _isLoading = false);
@@ -100,7 +100,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         await _secureStorage.write(key: 'saved_email', value: _emailController.text);
         if (mounted) {
           Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
-          Navigator.of(context, rootNavigator: true).pushReplacementNamed('/main');
+          Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/main', (route) => false);
         }
       }
     } catch (e) {
@@ -117,7 +117,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       if (user != null) {
         if (mounted) {
           Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
-          Navigator.of(context, rootNavigator: true).pushReplacementNamed('/main');
+          Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/main', (route) => false);
         }
       }
     } catch (e) {

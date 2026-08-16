@@ -47,6 +47,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> with WidgetsBindingOb
       child: Scaffold(
         backgroundColor: context.bg,
         appBar: AppBar(
+          automaticallyImplyLeading: false,
           title: Text('Portfolio', style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
           backgroundColor: context.bg,
           elevation: 0,

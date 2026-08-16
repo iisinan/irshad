@@ -158,7 +158,8 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
     return Scaffold(
       backgroundColor: context.bg,
       appBar: AppBar(
-        title: Text('Search Market', style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
+        automaticallyImplyLeading: false,
+        title: Text('Search & Analysis', style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
         backgroundColor: context.bg,
         elevation: 0,
         centerTitle: false,

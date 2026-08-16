@@ -50,7 +50,7 @@ class ApiService {
       },
       onError: (DioException error, handler) async {
         if (error.response?.statusCode == 401) {
-          final isAuthRoute = error.requestOptions.path.contains('login') || error.requestOptions.path.contains('register');
+          final isAuthRoute = error.requestOptions.path.contains('login') || error.requestOptions.path.contains('register') || error.requestOptions.path.contains('auth/google');
           if (!isAuthRoute) {
             debugPrint('401 Unauthorized encountered for ${error.requestOptions.path}');
             // Re-enabling automatic logout to prevent stuck states with expired tokens

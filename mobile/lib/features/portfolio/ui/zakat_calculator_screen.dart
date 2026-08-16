@@ -486,7 +486,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                           children: [
                             Row(
                               children: [
-                                Text('Smart Nisab Configurations', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: context.textDark)),
+                                Expanded(child: Text('Smart Nisab Configurations', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: context.textDark))),
                                 const SizedBox(width: 8),
                                 Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: context.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(6)), child: Text('LIVE', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: context.primary))),
                               ],

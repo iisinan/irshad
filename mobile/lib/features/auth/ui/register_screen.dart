@@ -104,7 +104,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
       if (user != null) {
         if (mounted) {
           Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
-          Navigator.of(context, rootNavigator: true).pushReplacementNamed('/main');
+          Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/main', (route) => false);
         }
       }
     } catch (e) {
@@ -129,7 +129,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
       if (user != null) {
         if (mounted) {
           Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
-          Navigator.of(context, rootNavigator: true).pushReplacementNamed('/main');
+          Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/main', (route) => false);
         }
       }
     } catch (e) {

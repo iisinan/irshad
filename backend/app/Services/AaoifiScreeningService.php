@@ -89,7 +89,7 @@ class AaoifiScreeningService
         $finalStatus = 'halal';
 
         if ($businessStatus === 'fail' || $debtStatus === 'fail' || $cashStatus === 'fail' || $impIncomeStatus === 'fail') {
-            $finalStatus = 'non-halal';
+            $finalStatus = 'non-compliant';
         } elseif ($businessStatus === 'warning' || $businessStatus === 'doubtful') {
             $finalStatus = 'doubtful';
         }
@@ -113,7 +113,7 @@ class AaoifiScreeningService
                     'market_cap' => $marketCap,
                     'total_assets' => $totalAssets,
                     'total_debt' => $totalDebt,
-                    'cash' => $cash,
+                    'cash_and_equivalents' => $cash,
                     'interest_bearing_securities' => $interestBearingSecurities,
                     'interest_income' => $interestIncome,
                     'total_revenue' => $totalRevenue,
@@ -128,9 +128,11 @@ class AaoifiScreeningService
         $stockStatus = $company->status()->first();
         if (! $stockStatus || ! $stockStatus->verified_by_scholar) {
             $oldStatus = $company->current_status;
+            app()->instance('verdict.unlock', true);
             $company->update(['current_status' => $finalStatus]);
+            app()->instance('verdict.unlock', false);
 
-            if ($finalStatus === 'non-halal') {
+            if ($finalStatus === 'non-compliant') {
                 $reason = ($businessStatus === 'fail' ? 'Failed Rule 1: Business Activity Check. ' . ($aiResult ?? 'The stock failed due to non-compliant business activities.') : 'Failed AAOIFI financial ratio screening.');
             } elseif ($finalStatus === 'doubtful') {
                 $reason = ($businessStatus === 'doubtful' || $businessStatus === 'warning') ? 'Doubtful Rule 1: Business Activity Check. ' . ($aiResult ?? 'Requires scholar review.') : 'Doubtful AAOIFI financial ratio screening (insufficient data).';
