@@ -410,10 +410,10 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
             <div className="hide-scrollbar" style={{ display:'flex', background:'var(--body-bg)', borderRadius:'14px', padding:'6px', gap:'8px', border: '1px solid rgba(0,0,0,0.03)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)', overflowX: 'auto', maxWidth: '100%' }}>
             {[
               { id:'all', label:'All', icon: Layers, activeColor: 'var(--primary)' },
-              { id:'halal', label: 'Compliant', icon: ShieldCheck, activeColor: '#16a34a' },
-              { id:'purify', label: 'Compliant (Purify)', icon: Droplet, activeColor: '#eab308' },
+              { id:'halal', label: 'Shariah Compliant', icon: ShieldCheck, activeColor: '#16a34a' },
+              { id:'purify', label: 'Shariah Compliant (Purify)', icon: Droplet, activeColor: '#eab308' },
               { id:'doubtful', label: 'Doubtful', icon: HelpCircle, activeColor: '#d97706' },
-              { id:'nonhalal', label: 'Non-Compliant', icon: AlertTriangle, activeColor: '#dc2626' }
+              { id:'nonhalal', label: 'Shariah Non-Compliant', icon: AlertTriangle, activeColor: '#dc2626' }
             ].map(f => (
               <button key={f.id} onClick={() => setActiveFilter(f.id)} style={{
                 display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0,

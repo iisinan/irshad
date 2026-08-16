@@ -404,7 +404,7 @@ const AdminDashboard = () => {
               <button onClick={loadData} style={{ marginTop: '12px', padding: '8px 20px', borderRadius: '10px', background: 'var(--primary)', color: 'white', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '0.82rem' }}>Retry</button>
             </div>
           ) : (
-            <div style={{ overflowX: 'auto', maxHeight: '600px', overflowY: 'auto' }}>
+            <div style={{ overflowX: 'auto', maxWidth: '100%', maxHeight: '600px', overflowY: 'auto' }}>
               <table style={{ width: '100%', minWidth: '700px', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead style={{ position: 'sticky', top: 0, zIndex: 10 }}>
                   <tr style={{ background: 'var(--bg-section)', borderBottom: '1px solid var(--border)' }}>

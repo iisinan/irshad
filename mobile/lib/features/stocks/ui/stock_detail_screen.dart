@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
 import '../../../core/providers/app_state_provider.dart';
@@ -12,6 +13,10 @@ import 'alert_bottom_sheet.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 import '../../../core/api/api_service.dart';
 import '../../../core/widgets/company_avatar.dart';
+import '../../profile/ui/widgets/add_assets_bottom_sheet.dart';
+import '../../portfolio/ui/tabs/portfolio_overview_tab.dart';
+import '../../portfolio/providers/portfolio_provider.dart';
+import '../../portfolio/ui/widgets/charities_bottom_sheet.dart';
 class StockDetailScreen extends StatefulWidget {
   final Map<String, dynamic> args;
 
@@ -21,56 +26,12 @@ class StockDetailScreen extends StatefulWidget {
     final repository = StockRepository();
     final symbol = initialStock['symbol'];
     
-    // 1. Check for stale cache for instant open
-    final cachedStock = repository.getCachedDataForUrl('stocks/$symbol');
-    final cachedAaoifi = repository.getCachedDataForUrl('stocks/$symbol/aaoifi-screening');
-    
-    bool hasStaleData = false;
-    Map<String, dynamic> mergedStock = {...initialStock};
-    Map<String, dynamic>? aaoifiData;
-
-    if (cachedStock != null) {
-      mergedStock = {...mergedStock, ...cachedStock};
-      if (cachedStock['status'] != null) mergedStock['status'] = cachedStock['status'];
-      hasStaleData = true;
-    }
-    if (cachedAaoifi != null) {
-      aaoifiData = cachedAaoifi;
-      hasStaleData = true;
-    }
-
-    if (hasStaleData) {
-      Navigator.pushNamed(context, '/stock_details', arguments: {
-        'prefetched': true,
-        'needs_refresh': true,
-        'stock': mergedStock,
-        'aaoifiData': aaoifiData,
-      });
-      return; // Skip spinner and network wait
-    }
-
-    // 2. If no cache, show spinner and wait for network
+    // Show spinner and wait for network
     showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black.withOpacity(0.2),
-      builder: (context) => Center(
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: CircularProgressIndicator(color: Theme.of(context).primaryColor),
-        ),
-      ),
+      barrierColor: Colors.black.withOpacity(0.4),
+      builder: (context) => _LoadingDialog(symbol: symbol),
     );
 
     try {
@@ -80,7 +41,7 @@ class StockDetailScreen extends StatefulWidget {
       ]);
       
       final fullData = futures[0] ?? {};
-      aaoifiData = futures[1] as Map<String, dynamic>?;
+      final aaoifiData = futures[1] as Map<String, dynamic>?;
 
       if (context.mounted) Navigator.pop(context);
 
@@ -94,8 +55,36 @@ class StockDetailScreen extends StatefulWidget {
       }
     } catch (e) {
       if (context.mounted) Navigator.pop(context);
+      
+      // Fallback to cache if network fails
+      final cachedStock = repository.getCachedDataForUrl('stocks/$symbol');
+      final cachedAaoifi = repository.getCachedDataForUrl('stocks/$symbol/aaoifi-screening');
+      
+      Map<String, dynamic> mergedStock = {...initialStock};
+      if (cachedStock != null) {
+        mergedStock = {...mergedStock, ...cachedStock};
+        if (cachedStock['status'] != null) mergedStock['status'] = cachedStock['status'];
+      }
+
       if (context.mounted) {
-        Navigator.pushNamed(context, '/stock_details', arguments: initialStock);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(cachedStock != null 
+                ? 'Network error. Showing offline data. Please check your connection.'
+                : 'Network error. Please check your internet connection.'),
+            backgroundColor: context.haram,
+            behavior: SnackBarBehavior.floating,
+          )
+        );
+
+        if (cachedStock != null) {
+          Navigator.pushNamed(context, '/stock_details', arguments: {
+            'prefetched': true,
+            'needs_refresh': true, // attempt refresh later if we fell back to cache
+            'stock': mergedStock,
+            'aaoifiData': cachedAaoifi,
+          });
+        }
       }
     }
   }
@@ -104,7 +93,7 @@ class StockDetailScreen extends StatefulWidget {
   State<StockDetailScreen> createState() => _StockDetailScreenState();
 }
 
-class _StockDetailScreenState extends State<StockDetailScreen> {
+class _StockDetailScreenState extends State<StockDetailScreen> with TickerProviderStateMixin {
   final _stockRepository = StockRepository();
   final _activityRepository = UserActivityRepository();
   late Map<String, dynamic> _currentStock;
@@ -121,6 +110,12 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
   final ScrollController _tabScrollController = ScrollController();
   Map<String, dynamic>? _aaoifiData;
 
+  // Alert button animation
+  late AnimationController _alertPulseController;
+  late AnimationController _alertScaleController;
+  late Animation<double> _alertScaleAnimation;
+  late Animation<double> _alertPulseAnimation;
+
   double _parseDouble(dynamic val) {
     if (val == null) return 0.0;
     if (val is double) return val;
@@ -131,6 +126,22 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
   @override
   void initState() {
     super.initState();
+
+    // Alert button animations
+    _alertScaleController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+    _alertScaleAnimation = Tween<double>(begin: 1.0, end: 0.94).animate(
+      CurvedAnimation(parent: _alertScaleController, curve: Curves.easeInOut),
+    );
+    _alertPulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    );
+    _alertPulseAnimation = Tween<double>(begin: 0.85, end: 1.0).animate(
+      CurvedAnimation(parent: _alertPulseController, curve: Curves.easeInOut),
+    );
     
     if (widget.args.containsKey('prefetched') && widget.args['prefetched'] == true) {
       _currentStock = widget.args['stock'];
@@ -191,12 +202,6 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
         hasStaleData = true;
       }
       
-      if (hasStaleData && mounted) {
-        setState(() {
-          _isLoadingDetails = false;
-        });
-      }
-
       // 2. Network fetch (Concurrent)
       final futures = await Future.wait([
         _stockRepository.getStockDetails(symbol),
@@ -233,27 +238,43 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
   }
 
   void _checkIfFavorited() async {
-    final favorites = await _activityRepository.getFavorites();
+    final watchlist = await _activityRepository.getWatchlist();
     if (mounted) {
+      final isAlerted = watchlist.any((w) => w['symbol'] == _currentStock['symbol']);
       setState(() {
-        _isAlreadyFavorited = favorites.any((f) => f['reference_id'] == _currentStock['id'].toString() || f['reference_id'] == _currentStock['id']);
+        _isAlreadyFavorited = isAlerted;
       });
+      if (isAlerted) {
+        _alertPulseController.repeat(reverse: true);
+      }
     }
   }
 
   void _onFavorite() async {
+    // Press animation
+    _alertScaleController.forward().then((_) => _alertScaleController.reverse());
     setState(() => _isFavoriting = true);
-    final success = await _activityRepository.addToFavorites('stock', _currentStock['id']);
-    if (success) {
-      if (mounted) {
+    
+    if (_isAlreadyFavorited) {
+      final success = await _activityRepository.removeFromWatchlist(_currentStock['symbol']);
+      if (success && mounted) {
+        _alertPulseController.stop();
+        _alertPulseController.reset();
+        setState(() => _isAlreadyFavorited = false);
+        Provider.of<AppStateProvider>(context, listen: false).decrementWatchlist();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Removed ${_currentStock['symbol']} from alerts'), behavior: SnackBarBehavior.floating, backgroundColor: context.textDark),
+        );
+      }
+    } else {
+      final success = await _activityRepository.addToWatchlist(_currentStock['symbol']);
+      if (success && mounted) {
         setState(() => _isAlreadyFavorited = true);
+        // Start pulse animation loop
+        _alertPulseController.repeat(reverse: true);
         Provider.of<AppStateProvider>(context, listen: false).incrementWatchlist();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Added to watchlist'), 
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: context.textDark,
-          ),
+          SnackBar(content: Text('Added ${_currentStock['symbol']} to alerts'), behavior: SnackBarBehavior.floating, backgroundColor: context.textDark),
         );
       }
     }
@@ -299,7 +320,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     if (rawStatus is Map) {
       status = rawStatus['status']?.toString().toLowerCase() ?? 'doubtful';
       isScholarVerified = rawStatus['verified_by_scholar'] == true;
-      if (status == 'non-halal') {
+      if (status == 'non-halal' || status == 'non-compliant') {
         reason = rawStatus['reason'] ?? 'The core business operations involve non-compliant activities.';
       } else if (status == 'doubtful') {
         reason = rawStatus['reason'] ?? 'This stock is currently under review or lacks sufficient data for a definitive Shariah ruling.';
@@ -308,8 +329,8 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
         reason = rawStatus['reason'] ?? 'The core business operations of this company have been verified to be in a Halal industry, with no significant involvement in prohibited activities like conventional finance, alcohol, gambling, or tobacco.';
       }
     } else if (rawStatus is String) {
-      if (rawStatus.toLowerCase() == 'non-halal') {
-        status = 'non-halal';
+      if (rawStatus.toLowerCase() == 'non-halal' || rawStatus.toLowerCase() == 'non-compliant') {
+        status = 'non-compliant';
         reason = 'Automated business activity analysis.';
       } else if (rawStatus.toLowerCase() == 'doubtful') {
         status = 'doubtful';
@@ -324,7 +345,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     // Financial data below is used only for the AAOIFI breakdown display panel, never to change the verdict.
 
     bool isHalal = status == 'halal';
-    bool isNonHalal = status == 'non-halal';
+    bool isNonHalal = status == 'non-halal' || status == 'non-compliant';
     Color statusColor = isHalal ? context.halal : (isNonHalal ? context.haram : context.questionable);
     Color badgeBg = isHalal ? context.halalBg : (isNonHalal ? context.haramBg : context.questionableBg);
     
@@ -334,8 +355,22 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     if (rawStatus is Map) {
       purificationRequired = rawStatus['purification_required'] == true || rawStatus['purification_required'] == 'true';
       haramRevenuePercent = double.tryParse(rawStatus['haram_revenue_percent']?.toString() ?? '0') ?? 0.0;
-      justification = rawStatus['reason']?.toString() ?? rawStatus['business_reasoning']?.toString() ?? '';
+      // Prefer aaoifi status_reason (most detailed) → status.reason → business_reasoning
+      justification = _aaoifiData?['status_reason']?.toString().isNotEmpty == true
+          ? _aaoifiData!['status_reason'].toString()
+          : (rawStatus['reason']?.toString().isNotEmpty == true
+              ? rawStatus['reason'].toString()
+              : (_aaoifiData?['business_reasoning']?.toString() ?? ''));
+    } else {
+      justification = _aaoifiData?['status_reason']?.toString() ?? '';
     }
+
+    // Strip Additionally it passes all AAOIFI... for non-trading stocks for parity with frontend
+    final isNotTrading = _currentStock['is_active'] == false || _currentStock['is_active'] == 0 || _currentStock['is_active'] == '0';
+    if (isNotTrading && justification.isNotEmpty) {
+      justification = justification.replaceAll(RegExp(r'\s*Additionally, it passes all AAOIFI quantitative financial screening ratios\.?', caseSensitive: false), '');
+    }
+
 
     String statusLabel = 'DOUBTFUL';
     if (_isLoadingDetails) {
@@ -358,6 +393,23 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
 
     final latestPrice = num.tryParse(_currentStock['latest_price']?.toString() ?? '0') ?? 0.0;
 
+    if (_isLoadingDetails) {
+      return Scaffold(
+        backgroundColor: context.bg,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios_new_rounded, color: context.textDark, size: 20),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        body: Center(
+          child: CircularProgressIndicator(color: context.primary),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: context.bg,
       appBar: AppBar(
@@ -376,13 +428,24 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.notifications_active_outlined, color: context.textDark, size: 22),
-            onPressed: () => AlertBottomSheet.show(context, _currentStock),
+            icon: Icon(_isAlreadyFavorited ? Icons.notifications_active_rounded : Icons.notifications_none_rounded, 
+              color: _isAlreadyFavorited ? context.primary : context.textDark, size: 22),
+            onPressed: _isFavoriting ? null : _onFavorite,
           ),
           IconButton(
-            icon: Icon(_isAlreadyFavorited ? Icons.favorite_rounded : Icons.favorite_outline_rounded, 
-              color: _isAlreadyFavorited ? context.haram : context.textDark, size: 22),
-            onPressed: _isAlreadyFavorited ? null : (_isFavoriting ? null : _onFavorite),
+            tooltip: 'Add to Holdings',
+            icon: Icon(Icons.add_chart_rounded, color: context.textDark, size: 22),
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (_) => AddHoldingBottomSheet(
+                  preSelectedSymbol: _currentStock['symbol'],
+                  preSelectedPrice: num.tryParse(_currentStock['latest_price']?.toString() ?? '0')?.toDouble(),
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -396,7 +459,8 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
               purificationRequired: !_isLoadingDetails && purificationRequired, 
               percent: haramRevenuePercent, 
               scholarVerified: isScholarVerified,
-              justification: justification),
+              justification: justification,
+              symbol: _currentStock['symbol']),
             
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -417,79 +481,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                     const SizedBox(height: 16),
                     _buildDetailedOverview(),
                   ],
-                  if (_selectedTab == 1) ...[
-                    const SizedBox(height: 24),
-                    Row(
-                      children: [
-                        const Icon(Icons.psychology_outlined, color: Color(0xFF8B5CF6), size: 22),
-                        const SizedBox(width: 8),
-                        Text('Screening Reasoning', style: TextStyle(color: context.textDark, fontSize: 17, fontWeight: FontWeight.w900)),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: context.bgSection,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: context.divider.withOpacity(0.5), width: 1),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.02),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(11),
-                        child: IntrinsicHeight(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Container(
-                                width: 5,
-                                color: const Color(0xFF8B5CF6),
-                              ),
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(20),
-                                  child: Text(
-                                    'Permissible core activity.',
-                                    style: TextStyle(color: context.textDark.withOpacity(0.85), fontSize: 15, fontWeight: FontWeight.w600, height: 1.5),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    Center(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 14),
-                        decoration: BoxDecoration(
-                          color: isHalal ? context.halalBg : (isNonHalal ? context.haramBg : context.questionableBg),
-                          borderRadius: BorderRadius.circular(100),
-                          border: Border.all(
-                            color: isHalal ? context.halal.withOpacity(0.6) : (isNonHalal ? context.haram.withOpacity(0.6) : context.questionable.withOpacity(0.6)), 
-                            width: 1.5
-                          ),
-                        ),
-                        child: Text(
-                          isHalal ? 'PASS' : (isNonHalal ? 'FAIL' : 'PENDING'),
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w900,
-                            color: isHalal ? context.halal : (isNonHalal ? context.haram : context.questionable),
-                            letterSpacing: 1.5,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                  ],
+                  if (_selectedTab == 1) ...[_buildStage1Tab()],
                   
                   if (_selectedTab == 2) ...[
                     const SizedBox(height: 32),
@@ -594,9 +586,9 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                     ),
                     items: const [
-                      DropdownMenuItem(value: 'halal', child: Text('Halal')),
+                      DropdownMenuItem(value: 'halal', child: Text('Shariah Compliant')),
                       DropdownMenuItem(value: 'doubtful', child: Text('Doubtful')),
-                      DropdownMenuItem(value: 'non-halal', child: Text('Non-Halal')),
+                      DropdownMenuItem(value: 'non-compliant', child: Text('Shariah Non-Compliant')),
                     ],
                     onChanged: (v) => setModalState(() => selectedStatus = v!),
                   ),
@@ -708,7 +700,19 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
       ),
     );
   }
-  Widget _buildStatusHeader(Color color, Color bg, String label, {bool purificationRequired = false, double percent = 0.0, bool scholarVerified = false, String justification = ''}) {
+  Widget _buildStatusHeader(Color color, Color bg, String label, {bool purificationRequired = false, double percent = 0.0, bool scholarVerified = false, String justification = '', String symbol = ''}) {
+    final portfolioProvider = context.watch<PortfolioProvider>();
+    final isHolding = portfolioProvider.holdings.any((h) => h['symbol'] == symbol);
+    final holdingPurification = portfolioProvider.purifications.firstWhere(
+      (h) => h['symbol'] == symbol,
+      orElse: () => null,
+    );
+    final amountDue = holdingPurification != null 
+        ? (num.tryParse(holdingPurification['purification_due']?.toString() ?? '0')?.toDouble() ?? 0.0)
+        : 0.0;
+    
+    final bool showPurificationBtn = isHolding && purificationRequired;
+    final bool isDonated = amountDue == 0.0;
     final latestPrice = num.tryParse(_currentStock['latest_price']?.toString() ?? '0') ?? 0.0;
     final priceChange = _currentStock['price_change_pct'] != null ? double.tryParse(_currentStock['price_change_pct'].toString()) : null;
     final isUp = (priceChange ?? 0) >= 0;
@@ -754,7 +758,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: context.textMuted, letterSpacing: 0),
                         ),
                         TextSpan(
-                          text: latestPrice.toStringAsFixed(2), 
+                          text: latestPrice.toStringAsFixed(2).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},'), 
                           style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -1.0, height: 1.0),
                         ),
                       ],
@@ -779,11 +783,48 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                           return const SizedBox.shrink();
                         }
                         
-                        return Text(
-                          _currentStock['name'] ?? '', 
-                          style: TextStyle(color: context.textMuted, fontSize: 14, fontWeight: FontWeight.w500, letterSpacing: -0.2),
-                          maxLines: 1, 
-                          overflow: TextOverflow.ellipsis,
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _currentStock['name'] ?? '', 
+                              style: TextStyle(color: context.textMuted, fontSize: 14, fontWeight: FontWeight.w500, letterSpacing: -0.2),
+                              maxLines: 1, 
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 6),
+                            Wrap(
+                              spacing: 6,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: context.divider.withOpacity(0.5),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text('NGX Listed', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: context.textDark)),
+                                ),
+                                if (_currentStock['is_active'] == false || _currentStock['is_active'] == 0 || _currentStock['is_active'] == '0')
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      border: Border.all(color: Colors.red.withOpacity(0.3)),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(Icons.info_outline, size: 10, color: Colors.red),
+                                        const SizedBox(width: 4),
+                                        const Text('currently not trading on ngx', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: Colors.red)),
+                                      ],
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ],
                         );
                       }
                     ),
@@ -853,87 +894,233 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                         ),
                         child: Text(mainLabel, style: TextStyle(color: color, fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
                       ),
-                      if (purificationRequired)
+                      if (showPurificationBtn)
                         GestureDetector(
-                          onTap: () {
-                            // TODO: Add navigation to purification tab if needed
+                          onTap: isDonated ? null : () {
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (ctx) => Padding(
+                                padding: EdgeInsets.only(top: MediaQuery.of(ctx).padding.top + 40),
+                                child: CharitiesBottomSheet(amountDue: amountDue, symbol: symbol),
+                              ),
+                            );
                           },
                           child: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               shape: BoxShape.circle,
-                              border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.3)),
+                              border: Border.all(
+                                color: isDonated ? context.halal.withOpacity(0.3) : const Color(0xFFF59E0B).withOpacity(0.3),
+                              ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFFF59E0B).withOpacity(0.15),
+                                  color: isDonated ? context.halal.withOpacity(0.15) : const Color(0xFFF59E0B).withOpacity(0.15),
                                   blurRadius: 12,
                                   offset: const Offset(0, 4),
                                 ),
                               ],
                             ),
-                            child: const Icon(Icons.opacity, color: Color(0xFFD97706), size: 20),
+                            child: Icon(Icons.opacity, color: isDonated ? context.halal : const Color(0xFFD97706), size: 20),
                           ),
                         ),
-                      if (scholarVerified)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: context.primary.withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(100),
-                            border: Border.all(color: context.primary.withOpacity(0.2)),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.verified_rounded, color: context.primary, size: 14),
-                              const SizedBox(width: 6),
-                              Text(
-                                'Verified',
-                                style: TextStyle(
-                                  color: context.primary,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 0.2,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+
                     ],
                   ),
                 ],
               ),
               if (justification.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: context.bg,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: color.withOpacity(0.15)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: color.withOpacity(0.04),
-                        blurRadius: 12,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        justification,
-                        style: TextStyle(
-                          color: context.textDark.withOpacity(0.9),
-                          fontSize: 13,
-                          height: 1.5,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ],
-                  ),
+                Builder(
+                  builder: (context) {
+                    String shortJ = '';
+                    String longJ = justification;
+                    if (justification.contains('|||')) {
+                      final parts = justification.split('|||');
+                      if (parts.length >= 2) {
+                        longJ = parts[0].trim();
+                        shortJ = parts[1].trim();
+                      }
+                    }
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (shortJ.isNotEmpty) ...[
+                          const SizedBox(height: 12),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(top: 2),
+                                child: Icon(Icons.auto_awesome, size: 16, color: color),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  shortJ,
+                                  style: TextStyle(
+                                    color: context.textDark.withOpacity(0.9),
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                        if (longJ.isNotEmpty) ...[
+                          const SizedBox(height: 12),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: context.bg,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: color.withOpacity(0.15)),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: color.withOpacity(0.04),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  longJ,
+                                  style: TextStyle(
+                                    color: context.textDark.withOpacity(0.9),
+                                    fontSize: 13,
+                                    height: 1.5,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                                // Reporting period
+                                if (_aaoifiData?['reporting_period'] != null) ...[
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.calendar_today_outlined, size: 11, color: context.textMuted),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'Reporting period: ${_aaoifiData!["reporting_period"]}'
+                                        '${_aaoifiData!["reporting_year"] != null ? " (${_aaoifiData!["reporting_year"]})" : ""}',
+                                        style: TextStyle(color: context.textMuted, fontSize: 11, fontWeight: FontWeight.w600),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    );
+                  }
+                ),
+              ],
+              // Alert CTA for stocks that pass Stage 1 and fail Stage 2
+              if (!_isLoadingDetails) ...[
+                Builder(
+                  builder: (context) {
+                    bool passesStage1 = (_currentStock['business_status'] != 'fail' && _currentStock['business_status'] != 'non-halal' && _currentStock['business_status'] != 'non-compliant') &&
+                                        (_aaoifiData == null || (_aaoifiData!['business_status'] != 'fail' && _aaoifiData!['stage1']?['status'] != 'non-halal' && _aaoifiData!['stage1']?['status'] != 'non-compliant'));
+                    bool isNonCompliant = label.toUpperCase().contains('NON-COMPLIANT');
+
+                    if (passesStage1 && isNonCompliant) {
+                      return Column(
+                        children: [
+                          const SizedBox(height: 12),
+                          Center(
+                            child: AnimatedBuilder(
+                              animation: Listenable.merge([_alertScaleAnimation, _alertPulseAnimation]),
+                              builder: (context, child) {
+                                return Transform.scale(
+                                  scale: _alertScaleAnimation.value,
+                                  child: GestureDetector(
+                                    onTapDown: (_) => _alertScaleController.forward(),
+                                    onTapUp: (_) {
+                                      _alertScaleController.reverse();
+                                      if (!_isFavoriting) _onFavorite();
+                                    },
+                                    onTapCancel: () => _alertScaleController.reverse(),
+                                    child: AnimatedContainer(
+                                      duration: const Duration(milliseconds: 350),
+                                      curve: Curves.easeInOutCubic,
+                                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
+                                      decoration: BoxDecoration(
+                                        color: _isAlreadyFavorited ? color : Colors.transparent,
+                                        borderRadius: BorderRadius.circular(30),
+                                        border: Border.all(
+                                          color: _isAlreadyFavorited ? color : color.withOpacity(0.4),
+                                          width: _isAlreadyFavorited ? 0 : 1.5,
+                                        ),
+                                        boxShadow: _isAlreadyFavorited ? [
+                                          BoxShadow(
+                                            color: color.withOpacity(0.25 * _alertPulseAnimation.value),
+                                            blurRadius: 14 * _alertPulseAnimation.value,
+                                            spreadRadius: 2 * _alertPulseAnimation.value,
+                                          )
+                                        ] : [],
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          AnimatedSwitcher(
+                                            duration: const Duration(milliseconds: 250),
+                                            switchInCurve: Curves.elasticOut,
+                                            switchOutCurve: Curves.easeIn,
+                                            transitionBuilder: (child, anim) => ScaleTransition(scale: anim, child: child),
+                                            child: _isFavoriting
+                                              ? SizedBox(
+                                                  key: const ValueKey('spinner'),
+                                                  width: 15,
+                                                  height: 15,
+                                                  child: CircularProgressIndicator(
+                                                    strokeWidth: 2,
+                                                    color: _isAlreadyFavorited ? Colors.white : color,
+                                                  ),
+                                                )
+                                              : Icon(
+                                                  _isAlreadyFavorited ? Icons.notifications_active_rounded : Icons.notifications_none_rounded,
+                                                  key: ValueKey(_isAlreadyFavorited),
+                                                  size: 15,
+                                                  color: _isAlreadyFavorited ? Colors.white : color,
+                                                ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          AnimatedSwitcher(
+                                            duration: const Duration(milliseconds: 300),
+                                            child: Text(
+                                              _isFavoriting
+                                                ? (_isAlreadyFavorited ? 'Removing...' : 'Adding...')
+                                                : (_isAlreadyFavorited ? 'Alert active · tap to remove' : 'Alert me when compliance changes'),
+                                              key: ValueKey('$_isFavoriting-$_isAlreadyFavorited'),
+                                              style: TextStyle(
+                                                color: _isAlreadyFavorited ? Colors.white : color,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w700,
+                                                letterSpacing: -0.2,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  }
                 ),
               ],
             ],
@@ -981,8 +1168,8 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                     
                     if (hasFinancials && 
                         currentStatus != 'doubtful' && 
-                        (_currentStock['business_status'] != 'fail' && _currentStock['business_status'] != 'non-halal') &&
-                        (_aaoifiData == null || (_aaoifiData!['business_status'] != 'fail' && _aaoifiData!['stage1']?['status'] != 'non-halal'))) {
+                        (_currentStock['business_status'] != 'fail' && _currentStock['business_status'] != 'non-halal' && _currentStock['business_status'] != 'non-compliant') &&
+                        (_aaoifiData == null || (_aaoifiData!['business_status'] != 'fail' && _aaoifiData!['stage1']?['status'] != 'non-halal' && _aaoifiData!['stage1']?['status'] != 'non-compliant'))) {
                       return Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -1782,8 +1969,14 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
       if (used != null) {
         double usedMcap = _getDouble(used['market_cap']);
         double usedAssets = _getDouble(used['total_assets']);
-        denominatorLabel = usedMcap > 0 ? 'Market Cap' : 'Total Assets';
-        denominator = usedMcap > 0 ? usedMcap : usedAssets;
+        
+        if (_aaoifiData!['denominator_used'] != null) {
+          denominatorLabel = _aaoifiData!['denominator_used'].toString();
+          denominator = denominatorLabel.toLowerCase().contains('asset') ? usedAssets : usedMcap;
+        } else {
+          denominatorLabel = usedMcap > 0 ? 'Market Cap' : 'Total Assets';
+          denominator = usedMcap > 0 ? usedMcap : usedAssets;
+        }
         
         totalDebt = _getDouble(used['total_debt']);
         cash = _getDouble(used['cash']);
@@ -2167,9 +2360,10 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
         const SizedBox(height: 24),
         buildRatioCard(1, 'Debt ratio', 'Total Debt / $denominatorLabel × 100', debtRatio, 30, 
           'Total Debt', denominatorLabel, formatCompact(totalDebt), formatCompact(denominator)),
-        buildRatioCard(2, 'Cash ratio', '(Cash + Securities) / $denominatorLabel × 100', cashRatio, 30, 
-          'Cash + Securities', denominatorLabel, '${formatCompact(cash)} + ${formatCompact(securities)}', formatCompact(denominator)),
-        buildRatioCard(3, 'Impure revenue', 'Impure Income / Total Revenue × 100', interestRatio, 5, 
+        if (_currentStock['symbol'] != 'JAIZBANK')
+          buildRatioCard(2, 'Cash ratio', '(Cash + Securities) / $denominatorLabel × 100', cashRatio, 30, 
+            'Cash + Securities', denominatorLabel, '${formatCompact(cash)} + ${formatCompact(securities)}', formatCompact(denominator)),
+        buildRatioCard(_currentStock['symbol'] == 'JAIZBANK' ? 2 : 3, 'Impure revenue', 'Impure Income / Total Revenue × 100', interestRatio, 5, 
           'Impure Income', 'Total Revenue', formatCompact(interestIncome), formatCompact(totalRevenue)),
         const SizedBox(height: 8),
         Container(
@@ -2286,6 +2480,136 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     );
   }
 
+  Widget _buildStage1Tab() {
+    final rawStatus = _currentStock['status'];
+    String stage1Status = 'doubtful';
+    String stage1Reason = 'Permissible core activity.';
+    double haramRevenuePercent = 0.0;
+    
+    if (_aaoifiData != null && _aaoifiData!['stage1'] != null) {
+      stage1Status = _aaoifiData!['stage1']['status'] ?? 'doubtful';
+      stage1Reason = _aaoifiData!['stage1']['reason'] ?? stage1Reason;
+      haramRevenuePercent = double.tryParse(_aaoifiData!['stage1']['haram_revenue_percent']?.toString() ?? '0') ?? 0.0;
+    } else if (_aaoifiData != null) {
+      stage1Status = _aaoifiData!['business_status'] ?? 'doubtful';
+      stage1Reason = _aaoifiData!['business_reasoning'] ?? stage1Reason;
+    } else if (rawStatus is Map) {
+       stage1Status = rawStatus['status']?.toString().toLowerCase() ?? 'doubtful';
+       if (stage1Status == 'non-halal' || stage1Status == 'non-compliant') stage1Reason = rawStatus['reason'] ?? 'The core business operations involve non-compliant activities.';
+       haramRevenuePercent = double.tryParse(rawStatus['haram_revenue_percent']?.toString() ?? '0') ?? 0.0;
+    } else if (rawStatus is String) {
+       stage1Status = rawStatus.toLowerCase();
+    }
+    
+    bool stage1Pass = stage1Status == 'halal' || stage1Status == 'pass';
+    bool stage1Fail = stage1Status == 'non-halal' || stage1Status == 'non-compliant' || stage1Status == 'fail';
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 24),
+        Row(
+          children: [
+            const Icon(Icons.psychology_outlined, color: Color(0xFF8B5CF6), size: 22),
+            const SizedBox(width: 8),
+            Text('Screening Reasoning', style: TextStyle(color: context.textDark, fontSize: 17, fontWeight: FontWeight.w900)),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: context.bgSection,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: context.divider.withOpacity(0.5), width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.02),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(11),
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    width: 5,
+                    color: const Color(0xFF8B5CF6),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Text(
+                        stage1Reason,
+                        style: TextStyle(color: context.textDark.withOpacity(0.85), fontSize: 15, fontWeight: FontWeight.w600, height: 1.5),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        if (stage1Fail && haramRevenuePercent > 5) ...[
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: context.haramBg,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: context.haram.withOpacity(0.2)),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.warning_amber_rounded, color: context.haram, size: 20),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Prohibited Activities Exceed Limit', style: TextStyle(color: context.haram, fontWeight: FontWeight.w800, fontSize: 14)),
+                      const SizedBox(height: 4),
+                      Text('Non-compliant revenue ($haramRevenuePercent%) exceeds the 5% threshold.', style: TextStyle(color: context.haram, fontSize: 13, height: 1.4)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+        const SizedBox(height: 32),
+        if (stage1Pass || stage1Fail)
+          Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 14),
+              decoration: BoxDecoration(
+                color: stage1Pass ? context.halalBg : context.haramBg,
+                borderRadius: BorderRadius.circular(100),
+                border: Border.all(
+                  color: stage1Pass ? context.halal.withOpacity(0.6) : context.haram.withOpacity(0.6), 
+                  width: 1.5
+                ),
+              ),
+              child: Text(
+                stage1Pass ? 'PASS' : 'FAIL',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w900,
+                  color: stage1Pass ? context.halal : context.haram,
+                  letterSpacing: 1.5,
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
   Widget _buildAboutCompany() {
     final sector = _currentStock['sector'] ?? 'Unknown';
     final name = _currentStock['name'] ?? 'This company';
@@ -2319,6 +2643,405 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
     _purificationController.dispose();
     _scrollController.dispose();
     _tabScrollController.dispose();
+    _alertPulseController.dispose();
+    _alertScaleController.dispose();
     super.dispose();
   }
 }
+
+class _LoadingDialog extends StatefulWidget {
+  final String symbol;
+  const _LoadingDialog({required this.symbol});
+
+  @override
+  State<_LoadingDialog> createState() => _LoadingDialogState();
+}
+
+class _LoadingDialogState extends State<_LoadingDialog>
+    with TickerProviderStateMixin {
+  static const _steps = [
+    _LoadingStep(icon: Icons.download_rounded,   label: 'Fetching market data'),
+    _LoadingStep(icon: Icons.bar_chart_rounded,  label: 'Analyzing financials'),
+    _LoadingStep(icon: Icons.balance_rounded,    label: 'AAOIFI screening'),
+    _LoadingStep(icon: Icons.verified_rounded,   label: 'Finalizing results'),
+  ];
+
+  int _currentStep = 0;
+  Timer? _timer;
+
+  // Card entrance
+  late AnimationController _entranceController;
+  late Animation<double> _entranceScale;
+  late Animation<double> _entranceFade;
+
+  // Avatar spinning border
+  late AnimationController _spinController;
+
+  // Avatar ripple rings
+  late AnimationController _ripple1Controller;
+  late AnimationController _ripple2Controller;
+  late Animation<double> _ripple1Scale, _ripple1Opacity;
+  late Animation<double> _ripple2Scale, _ripple2Opacity;
+
+  // Step label crossfade + icon bounce
+  late AnimationController _labelController;
+  late Animation<double> _labelFade;
+  late Animation<Offset> _labelSlide;
+
+  late AnimationController _iconBounceController;
+  late Animation<double> _iconBounce;
+
+  // Progress bar
+  late AnimationController _progressController;
+  late Animation<double> _progressAnim;
+
+  // Shimmer sweep across progress fill
+  late AnimationController _shimmerController;
+  late Animation<double> _shimmerAnim;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // --- Entrance ---
+    _entranceController = AnimationController(vsync: this, duration: const Duration(milliseconds: 420));
+    _entranceScale = Tween<double>(begin: 0.82, end: 1.0).animate(
+      CurvedAnimation(parent: _entranceController, curve: Curves.easeOutBack),
+    );
+    _entranceFade = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _entranceController, curve: const Interval(0, 0.6, curve: Curves.easeOut)),
+    );
+    _entranceController.forward();
+
+    // --- Spinning border (slow continuous rotation) ---
+    _spinController = AnimationController(vsync: this, duration: const Duration(seconds: 4))..repeat();
+
+    // --- Ripple rings ---
+    _ripple1Controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1600))..repeat();
+    _ripple1Scale   = Tween<double>(begin: 0.6, end: 1.6).animate(CurvedAnimation(parent: _ripple1Controller, curve: Curves.easeOut));
+    _ripple1Opacity = Tween<double>(begin: 0.5, end: 0.0).animate(CurvedAnimation(parent: _ripple1Controller, curve: Curves.easeOut));
+
+    _ripple2Controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1600))..repeat();
+    _ripple2Scale   = Tween<double>(begin: 0.6, end: 1.6).animate(CurvedAnimation(parent: _ripple2Controller, curve: Curves.easeOut));
+    _ripple2Opacity = Tween<double>(begin: 0.35, end: 0.0).animate(CurvedAnimation(parent: _ripple2Controller, curve: Curves.easeOut));
+    Future.delayed(const Duration(milliseconds: 800), () { if (mounted) _ripple2Controller.forward(from: 0.5); });
+
+    // --- Label crossfade ---
+    _labelController = AnimationController(vsync: this, duration: const Duration(milliseconds: 260))..value = 1.0;
+    _labelFade  = CurvedAnimation(parent: _labelController, curve: Curves.easeInOut);
+    _labelSlide = Tween<Offset>(begin: const Offset(0, 0.25), end: Offset.zero).animate(
+      CurvedAnimation(parent: _labelController, curve: Curves.easeOut),
+    );
+
+    // --- Icon bounce (plays once per step change) ---
+    _iconBounceController = AnimationController(vsync: this, duration: const Duration(milliseconds: 400));
+    _iconBounce = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _iconBounceController, curve: Curves.elasticOut),
+    );
+    _iconBounceController.value = 1.0; // start shown
+
+    // --- Progress bar ---
+    _progressController = AnimationController(vsync: this, duration: const Duration(milliseconds: 500))..value = 1 / _steps.length;
+    _progressAnim = _progressController;
+
+    // --- Shimmer sweep (repeating) ---
+    _shimmerController = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200))..repeat();
+    _shimmerAnim = Tween<double>(begin: -1.0, end: 2.0).animate(
+      CurvedAnimation(parent: _shimmerController, curve: Curves.easeInOut),
+    );
+
+    // --- Step timer ---
+    _timer = Timer.periodic(const Duration(milliseconds: 1400), (_) async {
+      if (!mounted) return;
+      await _labelController.reverse();
+      if (!mounted) return;
+      setState(() { _currentStep = (_currentStep + 1) % _steps.length; });
+      _progressController.animateTo(
+        (_currentStep + 1) / _steps.length,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+      // Icon bounce on step change
+      _iconBounceController.forward(from: 0.0);
+      _labelController.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _entranceController.dispose();
+    _spinController.dispose();
+    _ripple1Controller.dispose();
+    _ripple2Controller.dispose();
+    _labelController.dispose();
+    _iconBounceController.dispose();
+    _progressController.dispose();
+    _shimmerController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = context.primary;
+    final step = _steps[_currentStep];
+
+    return Center(
+      child: FadeTransition(
+        opacity: _entranceFade,
+        child: ScaleTransition(
+          scale: _entranceScale,
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 28),
+              padding: const EdgeInsets.fromLTRB(28, 36, 28, 32),
+              decoration: BoxDecoration(
+                color: context.bg,
+                borderRadius: BorderRadius.circular(32),
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withOpacity(0.20), blurRadius: 50, offset: const Offset(0, 24)),
+                  BoxShadow(color: primary.withOpacity(0.12), blurRadius: 80, offset: const Offset(0, 12)),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+
+                  // ── Avatar + spinning arc + ripple rings ──────────────
+                  SizedBox(
+                    width: 110,
+                    height: 110,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Ripple 2
+                        AnimatedBuilder(
+                          animation: _ripple2Controller,
+                          builder: (_, __) => Transform.scale(
+                            scale: _ripple2Scale.value,
+                            child: Container(
+                              width: 88, height: 88,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(color: primary.withOpacity(_ripple2Opacity.value), width: 2),
+                              ),
+                            ),
+                          ),
+                        ),
+                        // Ripple 1
+                        AnimatedBuilder(
+                          animation: _ripple1Controller,
+                          builder: (_, __) => Transform.scale(
+                            scale: _ripple1Scale.value,
+                            child: Container(
+                              width: 88, height: 88,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(color: primary.withOpacity(_ripple1Opacity.value), width: 2),
+                              ),
+                            ),
+                          ),
+                        ),
+                        // Spinning arc border
+                        AnimatedBuilder(
+                          animation: _spinController,
+                          builder: (_, __) => Transform.rotate(
+                            angle: _spinController.value * 2 * 3.14159,
+                            child: CustomPaint(
+                              size: const Size(84, 84),
+                              painter: _ArcBorderPainter(color: primary),
+                            ),
+                          ),
+                        ),
+                        // Avatar
+                        CompanyAvatar(
+                          logoUrl: null,
+                          symbol: widget.symbol,
+                          size: 68,
+                          borderRadius: 20,
+                          fontSize: 28,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+
+                  // ── Step segment track ────────────────────────────────
+                  Row(
+                    children: List.generate(_steps.length, (i) {
+                      final isActive = i == _currentStep;
+                      final isDone  = i < _currentStep;
+                      return Expanded(
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 350),
+                                curve: Curves.easeInOut,
+                                height: 4,
+                                decoration: BoxDecoration(
+                                  color: isDone ? context.halal : isActive ? primary : context.divider,
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                            ),
+                            if (i < _steps.length - 1) const SizedBox(width: 4),
+                          ],
+                        ),
+                      );
+                    }),
+                  ),
+                  const SizedBox(height: 28),
+
+                  // ── Icon bounce + label slide ─────────────────────────
+                  FadeTransition(
+                    opacity: _labelFade,
+                    child: SlideTransition(
+                      position: _labelSlide,
+                      child: Column(
+                        children: [
+                          // Bouncing icon
+                          ScaleTransition(
+                            scale: _iconBounce,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                // Radial glow
+                                Container(
+                                  width: 72, height: 72,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: RadialGradient(
+                                      colors: [primary.withOpacity(0.18), primary.withOpacity(0.0)],
+                                    ),
+                                  ),
+                                ),
+                                // Icon circle
+                                Container(
+                                  width: 52, height: 52,
+                                  decoration: BoxDecoration(
+                                    color: primary.withOpacity(0.12),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: primary.withOpacity(0.25), width: 1.5),
+                                  ),
+                                  child: Icon(step.icon, color: primary, size: 24),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          Text(
+                            step.label,
+                            style: TextStyle(color: context.textDark, fontSize: 16, fontWeight: FontWeight.w800, letterSpacing: -0.4),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            '${_currentStep + 1} / ${_steps.length}',
+                            style: TextStyle(color: context.textMuted, fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 0.5),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  // ── Progress bar with shimmer ─────────────────────────
+                  AnimatedBuilder(
+                    animation: Listenable.merge([_progressAnim, _shimmerAnim]),
+                    builder: (_, __) {
+                      return ClipRRect(
+                        borderRadius: BorderRadius.circular(6),
+                        child: SizedBox(
+                          height: 6,
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              // Track
+                              Container(color: context.divider),
+                              // Gradient fill
+                              FractionallySizedBox(
+                                widthFactor: _progressAnim.value,
+                                alignment: Alignment.centerLeft,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [primary.withOpacity(0.65), primary],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              // Shimmer sweep (clipped to fill width)
+                              FractionallySizedBox(
+                                widthFactor: _progressAnim.value,
+                                alignment: Alignment.centerLeft,
+                                child: ShaderMask(
+                                  shaderCallback: (rect) => LinearGradient(
+                                    begin: Alignment.centerLeft,
+                                    end: Alignment.centerRight,
+                                    colors: [
+                                      Colors.transparent,
+                                      Colors.white.withOpacity(0.45),
+                                      Colors.transparent,
+                                    ],
+                                    stops: [
+                                      (_shimmerAnim.value - 0.3).clamp(0.0, 1.0),
+                                      _shimmerAnim.value.clamp(0.0, 1.0),
+                                      (_shimmerAnim.value + 0.3).clamp(0.0, 1.0),
+                                    ],
+                                  ).createShader(rect),
+                                  blendMode: BlendMode.srcATop,
+                                  child: Container(color: Colors.white),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Paints a partial arc (dashed-look via short arc) used as the spinning border.
+class _ArcBorderPainter extends CustomPainter {
+  final Color color;
+  const _ArcBorderPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color.withOpacity(0.6)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5
+      ..strokeCap = StrokeCap.round;
+
+    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
+    // Draw three short arcs, evenly spaced, for a "dashed ring" feel
+    const gap = 0.35; // radians gap between arcs
+    const sweep = (2 * 3.14159 - gap * 3) / 3;
+    for (int i = 0; i < 3; i++) {
+      final start = i * (sweep + gap);
+      canvas.drawArc(rect, start, sweep, false, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_ArcBorderPainter old) => old.color != color;
+}
+
+class _LoadingStep {
+  final IconData icon;
+  final String label;
+  const _LoadingStep({required this.icon, required this.label});
+}
+

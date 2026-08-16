@@ -4,14 +4,18 @@ import '../../../core/notifications/notification_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'dart:convert';
 
 class AuthRepository {
   final ApiService _apiService = ApiService();
   final FlutterSecureStorage _storage = const FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
-  final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: ['email', 'profile'],
+    serverClientId: '900192262603-1v5t8hgmboe173j1h997p1bfk4kedn4k.apps.googleusercontent.com',
+  );
 
-  Future<Map<String, dynamic>?> register(String name, String email, String password, String passwordConfirmation, {String? location, String? phoneNumber, String? occupation, String? dob, String? investmentGoal}) async {
+  Future<Map<String, dynamic>?> register(String name, String email, String password, String passwordConfirmation, {String? location, String? phoneNumber, String? investorType, String? primaryUseCase, String? investmentExperience}) async {
     try {
       final response = await _apiService.post('register', {
         'name': name,
@@ -20,15 +24,15 @@ class AuthRepository {
         'password_confirmation': passwordConfirmation,
         'location': location,
         'phone_number': phoneNumber,
-        'occupation': occupation,
-        'dob': dob,
-        'investment_goal': investmentGoal,
+        'investor_type': investorType,
+        'primary_use_case': primaryUseCase,
+        'investment_experience': investmentExperience,
       });
 
       if (response.statusCode == 201) {
         final data = response.data['data'];
         await _storage.write(key: 'access_token', value: data['access_token']);
-        _registerFCMToken();
+        registerFCMToken();
         return data['user'];
       }
     } on DioException catch (e) {
@@ -47,7 +51,7 @@ class AuthRepository {
       if (response.statusCode == 200) {
         final data = response.data['data'];
         await _storage.write(key: 'access_token', value: data['access_token']);
-        _registerFCMToken();
+        registerFCMToken();
         return data['user'];
       }
     } on DioException catch (e) {
@@ -65,7 +69,7 @@ class AuthRepository {
       if (response.statusCode == 200) {
         final data = response.data['data'];
         await _storage.write(key: 'access_token', value: data['access_token']);
-        _registerFCMToken();
+        registerFCMToken();
         return data['user'];
       }
     } on DioException catch (e) {
@@ -92,10 +96,13 @@ class AuthRepository {
 
   Future<void> logout() async {
     try {
-      await _googleSignIn.signOut();
-      await _apiService.post('logout', {});
+      // We don't await google sign out strictly to avoid hanging if not logged in via Google
+      _googleSignIn.signOut().catchError((_) => null);
+      
+      // Attempt backend logout with a strict 3-second timeout
+      await _apiService.post('logout', {}).timeout(const Duration(seconds: 3));
     } catch (e) {
-      // In case of network error, still clear local token
+      // In case of network error or timeout, proceed to clear local token
     } finally {
       await _storage.deleteAll();
     }
@@ -141,13 +148,30 @@ class AuthRepository {
     return null;
   }
 
-  void _registerFCMToken() async {
+  void registerFCMToken() async {
     try {
       final pushService = PushNotificationService();
       final token = await pushService.getToken();
       if (token != null) {
         await _apiService.post('notifications/subscribe', {'fcm_token': token});
       }
+    } catch (e) {
+      // Non-fatal
+    }
+  }
+
+  Future<void> unsubscribeFCMToken() async {
+    try {
+      await _apiService.post('notifications/unsubscribe', {});
+      await FirebaseMessaging.instance.deleteToken();
+    } catch (e) {
+      // Non-fatal
+    }
+  }
+  
+  Future<void> updateDigestPreference(bool enabled) async {
+    try {
+      await _apiService.put('updates/digest', {'email_enabled': enabled});
     } catch (e) {
       // Non-fatal
     }

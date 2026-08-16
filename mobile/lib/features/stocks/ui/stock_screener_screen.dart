@@ -183,7 +183,7 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
                           children: ['halal', 'doubtful', 'non-halal'].map((status) {
                             final isSelected = tempStatuses.contains(status);
                             return FilterChip(
-                              label: Text(status == 'halal' ? 'SHARIAH COMPLIANT' : (status == 'non-halal' ? 'SHARIAH NON-COMPLIANT' : 'DOUBTFUL'), style: TextStyle(color: isSelected ? Colors.black : context.textMuted, fontSize: 12, fontWeight: FontWeight.bold)),
+                              label: Text(status == 'halal' ? 'SHARIAH COMPLIANT' : ((status == 'non-halal' || status == 'non-compliant') ? 'SHARIAH NON-COMPLIANT' : 'DOUBTFUL'), style: TextStyle(color: isSelected ? Colors.black : context.textMuted, fontSize: 12, fontWeight: FontWeight.bold)),
                               selected: isSelected,
                               selectedColor: context.primary,
                               backgroundColor: context.bg,
@@ -457,7 +457,7 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
                 ),
                 child: Row(
                   children: [
-                    Text(_selectedStatuses.map((s) => s == 'halal' ? 'SHARIAH COMPLIANT' : (s == 'non-halal' ? 'SHARIAH NON-COMPLIANT' : 'DOUBTFUL')).join(', '), style: TextStyle(color: context.textDark, fontSize: 11, fontWeight: FontWeight.bold)),
+                    Text(_selectedStatuses.map((s) => s == 'halal' ? 'SHARIAH COMPLIANT' : ((s == 'non-halal' || s == 'non-compliant') ? 'SHARIAH NON-COMPLIANT' : 'DOUBTFUL')).join(', '), style: TextStyle(color: context.textDark, fontSize: 11, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
@@ -529,33 +529,7 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
                         children: [
                           Text(
                             stock['symbol'],
-                            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: context.textDark, letterSpacing: -0.3),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Wrap(
-                              spacing: 6,
-                              runSpacing: 4,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                  decoration: BoxDecoration(color: context.primary.withOpacity(0.08), borderRadius: BorderRadius.circular(16)),
-                                  child: Text(
-                                    (stock['sector'] ?? 'Unknown').toUpperCase(),
-                                    style: TextStyle(color: context.primary, fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: 0.5),
-                                  ),
-                                ),
-                                if (stock['industry'] != null && stock['industry'].toString().isNotEmpty)
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                    decoration: BoxDecoration(color: context.primary.withOpacity(0.08), borderRadius: BorderRadius.circular(16)),
-                                    child: Text(
-                                      stock['industry'].toString().toUpperCase(),
-                                      style: TextStyle(color: context.primary, fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: 0.5),
-                                    ),
-                                  ),
-                              ],
-                            ),
+                            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: context.textDark, letterSpacing: -0.3),
                           ),
                         ],
                       ),
@@ -564,7 +538,31 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
                         stock['name'] ?? 'Unknown',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 12, color: context.textMuted),
+                        style: TextStyle(fontSize: 12, color: context.textMuted, fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(height: 6),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(color: context.divider.withOpacity(0.5), borderRadius: BorderRadius.circular(4)),
+                            child: Text(
+                              (stock['sector'] ?? 'Unknown').toUpperCase(),
+                              style: TextStyle(color: context.textDark.withOpacity(0.7), fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 0.2),
+                            ),
+                          ),
+                          if (stock['industry'] != null && stock['industry'].toString().isNotEmpty)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(color: context.divider.withOpacity(0.5), borderRadius: BorderRadius.circular(4)),
+                              child: Text(
+                                stock['industry'].toString().toUpperCase(),
+                                style: TextStyle(color: context.textDark.withOpacity(0.7), fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 0.2),
+                              ),
+                            ),
+                        ],
                       ),
                     ],
                   ),
@@ -573,7 +571,7 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      '₦${(double.tryParse(stock['latest_price']?.toString() ?? '0') ?? 0.0).toStringAsFixed(2)}',
+                      '₦${(double.tryParse(stock['latest_price']?.toString() ?? '0') ?? 0.0).toStringAsFixed(2).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}',
                       style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: context.textDark),
                     ),
                     const SizedBox(height: 2),

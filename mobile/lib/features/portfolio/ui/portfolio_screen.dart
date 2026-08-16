@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/api/api_service.dart';
+import 'tabs/update_tab.dart';
 import 'tabs/portfolio_overview_tab.dart';
 import 'tabs/purification_tab.dart';
 import 'tabs/resources_tab.dart'; 
@@ -42,7 +43,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> with WidgetsBindingOb
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 5,
+      length: 6,
       child: Scaffold(
         backgroundColor: context.bg,
         appBar: AppBar(
@@ -66,6 +67,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> with WidgetsBindingOb
             dividerColor: Colors.transparent,
             splashBorderRadius: BorderRadius.circular(20),
             tabs: [
+              Tab(text: 'Update'),
               Tab(text: 'Holdings'),
               Tab(text: 'Purification'),
               Tab(text: 'Zakat'),
@@ -76,6 +78,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> with WidgetsBindingOb
         ),
         body: const TabBarView(
           children: [
+            UpdateTab(),
             PortfolioOverviewTab(),
             PurificationTab(),
             ZakatCalculatorScreen(isTab: true),

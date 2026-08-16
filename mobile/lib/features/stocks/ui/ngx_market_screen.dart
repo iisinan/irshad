@@ -250,30 +250,6 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
   }
 
   Widget _buildStockCard(Map<String, dynamic> stock) {
-    final isPending = stock['_verdict_pending'] == true;
-    final status = stock['status']?['status'] ?? 'doubtful';
-    
-    Color statusColor;
-    IconData statusIcon;
-    if (isPending) {
-      statusColor = Colors.grey.shade400;
-      statusIcon = Icons.hourglass_empty_rounded;
-    } else {
-      switch (status) {
-        case 'halal':
-          statusColor = context.halal;
-          statusIcon = Icons.check_circle_rounded;
-          break;
-        case 'non-halal':
-          statusColor = const Color(0xFFDC2626);
-          statusIcon = Icons.cancel_rounded;
-          break;
-        default:
-          statusColor = context.questionable;
-          statusIcon = Icons.help_rounded;
-      }
-    }
-
     return InkWell(
       onTap: () {
         StockDetailScreen.openWithLoading(context, stock);
@@ -295,9 +271,9 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
               borderRadius: 22,
             ),
             const SizedBox(width: 14),
-            // Ticker & Name
+            // Ticker, Name & Status
             Expanded(
-              flex: 2,
+              flex: 3,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -315,32 +291,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
                 ],
               ),
             ),
-            // Sector
-            Expanded(
-              flex: 2,
-              child: Align(
-                alignment: Alignment.center,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: context.primary.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                  child: Text(
-                    (stock['sector'] ?? 'Unknown').toUpperCase(),
-                    style: TextStyle(
-                      color: context.primary,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.5,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ),
-            ),
-            // Price
+            // Price & Sector
             Expanded(
               flex: 2,
               child: Column(
@@ -348,8 +299,27 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    '₦${(double.tryParse(stock['latest_price']?.toString() ?? '0') ?? 0.0).toStringAsFixed(2)}',
-                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: context.textDark),
+                    '₦${(double.tryParse(stock['latest_price']?.toString() ?? '0') ?? 0.0).toStringAsFixed(2).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}',
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: context.textDark, letterSpacing: -0.5),
+                  ),
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: context.divider.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      (stock['sector'] ?? 'Unknown').toUpperCase(),
+                      style: TextStyle(
+                        color: context.textDark.withOpacity(0.7),
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.2,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ],
               ),
@@ -361,35 +331,6 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
   }
 
   Widget _buildGridCard(Map<String, dynamic> stock) {
-    final isPending = stock['_verdict_pending'] == true;
-    final status = stock['status']?['status'] ?? 'doubtful';
-    
-    Color statusColor;
-    IconData statusIcon;
-    String statusLabel;
-    if (isPending) {
-      statusColor = Colors.grey.shade400;
-      statusIcon = Icons.hourglass_empty_rounded;
-      statusLabel = 'VERIFYING...';
-    } else {
-      switch (status) {
-        case 'halal':
-          statusColor = context.halal;
-          statusIcon = Icons.check_circle_rounded;
-          statusLabel = 'SHARIAH COMPLIANT';
-          break;
-        case 'non-halal':
-          statusColor = const Color(0xFFDC2626);
-          statusIcon = Icons.cancel_rounded;
-          statusLabel = 'SHARIAH NON-COMPLIANT';
-          break;
-        default:
-          statusColor = context.questionable;
-          statusIcon = Icons.help_rounded;
-          statusLabel = 'DOUBTFUL';
-      }
-    }
-
     return InkWell(
       onTap: () {
         StockDetailScreen.openWithLoading(context, stock);
@@ -430,32 +371,8 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
             ),
             const Spacer(),
             Text(
-              '₦${(stock['latest_price'] ?? 0).toStringAsFixed(2)}',
+              '₦${(double.tryParse(stock['latest_price']?.toString() ?? '0') ?? 0.0).toStringAsFixed(2).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}',
               style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: context.textDark),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: statusColor.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(100), // Pill shape
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(statusIcon, size: 12, color: statusColor),
-                  const SizedBox(width: 4),
-                  Text(
-                    statusLabel,
-                    style: TextStyle(
-                      color: statusColor,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ],
-              ),
             ),
           ],
         ),

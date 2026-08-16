@@ -57,7 +57,7 @@ class ApiService {
             await _storage.delete(key: 'access_token');
             if (ApiService.navigatorKey.currentContext != null) {
               Provider.of<AppStateProvider>(ApiService.navigatorKey.currentContext!, listen: false).setAuthenticated(false);
-              ApiService.navigatorKey.currentState?.pushNamedAndRemoveUntil('/main', (route) => false);
+              ApiService.navigatorKey.currentState?.pushNamedAndRemoveUntil('/welcome', (route) => false);
             }
           }
         }

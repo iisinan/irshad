@@ -41,7 +41,7 @@ class FetchResourcesCommand extends Command
         $this->info('Fetching from YouTube API...');
 
         // Trusted channels or generic safe queries
-        $queries = ['Halal Investing', 'Islamic Finance', 'Zakat on Shares', 'AAOIFI Standards'];
+        $queries = ['Halal stocks', 'AAOFI screening', 'AAOIFI purification', 'stock zakat'];
 
         foreach ($queries as $query) {
             $response = Http::get('https://www.googleapis.com/youtube/v3/search', [

@@ -85,8 +85,8 @@ const StatusPill = ({ verdict }) => {
   const purif = typeof verdict === 'object' ? verdict?.purification_required : false;
 
   const map = {
-    halal:     { label: purif ? 'Halal w/ Purify' : 'Halal',     bg: purif ? 'rgba(245, 158, 11, 0.15)' : 'var(--halal-bg)',     color: purif ? '#f59e0b' : 'var(--halal)',     border: purif ? 'rgba(245, 158, 11, 0.4)' : 'var(--halal-border)'     },
-    compliant: { label: purif ? 'Halal w/ Purify' : 'Halal',     bg: purif ? 'rgba(245, 158, 11, 0.15)' : 'var(--halal-bg)',     color: purif ? '#f59e0b' : 'var(--halal)',     border: purif ? 'rgba(245, 158, 11, 0.4)' : 'var(--halal-border)'     },
+    halal:     { label: purif ? 'Shariah Compliant w/ Purify' : 'Shariah Compliant',     bg: purif ? 'rgba(245, 158, 11, 0.15)' : 'var(--halal-bg)',     color: purif ? '#f59e0b' : 'var(--halal)',     border: purif ? 'rgba(245, 158, 11, 0.4)' : 'var(--halal-border)'     },
+    compliant: { label: purif ? 'Shariah Compliant w/ Purify' : 'Shariah Compliant',     bg: purif ? 'rgba(245, 158, 11, 0.15)' : 'var(--halal-bg)',     color: purif ? '#f59e0b' : 'var(--halal)',     border: purif ? 'rgba(245, 158, 11, 0.4)' : 'var(--halal-border)'     },
     non_compliant: { label: 'Shariah Non-Compliant', bg: 'var(--non-compliant-bg)', color: 'var(--non-compliant)', border: 'var(--non-compliant-border)' },
     'non-compliant': { label: 'Shariah Non-Compliant', bg: 'var(--non-compliant-bg)', color: 'var(--non-compliant)', border: 'var(--non-compliant-border)' },
     doubtful:  { label: 'Doubtful',  bg: 'var(--doubtful-bg)',  color: 'var(--doubtful)',  border: 'var(--doubtful-border)'  },

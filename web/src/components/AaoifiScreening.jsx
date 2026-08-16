@@ -63,7 +63,7 @@ const Section = ({ children, style, className }) => (
 const SectionHead = ({ icon:Icon, iconColor='#C49852', iconBg='rgba(196,152,82,0.1)', iconBorder='rgba(196,152,82,0.22)', title, subtitle, right, accent }) => (
   <div style={{ padding:'24px',borderBottom:'1px solid var(--border)',display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,flexWrap:'wrap',background:'var(--bg-section)',position:'relative',overflow:'hidden' }}>
     {accent&&<div style={{ position:'absolute',top:0,left:0,right:0,height:3,background:accent }}/>}
-    <div style={{ display:'flex',alignItems:'center',gap:10,marginTop:accent?4:0 }}>
+    <div style={{ display:'flex',alignItems:'center',gap:10,flexWrap:'wrap',marginTop:accent?4:0 }}>
       <div style={{ width:32,height:32,borderRadius:10,background:iconBg,border:`1px solid ${iconBorder}`,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0 }}>
         <Icon size={15} color={iconColor}/>
       </div>
@@ -500,7 +500,7 @@ const AaoifiScreening = () => {
           <Link to="/portfolio#market" className="hover-lift" style={{ display:'flex',alignItems:'center',justifyContent:'center',width:36,height:36,background:'var(--bg)',border:'1px solid var(--border)',borderRadius:'50%',color:'var(--text-dark)',textDecoration:'none',transition:'all 0.2s',boxShadow:'var(--shadow-sm)' }}>
             <ArrowLeft size={18}/>
           </Link>
-          <div style={{ display:'flex',gap:10 }}>
+          <div style={{ display:'flex',gap:10,flexWrap:'wrap' }}>
             {isSearchOpen ? (
               <div style={{ position:'relative' }}>
                 <form 
@@ -720,7 +720,7 @@ const AaoifiScreening = () => {
           <SectionHead icon={Building2} title="Business Activity Screening" subtitle="Stage 1 · Qualitative analysis of core revenue streams"
             iconColor="var(--primary)" iconBg="rgba(6,78,59,0.08)" iconBorder="rgba(6,78,59,0.18)"
             accent={stage1Status==='halal'?'linear-gradient(90deg,#10B981,rgba(16,185,129,0.1),transparent)':stage1Status==='doubtful'?'linear-gradient(90deg,#D97706,rgba(245,158,11,0.1),transparent)':'linear-gradient(90deg,#EF4444,rgba(239,68,68,0.1),transparent)'}
-            right={<div style={{ display:'flex',alignItems:'center',gap:10 }}>
+            right={<div style={{ display:'flex',alignItems:'center',gap:10,flexWrap:'wrap' }}>
               {(report.reporting_period||report.reporting_year)&&<div style={{ fontSize:'0.67rem',color:'var(--text-muted)',fontWeight:600,display:'flex',alignItems:'center',gap:4 }}><Calendar size={10}/> {report.reporting_period||''} {report.reporting_year?`(${report.reporting_year})`:''}</div>}
               <StatusBadge status={stage1Status}/>
             </div>}/>

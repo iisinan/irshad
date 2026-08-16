@@ -235,7 +235,7 @@ const AdminUsers = () => {
           </span>
         </div>
 
-        <div style={{ overflowX: 'auto' }}>
+        <div style={{ overflowX: 'auto', maxWidth: '100%' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '700px' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)' }}>
@@ -363,7 +363,7 @@ const AdminUsers = () => {
               <input required type="password" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} minLength={8} style={inputStyle} placeholder="Min 8 characters" />
             </FormField>
             
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '28px' }}>
+            <div className="mobile-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '28px' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' }}>Role</label>
                 <div style={{ display: 'flex', gap: '8px' }}>
@@ -425,7 +425,7 @@ const AdminUsers = () => {
               <input required type="email" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} style={inputStyle} />
             </FormField>
             
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '28px' }}>
+            <div className="mobile-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '28px' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' }}>Role</label>
                 <div style={{ display: 'flex', gap: '8px' }}>

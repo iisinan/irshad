@@ -473,7 +473,7 @@ function PurificationCard({ h, onPurify, onStatClick }) {
           </div>
 
           {/* Right: Amount & Purify Button */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
             <div style={{ textAlign: 'right' }}>
                <div style={{ fontSize: '0.62rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '2px' }}>Amount to Purify</div>
                <div style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--primary)' }}>{fmt(due)}</div>
@@ -486,7 +486,7 @@ function PurificationCard({ h, onPurify, onStatClick }) {
         </div>
 
         {/* Stats row - super compact horizontal scroll */}
-        <div style={{ display: 'flex', gap: '8px', marginTop: '16px', overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: '4px' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '16px', overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: '4px' }}>
           {statItems.map((s, i) => (
              <div
               key={i}
@@ -644,8 +644,8 @@ export default function PurificationTab({ data, initialSymbol, refreshData, onCl
           </div>
 
           {purificationDue > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-              <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 <div style={{ background: 'var(--body-bg)', border: '1px solid var(--border)', borderRadius: '16px', padding: '12px 16px' }}>
                   <div style={{ fontSize: '0.62rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>Total Due</div>
                   <div style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--text-dark)' }}>₦{purificationDue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>

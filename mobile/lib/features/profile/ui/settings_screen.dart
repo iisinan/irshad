@@ -5,6 +5,9 @@ import '../../../core/api/api_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
 import '../../../core/providers/app_state_provider.dart';
+import '../../auth/data/auth_repository.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:flutter/services.dart';
 
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 class SettingsScreen extends StatefulWidget {
@@ -20,6 +23,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _biometricsEnabled = false;
   String _selectedLanguage = 'English';
   final List<String> _languages = ['English', 'Hausa', 'Yoruba', 'Igbo'];
+  
+  final LocalAuthentication _localAuth = LocalAuthentication();
+  final AuthRepository _authRepository = AuthRepository();
+  final ApiService _apiService = ApiService();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
 
   @override
   void initState() {
@@ -31,20 +39,48 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _biometricsEnabled = prefs.getBool('biometrics_enabled') ?? false;
+      _notificationsEnabled = prefs.getBool('notifications_enabled') ?? true;
+      _digestEnabled = prefs.getBool('digest_enabled') ?? true;
+      _selectedLanguage = prefs.getString('language') ?? 'English';
     });
   }
 
   Future<void> _toggleBiometrics(bool val) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('biometrics_enabled', val);
-    setState(() {
-      _biometricsEnabled = val;
-    });
+    if (val) {
+      try {
+        final canCheckBiometrics = await _localAuth.canCheckBiometrics;
+        final isDeviceSupported = await _localAuth.isDeviceSupported();
+        
+        if (canCheckBiometrics && isDeviceSupported) {
+          final authenticated = await _localAuth.authenticate(
+            localizedReason: 'Authenticate to enable biometric login',
+            biometricOnly: true,
+            persistAcrossBackgrounding: true,
+          );
+          if (authenticated) {
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setBool('biometrics_enabled', true);
+            setState(() => _biometricsEnabled = true);
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Biometric login enabled.')));
+            }
+          }
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Biometrics not supported on this device.')));
+          }
+        }
+      } on PlatformException catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Biometrics error: ${e.message}')));
+        }
+      }
+    } else {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('biometrics_enabled', false);
+      setState(() => _biometricsEnabled = false);
+    }
   }
-
-
-final ApiService _apiService = ApiService();
-  final FlutterSecureStorage _storage = const FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
 
   Future<void> _launchUrl(String urlString) async {
     final Uri url = Uri.parse(urlString);
@@ -102,6 +138,55 @@ final ApiService _apiService = ApiService();
     );
   }
 
+  void _showSignOutDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Sign Out'),
+        content: Text('Are you sure you want to sign out?', style: TextStyle(color: context.textMuted)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel', style: TextStyle(color: context.textDark)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: context.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+              elevation: 0,
+            ),
+            onPressed: () async {
+              Navigator.pop(context); // Close dialog
+              
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => const Center(child: CircularProgressIndicator()),
+              );
+              
+              try {
+                await _authRepository.logout();
+                if (mounted) {
+                  Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(false);
+                  Navigator.pop(context); // Close loading dialog
+                  Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+                }
+              } catch (e) {
+                if (mounted) {
+                  Navigator.pop(context); // Close loading dialog
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to sign out. Try again.')));
+                }
+              }
+            },
+            child: const Text('Sign Out'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -130,13 +215,27 @@ final ApiService _apiService = ApiService();
                 icon: Icons.notifications_active_rounded,
                 title: 'Push Notifications',
                 value: _notificationsEnabled,
-                onChanged: (val) => setState(() => _notificationsEnabled = val),
+                onChanged: (val) async {
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setBool('notifications_enabled', val);
+                  setState(() => _notificationsEnabled = val);
+                  if (val) {
+                    _authRepository.registerFCMToken(); // Need to expose this or handle it
+                  } else {
+                    await _authRepository.unsubscribeFCMToken();
+                  }
+                },
               ),
               _buildSwitchTile(
                 icon: Icons.email_rounded,
                 title: 'Weekly Digest',
                 value: _digestEnabled,
-                onChanged: (val) => setState(() => _digestEnabled = val),
+                onChanged: (val) async {
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setBool('digest_enabled', val);
+                  setState(() => _digestEnabled = val);
+                  await _authRepository.updateDigestPreference(val);
+                },
               ),
             ]),
 
@@ -183,7 +282,25 @@ final ApiService _apiService = ApiService();
               ),
             ]),
 
-            const SizedBox(height: 48),
+            const SizedBox(height: 32),
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              width: double.infinity,
+              child: TextButton.icon(
+                style: TextButton.styleFrom(
+                  backgroundColor: context.bgAlt,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    side: BorderSide(color: context.divider),
+                  ),
+                ),
+                icon: Icon(Icons.logout_rounded, color: context.primary, size: 20),
+                label: Text('Sign Out', style: TextStyle(color: context.primary, fontWeight: FontWeight.w700, fontSize: 14)),
+                onPressed: _showSignOutDialog,
+              ),
+            ),
+            const SizedBox(height: 16),
             TextButton(
               onPressed: _showDeleteAccountDialog,
               child: Text('Delete Account', style: TextStyle(color: context.haram, fontWeight: FontWeight.w800, fontSize: 13)),
@@ -244,8 +361,10 @@ final ApiService _apiService = ApiService();
         style: TextStyle(color: context.primary, fontWeight: FontWeight.w800, fontSize: 14),
         icon: Icon(Icons.keyboard_arrow_down_rounded, color: context.textMuted),
         items: _languages.map((l) => DropdownMenuItem(value: l, child: Text(l))).toList(),
-        onChanged: (val) {
+        onChanged: (val) async {
           if (val != null) {
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString('language', val);
             setState(() => _selectedLanguage = val);
           }
         },

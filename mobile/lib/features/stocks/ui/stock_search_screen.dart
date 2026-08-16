@@ -308,7 +308,7 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
   Widget _buildStockRow(Map<String, dynamic> stock) {
     final status = stock['status']?['status']?.toString().toLowerCase() ?? 'doubtful';
     final isHalal = status == 'halal';
-    final isNonHalal = status == 'non-halal';
+    final isNonHalal = status == 'non-halal' || status == 'non-compliant';
     
     Color statusColor = isHalal ? context.halal : (isNonHalal ? context.haram : context.questionable);
     Color badgeBg = isHalal ? context.halalBg : (isNonHalal ? context.haramBg : context.questionableBg);

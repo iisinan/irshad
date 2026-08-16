@@ -43,7 +43,7 @@ class _AlertsManagementScreenState extends State<AlertsManagementScreen> {
                   const SizedBox(height: 16),
                   Text('No active alerts', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: context.textDark)),
                   const SizedBox(height: 8),
-                  Text('Set alerts from the Watchlist to get notified.', style: TextStyle(color: context.textMuted)),
+                  Text('Set alerts from the Alerts tab to get notified.', style: TextStyle(color: context.textMuted)),
                 ],
               ),
             )

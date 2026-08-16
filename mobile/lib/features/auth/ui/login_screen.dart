@@ -8,6 +8,7 @@ import '../data/auth_repository.dart';
 import 'forgot_password_screen.dart';
 
 import 'package:irshad_mobile/core/theme/app_theme.dart';
+
 class LoginScreen extends StatefulWidget {
   final VoidCallback? onBack;
   const LoginScreen({super.key, this.onBack});
@@ -16,12 +17,14 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _authRepository = AuthRepository();
   final LocalAuthentication _localAuth = LocalAuthentication();
   final _secureStorage = const FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
+  
+  late AnimationController _animationController;
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _biometricsEnabled = false;
@@ -29,7 +32,17 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
+    _animationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 1000));
+    _animationController.forward();
     _checkBiometrics();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   Future<void> _checkBiometrics() async {
@@ -58,7 +71,6 @@ class _LoginScreenState extends State<LoginScreen> {
         final token = await _secureStorage.read(key: 'access_token');
         
         if (token != null) {
-          // If token exists, just proceed as authenticated
           if (mounted) {
             Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
             Navigator.of(context, rootNavigator: true).pushReplacementNamed('/main');
@@ -73,9 +85,9 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // Theme Constants
-Color get cardBg => context.bgAlt;
-void _login() async {
+  Color get cardBg => context.bgAlt;
+
+  void _login() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       _showError('Please fill in all fields');
       return;
@@ -129,10 +141,10 @@ void _login() async {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: context.bg,
+      extendBodyBehindAppBar: true,
       appBar: (widget.onBack != null || Navigator.canPop(context))
           ? AppBar(
-              backgroundColor: context.bg,
+              backgroundColor: Colors.transparent,
               elevation: 0,
               leading: IconButton(
                 icon: Icon(Icons.arrow_back_ios_new_rounded, color: context.textDark, size: 20),
@@ -140,157 +152,270 @@ void _login() async {
               ),
             )
           : null,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 20),
-              // Header
-              Text(
-                'Welcome back',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.w900,
-                  color: context.textDark,
-                  letterSpacing: -1,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Sign in to your IRSHAD account to access your\nportfolio and premium features.',
-                style: TextStyle(color: context.textMuted, height: 1.5, fontSize: 15),
-              ),
-              const SizedBox(height: 48),
-
-              // Form fields
-              _buildLabel('Email Address'),
-              _buildTextField(
-                controller: _emailController,
-                hint: 'name@example.com',
-                icon: Icons.alternate_email_rounded,
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: 24),
-              
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildLabel('Password'),
-                  TextButton(
-                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ForgotPasswordScreen())),
-                    style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
-                    child: Text('Forgot Password?', 
-                      style: TextStyle(color: context.primary, fontWeight: FontWeight.w700, fontSize: 13)),
-                  ),
-                ],
-              ),
-              _buildTextField(
-                controller: _passwordController,
-                hint: 'Enter your password',
-                icon: Icons.lock_outline_rounded,
-                isPassword: true,
-                obscure: _obscurePassword,
-                toggleObscure: () => setState(() => _obscurePassword = !_obscurePassword),
-              ),
-              const SizedBox(height: 40),
-
-              // Login Button & Biometrics
-              Row(
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 56,
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _login,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: context.primary,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-                          elevation: 0,
-                        ),
-                        child: _isLoading 
-                          ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) 
-                          : const Text('Sign In', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-                      ),
-                    ),
-                  ),
-                  if (_biometricsEnabled) ...[
-                    const SizedBox(width: 16),
-                    SizedBox(
-                      height: 56,
-                      width: 56,
-                      child: OutlinedButton(
-                        onPressed: _isLoading ? null : _authenticateWithBiometrics,
-                        style: OutlinedButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          side: BorderSide(color: context.divider),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-                        ),
-                        child: Icon(Icons.fingerprint_rounded, color: context.textDark, size: 28),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-              
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(child: Divider(color: context.divider)),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: Text('or continue with', style: TextStyle(color: context.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
-                  ),
-                  Expanded(child: Divider(color: context.divider)),
-                ],
-              ),
-              const SizedBox(height: 24),
-              
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: OutlinedButton(
-                  onPressed: _isLoading ? null : _loginWithGoogle,
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: context.divider, width: 1.5),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-                  ),
-                  child: Text('Continue with Google', style: TextStyle(color: context.textDark, fontWeight: FontWeight.w700, fontSize: 16)),
-                ),
-              ),
-              
-              const SizedBox(height: 32),
-
-              // Register Link
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Don\'t have an account?', style: TextStyle(color: context.textMuted)),
-                  TextButton(
-                    onPressed: () => Navigator.pushNamed(context, '/register'),
-                    child: Text(
-                      'Create Account',
-                      style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 60),
-              
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.verified_user_rounded, size: 14, color: context.primary),
-                  SizedBox(width: 8),
-                  Text(
-                    'Secure & Shariah Compliant',
-                    style: TextStyle(color: context.textMuted, fontSize: 12, fontWeight: FontWeight.w600),
-                  ),
-                ],
-              ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              context.primary.withValues(alpha: 0.05),
+              context.bg,
+              context.bg,
             ],
+            stops: const [0.0, 0.4, 1.0],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 10),
+                // App Logo
+                _FadeSlide(
+                  controller: _animationController,
+                  delay: 0.0,
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Image.asset(
+                      'assets/mobile logo.png',
+                      height: 48,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                // Header
+                _FadeSlide(
+                  controller: _animationController,
+                  delay: 0.0,
+                  child: ShaderMask(
+                    blendMode: BlendMode.srcIn,
+                    shaderCallback: (bounds) => LinearGradient(
+                      colors: [context.textDark, context.primary],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ).createShader(bounds),
+                    child: Text(
+                      'Welcome back',
+                      style: TextStyle(
+                        fontSize: 34,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                        letterSpacing: -1.2,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _FadeSlide(
+                  controller: _animationController,
+                  delay: 0.1,
+                  child: Text(
+                    'Sign in to your IRSHAD account to access your\nportfolio and premium features.',
+                    style: TextStyle(color: context.textMuted, height: 1.5, fontSize: 15, fontWeight: FontWeight.w500),
+                  ),
+                ),
+                const SizedBox(height: 48),
+
+                // Form fields
+                _FadeSlide(
+                  controller: _animationController,
+                  delay: 0.2,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildLabel('Email Address'),
+                      _buildTextField(
+                        controller: _emailController,
+                        hint: 'name@example.com',
+                        icon: Icons.alternate_email_rounded,
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                
+                _FadeSlide(
+                  controller: _animationController,
+                  delay: 0.3,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _buildLabel('Password'),
+                          TextButton(
+                            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ForgotPasswordScreen())),
+                            style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
+                            child: Text('Forgot Password?', 
+                              style: TextStyle(color: context.primary, fontWeight: FontWeight.w700, fontSize: 13)),
+                          ),
+                        ],
+                      ),
+                      _buildTextField(
+                        controller: _passwordController,
+                        hint: 'Enter your password',
+                        icon: Icons.lock_outline_rounded,
+                        isPassword: true,
+                        obscure: _obscurePassword,
+                        toggleObscure: () => setState(() => _obscurePassword = !_obscurePassword),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 40),
+
+                // Login Button & Biometrics
+                _FadeSlide(
+                  controller: _animationController,
+                  delay: 0.4,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                color: context.primary.withValues(alpha: 0.25),
+                                blurRadius: 20,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          child: SizedBox(
+                            height: 56,
+                            child: ElevatedButton(
+                              onPressed: _isLoading ? null : _login,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: context.primary,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                                elevation: 0,
+                              ),
+                              child: _isLoading 
+                                ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) 
+                                : const Text('Sign In', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+                            ),
+                          ),
+                        ),
+                      ),
+                      if (_biometricsEnabled) ...[
+                        const SizedBox(width: 16),
+                        Container(
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                color: context.textDark.withValues(alpha: 0.05),
+                                blurRadius: 15,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: SizedBox(
+                            height: 56,
+                            width: 56,
+                            child: OutlinedButton(
+                              onPressed: _isLoading ? null : _authenticateWithBiometrics,
+                              style: OutlinedButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                backgroundColor: context.bg,
+                                side: BorderSide(color: context.divider, width: 1.5),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                              ),
+                              child: Icon(Icons.fingerprint_rounded, color: context.primary, size: 28),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(height: 24),
+                _FadeSlide(
+                  controller: _animationController,
+                  delay: 0.5,
+                  child: Row(
+                    children: [
+                      Expanded(child: Divider(color: context.divider)),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text('or continue with', style: TextStyle(color: context.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
+                      ),
+                      Expanded(child: Divider(color: context.divider)),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                
+                _FadeSlide(
+                  controller: _animationController,
+                  delay: 0.6,
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: OutlinedButton(
+                      onPressed: _isLoading ? null : _loginWithGoogle,
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: context.bg,
+                        side: BorderSide(color: context.divider, width: 1.5),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset('assets/images/google_logo.png', height: 24, width: 24),
+                          const SizedBox(width: 12),
+                          Text('Continue with Google', style: TextStyle(color: context.textDark, fontWeight: FontWeight.w700, fontSize: 16)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                
+                const SizedBox(height: 32),
+
+                // Register Link
+                _FadeSlide(
+                  controller: _animationController,
+                  delay: 0.7,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Don\'t have an account?', style: TextStyle(color: context.textMuted, fontWeight: FontWeight.w500)),
+                      TextButton(
+                        onPressed: () => Navigator.pushNamed(context, '/register'),
+                        child: Text(
+                          'Create Account',
+                          style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 60),
+                
+                _FadeSlide(
+                  controller: _animationController,
+                  delay: 0.8,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.verified_user_rounded, size: 14, color: context.primary),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Secure & Shariah Compliant',
+                        style: TextStyle(color: context.textMuted, fontSize: 12, fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -324,27 +449,64 @@ void _login() async {
       controller: controller,
       obscureText: obscure ?? false,
       keyboardType: keyboardType,
-      style: TextStyle(color: context.textDark, fontWeight: FontWeight.w500),
+      style: TextStyle(color: context.textDark, fontWeight: FontWeight.w600),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(color: context.textMuted, fontWeight: FontWeight.w400),
+        hintStyle: TextStyle(color: context.textMuted.withValues(alpha: 0.7), fontWeight: FontWeight.w500),
         prefixIcon: Icon(icon, color: context.textMuted, size: 20),
         suffixIcon: isPassword ? IconButton(
           icon: Icon(obscure! ? Icons.visibility_off_rounded : Icons.visibility_rounded, color: context.textMuted, size: 20),
           onPressed: toggleObscure,
         ) : null,
         filled: true,
-        fillColor: context.bgAlt,
+        fillColor: context.bg,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: context.divider, width: 1),
+          borderSide: BorderSide(color: context.divider, width: 1.5),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: context.primary, width: 1.5),
+          borderSide: BorderSide(color: context.primary, width: 2),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
+    );
+  }
+}
+
+class _FadeSlide extends StatelessWidget {
+  final AnimationController controller;
+  final double delay;
+  final Widget child;
+
+  const _FadeSlide({
+    required this.controller,
+    required this.delay,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final start = delay;
+    final end = (delay + 0.4).clamp(0.0, 1.0);
+
+    final animation = CurvedAnimation(
+      parent: controller,
+      curve: Interval(start, end, curve: Curves.easeOutCubic),
+    );
+
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        return Opacity(
+          opacity: animation.value,
+          child: Transform.translate(
+            offset: Offset(0, 20 * (1 - animation.value)),
+            child: child,
+          ),
+        );
+      },
+      child: child,
     );
   }
 }

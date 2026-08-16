@@ -177,12 +177,12 @@ export default function AdminFinancialReviewQueue() {
 
               {/* Expanded details */}
               {expandedId === item.id && (
-                <div style={{ padding: '24px', borderTop: '1px solid var(--border)', display: 'flex', gap: '32px' }}>
+                <div className="mobile-col" style={{ padding: '24px', borderTop: '1px solid var(--border)', display: 'flex', gap: '32px' }}>
                   
                   {/* Left column: Edit Form */}
                   <div style={{ flex: '1', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     <h5 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-dark)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Extracted Financial Data</h5>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div className="mobile-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                       {Object.entries(editData).map(([key, val]) => {
                         // Skip rendering non-primitive types if they sneak in
                         if (typeof val === 'object' && val !== null) return null;

@@ -171,7 +171,7 @@ export default function StatementTab({ data }) {
           </div>
         </div>
 
-        <div className="statement-table-wrapper" style={{ overflowX: 'auto' }}>
+        <div className="statement-table-wrapper" style={{ overflowX: 'auto', maxWidth: '100%' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '560px' }}>
             <thead>
               <tr style={{ background: 'var(--bg-section)', borderBottom: '2px solid var(--border)' }}>

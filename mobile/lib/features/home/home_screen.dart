@@ -42,10 +42,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'Explore',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: context.textDark,
                         fontSize: 28,
                         fontWeight: FontWeight.w900,
                         letterSpacing: -0.5,
@@ -59,7 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: context.bgAlt,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.settings_outlined, color: Colors.white, size: 20),
+                        child: Icon(Icons.settings_outlined, color: context.textDark, size: 20),
                       ),
                     ),
                   ],

@@ -96,6 +96,26 @@ export default function WatchlistTab({ initialSymbol, onClearInitialSymbol }) {
 
   useEffect(() => {
     loadData();
+
+    // Auto-sync when window comes into focus or periodically
+    const syncWatchlist = async () => {
+      try {
+        const wlRes = await fetchWatchlist();
+        setWatchlistItems(wlRes);
+        setWatchlistSymbols(wlRes.map(item => item.symbol));
+        localStorage.setItem('irshad_watchlist_items_cache_v3', JSON.stringify(wlRes));
+      } catch (e) {
+        console.error('Background sync failed:', e);
+      }
+    };
+
+    window.addEventListener('focus', syncWatchlist);
+    const syncInterval = setInterval(syncWatchlist, 15000);
+
+    return () => {
+      window.removeEventListener('focus', syncWatchlist);
+      clearInterval(syncInterval);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -190,10 +210,10 @@ export default function WatchlistTab({ initialSymbol, onClearInitialSymbol }) {
           <div className="hide-scrollbar" style={{ display:'flex', background:'var(--body-bg)', borderRadius:'14px', padding:'6px', gap:'8px', border: '1px solid var(--border)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)', overflowX: 'auto', maxWidth: '100%' }}>
             {[
               { id:'all', label:'All', icon: Layers, activeColor: 'var(--primary)' },
-              { id:'halal', label: 'Compliant', icon: ShieldCheck, activeColor: '#16a34a' },
-              { id:'purify', label: 'Purify', icon: Droplet, activeColor: '#eab308' },
+              { id:'halal', label: 'Shariah Compliant', icon: ShieldCheck, activeColor: '#16a34a' },
+              { id:'purify', label: 'Shariah Compliant (Purify)', icon: Droplet, activeColor: '#eab308' },
               { id:'doubtful', label: 'Doubtful', icon: HelpCircle, activeColor: '#d97706' },
-              { id:'nonhalal', label: 'Non-Compliant', icon: AlertTriangle, activeColor: '#dc2626' }
+              { id:'nonhalal', label: 'Shariah Non-Compliant', icon: AlertTriangle, activeColor: '#dc2626' }
             ].map(f => (
               <button
                 key={f.id}
@@ -248,18 +268,6 @@ export default function WatchlistTab({ initialSymbol, onClearInitialSymbol }) {
           <p style={{ color:'var(--text-muted)', fontSize: '0.88rem', marginBottom:'32px', maxWidth:'400px', lineHeight:1.6 }}>
             Keep an eye on promising stocks. Set an alert to track their Shariah compliance status and daily performance.
           </p>
-          <button 
-            onClick={() => navigate('/portfolio#market')} 
-            style={{ 
-              display:'inline-flex', alignItems:'center', gap:'8px', padding:'14px 28px', 
-              borderRadius:'14px', background:'var(--primary)', color:'white', border:'none', 
-              fontWeight:800, fontSize: '0.84rem', cursor:'pointer', textDecoration:'none',
-              boxShadow:'var(--shadow-sm)', transition:'transform 0.2s, boxShadow 0.2s' 
-            }}
-            className="hover-lift"
-          >
-            <BarChart2 size={18} strokeWidth={2.5}/> Explore Market
-          </button>
         </div>
       ) : (
         <div className="custom-scrollbar" style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '600px', overflowY: 'auto', paddingRight: '8px' }}>

@@ -107,35 +107,35 @@ export default function ZakatTab({ data }) {
   const [overrideActive, setOverrideActive] = useState(false);
 
   useEffect(() => {
-    loadSettings();
+    fetchLiveNisab();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const loadSettings = async () => {
+  const fetchLiveNisab = async () => {
+    setIsFetchingNisab(true);
+    setFetchError('');
     try {
-      const res = await getSettings();
-      if (res?.data) {
-        let currentRate = 1600;
-        if (res.data.zakat_exchange_rate) {
-          currentRate = Number(res.data.zakat_exchange_rate);
-          setExchangeRate(currentRate);
+      const res = await api.get('/zakat/prices');
+      if (res.data?.data) {
+        const { gold_price, silver_price, exchange_rate, override_active } = res.data.data;
+        
+        if (exchange_rate) setExchangeRate(Number(exchange_rate));
+        
+        if (gold_price > 0) {
+          setGoldPrice(Math.round(gold_price));
+        } else if (!override_active) {
+          throw new Error('Live API failed to return a valid price');
         }
-
-        // Only use override if it's a real positive number
-        const override = Number(res.data.zakat_gold_price_override);
-        if (override > 0) {
-          setGoldPrice(override);
-          setOverrideActive(true);
-        } else {
-          setOverrideActive(false);
-          await fetchLiveNisab(currentRate);
-        }
-      } else {
-        await fetchLiveNisab(exchangeRate);
+        
+        if (silver_price > 0) setSilverPrice(Math.round(silver_price));
+        
+        setOverrideActive(!!override_active);
       }
     } catch (err) {
-      console.error('Failed to load Zakat settings:', err);
-      await fetchLiveNisab(exchangeRate);
+      console.error('Failed to fetch Zakat prices:', err);
+      setFetchError('Could not fetch live price. Please enter manually.');
+    } finally {
+      setIsFetchingNisab(false);
     }
   };
 
@@ -180,32 +180,6 @@ export default function ZakatTab({ data }) {
   const agriRate = irrigation === 'natural' ? 0.1 : 0.05; // 10% natural, 5% artificial
   const agriZakatDue = agriEligible ? harvestNum * agriRate : 0;
 
-  const fetchLiveNisab = async (rateToUse = exchangeRate) => {
-    if (overrideActive) return; // Don't fetch if override is active
-    setIsFetchingNisab(true);
-    setFetchError('');
-    try {
-      const resGold = await fetch('https://api.gold-api.com/price/XAU');
-      if (!resGold.ok) throw new Error('Failed to fetch gold price');
-      const apiData = await resGold.json();
-      const pricePerGramUsd = apiData.price / 31.1035; // Troy Ounce to Gram
-      setGoldPrice(Math.round(pricePerGramUsd * rateToUse));
-      
-      try {
-        const resSilver = await fetch('https://api.gold-api.com/price/XAG');
-        if (resSilver.ok) {
-          const silData = await resSilver.json();
-          setSilverPrice(Math.round((silData.price / 31.1035) * rateToUse));
-        }
-      } catch (e) { console.error('Silver fetch failed', e); }
-      
-    } catch (err) {
-      console.error(err);
-      setFetchError('Could not fetch live price. Please enter manually.');
-    } finally {
-      setIsFetchingNisab(false);
-    }
-  };
 
   const handlePrint = () => {
     window.print();
@@ -648,7 +622,7 @@ export default function ZakatTab({ data }) {
                 </div>
                 
                 <div style={{ marginTop: '20px', textAlign: 'center' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Financial data intelligently fetched in real-time from MetalpriceAPI and CBN Exchange Rates</span>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Financial data fetched in real-time from Irshad backend services</span>
                 </div>
               </div>
             )}

@@ -441,10 +441,6 @@ class _BasketDetailScreenState extends State<BasketDetailScreen> {
 
   Widget _buildStockCard(dynamic company, int index) {
     final statusObj = company['status'];
-    final rawStatusStr = statusObj != null ? statusObj['status'].toString().toUpperCase() : 'DOUBTFUL';
-    final isCompliant = rawStatusStr == 'HALAL';
-    final isNonCompliant = rawStatusStr == 'NON-HALAL';
-    final statusStr = isCompliant ? 'SHARIAH COMPLIANT' : (isNonCompliant ? 'SHARIAH NON-COMPLIANT' : 'DOUBTFUL');
     
     final latestPrice = num.tryParse(company['latest_price']?.toString() ?? '0') ?? 0.0;
     final isPositive = (double.tryParse(company['price_change']?.toString() ?? '0') ?? 0) >= 0;
@@ -491,23 +487,6 @@ class _BasketDetailScreenState extends State<BasketDetailScreen> {
                           Text(
                             company['symbol'],
                             style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800, fontSize: 17),
-                          ),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: isCompliant ? context.halalBg : context.questionableBg,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              statusStr,
-                              style: TextStyle(
-                                color: isCompliant ? context.halal : context.questionable,
-                                fontSize: 9,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
                           ),
                         ],
                       ),

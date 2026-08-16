@@ -86,7 +86,7 @@ class UpgradeScreen extends StatelessWidget {
               ),
               _buildFeature(
                 Icons.bookmark_rounded,
-                'Unlimited Watchlists',
+                'Unlimited Alerts',
                 'Track as many stocks as you want',
                 const Color(0xFF7C3AED),
               ),

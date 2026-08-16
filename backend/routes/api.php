@@ -26,6 +26,7 @@ use App\Http\Controllers\TradeController;
 use App\Http\Controllers\UpdatesController;
 use App\Http\Controllers\VerificationController;
 use App\Http\Controllers\WatchlistController;
+use App\Http\Controllers\ZakatController;
 use App\Http\Middleware\AdminMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -71,6 +72,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/stocks/{symbol}/analysis', [StockController::class, 'getAiAnalysis']);
         Route::get('/stocks/{symbol}/aaoifi-screening', [StockController::class, 'aaoifiScreening']);
         Route::post('/stocks/{symbol}/chat', [StockController::class, 'chatAboutStock']);
+        Route::get('/zakat/prices', [ZakatController::class, 'getPrices']);
     });
 
     // ── Public Overview / Landing Page ──
@@ -197,6 +199,11 @@ Route::middleware('auth:sanctum')->group(function () {
             auth()->user()->update(['fcm_token' => $request->fcm_token]);
 
             return response()->json(['message' => 'Successfully subscribed to push notifications']);
+        });
+        
+        Route::post('/notifications/unsubscribe', function (Request $request) {
+            auth()->user()->update(['fcm_token' => null]);
+            return response()->json(['message' => 'Successfully unsubscribed from push notifications']);
         });
 
         // Updates — News & Insights, Digest preferences

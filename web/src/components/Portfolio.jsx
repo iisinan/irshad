@@ -422,9 +422,9 @@ export default function Portfolio() {
             <div style={{ display:'flex', flexDirection:'column', gap:'12px' }}>
               {[
                 { label: 'Shariah Compliant',   value: halalCount,    icon: ShieldCheck,   color: 'var(--halal)',     bg: 'rgba(34,197,94,0.06)', action: () => { setActiveFilter('halal'); handleTabChange('holdings'); } },
-                { label: 'Compliant (Purify)',value: needsPurif,    icon: Droplet, color: 'var(--doubtful)',  bg: 'rgba(234,179,8,0.06)', action: () => { setActiveFilter('purify'); handleTabChange('holdings'); } },
+                { label: 'Shariah Compliant (Purify)',value: needsPurif,    icon: Droplet, color: 'var(--doubtful)',  bg: 'rgba(234,179,8,0.06)', action: () => { setActiveFilter('purify'); handleTabChange('holdings'); } },
                 { label: 'Doubtful',value: doubtfulCount,    icon: HelpCircle, color: '#d97706',  bg: 'rgba(245,158,11,0.06)', action: () => { setActiveFilter('doubtful'); handleTabChange('holdings'); } },
-                { label: 'Non-Compliant',        value: nonHalalCount, icon: XCircle,       color: 'var(--non-compliant)', bg: 'rgba(239,68,68,0.06)', action: () => { setActiveFilter('nonhalal'); handleTabChange('holdings'); } },
+                { label: 'Shariah Non-Compliant',        value: nonHalalCount, icon: XCircle,       color: 'var(--non-compliant)', bg: 'rgba(239,68,68,0.06)', action: () => { setActiveFilter('nonhalal'); handleTabChange('holdings'); } },
               ].filter(r => r.value > 0).map(row => (
                 <div 
                   key={row.label} 

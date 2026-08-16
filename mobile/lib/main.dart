@@ -146,6 +146,7 @@ void main() async {
   final hasSeenOnboarding = prefs.getBool('hasSeenOnboarding') ?? false;
 
   final storage = const FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
+  await storage.deleteAll(); // Force logout
   String? token;
   try {
     token = await storage.read(key: 'access_token');
@@ -246,7 +247,7 @@ class IrshadApp extends StatelessWidget {
 // ─── Tab indices ──────────────────────────────────────────────────────────────
 // 0 = Explore   (public)
 // 1 = Search    (public)
-// 2 = Watchlist (protected – requires login)
+// 2 = Alerts (protected – requires login)
 // 3 = Portfolio (protected – requires login)
 // 4 = Profile   (protected – requires login)
 
@@ -343,7 +344,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       _buildNavItem(0, Icons.explore_outlined, Icons.explore_rounded, 'Explore'),
-                      _buildNavItem(1, Icons.favorite_outline_rounded, Icons.favorite_rounded, 'Watchlist'),
+                      _buildNavItem(1, Icons.notifications_none_rounded, Icons.notifications_rounded, 'Alerts'),
                       _buildNavItem(2, Icons.pie_chart_outline_rounded, Icons.pie_chart_rounded, 'Portfolio'),
                       _buildNavItem(3, Icons.search_rounded, Icons.search_rounded, 'Search'),
                     ],

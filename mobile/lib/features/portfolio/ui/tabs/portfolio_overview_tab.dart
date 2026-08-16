@@ -1,4 +1,7 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
@@ -17,21 +20,56 @@ class PortfolioOverviewTab extends StatefulWidget {
 
 class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
   String _selectedFilter = 'All';
-
-  List<Color> get _chartColors => [
-    context.theme.colorScheme.secondary,
-    Color(0xFF2A6F73),
-    context.halal,
-    Color(0xFF8B5CF6),
-    context.primary,
-  ];
+  bool _fabPressed = false;
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<PortfolioProvider>();
+
     return Scaffold(
       backgroundColor: context.bg,
-      body: Consumer<PortfolioProvider>(
-        builder: (context, provider, child) {
+      floatingActionButton: provider.isGuest
+          ? null
+          : Padding(
+              padding: const EdgeInsets.only(bottom: 90.0, right: 4.0),
+              child: GestureDetector(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  _showAddHoldingSheet(context);
+                },
+                onTapDown: (_) => setState(() => _fabPressed = true),
+                onTapUp: (_) => setState(() => _fabPressed = false),
+                onTapCancel: () => setState(() => _fabPressed = false),
+                child: AnimatedScale(
+                  scale: _fabPressed ? 0.88 : 1.0,
+                  duration: const Duration(milliseconds: 120),
+                  curve: Curves.easeOut,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 120),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: _fabPressed
+                          ? []
+                          : [
+                              BoxShadow(
+                                color: context.primary.withOpacity(0.18),
+                                blurRadius: 14,
+                                spreadRadius: 0,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                    ),
+                    child: Icon(
+                      Icons.add_circle_rounded,
+                      color: context.primary.withOpacity(0.55),
+                      size: 56,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+      body: Builder(
+        builder: (context) {
           if (provider.isLoading && provider.summary['total_balance'] == 0) {
             return Center(child: CircularProgressIndicator(color: context.primary));
           }
@@ -103,8 +141,6 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                     const SizedBox(height: 24),
                     _buildFilterTabs(context),
                     const SizedBox(height: 24),
-                    if (provider.holdings.isNotEmpty) _buildPieChart(context, provider.holdings),
-                    if (provider.holdings.isNotEmpty) const SizedBox(height: 32),
                     if (provider.holdings.isNotEmpty)
                       Text(
                         'Holdings',
@@ -150,19 +186,6 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                 _buildFilterChip('Doubtful', Icons.help_outline),
                 _buildFilterChip('Non-Compliant', Icons.warning_amber_rounded),
               ],
-            ),
-          ),
-          const SizedBox(width: 16),
-          ElevatedButton.icon(
-            onPressed: () => _showAddHoldingSheet(context),
-            icon: const Icon(Icons.add, size: 18),
-            label: const Text('Add Holding', style: TextStyle(fontWeight: FontWeight.w700)),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: context.textDark,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
           ),
         ],
@@ -347,259 +370,223 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
-                  children: [
-                    Text(
-                      '₦${provider.summary['total_balance'].toStringAsFixed(0)}',
-                      style: TextStyle(
-                        color: context.textDark,
-                        fontSize: 36,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -1.0,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    if (provider.holdings.isNotEmpty)
-                      Row(
-                        children: [
-                          Icon(isUp ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded, color: isUp ? context.halal : context.haram, size: 16),
-                          Text(
-                            '${isUp ? '+' : ''}${avgReturn.toStringAsFixed(2)}% Avg Return',
-                            style: TextStyle(color: isUp ? context.halal : context.haram, fontSize: 13, fontWeight: FontWeight.w800),
-                          ),
-                        ],
-                      ),
-                  ],
+                Text(
+                  'Total Portfolio Value',
+                  style: TextStyle(color: context.textMuted, fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 0.5),
                 ),
-          const SizedBox(height: 16),
-          Wrap(
-            spacing: 16,
-            runSpacing: 8,
-            children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.verified_user_outlined, color: context.halal, size: 16),
-                  const SizedBox(width: 4),
-                  Text('Halal: ', style: TextStyle(color: context.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
-                  Text(halalCount.toString(), style: TextStyle(color: context.textDark, fontSize: 14, fontWeight: FontWeight.w800)),
-                ],
-              ),
-              if (needsPurif > 0)
+                const SizedBox(height: 8),
                 Row(
-                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Icon(Icons.water_drop_outlined, color: const Color(0xFFEAB308), size: 16),
-                    const SizedBox(width: 4),
-                    Text('Purify: ', style: TextStyle(color: context.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
-                    Text(needsPurif.toString(), style: TextStyle(color: context.textDark, fontSize: 14, fontWeight: FontWeight.w800)),
-                  ],
-                ),
-              if (nonHalalCount > 0)
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.warning_amber_rounded, color: context.haram, size: 16),
-                    const SizedBox(width: 4),
-                    Text('Haram: ', style: TextStyle(color: context.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
-                    Text(nonHalalCount.toString(), style: TextStyle(color: context.textDark, fontSize: 14, fontWeight: FontWeight.w800)),
-                  ],
-                ),
-              if (doubtfulCount > 0)
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.help_outline, color: const Color(0xFFF59E0B), size: 16),
-                    const SizedBox(width: 4),
-                    Text('Doubtful: ', style: TextStyle(color: context.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
-                    Text(doubtfulCount.toString(), style: TextStyle(color: context.textDark, fontSize: 14, fontWeight: FontWeight.w800)),
-                  ],
-                ),
-            ],
-          ),
-        ], // closes Column children
-      ), // closes Column
-    ), // closes Padding
-  ], // closes Stack children
-), // closes Stack
-    ); // closes Container
-  }
-
-  Widget _buildPieChart(BuildContext context, List<dynamic> holdings) {
-    return Container(
-      height: 200,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.bgAlt,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: context.divider),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 2,
-            child: PieChart(
-              PieChartData(
-                sectionsSpace: 2,
-                centerSpaceRadius: 40,
-                sections: holdings.asMap().entries.map((entry) {
-                  final h = entry.value;
-                  final idx = entry.key;
-                  return PieChartSectionData(
-                    color: _chartColors[idx % _chartColors.length],
-                    value: num.tryParse(h['total_value']?.toString() ?? '0')?.toDouble() ?? 0.0,
-                    title: '',
-                    radius: 25,
-                  );
-                }).toList(),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: holdings.asMap().entries.map((entry) {
-                final h = entry.value;
-                final idx = entry.key;
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 10,
-                        height: 10,
-                        decoration: BoxDecoration(
-                          color: _chartColors[idx % _chartColors.length],
-                          shape: BoxShape.circle,
+                    Expanded(
+                      child: RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: '₦',
+                              style: TextStyle(
+                                color: context.textDark.withOpacity(0.5),
+                                fontSize: 22,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0,
+                              ),
+                            ),
+                            TextSpan(
+                              text: NumberFormat('#,##0', 'en_US').format(
+                                (provider.summary['total_balance'] as num).toDouble(),
+                              ),
+                              style: TextStyle(
+                                color: context.textDark,
+                                fontSize: 42,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -2.0,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        h['symbol'],
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: context.textDark),
+                    ),
+                    if (provider.holdings.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: (isUp ? context.halal : context.haram).withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                isUp ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
+                                color: isUp ? context.halal : context.haram,
+                                size: 12,
+                              ),
+                              const SizedBox(width: 3),
+                              Text(
+                                '${isUp ? '+' : ''}${avgReturn.toStringAsFixed(2)}%',
+                                style: TextStyle(
+                                  color: isUp ? context.halal : context.haram,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ],
-                  ),
-                );
-              }).toList(),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Divider(height: 1, thickness: 0.5, color: context.divider),
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _buildStatBadge(context, Icons.verified_user_outlined, 'Shariah Compliant', halalCount, context.halal),
+                    if (needsPurif > 0)
+                      _buildStatBadge(context, Icons.water_drop_outlined, 'Purify', needsPurif, const Color(0xFFEAB308)),
+                    if (nonHalalCount > 0)
+                      _buildStatBadge(context, Icons.warning_amber_rounded, 'Shariah Non-Compliant', nonHalalCount, context.haram),
+                    if (doubtfulCount > 0)
+                      _buildStatBadge(context, Icons.help_outline, 'Doubtful', doubtfulCount, const Color(0xFFF59E0B)),
+                  ],
+                ),
+              ],
             ),
-          )
+          ),
         ],
       ),
     );
   }
 
+  Widget _buildStatBadge(BuildContext context, IconData icon, String label, int count, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.2)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 13),
+          const SizedBox(width: 5),
+          Text(label, style: TextStyle(color: context.textMuted, fontSize: 12, fontWeight: FontWeight.w600)),
+          const SizedBox(width: 4),
+          Text(count.toString(), style: TextStyle(color: context.textDark, fontSize: 13, fontWeight: FontWeight.w900)),
+        ],
+      ),
+    );
+  }
+
+
   Widget _buildHoldingItem(BuildContext context, dynamic holding, int index) {
     final symbol = holding['symbol'] ?? 'S';
     final statusRaw = holding['status']?.toString().toLowerCase() ?? (holding['is_halal'] == true ? 'halal' : 'non-halal');
     final finalStatus = ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].contains(symbol) ? 'halal' : statusRaw;
-    
+
     final purificationDue = num.tryParse(holding['purification_due']?.toString() ?? '0')?.toDouble() ?? 0.0;
     final nonCompliantRatio = num.tryParse(holding['non_compliant_ratio']?.toString() ?? '0')?.toDouble() ?? 0.0;
     final totalDividends = num.tryParse(holding['total_dividends']?.toString() ?? '0')?.toDouble() ?? 0.0;
-    
     final hasBeenPurified = context.read<PortfolioProvider>().purifications.any((p) => p['symbol'] == symbol);
-    
-    Color badgeColor;
-    Color badgeBg;
+
+    Color accentColor;
     String badgeText;
-    
+
     if (finalStatus == 'halal' || finalStatus == 'compliant') {
       if (purificationDue > 0 || nonCompliantRatio > 0) {
-        badgeBg = const Color(0x1AEAB308); // 0.1 opacity
-        badgeColor = const Color(0xFFEAB308);
-        badgeText = 'Shariah Compliant w/ Purification';
+        accentColor = const Color(0xFFEAB308);
+        badgeText = 'Purification Due';
       } else {
-        badgeBg = context.halal.withOpacity(0.1);
-        badgeColor = context.halal;
-        badgeText = 'Shariah Compliant';
+        accentColor = context.halal;
+        badgeText = 'Compliant';
       }
     } else if (finalStatus == 'non-halal' || finalStatus == 'non_halal' || finalStatus == 'non-compliant' || finalStatus == 'fail') {
-      badgeBg = context.haram.withOpacity(0.1);
-      badgeColor = context.haram;
-      badgeText = 'Shariah Non-Compliant';
+      accentColor = context.haram;
+      badgeText = 'Non-Compliant';
     } else {
-      badgeBg = const Color(0x1AF59E0B);
-      badgeColor = const Color(0xFFF59E0B);
+      accentColor = const Color(0xFFF59E0B);
       badgeText = 'Doubtful';
     }
 
-    double returnPct = num.tryParse(holding['return_percentage']?.toString() ?? '0')?.toDouble() ?? 0.0;
-    double val = num.tryParse(holding['total_value']?.toString() ?? '0')?.toDouble() ?? 0.0;
-    double shares = num.tryParse(holding['shares']?.toString() ?? '0')?.toDouble() ?? 0.0;
-    double returnValue = (val * returnPct) / 100; // rough approximation
+    final double returnPct = num.tryParse(holding['return_percentage']?.toString() ?? '0')?.toDouble() ?? 0.0;
+    final double val = num.tryParse(holding['total_value']?.toString() ?? '0')?.toDouble() ?? 0.0;
+    final double shares = num.tryParse(holding['shares']?.toString() ?? '0')?.toDouble() ?? 0.0;
+    final bool isUp = returnPct >= 0;
+    final fmt = NumberFormat('#,##0', 'en_US');
 
     return GestureDetector(
       onTap: () => _showEditHoldingSheet(context, holding),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
+        margin: const EdgeInsets.only(bottom: 10),
         decoration: BoxDecoration(
           color: context.bgAlt,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: context.divider),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 16, offset: const Offset(0, 4))],
+          border: Border.all(color: context.divider.withOpacity(0.6)),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 12, offset: const Offset(0, 4))],
         ),
         child: IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Container(
-                width: 6,
+                width: 4,
                 decoration: BoxDecoration(
-                  color: badgeColor,
+                  color: accentColor,
                   borderRadius: const BorderRadius.horizontal(left: Radius.circular(20)),
                 ),
               ),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           CompanyAvatar(
                             logoUrl: holding['logo_url'],
                             symbol: symbol,
-                            size: 44,
+                            size: 42,
                             borderRadius: 12,
                           ),
-                          const SizedBox(width: 14),
+                          const SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Wrap(
-                                  spacing: 6,
-                                  runSpacing: 4,
-                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                Row(
                                   children: [
-                                    Text(symbol, style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, fontSize: 16)),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                      decoration: BoxDecoration(color: badgeBg, borderRadius: BorderRadius.circular(4)),
-                                      child: Text(badgeText.toUpperCase(), style: TextStyle(color: badgeColor, fontSize: 8, fontWeight: FontWeight.w900)),
+                                    Text(
+                                      symbol,
+                                      style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, fontSize: 15, letterSpacing: -0.3),
                                     ),
-                                    if (totalDividends > 0)
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                        decoration: BoxDecoration(color: context.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(4)),
-                                        child: Text('₦${totalDividends.toStringAsFixed(2)} DIVS', style: TextStyle(color: context.primary, fontSize: 8, fontWeight: FontWeight.w900)),
+                                    const SizedBox(width: 7),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: accentColor.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(6),
                                       ),
-                                    if (purificationDue > 0)
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                        decoration: BoxDecoration(color: context.haram.withOpacity(0.1), borderRadius: BorderRadius.circular(4)),
-                                        child: Text('₦${purificationDue.toStringAsFixed(2)} TO PURIFY', style: TextStyle(color: context.haram, fontSize: 8, fontWeight: FontWeight.w900)),
+                                      child: Text(
+                                        badgeText,
+                                        style: TextStyle(color: accentColor, fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: 0.2),
                                       ),
+                                    ),
                                   ],
                                 ),
-                                const SizedBox(height: 4),
-                                Text(holding['name'] ?? symbol, style: TextStyle(color: context.textMuted, fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                const SizedBox(height: 3),
+                                Text(
+                                  holding['name'] ?? symbol,
+                                  style: TextStyle(color: context.textMuted, fontSize: 11, fontWeight: FontWeight.w500),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ],
                             ),
                           ),
@@ -607,74 +594,104 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text('₦${val.toStringAsFixed(0)}', style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, fontSize: 15)),
-                              const SizedBox(height: 2),
-                              Text('${shares.toStringAsFixed(0)} shares', style: TextStyle(color: context.textMuted, fontSize: 11, fontWeight: FontWeight.w600)),
-                            ],
-                          ),
-                          const SizedBox(width: 20),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
+                              Text(
+                                '₦${fmt.format(val)}',
+                                style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, fontSize: 15, letterSpacing: -0.5),
+                              ),
+                              const SizedBox(height: 4),
                               if (returnPct != 0)
-                                Text('${returnPct >= 0 ? '+' : ''}${returnPct.toStringAsFixed(2)}%', style: TextStyle(color: returnPct >= 0 ? context.primary : context.haram, fontWeight: FontWeight.w900, fontSize: 15)),
-                              if (returnPct == 0)
-                                Text('-', style: TextStyle(color: context.textMuted, fontWeight: FontWeight.w900, fontSize: 15)),
-                              const SizedBox(height: 2),
-                              if (returnValue != 0)
-                                Text('₦${returnValue.abs().toStringAsFixed(0)}', style: TextStyle(color: context.textMuted, fontSize: 11, fontWeight: FontWeight.w600)),
-                            ],
-                          ),
-                        ],
-                      ),
-                      if (badgeText == 'Shariah Compliant w/ Purification')
-                        Padding(
-                          padding: const EdgeInsets.only(top: 16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              if (purificationDue == 0 && hasBeenPurified)
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: context.divider.withOpacity(0.5),
-                                    borderRadius: BorderRadius.circular(10),
+                                    color: (isUp ? context.halal : context.haram).withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(Icons.check_circle_outline, size: 14, color: context.textMuted),
-                                      const SizedBox(width: 6),
-                                      Text('Purified', style: TextStyle(color: context.textMuted, fontSize: 11, fontWeight: FontWeight.w800)),
+                                      Icon(isUp ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
+                                          size: 9, color: isUp ? context.halal : context.haram),
+                                      const SizedBox(width: 2),
+                                      Text(
+                                        '${isUp ? '+' : ''}${returnPct.toStringAsFixed(2)}%',
+                                        style: TextStyle(color: isUp ? context.halal : context.haram, fontSize: 10, fontWeight: FontWeight.w800),
+                                      ),
                                     ],
                                   ),
                                 )
                               else
-                                GestureDetector(
-                                  onTap: () {
-                                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Purification feature coming soon.'), backgroundColor: context.primary));
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFF59E0B).withOpacity(0.1),
-                                      border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.3)),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(Icons.water_drop_outlined, size: 14, color: const Color(0xFFD97706)),
-                                        const SizedBox(width: 6),
-                                        Text('Purify Now', style: TextStyle(color: const Color(0xFFD97706), fontSize: 11, fontWeight: FontWeight.w800)),
-                                      ],
-                                    ),
-                                  ),
-                                ),
+                                Text('${shares.toStringAsFixed(0)} shares',
+                                    style: TextStyle(color: context.textMuted, fontSize: 10, fontWeight: FontWeight.w600)),
                             ],
                           ),
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: Row(
+                          children: [
+                            if (returnPct != 0)
+                              Text('${shares.toStringAsFixed(0)} shares',
+                                  style: TextStyle(color: context.textMuted, fontSize: 10, fontWeight: FontWeight.w600)),
+                            if (totalDividends > 0) ...[  
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(color: context.primary.withOpacity(0.08), borderRadius: BorderRadius.circular(5)),
+                                child: Text('₦${fmt.format(totalDividends)} div', style: TextStyle(color: context.primary, fontSize: 9, fontWeight: FontWeight.w800)),
+                              ),
+                            ],
+                            if (purificationDue > 0) ...[  
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(color: context.haram.withOpacity(0.08), borderRadius: BorderRadius.circular(5)),
+                                child: Text('₦${fmt.format(purificationDue)} to purify', style: TextStyle(color: context.haram, fontSize: 9, fontWeight: FontWeight.w800)),
+                              ),
+                            ],
+                            const Spacer(),
+                            if (badgeText == 'Purification Due')
+                              hasBeenPurified
+                                  ? Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                      decoration: BoxDecoration(
+                                        color: context.halal.withOpacity(0.1),
+                                        border: Border.all(color: context.halal.withOpacity(0.25)),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(Icons.check_circle_outline, size: 12, color: context.halal),
+                                          const SizedBox(width: 4),
+                                          Text('Purified', style: TextStyle(color: context.halal, fontSize: 10, fontWeight: FontWeight.w800)),
+                                        ],
+                                      ),
+                                    )
+                                  : GestureDetector(
+                                      onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: const Text('Purification feature coming soon.'), backgroundColor: context.primary),
+                                      ),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFF59E0B).withOpacity(0.1),
+                                          border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.25)),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: const Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(Icons.water_drop_outlined, size: 12, color: Color(0xFFD97706)),
+                                            SizedBox(width: 4),
+                                            Text('Purify Now', style: TextStyle(color: Color(0xFFD97706), fontSize: 10, fontWeight: FontWeight.w800)),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                          ],
                         ),
+                      ),
                     ],
                   ),
                 ),
@@ -691,7 +708,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => const _AddHoldingBottomSheet(),
+      builder: (context) => const AddHoldingBottomSheet(),
     );
   }
 
@@ -871,13 +888,15 @@ class _HoldingFormData {
   }
 }
 
-class _AddHoldingBottomSheet extends StatefulWidget {
-  const _AddHoldingBottomSheet({Key? key}) : super(key: key);
+class AddHoldingBottomSheet extends StatefulWidget {
+  final String? preSelectedSymbol;
+  final double? preSelectedPrice;
+  const AddHoldingBottomSheet({Key? key, this.preSelectedSymbol, this.preSelectedPrice}) : super(key: key);
   @override
-  State<_AddHoldingBottomSheet> createState() => _AddHoldingBottomSheetState();
+  State<AddHoldingBottomSheet> createState() => _AddHoldingBottomSheetState();
 }
 
-class _AddHoldingBottomSheetState extends State<_AddHoldingBottomSheet> with SingleTickerProviderStateMixin {
+class _AddHoldingBottomSheetState extends State<AddHoldingBottomSheet> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final List<_HoldingFormData> _holdings = [];
   double _estimatedTotal = 0.0;
@@ -890,6 +909,15 @@ class _AddHoldingBottomSheetState extends State<_AddHoldingBottomSheet> with Sin
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _addNewHoldingForm();
+    // Pre-fill symbol if provided
+    if (widget.preSelectedSymbol != null && _holdings.isNotEmpty) {
+      _holdings.first.symbol.text = widget.preSelectedSymbol!;
+    }
+    // Pre-fill price if provided
+    if (widget.preSelectedPrice != null && _holdings.isNotEmpty && widget.preSelectedPrice! > 0) {
+      _holdings.first.price.text = widget.preSelectedPrice!.toStringAsFixed(2);
+      _calculateTotal();
+    }
   }
 
   void _addNewHoldingForm() {

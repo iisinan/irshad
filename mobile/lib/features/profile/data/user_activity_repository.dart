@@ -51,6 +51,64 @@ class UserActivityRepository {
     }
   }
 
+  // Watchlist Methods (Stocks)
+  Future<List<Map<String, dynamic>>> getWatchlist() async {
+    try {
+      final response = await _apiService.get('watchlist');
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(response.data);
+      }
+    } catch (e) {
+      // Handle error
+    }
+    return [];
+  }
+
+  Future<bool> addToWatchlist(String symbol, {Map<String, bool>? alerts}) async {
+    try {
+      final body = {
+        'symbol': symbol,
+        if (alerts != null) ...alerts,
+      };
+      final response = await _apiService.post('watchlist', body);
+      return response.statusCode == 201 || response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> addMultipleToWatchlist(List<String> symbols, {bool alertInApp = false, bool alertPush = false, bool alertEmail = false}) async {
+    try {
+      final response = await _apiService.post('watchlist/bulk', {
+        'symbols': symbols,
+        'alert_inapp': alertInApp,
+        'alert_push': alertPush,
+        'alert_email': alertEmail,
+      });
+      return response.statusCode == 201 || response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> updateWatchlistAlerts(String symbol, Map<String, bool> alerts) async {
+    try {
+      final response = await _apiService.put('watchlist/$symbol', alerts);
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> removeFromWatchlist(String symbol) async {
+    try {
+      final response = await _apiService.delete('watchlist/$symbol');
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
+
   Future<List<Map<String, dynamic>>> getHistory({String? action}) async {
     try {
       final path = action != null ? '/history?action=$action' : '/history';

@@ -68,7 +68,7 @@ class _CharitiesBottomSheetState extends State<CharitiesBottomSheet> {
     },
     {
       "id": "8",
-      "name": "Sunnah TV Programmes Sponsorship",
+      "name": "Sunnah TV Programmes Sponsorship (Sunnah Global Media Ltd)",
       "bank": "Stanbic IBTC: 0006740998"
     },
     {
@@ -109,7 +109,7 @@ class _CharitiesBottomSheetState extends State<CharitiesBottomSheet> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: context.scaffoldBg,
+        color: context.bg,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: Column(

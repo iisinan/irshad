@@ -39,7 +39,7 @@ class CalcDetailsBottomSheet extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: context.scaffoldBg,
+        color: context.bg,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: Column(
