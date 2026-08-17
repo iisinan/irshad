@@ -195,6 +195,11 @@ const StockDetails = ({ symbol: propSymbol }) => {
 
   reason = formatAppJustification(reason, isNonHalal);
 
+  if (reason && reason.includes('|||')) {
+    const parts = reason.split('|||');
+    reason = parts[0].trim() + ' ' + parts[1].trim();
+  }
+
   const aaoifiData = stock.aaoifi_screening ?? stock.compliance_data ?? null;
   // purification_required is injected into stock.status by the backend
   const hasPurification = isHalal && !!(rawStatus?.purification_required);
