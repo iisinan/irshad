@@ -428,7 +428,7 @@ const AaoifiScreening = () => {
     cleanStatusReason = cleanStatusReason.replace(/\s*Additionally, it passes all AAOIFI quantitative financial screening ratios\.?/gi, '');
   }
 
-  let doubtfulTag = 'Requires Further Review';
+  let doubtfulTag = 'Under Verification';
   if (finalStatus === 'doubtful' && cleanStatusReason) {
     if (cleanStatusReason.includes('|||')) {
       const parts = cleanStatusReason.split('|||');
