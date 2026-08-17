@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { fetchAdminUsers, createAdminUser, updateAdminUser, deleteAdminUser } from '../services/api';
-import { Users, Shield, Plus, X, Search, Edit2, Trash2, Crown, ChevronRight } from 'lucide-react';
+import { Users, Shield, Plus, X, Search, Edit2, Trash2, Crown, ChevronRight, Activity } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import AdminUserAnalyticsModal from './AdminUserAnalyticsModal';
 
 // ─── Shared modal input ───────────────────────────────────
 function FormField({ label, children }) {
@@ -57,6 +58,7 @@ const AdminUsers = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [analyticsUserId, setAnalyticsUserId] = useState(null);
 
   const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'user', plan: 'free' });
   const [selectedUser, setSelectedUser] = useState(null);
@@ -299,6 +301,13 @@ const AdminUsers = () => {
                   </td>
                   <td style={{ padding: '15px 20px', textAlign: 'right' }}>
                     <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+                      <button onClick={() => setAnalyticsUserId(u.id)} title="View Analytics"
+                        style={{ width: '34px', height: '34px', borderRadius: '10px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.color = 'var(--primary)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
+                      >
+                        <Activity size={14} />
+                      </button>
                       <button onClick={() => openEditModal(u)} title="Edit User"
                         style={{ width: '34px', height: '34px', borderRadius: '10px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
                         onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.color = 'var(--primary)'; }}
@@ -505,6 +514,11 @@ const AdminUsers = () => {
             </div>
           </div>
         </ModalWrap>
+      )}
+
+      {/* ── User Analytics Modal ───────────────── */}
+      {analyticsUserId && (
+        <AdminUserAnalyticsModal userId={analyticsUserId} onClose={() => setAnalyticsUserId(null)} />
       )}
 
     </div>

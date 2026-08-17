@@ -133,6 +133,35 @@ class AdminController extends Controller
     }
 
     /**
+     * Get user analytics data (admin only).
+     */
+    public function getUserAnalytics($id)
+    {
+        $user = User::findOrFail($id);
+        
+        $holdings = \App\Models\Holding::with('company')->where('user_id', $id)->get();
+        $purifications = \App\Models\Purification::where('user_id', $id)->get();
+        $screenedCount = \App\Models\History::where('user_id', $id)->where('action', 'check')->distinct('reference_id')->count('reference_id');
+        $history = \App\Models\History::where('user_id', $id)->orderBy('created_at', 'desc')->take(200)->get();
+        $priceAlerts = \App\Models\PriceAlert::where('user_id', $id)->get();
+
+        return response()->json([
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'plan' => $user->plan,
+                'joined_at' => $user->created_at,
+            ],
+            'holdings' => $holdings,
+            'purifications' => $purifications,
+            'screened_count' => $screenedCount,
+            'recent_history' => $history,
+            'price_alerts' => $priceAlerts,
+        ]);
+    }
+
+    /**
      * Update Ticker About Info (admin only).
      */
     public function updateTickerAbout(Request $request, $symbol)

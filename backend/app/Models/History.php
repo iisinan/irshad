@@ -15,5 +15,6 @@ class History extends Model
         'user_id',
         'action',
         'reference_id',
+        'platform',
     ];
 }

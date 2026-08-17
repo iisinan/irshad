@@ -218,6 +218,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/admin/users', [AdminController::class, 'createAdmin']);
             Route::put('/admin/users/{id}', [AdminController::class, 'updateUser']);
             Route::delete('/admin/users/{id}', [AdminController::class, 'deleteUser']);
+            Route::get('/admin/users/{id}/analytics', [AdminController::class, 'getUserAnalytics']);
 
             // Admin Alerts
             Route::get('/admin/alerts', [AdminController::class, 'getAlerts']);

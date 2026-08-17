@@ -283,6 +283,11 @@ export const deleteAdminUser = async (id) => {
   return response.data;
 };
 
+export const fetchAdminUserAnalytics = async (id) => {
+  const response = await api.get(`/admin/users/${id}/analytics`);
+  return response.data;
+};
+
 // Admin Ticker Management
 export const updateTickerAbout = async (symbol, data) => {
   const response = await api.put(`/admin/stocks/${symbol}`, data);

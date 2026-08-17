@@ -70,12 +70,16 @@ class HistoryController extends Controller
         $validated = $request->validate([
             'action' => 'required|in:scan,check',
             'reference_id' => 'required|string',
+            'platform' => 'sometimes|in:web,mobile',
         ]);
+
+        $platform = $validated['platform'] ?? (str_contains(strtolower($request->userAgent()), 'dart') || str_contains(strtolower($request->userAgent()), 'okhttp') || str_contains(strtolower($request->userAgent()), 'mobile') ? 'mobile' : 'web');
 
         $history = History::create([
             'user_id' => Auth::id(),
             'action' => $validated['action'],
             'reference_id' => $validated['reference_id'],
+            'platform' => $platform,
         ]);
 
         return $this->success($history, 'Action tracked', 201);
