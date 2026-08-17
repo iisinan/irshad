@@ -469,13 +469,6 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                 children: [
                   const SizedBox(height: 12),
 
-                  // About Company
-                  if (_currentStock['overview'] != null && _currentStock['overview'].toString().trim().isNotEmpty) ...[
-                    _buildSectionHeader('About Company'),
-                    const SizedBox(height: 12),
-                    _buildAboutCompany(),
-                    const SizedBox(height: 32),
-                  ],
 
                   if (_selectedTab == 0) ...[
                     const SizedBox(height: 16),
@@ -1979,7 +1972,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
         }
         
         totalDebt = _getDouble(used['total_debt']);
-        cash = _getDouble(used['cash']);
+        cash = _getDouble(used['cash_and_equivalents'] ?? used['cash']);
         securities = _getDouble(used['interest_bearing_securities']);
         interestIncome = _getDouble(used['interest_income']);
         totalRevenue = _getDouble(used['total_revenue']);
@@ -2360,10 +2353,9 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
         const SizedBox(height: 24),
         buildRatioCard(1, 'Debt ratio', 'Total Debt / $denominatorLabel × 100', debtRatio, 30, 
           'Total Debt', denominatorLabel, formatCompact(totalDebt), formatCompact(denominator)),
-        if (_currentStock['symbol'] != 'JAIZBANK')
-          buildRatioCard(2, 'Cash ratio', '(Cash + Securities) / $denominatorLabel × 100', cashRatio, 30, 
-            'Cash + Securities', denominatorLabel, '${formatCompact(cash)} + ${formatCompact(securities)}', formatCompact(denominator)),
-        buildRatioCard(_currentStock['symbol'] == 'JAIZBANK' ? 2 : 3, 'Impure revenue', 'Impure Income / Total Revenue × 100', interestRatio, 5, 
+        buildRatioCard(2, 'Cash ratio', '(Cash + Securities) / $denominatorLabel × 100', cashRatio, 30, 
+          'Cash + Securities', denominatorLabel, '${formatCompact(cash)} + ${formatCompact(securities)}', formatCompact(denominator)),
+        buildRatioCard(3, 'Impure revenue', 'Impure Income / Total Revenue × 100', interestRatio, 5, 
           'Impure Income', 'Total Revenue', formatCompact(interestIncome), formatCompact(totalRevenue)),
         const SizedBox(height: 8),
         Container(
@@ -2610,33 +2602,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
     );
   }
 
-  Widget _buildAboutCompany() {
-    final sector = _currentStock['sector'] ?? 'Unknown';
-    final name = _currentStock['name'] ?? 'This company';
-    final overview = _currentStock['overview'] ?? '$name operates within the $sector sector. Its primary business activities include the production, provision, and distribution of goods and services specific to the $sector industry. As a publicly traded entity on the Nigerian Exchange, it focuses on delivering sustainable value to its stakeholders.';
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.bgAlt,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.divider.withValues(alpha: 0.5)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(Icons.business_rounded, color: context.primary.withValues(alpha: 0.7), size: 22),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              overview,
-              style: TextStyle(color: context.textDark, height: 1.6, fontSize: 13, fontWeight: FontWeight.w500),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
 
   @override
   void dispose() {

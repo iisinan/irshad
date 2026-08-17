@@ -626,15 +626,15 @@ class StockController extends Controller
             };
 
             $companyFin = $company->financials()->latest()->first();
-
             $frontendFinData = array_merge($finData, [
-                'total_assets' => ($companyFin->total_assets ?? 0) ?: $getVal('total_assets'),
-                'total_debt' => ($companyFin->total_debt ?? 0) ?: $getVal('total_debt'),
-                'cash' => ($companyFin->cash_and_equivalents ?? 0) ?: $getVal('cash_and_equivalents'),
-                'interest_bearing_securities' => ($companyFin->interest_bearing_securities ?? 0) ?: $getVal('interest_bearing_securities'),
-                'interest_income' => ($companyFin->interest_income ?? 0) ?: $getVal('interest_income'),
-                'total_revenue' => ($companyFin->total_revenue ?? 0) ?: $getVal('total_revenue'),
-                'market_cap' => ($company->market_cap ?? 0) ?: ($companyFin->market_cap ?? 0),
+                'total_assets' => ((float)($companyFin->total_assets ?? 0)) ?: $getVal('total_assets'),
+                'total_debt' => ((float)($companyFin->total_debt ?? 0)) ?: $getVal('total_debt'),
+                'cash' => ((float)($companyFin->cash_and_equivalents ?? 0)) ?: $getVal('cash_and_equivalents'),
+                'interest_bearing_securities' => ((float)($companyFin->interest_bearing_securities ?? 0)) ?: $getVal('interest_bearing_securities'),
+                'interest_income' => ((float)($companyFin->interest_income ?? 0)) ?: $getVal('interest_income'),
+                'total_revenue' => ((float)($companyFin->total_revenue ?? 0)) ?: $getVal('total_revenue'),
+                'cash_and_equivalents' => ((float)($companyFin->cash_and_equivalents ?? 0)) ?: $getVal('cash_and_equivalents'),
+                'market_cap' => ((float)($company->market_cap ?? 0)) ?: ((float)($companyFin->market_cap ?? 0)),
             ]);
 
             $dbIncomeRatio = (float) ($aaoifiScreening->impermissible_income_ratio ?? 0);

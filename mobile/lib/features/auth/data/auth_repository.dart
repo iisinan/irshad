@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'dart:convert';
+import 'package:hive/hive.dart';
 
 class AuthRepository {
   final ApiService _apiService = ApiService();
@@ -105,6 +106,9 @@ class AuthRepository {
       // In case of network error or timeout, proceed to clear local token
     } finally {
       await _storage.deleteAll();
+      try {
+        Hive.box('api_cache').clear();
+      } catch (_) {}
     }
   }
 
@@ -115,6 +119,9 @@ class AuthRepository {
       // Ignore network errors, proceed with local logout
     } finally {
       await _storage.deleteAll();
+      try {
+        Hive.box('api_cache').clear();
+      } catch (_) {}
     }
   }
 

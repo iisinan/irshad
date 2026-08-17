@@ -114,7 +114,26 @@ Return ONLY a valid JSON object matching this schema exactly, with NO markdown f
         if (!empty($extractedData['market_cap'])) {
             $financials->market_cap = $extractedData['market_cap'];
         }
+        
+        $extractedDate = $extractedData['published_date'] ?? '';
+        if (!empty($extractedDate)) {
+            try {
+                $financials->published_date = Carbon::parse($extractedDate)->toDateTimeString();
+            } catch (\Exception $e) {
+                $financials->published_date = $extractedDate;
+            }
+        } else {
+            $financials->published_date = Carbon::now()->toDateTimeString();
+        }
+        
+        if ($url) {
+            $financials->source_url = $url;
+        }
+
+        // Unlock observer protection to save AI-extracted data
+        app()->instance('verdict.unlock', true);
         $financials->save();
+        app()->instance('verdict.unlock', false);
 
         // Update AaoifiScreening financial_data_used JSON
         $aaoifi = AaoifiScreening::where('company_id', $company->id)->latest()->first();
@@ -169,8 +188,12 @@ Return ONLY a valid JSON object matching this schema exactly, with NO markdown f
             $this->info("-----------------------------\n");
         }
         
-        // Run compliance check
+        // Run compliance check (for scholar reviews)
         $newStatus = $aaoifiService->evaluateCompliance($company, $financials);
+
+        // Permanently persist new calculated ratios into the database
+        $screeningService = app(\App\Services\AaoifiScreeningService::class);
+        $screeningService->screenCompany($company);
         
         // Auto-approve and apply if staged in review
         $pendingReview = \App\Models\ComplianceReview::where('company_id', $company->id)->where('status', 'pending')->first();
@@ -198,5 +221,15 @@ Return ONLY a valid JSON object matching this schema exactly, with NO markdown f
         $this->info("Final Status: " . strtoupper($newStatus->status));
         $this->info("Reason: " . $newStatus->reason);
         $this->info("====================================");
+        
+        // Clear caches so UI shows the correct financial details
+        try {
+            \Illuminate\Support\Facades\Cache::tags(['stocks'])->forget("stocks.show.full.{$company->symbol}");
+            \Illuminate\Support\Facades\Cache::tags(['stocks'])->forget("aaoifi.screening.{$company->symbol}");
+        } catch (\BadMethodCallException $e) {
+            \Illuminate\Support\Facades\Cache::forget("stocks.show.full.{$company->symbol}");
+            \Illuminate\Support\Facades\Cache::forget("aaoifi.screening.{$company->symbol}");
+        }
+        $this->info("Cleared cache for {$company->symbol}.");
     }
 }

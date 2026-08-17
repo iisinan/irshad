@@ -3,6 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../../core/providers/app_state_provider.dart';
 import '../data/user_activity_repository.dart';
+import '../../scanner/ui/scanner_screen.dart';
+import '../../stocks/ui/stock_detail_screen.dart';
 
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 class HistoryScreen extends StatefulWidget {
@@ -169,7 +171,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           if (isScan) {
             Navigator.pushNamed(context, '/product_details', arguments: detail);
           } else {
-            Navigator.pushNamed(context, '/stock_details', arguments: detail);
+            StockDetailScreen.openWithLoading(context, Map<String, dynamic>.from(detail));
           }
         },
       ),

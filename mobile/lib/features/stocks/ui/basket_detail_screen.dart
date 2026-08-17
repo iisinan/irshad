@@ -2,6 +2,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:convert';
+import '../../../core/api/api_service.dart';
+import 'stock_detail_screen.dart';
 import '../providers/stock_provider.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 import '../../baskets/providers/basket_provider.dart';
@@ -466,7 +468,7 @@ class _BasketDetailScreenState extends State<BasketDetailScreen> {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(20),
-          onTap: () => Navigator.pushNamed(context, '/stock_details', arguments: company),
+          onTap: () => StockDetailScreen.openWithLoading(context, Map<String, dynamic>.from(company)),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Row(

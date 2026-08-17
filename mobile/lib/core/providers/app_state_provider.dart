@@ -65,6 +65,10 @@ class AppStateProvider extends ChangeNotifier {
 
   void setAuthenticated(bool isAuth) {
     _isAuthenticated = isAuth;
+    if (!isAuth) {
+      _userProfile = null;
+      _watchlistCount = 0;
+    }
     notifyListeners();
   }
 }

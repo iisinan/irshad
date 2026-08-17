@@ -5,6 +5,7 @@ import '../data/stock_repository.dart';
 import '../providers/stock_provider.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 import '../../../core/widgets/company_avatar.dart';
+import 'stock_detail_screen.dart';
 
 class StockSearchScreen extends StatefulWidget {
   const StockSearchScreen({super.key});
@@ -318,7 +319,7 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
       onTap: () {
         // Fetch details in background to cache in history
         _stockRepository.getStockDetails(stock['symbol']);
-        Navigator.pushNamed(context, '/stock_details', arguments: stock);
+        StockDetailScreen.openWithLoading(context, Map<String, dynamic>.from(stock));
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),

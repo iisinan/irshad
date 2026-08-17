@@ -95,15 +95,12 @@ class AaoifiComplianceService
         $interestSec = (string) ($financials->interest_bearing_securities ?: '0');
         $interestIncome = (string) ($financials->interest_income ?: '0');
 
-        // Calculate NGX Financial Ratios using BCMath (6 decimals for division)
-        $debtToMarketCap = bcdiv($totalDebt, $denominator, 6);
-        $cashAndSecurities = bcadd($cashAndEquiv, $interestSec, 4);
-        $cashRatioToMarketCap = bcdiv($cashAndSecurities, $denominator, 6);
-        $purificationFactor = bcdiv($interestIncome, $totalRevenue, 6);
+        $debtPct = $this->tripleCheckCalc($totalDebt, $denominator);
+        $cashPct = $this->tripleCheckCalc($cashAndEquiv + $interestSec, $denominator);
+        $purPct = $this->tripleCheckCalc($interestIncome, $totalRevenue);
 
         // STAGE 2: RULE 2 (NGX Debt Limit Check)
-        if (bccomp($debtToMarketCap, '0.3000', 4) === 1) {
-            $debtPct = bcmul($debtToMarketCap, '100', 2);
+        if ($debtPct > 30.00) {
             return $this->saveStatus(
                 $company,
                 'non-compliant',
@@ -112,8 +109,7 @@ class AaoifiComplianceService
         }
 
         // STAGE 3: RULE 3 (NGX Cash & Securities Limit Check)
-        if (bccomp($cashRatioToMarketCap, '0.3000', 4) === 1) {
-            $cashPct = bcmul($cashRatioToMarketCap, '100', 2);
+        if ($cashPct > 30.00) {
             return $this->saveStatus(
                 $company,
                 'non-compliant',
@@ -123,7 +119,7 @@ class AaoifiComplianceService
 
         // STAGE 4: RULE 4 (NGX Impermissible Income Limit Check)
         $reits = ['NESF', 'SKYESHELT', 'UHOMREIT', 'UPDC REIT', 'UPDCREIT'];
-        if (bccomp($purificationFactor, '0.0500', 4) === 1) {
+        if ($purPct > 5.00) {
             // Check if it's a REIT, they are exempted from the generic interest income check
             if (in_array(strtoupper($company->symbol), $reits)) {
                 return $this->saveStatus(
@@ -133,7 +129,6 @@ class AaoifiComplianceService
                 );
             }
 
-            $purPct = bcmul($purificationFactor, '100', 2);
             return $this->saveStatus(
                 $company,
                 'non-compliant',
@@ -144,8 +139,7 @@ class AaoifiComplianceService
         $extraNotes = $screening && $screening->business_reasoning ? ' Notes: ' . $screening->business_reasoning : '';
 
         // PIPELINE RESULT PROCESSING (ALL STAGES PASSED)
-        if (bccomp($purificationFactor, '0', 4) === 1) {
-            $purPct = bcmul($purificationFactor, '100', 2);
+        if ($purPct > 0) {
             return $this->saveStatus(
                 $company,
                 'halal',
@@ -306,5 +300,31 @@ class AaoifiComplianceService
                 }
             }
         }
+    }
+
+    private function tripleCheckCalc($num, $den): float
+    {
+        if ($den == 0 || $den == null) return 0.0;
+        
+        $numFloat = floatval($num);
+        $denFloat = floatval($den);
+        
+        // 1. Float calc
+        $calc1 = round(($numFloat / $denFloat) * 100, 4);
+        
+        // 2. BCMath calc (Arbitrary Precision)
+        $calc2 = round(floatval(bcdiv(bcmul(strval($num), '100', 8), strval($den), 8)), 4);
+        
+        // 3. Safe Scaled Math
+        $scale = 1000000;
+        $calc3 = round((($numFloat / $scale) / ($denFloat / $scale)) * 100, 4);
+        
+        // Compare with slight tolerance for floating point jitter
+        if (abs($calc1 - $calc2) > 0.001 || abs($calc2 - $calc3) > 0.001) {
+            \Illuminate\Support\Facades\Log::error("AAOIFI Math Mismatch: Float[$calc1] BCMath[$calc2] Scaled[$calc3] for $num / $den");
+            throw new \Exception("Triple check calculation failed for $num / $den. Mismatched results.");
+        }
+        
+        return $calc2;
     }
 }

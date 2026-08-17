@@ -92,13 +92,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _showDeleteAccountDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Delete Account?'),
         content: Text('Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently removed.', style: TextStyle(color: context.textMuted)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: Text('Cancel', style: TextStyle(color: context.textDark)),
           ),
           ElevatedButton(
@@ -109,18 +109,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
               elevation: 0,
             ),
             onPressed: () async {
-              Navigator.pop(context); // Close dialog
+              Navigator.pop(dialogContext); // Close dialog
               
               showDialog(
                 context: context,
                 barrierDismissible: false,
-                builder: (context) => const Center(child: CircularProgressIndicator()),
+                builder: (loadingContext) => const Center(child: CircularProgressIndicator()),
               );
               
               try {
                 await _apiService.delete('account');
                 await _storage.deleteAll();
                 if (mounted) {
+                  Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(false);
                   Navigator.pop(context); // Close loading dialog
                   Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
                 }
@@ -141,13 +142,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _showSignOutDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Sign Out'),
         content: Text('Are you sure you want to sign out?', style: TextStyle(color: context.textMuted)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: Text('Cancel', style: TextStyle(color: context.textDark)),
           ),
           ElevatedButton(
@@ -158,12 +159,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
               elevation: 0,
             ),
             onPressed: () async {
-              Navigator.pop(context); // Close dialog
+              Navigator.pop(dialogContext); // Close dialog
               
               showDialog(
                 context: context,
                 barrierDismissible: false,
-                builder: (context) => const Center(child: CircularProgressIndicator()),
+                builder: (loadingContext) => const Center(child: CircularProgressIndicator()),
               );
               
               try {

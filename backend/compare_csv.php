@@ -1,103 +1,71 @@
 <?php
-require __DIR__.'/vendor/autoload.php';
-$app = require_once __DIR__.'/bootstrap/app.php';
-$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+require "vendor/autoload.php";
+$app = require_once "bootstrap/app.php";
+$app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+
+use App\Models\Company;
 
 $csvFile = '/Users/sinan/Desktop/stocks_financial_data.csv';
-$lines = file($csvFile);
-$header = str_getcsv(array_shift($lines));
+$handle = fopen($csvFile, 'r');
+$header = fgetcsv($handle);
 
 $discrepancies = [];
+$missing = [];
 
-foreach ($lines as $line) {
-    if (trim($line) === '') continue;
-    $row = str_getcsv($line);
+while (($row = fgetcsv($handle)) !== false) {
+    $data = array_combine($header, $row);
+    $symbol = $data['Symbol'];
     
-    $symbol = $row[0];
-    $csvFinalStatus = strtolower(trim($row[3]));
-    $csvMarketCap = (float) $row[5];
-    $csvTotalAssets = (float) $row[6];
-    $csvTotalDebt = (float) $row[7];
-    $csvCash = (float) $row[8];
-    $csvInterestIncome = (float) $row[9];
-    $csvTotalRevenue = (float) $row[10];
-    
-    $csvDebtRatio = (float) $row[11];
-    $csvCashRatio = (float) $row[12];
-    $csvImpureRatio = (float) $row[13];
-    
-    $company = \App\Models\Company::with('aaoifiScreening')->where('symbol', $symbol)->first();
+    $company = Company::where('symbol', $symbol)->first();
     if (!$company) {
-        $discrepancies[] = "- **{$symbol}**: Missing in database.";
+        $missing[] = $symbol;
         continue;
     }
     
-    $screening = $company->aaoifiScreening;
-    if (!$screening) {
-        $discrepancies[] = "- **{$symbol}**: Missing screening data in database.";
-        continue;
-    }
+    $financials = $company->financials()->latest()->first();
+    $aaoifi = $company->aaoifiScreening;
     
-    $dbFinalStatus = strtolower($company->current_status ?? $screening->final_status);
-    $dbMarketCap = (float) $company->market_cap;
-    $dbTotalAssets = (float) $screening->total_assets;
-    $dbTotalDebt = (float) $screening->total_debt;
-    $dbCash = (float) $screening->cash;
-    $dbInterestIncome = (float) $screening->interest_income;
-    $dbTotalRevenue = (float) $screening->total_revenue;
+    $dbMarketCap = $company->market_cap ?? 0;
+    // For legacy/missing financials, CSV might have 0 while DB has 0
+    $dbAssets = $financials?->total_assets ?? 0;
+    $dbDebt = $financials?->total_debt ?? 0;
+    $dbCash = $financials?->cash_and_equivalents ?? 0;
+    $dbInterestIncome = $financials?->interest_income ?? 0;
+    $dbRevenue = $financials?->total_revenue ?? 0;
     
-    $dbDebtRatio = $screening->debt_ratio !== null ? (float) $screening->debt_ratio : 0.0;
-    $dbCashRatio = $screening->cash_ratio !== null ? (float) $screening->cash_ratio : 0.0;
-    $dbImpureRatio = $screening->impermissible_income_ratio !== null ? (float) $screening->impermissible_income_ratio : 0.0;
+    $dbDebtRatio = $aaoifi?->debt_ratio ?? 0;
+    $dbCashRatio = $aaoifi?->cash_ratio ?? 0;
+    $dbImpureRatio = $aaoifi?->impermissible_income_ratio ?? 0;
+    $dbFinalStatus = $aaoifi?->final_status ?? $company->current_status;
     
     $diffs = [];
     
-    if ($csvFinalStatus !== $dbFinalStatus) {
-        $diffs[] = "Status (CSV: {$csvFinalStatus}, DB: {$dbFinalStatus})";
-    }
+    // Check raw values
+    if (abs((float)$data['Total Assets'] - (float)$dbAssets) > 100) $diffs['Total Assets'] = ['csv' => $data['Total Assets'], 'db' => $dbAssets];
+    if (abs((float)$data['Total Debt'] - (float)$dbDebt) > 100) $diffs['Total Debt'] = ['csv' => $data['Total Debt'], 'db' => $dbDebt];
+    if (abs((float)$data['Cash'] - (float)$dbCash) > 100) $diffs['Cash'] = ['csv' => $data['Cash'], 'db' => $dbCash];
+    if (abs((float)$data['Interest Income'] - (float)$dbInterestIncome) > 100) $diffs['Interest Income'] = ['csv' => $data['Interest Income'], 'db' => $dbInterestIncome];
+    if (abs((float)$data['Total Revenue'] - (float)$dbRevenue) > 100) $diffs['Total Revenue'] = ['csv' => $data['Total Revenue'], 'db' => $dbRevenue];
     
-    if (abs($csvMarketCap - $dbMarketCap) > 1.0) {
-        $diffs[] = "Market Cap (CSV: {$csvMarketCap}, DB: {$dbMarketCap})";
-    }
+    // Check AAOIFI ratios
+    if (abs((float)$data['Debt Ratio'] - (float)$dbDebtRatio) > 0.01) $diffs['Debt Ratio'] = ['csv' => $data['Debt Ratio'], 'db' => $dbDebtRatio];
+    if (abs((float)$data['Cash Ratio'] - (float)$dbCashRatio) > 0.01) $diffs['Cash Ratio'] = ['csv' => $data['Cash Ratio'], 'db' => $dbCashRatio];
+    if (abs((float)$data['Impure Ratio'] - (float)$dbImpureRatio) > 0.01) $diffs['Impure Ratio'] = ['csv' => $data['Impure Ratio'], 'db' => $dbImpureRatio];
     
-    if ($csvTotalAssets != 0 && abs($csvTotalAssets - $dbTotalAssets) > 1.0) {
-        $diffs[] = "Total Assets (CSV: {$csvTotalAssets}, DB: {$dbTotalAssets})";
-    }
-    
-    if ($csvTotalDebt != 0 && abs($csvTotalDebt - $dbTotalDebt) > 1.0) {
-        $diffs[] = "Total Debt (CSV: {$csvTotalDebt}, DB: {$dbTotalDebt})";
-    }
-    
-    if ($csvCash != 0 && abs($csvCash - $dbCash) > 1.0) {
-        $diffs[] = "Cash (CSV: {$csvCash}, DB: {$dbCash})";
-    }
-    
-    $csvDebtRatioPct = round($csvDebtRatio * 100, 4);
-    $csvCashRatioPct = round($csvCashRatio * 100, 4);
-    $csvImpureRatioPct = round($csvImpureRatio * 100, 4);
-    
-    $dbDebtRatioRound = round($dbDebtRatio, 4);
-    $dbCashRatioRound = round($dbCashRatio, 4);
-    $dbImpureRatioRound = round($dbImpureRatio, 4);
-    
-    if (abs($csvDebtRatioPct - $dbDebtRatioRound) > 0.1) {
-        $diffs[] = "Debt Ratio (CSV: {$csvDebtRatioPct}%, DB: {$dbDebtRatioRound}%)";
-    }
-    if (abs($csvCashRatioPct - $dbCashRatioRound) > 0.1) {
-        $diffs[] = "Cash Ratio (CSV: {$csvCashRatioPct}%, DB: {$dbCashRatioRound}%)";
-    }
-    if (abs($csvImpureRatioPct - $dbImpureRatioRound) > 0.1) {
-        $diffs[] = "Impure Ratio (CSV: {$csvImpureRatioPct}%, DB: {$dbImpureRatioRound}%)";
+    // Check status
+    if ($data['Final Status'] !== $dbFinalStatus) {
+        $diffs['Final Status'] = ['csv' => $data['Final Status'], 'db' => $dbFinalStatus];
     }
     
     if (!empty($diffs)) {
-        $discrepancies[] = "- **{$symbol}**: " . implode(", ", $diffs);
+        $discrepancies[$symbol] = $diffs;
     }
 }
+fclose($handle);
 
-if (empty($discrepancies)) {
-    echo "No discrepancies found!\n";
-} else {
-    echo count($discrepancies) . " discrepancies found:\n\n";
-    echo implode("\n", $discrepancies) . "\n";
-}
+file_put_contents('csv_comparison_results.json', json_encode([
+    'missing' => $missing,
+    'discrepancies' => $discrepancies
+], JSON_PRETTY_PRINT));
+
+echo "Comparison complete! Written to csv_comparison_results.json\n";

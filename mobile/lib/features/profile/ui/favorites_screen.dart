@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:provider/provider.dart';
 import '../../stocks/ui/stock_screener_screen.dart';
 import '../../scanner/ui/scanner_screen.dart';
+import '../../stocks/providers/stock_provider.dart';
+import '../../stocks/ui/stock_detail_screen.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 import 'package:irshad_mobile/core/widgets/company_avatar.dart';
 import 'package:irshad_mobile/features/profile/data/user_activity_repository.dart';
@@ -342,10 +344,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> with WidgetsBindingOb
           if (isProduct) {
             Navigator.pushNamed(context, '/product_details', arguments: data['item']);
           } else {
-            // For watchlists, we might just have the symbol. We need to pass enough for stock details or fetch it.
-            // If it's a legacy favorite, data['item'] is the full company.
             final stockData = isLegacyFavorite ? data['item'] : {'symbol': data['symbol'], 'name': data['name']};
-            Navigator.pushNamed(context, '/stock_details', arguments: stockData);
+            StockDetailScreen.openWithLoading(context, Map<String, dynamic>.from(stockData));
           }
         },
         borderRadius: BorderRadius.circular(16),
