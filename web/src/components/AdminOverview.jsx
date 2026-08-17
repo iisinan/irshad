@@ -41,7 +41,7 @@ export default function AdminOverview() {
     { label: 'Total Stocks', value: stats.total_stocks, icon: TrendingUp, color: 'var(--primary)', bg: 'var(--primary-50)' },
     { label: 'Halal Stocks', value: stats.halal_stocks, icon: CheckCircle, color: 'var(--halal)', bg: 'var(--halal-bg)' },
     { label: 'Doubtful Stocks', value: stats.doubtful_stocks, icon: HelpCircle, color: 'var(--doubtful)', bg: 'var(--doubtful-bg)' },
-    { label: 'Non-Compliant Stocks', value: stats.non_compliant_stocks, icon: AlertCircle, color: 'var(--non-compliant)', bg: 'var(--non-compliant-bg)' },
+    { label: 'Non-Compliant Stocks', value: stats.non_halal_stocks, icon: AlertCircle, color: 'var(--non-compliant)', bg: 'var(--non-compliant-bg)' },
   ];
 
   return (
