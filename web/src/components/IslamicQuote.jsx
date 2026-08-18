@@ -34,7 +34,7 @@ const quotes = [
   }
 ];
 
-export default function IslamicQuote() {
+export default function IslamicQuote({ merged = false }) {
   const [quote, setQuote] = useState(null);
   const [isVisible, setIsVisible] = useState(true);
 
@@ -47,7 +47,15 @@ export default function IslamicQuote() {
   if (!isVisible || !quote) return null;
 
   return (
-    <div style={{
+    <div style={merged ? {
+      position: 'relative',
+      display: 'flex',
+      gap: '16px',
+      alignItems: 'flex-start',
+      marginTop: '24px',
+      paddingTop: '24px',
+      borderTop: '1px solid var(--border)'
+    } : {
       background: 'var(--bg)',
       border: '1px solid var(--border)',
       borderRadius: '20px',

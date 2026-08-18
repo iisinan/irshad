@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Newspaper, Bell, Moon, Clock, Star, Mail, Droplet } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import IslamicQuote from '../IslamicQuote';
 import UpdatesNews    from './UpdatesNews';
 import UpdatesInbox   from './UpdatesInbox';
 import UpdatesDigest  from './UpdatesDigest';
@@ -212,6 +213,9 @@ export default function UpdatesTab({ unreadCount = 0 }) {
             {/* Right: clock card */}
             <LiveClock hijriDate={hijriDate} />
           </div>
+          
+          {/* Injected Islamic Quote directly below greeting */}
+          <IslamicQuote merged={true} />
         </div>
       </div>
 
