@@ -44,7 +44,7 @@ void callbackDispatcher() {
         List<String> history = prefs.getStringList('scan_history') ?? [];
         if (history.isEmpty) return Future.value(true);
 
-        final String baseUrl = dotenv.env['API_BASE_URL'] ?? 'https://irshad-k3el.onrender.com/api/v1/';
+        final String baseUrl = dotenv.env['API_BASE_URL'] ?? 'https://irshad-backend-production.up.railway.app/api/v1/';
         
         final dio = Dio(BaseOptions(
           baseUrl: baseUrl,
