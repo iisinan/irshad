@@ -54,41 +54,42 @@ function LiveClock({ hijriDate }) {
   return (
     <div style={{
       display: 'flex', flexDirection: 'column', alignItems: 'center',
-      background: 'var(--bg-section)',
+      background: 'linear-gradient(145deg, var(--bg-section), color-mix(in srgb, var(--primary) 6%, var(--bg-section)))',
       border: '1px solid var(--border)',
       borderRadius: '18px',
-      padding: '16px 22px',
-      minWidth: '140px',
-      gap: '4px',
+      padding: '14px 20px',
+      minWidth: '150px',
+      gap: '3px',
       flexShrink: 0,
+      boxShadow: '0 1px 8px rgba(0,0,0,0.04)',
     }}>
       {/* Time digits */}
       <div style={{
-        display: 'flex', alignItems: 'center', gap: '2px',
+        display: 'flex', alignItems: 'baseline', gap: '1px',
         fontFamily: 'var(--mono, monospace)',
         fontVariantNumeric: 'tabular-nums',
       }}>
-        {/* HH */}
-        <span style={{ fontSize: '1.9rem', fontWeight: 900, color: 'var(--text-dark)', lineHeight: 1, letterSpacing: '-1px' }}>{hh}</span>
-        <span style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--primary)', lineHeight: 1, margin: '0 1px', opacity: 0.7 }}>:</span>
-        {/* MM */}
-        <span style={{ fontSize: '1.9rem', fontWeight: 900, color: 'var(--text-dark)', lineHeight: 1, letterSpacing: '-1px' }}>{mm}</span>
-        <span style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--primary)', lineHeight: 1, margin: '0 1px', opacity: 0.7 }}>:</span>
-        {/* SS */}
-        <span style={{ fontSize: '1.9rem', fontWeight: 900, color: 'var(--text-muted)', lineHeight: 1, letterSpacing: '-1px', opacity: 0.65 }}>{ss}</span>
+        <span style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-dark)', lineHeight: 1, letterSpacing: '-2px' }}>{hh}</span>
+        <span style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--primary)', lineHeight: 1, margin: '0 1px', opacity: 0.6 }}>:</span>
+        <span style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-dark)', lineHeight: 1, letterSpacing: '-2px' }}>{mm}</span>
+        <span style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--primary)', lineHeight: 1, margin: '0 1px', opacity: 0.6 }}>:</span>
+        <span style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-muted)', lineHeight: 1, letterSpacing: '-1px', opacity: 0.55, alignSelf: 'flex-end', marginBottom: '2px' }}>{ss}</span>
       </div>
 
       {/* Gregorian date */}
-      <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.4 }}>
+      <div style={{ fontSize: '0.63rem', fontWeight: 600, color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.5, marginTop: '2px' }}>
         {dateStr}
       </div>
 
-      {/* Hijri date */}
+      {/* Hijri date pill */}
       {hijriDate && (
         <div style={{
-          fontSize: '0.62rem', fontWeight: 800, color: 'var(--primary)',
-          background: 'var(--primary-50)', borderRadius: '6px',
-          padding: '2px 8px', marginTop: '4px', textAlign: 'center',
+          fontSize: '0.6rem', fontWeight: 800, color: 'var(--primary)',
+          background: 'var(--primary-50)',
+          border: '1px solid color-mix(in srgb, var(--primary) 20%, transparent)',
+          borderRadius: '20px',
+          padding: '2px 10px', marginTop: '5px', textAlign: 'center',
+          letterSpacing: '0.02em',
         }}>
           {hijriDate}
         </div>
@@ -139,43 +140,49 @@ export default function UpdatesTab({ unreadCount = 0 }) {
     <div style={{ width: '100%', maxWidth: '100%', overflowX: 'hidden', paddingBottom: '40px' }}>
       {/* ── Greeting Banner ── */}
       <div style={{
-        background: 'var(--bg)',
+        background: 'linear-gradient(135deg, var(--bg) 0%, color-mix(in srgb, var(--primary) 4%, var(--bg)) 100%)',
         border: '1px solid var(--border)',
         borderRadius: '24px',
-        padding: '0',
         marginBottom: '24px',
         position: 'relative',
         overflow: 'hidden',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+        boxShadow: '0 2px 24px rgba(0,0,0,0.06)',
       }}>
 
-        {/* Top strip with subtle pattern */}
+        {/* Top accent bar — gradient */}
         <div style={{
-          height: '5px',
-          background: 'var(--primary)',
+          height: '4px',
+          background: 'linear-gradient(90deg, var(--primary), color-mix(in srgb, var(--primary) 60%, #a78bfa))',
           borderRadius: '24px 24px 0 0',
         }} />
 
-        <div style={{ padding: '20px 24px 24px' }}>
-          {/* Main row: greeting left, clock right */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+        <div style={{ padding: '22px 26px 26px' }}>
 
-            {/* Left: greeting */}
+          {/* ── Row 1: Greeting + Clock ── */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+
+            {/* Left: Salam + name */}
             <div style={{ flex: '1 1 200px' }}>
-              {/* Arabic */}
+
+              {/* Salam in Arabic */}
               <div style={{
-                fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary)',
-                marginBottom: '6px',
-                fontFamily: '"Amiri", "Scheherazade New", "Traditional Arabic", serif',
-                direction: 'rtl', textAlign: 'left', opacity: 0.9,
+                fontSize: '1rem',
+                fontWeight: 700,
+                color: 'var(--primary)',
+                marginBottom: '8px',
+                fontFamily: '"Amiri", "Scheherazade New", serif',
+                direction: 'rtl',
+                textAlign: 'left',
+                letterSpacing: '0.01em',
+                lineHeight: 1.6,
               }}>
                 ٱلسَّلَامُ عَلَيْكُمْ وَرَحْمَةُ ٱللَّٰهِ وَبَرَكَاتُهُ
               </div>
 
               {/* Name line */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                 <span style={{
-                  fontSize: 'clamp(1.2rem, 3.5vw, 1.55rem)',
+                  fontSize: 'clamp(1.25rem, 3.5vw, 1.6rem)',
                   fontWeight: 900,
                   color: 'var(--text-dark)',
                   letterSpacing: '-0.5px',
@@ -188,8 +195,11 @@ export default function UpdatesTab({ unreadCount = 0 }) {
 
               {/* Subtitle */}
               <p style={{
-                fontSize: '0.78rem', color: 'var(--text-muted)',
-                margin: '0 0 0', fontWeight: 600, lineHeight: 1.5,
+                fontSize: '0.78rem',
+                color: 'var(--text-muted)',
+                margin: 0,
+                fontWeight: 500,
+                lineHeight: 1.5,
               }}>
                 Here's what's happening with your halal portfolio today.
               </p>
@@ -210,11 +220,19 @@ export default function UpdatesTab({ unreadCount = 0 }) {
               )}
             </div>
 
-            {/* Right: clock card */}
+            {/* Right: clock */}
             <LiveClock hijriDate={hijriDate} />
           </div>
 
-          {/* Islamic Quote — merged seamlessly below greeting */}
+          {/* ── Divider ── */}
+          <div style={{
+            margin: '20px 0 0',
+            height: '1px',
+            background: 'linear-gradient(90deg, var(--primary) 0%, transparent 80%)',
+            opacity: 0.18,
+          }} />
+
+          {/* ── Islamic Quote ── */}
           <IslamicQuote merged={true} />
         </div>
 

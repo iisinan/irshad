@@ -59,132 +59,153 @@ export default function IslamicQuote({ merged = false }) {
 
   if (!visible || !quote) return null;
 
-  const isDua = quote.type === 'dua';
-
-  const wrapperStyle = merged
-    ? {
-        marginTop: '20px',
-        paddingTop: '20px',
-        borderTop: '1px dashed var(--border)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '10px',
-      }
-    : {
-        background: 'var(--bg)',
+  /* ── Standalone card wrapper (when not merged) ── */
+  if (!merged) {
+    return (
+      <div style={{
+        background: 'linear-gradient(135deg, var(--bg) 0%, color-mix(in srgb, var(--primary) 4%, var(--bg)) 100%)',
         border: '1px solid var(--border)',
         borderRadius: '20px',
         padding: '20px 24px',
         marginBottom: '24px',
         boxShadow: 'var(--shadow-sm)',
-      };
+      }}>
+        <QuoteBody quote={quote} onDismiss={() => setVisible(false)} />
+      </div>
+    );
+  }
+
+  /* ── Merged mode: no outer card ── */
+  return (
+    <div style={{ paddingTop: '18px' }}>
+      <QuoteBody quote={quote} onDismiss={() => setVisible(false)} />
+    </div>
+  );
+}
+
+/* ── Inner content shared between modes ── */
+function QuoteBody({ quote, onDismiss }) {
+  const hasArabic = !!quote.arabic;
 
   return (
-    <div style={wrapperStyle}>
-      {/* Label row */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Sparkles size={13} color="var(--primary)" style={{ opacity: 0.8 }} />
+    <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+
+      {/* Left: content */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+
+        {/* Label row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: hasArabic ? '14px' : '10px' }}>
+          <Sparkles size={12} color="var(--primary)" style={{ opacity: 0.75, flexShrink: 0 }} />
           <span style={{
-            fontSize: '0.68rem',
+            fontSize: '0.65rem',
             fontWeight: 800,
-            letterSpacing: '0.08em',
+            letterSpacing: '0.1em',
             textTransform: 'uppercase',
             color: 'var(--primary)',
-            opacity: 0.85,
+            opacity: 0.8,
           }}>
             {quote.label} of the day
           </span>
         </div>
-        <button
-          onClick={() => setVisible(false)}
-          aria-label="Dismiss"
-          style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
+
+        {/* Narrator (hadith only) */}
+        {quote.narrator && (
+          <p style={{
+            fontSize: '0.73rem',
             color: 'var(--text-muted)',
-            padding: '2px',
-            display: 'flex',
-            alignItems: 'center',
-            borderRadius: '50%',
-            opacity: 0.6,
-            transition: 'opacity 0.2s',
-          }}
-          onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
-          onMouseLeave={e => (e.currentTarget.style.opacity = '0.6')}
-        >
-          <X size={15} />
-        </button>
+            margin: '0 0 10px',
+            fontStyle: 'italic',
+            lineHeight: 1.5,
+          }}>
+            {quote.narrator}
+          </p>
+        )}
+
+        {/* Arabic */}
+        {hasArabic && (
+          <div
+            dir="rtl"
+            style={{
+              fontFamily: '"Amiri", "Scheherazade New", serif',
+              fontSize: '1.3rem',
+              lineHeight: 2,
+              color: 'var(--text-dark)',
+              textAlign: 'right',
+              marginBottom: '12px',
+              opacity: 0.95,
+            }}
+          >
+            {quote.arabic}
+          </div>
+        )}
+
+        {/* Translation — left-border accent */}
+        <p style={{
+          margin: '0 0 8px',
+          fontSize: '0.875rem',
+          fontWeight: 600,
+          color: 'var(--text-dark)',
+          lineHeight: 1.7,
+          borderLeft: '3px solid var(--primary)',
+          paddingLeft: '12px',
+          opacity: 0.9,
+        }}>
+          {quote.translation}
+        </p>
+
+        {/* Transliteration */}
+        {quote.transliteration && (
+          <p style={{
+            margin: '0 0 8px',
+            paddingLeft: '15px',
+            fontSize: '0.75rem',
+            color: 'var(--text-muted)',
+            lineHeight: 1.6,
+            fontStyle: 'italic',
+          }}>
+            {quote.transliteration}
+          </p>
+        )}
+
+        {/* Source */}
+        <p style={{
+          margin: 0,
+          paddingLeft: '15px',
+          fontSize: '0.68rem',
+          fontWeight: 800,
+          color: 'var(--primary)',
+          opacity: 0.65,
+          letterSpacing: '0.04em',
+          textTransform: 'uppercase',
+        }}>
+          {quote.source}
+        </p>
       </div>
 
-      {/* Narrator (hadith only) */}
-      {quote.narrator && (
-        <p style={{
-          fontSize: '0.72rem',
+      {/* Right: dismiss button */}
+      <button
+        onClick={onDismiss}
+        aria-label="Dismiss"
+        style={{
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
           color: 'var(--text-muted)',
-          margin: 0,
-          fontStyle: 'italic',
-        }}>
-          {quote.narrator}
-        </p>
-      )}
+          padding: '2px',
+          display: 'flex',
+          alignItems: 'center',
+          borderRadius: '50%',
+          opacity: 0.45,
+          transition: 'opacity 0.2s',
+          flexShrink: 0,
+          marginTop: '1px',
+        }}
+        onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
+        onMouseLeave={e => (e.currentTarget.style.opacity = '0.45')}
+      >
+        <X size={15} />
+      </button>
 
-      {/* Arabic */}
-      {quote.arabic && (
-        <div
-          dir="rtl"
-          style={{
-            fontFamily: '"Amiri", "Scheherazade New", serif',
-            fontSize: '1.35rem',
-            lineHeight: 2,
-            color: 'var(--text-dark)',
-            textAlign: 'right',
-          }}
-        >
-          {quote.arabic}
-        </div>
-      )}
-
-      {/* Translation */}
-      <p style={{
-        margin: 0,
-        fontSize: '0.88rem',
-        fontWeight: 600,
-        color: 'var(--text-dark)',
-        lineHeight: 1.65,
-        fontStyle: isDua ? 'italic' : 'normal',
-        borderLeft: '3px solid var(--primary)',
-        paddingLeft: '12px',
-        opacity: 0.92,
-      }}>
-        {quote.translation}
-      </p>
-
-      {/* Transliteration */}
-      {quote.transliteration && (
-        <p style={{
-          margin: 0,
-          fontSize: '0.75rem',
-          color: 'var(--text-muted)',
-          lineHeight: 1.6,
-          fontStyle: 'italic',
-        }}>
-          {quote.transliteration}
-        </p>
-      )}
-
-      {/* Source */}
-      <p style={{
-        margin: 0,
-        fontSize: '0.7rem',
-        fontWeight: 700,
-        color: 'var(--primary)',
-        opacity: 0.75,
-        letterSpacing: '0.02em',
-      }}>
-        {quote.source}
-      </p>
     </div>
   );
 }
