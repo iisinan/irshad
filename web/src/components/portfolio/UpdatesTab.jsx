@@ -156,7 +156,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
           borderRadius: '24px 24px 0 0',
         }} />
 
-        <div style={{ padding: '22px 24px 22px' }}>
+        <div style={{ padding: '20px 24px 24px' }}>
           {/* Main row: greeting left, clock right */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
 
@@ -213,10 +213,11 @@ export default function UpdatesTab({ unreadCount = 0 }) {
             {/* Right: clock card */}
             <LiveClock hijriDate={hijriDate} />
           </div>
-          
-          {/* Injected Islamic Quote directly below greeting */}
+
+          {/* Islamic Quote — merged seamlessly below greeting */}
           <IslamicQuote merged={true} />
         </div>
+
       </div>
 
       {/* ── Sub-tab Navigation ── */}
