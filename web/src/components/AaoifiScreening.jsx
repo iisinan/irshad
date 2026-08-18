@@ -667,7 +667,30 @@ const AaoifiScreening = () => {
                 <p style={{ color:'var(--text-dark)',fontSize:'0.9rem',lineHeight:1.6,margin:0, fontWeight:600 }}>{cleanStatusReason||'Screened in accordance with AAOIFI Shariah Standard No. 21.'}</p>
               </div>
               
-              {(report.reporting_period||report.reporting_year)&&(<div style={{ display:'inline-flex',alignItems:'center',gap:6,padding:'6px 16px',background:'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%)',borderRadius:100,fontSize:'0.7rem',color:'var(--text-muted)',fontWeight:800,border:`1px solid ${sc.color}20`,width:'fit-content',marginTop:4, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}><Calendar size={12} color={sc.color}/> {report.reporting_period} {report.reporting_year?`(${report.reporting_year})`:''}</div>)}
+              {(report.reporting_period || report.reporting_year || report.published_date || report.source_url) && (
+                <div style={{ display:'flex', alignItems:'center', gap: '10px', flexWrap: 'wrap', marginTop: 12 }}>
+                  {(report.reporting_period || report.reporting_year) && (
+                    <div style={{ display:'inline-flex',alignItems:'center',gap:6,padding:'6px 14px',background:'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%)',borderRadius:100,fontSize:'0.7rem',color:'var(--text-muted)',fontWeight:800,border:`1px solid ${sc.color}20`, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+                      <Calendar size={12} color={sc.color}/> 
+                      {report.reporting_period||''} {report.reporting_year?`(${report.reporting_year})`:''}
+                    </div>
+                  )}
+                  
+                  {report.published_date && (
+                    <div style={{ display:'inline-flex',alignItems:'center',gap:6,padding:'6px 14px',background:'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%)',borderRadius:100,fontSize:'0.7rem',color:'var(--text-muted)',fontWeight:800,border:`1px solid ${sc.color}20`, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+                      <Clock size={12} color={sc.color}/> 
+                      Published: {fmtDate(report.published_date)}
+                    </div>
+                  )}
+                  
+                  {report.source_url && (
+                    <a href={report.source_url} target="_blank" rel="noopener noreferrer" className="hover-lift" style={{ display:'inline-flex',alignItems:'center',gap:6,padding:'6px 14px',background:'var(--bg)',borderRadius:100,fontSize:'0.7rem',color:'var(--primary)',fontWeight:800,border:`1px solid var(--border)`, boxShadow: 'var(--shadow-sm)', textDecoration: 'none' }}>
+                      <ExternalLink size={12} color="var(--primary)"/> 
+                      Source Document
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
             
             {hasPurification&&(<div style={{ flex:'0 0 280px',padding:'24px 32px',display:'flex',flexDirection:'column',justifyContent:'center',gap:16,background:'linear-gradient(135deg, rgba(245,158,11,0.02) 0%, rgba(245,158,11,0.08) 100%)' }}>
