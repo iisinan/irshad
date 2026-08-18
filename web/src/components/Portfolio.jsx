@@ -18,6 +18,7 @@ import UpdatesTab from './portfolio/UpdatesTab';
 import GuideTab from './portfolio/GuideTab';
 
 import AddHoldingModal from "./portfolio/AddHoldingModal";
+import IslamicQuote from './IslamicQuote';
 
 /* ─── Skeleton ─────────────────────────────────────────────── */
 function Skeleton() {
@@ -277,6 +278,7 @@ export default function Portfolio() {
 
   return (
     <div className="page-wrapper animate-fade-in" style={{ maxWidth: '1400px', margin: '0 auto', padding: '36px 24px 80px' }}>
+      <IslamicQuote />
       {showAddModal && (
         <AddHoldingModal 
           initialTab={typeof showAddModal === 'string' ? showAddModal : 'manual'}
