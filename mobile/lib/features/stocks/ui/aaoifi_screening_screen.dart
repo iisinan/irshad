@@ -150,10 +150,10 @@ class _AaoifiScreeningScreenState extends State<AaoifiScreeningScreen> with Sing
     Color statusColor = Colors.grey;
     IconData statusIcon = Icons.help_outline;
     
-    if (finalStatus == 'halal') {
+    if (finalStatus == 'halal' || finalStatus == 'pass') {
       statusColor = context.halal;
       statusIcon = Icons.check_circle;
-    } else if (finalStatus == 'non-halal' || finalStatus == 'non-compliant') {
+    } else if (finalStatus == 'non-halal' || finalStatus == 'non-compliant' || finalStatus == 'fail') {
       statusColor = Colors.red;
       statusIcon = Icons.cancel;
     } else if (finalStatus == 'doubtful') {
@@ -186,7 +186,7 @@ class _AaoifiScreeningScreenState extends State<AaoifiScreeningScreen> with Sing
               Icon(statusIcon, color: statusColor, size: 72),
               const SizedBox(height: 12),
               Text(
-                finalStatus == 'halal' ? 'SHARIAH COMPLIANT' : ((finalStatus == 'non-halal' || finalStatus == 'non-compliant') ? 'SHARIAH NON-COMPLIANT' : 'DOUBTFUL'),
+                (finalStatus == 'halal' || finalStatus == 'pass') ? 'SHARIAH COMPLIANT' : ((finalStatus == 'non-halal' || finalStatus == 'non-compliant' || finalStatus == 'fail') ? 'SHARIAH NON-COMPLIANT' : 'DOUBTFUL'),
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w900,

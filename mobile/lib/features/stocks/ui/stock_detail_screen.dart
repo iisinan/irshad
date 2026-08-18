@@ -320,7 +320,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
     if (rawStatus is Map) {
       status = rawStatus['status']?.toString().toLowerCase() ?? 'doubtful';
       isScholarVerified = rawStatus['verified_by_scholar'] == true;
-      if (status == 'non-halal' || status == 'non-compliant') {
+      if (status == 'non-halal' || status == 'non-compliant' || status == 'fail') {
         reason = rawStatus['reason'] ?? 'The core business operations involve non-compliant activities.';
       } else if (status == 'doubtful') {
         reason = rawStatus['reason'] ?? 'This stock is currently under review or lacks sufficient data for a definitive Shariah ruling.';
@@ -329,7 +329,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
         reason = rawStatus['reason'] ?? 'The core business operations of this company have been verified to be in a Halal industry, with no significant involvement in prohibited activities like conventional finance, alcohol, gambling, or tobacco.';
       }
     } else if (rawStatus is String) {
-      if (rawStatus.toLowerCase() == 'non-halal' || rawStatus.toLowerCase() == 'non-compliant') {
+      if (rawStatus.toLowerCase() == 'non-halal' || rawStatus.toLowerCase() == 'non-compliant' || rawStatus.toLowerCase() == 'fail') {
         status = 'non-compliant';
         reason = 'Automated business activity analysis.';
       } else if (rawStatus.toLowerCase() == 'doubtful') {
@@ -344,8 +344,8 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
     // The backend is the single source of truth for verdicts — especially for scholar-verified statuses.
     // Financial data below is used only for the AAOIFI breakdown display panel, never to change the verdict.
 
-    bool isHalal = status == 'halal';
-    bool isNonHalal = status == 'non-halal' || status == 'non-compliant';
+    bool isHalal = status == 'halal' || status == 'pass';
+    bool isNonHalal = status == 'non-halal' || status == 'non-compliant' || status == 'fail';
     Color statusColor = isHalal ? context.halal : (isNonHalal ? context.haram : context.questionable);
     Color badgeBg = isHalal ? context.halalBg : (isNonHalal ? context.haramBg : context.questionableBg);
     
@@ -2301,7 +2301,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                       Icon(isPass ? Icons.check : Icons.close, size: 10, color: isPass ? context.halal : context.haram),
                       const SizedBox(width: 4),
                       Text(
-                        isPass ? '${(limit - value).toStringAsFixed(2)}pp headroom' : '${(value - limit).toStringAsFixed(2)}pp excess',
+                        isPass ? 'PASS • ${(limit - value).toStringAsFixed(2)}pp headroom' : 'FAIL • ${(value - limit).toStringAsFixed(2)}pp excess',
                         style: TextStyle(color: isPass ? context.halal : context.haram, fontSize: 10, fontWeight: FontWeight.w800),
                       ),
                     ]
