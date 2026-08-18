@@ -90,6 +90,7 @@ const StatusBadge = ({ status }) => {
     halal:       { label:'PASS',   icon:<CheckCircle size={12}/>,   color:'var(--halal)',     bg:'var(--halal-bg)',      border:'rgba(16,185,129,0.3)' },
     doubtful:    { label:'REVIEW', icon:<AlertTriangle size={12}/>, color:'#D97706',           bg:'rgba(245,158,11,0.1)', border:'rgba(245,158,11,0.3)' },
     'non-compliant': { label:'FAIL',   icon:<XCircle size={12}/>,       color:'var(--non-compliant)', bg:'var(--non-compliant-bg)', border:'rgba(239,68,68,0.3)'  },
+    'non-halal': { label:'FAIL',   icon:<XCircle size={12}/>,       color:'var(--non-compliant)', bg:'var(--non-compliant-bg)', border:'rgba(239,68,68,0.3)'  },
     fail:        { label:'FAIL',   icon:<XCircle size={12}/>,       color:'var(--non-compliant)', bg:'var(--non-compliant-bg)', border:'rgba(239,68,68,0.3)'  },
     pass:        { label:'PASS',   icon:<CheckCircle size={12}/>,   color:'var(--halal)',     bg:'var(--halal-bg)',      border:'rgba(16,185,129,0.3)' },
   };
