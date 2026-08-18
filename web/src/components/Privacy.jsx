@@ -84,7 +84,7 @@ const PrivacyPage = () => {
               <ul style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: 1.75, paddingLeft: '24px', margin: 0 }}>
                 <li><strong>Account Registration Data:</strong> Name, email address, password hash, and optional phone number.</li>
                 <li><strong>User Portfolio & Watchlist Data:</strong> Tickers tracked, custom share quantities, and dividend calculation preferences.</li>
-                <li><strong>Payment Information:</strong> Handled securely by our certified PCI-DSS Level 1 payment processors (Paystack/Flutterwave/Stripe). Irshad never stores raw debit/credit card numbers or CVVs on its servers.</li>
+                <li><strong>Mobile App & Device Data:</strong> When you use our Android or iOS applications, we collect device-specific information (such as hardware model, operating system version, unique device identifiers, and crash logs) to ensure app stability and provide troubleshooting support.</li>
                 <li><strong>Technical & Usage Logs:</strong> IP address, device operating system, browser type, and interaction timestamps for fraud prevention and performance optimization.</li>
               </ul>
             </div>
@@ -128,20 +128,20 @@ const PrivacyPage = () => {
               </p>
             </div>
 
-            {/* 5. Your Rights */}
+            {/* 5. Your Privacy Rights & Account Deletion */}
             <div>
               <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <span style={{ fontSize: '0.9rem', color: 'var(--primary)', background: 'var(--primary-50)', padding: '4px 10px', borderRadius: '8px', fontWeight: 900 }}>5</span>
-                Your Privacy Rights
+                Your Privacy Rights & Account Deletion
               </h2>
               <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: 1.75, marginBottom: '12px' }}>
-                Under applicable data protection laws (including NDPR and GDPR), you have the right to:
+                Under applicable data protection laws and Google Play's User Data policy, you have the right to manage and delete your data:
               </p>
               <ul style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: 1.75, paddingLeft: '24px', margin: 0 }}>
-                <li>Access and export a copy of all personal and financial tracking data we hold about you.</li>
-                <li>Request rectification of any inaccurate information.</li>
-                <li>Request complete erasure of your account and related records.</li>
-                <li>Opt out of marketing communications at any time with a single click.</li>
+                <li><strong>Account Deletion:</strong> You can permanently delete your account directly from within the Mobile App by navigating to <em>Profile Settings &gt; Delete Account</em>, or by submitting a request to <a href="mailto:privacy@iirshad.com" style={{ color: 'var(--primary)' }}>privacy@iirshad.com</a>.</li>
+                <li><strong>Data Erasure:</strong> Upon deletion, all personal information, watchlists, and portfolio records are completely and permanently purged from active databases within 30 days.</li>
+                <li><strong>Access and Export:</strong> Request a copy of all personal and financial tracking data we hold about you.</li>
+                <li><strong>Opt-out:</strong> Opt out of marketing communications at any time with a single click.</li>
               </ul>
             </div>
 
