@@ -1007,6 +1007,36 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                                     ],
                                   ),
                                 ],
+                                if (_aaoifiData?['published_date'] != null) ...[
+                                  const SizedBox(height: 6),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.access_time, size: 11, color: context.textMuted),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'Published: ${_aaoifiData!["published_date"].toString().split("T").first}',
+                                        style: TextStyle(color: context.textMuted, fontSize: 11, fontWeight: FontWeight.w600),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                                if (_aaoifiData?['source_url'] != null) ...[
+                                  const SizedBox(height: 6),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.link, size: 11, color: context.textMuted),
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: Text(
+                                          'Source: ${_aaoifiData!["source_url"]}',
+                                          style: TextStyle(color: context.textMuted, fontSize: 11, fontWeight: FontWeight.w600),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ],
                             ),
                           ),
