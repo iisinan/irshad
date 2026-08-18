@@ -153,7 +153,7 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '20px', padding: '16px 20px',
+        display: 'grid', gridTemplateColumns: '2fr 1.2fr 1fr auto', alignItems: 'center', gap: '20px', padding: '16px 20px',
         background: 'linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%)',
         border: '1px solid var(--border)',
         borderRadius: '16px',
@@ -163,8 +163,8 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
         boxShadow: hov ? '0 8px 24px rgba(91, 41, 113, 0.06)' : '0 2px 8px rgba(0,0,0,0.02)'
       }}
     >
-      {/* Left: Asset Info */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: 0 }}>
+      {/* Col 1: Asset Info */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0 }}>
         <CompanyLogo symbol={holding.symbol} logoUrl={holding.logo_url} size={42} radius={12} />
         <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: '4px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -179,44 +179,44 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
         </div>
       </div>
 
-      {/* Middle: Value & Details */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ fontWeight: 900, color: 'var(--text-dark)', fontSize: '1rem', fontVariantNumeric: 'tabular-nums' }}>
-            {fmtK(holding.total_value)}
-          </span>
-          {(holding.return_percentage !== null && holding.return_percentage !== undefined && holding.return_percentage !== 0) && (
-            <span style={{ fontWeight: 800, fontSize: '0.75rem', color: isUp ? 'var(--halal)' : 'var(--non-compliant)', display: 'flex', alignItems: 'center', gap: '2px', background: isUp ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', padding: '2px 6px', borderRadius: '6px' }}>
-              {isUp ? <ArrowUpRight size={12}/> : <ArrowDownRight size={12}/>}
-              {isUp?'+':''}{Number(holding.return_percentage||0).toFixed(2)}%
-            </span>
-          )}
-        </div>
-        
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+      {/* Col 2: Value & Details */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <span style={{ fontWeight: 900, color: 'var(--text-dark)', fontSize: '0.95rem', fontVariantNumeric: 'tabular-nums' }}>
+          {fmtK(holding.total_value)}
+        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600, flexWrap: 'wrap' }}>
           <span>{Number(holding.shares).toLocaleString()} shares</span>
           
           {(hasDivs || hasPurify) && <span style={{ color: 'var(--border)' }}>•</span>}
           
           {hasDivs && (
-            <span style={{ color: 'var(--primary)' }}>
+            <span style={{ color: 'var(--primary)', background: 'var(--primary-50)', padding: '2px 6px', borderRadius: '4px' }}>
               ₦{Number(holding.total_dividends).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Divs
             </span>
           )}
           
           {hasPurify && (
-            <>
-              {hasDivs && <span style={{ color: 'var(--border)' }}>•</span>}
-              <span style={{ color: 'var(--non-compliant)' }}>
-                ₦{Number(holding.purification_due).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} purify
-              </span>
-            </>
+            <span style={{ color: 'var(--non-compliant)', background: 'rgba(239,68,68,0.1)', padding: '2px 6px', borderRadius: '4px' }}>
+              ₦{Number(holding.purification_due).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} purify
+            </span>
           )}
         </div>
       </div>
 
-      {/* Right: Actions */}
-      <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginLeft: '16px' }} onClick={e => e.stopPropagation()}>
+      {/* Col 3: Performance */}
+      <div>
+        {(holding.return_percentage !== null && holding.return_percentage !== undefined && holding.return_percentage !== 0) ? (
+          <span style={{ fontWeight: 800, fontSize: '0.75rem', color: isUp ? 'var(--halal)' : 'var(--non-compliant)', display: 'inline-flex', alignItems: 'center', gap: '2px', background: isUp ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', padding: '4px 8px', borderRadius: '6px' }}>
+            {isUp ? <ArrowUpRight size={12}/> : <ArrowDownRight size={12}/>}
+            {isUp?'+':''}{Number(holding.return_percentage||0).toFixed(2)}%
+          </span>
+        ) : (
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>-</span>
+        )}
+      </div>
+
+      {/* Col 4: Actions */}
+      <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }} onClick={e => e.stopPropagation()}>
         {badge.text === 'Shariah Compliant w/ Purification' && (
           Number(holding.purification_due || 0) === 0 && hasBeenPurified ? (
             <button disabled style={{ background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.3)', color: 'var(--halal)', cursor: 'default', padding: '6px 12px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, fontSize: '0.7rem' }}>
