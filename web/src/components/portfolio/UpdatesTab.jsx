@@ -90,87 +90,121 @@ export default function UpdatesTab({ unreadCount = 0 }) {
   return (
     <div style={{ width: '100%', maxWidth: '100%', overflowX: 'hidden', paddingBottom: '40px' }}>
 
-      {/* ── Compact Banner ── */}
+      {/* ── Banner ── */}
       <div style={{
         display: 'flex',
-        border: '1px solid var(--border)',
-        borderRadius: '18px',
+        border: '1px solid color-mix(in srgb, var(--primary) 18%, var(--border))',
+        borderRadius: '20px',
         marginBottom: '20px',
         overflow: 'hidden',
-        boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
-        background: 'var(--bg)',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.06)',
+        background: 'linear-gradient(110deg, var(--bg) 60%, color-mix(in srgb, var(--primary) 5%, var(--bg)) 100%)',
+        animation: 'fadeIn 0.4s ease-out',
       }}>
 
-        {/* Left accent bar */}
+        {/* Left accent bar — animated gradient */}
         <div style={{
-          width: '4px',
+          width: '5px',
           flexShrink: 0,
-          background: 'linear-gradient(180deg, var(--primary) 0%, color-mix(in srgb, var(--primary) 55%, #a78bfa) 100%)',
+          background: 'linear-gradient(180deg, var(--primary) 0%, color-mix(in srgb, var(--primary) 45%, #8b5cf6) 60%, color-mix(in srgb, var(--primary) 25%, #06b6d4) 100%)',
         }} />
 
-        {/* Main content */}
-        <div style={{ flex: 1, minWidth: 0, padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        {/* Content */}
+        <div style={{ flex: 1, minWidth: 0, padding: '13px 20px 13px 16px', display: 'flex', flexDirection: 'column', gap: '9px' }}>
 
-          {/* ── Row 1: Greeting + Clock ── */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+          {/* ── Row 1 ── */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
 
-            {/* Left: Salam · name */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flexWrap: 'wrap' }}>
+            {/* Left cluster */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0', minWidth: 0 }}>
+
+              {/* Salam pill */}
               <span style={{
+                display: 'inline-flex', alignItems: 'center',
                 fontFamily: '"Amiri", "Scheherazade New", serif',
-                fontSize: '0.9rem',
+                fontSize: '1rem',
                 fontWeight: 700,
                 color: 'var(--primary)',
-                lineHeight: 1,
+                background: 'color-mix(in srgb, var(--primary) 8%, transparent)',
+                borderRadius: '8px',
+                padding: '3px 10px 3px 10px',
                 direction: 'rtl',
                 whiteSpace: 'nowrap',
+                letterSpacing: '0.01em',
+                marginRight: '12px',
+                flexShrink: 0,
               }}>
                 ٱلسَّلَامُ عَلَيْكُمْ
               </span>
-              <span style={{ width: '1px', height: '14px', background: 'var(--border)', flexShrink: 0 }} />
-              <span style={{
-                fontSize: '0.95rem',
-                fontWeight: 800,
-                color: 'var(--text-dark)',
-                letterSpacing: '-0.3px',
-                whiteSpace: 'nowrap',
-              }}>
-                {greeting.english}, {firstName} {greeting.emoji}
-              </span>
+
+              {/* Greeting + name */}
+              <div style={{ minWidth: 0 }}>
+                <div style={{
+                  fontSize: '1rem',
+                  fontWeight: 900,
+                  color: 'var(--text-dark)',
+                  letterSpacing: '-0.4px',
+                  lineHeight: 1.15,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}>
+                  {greeting.english}, {firstName}&nbsp;{greeting.emoji}
+                </div>
+                <div style={{
+                  fontSize: '0.7rem',
+                  fontWeight: 500,
+                  color: 'var(--text-muted)',
+                  marginTop: '1px',
+                  letterSpacing: '0.01em',
+                }}>
+                  Your halal portfolio awaits
+                </div>
+              </div>
+
+              {/* Unread badge */}
               {unreadCount > 0 && (
                 <span style={{
                   display: 'inline-flex', alignItems: 'center', gap: '4px',
-                  background: 'var(--primary-50)', border: '1px solid var(--primary-100)',
-                  borderRadius: '20px', padding: '2px 8px',
-                  fontSize: '0.65rem', fontWeight: 800, color: 'var(--primary)',
-                  whiteSpace: 'nowrap',
+                  background: 'var(--primary)', color: '#fff',
+                  borderRadius: '20px', padding: '2px 9px',
+                  fontSize: '0.62rem', fontWeight: 800,
+                  marginLeft: '12px', flexShrink: 0, whiteSpace: 'nowrap',
+                  boxShadow: '0 2px 6px color-mix(in srgb, var(--primary) 40%, transparent)',
                 }}>
-                  <Bell size={10} />
-                  {unreadCount} unread
+                  <Bell size={9} />
+                  {unreadCount} new
                 </span>
               )}
             </div>
 
-            {/* Right: compact clock */}
+            {/* Clock — right */}
             <div style={{
               display: 'flex', flexDirection: 'column', alignItems: 'flex-end',
-              flexShrink: 0, gap: '1px',
+              flexShrink: 0, gap: '2px',
             }}>
               <div style={{
-                fontFamily: 'var(--mono, monospace)',
+                fontFamily: '"SF Mono", "Fira Code", "Fira Mono", monospace',
                 fontVariantNumeric: 'tabular-nums',
-                display: 'flex', alignItems: 'baseline', gap: '1px',
+                display: 'flex', alignItems: 'baseline', gap: '0px', lineHeight: 1,
               }}>
-                <span style={{ fontSize: '1.3rem', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-1.5px' }}>{hh}</span>
-                <span style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--primary)', opacity: 0.6 }}>:</span>
-                <span style={{ fontSize: '1.3rem', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-1.5px' }}>{mm}</span>
-                <span style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--primary)', opacity: 0.6 }}>:</span>
-                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)', opacity: 0.5, letterSpacing: '-0.5px', alignSelf: 'flex-end', marginBottom: '1px' }}>{ss}</span>
+                <span style={{ fontSize: '1.45rem', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-2px' }}>{hh}</span>
+                <span style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--primary)', opacity: 0.55, margin: '0 1px' }}>:</span>
+                <span style={{ fontSize: '1.45rem', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-2px' }}>{mm}</span>
+                <span style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--primary)', opacity: 0.55, margin: '0 1px' }}>:</span>
+                <span style={{
+                  fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)',
+                  opacity: 0.45, letterSpacing: '-0.5px',
+                  alignSelf: 'flex-end', marginBottom: '2px',
+                  transition: 'opacity 0.4s',
+                }}>{ss}</span>
               </div>
               {hijriDate && (
                 <span style={{
-                  fontSize: '0.6rem', fontWeight: 700, color: 'var(--primary)',
-                  opacity: 0.7, letterSpacing: '0.02em',
+                  fontSize: '0.58rem', fontWeight: 700, color: 'var(--primary)',
+                  opacity: 0.6, letterSpacing: '0.04em', textTransform: 'uppercase',
+                  background: 'color-mix(in srgb, var(--primary) 10%, transparent)',
+                  padding: '1px 6px', borderRadius: '4px',
                 }}>
                   {hijriDate}
                 </span>
@@ -178,51 +212,90 @@ export default function UpdatesTab({ unreadCount = 0 }) {
             </div>
           </div>
 
-          {/* ── Row 2: Quote ── */}
+          {/* ── Row 2: Quote strip ── */}
           {quoteVisible && (
             <div style={{
-              display: 'flex', alignItems: 'center', gap: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
               paddingTop: '8px',
-              borderTop: '1px dashed color-mix(in srgb, var(--border) 80%, transparent)',
+              borderTop: '1px solid color-mix(in srgb, var(--primary) 12%, var(--border))',
               minWidth: 0,
+              animation: 'fadeIn 0.5s ease-out 0.1s both',
             }}>
-              <Sparkles size={11} color="var(--primary)" style={{ flexShrink: 0, opacity: 0.7 }} />
+              {/* Decorative quote mark */}
               <span style={{
-                fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.08em',
-                textTransform: 'uppercase', color: 'var(--primary)', opacity: 0.75,
-                whiteSpace: 'nowrap', flexShrink: 0,
+                fontSize: '1.4rem',
+                lineHeight: 1,
+                color: 'var(--primary)',
+                opacity: 0.25,
+                fontFamily: 'Georgia, serif',
+                flexShrink: 0,
+                marginTop: '-4px',
+                userSelect: 'none',
+              }}>"</span>
+
+              {/* Label badge */}
+              <span style={{
+                fontSize: '0.58rem',
+                fontWeight: 900,
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                color: '#fff',
+                background: 'var(--primary)',
+                borderRadius: '4px',
+                padding: '2px 6px',
+                flexShrink: 0,
+                whiteSpace: 'nowrap',
               }}>
                 {quote.label}
               </span>
-              <span style={{ color: 'var(--border)', flexShrink: 0 }}>·</span>
+
+              {/* Quote text */}
               <span style={{
-                fontSize: '0.8rem', color: 'var(--text-dark)', fontWeight: 500,
-                lineHeight: 1.5, opacity: 0.88,
-                flex: 1, minWidth: 0,
-                overflow: 'hidden', display: '-webkit-box',
-                WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+                fontSize: '0.8rem',
+                color: 'var(--text-dark)',
+                fontWeight: 500,
+                lineHeight: 1.55,
+                opacity: 0.9,
+                flex: 1,
+                minWidth: 0,
+                overflow: 'hidden',
+                display: '-webkit-box',
+                WebkitLineClamp: 1,
+                WebkitBoxOrient: 'vertical',
+                fontStyle: 'italic',
               }}>
                 {quote.text}
               </span>
+
+              {/* Source */}
               <span style={{
-                fontSize: '0.62rem', fontWeight: 700, color: 'var(--primary)',
-                opacity: 0.6, whiteSpace: 'nowrap', flexShrink: 0, letterSpacing: '0.02em',
+                fontSize: '0.6rem',
+                fontWeight: 700,
+                color: 'var(--primary)',
+                opacity: 0.65,
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+                letterSpacing: '0.03em',
               }}>
                 {quote.source}
               </span>
+
+              {/* Dismiss */}
               <button
                 onClick={() => setQuoteVisible(false)}
-                aria-label="Dismiss"
+                aria-label="Dismiss quote"
                 style={{
                   background: 'none', border: 'none', cursor: 'pointer',
-                  color: 'var(--text-muted)', padding: '2px', display: 'flex',
-                  alignItems: 'center', borderRadius: '50%', opacity: 0.35,
-                  transition: 'opacity 0.2s', flexShrink: 0,
+                  color: 'var(--text-muted)', padding: '3px', display: 'flex',
+                  alignItems: 'center', borderRadius: '50%', opacity: 0.3,
+                  transition: 'opacity 0.15s, background 0.15s', flexShrink: 0,
                 }}
-                onMouseEnter={e => (e.currentTarget.style.opacity = '0.9')}
-                onMouseLeave={e => (e.currentTarget.style.opacity = '0.35')}
+                onMouseEnter={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.background = 'color-mix(in srgb, var(--primary) 10%, transparent)'; }}
+                onMouseLeave={e => { e.currentTarget.style.opacity = '0.3'; e.currentTarget.style.background = 'none'; }}
               >
-                <X size={13} />
+                <X size={12} />
               </button>
             </div>
           )}
