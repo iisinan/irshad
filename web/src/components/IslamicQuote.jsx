@@ -1,211 +1,126 @@
 import React, { useState, useEffect } from 'react';
-import { X, Sparkles } from 'lucide-react';
+import { BookOpen, X } from 'lucide-react';
 
 const quotes = [
   {
-    type: 'dua',
-    arabic: 'اللَّهُمَّ إِنِّي أَسْأَلُكَ عِلْمًا نَافِعًا، وَرِزْقًا طَيِّبًا، وَعَمَلًا مُتَقَبَّلًا',
+    arabic: "اللَّهُمَّ إِنِّي أَسْأَلُكَ عِلْمًا نَافِعًا، وَرِزْقًا طَيِّبًا، وَعَمَلًا مُتَقَبَّلًا",
     transliteration: "Allaahumma 'innee 'as'aluka 'ilman naafi'an, wa rizqan tayyiban, wa 'amalan mutaqabbalan.",
-    translation: 'O Allaah, I ask You for beneficial knowledge, good provision, and accepted deeds.',
-    source: 'Ibn Majah 5:925',
-    label: 'Dua',
+    translation: "O Allaah, I ask You for beneficial knowledge, good provision, and accepted deeds.",
+    source: "Ibn Majah: 5:925"
   },
   {
-    type: 'hadith',
-    arabic: '',
-    transliteration: '',
-    translation:
-      'When the verses of Surat Al-Baqara about the usury (Riba) were revealed, the Prophet ﷺ went to the mosque and recited them in front of the people and then banned the trade of alcohol.',
-    source: 'Sahih al-Bukhari 459',
-    narrator: 'Narrated by ʿAisha (رضي الله عنها)',
-    label: 'Hadith',
+    arabic: "",
+    transliteration: "",
+    translation: "When the verses of Surat Al-Baqara about the usury (Riba) were revealed, the Prophet went to the mosque and recited them in front of the people and then banned the trade of alcohol.",
+    source: "Sahih al-Bukhari 459 (Narrated `Aisha)"
   },
   {
-    type: 'dua',
-    arabic: 'اللَّهُمَّ إِنِّي أَسْأَلُكَ مِنْ فَضْلِكَ',
+    arabic: "اللَّهُمَّ إِنِّي أَسْأَلُكَ مِنْ فَضْلِكَ",
     transliteration: "Allaahumma 'innee 'as'aluka min fadhlika.",
-    translation: 'O Allah, I ask You from Your bounty and generosity.',
-    source: 'Abu Dawud 2:465',
-    label: 'Dua',
+    translation: "O Allah, I ask You for Your bounty and generosity.",
+    source: "Abu Dawud 2:465"
   },
   {
-    type: 'hadith',
-    arabic: '',
-    transliteration: '',
-    translation:
-      '"O Messenger of Allah, tell me something about Islam which I can ask of no one but you." He ﷺ said: "Say: I believe in Allah — and then be steadfast."',
-    source: '40 Hadith an-Nawawi, Hadith 21',
-    narrator: 'On the authority of Abu ʿAmr (رضي الله عنه)',
-    label: 'Hadith',
+    arabic: "",
+    transliteration: "",
+    translation: "I said, 'O Messenger of Allah, tell me something about Islam which I can ask of no one but you.' He said, 'Say I believe in Allah — and then be steadfast.'",
+    source: "[Muslim] Hadith 21, 40 Hadith an-Nawawi"
   },
   {
-    type: 'dua',
-    arabic: 'اللَّهُمَّ اغْفِرْ لِي، وَارْحَمْنِي، وَاهْدِنِي، وَاجْبُرْنِي، وَعَافِنِي، وَارْزُقْنِي، وَارْفَعْنِي',
+    arabic: "اللَّهُمَّ اغْفِرْ لِي، وَارْحَمْنِي، وَاهْدِنِي، وَاجْبُرْنِي، وَعَافِنِي، وَارْزُقْنِي، وَارْفَعْنِي",
     transliteration: "Allaahum-maghfir lee, warhamnee, wahdinee, wajburnee, wa 'aafinee, warzuqnee, warfa'nee.",
-    translation:
-      'O Allaah, forgive me, have mercy on me, guide me, strengthen me, grant me well-being, provide for me, and elevate me.',
-    source: 'Ibn Majah 34:3845 · At-Tirmidhi 2:284',
-    label: 'Dua',
-  },
+    translation: "O Allaah, forgive me, have mercy on me, guide me, strengthen me, grant me well-being, provide for me, and elevate me.",
+    source: "Ibn Majah 34:3845, At-Tirmidhi 2:284"
+  }
 ];
 
 export default function IslamicQuote({ merged = false }) {
   const [quote, setQuote] = useState(null);
-  const [visible, setVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    setQuote(quotes[Math.floor(Math.random() * quotes.length)]);
+    // Pick a random quote on mount
+    const randomIndex = Math.floor(Math.random() * quotes.length);
+    setQuote(quotes[randomIndex]);
   }, []);
 
-  if (!visible || !quote) return null;
+  if (!isVisible || !quote) return null;
 
-  /* ── Standalone card wrapper (when not merged) ── */
-  if (!merged) {
-    return (
+  return (
+    <div style={merged ? {
+      position: 'relative',
+      display: 'flex',
+      gap: '16px',
+      alignItems: 'flex-start',
+      marginTop: '24px',
+      paddingTop: '24px',
+      borderTop: '1px solid var(--border)'
+    } : {
+      background: 'var(--bg)',
+      border: '1px solid var(--border)',
+      borderRadius: '20px',
+      padding: '20px 24px',
+      marginBottom: '24px',
+      boxShadow: 'var(--shadow-sm)',
+      position: 'relative',
+      display: 'flex',
+      gap: '16px',
+      alignItems: 'flex-start'
+    }}>
       <div style={{
-        background: 'linear-gradient(135deg, var(--bg) 0%, color-mix(in srgb, var(--primary) 4%, var(--bg)) 100%)',
-        border: '1px solid var(--border)',
-        borderRadius: '20px',
-        padding: '20px 24px',
-        marginBottom: '24px',
-        boxShadow: 'var(--shadow-sm)',
+        background: 'var(--primary-50)',
+        color: 'var(--primary)',
+        width: '40px',
+        height: '40px',
+        borderRadius: '12px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexShrink: 0
       }}>
-        <QuoteBody quote={quote} onDismiss={() => setVisible(false)} />
+        <BookOpen size={20} />
       </div>
-    );
-  }
-
-  /* ── Merged mode: no outer card ── */
-  return (
-    <div style={{ paddingTop: '18px' }}>
-      <QuoteBody quote={quote} onDismiss={() => setVisible(false)} />
-    </div>
-  );
-}
-
-/* ── Inner content shared between modes ── */
-function QuoteBody({ quote, onDismiss }) {
-  const hasArabic = !!quote.arabic;
-
-  return (
-    <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
-
-      {/* Left: content */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-
-        {/* Label row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: hasArabic ? '14px' : '10px' }}>
-          <Sparkles size={12} color="var(--primary)" style={{ opacity: 0.75, flexShrink: 0 }} />
-          <span style={{
-            fontSize: '0.65rem',
-            fontWeight: 800,
-            letterSpacing: '0.1em',
-            textTransform: 'uppercase',
-            color: 'var(--primary)',
-            opacity: 0.8,
-          }}>
-            {quote.label} of the day
-          </span>
-        </div>
-
-        {/* Narrator (hadith only) */}
-        {quote.narrator && (
-          <p style={{
-            fontSize: '0.73rem',
-            color: 'var(--text-muted)',
-            margin: '0 0 10px',
-            fontStyle: 'italic',
-            lineHeight: 1.5,
-          }}>
-            {quote.narrator}
-          </p>
-        )}
-
-        {/* Arabic */}
-        {hasArabic && (
-          <div
-            dir="rtl"
-            style={{
-              fontFamily: '"Amiri", "Scheherazade New", serif',
-              fontSize: '1.3rem',
-              lineHeight: 2,
-              color: 'var(--text-dark)',
-              textAlign: 'right',
-              marginBottom: '12px',
-              opacity: 0.95,
-            }}
-          >
+      <div style={{ flex: 1 }}>
+        {quote.arabic && (
+          <div style={{ fontSize: '1.5rem', fontFamily: 'serif', textAlign: 'right', marginBottom: '12px', color: 'var(--text-dark)', lineHeight: 1.6 }} dir="rtl">
             {quote.arabic}
           </div>
         )}
-
-        {/* Translation — left-border accent */}
-        <p style={{
-          margin: '0 0 8px',
-          fontSize: '0.875rem',
-          fontWeight: 600,
-          color: 'var(--text-dark)',
-          lineHeight: 1.7,
-          borderLeft: '3px solid var(--primary)',
-          paddingLeft: '12px',
-          opacity: 0.9,
-        }}>
-          {quote.translation}
-        </p>
-
-        {/* Transliteration */}
+        <div style={{ fontSize: '0.9rem', color: 'var(--text-dark)', fontWeight: 600, fontStyle: 'italic', marginBottom: '6px', lineHeight: 1.6 }}>
+          "{quote.translation}"
+        </div>
         {quote.transliteration && (
-          <p style={{
-            margin: '0 0 8px',
-            paddingLeft: '15px',
-            fontSize: '0.75rem',
-            color: 'var(--text-muted)',
-            lineHeight: 1.6,
-            fontStyle: 'italic',
-          }}>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '8px', lineHeight: 1.5 }}>
             {quote.transliteration}
-          </p>
+          </div>
         )}
-
-        {/* Source */}
-        <p style={{
-          margin: 0,
-          paddingLeft: '15px',
-          fontSize: '0.68rem',
-          fontWeight: 800,
-          color: 'var(--primary)',
-          opacity: 0.65,
-          letterSpacing: '0.04em',
-          textTransform: 'uppercase',
-        }}>
+        <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)', marginTop: '8px' }}>
           {quote.source}
-        </p>
+        </div>
       </div>
-
-      {/* Right: dismiss button */}
-      <button
-        onClick={onDismiss}
-        aria-label="Dismiss"
+      <button 
+        onClick={() => setIsVisible(false)}
         style={{
           background: 'none',
           border: 'none',
-          cursor: 'pointer',
           color: 'var(--text-muted)',
-          padding: '2px',
+          cursor: 'pointer',
+          padding: '4px',
           display: 'flex',
           alignItems: 'center',
+          justifyContent: 'center',
           borderRadius: '50%',
-          opacity: 0.45,
-          transition: 'opacity 0.2s',
+          transition: 'background 0.2s',
           flexShrink: 0,
-          marginTop: '1px',
+          marginTop: '-4px',
+          marginRight: '-4px'
         }}
-        onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
-        onMouseLeave={e => (e.currentTarget.style.opacity = '0.45')}
+        onMouseEnter={e => e.currentTarget.style.background = 'var(--hover-bg)'}
+        onMouseLeave={e => e.currentTarget.style.background = 'none'}
+        aria-label="Close"
       >
-        <X size={15} />
+        <X size={18} />
       </button>
-
     </div>
   );
 }

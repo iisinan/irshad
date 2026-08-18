@@ -1,40 +1,101 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Newspaper, Bell, Mail, Droplet, Sparkles, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Newspaper, Bell, Moon, Clock, Star, Mail, Droplet } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import IslamicQuote from '../IslamicQuote';
 import UpdatesNews    from './UpdatesNews';
 import UpdatesInbox   from './UpdatesInbox';
 import UpdatesDigest  from './UpdatesDigest';
 import UpdatesPurification from './UpdatesPurification';
 
-/* ── Helpers ── */
+/* ── Greeting helpers ── */
 function getGreeting() {
   const h = new Date().getHours();
-  if (h < 5)  return { emoji: '🌙', english: 'Good night' };
+  if (h < 5)  return { emoji: '🌙', english: 'Good evening' };
   if (h < 12) return { emoji: '☀️', english: 'Good morning' };
   if (h < 17) return { emoji: '🌤️', english: 'Good afternoon' };
   if (h < 21) return { emoji: '🌇', english: 'Good evening' };
   return        { emoji: '🌙', english: 'Good evening' };
 }
+
 function getFirstName(user) {
   if (!user) return 'there';
   return user.first_name || user.name?.split(' ')[0] || 'there';
 }
+
+/* ── Hijri date helper (approx) ── */
 function getHijriDate() {
   try {
     return new Intl.DateTimeFormat('en-TN-u-ca-islamic', {
-      day: 'numeric', month: 'short', year: 'numeric',
+      day: 'numeric', month: 'long', year: 'numeric',
     }).format(new Date());
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
-/* ── Quotes ── */
-const QUOTES = [
-  { label: 'Dua',    text: 'O Allaah, I ask You for beneficial knowledge, good provision, and accepted deeds.',                                                                         source: 'Ibn Majah 5:925' },
-  { label: 'Hadith', text: 'When the verses of Surat Al-Baqara about Riba were revealed, the Prophet ﷺ went to the mosque and then banned the trade of alcohol.',                       source: 'Bukhari 459' },
-  { label: 'Dua',    text: 'O Allah, I ask You from Your bounty and generosity.',                                                                                                        source: 'Abu Dawud 2:465' },
-  { label: 'Hadith', text: '"Tell me something about Islam which I can ask of no one but you." He ﷺ said: "Say: I believe in Allah — and then be steadfast."',                          source: 'Nawawi 21' },
-  { label: 'Dua',    text: 'O Allaah, forgive me, have mercy on me, guide me, strengthen me, grant me well-being, provide for me, and elevate me.',                                    source: 'Ibn Majah 34:3845' },
-];
+/* ── Live Clock Component ── */
+function LiveClock({ hijriDate }) {
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const [hh, mm, ss] = [
+    String(now.getHours()).padStart(2, '0'),
+    String(now.getMinutes()).padStart(2, '0'),
+    String(now.getSeconds()).padStart(2, '0'),
+  ];
+  const dateStr = now.toLocaleDateString('en-GB', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+  });
+
+  return (
+    <div style={{
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      background: 'var(--bg-section)',
+      border: '1px solid var(--border)',
+      borderRadius: '18px',
+      padding: '16px 22px',
+      minWidth: '140px',
+      gap: '4px',
+      flexShrink: 0,
+    }}>
+      {/* Time digits */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: '2px',
+        fontFamily: 'var(--mono, monospace)',
+        fontVariantNumeric: 'tabular-nums',
+      }}>
+        {/* HH */}
+        <span style={{ fontSize: '1.9rem', fontWeight: 900, color: 'var(--text-dark)', lineHeight: 1, letterSpacing: '-1px' }}>{hh}</span>
+        <span style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--primary)', lineHeight: 1, margin: '0 1px', opacity: 0.7 }}>:</span>
+        {/* MM */}
+        <span style={{ fontSize: '1.9rem', fontWeight: 900, color: 'var(--text-dark)', lineHeight: 1, letterSpacing: '-1px' }}>{mm}</span>
+        <span style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--primary)', lineHeight: 1, margin: '0 1px', opacity: 0.7 }}>:</span>
+        {/* SS */}
+        <span style={{ fontSize: '1.9rem', fontWeight: 900, color: 'var(--text-muted)', lineHeight: 1, letterSpacing: '-1px', opacity: 0.65 }}>{ss}</span>
+      </div>
+
+      {/* Gregorian date */}
+      <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.4 }}>
+        {dateStr}
+      </div>
+
+      {/* Hijri date */}
+      {hijriDate && (
+        <div style={{
+          fontSize: '0.62rem', fontWeight: 800, color: 'var(--primary)',
+          background: 'var(--primary-50)', borderRadius: '6px',
+          padding: '2px 8px', marginTop: '4px', textAlign: 'center',
+        }}>
+          {hijriDate}
+        </div>
+      )}
+    </div>
+  );
+}
 
 /* ══════════════════════════════════════════════════════════════
    UpdatesTab — Greeting banner + News & Inbox sub-tabs
@@ -74,231 +135,87 @@ export default function UpdatesTab({ unreadCount = 0 }) {
     },
   ];
 
-  const quote = useMemo(() => QUOTES[Math.floor(Math.random() * QUOTES.length)], []);
-  const [quoteVisible, setQuoteVisible] = useState(true);
-  const [now, setNow] = useState(new Date());
-
-  useEffect(() => {
-    const t = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(t);
-  }, []);
-
-  const hh = String(now.getHours()).padStart(2, '0');
-  const mm = String(now.getMinutes()).padStart(2, '0');
-  const ss = String(now.getSeconds()).padStart(2, '0');
-
   return (
     <div style={{ width: '100%', maxWidth: '100%', overflowX: 'hidden', paddingBottom: '40px' }}>
-
-      {/* ── Banner ── */}
+      {/* ── Greeting Banner ── */}
       <div style={{
-        display: 'flex',
-        border: '1px solid color-mix(in srgb, var(--primary) 18%, var(--border))',
-        borderRadius: '20px',
-        marginBottom: '20px',
+        background: 'var(--bg)',
+        border: '1px solid var(--border)',
+        borderRadius: '24px',
+        padding: '0',
+        marginBottom: '24px',
+        position: 'relative',
         overflow: 'hidden',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.06)',
-        background: 'linear-gradient(110deg, var(--bg) 60%, color-mix(in srgb, var(--primary) 5%, var(--bg)) 100%)',
-        animation: 'fadeIn 0.4s ease-out',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
       }}>
 
-        {/* Left accent bar — animated gradient */}
+        {/* Top strip with subtle pattern */}
         <div style={{
-          width: '5px',
-          flexShrink: 0,
-          background: 'linear-gradient(180deg, var(--primary) 0%, color-mix(in srgb, var(--primary) 45%, #8b5cf6) 60%, color-mix(in srgb, var(--primary) 25%, #06b6d4) 100%)',
+          height: '5px',
+          background: 'var(--primary)',
+          borderRadius: '24px 24px 0 0',
         }} />
 
-        {/* Content */}
-        <div style={{ flex: 1, minWidth: 0, padding: '13px 20px 13px 16px', display: 'flex', flexDirection: 'column', gap: '9px' }}>
+        <div style={{ padding: '22px 24px 22px' }}>
+          {/* Main row: greeting left, clock right */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
 
-          {/* ── Row 1 ── */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
-
-            {/* Left cluster */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0', minWidth: 0 }}>
-
-              {/* Salam pill */}
-              <span style={{
-                display: 'inline-flex', alignItems: 'center',
-                fontFamily: '"Amiri", "Scheherazade New", serif',
-                fontSize: '1rem',
-                fontWeight: 700,
-                color: 'var(--primary)',
-                background: 'color-mix(in srgb, var(--primary) 8%, transparent)',
-                borderRadius: '8px',
-                padding: '3px 10px 3px 10px',
-                direction: 'rtl',
-                whiteSpace: 'nowrap',
-                letterSpacing: '0.01em',
-                marginRight: '12px',
-                flexShrink: 0,
+            {/* Left: greeting */}
+            <div style={{ flex: '1 1 200px' }}>
+              {/* Arabic */}
+              <div style={{
+                fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary)',
+                marginBottom: '6px',
+                fontFamily: '"Amiri", "Scheherazade New", "Traditional Arabic", serif',
+                direction: 'rtl', textAlign: 'left', opacity: 0.9,
               }}>
-                ٱلسَّلَامُ عَلَيْكُمْ
-              </span>
+                ٱلسَّلَامُ عَلَيْكُمْ وَرَحْمَةُ ٱللَّٰهِ وَبَرَكَاتُهُ
+              </div>
 
-              {/* Greeting + name */}
-              <div style={{ minWidth: 0 }}>
-                <div style={{
-                  fontSize: '1rem',
+              {/* Name line */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
+                <span style={{
+                  fontSize: 'clamp(1.2rem, 3.5vw, 1.55rem)',
                   fontWeight: 900,
                   color: 'var(--text-dark)',
-                  letterSpacing: '-0.4px',
-                  lineHeight: 1.15,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
+                  letterSpacing: '-0.5px',
+                  lineHeight: 1.2,
                 }}>
-                  {greeting.english}, {firstName}&nbsp;{greeting.emoji}
-                </div>
-                <div style={{
-                  fontSize: '0.7rem',
-                  fontWeight: 500,
-                  color: 'var(--text-muted)',
-                  marginTop: '1px',
-                  letterSpacing: '0.01em',
-                }}>
-                  Your halal portfolio awaits
-                </div>
+                  {greeting.english}, {firstName}
+                </span>
+                <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>{greeting.emoji}</span>
               </div>
 
-              {/* Unread badge */}
+              {/* Subtitle */}
+              <p style={{
+                fontSize: '0.78rem', color: 'var(--text-muted)',
+                margin: '0 0 0', fontWeight: 600, lineHeight: 1.5,
+              }}>
+                Here's what's happening with your halal portfolio today.
+              </p>
+
+              {/* Unread pill */}
               {unreadCount > 0 && (
-                <span style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '4px',
-                  background: 'var(--primary)', color: '#fff',
-                  borderRadius: '20px', padding: '2px 9px',
-                  fontSize: '0.62rem', fontWeight: 800,
-                  marginLeft: '12px', flexShrink: 0, whiteSpace: 'nowrap',
-                  boxShadow: '0 2px 6px color-mix(in srgb, var(--primary) 40%, transparent)',
+                <div style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '6px',
+                  marginTop: '12px', background: 'var(--primary-50)',
+                  border: '1px solid var(--primary-100)',
+                  borderRadius: '30px', padding: '5px 12px',
                 }}>
-                  <Bell size={9} />
-                  {unreadCount} new
-                </span>
+                  <Bell size={12} color="var(--primary)" />
+                  <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--primary)' }}>
+                    {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
+                  </span>
+                </div>
               )}
             </div>
 
-            {/* Clock — right */}
-            <div style={{
-              display: 'flex', flexDirection: 'column', alignItems: 'flex-end',
-              flexShrink: 0, gap: '2px',
-            }}>
-              <div style={{
-                fontFamily: '"SF Mono", "Fira Code", "Fira Mono", monospace',
-                fontVariantNumeric: 'tabular-nums',
-                display: 'flex', alignItems: 'baseline', gap: '0px', lineHeight: 1,
-              }}>
-                <span style={{ fontSize: '1.45rem', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-2px' }}>{hh}</span>
-                <span style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--primary)', opacity: 0.55, margin: '0 1px' }}>:</span>
-                <span style={{ fontSize: '1.45rem', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-2px' }}>{mm}</span>
-                <span style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--primary)', opacity: 0.55, margin: '0 1px' }}>:</span>
-                <span style={{
-                  fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)',
-                  opacity: 0.45, letterSpacing: '-0.5px',
-                  alignSelf: 'flex-end', marginBottom: '2px',
-                  transition: 'opacity 0.4s',
-                }}>{ss}</span>
-              </div>
-              {hijriDate && (
-                <span style={{
-                  fontSize: '0.58rem', fontWeight: 700, color: 'var(--primary)',
-                  opacity: 0.6, letterSpacing: '0.04em', textTransform: 'uppercase',
-                  background: 'color-mix(in srgb, var(--primary) 10%, transparent)',
-                  padding: '1px 6px', borderRadius: '4px',
-                }}>
-                  {hijriDate}
-                </span>
-              )}
-            </div>
+            {/* Right: clock card */}
+            <LiveClock hijriDate={hijriDate} />
           </div>
-
-          {/* ── Row 2: Quote strip ── */}
-          {quoteVisible && (
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              paddingTop: '8px',
-              borderTop: '1px solid color-mix(in srgb, var(--primary) 12%, var(--border))',
-              minWidth: 0,
-              animation: 'fadeIn 0.5s ease-out 0.1s both',
-            }}>
-              {/* Decorative quote mark */}
-              <span style={{
-                fontSize: '1.4rem',
-                lineHeight: 1,
-                color: 'var(--primary)',
-                opacity: 0.25,
-                fontFamily: 'Georgia, serif',
-                flexShrink: 0,
-                marginTop: '-4px',
-                userSelect: 'none',
-              }}>"</span>
-
-              {/* Label badge */}
-              <span style={{
-                fontSize: '0.58rem',
-                fontWeight: 900,
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase',
-                color: '#fff',
-                background: 'var(--primary)',
-                borderRadius: '4px',
-                padding: '2px 6px',
-                flexShrink: 0,
-                whiteSpace: 'nowrap',
-              }}>
-                {quote.label}
-              </span>
-
-              {/* Quote text */}
-              <span style={{
-                fontSize: '0.8rem',
-                color: 'var(--text-dark)',
-                fontWeight: 500,
-                lineHeight: 1.55,
-                opacity: 0.9,
-                flex: 1,
-                minWidth: 0,
-                overflow: 'hidden',
-                display: '-webkit-box',
-                WebkitLineClamp: 1,
-                WebkitBoxOrient: 'vertical',
-                fontStyle: 'italic',
-              }}>
-                {quote.text}
-              </span>
-
-              {/* Source */}
-              <span style={{
-                fontSize: '0.6rem',
-                fontWeight: 700,
-                color: 'var(--primary)',
-                opacity: 0.65,
-                whiteSpace: 'nowrap',
-                flexShrink: 0,
-                letterSpacing: '0.03em',
-              }}>
-                {quote.source}
-              </span>
-
-              {/* Dismiss */}
-              <button
-                onClick={() => setQuoteVisible(false)}
-                aria-label="Dismiss quote"
-                style={{
-                  background: 'none', border: 'none', cursor: 'pointer',
-                  color: 'var(--text-muted)', padding: '3px', display: 'flex',
-                  alignItems: 'center', borderRadius: '50%', opacity: 0.3,
-                  transition: 'opacity 0.15s, background 0.15s', flexShrink: 0,
-                }}
-                onMouseEnter={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.background = 'color-mix(in srgb, var(--primary) 10%, transparent)'; }}
-                onMouseLeave={e => { e.currentTarget.style.opacity = '0.3'; e.currentTarget.style.background = 'none'; }}
-              >
-                <X size={12} />
-              </button>
-            </div>
-          )}
+          
+          {/* Injected Islamic Quote directly below greeting */}
+          <IslamicQuote merged={true} />
         </div>
       </div>
 
