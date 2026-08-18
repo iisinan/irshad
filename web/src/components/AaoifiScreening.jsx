@@ -147,7 +147,7 @@ const RatioBar = ({ title, subtitle, ratio, threshold, numLabel, numVal, denLabe
       <div style={{ textAlign:'right' }}>
         <div style={{ fontSize:'1.35rem',fontWeight:900,color:col,letterSpacing:'-0.5px',fontVariantNumeric:'tabular-nums',lineHeight:1.1 }}>{rv.toFixed(2)}%</div>
         <div style={{ display:'inline-flex',alignItems:'center',gap:4,fontSize:'0.65rem',fontWeight:800,color:col,marginTop:6,padding:'3px 8px',borderRadius:100,background:ok?'rgba(16,185,129,0.08)':'rgba(239,68,68,0.08)',border:ok?'1px solid rgba(16,185,129,0.2)':'1px solid rgba(239,68,68,0.2)' }}>
-          {ok?'✓':'✕'} {diff}pp {ok?'headroom':'excess'}
+          {ok?'✓ PASS':'✕ FAIL'} • {diff}pp {ok?'headroom':'excess'}
         </div>
       </div>
     </div>
