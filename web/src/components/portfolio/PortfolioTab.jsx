@@ -132,17 +132,19 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
   const finalStatus = ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(holding.symbol) ? 'halal' : statusRaw;
   
   const getBadgeStyle = (status, purificationDue, nonCompliantRatio) => {
-    if (status === 'halal' || status === 'compliant') {
+    if (status === 'halal' || status === 'compliant' || status === 'pass') {
       if (Number(purificationDue || 0) > 0 || Number(nonCompliantRatio || 0) > 0) {
         return { bg: 'rgba(234, 179, 8, 0.1)', color: '#eab308', text: 'Shariah Compliant w/ Purification' };
       }
       return { bg: 'rgba(34, 197, 94, 0.1)', color: 'var(--halal)', text: 'Shariah Compliant' };
     }
-    if (status === 'non-compliant' || status === 'non_compliant' || status === 'non-compliant' || status === 'fail') return { bg: 'rgba(239, 68, 68, 0.1)', color: 'var(--non-compliant)', text: 'Shariah Non-Compliant' };
+    if (status === 'non-compliant' || status === 'non_compliant' || status === 'non-halal' || status === 'fail') return { bg: 'rgba(239, 68, 68, 0.1)', color: 'var(--non-compliant)', text: 'Shariah Non-Compliant' };
     return { bg: 'rgba(245, 158, 11, 0.1)', color: 'var(--questionable)', text: 'Doubtful' };
   };
   const badge = getBadgeStyle(finalStatus, holding.purification_due, holding.non_compliant_ratio);
-  const accentColor = badge.color;
+
+  const hasDivs = Number(holding.total_dividends || 0) > 0;
+  const hasPurify = Number(holding.purification_due || 0) > 0;
 
   return (
     <div
@@ -151,98 +153,103 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
-        display: 'grid', gridTemplateColumns: '2.5fr 1fr 1fr auto', alignItems: 'center', gap: '16px', padding: '20px 24px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '20px', padding: '16px 20px',
         background: 'linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%)',
         border: '1px solid var(--border)',
-        borderRadius: '20px',
-        marginBottom: '8px',
+        borderRadius: '16px',
+        marginBottom: '10px',
         transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-        position: 'relative',
         cursor: 'pointer',
-        boxShadow: hov ? '0 12px 32px rgba(91, 41, 113, 0.08)' : '0 4px 16px rgba(0,0,0,0.02)'
+        boxShadow: hov ? '0 8px 24px rgba(91, 41, 113, 0.06)' : '0 2px 8px rgba(0,0,0,0.02)'
       }}
     >
-      {/* Indicator */}
-      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '6px', background: accentColor, borderTopLeftRadius: '20px', borderBottomLeftRadius: '20px' }} />
-
-      {/* Logo & Symbol */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0 }}>
-        <CompanyLogo symbol={holding.symbol} logoUrl={holding.logo_url} size={44} radius={12} />
-        <div style={{ minWidth: 0 }}>
-          <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.79rem', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-            {holding.symbol}
-            <span style={{ padding: '2px 6px', borderRadius: '4px', background: badge.bg, color: badge.color, fontSize: '0.48rem', fontWeight: 800, textTransform: 'uppercase' }}>
+      {/* Left: Asset Info */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: 0 }}>
+        <CompanyLogo symbol={holding.symbol} logoUrl={holding.logo_url} size={42} radius={12} />
+        <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.9rem' }}>{holding.symbol}</span>
+            <span style={{ padding: '2px 8px', borderRadius: '100px', background: badge.bg, color: badge.color, fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
               {badge.text}
             </span>
-            {Number(holding.total_dividends || 0) > 0 && (
-              <span style={{ padding: '2px 6px', borderRadius: '4px', background: 'var(--primary-50)', color: 'var(--primary)', fontSize: '0.48rem', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                ₦{Number(holding.total_dividends).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Divs
-              </span>
-            )}
-            {Number(holding.purification_due || 0) > 0 && (
-              <span style={{ padding: '2px 6px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--non-compliant)', fontSize: '0.48rem', fontWeight: 800 }}>
-                ₦{Number(holding.purification_due).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} to purify
-              </span>
-            )}
           </div>
-          <div style={{ fontSize: '0.62rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>{holding.name || holding.symbol}</div>
+          <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 500 }}>
+            {holding.name || holding.symbol}
+          </div>
         </div>
       </div>
 
-      {/* Shares & Value */}
-      <div style={{ textAlign: 'left' }}>
-        <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.79rem' }}>{fmtK(holding.total_value)}</div>
-        <div style={{ fontSize: '0.62rem', color: 'var(--text-muted)', fontWeight: 600, marginTop: '2px' }}>{Number(holding.shares).toLocaleString()} shares</div>
+      {/* Middle: Value & Details */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ fontWeight: 900, color: 'var(--text-dark)', fontSize: '1rem', fontVariantNumeric: 'tabular-nums' }}>
+            {fmtK(holding.total_value)}
+          </span>
+          {(holding.return_percentage !== null && holding.return_percentage !== undefined && holding.return_percentage !== 0) && (
+            <span style={{ fontWeight: 800, fontSize: '0.75rem', color: isUp ? 'var(--halal)' : 'var(--non-compliant)', display: 'flex', alignItems: 'center', gap: '2px', background: isUp ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', padding: '2px 6px', borderRadius: '6px' }}>
+              {isUp ? <ArrowUpRight size={12}/> : <ArrowDownRight size={12}/>}
+              {isUp?'+':''}{Number(holding.return_percentage||0).toFixed(2)}%
+            </span>
+          )}
+        </div>
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+          <span>{Number(holding.shares).toLocaleString()} shares</span>
+          
+          {(hasDivs || hasPurify) && <span style={{ color: 'var(--border)' }}>•</span>}
+          
+          {hasDivs && (
+            <span style={{ color: 'var(--primary)' }}>
+              ₦{Number(holding.total_dividends).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Divs
+            </span>
+          )}
+          
+          {hasPurify && (
+            <>
+              {hasDivs && <span style={{ color: 'var(--border)' }}>•</span>}
+              <span style={{ color: 'var(--non-compliant)' }}>
+                ₦{Number(holding.purification_due).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} purify
+              </span>
+            </>
+          )}
+        </div>
       </div>
 
-      {/* Return */}
-      <div style={{ textAlign: 'left' }}>
-        {(holding.return_percentage !== null && holding.return_percentage !== undefined && holding.return_percentage !== 0) ? (
-          <div style={{ fontWeight: 800, fontSize: '0.75rem', color: isUp ? 'var(--halal)' : 'var(--non-compliant)', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '2px' }}>
-            {isUp ? <ArrowUpRight size={12}/> : <ArrowDownRight size={12}/>}
-            {isUp?'+':''}{Number(holding.return_percentage||0).toFixed(2)}%
-          </div>
-        ) : (
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>-</div>
-        )}
-      </div>
-
-      {/* Actions */}
-      <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }} onClick={e => e.stopPropagation()}>
+      {/* Right: Actions */}
+      <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginLeft: '16px' }} onClick={e => e.stopPropagation()}>
         {badge.text === 'Shariah Compliant w/ Purification' && (
           Number(holding.purification_due || 0) === 0 && hasBeenPurified ? (
-            <button 
-              disabled
-              style={{ background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.3)', color: 'var(--halal)', cursor: 'default', padding: '8px 12px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, fontSize: '0.7rem' }}
-            >
+            <button disabled style={{ background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.3)', color: 'var(--halal)', cursor: 'default', padding: '6px 12px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, fontSize: '0.7rem' }}>
               <ShieldCheck size={13} /> Purified
             </button>
           ) : (
             <button 
               onClick={(e) => { e.stopPropagation(); navigate('/portfolio#purification', { state: { action: 'purify', targetSymbol: holding.symbol } }); }}
-              style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.1) 0%, rgba(245,158,11,0.2) 100%)', border: '1px solid rgba(245,158,11,0.3)', color: '#D97706', cursor: 'pointer', padding: '8px 12px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, fontSize: '0.7rem', transition: 'all 0.2s' }}
+              style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.1) 0%, rgba(245,158,11,0.2) 100%)', border: '1px solid rgba(245,158,11,0.3)', color: '#D97706', cursor: 'pointer', padding: '6px 12px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, fontSize: '0.7rem', transition: 'all 0.2s' }}
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(245,158,11,0.2)'; e.currentTarget.style.borderColor = 'rgba(245,158,11,0.4)'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'linear-gradient(135deg, rgba(245,158,11,0.1) 0%, rgba(245,158,11,0.2) 100%)'; e.currentTarget.style.borderColor = 'rgba(245,158,11,0.3)'; }}
             >
-              <Droplet size={13} /> Purify Now
+              <Droplet size={13} /> Purify
             </button>
           )
         )}
         <button 
           onClick={() => onEdit(holding)}
-          style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-dark)', cursor: 'pointer', padding: '8px 12px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, fontSize: '0.7rem', transition: 'all 0.2s' }}
+          style={{ background: 'var(--bg-section)', border: '1px solid var(--border)', color: 'var(--text-dark)', cursor: 'pointer', padding: '6px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
           onMouseEnter={e => { e.currentTarget.style.background = 'var(--primary-50)'; e.currentTarget.style.borderColor = 'var(--primary-100)'; e.currentTarget.style.color = 'var(--primary)'; }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-dark)'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg-section)'; e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-dark)'; }}
+          title="Edit"
         >
-          <Edit2 size={13} /> Edit
+          <Edit2 size={14} />
         </button>
         <button 
           onClick={() => onDelete(holding.id)}
-          style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--non-compliant)', cursor: 'pointer', padding: '8px 12px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, fontSize: '0.7rem', transition: 'all 0.2s' }}
+          style={{ background: 'var(--bg-section)', border: '1px solid var(--border)', color: 'var(--non-compliant)', cursor: 'pointer', padding: '6px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
           onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.1)'; e.currentTarget.style.borderColor = 'rgba(239,68,68,0.3)'; }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'var(--border)'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg-section)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
+          title="Delete"
         >
-          <Trash2 size={13} /> Delete
+          <Trash2 size={14} />
         </button>
       </div>
     </div>
