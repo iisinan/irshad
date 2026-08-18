@@ -4,7 +4,7 @@ import { fetchPortfolio, removeHolding } from '../services/api';
 import { toastError, toastSuccess } from '../utils/toast';
 import { useAuth } from '../context/AuthContext';
 import localforage from 'localforage';
-import { Search, BarChart2, Star, Calculator, ShieldCheck, BookOpen, Briefcase, Activity, FileText, Rss, CheckCircle2, XCircle, AlertTriangle, Droplet, HelpCircle } from 'lucide-react';
+import { Search, BarChart2, Star, Calculator, ShieldCheck, BookOpen, Briefcase, Activity, FileText, Rss, CheckCircle2, XCircle, AlertTriangle, Droplet, HelpCircle, Mail } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
 import PortfolioTab from './portfolio/PortfolioTab';
@@ -459,6 +459,34 @@ export default function Portfolio() {
         </div>
         )}
       </div>
+      
+      {/* Floating Suggestion Button */}
+      <a 
+        href="mailto:hello@iirshad.com?subject=Suggestion%20for%20Irshad"
+        style={{
+          position: 'fixed',
+          bottom: '24px',
+          right: '24px',
+          background: 'var(--primary)',
+          color: '#ffffff',
+          padding: '12px 20px',
+          borderRadius: '50px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          textDecoration: 'none',
+          boxShadow: '0 4px 14px rgba(91, 41, 113, 0.4)',
+          zIndex: 1000,
+          transition: 'all 0.2s',
+          fontWeight: 800,
+          fontSize: '0.85rem'
+        }}
+        onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(91, 41, 113, 0.6)'; }}
+        onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(91, 41, 113, 0.4)'; }}
+      >
+        <Mail size={18} strokeWidth={2.5} />
+        Suggest for Irshad
+      </a>
       
     </div>
   );
