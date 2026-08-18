@@ -169,7 +169,7 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
         <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: '4px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.9rem' }}>{holding.symbol}</span>
-            <span style={{ padding: '2px 8px', borderRadius: '100px', background: badge.bg, color: badge.color, fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            <span style={{ whiteSpace: 'nowrap', padding: '2px 8px', borderRadius: '100px', background: badge.bg, color: badge.color, fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
               {badge.text}
             </span>
           </div>
@@ -450,15 +450,12 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
         
         {/* Header */}
         {displayHoldings.length > 0 && (
-          <div className="desktop-only" style={{ position: 'relative', marginTop: '12px', padding: '8px 24px', background: 'var(--body-bg)', zIndex: 20 }}>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <div style={{ flex: 1.5, fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', paddingLeft: '62px' }}>Asset</div>
-              <div style={{ flex: 1, textAlign: 'right', fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Value / Shares</div>
-              <div style={{ flex: 0.8, textAlign: 'right', fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', paddingLeft: '20px' }}>Total Return</div>
-              <div style={{ paddingLeft: '24px', display: 'flex', gap: '8px' }}>
-                <div style={{ width: '71px' }} />
-                <div style={{ width: '85px' }} />
-              </div>
+          <div className="desktop-only" style={{ position: 'relative', marginTop: '12px', padding: '8px 20px', background: 'var(--body-bg)', zIndex: 20 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1.2fr 1fr auto', alignItems: 'center', gap: '20px' }}>
+              <div style={{ fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', paddingLeft: '56px' }}>Asset</div>
+              <div style={{ fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Value / Shares</div>
+              <div style={{ fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Total Return</div>
+              <div style={{ width: '150px', textAlign: 'right', fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Actions</div>
             </div>
             {/* Diminishing fade shadow effect that covers the scrolled items below it */}
             <div style={{ position: 'absolute', bottom: '-24px', left: 0, right: 0, height: '24px', background: 'linear-gradient(to bottom, var(--body-bg) 0%, transparent 100%)', pointerEvents: 'none', zIndex: 21 }} />
