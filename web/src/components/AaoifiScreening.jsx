@@ -933,6 +933,7 @@ const AaoifiScreening = () => {
           isAdding={isAddingHolding}
           initialTab="manual"
           initialSymbol={symbol}
+          initialPrice={stock?.latest_price}
         />
       )}
 
