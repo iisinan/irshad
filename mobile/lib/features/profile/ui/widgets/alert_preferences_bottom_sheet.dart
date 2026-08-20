@@ -36,7 +36,6 @@ class _AlertPreferencesBottomSheetState extends State<AlertPreferencesBottomShee
         'alert_push': widget.item['alert_push'] == true,
         'alert_verdict_change': widget.item['alert_verdict_change'] == true,
         'alert_compliance_risk': widget.item['alert_compliance_risk'] == true,
-        'alert_weekly_digest': widget.item['alert_weekly_digest'] == true,
         'alert_price_change': widget.item['alert_price_change'] == true,
       };
     }
@@ -51,7 +50,7 @@ class _AlertPreferencesBottomSheetState extends State<AlertPreferencesBottomShee
   Future<void> _save() async {
     if (!widget.isProduct) {
       final hasDelivery = (prefs['alert_email'] ?? false) || (prefs['alert_inapp'] ?? false) || (prefs['alert_push'] ?? false);
-      final hasType = (prefs['alert_verdict_change'] ?? false) || (prefs['alert_compliance_risk'] ?? false) || (prefs['alert_price_change'] ?? false) || (prefs['alert_weekly_digest'] ?? false);
+      final hasType = (prefs['alert_verdict_change'] ?? false) || (prefs['alert_compliance_risk'] ?? false) || (prefs['alert_price_change'] ?? false);
 
       if (hasDelivery && !hasType) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please select at least one alert type to receive.'), backgroundColor: context.haram));
@@ -154,7 +153,6 @@ class _AlertPreferencesBottomSheetState extends State<AlertPreferencesBottomShee
                     _buildToggleRow('alert_verdict_change', Icons.gavel_rounded, 'Verdict Changes', 'Notify me immediately if Shariah compliance status changes.'),
                     _buildToggleRow('alert_compliance_risk', Icons.warning_rounded, 'Compliance Risk', 'Warn me if non-permissible debt/revenue approaches 33% or 5%.'),
                     _buildToggleRow('alert_price_change', Icons.trending_up_rounded, 'Price Changes', 'Notify me if the price changes significantly in one day.'),
-                    _buildToggleRow('alert_weekly_digest', Icons.description_rounded, 'Weekly Digest', 'Send me a weekly summary of news and financials.'),
                   ],
                 ],
               ),
