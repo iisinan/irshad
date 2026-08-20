@@ -8,7 +8,7 @@
 
 **WHAT CHANGED**
 
-{{ $symbol }}'s Shariah status changed from {{ $oldStatus }} to Haram based on newly published data.
+{{ $symbol }}'s Shariah status changed from {{ $oldStatus }} to Shariah Non-Compliant based on newly published data.
 
 @if($ratios)
 <br>
