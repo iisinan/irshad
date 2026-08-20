@@ -13,7 +13,7 @@ Schedule::command('app:sync-market-data')->timezone('Africa/Lagos')->dailyAt('15
 Schedule::command('app:sync-market-data')->twiceDaily(10, 22)->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
 
 
-Schedule::command('news:scrape-stocks')->everyTwoHours()->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
+Schedule::command('news:scrape-stocks')->dailyAt('18:00')->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
 Schedule::command('app:snapshot-portfolios')->dailyAt('17:00')->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
 // DEACTIVATED: Schedule::command('alerts:process')->everyMinute();
 
@@ -23,7 +23,7 @@ Schedule::command('app:snapshot-portfolios')->dailyAt('17:00')->withoutOverlappi
 
 
 // Updates section: detect Halal ↔ Non-Halal changes and push inbox notifications
-Schedule::command('irshad:detect-compliance-changes')->hourly()->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
+Schedule::command('irshad:detect-compliance-changes')->dailyAt('18:30')->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
 
 // Detect significant daily price movements and notify users who opted in
 Schedule::command('irshad:detect-price-movements')->dailyAt('16:00')->withoutOverlapping();
