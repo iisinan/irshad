@@ -6,7 +6,10 @@ use App\Models\Company;
 use App\Models\Watchlist;
 use App\Models\UserNotification;
 use App\Services\PushNotificationService;
+use App\Mail\PriceMovementAlert;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class DetectPriceMovements extends Command
 {
@@ -55,6 +58,14 @@ class DetectPriceMovements extends Command
                         try {
                             $pushService->sendToUser($wl->user, "Price Movement: {$company->symbol}", $message, ['type' => 'price_alert']);
                         } catch (\Exception $e) { }
+                    }
+
+                    if ($wl->alert_email && $wl->user->email) {
+                        try {
+                            Mail::to($wl->user->email)->send(new PriceMovementAlert($wl->user, $company->symbol, $direction, abs($changePct), (float) $today));
+                        } catch (\Exception $e) {
+                            Log::error("Failed to send price movement email to {$wl->user->email}: " . $e->getMessage());
+                        }
                     }
                 }
             }

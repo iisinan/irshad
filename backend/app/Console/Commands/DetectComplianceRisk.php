@@ -6,8 +6,11 @@ use App\Models\Company;
 use App\Models\Watchlist;
 use App\Models\UserNotification;
 use App\Services\PushNotificationService;
+use App\Mail\ComplianceRiskAlert;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class DetectComplianceRisk extends Command
 {
@@ -67,6 +70,14 @@ class DetectComplianceRisk extends Command
                         try {
                             $pushService->sendToUser($wl->user, "Compliance Risk: {$company->symbol}", $message, ['type' => 'compliance_risk']);
                         } catch (\Exception $e) { }
+                    }
+
+                    if ($wl->alert_email && $wl->user->email) {
+                        try {
+                            Mail::to($wl->user->email)->send(new ComplianceRiskAlert($wl->user, $company->symbol, $riskReasons));
+                        } catch (\Exception $e) {
+                            Log::error("Failed to send compliance risk email to {$wl->user->email}: " . $e->getMessage());
+                        }
                     }
                 }
                 
