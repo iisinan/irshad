@@ -788,6 +788,12 @@ const AaoifiScreening = () => {
               <Info size={16} color="var(--primary)" style={{ flexShrink:0,marginTop:2 }}/>
               <div style={{ fontSize:'0.8rem',color:'var(--text-muted)',lineHeight:1.5, fontWeight:500 }}><strong style={{ color:'var(--text-dark)', fontWeight:800 }}>Important:</strong> AAOIFI applies strict thresholds with no buffer zones. For example, a company at 30.01% debt is non-compliant. Click any bar to see the full calculation breakdown.</div>
             </div>
+            
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '12px', padding: '16px 8px 0', fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+              {(fd?.published_date || report?.published_date) && <span>Published: {fd?.published_date || report?.published_date}</span>}
+              {(fd?.published_date || report?.published_date) && (fd?.reporting_period || report?.reporting_period || fd?.financial_year || report?.reporting_year) && <span>•</span>}
+              {(fd?.reporting_period || report?.reporting_period || fd?.financial_year || report?.reporting_year) && <span>Quarter: {fd?.reporting_period || report?.reporting_period} {fd?.financial_year || report?.reporting_year || ''}</span>}
+            </div>
           </div>
         </Section>)}
 

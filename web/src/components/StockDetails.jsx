@@ -607,7 +607,8 @@ const StockDetails = ({ symbol: propSymbol }) => {
 
           {/* AAOIFI Quantitative Screening Details */}
           {showAaoifiPanel && (
-          <div className="detail-panel" style={{ padding: '24px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '24px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)', marginBottom: '24px' }}>
+            <>
+          <div className="detail-panel" style={{ padding: '24px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '24px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)', marginBottom: '8px' }}>
             {/* Panel header */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
               <div style={{ background: 'rgba(209,165,98,0.12)', padding: '8px', borderRadius: '10px', display: 'flex' }}>
@@ -665,6 +666,13 @@ const StockDetails = ({ symbol: propSymbol }) => {
               );
             })}
           </div>
+          
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '12px', padding: '0 8px', marginBottom: '24px', fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+            {(fd?.published_date || report?.published_date) && <span>Published: {fd?.published_date || report?.published_date}</span>}
+            {(fd?.published_date || report?.published_date) && (fd?.reporting_period || report?.reporting_period || fd?.financial_year || report?.reporting_year) && <span>•</span>}
+            {(fd?.reporting_period || report?.reporting_period || fd?.financial_year || report?.reporting_year) && <span>Quarter: {fd?.reporting_period || report?.reporting_period} {fd?.financial_year || report?.reporting_year || ''}</span>}
+          </div>
+          </>
           )}
 
           {/* Irshad Shariah Analysis — hidden for business activity failures */}
