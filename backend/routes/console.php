@@ -25,6 +25,12 @@ Schedule::command('app:snapshot-portfolios')->dailyAt('17:00')->withoutOverlappi
 // Updates section: detect Halal ↔ Non-Halal changes and push inbox notifications
 Schedule::command('irshad:detect-compliance-changes')->hourly()->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
 
+// Detect significant daily price movements and notify users who opted in
+Schedule::command('irshad:detect-price-movements')->dailyAt('16:00')->withoutOverlapping();
+
+// Detect compliance risk (approaching thresholds) and notify users who opted in
+Schedule::command('irshad:detect-compliance-risk')->weekly()->withoutOverlapping();
+
 // Notify users whose non-compliant holding grace period has expired
 Schedule::command('irshad:notify-grace-period-end')->dailyAt('09:00')->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
 

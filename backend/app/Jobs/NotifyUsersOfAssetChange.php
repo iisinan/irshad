@@ -49,8 +49,9 @@ class NotifyUsersOfAssetChange implements ShouldQueue
         $usersToNotify = []; // Format: userId => ['user' => User, 'channels' => ['mail', 'whatsapp']]
 
         if ($this->assetType === 'stock') {
-            // Find in Watchlists (Web)
+            // Find in Watchlists (Web) who opted in for verdict changes
             $watchlists = Watchlist::where('symbol', $this->asset->symbol)
+                ->where('alert_verdict_change', true)
                 ->where(function ($query) {
                     $query->where('alert_email', true)->orWhere('alert_push', true);
                 })->get();

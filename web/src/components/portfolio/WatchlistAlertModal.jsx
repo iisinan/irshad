@@ -40,7 +40,6 @@ export default function WatchlistAlertModal({ stock, watchlistData, onClose, onU
     alert_push: watchlistData?.alert_push || false,
     alert_verdict_change: watchlistData?.alert_verdict_change || false,
     alert_compliance_risk: watchlistData?.alert_compliance_risk || false,
-    alert_weekly_digest: watchlistData?.alert_weekly_digest || false,
     alert_price_change: watchlistData?.alert_price_change || false,
   });
 
@@ -50,7 +49,7 @@ export default function WatchlistAlertModal({ stock, watchlistData, onClose, onU
 
   const handleSave = async () => {
     const hasDelivery = prefs.alert_email || prefs.alert_inapp || prefs.alert_push;
-    const hasType = prefs.alert_verdict_change || prefs.alert_compliance_risk || prefs.alert_price_change || prefs.alert_weekly_digest;
+    const hasType = prefs.alert_verdict_change || prefs.alert_compliance_risk || prefs.alert_price_change;
 
     if (hasDelivery && !hasType) {
       toastError('Please select at least one alert type to receive.');
@@ -168,14 +167,6 @@ export default function WatchlistAlertModal({ stock, watchlistData, onClose, onU
               icon={TrendingUp} 
               title="Price Movements" 
               description="Significant daily price rise or fall" 
-              prefs={prefs}
-              handleToggle={handleToggle}
-            />
-            <ToggleRow 
-              field="alert_weekly_digest" 
-              icon={FileText} 
-              title="Weekly Digest" 
-              description="Include in your weekly portfolio summary" 
               prefs={prefs}
               handleToggle={handleToggle}
             />

@@ -70,8 +70,10 @@ class DetectComplianceChanges extends Command
             .' to '.ucfirst($change->new_status).'. '
             .($change->reason ? "Reason: {$change->reason}" : '');
 
-        // Users with this in their watchlist
+        // Users with this in their watchlist who opted in for verdict change and in-app alerts
         $watchlistUserIds = Watchlist::where('symbol', $company->symbol)
+            ->where('alert_verdict_change', true)
+            ->where('alert_inapp', true)
             ->pluck('user_id')
             ->unique();
 
