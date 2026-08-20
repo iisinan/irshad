@@ -37,13 +37,27 @@ class AppStateProvider extends ChangeNotifier {
     if (profile != null) {
       _userProfile = profile;
       _isAuthenticated = true;
+      _syncHawlDate(profile);
       notifyListeners();
     }
   }
 
   void setUserProfile(Map<String, dynamic> profile) {
     _userProfile = profile;
+    _syncHawlDate(profile);
     notifyListeners();
+  }
+
+  Future<void> _syncHawlDate(Map<String, dynamic> profile) async {
+    if (profile.containsKey('preferences') && profile['preferences'] != null) {
+      final hawlDate = profile['preferences']['zakat_hawl_date'];
+      final prefs = await SharedPreferences.getInstance();
+      if (hawlDate != null) {
+        await prefs.setString('irshad_zakat_hawl_date', hawlDate);
+      } else {
+        await prefs.remove('irshad_zakat_hawl_date');
+      }
+    }
   }
 
   void setWatchlistCount(int count) {

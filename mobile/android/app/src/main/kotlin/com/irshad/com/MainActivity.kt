@@ -1,4 +1,4 @@
-package com.irshad.irshad
+package com.irshad.com
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

@@ -1,0 +1,779 @@
+EUNISELL INTERLINKED PLC
+
+UNAUDITED ACCOUNTS FOR THE PERIOD ENDED
+
+30TH JUNE, 2026
+
+EUNISELL INTERLINKED PLC
+UNAUDITED STATEMENT OF COMPREHENSIVE INCOME FOR YEAR ENDED 30TH JUNE 2026
+(Figures in ₦'000)
+Unaudited
+Jun-26
+₦'000
+
+Audited
+Jun-25
+
+% Change
+
+₦'000
+
+REVENUE
+
+1,836,917
+
+1,410,429
+
+30%
+
+COST OF SALES
+
+(1,183,964)
+
+(930,818)
+
+27%
+
+GROSS PROFIT
+
+652,953
+
+479,611
+
+36%
+
+OPERATING EXPENSES
+
+(288,429)
+
+(200,800)
+
+44%
+
+36
+
+-100%
+
+OTHER INCOME
+
+-
+
+PROFIT/(LOSS)FROM OPERATIONS
+
+364,524
+
+278,847
+
+31%
+
+FINANCE COST
+
+(10,616)
+
+(42,998)
+
+-75%
+
+PROFIT BEFORE TAX
+
+353,908
+
+235,849
+
+50%
+
+-
+
+(45,367)
+
+-100%
+
+353,908
+
+190,482
+
+86%
+
+353,908
+
+190,482
+
+TAXATION
+PROFIT/(LOSS) FOR THE PERIOD
+OTHER COMPREHENSIVE INCOME
+GAINS/LOSS ON PROPERTY REVALUATION
+EXCHANGE DIFF. FROM TRANSLATION OF FOREIGN ENTITY'S F/S
+GAINS/LOSS FROM VALUATION OF EQUITY INVESTMENT INSTRUMENT
+MEASURED AT FAIR VALUE THROUGH OTHER COMPREHENSIVE INCOME
+
+Total Comprehensive Income for the Year
+
+EUNISELL INTERLINKED PLC
+UNAUDITED STATEMENT OF FINANCIAL POSITION
+AS AT 30TH JUNE, 2026
+(Figures in N'000)
+NOTES
+
+Assets:
+Non-Current Assets:
+Property, Plant and equipment
+Current Assets:
+Inventories
+Trade Receivables/Prepayment
+Cash and Cash Equivalents
+
+Unaudited
+30 JUNE 2026
+
+Audited
+30 JUNE 2025
+
+₦'000
+
+₦'000
+
+1
+
+2
+
+Total Assets
+
+136,863
+
+12,656
+
+442,891
+875,342
+15,688
+1,333,921
+
+288,670
+543,703
+84,194
+916,567
+
+1,470,784
+
+929,223
+
+118,350
+489,472
+232,440
+840,262
+
+118,350
+135,564
+232,440
+486,354
+
+2,971
+
+2,971
+
+282,327
+0
+145,224
+200,000
+627,551
+
+111,210
+43,865
+84,823
+200,000
+439,898
+
+1,470,784
+
+929,223
+
+Equity and Liabilities
+Equity
+Share capital
+Retained earnings
+Other Components of Equity
+Total Equity
+
+3
+
+Non-Current Liabilities
+Deferred Tax
+Current Liabilities
+Trade and other Payables
+Current income tax liabilities
+Short-term Borrowings
+Deposit for shares
+
+4
+
+Total Equity and Liabilities
+
+Chika Ikenga
+
+Chris Okoro
+
+Victoria Adeku
+
+Chairman
+
+MD/CEO
+
+Chief Financial Officer (CFO)
+
+FRC/2023/PRO/DIR/003/815560 FRC/2019/002/0000074
+Approved by the Board
+July 28th, 2026
+
+FRC/2023/PRO/ICAN/001/485227
+
+STATEMENT OF CASH FLOWS
+30TH JUNE, 2026
+
+Notes
+Cash from operating activities
+Profit before income tax
+Adjustments:
+Interest income
+Interest expense
+Profit from asset disposal
+Depreciation
+Changes in working capital:
+inventories
+trade and other receivables
+trade and other payables
+Cash generated from operations
+Interest income received
+Interest expense paid
+Income tax paid
+VAT paid
+Net cash from/ (used in) operating activities
+Cash from investing activities
+Purchase of property, plant and equipment
+Proceeds from disposal of property, plant and
+Net cash from/ (used in) investing activities
+Cash from financing activities
+Deposits for shares
+Net proceeds / (repayment) on long term
+Net proceeds / (repayment) on short term
+Restricted cash
+Net cash from/ (used in) financing activities
+Net change in cash and cash equivalents
+Cash and cash equivalents at beginning of the year
+Cash and cash equivalents at end of the year
+Represented By:
+Cash and cash equivalents
+
+Unaudited
+30 JUNE 2026
+₦'000
+
+Audited
+30 JUNE 2025
+₦'000
+
+353,908
+
+235,849
+
+10,616
+18,400
+
+42,998
+2,798
+
+(154,221)
+(331,639)
+171,117
+68,181
+(10,616)
+(32,053)
+
+21,797
+23,069
+(118,247)
+208,263
+(42,998)
+(32,054)
+
+25,512
+
+133,211
+
+(142,607)
+(142,607)
+
+(4,795)
+(4,795)
+-
+
+60,401
+60,401
+(68,506)
+84,194
+15,688
+
+(46,094)
+(46,094)
+82,322
+1,870
+84,192
+
+15,688
+
+84,192
+
+STATEMENT OF CHANGE IN EQUITY
+
+-1
+
+30th June, 2026
+
+Share
+
+Share
+
+Other
+
+Retained
+
+Total
+
+Capital
+
+Premium
+
+Reserves
+
+Earnings
+
+Equity
+
+₦'000
+
+₦'000
+
+₦'000
+
+₦'000
+
+₦'000
+
+Balance as at 30th June, 2025
+
+118,350
+
+229,351
+
+Profit for the period
+
+-
+
+-
+
+118,350
+
+229,351
+
+Balance as at 30th June, 2026
+
+3,089
+
+135,564
+
+486,354
+
+-
+
+353,908
+
+353,908
+
+3,089
+
+489,472
+
+840,262
+
+EUNISELL INTERLINKED PLC
+NOTES TO THE ACCOUNTS
+
+1
+
+PROPERTY, PLANT & EQUIPMENT
+Leasehold
+
+Motor
+
+Plant &
+
+Furniture &
+
+Computer
+
+Improvement
+
+Vehicle
+
+Machinery
+
+Equipment
+
+Equipment
+
+₦'000
+
+₦'000
+
+₦'000
+
+₦'000
+
+₦'000
+
+Cost/Valuation:
+
+Borehole
+
+Total
+
+₦'000
+
+₦'000
+
+Cost:
+At July 1, 2025
+
+7,065
+
+5,477
+120,000
+
+15,247
+16,417
+
+17,575
+2,340
+
+13,345
+3,850
+
+415
+
+59,124
+142,607
+
+7,065
+
+125,477
+
+31,664
+
+19,915
+
+17,195
+
+415
+
+201,731
+
+Additions
+At June 30, 2026
+Depreciation:
+At July 1, 2025
+
+7,065
+
+Charge for the period
+
+4,377
+
+11,264
+
+15,519
+
+7,856
+
+387
+
+46,468
+
+13,333
+
+1,862
+
+700
+
+2,503
+
+2
+
+18,400
+
+At June 30, 2026
+
+7,065
+
+17,710
+
+13,126
+
+16,219
+
+10,359
+
+389
+
+64,868
+
+Net Book Value:
+At June 30, 2026
+
+-
+
+107,767
+
+18,538
+
+3,696
+
+6,836
+
+26
+
+136,863
+
+1,925
+
+4,734
+
+930
+
+3,022
+
+50
+
+10,660
+
+At June 30, 2025
+
+2. Trade Receivables and Prepayments
+Trade Receivables
+Other Receivables
+Prepayments
+
+3. Other Components Of Equity
+Share Premium
+Revaluation Reserve
+
+4. Trade Creditors and Accruals
+Trade Payables
+Sundry Payables
+Other Payables & Accruals
+
+5. Revenue
+Power products
+Oil & Gas
+Household
+Construction
+Manufacturing
+
+5. Administrative Expenses
+Employees Benefits
+Professional fees
+Audit fees
+Repairs & Maintenance
+Adverts, promotion and marketing
+Rent and rates
+Depreciation
+Medical & Staff welfare
+Insurance
+Travel, hotel & entertainment
+Other expenses
+
+Unaudited
+Jun-26
+₦'000
+
+Audited
+Jun-25
+₦'000
+
+419,410
+371,218
+84,714
+875,342
+
+151,499
+267,796
+124,408
+543,703
+
+229,351
+3,089
+232,440
+
+229,351
+3,089
+232,440
+
+166,329
+71,009
+44,989
+282,327
+
+56,795
+27,486
+26,930
+111,210
+
+Unaudited
+Jun-26
+₦'000
+
+Audited
+Jun-25
+₦'000
+
+115,461
+1,589,064
+59,301
+73,091
+1,836,917
+
+54,195
+1,164,438
+180,479
+11,318
+1,410,429
+
+115,849
+19,168
+1,613
+8,257
+22,869
+15,000
+18,402
+8,583
+5,516
+10,502
+62,670
+288,429
+
+80,708
+26,610
+1,500
+19,814
+4,113
+11,000
+2,798
+6,048
+1,504
+8,593
+38,112
+200,800
+
+SECURITIES TRADING POLICY
+In compliance with Rule 17.15 Disclosure of Dealings in Issuers’ Shares, Rulebook of the Exchange 2015 (Issuers
+Rule)Eunisell Interlinked Plc maintains a Security Trading Policy which guides Directors, Audit Committee
+members, employees and all individuals categorized as insiders as to their dealing in the Company’s shares. The
+Policy undergoes periodic reviews by the Board and is updated accordingly. The Company has made specific
+inquiries of all its directors and other insiders and is not aware of any infringement of the policy during the
+period under review.
+
+EUNISELL INTERLINKED PLC
+Hypothetical Case on Free Float Computation
+Shareholding Structure/Free Float Status
+Description
+Issued Share Capital
+Substantial Shareholdings (5% and above)
+Boussole Intergrated Limited
+
+30-Jun-26
+30-Jun-25
+Unit
+PercentageUnit
+Percentage
+236,700
+100% 236,700
+100%
+150,223
+
+63.47%
+
+150,223
+
+63.47%
+
+150,223
+
+63.47%
+
+150,223
+
+63.47%
+
+Mr. Chika Ikenga
+Kayode Awobodu
+Mr. Christopher Okoro
+Mr. Surajudeen Baarabe Yakubu
+Mr. Ajibola Edwards
+
+3,480
+835
+0
+0
+0
+
+1.47%
+0.35%
+0.00%
+0.00%
+0.00%
+
+3,480
+1,249
+0
+0
+0
+
+1.47%
+0.53%
+0.00%
+0.00%
+0.00%
+
+Total Directors' Shareholdings
+Other Influential Shareholdings
+
+4,315
+
+1.82%
+
+4,729
+
+2.00%
+
+Total Other Influential Shareholdings
+Free Float in Units and Percentage
+Free Float in Value
+
+0
+0.00%
+82,162 34.71%
+₦ 616,215.00
+
+Total Substantial Shareholdings
+Directors' Shareholdings (direct and indirect), excluding directors with substantial interests
+
+0
+0.00%
+81,748
+34.54%
+₦ 613,110.00
+
+Declaration:
+(A) Eunisell Interlinked Plc with a free float percentage of 34.71% as at 30 June 2026, is compliant with The Exchange's free float requirements for
+for companies listed on the main board
+(B) Eunisell Interlinked Plc with a free float value of N613,110 as at 30 June 2025, is compliant with The Exchange's free float requirements for
+companies listed on the Main Board.
+
+

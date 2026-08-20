@@ -22,6 +22,7 @@
         "resend/resend-php": "^1.5",
         "sentry/sentry-laravel": "^4.27",
         "smalot/pdfparser": "^2.12",
+        "spatie/laravel-backup": "^9.3",
         "spiral/roadrunner": "^2025.1",
         "spiral/roadrunner-cli": "^2.6.0",
         "spiral/roadrunner-http": "^3.3.0",

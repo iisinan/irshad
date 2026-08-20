@@ -12,3 +12,6 @@ cmds = [
     'php artisan route:clear',
     'php artisan view:clear'
 ]
+
+[phases.setup]
+nixPkgs = ["...", "postgresql_15"]

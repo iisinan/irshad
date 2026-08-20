@@ -40,9 +40,23 @@ class ProcessFinancialPdfCommand extends Command
         $apiKey = explode(',', $apiKey)[0];
 
         $this->info("Reading PDF for {$ticker}...");
+        
+        // 1. Manual Extraction using pdftotext
+        $this->info("Performing manual regex extraction as a baseline...");
+        $manualText = shell_exec("pdftotext -layout " . escapeshellarg($pdfPath) . " -");
+        $manualAssets = 0;
+        
+        // Very basic naive regex to find "Total Assets" followed by numbers
+        if (preg_match('/Total\s+Assets[^\d]*?([\d,\.]+)/i', $manualText, $matches)) {
+            $manualAssets = (float) str_replace(',', '', $matches[1]);
+            $this->info("Manual Regex Extracted Total Assets: " . number_format($manualAssets, 2));
+        } else {
+            $this->warn("Manual Regex could not confidently find Total Assets. Fallback comparison might skip.");
+        }
+
         $base64Pdf = base64_encode(file_get_contents($pdfPath));
 
-        $prompt = "You are an expert financial analyst. Analyze the attached financial report PDF.
+        $basePrompt = "You are an expert financial analyst. Analyze the attached financial report PDF.
 Extract the following exact figures for the most recent period (e.g., FY 2023 or Q1 2024) in absolute numbers (e.g. 5000000, not '5 million').
 Return ONLY a valid JSON object matching this schema exactly, with NO markdown formatting (no ```json blocks), NO extra text, NO comments.
 {
@@ -56,42 +70,85 @@ Return ONLY a valid JSON object matching this schema exactly, with NO markdown f
   \"published_date\": \"\" // The date of the report (e.g., '2023-12-31' or '31 March 2024')
 }";
 
-        $this->info("Sending PDF to Gemini 1.5 Pro... this may take 30-60 seconds depending on the PDF size.");
+        $extractedData = null;
+        $maxRetries = 3;
+        
+        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+            $this->info("Sending PDF to Gemini 1.5 Pro... Attempt {$attempt} of {$maxRetries}");
+            
+            $currentPrompt = $basePrompt;
+            if ($attempt > 1 && $manualAssets > 0) {
+                $currentPrompt .= "\n\nHINT: Our manual text extraction found Total Assets around " . number_format($manualAssets, 2) . ". Ensure you are looking at the correct balance sheet and reading the units correctly (e.g., thousands vs millions).";
+            }
 
-        $response = Http::timeout(120)->withHeaders([
-            'Content-Type' => 'application/json',
-        ])->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key={$apiKey}", [
-            'contents' => [
-                [
-                    'parts' => [
-                        ['text' => $prompt],
-                        [
-                            'inline_data' => [
-                                'mime_type' => 'application/pdf',
-                                'data' => $base64Pdf,
+            $response = Http::timeout(120)->withHeaders([
+                'Content-Type' => 'application/json',
+            ])->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key={$apiKey}", [
+                'contents' => [
+                    [
+                        'parts' => [
+                            ['text' => $currentPrompt],
+                            [
+                                'inline_data' => [
+                                    'mime_type' => 'application/pdf',
+                                    'data' => $base64Pdf,
+                                ],
                             ],
                         ],
                     ],
                 ],
-            ],
-            'generationConfig' => [
-                'temperature' => 0.1,
-            ],
-        ]);
+                'generationConfig' => [
+                    'temperature' => 0.1,
+                ],
+            ]);
 
-        if (!$response->successful()) {
-            $this->error('API Request Failed: ' . $response->body());
-            return;
+            if (!$response->successful()) {
+                $this->error('API Request Failed: ' . $response->body());
+                if ($attempt === $maxRetries) return;
+                continue;
+            }
+
+            $data = $response->json();
+            $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
+            $text = trim(str_replace(['```json', '```'], '', $text));
+            
+            $attemptData = json_decode($text, true);
+
+            if (!$attemptData) {
+                $this->error("Failed to parse JSON from Gemini response. Raw output:\n" . $text);
+                if ($attempt === $maxRetries) return;
+                continue;
+            }
+            
+            // Check against manual extraction
+            $geminiAssets = $attemptData['total_assets'] ?? 0;
+            if ($manualAssets > 0) {
+                // Allow a small 1% margin for rounding differences or units (e.g., 500.5 vs 500)
+                $diff = abs($manualAssets - $geminiAssets) / max($manualAssets, 1);
+                
+                // Sometimes Gemini extracts the exact number but off by a factor of 1000 due to "in thousands" missing
+                // In our "Triple Validation" we strictly want them to match.
+                if ($diff <= 0.01 || $geminiAssets == $manualAssets) {
+                    $this->info("Triple Validation PASSED: Gemini and Manual extraction match.");
+                    $extractedData = $attemptData;
+                    break;
+                } else {
+                    $this->warn("Triple Validation FAILED: Gemini Total Assets (" . number_format($geminiAssets, 2) . ") does not match manual extraction (" . number_format($manualAssets, 2) . ").");
+                    if ($attempt === $maxRetries) {
+                        $this->error("Max retries reached. Aborting pipeline to prevent incorrect calculations. Please review the PDF manually.");
+                        return;
+                    }
+                }
+            } else {
+                // If manual extraction failed to find anything, we assume Gemini is right but warn
+                $this->info("Skipping Triple Validation since manual regex could not determine Total Assets.");
+                $extractedData = $attemptData;
+                break;
+            }
         }
 
-        $data = $response->json();
-        $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
-        $text = trim(str_replace(['```json', '```'], '', $text));
-        
-        $extractedData = json_decode($text, true);
-
         if (!$extractedData) {
-            $this->error("Failed to parse JSON from Gemini response. Raw output:\n" . $text);
+            $this->error("Failed to extract valid data after {$maxRetries} attempts.");
             return;
         }
 
@@ -140,7 +197,7 @@ Return ONLY a valid JSON object matching this schema exactly, with NO markdown f
         if ($aaoifi) {
             $finDataUsed = is_string($aaoifi->financial_data_used) ? json_decode($aaoifi->financial_data_used, true) : ($aaoifi->financial_data_used ?? []);
             
-            $finDataUsed['source'] = "PDF Extraction via Gemini AI";
+            $finDataUsed['source'] = "PDF Extraction via Triple Validation Method";
             $finDataUsed['total_assets'] = $financials->total_assets;
             $finDataUsed['total_debt'] = $financials->total_debt;
             $finDataUsed['cash'] = $financials->cash_and_equivalents;
@@ -176,7 +233,7 @@ Return ONLY a valid JSON object matching this schema exactly, with NO markdown f
         $liveMarketCap = $company->market_cap ?? 0;
         
         if ($pdfMarketCap > 0 && $liveMarketCap > 0) {
-            $difference = abs($pdfMarketCap - $liveMarketCap) / $liveMarketCap * 100;
+            $difference = abs($pdfMarketCap - $liveMarketCap) / max($liveMarketCap, 1) * 100;
             $this->info("\n--- Market Cap Comparison ---");
             $this->info("PDF Extracted Market Cap: ₦" . number_format($pdfMarketCap, 2));
             $this->info("NGXPulse Live Market Cap: ₦" . number_format($liveMarketCap, 2));

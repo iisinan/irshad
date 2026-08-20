@@ -312,7 +312,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
 
   @override
   Widget build(BuildContext context) {
-    final rawStatus = _currentStock['status'];
+    final rawStatus = _currentStock['status'] ?? _currentStock['current_status'];
     String status = 'doubtful';
     String reason = 'This stock is currently under review or lacks sufficient data for a definitive Shariah ruling.';
     bool isScholarVerified = false;
@@ -352,9 +352,16 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
     bool purificationRequired = false;
     double haramRevenuePercent = 0.0;
     String justification = '';
-    if (rawStatus is Map) {
+    if (_aaoifiData != null && _aaoifiData!['stage1'] != null) {
+      final stage1 = _aaoifiData!['stage1'];
+      purificationRequired = stage1['purification_required'] == true || stage1['purification_required'] == 'true';
+      haramRevenuePercent = double.tryParse(stage1['haram_revenue_percent']?.toString() ?? '0') ?? 0.0;
+    } else if (rawStatus is Map) {
       purificationRequired = rawStatus['purification_required'] == true || rawStatus['purification_required'] == 'true';
       haramRevenuePercent = double.tryParse(rawStatus['haram_revenue_percent']?.toString() ?? '0') ?? 0.0;
+    }
+
+    if (rawStatus is Map) {
       // Prefer aaoifi status_reason (most detailed) → status.reason → business_reasoning
       justification = _aaoifiData?['status_reason']?.toString().isNotEmpty == true
           ? _aaoifiData!['status_reason'].toString()
@@ -1161,7 +1168,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                 _buildTabItem(1, 'Stage 1 Screening'),
                 Builder(
                   builder: (context) {
-                    final rawStatus = _currentStock['status'];
+                    final rawStatus = _currentStock['status'] ?? _currentStock['current_status'];
                     String currentStatus = 'doubtful';
                     if (rawStatus is Map) {
                       currentStatus = rawStatus['status']?.toString().toLowerCase() ?? 'doubtful';
@@ -2503,7 +2510,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
   }
 
   Widget _buildStage1Tab() {
-    final rawStatus = _currentStock['status'];
+    final rawStatus = _currentStock['status'] ?? _currentStock['current_status'];
     String stage1Status = 'doubtful';
     String stage1Reason = 'Permissible core activity.';
     double haramRevenuePercent = 0.0;

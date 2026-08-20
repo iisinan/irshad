@@ -109,6 +109,14 @@ class AuthRepository {
       try {
         Hive.box('api_cache').clear();
       } catch (_) {}
+      try {
+        if (Hive.isBoxOpen('portfolioBox')) {
+          Hive.box('portfolioBox').clear();
+        } else {
+          final box = await Hive.openBox('portfolioBox');
+          await box.clear();
+        }
+      } catch (_) {}
     }
   }
 
@@ -121,6 +129,14 @@ class AuthRepository {
       await _storage.deleteAll();
       try {
         Hive.box('api_cache').clear();
+      } catch (_) {}
+      try {
+        if (Hive.isBoxOpen('portfolioBox')) {
+          Hive.box('portfolioBox').clear();
+        } else {
+          final box = await Hive.openBox('portfolioBox');
+          await box.clear();
+        }
       } catch (_) {}
     }
   }

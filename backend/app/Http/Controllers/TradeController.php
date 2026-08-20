@@ -39,6 +39,8 @@ class TradeController extends Controller
             'cash_balance' => 1000000.00, // ₦1M
         ]);
 
+        \Illuminate\Support\Facades\Cache::forget("portfolio_data_" . $user->id);
+
         return $this->success($brokerage, 'Brokerage account successfully linked. You have received ₦1,000,000 in simulated cash.');
     }
 
@@ -123,6 +125,8 @@ class TradeController extends Controller
                     'new_balance' => $brokerage->cash_balance,
                 ];
             });
+
+            \Illuminate\Support\Facades\Cache::forget("portfolio_data_" . $user->id);
 
             return $this->success($result, "Successfully purchased {$request->shares} shares of {$company->symbol}.");
 

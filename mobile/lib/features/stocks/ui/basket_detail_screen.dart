@@ -64,7 +64,7 @@ class _BasketDetailScreenState extends State<BasketDetailScreen> {
       final changePct = num.tryParse(stock['price_change_pct']?.toString() ?? '0')?.toDouble() ?? 0.0;
       totalChange += changePct;
 
-      final statusStr = stock['status']?['status']?.toString().toUpperCase() ?? '';
+      final statusStr = stock['status']?['status']?.toString().toUpperCase() ?? stock['current_status']?.toString().toUpperCase() ?? '';
       if (statusStr == 'HALAL') halal++;
 
       if (changePct > maxChange) {

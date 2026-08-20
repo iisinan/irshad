@@ -146,6 +146,14 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
   const hasDivs = Number(holding.total_dividends || 0) > 0;
   const hasPurify = Number(holding.purification_due || 0) > 0;
 
+  const gracePeriodEndsAt = holding.grace_period_ends_at;
+  let daysLeft = null;
+  if (gracePeriodEndsAt) {
+    const end = new Date(gracePeriodEndsAt);
+    const now = new Date();
+    daysLeft = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
+  }
+
   return (
     <div
       className="hover-card holding-row"
@@ -153,7 +161,7 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
-        display: 'grid', gridTemplateColumns: '2fr 1.2fr 1fr auto', alignItems: 'center', gap: '20px', padding: '16px 20px',
+        display: 'flex', flexDirection: 'column', padding: '16px 20px', gap: '12px',
         background: 'linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%)',
         border: '1px solid var(--border)',
         borderRadius: '16px',
@@ -163,8 +171,9 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
         boxShadow: hov ? '0 8px 24px rgba(91, 41, 113, 0.06)' : '0 2px 8px rgba(0,0,0,0.02)'
       }}
     >
-      {/* Col 1: Asset Info */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1.2fr 1fr auto', alignItems: 'center', gap: '20px', width: '100%' }}>
+        {/* Col 1: Asset Info */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0 }}>
         <CompanyLogo symbol={holding.symbol} logoUrl={holding.logo_url} size={42} radius={12} />
         <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: '4px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -252,6 +261,15 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
           <Trash2 size={14} />
         </button>
       </div>
+      </div>
+      {gracePeriodEndsAt && (
+         <div style={{ padding: '8px 12px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <AlertTriangle size={14} color="#dc2626" />
+            <span style={{ fontSize: '0.75rem', color: '#dc2626', fontWeight: 600 }}>
+              {daysLeft > 0 ? `Grace period ends in ${daysLeft} day${daysLeft > 1 ? 's' : ''}. Please plan to exit your position.` : 'Grace period has expired. Please sell immediately.'}
+            </span>
+         </div>
+      )}
     </div>
   );
 }

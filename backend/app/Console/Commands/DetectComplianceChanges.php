@@ -75,6 +75,16 @@ class DetectComplianceChanges extends Command
             ->pluck('user_id')
             ->unique();
 
+        // If it changed to non-halal (non-compliant), set a 90-day grace period for current holdings
+        if (in_array(strtolower($change->new_status), ['non_halal', 'non-halal', 'non-compliant', 'non_compliant'])) {
+            Holding::where('symbol', $company->symbol)
+                ->whereNull('grace_period_ends_at')
+                ->update([
+                    'grace_period_ends_at' => now()->addDays(90),
+                    'grace_period_notified' => false,
+                ]);
+        }
+
         // Users who hold this stock
         $holdingUserIds = Holding::where('symbol', $company->symbol)
             ->pluck('user_id')

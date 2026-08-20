@@ -1,0 +1,765 @@
+{
+  "missing": [
+    "NEWGOLD"
+  ],
+  "discrepancies": {
+    "TRANSCOHOT": {
+      "Total Assets": "CSV: 0.0 | DB: 197483117000.0",
+      "Total Debt": "CSV: 0.0 | DB: 51384642000.0",
+      "Cash": "CSV: 0.0 | DB: 17435795000.0",
+      "Interest Income": "CSV: 0.0 | DB: 1989837000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 44428832000.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 2.0739",
+      "Cash Ratio": "CSV: 0.0 | DB: 1.1128",
+      "Impure Ratio": "CSV: 0.0 | DB: 4.4787",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "NB": {
+      "Total Assets": "CSV: 0.0 | DB: 619888682000.0",
+      "Total Debt": "CSV: 0.0 | DB: 122282736000.0",
+      "Cash": "CSV: 0.0 | DB: 22180841000.0",
+      "Interest Income": "CSV: 0.0 | DB: 349192000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 550637994000.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 5.2624",
+      "Cash Ratio": "CSV: 0.0 | DB: 0.9545",
+      "Impure Ratio": "CSV: 0.0 | DB: 0.0634",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "UBA": {
+      "Total Debt": "CSV: 0.0 | DB: 1050000000000.0",
+      "Cash": "CSV: 0.0 | DB: 5350000000000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 1850000000000.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 51.8162",
+      "Cash Ratio": "CSV: 0.0 | DB: 264.0157",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "SFSREIT": {
+      "Total Assets": "CSV: 0.0 | DB: 6716391000.0",
+      "Cash": "CSV: 0.0 | DB: 109542000.0",
+      "Interest Income": "CSV: 0.0 | DB: 127218000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 272418000.0",
+      "Cash Ratio": "CSV: 0.0 | DB: 15.9971",
+      "Impure Ratio": "CSV: 0.0 | DB: 46.6996",
+      "Final Status": "CSV: doubtful | DB: non-compliant"
+    },
+    "INTBREW": {
+      "Total Assets": "CSV: 792651836000.0 | DB: 784863621000.0",
+      "Total Debt": "CSV: 51337856000.0 | DB: 52773890000.0",
+      "Cash": "CSV: 171075664000.0 | DB: 161487955000.0",
+      "Interest Income": "CSV: 7741327000.0 | DB: 4217698000.0",
+      "Total Revenue": "CSV: 163361102000.0 | DB: 178706926000.0",
+      "Debt Ratio": "CSV: 0.0277 | DB: 17.7667",
+      "Cash Ratio": "CSV: 0.0 | DB: 92.8125",
+      "Impure Ratio": "CSV: 0.0474 | DB: 2.3601",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "STANBIC": {
+      "Total Debt": "CSV: 0.0 | DB: 727150000000.0",
+      "Cash": "CSV: 0.0 | DB: 4050000000000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 547490000000.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 28.0624",
+      "Cash Ratio": "CSV: 0.0 | DB: 156.2986",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "ETI": {
+      "Total Assets": "CSV: 0.0 | DB: 35156507000.0",
+      "Total Debt": "CSV: 0.0 | DB: 1899745000.0",
+      "Cash": "CSV: 0.0 | DB: 6741761000.0",
+      "Interest Income": "CSV: 0.0 | DB: 561080000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 636223000.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 0.09",
+      "Cash Ratio": "CSV: 0.0 | DB: 0.8218",
+      "Impure Ratio": "CSV: 0.0 | DB: 88.1892",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "ACCESSCORP": {
+      "Total Assets": "CSV: 0.0 | DB: 53437039000000.0",
+      "Total Debt": "CSV: 0.0 | DB: 2788403000000.0",
+      "Cash": "CSV: 0.0 | DB: 8888204000000.0",
+      "Interest Income": "CSV: 0.0 | DB: 895034000000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 1375504000000.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 200.3745",
+      "Cash Ratio": "CSV: 0.0 | DB: 1846.8769",
+      "Impure Ratio": "CSV: 0.0 | DB: 65.0695",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "DANGSUGAR": {
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "WEMABANK": {
+      "Total Assets": "CSV: 0.0 | DB: 639937056535.0",
+      "Total Debt": "CSV: 0.0 | DB: 253834180186.0",
+      "Interest Income": "CSV: 0.0 | DB: 204779858091.0",
+      "Total Revenue": "CSV: 0.0 | DB: 341299763485.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 59.4982",
+      "Impure Ratio": "CSV: 0.0 | DB: 60.0",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "TOTAL": {
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "MANSARD": {
+      "Total Assets": "CSV: 0.0 | DB: 260601627.0",
+      "Total Debt": "CSV: 0.0 | DB: 7129486.0",
+      "Cash": "CSV: 0.0 | DB: 27995420.0",
+      "Interest Income": "CSV: 0.0 | DB: 3027553.0",
+      "Total Revenue": "CSV: 0.0 | DB: 48457383.0",
+      "Cash Ratio": "CSV: 0.0 | DB: 0.1105",
+      "Impure Ratio": "CSV: 0.0 | DB: 6.2479",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "LIVESTOCK": {
+      "Total Assets": "CSV: 0.0 | DB: 13210046000.0",
+      "Total Debt": "CSV: 0.0 | DB: 314207000.0",
+      "Cash": "CSV: 0.0 | DB: 795291000.0",
+      "Interest Income": "CSV: 0.0 | DB: 1099000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 7635023000.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 1.2179",
+      "Cash Ratio": "CSV: 0.0 | DB: 3.1495",
+      "Impure Ratio": "CSV: 0.0 | DB: 0.0144",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "LASACO": {
+      "Total Assets": "CSV: 0.0 | DB: 42214117000.0",
+      "Cash": "CSV: 0.0 | DB: 16730633000.0",
+      "Interest Income": "CSV: 0.0 | DB: 1335634000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 16349146000.0",
+      "Cash Ratio": "CSV: 0.0 | DB: 73.9608",
+      "Impure Ratio": "CSV: 0.0 | DB: 8.1694",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "OANDO": {
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "UNILEVER": {
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "SCOA": {
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "MOFIREIF": {
+      "Total Assets": "CSV: 0.0 | DB: 342191577020.0",
+      "Total Debt": "CSV: 0.0 | DB: 116713252555.0",
+      "Cash": "CSV: 0.0 | DB: 80617615000.0",
+      "Interest Income": "CSV: 0.0 | DB: 6843831540.0",
+      "Total Revenue": "CSV: 0.0 | DB: 182502174411.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 116.7133",
+      "Cash Ratio": "CSV: 0.0 | DB: 142.9268",
+      "Impure Ratio": "CSV: 0.0 | DB: 3.75",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "CHAMPION": {
+      "Total Assets": "CSV: 0.0 | DB: 132475170000.0",
+      "Total Debt": "CSV: 0.0 | DB: 49236189000.0",
+      "Cash": "CSV: 0.0 | DB: 16068092000.0",
+      "Interest Income": "CSV: 0.0 | DB: 804358000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 14357321000.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 50.0226",
+      "Cash Ratio": "CSV: 0.0 | DB: 16.3247",
+      "Impure Ratio": "CSV: 0.0 | DB: 5.6024",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "MBENEFIT": {
+      "Total Assets": "CSV: 0.0 | DB: 196517236000.0",
+      "Total Debt": "CSV: 0.0 | DB: 400870000.0",
+      "Cash": "CSV: 0.0 | DB: 46156468000.0",
+      "Interest Income": "CSV: 0.0 | DB: 2742060000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 20393217000.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 0.6206",
+      "Cash Ratio": "CSV: 0.0 | DB: 207.2468",
+      "Impure Ratio": "CSV: 0.0 | DB: 13.4459",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "DAARCOMM": {
+      "Total Assets": "CSV: 0.0 | DB: 27934893000.0",
+      "Total Debt": "CSV: 0.0 | DB: 655825000.0",
+      "Cash": "CSV: 0.0 | DB: 389783000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 1670243000.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 3.1052",
+      "Cash Ratio": "CSV: 0.0 | DB: 1.8456"
+    },
+    "GTCO": {
+      "Total Debt": "CSV: 0.0 | DB: 40200000000.0",
+      "Cash": "CSV: 0.0 | DB: 6160000000000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 1670000000000.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 0.8539",
+      "Cash Ratio": "CSV: 0.0 | DB: 130.8503",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "ETERNA": {
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "UPDCREIT": {
+      "Total Assets": "CSV: 0.0 | DB: 156748683909.0",
+      "Total Debt": "CSV: 0.0 | DB: 48037163162.0",
+      "Interest Income": "CSV: 0.0 | DB: 3134973678.0",
+      "Total Revenue": "CSV: 0.0 | DB: 83599298085.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 128.5937",
+      "Impure Ratio": "CSV: 0.0 | DB: 3.75",
+      "Final Status": "CSV: doubtful | DB: non-compliant"
+    },
+    "UCAP": {
+      "Total Assets": "CSV: 0.0 | DB: 1808542680000.0",
+      "Total Debt": "CSV: 0.0 | DB: 304886738000.0",
+      "Cash": "CSV: 0.0 | DB: 366909873000.0",
+      "Interest Income": "CSV: 0.0 | DB: 37814671000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 17169086000.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 93.8402",
+      "Cash Ratio": "CSV: 0.0 | DB: 489.8598",
+      "Impure Ratio": "CSV: 0.0 | DB: 220.2486",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "FTNCOCOA": {
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "BETAGLAS": {
+      "Total Assets": "CSV: 0.0 | DB: 189442373000.0",
+      "Total Debt": "CSV: 0.0 | DB: 37546721000.0",
+      "Cash": "CSV: 0.0 | DB: 12966026000.0",
+      "Interest Income": "CSV: 0.0 | DB: 2662953000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 37538942000.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 11.1196",
+      "Cash Ratio": "CSV: 0.0 | DB: 17.2061",
+      "Impure Ratio": "CSV: 0.0 | DB: 7.0938",
+      "Final Status": "CSV: doubtful | DB: non-compliant"
+    },
+    "TANTALIZER": {
+      "Total Assets": "CSV: 0.0 | DB: 15633415327.0",
+      "Total Debt": "CSV: 0.0 | DB: 7313157801.0",
+      "Cash": "CSV: 0.0 | DB: 570072497.0",
+      "Interest Income": "CSV: 0.0 | DB: 12220055.0",
+      "Total Revenue": "CSV: 0.0 | DB: 396240192.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 31.9352",
+      "Cash Ratio": "CSV: 0.0 | DB: 10.0223",
+      "Impure Ratio": "CSV: 0.0 | DB: 3.084",
+      "Final Status": "CSV: doubtful | DB: non-compliant"
+    },
+    "AIICO": {
+      "Total Assets": "CSV: 0.0 | DB: 652765667000.0",
+      "Total Debt": "CSV: 0.0 | DB: 106095228000.0",
+      "Cash": "CSV: 0.0 | DB: 35779688000.0",
+      "Interest Income": "CSV: 0.0 | DB: 18474717000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 64429674000.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 33.1632",
+      "Cash Ratio": "CSV: 0.0 | DB: 173.5778",
+      "Impure Ratio": "CSV: 0.0 | DB: 28.6742",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "CONOIL": {
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "CAVERTON": {
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "UPDC": {
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "GEREGU": {
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "IKEJAHOTEL": {
+      "Total Assets": "CSV: 0.0 | DB: 612047379263.0",
+      "Total Debt": "CSV: 0.0 | DB: 239585239165.0",
+      "Cash": "CSV: 0.0 | DB: 34715725000.0",
+      "Interest Income": "CSV: 0.0 | DB: 12240947585.0",
+      "Total Revenue": "CSV: 0.0 | DB: 326425268940.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 235.7396",
+      "Cash Ratio": "CSV: 0.0 | DB: 34.1585",
+      "Impure Ratio": "CSV: 0.0 | DB: 3.75",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "VERITASKAP": {
+      "Total Assets": "CSV: 0.0 | DB: 37221321000.0",
+      "Cash": "CSV: 0.0 | DB: 9781674000.0",
+      "Interest Income": "CSV: 0.0 | DB: 248792000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 5370440000.0",
+      "Cash Ratio": "CSV: 0.0 | DB: 93.5233",
+      "Impure Ratio": "CSV: 0.0 | DB: 4.6326",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "FIRSTHOLDCO": {
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "WAPIC": {
+      "Total Assets": "CSV: 0.0 | DB: 110970181000.0",
+      "Total Debt": "CSV: 0.0 | DB: 609509000.0",
+      "Cash": "CSV: 0.0 | DB: 22813795000.0",
+      "Interest Income": "CSV: 0.0 | DB: 2759041000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 23924804000.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 1.0162",
+      "Cash Ratio": "CSV: 0.0 | DB: 115.4367",
+      "Impure Ratio": "CSV: 0.0 | DB: 11.5321",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "UNITYBNK": {
+      "Total Assets": "CSV: 0.0 | DB: 472584916000.0",
+      "Total Debt": "CSV: 0.0 | DB: 340296448000.0",
+      "Cash": "CSV: 0.0 | DB: 77450125000.0",
+      "Interest Income": "CSV: 0.0 | DB: 53722356000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 59364269000.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 1927.9269",
+      "Cash Ratio": "CSV: 0.0 | DB: 1070.9048",
+      "Impure Ratio": "CSV: 0.0 | DB: 90.4961",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "AFRIPRUD": {
+      "Total Assets": "CSV: 0.0 | DB: 46524565.0",
+      "Cash": "CSV: 0.0 | DB: 1113428.0",
+      "Interest Income": "CSV: 0.0 | DB: 3457559.0",
+      "Total Revenue": "CSV: 0.0 | DB: 742318.0",
+      "Cash Ratio": "CSV: 0.0 | DB: 0.07",
+      "Impure Ratio": "CSV: 0.0 | DB: 465.7787",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "ELLAHLAKES": {
+      "Total Assets": "CSV: 0.0 | DB: 26101625000.0",
+      "Total Debt": "CSV: 0.0 | DB: 7420667000.0",
+      "Cash": "CSV: 0.0 | DB: 843371000.0",
+      "Interest Income": "CSV: 0.0 | DB: 19607000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 359488000.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 21.7329",
+      "Cash Ratio": "CSV: 0.0 | DB: 2.47",
+      "Impure Ratio": "CSV: 0.0 | DB: 5.4541",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "NPFMCRFBK": {
+      "Total Assets": "CSV: 0.0 | DB: 396483176928.0",
+      "Total Debt": "CSV: 0.0 | DB: 139248933101.0",
+      "Interest Income": "CSV: 0.0 | DB: 7929663539.0",
+      "Total Revenue": "CSV: 0.0 | DB: 211457694362.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 484.0735",
+      "Impure Ratio": "CSV: 0.0 | DB: 3.75",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "UHOMREIT": {
+      "Total Assets": "CSV: 0.0 | DB: 11366828000.0",
+      "Cash": "CSV: 0.0 | DB: 848604000.0",
+      "Interest Income": "CSV: 0.0 | DB: 32150000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 159209000.0",
+      "Cash Ratio": "CSV: 0.0 | DB: 7.7057",
+      "Impure Ratio": "CSV: 0.0 | DB: 20.1936",
+      "Final Status": "CSV: doubtful | DB: non-compliant"
+    },
+    "NCR": {
+      "Total Assets": "CSV: 0.0 | DB: 7450278000.0",
+      "Cash": "CSV: 0.0 | DB: 1777794000.0",
+      "Interest Income": "CSV: 0.0 | DB: 10698000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 614555000.0",
+      "Cash Ratio": "CSV: 0.0 | DB: 10.2116",
+      "Impure Ratio": "CSV: 0.0 | DB: 1.7408"
+    },
+    "RTBRISCOE": {
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "LINKASSURE": {
+      "Total Assets": "CSV: 0.0 | DB: 87270155000.0",
+      "Cash": "CSV: 0.0 | DB: 3881689000.0",
+      "Interest Income": "CSV: 0.0 | DB: 1105855000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 6401725000.0",
+      "Cash Ratio": "CSV: 0.0 | DB: 76.999",
+      "Impure Ratio": "CSV: 0.0 | DB: 17.2743",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "UNIVINSURE": {
+      "Total Assets": "CSV: 0.0 | DB: 602090867475.0",
+      "Total Debt": "CSV: 0.0 | DB: 234568758834.0",
+      "Interest Income": "CSV: 0.0 | DB: 12041817350.0",
+      "Total Revenue": "CSV: 0.0 | DB: 321115129320.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 1647.2525",
+      "Impure Ratio": "CSV: 0.0 | DB: 3.75",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "TRANSCORP": {
+      "Total Debt": "CSV: 0.0 | DB: 75570000000.0",
+      "Cash": "CSV: 0.0 | DB: 31420000000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 407920000000.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 17.706",
+      "Cash Ratio": "CSV: 0.0 | DB: 7.3617"
+    },
+    "FTGINSURE": {
+      "Total Assets": "CSV: 0.0 | DB: 24869346.0",
+      "Total Debt": "CSV: 0.0 | DB: 5741609.0",
+      "Cash": "CSV: 0.0 | DB: 8770887.0",
+      "Interest Income": "CSV: 0.0 | DB: 22001.0",
+      "Total Revenue": "CSV: 0.0 | DB: 445979.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 0.0171",
+      "Cash Ratio": "CSV: 0.0 | DB: 0.0322",
+      "Impure Ratio": "CSV: 0.0 | DB: 4.9332",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "PRESTIGE": {
+      "Total Assets": "CSV: 0.0 | DB: 37700141000.0",
+      "Cash": "CSV: 0.0 | DB: 1472745000.0",
+      "Interest Income": "CSV: 0.0 | DB: 404685000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 6984510000.0",
+      "Cash Ratio": "CSV: 0.0 | DB: 69.9135",
+      "Impure Ratio": "CSV: 0.0 | DB: 5.794",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "LIVINGTRUST": {
+      "Total Assets": "CSV: 0.0 | DB: 32739992747.0",
+      "Total Debt": "CSV: 0.0 | DB: 2336251323.0",
+      "Cash": "CSV: 0.0 | DB: 12969705548.0",
+      "Interest Income": "CSV: 0.0 | DB: 4491126232.0",
+      "Total Revenue": "CSV: 0.0 | DB: 6522633528.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 12.2961",
+      "Cash Ratio": "CSV: 0.0 | DB: 75.773",
+      "Impure Ratio": "CSV: 0.0 | DB: 68.8545",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "REGALINS": {
+      "Total Assets": "CSV: 0.0 | DB: 141745250629.0",
+      "Total Debt": "CSV: 0.0 | DB: 43042237142.0",
+      "Interest Income": "CSV: 0.0 | DB: 2834905013.0",
+      "Total Revenue": "CSV: 0.0 | DB: 75597467002.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 336.1624",
+      "Impure Ratio": "CSV: 0.0 | DB: 3.75",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "ROYALEX": {
+      "Total Assets": "CSV: 12161081000.0 | DB: 633104829480.0",
+      "Total Debt": "CSV: 1657064000.0 | DB: 250316714086.0",
+      "Cash": "CSV: 1309291000.0 | DB: 0.0",
+      "Interest Income": "CSV: 179986000.0 | DB: 12662096590.0",
+      "Total Revenue": "CSV: 407298000.0 | DB: 337655909056.0",
+      "Debt Ratio": "CSV: 0.1657 | DB: 2259.7112",
+      "Impure Ratio": "CSV: 0.4419 | DB: 3.75",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "GOLDBREW": {
+      "Total Assets": "CSV: 0.0 | DB: 4523222792.0",
+      "Cash": "CSV: 0.0 | DB: 22080013.0",
+      "Total Revenue": "CSV: 0.0 | DB: 170846800.0",
+      "Cash Ratio": "CSV: 0.0 | DB: 0.3035",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "UNIONDICON": {
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "SUNUASSUR": {
+      "Total Assets": "CSV: 0.0 | DB: 27708252000.0",
+      "Cash": "CSV: 0.0 | DB: 13815924000.0",
+      "Interest Income": "CSV: 0.0 | DB: 423413000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 6042738000.0",
+      "Cash Ratio": "CSV: 0.0 | DB: 67.6448",
+      "Impure Ratio": "CSV: 0.0 | DB: 7.007",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "GUINEAINS": {
+      "Total Assets": "CSV: 0.0 | DB: 7752500000.0",
+      "Cash": "CSV: 0.0 | DB: 1273719000.0",
+      "Interest Income": "CSV: 0.0 | DB: 116404000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 840063000.0",
+      "Cash Ratio": "CSV: 0.0 | DB: 49.2178",
+      "Impure Ratio": "CSV: 0.0 | DB: 13.8566",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "INTENEGINS": {
+      "Total Assets": "CSV: 0.0 | DB: 7598656000.0",
+      "Total Debt": "CSV: 0.0 | DB: 12454934000.0",
+      "Cash": "CSV: 0.0 | DB: 278458000.0",
+      "Interest Income": "CSV: 0.0 | DB: 91743000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 667224000.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 236.5722",
+      "Cash Ratio": "CSV: 0.0 | DB: 6.3014",
+      "Impure Ratio": "CSV: 0.0 | DB: 13.75",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "CILEASING": {
+      "Total Assets": "CSV: 149362853000.0 | DB: 274807736324.0",
+      "Total Debt": "CSV: 71666613000.0 | DB: 90273639005.0",
+      "Cash": "CSV: 1401659000.0 | DB: 0.0",
+      "Interest Income": "CSV: 0.0 | DB: 5496154726.0",
+      "Total Revenue": "CSV: 25875110000.0 | DB: 146564126040.0",
+      "Debt Ratio": "CSV: 4.3403 | DB: 556.6546",
+      "Impure Ratio": "CSV: 0.0 | DB: 3.75",
+      "Final Status": "CSV: doubtful | DB: non-compliant"
+    },
+    "NSLTECH": {
+      "Total Assets": "CSV: 0.0 | DB: 79843213550.0",
+      "Total Debt": "CSV: 0.0 | DB: 23322527363.0",
+      "Cash": "CSV: 0.0 | DB: 61932000.0",
+      "Interest Income": "CSV: 0.0 | DB: 1596864271.0",
+      "Total Revenue": "CSV: 0.0 | DB: 42583047227.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 530.9503",
+      "Cash Ratio": "CSV: 0.0 | DB: 1.4099",
+      "Impure Ratio": "CSV: 0.0 | DB: 3.75",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "STACO": {
+      "Total Assets": "CSV: 0.0 | DB: 2618291000.0",
+      "Total Debt": "CSV: 0.0 | DB: 4888388000.0",
+      "Cash": "CSV: 0.0 | DB: 90699000.0",
+      "Interest Income": "CSV: 0.0 | DB: 158000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 227215000.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 109.0252",
+      "Cash Ratio": "CSV: 0.0 | DB: 2.575",
+      "Impure Ratio": "CSV: 0.0 | DB: 0.0695",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "GUINNESS": {
+      "Total Assets": "CSV: 0.0 | DB: 255338254000.0",
+      "Total Debt": "CSV: 0.0 | DB: 22767161000.0",
+      "Cash": "CSV: 0.0 | DB: 3533354000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 265042881000.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 2.7644",
+      "Cash Ratio": "CSV: 0.0 | DB: 0.429",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "NASCON": {
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "FIDELITYBK": {
+      "Total Assets": "CSV: 0.0 | DB: 11354300000000.0",
+      "Total Debt": "CSV: 0.0 | DB: 867916000000.0",
+      "Cash": "CSV: 0.0 | DB: 1541659000000.0",
+      "Interest Income": "CSV: 0.0 | DB: 353301000000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 434947000000.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 80.023",
+      "Cash Ratio": "CSV: 0.0 | DB: 378.936",
+      "Impure Ratio": "CSV: 0.0 | DB: 81.2285",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "UACN": {
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "CUSTODIAN": {
+      "Total Assets": "CSV: 0.0 | DB: 1108570246000.0",
+      "Total Debt": "CSV: 0.0 | DB: 136842132000.0",
+      "Cash": "CSV: 0.0 | DB: 163988612000.0",
+      "Interest Income": "CSV: 0.0 | DB: 35143527000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 80260268000.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 29.656",
+      "Cash Ratio": "CSV: 0.0 | DB: 86.8537",
+      "Impure Ratio": "CSV: 0.0 | DB: 43.787",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "NGXGROUP": {
+      "Total Assets": "CSV: 0.0 | DB: 76328907000.0",
+      "Cash": "CSV: 0.0 | DB: 2647616000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 7222959000.0",
+      "Cash Ratio": "CSV: 0.0 | DB: 0.9635"
+    },
+    "CORNERST": {
+      "Total Assets": "CSV: 0.0 | DB: 144472379000.0",
+      "Cash": "CSV: 0.0 | DB: 18101847000.0",
+      "Interest Income": "CSV: 0.0 | DB: 2220974000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 14005136000.0",
+      "Cash Ratio": "CSV: 0.0 | DB: 100.5806",
+      "Impure Ratio": "CSV: 0.0 | DB: 15.8583",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "INFINITY": {
+      "Total Assets": "CSV: 0.0 | DB: 53251591614.0",
+      "Total Debt": "CSV: 0.0 | DB: 27155195299.0",
+      "Cash": "CSV: 0.0 | DB: 9625567664.0",
+      "Interest Income": "CSV: 0.0 | DB: 3731979981.0",
+      "Total Revenue": "CSV: 0.0 | DB: 4039461244.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 57.8785",
+      "Cash Ratio": "CSV: 0.0 | DB: 24.6873",
+      "Impure Ratio": "CSV: 0.0 | DB: 92.3881",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "HMCALL": {
+      "Total Assets": "CSV: 0.0 | DB: 21619952467.0",
+      "Total Debt": "CSV: 0.0 | DB: 2703810079.0",
+      "Cash": "CSV: 0.0 | DB: 50249777.0",
+      "Total Revenue": "CSV: 0.0 | DB: 405251720.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 30.3877",
+      "Cash Ratio": "CSV: 0.0 | DB: 0.5648",
+      "Final Status": "CSV: doubtful | DB: non-compliant"
+    },
+    "CHELLARAM": {
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "ZENITHBANK": {
+      "Total Debt": "CSV: 0.0 | DB: 554070000000.0",
+      "Cash": "CSV: 0.0 | DB: 3770000000000.0",
+      "Interest Income": "CSV: 0.0 | DB: 1730000000000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 2210000000000.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 11.2051",
+      "Cash Ratio": "CSV: 0.0 | DB: 76.2416",
+      "Impure Ratio": "CSV: 0.0 | DB: 78.2805",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "NNFM": {
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "UPL": {
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "GREENWETF": {
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "TRIPPLEG": {
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "FCMB": {
+      "Total Assets": "CSV: 0.0 | DB: 7964005564000.0",
+      "Total Debt": "CSV: 0.0 | DB: 968493707000.0",
+      "Cash": "CSV: 0.0 | DB: 1810180239000.0",
+      "Interest Income": "CSV: 0.0 | DB: 286135956000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 320219950000.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 199.5007",
+      "Cash Ratio": "CSV: 0.0 | DB: 819.8345",
+      "Impure Ratio": "CSV: 0.0 | DB: 89.3561",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "STERLINGNG": {
+      "Total Assets": "CSV: 0.0 | DB: 4070583.0",
+      "Total Debt": "CSV: 0.0 | DB: 236873.0",
+      "Cash": "CSV: 0.0 | DB: 519867.0",
+      "Interest Income": "CSV: 0.0 | DB: 106264.0",
+      "Total Revenue": "CSV: 0.0 | DB: 134819.0",
+      "Impure Ratio": "CSV: 0.0 | DB: 78.8198",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "CNIF": {
+      "Total Assets": "CSV: 0.0 | DB: 9796769.0",
+      "Total Debt": "CSV: 0.0 | DB: 66795.0",
+      "Cash": "CSV: 0.0 | DB: 4755493.0",
+      "Interest Income": "CSV: 0.0 | DB: 2082042.0",
+      "Total Revenue": "CSV: 0.0 | DB: 2082046.0",
+      "Cash Ratio": "CSV: 0.0 | DB: 0.0722",
+      "Impure Ratio": "CSV: 0.0 | DB: 99.9998",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "NIDF": {
+      "Total Assets": "CSV: 0.0 | DB: 137317748000.0",
+      "Cash": "CSV: 0.0 | DB: 45772077000.0",
+      "Interest Income": "CSV: 0.0 | DB: 11683832000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 11798210000.0",
+      "Cash Ratio": "CSV: 0.0 | DB: 70.148",
+      "Impure Ratio": "CSV: 0.0 | DB: 99.0305",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "NEM": {
+      "Total Assets": "CSV: 0.0 | DB: 185571657000.0",
+      "Total Debt": "CSV: 0.0 | DB: 480368000.0",
+      "Cash": "CSV: 0.0 | DB: 15855345000.0",
+      "Interest Income": "CSV: 0.0 | DB: 1386392000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 37237020000.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 0.28",
+      "Cash Ratio": "CSV: 0.0 | DB: 56.895",
+      "Impure Ratio": "CSV: 0.0 | DB: 3.7232",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "RONCHESS": {
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "MEYER": {
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "VFDGROUP": {
+      "Total Assets": "CSV: 0.0 | DB: 458694931000.0",
+      "Total Debt": "CSV: 0.0 | DB: 104742335000.0",
+      "Cash": "CSV: 0.0 | DB: 29541218000.0",
+      "Interest Income": "CSV: 0.0 | DB: 11482700000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 27072361000.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 112.0317",
+      "Cash Ratio": "CSV: 0.0 | DB: 137.5585",
+      "Impure Ratio": "CSV: 0.0 | DB: 42.4148",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "CONHALLPLC": {
+      "Total Assets": "CSV: 0.0 | DB: 100329006952.0",
+      "Total Debt": "CSV: 0.0 | DB: 3744893135.0",
+      "Cash": "CSV: 0.0 | DB: 8296256092.0",
+      "Interest Income": "CSV: 0.0 | DB: 1796793153.0",
+      "Total Revenue": "CSV: 0.0 | DB: 11691819588.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 4.5457",
+      "Cash Ratio": "CSV: 0.0 | DB: 36.7381",
+      "Impure Ratio": "CSV: 0.0 | DB: 15.368",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "TRANSEXPR": {
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "CHAMS": {
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "AFROMEDIA": {
+      "Total Assets": "CSV: 0.0 | DB: 1649374000.0",
+      "Total Debt": "CSV: 0.0 | DB: 3176075000.0",
+      "Cash": "CSV: 0.0 | DB: 4415000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 345991000.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 298.1191",
+      "Cash Ratio": "CSV: 0.0 | DB: 0.4144",
+      "Final Status": "CSV: doubtful | DB: non-compliant"
+    },
+    "VSPBONDETF": {
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "SOVRENINS": {
+      "Total Assets": "CSV: 0.0 | DB: 27057517000.0",
+      "Total Debt": "CSV: 0.0 | DB: 5004710000.0",
+      "Cash": "CSV: 0.0 | DB: 5807576000.0",
+      "Interest Income": "CSV: 0.0 | DB: 150270000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 17959079000.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 17.3275",
+      "Cash Ratio": "CSV: 0.0 | DB: 20.1072",
+      "Impure Ratio": "CSV: 0.0 | DB: 0.8367",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "STANBICETF30": {
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "VETBANK": {
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "ZICHIS": {
+      "Total Assets": "CSV: 0.0 | DB: 1464156586.0",
+      "Cash": "CSV: 0.0 | DB: 22099033.0",
+      "Total Revenue": "CSV: 0.0 | DB: 420040132.0",
+      "Cash Ratio": "CSV: 0.0 | DB: 0.1529",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "AVACAP": {
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "AFRINSURE": {
+      "Total Assets": "CSV: 0.0 | DB: 53473361000.0",
+      "Total Debt": "CSV: 0.0 | DB: 134611000.0",
+      "Cash": "CSV: 0.0 | DB: 1141679000.0",
+      "Interest Income": "CSV: 0.0 | DB: 974906000.0",
+      "Total Revenue": "CSV: 0.0 | DB: 8166953000.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 3.2696",
+      "Cash Ratio": "CSV: 0.0 | DB: 181.5313",
+      "Impure Ratio": "CSV: 0.0 | DB: 11.9372",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "AVAIF": {
+      "Total Assets": "CSV: 0.0 | DB: 362837033646.0",
+      "Total Debt": "CSV: 0.0 | DB: 125153225484.0",
+      "Interest Income": "CSV: 0.0 | DB: 7256740673.0",
+      "Total Revenue": "CSV: 0.0 | DB: 193513084611.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 3071.2448",
+      "Impure Ratio": "CSV: 0.0 | DB: 3.75",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "VETGRIF30": {
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "SIAMLETF40": {
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "ABBEYBANK": {
+      "Total Assets": "CSV: 0.0 | DB: 353887617304.0",
+      "Total Debt": "CSV: 0.0 | DB: 121475117377.0",
+      "Interest Income": "CSV: 0.0 | DB: 113244037537.0",
+      "Total Revenue": "CSV: 0.0 | DB: 188740062562.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 51.4889",
+      "Impure Ratio": "CSV: 0.0 | DB: 60.0",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    },
+    "CMFC": {
+      "Total Assets": "CSV: 0.0 | DB: 390406271458.0",
+      "Total Debt": "CSV: 0.0 | DB: 136671802383.0",
+      "Interest Income": "CSV: 0.0 | DB: 124930006867.0",
+      "Total Revenue": "CSV: 0.0 | DB: 208216678111.0",
+      "Debt Ratio": "CSV: 0.0 | DB: 52.5114",
+      "Impure Ratio": "CSV: 0.0 | DB: 60.0",
+      "Final Status": "CSV: non-halal | DB: non-compliant"
+    }
+  }
+}

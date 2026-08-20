@@ -73,13 +73,37 @@ class AssetStatusAlert extends Notification implements ShouldQueue
         $newFormatted = ucfirst($this->newStatus);
         $firstName = $notifiable->first_name ?? explode(' ', $notifiable->name)[0] ?? 'there';
 
-        $isNowNonHalal = strtolower($this->newStatus) === 'non-halal';
+        $isNowNonHalal = in_array(strtolower($this->newStatus), ['non-halal', 'non-compliant', 'non_halal', 'non_compliant']);
         $isNowHalal    = strtolower($this->newStatus) === 'halal';
 
-        if ($isNowNonHalal) {
-            $contextLine = '**'.$assetName.'** has changed its Shariah compliance status from **'.$oldFormatted.'** to **'.$newFormatted.'**.';
-            $actionLine  = 'We recommend reviewing your portfolio and considering whether to divest from this asset to keep your investments aligned with your values.';
-        } elseif ($isNowHalal) {
+        if ($isNowNonHalal && $this->assetType === 'stock') {
+            $hasHolding = $notifiable->holdings()->where('symbol', $this->asset->symbol)->exists();
+            $ratios = null;
+
+            $screening = $this->asset->aaoifiScreening;
+            if ($screening) {
+                $ratios = [
+                    'debt' => $screening->debt_ratio,
+                    'income' => $screening->impermissible_income_ratio,
+                    'cash' => $screening->cash_ratio,
+                ];
+            }
+
+            return (new MailMessage)
+                ->subject('Important Shariah Alert: '.$this->asset->name.' is now Not Permissible')
+                ->markdown('emails.non_compliant_stock', [
+                    'companyName' => $this->asset->name,
+                    'symbol' => $this->asset->symbol,
+                    'oldStatus' => $oldFormatted,
+                    'date' => now()->format('j F Y'),
+                    'ratios' => $ratios,
+                    'hasHolding' => $hasHolding,
+                    'actionUrl' => config('app.frontend_url') . ($hasHolding ? '/portfolio' : '/market/' . $this->asset->symbol),
+                    'actionText' => $hasHolding ? 'View My Portfolio' : 'View on Irshad',
+                ]);
+        }
+
+        if ($isNowHalal) {
             $contextLine = '**'.$assetName.'** has been reclassified as **'.$newFormatted.'** (previously: '.$oldFormatted.').';
             $actionLine  = 'You may now consider adding this asset to your portfolio if it aligns with your investment goals.';
         } else {

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'dart:convert';
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:in_app_update/in_app_update.dart';
 import 'core/api/api_service.dart';
 import 'features/auth/ui/login_screen.dart';
 import 'features/auth/ui/register_screen.dart';
@@ -146,7 +148,6 @@ void main() async {
   final hasSeenOnboarding = prefs.getBool('hasSeenOnboarding') ?? false;
 
   final storage = const FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
-  await storage.deleteAll(); // Force logout
   String? token;
   try {
     token = await storage.read(key: 'access_token');
@@ -268,6 +269,20 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   void initState() {
     super.initState();
     _checkInitialAuth();
+    _checkForUpdate();
+  }
+
+  Future<void> _checkForUpdate() async {
+    if (Platform.isAndroid) {
+      try {
+        final updateInfo = await InAppUpdate.checkForUpdate();
+        if (updateInfo.updateAvailability == UpdateAvailability.updateAvailable) {
+          await InAppUpdate.performImmediateUpdate();
+        }
+      } catch (e) {
+        debugPrint("InAppUpdate failed: $e");
+      }
+    }
   }
 
   Future<void> _checkInitialAuth() async {

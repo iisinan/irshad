@@ -25,6 +25,9 @@ Schedule::command('app:snapshot-portfolios')->dailyAt('17:00')->withoutOverlappi
 // Updates section: detect Halal ↔ Non-Halal changes and push inbox notifications
 Schedule::command('irshad:detect-compliance-changes')->hourly()->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
 
+// Notify users whose non-compliant holding grace period has expired
+Schedule::command('irshad:notify-grace-period-end')->dailyAt('09:00')->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
+
 // Send weekly updates digest
 Schedule::command('irshad:send-updates-digest')->weeklyOn(5, '15:00')->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
 
@@ -50,3 +53,4 @@ Schedule::command('cache:warm')->hourly()->withoutOverlapping();
 
 // Scrape NGX Pulse for new financial disclosures twice a day at 7 AM and 7 PM
 Schedule::command('irshad:scrape-disclosures')->timezone('Africa/Lagos')->twiceDaily(7, 19)->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');
+Schedule::command('backup:run --only-db')->timezone('Africa/Lagos')->dailyAt('00:00')->withoutOverlapping()->emailOutputTo('sinanismailaidris@gmail.com');

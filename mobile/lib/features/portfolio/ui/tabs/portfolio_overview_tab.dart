@@ -519,6 +519,15 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
     final bool isUp = returnPct >= 0;
     final fmt = NumberFormat('#,##0', 'en_US');
 
+    final String? gracePeriodEndsAtStr = holding['grace_period_ends_at'];
+    int? daysLeft;
+    if (gracePeriodEndsAtStr != null) {
+      final end = DateTime.tryParse(gracePeriodEndsAtStr);
+      if (end != null) {
+        daysLeft = end.difference(DateTime.now()).inDays;
+      }
+    }
+
     return GestureDetector(
       onTap: () => _showEditHoldingSheet(context, holding),
       child: Container(
@@ -529,10 +538,12 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
           border: Border.all(color: context.divider.withOpacity(0.6)),
           boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 12, offset: const Offset(0, 4))],
         ),
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
+        child: Column(
+          children: [
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
               Container(
                 width: 4,
                 decoration: BoxDecoration(
@@ -562,9 +573,12 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                               children: [
                                 Row(
                                   children: [
-                                    Text(
-                                      symbol,
-                                      style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, fontSize: 15, letterSpacing: -0.3),
+                                    Flexible(
+                                      child: Text(
+                                        symbol,
+                                        style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, fontSize: 15, letterSpacing: -0.3),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                                     ),
                                     const SizedBox(width: 7),
                                     Container(
@@ -669,9 +683,9 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                                       ),
                                     )
                                   : GestureDetector(
-                                      onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: const Text('Purification feature coming soon.'), backgroundColor: context.primary),
-                                      ),
+                                      onTap: () {
+                                        DefaultTabController.of(context).animateTo(2);
+                                      },
                                       child: Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                         decoration: BoxDecoration(
@@ -694,10 +708,39 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                       ),
                     ],
                   ),
+                  ),
                 ),
               ),
-            ],
-          ),
+            ),
+            if (daysLeft != null)
+              Container(
+                margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEF4444).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFFEF4444).withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.warning_amber_rounded, size: 14, color: Color(0xFFEF4444)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        daysLeft! > 0
+                            ? 'Grace period ends in $daysLeft day${daysLeft! > 1 ? 's' : ''}. Please plan to exit your position.'
+                            : 'Grace period has expired. Please sell immediately.',
+                        style: const TextStyle(
+                          color: Color(0xFFEF4444),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
         ),
       ),
     );
@@ -1041,7 +1084,7 @@ class _AddHoldingBottomSheetState extends State<AddHoldingBottomSheet> with Sing
                         bool updated = await provider.updateZakatDate(purchaseDate);
                         if (updated) {
                           final prefs = await SharedPreferences.getInstance();
-                          await prefs.setString('ZAKAT_DATE_KEY', purchaseDate);
+                          await prefs.setString('irshad_zakat_hawl_date', purchaseDate);
                         }
                         if (mounted) Navigator.pop(ctx);
                         if (mounted) _showZakatConfirmation(purchaseDate);

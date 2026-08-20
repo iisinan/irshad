@@ -117,7 +117,7 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
 
   List<Map<String, dynamic>> _applyFilters(List<Map<String, dynamic>> list, {bool ignoreSector = false}) {
     return list.where((stock) {
-      final status = stock['status']?['status']?.toString().toLowerCase() ?? 'doubtful';
+      final status = stock['status']?['status']?.toString().toLowerCase() ?? stock['current_status']?.toString().toLowerCase() ?? 'doubtful';
       final isHalal = status == 'halal';
       
       // Filter by halal
@@ -308,7 +308,7 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
   }
 
   Widget _buildStockRow(Map<String, dynamic> stock) {
-    final status = stock['status']?['status']?.toString().toLowerCase() ?? 'doubtful';
+    final status = stock['status']?['status']?.toString().toLowerCase() ?? stock['current_status']?.toString().toLowerCase() ?? 'doubtful';
     final isHalal = status == 'halal';
     final isNonHalal = status == 'non-halal' || status == 'non-compliant';
     

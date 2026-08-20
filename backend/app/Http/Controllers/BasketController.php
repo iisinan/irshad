@@ -233,6 +233,8 @@ class BasketController extends Controller
                 ];
             });
 
+            \Illuminate\Support\Facades\Cache::forget("portfolio_data_" . $user->id);
+
             return $this->success($result, 'Successfully invested in basket.');
         } catch (\Exception $e) {
             $code = str_contains($e->getMessage(), 'link a broker') || str_contains($e->getMessage(), 'funds') || str_contains($e->getMessage(), 'Cannot invest') ? 400 : 500;

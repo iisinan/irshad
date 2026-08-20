@@ -137,7 +137,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> with WidgetsBindingOb
           'name': isProduct ? (item['brand'] ?? 'Market Listed') : item['name'],
           'status': isProduct 
             ? item['status']?.toString().toLowerCase() 
-            : item['status']?['status']?.toString().toLowerCase(),
+            : (item['status']?['status']?.toString().toLowerCase() ?? item['current_status']?.toString().toLowerCase()),
         });
       }
     }

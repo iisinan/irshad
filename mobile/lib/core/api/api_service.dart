@@ -53,12 +53,8 @@ class ApiService {
           final isAuthRoute = error.requestOptions.path.contains('login') || error.requestOptions.path.contains('register') || error.requestOptions.path.contains('auth/google');
           if (!isAuthRoute) {
             debugPrint('401 Unauthorized encountered for ${error.requestOptions.path}');
-            // Re-enabling automatic logout to prevent stuck states with expired tokens
-            await _storage.delete(key: 'access_token');
-            if (ApiService.navigatorKey.currentContext != null) {
-              Provider.of<AppStateProvider>(ApiService.navigatorKey.currentContext!, listen: false).setAuthenticated(false);
-              ApiService.navigatorKey.currentState?.pushNamedAndRemoveUntil('/welcome', (route) => false);
-            }
+            // Automatic logout has been disabled per user request.
+            // The user will remain logged in until they manually click 'Sign Out'.
           }
         }
         return handler.next(error);

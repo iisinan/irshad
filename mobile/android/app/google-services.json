@@ -7,6 +7,43 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:900192262603:android:de5d5c8b7bcbeaed72be4e",
+        "android_client_info": {
+          "package_name": "com.irshad.com"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "900192262603-69t14r9hv9mgp3ranvsh1ekdo1p2ocpu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.irshad.com",
+            "certificate_hash": "61b806b64033fff4ddad8c5f9980ac482ca89616"
+          }
+        },
+        {
+          "client_id": "900192262603-1v5t8hgmboe173j1h997p1bfk4kedn4k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDM3Vc3cpAbQ9iRxLFQPkfzN238TebGKQs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "900192262603-1v5t8hgmboe173j1h997p1bfk4kedn4k.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:900192262603:android:6765036b763b123f72be4e",
         "android_client_info": {
           "package_name": "com.irshad.irshad"
