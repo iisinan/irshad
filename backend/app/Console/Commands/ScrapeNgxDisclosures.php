@@ -44,8 +44,11 @@ class ScrapeNgxDisclosures extends Command
             $type = strtolower($disclosure['type'] ?? '');
             $title = strtolower($disclosure['title'] ?? '');
 
-            // Check if it's a financial statement
-            if (str_contains($type, 'financial') || str_contains($title, 'financial') || str_contains($type, 'results') || str_contains($title, 'results')) {
+            // Check if it's a financial statement (strictly avoiding 'meeting results' or unrelated docs)
+            $isFinancial = (str_contains($type, 'financial') || str_contains($title, 'financial') || str_contains($title, 'audited') || str_contains($title, 'unaudited')) || 
+                           (str_contains($title, 'results') && !str_contains($title, 'meeting') && !str_contains($title, 'agm'));
+
+            if ($isFinancial) {
                 $this->processFinancialDisclosure($disclosure);
             }
         }
