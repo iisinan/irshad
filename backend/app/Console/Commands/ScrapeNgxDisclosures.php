@@ -48,6 +48,16 @@ class ScrapeNgxDisclosures extends Command
             $isFinancial = (str_contains($type, 'financial') || str_contains($title, 'financial') || str_contains($title, 'audited') || str_contains($title, 'unaudited')) || 
                            (str_contains($title, 'results') && !str_contains($title, 'meeting') && !str_contains($title, 'agm'));
 
+            // Explicitly ignore unrelated document types that might slip through
+            if (str_contains($title, 'director') || 
+                str_contains($title, 'board meeting') || 
+                str_contains($title, 'corporate action') || 
+                str_contains($type, 'corporate action') ||
+                str_contains($title, 'change') ||
+                str_contains($title, 'coorporate action')) {
+                $isFinancial = false;
+            }
+
             if ($isFinancial) {
                 $this->processFinancialDisclosure($disclosure);
             }
