@@ -144,6 +144,16 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
   };
   const badge = getBadgeStyle(finalStatus, holding.purification_due, holding.non_compliant_ratio);
 
+  const hasDivs   = Number(holding.total_dividends || 0) > 0;
+  const hasPurify = Number(holding.purification_due || 0) > 0;
+  const gracePeriodEndsAt = holding.grace_period_ends_at;
+  let daysLeft = null;
+  if (gracePeriodEndsAt) {
+    const end = new Date(gracePeriodEndsAt);
+    daysLeft = Math.ceil((end - new Date()) / (1000 * 60 * 60 * 24));
+  }
+  const showPurifyBtn = badge.text === 'Shariah Compliant w/ Purification';
+
   const actionBtns = (
     <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }} onClick={e => e.stopPropagation()}>
       {showPurifyBtn && (
