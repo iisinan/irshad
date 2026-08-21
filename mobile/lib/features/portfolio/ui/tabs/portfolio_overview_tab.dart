@@ -594,13 +594,6 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 3),
-                                Text(
-                                  holding['name'] ?? symbol,
-                                  style: TextStyle(color: context.textMuted, fontSize: 11, fontWeight: FontWeight.w500),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
                               ],
                             ),
                           ),
