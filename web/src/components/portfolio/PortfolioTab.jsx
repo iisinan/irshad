@@ -202,12 +202,6 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
                 {badge.text}
               </span>
             </div>
-            <div style={{
-              fontSize: '0.67rem', color: 'var(--text-muted)', fontWeight: 500,
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px',
-            }}>
-              {holding.name || holding.symbol}
-            </div>
           </div>
         </div>
 
