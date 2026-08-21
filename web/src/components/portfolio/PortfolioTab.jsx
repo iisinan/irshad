@@ -165,117 +165,110 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: '0',
         background: hov ? 'var(--bg-section)' : 'var(--bg)',
         border: '1px solid var(--border)',
-        borderRadius: '16px',
-        marginBottom: '8px',
-        transition: 'all 0.2s ease',
+        borderRadius: '12px',
+        marginBottom: '6px',
+        transition: 'all 0.18s ease',
         cursor: 'pointer',
         overflow: 'hidden',
-        boxShadow: hov ? '0 4px 20px rgba(0,0,0,0.06)' : '0 1px 4px rgba(0,0,0,0.03)',
+        boxShadow: hov ? '0 3px 14px rgba(0,0,0,0.06)' : 'none',
       }}
     >
       {/* ── Main Row ── */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: '2fr 1fr 1fr 1fr auto',
+        gridTemplateColumns: '1.8fr 0.9fr 0.9fr 0.8fr auto',
         alignItems: 'center',
-        gap: '16px',
-        padding: '14px 20px',
+        gap: '12px',
+        padding: '10px 16px',
       }}>
 
-        {/* Col 1: Logo + Symbol + Badge */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0 }}>
-          <CompanyLogo symbol={holding.symbol} logoUrl={holding.logo_url} size={40} radius={10} />
-          <div style={{ minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.88rem', letterSpacing: '-0.2px' }}>
-                {holding.symbol}
-              </span>
-            </div>
-          </div>
+        {/* Col 1: Logo + Symbol */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+          <CompanyLogo symbol={holding.symbol} logoUrl={holding.logo_url} size={34} radius={8} />
+          <span style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.8rem', letterSpacing: '-0.1px', whiteSpace: 'nowrap' }}>
+            {holding.symbol}
+          </span>
         </div>
 
-        {/* Col 2: Value */}
+        {/* Col 2: Value / Shares */}
         <div>
-          <div style={{ fontWeight: 900, color: 'var(--text-dark)', fontSize: '0.92rem', fontVariantNumeric: 'tabular-nums' }}>
+          <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.78rem', fontVariantNumeric: 'tabular-nums' }}>
             {fmtK(holding.total_value)}
           </div>
-          <div style={{ fontSize: '0.67rem', color: 'var(--text-muted)', fontWeight: 600, marginTop: '2px' }}>
+          <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontWeight: 600, marginTop: '1px' }}>
             {Number(holding.shares).toLocaleString()} shares
           </div>
         </div>
 
-        {/* Col 3: Tags (Divs / Purify) */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        {/* Col 3: Dividends / Purify */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
           {hasDivs && (
             <span style={{
-              display: 'inline-flex', alignItems: 'center', gap: '3px',
               background: 'var(--primary-50)', color: 'var(--primary)',
-              padding: '3px 8px', borderRadius: '6px',
-              fontSize: '0.62rem', fontWeight: 700, whiteSpace: 'nowrap',
+              padding: '2px 6px', borderRadius: '5px',
+              fontSize: '0.58rem', fontWeight: 700, whiteSpace: 'nowrap', display: 'inline-block',
             }}>
               ₦{Number(holding.total_dividends).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Divs
             </span>
           )}
           {hasPurify && (
             <span style={{
-              display: 'inline-flex', alignItems: 'center', gap: '3px',
               background: 'rgba(239,68,68,0.08)', color: 'var(--non-compliant)',
-              padding: '3px 8px', borderRadius: '6px',
-              fontSize: '0.62rem', fontWeight: 700, whiteSpace: 'nowrap',
+              padding: '2px 6px', borderRadius: '5px',
+              fontSize: '0.58rem', fontWeight: 700, whiteSpace: 'nowrap', display: 'inline-block',
             }}>
               ₦{Number(holding.purification_due).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} purify
             </span>
           )}
           {!hasDivs && !hasPurify && (
-            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>—</span>
+            <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>—</span>
           )}
         </div>
 
-        {/* Col 4: Return */}
+        {/* Col 4: Return % */}
         <div style={{ textAlign: 'right' }}>
           {(holding.return_percentage !== null && holding.return_percentage !== undefined && holding.return_percentage !== 0) ? (
             <span style={{
-              fontWeight: 800, fontSize: '0.75rem',
+              fontWeight: 700, fontSize: '0.68rem',
               color: isUp ? 'var(--halal)' : 'var(--non-compliant)',
-              display: 'inline-flex', alignItems: 'center', gap: '2px',
-              background: isUp ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
-              padding: '4px 10px', borderRadius: '8px',
+              display: 'inline-flex', alignItems: 'center', gap: '1px',
+              background: isUp ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)',
+              padding: '3px 7px', borderRadius: '6px',
             }}>
-              {isUp ? <ArrowUpRight size={12}/> : <ArrowDownRight size={12}/>}
+              {isUp ? <ArrowUpRight size={10}/> : <ArrowDownRight size={10}/>}
               {isUp ? '+' : ''}{Number(holding.return_percentage || 0).toFixed(2)}%
             </span>
           ) : (
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>—</span>
+            <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600 }}>—</span>
           )}
         </div>
 
         {/* Col 5: Actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }} onClick={e => e.stopPropagation()}>
           {showPurifyBtn && (
             Number(holding.purification_due || 0) === 0 && hasBeenPurified ? (
               <button disabled style={{
-                background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.25)',
-                color: 'var(--halal)', cursor: 'default', padding: '6px 12px', borderRadius: '10px',
-                display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 700, fontSize: '0.68rem',
+                background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)',
+                color: 'var(--halal)', cursor: 'default', padding: '4px 9px', borderRadius: '7px',
+                display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 700, fontSize: '0.6rem',
               }}>
-                <ShieldCheck size={12}/> Purified
+                <ShieldCheck size={10}/> Purified
               </button>
             ) : (
               <button
                 onClick={(e) => { e.stopPropagation(); navigate('/portfolio#purification', { state: { action: 'purify', targetSymbol: holding.symbol } }); }}
                 style={{
-                  background: 'rgba(234,179,8,0.1)', border: '1px solid rgba(234,179,8,0.25)',
-                  color: '#d97706', cursor: 'pointer', padding: '6px 12px', borderRadius: '10px',
-                  display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 700, fontSize: '0.68rem',
+                  background: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.2)',
+                  color: '#d97706', cursor: 'pointer', padding: '4px 9px', borderRadius: '7px',
+                  display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 700, fontSize: '0.6rem',
                   transition: 'all 0.15s',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(234,179,8,0.2)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(234,179,8,0.1)'; }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(234,179,8,0.15)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(234,179,8,0.08)'; }}
               >
-                <Droplet size={12}/> Purify
+                <Droplet size={10}/> Purify
               </button>
             )
           )}
@@ -284,28 +277,28 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
             title="Edit"
             style={{
               background: 'transparent', border: '1px solid var(--border)',
-              color: 'var(--text-muted)', cursor: 'pointer', padding: '6px',
-              borderRadius: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: 'var(--text-muted)', cursor: 'pointer', padding: '5px',
+              borderRadius: '7px', display: 'flex', alignItems: 'center', justifyContent: 'center',
               transition: 'all 0.15s',
             }}
             onMouseEnter={e => { e.currentTarget.style.background = 'var(--primary-50)'; e.currentTarget.style.color = 'var(--primary)'; e.currentTarget.style.borderColor = 'var(--primary-100)'; }}
             onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
           >
-            <Edit2 size={13}/>
+            <Edit2 size={11}/>
           </button>
           <button
             onClick={() => onDelete(holding.id)}
             title="Delete"
             style={{
               background: 'transparent', border: '1px solid var(--border)',
-              color: 'var(--non-compliant)', cursor: 'pointer', padding: '6px',
-              borderRadius: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: 'var(--non-compliant)', cursor: 'pointer', padding: '5px',
+              borderRadius: '7px', display: 'flex', alignItems: 'center', justifyContent: 'center',
               transition: 'all 0.15s',
             }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.08)'; e.currentTarget.style.borderColor = 'rgba(239,68,68,0.25)'; }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.06)'; e.currentTarget.style.borderColor = 'rgba(239,68,68,0.2)'; }}
             onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'var(--border)'; }}
           >
-            <Trash2 size={13}/>
+            <Trash2 size={11}/>
           </button>
         </div>
       </div>
@@ -313,16 +306,16 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
       {/* ── Grace Period Banner ── */}
       {gracePeriodEndsAt && (
         <div style={{
-          padding: '8px 20px',
-          background: 'rgba(239, 68, 68, 0.06)',
-          borderTop: '1px solid rgba(239, 68, 68, 0.15)',
-          display: 'flex', alignItems: 'center', gap: '8px',
+          padding: '6px 16px',
+          background: 'rgba(239,68,68,0.05)',
+          borderTop: '1px solid rgba(239,68,68,0.12)',
+          display: 'flex', alignItems: 'center', gap: '6px',
         }}>
-          <AlertTriangle size={13} color="#dc2626"/>
-          <span style={{ fontSize: '0.72rem', color: '#dc2626', fontWeight: 600 }}>
+          <AlertTriangle size={11} color="#dc2626"/>
+          <span style={{ fontSize: '0.6rem', color: '#dc2626', fontWeight: 600 }}>
             {daysLeft > 0
-              ? `Grace period ends in ${daysLeft} day${daysLeft > 1 ? 's' : ''}. Please plan to exit your position.`
-              : 'Grace period has expired. Please sell immediately.'}
+              ? `Grace period ends in ${daysLeft} day${daysLeft > 1 ? 's' : ''}. Please plan to exit.`
+              : 'Grace period expired. Please sell immediately.'}
           </span>
         </div>
       )}
@@ -525,12 +518,12 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
         {/* Header */}
         {displayHoldings.length > 0 && (
           <div className="desktop-only" style={{ position: 'relative', marginTop: '12px', padding: '8px 20px', background: 'var(--body-bg)', zIndex: 20 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr auto', alignItems: 'center', gap: '16px' }}>
-              <div style={{ fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', paddingLeft: '54px' }}>Asset</div>
-              <div style={{ fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Value / Shares</div>
-              <div style={{ fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Dividends / Purify</div>
-              <div style={{ fontSize: '0.57rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', textAlign: 'right' }}>Total Return</div>
-              <div style={{ minWidth: '120px' }}></div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 0.9fr 0.9fr 0.8fr auto', alignItems: 'center', gap: '12px', padding: '0 16px' }}>
+              <div style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', paddingLeft: '44px' }}>Asset</div>
+              <div style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Value / Shares</div>
+              <div style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Dividends / Purify</div>
+              <div style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', textAlign: 'right' }}>Return</div>
+              <div style={{ minWidth: '100px' }}></div>
             </div>
             {/* Diminishing fade shadow effect that covers the scrolled items below it */}
             <div style={{ position: 'absolute', bottom: '-24px', left: 0, right: 0, height: '24px', background: 'linear-gradient(to bottom, var(--body-bg) 0%, transparent 100%)', pointerEvents: 'none', zIndex: 21 }} />
