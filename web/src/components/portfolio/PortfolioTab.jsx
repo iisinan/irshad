@@ -189,17 +189,9 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0 }}>
           <CompanyLogo symbol={holding.symbol} logoUrl={holding.logo_url} size={40} radius={10} />
           <div style={{ minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.88rem', letterSpacing: '-0.2px' }}>
                 {holding.symbol}
-              </span>
-              <span style={{
-                padding: '2px 7px', borderRadius: '100px',
-                background: badge.bg, color: badge.color,
-                fontSize: '0.52rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.4px',
-                whiteSpace: 'nowrap',
-              }}>
-                {badge.text}
               </span>
             </div>
           </div>
