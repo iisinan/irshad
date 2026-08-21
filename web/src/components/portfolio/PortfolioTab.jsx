@@ -144,154 +144,101 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
   };
   const badge = getBadgeStyle(finalStatus, holding.purification_due, holding.non_compliant_ratio);
 
-  const hasDivs   = Number(holding.total_dividends || 0) > 0;
-  const hasPurify = Number(holding.purification_due || 0) > 0;
-
-  const gracePeriodEndsAt = holding.grace_period_ends_at;
-  let daysLeft = null;
-  if (gracePeriodEndsAt) {
-    const end = new Date(gracePeriodEndsAt);
-    daysLeft = Math.ceil((end - new Date()) / (1000 * 60 * 60 * 24));
-  }
-
-  const showPurifyBtn = badge.text === 'Shariah Compliant w/ Purification';
+  const actionBtns = (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }} onClick={e => e.stopPropagation()}>
+      {showPurifyBtn && (
+        Number(holding.purification_due || 0) === 0 && hasBeenPurified ? (
+          <button disabled style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', color: 'var(--halal)', padding: '4px 8px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '3px', fontWeight: 700, fontSize: '0.6rem', cursor: 'default' }}>
+            <ShieldCheck size={10}/> Purified
+          </button>
+        ) : (
+          <button onClick={(e) => { e.stopPropagation(); navigate('/portfolio#purification', { state: { action: 'purify', targetSymbol: holding.symbol } }); }}
+            style={{ background: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.2)', color: '#d97706', padding: '4px 8px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '3px', fontWeight: 700, fontSize: '0.6rem', cursor: 'pointer' }}>
+            <Droplet size={10}/> Purify
+          </button>
+        )
+      )}
+      <button onClick={() => onEdit(holding)} style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-muted)', padding: '5px', borderRadius: '6px', display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+        <Edit2 size={11}/>
+      </button>
+      <button onClick={() => onDelete(holding.id)} style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--non-compliant)', padding: '5px', borderRadius: '6px', display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+        <Trash2 size={11}/>
+      </button>
+    </div>
+  );
 
   return (
-    <>
-      <style>{`
-        .holding-card { display: flex; flex-direction: column; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 6px; transition: all 0.18s ease; cursor: pointer; overflow: hidden; }
-        .holding-card:hover { background: var(--bg-section); box-shadow: 0 3px 14px rgba(0,0,0,0.06); }
-        .holding-card-row { display: grid; grid-template-columns: 1.8fr 0.9fr 0.9fr 0.8fr auto; align-items: center; gap: 12px; padding: 10px 16px; }
-        @media (max-width: 640px) {
-          .holding-card-row { grid-template-columns: auto 1fr; gap: 10px; padding: 12px 14px; }
-          .holding-card-col-divs { display: none; }
-          .holding-card-col-return { display: none; }
-          .holding-card-col-actions-desktop { display: none; }
-          .holding-card-mobile-row2 { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 14px 10px 14px; }
-        }
-        @media (min-width: 641px) {
-          .holding-card-mobile-row2 { display: none; }
-        }
-      `}</style>
     <div
-      className="holding-card"
       onClick={() => navigate(`/market/${holding.symbol}/aaoifi`, { state: { stock: holding } })}
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
+      style={{
+        background: hov ? 'var(--bg-section)' : 'var(--bg)',
+        border: '1px solid var(--border)',
+        borderRadius: '12px',
+        marginBottom: '6px',
+        transition: 'background 0.15s',
+        cursor: 'pointer',
+        overflow: 'hidden',
+      }}
     >
-      {/* ── Main Row ── */}
-      <div className="holding-card-row">
+      {/* ── Row 1: Logo | Symbol + Value | Actions ── */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px' }}>
 
-        {/* Col 1: Logo + Symbol */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
-          <CompanyLogo symbol={holding.symbol} logoUrl={holding.logo_url} size={34} radius={8} />
-          <span style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.8rem', letterSpacing: '-0.1px', whiteSpace: 'nowrap' }}>
-            {holding.symbol}
-          </span>
+        {/* Logo */}
+        <CompanyLogo symbol={holding.symbol} logoUrl={holding.logo_url} size={34} radius={8} />
+
+        {/* Symbol + Value (takes all available space) */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', flexWrap: 'nowrap' }}>
+            <span style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.8rem', letterSpacing: '-0.1px', whiteSpace: 'nowrap' }}>
+              {holding.symbol}
+            </span>
+            <span style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.78rem', fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
+              {fmtK(holding.total_value)}
+            </span>
+            <span style={{ fontSize: '0.58rem', color: 'var(--text-muted)', fontWeight: 600, whiteSpace: 'nowrap' }}>
+              {Number(holding.shares).toLocaleString()} shares
+            </span>
+          </div>
         </div>
 
-        {/* Col 2: Value / Shares — always visible */}
-        <div>
-          <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.78rem', fontVariantNumeric: 'tabular-nums' }}>
-            {fmtK(holding.total_value)}
-          </div>
-          <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontWeight: 600, marginTop: '1px' }}>
-            {Number(holding.shares).toLocaleString()} shares
-          </div>
-        </div>
+        {/* Actions always on the right */}
+        {actionBtns}
+      </div>
 
-        {/* Col 3: Dividends / Purify — hidden on mobile */}
-        <div className="holding-card-col-divs" style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+      {/* ── Row 2: Pills (Divs, Purify, Return%) ── only shown if any exist */}
+      {(hasDivs || hasPurify || (holding.return_percentage !== null && holding.return_percentage !== undefined && holding.return_percentage !== 0)) && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', padding: '0 12px 9px 56px' }}>
           {hasDivs && (
-            <span style={{ background: 'var(--primary-50)', color: 'var(--primary)', padding: '2px 6px', borderRadius: '5px', fontSize: '0.58rem', fontWeight: 700, whiteSpace: 'nowrap', display: 'inline-block' }}>
+            <span style={{ background: 'var(--primary-50)', color: 'var(--primary)', padding: '2px 7px', borderRadius: '5px', fontSize: '0.58rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
               ₦{Number(holding.total_dividends).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Divs
             </span>
           )}
           {hasPurify && (
-            <span style={{ background: 'rgba(239,68,68,0.08)', color: 'var(--non-compliant)', padding: '2px 6px', borderRadius: '5px', fontSize: '0.58rem', fontWeight: 700, whiteSpace: 'nowrap', display: 'inline-block' }}>
+            <span style={{ background: 'rgba(239,68,68,0.08)', color: 'var(--non-compliant)', padding: '2px 7px', borderRadius: '5px', fontSize: '0.58rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
               ₦{Number(holding.purification_due).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} purify
             </span>
           )}
-          {!hasDivs && !hasPurify && <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>—</span>}
-        </div>
-
-        {/* Col 4: Return % — hidden on mobile */}
-        <div className="holding-card-col-return" style={{ textAlign: 'right' }}>
-          {(holding.return_percentage !== null && holding.return_percentage !== undefined && holding.return_percentage !== 0) ? (
-            <span style={{ fontWeight: 700, fontSize: '0.68rem', color: isUp ? 'var(--halal)' : 'var(--non-compliant)', display: 'inline-flex', alignItems: 'center', gap: '1px', background: isUp ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)', padding: '3px 7px', borderRadius: '6px' }}>
-              {isUp ? <ArrowUpRight size={10}/> : <ArrowDownRight size={10}/>}
+          {(holding.return_percentage !== null && holding.return_percentage !== undefined && holding.return_percentage !== 0) && (
+            <span style={{ fontWeight: 700, fontSize: '0.58rem', color: isUp ? 'var(--halal)' : 'var(--non-compliant)', display: 'inline-flex', alignItems: 'center', gap: '1px', background: isUp ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)', padding: '2px 6px', borderRadius: '5px', whiteSpace: 'nowrap' }}>
+              {isUp ? <ArrowUpRight size={9}/> : <ArrowDownRight size={9}/>}
               {isUp ? '+' : ''}{Number(holding.return_percentage || 0).toFixed(2)}%
             </span>
-          ) : (
-            <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600 }}>—</span>
           )}
         </div>
-
-        {/* Col 5: Actions — hidden on mobile */}
-        <div className="holding-card-col-actions-desktop" style={{ display: 'flex', alignItems: 'center', gap: '4px' }} onClick={e => e.stopPropagation()}>
-          {showPurifyBtn && (
-            Number(holding.purification_due || 0) === 0 && hasBeenPurified ? (
-              <button disabled style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', color: 'var(--halal)', cursor: 'default', padding: '4px 9px', borderRadius: '7px', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 700, fontSize: '0.6rem' }}>
-                <ShieldCheck size={10}/> Purified
-              </button>
-            ) : (
-              <button onClick={(e) => { e.stopPropagation(); navigate('/portfolio#purification', { state: { action: 'purify', targetSymbol: holding.symbol } }); }}
-                style={{ background: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.2)', color: '#d97706', cursor: 'pointer', padding: '4px 9px', borderRadius: '7px', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 700, fontSize: '0.6rem', transition: 'all 0.15s' }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(234,179,8,0.15)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(234,179,8,0.08)'; }}
-              >
-                <Droplet size={10}/> Purify
-              </button>
-            )
-          )}
-          <button onClick={() => onEdit(holding)} title="Edit"
-            style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-muted)', cursor: 'pointer', padding: '5px', borderRadius: '7px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'var(--primary-50)'; e.currentTarget.style.color = 'var(--primary)'; e.currentTarget.style.borderColor = 'var(--primary-100)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
-          ><Edit2 size={11}/></button>
-          <button onClick={() => onDelete(holding.id)} title="Delete"
-            style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--non-compliant)', cursor: 'pointer', padding: '5px', borderRadius: '7px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.06)'; e.currentTarget.style.borderColor = 'rgba(239,68,68,0.2)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'var(--border)'; }}
-          ><Trash2 size={11}/></button>
-        </div>
-      </div>
-
-      {/* ── Mobile Row 2: pills + return + actions ── */}
-      <div className="holding-card-mobile-row2" onClick={e => e.stopPropagation()}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', flex: 1 }}>
-          {hasDivs && <span style={{ background: 'var(--primary-50)', color: 'var(--primary)', padding: '2px 7px', borderRadius: '5px', fontSize: '0.6rem', fontWeight: 700 }}>₦{Number(holding.total_dividends).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Divs</span>}
-          {hasPurify && <span style={{ background: 'rgba(239,68,68,0.08)', color: 'var(--non-compliant)', padding: '2px 7px', borderRadius: '5px', fontSize: '0.6rem', fontWeight: 700 }}>₦{Number(holding.purification_due).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} purify</span>}
-          {(holding.return_percentage !== null && holding.return_percentage !== undefined && holding.return_percentage !== 0) && (
-            <span style={{ fontWeight: 700, fontSize: '0.6rem', color: isUp ? 'var(--halal)' : 'var(--non-compliant)', display: 'inline-flex', alignItems: 'center', gap: '1px', background: isUp ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)', padding: '2px 6px', borderRadius: '5px' }}>
-              {isUp ? <ArrowUpRight size={9}/> : <ArrowDownRight size={9}/>}{isUp ? '+' : ''}{Number(holding.return_percentage || 0).toFixed(2)}%
-            </span>
-          )}
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          {showPurifyBtn && (Number(holding.purification_due || 0) === 0 && hasBeenPurified ? (
-            <button disabled style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', color: 'var(--halal)', padding: '4px 8px', borderRadius: '7px', display: 'flex', alignItems: 'center', gap: '3px', fontWeight: 700, fontSize: '0.6rem' }}><ShieldCheck size={9}/> Purified</button>
-          ) : (
-            <button onClick={(e) => { e.stopPropagation(); navigate('/portfolio#purification', { state: { action: 'purify', targetSymbol: holding.symbol } }); }}
-              style={{ background: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.2)', color: '#d97706', padding: '4px 8px', borderRadius: '7px', display: 'flex', alignItems: 'center', gap: '3px', fontWeight: 700, fontSize: '0.6rem' }}
-            ><Droplet size={9}/> Purify</button>
-          ))}
-          <button onClick={() => onEdit(holding)} style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-muted)', padding: '5px', borderRadius: '7px', display: 'flex', alignItems: 'center' }}><Edit2 size={11}/></button>
-          <button onClick={() => onDelete(holding.id)} style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--non-compliant)', padding: '5px', borderRadius: '7px', display: 'flex', alignItems: 'center' }}><Trash2 size={11}/></button>
-        </div>
-      </div>
+      )}
 
       {/* ── Grace Period Banner ── */}
       {gracePeriodEndsAt && (
-        <div style={{ padding: '6px 16px', background: 'rgba(239,68,68,0.05)', borderTop: '1px solid rgba(239,68,68,0.12)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <AlertTriangle size={11} color="#dc2626"/>
-          <span style={{ fontSize: '0.6rem', color: '#dc2626', fontWeight: 600 }}>
+        <div style={{ padding: '5px 12px', background: 'rgba(239,68,68,0.05)', borderTop: '1px solid rgba(239,68,68,0.1)', display: 'flex', alignItems: 'center', gap: '5px' }}>
+          <AlertTriangle size={10} color="#dc2626"/>
+          <span style={{ fontSize: '0.58rem', color: '#dc2626', fontWeight: 600 }}>
             {daysLeft > 0 ? `Grace period ends in ${daysLeft} day${daysLeft > 1 ? 's' : ''}. Please plan to exit.` : 'Grace period expired. Please sell immediately.'}
           </span>
         </div>
       )}
     </div>
-    </>
   );
 }
 
