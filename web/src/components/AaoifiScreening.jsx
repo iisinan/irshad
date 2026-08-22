@@ -708,7 +708,7 @@ const AaoifiScreening = () => {
                   {(report.reporting_period || report.reporting_year) && (
                     <div style={{ display:'inline-flex',alignItems:'center',gap:6,padding:'6px 14px',background:'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%)',borderRadius:100,fontSize:'0.7rem',color:'var(--text-muted)',fontWeight:800,border:`1px solid ${sc.color}20`, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
                       <Calendar size={12} color={sc.color}/> 
-                      {report.reporting_period||''} {report.reporting_year?`(${report.reporting_year})`:''}
+                      Financial Results {report.reporting_period||''} {report.reporting_year?`(${report.reporting_year})`:''}
                     </div>
                   )}
                   
@@ -783,7 +783,7 @@ const AaoifiScreening = () => {
             iconColor="var(--primary)" iconBg="rgba(6,78,59,0.08)" iconBorder="rgba(6,78,59,0.18)"
             accent={stage1Status==='halal'?'linear-gradient(90deg,#10B981,rgba(16,185,129,0.1),transparent)':stage1Status==='doubtful'?'linear-gradient(90deg,#D97706,rgba(245,158,11,0.1),transparent)':'linear-gradient(90deg,#EF4444,rgba(239,68,68,0.1),transparent)'}
             right={<div style={{ display:'flex',alignItems:'center',gap:10,flexWrap:'wrap' }}>
-              {(report.reporting_period||report.reporting_year)&&<div style={{ fontSize:'0.67rem',color:'var(--text-muted)',fontWeight:600,display:'flex',alignItems:'center',gap:4 }}><Calendar size={10}/> {report.reporting_period||''} {report.reporting_year?`(${report.reporting_year})`:''}</div>}
+              {(report.reporting_period||report.reporting_year)&&<div style={{ fontSize:'0.67rem',color:'var(--text-muted)',fontWeight:600,display:'flex',alignItems:'center',gap:4 }}><Calendar size={10}/> Financial Results {report.reporting_period||''} {report.reporting_year?`(${report.reporting_year})`:''}</div>}
               <StatusBadge status={stage1Status}/>
             </div>}/>
           <div style={{ padding:'24px' }}>
