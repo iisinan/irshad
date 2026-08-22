@@ -53,17 +53,17 @@ function LiveClock({ hijriDate, compact = false }) {
 
   if (compact) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--bg-section)', padding: '8px 14px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--body-bg)', padding: '8px 16px', borderRadius: '14px', border: '1px solid var(--border)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '2px', fontFamily: 'var(--mono, monospace)', fontVariantNumeric: 'tabular-nums' }}>
-          <span style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)', letterSpacing: '-0.5px' }}>{hh}:{mm}</span>
-          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', opacity: 0.8, marginLeft: '2px' }}>{ss}</span>
+          <span style={{ fontSize: '1.15rem', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-0.5px' }}>{hh}:{mm}</span>
+          <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)', opacity: 0.7, marginLeft: '2px' }}>{ss}</span>
         </div>
-        <div style={{ width: '1px', height: '16px', background: 'var(--border)' }} />
-        <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>{dateStr}</div>
+        <div style={{ width: '1px', height: '16px', background: 'var(--border)', opacity: 0.8 }} />
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>{dateStr}</div>
         {hijriDate && (
           <>
-            <div style={{ width: '1px', height: '16px', background: 'var(--border)' }} />
-            <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--primary)' }}>{hijriDate}</div>
+            <div style={{ width: '1px', height: '16px', background: 'var(--border)', opacity: 0.8 }} />
+            <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)' }}>{hijriDate}</div>
           </>
         )}
       </div>
@@ -152,8 +152,8 @@ export default function UpdatesTab({ unreadCount = 0 }) {
       <div style={{
         background: 'var(--bg)',
         border: '1px solid var(--border)',
-        borderRadius: '16px',
-        padding: '16px 20px',
+        borderRadius: '20px',
+        padding: '16px 24px',
         marginBottom: '24px',
         display: 'flex',
         alignItems: 'center',
@@ -163,15 +163,29 @@ export default function UpdatesTab({ unreadCount = 0 }) {
         boxShadow: 'var(--shadow-sm)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ fontSize: '2.2rem', lineHeight: 1 }}>{greeting.emoji}</div>
+          <div style={{ 
+            fontSize: '1.8rem', 
+            lineHeight: 1, 
+            background: 'var(--primary-50)', 
+            width: '48px', 
+            height: '48px', 
+            borderRadius: '16px', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
+            border: '1px solid var(--primary-100)'
+          }}>
+            {greeting.emoji}
+          </div>
           <div>
-            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--primary)', marginBottom: '4px', fontFamily: '"Amiri", "Scheherazade New", serif' }}>
+            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--primary)', marginBottom: '2px', fontFamily: '"Amiri", "Scheherazade New", serif', opacity: 0.9 }}>
               ٱلسَّلَامُ عَلَيْكُمْ وَرَحْمَةُ ٱللَّٰهِ وَبَرَكَاتُهُ
             </div>
-            <div style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-0.3px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-0.4px', display: 'flex', alignItems: 'center', gap: '10px' }}>
               {greeting.english}, {firstName}
               {unreadCount > 0 && (
-                <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'white', background: 'var(--non-compliant)', padding: '2px 8px', borderRadius: '100px' }}>
+                <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'white', background: 'var(--primary)', padding: '2px 8px', borderRadius: '100px', boxShadow: '0 2px 8px var(--primary-50)' }}>
                   {unreadCount} unread
                 </span>
               )}

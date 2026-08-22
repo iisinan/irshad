@@ -52,26 +52,26 @@ export default function IslamicQuote({ merged = false, compact = false }) {
         background: 'var(--bg)',
         border: '1px solid var(--border)',
         borderRadius: '16px',
-        padding: '12px 16px',
+        padding: '12px 18px',
         marginBottom: '24px',
         display: 'flex',
         gap: '12px',
         alignItems: 'center',
-        boxShadow: 'var(--shadow-sm)'
+        boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
       }}>
-        <div style={{ color: 'var(--primary)', flexShrink: 0 }}>
-          <BookOpen size={16} />
+        <div style={{ color: 'var(--primary)', flexShrink: 0, opacity: 0.8 }}>
+          <BookOpen size={16} strokeWidth={2.5} />
         </div>
         <div style={{ flex: 1, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px' }}>
-          <div style={{ fontSize: '0.85rem', color: 'var(--text-dark)', fontWeight: 600, fontStyle: 'italic' }}>
+          <div style={{ fontSize: '0.82rem', color: 'var(--text-dark)', fontWeight: 600, fontStyle: 'italic', letterSpacing: '-0.2px' }}>
             "{quote.translation}"
           </div>
-          <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--primary)' }}>
+          <div style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--primary)', opacity: 0.9 }}>
             — {quote.source}
           </div>
         </div>
-        <button onClick={() => setIsVisible(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}>
-          <X size={14} />
+        <button onClick={() => setIsVisible(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px', opacity: 0.5 }}>
+          <X size={14} strokeWidth={2.5} />
         </button>
       </div>
     );
