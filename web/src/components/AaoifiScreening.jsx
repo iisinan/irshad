@@ -104,6 +104,8 @@ const StatusBadge = ({ status }) => {
 
 /* ─── Ratio bar ─────────────────────────────────────────── */
 const RatioBar = ({ title, subtitle, ratio, threshold, numLabel, numVal, denLabel, denVal, formula, onInspect }) => {
+  const [expanded, setExpanded] = React.useState(false);
+
   if (ratio === null || ratio === undefined || isNaN(parseFloat(ratio))) {
     return (
       <div className="mobile-col" style={{ background:'var(--bg)',borderRadius:14,padding:'15px 20px',marginBottom:10,border:'1px solid var(--border)',display:'grid',gridTemplateColumns:'1fr 1fr auto',gap:16,alignItems:'center' }}>
@@ -138,35 +140,50 @@ const RatioBar = ({ title, subtitle, ratio, threshold, numLabel, numVal, denLabe
 
   return (
     <div onClick={clickable?()=>onInspect({title,ratio:rv,threshold:`≤ ${threshold}%`,formula,numLabel,numVal,denLabel,denVal}):undefined}
-      className={clickable?'hover-lift mobile-col':'mobile-col'} style={{ background:'var(--bg)',borderRadius:14,padding:'16px 20px',marginBottom:12,border:`1px solid ${ok?'rgba(16,185,129,0.15)':'rgba(239,68,68,0.15)'}`,cursor:clickable?'pointer':'default',transition:'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',display:'grid',gridTemplateColumns:'180px 1fr auto',gap:20,alignItems:'center', boxShadow:'0 2px 8px rgba(0,0,0,0.02)' }}>
-      <div>
-        <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:4 }}>
-          {num&&<span style={{ width:20,height:20,borderRadius:6,background:ok?'rgba(16,185,129,0.12)':'rgba(239,68,68,0.12)',color:ok?'var(--halal)':'var(--non-compliant)',fontSize:'0.68rem',fontWeight:900,display:'inline-flex',alignItems:'center',justifyContent:'center' }}>{num}</span>}
-          <span style={{ fontWeight:800,color:'var(--text-dark)',fontSize:'0.9rem', letterSpacing:'-0.3px' }}>{name}</span>
-          {clickable&&<span style={{ fontSize:'0.56rem',padding:'2px 6px',borderRadius:100,background:'var(--bg-section)',color:'var(--text-muted)',fontWeight:800,border:'1px solid var(--border)' }}>↗</span>}
+      className={clickable?'hover-lift':''} style={{ background:'var(--bg)',borderRadius:14,padding:'16px 20px',marginBottom:12,border:`1px solid ${ok?'rgba(16,185,129,0.15)':'rgba(239,68,68,0.15)'}`,cursor:clickable?'pointer':'default',transition:'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',display:'flex',flexDirection:'column',gap:12, boxShadow:'0 2px 8px rgba(0,0,0,0.02)' }}>
+      
+      <div className="mobile-col" style={{ display:'grid',gridTemplateColumns:'180px 1fr auto',gap:20,alignItems:'center' }}>
+        <div>
+          <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:4 }}>
+            {num&&<span style={{ width:20,height:20,borderRadius:6,background:ok?'rgba(16,185,129,0.12)':'rgba(239,68,68,0.12)',color:ok?'var(--halal)':'var(--non-compliant)',fontSize:'0.68rem',fontWeight:900,display:'inline-flex',alignItems:'center',justifyContent:'center' }}>{num}</span>}
+            <span style={{ fontWeight:800,color:'var(--text-dark)',fontSize:'0.9rem', letterSpacing:'-0.3px' }}>{name}</span>
+            {clickable&&<span style={{ fontSize:'0.56rem',padding:'2px 6px',borderRadius:100,background:'var(--bg-section)',color:'var(--text-muted)',fontWeight:800,border:'1px solid var(--border)' }}>↗</span>}
+          </div>
+          <div style={{ fontSize:'0.7rem',color:'var(--text-muted)',lineHeight:1.4, fontWeight:500 }}>{subtitle}</div>
         </div>
-        <div style={{ fontSize:'0.7rem',color:'var(--text-muted)',lineHeight:1.4, fontWeight:500 }}>{subtitle}</div>
-      </div>
-      <div style={{ position:'relative',height:10,background:'rgba(0,0,0,0.06)',borderRadius:100,overflow:'visible' }}>
-        <div style={{ position:'absolute',top:0,left:0,height:'100%',width:`${fill}%`,background:grad,borderRadius:100,boxShadow:ok?'0 0 10px rgba(16,185,129,0.3)':'0 0 10px rgba(239,68,68,0.3)',transition:'width 0.9s cubic-bezier(0.4,0,0.2,1)' }}/>
-        <div style={{ position:'absolute',top:-5,bottom:-5,left:`${pin}%`,width:3,background:'var(--non-compliant)',borderRadius:2,boxShadow:'0 0 6px rgba(239,68,68,0.5)' }}/>
-        <div style={{ position:'absolute',top:16,left:`${pin}%`,transform:'translateX(-50%)' }}>
-          <span style={{ fontSize:'0.6rem',fontWeight:800,color:'var(--non-compliant)',background:'rgba(239,68,68,0.08)',border:'1px solid rgba(239,68,68,0.2)',padding:'2px 6px',borderRadius:6,whiteSpace:'nowrap' }}>{threshold}% limit</span>
+        <div style={{ position:'relative',height:10,background:'rgba(0,0,0,0.06)',borderRadius:100,overflow:'visible' }}>
+          <div style={{ position:'absolute',top:0,left:0,height:'100%',width:`${fill}%`,background:grad,borderRadius:100,boxShadow:ok?'0 0 10px rgba(16,185,129,0.3)':'0 0 10px rgba(239,68,68,0.3)',transition:'width 0.9s cubic-bezier(0.4,0,0.2,1)' }}/>
+          <div style={{ position:'absolute',top:-5,bottom:-5,left:`${pin}%`,width:3,background:'var(--non-compliant)',borderRadius:2,boxShadow:'0 0 6px rgba(239,68,68,0.5)' }}/>
+          <div style={{ position:'absolute',top:16,left:`${pin}%`,transform:'translateX(-50%)' }}>
+            <span style={{ fontSize:'0.6rem',fontWeight:800,color:'var(--non-compliant)',background:'rgba(239,68,68,0.08)',border:'1px solid rgba(239,68,68,0.2)',padding:'2px 6px',borderRadius:6,whiteSpace:'nowrap' }}>{threshold}% limit</span>
+          </div>
         </div>
-      </div>
-      <div style={{ textAlign:'right', display:'flex', flexDirection:'column', alignItems:'flex-end', gap:6 }}>
-        <div style={{ fontSize:'1.35rem',fontWeight:900,color:col,letterSpacing:'-0.5px',fontVariantNumeric:'tabular-nums',lineHeight:1.1 }}>{rv.toFixed(2)}%</div>
-        <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap', justifyContent:'flex-end' }}>
-          {isNearLimit && (
-            <div style={{ display:'inline-flex',alignItems:'center',gap:4,fontSize:'0.65rem',fontWeight:800,color:'#D97706',padding:'3px 8px',borderRadius:100,background:'rgba(245,158,11,0.1)',border:'1px solid rgba(245,158,11,0.2)' }}>
-              <AlertTriangle size={10} /> Near limit
+        <div style={{ textAlign:'right', display:'flex', flexDirection:'column', alignItems:'flex-end', gap:6 }}>
+          <div style={{ fontSize:'1.35rem',fontWeight:900,color:col,letterSpacing:'-0.5px',fontVariantNumeric:'tabular-nums',lineHeight:1.1 }}>{rv.toFixed(2)}%</div>
+          <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap', justifyContent:'flex-end' }}>
+            {isNearLimit && (
+              <div onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }} style={{ display:'inline-flex',alignItems:'center',gap:4,fontSize:'0.65rem',fontWeight:800,color:'#D97706',padding:'3px 8px',borderRadius:100,background:'rgba(245,158,11,0.1)',border:'1px solid rgba(245,158,11,0.2)',cursor:'pointer' }}>
+                <Activity size={10} /> Near Limit {expanded ? <ChevronUp size={12}/> : <ChevronDown size={12}/>}
+              </div>
+            )}
+            <div style={{ display:'inline-flex',alignItems:'center',gap:4,fontSize:'0.65rem',fontWeight:800,color:col,padding:'3px 8px',borderRadius:100,background:ok?'rgba(16,185,129,0.08)':'rgba(239,68,68,0.08)',border:ok?'1px solid rgba(16,185,129,0.2)':'1px solid rgba(239,68,68,0.2)' }}>
+              {ok?'✓ PASS':'✕ FAIL'} • {diff}pp {ok?'headroom':'excess'}
             </div>
-          )}
-          <div style={{ display:'inline-flex',alignItems:'center',gap:4,fontSize:'0.65rem',fontWeight:800,color:col,padding:'3px 8px',borderRadius:100,background:ok?'rgba(16,185,129,0.08)':'rgba(239,68,68,0.08)',border:ok?'1px solid rgba(16,185,129,0.2)':'1px solid rgba(239,68,68,0.2)' }}>
-            {ok?'✓ PASS':'✕ FAIL'} • {diff}pp {ok?'headroom':'excess'}
           </div>
         </div>
       </div>
+
+      {isNearLimit && expanded && (
+        <div style={{ marginTop: 4, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', color: 'var(--text-dark)', fontWeight: 600 }}>
+             <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#D97706' }} />
+             {name} at {rv.toFixed(1)}%, approaching the {threshold}% limit {rv > thr ? 'from above' : 'from below'}
+          </div>
+          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 4, paddingLeft: 11 }}>
+            Worth monitoring — could shift with updated data.
+          </div>
+        </div>
+      )}
     </div>
   );
 };
