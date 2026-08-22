@@ -150,6 +150,13 @@ const RatioBar = ({ title, subtitle, ratio, threshold, numLabel, numVal, denLabe
             {clickable&&<span style={{ fontSize:'0.56rem',padding:'2px 6px',borderRadius:100,background:'var(--bg-section)',color:'var(--text-muted)',fontWeight:800,border:'1px solid var(--border)' }}>↗</span>}
           </div>
           <div style={{ fontSize:'0.7rem',color:'var(--text-muted)',lineHeight:1.4, fontWeight:500 }}>{subtitle}</div>
+          {isNearLimit && (
+            <div style={{ marginTop: 8 }}>
+              <div onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }} style={{ display:'inline-flex',alignItems:'center',gap:4,fontSize:'0.65rem',fontWeight:800,color:'#D97706',padding:'3px 8px',borderRadius:100,background:'rgba(245,158,11,0.1)',border:'1px solid rgba(245,158,11,0.2)',cursor:'pointer' }}>
+                <Activity size={10} /> Near Limit {expanded ? <ChevronUp size={12}/> : <ChevronDown size={12}/>}
+              </div>
+            </div>
+          )}
         </div>
         <div style={{ position:'relative',height:10,background:'rgba(0,0,0,0.06)',borderRadius:100,overflow:'visible' }}>
           <div style={{ position:'absolute',top:0,left:0,height:'100%',width:`${fill}%`,background:grad,borderRadius:100,boxShadow:ok?'0 0 10px rgba(16,185,129,0.3)':'0 0 10px rgba(239,68,68,0.3)',transition:'width 0.9s cubic-bezier(0.4,0,0.2,1)' }}/>
@@ -161,11 +168,6 @@ const RatioBar = ({ title, subtitle, ratio, threshold, numLabel, numVal, denLabe
         <div style={{ textAlign:'right', display:'flex', flexDirection:'column', alignItems:'flex-end', gap:6 }}>
           <div style={{ fontSize:'1.35rem',fontWeight:900,color:col,letterSpacing:'-0.5px',fontVariantNumeric:'tabular-nums',lineHeight:1.1 }}>{rv.toFixed(2)}%</div>
           <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap', justifyContent:'flex-end' }}>
-            {isNearLimit && (
-              <div onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }} style={{ display:'inline-flex',alignItems:'center',gap:4,fontSize:'0.65rem',fontWeight:800,color:'#D97706',padding:'3px 8px',borderRadius:100,background:'rgba(245,158,11,0.1)',border:'1px solid rgba(245,158,11,0.2)',cursor:'pointer' }}>
-                <Activity size={10} /> Near Limit {expanded ? <ChevronUp size={12}/> : <ChevronDown size={12}/>}
-              </div>
-            )}
             <div style={{ display:'inline-flex',alignItems:'center',gap:4,fontSize:'0.65rem',fontWeight:800,color:col,padding:'3px 8px',borderRadius:100,background:ok?'rgba(16,185,129,0.08)':'rgba(239,68,68,0.08)',border:ok?'1px solid rgba(16,185,129,0.2)':'1px solid rgba(239,68,68,0.2)' }}>
               {ok?'✓ PASS':'✕ FAIL'} • {diff}pp {ok?'headroom':'excess'}
             </div>
