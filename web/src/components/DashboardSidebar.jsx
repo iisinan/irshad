@@ -9,6 +9,19 @@ import {
   X, Moon, Sun, Shield, FileText, Bell, HelpCircle, Star
 } from 'lucide-react';
 
+const SidebarClock = () => {
+  const [time, setTime] = React.useState(new Date());
+  React.useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 10000);
+    return () => clearInterval(timer);
+  }, []);
+  return (
+    <div style={{ fontSize: '0.62rem', color: 'var(--text-muted)', fontWeight: 600, letterSpacing: '0.5px', marginTop: 8, textAlign: 'center' }}>
+      {time.toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' })} • {time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+    </div>
+  );
+};
+
 export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -311,6 +324,7 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
             >
               <LogOut size={14} /> Log Out
             </button>
+            <SidebarClock />
           </>
         ) : (
           /* Collapsed footer */
