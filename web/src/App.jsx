@@ -11,6 +11,19 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { Toaster } from 'react-hot-toast';
 import './index.css';
 
+const HeaderClock = () => {
+  const [time, setTime] = useState(new Date());
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 10000); // tick every 10s
+    return () => clearInterval(timer);
+  }, []);
+  return (
+    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600, letterSpacing: '0.5px', paddingRight: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+      {time.toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' })} • {time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+    </div>
+  );
+};
+
 const lazyWithRetry = (componentImport) =>
   React.lazy(async () => {
     const refreshKey = 'chunk_reload_' + window.location.pathname;
@@ -202,18 +215,21 @@ const TopNavbar = () => {
           <div className="nav-divider" />
           {!loading && (
             user ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
-                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--primary-50)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, border: '1px solid var(--primary-100)' }}>
-                    {(user.first_name || user.name || 'U').charAt(0).toUpperCase()}
-                  </div>
-                  <span style={{ fontSize: '0.79rem', color: 'var(--text-dark)', fontWeight: 600 }}>
-                    {user.first_name || user.name || 'Profile'}
-                  </span>
-                </Link>
-                <button onClick={logout} className="nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
-                  Log Out
-                </button>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--primary-50)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, border: '1px solid var(--primary-100)' }}>
+                      {(user.first_name || user.name || 'U').charAt(0).toUpperCase()}
+                    </div>
+                    <span style={{ fontSize: '0.79rem', color: 'var(--text-dark)', fontWeight: 600 }}>
+                      {user.first_name || user.name || 'Profile'}
+                    </span>
+                  </Link>
+                  <button onClick={logout} className="nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                    Log Out
+                  </button>
+                </div>
+                <HeaderClock />
               </div>
             ) : (
               <>
