@@ -271,6 +271,7 @@ const AaoifiScreening = () => {
   const [purDividend,     setPurDividend]     = useState('');
   const [showNewsAll,     setShowNewsAll]     = useState(false);
   const [isInitialLoad,   setIsInitialLoad]   = useState(true);
+  const [verdictExpanded, setVerdictExpanded] = useState(false);
 
   useEffect(() => {
     if (!queryLoading && !isFetching) {
@@ -699,8 +700,16 @@ const AaoifiScreening = () => {
                 </div>
               </div>
 
-              <div style={{ padding: '16px 20px', background: 'rgba(255,255,255,0.85)', borderRadius: 16, border: '1px solid #fff', marginTop: 4, boxShadow: '0 4px 16px rgba(0,0,0,0.04), inset 0 2px 4px rgba(255,255,255,1)', backdropFilter: 'blur(20px)' }}>
-                <p style={{ color:'var(--text-dark)',fontSize:'0.9rem',lineHeight:1.6,margin:0, fontWeight:600 }}>{cleanStatusReason||'Screened in accordance with AAOIFI Shariah Standard No. 21.'}</p>
+              <div style={{ marginTop: 4 }}>
+                <div onClick={() => setVerdictExpanded(!verdictExpanded)} className="hover-lift" style={{ display:'inline-flex',alignItems:'center',gap:6,padding:'8px 16px',background:'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%)',borderRadius:100,fontSize:'0.75rem',color:'var(--text-dark)',fontWeight:800,border:`1px solid ${sc.color}30`,cursor:'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+                  <HelpCircle size={14} color={sc.color} /> Why this verdict?
+                  {verdictExpanded ? <ChevronUp size={14} color="var(--text-muted)"/> : <ChevronDown size={14} color="var(--text-muted)"/>}
+                </div>
+                {verdictExpanded && (
+                  <div style={{ padding: '16px 20px', background: 'rgba(255,255,255,0.85)', borderRadius: 16, border: '1px solid #fff', marginTop: 12, boxShadow: '0 4px 16px rgba(0,0,0,0.04), inset 0 2px 4px rgba(255,255,255,1)', backdropFilter: 'blur(20px)' }}>
+                    <p style={{ color:'var(--text-dark)',fontSize:'0.9rem',lineHeight:1.6,margin:0, fontWeight:600 }}>{cleanStatusReason||'Screened in accordance with AAOIFI Shariah Standard No. 21.'}</p>
+                  </div>
+                )}
               </div>
               
               {(report.reporting_period || report.reporting_year || report.published_date || report.source_url) && (
