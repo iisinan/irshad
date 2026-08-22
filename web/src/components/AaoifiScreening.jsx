@@ -826,9 +826,9 @@ const AaoifiScreening = () => {
             </div>
             
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '12px', padding: '16px 8px 0', fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-              {(fd?.published_date || report?.published_date) && <span>Published: {fd?.published_date || report?.published_date}</span>}
+              {(fd?.published_date || report?.published_date) && <span>Published: {fmtDate(fd?.published_date || report?.published_date)}</span>}
               {(fd?.published_date || report?.published_date) && (fd?.reporting_period || report?.reporting_period || fd?.financial_year || report?.reporting_year) && <span>•</span>}
-              {(fd?.reporting_period || report?.reporting_period || fd?.financial_year || report?.reporting_year) && <span>Quarter: {fd?.reporting_period || report?.reporting_period} {fd?.financial_year || report?.reporting_year || ''}</span>}
+              {(fd?.reporting_period || report?.reporting_period || fd?.financial_year || report?.reporting_year) && <span>Financial Results: {fd?.reporting_period || report?.reporting_period} {fd?.financial_year || report?.reporting_year || ''}</span>}
             </div>
           </div>
         </Section>)}
