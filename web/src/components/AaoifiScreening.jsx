@@ -126,9 +126,19 @@ const RatioBar = ({ title, subtitle, ratio, threshold, numLabel, numVal, denLabe
   const num = m?m[1]:null; const name=m?m[2]:title;
   const clickable = parseFloat(numVal)!==0;
 
+  const isDebtOrCash = title.toLowerCase().includes('debt') || title.toLowerCase().includes('cash');
+  const isImpure = title.toLowerCase().includes('impure');
+  
+  let isNearLimit = false;
+  if (isDebtOrCash && Math.abs(rv - thr) <= 5) {
+    isNearLimit = true;
+  } else if (isImpure && Math.abs(rv - thr) <= 1) {
+    isNearLimit = true;
+  }
+
   return (
     <div onClick={clickable?()=>onInspect({title,ratio:rv,threshold:`≤ ${threshold}%`,formula,numLabel,numVal,denLabel,denVal}):undefined}
-      className={clickable?'hover-lift mobile-col':'mobile-col'} style={{ background:'var(--bg)',borderRadius:14,padding:'16px 20px',marginBottom:12,border:`1px solid ${ok?'rgba(16,185,129,0.15)':'rgba(239,68,68,0.15)'}`,cursor:clickable?'pointer':'default',transition:'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',display:'grid',gridTemplateColumns:'180px 1fr 118px',gap:20,alignItems:'center', boxShadow:'0 2px 8px rgba(0,0,0,0.02)' }}>
+      className={clickable?'hover-lift mobile-col':'mobile-col'} style={{ background:'var(--bg)',borderRadius:14,padding:'16px 20px',marginBottom:12,border:`1px solid ${ok?'rgba(16,185,129,0.15)':'rgba(239,68,68,0.15)'}`,cursor:clickable?'pointer':'default',transition:'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',display:'grid',gridTemplateColumns:'180px 1fr auto',gap:20,alignItems:'center', boxShadow:'0 2px 8px rgba(0,0,0,0.02)' }}>
       <div>
         <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:4 }}>
           {num&&<span style={{ width:20,height:20,borderRadius:6,background:ok?'rgba(16,185,129,0.12)':'rgba(239,68,68,0.12)',color:ok?'var(--halal)':'var(--non-compliant)',fontSize:'0.68rem',fontWeight:900,display:'inline-flex',alignItems:'center',justifyContent:'center' }}>{num}</span>}
@@ -144,10 +154,17 @@ const RatioBar = ({ title, subtitle, ratio, threshold, numLabel, numVal, denLabe
           <span style={{ fontSize:'0.6rem',fontWeight:800,color:'var(--non-compliant)',background:'rgba(239,68,68,0.08)',border:'1px solid rgba(239,68,68,0.2)',padding:'2px 6px',borderRadius:6,whiteSpace:'nowrap' }}>{threshold}% limit</span>
         </div>
       </div>
-      <div style={{ textAlign:'right' }}>
+      <div style={{ textAlign:'right', display:'flex', flexDirection:'column', alignItems:'flex-end', gap:6 }}>
         <div style={{ fontSize:'1.35rem',fontWeight:900,color:col,letterSpacing:'-0.5px',fontVariantNumeric:'tabular-nums',lineHeight:1.1 }}>{rv.toFixed(2)}%</div>
-        <div style={{ display:'inline-flex',alignItems:'center',gap:4,fontSize:'0.65rem',fontWeight:800,color:col,marginTop:6,padding:'3px 8px',borderRadius:100,background:ok?'rgba(16,185,129,0.08)':'rgba(239,68,68,0.08)',border:ok?'1px solid rgba(16,185,129,0.2)':'1px solid rgba(239,68,68,0.2)' }}>
-          {ok?'✓ PASS':'✕ FAIL'} • {diff}pp {ok?'headroom':'excess'}
+        <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap', justifyContent:'flex-end' }}>
+          {isNearLimit && (
+            <div style={{ display:'inline-flex',alignItems:'center',gap:4,fontSize:'0.65rem',fontWeight:800,color:'#D97706',padding:'3px 8px',borderRadius:100,background:'rgba(245,158,11,0.1)',border:'1px solid rgba(245,158,11,0.2)' }}>
+              <AlertTriangle size={10} /> Near limit
+            </div>
+          )}
+          <div style={{ display:'inline-flex',alignItems:'center',gap:4,fontSize:'0.65rem',fontWeight:800,color:col,padding:'3px 8px',borderRadius:100,background:ok?'rgba(16,185,129,0.08)':'rgba(239,68,68,0.08)',border:ok?'1px solid rgba(16,185,129,0.2)':'1px solid rgba(239,68,68,0.2)' }}>
+            {ok?'✓ PASS':'✕ FAIL'} • {diff}pp {ok?'headroom':'excess'}
+          </div>
         </div>
       </div>
     </div>
