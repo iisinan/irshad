@@ -34,7 +34,7 @@ const quotes = [
   }
 ];
 
-export default function IslamicQuote({ merged = false }) {
+export default function IslamicQuote({ merged = false, compact = false }) {
   const [quote, setQuote] = useState(null);
   const [isVisible, setIsVisible] = useState(true);
 
@@ -45,6 +45,37 @@ export default function IslamicQuote({ merged = false }) {
   }, []);
 
   if (!isVisible || !quote) return null;
+
+  if (compact) {
+    return (
+      <div style={{
+        background: 'var(--bg)',
+        border: '1px solid var(--border)',
+        borderRadius: '16px',
+        padding: '12px 16px',
+        marginBottom: '24px',
+        display: 'flex',
+        gap: '12px',
+        alignItems: 'center',
+        boxShadow: 'var(--shadow-sm)'
+      }}>
+        <div style={{ color: 'var(--primary)', flexShrink: 0 }}>
+          <BookOpen size={16} />
+        </div>
+        <div style={{ flex: 1, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px' }}>
+          <div style={{ fontSize: '0.85rem', color: 'var(--text-dark)', fontWeight: 600, fontStyle: 'italic' }}>
+            "{quote.translation}"
+          </div>
+          <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--primary)' }}>
+            — {quote.source}
+          </div>
+        </div>
+        <button onClick={() => setIsVisible(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}>
+          <X size={14} />
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div style={merged ? {

@@ -182,6 +182,8 @@ export default function UpdatesTab({ unreadCount = 0 }) {
         <LiveClock hijriDate={hijriDate} compact={true} />
       </div>
 
+      <IslamicQuote compact={true} />
+
       {/* ── Sub-tab Navigation ── */}
       <div className="hide-scrollbar" style={{
         display: 'flex',
