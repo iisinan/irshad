@@ -150,7 +150,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
     <div style={{ width: '100%', maxWidth: '100%', overflowX: 'hidden', paddingBottom: '40px' }}>
       {/* ── Compact Greeting Banner ── */}
       <div style={{
-        background: 'var(--bg)',
+        background: 'linear-gradient(145deg, var(--bg) 0%, rgba(91, 41, 113, 0.02) 100%)',
         border: '1px solid var(--border)',
         borderRadius: '20px',
         padding: '16px 24px',
@@ -160,9 +160,14 @@ export default function UpdatesTab({ unreadCount = 0 }) {
         justifyContent: 'space-between',
         flexWrap: 'wrap',
         gap: '16px',
-        boxShadow: 'var(--shadow-sm)'
+        boxShadow: '0 8px 32px rgba(91, 41, 113, 0.04), inset 0 2px 0 rgba(255,255,255,0.7)',
+        position: 'relative',
+        overflow: 'hidden'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        {/* Subtle decorative glow orb */}
+        <div style={{ position: 'absolute', top: '-50%', left: '-5%', width: '150px', height: '150px', background: 'radial-gradient(circle, var(--primary-50) 0%, transparent 70%)', zIndex: 0, opacity: 0.6, pointerEvents: 'none' }} />
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', zIndex: 1 }}>
           <div style={{ 
             fontSize: '1.8rem', 
             lineHeight: 1, 
@@ -193,7 +198,9 @@ export default function UpdatesTab({ unreadCount = 0 }) {
           </div>
         </div>
         
-        <LiveClock hijriDate={hijriDate} compact={true} />
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <LiveClock hijriDate={hijriDate} compact={true} />
+        </div>
       </div>
 
       <IslamicQuote compact={true} />
