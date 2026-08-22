@@ -351,6 +351,13 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
             {/* Status Summary */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '4px', flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Layers size={16} color="var(--primary)" />
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>All Holdings <strong style={{ color: 'var(--text-dark)', fontWeight: 800, marginLeft: '4px' }}>{holdings.length}</strong></span>
+              </div>
+              
+              <div style={{ width: '1px', height: '14px', background: 'var(--border)' }} />
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <ShieldCheck size={16} color="#16a34a" />
                 <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Compliant <strong style={{ color: 'var(--text-dark)', fontWeight: 800, marginLeft: '4px' }}>{halalCount}</strong></span>
               </div>
