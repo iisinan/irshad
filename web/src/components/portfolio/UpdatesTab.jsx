@@ -186,13 +186,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
                 <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>{greeting.emoji}</span>
               </div>
 
-              {/* Subtitle */}
-              <p style={{
-                fontSize: '0.78rem', color: 'var(--text-muted)',
-                margin: '0 0 0', fontWeight: 600, lineHeight: 1.5,
-              }}>
-                Here's what's happening with your halal portfolio today.
-              </p>
+
 
               {/* Unread pill */}
               {unreadCount > 0 && (
