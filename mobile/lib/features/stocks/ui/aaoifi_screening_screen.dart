@@ -162,14 +162,28 @@ class _AaoifiScreeningScreenState extends State<AaoifiScreeningScreen> with Sing
     }
 
     final fd = _report!['financial_data_used'] ?? {};
-    final marketCap = double.tryParse(fd['market_cap']?.toString() ?? '0') ?? 0.0;
+    final marketCap = double.tryParse((_report!['market_cap'] ?? fd['market_cap'])?.toString() ?? '0') ?? 0.0;
     final totalDebt = double.tryParse(fd['total_debt']?.toString() ?? '0') ?? 0.0;
     final cash = double.tryParse(fd['cash']?.toString() ?? '0') ?? 0.0;
+    final interestBearingSecurities = double.tryParse(fd['interest_bearing_securities']?.toString() ?? '0') ?? 0.0;
+    final cashAndSec = cash + interestBearingSecurities;
     final totalAssets = double.tryParse(fd['total_assets']?.toString() ?? '0') ?? 0.0;
+    final totalRevenue = double.tryParse(fd['total_revenue']?.toString() ?? '0') ?? 0.0;
+    final interestIncome = double.tryParse(fd['interest_income']?.toString() ?? '0') ?? 0.0;
 
-    final double? debtRatio = _report!['debt_ratio'] != null ? double.tryParse(_report!['debt_ratio'].toString()) : null;
-    final double? cashRatio = _report!['cash_ratio'] != null ? double.tryParse(_report!['cash_ratio'].toString()) : null;
-    final double? impureRatio = _report!['impermissible_income_ratio'] != null ? double.tryParse(_report!['impermissible_income_ratio'].toString()) : null;
+    final double? debtRatioRaw = marketCap > 0 ? (totalDebt / marketCap) * 100 : null;
+    final double? cashRatioRaw = marketCap > 0 ? (cashAndSec / marketCap) * 100 : null;
+    final double? impureRatioRaw = totalRevenue > 0 ? (interestIncome / totalRevenue) * 100 : null;
+
+    double? parseRatio(dynamic value) {
+      if (value == null) return null;
+      final s = value.toString().replaceAll('%', '').replaceAll(',', '').trim();
+      return double.tryParse(s);
+    }
+
+    final double? debtRatio = parseRatio(_report!['debt_ratio']) ?? debtRatioRaw;
+    final double? cashRatio = parseRatio(_report!['cash_ratio']) ?? cashRatioRaw;
+    final double? impureRatio = parseRatio(_report!['impermissible_income_ratio']) ?? impureRatioRaw;
 
     final bool isDebtNearLimit = debtRatio != null && (debtRatio - 30.0).abs() <= 5.0;
     final bool isCashNearLimit = cashRatio != null && (cashRatio - 30.0).abs() <= 5.0;
