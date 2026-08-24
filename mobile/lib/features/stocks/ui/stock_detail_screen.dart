@@ -703,12 +703,12 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
   Widget _buildStatusHeader(Color color, Color bg, String label, {bool purificationRequired = false, double percent = 0.0, bool scholarVerified = false, String justification = '', String symbol = ''}) {
     final portfolioProvider = context.watch<PortfolioProvider>();
     final isHolding = portfolioProvider.holdings.any((h) => h['symbol'] == symbol);
-    final holdingPurification = portfolioProvider.purifications.firstWhere(
+    final holdingData = portfolioProvider.holdings.firstWhere(
       (h) => h['symbol'] == symbol,
       orElse: () => null,
     );
-    final amountDue = holdingPurification != null 
-        ? (num.tryParse(holdingPurification['purification_due']?.toString() ?? '0')?.toDouble() ?? 0.0)
+    final amountDue = holdingData != null 
+        ? (num.tryParse(holdingData['purification_due']?.toString() ?? '0')?.toDouble() ?? 0.0)
         : 0.0;
     
     final bool showPurificationBtn = isHolding && purificationRequired;
@@ -721,9 +721,6 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
     final pctChangeStr = priceChange?.toStringAsFixed(2) ?? '0.00';
 
     String mainLabel = label;
-    if (purificationRequired) {
-      mainLabel = 'SHARIAH COMPLIANT';
-    }
 
     return Container(
       width: double.infinity,
@@ -2368,7 +2365,6 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Quantitative Financial Ratios', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: context.textDark)),
-
                 ],
               ),
             ),
@@ -2388,6 +2384,51 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
           ),
         ),
         const SizedBox(height: 24),
+        
+        if ((debtRatio - 30.0).abs() <= 5.0 || (cashRatio - 30.0).abs() <= 5.0 || (interestRatio - 5.0).abs() <= 1.0) ...[
+          Container(
+            margin: const EdgeInsets.only(bottom: 24),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  const Color(0xFFD97706).withValues(alpha: 0.1),
+                  const Color(0xFFD97706).withValues(alpha: 0.05),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFD97706).withValues(alpha: 0.2)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(color: const Color(0xFFD97706).withValues(alpha: 0.15), blurRadius: 4, offset: const Offset(0, 2)),
+                    ],
+                  ),
+                  child: const Icon(Icons.warning_amber_rounded, color: Color(0xFFD97706), size: 14),
+                ),
+                const SizedBox(width: 10),
+                const Expanded(
+                  child: Text(
+                    "Near Limit Detected on Financial Screening",
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF92400E),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+
         buildRatioCard(1, 'Debt ratio', 'Total Debt / $denominatorLabel × 100', debtRatio, 30, 
           'Total Debt', denominatorLabel, formatCompact(totalDebt), formatCompact(denominator)),
         buildRatioCard(2, 'Cash ratio', '(Cash + Securities) / $denominatorLabel × 100', cashRatio, 30, 
