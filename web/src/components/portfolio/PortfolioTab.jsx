@@ -192,28 +192,34 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
         overflow: 'hidden',
       }}
     >
-      <div className="portfolio-row-grid" style={{ padding: '8px 12px' }}>
+      {/* ── Row 1: Logo | Symbol + Value | Actions ── */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px' }}>
 
-        {/* Column 1: Logo + Symbol */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <CompanyLogo symbol={holding.symbol} logoUrl={holding.logo_url} size={34} radius={8} />
-          <span style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.8rem', letterSpacing: '-0.1px', whiteSpace: 'nowrap' }}>
-            {holding.symbol}
-          </span>
+        {/* Logo */}
+        <CompanyLogo symbol={holding.symbol} logoUrl={holding.logo_url} size={34} radius={8} />
+
+        {/* Symbol + Value (takes all available space) */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', flexWrap: 'nowrap' }}>
+            <span style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.8rem', letterSpacing: '-0.1px', whiteSpace: 'nowrap' }}>
+              {holding.symbol}
+            </span>
+            <span style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.78rem', fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
+              {fmtK(holding.total_value)}
+            </span>
+            <span style={{ fontSize: '0.58rem', color: 'var(--text-muted)', fontWeight: 600, whiteSpace: 'nowrap' }}>
+              {Number(holding.shares).toLocaleString()} shares
+            </span>
+          </div>
         </div>
 
-        {/* Column 2: Value & Shares */}
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', flexWrap: 'nowrap' }}>
-          <span style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.78rem', fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
-            {fmtK(holding.total_value)}
-          </span>
-          <span style={{ fontSize: '0.58rem', color: 'var(--text-muted)', fontWeight: 600, whiteSpace: 'nowrap' }}>
-            {Number(holding.shares).toLocaleString()} sh
-          </span>
-        </div>
+        {/* Actions always on the right */}
+        {actionBtns}
+      </div>
 
-        {/* Column 3: Dividends / Purify */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+      {/* ── Row 2: Pills (Divs, Purify, Return%) ── only shown if any exist */}
+      {(hasDivs || hasPurify || (holding.return_percentage !== null && holding.return_percentage !== undefined && holding.return_percentage !== 0)) && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', padding: '0 12px 9px 56px' }}>
           {hasDivs && (
             <span style={{ background: 'var(--primary-50)', color: 'var(--primary)', padding: '2px 7px', borderRadius: '5px', fontSize: '0.58rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
               ₦{Number(holding.total_dividends).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Divs
@@ -224,10 +230,6 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
               ₦{Number(holding.purification_due).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} purify
             </span>
           )}
-        </div>
-
-        {/* Column 4: Return */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
           {(holding.return_percentage !== null && holding.return_percentage !== undefined && holding.return_percentage !== 0) && (
             <span style={{ fontWeight: 700, fontSize: '0.58rem', color: isUp ? 'var(--halal)' : 'var(--non-compliant)', display: 'inline-flex', alignItems: 'center', gap: '1px', background: isUp ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)', padding: '2px 6px', borderRadius: '5px', whiteSpace: 'nowrap' }}>
               {isUp ? <ArrowUpRight size={9}/> : <ArrowDownRight size={9}/>}
@@ -235,12 +237,7 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
             </span>
           )}
         </div>
-
-        {/* Column 5: Actions */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          {actionBtns}
-        </div>
-      </div>
+      )}
 
       {/* ── Grace Period Banner ── */}
       {gracePeriodEndsAt && (
@@ -456,8 +453,8 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
         
         {/* Header */}
         {displayHoldings.length > 0 && (
-          <div className="desktop-only" style={{ position: 'relative', marginTop: '12px', padding: '8px 0', background: 'var(--body-bg)', zIndex: 20 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 0.9fr 0.9fr 1.0fr 160px', alignItems: 'center', gap: '12px', padding: '0 25px 0 13px' }}>
+          <div className="desktop-only" style={{ position: 'relative', marginTop: '12px', padding: '8px 20px', background: 'var(--body-bg)', zIndex: 20 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 0.9fr 0.9fr 0.8fr auto', alignItems: 'center', gap: '12px', padding: '0 16px' }}>
               <div style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', paddingLeft: '44px' }}>Asset</div>
               <div style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Value / Shares</div>
               <div style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Dividends / Purify</div>
