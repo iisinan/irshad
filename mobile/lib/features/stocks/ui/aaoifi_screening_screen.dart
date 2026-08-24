@@ -167,6 +167,15 @@ class _AaoifiScreeningScreenState extends State<AaoifiScreeningScreen> with Sing
     final cash = double.tryParse(fd['cash']?.toString() ?? '0') ?? 0.0;
     final totalAssets = double.tryParse(fd['total_assets']?.toString() ?? '0') ?? 0.0;
 
+    final double? debtRatio = _report!['debt_ratio'] != null ? double.tryParse(_report!['debt_ratio'].toString()) : null;
+    final double? cashRatio = _report!['cash_ratio'] != null ? double.tryParse(_report!['cash_ratio'].toString()) : null;
+    final double? impureRatio = _report!['impermissible_income_ratio'] != null ? double.tryParse(_report!['impermissible_income_ratio'].toString()) : null;
+
+    final bool isDebtNearLimit = debtRatio != null && (debtRatio - 30.0).abs() <= 5.0;
+    final bool isCashNearLimit = cashRatio != null && (cashRatio - 30.0).abs() <= 5.0;
+    final bool isImpureNearLimit = impureRatio != null && (impureRatio - 5.0).abs() <= 1.0;
+    final bool hasNearLimit = isDebtNearLimit || isCashNearLimit || isImpureNearLimit;
+
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -288,6 +297,49 @@ class _AaoifiScreeningScreenState extends State<AaoifiScreeningScreen> with Sing
                   ),
                 ],
               ),
+              if (hasNearLimit) ...[
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        const Color(0xFFD97706).withValues(alpha: 0.1),
+                        const Color(0xFFD97706).withValues(alpha: 0.05),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFD97706).withValues(alpha: 0.2)),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 24,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(color: const Color(0xFFD97706).withValues(alpha: 0.15), blurRadius: 4, offset: const Offset(0, 2)),
+                          ],
+                        ),
+                        child: const Icon(Icons.warning_amber_rounded, color: Color(0xFFD97706), size: 14),
+                      ),
+                      const SizedBox(width: 10),
+                      const Expanded(
+                        child: Text(
+                          "Near Limit Detected on Financial Screening",
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF92400E),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ],
           ),
         ),
