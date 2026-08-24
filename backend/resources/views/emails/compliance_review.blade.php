@@ -188,15 +188,14 @@
         <div class="reason-box">{{ $review->reason }}</div>
 
         <p class="instructions">
-            Click <strong>Approve</strong> to apply the new status to the live app immediately, or <strong>Reject</strong> to keep the current status unchanged and dismiss this review.
+            Please log in to the Admin Dashboard to review the full context and history before approving or rejecting this change.
         </p>
 
         <div class="actions">
-            <a href="{{ config('app.url') }}/api/v1/admin/compliance-reviews/{{ $review->id }}/approve-link" class="btn btn-approve">✅ &nbsp;Approve Change</a>
-            <a href="{{ config('app.url') }}/api/v1/admin/compliance-reviews/{{ $review->id }}/reject-link"  class="btn btn-reject">❌ &nbsp;Reject &amp; Keep Current</a>
+            <a href="{{ config('app.frontend_url') }}/admin/compliance-reviews" class="btn btn-approve" style="width: 100%; display: block; box-sizing: border-box;">Log in to Admin Dashboard</a>
         </div>
 
-        <p class="hint">Or log in to the <a href="{{ config('app.frontend_url') }}/admin/compliance-reviews" style="color:#6366f1;">Admin Dashboard → Compliance Reviews</a> to review with full context and history.</p>
+        <p class="hint">This action can only be performed securely from within the dashboard.</p>
 
     </div>
 

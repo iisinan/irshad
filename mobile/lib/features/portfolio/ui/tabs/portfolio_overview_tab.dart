@@ -689,10 +689,11 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                       ),
                     ],
                   ),
-                  ),
                 ),
               ),
-            ),
+            ],
+          ),
+        ),
             if (daysLeft != null)
               Container(
                 margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),

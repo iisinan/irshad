@@ -262,7 +262,7 @@ class AaoifiComplianceService
     {
         // Eager-load the company relation so it is available in the queued mailable
         $review->load('company');
-        Mail::to('sinanismailaidris@gmail.com')->queue(new ComplianceReviewNotification($review));
+        Mail::to('mairopettel@gmail.com')->queue(new ComplianceReviewNotification($review));
     }
 
     private function notifyUsersOfDowngrade(Company $company)
