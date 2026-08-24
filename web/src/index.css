@@ -5156,7 +5156,7 @@ button, a.nav-link, a.btn-primary, a.btn-secondary, .mobile-col > div[style*="cu
 
 .portfolio-row-grid {
   display: grid;
-  grid-template-columns: 1.8fr 0.9fr 0.9fr 0.8fr auto;
+  grid-template-columns: 1.8fr 0.9fr 0.9fr 0.8fr 120px;
   align-items: center;
   gap: 12px;
   padding: 10px 16px;
