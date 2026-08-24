@@ -457,7 +457,7 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
         {/* Header */}
         {displayHoldings.length > 0 && (
           <div className="desktop-only" style={{ position: 'relative', marginTop: '12px', padding: '8px 0', background: 'var(--body-bg)', zIndex: 20 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 0.9fr 0.9fr 0.8fr 120px', alignItems: 'center', gap: '12px', padding: '0 25px 0 13px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 0.9fr 0.9fr 1.0fr 160px', alignItems: 'center', gap: '12px', padding: '0 25px 0 13px' }}>
               <div style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', paddingLeft: '44px' }}>Asset</div>
               <div style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Value / Shares</div>
               <div style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Dividends / Purify</div>
