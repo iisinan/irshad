@@ -198,8 +198,8 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
         {/* Logo */}
         <CompanyLogo symbol={holding.symbol} logoUrl={holding.logo_url} size={34} radius={8} />
 
-        {/* Symbol + Value (takes all available space) */}
-        <div style={{ flex: 1, minWidth: 0 }}>
+        {/* Symbol + Value + Pills (takes all available space) */}
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', flexWrap: 'wrap', columnGap: '12px', rowGap: '6px' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', flexWrap: 'nowrap' }}>
             <span style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.8rem', letterSpacing: '-0.1px', whiteSpace: 'nowrap' }}>
               {holding.symbol}
@@ -211,33 +211,33 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
               {Number(holding.shares).toLocaleString()} shares
             </span>
           </div>
+
+          {/* Pills (Divs, Purify, Return%) */}
+          {(hasDivs || hasPurify || (holding.return_percentage !== null && holding.return_percentage !== undefined && holding.return_percentage !== 0)) && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              {hasDivs && (
+                <span style={{ background: 'var(--primary-50)', color: 'var(--primary)', padding: '2px 7px', borderRadius: '5px', fontSize: '0.58rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                  ₦{Number(holding.total_dividends).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Divs
+                </span>
+              )}
+              {hasPurify && (
+                <span style={{ background: 'rgba(239,68,68,0.08)', color: 'var(--non-compliant)', padding: '2px 7px', borderRadius: '5px', fontSize: '0.58rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                  ₦{Number(holding.purification_due).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} purify
+                </span>
+              )}
+              {(holding.return_percentage !== null && holding.return_percentage !== undefined && holding.return_percentage !== 0) && (
+                <span style={{ fontWeight: 700, fontSize: '0.58rem', color: isUp ? 'var(--halal)' : 'var(--non-compliant)', display: 'inline-flex', alignItems: 'center', gap: '1px', background: isUp ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)', padding: '2px 6px', borderRadius: '5px', whiteSpace: 'nowrap' }}>
+                  {isUp ? <ArrowUpRight size={9}/> : <ArrowDownRight size={9}/>}
+                  {isUp ? '+' : ''}{Number(holding.return_percentage || 0).toFixed(2)}%
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Actions always on the right */}
         {actionBtns}
       </div>
-
-      {/* ── Row 2: Pills (Divs, Purify, Return%) ── only shown if any exist */}
-      {(hasDivs || hasPurify || (holding.return_percentage !== null && holding.return_percentage !== undefined && holding.return_percentage !== 0)) && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', padding: '0 12px 9px 56px' }}>
-          {hasDivs && (
-            <span style={{ background: 'var(--primary-50)', color: 'var(--primary)', padding: '2px 7px', borderRadius: '5px', fontSize: '0.58rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
-              ₦{Number(holding.total_dividends).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Divs
-            </span>
-          )}
-          {hasPurify && (
-            <span style={{ background: 'rgba(239,68,68,0.08)', color: 'var(--non-compliant)', padding: '2px 7px', borderRadius: '5px', fontSize: '0.58rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
-              ₦{Number(holding.purification_due).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} purify
-            </span>
-          )}
-          {(holding.return_percentage !== null && holding.return_percentage !== undefined && holding.return_percentage !== 0) && (
-            <span style={{ fontWeight: 700, fontSize: '0.58rem', color: isUp ? 'var(--halal)' : 'var(--non-compliant)', display: 'inline-flex', alignItems: 'center', gap: '1px', background: isUp ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)', padding: '2px 6px', borderRadius: '5px', whiteSpace: 'nowrap' }}>
-              {isUp ? <ArrowUpRight size={9}/> : <ArrowDownRight size={9}/>}
-              {isUp ? '+' : ''}{Number(holding.return_percentage || 0).toFixed(2)}%
-            </span>
-          )}
-        </div>
-      )}
 
       {/* ── Grace Period Banner ── */}
       {gracePeriodEndsAt && (
