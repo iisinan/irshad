@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { X, Search, CheckCircle2, AlertCircle, HelpCircle } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import { addMultipleToWatchlist } from '../../services/api';
 import CompanyLogo from '../CompanyLogo';
 
@@ -61,7 +62,7 @@ export default function AddWatchlistModal({ onClose, onAdded, allStocks, watchli
     }
   };
 
-  return (
+  return createPortal(
     <>
       <style>{`
         @keyframes slideUpFade {
@@ -96,7 +97,7 @@ export default function AddWatchlistModal({ onClose, onAdded, allStocks, watchli
           .modal-box {
             max-width: 100% !important;
             width: 100% !important;
-            max-height: 90vh !important;
+            max-height: 90% !important;
             border-radius: 28px 28px 0 0 !important;
             box-shadow: 0 -8px 32px rgba(0,0,0,0.1) !important;
           }
@@ -118,7 +119,7 @@ export default function AddWatchlistModal({ onClose, onAdded, allStocks, watchli
             boxShadow: '0 32px 80px rgba(0,0,0,0.2), 0 0 0 1px var(--border) inset', 
             display: 'flex', 
             flexDirection: 'column', 
-            maxHeight: 'calc(100vh - 48px)',
+            maxHeight: 'calc(100% - 48px)',
             minHeight: 0,
             overflow: 'hidden',
             animation: 'slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards' 
@@ -233,6 +234,7 @@ export default function AddWatchlistModal({ onClose, onAdded, allStocks, watchli
         </div>
       </div>
     </div>
-    </>
+    </>,
+    document.body
   );
 }

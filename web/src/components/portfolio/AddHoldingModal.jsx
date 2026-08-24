@@ -388,7 +388,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
       `}</style>
       {createPortal(
         <div className="modal-overlay animate-fade-in" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000, padding: '24px' }}>
-          <div className="modal-box" ref={modalRef} style={{ background: 'var(--bg)', borderRadius: '24px', width: '100%', maxWidth: '720px', boxShadow: '0 24px 64px rgba(0,0,0,0.12)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: 'calc(100vh - 48px)', minHeight: 0, animation: 'slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+          <div className="modal-box" ref={modalRef} style={{ background: 'var(--bg)', borderRadius: '24px', width: '100%', maxWidth: '720px', boxShadow: '0 24px 64px rgba(0,0,0,0.12)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: 'calc(100% - 48px)', minHeight: 0, animation: 'slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>
 
             {/* Header */}
             <div className="modal-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '32px 32px 24px', background: 'var(--bg)', flexShrink: 0 }}>
