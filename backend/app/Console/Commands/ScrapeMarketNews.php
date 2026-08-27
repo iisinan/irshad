@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use App\Models\NewsArticle;
+use App\Models\BusinessActivityUpdate;
 use App\Models\Company;
 use Carbon\Carbon;
 
@@ -70,8 +71,16 @@ class ScrapeMarketNews extends Command
         $dividendKeywords = ['dividend', 'payout', 'yield', 'bonus share'];
         $analysisKeywords = ['earnings', 'profit', 'loss', 'revenue', 'quarter', 'q1', 'q2', 'q3', 'q4', 'annual report', 'financial statement', 'screening', 'aaoifi'];
 
+        $businessActivityTypes = [
+            'acquisition' => ['acquisition', 'buyout', 'takeover', 'merger'],
+            'new_business' => ['new business', 'subsidiary', 'expansion', 'partnership'],
+            'disposal' => ['disposal', 'sell-off', 'divestment', 'shut down'],
+            'regulatory' => ['regulatory', 'sec', 'cbn penalty', 'fine', 'sanction', 'court'],
+        ];
+
         $companies = Company::all();
         $added = 0;
+        $addedBusiness = 0;
 
         foreach ($articles as $item) {
             $title = $item['title'] ?? '';
@@ -99,8 +108,53 @@ class ScrapeMarketNews extends Command
             $url = $item['link'] ?? '';
             if (empty($url)) continue;
 
+            $cleanDesc = strip_tags(html_entity_decode($desc, ENT_QUOTES | ENT_HTML5));
+            $cleanDesc = preg_replace('/\s+/', ' ', $cleanDesc);
+            $cleanDesc = trim($cleanDesc);
+
+            $companyId = null;
+            foreach ($companies as $comp) {
+                $symbolWord = '\b' . preg_quote(strtolower($comp->symbol), '/') . '\b';
+                $nameSnippet = preg_quote(strtolower(explode(' ', $comp->name)[0]), '/'); 
+                
+                if (preg_match("/$symbolWord/", $text) || (strlen($nameSnippet) > 3 && strpos($text, $nameSnippet) !== false)) {
+                    $companyId = $comp->id;
+                    break;
+                }
+            }
+
+            // Check for Business Activity
+            if ($companyId) {
+                $bType = null;
+                foreach ($businessActivityTypes as $type => $keywords) {
+                    foreach ($keywords as $kw) {
+                        if (preg_match('/\b' . preg_quote($kw, '/') . '\b/', $text)) {
+                            $bType = $type;
+                            break 2;
+                        }
+                    }
+                }
+
+                if ($bType) {
+                    $exists = BusinessActivityUpdate::where('source_url', $url)->exists();
+                    if (!$exists) {
+                        BusinessActivityUpdate::create([
+                            'company_id' => $companyId,
+                            'activity_type' => $bType,
+                            'summary' => $title,
+                            'source' => $item['source'] ?? 'News',
+                            'source_url' => $url,
+                            'confidence_level' => 'high',
+                            'confidence_score' => 0.9,
+                            'date_detected' => isset($item['published_at']) ? Carbon::parse($item['published_at']) : now(),
+                        ]);
+                        $addedBusiness++;
+                    }
+                }
+            }
+
             if (NewsArticle::where('source_url', $url)->exists()) {
-                // If it already exists, maybe we can update its category just in case it was misclassified before
+                // Retroactively update category if needed
                 $existing = NewsArticle::where('source_url', $url)->first();
                 $cat = 'market_intelligence';
                 
@@ -124,21 +178,6 @@ class ScrapeMarketNews extends Command
                     $existing->update(['category' => $cat]);
                 }
                 continue; 
-            }
-
-            $cleanDesc = strip_tags(html_entity_decode($desc, ENT_QUOTES | ENT_HTML5));
-            $cleanDesc = preg_replace('/\s+/', ' ', $cleanDesc);
-            $cleanDesc = trim($cleanDesc);
-
-            $companyId = null;
-            foreach ($companies as $comp) {
-                $symbolWord = '\b' . preg_quote(strtolower($comp->symbol), '/') . '\b';
-                $nameSnippet = preg_quote(strtolower(explode(' ', $comp->name)[0]), '/'); 
-                
-                if (preg_match("/$symbolWord/", $text) || (strlen($nameSnippet) > 3 && strpos($text, $nameSnippet) !== false)) {
-                    $companyId = $comp->id;
-                    break;
-                }
             }
 
             $category = 'market_intelligence';
@@ -176,6 +215,6 @@ class ScrapeMarketNews extends Command
         // Clear cache so Updates API returns fresh data
         \Illuminate\Support\Facades\Cache::forget('updates_news_insights');
 
-        $this->info("Saved $added new articles.");
+        $this->info("Saved $added new articles. Added $addedBusiness business activities.");
     }
 }
