@@ -5,6 +5,7 @@ import 'package:hive/hive.dart';
 import 'dart:convert';
 import 'package:irshad_mobile/core/widgets/company_avatar.dart';
 import 'package:irshad_mobile/features/stocks/ui/stock_detail_screen.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class UpdatesNewsTab extends StatefulWidget {
   const UpdatesNewsTab({super.key});
@@ -245,7 +246,18 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
   }
 
   Widget _buildMarketCard(Map<String, dynamic> item) {
-    return Container(
+    return GestureDetector(
+      onTap: () async {
+        final url = item['source_url'] as String?;
+        if (url != null && url.isNotEmpty) {
+          try {
+            await launchUrlString(url, mode: LaunchMode.externalApplication);
+          } catch (e) {
+            debugPrint("Could not launch $url");
+          }
+        }
+      },
+      child: Container(
       margin: const EdgeInsets.only(bottom: 12, left: 24, right: 24),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -288,8 +300,22 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
               ],
             ),
           ),
+          if (item['image_url'] != null && (item['image_url'] as String).isNotEmpty)
+            Container(
+              width: 70,
+              height: 70,
+              margin: const EdgeInsets.only(left: 12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                image: DecorationImage(
+                  image: NetworkImage(item['image_url']),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
         ],
       ),
+    ),
     );
   }
 

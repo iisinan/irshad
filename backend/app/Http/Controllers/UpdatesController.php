@@ -70,6 +70,7 @@ class UpdatesController extends Controller
                     'content' => $n->content,
                     'source' => $n->source,
                     'source_url' => $n->source_url,
+                    'image_url' => $n->image_url,
                     'published_at' => $n->published_at,
                     'time_ago' => $n->published_at?->diffForHumans(),
                 ]);

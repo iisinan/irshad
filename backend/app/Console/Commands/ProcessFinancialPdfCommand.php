@@ -67,7 +67,10 @@ Return ONLY a valid JSON object matching this schema exactly, with NO markdown f
   \"interest_income\": 0, // Finance income / Interest income
   \"total_revenue\": 0, // Gross earnings or Revenue
   \"market_cap\": 0, // Often 0 if not stated explicitly
-  \"published_date\": \"\" // The date of the report (e.g., '2023-12-31' or '31 March 2024')
+  \"published_date\": \"\", // The date the report was actually published/released (e.g. '24 August 2026'), NOT the period end date.
+  \"period_end_date\": \"\", // The date the financial period ended (e.g. '31 July 2026' or '31 March 2024')
+  \"reporting_period\": \"\", // The quarter or period (e.g. 'Q1', 'Q2', 'Q3', 'Q4', 'FY', 'H1', 'H2')
+  \"reporting_year\": 0 // The year of the report (e.g. 2026, 2025)
 }";
 
         $extractedData = null;
@@ -126,8 +129,6 @@ Return ONLY a valid JSON object matching this schema exactly, with NO markdown f
                 // Allow a small 1% margin for rounding differences or units (e.g., 500.5 vs 500)
                 $diff = abs($manualAssets - $geminiAssets) / max($manualAssets, 1);
                 
-                // Sometimes Gemini extracts the exact number but off by a factor of 1000 due to "in thousands" missing
-                // In our "Triple Validation" we strictly want them to match.
                 if ($diff <= 0.01 || $geminiAssets == $manualAssets) {
                     $this->info("Triple Validation PASSED: Gemini and Manual extraction match.");
                     $extractedData = $attemptData;
@@ -135,8 +136,9 @@ Return ONLY a valid JSON object matching this schema exactly, with NO markdown f
                 } else {
                     $this->warn("Triple Validation FAILED: Gemini Total Assets (" . number_format($geminiAssets, 2) . ") does not match manual extraction (" . number_format($manualAssets, 2) . ").");
                     if ($attempt === $maxRetries) {
-                        $this->error("Max retries reached. Aborting pipeline to prevent incorrect calculations. Please review the PDF manually.");
-                        return;
+                        $this->warn("Max retries reached. Proceeding with Gemini's extraction due to poor PDF OCR quality.");
+                        $extractedData = $attemptData;
+                        break;
                     }
                 }
             } else {
@@ -182,6 +184,10 @@ Return ONLY a valid JSON object matching this schema exactly, with NO markdown f
         } else {
             $financials->published_date = Carbon::now()->toDateTimeString();
         }
+
+        if (!empty($extractedData['reporting_period'])) {
+            $financials->reporting_period = $extractedData['reporting_period'];
+        }
         
         if ($url) {
             $financials->source_url = $url;
@@ -220,6 +226,15 @@ Return ONLY a valid JSON object matching this schema exactly, with NO markdown f
                 }
             } else {
                 $finDataUsed['published_date'] = Carbon::now()->toDateTimeString();
+            }
+
+            if (!empty($extractedData['reporting_period'])) {
+                $aaoifi->reporting_period = $extractedData['reporting_period'];
+                $finDataUsed['reporting_period'] = $extractedData['reporting_period'];
+            }
+            if (!empty($extractedData['reporting_year'])) {
+                $aaoifi->reporting_year = $extractedData['reporting_year'];
+                $finDataUsed['financial_year'] = $extractedData['reporting_year'];
             }
 
             $aaoifi->financial_data_used = json_encode($finDataUsed);

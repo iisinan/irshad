@@ -145,18 +145,25 @@ const MarketCard = ({ item }) => {
       <div style={{ width: '34px', height: '34px', borderRadius: '10px', background: `color-mix(in srgb, ${categoryColor} 12%, transparent)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '2px' }}>
         <Icon size={15} color={categoryColor} />
       </div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '4px', lineHeight: 1.3 }}>{item.title}</div>
-        {item.content && <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: 1.5, margin: '0 0 8px' }}>{item.content.substring(0, 140)}{item.content.length > 140 ? '...' : ''}</p>}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-          {item.source && <span style={{ fontSize: '0.63rem', color: 'var(--text-muted)', fontWeight: 600 }}>{item.source}</span>}
-          <span style={{ fontSize: '0.63rem', color: 'var(--text-muted)', fontWeight: 600 }}>{item.time_ago}</span>
-          {item.source_url && (
-            <a href={item.source_url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '0.66rem', fontWeight: 800, color: 'var(--primary)', textDecoration: 'none', marginLeft: 'auto' }}>
-              Read More <ExternalLink size={10} />
-            </a>
-          )}
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', gap: '12px', flexDirection: 'row' }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '4px', lineHeight: 1.3 }}>{item.title}</div>
+          {item.content && <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: 1.5, margin: '0 0 8px' }}>{item.content.substring(0, 140)}{item.content.length > 140 ? '...' : ''}</p>}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+            {item.source && <span style={{ fontSize: '0.63rem', color: 'var(--text-muted)', fontWeight: 600 }}>{item.source}</span>}
+            <span style={{ fontSize: '0.63rem', color: 'var(--text-muted)', fontWeight: 600 }}>{item.time_ago}</span>
+            {item.source_url && (
+              <a href={item.source_url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '0.66rem', fontWeight: 800, color: 'var(--primary)', textDecoration: 'none', marginLeft: 'auto' }}>
+                Read More <ExternalLink size={10} />
+              </a>
+            )}
+          </div>
         </div>
+        {item.image_url && (
+          <div style={{ width: '80px', height: '80px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0 }}>
+            <img src={item.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
+        )}
       </div>
     </div>
   );

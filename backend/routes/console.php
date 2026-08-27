@@ -60,3 +60,6 @@ Schedule::command('cache:warm')->hourly()->withoutOverlapping();
 // Scrape NGX Pulse for new financial disclosures twice a day at 7 AM and 7 PM
 Schedule::command('irshad:scrape-disclosures')->timezone('Africa/Lagos')->twiceDaily(7, 19)->withoutOverlapping()->emailOutputTo('iirshad2026@gmail.com');
 Schedule::command('backup:run --only-db')->timezone('Africa/Lagos')->dailyAt('00:00')->withoutOverlapping()->emailOutputTo('iirshad2026@gmail.com');
+
+// Scrape NGXPulse market news daily at 5 AM
+Schedule::command('scrape:market-news')->timezone('Africa/Lagos')->dailyAt('05:00')->withoutOverlapping()->emailOutputTo('iirshad2026@gmail.com');
