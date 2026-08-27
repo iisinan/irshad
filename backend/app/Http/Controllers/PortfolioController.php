@@ -67,7 +67,7 @@ class PortfolioController extends Controller
                 })->reduce(function ($carry, $dividend) {
                     $amount = $dividend->amount;
                     if (strtoupper($dividend->currency) === 'USD') {
-                        $amount *= 1600; // Approximate USD to NGN rate
+                        $amount *= 1370; // Approximate USD to NGN rate
                     }
                     return $carry + $amount;
                 }, 0) ?? 0;
