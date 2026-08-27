@@ -398,6 +398,39 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
       _parseDouble(latestFin['interest_income']) > 0
     );
 
+    bool nearLimitDetected = false;
+    if (_aaoifiData != null) {
+      double debtRatio = _parseDouble(_aaoifiData!['debt_ratio']);
+      double cashRatio = _parseDouble(_aaoifiData!['cash_ratio']);
+      double interestRatio = _parseDouble(_aaoifiData!['impermissible_income_ratio']);
+      if ((debtRatio - 30.0).abs() <= 5.0 || (cashRatio - 30.0).abs() <= 5.0 || (interestRatio - 5.0).abs() <= 1.0) {
+        nearLimitDetected = true;
+      }
+    } else if (latestFin != null) {
+      double marketCap = _parseDouble(latestFin['market_cap']);
+      if (marketCap == 0) marketCap = _parseDouble(_currentStock['market_capitalisation']);
+      double totalAssets = _parseDouble(latestFin['total_assets']);
+      double denominator = marketCap > 0 ? marketCap : totalAssets;
+      double totalDebt = _parseDouble(latestFin['total_debt']);
+      double cash = _parseDouble(latestFin['cash_and_equivalents']);
+      double securities = _parseDouble(latestFin['interest_bearing_securities']);
+      double interestIncome = _parseDouble(latestFin['interest_income']);
+      double totalRevenue = _parseDouble(latestFin['total_revenue']);
+      
+      double debtRatio = denominator > 0 ? (totalDebt / denominator) * 100 : 0.0;
+      double cashRatio = denominator > 0 ? ((cash + securities) / denominator) * 100 : 0.0;
+      double apiInterestRatio = _parseDouble(latestFin['interest_income_ratio']);
+      double interestRatio = apiInterestRatio > 0 ? apiInterestRatio : (totalRevenue > 0 ? (interestIncome / totalRevenue) * 100 : 0.0);
+      
+      if ((debtRatio - 30.0).abs() <= 5.0 || (cashRatio - 30.0).abs() <= 5.0 || (interestRatio - 5.0).abs() <= 1.0) {
+        nearLimitDetected = true;
+      }
+    }
+
+    if (!isHalal) {
+      purificationRequired = false;
+    }
+
     final latestPrice = num.tryParse(_currentStock['latest_price']?.toString() ?? '0') ?? 0.0;
 
     if (_isLoadingDetails) {
@@ -467,7 +500,8 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
               percent: haramRevenuePercent, 
               scholarVerified: isScholarVerified,
               justification: justification,
-              symbol: _currentStock['symbol']),
+              symbol: _currentStock['symbol'],
+              nearLimitDetected: nearLimitDetected),
             
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -700,7 +734,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
       ),
     );
   }
-  Widget _buildStatusHeader(Color color, Color bg, String label, {bool purificationRequired = false, double percent = 0.0, bool scholarVerified = false, String justification = '', String symbol = ''}) {
+  Widget _buildStatusHeader(Color color, Color bg, String label, {bool purificationRequired = false, double percent = 0.0, bool scholarVerified = false, String justification = '', String symbol = '', bool nearLimitDetected = false}) {
     final portfolioProvider = context.watch<PortfolioProvider>();
     final isHolding = portfolioProvider.holdings.any((h) => h['symbol'] == symbol);
     final holdingData = portfolioProvider.holdings.firstWhere(
@@ -869,6 +903,34 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                               'With Purification ${percent > 0 ? '${percent.toStringAsFixed(2)}%' : ''}',
                               style: const TextStyle(
                                 color: Color(0xFFF59E0B),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.2,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  if (nearLimitDetected)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFD97706).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(100),
+                          border: Border.all(color: const Color(0xFFD97706).withOpacity(0.2)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.warning_amber_rounded, color: Color(0xFFD97706), size: 14),
+                            const SizedBox(width: 6),
+                            const Text(
+                              'Near Limit Detected on Financial Screening',
+                              style: TextStyle(
+                                color: Color(0xFF92400E),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 0.2,
@@ -1802,26 +1864,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
   }
 
   Widget _buildAdvancedMetrics() {
-    final valuation = _currentStock['valuation_info'] ?? 'N/A';
-    final growth = _currentStock['growth_info'] ?? 'N/A';
-    
-    if (valuation == 'N/A' && growth == 'N/A') return const SizedBox.shrink();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader('Advanced Metrics'),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(child: _buildMetricCard('VALUATION', valuation, icon: Icons.analytics_outlined)),
-            const SizedBox(width: 12),
-            Expanded(child: _buildMetricCard('GROWTH FORECAST', growth, icon: Icons.rocket_launch_outlined)),
-          ],
-        ),
-        const SizedBox(height: 32),
-      ],
-    );
+    return const SizedBox.shrink();
   }
 
   Widget _buildNewsSection() {
@@ -2050,9 +2093,13 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
     Widget buildRatioCard(int number, String title, String formula, double value, double limit, String numLabel, String denLabel, String numValStr, String denValStr) {
       bool isPass = value <= limit;
       bool isClickable = numValStr != '0' && numValStr != '0 + 0' && numValStr != '0.00' && numValStr != '—';
+      bool isNearLimit = limit == 30 ? (value - 30.0).abs() <= 5.0 : (limit == 5 ? (value - 5.0).abs() <= 1.0 : false);
       
-      return GestureDetector(
-        behavior: HitTestBehavior.opaque,
+      bool isExpanded = false;
+      return StatefulBuilder(
+        builder: (context, setLocalState) {
+          return GestureDetector(
+            behavior: HitTestBehavior.opaque,
         onTap: () {
           if (!isClickable) return;
 
@@ -2277,6 +2324,35 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                       ),
                       const SizedBox(height: 2),
                       Text(formula, style: TextStyle(fontSize: 10, color: context.textMuted, height: 1.2)),
+                      if (isNearLimit) ...[
+                        const SizedBox(height: 6),
+                        GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            setLocalState(() {
+                              isExpanded = !isExpanded;
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFD97706).withOpacity(0.05),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(color: const Color(0xFFD97706).withOpacity(0.2)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.show_chart_rounded, size: 10, color: Color(0xFFD97706)),
+                                const SizedBox(width: 4),
+                                const Text('Near Limit', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: Color(0xFFD97706))),
+                                const SizedBox(width: 2),
+                                Icon(isExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded, size: 12, color: const Color(0xFFD97706)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ]
                   ),
                 ),
@@ -2342,12 +2418,48 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                   ),
                 )
               ]
-            )
+            ),
+            if (isNearLimit && isExpanded) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.only(top: 12),
+                decoration: BoxDecoration(
+                  border: Border(top: BorderSide(color: context.divider.withOpacity(0.5))),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(width: 5, height: 5, decoration: const BoxDecoration(color: Color(0xFFD97706), shape: BoxShape.circle)),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            '$title at ${value.toStringAsFixed(1)}%, approaching the ${limit.toInt()}% limit ${value > limit ? 'from above' : 'from below'}',
+                            style: TextStyle(fontSize: 11, color: context.textDark, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 11),
+                      child: Text(
+                        'Worth monitoring — could shift with updated data.',
+                        style: TextStyle(fontSize: 10, color: context.textMuted),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ]
         ),
       ),
-    );
-  }
+          );
+        },
+      );
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -2385,49 +2497,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
         ),
         const SizedBox(height: 24),
         
-        if ((debtRatio - 30.0).abs() <= 5.0 || (cashRatio - 30.0).abs() <= 5.0 || (interestRatio - 5.0).abs() <= 1.0) ...[
-          Container(
-            margin: const EdgeInsets.only(bottom: 24),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  const Color(0xFFD97706).withValues(alpha: 0.1),
-                  const Color(0xFFD97706).withValues(alpha: 0.05),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFD97706).withValues(alpha: 0.2)),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(color: const Color(0xFFD97706).withValues(alpha: 0.15), blurRadius: 4, offset: const Offset(0, 2)),
-                    ],
-                  ),
-                  child: const Icon(Icons.warning_amber_rounded, color: Color(0xFFD97706), size: 14),
-                ),
-                const SizedBox(width: 10),
-                const Expanded(
-                  child: Text(
-                    "Near Limit Detected on Financial Screening",
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF92400E),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+
 
         buildRatioCard(1, 'Debt ratio', 'Total Debt / $denominatorLabel × 100', debtRatio, 30, 
           'Total Debt', denominatorLabel, formatCompact(totalDebt), formatCompact(denominator)),

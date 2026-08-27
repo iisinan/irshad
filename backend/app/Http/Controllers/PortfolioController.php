@@ -31,7 +31,7 @@ class PortfolioController extends Controller
                 'company.aaoifiScreening:id,company_id,impermissible_income_ratio',
                 'company.latestDividend',
                 'company.dividends' => function ($query) {
-                    $query->where('status', 'paid')
+                    $query->whereIn('status', ['paid', 'upcoming', 'declared'])
                         ->where('pay_date', '>=', now()->subMonths(12));
                 },
             ])
