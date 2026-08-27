@@ -67,6 +67,9 @@ class ScrapeMarketNews extends Command
             'party', 'opposition', 'ruling'
         ];
 
+        $dividendKeywords = ['dividend', 'payout', 'yield', 'bonus share'];
+        $analysisKeywords = ['earnings', 'profit', 'loss', 'revenue', 'quarter', 'q1', 'q2', 'q3', 'q4', 'annual report', 'financial statement', 'screening', 'aaoifi'];
+
         $companies = Company::all();
         $added = 0;
 
@@ -82,7 +85,6 @@ class ScrapeMarketNews extends Command
                     break;
                 }
             }
-
             if ($isNonFinancial) continue;
 
             $isFinancial = false;
@@ -92,13 +94,35 @@ class ScrapeMarketNews extends Command
                     break;
                 }
             }
-
             if (!$isFinancial) continue;
 
             $url = $item['link'] ?? '';
             if (empty($url)) continue;
 
             if (NewsArticle::where('source_url', $url)->exists()) {
+                // If it already exists, maybe we can update its category just in case it was misclassified before
+                $existing = NewsArticle::where('source_url', $url)->first();
+                $cat = 'market_intelligence';
+                
+                foreach ($dividendKeywords as $kw) {
+                    if (preg_match('/\b' . preg_quote($kw, '/') . '\b/', $text)) {
+                        $cat = 'dividend';
+                        break;
+                    }
+                }
+                
+                if ($cat === 'market_intelligence') {
+                    foreach ($analysisKeywords as $kw) {
+                        if (preg_match('/\b' . preg_quote($kw, '/') . '\b/', $text)) {
+                            $cat = 'earnings';
+                            break;
+                        }
+                    }
+                }
+                
+                if ($existing->category !== $cat) {
+                    $existing->update(['category' => $cat]);
+                }
                 continue; 
             }
 
@@ -117,13 +141,31 @@ class ScrapeMarketNews extends Command
                 }
             }
 
+            $category = 'market_intelligence';
+            
+            foreach ($dividendKeywords as $kw) {
+                if (preg_match('/\b' . preg_quote($kw, '/') . '\b/', $text)) {
+                    $category = 'dividend';
+                    break;
+                }
+            }
+            
+            if ($category === 'market_intelligence') {
+                foreach ($analysisKeywords as $kw) {
+                    if (preg_match('/\b' . preg_quote($kw, '/') . '\b/', $text)) {
+                        $category = 'earnings'; // which gets grouped under analysis
+                        break;
+                    }
+                }
+            }
+
             NewsArticle::create([
                 'title' => $title,
                 'source_url' => $url,
                 'source' => $item['source'] ?? 'News',
                 'image_url' => $item['image'] ?? null,
                 'content' => mb_strimwidth($cleanDesc, 0, 1000, '...'),
-                'category' => 'market_intelligence',
+                'category' => $category,
                 'published_at' => isset($item['published_at']) ? Carbon::parse($item['published_at']) : now(),
                 'company_id' => $companyId
             ]);
@@ -134,6 +176,6 @@ class ScrapeMarketNews extends Command
         // Clear cache so Updates API returns fresh data
         \Illuminate\Support\Facades\Cache::forget('updates_news_insights');
 
-        $this->info("Saved $added new market intelligence articles.");
+        $this->info("Saved $added new articles.");
     }
 }
