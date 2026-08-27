@@ -31,8 +31,8 @@ class AdminComplianceController extends Controller
             $filter = $request->input('filter');
             if ($filter === 'to-halal') {
                 $query->where('new_status', 'halal');
-            } elseif ($filter === 'to-nonhalal') {
-                $query->where('new_status', 'non-halal');
+            } elseif ($filter === 'to-noncompliant') {
+                $query->where('new_status', 'non-compliant');
             }
         }
 
@@ -45,7 +45,7 @@ class AdminComplianceController extends Controller
     {
         $totalStocks = Company::count();
         $halalStocks = Company::where('current_status', 'halal')->count();
-        $nonHalalStocks = Company::where('current_status', 'non-halal')->count();
+        $nonHalalStocks = Company::where('current_status', 'non-compliant')->count();
         $doubtfulStocks = Company::where('current_status', 'doubtful')->count();
         $pendingReviews = ComplianceReview::where('status', 'pending')->count();
 
@@ -76,8 +76,8 @@ class AdminComplianceController extends Controller
             $filter = $request->input('filter');
             if ($filter === 'to-halal') {
                 $query->where('new_status', 'halal');
-            } elseif ($filter === 'to-nonhalal') {
-                $query->where('new_status', 'non-halal');
+            } elseif ($filter === 'to-noncompliant') {
+                $query->where('new_status', 'non-compliant');
             }
         }
 
@@ -120,8 +120,8 @@ class AdminComplianceController extends Controller
             $filter = $request->input('filter');
             if ($filter === 'to-halal') {
                 $query->where('new_status', 'halal');
-            } elseif ($filter === 'to-nonhalal') {
-                $query->where('new_status', 'non-halal');
+            } elseif ($filter === 'to-noncompliant') {
+                $query->where('new_status', 'non-compliant');
             }
         }
 

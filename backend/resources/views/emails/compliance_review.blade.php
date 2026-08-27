@@ -63,7 +63,7 @@
             letter-spacing: 0.3px;
         }
         .badge-halal     { background: #dcfce7; color: #166534; }
-        .badge-non-halal { background: #fee2e2; color: #991b1b; }
+        .badge-non-compliant { background: #fee2e2; color: #991b1b; }
         .badge-doubtful  { background: #fef3c7; color: #92400e; }
         .badge-unknown   { background: #f1f5f9; color: #475569; }
         /* Reasoning */
@@ -155,8 +155,8 @@
                 <td>
                     @if($review->old_status === 'halal')
                         <span class="badge badge-halal">✅ Halal</span>
-                    @elseif($review->old_status === 'non-halal')
-                        <span class="badge badge-non-halal">❌ Non-Halal</span>
+                    @elseif($review->old_status === 'non-compliant')
+                        <span class="badge badge-non-compliant">❌ Non-Compliant</span>
                     @elseif($review->old_status === 'doubtful')
                         <span class="badge badge-doubtful">⚠️ Doubtful</span>
                     @else
@@ -169,8 +169,8 @@
                 <td>
                     @if($review->new_status === 'halal')
                         <span class="badge badge-halal">✅ Halal</span>
-                    @elseif($review->new_status === 'non-halal')
-                        <span class="badge badge-non-halal">❌ Non-Halal</span>
+                    @elseif($review->new_status === 'non-compliant')
+                        <span class="badge badge-non-compliant">❌ Non-Compliant</span>
                     @elseif($review->new_status === 'doubtful')
                         <span class="badge badge-doubtful">⚠️ Doubtful</span>
                     @else
