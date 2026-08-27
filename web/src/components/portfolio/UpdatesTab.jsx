@@ -54,8 +54,8 @@ function LiveClock({ hijriDate, compact = false }) {
 
   if (compact) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--body-bg)', padding: '8px 16px', borderRadius: '14px', border: '1px solid var(--border)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '2px', fontFamily: 'var(--mono, monospace)', fontVariantNumeric: 'tabular-nums' }}>
+      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--body-bg)', padding: '8px 16px', borderRadius: '14px', border: '1px solid var(--border)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)' }}>
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '2px', fontFamily: 'var(--mono, monospace)', fontVariantNumeric: 'tabular-nums' }}>
           <span style={{ fontSize: '1.15rem', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-0.5px' }}>{hh}:{mm}</span>
           <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)', opacity: 0.7, marginLeft: '2px' }}>{ss}</span>
         </div>
@@ -73,7 +73,7 @@ function LiveClock({ hijriDate, compact = false }) {
 
   return (
     <div style={{
-      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center',
       background: 'var(--bg-section)',
       border: '1px solid var(--border)',
       borderRadius: '18px',
@@ -83,7 +83,7 @@ function LiveClock({ hijriDate, compact = false }) {
       flexShrink: 0,
     }}>
       <div style={{
-        display: 'flex', alignItems: 'center', gap: '2px',
+        position: 'relative', display: 'flex', alignItems: 'center', gap: '2px',
         fontFamily: 'var(--mono, monospace)',
         fontVariantNumeric: 'tabular-nums',
       }}>
@@ -122,6 +122,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
   const tabs = [
     {
       id: 'news',
+      hasNew: unreadNews > 0,
       label: 'News & Insights',
       icon: Newspaper,
       description: 'Compliance updates, business activity & market intelligence',
@@ -130,7 +131,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
       id: 'inbox',
       label: 'Inbox',
       icon: Bell,
-      badge: unreadCount,
+      hasNew: unreadInbox > 0,
       description: 'Your personal notifications & alerts',
     },
     {
@@ -162,7 +163,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
         borderRadius: '20px',
         padding: '16px 24px',
         marginBottom: '24px',
-        display: 'flex',
+        position: 'relative', display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         flexWrap: 'wrap',
@@ -174,7 +175,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
         {/* Subtle decorative glow orb */}
         <div style={{ position: 'absolute', top: '-50%', left: '-5%', width: '150px', height: '150px', background: 'radial-gradient(circle, var(--primary-50) 0%, transparent 70%)', zIndex: 0, opacity: 0.6, pointerEvents: 'none' }} />
         
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', zIndex: 1 }}>
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', zIndex: 1 }}>
           <div style={{ 
             fontSize: '1.8rem', 
             lineHeight: 1, 
@@ -182,7 +183,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
             width: '48px', 
             height: '48px', 
             borderRadius: '16px', 
-            display: 'flex', 
+            position: 'relative', display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'center',
             boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
@@ -194,7 +195,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
             <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--primary)', marginBottom: '2px', fontFamily: '"Amiri", "Scheherazade New", serif', opacity: 0.9 }}>
               ٱلسَّلَامُ عَلَيْكُمْ وَرَحْمَةُ ٱللَّٰهِ وَبَرَكَاتُهُ
             </div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-0.4px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-0.4px', position: 'relative', display: 'flex', alignItems: 'center', gap: '10px' }}>
               {greeting.english}, {firstName}
               {unreadCount > 0 && (
                 <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'white', background: 'var(--primary)', padding: '2px 8px', borderRadius: '100px', boxShadow: '0 2px 8px var(--primary-50)' }}>
@@ -214,7 +215,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
 
       {/* ── Sub-tab Navigation ── */}
       <div className="hide-scrollbar" style={{
-        display: 'flex',
+        position: 'relative', display: 'flex',
         alignItems: 'center',
         gap: '12px',
         marginBottom: '24px',
@@ -239,7 +240,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
               }}
               className={`animate-slide-up stagger-${index + 1}`}
               style={{
-                display: 'flex',
+                position: 'relative', display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
                 padding: '10px 18px',

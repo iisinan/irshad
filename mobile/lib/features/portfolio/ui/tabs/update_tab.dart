@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
+import 'package:irshad_mobile/core/api/api_service.dart';
 import 'package:irshad_mobile/core/providers/app_state_provider.dart';
 
 import 'updates/updates_news_tab.dart';
@@ -19,6 +20,28 @@ class UpdateTab extends StatefulWidget {
 
 class _UpdateTabState extends State<UpdateTab> {
   String _activeTabId = 'news';
+  int _unreadInbox = 0;
+  int _unreadNews = 1; // Default to 1 to show the red dot
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUnreadCounts();
+  }
+
+  Future<void> _fetchUnreadCounts() async {
+    try {
+      final response = await ApiService().get('notifications/unread-count');
+      if (response.statusCode == 200) {
+        if (mounted) {
+          setState(() {
+            _unreadInbox = response.data['data']?['count'] ?? response.data['count'] ?? 0;
+          });
+        }
+      }
+    } catch (_) {}
+  }
+
 
   final List<Map<String, dynamic>> _tabs = [
     {'id': 'news', 'label': 'News & Insights', 'icon': Icons.newspaper_rounded},
@@ -30,7 +53,7 @@ class _UpdateTabState extends State<UpdateTab> {
 
   @override
   Widget build(BuildContext context) {
-    final unreadCount = 0; // Ideally fetch from a provider later
+    
 
     return SingleChildScrollView(
       child: Column(
@@ -145,7 +168,7 @@ class _UpdateTabState extends State<UpdateTab> {
       child: Row(
         children: _tabs.map((tab) {
           final isActive = _activeTabId == tab['id'];
-          final isInbox = tab['id'] == 'inbox';
+          final hasNew = (tab['id'] == 'inbox' && _unreadInbox > 0) || (tab['id'] == 'news' && _unreadNews > 0);
           
           return GestureDetector(
             onTap: () => setState(() => _activeTabId = tab['id']),
@@ -159,33 +182,35 @@ class _UpdateTabState extends State<UpdateTab> {
                 borderRadius: BorderRadius.circular(30),
                 boxShadow: isActive ? [BoxShadow(color: context.primary.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 2))] : [],
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
+              child: Stack(
+                clipBehavior: Clip.none,
                 children: [
-                  Icon(tab['icon'], size: 16, color: isActive ? Colors.white : context.textDark),
-                  const SizedBox(width: 8),
-                  Text(
-                    tab['label'],
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
-                      color: isActive ? Colors.white : context.textDark,
-                    ),
-                  ),
-                  if (isInbox && unreadCount > 0)
-                    Container(
-                      margin: const EdgeInsets.only(left: 6),
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: isActive ? Colors.white : context.primary,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        unreadCount > 99 ? '99+' : unreadCount.toString(),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(tab['icon'], size: 16, color: isActive ? Colors.white : context.textDark),
+                      const SizedBox(width: 8),
+                      Text(
+                        tab['label'],
                         style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w900,
-                          color: isActive ? context.primary : Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          color: isActive ? Colors.white : context.textDark,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (hasNew)
+                    Positioned(
+                      top: -2,
+                      right: -8,
+                      child: Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: context.haram,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: isActive ? context.primary : context.bgAlt, width: 1.5),
                         ),
                       ),
                     ),
