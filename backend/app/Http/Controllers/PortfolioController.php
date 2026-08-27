@@ -64,7 +64,13 @@ class PortfolioController extends Controller
                     $dividendDt = $dividend->pay_date ? \Carbon\Carbon::parse($dividend->pay_date) : 
                                   ($dividend->ex_date ? \Carbon\Carbon::parse($dividend->ex_date) : $dividend->created_at);
                     return $dividendDt->isAfter($latestPurificationDate);
-                })->sum('amount') ?? 0;
+                })->reduce(function ($carry, $dividend) {
+                    $amount = $dividend->amount;
+                    if (strtoupper($dividend->currency) === 'USD') {
+                        $amount *= 1600; // Approximate USD to NGN rate
+                    }
+                    return $carry + $amount;
+                }, 0) ?? 0;
                 
                 $totalDividendsReceived = $holding->shares * $trailingDividendsPerShare;
                 $purificationDue = $isHalal ? $totalDividendsReceived * ($nonCompliantRatio / 100) : 0;
