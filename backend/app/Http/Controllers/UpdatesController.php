@@ -11,10 +11,6 @@ use Illuminate\Http\Request;
 
 class UpdatesController extends Controller
 {
-    /**
-     * GET /v1/updates/news
-     * Returns all News & Insights data in a single response.
-     */
     public function newsAndInsights(Request $request): JsonResponse
     {
         $data = \Illuminate\Support\Facades\Cache::remember('updates_news_insights', now()->addHours(1), function () {
@@ -55,30 +51,50 @@ class UpdatesController extends Controller
                     'time_ago' => $b->date_detected?->diffForHumans(),
                 ]);
 
-            // 3. Market Intelligence (from news_articles, category = market_intelligence etc.)
+            $mapNews = fn ($n) => [
+                'id' => $n->id,
+                'symbol' => $n->company?->symbol,
+                'name' => $n->company?->name,
+                'title' => $n->title,
+                'category' => $n->category,
+                'content' => $n->content,
+                'source' => $n->source,
+                'source_url' => $n->source_url,
+                'image_url' => $n->image_url,
+                'published_at' => $n->published_at,
+                'time_ago' => $n->published_at?->diffForHumans(),
+            ];
+
+            // 3. Market Intelligence
             $marketIntelligence = NewsArticle::with('company:id,symbol,name')
-                ->whereIn('category', ['market_intelligence', 'earnings', 'dividend', 'aaoifi', 'screening'])
+                ->where('category', 'market_intelligence')
                 ->orderBy('published_at', 'desc')
                 ->limit(15)
                 ->get()
-                ->map(fn ($n) => [
-                    'id' => $n->id,
-                    'symbol' => $n->company?->symbol,
-                    'name' => $n->company?->name,
-                    'title' => $n->title,
-                    'category' => $n->category,
-                    'content' => $n->content,
-                    'source' => $n->source,
-                    'source_url' => $n->source_url,
-                    'image_url' => $n->image_url,
-                    'published_at' => $n->published_at,
-                    'time_ago' => $n->published_at?->diffForHumans(),
-                ]);
+                ->map($mapNews);
+
+            // 4. Dividends
+            $dividends = NewsArticle::with('company:id,symbol,name')
+                ->where('category', 'dividend')
+                ->orderBy('published_at', 'desc')
+                ->limit(10)
+                ->get()
+                ->map($mapNews);
+
+            // 5. Analysis (earnings, screening, aaoifi)
+            $analysis = NewsArticle::with('company:id,symbol,name')
+                ->whereIn('category', ['earnings', 'screening', 'aaoifi'])
+                ->orderBy('published_at', 'desc')
+                ->limit(10)
+                ->get()
+                ->map($mapNews);
 
             return [
                 'compliance_changes' => $complianceChanges,
                 'business_updates' => $businessUpdates,
                 'market_intelligence' => $marketIntelligence,
+                'dividends' => $dividends,
+                'analysis' => $analysis,
             ];
         });
 
@@ -87,10 +103,6 @@ class UpdatesController extends Controller
         ]);
     }
 
-    /**
-     * GET /v1/updates/digest
-     * Return the current user's digest preference.
-     */
     public function digestPreference(Request $request): JsonResponse
     {
         $pref = WeeklyDigestPreference::firstOrCreate(
@@ -101,10 +113,6 @@ class UpdatesController extends Controller
         return response()->json(['data' => $pref]);
     }
 
-    /**
-     * PUT /v1/updates/digest
-     * Save the user's digest preference.
-     */
     public function updateDigestPreference(Request $request): JsonResponse
     {
         $validated = $request->validate([

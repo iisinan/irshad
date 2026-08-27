@@ -215,13 +215,17 @@ export default function UpdatesNews() {
   }, []);
 
   const sections = [
-        { id: 'business',    label: 'Business Activity',   icon: Zap,       color: 'var(--doubtful)' },
+    { id: 'business',    label: 'Business Activity',   icon: Zap,       color: 'var(--doubtful)' },
     { id: 'market',      label: 'Market Intelligence', icon: BarChart2,  color: 'var(--primary)' },
+    { id: 'dividends',   label: 'Dividends',           icon: Star,       color: 'var(--gold)' },
+    { id: 'analysis',    label: 'Analysis',            icon: TrendingUp, color: '#8b5cf6' },
   ];
 
   const complianceChanges  = data?.compliance_changes  || [];
   const businessUpdates    = data?.business_updates    || [];
   const marketIntelligence = data?.market_intelligence || [];
+  const dividendsData      = data?.dividends           || [];
+  const analysisData       = data?.analysis            || [];
 
   return (
     <div>
@@ -287,6 +291,30 @@ export default function UpdatesNews() {
                 {marketIntelligence.length === 0
                   ? <EmptyState icon={Newspaper} title="No Market News" subtitle="No market intelligence articles available right now. Check back soon." color="var(--primary)" />
                   : marketIntelligence.map(item => <MarketCard key={item.id} item={item} />)
+                }
+              </div>
+            </>
+          )}
+
+          {activeSection === 'dividends' && (
+            <>
+              <SectionHeader icon={Star} title="Dividends & Payouts" count={dividendsData.length} color="var(--gold)" />
+              <div style={{ maxHeight: '600px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingRight: '6px' }} className="custom-scrollbar">
+                {dividendsData.length === 0
+                  ? <EmptyState icon={Star} title="No Dividend News" subtitle="No recent dividend announcements detected." color="var(--gold)" />
+                  : dividendsData.map(item => <MarketCard key={item.id} item={item} />)
+                }
+              </div>
+            </>
+          )}
+
+          {activeSection === 'analysis' && (
+            <>
+              <SectionHeader icon={TrendingUp} title="Earnings & Analysis" count={analysisData.length} color="#8b5cf6" />
+              <div style={{ maxHeight: '600px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingRight: '6px' }} className="custom-scrollbar">
+                {analysisData.length === 0
+                  ? <EmptyState icon={TrendingUp} title="No Analysis Available" subtitle="No earnings or technical analysis updates right now." color="#8b5cf6" />
+                  : analysisData.map(item => <MarketCard key={item.id} item={item} />)
                 }
               </div>
             </>

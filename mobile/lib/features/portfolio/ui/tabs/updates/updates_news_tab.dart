@@ -85,9 +85,10 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
     final complianceChanges = _data?['compliance_changes'] ?? [];
     
     final sections = [
-      
       {'id': 'business', 'label': 'Business Activity', 'icon': Icons.bolt_outlined, 'color': const Color(0xFFF59E0B)},
       {'id': 'market', 'label': 'Market Intelligence', 'icon': Icons.bar_chart_outlined, 'color': context.primary},
+      {'id': 'dividends', 'label': 'Dividends', 'icon': Icons.star_outline, 'color': const Color(0xFFEAB308)},
+      {'id': 'analysis', 'label': 'Analysis', 'icon': Icons.trending_up_outlined, 'color': const Color(0xFF8B5CF6)},
     ];
 
     return SingleChildScrollView(
@@ -329,6 +330,10 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
       items = _data?['business_updates'] ?? [];
     } else if (_activeSection == 'market') {
       items = _data?['market_intelligence'] ?? [];
+    } else if (_activeSection == 'dividends') {
+      items = _data?['dividends'] ?? [];
+    } else if (_activeSection == 'analysis') {
+      items = _data?['analysis'] ?? [];
     }
 
     return Column(
