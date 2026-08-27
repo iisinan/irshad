@@ -17,7 +17,7 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
   bool _isLoading = true;
   String? _error;
   Map<String, dynamic>? _data;
-  String _activeSection = 'compliance';
+  String _activeSection = 'business';
 
   @override
   void initState() {
@@ -84,7 +84,7 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
     final complianceChanges = _data?['compliance_changes'] ?? [];
     
     final sections = [
-      {'id': 'compliance', 'label': 'Compliance Changes', 'icon': Icons.shield_outlined, 'color': context.primary, 'count': complianceChanges.length},
+      
       {'id': 'business', 'label': 'Business Activity', 'icon': Icons.bolt_outlined, 'color': const Color(0xFFF59E0B)},
       {'id': 'market', 'label': 'Market Intelligence', 'icon': Icons.bar_chart_outlined, 'color': context.primary},
     ];
@@ -176,88 +176,6 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
       child: Text(
         label,
         style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: color),
-      ),
-    );
-  }
-
-  Widget _buildComplianceCard(Map<String, dynamic> item) {
-    final isWorsening = item['new_status'] == 'non_compliant' || item['new_status'] == 'non-compliant';
-    final isImproving = item['new_status'] == 'halal' && (item['previous_status'] == 'non_compliant' || item['previous_status'] == 'non-compliant');
-    final borderColor = isWorsening ? context.appColors.haram : isImproving ? context.appColors.halal : context.appColors.divider;
-
-    return GestureDetector(
-      onTap: () => StockDetailScreen.openWithLoading(context, item),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12, left: 24, right: 24),
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: context.bg,
-          border: Border.all(color: borderColor.withValues(alpha: 0.5)),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4)),
-          ],
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CompanyAvatar(symbol: item['symbol'], logoUrl: item['logo_url'], size: 40),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(item['name'] ?? item['symbol'] ?? '', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: context.textDark)),
-                            Text(item['symbol'] ?? '', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: context.textMuted)),
-                          ],
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          _buildStatusBadge(item['previous_status']),
-                          const Icon(Icons.arrow_downward_rounded, size: 12, color: Colors.grey),
-                          _buildStatusBadge(item['new_status']),
-                        ],
-                      )
-                    ],
-                  ),
-                  if (item['reason'] != null)
-                    Container(
-                      margin: const EdgeInsets.only(top: 10, bottom: 8),
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: isWorsening ? context.appColors.haramBg : context.bgAlt,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: RichText(
-                        text: TextSpan(
-                          style: TextStyle(fontSize: 12, color: context.appColors.textBody, height: 1.4, fontFamily: 'Manrope'),
-                          children: [
-                            const TextSpan(text: 'Reason: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                            TextSpan(text: item['reason']),
-                          ],
-                        ),
-                      ),
-                    ),
-                  const SizedBox(height: 8),
-                  Text(
-                    item['time_ago'] ?? '',
-                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: context.textMuted),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -381,9 +299,7 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
     if (_error != null) return Center(child: Text(_error!, style: const TextStyle(color: Colors.red)));
 
     List<dynamic> items = [];
-    if (_activeSection == 'compliance') {
-      items = _data?['compliance_changes'] ?? [];
-    } else if (_activeSection == 'business') {
+    if (_activeSection == 'business') {
       items = _data?['business_updates'] ?? [];
     } else if (_activeSection == 'market') {
       items = _data?['market_intelligence'] ?? [];
@@ -405,7 +321,6 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
           )
         else
           ...items.map((item) {
-            if (_activeSection == 'compliance') return _buildComplianceCard(item);
             if (_activeSection == 'business') return _buildBusinessCard(item);
             return _buildMarketCard(item);
           }),

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Newspaper, Bell, Moon, Clock, Star, Mail, Droplet } from 'lucide-react';
+import { Newspaper, Bell, Moon, Clock, Star, Mail, Droplet, Shield } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import IslamicQuote from '../IslamicQuote';
 import UpdatesNews    from './UpdatesNews';
 import UpdatesInbox   from './UpdatesInbox';
 import UpdatesDigest  from './UpdatesDigest';
 import UpdatesPurification from './UpdatesPurification';
+import UpdatesCompliance  from './UpdatesCompliance';
 
 /* ── Greeting helpers ── */
 function getGreeting() {
@@ -137,6 +138,12 @@ export default function UpdatesTab({ unreadCount = 0 }) {
       label: 'Irshad Digest',
       icon: Mail,
       description: 'Portfolio compliance status summary',
+    },
+    {
+      id: 'compliance',
+      label: 'Compliance Changes',
+      icon: Shield,
+      description: 'Recent status changes for screened companies',
     },
     {
       id: 'purification',

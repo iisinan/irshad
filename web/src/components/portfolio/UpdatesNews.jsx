@@ -66,63 +66,6 @@ const SectionHeader = ({ icon: Icon, title, count, color = 'var(--primary)' }) =
 );
 
 
-/* ── Compliance Change Card ── */
-const ComplianceCard = ({ item }) => {
-  const isWorsening = item.new_status === 'non_compliant' || item.new_status === 'non-compliant';
-  const isImproving = (item.new_status === 'halal') && (item.previous_status === 'non_compliant' || item.previous_status === 'non-compliant');
-  const navigate = useNavigate();
-
-  return (
-    <div className="animate-slide-up" style={{
-      background: 'var(--bg)',
-      border: `1px solid ${isWorsening ? 'var(--non-compliant-border)' : isImproving ? 'var(--halal-border)' : 'var(--border)'}`,
-      borderRadius: '16px',
-      padding: '18px',
-      transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-      display: 'flex',
-      gap: '14px',
-      alignItems: 'flex-start',
-      cursor: 'pointer',
-    }}
-      onClick={() => navigate(`/market/${item.symbol}/aaoifi`)}
-      onMouseEnter={e => { e.currentTarget.style.boxShadow = 'var(--shadow-md)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = isWorsening ? 'var(--non-compliant)' : isImproving ? 'var(--halal)' : 'var(--primary-100)'; }}
-      onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderColor = isWorsening ? 'var(--non-compliant-border)' : isImproving ? 'var(--halal-border)' : 'var(--border)'; }}
-    >
-      <div style={{ flexShrink: 0 }}>
-        <CompanyLogo symbol={item.symbol} logoUrl={item.logo_url} size={40} />
-      </div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap', marginBottom: '10px' }}>
-          <div>
-            <div style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-dark)' }}>{item.name || item.symbol}</div>
-            <div style={{ fontSize: '0.69rem', fontWeight: 700, color: 'var(--text-muted)' }}>{item.symbol}</div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <StatusBadge status={item.previous_status?.replace('-', '_')} />
-            <ArrowRight size={12} color="var(--text-muted)" />
-            <StatusBadge status={item.new_status?.replace('-', '_')} />
-          </div>
-        </div>
-        {item.reason && (
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-body)', lineHeight: 1.5, marginBottom: '10px', padding: '8px 12px', background: isWorsening ? 'var(--non-compliant-bg)' : 'var(--bg-section)', borderRadius: '10px' }}>
-            <span style={{ fontWeight: 700 }}>Reason: </span>{item.reason}
-          </div>
-        )}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
-          <span style={{ fontSize: '0.66rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-            Updated: {item.updated_at ? new Date(item.updated_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : item.time_ago}
-          </span>
-          {item.report_url && (
-            <a href={item.report_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.69rem', fontWeight: 800, color: 'var(--primary)', textDecoration: 'none' }}>
-              View Report <ExternalLink size={11} />
-            </a>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
 /* ── Business Update Card ── */
 const BusinessCard = ({ item }) => {
   const typeColors = {
@@ -237,7 +180,7 @@ export default function UpdatesNews() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeSection, setActiveSection] = useState('compliance');
+  const [activeSection, setActiveSection] = useState('business');
 
   const load = async (silent = false) => {
     try {
@@ -265,8 +208,7 @@ export default function UpdatesNews() {
   }, []);
 
   const sections = [
-    { id: 'compliance',  label: 'Compliance Changes',  icon: Shield,    color: 'var(--primary)' },
-    { id: 'business',    label: 'Business Activity',   icon: Zap,       color: 'var(--doubtful)' },
+        { id: 'business',    label: 'Business Activity',   icon: Zap,       color: 'var(--doubtful)' },
     { id: 'market',      label: 'Market Intelligence', icon: BarChart2,  color: 'var(--primary)' },
   ];
 
@@ -317,17 +259,7 @@ export default function UpdatesNews() {
         <EmptyState icon={AlertTriangle} title="Failed to Load" subtitle={error} color="var(--non-compliant)" />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {activeSection === 'compliance' && (
-            <>
-              <SectionHeader icon={Shield} title="Compliance Status Changes" count={complianceChanges.length} color="var(--non-compliant)" />
-              <div style={{ maxHeight: '600px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingRight: '6px' }} className="custom-scrollbar">
-                {complianceChanges.length === 0
-                  ? <EmptyState icon={CheckCircle2} title="No Recent Changes" subtitle="No companies have changed compliance status recently. You're all clear!" color="var(--halal)" />
-                  : complianceChanges.map(item => <ComplianceCard key={item.id} item={item} />)
-                }
-              </div>
-            </>
-          )}
+          
 
           {activeSection === 'business' && (
             <>
