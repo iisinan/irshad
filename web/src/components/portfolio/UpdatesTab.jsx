@@ -122,7 +122,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
   const tabs = [
     {
       id: 'news',
-      hasNew: unreadNews > 0,
+      hasNew: false,
       label: 'News & Insights',
       icon: Newspaper,
       description: 'Compliance updates, business activity & market intelligence',
@@ -131,7 +131,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
       id: 'inbox',
       label: 'Inbox',
       icon: Bell,
-      hasNew: unreadInbox > 0,
+      hasNew: unreadCount > 0,
       description: 'Your personal notifications & alerts',
     },
     {
