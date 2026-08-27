@@ -127,7 +127,13 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
   Widget build(BuildContext context) {
     if (_isLoading) return Center(child: CircularProgressIndicator(color: context.primary));
     if (_error != null) return Center(child: Text(_error!, style: const TextStyle(color: Colors.red)));
-    if (_notifications.isEmpty) {
+    
+    final filteredNotifications = _notifications.where((n) {
+      final cat = n['category'];
+      return cat != 'market_news' && cat != 'business_activity';
+    }).toList();
+
+    if (filteredNotifications.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -142,9 +148,9 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
 
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-      itemCount: _notifications.length,
+      itemCount: filteredNotifications.length,
       itemBuilder: (context, index) {
-        final item = _notifications[index];
+        final item = filteredNotifications[index];
         final isUnread = item['read_at'] == null;
         final category = item['category'] ?? 'system';
 

@@ -36,8 +36,6 @@ const NotifSkeleton = () => {
 const CATEGORY_CONFIG = {
   portfolio:         { icon: TrendingUp, color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)',   label: 'Portfolio' },
   screening:         { icon: Shield,     color: 'var(--primary)',   bg: 'var(--primary-50)',   label: 'Screening' },
-  market_news:       { icon: BarChart2,  color: '#0ea5e9',          bg: 'rgba(14,165,233,0.1)', label: 'Market News' },
-  business_activity: { icon: Zap,        color: 'var(--doubtful)',  bg: 'var(--doubtful-bg)',  label: 'Business Activity' },
   price_alerts:      { icon: Bell,       color: 'var(--gold)',      bg: 'var(--gold-50)',      label: 'Price Alerts' },
   system:            { icon: Settings,   color: 'var(--text-muted)', bg: 'var(--bg-section)', label: 'System' },
   security:          { icon: Lock,       color: 'var(--non-compliant)', bg: 'var(--non-compliant-bg)', label: 'Security' },
@@ -250,7 +248,7 @@ export default function UpdatesInbox() {
     }
   };
 
-  const displayedNotifications = notifications;
+  const displayedNotifications = notifications.filter(n => n.category !== 'market_news' && n.category !== 'business_activity');
 
   return (
     <div style={{ width: '100%', maxWidth: '100%' }}>
