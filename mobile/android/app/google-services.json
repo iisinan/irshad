@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "900192262603-89g0piqdq28rangbrfsn50n440tr85u5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.irshad.com",
+            "certificate_hash": "f1a92fc85d63cde0c7253745da3508ec34c16eae"
+          }
+        },
+        {
           "client_id": "900192262603-ebfiba92po77lppol5ld6gfmja4kihf0.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
