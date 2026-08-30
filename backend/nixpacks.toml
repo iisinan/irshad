@@ -14,4 +14,4 @@ cmds = [
 ]
 
 [phases.setup]
-nixPkgs = ["...", "postgresql_15"]
+aptPkgs = ["...", "postgresql-client"]
