@@ -79,6 +79,21 @@ class _UpdatesComplianceTabState extends State<UpdatesComplianceTab> {
     }
   }
 
+  Widget _buildStatusBadge(String? status) {
+    if (status == null) return const SizedBox.shrink();
+    final s = status.toLowerCase().replaceAll('-', '_');
+    final isHalal = s == 'halal' || s == 'compliant';
+    final isHaram = s == 'non_compliant';
+    final color = isHalal ? const Color(0xFF22c55e) : isHaram ? const Color(0xFFef4444) : const Color(0xFFf59e0b);
+    final bg = isHalal ? const Color(0xFFf0fdf4) : isHaram ? const Color(0xFFfef2f2) : const Color(0xFFFFFBEB);
+    final label = isHalal ? 'Compliant' : isHaram ? 'Non-Compliant' : 'Doubtful';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(8)),
+      child: Text(label, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: color)),
+    );
+  }
+
   Widget _buildComplianceCard(Map<String, dynamic> item) {
     final isWorsening = item['new_status'] == 'non_compliant' || item['new_status'] == 'non-compliant';
     final isImproving = item['new_status'] == 'halal' && (item['previous_status'] == 'non_compliant' || item['previous_status'] == 'non-compliant');

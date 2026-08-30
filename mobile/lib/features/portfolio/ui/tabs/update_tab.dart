@@ -61,9 +61,9 @@ class _UpdateTabState extends State<UpdateTab> {
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            child: _buildGreetingBanner(context, unreadCount),
+            child: _buildGreetingBanner(context, _unreadInbox),
           ),
-          _buildSubTabNavigation(context, unreadCount),
+          _buildSubTabNavigation(context, _unreadInbox),
           const SizedBox(height: 16),
           _buildActiveTabContent(),
           const SizedBox(height: 100),
