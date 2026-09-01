@@ -25,13 +25,16 @@ class SuggestionController extends Controller
         // Notify all admins
         $admins = User::where('role', 'admin')->get();
         foreach ($admins as $admin) {
-            UserNotification::create([
-                'user_id' => $admin->id,
-                'category' => 'system', // or suggestion
-                'message' => 'New suggestion received from ' . (auth()->user()->name ?? 'a user') . '.',
-                'related_entity_type' => 'App\Models\Suggestion',
-                'related_entity_id' => $suggestion->id
-            ]);
+            UserNotification::notify(
+                $admin->id,
+                'New Suggestion',
+                'New suggestion received from ' . (auth()->user()->name ?? 'a user') . '.',
+                [
+                    'category' => 'system',
+                    'icon' => '💡',
+                    'action_url' => '/admin/inbox'
+                ]
+            );
         }
 
         return response()->json([
