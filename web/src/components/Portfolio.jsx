@@ -8,6 +8,7 @@ import { Search, BarChart2, Star, Calculator, ShieldCheck, BookOpen, Briefcase, 
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
 import PortfolioTab from './portfolio/PortfolioTab';
+import SuggestModal from './SuggestModal';
 import MarketTab from './portfolio/MarketTab';
 import WatchlistTab from './portfolio/WatchlistTab';
 import ZakatTab from './portfolio/ZakatTab';
@@ -81,6 +82,7 @@ export default function Portfolio() {
   const [activeTab, setActiveTab] = useState(() => getTabFromHash(location.hash));
   const [mountedTabs, setMountedTabs] = useState([activeTab]);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showSuggestModal, setShowSuggestModal] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [activeFilter, setActiveFilter] = useState('all');
   const [initialHoldingSymbol, setInitialHoldingSymbol] = useState(null);
@@ -277,6 +279,7 @@ export default function Portfolio() {
 
   return (
     <div className="page-wrapper animate-fade-in" style={{ maxWidth: '1400px', margin: '0 auto', padding: '36px 24px 80px' }}>
+      {showSuggestModal && <SuggestModal onClose={() => setShowSuggestModal(false)} />}
       {showAddModal && (
         <AddHoldingModal 
           initialTab={typeof showAddModal === 'string' ? showAddModal : 'manual'}
@@ -461,10 +464,12 @@ export default function Portfolio() {
       </div>
       
       {/* Floating Suggestion Button */}
-      <a 
-        href="mailto:hello@iirshad.com?subject=Suggestion%20for%20Irshad"
+      <button 
+        onClick={() => setShowSuggestModal(true)}
         style={{
           position: 'fixed',
+          border: 'none',
+          cursor: 'pointer',
           bottom: '24px',
           right: '24px',
           background: 'var(--primary)',
@@ -486,7 +491,7 @@ export default function Portfolio() {
       >
         <Mail size={18} strokeWidth={2.5} />
         Suggest for Irshad
-      </a>
+      </button>
       
     </div>
   );

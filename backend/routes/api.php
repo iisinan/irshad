@@ -31,6 +31,8 @@ use App\Http\Middleware\AdminMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SuggestionController;
+
 
 /*
 |--------------------------------------------------------------------------

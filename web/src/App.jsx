@@ -384,6 +384,7 @@ function App() {
                     </ProtectedRoute>
                   }>
                     <Route path="/admin" element={<AdminOverview />} />
+                                        <Route path="/admin/inbox" element={<AdminInbox />} />
                     <Route path="/admin/alerts" element={<AdminDashboard />} />
                     <Route path="/admin/compliance-reviews" element={<AdminComplianceReviews />} />
                     <Route path="/admin/users" element={<AdminUsers />} />

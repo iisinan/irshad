@@ -5,7 +5,7 @@ import { useTheme } from '../context/ThemeContext';
 import {
   Activity, HeartHandshake, BookOpen,
   LogOut, ChevronLeft, X, Moon, Sun,
-  LayoutDashboard, Shield, Users, ArrowLeft, Inbox
+  LayoutDashboard, Shield, Users, ArrowLeft, Inbox, Mail
 } from 'lucide-react';
 
 export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
@@ -18,10 +18,11 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
     { section: 'Admin' },
     { label: 'Overview',            icon: LayoutDashboard, to: '/admin' },
     { label: 'Alerts & Stocks',     icon: Activity,        to: '/admin/alerts' },
+    { label: 'Inbox, Mail',               icon: Mail,            to: '/admin/inbox' },
     { label: 'Compliance Reviews',  icon: Shield,          to: '/admin/compliance-reviews' },
     { label: 'Registered Users',    icon: Users,           to: '/admin/users' },
     { label: 'Resources',           icon: BookOpen,        to: '/admin/resources' },
-    { label: 'Financial Data Queue',icon: Inbox,           to: '/admin/financial-queue' },
+    { label: 'Financial Data Queue',icon: Inbox, Mail,           to: '/admin/financial-queue' },
     { label: 'Zakat Settings',      icon: HeartHandshake,  to: '/admin/zakat-settings' },
     { section: 'Exit' },
     { label: 'Back to App',         icon: ArrowLeft,       to: '/portfolio' },
