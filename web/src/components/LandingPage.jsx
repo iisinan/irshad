@@ -232,7 +232,7 @@ export default function LandingPage() {
                 </div>
               </a>
 
-              <a href="https://play.google.com" target="_blank" rel="noopener noreferrer"
+              <a href="https://play.google.com/store/apps/details?id=com.irshad.com" target="_blank" rel="noopener noreferrer"
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 11, background: '#111', color: 'white', padding: '11px 20px', borderRadius: 13, textDecoration: 'none', transition: 'transform 0.2s, box-shadow 0.2s', boxShadow: '0 4px 16px rgba(0,0,0,0.18)', border: '1px solid rgba(255,255,255,0.06)' }}
                 onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 10px 28px rgba(0,0,0,0.26)'; }}
                 onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.18)'; }}>
