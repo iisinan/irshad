@@ -203,7 +203,16 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
                   transition: 'color 0.15s',
                 }}
               />
-              {!isCollapsed && <span style={{ flex: 1 }}>{item.label}</span>}
+                            {!isCollapsed && <span style={{ flex: 1 }}>{item.label}</span>}
+              {!isCollapsed && item.badge > 0 && (
+                <span style={{
+                  background: 'var(--non-compliant)', color: 'white',
+                  fontSize: '0.65rem', fontWeight: 800, padding: '2px 6px',
+                  borderRadius: '10px', marginLeft: 'auto'
+                }}>
+                  {item.badge}
+                </span>
+              )}
               {!isCollapsed && active && (
                 <div style={{
                   width: '5px', height: '5px', borderRadius: '50%',

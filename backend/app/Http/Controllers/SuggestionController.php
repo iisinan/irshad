@@ -44,6 +44,12 @@ class SuggestionController extends Controller
     }
 
     // Admin methods
+    public function unreadCount(): JsonResponse
+    {
+        $count = Suggestion::where('status', 'unread')->count();
+        return response()->json(['count' => $count]);
+    }
+
     public function index(): JsonResponse
     {
         $suggestions = Suggestion::with('user:id,name,email')->orderBy('created_at', 'desc')->paginate(20);
