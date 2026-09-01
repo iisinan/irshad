@@ -192,52 +192,67 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
         overflow: 'hidden',
       }}
     >
-      {/* ── Row 1: Logo | Symbol + Value | Actions ── */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px' }}>
-
-        {/* Logo */}
-        <CompanyLogo symbol={holding.symbol} logoUrl={holding.logo_url} size={34} radius={8} />
-
-        {/* Symbol + Value (takes all available space) */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', flexWrap: 'nowrap' }}>
-            <span style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.8rem', letterSpacing: '-0.1px', whiteSpace: 'nowrap' }}>
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'minmax(120px, 1.2fr) minmax(110px, 1fr) minmax(150px, 1.5fr) minmax(80px, 1fr) 90px', 
+        alignItems: 'center', 
+        gap: '12px', 
+        padding: '12px' 
+      }}>
+        
+        {/* Col 1: Asset (Logo + Symbol) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+          <CompanyLogo symbol={holding.symbol} logoUrl={holding.logo_url} size={34} radius={8} />
+          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+            <span style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.8rem', letterSpacing: '-0.1px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {holding.symbol}
             </span>
-            <span style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.78rem', fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
-              {fmtK(holding.total_value)}
+            <span style={{ fontSize: '0.6rem', color: badge.color, fontWeight: 700, whiteSpace: 'nowrap' }}>
+              {finalStatus === 'halal' ? 'Halal' : finalStatus === 'doubtful' ? 'Doubtful' : 'Non-compliant'}
             </span>
-            <span style={{ fontSize: '0.58rem', color: 'var(--text-muted)', fontWeight: 600, whiteSpace: 'nowrap' }}>
-              {Number(holding.shares).toLocaleString()} shares
-            </span>
-            {(holding.return_percentage !== null && holding.return_percentage !== undefined && holding.return_percentage !== 0) && (
-              <span style={{ fontWeight: 700, fontSize: '0.58rem', color: isUp ? 'var(--halal)' : 'var(--non-compliant)', display: 'inline-flex', alignItems: 'center', gap: '1px', background: isUp ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)', padding: '2px 6px', borderRadius: '5px', whiteSpace: 'nowrap' }}>
-                {isUp ? <ArrowUpRight size={9}/> : <ArrowDownRight size={9}/>}
-                {isUp ? '+' : ''}{Number(holding.return_percentage || 0).toFixed(2)}%
-              </span>
-            )}
           </div>
         </div>
 
-        {/* Actions always on the right */}
-        {actionBtns}
-      </div>
+        {/* Col 2: Value / Shares */}
+        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+          <span style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.78rem', fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
+            {fmtK(holding.total_value)}
+          </span>
+          <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontWeight: 600, whiteSpace: 'nowrap' }}>
+            {Number(holding.shares).toLocaleString()} shares
+          </span>
+        </div>
 
-      {/* ── Row 2: Pills (Divs, Purify) ── only shown if any exist */}
-      {(hasDivs || hasPurify) && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', padding: '0 12px 9px 56px' }}>
-          {hasDivs && (
-            <span style={{ background: 'var(--primary-50)', color: 'var(--primary)', padding: '2px 7px', borderRadius: '5px', fontSize: '0.58rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
-              ₦{Number(holding.total_dividends).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Divs
+        {/* Col 3: Dividends / Purify */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', minWidth: 0 }}>
+          {hasDivs ? (
+            <span style={{ background: 'var(--primary-50)', color: 'var(--primary)', padding: '2px 7px', borderRadius: '5px', fontSize: '0.6rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
+              ₦{Number(holding.total_dividends).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
             </span>
-          )}
+          ) : <span style={{ color: 'var(--text-muted)', fontSize: '0.6rem', fontWeight: 600 }}>-</span>}
+          
           {hasPurify && (
-            <span style={{ background: 'rgba(239,68,68,0.08)', color: 'var(--non-compliant)', padding: '2px 7px', borderRadius: '5px', fontSize: '0.58rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
-              ₦{Number(holding.purification_due).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} purify
+            <span style={{ background: 'rgba(239,68,68,0.08)', color: 'var(--non-compliant)', padding: '2px 7px', borderRadius: '5px', fontSize: '0.6rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
+              ₦{Number(holding.purification_due).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
             </span>
           )}
         </div>
-      )}
+
+        {/* Col 4: Return */}
+        <div style={{ display: 'flex', alignItems: 'center', minWidth: 0 }}>
+          {(holding.return_percentage !== null && holding.return_percentage !== undefined && holding.return_percentage !== 0) ? (
+            <span style={{ fontWeight: 800, fontSize: '0.65rem', color: isUp ? 'var(--halal)' : 'var(--non-compliant)', display: 'inline-flex', alignItems: 'center', gap: '2px', background: isUp ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)', padding: '4px 8px', borderRadius: '6px', whiteSpace: 'nowrap' }}>
+              {isUp ? <ArrowUpRight size={10} strokeWidth={3}/> : <ArrowDownRight size={10} strokeWidth={3}/>}
+              {isUp ? '+' : ''}{Number(holding.return_percentage || 0).toFixed(2)}%
+            </span>
+          ) : <span style={{ color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 600 }}>-</span>}
+        </div>
+
+        {/* Col 5: Actions */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', minWidth: 0 }}>
+          {actionBtns}
+        </div>
+      </div>
 
       {/* ── Grace Period Banner ── */}
       {gracePeriodEndsAt && (
@@ -493,12 +508,35 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
             className="" 
             style={{ 
               paddingRight: '12px',
-              paddingBottom: '60px'
+              paddingBottom: '60px',
+              overflowX: 'auto',
+              WebkitOverflowScrolling: 'touch'
             }}
           >
+            <div style={{ minWidth: '650px' }}>
+            {/* ── Table Headers ── */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'minmax(120px, 1.2fr) minmax(110px, 1fr) minmax(150px, 1.5fr) minmax(80px, 1fr) 90px',
+              gap: '12px',
+              padding: '0 12px 12px 12px',
+              fontSize: '0.65rem',
+              fontWeight: 800,
+              color: 'var(--text-muted)',
+              textTransform: 'uppercase',
+              letterSpacing: '1px'
+            }}>
+              <div>Asset</div>
+              <div>Value / Shares</div>
+              <div>Dividends / Purify</div>
+              <div>Return</div>
+              <div style={{ textAlign: 'right' }}>Actions</div>
+            </div>
+
             {displayHoldings.map((h) => (
               <HoldingRow key={h.id} holding={h} onDelete={handleDelete} onEdit={setEditingHolding} hasBeenPurified={purifications.some(p => p.symbol === h.symbol)} />
             ))}
+            </div>
           </div>
         )}
       </div>
