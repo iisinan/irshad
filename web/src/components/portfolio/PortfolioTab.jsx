@@ -194,7 +194,7 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
     >
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: '1.8fr 0.9fr 0.9fr 0.8fr 100px', 
+        gridTemplateColumns: 'minmax(0, 1.8fr) minmax(0, 0.9fr) minmax(0, 0.9fr) minmax(0, 0.8fr) 100px', 
         alignItems: 'center', 
         gap: '12px', 
         padding: '12px 16px' 
@@ -466,7 +466,23 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
           </div>
         </div>
         
-        {/* ─── HOLDINGS LIST ─── */}
+          {/* Header */}
+        {displayHoldings.length > 0 && (
+          <div className="desktop-only" style={{ position: 'relative', marginTop: '12px', padding: '8px 0px', background: 'var(--body-bg)', zIndex: 20 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.8fr) minmax(0, 0.9fr) minmax(0, 0.9fr) minmax(0, 0.8fr) 100px', alignItems: 'center', gap: '12px', padding: '0 16px' }}>
+              <div style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', paddingLeft: '44px' }}>Asset</div>
+              <div style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Value / Shares</div>
+              <div style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Dividends / Purify</div>
+              <div style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', textAlign: 'right' }}>Return</div>
+              <div style={{ minWidth: '100px' }}></div>
+            </div>
+            {/* Diminishing fade shadow effect that covers the scrolled items below it */}
+            <div style={{ position: 'absolute', bottom: '-24px', left: 0, right: 0, height: '24px', background: 'linear-gradient(to bottom, var(--body-bg) 0%, transparent 100%)', pointerEvents: 'none', zIndex: 21 }} />
+          </div>
+        )}
+      </div>
+
+      {/* ─── HOLDINGS LIST ─── */}
       <div className="stagger-3" style={{ marginTop: '0px' }}>
 
         {/* Rows */}
@@ -498,14 +514,7 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
             }}
           >
             <div style={{ minWidth: '650px' }}>
-              {/* ── Table Headers ── */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 0.9fr 0.9fr 0.8fr 100px', alignItems: 'center', gap: '12px', padding: '0 16px 8px 16px', borderBottom: '1px solid var(--border)', marginBottom: '8px' }}>
-                <div style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', paddingLeft: '44px' }}>Asset</div>
-                <div style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Value / Shares</div>
-                <div style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Dividends / Purify</div>
-                <div style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', textAlign: 'right' }}>Return</div>
-                <div style={{ minWidth: '100px' }}></div>
-              </div>
+              
 
             
 
