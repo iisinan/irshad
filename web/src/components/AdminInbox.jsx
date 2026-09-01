@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Search, CheckCircle, Clock, Trash2 } from 'lucide-react';
+import { Mail, Search, CheckCircle, Clock, Trash2, Reply } from 'lucide-react';
 import api from '../services/api';
 import { toastSuccess, toastError } from '../utils/toast';
 
@@ -30,6 +30,7 @@ export default function AdminInbox() {
       await api.put(`/admin/suggestions/${id}/status`, { status });
       setSuggestions(prev => prev.map(s => s.id === id ? { ...s, status } : s));
       toastSuccess(`Marked as ${status}`);
+      window.dispatchEvent(new Event('suggestions-updated'));
     } catch (err) {
       toastError('Failed to update status');
     }
@@ -41,6 +42,7 @@ export default function AdminInbox() {
       await api.delete(`/admin/suggestions/${id}`);
       setSuggestions(prev => prev.filter(s => s.id !== id));
       toastSuccess('Deleted successfully');
+      window.dispatchEvent(new Event('suggestions-updated'));
     } catch (err) {
       toastError('Failed to delete');
     }
@@ -115,6 +117,12 @@ export default function AdminInbox() {
                   </button>
                 )}
                 
+                <a href={`mailto:${s.user?.email || ''}?subject=Re: Your Suggestion for Irshad`} style={{
+                  padding: '8px 14px', borderRadius: '8px', border: 'none', background: 'var(--primary-50)', color: 'var(--primary)',
+                  fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none'
+                }}>
+                  <Reply size={14} /> Reply
+                </a>
                 <button onClick={() => handleDelete(s.id)} style={{
                   padding: '8px 14px', borderRadius: '8px', border: 'none', background: 'rgba(239,68,68,0.1)', color: '#EF4444',
                   fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto'
