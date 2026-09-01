@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { Mail, X } from 'lucide-react';
+import { Mail, X, Send, Paperclip } from 'lucide-react';
 import { toastSuccess, toastError } from '../utils/toast';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 export default function SuggestModal({ onClose }) {
+  const { user } = useAuth();
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -26,56 +28,90 @@ export default function SuggestModal({ onClose }) {
   return (
     <div style={{
       position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+      background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       zIndex: 9999, padding: '20px'
     }}>
-      <div className="animate-scale-up" style={{
-        background: 'var(--bg)', borderRadius: '24px', padding: '32px',
-        width: '100%', maxWidth: '500px', position: 'relative',
-        boxShadow: '0 20px 40px rgba(0,0,0,0.2)'
+      <div className="animate-slide-up" style={{
+        background: 'var(--bg)', borderRadius: '16px', 
+        width: '100%', maxWidth: '600px', position: 'relative',
+        boxShadow: '0 24px 48px rgba(0,0,0,0.3)',
+        display: 'flex', flexDirection: 'column',
+        overflow: 'hidden'
       }}>
-        <button onClick={onClose} style={{
-          position: 'absolute', top: '24px', right: '24px',
-          background: 'var(--bg-section)', border: 'none', borderRadius: '50%',
-          width: '32px', height: '32px', display: 'flex', alignItems: 'center',
-          justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)'
+        {/* Header - Looks like Email header */}
+        <div style={{
+          background: 'var(--bg-section)', padding: '16px 20px',
+          borderBottom: '1px solid var(--border)', display: 'flex',
+          justifyContent: 'space-between', alignItems: 'center'
         }}>
-          <X size={16} />
-        </button>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
-          <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: 'var(--primary-50)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Mail size={24} color="var(--primary)" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ background: 'var(--primary)', padding: '8px', borderRadius: '10px', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Mail size={18} />
+            </div>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)', margin: 0 }}>New Suggestion</h2>
           </div>
-          <div>
-            <h2 style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--text-dark)', margin: 0 }}>Suggest for Irshad</h2>
-            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>Help us improve the platform.</div>
-          </div>
+          <button onClick={onClose} style={{
+            background: 'transparent', border: 'none', cursor: 'pointer',
+            color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '4px', borderRadius: '50%'
+          }}>
+            <X size={20} />
+          </button>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column' }}>
+          {/* Email To/From fields mockup */}
+          <div style={{ padding: '0 20px' }}>
+            <div style={{ padding: '16px 0', borderBottom: '1px solid var(--border)', display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600, width: '40px' }}>To:</span>
+              <span style={{ background: 'var(--primary-50)', color: 'var(--primary)', padding: '4px 12px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 700 }}>
+                Irshad Admin Team
+              </span>
+            </div>
+            <div style={{ padding: '16px 0', borderBottom: '1px solid var(--border)', display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600, width: '40px' }}>From:</span>
+              <span style={{ color: 'var(--text-dark)', fontSize: '0.9rem', fontWeight: 500 }}>
+                {user?.email || 'user@example.com'}
+              </span>
+            </div>
+          </div>
+
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Type your suggestion or feedback here..."
+            autoFocus
             style={{
-              width: '100%', height: '150px', padding: '16px',
-              borderRadius: '16px', border: '1px solid var(--border)',
-              background: 'var(--bg-section)', color: 'var(--text-dark)',
-              fontSize: '0.9rem', resize: 'none', marginBottom: '24px',
-              fontFamily: 'inherit'
+              width: '100%', minHeight: '200px', padding: '20px',
+              border: 'none', background: 'transparent',
+              color: 'var(--text-dark)', fontSize: '0.95rem',
+              resize: 'none', outline: 'none', fontFamily: 'inherit',
+              lineHeight: '1.6'
             }}
             required
           />
-          <button type="submit" disabled={loading} style={{
-            width: '100%', padding: '14px', borderRadius: '16px',
-            background: 'var(--primary)', color: 'white', border: 'none',
-            fontWeight: 800, fontSize: '0.95rem', cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.7 : 1
+
+          <div style={{
+            padding: '16px 20px', borderTop: '1px solid var(--border)',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            background: 'var(--bg-section)'
           }}>
-            {loading ? 'Submitting...' : 'Submit Suggestion'}
-          </button>
+            <div style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <Paperclip size={18} style={{ cursor: 'not-allowed', opacity: 0.5 }} />
+              <span style={{ fontSize: '0.8rem' }}>Attachments not supported yet</span>
+            </div>
+            
+            <button type="submit" disabled={loading} style={{
+              padding: '10px 24px', borderRadius: '30px',
+              background: 'var(--primary)', color: 'white', border: 'none',
+              fontWeight: 700, fontSize: '0.9rem', cursor: loading ? 'not-allowed' : 'pointer',
+              opacity: loading ? 0.7 : 1, display: 'flex', alignItems: 'center', gap: '8px',
+              boxShadow: '0 4px 12px rgba(91,41,113,0.3)'
+            }}>
+              {loading ? 'Sending...' : 'Send'} <Send size={16} />
+            </button>
+          </div>
         </form>
       </div>
     </div>
