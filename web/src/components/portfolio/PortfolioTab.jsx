@@ -194,7 +194,7 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
     >
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: 'minmax(0, 1.8fr) minmax(0, 0.9fr) minmax(0, 0.9fr) minmax(0, 0.8fr) 100px', 
+        gridTemplateColumns: 'minmax(0, 1.8fr) minmax(0, 0.9fr) minmax(0, 0.9fr) minmax(0, 0.8fr) auto', 
         alignItems: 'center', 
         gap: '12px', 
         padding: '12px 16px' 
@@ -208,7 +208,7 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
               {holding.symbol}
             </span>
             <span style={{ fontSize: '0.6rem', color: badge.color, fontWeight: 700, whiteSpace: 'nowrap' }}>
-              {finalStatus === 'halal' ? 'Halal' : finalStatus === 'doubtful' ? 'Doubtful' : 'Non-compliant'}
+              {badge.text}
             </span>
           </div>
         </div>
@@ -469,12 +469,12 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
           {/* Header */}
         {displayHoldings.length > 0 && (
           <div className="desktop-only" style={{ position: 'relative', marginTop: '12px', padding: '8px 0px', background: 'var(--body-bg)', zIndex: 20 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.8fr) minmax(0, 0.9fr) minmax(0, 0.9fr) minmax(0, 0.8fr) 100px', alignItems: 'center', gap: '12px', padding: '0 16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.8fr) minmax(0, 0.9fr) minmax(0, 0.9fr) minmax(0, 0.8fr) auto', alignItems: 'center', gap: '12px', padding: '0 16px' }}>
               <div style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', paddingLeft: '44px' }}>Asset</div>
               <div style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Value / Shares</div>
               <div style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Dividends / Purify</div>
               <div style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', textAlign: 'right' }}>Return</div>
-              <div style={{ minWidth: '100px' }}></div>
+              <div style={{ minWidth: '130px' }}></div>
             </div>
             {/* Diminishing fade shadow effect that covers the scrolled items below it */}
             <div style={{ position: 'absolute', bottom: '-24px', left: 0, right: 0, height: '24px', background: 'linear-gradient(to bottom, var(--body-bg) 0%, transparent 100%)', pointerEvents: 'none', zIndex: 21 }} />
