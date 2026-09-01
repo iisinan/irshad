@@ -29,7 +29,7 @@ class AdminSuggestionNotification extends Notification implements ShouldQueue
         $userName = $this->suggestion->user ? ($this->suggestion->user->name ?? $this->suggestion->user->first_name) : 'A user';
         $userEmail = $this->suggestion->user ? $this->suggestion->user->email : 'No email provided';
 
-        return (new MailMessage)
+        $mail = (new MailMessage)
             ->subject('New Suggestion Received for Irshad')
             ->greeting('As-salamu alaykum, Admin!')
             ->line('A new suggestion or feedback has been submitted by **' . $userName . ' (' . $userEmail . ')**.')
@@ -38,5 +38,11 @@ class AdminSuggestionNotification extends Notification implements ShouldQueue
             ->action('View Admin Inbox', config('app.frontend_url') . '/admin/inbox')
             ->line('Jazakallah Khair,')
             ->salutation('The Irshad System');
+
+        if ($this->suggestion->user && $this->suggestion->user->email) {
+            $mail->replyTo($this->suggestion->user->email, $userName);
+        }
+
+        return $mail;
     }
 }
