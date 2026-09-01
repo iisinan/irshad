@@ -194,10 +194,10 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
     >
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: 'minmax(120px, 1.2fr) minmax(110px, 1fr) minmax(150px, 1.5fr) minmax(80px, 1fr) 90px', 
+        gridTemplateColumns: '1.8fr 0.9fr 0.9fr 0.8fr 100px', 
         alignItems: 'center', 
         gap: '12px', 
-        padding: '12px' 
+        padding: '12px 16px' 
       }}>
         
         {/* Col 1: Asset (Logo + Symbol) */}
@@ -239,7 +239,7 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
         </div>
 
         {/* Col 4: Return */}
-        <div style={{ display: 'flex', alignItems: 'center', minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', minWidth: 0 }}>
           {(holding.return_percentage !== null && holding.return_percentage !== undefined && holding.return_percentage !== 0) ? (
             <span style={{ fontWeight: 800, fontSize: '0.65rem', color: isUp ? 'var(--halal)' : 'var(--non-compliant)', display: 'inline-flex', alignItems: 'center', gap: '2px', background: isUp ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)', padding: '4px 8px', borderRadius: '6px', whiteSpace: 'nowrap' }}>
               {isUp ? <ArrowUpRight size={10} strokeWidth={3}/> : <ArrowDownRight size={10} strokeWidth={3}/>}
@@ -466,23 +466,7 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
           </div>
         </div>
         
-        {/* Header */}
-        {displayHoldings.length > 0 && (
-          <div className="desktop-only" style={{ position: 'relative', marginTop: '12px', padding: '8px 20px', background: 'var(--body-bg)', zIndex: 20 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 0.9fr 0.9fr 0.8fr auto', alignItems: 'center', gap: '12px', padding: '0 16px' }}>
-              <div style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', paddingLeft: '44px' }}>Asset</div>
-              <div style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Value / Shares</div>
-              <div style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Dividends / Purify</div>
-              <div style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', textAlign: 'right' }}>Return</div>
-              <div style={{ minWidth: '100px' }}></div>
-            </div>
-            {/* Diminishing fade shadow effect that covers the scrolled items below it */}
-            <div style={{ position: 'absolute', bottom: '-24px', left: 0, right: 0, height: '24px', background: 'linear-gradient(to bottom, var(--body-bg) 0%, transparent 100%)', pointerEvents: 'none', zIndex: 21 }} />
-          </div>
-        )}
-      </div>
-
-      {/* ─── HOLDINGS LIST ─── */}
+        {/* ─── HOLDINGS LIST ─── */}
       <div className="stagger-3" style={{ marginTop: '0px' }}>
 
         {/* Rows */}
@@ -514,24 +498,16 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
             }}
           >
             <div style={{ minWidth: '650px' }}>
-            {/* ── Table Headers ── */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'minmax(120px, 1.2fr) minmax(110px, 1fr) minmax(150px, 1.5fr) minmax(80px, 1fr) 90px',
-              gap: '12px',
-              padding: '0 12px 12px 12px',
-              fontSize: '0.65rem',
-              fontWeight: 800,
-              color: 'var(--text-muted)',
-              textTransform: 'uppercase',
-              letterSpacing: '1px'
-            }}>
-              <div>Asset</div>
-              <div>Value / Shares</div>
-              <div>Dividends / Purify</div>
-              <div>Return</div>
-              <div style={{ textAlign: 'right' }}>Actions</div>
-            </div>
+              {/* ── Table Headers ── */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 0.9fr 0.9fr 0.8fr 100px', alignItems: 'center', gap: '12px', padding: '0 16px 8px 16px', borderBottom: '1px solid var(--border)', marginBottom: '8px' }}>
+                <div style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', paddingLeft: '44px' }}>Asset</div>
+                <div style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Value / Shares</div>
+                <div style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Dividends / Purify</div>
+                <div style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', textAlign: 'right' }}>Return</div>
+                <div style={{ minWidth: '100px' }}></div>
+              </div>
+
+            
 
             {displayHoldings.map((h) => (
               <HoldingRow key={h.id} holding={h} onDelete={handleDelete} onEdit={setEditingHolding} hasBeenPurified={purifications.some(p => p.symbol === h.symbol)} />
