@@ -210,6 +210,12 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
             <span style={{ fontSize: '0.58rem', color: 'var(--text-muted)', fontWeight: 600, whiteSpace: 'nowrap' }}>
               {Number(holding.shares).toLocaleString()} shares
             </span>
+            {(holding.return_percentage !== null && holding.return_percentage !== undefined && holding.return_percentage !== 0) && (
+              <span style={{ fontWeight: 700, fontSize: '0.58rem', color: isUp ? 'var(--halal)' : 'var(--non-compliant)', display: 'inline-flex', alignItems: 'center', gap: '1px', background: isUp ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)', padding: '2px 6px', borderRadius: '5px', whiteSpace: 'nowrap' }}>
+                {isUp ? <ArrowUpRight size={9}/> : <ArrowDownRight size={9}/>}
+                {isUp ? '+' : ''}{Number(holding.return_percentage || 0).toFixed(2)}%
+              </span>
+            )}
           </div>
         </div>
 
@@ -217,8 +223,8 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
         {actionBtns}
       </div>
 
-      {/* ── Row 2: Pills (Divs, Purify, Return%) ── only shown if any exist */}
-      {(hasDivs || hasPurify || (holding.return_percentage !== null && holding.return_percentage !== undefined && holding.return_percentage !== 0)) && (
+      {/* ── Row 2: Pills (Divs, Purify) ── only shown if any exist */}
+      {(hasDivs || hasPurify) && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', padding: '0 12px 9px 56px' }}>
           {hasDivs && (
             <span style={{ background: 'var(--primary-50)', color: 'var(--primary)', padding: '2px 7px', borderRadius: '5px', fontSize: '0.58rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
@@ -228,12 +234,6 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
           {hasPurify && (
             <span style={{ background: 'rgba(239,68,68,0.08)', color: 'var(--non-compliant)', padding: '2px 7px', borderRadius: '5px', fontSize: '0.58rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
               ₦{Number(holding.purification_due).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} purify
-            </span>
-          )}
-          {(holding.return_percentage !== null && holding.return_percentage !== undefined && holding.return_percentage !== 0) && (
-            <span style={{ fontWeight: 700, fontSize: '0.58rem', color: isUp ? 'var(--halal)' : 'var(--non-compliant)', display: 'inline-flex', alignItems: 'center', gap: '1px', background: isUp ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)', padding: '2px 6px', borderRadius: '5px', whiteSpace: 'nowrap' }}>
-              {isUp ? <ArrowUpRight size={9}/> : <ArrowDownRight size={9}/>}
-              {isUp ? '+' : ''}{Number(holding.return_percentage || 0).toFixed(2)}%
             </span>
           )}
         </div>
