@@ -144,6 +144,10 @@ Route::middleware('auth:sanctum')->group(function () {
         // Verification
         Route::post('/email/resend', [VerificationController::class, 'resend']);
 
+        // Suggestions
+        Route::post('/suggestions', [SuggestionController::class, 'store']);
+
+
         // ── Verified Protected Routes (Require Email Verification) ──
         Route::middleware('verified')->group(function () {
             // Brokerage
@@ -215,6 +219,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // ── Admin Routes ─────────────────────────────────────────────────────
         Route::middleware(AdminMiddleware::class)->group(function () {
+            // Admin Suggestions
+            Route::get('/admin/suggestions/unread-count', [SuggestionController::class, 'unreadCount']);
+            Route::get('/admin/suggestions', [SuggestionController::class, 'index']);
+            Route::put('/admin/suggestions/{id}/status', [SuggestionController::class, 'updateStatus']);
+            Route::delete('/admin/suggestions/{id}', [SuggestionController::class, 'destroy']);
+
             // User Management
             Route::get('/admin/users', [AdminController::class, 'getUsers']);
             Route::post('/admin/users', [AdminController::class, 'createAdmin']);
