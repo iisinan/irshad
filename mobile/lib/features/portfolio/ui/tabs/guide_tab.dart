@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:irshad_mobile/core/api/api_service.dart';
 
 class GuideTab extends StatefulWidget {
   const GuideTab({super.key});
@@ -715,7 +716,7 @@ class _GuideTabState extends State<GuideTab> {
                                   if (controller.text.trim().isEmpty) return;
                                   setModalState(() => isSubmitting = true);
                                   try {
-                                    final res = await ApiService().post('suggestions', data: {'message': controller.text});
+                                    final res = await ApiService().post('suggestions', {'message': controller.text});
                                     if (res.statusCode == 200 || res.statusCode == 201) {
                                       Navigator.pop(ctx);
                                       if (ctx.mounted) {
@@ -762,7 +763,7 @@ class _GuideTabState extends State<GuideTab> {
     );
   }
 
-  Widget _buildSupportCard(IconData icon, String title, String desc, String btnLabel, Color color, String url) {
+  Widget _buildSupportCard(IconData icon, String title, String desc, String btnLabel, Color color, dynamic action) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(20),
@@ -788,9 +789,13 @@ class _GuideTabState extends State<GuideTab> {
             width: double.infinity,
             child: OutlinedButton(
               onPressed: () async {
-                final uri = Uri.parse(url);
-                if (await canLaunchUrl(uri)) {
-                  await launchUrl(uri);
+                if (action is String) {
+                  final uri = Uri.parse(action);
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri);
+                  }
+                } else if (action is Function) {
+                  action();
                 }
               },
               style: OutlinedButton.styleFrom(
