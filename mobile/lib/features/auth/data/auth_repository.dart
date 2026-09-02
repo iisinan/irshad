@@ -13,7 +13,6 @@ class AuthRepository {
   final FlutterSecureStorage _storage = const FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: ['email', 'profile'],
-    serverClientId: '900192262603-1v5t8hgmboe173j1h997p1bfk4kedn4k.apps.googleusercontent.com',
   );
 
   Future<Map<String, dynamic>?> register(String name, String email, String password, String passwordConfirmation, {String? location, String? phoneNumber, String? investorType, String? primaryUseCase, String? investmentExperience}) async {
