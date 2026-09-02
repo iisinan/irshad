@@ -38,6 +38,14 @@
           }
         },
         {
+          "client_id": "900192262603-k6l14h2tb25jrva3qb4evv4qd54n05gm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.irshad.com",
+            "certificate_hash": "a191fd4367fe7da115f6e39329b8e538e42d8c22"
+          }
+        },
+        {
           "client_id": "900192262603-1v5t8hgmboe173j1h997p1bfk4kedn4k.apps.googleusercontent.com",
           "client_type": 3
         }
