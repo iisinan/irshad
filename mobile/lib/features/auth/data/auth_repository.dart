@@ -80,9 +80,9 @@ class AuthRepository {
 
   Future<Map<String, dynamic>?> signInWithGoogleFlow() async {
     try {
-      // Silently sign out first to clear any stale cached failure state
-      // from Google Play Services (e.g. previous Error 10 cache).
-      await _googleSignIn.signOut().catchError((_) => null);
+      // Fully disconnect to clear any cached failure state (e.g. Error 10)
+      // from Google Play Services before attempting a fresh sign-in.
+      await _googleSignIn.disconnect().catchError((_) => null);
       final GoogleSignInAccount? account = await _googleSignIn.signIn();
       if (account == null) return null; // user canceled
       
