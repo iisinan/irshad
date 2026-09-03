@@ -113,13 +113,51 @@ class ScrapeMarketNews extends Command
             $cleanDesc = trim($cleanDesc);
 
             $companyId = null;
+
+            // Noise words that are too generic to be a reliable match on their own
+            $skipWords = ['nigerian', 'nigeria', 'national', 'group', 'plc', 'limited', 'ltd',
+                          'company', 'co', 'industries', 'holdings', 'international', 'africa',
+                          'west', 'east', 'first', 'united', 'global', 'new', 'trans'];
+
             foreach ($companies as $comp) {
-                $symbolWord = '\b' . preg_quote(strtolower($comp->symbol), '/') . '\b';
-                $nameSnippet = preg_quote(strtolower(explode(' ', $comp->name)[0]), '/'); 
-                
-                if (preg_match("/$symbolWord/", $text) || (strlen($nameSnippet) > 3 && strpos($text, $nameSnippet) !== false)) {
+                // 1. Ticker symbol must appear as a whole word (e.g. "MTN" ≠ "MTN seeks")
+                //    Symbols shorter than 3 chars are too risky — skip symbol matching for them.
+                $symbol = strtolower($comp->symbol);
+                $symbolPattern = '\\b' . preg_quote($symbol, '/') . '\\b';
+                if (strlen($symbol) >= 3 && preg_match("/$symbolPattern/", $text)) {
                     $companyId = $comp->id;
                     break;
+                }
+
+                // 2. Name matching: require at least 2 meaningful words (≥4 chars, not in skip list)
+                //    from the company name to appear as whole words in the article text.
+                $nameParts = array_filter(
+                    explode(' ', strtolower($comp->name)),
+                    fn($w) => strlen($w) >= 4 && !in_array($w, $skipWords)
+                );
+
+                if (count($nameParts) >= 2) {
+                    $matched = 0;
+                    foreach ($nameParts as $part) {
+                        $partPattern = '\\b' . preg_quote($part, '/') . '\\b';
+                        if (preg_match("/$partPattern/", $text)) {
+                            $matched++;
+                        }
+                    }
+                    if ($matched >= 2) {
+                        $companyId = $comp->id;
+                        break;
+                    }
+                } elseif (count($nameParts) === 1) {
+                    // Single meaningful word — only match if the word is long enough (≥6 chars)
+                    $word = reset($nameParts);
+                    if (strlen($word) >= 6) {
+                        $partPattern = '\\b' . preg_quote($word, '/') . '\\b';
+                        if (preg_match("/$partPattern/", $text)) {
+                            $companyId = $comp->id;
+                            break;
+                        }
+                    }
                 }
             }
 
