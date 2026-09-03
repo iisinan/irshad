@@ -8,13 +8,13 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'pwa-192x192.png', 'pwa-512x512.png'],
+      includeAssets: ['favicon.svg', 'pwa-192x192.png', 'pwa-512x512.png', 'pwa-maskable-512x512.png'],
       manifest: {
         name: 'Irshad - Islamic Wealth Management',
         short_name: 'Irshad',
         description: 'Islamic Wealth Management and Stock Screening',
-        theme_color: '#5B2971',
-        background_color: '#F0F3F7',
+        theme_color: '#1a3a38',
+        background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait',
         icons: [
@@ -27,6 +27,12 @@ export default defineConfig({
             src: '/pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png'
+          },
+          {
+            src: '/pwa-maskable-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable'
           }
         ]
       },
