@@ -88,8 +88,8 @@ class ReassignNewsCompanies extends Command
         $deletedBiz  = 0;
 
         BusinessActivityUpdate::chunkById(200, function ($updates) use (
-            $companies, $deleteUnmatched,
-            &$totalBiz, &$fixedBiz, &$nullifiedBiz, &$deletedBiz
+            $companies,
+            &$totalBiz, &$fixedBiz, &$deletedBiz
         ) {
             foreach ($updates as $update) {
                 $totalBiz++;
@@ -97,25 +97,21 @@ class ReassignNewsCompanies extends Command
                 $correctId = $this->matchCompany($text, $companies);
 
                 if ($correctId === $update->company_id) {
-                    continue;
+                    continue; // already correct
                 }
 
                 if ($correctId !== null) {
                     $update->update(['company_id' => $correctId]);
                     $fixedBiz++;
                 } else {
-                    if ($deleteUnmatched) {
-                        $update->delete();
-                        $deletedBiz++;
-                    } else {
-                        $update->update(['company_id' => null]);
-                        $nullifiedBiz++;
-                    }
+                    // company_id is NOT NULL in this table — delete the bad row
+                    $update->delete();
+                    $deletedBiz++;
                 }
             }
         });
 
-        $this->info("  business_activity_updates → checked: {$totalBiz}, re-assigned: {$fixedBiz}, nullified: {$nullifiedBiz}, deleted: {$deletedBiz}");
+        $this->info("  business_activity_updates → checked: {$totalBiz}, re-assigned: {$fixedBiz}, deleted: {$deletedBiz}");
 
         // ── Bust cache so frontend sees fresh data immediately ────────────
         Cache::forget('updates_news_insights');
