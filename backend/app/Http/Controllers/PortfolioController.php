@@ -320,44 +320,57 @@ class PortfolioController extends Controller
             $holding = Holding::where('user_id', $userId)->where('symbol', $symbol)->first();
             if (!$holding) continue;
 
-            $company = Company::with(['dividends', 'aaoifiScreening'])->where('symbol', $symbol)->first();
+            $company = Company::with([
+                'aaoifiScreening',
+                'dividends' => function ($query) {
+                    // Match the same 12-month window used in the portfolio index
+                    $query->whereIn('status', ['paid', 'upcoming', 'declared'])
+                          ->where('pay_date', '>=', now()->subMonths(12));
+                },
+            ])->where('symbol', $symbol)->first();
             if (!$company) continue;
 
             $status = $company->current_status ?? 'doubtful';
             $isHalal = strtolower($status) === 'halal' || strtolower($status) === 'compliant';
-            
+
+            // Only purify halal stocks — non-halal stocks shouldn't be on this tab
             if (!$isHalal) continue;
 
             $screening = $company->aaoifiScreening;
             $nonCompliantRatio = $screening?->impermissible_income_ratio ?? 0;
 
-            if ($nonCompliantRatio <= 0) continue;
-
-            // Fetch latest purification date
+            // Fetch latest purification date for this symbol
             $latestPurificationDate = \App\Models\Purification::where('user_id', $userId)
                 ->where('symbol', $symbol)
                 ->latest()
                 ->value('created_at');
 
-            // Calculate Purification Due
+            // Calculate purification due — only count dividends after the last purification date
             $trailingDividendsPerShare = $company->dividends->filter(function ($dividend) use ($latestPurificationDate) {
                 if (!$latestPurificationDate) return true;
-                $dividendDt = $dividend->pay_date ? \Carbon\Carbon::parse($dividend->pay_date) : 
+                $dividendDt = $dividend->pay_date ? \Carbon\Carbon::parse($dividend->pay_date) :
                               ($dividend->ex_date ? \Carbon\Carbon::parse($dividend->ex_date) : $dividend->created_at);
                 return $dividendDt->isAfter($latestPurificationDate);
-            })->sum('amount') ?? 0;
+            })->reduce(function ($carry, $dividend) {
+                $amount = $dividend->amount;
+                if (strtoupper($dividend->currency) === 'USD') {
+                    $amount *= 1370;
+                }
+                return $carry + $amount;
+            }, 0) ?? 0;
 
             $totalDividendsReceived = $holding->shares * $trailingDividendsPerShare;
             $purificationDue = $totalDividendsReceived * ($nonCompliantRatio / 100);
 
-            if ($purificationDue > 0) {
-                \App\Models\Purification::create([
-                    'user_id' => $userId,
-                    'symbol' => $symbol,
-                    'amount' => round($purificationDue, 2)
-                ]);
-                $purifiedCount++;
-            }
+            // Always create a purification record, even if amount is 0.
+            // This acts as a timestamp marker so the stock disappears from the
+            // purification tab and does not reappear until new dividends are paid.
+            \App\Models\Purification::create([
+                'user_id' => $userId,
+                'symbol'  => $symbol,
+                'amount'  => round($purificationDue, 2),
+            ]);
+            $purifiedCount++;
         }
 
         if ($purifiedCount > 0) {
@@ -365,6 +378,6 @@ class PortfolioController extends Controller
             return $this->success(null, "Purification recorded successfully.");
         }
 
-        return $this->success(null, "No purification due.");
+        return $this->success(null, "No holdings to purify.");
     }
 }

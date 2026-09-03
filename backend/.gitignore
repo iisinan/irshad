@@ -1,4 +1,13 @@
 /.phpunit.cache
+# Binary build artifacts — never commit these
+*.apk
+*.aab
+*.ipa
+# Scratch patch scripts
+patch_*.py
+fix_*.py
+test_site.js
+
 /node_modules
 /public/build
 /public/hot

@@ -14,10 +14,17 @@ class PurificationTab extends StatelessWidget {
       builder: (context, provider, child) {
         final isLoading = provider.isLoading;
         
-        // We only want to show holdings that have a purification due > 0
+        // Holdings with actual money due — shown in the main pending list
         final holdingsRequiringPurification = provider.holdings.where((h) {
           final due = num.tryParse(h['purification_due']?.toString() ?? '0')?.toDouble() ?? 0.0;
           return due > 0;
+        }).toList();
+
+        // Holdings flagged as needing purification but ₦0.00 due (no dividends in last 12M)
+        final holdingsNoDividends = provider.holdings.where((h) {
+          final due = num.tryParse(h['purification_due']?.toString() ?? '0')?.toDouble() ?? 0.0;
+          final ratio = num.tryParse(h['non_compliant_ratio']?.toString() ?? '0')?.toDouble() ?? 0.0;
+          return due == 0 && ratio > 0;
         }).toList();
 
         final totalPurificationDue = holdingsRequiringPurification.fold<double>(0.0, (sum, h) {
@@ -248,6 +255,91 @@ class PurificationTab extends StatelessWidget {
                   ],
                 ),
               ),
+
+              // Informational section: stocks that require purification but had no dividends in 12M
+              if (holdingsNoDividends.isNotEmpty) ...[
+                const SizedBox(height: 24),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: context.bg,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: context.divider),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF59E0B).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(Icons.info_outline_rounded, size: 18, color: Color(0xFFF59E0B)),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Watching for Dividends', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: context.textDark)),
+                                const SizedBox(height: 2),
+                                Text('These stocks have impure income but paid no dividends in the last 12 months.', style: TextStyle(fontSize: 12, color: context.textMuted)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: holdingsNoDividends.length,
+                        separatorBuilder: (_, __) => Divider(color: context.divider, height: 24),
+                        itemBuilder: (context, index) {
+                          final h = holdingsNoDividends[index];
+                          final symbol = h['symbol'] ?? '';
+                          final ratio = num.tryParse(h['non_compliant_ratio']?.toString() ?? '0')?.toDouble() ?? 0.0;
+                          return Row(
+                            children: [
+                              Container(
+                                width: 36, height: 36,
+                                decoration: BoxDecoration(
+                                  color: context.bgAlt,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(color: context.divider),
+                                ),
+                                child: Center(child: Text(symbol.length > 4 ? symbol.substring(0, 4) : symbol, style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: context.textMuted))),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(symbol, style: TextStyle(fontWeight: FontWeight.w700, color: context.textDark, fontSize: 14)),
+                                    Text('${ratio.toStringAsFixed(2)}% impure ratio · No dividends in 12M', style: TextStyle(fontSize: 11, color: context.textMuted)),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF59E0B).withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Text('Watching', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Color(0xFFF59E0B))),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ],
           ),
         );
