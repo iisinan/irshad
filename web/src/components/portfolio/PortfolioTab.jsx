@@ -157,10 +157,16 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
   const actionBtns = (
     <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }} onClick={e => e.stopPropagation()}>
       {showPurifyBtn && (
-        Number(holding.purification_due || 0) === 0 && hasBeenPurified ? (
-          <button disabled style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', color: 'var(--halal)', padding: '4px 8px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '3px', fontWeight: 700, fontSize: '0.6rem', cursor: 'default' }}>
-            <ShieldCheck size={10}/> Purified
-          </button>
+        Number(holding.purification_due || 0) === 0 ? (
+          hasDivs ? (
+            <button disabled style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', color: 'var(--halal)', padding: '4px 8px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '3px', fontWeight: 700, fontSize: '0.6rem', cursor: 'default' }}>
+              <ShieldCheck size={10}/> Purified
+            </button>
+          ) : (
+            <button disabled style={{ background: 'rgba(156,163,175,0.08)', border: '1px solid rgba(156,163,175,0.2)', color: 'var(--text-muted)', padding: '4px 8px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '3px', fontWeight: 700, fontSize: '0.6rem', cursor: 'default' }}>
+              <CheckCircle size={10}/> No Divs
+            </button>
+          )
         ) : (
           <button onClick={(e) => { e.stopPropagation(); navigate('/portfolio#purification', { state: { action: 'purify', targetSymbol: holding.symbol } }); }}
             style={{ background: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.2)', color: '#d97706', padding: '4px 8px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '3px', fontWeight: 700, fontSize: '0.6rem', cursor: 'pointer' }}>
