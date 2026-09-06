@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\BrokerageAccount;
 use App\Models\Company;
 use App\Models\Holding;
+use App\Models\Setting;
 use App\Models\PortfolioSnapshot;
 use App\Models\Watchlist;
 use App\Traits\ApiResponder;
@@ -26,6 +27,12 @@ class PortfolioController extends Controller
         $cacheKey = "portfolio_data_{$userId}";
 
         $data = Cache::remember($cacheKey, now()->addMinutes(15), function () use ($userId) {
+            try {
+                $exchangeRate = (float) (\App\Models\Setting::where('key', 'zakat_exchange_rate')->value('value') ?? 1600.0);
+            } catch (\Exception $e) {
+                $exchangeRate = 1600.0;
+            }
+
             $holdings = Holding::with([
                 'company.financials:id,company_id,total_revenue,interest_income',
                 'company.aaoifiScreening:id,company_id,impermissible_income_ratio',
@@ -41,7 +48,7 @@ class PortfolioController extends Controller
                 ->where('user_id', $userId)
                 ->get();
 
-            $portfolioData = $holdings->map(function ($holding) use ($userId) {
+            $portfolioData = $holdings->map(function ($holding) use ($userId, $exchangeRate) {
                 $company = $holding->company;
                 $currentPrice = (float) ($company->latest_price ?? 0);
                 $status = $company->current_status ?? 'doubtful';
@@ -77,11 +84,10 @@ class PortfolioController extends Controller
                     if ($latestPurificationDate && $effectiveDate->lessThanOrEqualTo($latestPurificationDate)) return false;
 
                     return true;
-                })->reduce(function ($carry, $dividend) {
+                })->reduce(function ($carry, $dividend) use ($exchangeRate) {
                     $amount = $dividend->amount;
                     if (strtoupper($dividend->currency) === 'USD') {
-                        // TODO: Use a dynamic exchange rate API instead of hardcoded
-                        $amount *= 1600; 
+                        $amount *= $exchangeRate; 
                     }
                     return $carry + $amount;
                 }, 0) ?? 0;
@@ -317,6 +323,12 @@ class PortfolioController extends Controller
             'all' => 'nullable|boolean'
         ]);
 
+        try {
+            $exchangeRate = (float) (\App\Models\Setting::where('key', 'zakat_exchange_rate')->value('value') ?? 1600.0);
+        } catch (\Exception $e) {
+            $exchangeRate = 1600.0;
+        }
+
         $userId = Auth::id();
         $symbolsToPurify = [];
 
@@ -375,10 +387,10 @@ class PortfolioController extends Controller
                 if ($latestPurificationDate && $effectiveDate->lessThanOrEqualTo($latestPurificationDate)) return false;
 
                 return true;
-            })->reduce(function ($carry, $dividend) {
+            })->reduce(function ($carry, $dividend) use ($exchangeRate) {
                 $amount = $dividend->amount;
                 if (strtoupper($dividend->currency) === 'USD') {
-                    $amount *= 1600;
+                    $amount *= $exchangeRate;
                 }
                 return $carry + $amount;
             }, 0) ?? 0;
