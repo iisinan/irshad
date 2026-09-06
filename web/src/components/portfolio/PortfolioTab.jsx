@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Wallet, Layers, ShieldAlert, AlertTriangle, Sparkles, Target,
   Plus, X, Trash2, ArrowUpRight, ArrowDownRight,
-  RefreshCw, Edit2, ShieldCheck, Droplet, HelpCircle
+  RefreshCw, Edit2, ShieldCheck, Droplet, HelpCircle, CheckCircle
 } from 'lucide-react';
 
 import { updateHolding } from '../../services/api';
