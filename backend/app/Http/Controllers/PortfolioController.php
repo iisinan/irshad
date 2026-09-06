@@ -30,9 +30,12 @@ class PortfolioController extends Controller
                 'company.financials:id,company_id,total_revenue,interest_income',
                 'company.aaoifiScreening:id,company_id,impermissible_income_ratio',
                 'company.latestDividend',
-                'company.dividends' => function ($query) {
+                                'company.dividends' => function ($query) {
                     $query->whereIn('status', ['paid', 'upcoming', 'declared'])
-                        ->where('pay_date', '>=', now()->subMonths(12));
+                        ->where(function ($q) {
+                            $q->where('pay_date', '>=', now()->subMonths(12))
+                              ->orWhereNull('pay_date');
+                        });
                 },
             ])
                 ->where('user_id', $userId)
@@ -56,18 +59,29 @@ class PortfolioController extends Controller
                     ->latest()
                     ->value('created_at');
 
-                // Calculate Purification Due based on paid dividends in the trailing 12 months,
-                // but only count dividends paid AFTER the latest purification date.
-                $trailingDividendsPerShare = $company?->dividends?->filter(function ($dividend) use ($latestPurificationDate) {
-                    if (!$latestPurificationDate) return true;
-                    // If no pay_date, fallback to ex_date or created_at
-                    $dividendDt = $dividend->pay_date ? \Carbon\Carbon::parse($dividend->pay_date) : 
+                $purchaseDate = $holding->purchase_date ? \Carbon\Carbon::parse($holding->purchase_date) : \Carbon\Carbon::parse($holding->created_at);
+
+                // Calculate Purification Due based on paid dividends in the trailing 12 months.
+                $trailingDividendsPerShare = $company?->dividends?->filter(function ($dividend) use ($latestPurificationDate, $purchaseDate) {
+                    $effectiveDate = $dividend->pay_date ? \Carbon\Carbon::parse($dividend->pay_date) : 
                                   ($dividend->ex_date ? \Carbon\Carbon::parse($dividend->ex_date) : $dividend->created_at);
-                    return $dividendDt->isAfter($latestPurificationDate);
+                    $exDate = $dividend->ex_date ? \Carbon\Carbon::parse($dividend->ex_date) : $effectiveDate;
+
+                    // 1. Cannot owe purification on dividends not yet received
+                    if ($effectiveDate->isFuture()) return false;
+
+                    // 2. Cannot owe purification on dividends from before you bought the stock
+                    if ($purchaseDate->copy()->startOfDay()->isAfter($exDate->copy()->startOfDay())) return false;
+
+                    // 3. Cannot owe purification on dividends already purified
+                    if ($latestPurificationDate && $effectiveDate->lessThanOrEqualTo($latestPurificationDate)) return false;
+
+                    return true;
                 })->reduce(function ($carry, $dividend) {
                     $amount = $dividend->amount;
                     if (strtoupper($dividend->currency) === 'USD') {
-                        $amount *= 1370; // Approximate USD to NGN rate
+                        // TODO: Use a dynamic exchange rate API instead of hardcoded
+                        $amount *= 1600; 
                     }
                     return $carry + $amount;
                 }, 0) ?? 0;
@@ -325,7 +339,10 @@ class PortfolioController extends Controller
                 'dividends' => function ($query) {
                     // Match the same 12-month window used in the portfolio index
                     $query->whereIn('status', ['paid', 'upcoming', 'declared'])
-                          ->where('pay_date', '>=', now()->subMonths(12));
+                        ->where(function ($q) {
+                            $q->where('pay_date', '>=', now()->subMonths(12))
+                              ->orWhereNull('pay_date');
+                        });
                 },
             ])->where('symbol', $symbol)->first();
             if (!$company) continue;
@@ -345,16 +362,23 @@ class PortfolioController extends Controller
                 ->latest()
                 ->value('created_at');
 
+            $purchaseDate = $holding->purchase_date ? \Carbon\Carbon::parse($holding->purchase_date) : \Carbon\Carbon::parse($holding->created_at);
+
             // Calculate purification due — only count dividends after the last purification date
-            $trailingDividendsPerShare = $company->dividends->filter(function ($dividend) use ($latestPurificationDate) {
-                if (!$latestPurificationDate) return true;
-                $dividendDt = $dividend->pay_date ? \Carbon\Carbon::parse($dividend->pay_date) :
+            $trailingDividendsPerShare = $company->dividends->filter(function ($dividend) use ($latestPurificationDate, $purchaseDate) {
+                $effectiveDate = $dividend->pay_date ? \Carbon\Carbon::parse($dividend->pay_date) :
                               ($dividend->ex_date ? \Carbon\Carbon::parse($dividend->ex_date) : $dividend->created_at);
-                return $dividendDt->isAfter($latestPurificationDate);
+                $exDate = $dividend->ex_date ? \Carbon\Carbon::parse($dividend->ex_date) : $effectiveDate;
+
+                if ($effectiveDate->isFuture()) return false;
+                if ($purchaseDate->copy()->startOfDay()->isAfter($exDate->copy()->startOfDay())) return false;
+                if ($latestPurificationDate && $effectiveDate->lessThanOrEqualTo($latestPurificationDate)) return false;
+
+                return true;
             })->reduce(function ($carry, $dividend) {
                 $amount = $dividend->amount;
                 if (strtoupper($dividend->currency) === 'USD') {
-                    $amount *= 1370;
+                    $amount *= 1600;
                 }
                 return $carry + $amount;
             }, 0) ?? 0;
