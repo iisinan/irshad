@@ -93,8 +93,12 @@ class ScrapeNgxDisclosures extends Command
         $title = $disclosure['title'] ?? 'Financial Statement';
 
         // Check if we already have it in corporate_disclosures by publication date
+        // Check if we already have it in corporate_disclosures by pdf URL or Title
         $existingDisclosure = CorporateDisclosure::where('company_symbol', $symbol)
-            ->where('published_at', $publishedAt)
+            ->where(function($q) use ($pdfUrl, $title) {
+                $q->where('pdf_url', $pdfUrl)
+                  ->orWhere('title', $title);
+            })
             ->first();
 
         if ($existingDisclosure) {
