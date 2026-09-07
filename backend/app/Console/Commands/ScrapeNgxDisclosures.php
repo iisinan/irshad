@@ -110,6 +110,37 @@ class ScrapeNgxDisclosures extends Command
         // Wait, normally we trust corporate_disclosures as the truth of processed files.
 
         $this->info("NEW DISCLOSURE FOUND: {$symbol} - {$title}");
+        $this->info("Downloading PDF to compute SHA-256 hash before notifying...");
+
+        try {
+            $pdfResponse = Http::timeout(60)->get($pdfUrl);
+            if ($pdfResponse->successful()) {
+                $fileContent = $pdfResponse->body();
+                $fileHash = hash('sha256', $fileContent);
+                
+                // Check if this hash already exists in financials for this company
+                $existingFinancial = Financial::where('company_id', $company->id)
+                    ->where('file_hash', $fileHash)
+                    ->first();
+
+                if ($existingFinancial) {
+                    $this->warn("Duplicate file detected! The SHA-256 hash matches an already processed financial statement. Skipping email.");
+                    
+                    // Save to CorporateDisclosure so we don't download it again next time
+                    CorporateDisclosure::create([
+                        'company_symbol' => $symbol,
+                        'title' => $title,
+                        'pdf_url' => $pdfUrl,
+                        'published_at' => $publishedAt
+                    ]);
+                    return;
+                }
+            } else {
+                $this->warn("Failed to download PDF for hashing. Proceeding anyway.");
+            }
+        } catch (\Exception $e) {
+            $this->warn("Error during PDF download/hashing: " . $e->getMessage() . ". Proceeding anyway.");
+        }
 
         // Save to DB
         $cd = CorporateDisclosure::create([
