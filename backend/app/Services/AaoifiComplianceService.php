@@ -67,7 +67,7 @@ class AaoifiComplianceService
             return $this->saveStatus(
                 $company,
                 'non-compliant',
-                'Failed Rule 1: Business Activity Check. ' . ($screening->business_reasoning ?? 'The stock failed due to non-compliant business activities.')
+                'Failed Rule 1: Business Activity Check. ' . (is_array($screening->business_reasoning) ? ($screening->business_reasoning['summary'] ?? json_encode($screening->business_reasoning)) : ($screening->business_reasoning ?? 'The stock failed due to non-compliant business activities.'))
             );
         }
 
@@ -75,7 +75,7 @@ class AaoifiComplianceService
             return $this->saveStatus(
                 $company,
                 'doubtful',
-                'Doubtful Rule 1: Business Activity Check. ' . ($screening->business_reasoning ?? 'The stock is marked as doubtful and requires scholar review.')
+                'Doubtful Rule 1: Business Activity Check. ' . (is_array($screening->business_reasoning) ? ($screening->business_reasoning['summary'] ?? json_encode($screening->business_reasoning)) : ($screening->business_reasoning ?? 'The stock is marked as doubtful and requires scholar review.'))
             );
         }
 
@@ -136,7 +136,7 @@ class AaoifiComplianceService
             );
         }
 
-        $extraNotes = $screening && $screening->business_reasoning ? ' Notes: ' . $screening->business_reasoning : '';
+        $extraNotes = $screening && $screening->business_reasoning ? ' Notes: ' . (is_array($screening->business_reasoning) ? ($screening->business_reasoning['summary'] ?? json_encode($screening->business_reasoning)) : $screening->business_reasoning) : '';
 
         // PIPELINE RESULT PROCESSING (ALL STAGES PASSED)
         if ($purPct > 0) {

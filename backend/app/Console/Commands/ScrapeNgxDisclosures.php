@@ -15,24 +15,26 @@ use Carbon\Carbon;
 class ScrapeNgxDisclosures extends Command
 {
     protected $signature = 'irshad:scrape-disclosures';
-    protected $description = 'Scrape NGXPulse for new financial disclosures and notify if new';
+    protected $description = 'Scrape NGX Official Doclib for new financial disclosures and notify if new';
 
     public function handle()
     {
-        $this->info("Fetching data from NGX Pulse Disclosures...");
+        $this->info("Fetching data from NGX Official Document Library...");
+
+        // Official NGX SharePoint REST API endpoint (no API key required)
+        $url = "https://doclib.ngxgroup.com/_api/Web/Lists/GetByTitle('XFinancial_News')/items/?\$select=URL,Modified,Created,CompanyName,CompanySymbol,InternationSecIN,Type_of_Submission&\$orderby=Created%20desc&\$Top=50";
 
         $response = Http::withHeaders([
-            'X-API-Key' => env('KOBOTERMINAL_API_KEY'),
-            'Referer' => 'https://koboterminal.com/',
-        ])->get('https://koboterminal.com/api/ngxdata/disclosures?limit=50');
+            'Accept' => 'application/json;odata=verbose',
+        ])->get($url);
 
         if (! $response->successful()) {
-            $this->error('Failed to fetch from NGX Pulse API: ' . $response->status());
+            $this->error('Failed to fetch from NGX Official API: ' . $response->status());
             return 1;
         }
 
         $data = $response->json();
-        $disclosures = $data['data'] ?? [];
+        $disclosures = $data['d']['results'] ?? [];
 
         if (empty($disclosures)) {
             $this->info("No disclosures found.");
@@ -41,9 +43,12 @@ class ScrapeNgxDisclosures extends Command
 
         $this->info('Found ' . count($disclosures) . ' disclosures. Processing...');
 
-        foreach ($disclosures as $disclosure) {
-            $type = strtolower($disclosure['type'] ?? '');
-            $title = strtolower($disclosure['title'] ?? '');
+        foreach ($disclosures as $doc) {
+            $type = strtolower($doc['Type_of_Submission'] ?? '');
+            $title = strtolower($doc['URL']['Description'] ?? '');
+            $pdfUrl = $doc['URL']['Url'] ?? null;
+            $symbol = $doc['CompanySymbol'] ?? null;
+            $createdAt = $doc['Created'] ?? null;
 
             // Check if it's a financial statement (strictly avoiding 'meeting results' or unrelated docs)
             $isFinancial = (str_contains($type, 'financial') || str_contains($title, 'financial') || str_contains($title, 'audited') || str_contains($title, 'unaudited')) || 
@@ -59,7 +64,14 @@ class ScrapeNgxDisclosures extends Command
                 $isFinancial = false;
             }
 
-            if ($isFinancial) {
+            if ($isFinancial && $symbol && $pdfUrl && $createdAt) {
+                // Normalize array to match the old format expected by processFinancialDisclosure
+                $disclosure = [
+                    'symbol' => $symbol,
+                    'created' => $createdAt,
+                    'url' => $pdfUrl,
+                    'title' => $doc['URL']['Description'] ?? 'Financial Statement'
+                ];
                 $this->processFinancialDisclosure($disclosure);
             }
         }
@@ -90,71 +102,33 @@ class ScrapeNgxDisclosures extends Command
             return;
         }
 
-        // It's not in corporate disclosures. Now check the SHA in financials table
-        $isNewByHash = true;
-        if ($pdfUrl) {
-            $tempPath = storage_path('app/temp_disclosure_' . $symbol . '_' . time() . '.pdf');
-            $downloaded = $this->downloadFile($pdfUrl, $tempPath);
+        // Also ensure we don't repeatedly send email if it somehow failed in corporate_disclosures but exists in financials
+        // Wait, normally we trust corporate_disclosures as the truth of processed files.
 
-            if ($downloaded && file_exists($tempPath) && filesize($tempPath) > 0) {
-                $fileHash = hash_file('sha256', $tempPath);
-                
-                // Check if hash exists in financials
-                if (Financial::where('file_hash', $fileHash)->exists()) {
-                    $isNewByHash = false;
-                    $this->line("Skipping {$symbol} - SHA hash already exists in Financials.");
-                }
+        $this->info("NEW DISCLOSURE FOUND: {$symbol} - {$title}");
 
-                unlink($tempPath); // cleanup
-            } else {
-                $this->warn("Failed to download PDF for {$symbol}. Proceeding as new.");
-            }
-        }
+        // Save to DB
+        $cd = CorporateDisclosure::create([
+            'company_symbol' => $symbol,
+            'title' => $title,
+            'pdf_url' => $pdfUrl,
+            'published_at' => $publishedAt
+        ]);
 
-        // If it's a completely new financial statement
-        if ($isNewByHash) {
-            $this->info("New financial statement found for {$symbol}!");
-            
-            // Save to corporate disclosures
-            CorporateDisclosure::create([
-                'company_symbol' => $symbol,
-                'company_name' => $company->name,
-                'title' => $title,
-                'pdf_url' => $pdfUrl,
-                'submission_type' => 'Financial Statement',
-                'published_at' => $publishedAt,
-            ]);
+        // Send Email
+        Mail::to('mairopettel@gmail.com')->send(new NewFinancialStatementAlert($company, $pdfUrl, $title));
+        $this->info("Alert email sent to mairopettel@gmail.com for {$symbol}.");
 
-            // Notify user
-            try {
-                Mail::to('sinanismailaidris@gmail.com')->send(new NewFinancialStatementAlert($company, $title, $pdfUrl));
-                $this->info("Alert email sent for {$symbol}.");
-            } catch (\Exception $e) {
-                Log::error("Failed to send financial alert for {$symbol}: " . $e->getMessage());
-                $this->error("Failed to send alert email for {$symbol}.");
-            }
-        }
-    }
-
-    private function downloadFile(string $url, string $path): bool
-    {
+        // Fire off background AI processing job
         try {
-            $fp = fopen($path, 'w+');
-            if (!$fp) return false;
-
-            $ch = curl_init(str_replace(' ', '%20', $url));
-            curl_setopt($ch, CURLOPT_TIMEOUT, 60);
-            curl_setopt($ch, CURLOPT_FILE, $fp);
-            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-            curl_setopt($ch, CURLOPT_FAILONERROR, true);
-            curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)');
-            $success = curl_exec($ch);
-            curl_close($ch);
-            fclose($fp);
-
-            return $success !== false;
+            $this->info("Triggering PDF extraction via Artisan command in background...");
+            // Run process-pdf via background shell or dispatch Job
+            // Since this is a cron command, we can just shell out or use Artisan::call if it was sync, 
+            // but usually this is better via Queue. If the old system shelled out, we can keep it.
+            $processCmd = "php artisan aaoifi:process-pdf {$symbol} '{$pdfUrl}' --url='{$pdfUrl}' > /dev/null 2>&1 &";
+            exec($processCmd);
         } catch (\Exception $e) {
-            return false;
+            Log::error("Failed to trigger process-pdf: " . $e->getMessage());
         }
     }
 }
