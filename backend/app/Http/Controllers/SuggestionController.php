@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Suggestion;
 use App\Models\User;
-use App\Models\UserNotification;
 use App\Notifications\AdminSuggestionNotification;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -26,19 +25,7 @@ class SuggestionController extends Controller
         // Notify all admins
         $admins = User::where('role', 'admin')->get();
         foreach ($admins as $admin) {
-            // 1. In-app notification
-            UserNotification::notify(
-                $admin->id,
-                'New Suggestion',
-                'New suggestion received from ' . (auth()->user()->name ?? 'a user') . '.',
-                [
-                    'category' => 'system',
-                    'icon' => '💡',
-                    'action_url' => '/admin/inbox'
-                ]
-            );
-
-            // 2. Email notification
+            // 1. Email notification
             $admin->notify(new AdminSuggestionNotification($suggestion));
         }
 
