@@ -154,16 +154,5 @@ class ScrapeNgxDisclosures extends Command
         Mail::to('mairopettel@gmail.com')->send(new NewFinancialStatementAlert($company, $pdfUrl, $title));
         $this->info("Alert email sent to mairopettel@gmail.com for {$symbol}.");
 
-        // Fire off background AI processing job
-        try {
-            $this->info("Triggering PDF extraction via Artisan command in background...");
-            // Run process-pdf via background shell or dispatch Job
-            // Since this is a cron command, we can just shell out or use Artisan::call if it was sync, 
-            // but usually this is better via Queue. If the old system shelled out, we can keep it.
-            $processCmd = "php artisan aaoifi:process-pdf {$symbol} '{$pdfUrl}' --url='{$pdfUrl}' > /dev/null 2>&1 &";
-            exec($processCmd);
-        } catch (\Exception $e) {
-            Log::error("Failed to trigger process-pdf: " . $e->getMessage());
-        }
     }
 }
