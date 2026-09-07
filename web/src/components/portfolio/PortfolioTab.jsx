@@ -144,7 +144,7 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
   };
   const badge = getBadgeStyle(finalStatus, holding.purification_due, holding.non_compliant_ratio);
 
-  const hasDivs   = Number(holding.total_dividends || 0) > 0;
+  const hasDivs   = Number(holding.lifetime_dividends || holding.total_dividends || 0) > 0;
   const hasPurify = Number(holding.purification_due || 0) > 0;
   const gracePeriodEndsAt = holding.grace_period_ends_at;
   let daysLeft = null;

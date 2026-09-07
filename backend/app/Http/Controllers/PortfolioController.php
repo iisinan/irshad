@@ -92,7 +92,24 @@ class PortfolioController extends Controller
                     return $carry + $amount;
                 }, 0) ?? 0;
                 
+                // Calculate Lifetime Dividends (ignores purification date)
+                $lifetimeDividendsPerShare = $company?->dividends?->filter(function ($dividend) use ($purchaseDate) {
+                    $effectiveDate = $dividend->pay_date ? \Carbon\Carbon::parse($dividend->pay_date) : 
+                                  ($dividend->ex_date ? \Carbon\Carbon::parse($dividend->ex_date) : $dividend->created_at);
+                    $exDate = $dividend->ex_date ? \Carbon\Carbon::parse($dividend->ex_date) : $effectiveDate;
+                    if ($effectiveDate->isFuture()) return false;
+                    if ($purchaseDate->copy()->startOfDay()->isAfter($exDate->copy()->startOfDay())) return false;
+                    return true;
+                })->reduce(function ($carry, $dividend) use ($exchangeRate) {
+                    $amount = $dividend->amount;
+                    if (strtoupper($dividend->currency) === 'USD') {
+                        $amount *= $exchangeRate; 
+                    }
+                    return $carry + $amount;
+                }, 0) ?? 0;
+                
                 $totalDividendsReceived = $holding->shares * $trailingDividendsPerShare;
+                $lifetimeDividendsReceived = $holding->shares * $lifetimeDividendsPerShare;
                 $purificationDue = $isHalal ? $totalDividendsReceived * ($nonCompliantRatio / 100) : 0;
 
                 // Calculate return
@@ -115,6 +132,7 @@ class PortfolioController extends Controller
                     'is_halal' => $isHalal,
                     'purification_due' => round($purificationDue, 2),
                     'total_dividends' => round($totalDividendsReceived, 2),
+                    'lifetime_dividends' => round($lifetimeDividendsReceived, 2),
                     'latest_dividend' => $company->latestDividend ? [
                         'amount' => $company->latestDividend->amount,
                         'pay_date' => $company->latestDividend->pay_date?->toISOString(),

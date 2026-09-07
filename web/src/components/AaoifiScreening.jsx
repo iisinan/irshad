@@ -259,7 +259,7 @@ const AaoifiScreening = () => {
   const hasBought = userHoldingsForSymbol.length > 0;
   const currentHolding = userHoldingsForSymbol[0] || null;
   const purificationDue = currentHolding ? Number(currentHolding.purification_due || 0) : 0;
-  const totalDivs = currentHolding ? Number(currentHolding.total_dividends_received || currentHolding.total_dividends || 0) : 0;
+  const totalDivs = currentHolding ? Number(currentHolding.lifetime_dividends || currentHolding.total_dividends || 0) : 0;
 
   /* ── UI state ── */
   const [modalData, setModalData] = useState(null);
