@@ -257,6 +257,9 @@ const AaoifiScreening = () => {
   
   const userHoldingsForSymbol = portfolioRes?.data?.holdings?.filter(h => h.symbol === symbol) || [];
   const hasBought = userHoldingsForSymbol.length > 0;
+  const currentHolding = userHoldingsForSymbol[0] || null;
+  const purificationDue = currentHolding ? Number(currentHolding.purification_due || 0) : 0;
+  const totalDivs = currentHolding ? Number(currentHolding.total_dividends_received || currentHolding.total_dividends || 0) : 0;
 
   /* ── UI state ── */
   const [modalData, setModalData] = useState(null);
@@ -752,7 +755,19 @@ const AaoifiScreening = () => {
                 <div style={{ fontSize:'1rem',color:'var(--text-dark)',fontWeight:800,lineHeight:1.4 }}>Donate <strong style={{ color:'#D97706', fontSize:'1.3rem', padding: '0 2px' }}>{purPct}%</strong> of dividend income to charity</div>
               </div>
               {hasBought && (
-                <Link to="/portfolio#purification" state={{ action: 'purify', targetSymbol: symbol }} className="hover-lift" style={{ display:'inline-flex',alignItems:'center',justifyContent:'center',gap:6,padding:'12px 20px',borderRadius:16,background:'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 100%)',border:'1px solid rgba(245,158,11,0.3)',color:'#D97706',fontSize:'0.85rem',fontWeight:900,textDecoration:'none',marginTop:8, transition:'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: '0 8px 24px rgba(245,158,11,0.15), inset 0 2px 4px #fff' }}>Purify Now <ChevronRight size={16}/></Link>
+                purificationDue === 0 ? (
+                  totalDivs > 0 ? (
+                    <button disabled style={{ display:'inline-flex',alignItems:'center',justifyContent:'center',gap:6,padding:'12px 20px',borderRadius:16,background:'rgba(34,197,94,0.08)',border:'1px solid rgba(34,197,94,0.2)',color:'var(--halal)',fontSize:'0.85rem',fontWeight:900,marginTop:8, cursor:'default' }}>
+                      <ShieldCheck size={16}/> Purified
+                    </button>
+                  ) : (
+                    <button disabled style={{ display:'inline-flex',alignItems:'center',justifyContent:'center',gap:6,padding:'12px 20px',borderRadius:16,background:'rgba(156,163,175,0.08)',border:'1px solid rgba(156,163,175,0.2)',color:'var(--text-muted)',fontSize:'0.85rem',fontWeight:900,marginTop:8, cursor:'default' }}>
+                      <CheckCircle size={16}/> No Divs
+                    </button>
+                  )
+                ) : (
+                  <Link to="/portfolio#purification" state={{ action: 'purify', targetSymbol: symbol }} className="hover-lift" style={{ display:'inline-flex',alignItems:'center',justifyContent:'center',gap:6,padding:'12px 20px',borderRadius:16,background:'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 100%)',border:'1px solid rgba(245,158,11,0.3)',color:'#D97706',fontSize:'0.85rem',fontWeight:900,textDecoration:'none',marginTop:8, transition:'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: '0 8px 24px rgba(245,158,11,0.15), inset 0 2px 4px #fff' }}>Purify Now <ChevronRight size={16}/></Link>
+                )
               )}
             </div>)}
             
