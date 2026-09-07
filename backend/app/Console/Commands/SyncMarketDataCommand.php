@@ -60,7 +60,7 @@ class SyncMarketDataCommand extends Command
                 ->withOptions(['verify' => false])
                 ->retry(2, 5000)
                 ->timeout(15)
-                ->get('https://ngxpulse.ng/ngx-dividend-calendar');
+                ->get('https://koboterminal.com/ngx-dividend-calendar');
 
             if ($divResponse->successful()) {
                 $html = $divResponse->body();
@@ -122,7 +122,7 @@ class SyncMarketDataCommand extends Command
 
         foreach ($companies as $company) {
             try {
-                $url = "https://ngxpulse.ng/stocks/" . $company->symbol;
+                $url = "https://koboterminal.com/stocks/" . $company->symbol;
                 $response = Http::timeout(20)->get($url);
 
                 if ($response->successful()) {

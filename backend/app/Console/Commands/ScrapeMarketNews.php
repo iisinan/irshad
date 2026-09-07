@@ -19,9 +19,10 @@ class ScrapeMarketNews extends Command
         $this->info("Fetching market news from NGXPulse API...");
 
         $response = Http::withHeaders([
-            'Referer' => 'https://ngxpulse.ng/blog',
+            'X-API-Key' => env('KOBOTERMINAL_API_KEY'),
+            'Referer' => 'https://koboterminal.com/blog',
             'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        ])->get('https://ngxpulse.ng/api/news');
+        ])->get('https://koboterminal.com/api/news');
 
         if (!$response->successful()) {
             $this->error("Failed to fetch news. Status: " . $response->status());

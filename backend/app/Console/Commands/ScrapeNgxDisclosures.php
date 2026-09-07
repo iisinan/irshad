@@ -22,8 +22,9 @@ class ScrapeNgxDisclosures extends Command
         $this->info("Fetching data from NGX Pulse Disclosures...");
 
         $response = Http::withHeaders([
-            'Referer' => 'https://ngxpulse.ng/',
-        ])->get('https://ngxpulse.ng/api/ngxdata/disclosures?limit=50');
+            'X-API-Key' => env('KOBOTERMINAL_API_KEY'),
+            'Referer' => 'https://koboterminal.com/',
+        ])->get('https://koboterminal.com/api/ngxdata/disclosures?limit=50');
 
         if (! $response->successful()) {
             $this->error('Failed to fetch from NGX Pulse API: ' . $response->status());

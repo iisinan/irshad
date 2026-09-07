@@ -33,8 +33,9 @@ class SeedNgxLogosCommand extends Command
 
         try {
             $response = Http::withHeaders([
-                'Referer' => 'https://ngxpulse.ng/',
-            ])->timeout(20)->get('https://ngxpulse.ng/stocks/DANGCEM');
+                'X-API-Key' => env('KOBOTERMINAL_API_KEY'),
+            'Referer' => 'https://koboterminal.com/',
+            ])->timeout(20)->get('https://koboterminal.com/stocks/DANGCEM');
 
             $html = $response->body();
             $logoMapping = [];
@@ -53,7 +54,7 @@ class SeedNgxLogosCommand extends Command
             foreach ($companies as $company) {
                 if (isset($logoMapping[$company->symbol])) {
                     $filename = $logoMapping[$company->symbol];
-                    $logoUrl = "https://ngxpulse.ng/logos_small/{$filename}";
+                    $logoUrl = "https://koboterminal.com/logos_small/{$filename}";
                     $company->update(['logo_url' => $logoUrl]);
                     $this->info("Updated {$company->symbol} -> {$logoUrl}");
                     $updatedNgx++;
