@@ -151,8 +151,8 @@ class ScrapeNgxDisclosures extends Command
         ]);
 
         // Send Email
-        Mail::to('mairopettel@gmail.com')->send(new NewFinancialStatementAlert($company, $pdfUrl, $title));
-        $this->info("Alert email sent to mairopettel@gmail.com for {$symbol}.");
+        Mail::to(['mairopettel@gmail.com', 'iirshad2026@gmail.com'])->send(new NewFinancialStatementAlert($company, $pdfUrl, $title));
+        $this->info("Alert email sent to mairopettel@gmail.com and iirshad2026@gmail.com for {$symbol}.");
 
     }
 }
