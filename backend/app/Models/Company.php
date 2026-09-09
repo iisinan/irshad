@@ -67,7 +67,7 @@ class Company extends Model
 
     public function marketData(): HasOne
     {
-        return $this->hasOne(MarketData::class);
+        return $this->hasOne(MarketData::class)->latestOfMany();
     }
 
     public function dataSources(): HasMany
