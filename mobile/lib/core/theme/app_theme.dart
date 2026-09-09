@@ -1,3 +1,4 @@
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 
 class AppColors extends ThemeExtension<AppColors> {
@@ -148,7 +149,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      fontFamily: 'Manrope',
+      fontFamily: GoogleFonts.figtree().fontFamily,
       scaffoldBackgroundColor: darkBg,
       appBarTheme: const AppBarTheme(
         centerTitle: false,
@@ -218,7 +219,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      fontFamily: 'Manrope',
+      fontFamily: GoogleFonts.figtree().fontFamily,
       scaffoldBackgroundColor: lightBg,
       appBarTheme: const AppBarTheme(
         centerTitle: false,

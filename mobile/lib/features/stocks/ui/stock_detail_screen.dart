@@ -1,3 +1,4 @@
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:fl_chart/fl_chart.dart';
@@ -2521,7 +2522,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
               Expanded(
                 child: RichText(
                   text: TextSpan(
-                    style: TextStyle(color: context.textDark.withOpacity(0.8), fontSize: 13, height: 1.5, fontFamily: 'Manrope'),
+                    style: TextStyle(color: context.textDark.withOpacity(0.8), fontSize: 13, height: 1.5, fontFamily: GoogleFonts.figtree().fontFamily),
                     children: [
                       TextSpan(text: 'Important: ', style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark)),
                       const TextSpan(text: 'AAOIFI applies strict thresholds with no buffer zones. For example, a company at 30.01% debt is non-halal. Click any bar to see the full calculation breakdown.'),

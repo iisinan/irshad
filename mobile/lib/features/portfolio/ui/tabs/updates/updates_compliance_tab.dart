@@ -1,3 +1,4 @@
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 import 'package:irshad_mobile/core/api/api_service.dart';
@@ -154,7 +155,7 @@ class _UpdatesComplianceTabState extends State<UpdatesComplianceTab> {
                       ),
                       child: RichText(
                         text: TextSpan(
-                          style: TextStyle(fontSize: 12, color: context.appColors.textBody, height: 1.4, fontFamily: 'Manrope'),
+                          style: TextStyle(fontSize: 12, color: context.appColors.textBody, height: 1.4, fontFamily: GoogleFonts.figtree().fontFamily),
                           children: [
                             const TextSpan(text: 'Reason: ', style: TextStyle(fontWeight: FontWeight.bold)),
                             TextSpan(text: item['reason']),

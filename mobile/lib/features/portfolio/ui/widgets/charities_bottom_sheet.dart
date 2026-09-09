@@ -1,3 +1,4 @@
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -152,7 +153,7 @@ class _CharitiesBottomSheetState extends State<CharitiesBottomSheet> {
                 Expanded(
                   child: RichText(
                     text: TextSpan(
-                      style: TextStyle(fontSize: 13, color: Colors.amber.shade900, height: 1.5, fontFamily: 'Inter'),
+                      style: TextStyle(fontSize: 13, color: Colors.amber.shade900, height: 1.5, fontFamily: GoogleFonts.figtree().fontFamily),
                       children: const [
                         TextSpan(text: 'Note: ', style: TextStyle(fontWeight: FontWeight.w800)),
                         TextSpan(text: 'We are not affiliated with any of these charities and organisations. Please do your own verification.', style: TextStyle(fontWeight: FontWeight.w500)),
