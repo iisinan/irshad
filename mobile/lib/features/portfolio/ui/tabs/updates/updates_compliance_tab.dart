@@ -184,6 +184,8 @@ class _UpdatesComplianceTabState extends State<UpdatesComplianceTab> {
     List<dynamic> items = _data?['compliance_changes'] ?? [];
 
     return ListView(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       children: [
         if (items.isEmpty)

@@ -11,6 +11,8 @@ import 'updates/updates_digest_tab.dart';
 import 'purification_tab.dart';
 import 'updates/updates_purification_tab.dart';
 import 'updates/updates_compliance_tab.dart';
+import '../widgets/islamic_quote_widget.dart';
+
 class UpdateTab extends StatefulWidget {
   const UpdateTab({super.key});
 
@@ -63,6 +65,8 @@ class _UpdateTabState extends State<UpdateTab> {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             child: _buildGreetingBanner(context, _unreadInbox),
           ),
+          const IslamicQuoteWidget(compact: true),
+          const SizedBox(height: 8),
           _buildSubTabNavigation(context, _unreadInbox),
           const SizedBox(height: 16),
           _buildActiveTabContent(),
@@ -88,73 +92,96 @@ class _UpdateTabState extends State<UpdateTab> {
     return Container(
       decoration: BoxDecoration(
         color: context.bg,
+        gradient: LinearGradient(
+          colors: [context.bg, context.primary.withValues(alpha: 0.05)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         border: Border.all(color: context.appColors.divider),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4)),
+          BoxShadow(color: context.primary.withValues(alpha: 0.04), blurRadius: 32, offset: const Offset(0, 8)),
         ],
       ),
-      child: Column(
+      padding: const EdgeInsets.all(20),
+      child: Stack(
+        clipBehavior: Clip.none,
         children: [
-          // Top primary strip
-          Container(
-            height: 5,
-            decoration: BoxDecoration(
-              color: context.primary,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          // Decorative glow orb (simulate)
+          Positioned(
+            top: -50,
+            left: -20,
+            child: Container(
+              width: 150,
+              height: 150,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [context.primary.withValues(alpha: 0.1), Colors.transparent],
+                  stops: const [0.0, 0.7],
+                ),
+              ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'ٱلسَّلَامُ عَلَيْكُمْ وَرَحْمَةُ ٱللَّٰهِ وَبَرَكَاتُهُ',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF5B2971), fontFamily: 'Amiri'),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '$greetingEn, $firstName $emoji',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Here\'s what\'s happening with your halal portfolio today.',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: context.textMuted, height: 1.4),
-                      ),
-                      if (unreadCount > 0)
-                        Container(
-                          margin: const EdgeInsets.only(top: 12),
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: context.primary.withValues(alpha: 0.1),
-                            border: Border.all(color: context.primary.withValues(alpha: 0.2)),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.notifications, size: 12, color: context.primary),
-                              const SizedBox(width: 4),
-                              Text(
-                                '$unreadCount unread notification${unreadCount != 1 ? 's' : ''}',
-                                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: context.primary),
-                              ),
-                            ],
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Emoji Box
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: context.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: context.primary.withValues(alpha: 0.2)),
+                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 12, offset: const Offset(0, 4))],
+                ),
+                child: Center(
+                  child: Text(emoji, style: const TextStyle(fontSize: 24)),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'ٱلسَّلَامُ عَلَيْكُمْ وَرَحْمَةُ ٱللَّٰهِ وَبَرَكَاتُهُ',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF5B2971), fontFamily: 'Amiri'),
+                    ),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            '$greetingEn, $firstName',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                    ],
-                  ),
+                        if (unreadCount > 0) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: context.primary,
+                              borderRadius: BorderRadius.circular(100),
+                              boxShadow: [BoxShadow(color: context.primary.withValues(alpha: 0.5), blurRadius: 8, offset: const Offset(0, 2))],
+                            ),
+                            child: Text(
+                              '$unreadCount unread',
+                              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.white),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 16),
-                const LiveClockWidget(),
-              ],
-            ),
+              ),
+              const SizedBox(width: 12),
+              const LiveClockWidget(),
+            ],
           ),
         ],
       ),
@@ -231,6 +258,8 @@ class _UpdateTabState extends State<UpdateTab> {
         return const UpdatesInboxTab();
       case 'digest':
         return const UpdatesDigestTab();
+      case 'compliance':
+        return const UpdatesComplianceTab();
       case 'purification':
         return const UpdatesPurificationTab();
       default:

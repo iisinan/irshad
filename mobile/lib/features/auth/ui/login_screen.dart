@@ -52,9 +52,13 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     if (enabled) {
       final canCheckBiometrics = await _localAuth.canCheckBiometrics;
       final isDeviceSupported = await _localAuth.isDeviceSupported();
-      setState(() {
-        _biometricsEnabled = canCheckBiometrics && isDeviceSupported;
-      });
+      if (canCheckBiometrics && isDeviceSupported) {
+        setState(() {
+          _biometricsEnabled = true;
+        });
+        // Auto-prompt on launch
+        _authenticateWithBiometrics();
+      }
     }
   }
 
@@ -100,7 +104,52 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         await _secureStorage.write(key: 'saved_email', value: _emailController.text);
         if (mounted) {
           Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
-          Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/main', (route) => false);
+          
+          // Prompt for biometrics if not enabled
+          final prefs = await SharedPreferences.getInstance();
+          final isEnabled = prefs.getBool('biometrics_enabled') ?? false;
+          final hasPrompted = prefs.getBool('biometrics_prompted') ?? false;
+          
+          if (!isEnabled && !hasPrompted) {
+            final canCheckBiometrics = await _localAuth.canCheckBiometrics;
+            final isDeviceSupported = await _localAuth.isDeviceSupported();
+            
+            if (canCheckBiometrics && isDeviceSupported) {
+              await prefs.setBool('biometrics_prompted', true);
+              
+              final enable = await showDialog<bool>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: const Text('Enable Biometric Login'),
+                  content: const Text('Would you like to use your fingerprint or face to log in faster next time?'),
+                  actions: [
+                    TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Not Now')),
+                    ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Enable')),
+                  ],
+                ),
+              );
+              
+              if (enable == true) {
+                try {
+                  final authenticated = await _localAuth.authenticate(
+                    localizedReason: 'Authenticate to enable biometric login',
+                    biometricOnly: true,
+                    persistAcrossBackgrounding: true,
+                  );
+                  if (authenticated) {
+                    await prefs.setBool('biometrics_enabled', true);
+                    if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Biometric login enabled.')));
+                  }
+                } catch (e) {
+                  debugPrint('Biometric enable error: $e');
+                }
+              }
+            }
+          }
+          
+          if (mounted) {
+            Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/main', (route) => false);
+          }
         }
       }
     } catch (e) {
@@ -117,7 +166,52 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       if (user != null) {
         if (mounted) {
           Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
-          Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/main', (route) => false);
+          
+          // Prompt for biometrics if not enabled
+          final prefs = await SharedPreferences.getInstance();
+          final isEnabled = prefs.getBool('biometrics_enabled') ?? false;
+          final hasPrompted = prefs.getBool('biometrics_prompted') ?? false;
+          
+          if (!isEnabled && !hasPrompted) {
+            final canCheckBiometrics = await _localAuth.canCheckBiometrics;
+            final isDeviceSupported = await _localAuth.isDeviceSupported();
+            
+            if (canCheckBiometrics && isDeviceSupported) {
+              await prefs.setBool('biometrics_prompted', true);
+              
+              final enable = await showDialog<bool>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: const Text('Enable Biometric Login'),
+                  content: const Text('Would you like to use your fingerprint or face to log in faster next time?'),
+                  actions: [
+                    TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Not Now')),
+                    ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Enable')),
+                  ],
+                ),
+              );
+              
+              if (enable == true) {
+                try {
+                  final authenticated = await _localAuth.authenticate(
+                    localizedReason: 'Authenticate to enable biometric login',
+                    biometricOnly: true,
+                    persistAcrossBackgrounding: true,
+                  );
+                  if (authenticated) {
+                    await prefs.setBool('biometrics_enabled', true);
+                    if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Biometric login enabled.')));
+                  }
+                } catch (e) {
+                  debugPrint('Biometric enable error: $e');
+                }
+              }
+            }
+          }
+
+          if (mounted) {
+            Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/main', (route) => false);
+          }
         }
       }
     } catch (e) {

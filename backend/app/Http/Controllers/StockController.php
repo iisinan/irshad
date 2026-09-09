@@ -139,7 +139,7 @@ class StockController extends Controller
 
             $stockArray = $company->toArray();
             if ($company->marketData) {
-                $stockArray = array_merge($stockArray, $company->marketData->toArray());
+                $stockArray = array_merge($company->marketData->toArray(), $stockArray);
                 unset($stockArray['market_data']);
             }
             

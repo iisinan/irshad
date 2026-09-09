@@ -147,6 +147,8 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
     }
 
     return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       itemCount: filteredNotifications.length,
       itemBuilder: (context, index) {
