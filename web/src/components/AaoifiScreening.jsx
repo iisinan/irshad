@@ -726,7 +726,7 @@ const AaoifiScreening = () => {
                         marginLeft: '6px', 
                         padding: '1px 6px', 
                         background: '#ffffff', 
-                        border: '1px solid rgba(16,185,129,0.2)', 
+                        border: '1px solid #ffffff', 
                         borderRadius: '100px', 
                         color: 'var(--halal)', 
                         fontSize: '0.52rem', 
