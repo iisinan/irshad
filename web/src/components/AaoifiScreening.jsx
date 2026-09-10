@@ -706,12 +706,15 @@ const AaoifiScreening = () => {
               </div>
 
               <div style={{ padding: '16px 20px', background: 'rgba(255,255,255,0.85)', borderRadius: 16, border: '1px solid #fff', marginTop: 12, boxShadow: '0 4px 16px rgba(0,0,0,0.04), inset 0 2px 4px rgba(255,255,255,1)', backdropFilter: 'blur(20px)' }}>
-                <p style={{ color:'var(--text-dark)',fontSize:'0.9rem',lineHeight:1.6,margin:0, fontWeight:600 }}>
+                <div style={{ color:'var(--text-dark)',fontSize:'0.9rem',lineHeight:1.6,margin:0, fontWeight:600 }}>
                   {cleanStatusReason||'Screened in accordance with AAOIFI Shariah Standard No. 21.'}
                   {(finalStatus === 'halal' && showFinancials) && (
                     <button 
-                      onClick={() => {
-                        document.getElementById('aaoifi-financial-ratios')?.scrollIntoView({ behavior: 'smooth' });
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        document.getElementById('aaoifi-financial-ratios')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                       }}
                       style={{ 
                         marginLeft: '8px', 
@@ -726,12 +729,14 @@ const AaoifiScreening = () => {
                         display: 'inline-flex',
                         alignItems: 'center',
                         gap: '4px',
-                        verticalAlign: 'middle'
+                        verticalAlign: 'middle',
+                        position: 'relative',
+                        zIndex: 10
                       }}>
                       See Ratios <ArrowRight size={10} />
                     </button>
                   )}
-                </p>
+                </div>
               </div>
 
               {hasNearLimit && (
