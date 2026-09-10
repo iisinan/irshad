@@ -802,7 +802,7 @@ const AaoifiScreening = () => {
                   }}
                   disabled={alertLoading}
                   className="hover-lift"
-                  style={{ display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8,padding:'10px 16px',borderRadius:12,background: hasAlert ? 'rgba(239,68,68,0.08)' : 'var(--body-bg)',border: hasAlert ? '1px solid rgba(239,68,68,0.2)' : '1px solid var(--border)',color: hasAlert ? 'var(--non-compliant)' : 'var(--text-dark)',fontSize:'0.8rem',fontWeight:800,cursor:alertLoading?'not-allowed':'pointer',marginTop:12, transition:'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: hasAlert ? 'inset 0 0 0 1px rgba(239,68,68,0.1)' : 'var(--shadow-sm)' }}
+                  style={{ display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8,padding:'10px 16px',borderRadius:12,background: hasAlert ? (!businessFailed ? 'rgba(59,130,246,0.08)' : 'rgba(239,68,68,0.08)') : 'var(--body-bg)',border: hasAlert ? (!businessFailed ? '1px solid rgba(59,130,246,0.2)' : '1px solid rgba(239,68,68,0.2)') : '1px solid var(--border)',color: hasAlert ? (!businessFailed ? '#3B82F6' : 'var(--non-compliant)') : 'var(--text-dark)',fontSize:'0.8rem',fontWeight:800,cursor:alertLoading?'not-allowed':'pointer',marginTop:12, transition:'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: hasAlert ? (!businessFailed ? 'inset 0 0 0 1px rgba(59,130,246,0.1)' : 'inset 0 0 0 1px rgba(239,68,68,0.1)') : 'var(--shadow-sm)' }}
                 >
                   {alertLoading ? <RefreshCw size={16} className="spin" /> : (hasAlert ? <CheckCircle size={16} strokeWidth={2.5}/> : <Bell size={16} strokeWidth={2.5}/>)} {hasAlert ? 'Alert Active' : 'Alert me when it changes'}
                 </button>
