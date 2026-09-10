@@ -539,12 +539,18 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                   ],
 
 
-                  // Price & Market Data
-                  if (_selectedTab == 3) ...[
-                    _buildPriceAndMarketData(),
-                    _buildAdvancedMetrics(),
-                    _buildAnalystRating(),
-                  ],
+                  // Price & Market Data (hidden for business activity failures)
+                  if (_selectedTab == 3) ...(() {
+                    final bool _bizFailed =
+                        (_currentStock['business_status'] == 'fail' || _currentStock['business_status'] == 'non-halal' || _currentStock['business_status'] == 'non-compliant') ||
+                        (_aaoifiData != null && (_aaoifiData!['stage1']?['status'] == 'non-halal' || _aaoifiData!['stage1']?['status'] == 'non-compliant' || _aaoifiData!['business_status'] == 'fail'));
+                    if (_bizFailed) return <Widget>[];
+                    return [
+                      _buildPriceAndMarketData(),
+                      _buildAdvancedMetrics(),
+                      _buildAnalystRating(),
+                    ];
+                  })(),
                   
                   // News Section
                   if (_selectedTab == 4 && (_isLoadingNews || _news.isNotEmpty)) ...[
@@ -881,62 +887,6 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (purificationRequired)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF59E0B).withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(100),
-                          border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.2)),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.opacity, color: Color(0xFFF59E0B), size: 14),
-                            const SizedBox(width: 6),
-                            Text(
-                              'With Purification ${percent > 0 ? '${percent.toStringAsFixed(2)}%' : ''}',
-                              style: const TextStyle(
-                                color: Color(0xFFF59E0B),
-                                fontSize: 13,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.2,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  if (nearLimitDetected)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFD97706).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(100),
-                          border: Border.all(color: const Color(0xFFD97706).withOpacity(0.2)),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.warning_amber_rounded, color: Color(0xFFD97706), size: 14),
-                            const SizedBox(width: 6),
-                            const Text(
-                              'Near Limit Detected on Financial Screening',
-                              style: TextStyle(
-                                color: Color(0xFF92400E),
-                                fontSize: 13,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.2,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
@@ -950,6 +900,53 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                         ),
                         child: Text(mainLabel, style: TextStyle(color: color, fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
                       ),
+                      // Compact EXCLUDED pill — shown for business activity failures
+                      if (businessFailed)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: const Color(0xFFDC2626).withOpacity(0.2), width: 1),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFDC2626).withOpacity(0.06),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.cancel_outlined, color: Color(0xFFDC2626), size: 16),
+                              const SizedBox(width: 6),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Text(
+                                    'EXCLUDED',
+                                    style: TextStyle(
+                                      color: Color(0xFFDC2626),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 0.6,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Not suitable for investment',
+                                    style: TextStyle(
+                                      color: Colors.grey[500],
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
                       if (showPurificationBtn)
                         GestureDetector(
                           onTap: isDonated ? null : () {
@@ -987,6 +984,125 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                   ),
                 ],
               ),
+
+              // ── PURIFICATION NEEDED (right after verdict) ──────────
+              if (purificationRequired) ...[
+                const SizedBox(height: 10),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF7ED),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.3)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: const [
+                          Icon(Icons.opacity, color: Color(0xFFD97706), size: 13),
+                          SizedBox(width: 5),
+                          Text(
+                            'PURIFICATION NEEDED',
+                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Color(0xFFD97706), letterSpacing: 0.8),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 5),
+                      RichText(
+                        text: TextSpan(
+                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFF1C1C1E), height: 1.3),
+                          children: [
+                            const TextSpan(text: 'Donate '),
+                            TextSpan(
+                              text: percent > 0 ? '${percent.toStringAsFixed(2)}%' : 'a portion',
+                              style: const TextStyle(color: Color(0xFFD97706), fontWeight: FontWeight.w900),
+                            ),
+                            const TextSpan(text: ' of dividend income to charity'),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              // ───────────────────────────────────────────────────────
+
+              // ── FINANCIAL SCREENING FAILED BANNER ───────────────────
+              Builder(
+                builder: (context) {
+                  bool isNonCompliant = label.toUpperCase().contains('NON-COMPLIANT');
+                  if (businessFailed || !isNonCompliant) return const SizedBox.shrink();
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Section label
+                        Row(
+                          children: const [
+                            Icon(Icons.warning_amber_rounded, color: Color(0xFF1D6ADB), size: 16),
+                            SizedBox(width: 6),
+                            Text(
+                              'SCREENING RESULT',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w900,
+                                color: Color(0xFF1D6ADB),
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        // Card
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF1D6ADB).withOpacity(0.08),
+                                blurRadius: 20,
+                                offset: const Offset(0, 6),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 36,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: const Color(0xFF1D6ADB), width: 2),
+                                ),
+                                child: const Icon(Icons.info_outline_rounded, color: Color(0xFF1D6ADB), size: 18),
+                              ),
+                              const SizedBox(width: 12),
+                              const Expanded(
+                                child: Text(
+                                  'Not suitable for investment now',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFF1D6ADB),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+              // ────────────────────────────────────────────────────────
+
               if (justification.isNotEmpty) ...[
                 Builder(
                   builder: (context) {
@@ -1100,6 +1216,37 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                                     ],
                                   ),
                                 ],
+                                // See Ratios button — blue if passed business activity but failed financial
+                                if (!businessFailed)
+                                  Builder(builder: (ctx) {
+                                    final bool isNC = label.toUpperCase().contains('NON-COMPLIANT');
+                                    final btnColor = isNC ? const Color(0xFF1D6ADB) : ctx.halal;
+                                    return Padding(
+                                      padding: const EdgeInsets.only(top: 10),
+                                      child: GestureDetector(
+                                        onTap: () => setState(() => _selectedTab = 2),
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(100),
+                                            border: Border.all(color: Colors.white, width: 1),
+                                            boxShadow: [
+                                              BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 6, offset: const Offset(0, 2)),
+                                            ],
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text('See Ratios', style: TextStyle(color: btnColor, fontSize: 12, fontWeight: FontWeight.w800)),
+                                              const SizedBox(width: 4),
+                                              Icon(Icons.arrow_forward_rounded, color: btnColor, size: 13),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }),
                               ],
                             ),
                           ),
@@ -1109,6 +1256,31 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                   }
                 ),
               ],
+              // ── NEAR FINANCIAL LIMIT (below justification) ──────────
+              if (nearLimitDetected) ...[
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFFBEB),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFFD97706).withOpacity(0.25)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(Icons.warning_amber_rounded, color: Color(0xFFD97706), size: 14),
+                      SizedBox(width: 6),
+                      Text(
+                        'Near Financial Limit',
+                        style: TextStyle(color: Color(0xFF92400E), fontSize: 12, fontWeight: FontWeight.w800),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+
+              // ────────────────────────────────────────────────────────
               // Alert CTA for stocks that pass Stage 1 and fail Stage 2
               if (!_isLoadingDetails) ...[
                 Builder(
@@ -1260,15 +1432,13 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const SizedBox(width: 24),
-                          _buildTabItem(2, 'Stage 2 Screening'),
+                          _buildTabItem(2, 'Financial Screening'),
                         ],
                       );
                     }
                     return const SizedBox.shrink();
                   }
                 ),
-                const SizedBox(width: 24),
-                _buildTabItem(3, 'Price & Market Data'),
                 Builder(
                   builder: (context) {
                     bool businessFailed = (_currentStock['business_status'] == 'fail' || _currentStock['business_status'] == 'non-halal' || _currentStock['business_status'] == 'non-compliant') ||
@@ -1277,6 +1447,8 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                     return Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        const SizedBox(width: 24),
+                        _buildTabItem(3, 'Price & Market Data'),
                         const SizedBox(width: 24),
                         _buildTabItem(4, 'News'),
                       ],
@@ -2670,6 +2842,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 24),
+
         Row(
           children: [
             const Icon(Icons.business_center_outlined, color: Color(0xFF8B5CF6), size: 22),
@@ -2719,30 +2892,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                                   stage1Reason,
                                   style: TextStyle(color: context.textDark.withOpacity(0.85), fontSize: 15, fontWeight: FontWeight.w600, height: 1.5),
                                 ),
-                                const SizedBox(height: 12),
-                                GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      _selectedTab = 2; // Jump to Stage 2 tab
-                                    });
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(100),
-                                      border: Border.all(color: context.halal.withOpacity(0.3), width: 1),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text('SEE RATIOS', style: TextStyle(color: context.halal, fontSize: 8, fontWeight: FontWeight.w800, letterSpacing: 0.3)),
-                                        const SizedBox(width: 2),
-                                        Icon(Icons.arrow_forward_rounded, color: context.halal, size: 8),
-                                      ],
-                                    ),
-                                  ),
-                                ),
+
                               ],
                             );
                           } else {

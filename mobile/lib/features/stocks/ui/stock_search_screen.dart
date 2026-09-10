@@ -193,26 +193,7 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
-          // Halal Only Toggle
-          FilterChip(
-            selected: _halalOnly,
-            label: Row(
-              children: [
-                Icon(Icons.shield_rounded, size: 16, color: _halalOnly ? context.halal : context.textMuted),
-                const SizedBox(width: 4),
-                Text('Halal Only', style: TextStyle(color: _halalOnly ? context.textDark : context.textMuted, fontWeight: FontWeight.w700, fontSize: 13)),
-              ],
-            ),
-            selectedColor: context.halal.withOpacity(0.15),
-            backgroundColor: context.bgAlt,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-              side: BorderSide(color: _halalOnly ? context.halal : context.divider, width: 1.5),
-            ),
-            onSelected: _toggleHalalOnly,
-            showCheckmark: false,
-          ),
-          const SizedBox(width: 8),
+
           Container(height: 24, width: 1.5, color: context.divider, margin: const EdgeInsets.symmetric(horizontal: 4)),
           const SizedBox(width: 8),
           // Sectors

@@ -287,7 +287,7 @@ class PurificationTab extends StatelessWidget {
                               children: [
                                 Text('Watching for Dividends', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: context.textDark)),
                                 const SizedBox(height: 2),
-                                Text('These stocks have impure income but paid no dividends in the last 12 months.', style: TextStyle(fontSize: 12, color: context.textMuted)),
+                                Text('These stocks generate impure income and are currently awaiting dividend payments.', style: TextStyle(fontSize: 12, color: context.textMuted)),
                               ],
                             ),
                           ),
