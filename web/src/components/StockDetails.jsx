@@ -385,7 +385,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
               </div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', justifyContent: 'flex-end', marginTop: '3px' }}>
                 <span style={{ fontSize: '1.45rem', fontWeight: 900, color: 'white', letterSpacing: '-0.5px', fontVariantNumeric: 'tabular-nums' }}>
-                  ₦ {latestPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  {aBusinessFailed ? '-' : `₦ ${latestPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                 </span>
                 <span style={{
                   display: 'inline-flex', alignItems: 'center', gap: '3px',

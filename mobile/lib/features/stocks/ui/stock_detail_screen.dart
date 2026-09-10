@@ -760,6 +760,11 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
     
     final absChangeStr = _currentStock['price_change']?.toString() ?? '0.00';
     final pctChangeStr = priceChange?.toStringAsFixed(2) ?? '0.00';
+    
+    bool businessFailed = _currentStock['business_status'] == 'fail' || _currentStock['business_status'] == 'non-halal' || _currentStock['business_status'] == 'non-compliant';
+    if (_aaoifiData != null && _aaoifiData!['business_status'] != null) {
+      businessFailed = _aaoifiData!['business_status'] == 'fail';
+    }
 
     String mainLabel = label;
 
@@ -788,7 +793,8 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(_currentStock['symbol'] ?? '', style: TextStyle(fontSize: 34, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -1.0, height: 1.0)),
-                  RichText(
+                  businessFailed ? Text('-', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -1.0, height: 1.0))
+                  : RichText(
                     text: TextSpan(
                       children: [
                         TextSpan(
@@ -1828,6 +1834,15 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
     ];
     priceItems.removeWhere((item) => item['value'] == '—');
 
+    bool businessFailed = _currentStock['business_status'] == 'fail' || _currentStock['business_status'] == 'non-halal' || _currentStock['business_status'] == 'non-compliant';
+    if (_aaoifiData != null && _aaoifiData!['business_status'] != null) {
+      businessFailed = _aaoifiData!['business_status'] == 'fail';
+    }
+
+    if (businessFailed) {
+      for (var item in priceItems) item['value'] = '-';
+    }
+
     List<Map<String, dynamic>> marketItems = [
       {'label': 'Market Cap', 'value': formatMcap(_currentStock['market_cap'])},
       {'label': 'Shares Out.', 'value': formatCount(_currentStock['shares_outstanding'])},
@@ -1836,26 +1851,30 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
       {'label': 'EPS', 'value': _currentStock['eps']?.toString() ?? '—'},
     ];
     
+    if (businessFailed) {
+      for (var item in marketItems) item['value'] = '-';
+    }
+    
     if (_currentStock['last_paid_dividend'] != null) {
       marketItems.add({
         'label': 'Last Div.',
-        'sub': formatDate(_currentStock['last_paid_dividend']['pay_date']),
-        'value': formatRaw(_currentStock['last_paid_dividend']['amount'])
+        'sub': businessFailed ? null : formatDate(_currentStock['last_paid_dividend']['pay_date']),
+        'value': businessFailed ? '-' : formatRaw(_currentStock['last_paid_dividend']['amount'])
       });
     }
     
     if (_currentStock['upcoming_dividend'] != null) {
       marketItems.add({
         'label': 'Next Div.',
-        'sub': formatDate(_currentStock['upcoming_dividend']['pay_date']),
-        'value': formatRaw(_currentStock['upcoming_dividend']['amount'])
+        'sub': businessFailed ? null : formatDate(_currentStock['upcoming_dividend']['pay_date']),
+        'value': businessFailed ? '-' : formatRaw(_currentStock['upcoming_dividend']['amount'])
       });
     }
     
     if (_currentStock['div_yield'] != null) {
       marketItems.add({
         'label': 'Div. Yield',
-        'value': '${_currentStock['div_yield']}%'
+        'value': businessFailed ? '-' : '${_currentStock['div_yield']}%'
       });
     }
     marketItems.removeWhere((item) => item['value'] == '—');

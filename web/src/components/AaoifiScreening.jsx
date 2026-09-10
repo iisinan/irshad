@@ -662,14 +662,14 @@ const AaoifiScreening = () => {
               {latestPrice>0&&(<div style={{ textAlign:'left', paddingRight:20, borderRight:'1px solid rgba(91,41,113,0.08)' }}>
                 <div style={{ fontSize:'0.6rem',fontWeight:800,color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'1px',marginBottom:4 }}>Last Price</div>
                 <div style={{ fontSize:'1.25rem',fontWeight:900,color:'var(--text-dark)',letterSpacing:'-0.5px',fontVariantNumeric:'tabular-nums',lineHeight:1 }}>
-                  ₦{latestPrice.toLocaleString('en-US', {maximumFractionDigits: 2})}
+                  {businessFailed ? '-' : `₦${latestPrice.toLocaleString('en-US', {maximumFractionDigits: 2})}`}
                 </div>
-                <div style={{ display:'flex',alignItems:'center',gap:4,marginTop:6 }}>
+                {!businessFailed && <div style={{ display:'flex',alignItems:'center',gap:4,marginTop:6 }}>
                   <span style={{ fontSize:'0.7rem',fontWeight:800,color: priceChangePct >= 0 ? 'var(--halal)' : 'var(--non-compliant)' }}>
                     {priceChangePct >= 0 ? '▲' : '▼'} {Math.abs(priceChangePct).toFixed(2)}%
                   </span>
                   <span style={{ fontSize:'0.65rem',fontWeight:600,color:'var(--text-muted)' }}>today</span>
-                </div>
+                </div>}
               </div>)}
               {marketCap>0&&(<div style={{ textAlign:'left' }}>
                 <div style={{ fontSize:'0.6rem',fontWeight:800,color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'1px',marginBottom:4 }}>Market Cap</div>
@@ -918,7 +918,7 @@ const AaoifiScreening = () => {
             { label: 'Day Low', value: stock?.day_low, fmt: fmtRaw },
             { label: '52W High', value: stock?.fifty_two_week_high, fmt: fmtRaw },
             { label: '52W Low', value: stock?.fifty_two_week_low, fmt: fmtRaw }
-          ].filter(item => item.value != null && item.value !== '');
+          ].filter(item => item.value != null && item.value !== '').map(item => businessFailed ? { ...item, value: '-', fmt: null } : item);
 
           if (priceDataItems.length === 0) return null;
 
@@ -953,7 +953,7 @@ const AaoifiScreening = () => {
             { label: 'Last Div.', sub: stock?.last_paid_dividend?.pay_date && new Date(stock.last_paid_dividend.pay_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}), value: stock?.last_paid_dividend ? `₦${Number(stock.last_paid_dividend.amount).toFixed(2)}` : null },
             { label: 'Next Div.', sub: stock?.upcoming_dividend?.pay_date && new Date(stock.upcoming_dividend.pay_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}), value: stock?.upcoming_dividend ? `₦${Number(stock.upcoming_dividend.amount).toFixed(2)}` : null },
             { label: 'Div. Yield', value: stock?.div_yield ? `${stock.div_yield}%` : null }
-          ].filter(item => item.value != null && item.value !== '');
+          ].filter(item => item.value != null && item.value !== '').map(item => businessFailed ? { ...item, value: '-', fmt: null, sub: null } : item);
 
           if (marketDataItems.length === 0) return null;
 
