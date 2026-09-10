@@ -428,7 +428,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
           position: 'relative', zIndex: 1,
           width: '100%', boxSizing: 'border-box',
           background: 'linear-gradient(135deg, rgba(26,16,32,0.8) 0%, rgba(42,26,46,0.7) 100%)',
-          border: `1.5px solid ${hasPurification ? 'rgba(245, 158, 11, 0.4)' : isHalal ? 'rgba(16, 185, 129, 0.4)' : isNonHalal ? 'rgba(239, 68, 68, 0.4)' : 'rgba(234, 179, 8, 0.4)'}`,
+          border: `1.5px solid ${hasPurification ? 'rgba(245, 158, 11, 0.4)' : isHalal ? 'rgba(16, 185, 129, 0.4)' : (isNonHalal && !aBusinessFailed) ? 'rgba(59, 130, 246, 0.4)' : isNonHalal ? 'rgba(239, 68, 68, 0.4)' : 'rgba(234, 179, 8, 0.4)'}`,
           borderRadius: '20px',
           padding: '24px 28px',
           boxShadow: '0 12px 36px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
@@ -445,21 +445,9 @@ const StockDetails = ({ symbol: propSymbol }) => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
             <div style={{
               width: '60px', height: '60px', borderRadius: '18px',
-              background: hasPurification 
-                ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' 
-                : isHalal 
-                ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)' 
-                : isNonHalal 
-                ? 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)' 
-                : 'linear-gradient(135deg, #EAB308 0%, #CA8A04 100%)',
+              background: hasPurification ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' : isHalal ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)' : (isNonHalal && !aBusinessFailed) ? 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)' : isNonHalal ? 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)' : 'linear-gradient(135deg, #EAB308 0%, #CA8A04 100%)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: hasPurification 
-                ? '0 8px 24px rgba(245, 158, 11, 0.45)' 
-                : isHalal 
-                ? '0 8px 24px rgba(16, 185, 129, 0.45)' 
-                : isNonHalal 
-                ? '0 8px 24px rgba(239, 68, 68, 0.45)' 
-                : '0 8px 24px rgba(234, 179, 8, 0.45)', 
+              boxShadow: hasPurification ? '0 8px 24px rgba(245, 158, 11, 0.45)' : isHalal ? '0 8px 24px rgba(16, 185, 129, 0.45)' : (isNonHalal && !aBusinessFailed) ? '0 8px 24px rgba(59, 130, 246, 0.45)' : isNonHalal ? '0 8px 24px rgba(239, 68, 68, 0.45)' : '0 8px 24px rgba(234, 179, 8, 0.45)', 
               flexShrink: 0,
               border: '2px solid rgba(255,255,255,0.3)',
             }}>

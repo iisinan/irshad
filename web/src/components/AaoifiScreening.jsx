@@ -491,9 +491,12 @@ const AaoifiScreening = () => {
     }
   }
 
+  
   const SC = {
     halal:       { color:'var(--halal)',     icon:hasPurification?Droplets:CheckCircle, bg:'linear-gradient(135deg,rgba(16,185,129,0.09),rgba(16,185,129,0.03))',  border:'rgba(16,185,129,0.28)',  label:'SHARIAH COMPLIANT',     tag:'Halal'    },
-    'non-compliant': { color:'var(--non-compliant)', icon:XCircle,                              bg:'linear-gradient(135deg,rgba(239,68,68,0.1),rgba(239,68,68,0.03))',    border:'rgba(239,68,68,0.28)',   label:'SHARIAH NON-COMPLIANT', tag: 'Non-halal'  },
+    'non-compliant': (isNonHalal && !businessFailed) 
+                     ? { color:'#3B82F6', icon:AlertCircle, bg:'linear-gradient(135deg,rgba(59,130,246,0.1),rgba(59,130,246,0.03))', border:'rgba(59,130,246,0.28)', label:'NON-COMPLIANT', tag: 'Non-compliant' }
+                     : { color:'var(--non-compliant)', icon:XCircle, bg:'linear-gradient(135deg,rgba(239,68,68,0.1),rgba(239,68,68,0.03))', border:'rgba(239,68,68,0.28)', label:'SHARIAH NON-COMPLIANT', tag: 'Non-halal' },
     doubtful:    { color:'#D97706',          icon:AlertTriangle,                        bg:'linear-gradient(135deg,rgba(245,158,11,0.1),rgba(245,158,11,0.03))',   border:'rgba(245,158,11,0.28)', label:'DOUBTFUL',  tag: doubtfulTag  },
   };
   const sc=SC[finalStatus]||SC.doubtful; const StatusIcon=sc.icon;
@@ -771,11 +774,11 @@ const AaoifiScreening = () => {
               )}
             </div>)}
             
-            {isNonHalal&&(<div style={{ flex:'1 1 280px',padding:'24px 32px',display:'flex',flexDirection:'column',justifyContent:'center',gap:16,background:'linear-gradient(135deg, rgba(239,68,68,0.02) 0%, rgba(239,68,68,0.08) 100%)' }}>
-              <div style={{ fontSize:'0.7rem',fontWeight:900,textTransform:'uppercase',letterSpacing:'1.5px',color:'var(--non-compliant)', display:'flex', alignItems:'center', gap:6 }}><AlertTriangle size={14} strokeWidth={2.5}/> Screening Result</div>
-              <div style={{ display:'flex',alignItems:'center',gap:14, background: 'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 100%)', padding: '16px', borderRadius: 16, boxShadow: '0 8px 24px rgba(239,68,68,0.15), inset 0 2px 4px #fff', border: '1px solid rgba(239,68,68,0.2)' }}>
-                <XCircle size={36} color="var(--non-compliant)" strokeWidth={2.5}/>
-                <div><div style={{ fontSize:'1.1rem',fontWeight:900,color:'var(--non-compliant)' }}>EXCLUDED</div><div style={{ fontSize:'0.75rem',color:'var(--text-muted)',fontWeight:700 }}>{(!businessFailed && isNonHalal) ? 'Not suitable for investment now' : 'Not suitable for investment'}</div></div>
+            {isNonHalal&&(<div style={{ flex:'1 1 280px',padding:'24px 32px',display:'flex',flexDirection:'column',justifyContent:'center',gap:16,background: (!businessFailed ? 'linear-gradient(135deg, rgba(59,130,246,0.02) 0%, rgba(59,130,246,0.08) 100%)' : 'linear-gradient(135deg, rgba(239,68,68,0.02) 0%, rgba(239,68,68,0.08) 100%)') }}>
+              <div style={{ fontSize:'0.7rem',fontWeight:900,textTransform:'uppercase',letterSpacing:'1.5px',color: (!businessFailed ? '#3B82F6' : 'var(--non-compliant)'), display:'flex', alignItems:'center', gap:6 }}><AlertTriangle size={14} strokeWidth={2.5}/> Screening Result</div>
+              <div style={{ display:'flex',alignItems:'center',gap:14, background: 'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 100%)', padding: '16px', borderRadius: 16, boxShadow: (!businessFailed ? '0 8px 24px rgba(59,130,246,0.15), inset 0 2px 4px #fff' : '0 8px 24px rgba(239,68,68,0.15), inset 0 2px 4px #fff'), border: (!businessFailed ? '1px solid rgba(59,130,246,0.2)' : '1px solid rgba(239,68,68,0.2)') }}>
+                { !businessFailed ? <AlertCircle size={36} color="#3B82F6" strokeWidth={2.5}/> : <XCircle size={36} color="var(--non-compliant)" strokeWidth={2.5}/> }
+                <div><div style={{ fontSize:'1.1rem',fontWeight:900,color: (!businessFailed ? '#3B82F6' : 'var(--non-compliant)') }}>EXCLUDED</div><div style={{ fontSize:'0.75rem',color:'var(--text-muted)',fontWeight:700 }}>{(!businessFailed && isNonHalal) ? 'Not suitable for investment now' : 'Not suitable for investment'}</div></div>
               </div>
               {(!businessFailed && isNonHalal) && (
                 <button 

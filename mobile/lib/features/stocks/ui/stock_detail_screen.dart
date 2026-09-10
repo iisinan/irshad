@@ -344,11 +344,18 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
     // NOTE: We do NOT recalculate/override the verdict locally from financial ratios.
     // The backend is the single source of truth for verdicts — especially for scholar-verified statuses.
     // Financial data below is used only for the AAOIFI breakdown display panel, never to change the verdict.
-
     bool isHalal = status == 'halal' || status == 'pass';
     bool isNonHalal = status == 'non-halal' || status == 'non-compliant' || status == 'fail';
-    Color statusColor = isHalal ? context.halal : (isNonHalal ? context.haram : context.questionable);
-    Color badgeBg = isHalal ? context.halalBg : (isNonHalal ? context.haramBg : context.questionableBg);
+    
+    bool businessFailed = _currentStock['business_status'] == 'fail' || _currentStock['business_status'] == 'non-halal' || _currentStock['business_status'] == 'non-compliant';
+    if (_aaoifiData != null && _aaoifiData!['business_status'] != null) {
+      businessFailed = _aaoifiData!['business_status'] == 'fail';
+    }
+    bool hybridFail = isNonHalal && !businessFailed;
+
+    Color statusColor = isHalal ? context.halal : (hybridFail ? Colors.blue : (isNonHalal ? context.haram : context.questionable));
+    Color badgeBg = isHalal ? context.halalBg : (hybridFail ? Colors.blue.withValues(alpha: 0.1) : (isNonHalal ? context.haramBg : context.questionableBg));
+
     
     bool purificationRequired = false;
     double haramRevenuePercent = 0.0;
@@ -382,12 +389,11 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
 
     String statusLabel = 'DOUBTFUL';
     if (_isLoadingDetails) {
-      // Don't commit to purification label until full details confirmed
-      statusLabel = isHalal ? 'SHARIAH COMPLIANT' : (isNonHalal ? 'SHARIAH NON-COMPLIANT' : 'DOUBTFUL');
+      statusLabel = isHalal ? 'SHARIAH COMPLIANT' : (isNonHalal ? (hybridFail ? 'NON-COMPLIANT' : 'SHARIAH NON-COMPLIANT') : 'DOUBTFUL');
     } else if (isHalal) {
       statusLabel = 'SHARIAH COMPLIANT';
     } else if (isNonHalal) {
-      statusLabel = 'SHARIAH NON-COMPLIANT';
+      statusLabel = hybridFail ? 'NON-COMPLIANT' : 'SHARIAH NON-COMPLIANT';
     }
 
     final financials = _currentStock['financials'];
