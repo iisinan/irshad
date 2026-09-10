@@ -706,7 +706,32 @@ const AaoifiScreening = () => {
               </div>
 
               <div style={{ padding: '16px 20px', background: 'rgba(255,255,255,0.85)', borderRadius: 16, border: '1px solid #fff', marginTop: 12, boxShadow: '0 4px 16px rgba(0,0,0,0.04), inset 0 2px 4px rgba(255,255,255,1)', backdropFilter: 'blur(20px)' }}>
-                <p style={{ color:'var(--text-dark)',fontSize:'0.9rem',lineHeight:1.6,margin:0, fontWeight:600 }}>{cleanStatusReason||'Screened in accordance with AAOIFI Shariah Standard No. 21.'}</p>
+                <p style={{ color:'var(--text-dark)',fontSize:'0.9rem',lineHeight:1.6,margin:0, fontWeight:600 }}>
+                  {cleanStatusReason||'Screened in accordance with AAOIFI Shariah Standard No. 21.'}
+                  {(finalStatus === 'halal' && showFinancials) && (
+                    <button 
+                      onClick={() => {
+                        document.getElementById('aaoifi-financial-ratios')?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      style={{ 
+                        marginLeft: '8px', 
+                        padding: '4px 10px', 
+                        background: 'rgba(16,185,129,0.1)', 
+                        border: '1px solid rgba(16,185,129,0.3)', 
+                        borderRadius: '100px', 
+                        color: 'var(--halal)', 
+                        fontSize: '0.75rem', 
+                        fontWeight: 800, 
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        verticalAlign: 'middle'
+                      }}>
+                      See Ratios <ArrowRight size={10} />
+                    </button>
+                  )}
+                </p>
               </div>
 
               {hasNearLimit && (
@@ -833,7 +858,7 @@ const AaoifiScreening = () => {
         </Section>
 
         {/* ══ STAGE 2: FINANCIAL RATIOS ══ */}
-        {showFinancials&&(<Section className="aaoifi-stage2">
+        {showFinancials&&(<Section id="aaoifi-financial-ratios" className="aaoifi-stage2">
           <SectionHead icon={BarChart3} title="Quantitative Financial Ratios" subtitle="Stage 2 · The three AAOIFI financial screening thresholds"
             iconColor="#7C3AED" iconBg="rgba(139,92,246,0.08)" iconBorder="rgba(139,92,246,0.18)"
             accent="linear-gradient(90deg,#7C3AED,rgba(139,92,246,0.1),transparent)"

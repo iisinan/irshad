@@ -2705,9 +2705,53 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.all(20),
-                      child: Text(
-                        stage1Reason,
-                        style: TextStyle(color: context.textDark.withOpacity(0.85), fontSize: 15, fontWeight: FontWeight.w600, height: 1.5),
+                      child: Builder(
+                        builder: (context) {
+                          final finalStatusRaw = _currentStock['status'] is Map ? _currentStock['status']['status']?.toString().toLowerCase() : _currentStock['current_status']?.toString().toLowerCase();
+                          bool isHalal = finalStatusRaw == 'halal' || finalStatusRaw == 'compliant' || finalStatusRaw == 'pass';
+                          
+                          if (isHalal) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  stage1Reason,
+                                  style: TextStyle(color: context.textDark.withOpacity(0.85), fontSize: 15, fontWeight: FontWeight.w600, height: 1.5),
+                                ),
+                                const SizedBox(height: 12),
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _selectedTab = 2; // Jump to Stage 2 tab
+                                    });
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: context.halal.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(100),
+                                      border: Border.all(color: context.halal.withOpacity(0.3)),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text('See Ratios', style: TextStyle(color: context.halal, fontSize: 12, fontWeight: FontWeight.w800)),
+                                        const SizedBox(width: 4),
+                                        Icon(Icons.arrow_forward_rounded, color: context.halal, size: 12),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          } else {
+                            return Text(
+                              stage1Reason,
+                              style: TextStyle(color: context.textDark.withOpacity(0.85), fontSize: 15, fontWeight: FontWeight.w600, height: 1.5),
+                            );
+                          }
+                        }
                       ),
                     ),
                   ),
