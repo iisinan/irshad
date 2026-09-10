@@ -55,8 +55,8 @@ const fmtDate  = (d) => {
 const pct = (n) => isNaN(parseFloat(n))?'—':`${parseFloat(n).toFixed(2)}%`;
 
 /* ─── Section wrapper ───────────────────────────────────── */
-const Section = ({ children, style, className }) => (
-  <div className={className} style={{ background:'var(--bg-section)',borderRadius:18,border:'1px solid var(--border)',overflow:'hidden',marginBottom:16,...style }}>
+const Section = ({ children, style, className, id }) => (
+  <div id={id} className={className} style={{ background:'var(--bg-section)',borderRadius:18,border:'1px solid var(--border)',overflow:'hidden',marginBottom:16,...style }}>
     {children}
   </div>
 );
