@@ -716,24 +716,40 @@ const AaoifiScreening = () => {
                         e.stopPropagation();
                         document.getElementById('aaoifi-financial-ratios')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                       }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'var(--halal)';
+                        e.currentTarget.style.color = '#fff';
+                        e.currentTarget.style.transform = 'translateY(-1px)';
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(16,185,129,0.25)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'linear-gradient(135deg, rgba(16,185,129,0.12) 0%, rgba(16,185,129,0.04) 100%)';
+                        e.currentTarget.style.color = 'var(--halal)';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = '0 2px 6px rgba(16,185,129,0.08)';
+                      }}
                       style={{ 
-                        marginLeft: '8px', 
-                        padding: '4px 10px', 
-                        background: 'rgba(16,185,129,0.1)', 
-                        border: '1px solid rgba(16,185,129,0.3)', 
+                        marginLeft: '10px', 
+                        padding: '5px 12px', 
+                        background: 'linear-gradient(135deg, rgba(16,185,129,0.12) 0%, rgba(16,185,129,0.04) 100%)', 
+                        border: '1px solid rgba(16,185,129,0.25)', 
                         borderRadius: '100px', 
                         color: 'var(--halal)', 
-                        fontSize: '0.75rem', 
-                        fontWeight: 800, 
+                        fontSize: '0.72rem', 
+                        fontWeight: 800,
+                        letterSpacing: '0.3px',
+                        textTransform: 'uppercase',
                         cursor: 'pointer',
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '4px',
+                        gap: '5px',
                         verticalAlign: 'middle',
                         position: 'relative',
-                        zIndex: 10
+                        zIndex: 10,
+                        transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                        boxShadow: '0 2px 6px rgba(16,185,129,0.08)'
                       }}>
-                      See Ratios <ArrowRight size={10} />
+                      See Ratios <ArrowRight size={11} strokeWidth={2.5} />
                     </button>
                   )}
                 </div>

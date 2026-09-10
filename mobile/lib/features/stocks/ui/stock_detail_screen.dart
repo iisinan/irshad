@@ -2727,16 +2727,28 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                                     });
                                   },
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                                     decoration: BoxDecoration(
-                                      color: context.halal.withOpacity(0.1),
+                                      color: Colors.white,
+                                      gradient: LinearGradient(
+                                        colors: [context.halal.withOpacity(0.15), context.halal.withOpacity(0.05)],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
                                       borderRadius: BorderRadius.circular(100),
-                                      border: Border.all(color: context.halal.withOpacity(0.3)),
+                                      border: Border.all(color: context.halal.withOpacity(0.3), width: 1.5),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: context.halal.withOpacity(0.1),
+                                          blurRadius: 6,
+                                          offset: const Offset(0, 2),
+                                        )
+                                      ],
                                     ),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Text('See Ratios', style: TextStyle(color: context.halal, fontSize: 12, fontWeight: FontWeight.w800)),
+                                        Text('SEE RATIOS', style: TextStyle(color: context.halal, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
                                         const SizedBox(width: 4),
                                         Icon(Icons.arrow_forward_rounded, color: context.halal, size: 12),
                                       ],
