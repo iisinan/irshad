@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Play, FileText, Download, BookOpen, Search, X, Plus, Edit2, Trash2 } from 'lucide-react';
+import { Play, FileText, Download, BookOpen, Search, X, Plus, Edit2, Trash2, Upload, Link, CheckCircle } from 'lucide-react';
 import api, { createResource, updateResource, deleteResource } from '../services/api';
 import Footer from './Footer';
 import { useAuth } from '../context/AuthContext';
@@ -20,6 +20,13 @@ export default function ResourcesPage() {
   const [manageData, setManageData] = useState({ id: null, title: '', type: 'video', url: '', thumbnail: '', duration: '', category: '', scholar: '' });
   const [manageLoading, setManageLoading] = useState(false);
   const [manageError, setManageError] = useState('');
+
+  // Upload mode state
+  const [uploadMode, setUploadMode] = useState('url');
+  const [uploadFile, setUploadFile] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [dragOver, setDragOver] = useState(false);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     const fetchResources = async () => {
@@ -55,18 +62,60 @@ export default function ResourcesPage() {
     } else {
       setManageData({ id: null, title: '', type: 'video', url: '', thumbnail: '', duration: '', category: '', scholar: '' });
     }
+    setUploadMode('url');
+    setUploadFile(null);
+    setUploadProgress(0);
+    setDragOver(false);
     setShowManageModal(true);
+  };
+
+  const handleFileDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files[0];
+    if (file) setUploadFile(file);
   };
 
   const handleSaveResource = async (e) => {
     e.preventDefault();
     setManageLoading(true);
     setManageError('');
+    setUploadProgress(0);
     try {
-      if (manageData.id) {
-        await updateResource(manageData.id, manageData);
+      let payload;
+      let isMultipart = false;
+
+      if (uploadMode === 'file' && uploadFile) {
+        isMultipart = true;
+        const fd = new FormData();
+        fd.append('file', uploadFile);
+        Object.entries(manageData).forEach(([k, v]) => {
+          if (v !== null && v !== undefined && v !== '') fd.append(k, String(v));
+        });
+        payload = fd;
       } else {
-        await createResource(manageData);
+        payload = manageData;
+      }
+
+      const config = isMultipart
+        ? {
+            headers: { 'Content-Type': 'multipart/form-data' },
+            onUploadProgress: (ev) => setUploadProgress(Math.round((ev.loaded * 100) / ev.total)),
+          }
+        : {};
+
+      if (manageData.id) {
+        if (isMultipart) {
+          await api.post(`/resources/${manageData.id}?_method=PUT`, payload, config);
+        } else {
+          await updateResource(manageData.id, payload);
+        }
+      } else {
+        if (isMultipart) {
+          await api.post('/resources', payload, config);
+        } else {
+          await createResource(payload);
+        }
       }
       setShowManageModal(false);
       window.location.reload();
@@ -427,14 +476,60 @@ export default function ResourcesPage() {
                 </div>
               </div>
 
-              {/* URL */}
+              {/* Source toggle: URL vs Device Upload */}
               <div>
-                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' }}>Resource URL</label>
-                <input required type="url" value={manageData.url} onChange={e => setManageData({...manageData, url: e.target.value})} placeholder="https://youtube.com/... or /storage/file.pdf" style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', color: 'var(--text-dark)', fontSize: '0.88rem', outline: 'none', fontFamily: 'inherit' }} />
+                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '10px' }}>Source</label>
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
+                  {[['url', Link, 'Paste URL'], ['file', Upload, 'Upload from Device']].map(([mode, Icon, label]) => (
+                    <button key={mode} type="button" onClick={() => { setUploadMode(mode); setUploadFile(null); }}
+                      style={{ flex: 1, padding: '10px 14px', borderRadius: '12px', border: '1.5px solid', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', cursor: 'pointer', fontWeight: 700, fontSize: '0.8rem', transition: 'all 0.18s',
+                        borderColor: uploadMode === mode ? 'var(--primary)' : 'var(--border)',
+                        background: uploadMode === mode ? 'var(--primary-50)' : 'var(--bg-section)',
+                        color: uploadMode === mode ? 'var(--primary)' : 'var(--text-muted)' }}>
+                      <Icon size={14} />{label}
+                    </button>
+                  ))}
+                </div>
+
+                {uploadMode === 'url' ? (
+                  <input required={uploadMode === 'url'} type="url" value={manageData.url} onChange={e => setManageData({...manageData, url: e.target.value})}
+                    placeholder={manageData.type === 'video' ? 'https://youtube.com/watch?v=...' : 'https://example.com/file.pdf'}
+                    style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', color: 'var(--text-dark)', fontSize: '0.88rem', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                ) : (
+                  <div
+                    onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+                    onDragLeave={() => setDragOver(false)}
+                    onDrop={handleFileDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                    style={{ border: `2px dashed ${dragOver ? 'var(--primary)' : uploadFile ? 'var(--halal)' : 'var(--border)'}`, borderRadius: '14px', padding: '28px 20px', textAlign: 'center', cursor: 'pointer', background: dragOver ? 'var(--primary-50)' : uploadFile ? 'rgba(16,185,129,0.04)' : 'var(--bg-section)', transition: 'all 0.2s' }}>
+                    <input ref={fileInputRef} type="file" hidden
+                      accept={manageData.type === 'video' ? 'video/*' : '.pdf,.doc,.docx,.ppt,.pptx'}
+                      onChange={e => { const f = e.target.files[0]; if (f) setUploadFile(f); }} />
+                    {uploadFile ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                        <CheckCircle size={28} color="var(--halal)" />
+                        <div style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.88rem' }}>{uploadFile.name}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{(uploadFile.size / 1024 / 1024).toFixed(2)} MB · <span style={{ color: 'var(--primary)', cursor: 'pointer', fontWeight: 600 }} onClick={e => { e.stopPropagation(); setUploadFile(null); }}>Remove</span></div>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ width: 44, height: 44, borderRadius: '12px', background: 'var(--primary-50)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
+                          <Upload size={20} color="var(--primary)" />
+                        </div>
+                        <div style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.88rem' }}>
+                          {dragOver ? 'Drop to upload' : `Drag & drop or click to browse`}
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                          {manageData.type === 'video' ? 'MP4, MOV, AVI, WEBM up to 500MB' : 'PDF, DOC, DOCX, PPT up to 100MB'}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
-              {/* Video fields */}
-              {manageData.type === 'video' && (
+              {/* Video fields — only when URL mode (file uploads auto-derive these) */}
+              {manageData.type === 'video' && uploadMode === 'url' && (
                 <div style={{ padding: '20px', background: 'var(--primary-50)', borderRadius: '14px', border: '1px solid var(--primary-100)' }}>
                   <div style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '16px' }}>Video Details</div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
@@ -456,11 +551,27 @@ export default function ResourcesPage() {
                 <input required type="text" value={manageData.scholar} onChange={e => setManageData({...manageData, scholar: e.target.value})} placeholder="e.g. Sheikh Musa Furber" style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-section)', color: 'var(--text-dark)', fontSize: '0.88rem', outline: 'none', fontFamily: 'inherit' }} />
               </div>
 
+              {/* Upload progress bar */}
+              {manageLoading && uploadMode === 'file' && uploadProgress > 0 && (
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>Uploading…</span>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)' }}>{uploadProgress}%</span>
+                  </div>
+                  <div style={{ height: '6px', borderRadius: '100px', background: 'var(--bg-section)', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${uploadProgress}%`, background: 'var(--primary)', borderRadius: '100px', transition: 'width 0.3s ease' }} />
+                  </div>
+                </div>
+              )}
+
               {/* Actions */}
               <div style={{ display: 'flex', gap: '12px', paddingTop: '8px', borderTop: '1px solid var(--border)', marginTop: '8px' }}>
                 <button type="button" onClick={() => setShowManageModal(false)} style={{ flex: 1, padding: '13px', borderRadius: '12px', background: 'var(--bg-section)', border: 'none', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer', fontSize: '0.88rem' }}>Cancel</button>
-                <button type="submit" disabled={manageLoading} style={{ flex: 2, padding: '13px', borderRadius: '12px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 800, cursor: manageLoading ? 'not-allowed' : 'pointer', fontSize: '0.88rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(91, 41, 113,0.22)' }}>
-                  {manageLoading ? <div className="spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', borderColor: 'rgba(255,255,255,0.3)', borderTopColor: 'white' }} /> : (manageData.id ? 'Save Changes' : 'Add Resource')}
+                <button type="submit" disabled={manageLoading || (uploadMode === 'file' && !uploadFile)}
+                  style={{ flex: 2, padding: '13px', borderRadius: '12px', background: (manageLoading || (uploadMode === 'file' && !uploadFile)) ? 'var(--text-muted)' : 'var(--primary)', border: 'none', color: 'white', fontWeight: 800, cursor: (manageLoading || (uploadMode === 'file' && !uploadFile)) ? 'not-allowed' : 'pointer', fontSize: '0.88rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(91,41,113,0.22)', transition: 'background 0.2s' }}>
+                  {manageLoading
+                    ? <><div className="spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', borderColor: 'rgba(255,255,255,0.3)', borderTopColor: 'white' }} />{uploadMode === 'file' ? 'Uploading…' : 'Saving…'}</>
+                    : <><Upload size={15} />{manageData.id ? 'Save Changes' : 'Add Resource'}</>}
                 </button>
               </div>
             </form>

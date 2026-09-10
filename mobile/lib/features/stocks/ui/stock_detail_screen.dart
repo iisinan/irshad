@@ -1221,7 +1221,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
               children: [
                 _buildTabItem(0, 'About'),
                 const SizedBox(width: 24),
-                _buildTabItem(1, 'Stage 1 Screening'),
+                _buildTabItem(1, 'Business Activity'),
                 Builder(
                   builder: (context) {
                     final rawStatus = _currentStock['status'] ?? _currentStock['current_status'];
@@ -2672,9 +2672,9 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
         const SizedBox(height: 24),
         Row(
           children: [
-            const Icon(Icons.psychology_outlined, color: Color(0xFF8B5CF6), size: 22),
+            const Icon(Icons.business_center_outlined, color: Color(0xFF8B5CF6), size: 22),
             const SizedBox(width: 8),
-            Text('Screening Reasoning', style: TextStyle(color: context.textDark, fontSize: 17, fontWeight: FontWeight.w900)),
+            Text('Business Activity Screening', style: TextStyle(color: context.textDark, fontSize: 17, fontWeight: FontWeight.w900)),
           ],
         ),
         const SizedBox(height: 16),
