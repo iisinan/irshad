@@ -1285,8 +1285,20 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                 ),
                 const SizedBox(width: 24),
                 _buildTabItem(3, 'Price & Market Data'),
-                const SizedBox(width: 24),
-                _buildTabItem(4, 'News'),
+                Builder(
+                  builder: (context) {
+                    bool businessFailed = (_currentStock['business_status'] == 'fail' || _currentStock['business_status'] == 'non-halal' || _currentStock['business_status'] == 'non-compliant') ||
+                                          (_aaoifiData != null && (_aaoifiData!['business_status'] == 'fail' || _aaoifiData!['stage1']?['status'] == 'non-halal' || _aaoifiData!['stage1']?['status'] == 'non-compliant'));
+                    if (businessFailed) return const SizedBox.shrink();
+                    return Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(width: 24),
+                        _buildTabItem(4, 'News'),
+                      ],
+                    );
+                  }
+                ),
               ],
             ),
           ),
