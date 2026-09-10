@@ -719,37 +719,34 @@ const AaoifiScreening = () => {
                       onMouseEnter={(e) => {
                         e.currentTarget.style.background = 'var(--halal)';
                         e.currentTarget.style.color = '#fff';
-                        e.currentTarget.style.transform = 'translateY(-1px)';
-                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(16,185,129,0.25)';
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'linear-gradient(135deg, rgba(16,185,129,0.12) 0%, rgba(16,185,129,0.04) 100%)';
+                        e.currentTarget.style.background = 'rgba(16,185,129,0.08)';
                         e.currentTarget.style.color = 'var(--halal)';
-                        e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = '0 2px 6px rgba(16,185,129,0.08)';
                       }}
                       style={{ 
-                        marginLeft: '8px', 
-                        padding: '3px 9px', 
-                        background: 'linear-gradient(135deg, rgba(16,185,129,0.12) 0%, rgba(16,185,129,0.04) 100%)', 
-                        border: '1px solid rgba(16,185,129,0.25)', 
+                        marginLeft: '6px', 
+                        padding: '1px 6px', 
+                        background: 'rgba(16,185,129,0.08)', 
+                        border: '1px solid rgba(16,185,129,0.2)', 
                         borderRadius: '100px', 
                         color: 'var(--halal)', 
-                        fontSize: '0.64rem', 
-                        fontWeight: 800,
-                        letterSpacing: '0.3px',
+                        fontSize: '0.58rem', 
+                        fontWeight: 700,
+                        letterSpacing: '0.2px',
                         textTransform: 'uppercase',
                         cursor: 'pointer',
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '4px',
+                        gap: '3px',
                         verticalAlign: 'middle',
                         position: 'relative',
+                        top: '-1px',
                         zIndex: 10,
-                        transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-                        boxShadow: '0 2px 6px rgba(16,185,129,0.08)'
+                        transition: 'all 0.2s ease',
+                        boxShadow: 'none'
                       }}>
-                      See Ratios <ArrowRight size={9} strokeWidth={2.5} />
+                      See Ratios <ArrowRight size={8} strokeWidth={2.5} />
                     </button>
                   )}
                 </div>
