@@ -871,7 +871,7 @@ const AaoifiScreening = () => {
 
 
         {/* ══ NEWS & DISCLOSURES ══ */}
-        {(newsItems.length>0 && stage1Status !== 'non-compliant')&&(<Section className="aaoifi-news">
+        {(newsItems.length>0 && !businessFailed)&&(<Section className="aaoifi-news">
           <SectionHead icon={Newspaper} title="News & Disclosures" subtitle="Sources reviewed during the AAOIFI screening process"
             iconColor="#2563EB" iconBg="rgba(37,99,235,0.08)" iconBorder="rgba(37,99,235,0.18)"
             accent="linear-gradient(90deg,#2563EB,rgba(37,99,235,0.1),transparent)"
