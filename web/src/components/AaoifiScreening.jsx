@@ -849,7 +849,7 @@ const AaoifiScreening = () => {
 
         {/* ══ STAGE 1: BUSINESS ACTIVITY ══ */}
         <Section className="aaoifi-stage1">
-          <SectionHead icon={Building2} title="Business Activity Screening" subtitle="Stage 1 · Qualitative analysis of core revenue streams"
+          <SectionHead icon={Building2} title="Business Activity Screening" 
             iconColor="var(--primary)" iconBg="rgba(6,78,59,0.08)" iconBorder="rgba(6,78,59,0.18)"
             accent={stage1Status==='halal'?'linear-gradient(90deg,#10B981,rgba(16,185,129,0.1),transparent)':stage1Status==='doubtful'?'linear-gradient(90deg,#D97706,rgba(245,158,11,0.1),transparent)':'linear-gradient(90deg,#EF4444,rgba(239,68,68,0.1),transparent)'}
             right={<div style={{ display:'flex',alignItems:'center',gap:10,flexWrap:'wrap' }}>
@@ -875,7 +875,7 @@ const AaoifiScreening = () => {
 
         {/* ══ STAGE 2: FINANCIAL RATIOS ══ */}
         {showFinancials&&(<Section id="aaoifi-financial-ratios" className="aaoifi-stage2">
-          <SectionHead icon={BarChart3} title="Quantitative Financial Ratios" subtitle="Stage 2 · The three AAOIFI financial screening thresholds"
+          <SectionHead icon={BarChart3} title="Quantitative Financial Ratios" 
             iconColor="#7C3AED" iconBg="rgba(139,92,246,0.08)" iconBorder="rgba(139,92,246,0.18)"
             accent="linear-gradient(90deg,#7C3AED,rgba(139,92,246,0.1),transparent)"
             right={<div style={{ display:'flex',alignItems:'center',gap:6,background:'var(--bg)',border:'1px solid var(--border)',borderRadius:9,padding:'5px 10px' }}>
