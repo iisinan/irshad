@@ -132,9 +132,9 @@ const RatioBar = ({ title, subtitle, ratio, threshold, numLabel, numVal, denLabe
   const isImpure = title.toLowerCase().includes('impure');
   
   let isNearLimit = false;
-  if (isDebtOrCash && Math.abs(rv - thr) <= 5) {
+  if (isDebtOrCash && rv <= thr && (thr - rv) <= 5) {
     isNearLimit = true;
-  } else if (isImpure && Math.abs(rv - thr) <= 1) {
+  } else if (isImpure && rv <= thr && (thr - rv) <= 1) {
     isNearLimit = true;
   }
 
@@ -179,7 +179,7 @@ const RatioBar = ({ title, subtitle, ratio, threshold, numLabel, numVal, denLabe
         <div style={{ marginTop: 4, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', color: 'var(--text-dark)', fontWeight: 600 }}>
              <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#D97706' }} />
-             {name} at {rv.toFixed(1)}%, approaching the {threshold}% limit {rv > thr ? 'from above' : 'from below'}
+             {name} at {rv.toFixed(1)}%, approaching the {threshold}% limit
           </div>
           <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 4, paddingLeft: 11 }}>
             Worth monitoring — could shift with updated data.
@@ -471,9 +471,9 @@ const AaoifiScreening = () => {
     cleanStatusReason = cleanStatusReason.replace(/\s*Additionally, it passes all AAOIFI quantitative financial screening ratios\.?/gi, '');
   }
 
-  const isDebtNearLimit = debtRatio !== null && Math.abs(debtRatio - 30) <= 5;
-  const isCashNearLimit = cashRatio !== null && Math.abs(cashRatio - 30) <= 5;
-  const isImpureNearLimit = impureRatio !== null && Math.abs(impureRatio - 5) <= 1;
+  const isDebtNearLimit = debtRatio !== null && debtRatio <= 30 && (30 - debtRatio) <= 5;
+  const isCashNearLimit = cashRatio !== null && cashRatio <= 30 && (30 - cashRatio) <= 5;
+  const isImpureNearLimit = impureRatio !== null && impureRatio <= 5 && (5 - impureRatio) <= 1;
   const hasNearLimit = isDebtNearLimit || isCashNearLimit || isImpureNearLimit;
 
   let doubtfulTag = 'Under Verification';

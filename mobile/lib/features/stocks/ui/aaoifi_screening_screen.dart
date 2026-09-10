@@ -185,9 +185,9 @@ class _AaoifiScreeningScreenState extends State<AaoifiScreeningScreen> with Sing
     final double? cashRatio = parseRatio(_report!['cash_ratio']) ?? cashRatioRaw;
     final double? impureRatio = parseRatio(_report!['impermissible_income_ratio']) ?? impureRatioRaw;
 
-    final bool isDebtNearLimit = debtRatio != null && (debtRatio - 30.0).abs() <= 5.0;
-    final bool isCashNearLimit = cashRatio != null && (cashRatio - 30.0).abs() <= 5.0;
-    final bool isImpureNearLimit = impureRatio != null && (impureRatio - 5.0).abs() <= 1.0;
+    final bool isDebtNearLimit = debtRatio != null && debtRatio <= 30.0 && (30.0 - debtRatio) <= 5.0;
+    final bool isCashNearLimit = cashRatio != null && cashRatio <= 30.0 && (30.0 - cashRatio) <= 5.0;
+    final bool isImpureNearLimit = impureRatio != null && impureRatio <= 5.0 && (5.0 - impureRatio) <= 1.0;
     final bool hasNearLimit = isDebtNearLimit || isCashNearLimit || isImpureNearLimit;
 
     return ListView(

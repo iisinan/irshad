@@ -2115,7 +2115,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
     Widget buildRatioCard(int number, String title, String formula, double value, double limit, String numLabel, String denLabel, String numValStr, String denValStr) {
       bool isPass = value <= limit;
       bool isClickable = numValStr != '0' && numValStr != '0 + 0' && numValStr != '0.00' && numValStr != '—';
-      bool isNearLimit = limit == 30 ? (value - 30.0).abs() <= 5.0 : (limit == 5 ? (value - 5.0).abs() <= 1.0 : false);
+      bool isNearLimit = value <= limit && (limit == 30 ? (30.0 - value) <= 5.0 : (limit == 5 ? (5.0 - value) <= 1.0 : false));
       
       bool isExpanded = false;
       return StatefulBuilder(
@@ -2457,7 +2457,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
-                            '$title at ${value.toStringAsFixed(1)}%, approaching the ${limit.toInt()}% limit ${value > limit ? 'from above' : 'from below'}',
+                            '$title at ${value.toStringAsFixed(1)}%, approaching the ${limit.toInt()}% limit',
                             style: TextStyle(fontSize: 11, color: context.textDark, fontWeight: FontWeight.w600),
                           ),
                         ),
