@@ -729,7 +729,7 @@ const AaoifiScreening = () => {
                         border: '1px solid rgba(16,185,129,0.2)', 
                         borderRadius: '100px', 
                         color: 'var(--halal)', 
-                        fontSize: '0.58rem', 
+                        fontSize: '0.52rem', 
                         fontWeight: 700,
                         letterSpacing: '0.2px',
                         textTransform: 'uppercase',

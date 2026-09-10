@@ -2736,9 +2736,9 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Text('SEE RATIOS', style: TextStyle(color: context.halal, fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: 0.3)),
+                                        Text('SEE RATIOS', style: TextStyle(color: context.halal, fontSize: 8, fontWeight: FontWeight.w800, letterSpacing: 0.3)),
                                         const SizedBox(width: 2),
-                                        Icon(Icons.arrow_forward_rounded, color: context.halal, size: 9),
+                                        Icon(Icons.arrow_forward_rounded, color: context.halal, size: 8),
                                       ],
                                     ),
                                   ),
