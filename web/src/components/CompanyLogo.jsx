@@ -16,7 +16,7 @@ import { formatLogoUrl } from '../services/api';
  */
 export default function CompanyLogo({ symbol = '', logoUrl, size = 36, radius = 9, style = {} }) {
   const buildGcs = (sym) =>
-    `https://storage.googleapis.com/irshad-images/logos/${(sym || '').toLowerCase()}.png`;
+    `https://raw.githubusercontent.com/iisinan/irshad/main/mobile/assets/logos/${(sym || '').toUpperCase()}.png`;
 
   const init = () => {
     const primary = formatLogoUrl(logoUrl);

@@ -24,9 +24,9 @@ class CompanyAvatar extends StatelessWidget {
   });
 
   static const String _gcsBucket =
-      'https://storage.googleapis.com/irshad-images/logos/';
+      'https://raw.githubusercontent.com/iisinan/irshad/main/mobile/assets/logos/';
 
-  String get _gcsUrl => '$_gcsBucket${symbol.toLowerCase()}.png';
+  String get _gcsUrl => '$_gcsBucket${symbol.toUpperCase()}.png';
 
   Widget _buildInitials(BuildContext context) {
     const colors = [
