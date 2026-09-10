@@ -2729,9 +2729,9 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                     decoration: BoxDecoration(
-                                      color: context.halal.withOpacity(0.08),
+                                      color: Colors.white,
                                       borderRadius: BorderRadius.circular(100),
-                                      border: Border.all(color: context.halal.withOpacity(0.2), width: 1),
+                                      border: Border.all(color: context.halal.withOpacity(0.3), width: 1),
                                     ),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
