@@ -355,14 +355,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
                 <span>{stock.sector ?? 'Market Listed'}</span>
                 <span>·</span>
                 <span style={{ background: 'rgba(255, 255, 255, 0.06)', padding: '2px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 700 }}>NGX Listed</span>
-                {(stock.is_active === false || stock.is_active === 0 || stock.is_active === '0') && (
-                  <>
-                    <span>·</span>
-                    <span style={{ background: '#FFFFFF', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '2px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 800, textTransform: 'none', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '4px', boxShadow: '0 2px 8px rgba(239, 68, 68, 0.05)' }}>
-                      <AlertCircle size={12} /> currently not trading on ngx
-                    </span>
-                  </>
-                )}
+
               </p>
             </div>
           </div>

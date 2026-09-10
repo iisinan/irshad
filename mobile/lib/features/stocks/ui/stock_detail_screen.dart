@@ -849,23 +849,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                                   ),
                                   child: Text('NGX Listed', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: context.textDark)),
                                 ),
-                                if (_currentStock['is_active'] == false || _currentStock['is_active'] == 0 || _currentStock['is_active'] == '0')
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      border: Border.all(color: Colors.red.withOpacity(0.3)),
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Icon(Icons.info_outline, size: 10, color: Colors.red),
-                                        const SizedBox(width: 4),
-                                        const Text('currently not trading on ngx', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: Colors.red)),
-                                      ],
-                                    ),
-                                  ),
+
                               ],
                             ),
                           ],
