@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import {
-  ArrowLeft, CheckCircle, XCircle, AlertTriangle,
+  ArrowLeft, ArrowRight, CheckCircle, XCircle, AlertTriangle,
   HelpCircle, ShieldCheck, ChevronRight, FileText, Download, Droplets,
   Calendar, TrendingUp, Calculator, ExternalLink, Activity,
   Building2, CreditCard, Coins, BarChart3, AlertCircle, X,
