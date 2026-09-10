@@ -394,7 +394,7 @@ const AaoifiScreening = () => {
   /* ── Derived ── */
   const finalStatus    = report.final_status||'doubtful';
   const isNonHalal     = finalStatus==='non-compliant';
-  const businessFailed = report.business_status==='fail';
+  const businessFailed = report.business_status==='fail' || stock?.business_status==='fail' || report.stage1?.status==='non-compliant' || report.stage1?.status==='fail' || report.business_status==='non-compliant';
   const fd             = report.financial_data_used||{};
   const totalAssets    = parseFloat(fd.total_assets)||0;
   const marketCap      = parseFloat(report.market_cap||fd.market_cap)||0;
