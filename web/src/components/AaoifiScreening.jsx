@@ -729,27 +729,27 @@ const AaoifiScreening = () => {
                         e.currentTarget.style.boxShadow = '0 2px 6px rgba(16,185,129,0.08)';
                       }}
                       style={{ 
-                        marginLeft: '10px', 
-                        padding: '5px 12px', 
+                        marginLeft: '8px', 
+                        padding: '3px 9px', 
                         background: 'linear-gradient(135deg, rgba(16,185,129,0.12) 0%, rgba(16,185,129,0.04) 100%)', 
                         border: '1px solid rgba(16,185,129,0.25)', 
                         borderRadius: '100px', 
                         color: 'var(--halal)', 
-                        fontSize: '0.72rem', 
+                        fontSize: '0.64rem', 
                         fontWeight: 800,
                         letterSpacing: '0.3px',
                         textTransform: 'uppercase',
                         cursor: 'pointer',
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '5px',
+                        gap: '4px',
                         verticalAlign: 'middle',
                         position: 'relative',
                         zIndex: 10,
                         transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
                         boxShadow: '0 2px 6px rgba(16,185,129,0.08)'
                       }}>
-                      See Ratios <ArrowRight size={11} strokeWidth={2.5} />
+                      See Ratios <ArrowRight size={9} strokeWidth={2.5} />
                     </button>
                   )}
                 </div>
