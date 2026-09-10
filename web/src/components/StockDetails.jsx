@@ -664,7 +664,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
           )}
 
           {/* Irshad Shariah Analysis — hidden for business activity failures */}
-          {!aBusinessFailed {!isFailedBusinessActivity && ({!isFailedBusinessActivity && ( (
+          {!aBusinessFailed && (
           <div className="detail-panel hover-card" style={{ 
             background: 'linear-gradient(160deg, var(--bg-section) 0%, var(--bg) 100%)', 
             border: '1px solid rgba(209, 165, 98, 0.25)', 
@@ -721,7 +721,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
 
 
           {/* Advanced Metrics — hidden for business activity failures */}
-          {!aBusinessFailed {!isFailedBusinessActivity && ({!isFailedBusinessActivity && ( (stock.valuation_info && stock.valuation_info !== 'N/A' && stock.valuation_info !== 'O' ||
+          {!aBusinessFailed && (stock.valuation_info && stock.valuation_info !== 'N/A' && stock.valuation_info !== 'O' ||
             stock.growth_info && stock.growth_info !== 'N/A' && stock.growth_info !== 'O') && (
             <div className="detail-panel" style={{ padding: '28px', background: 'var(--bg-section)', border: '1px solid var(--border)' }}>
               <div className="detail-section-label" style={{ marginBottom: '20px' }}>Advanced Metrics</div>
@@ -747,7 +747,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
           )}
 
           {/* Price Chart — hidden for business activity failures */}
-          {!aBusinessFailed {!isFailedBusinessActivity && ({!isFailedBusinessActivity && ( (
+          {!aBusinessFailed && (
           <div className="detail-panel">
             <div className="detail-section-label">Price History (30 Days)</div>
             <div style={{ height: '240px', width: '100%', marginTop: '16px' }}>
@@ -943,7 +943,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
 
 
       {/* ─── News Section — hidden for business activity failures ─── */}
-      {!aBusinessFailed {!isFailedBusinessActivity && ({!isFailedBusinessActivity && ( (
+      {!aBusinessFailed && (
       <div style={{ marginTop: '32px', paddingBottom: '32px' }}>
         <div className="detail-panel">
           <div className="detail-section-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px' }}>
