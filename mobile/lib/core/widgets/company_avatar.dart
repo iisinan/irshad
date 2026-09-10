@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../theme/app_theme.dart';
 
+/// CompanyAvatar — 3-level logo fallback:
+///   1. logoUrl  (API-supplied network URL, cached)
+///   2. GCS bucket https://storage.googleapis.com/irshad-images/logos/<symbol>.png
+///   3. Local bundled asset  assets/logos/<SYMBOL>.png
+///   4. Coloured initials (final fallback)
 class CompanyAvatar extends StatelessWidget {
   final String? logoUrl;
   final String symbol;
@@ -19,16 +23,21 @@ class CompanyAvatar extends StatelessWidget {
     this.borderRadius = 12.0,
   });
 
+  static const String _gcsBucket =
+      'https://storage.googleapis.com/irshad-images/logos/';
+
+  String get _gcsUrl => '$_gcsBucket${symbol.toLowerCase()}.png';
+
   Widget _buildInitials(BuildContext context) {
-    final colors = [
-      const Color(0xFF6366F1), // Indigo
-      const Color(0xFF14B8A6), // Teal
-      const Color(0xFFF59E0B), // Amber
-      const Color(0xFF8B5CF6), // Violet
-      const Color(0xFFEC4899), // Pink
-      const Color(0xFF3B82F6), // Blue
-      const Color(0xFF10B981), // Emerald
-      const Color(0xFFEF4444), // Red
+    const colors = [
+      Color(0xFF5B2971), // Brand purple
+      Color(0xFF14B8A6), // Teal
+      Color(0xFFF59E0B), // Amber
+      Color(0xFF8B5CF6), // Violet
+      Color(0xFFEC4899), // Pink
+      Color(0xFF3B82F6), // Blue
+      Color(0xFF10B981), // Emerald
+      Color(0xFFEF4444), // Red
     ];
 
     int hash = 0;
@@ -57,31 +66,82 @@ class CompanyAvatar extends StatelessWidget {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(borderRadius),
-        border: Border.all(color: context.divider, width: 1),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(borderRadius - 1),
-        child: Padding(
-          padding: const EdgeInsets.all(2.0),
-          child: Image.asset(
-            'assets/logos/${symbol.toUpperCase()}.png',
+  Widget _container({required Widget child, required BuildContext context}) =>
+      Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(borderRadius),
+          border: Border.all(color: context.divider, width: 1),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(borderRadius - 1),
+          child: Padding(padding: const EdgeInsets.all(2.0), child: child),
+        ),
+      );
+
+  /// Level 3: local asset → initials
+  Widget _localAssetWithFallback(BuildContext context) =>
+      _container(
+        context: context,
+        child: Image.asset(
+          'assets/logos/${symbol.toUpperCase()}.png',
+          width: size,
+          height: size,
+          fit: BoxFit.contain,
+          errorBuilder: (_, __, _unused) => _buildInitials(context),
+        ),
+      );
+
+  /// Level 2: GCS URL → local asset → initials
+  Widget _gcsWithFallback(BuildContext context) => CachedNetworkImage(
+        imageUrl: _gcsUrl,
+        imageBuilder: (ctx, imageProvider) => _container(
+          context: context,
+          child: Image(
+            image: imageProvider,
             width: size,
             height: size,
             fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) {
-              return _buildInitials(context);
-            },
           ),
         ),
-      ),
-    );
+        errorWidget: (_, __, _unused) => _localAssetWithFallback(context),
+        placeholder: (_, __) => _container(
+          context: context,
+          child: const SizedBox.shrink(),
+        ),
+        fadeInDuration: Duration.zero,
+        fadeOutDuration: Duration.zero,
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    // Level 1: use supplied network logoUrl if available
+    final url = logoUrl?.trim();
+    if (url != null && url.isNotEmpty) {
+      return CachedNetworkImage(
+        imageUrl: url,
+        imageBuilder: (ctx, imageProvider) => _container(
+          context: context,
+          child: Image(
+            image: imageProvider,
+            width: size,
+            height: size,
+            fit: BoxFit.contain,
+          ),
+        ),
+        errorWidget: (_, __, _unused) => _gcsWithFallback(context),
+        placeholder: (_, __) => _container(
+          context: context,
+          child: const SizedBox.shrink(),
+        ),
+        fadeInDuration: Duration.zero,
+        fadeOutDuration: Duration.zero,
+      );
+    }
+
+    // Level 2+: no logoUrl supplied, try GCS then local
+    return _gcsWithFallback(context);
   }
 }
