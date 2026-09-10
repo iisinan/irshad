@@ -150,17 +150,16 @@ class _UpdateTabState extends State<UpdateTab> {
                       style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF5B2971), fontFamily: 'Amiri'),
                     ),
                     const SizedBox(height: 2),
-                    Row(
+                    Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
+                      runSpacing: 4,
                       children: [
-                        Flexible(
-                          child: Text(
-                            '$greetingEn, $firstName',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5),
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                        Text(
+                          '$greetingEn, $firstName',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5),
                         ),
-                        if (unreadCount > 0) ...[
-                          const SizedBox(width: 8),
+                        if (unreadCount > 0)
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
@@ -173,7 +172,6 @@ class _UpdateTabState extends State<UpdateTab> {
                               style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.white),
                             ),
                           ),
-                        ],
                       ],
                     ),
                   ],

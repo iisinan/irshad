@@ -246,11 +246,10 @@ class IrshadApp extends StatelessWidget {
 }
 
 // ─── Tab indices ──────────────────────────────────────────────────────────────
-// 0 = Explore   (public)
-// 1 = Search    (public)
-// 2 = Alerts (protected – requires login)
-// 3 = Portfolio (protected – requires login)
-// 4 = Profile   (protected – requires login)
+// 0 = Portfolio 
+// 1 = Explore   
+// 2 = Alerts 
+// 3 = Search    
 
 
 
@@ -300,21 +299,21 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   void _onBackToExplore() {
-    if (mounted) setState(() => _selectedIndex = 0);
+    if (mounted) setState(() => _selectedIndex = 1);
   }
 
   Widget _buildScreen(int index) {
     switch (index) {
       case 0:
-        return const HomeScreen();
-      case 1:
-        return const FavoritesScreen();
-      case 2:
         return const PortfolioScreen();
+      case 1:
+        return const HomeScreen();
+      case 2:
+        return const FavoritesScreen();
       case 3:
         return const StockSearchScreen();
       default:
-        return const HomeScreen();
+        return const PortfolioScreen();
     }
   }
 
@@ -358,9 +357,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _buildNavItem(0, Icons.explore_outlined, Icons.explore_rounded, 'Explore'),
-                      _buildNavItem(1, Icons.notifications_none_rounded, Icons.notifications_rounded, 'Alerts'),
-                      _buildNavItem(2, Icons.pie_chart_outline_rounded, Icons.pie_chart_rounded, 'Portfolio'),
+                      _buildNavItem(0, Icons.pie_chart_outline_rounded, Icons.pie_chart_rounded, 'Portfolio'),
+                      _buildNavItem(1, Icons.explore_outlined, Icons.explore_rounded, 'Explore'),
+                      _buildNavItem(2, Icons.notifications_none_rounded, Icons.notifications_rounded, 'Alerts'),
                       _buildNavItem(3, Icons.search_rounded, Icons.search_rounded, 'Search'),
                     ],
                   ),
