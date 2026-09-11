@@ -717,7 +717,7 @@ const AaoifiScreening = () => {
                         document.getElementById('aaoifi-financial-ratios')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'rgba(16,185,129,0.06)';
+                        e.currentTarget.style.background = `${sc.color}12`;
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.background = '#ffffff';
@@ -728,7 +728,7 @@ const AaoifiScreening = () => {
                         background: '#ffffff', 
                         border: '1px solid #ffffff', 
                         borderRadius: '100px', 
-                        color: 'var(--halal)', 
+                        color: sc.color, 
                         fontSize: '0.52rem', 
                         fontWeight: 700,
                         letterSpacing: '0.2px',
