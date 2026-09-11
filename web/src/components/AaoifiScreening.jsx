@@ -708,7 +708,7 @@ const AaoifiScreening = () => {
               <div style={{ padding: '16px 20px', background: 'rgba(255,255,255,0.85)', borderRadius: 16, border: '1px solid #fff', marginTop: 12, boxShadow: '0 4px 16px rgba(0,0,0,0.04), inset 0 2px 4px rgba(255,255,255,1)', backdropFilter: 'blur(20px)' }}>
                 <div style={{ color:'var(--text-dark)',fontSize:'0.9rem',lineHeight:1.6,margin:0, fontWeight:600 }}>
                   {cleanStatusReason||'Screened in accordance with AAOIFI Shariah Standard No. 21.'}
-                  {(finalStatus === 'halal' && showFinancials) && (
+                  {(showFinancials) && (
                     <button 
                       type="button"
                       onClick={(e) => {
