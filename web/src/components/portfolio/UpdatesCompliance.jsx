@@ -46,9 +46,38 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-/* ── Confidence pill removed per user request ── */
+/* ── Skeleton loader ── */
+const SkeletonLoader = () => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+    {[1, 2, 3].map(i => <CardSkeleton key={i} />)}
+  </div>
+);
 
-/* ── Section header ── */
+/* ── Empty state ── */
+const EmptyState = ({ icon: Icon, title, subtitle, color = 'var(--primary)' }) => (
+  <div style={{
+    display: 'flex', flexDirection: 'column', alignItems: 'center',
+    justifyContent: 'center', padding: '60px 24px', textAlign: 'center',
+    background: 'var(--bg-section)', borderRadius: '20px',
+    border: '1px dashed var(--border)',
+  }}>
+    <div style={{
+      width: '56px', height: '56px', borderRadius: '16px', marginBottom: '16px',
+      background: `color-mix(in srgb, ${color} 12%, transparent)`,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      <Icon size={26} color={color} strokeWidth={1.5} />
+    </div>
+    <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '8px' }}>
+      {title}
+    </div>
+    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500, maxWidth: '280px', lineHeight: 1.6 }}>
+      {subtitle}
+    </div>
+  </div>
+);
+
+
 const SectionHeader = ({ icon: Icon, title, count, color = 'var(--primary)' }) => (
   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
     <div style={{ width: '34px', height: '34px', borderRadius: '10px', background: `color-mix(in srgb, ${color} 12%, transparent)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
