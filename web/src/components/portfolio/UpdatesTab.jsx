@@ -299,6 +299,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
         {activeSubTab === 'news'         && <UpdatesNews />}
         {activeSubTab === 'inbox'        && <UpdatesInbox />}
         {activeSubTab === 'digest'       && <UpdatesDigest />}
+        {activeSubTab === 'compliance'   && <UpdatesCompliance />}
         {activeSubTab === 'purification' && <UpdatesPurification />}
       </div>
     </div>
