@@ -85,6 +85,7 @@ Route::prefix('v1')->group(function () {
 
         Route::post('/stocks/{symbol}/chat', [StockController::class, 'chatAboutStock']);
         Route::get('/stocks/{symbol}', [StockController::class, 'show']);
+    });
 
     // ── Public Overview / Landing Page ──
     Route::get('/public/stats', [PublicOverviewController::class, 'stats']);
@@ -272,4 +273,3 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 
-});
