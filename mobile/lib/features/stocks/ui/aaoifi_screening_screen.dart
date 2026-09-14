@@ -1,3 +1,5 @@
+import "dart:convert";
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
@@ -459,12 +461,21 @@ class _AaoifiScreeningScreenState extends State<AaoifiScreeningScreen> with Sing
     );
   }
 
-  Widget _buildBusinessAnalysis() {
-        final aiExp = _report!['ai_explanation'];
+    Widget _buildBusinessAnalysis() {
+    final aiExp = _report!['ai_explanation'];
     dynamic aiData;
     if (aiExp is Map && aiExp['details'] != null) {
       aiData = aiExp['details'];
-    } else {
+    } else if (aiExp is String && aiExp.trim().startsWith('{')) {
+      try {
+        
+        final parsed = jsonDecode(aiExp);
+        if (parsed['details'] != null) {
+          aiData = parsed['details'];
+        }
+      } catch(e) {}
+    }
+    if (aiData == null) {
       aiData = _report!['business_reasoning'];
     }
     if (aiData == null) return const Text("No Irshad analysis available.");
