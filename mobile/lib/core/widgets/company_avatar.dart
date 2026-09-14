@@ -77,7 +77,10 @@ class CompanyAvatar extends StatelessWidget {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(borderRadius - 1),
-          child: Padding(padding: const EdgeInsets.all(2.0), child: child),
+          child: Container(
+            color: Colors.white, // Ensure white background for transparent PNGs
+            child: Padding(padding: const EdgeInsets.all(2.0), child: child),
+          ),
         ),
       );
 
