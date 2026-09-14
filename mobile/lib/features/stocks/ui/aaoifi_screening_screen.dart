@@ -460,7 +460,13 @@ class _AaoifiScreeningScreenState extends State<AaoifiScreeningScreen> with Sing
   }
 
   Widget _buildBusinessAnalysis() {
-    final aiData = _report!['business_reasoning'];
+        final aiExp = _report!['ai_explanation'];
+    dynamic aiData;
+    if (aiExp is Map && aiExp['details'] != null) {
+      aiData = aiExp['details'];
+    } else {
+      aiData = _report!['business_reasoning'];
+    }
     if (aiData == null) return const Text("No Irshad analysis available.");
 
     return Container(
@@ -503,7 +509,7 @@ class _AaoifiScreeningScreenState extends State<AaoifiScreeningScreen> with Sing
           const SizedBox(height: 4),
           Text(
             (aiData is String) 
-                ? aiData 
+                ? (aiData.contains('|||') ? aiData.split('|||')[0].trim() : aiData)
                 : (aiData is Map ? (aiData['summary']?.toString() ?? aiData['reasoning']?.toString() ?? "N/A") : "N/A"),
             style: const TextStyle(fontSize: 13, height: 1.4),
           ),
