@@ -62,20 +62,24 @@ Route::prefix('v1')->group(function () {
     Route::middleware('throttle:60,1')->group(function () {
         Route::get('/resources', [ResourceController::class, 'index']);
         Route::get('/settings', [SettingsController::class, 'index']);
+        Route::get('/sectors', [SectorController::class, 'index']);
+        Route::get('/disclosures', [CorporateDisclosureController::class, 'index']);
+        Route::get('/news', [NewsController::class, 'index']);
+        Route::get('/zakat/prices', [ZakatController::class, 'getPrices']);
+    });
+
+    Route::middleware('auth:sanctum')->group(function () {
+        // Protected Stocks
         Route::get('/stocks', [StockController::class, 'index']);
         Route::get('/stocks/compliance-changes', [StockController::class, 'complianceChanges']);
-        Route::get('/sectors', [SectorController::class, 'index']);
         Route::get('/stocks/search', [StockController::class, 'search']);
         Route::get('/stocks/ngx', [StockController::class, 'ngx']);
         Route::get('/stocks/baskets', [BasketController::class, 'index']);
         Route::get('/stocks/baskets/{basket}', [BasketController::class, 'show']);
-        Route::get('/disclosures', [CorporateDisclosureController::class, 'index']);
-        Route::get('/news', [NewsController::class, 'index']);
         Route::get('/stocks/{symbol}/analysis', [StockController::class, 'getAiAnalysis']);
         Route::get('/stocks/{symbol}/aaoifi-screening', [StockController::class, 'aaoifiScreening']);
         Route::post('/stocks/{symbol}/chat', [StockController::class, 'chatAboutStock']);
-        Route::get('/zakat/prices', [ZakatController::class, 'getPrices']);
-    });
+        Route::get('/stocks/{symbol}', [StockController::class, 'show']);
 
     // ── Public Overview / Landing Page ──
     Route::get('/public/stats', [PublicOverviewController::class, 'stats']);
@@ -261,7 +265,5 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::put('/admin/settings', [SettingsController::class, 'update']);
         });
     });
-
-    // Public wildcard route placed after all other specific protected routes
-    Route::get('/stocks/{symbol}', [StockController::class, 'show']);
 });
+

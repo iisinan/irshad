@@ -37,12 +37,15 @@ class StockController extends Controller
 
     public function index(): JsonResponse
     {
-        $stocks = $this->safeTaggedCache(['stocks'])->remember('stocks.index', 300, function () {
+        // Now returns paginated by default
+        $page = request()->input('page', 1);
+        $cacheKey = "stocks.index.page.{$page}";
+        $stocks = $this->safeTaggedCache(['stocks'])->remember($cacheKey, 300, function () {
             return Company::select(['id', 'name', 'symbol', 'sector', 'current_status', 'latest_price', 'price_change_pct', 'logo_url', 'market_cap', 'pe_ratio'])
                 ->with('aaoifiScreening:company_id,impermissible_income_ratio')
                 ->orderBy('symbol', 'asc')
-                ->get()
-                ->map(function ($company) {
+                ->paginate(20)
+                ->through(function ($company) {
                     $ratio = $company->aaoifiScreening ? (float) $company->aaoifiScreening->impermissible_income_ratio : 0;
                     $ratioPct = $ratio;
                     $company->status = $company->current_status ? [
@@ -282,21 +285,13 @@ class StockController extends Controller
                 $query->whereNotNull('pe_ratio')->where('pe_ratio', '<=', (float) $request->pe_max);
             }
 
-            $perPage = $request->input('per_page');
+            $perPage = $request->input('per_page', 20);
 
-            if ($perPage) {
-                return $query->paginate((int) $perPage)->through(function ($company) {
-                    $company->status = $company->current_status ? ['status' => $company->current_status] : null;
+            return $query->paginate((int) $perPage)->through(function ($company) {
+                $company->status = $company->current_status ? ['status' => $company->current_status] : null;
 
-                    return $company;
-                });
-            } else {
-                return $query->get()->map(function ($company) {
-                    $company->status = $company->current_status ? ['status' => $company->current_status] : null;
-
-                    return $company;
-                });
-            }
+                return $company;
+            });
         });
 
         return $this->success($stocks);
