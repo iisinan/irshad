@@ -45,7 +45,7 @@ export default function CompanyLogo({ symbol = '', logoUrl, size = 36, radius = 
     height: size,
     borderRadius: radius,
     flexShrink: 0,
-    background: 'var(--primary-50)',
+    background: '#FFFFFF', // Always white so transparent PNGs render correctly
     border: '1px solid var(--border)',
     display: 'flex',
     alignItems: 'center',
