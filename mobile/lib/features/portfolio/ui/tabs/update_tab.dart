@@ -78,7 +78,10 @@ class _UpdateTabState extends State<UpdateTab> {
 
   Widget _buildGreetingBanner(BuildContext context, int unreadCount) {
     final authUser = Provider.of<AppStateProvider>(context).userProfile;
-    final firstName = (authUser?['first_name'] ?? authUser?['name']?.split(' ').first) ?? 'there';
+    final firstNameRaw = (authUser?['first_name'] ?? authUser?['name']?.split(' ').first) ?? 'there';
+    final firstName = firstNameRaw.isNotEmpty 
+        ? '${firstNameRaw[0].toUpperCase()}${firstNameRaw.substring(1).toLowerCase()}' 
+        : 'There';
     
     // Greeting logic
     final hour = DateTime.now().hour;
@@ -103,7 +106,7 @@ class _UpdateTabState extends State<UpdateTab> {
           BoxShadow(color: context.primary.withValues(alpha: 0.04), blurRadius: 32, offset: const Offset(0, 8)),
         ],
       ),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       child: Stack(
         clipBehavior: Clip.none,
         children: [
@@ -140,24 +143,24 @@ class _UpdateTabState extends State<UpdateTab> {
                   child: Text(emoji, style: const TextStyle(fontSize: 24)),
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
                       'ٱلسَّلَامُ عَلَيْكُمْ وَرَحْمَةُ ٱللَّٰهِ وَبَرَكَاتُهُ',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF5B2971), fontFamily: 'Amiri'),
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF5B2971), fontFamily: 'Amiri'),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 4),
                     Wrap(
                       crossAxisAlignment: WrapCrossAlignment.center,
                       spacing: 8,
                       runSpacing: 4,
                       children: [
                         Text(
-                          '$greetingEn, $firstName',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5),
+                          '$greetingEn,\n$firstName',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5, height: 1.1),
                         ),
                         if (unreadCount > 0)
                           Container(
@@ -177,7 +180,7 @@ class _UpdateTabState extends State<UpdateTab> {
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
               const LiveClockWidget(),
             ],
           ),
@@ -310,7 +313,7 @@ class _LiveClockWidgetState extends State<LiveClockWidget> {
     final dateStr = '${_getWeekdayName(_now.weekday)} ${_now.day} ${_getMonthName(_now.month)} ${_now.year}';
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: context.bgAlt,
         border: Border.all(color: context.appColors.divider),
@@ -323,11 +326,11 @@ class _LiveClockWidgetState extends State<LiveClockWidget> {
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
-              Text(hh, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -1)),
-              Text(':', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.primary)),
-              Text(mm, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -1)),
-              Text(':', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.primary)),
-              Text(ss, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: context.textMuted, letterSpacing: -1)),
+              Text(hh, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -1)),
+              Text(':', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: context.primary)),
+              Text(mm, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -1)),
+              Text(':', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: context.primary.withValues(alpha: 0.5))),
+              Text(ss, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: context.textMuted, letterSpacing: -1)),
             ],
           ),
           const SizedBox(height: 4),
@@ -337,3 +340,4 @@ class _LiveClockWidgetState extends State<LiveClockWidget> {
     );
   }
 }
+
