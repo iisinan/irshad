@@ -427,11 +427,11 @@ const AaoifiScreening = () => {
   if (typeof stage1ReasonRaw === 'string' && stage1ReasonRaw.trim().startsWith('{')) {
     try {
       const parsed = JSON.parse(stage1ReasonRaw);
-      stage1ReasonRaw = parsed.summary || parsed.justification || parsed.reason || stage1ReasonRaw;
+      stage1ReasonRaw = parsed.details || parsed.summary || parsed.justification || parsed.reason || stage1ReasonRaw;
     } catch (e) {}
   }
   if (typeof stage1ReasonRaw === 'object' && stage1ReasonRaw !== null) {
-    stage1ReasonRaw = stage1ReasonRaw.summary || stage1ReasonRaw.justification || stage1ReasonRaw.reason || '';
+    stage1ReasonRaw = stage1ReasonRaw.details || stage1ReasonRaw.summary || stage1ReasonRaw.justification || stage1ReasonRaw.reason || '';
   }
   if (typeof stage1ReasonRaw === 'string') {
     stage1ReasonRaw = stage1ReasonRaw.replace(/Note:s*This company is currently not trading on the NGX.?/gi, '').trim();
