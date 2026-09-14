@@ -1262,7 +1262,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                       Icon(Icons.warning_amber_rounded, color: Color(0xFFD97706), size: 14),
                       SizedBox(width: 6),
                       Text(
-                        'Near Financial Limit',
+                        'Near Financial Limit is Detected',
                         style: TextStyle(color: Color(0xFF92400E), fontSize: 12, fontWeight: FontWeight.w800),
                       ),
                     ],
