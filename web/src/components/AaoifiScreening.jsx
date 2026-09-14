@@ -425,21 +425,25 @@ const AaoifiScreening = () => {
   const latestPrice    = parseFloat(stock?.latest_price||report.latest_price)||0;
   let stage1ReasonRaw = report.stage1?.reason || report.business_reasoning;
   
-  let br = report.business_reasoning;
-  if (typeof br === 'string' && br.trim().startsWith('{')) {
-    try { br = JSON.parse(br); } catch(e) {}
-  }
-  if (br && typeof br === 'object' && br.details) {
-    stage1ReasonRaw = br.details;
+  if (report.ai_explanation && report.ai_explanation.details) {
+    stage1ReasonRaw = report.ai_explanation.details;
   } else {
-    if (typeof stage1ReasonRaw === 'string' && stage1ReasonRaw.trim().startsWith('{')) {
-      try {
-        const parsed = JSON.parse(stage1ReasonRaw);
-        stage1ReasonRaw = parsed.details || parsed.summary || parsed.justification || parsed.reason || stage1ReasonRaw;
-      } catch (e) {}
+    let br = report.business_reasoning;
+    if (typeof br === 'string' && br.trim().startsWith('{')) {
+      try { br = JSON.parse(br); } catch(e) {}
     }
-    if (typeof stage1ReasonRaw === 'object' && stage1ReasonRaw !== null) {
-      stage1ReasonRaw = stage1ReasonRaw.details || stage1ReasonRaw.summary || stage1ReasonRaw.justification || stage1ReasonRaw.reason || '';
+    if (br && typeof br === 'object' && br.details) {
+      stage1ReasonRaw = br.details;
+    } else {
+      if (typeof stage1ReasonRaw === 'string' && stage1ReasonRaw.trim().startsWith('{')) {
+        try {
+          const parsed = JSON.parse(stage1ReasonRaw);
+          stage1ReasonRaw = parsed.details || parsed.summary || parsed.justification || parsed.reason || stage1ReasonRaw;
+        } catch (e) {}
+      }
+      if (typeof stage1ReasonRaw === 'object' && stage1ReasonRaw !== null) {
+        stage1ReasonRaw = stage1ReasonRaw.details || stage1ReasonRaw.summary || stage1ReasonRaw.justification || stage1ReasonRaw.reason || '';
+      }
     }
   }
   
