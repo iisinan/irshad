@@ -799,32 +799,33 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Row 1: Ticker Symbol & Price
+              // Row 1: Ticker Symbol & Trading Board
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(_currentStock['symbol'] ?? '', style: TextStyle(fontSize: 34, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -1.0, height: 1.0)),
-                  businessFailed ? Text('-', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -1.0, height: 1.0))
-                  : RichText(
-                    text: TextSpan(
-                      children: [
-                        TextSpan(
-                          text: '₦ ', 
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: context.textMuted, letterSpacing: 0),
-                        ),
-                        TextSpan(
-                          text: latestPrice.toStringAsFixed(2).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},'), 
-                          style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -1.0, height: 1.0),
-                        ),
-                      ],
-                    ),
-                  ),
+                  Builder(builder: (context) {
+                    final tradingBoard = _currentStock['trading_board']?.toString().trim() ?? '';
+                    if (tradingBoard.isEmpty) return const SizedBox.shrink();
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: context.primary.withOpacity(0.10),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: context.primary.withOpacity(0.25), width: 1),
+                      ),
+                      child: Text(
+                        tradingBoard,
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: context.primary, letterSpacing: -0.2),
+                      ),
+                    );
+                  }),
                 ],
               ),
               const SizedBox(height: 8),
               
-              // Row 2: Company Name & Price Change
+              // Row 2: Company Name (no price change badge)
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -861,28 +862,11 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                                   ),
                                   child: Text('NGX Listed', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: context.textDark)),
                                 ),
-
                               ],
                             ),
                           ],
                         );
                       }
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: isUp ? context.halal.withOpacity(0.12) : context.haram.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                    child: Text(
-                      '${isUp ? '+' : '-'}₦$absChangeStr (${isUp ? '+' : ''}$pctChangeStr%)',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w800,
-                        color: isUp ? context.halal : context.haram,
-                        letterSpacing: -0.2,
-                      ),
                     ),
                   ),
                 ],

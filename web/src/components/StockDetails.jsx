@@ -354,46 +354,39 @@ const StockDetails = ({ symbol: propSymbol }) => {
                 <span>·</span>
                 <span>{stock.sector ?? 'Market Listed'}</span>
                 <span>·</span>
-                <span style={{ background: 'rgba(255, 255, 255, 0.06)', padding: '2px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 700 }}>NGX Listed</span>
+                <span style={{ background: 'rgba(255, 255, 255, 0.06)', padding: '2px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 700 }}>{stock.trading_board ? `NGX ${stock.trading_board}` : 'NGX Listed'}</span>
 
               </p>
             </div>
           </div>
 
-          {/* Right: Actions & Secondary Price Tag */}
+          {/* Right: Actions & Trading Board Tag */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-            {/* Price Tag Card */}
-            <div style={{
-              textAlign: 'right',
-              background: 'rgba(255, 255, 255, 0.03)',
-              padding: '10px 18px',
-              borderRadius: '16px',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              backdropFilter: 'blur(16px)',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.15)'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px', color: 'rgba(255,255,255,0.6)', fontSize: '0.62rem', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase' }}>
-                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10B981', boxShadow: '0 0 6px #10B981' }} />
-                Latest Price
+            {/* Trading Board Card */}
+            {stock.trading_board && (
+              <div style={{
+                textAlign: 'right',
+                background: 'rgba(255, 255, 255, 0.03)',
+                padding: '10px 18px',
+                borderRadius: '16px',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                backdropFilter: 'blur(16px)',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.15)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px', color: 'rgba(255,255,255,0.6)', fontSize: '0.62rem', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase' }}>
+                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10B981', boxShadow: '0 0 6px #10B981' }} />
+                  Trading Board
+                </div>
+                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'flex-end', marginTop: '3px' }}>
+                  <span style={{ fontSize: '1.3rem', fontWeight: 900, color: 'white', letterSpacing: '-0.5px' }}>
+                    {stock.trading_board}
+                  </span>
+                </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', justifyContent: 'flex-end', marginTop: '3px' }}>
-                <span style={{ fontSize: '1.45rem', fontWeight: 900, color: 'white', letterSpacing: '-0.5px', fontVariantNumeric: 'tabular-nums' }}>
-                  {aBusinessFailed ? '-' : `₦ ${latestPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                </span>
-                <span style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '3px',
-                  color: isPositive ? '#34D399' : '#F87171',
-                  background: isPositive ? 'rgba(52, 211, 153, 0.15)' : 'rgba(248, 113, 113, 0.15)',
-                  padding: '2px 8px', borderRadius: '6px',
-                  fontWeight: 800, fontSize: '0.74rem', fontVariantNumeric: 'tabular-nums'
-                }}>
-                  {isPositive ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
-                  {isPositive ? '+' : ''}{priceChangePct.toFixed(2)}%
-                </span>
-              </div>
-            </div>
+            )}
 
             {/* Alert / Watchlist Button */}
+
             <button
                onClick={toggleWatchlist}
                disabled={watchlistLoading}
