@@ -100,7 +100,7 @@ class AppTheme {
 
   // Light Colors
   static const Color lightBg = Color(0xFFFFFFFF);
-  static const Color lightBgAlt = Color(0xFFF0F3F7);
+  static const Color lightBgAlt = Color(0xFFFFFFFF);
   static const Color lightBgSection = Color(0xFFFFFFFF);
   static const Color lightDivider = Color(0xFFE5E7EB);
   static const Color lightText = Color(0xFF1F2937);
