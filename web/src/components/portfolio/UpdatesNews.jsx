@@ -216,14 +216,12 @@ export default function UpdatesNews() {
 
   const sections = [
     { id: 'business',    label: 'Business Activity',   icon: Zap,       color: 'var(--doubtful)' },
-    { id: 'market',      label: 'Market Intelligence', icon: BarChart2,  color: 'var(--primary)' },
     { id: 'dividends',   label: 'Dividends',           icon: Star,       color: 'var(--gold)' },
     { id: 'analysis',    label: 'Analysis',            icon: TrendingUp, color: '#8b5cf6' },
   ];
 
   const complianceChanges  = data?.compliance_changes  || [];
   const businessUpdates    = data?.business_updates    || [];
-  const marketIntelligence = data?.market_intelligence || [];
   const dividendsData      = data?.dividends           || [];
   const analysisData       = data?.analysis            || [];
 
@@ -279,18 +277,6 @@ export default function UpdatesNews() {
                 {businessUpdates.length === 0
                   ? <EmptyState icon={Zap} title="No Business Updates" subtitle="No new business activities have been detected from your followed companies." color="var(--doubtful)" />
                   : businessUpdates.map(item => <BusinessCard key={item.id} item={item} />)
-                }
-              </div>
-            </>
-          )}
-
-          {activeSection === 'market' && (
-            <>
-              <SectionHeader icon={BarChart2} title="Islamic Market Intelligence" count={marketIntelligence.length} color="var(--primary)" />
-              <div style={{ maxHeight: '600px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingRight: '6px' }} className="custom-scrollbar">
-                {marketIntelligence.length === 0
-                  ? <EmptyState icon={Newspaper} title="No Market News" subtitle="No market intelligence articles available right now. Check back soon." color="var(--primary)" />
-                  : marketIntelligence.map(item => <MarketCard key={item.id} item={item} />)
                 }
               </div>
             </>
