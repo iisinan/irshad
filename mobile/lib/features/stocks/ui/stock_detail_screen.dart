@@ -1,3 +1,5 @@
+import "dart:convert";
+
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
@@ -378,6 +380,10 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
               : (_aaoifiData?['business_reasoning']?.toString() ?? ''));
     } else {
       justification = _aaoifiData?['status_reason']?.toString() ?? '';
+    }
+    
+    if (justification.isEmpty) {
+      justification = reason;
     }
 
     // Strip Additionally it passes all AAOIFI... for non-trading stocks for parity with frontend
@@ -1217,7 +1223,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                                   ),
                                 ],
                                 // See Ratios button — blue if passed business activity but failed financial
-                                if (!businessFailed)
+                                if (!businessFailed && !label.toUpperCase().contains('DOUBTFUL'))
                                   Builder(builder: (ctx) {
                                     final bool isNC = label.toUpperCase().contains('NON-COMPLIANT');
                                     final btnColor = isNC ? const Color(0xFF1D6ADB) : ctx.halal;
@@ -2829,11 +2835,29 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
       stage1Reason = _aaoifiData!['business_reasoning'] ?? stage1Reason;
     } else if (rawStatus is Map) {
        stage1Status = rawStatus['status']?.toString().toLowerCase() ?? 'doubtful';
-       if (stage1Status == 'non-halal' || stage1Status == 'non-compliant') stage1Reason = rawStatus['reason'] ?? 'The core business operations involve non-compliant activities.';
+       if (stage1Status == 'non-halal' || stage1Status == 'non-compliant') {
+           stage1Reason = rawStatus['reason'] ?? 'The core business operations involve non-compliant activities.';
+       } else if (stage1Status == 'doubtful' && rawStatus['reason'] != null) {
+           stage1Reason = rawStatus['reason'];
+       }
        haramRevenuePercent = double.tryParse(rawStatus['haram_revenue_percent']?.toString() ?? '0') ?? 0.0;
     } else if (rawStatus is String) {
        stage1Status = rawStatus.toLowerCase();
     }
+    
+    // Override stage1Reason with ai_explanation.details if it exists
+    if (_aaoifiData != null && _aaoifiData!['ai_explanation'] != null) {
+      final aiExp = _aaoifiData!['ai_explanation'];
+      if (aiExp is Map && aiExp['details'] != null) {
+        stage1Reason = aiExp['details'];
+      } else if (aiExp is String && aiExp.trim().startsWith('{')) {
+        try {
+          final parsed = jsonDecode(aiExp);
+          if (parsed['details'] != null) stage1Reason = parsed['details'];
+        } catch(e) {}
+      }
+    }
+
     
     bool stage1Pass = stage1Status == 'halal' || stage1Status == 'pass';
     bool stage1Fail = stage1Status == 'non-halal' || stage1Status == 'non-compliant' || stage1Status == 'fail';
@@ -2848,6 +2872,25 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
             const Icon(Icons.business_center_outlined, color: Color(0xFF8B5CF6), size: 22),
             const SizedBox(width: 8),
             Text('Business Activity Screening', style: TextStyle(color: context.textDark, fontSize: 17, fontWeight: FontWeight.w900)),
+            const Spacer(),
+            if (stage1Pass || stage1Fail)
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: stage1Pass ? context.halalBg : context.haramBg,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: stage1Pass ? context.halal.withOpacity(0.6) : context.haram.withOpacity(0.6), 
+                    width: 1.5
+                  ),
+                ),
+                child: Icon(
+                  stage1Pass ? Icons.check_rounded : Icons.close_rounded,
+                  size: 16,
+                  color: stage1Pass ? context.halal : context.haram,
+                  weight: 800,
+                ),
+              ),
           ],
         ),
         const SizedBox(height: 16),
@@ -2889,7 +2932,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  stage1Reason,
+                                  stage1Reason.contains('|||') ? stage1Reason.split('|||')[0].trim() : stage1Reason,
                                   style: TextStyle(color: context.textDark.withOpacity(0.85), fontSize: 15, fontWeight: FontWeight.w600, height: 1.5),
                                 ),
 
@@ -2938,30 +2981,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
             ),
           ),
         ],
-        const SizedBox(height: 32),
-        if (stage1Pass || stage1Fail)
-          Center(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 14),
-              decoration: BoxDecoration(
-                color: stage1Pass ? context.halalBg : context.haramBg,
-                borderRadius: BorderRadius.circular(100),
-                border: Border.all(
-                  color: stage1Pass ? context.halal.withOpacity(0.6) : context.haram.withOpacity(0.6), 
-                  width: 1.5
-                ),
-              ),
-              child: Text(
-                stage1Pass ? 'PASS' : 'FAIL',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w900,
-                  color: stage1Pass ? context.halal : context.haram,
-                  letterSpacing: 1.5,
-                ),
-              ),
-            ),
-          ),
+
       ],
     );
   }
