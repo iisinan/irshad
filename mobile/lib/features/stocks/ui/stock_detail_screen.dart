@@ -2276,7 +2276,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
         
     Widget buildRatioCard(int number, String title, String formula, double value, double limit, String numLabel, String denLabel, String numValStr, String denValStr) {
       bool isPass = value <= limit;
-      bool isClickable = numValStr != '0' && numValStr != '0 + 0' && numValStr != '0.00' && numValStr != '—';
+      bool isClickable = true;
       bool isNearLimit = value <= limit && (limit == 30 ? (30.0 - value) <= 5.0 : (limit == 5 ? (5.0 - value) <= 1.0 : false));
       
       bool isExpanded = false;
