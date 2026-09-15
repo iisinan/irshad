@@ -55,7 +55,7 @@ export default function WatchlistTab({ initialSymbol, onClearInitialSymbol }) {
   // Hydrate from cache for instant render
   const [allStocks, setAllStocks] = useState(() => {
     try {
-      const cached = localStorage.getItem('irshad_stocks_cache_v10');
+      const cached = localStorage.getItem('irshad_stocks_cache_v11');
       if (cached) {
         const { data, expiry } = JSON.parse(cached);
         if (Date.now() < expiry) return data?.data || [];
@@ -86,7 +86,7 @@ export default function WatchlistTab({ initialSymbol, onClearInitialSymbol }) {
       setWatchlistSymbols(newWl);
       localStorage.setItem('irshad_watchlist_items_cache_v3', JSON.stringify(wlRes));
       setAllStocks(stocksRes.data || []);
-      localStorage.setItem('irshad_stocks_cache_v10', JSON.stringify({ data: stocksRes, expiry: Date.now() + 1000 * 60 * 60 }));
+      localStorage.setItem('irshad_stocks_cache_v11', JSON.stringify({ data: stocksRes, expiry: Date.now() + 1000 * 60 * 60 }));
     } catch (err) {
       console.error(err);
     } finally {

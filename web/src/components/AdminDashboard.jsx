@@ -67,12 +67,12 @@ const AdminDashboard = () => {
       if (data && typeof data === 'object' && Array.isArray(data.data)) {
         data = data.data;
       }
-      localStorage.setItem('irshad_admin_stocks_v1', JSON.stringify(data));
+      localStorage.setItem('irshad_admin_stocks_v2', JSON.stringify(data));
       return data;
     },
     initialData: () => {
       try {
-        const cached = localStorage.getItem('irshad_admin_stocks_v1');
+        const cached = localStorage.getItem('irshad_admin_stocks_v2');
         return cached ? JSON.parse(cached) : undefined;
       } catch { return undefined; }
     },

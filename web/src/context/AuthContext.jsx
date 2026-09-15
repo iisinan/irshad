@@ -139,7 +139,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_user');
     localforage.removeItem('irshad_portfolio_cache');
-    localStorage.removeItem('irshad_admin_stocks_v1');
+    localStorage.removeItem('irshad_admin_stocks_v2');
     localStorage.removeItem('irshad_admin_products_v1');
     localStorage.removeItem('irshad_admin_alerts_v1');
     setUser(null);
