@@ -64,10 +64,6 @@ function IPOCard({ ipo, onClick }) {
           </div>
         </div>
         
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '2px' }}>Expected Valuation</div>
-          <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)' }}>{ipo.valuation}</div>
-        </div>
       </div>
     </div>
   );
