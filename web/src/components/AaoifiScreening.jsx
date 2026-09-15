@@ -592,7 +592,7 @@ const AaoifiScreening = () => {
                 </form>
                 
                 {searchQuery.length > 0 && (
-                  <div className="aaoifi-search-dropdown">
+                  <div className="aaoifi-search-dropdown" style={{ borderRadius: 16, boxShadow: '0 12px 32px rgba(0,0,0,0.12), 0 0 0 1px var(--border)', overflow: 'hidden' }}>
                     {allStocks.filter(s => s.symbol.toLowerCase().includes(searchQuery.toLowerCase()) || s.name?.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 5).map(s => (
                       <div 
                         key={s.symbol}
@@ -601,13 +601,18 @@ const AaoifiScreening = () => {
                           setIsSearchOpen(false); 
                           setSearchQuery('');
                         }}
-                        style={{ padding:'10px 14px', cursor:'pointer', borderBottom:'1px solid var(--border)', display:'flex', flexDirection:'column' }}
+                        style={{ padding:'12px 16px', cursor:'pointer', borderBottom:'1px solid var(--border)', display:'flex', alignItems: 'center', gap: 12, transition: 'background 0.2s' }}
                         className="hover-bg"
                         onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-section)'}
                         onMouseLeave={(e) => e.currentTarget.style.background = 'var(--bg)'}
                       >
-                        <span style={{ fontWeight:800, fontSize:'0.85rem', color:'var(--primary)' }}>{s.symbol}</span>
-                        <span style={{ fontSize:'0.75rem', color:'var(--text-muted)' }}>{s.name}</span>
+                        <div style={{ width: 36, height: 36, borderRadius: 8, background: '#fff', border: '1px solid var(--border)', flexShrink: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <CompanyLogo symbol={s.symbol} logoUrl={s.logo_url} size={36} radius={8} />
+                        </div>
+                        <div style={{ display:'flex', flexDirection:'column', overflow: 'hidden' }}>
+                          <span style={{ fontWeight:800, fontSize:'0.9rem', color:'var(--primary)' }}>{s.symbol}</span>
+                          <span style={{ fontSize:'0.75rem', color:'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.name}</span>
+                        </div>
                       </div>
                     ))}
                     {allStocks.filter(s => s.symbol.toLowerCase().includes(searchQuery.toLowerCase()) || s.name?.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
