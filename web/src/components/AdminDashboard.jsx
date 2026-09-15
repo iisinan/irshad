@@ -61,8 +61,12 @@ const AdminDashboard = () => {
   const { data: stocks = [], isFetching: stocksFetching, refetch: refetchStocks, error: stocksError } = useQuery({
     queryKey: ['admin-stocks'],
     queryFn: async () => {
-      const res = await api.get('/stocks');
-      const data = res.data?.data || [];
+      const res = await api.get('/stocks', { params: { per_page: 1000 } });
+      let data = res.data?.data || [];
+      // Handle paginated response structure
+      if (data && typeof data === 'object' && Array.isArray(data.data)) {
+        data = data.data;
+      }
       localStorage.setItem('irshad_admin_stocks_v1', JSON.stringify(data));
       return data;
     },
