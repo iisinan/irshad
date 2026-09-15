@@ -11,6 +11,7 @@ import 'updates/updates_digest_tab.dart';
 import 'purification_tab.dart';
 import 'updates/updates_purification_tab.dart';
 import 'updates/updates_compliance_tab.dart';
+import 'updates/updates_ipo_tab.dart';
 import '../widgets/islamic_quote_widget.dart';
 
 class UpdateTab extends StatefulWidget {
@@ -51,6 +52,7 @@ class _UpdateTabState extends State<UpdateTab> {
     {'id': 'digest', 'label': 'Irshad Digest', 'icon': Icons.mail_outline_rounded},
     {'id': 'compliance', 'label': 'Compliance Changes', 'icon': Icons.shield_outlined},
     {'id': 'purification', 'label': 'Purification', 'icon': Icons.water_drop_outlined},
+    {'id': 'ipo', 'label': 'IPO', 'icon': Icons.rocket_launch_outlined},
   ];
 
   @override
@@ -267,6 +269,8 @@ class _UpdateTabState extends State<UpdateTab> {
         return const UpdatesComplianceTab();
       case 'purification':
         return const UpdatesPurificationTab();
+      case 'ipo':
+        return const UpdatesIpoTab();
       default:
         return const SizedBox.shrink();
     }
