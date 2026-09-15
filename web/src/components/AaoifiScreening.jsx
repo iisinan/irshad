@@ -592,8 +592,8 @@ const AaoifiScreening = () => {
                 </form>
                 
                 {searchQuery.length > 0 && (
-                  <div className="aaoifi-search-dropdown" style={{ borderRadius: 16, boxShadow: '0 12px 32px rgba(0,0,0,0.12), 0 0 0 1px var(--border)', overflow: 'hidden' }}>
-                    {allStocks.filter(s => s.symbol.toLowerCase().includes(searchQuery.toLowerCase()) || s.name?.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 5).map(s => (
+                  <div className="aaoifi-search-dropdown" style={{ borderRadius: 16, padding: '8px', boxShadow: '0 12px 32px rgba(0,0,0,0.12), 0 0 0 1px var(--border)', background: 'var(--bg)', backdropFilter: 'blur(20px)', overflow: 'hidden' }}>
+                    {allStocks.filter(s => s.symbol.toLowerCase().includes(searchQuery.toLowerCase()) || s.name?.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 5).map((s, idx, arr) => (
                       <div 
                         key={s.symbol}
                         onClick={() => {
@@ -601,22 +601,26 @@ const AaoifiScreening = () => {
                           setIsSearchOpen(false); 
                           setSearchQuery('');
                         }}
-                        style={{ padding:'12px 16px', cursor:'pointer', borderBottom:'1px solid var(--border)', display:'flex', alignItems: 'center', gap: 12, transition: 'background 0.2s' }}
-                        className="hover-bg"
-                        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-section)'}
-                        onMouseLeave={(e) => e.currentTarget.style.background = 'var(--bg)'}
+                        style={{ padding:'10px 12px', cursor:'pointer', marginBottom: idx === arr.length - 1 ? 0 : 4, borderRadius: 12, display:'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(91,41,113,0.06)'; e.currentTarget.style.transform = 'scale(0.99)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.transform = 'scale(1)'; }}
                       >
-                        <div style={{ width: 36, height: 36, borderRadius: 8, background: '#fff', border: '1px solid var(--border)', flexShrink: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <CompanyLogo symbol={s.symbol} logoUrl={s.logo_url} size={36} radius={8} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, overflow: 'hidden' }}>
+                          <div style={{ width: 34, height: 34, borderRadius: 10, background: '#fff', border: '1px solid var(--border)', flexShrink: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+                            <CompanyLogo symbol={s.symbol} logoUrl={s.logo_url} size={34} radius={10} />
+                          </div>
+                          <div style={{ display:'flex', flexDirection:'column', overflow: 'hidden' }}>
+                            <span style={{ fontWeight:900, fontSize:'0.9rem', color:'var(--primary)', letterSpacing: '-0.2px' }}>{s.symbol}</span>
+                            <span style={{ fontSize:'0.7rem', color:'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: 600 }}>{s.name}</span>
+                          </div>
                         </div>
-                        <div style={{ display:'flex', flexDirection:'column', overflow: 'hidden' }}>
-                          <span style={{ fontWeight:800, fontSize:'0.9rem', color:'var(--primary)' }}>{s.symbol}</span>
-                          <span style={{ fontSize:'0.75rem', color:'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.name}</span>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <ChevronRight size={14} color="var(--text-muted)" style={{ opacity: 0.5 }} />
                         </div>
                       </div>
                     ))}
                     {allStocks.filter(s => s.symbol.toLowerCase().includes(searchQuery.toLowerCase()) || s.name?.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
-                      <div style={{ padding:'12px', textAlign:'center', color:'var(--text-muted)', fontSize:'0.8rem' }}>No matches found</div>
+                      <div style={{ padding:'16px', textAlign:'center', color:'var(--text-muted)', fontSize:'0.85rem', fontWeight: 600 }}>No matching stocks found</div>
                     )}
                   </div>
                 )}
