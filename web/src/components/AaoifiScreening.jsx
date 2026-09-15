@@ -126,7 +126,7 @@ const RatioBar = ({ title, subtitle, ratio, threshold, numLabel, numVal, denLabe
   const pin = Math.min((thr/maxV)*100, 100);
   const m   = title.match(/^(\d+)\.\s*(.*)/);
   const num = m?m[1]:null; const name=m?m[2]:title;
-  const clickable = parseFloat(numVal)!==0;
+  const clickable = true;
 
   const isDebtOrCash = title.toLowerCase().includes('debt') || title.toLowerCase().includes('cash');
   const isImpure = title.toLowerCase().includes('impure');
