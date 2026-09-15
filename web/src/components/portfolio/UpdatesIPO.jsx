@@ -56,12 +56,12 @@ function IPOCard({ ipo, onClick }) {
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <h3 style={{ fontSize: '1.3rem', fontWeight: 900, color: 'var(--text-dark)', margin: 0, letterSpacing: '-0.2px' }}>{ipo.name}</h3>
-              <span style={{ fontSize: '0.65rem', fontWeight: 800, background: ipo.statusBg, color: ipo.statusColor, padding: '4px 10px', borderRadius: '100px', letterSpacing: '0.5px', boxShadow: '0 2px 8px ' + ipo.statusBg }}>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: 'var(--text-dark)', margin: 0, letterSpacing: '-0.2px' }}>{ipo.name}</h3>
+              <span style={{ fontSize: '0.6rem', fontWeight: 800, background: ipo.statusBg, color: ipo.statusColor, padding: '4px 10px', borderRadius: '100px', letterSpacing: '0.5px', boxShadow: '0 2px 8px ' + ipo.statusBg }}>
                 {ipo.status}
               </span>
             </div>
-            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Building size={16} style={{opacity: 0.7}} /> {ipo.sector}</span>
               <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><BarChart2 size={16} style={{opacity: 0.7}} /> {ipo.exchange}</span>
             </div>
@@ -70,8 +70,8 @@ function IPOCard({ ipo, onClick }) {
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px', flexShrink: 0 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', borderLeft: '1px solid var(--border)', paddingLeft: '24px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}><Clock size={14} color="var(--primary)" /> Offer Period</div>
-            <div style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-dark)' }}>{ipo.dateStart.split(',')[0]} - {ipo.dateEnd.split(',')[0]}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600 }}><Clock size={14} color="var(--primary)" /> Offer Period</div>
+            <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-dark)' }}>{ipo.dateStart.split(',')[0]} - {ipo.dateEnd.split(',')[0]}</div>
           </div>
           
           <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--primary-50)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', flexShrink: 0, transition: 'all 0.2s' }} className="ipo-arrow">
@@ -111,19 +111,19 @@ function IPOModal({ ipo, onClose }) {
         }}
       >
         {/* Header */}
-        <div style={{ padding: '28px', borderBottom: '1px solid var(--border)', position: 'sticky', top: 0, background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(12px)', zIndex: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{ width: '48px', height: '48px', background: 'white', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0, boxShadow: '0 4px 12px rgba(0,0,0,0.04)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '32px', borderBottom: '1px solid var(--border)', background: 'linear-gradient(to bottom, var(--bg-section) 0%, var(--bg) 100%)' }}>
+          <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+            <div style={{ width: '64px', height: '64px', background: 'white', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0, boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)' }}>
               <img src={ipo.logo} alt={ipo.name} style={{ width: '75%', height: '75%', objectFit: 'contain' }} onError={(e) => e.target.style.display = 'none'} />
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '2px' }}>
-                <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-dark)', margin: 0, letterSpacing: '-0.2px' }}>{ipo.name}</h3>
-                <span style={{ fontSize: '0.65rem', fontWeight: 800, background: ipo.statusBg, color: ipo.statusColor, padding: '4px 10px', borderRadius: '100px', letterSpacing: '0.5px', boxShadow: '0 2px 8px ' + ipo.statusBg }}>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--text-dark)', margin: 0, letterSpacing: '-0.2px' }}>{ipo.name}</h3>
+                <span style={{ fontSize: '0.6rem', fontWeight: 800, background: ipo.statusBg, color: ipo.statusColor, padding: '4px 10px', borderRadius: '100px', letterSpacing: '0.5px', boxShadow: '0 2px 8px ' + ipo.statusBg }}>
                   {ipo.status}
                 </span>
               </div>
-              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Initial Public Offering Details</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Initial Public Offering Details</div>
             </div>
           </div>
           <button 
@@ -142,30 +142,30 @@ function IPOModal({ ipo, onClose }) {
           {/* Key Metrics Grid */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '32px' }}>
             <div style={{ padding: '20px', background: 'linear-gradient(135deg, var(--bg-section) 0%, var(--bg) 100%)', borderRadius: '20px', border: '1px solid var(--border)', boxShadow: '0 4px 12px rgba(0,0,0,0.01)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', marginBottom: '12px', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', marginBottom: '12px', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 <Clock size={16} /> Offer Starts
               </div>
-              <div style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-dark)' }}>{ipo.dateStart}</div>
+              <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-dark)' }}>{ipo.dateStart}</div>
             </div>
             <div style={{ padding: '20px', background: 'linear-gradient(135deg, var(--bg-section) 0%, var(--bg) 100%)', borderRadius: '20px', border: '1px solid var(--border)', boxShadow: '0 4px 12px rgba(0,0,0,0.01)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', marginBottom: '12px', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', marginBottom: '12px', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 <Clock size={16} /> Offer Ends
               </div>
-              <div style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-dark)' }}>{ipo.dateEnd}</div>
+              <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-dark)' }}>{ipo.dateEnd}</div>
             </div>
             <div style={{ padding: '20px', background: 'linear-gradient(135deg, var(--bg-section) 0%, var(--bg) 100%)', borderRadius: '20px', border: '1px solid var(--border)', boxShadow: '0 4px 12px rgba(0,0,0,0.01)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', marginBottom: '12px', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', marginBottom: '12px', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 <DollarSign size={16} /> Share Price
               </div>
-              <div style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-dark)' }}>{ipo.price}</div>
+              <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-dark)' }}>{ipo.price}</div>
             </div>
           </div>
 
           <div style={{ marginBottom: '32px' }}>
-            <h4 style={{ fontSize: '1.15rem', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <h4 style={{ fontSize: '1.05rem', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <FileText size={20} color="var(--primary)" /> Overview
             </h4>
-            <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', lineHeight: 1.7, margin: 0 }}>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.7, margin: 0 }}>
               {ipo.description}
             </p>
           </div>
@@ -173,24 +173,24 @@ function IPOModal({ ipo, onClose }) {
           {/* Additional Details */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '32px' }}>
             <div style={{ padding: '16px', background: 'var(--bg)', borderRadius: '16px', border: '1px solid var(--border)' }}>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Target Valuation</div>
-              <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-dark)' }}>{ipo.valuation}</div>
+              <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Target Valuation</div>
+              <div style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-dark)' }}>{ipo.valuation}</div>
             </div>
             <div style={{ padding: '16px', background: 'var(--bg)', borderRadius: '16px', border: '1px solid var(--border)' }}>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Capacity</div>
-              <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-dark)' }}>{ipo.capacity}</div>
+              <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Capacity</div>
+              <div style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-dark)' }}>{ipo.capacity}</div>
             </div>
             <div style={{ padding: '16px', background: 'var(--bg)', borderRadius: '16px', border: '1px solid var(--border)' }}>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Listing Location</div>
-              <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-dark)' }}>{ipo.listingLocation}</div>
+              <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Listing Location</div>
+              <div style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-dark)' }}>{ipo.listingLocation}</div>
             </div>
           </div>
 
           <div style={{ display: 'flex', gap: '20px', background: 'linear-gradient(135deg, var(--halal-bg) 0%, rgba(255,255,255,0) 100%)', padding: '24px', borderRadius: '20px', color: 'var(--text-dark)', border: '1px solid var(--halal-border)' }}>
             <Shield size={28} color="var(--halal)" style={{ flexShrink: 0 }} />
             <div>
-              <strong style={{ display: 'block', marginBottom: '8px', fontSize: '1.1rem', fontWeight: 900, color: 'var(--halal)' }}>Preliminary Shariah Assessment</strong>
-              <div style={{ fontSize: '0.9rem', lineHeight: 1.7, color: 'var(--text-muted)' }}>
+              <strong style={{ display: 'block', marginBottom: '8px', fontSize: '0.95rem', fontWeight: 900, color: 'var(--halal)' }}>Preliminary Shariah Assessment</strong>
+              <div style={{ fontSize: '0.8rem', lineHeight: 1.7, color: 'var(--text-muted)' }}>
                 {ipo.shariahAssessment}
               </div>
             </div>
