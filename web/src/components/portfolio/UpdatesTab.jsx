@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Newspaper, Bell, Moon, Clock, Star, Mail, Droplet, Shield } from 'lucide-react';
+import { Newspaper, Bell, Moon, Clock, Star, Mail, Droplet, Shield, Rocket } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import IslamicQuote from '../IslamicQuote';
 import UpdatesNews    from './UpdatesNews';
@@ -7,6 +7,7 @@ import UpdatesInbox   from './UpdatesInbox';
 import UpdatesDigest  from './UpdatesDigest';
 import UpdatesPurification from './UpdatesPurification';
 import UpdatesCompliance  from './UpdatesCompliance';
+import UpdatesIPO from './UpdatesIPO';
 
 /* ── Greeting helpers ── */
 function getGreeting() {
@@ -151,6 +152,12 @@ export default function UpdatesTab({ unreadCount = 0 }) {
       label: 'Purification',
       icon: Droplet,
       description: 'Understanding stock purification and AAOIFI standards',
+    },
+    {
+      id: 'ipo',
+      label: 'IPO',
+      icon: Rocket,
+      description: 'Upcoming Initial Public Offerings & Shariah analysis',
     },
   ];
 
@@ -301,6 +308,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
         {activeSubTab === 'digest'       && <UpdatesDigest />}
         {activeSubTab === 'compliance'   && <UpdatesCompliance />}
         {activeSubTab === 'purification' && <UpdatesPurification />}
+        {activeSubTab === 'ipo'          && <UpdatesIPO />}
       </div>
     </div>
   );
