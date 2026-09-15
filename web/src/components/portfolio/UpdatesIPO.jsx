@@ -6,9 +6,9 @@ const IPO_LIST = [
   {
     id: 'dangote-refinery',
     name: 'Dangote Refinery',
-    status: 'UPCOMING',
-    statusColor: 'var(--primary)',
-    statusBg: 'var(--primary-50)',
+    status: 'OPEN',
+    statusColor: 'var(--halal)',
+    statusBg: 'var(--halal-bg)',
     sector: 'Oil & Gas',
     exchange: 'NGX (Planned)',
     valuation: '~$20B+',
@@ -17,10 +17,10 @@ const IPO_LIST = [
     capacity: '650,000 barrels per day',
     listingLocation: 'Nigerian Exchange (NGX), London (LSE)',
     shariahAssessment: 'As a refining business, the core activity (petroleum processing) is generally considered permissible (Halal). A full AAOIFI screening regarding debt ratios (which may be substantial given the project size) and interest-bearing assets will be conducted once the official prospectus and financial statements are released.',
-    description: "The Dangote Refinery is Africa's largest oil refinery and the world's largest single-train facility. The planned IPO is expected to be one of the largest in African history. Irshad will provide a comprehensive Shariah compliance breakdown of the offer once the regulatory filings are public.",
-    dateStart: 'TBA (Pending SEC Approval)',
-    dateEnd: 'TBA',
-    price: 'To Be Determined'
+    description: "The Dangote Petroleum Refinery and Petrochemicals FZE initial public offering is now live. The offering involves 4.1 billion ordinary shares aimed at raising ₦2.15 trillion ($1.6 billion), representing one of the largest IPOs in African history. Minimum subscription is 10 shares (₦5,250), with subsequent multiples of 10. Irshad will provide a comprehensive Shariah compliance breakdown of the offer based on the official prospectus.",
+    dateStart: 'September 14, 2026',
+    dateEnd: 'October 13, 2026',
+    price: '₦525 per share'
   }
 ];
 
