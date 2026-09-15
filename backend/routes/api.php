@@ -78,7 +78,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/stocks/baskets/{basket}', [BasketController::class, 'show']);
 
         // Strict rate limit on proprietary data to prevent authenticated scraping
-        Route::middleware('throttle:15,1')->group(function () {
+        Route::middleware('throttle:60,1')->group(function () {
             Route::get('/stocks/{symbol}/analysis', [StockController::class, 'getAiAnalysis']);
             Route::get('/stocks/{symbol}/aaoifi-screening', [StockController::class, 'aaoifiScreening']);
         });
