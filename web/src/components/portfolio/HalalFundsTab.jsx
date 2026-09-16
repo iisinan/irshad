@@ -26,6 +26,22 @@ const funds = [
   { asset: 'Stanbic IBTC Shariah Fixed Income Fund', provider: 'Stanbic IBTC Asset Mgt.' },
 ];
 
+const getAvatarStyle = (str) => {
+  const colors = [
+    { bg: 'rgba(59, 130, 246, 0.1)', text: '#3b82f6', border: 'rgba(59, 130, 246, 0.2)' }, // blue
+    { bg: 'rgba(239, 68, 68, 0.1)', text: '#ef4444', border: 'rgba(239, 68, 68, 0.2)' }, // red
+    { bg: 'rgba(16, 185, 129, 0.1)', text: '#10b981', border: 'rgba(16, 185, 129, 0.2)' }, // green
+    { bg: 'rgba(245, 158, 11, 0.1)', text: '#f59e0b', border: 'rgba(245, 158, 11, 0.2)' }, // yellow
+    { bg: 'rgba(139, 92, 246, 0.1)', text: '#8b5cf6', border: 'rgba(139, 92, 246, 0.2)' }, // purple
+    { bg: 'rgba(236, 72, 153, 0.1)', text: '#ec4899', border: 'rgba(236, 72, 153, 0.2)' }, // pink
+    { bg: 'rgba(14, 165, 233, 0.1)', text: '#0ea5e9', border: 'rgba(14, 165, 233, 0.2)' }, // sky
+    { bg: 'rgba(249, 115, 22, 0.1)', text: '#f97316', border: 'rgba(249, 115, 22, 0.2)' }, // orange
+  ];
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  return colors[Math.abs(hash) % colors.length];
+};
+
 export default function HalalFundsTab() {
   const [search, setSearch] = useState('');
 
@@ -71,24 +87,35 @@ export default function HalalFundsTab() {
               </tr>
             </thead>
             <tbody>
-              {filteredFunds.map((fund, idx) => (
+              {filteredFunds.map((fund, idx) => {
+                const avatar = getAvatarStyle(fund.provider);
+                return (
                 <tr 
                   key={idx} 
                   style={{ borderBottom: idx === filteredFunds.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background 0.2s' }}
+                  className="hover-bg"
                   onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-section)'}
                   onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                 >
-                  <td style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ width: 36, height: 36, borderRadius: '10px', background: 'var(--primary-50)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', flexShrink: 0 }}>
-                      <Briefcase size={16} />
+                  <td style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+                    <div style={{ 
+                      width: 40, height: 40, borderRadius: '12px', 
+                      background: avatar.bg, 
+                      color: avatar.text, 
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                      fontWeight: 800, fontSize: '1.1rem', flexShrink: 0,
+                      border: `1px solid ${avatar.border}`
+                    }}>
+                      {fund.provider.charAt(0)}
                     </div>
-                    <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-dark)' }}>{fund.asset}</span>
+                    <span style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-dark)' }}>{fund.asset}</span>
                   </td>
-                  <td style={{ padding: '16px 20px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                  <td style={{ padding: '16px 20px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>
                     {fund.provider}
                   </td>
                 </tr>
-              ))}
+                );
+              })}
               {filteredFunds.length === 0 && (
                 <tr>
                   <td colSpan={2} style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
