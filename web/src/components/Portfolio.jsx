@@ -17,7 +17,7 @@ import LecturesTab from './portfolio/LecturesTab';
 import StatementTab from './portfolio/StatementTab';
 import UpdatesTab from './portfolio/UpdatesTab';
 import GuideTab from './portfolio/GuideTab';
-
+import HalalFundsTab from './portfolio/HalalFundsTab';
 import AddHoldingModal from "./portfolio/AddHoldingModal";
 
 /* ─── Skeleton ─────────────────────────────────────────────── */
@@ -313,6 +313,11 @@ export default function Portfolio() {
           {mountedTabs.includes('market') && (
             <div style={{ display: activeTab === 'market' ? 'block' : 'none' }}>
               <MarketTab />
+            </div>
+          )}
+          {mountedTabs.includes('funds') && (
+            <div style={{ display: activeTab === 'funds' ? 'block' : 'none' }}>
+              <HalalFundsTab />
             </div>
           )}
           {mountedTabs.includes('watchlist') && (
