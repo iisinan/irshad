@@ -88,7 +88,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> with WidgetsBindingOb
     }
   }
 
-  void _removeFavorite(int favoriteId) async {
+  void _removeFavorite(dynamic favId) async {
+    int favoriteId = favId is int ? favId : int.tryParse(favId.toString()) ?? 0;
     // Optimistic UI update
     setState(() {
       _favorites.removeWhere((f) => f['id'] == favoriteId);
@@ -107,7 +108,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> with WidgetsBindingOb
     }
   }
 
-  void _removeWatchlist(String symbol) async {
+  void _removeWatchlist(dynamic sym) async {
+    if (sym == null) return;
+    String symbol = sym.toString();
     // Optimistic UI update
     setState(() {
       _watchlists.removeWhere((w) => (w['symbol'] as String?)?.toLowerCase() == symbol.toLowerCase());
