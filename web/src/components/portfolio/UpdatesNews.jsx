@@ -187,7 +187,7 @@ export default function UpdatesNews() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeSection, setActiveSection] = useState('business');
+  const [activeSection, setActiveSection] = useState('market');
 
   const load = async (silent = false) => {
     try {
@@ -215,45 +215,54 @@ export default function UpdatesNews() {
   }, []);
 
   const sections = [
-    { id: 'business',    label: 'Business Activity',   icon: Zap,       color: 'var(--doubtful)' },
+    { id: 'market',      label: 'Market Intelligence', icon: BarChart2,    color: 'var(--primary)' },
     { id: 'dividends',   label: 'Dividends',           icon: Star,       color: 'var(--gold)' },
     { id: 'analysis',    label: 'Analysis',            icon: TrendingUp, color: '#8b5cf6' },
   ];
 
   const complianceChanges  = data?.compliance_changes  || [];
-  const businessUpdates    = data?.business_updates    || [];
+  const rawBusiness        = data?.business_updates    || [];
+  const rawMarket          = data?.market_intelligence || [];
+  
+  // Merge Business Activity and Market Intelligence
+  const businessItems = rawBusiness.map(e => ({ ...e, _cardType: 'business' }));
+  const marketItems = rawMarket.map(e => ({ ...e, _cardType: 'market' }));
+  const marketIntelligence = [...businessItems, ...marketItems].sort((a, b) => {
+    return new Date(b.published_at || 0) - new Date(a.published_at || 0);
+  });
+
   const dividendsData      = data?.dividends           || [];
   const analysisData       = data?.analysis            || [];
 
   return (
     <div>
-
-      {/* Section Pills */}
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', flexWrap: 'wrap' }}>
-        {sections.map(s => (
-          <button
-            key={s.id}
-            onClick={() => setActiveSection(s.id)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '6px',
-              padding: '8px 16px', borderRadius: '12px',
-              border: `1px solid ${activeSection === s.id ? s.color : 'var(--border)'}`,
-              background: activeSection === s.id ? `color-mix(in srgb, ${s.color} 10%, transparent)` : 'var(--bg)',
-              backdropFilter: activeSection === s.id ? 'blur(10px)' : 'none',
-              color: activeSection === s.id ? s.color : 'var(--text-muted)',
-              fontWeight: 800, fontSize: '0.72rem', cursor: 'pointer',
-              transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-            }}
-          >
-            <s.icon size={13} />
-            {s.label}
-            {s.id === 'compliance' && complianceChanges.length > 0 && (
-              <span style={{ fontSize: '0.63rem', fontWeight: 900, padding: '1px 6px', borderRadius: '10px', background: s.color, color: 'white', lineHeight: '16px' }}>
-                {complianceChanges.length}
-              </span>
-            )}
-          </button>
-        ))}
+      {/* Horizontal Tabs */}
+      <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '16px', marginBottom: '8px' }} className="hide-scrollbar">
+        {sections.map(s => {
+          const isActive = activeSection === s.id;
+          return (
+            <button
+              key={s.id}
+              onClick={() => setActiveSection(s.id)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '8px',
+                padding: '10px 20px',
+                borderRadius: '16px',
+                border: `1px solid ${isActive ? s.color : 'var(--border)'}`,
+                background: isActive ? `${s.color}15` : 'var(--bg-alt)',
+                color: isActive ? s.color : 'var(--text-muted)',
+                fontSize: '0.9rem',
+                fontWeight: isActive ? 800 : 600,
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              <s.icon size={18} strokeWidth={isActive ? 2.5 : 2} />
+              {s.label}
+            </button>
+          );
+        })}
         <button onClick={load} disabled={loading} style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-muted)', fontWeight: 700, fontSize: '0.72rem', cursor: 'pointer' }}>
           <RefreshCw size={13} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} /> Refresh
         </button>
@@ -270,13 +279,13 @@ export default function UpdatesNews() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           
 
-          {activeSection === 'business' && (
+          {activeSection === 'market' && (
             <>
-              <SectionHeader icon={Zap} title="Business Activity Updates" count={businessUpdates.length} color="var(--doubtful)" />
+              <SectionHeader icon={BarChart2} title="Market Intelligence" count={marketIntelligence.length} color="var(--primary)" />
               <div style={{ maxHeight: '600px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingRight: '6px' }} className="custom-scrollbar">
-                {businessUpdates.length === 0
-                  ? <EmptyState icon={Zap} title="No Business Updates" subtitle="No new business activities have been detected from your followed companies." color="var(--doubtful)" />
-                  : businessUpdates.map(item => <BusinessCard key={item.id} item={item} />)
+                {marketIntelligence.length === 0
+                  ? <EmptyState icon={BarChart2} title="No Market Intelligence" subtitle="No recent updates have been found." color="var(--primary)" />
+                  : marketIntelligence.map(item => item._cardType === 'business' ? <BusinessCard key={'b'+item.id} item={item} /> : <MarketCard key={'m'+item.id} item={item} />)
                 }
               </div>
             </>

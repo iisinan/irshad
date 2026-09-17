@@ -18,7 +18,7 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
   bool _isLoading = true;
   String? _error;
   Map<String, dynamic>? _data;
-  String _activeSection = 'business';
+  String _activeSection = 'market';
 
   @override
   void initState() {
@@ -37,11 +37,13 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
           final cachedData = cached['data'] is Map && cached['data']['data'] != null
               ? cached['data']['data']
               : cached['data'];
-          if (mounted) {
-            setState(() {
-              _data = cachedData;
-              _isLoading = false;
-            });
+          if (cachedData is Map<String, dynamic>) {
+            if (mounted) {
+              setState(() {
+                _data = cachedData;
+                _isLoading = false;
+              });
+            }
           }
         }
       }
@@ -51,9 +53,16 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
       final response = await ApiService().get('updates/news');
       if (response.statusCode == 200) {
         if (mounted) {
-          final data = response.data is Map && response.data['data'] != null
-              ? response.data['data']
+          final data = response.data is Map && response.data['data'] != null 
+              ? response.data['data'] 
               : response.data;
+              
+          if (data is Map<String, dynamic>) {
+            setState(() {
+              _data = data;
+              _isLoading = false;
+            });
+          }
           
           try {
             final box = await Hive.openBox('updatesBox');
@@ -62,16 +71,11 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
               'expiry': DateTime.now().add(const Duration(hours: 1)).millisecondsSinceEpoch
             }));
           } catch (_) {}
-
-          setState(() {
-            _data = data;
-            _isLoading = false;
-          });
         }
       } else {
         if (mounted && _data == null) {
           setState(() {
-            _error = 'Failed to fetch news';
+            _error = 'Failed to load news';
             _isLoading = false;
           });
         }
@@ -79,7 +83,7 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
     } catch (e) {
       if (mounted && _data == null) {
         setState(() {
-          _error = 'Error loading news';
+          _error = 'Connection error';
           _isLoading = false;
         });
       }
@@ -90,7 +94,6 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
     final complianceChanges = _data?['compliance_changes'] ?? [];
     
     final sections = [
-      {'id': 'business', 'label': 'Business Activity', 'icon': Icons.bolt_outlined, 'color': const Color(0xFFF59E0B)},
       {'id': 'market', 'label': 'Market Intelligence', 'icon': Icons.bar_chart_outlined, 'color': context.primary},
       {'id': 'dividends', 'label': 'Dividends', 'icon': Icons.star_outline, 'color': const Color(0xFFEAB308)},
       {'id': 'analysis', 'label': 'Analysis', 'icon': Icons.trending_up_outlined, 'color': const Color(0xFF8B5CF6)},
@@ -331,10 +334,15 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
     if (_error != null) return Center(child: Text(_error!, style: const TextStyle(color: Colors.red)));
 
     List<dynamic> items = [];
-    if (_activeSection == 'business') {
-      items = _data?['business_updates'] ?? [];
-    } else if (_activeSection == 'market') {
-      items = _data?['market_intelligence'] ?? [];
+    if (_activeSection == 'market') {
+      final business = (_data?['business_updates'] as List?)?.map((e) => {...e, '_cardType': 'business'}) ?? [];
+      final market = (_data?['market_intelligence'] as List?)?.map((e) => {...e, '_cardType': 'market'}) ?? [];
+      items = [...business, ...market];
+      items.sort((a, b) {
+        final dateA = DateTime.tryParse(a['published_at']?.toString() ?? '') ?? DateTime.fromMillisecondsSinceEpoch(0);
+        final dateB = DateTime.tryParse(b['published_at']?.toString() ?? '') ?? DateTime.fromMillisecondsSinceEpoch(0);
+        return dateB.compareTo(dateA);
+      });
     } else if (_activeSection == 'dividends') {
       items = _data?['dividends'] ?? [];
     } else if (_activeSection == 'analysis') {
@@ -357,7 +365,7 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
           )
         else
           ...items.map((item) {
-            if (_activeSection == 'business') return _buildBusinessCard(item);
+            if (item['_cardType'] == 'business') return _buildBusinessCard(item);
             return _buildMarketCard(item);
           }),
       ],
