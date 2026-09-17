@@ -492,7 +492,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                               ],
                             ),
                             const SizedBox(height: 4),
-                            Text('Manage your minimum thresholds', style: TextStyle(fontSize: 12, color: context.textMuted, fontWeight: FontWeight.w500)),
+                            Text('See minimum threshold', style: TextStyle(fontSize: 12, color: context.textMuted, fontWeight: FontWeight.w500)),
                           ],
                         ),
                       ),
@@ -560,6 +560,14 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                             children: [
                               Text('1g Price:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: context.textMuted)),
                               Text(fmt(activePricePerGram, 0), style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: context.textDark)),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('estimated 1Kg market price', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: context.textMuted)),
+                              Text(fmt(activePricePerGram * 1000, 0), style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: context.textDark)),
                             ],
                           ),
                         ],

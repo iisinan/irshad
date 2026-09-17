@@ -6,6 +6,7 @@ import '../../core/providers/app_state_provider.dart';
 import '../portfolio/providers/portfolio_provider.dart';
 import '../stocks/ui/stock_screener_screen.dart';
 import '../baskets/ui/baskets_screen.dart';
+import 'ui/funds_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -103,12 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: TabBarView(
                   children: [
                     StockScreenerScreen(),
-                    _buildComingSoonState(
-                      context, 
-                      Icons.trending_up_rounded, 
-                      'Halal Mutual Funds', 
-                      'We are partnering with leading asset managers to bring you curated, shariah-compliant mutual funds. Stay tuned!'
-                    ),
+                    FundsScreen(),
                     const BasketsScreen(),
                   ],
                 ),

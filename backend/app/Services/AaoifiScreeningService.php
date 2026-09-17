@@ -132,17 +132,19 @@ class AaoifiScreeningService
             $company->update(['current_status' => $finalStatus]);
             app()->instance('verdict.unlock', false);
 
+            
+            $aiResultString = is_array($aiResult) ? ($aiResult['justification'] ?? $aiResult['reason'] ?? $aiResult['reasoning'] ?? $aiResult['summary'] ?? json_encode($aiResult)) : $aiResult;
             if ($finalStatus === 'non-compliant') {
-                $reason = ($businessStatus === 'fail' ? 'Failed Rule 1: Business Activity Check. ' . ($aiResult ?? 'The stock failed due to non-compliant business activities.') : 'Failed AAOIFI financial ratio screening.');
+                $reason = ($businessStatus === 'fail' ? 'Failed Rule 1: Business Activity Check. ' . ($aiResultString ?? 'The stock failed due to non-compliant business activities.') : 'Failed AAOIFI financial ratio screening.');
             } elseif ($finalStatus === 'doubtful') {
-                $reason = ($businessStatus === 'doubtful' || $businessStatus === 'warning') ? 'Doubtful Rule 1: Business Activity Check. ' . ($aiResult ?? 'Requires scholar review.') : 'Doubtful AAOIFI financial ratio screening (insufficient data).';
+                $reason = ($businessStatus === 'doubtful' || $businessStatus === 'warning') ? 'Doubtful Rule 1: Business Activity Check. ' . ($aiResultString ?? 'Requires scholar review.') : 'Doubtful AAOIFI financial ratio screening (insufficient data).';
             } else {
                 if ($impermissibleIncomeRatio > 0 && $impermissibleIncomeRatio <= 5) {
-                    $reason = 'Stock passes all screens. Status is Halal with an active dividend purification factor of ' . number_format($impermissibleIncomeRatio, 2) . '%.' . ($aiResult ? ' Notes: ' . $aiResult : '');
+                    $reason = 'Stock passes all screens. Status is Halal with an active dividend purification factor of ' . number_format($impermissibleIncomeRatio, 2) . '%.' . ($aiResultString ? ' Notes: ' . $aiResultString : '');
                 } elseif (!$financials) {
-                    $reason = 'Stock passes Business Activity Check. Status is Halal (Financial data pending).' . ($aiResult ? ' Notes: ' . $aiResult : '');
+                    $reason = 'Stock passes Business Activity Check. Status is Halal (Financial data pending).' . ($aiResultString ? ' Notes: ' . $aiResultString : '');
                 } else {
-                    $reason = 'Stock passes all screens cleanly. Status is 100% Halal and Shariah-compliant.' . ($aiResult ? ' Notes: ' . $aiResult : '');
+                    $reason = 'Stock passes all screens cleanly. Status is 100% Halal and Shariah-compliant.' . ($aiResultString ? ' Notes: ' . $aiResultString : '');
                 }
             }
 
