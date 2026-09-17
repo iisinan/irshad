@@ -51,7 +51,7 @@ class PortfolioController extends Controller
             $portfolioData = $holdings->map(function ($holding) use ($userId, $exchangeRate) {
                 $company = $holding->company;
                 $currentPrice = (float) ($company->latest_price ?? 0);
-                $status = $company->current_status ?? 'doubtful';
+                $status = $company->current_status ?? $company->aaoifiScreening?->final_status ?? 'doubtful';
 
                 $screening = $company?->aaoifiScreening;
                 $nonCompliantRatio = $screening?->impermissible_income_ratio ?? 0;
@@ -377,7 +377,7 @@ class PortfolioController extends Controller
             ])->where('symbol', $symbol)->first();
             if (!$company) continue;
 
-            $status = $company->current_status ?? 'doubtful';
+            $status = $company->current_status ?? $company->aaoifiScreening?->final_status ?? 'doubtful';
             $isHalal = strtolower($status) === 'halal' || strtolower($status) === 'compliant';
 
             // Only purify halal stocks — non-halal stocks shouldn't be on this tab
