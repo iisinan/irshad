@@ -72,12 +72,22 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       
       if (authenticated) {
         setState(() => _isLoading = true);
-        final token = await _secureStorage.read(key: 'access_token');
+        final savedEmail = await _secureStorage.read(key: 'saved_email');
+        final savedPassword = await _secureStorage.read(key: 'saved_password');
         
-        if (token != null) {
-          if (mounted) {
-            Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
-            Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/main', (route) => false);
+        if (savedEmail != null && savedPassword != null) {
+          try {
+            final user = await _authRepository.login(savedEmail, savedPassword);
+            if (user != null && mounted) {
+              Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
+              Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/main', (route) => false);
+            } else {
+              setState(() => _isLoading = false);
+              _showError('Saved credentials invalid or expired. Please log in with your password.');
+            }
+          } catch (e) {
+            setState(() => _isLoading = false);
+            _showError(e.toString());
           }
         } else {
           setState(() => _isLoading = false);
@@ -102,6 +112,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       final user = await _authRepository.login(_emailController.text, _passwordController.text);
       if (user != null) {
         await _secureStorage.write(key: 'saved_email', value: _emailController.text);
+        await _secureStorage.write(key: 'saved_password', value: _passwordController.text);
         if (mounted) {
           Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
           

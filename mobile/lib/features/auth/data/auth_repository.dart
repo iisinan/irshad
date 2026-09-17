@@ -107,7 +107,8 @@ class AuthRepository {
     } catch (e) {
       // In case of network error or timeout, proceed to clear local token
     } finally {
-      await _storage.deleteAll();
+      await _storage.delete(key: 'access_token');
+      await _storage.delete(key: 'user');
       try {
         Hive.box('api_cache').clear();
       } catch (_) {}
@@ -128,7 +129,8 @@ class AuthRepository {
     } catch (e) {
       // Ignore network errors, proceed with local logout
     } finally {
-      await _storage.deleteAll();
+      await _storage.delete(key: 'access_token');
+      await _storage.delete(key: 'user');
       try {
         Hive.box('api_cache').clear();
       } catch (_) {}
