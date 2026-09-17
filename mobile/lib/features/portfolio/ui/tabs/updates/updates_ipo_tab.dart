@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 
 
@@ -17,7 +16,7 @@ class UpdatesIpoTab extends StatelessWidget {
       'sector': 'Oil & Gas',
       'exchange': 'NGX (Planned)',
       'valuation': '~\$20B+',
-      'logo': 'https://upload.wikimedia.org/wikipedia/commons/9/90/Dangote_Group_Logo.svg',
+      'logo': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Dangote_Group_Logo.svg/512px-Dangote_Group_Logo.svg.png',
       'timeline': 'Q4 2026 - Q1 2027 (Est.)',
       'capacity': '650,000 barrels per day',
       'listingLocation': 'Nigerian Exchange (NGX), London (LSE)',
@@ -97,7 +96,7 @@ class UpdatesIpoTab extends StatelessWidget {
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(color: context.appColors.divider),
                     ),
-                    child: SvgPicture.network(ipo['logo'], fit: BoxFit.contain, placeholderBuilder: (_) => const Icon(Icons.business)),
+                    child: Image.network(ipo['logo'], fit: BoxFit.contain, errorBuilder: (_, __, ___) => const Icon(Icons.business)),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -202,7 +201,7 @@ class UpdatesIpoTab extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: context.appColors.divider),
                     ),
-                    child: SvgPicture.network(ipo['logo'], fit: BoxFit.contain, placeholderBuilder: (_) => const Icon(Icons.business)),
+                    child: Image.network(ipo['logo'], fit: BoxFit.contain, errorBuilder: (_, __, ___) => const Icon(Icons.business)),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
