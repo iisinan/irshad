@@ -335,8 +335,18 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
 
     List<dynamic> items = [];
     if (_activeSection == 'market') {
-      final business = (_data?['business_updates'] as List?)?.map((e) => {...e, '_cardType': 'business'}) ?? [];
-      final market = (_data?['market_intelligence'] as List?)?.map((e) => {...e, '_cardType': 'market'}) ?? [];
+      final business = (_data?['business_updates'] as List?)?.map((e) {
+        final m = Map<String, dynamic>.from(e as Map);
+        m['_cardType'] = 'business';
+        return m;
+      }).toList() ?? [];
+      
+      final market = (_data?['market_intelligence'] as List?)?.map((e) {
+        final m = Map<String, dynamic>.from(e as Map);
+        m['_cardType'] = 'market';
+        return m;
+      }).toList() ?? [];
+      
       items = [...business, ...market];
       items.sort((a, b) {
         final dateA = DateTime.tryParse(a['published_at']?.toString() ?? '') ?? DateTime.fromMillisecondsSinceEpoch(0);
