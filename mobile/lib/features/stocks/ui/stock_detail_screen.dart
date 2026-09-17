@@ -815,9 +815,19 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(color: context.primary.withOpacity(0.25), width: 1),
                       ),
-                      child: Text(
-                        'Trading Board: $tradingBoard',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: context.primary, letterSpacing: -0.2),
+                      child: Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Trading Board: ',
+                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: context.primary.withOpacity(0.7)),
+                            ),
+                            TextSpan(
+                              text: tradingBoard,
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: context.primary, letterSpacing: -0.2),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   }),
