@@ -24,15 +24,15 @@ class AddAssetsBottomSheet extends StatefulWidget {
 class _AddAssetsBottomSheetState extends State<AddAssetsBottomSheet> {
   final _searchController = TextEditingController();
   String _searchQuery = '';
-  final List<String> _selectedSymbols = [];
-  bool _isAdding = false;
+  final Set<String> _addingSymbols = {};
+  final Set<String> _addedSymbols = {};
   final _repository = UserActivityRepository();
 
   @override
   void initState() {
     super.initState();
     if (widget.preSelectedSymbol != null) {
-      _selectedSymbols.add(widget.preSelectedSymbol!);
+      _addAsset(widget.preSelectedSymbol!);
     }
   }
 
@@ -43,11 +43,10 @@ class _AddAssetsBottomSheetState extends State<AddAssetsBottomSheet> {
   }
 
   void _addAsset(String symbol) async {
-    if (_selectedSymbols.contains(symbol) || _isAdding) return;
+    if (_addingSymbols.contains(symbol) || _addedSymbols.contains(symbol)) return;
     
     setState(() {
-      _selectedSymbols.add(symbol);
-      _isAdding = true;
+      _addingSymbols.add(symbol);
     });
     
     final success = await _repository.addMultipleToWatchlist(
@@ -59,26 +58,23 @@ class _AddAssetsBottomSheetState extends State<AddAssetsBottomSheet> {
     if (success) {
       widget.onAdded();
       if (mounted) {
-        setState(() => _isAdding = false);
-        // Automatically close if they just added the pre-selected one, or keep open if searching
+        setState(() {
+          _addingSymbols.remove(symbol);
+          _addedSymbols.add(symbol);
+        });
+        
         if (widget.preSelectedSymbol != null && widget.preSelectedSymbol == symbol) {
            Navigator.pop(context);
-        } else {
-           // We keep it open so they can add more, but it will disappear from filteredStocks because currentWatchlistSymbols updates!
-           // Wait, currentWatchlistSymbols is passed as a widget property. widget.onAdded() triggers a rebuild in the parent,
-           // but does the BottomSheet rebuild with new currentWatchlistSymbols?
-           // No, bottom sheet is a separate route. We should manually add it to our local list of excluded symbols.
         }
       }
     } else {
       if (mounted) {
         setState(() {
-          _selectedSymbols.remove(symbol);
-          _isAdding = false;
+          _addingSymbols.remove(symbol);
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Failed to add asset. Please try again.'),
+            content: Text('Failed to add $symbol. Please try again.'),
             backgroundColor: context.haram,
           ),
         );
@@ -90,7 +86,7 @@ class _AddAssetsBottomSheetState extends State<AddAssetsBottomSheet> {
   Widget build(BuildContext context) {
     final stocks = Provider.of<StockProvider>(context).ngxStocks;
     final availableStocks = stocks
-        .where((s) => !widget.currentWatchlistSymbols.contains(s['symbol']))
+        .where((s) => !widget.currentWatchlistSymbols.contains(s['symbol']) && !_addedSymbols.contains(s['symbol']))
         .toList();
     
     final filteredStocks = availableStocks.where((s) {
@@ -181,7 +177,7 @@ class _AddAssetsBottomSheetState extends State<AddAssetsBottomSheet> {
                       final stock = filteredStocks[index];
                       final symbol = stock['symbol'] as String;
                       final name = stock['name'] as String? ?? '';
-                      final isSelected = _selectedSymbols.contains(symbol);
+                      final isAdding = _addingSymbols.contains(symbol);
 
                       return InkWell(
                         onTap: () => _addAsset(symbol),
@@ -189,7 +185,7 @@ class _AddAssetsBottomSheetState extends State<AddAssetsBottomSheet> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 24, vertical: 12),
                           decoration: BoxDecoration(
-                            color: isSelected
+                            color: isAdding
                                 ? context.primary.withValues(alpha: 0.05)
                                 : Colors.transparent,
                             border: Border(
@@ -229,9 +225,9 @@ class _AddAssetsBottomSheetState extends State<AddAssetsBottomSheet> {
                                 height: 32,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: isSelected ? context.primary.withValues(alpha: 0.1) : context.bgAlt,
+                                  color: isAdding ? context.primary.withValues(alpha: 0.1) : context.bgAlt,
                                 ),
-                                child: isSelected
+                                child: isAdding
                                     ? Padding(padding: const EdgeInsets.all(8), child: CircularProgressIndicator(color: context.primary, strokeWidth: 2))
                                     : Icon(Icons.add_rounded, color: context.primary, size: 20),
                               ),
