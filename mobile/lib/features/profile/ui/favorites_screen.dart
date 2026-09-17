@@ -522,28 +522,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> with WidgetsBindingOb
               textAlign: TextAlign.center,
               style: TextStyle(color: context.textMuted, fontSize: 14, height: 1.5, fontWeight: FontWeight.w500),
             ),
-            const SizedBox(height: 32),
-            GestureDetector(
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StockScreenerScreen())),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                decoration: BoxDecoration(
-                  color: context.primary,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(color: context.primary.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4)),
-                  ],
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    Icon(Icons.bar_chart_rounded, color: Colors.white, size: 20),
-                    SizedBox(width: 8),
-                    Text('Explore Market', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 15)),
-                  ],
-                ),
-              ),
-            ),
           ],
         ),
         ),
