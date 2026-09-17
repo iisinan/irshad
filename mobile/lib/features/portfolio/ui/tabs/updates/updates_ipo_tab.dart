@@ -16,7 +16,7 @@ class UpdatesIpoTab extends StatelessWidget {
       'sector': 'Oil & Gas',
       'exchange': 'NGX (Planned)',
       'valuation': '~\$20B+',
-      'logo': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Dangote_Group_Logo.svg/512px-Dangote_Group_Logo.svg.png',
+      'logo': 'https://logo.clearbit.com/dangote.com',
       'timeline': 'Q4 2026 - Q1 2027 (Est.)',
       'capacity': '650,000 barrels per day',
       'listingLocation': 'Nigerian Exchange (NGX), London (LSE)',
