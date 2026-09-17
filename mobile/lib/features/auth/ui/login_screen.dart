@@ -72,26 +72,44 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       
       if (authenticated) {
         setState(() => _isLoading = true);
-        final savedEmail = await _secureStorage.read(key: 'saved_email');
-        final savedPassword = await _secureStorage.read(key: 'saved_password');
+        final loginMethod = await _secureStorage.read(key: 'login_method');
         
-        if (savedEmail != null && savedPassword != null) {
+        if (loginMethod == 'google') {
           try {
-            final user = await _authRepository.login(savedEmail, savedPassword);
+            final user = await _authRepository.signInWithGoogleFlow();
             if (user != null && mounted) {
               Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
               Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/main', (route) => false);
             } else {
               setState(() => _isLoading = false);
-              _showError('Saved credentials invalid or expired. Please log in with your password.');
+              _showError('Google authentication failed.');
             }
           } catch (e) {
             setState(() => _isLoading = false);
             _showError(e.toString());
           }
         } else {
-          setState(() => _isLoading = false);
-          _showError('No saved credentials found. Please log in with your password once.');
+          final savedEmail = await _secureStorage.read(key: 'saved_email');
+          final savedPassword = await _secureStorage.read(key: 'saved_password');
+          
+          if (savedEmail != null && savedPassword != null) {
+            try {
+              final user = await _authRepository.login(savedEmail, savedPassword);
+              if (user != null && mounted) {
+                Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
+                Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/main', (route) => false);
+              } else {
+                setState(() => _isLoading = false);
+                _showError('Saved credentials invalid or expired. Please log in with your password.');
+              }
+            } catch (e) {
+              setState(() => _isLoading = false);
+              _showError(e.toString());
+            }
+          } else {
+            setState(() => _isLoading = false);
+            _showError('No saved credentials found. Please log in manually once.');
+          }
         }
       }
     } catch (e) {
@@ -111,6 +129,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     try {
       final user = await _authRepository.login(_emailController.text, _passwordController.text);
       if (user != null) {
+        await _secureStorage.write(key: 'login_method', value: 'email');
         await _secureStorage.write(key: 'saved_email', value: _emailController.text);
         await _secureStorage.write(key: 'saved_password', value: _passwordController.text);
         if (mounted) {
@@ -175,6 +194,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     try {
       final user = await _authRepository.signInWithGoogleFlow();
       if (user != null) {
+        await _secureStorage.write(key: 'login_method', value: 'google');
         if (mounted) {
           Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
           
