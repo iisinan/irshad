@@ -44,4 +44,19 @@ class AlertsProvider with ChangeNotifier {
       }
     }
   }
+
+  Future<void> deleteAlert(int alertId) async {
+    final index = _alerts.indexWhere((a) => a['id'] == alertId);
+    if (index != -1) {
+      final removed = _alerts.removeAt(index);
+      notifyListeners();
+      try {
+        await _api.delete('alerts/$alertId');
+      } catch (e) {
+        debugPrint('Error deleting alert: $e');
+        _alerts.insert(index, removed);
+        notifyListeners();
+      }
+    }
+  }
 }

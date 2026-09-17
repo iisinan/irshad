@@ -88,6 +88,12 @@ class _AlertsManagementScreenState extends State<AlertsManagementScreen> {
                           context.read<AlertsProvider>().toggleAlert(alert['id'], val);
                         },
                       ),
+                      IconButton(
+                        icon: Icon(Icons.delete_outline_rounded, color: context.haram, size: 22),
+                        onPressed: () {
+                          context.read<AlertsProvider>().deleteAlert(alert['id']);
+                        },
+                      ),
                     ],
                   ),
                 );
