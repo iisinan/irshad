@@ -34,8 +34,11 @@ class _UpdatesComplianceTabState extends State<UpdatesComplianceTab> {
         final int expiry = cached['expiry'] ?? 0;
         if (DateTime.now().millisecondsSinceEpoch < expiry) {
           if (mounted) {
+            final cachedData = cached['data'] is Map && cached['data']['data'] != null
+                ? cached['data']['data']
+                : cached['data'];
             setState(() {
-              _data = cached['data'];
+              _data = cachedData;
               _isLoading = false;
             });
           }
@@ -47,7 +50,9 @@ class _UpdatesComplianceTabState extends State<UpdatesComplianceTab> {
       final response = await ApiService().get('updates/news');
       if (response.statusCode == 200) {
         if (mounted) {
-          final data = response.data;
+          final data = response.data is Map && response.data['data'] != null
+              ? response.data['data']
+              : response.data;
           
           try {
             final box = await Hive.openBox('updatesBox');
