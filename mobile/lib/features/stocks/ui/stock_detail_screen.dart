@@ -1595,28 +1595,31 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                   child: Icon(icon, size: 15, color: context.textMuted),
                 ),
                 const SizedBox(width: 12),
+                Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: context.textMuted)),
+                const SizedBox(width: 16),
                 Expanded(
-                  child: Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: context.textMuted)),
+                  child: isVerified
+                      ? Align(
+                          alignment: Alignment.centerRight,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEFF6FF),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: const Color(0xFF3B82F6).withOpacity(0.3)),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.verified_rounded, size: 11, color: Color(0xFF3B82F6)),
+                                SizedBox(width: 4),
+                                Text('Verified', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Color(0xFF3B82F6))),
+                              ],
+                            ),
+                          ),
+                        )
+                      : Text(value, textAlign: TextAlign.right, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: context.textDark)),
                 ),
-                if (isVerified)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFEFF6FF),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFF3B82F6).withOpacity(0.3)),
-                    ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.verified_rounded, size: 11, color: Color(0xFF3B82F6)),
-                        SizedBox(width: 4),
-                        Text('Verified', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Color(0xFF3B82F6))),
-                      ],
-                    ),
-                  )
-                else
-                  Text(value, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: context.textDark)),
               ],
             ),
           ),
