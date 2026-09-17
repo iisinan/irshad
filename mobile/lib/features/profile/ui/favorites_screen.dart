@@ -89,22 +89,40 @@ class _FavoritesScreenState extends State<FavoritesScreen> with WidgetsBindingOb
   }
 
   void _removeFavorite(int favoriteId) async {
+    // Optimistic UI update
+    setState(() {
+      _favorites.removeWhere((f) => f['id'] == favoriteId);
+    });
+
     final success = await _activityRepository.removeFromFavorites(favoriteId);
     if (success) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Removed from watchlist'), behavior: SnackBarBehavior.floating, backgroundColor: context.textDark));
       }
-      _fetchData();
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to remove'), behavior: SnackBarBehavior.floating, backgroundColor: context.haram));
+      }
+      _fetchData(); // Rollback on failure
     }
   }
 
   void _removeWatchlist(String symbol) async {
+    // Optimistic UI update
+    setState(() {
+      _watchlists.removeWhere((w) => w['symbol'] == symbol);
+    });
+
     final success = await _activityRepository.removeFromWatchlist(symbol);
     if (success) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Removed $symbol from watchlist'), behavior: SnackBarBehavior.floating, backgroundColor: context.textDark));
       }
-      _fetchData();
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to remove $symbol'), behavior: SnackBarBehavior.floating, backgroundColor: context.haram));
+      }
+      _fetchData(); // Rollback on failure
     }
   }
 
@@ -568,6 +586,27 @@ class _FavoritesScreenState extends State<FavoritesScreen> with WidgetsBindingOb
     );
   }
 
+  void _onAssetAdded(String symbol) {
+    final stocks = Provider.of<StockProvider>(context, listen: false).ngxStocks;
+    final stock = stocks.firstWhere((s) => s['symbol'] == symbol, orElse: () => <String, dynamic>{});
+    
+    if (stock.isNotEmpty) {
+      setState(() {
+        _watchlists.add({
+          'id': DateTime.now().millisecondsSinceEpoch,
+          'symbol': symbol,
+          'name': stock['name'],
+          'status': 'active',
+          'alert_inapp': true,
+          'alert_email': true,
+        });
+      });
+    }
+    
+    // Fetch in background just to ensure everything is perfectly synced with the backend
+    Future.delayed(const Duration(milliseconds: 500), () => _fetchData());
+  }
+
   void _showAddBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -575,7 +614,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> with WidgetsBindingOb
       isScrollControlled: true,
       builder: (context) => AddAssetsBottomSheet(
         currentWatchlistSymbols: _watchlists.map((w) => w['symbol'] as String).toList(),
-        onAdded: _fetchData,
+        onAdded: _onAssetAdded,
       ),
     );
   }

@@ -7,7 +7,7 @@ import 'package:irshad_mobile/core/widgets/company_avatar.dart';
 
 class AddAssetsBottomSheet extends StatefulWidget {
   final List<String> currentWatchlistSymbols;
-  final VoidCallback onAdded;
+  final Function(String) onAdded;
   final String? preSelectedSymbol;
 
   const AddAssetsBottomSheet({
@@ -56,7 +56,7 @@ class _AddAssetsBottomSheetState extends State<AddAssetsBottomSheet> {
     );
     
     if (success) {
-      widget.onAdded();
+      widget.onAdded(symbol);
       if (mounted) {
         setState(() {
           _addingSymbols.remove(symbol);
