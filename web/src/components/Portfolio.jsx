@@ -84,7 +84,7 @@ export default function Portfolio() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showSuggestModal, setShowSuggestModal] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
-  const [activeFilter, setActiveFilter] = useState('all');
+  const [activeFilter, setActiveFilter] = useState('halal');
   const [initialHoldingSymbol, setInitialHoldingSymbol] = useState(null);
 
   // Auto-open add modal or purification modal if navigated with state
