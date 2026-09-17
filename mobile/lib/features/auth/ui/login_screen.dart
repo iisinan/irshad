@@ -49,7 +49,13 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     final prefs = await SharedPreferences.getInstance();
     final enabled = prefs.getBool('biometrics_enabled') ?? false;
     
-    if (enabled) {
+    final loginMethod = await _secureStorage.read(key: 'login_method');
+    final savedEmail = await _secureStorage.read(key: 'saved_email');
+    final savedPassword = await _secureStorage.read(key: 'saved_password');
+    
+    final hasCreds = loginMethod == 'google' || (savedEmail != null && savedPassword != null);
+    
+    if (enabled && hasCreds) {
       final canCheckBiometrics = await _localAuth.canCheckBiometrics;
       final isDeviceSupported = await _localAuth.isDeviceSupported();
       if (canCheckBiometrics && isDeviceSupported) {
