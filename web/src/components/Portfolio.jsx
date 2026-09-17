@@ -76,7 +76,7 @@ export default function Portfolio() {
   const location = useLocation();
   const getTabFromHash = (hash) => {
     const h = hash.replace('#', '');
-    return ['holdings', 'market', 'funds', 'watchlist', 'zakat', 'purification', 'lectures', 'statement', 'updates', 'guide'].includes(h) ? h : 'holdings';
+    return ['holdings', 'market', 'funds', 'watchlist', 'zakat', 'purification', 'lectures', 'statement', 'updates', 'guide'].includes(h) ? h : 'updates';
   };
   
   const [activeTab, setActiveTab] = useState(() => getTabFromHash(location.hash));
