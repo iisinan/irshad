@@ -124,7 +124,7 @@ function FAQItem({ q, a }) {
 ────────────────────────────────────────────────── */
 export default function UpdatesPurification() {
   return (
-    <div className="animate-fade-in" style={{ paddingBottom: '56px', maxWidth: '960px' }}>
+    <div className="animate-fade-in" style={{ paddingBottom: '56px', maxWidth: '100%' }}>
 
       {/* ── 1. Hero ── */}
       <div style={{
