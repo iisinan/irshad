@@ -55,7 +55,7 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
     const toHash = to.split('#')[1] ? '#' + to.split('#')[1] : '';
     if (toPath === '/portfolio' || toPath === '/profile') {
       if (location.pathname !== toPath) return false;
-      const currentHash = location.hash || (toPath === '/portfolio' ? '#holdings' : '');
+      const currentHash = location.hash || (toPath === '/portfolio' ? '#updates' : '');
       if (toHash) return currentHash === toHash;
       return currentHash === '';
     }

@@ -18,7 +18,7 @@ export default function BottomNavigation() {
     if (path === '/') return location.pathname === '/';
     if (path.startsWith('/portfolio#')) {
       const hash = path.split('#')[1];
-      return location.pathname === '/portfolio' && (location.hash === `#${hash}` || (!location.hash && hash === 'holdings'));
+      return location.pathname === '/portfolio' && (location.hash === `#${hash}` || (!location.hash && hash === 'updates'));
     }
     return location.pathname.startsWith(path);
   };
