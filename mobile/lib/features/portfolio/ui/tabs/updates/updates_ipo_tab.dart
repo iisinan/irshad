@@ -16,7 +16,7 @@ class UpdatesIpoTab extends StatelessWidget {
       'sector': 'Oil & Gas',
       'exchange': 'NGX (Planned)',
       'valuation': '~\$20B+',
-      'logo': 'https://logo.clearbit.com/dangote.com',
+      'logo': 'assets/logos/dangote.png',
       'timeline': 'Q4 2026 - Q1 2027 (Est.)',
       'capacity': '650,000 barrels per day',
       'listingLocation': 'Nigerian Exchange (NGX), London (LSE)',
@@ -96,7 +96,7 @@ class UpdatesIpoTab extends StatelessWidget {
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(color: context.appColors.divider),
                     ),
-                    child: Image.network(ipo['logo'], fit: BoxFit.contain, errorBuilder: (_, __, ___) => const Icon(Icons.business)),
+                    child: ipo['logo'].startsWith('http') ? Image.network(ipo['logo'], fit: BoxFit.contain, errorBuilder: (_, __, ___) => const Icon(Icons.business)) : Image.asset(ipo['logo'], fit: BoxFit.contain, errorBuilder: (_, __, ___) => const Icon(Icons.business)),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -201,7 +201,7 @@ class UpdatesIpoTab extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: context.appColors.divider),
                     ),
-                    child: Image.network(ipo['logo'], fit: BoxFit.contain, errorBuilder: (_, __, ___) => const Icon(Icons.business)),
+                    child: ipo['logo'].startsWith('http') ? Image.network(ipo['logo'], fit: BoxFit.contain, errorBuilder: (_, __, ___) => const Icon(Icons.business)) : Image.asset(ipo['logo'], fit: BoxFit.contain, errorBuilder: (_, __, ___) => const Icon(Icons.business)),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
