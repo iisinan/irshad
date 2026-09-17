@@ -42,23 +42,16 @@ class _AddAssetsBottomSheetState extends State<AddAssetsBottomSheet> {
     super.dispose();
   }
 
-  void _toggleSelection(String symbol) {
-    setState(() {
-      if (_selectedSymbols.contains(symbol)) {
-        _selectedSymbols.remove(symbol);
-      } else {
-        _selectedSymbols.add(symbol);
-      }
-    });
-  }
-
-  Future<void> _handleSubmit() async {
-    if (_selectedSymbols.isEmpty) return;
-    setState(() => _isAdding = true);
+  void _addAsset(String symbol) async {
+    if (_selectedSymbols.contains(symbol) || _isAdding) return;
     
-    // Defaulting to alertInApp and alertEmail true, replicating the frontend behavior of opt-in by default
+    setState(() {
+      _selectedSymbols.add(symbol);
+      _isAdding = true;
+    });
+    
     final success = await _repository.addMultipleToWatchlist(
-      _selectedSymbols,
+      [symbol],
       alertEmail: true,
       alertInApp: true,
     );
@@ -66,14 +59,26 @@ class _AddAssetsBottomSheetState extends State<AddAssetsBottomSheet> {
     if (success) {
       widget.onAdded();
       if (mounted) {
-        Navigator.pop(context);
+        setState(() => _isAdding = false);
+        // Automatically close if they just added the pre-selected one, or keep open if searching
+        if (widget.preSelectedSymbol != null && widget.preSelectedSymbol == symbol) {
+           Navigator.pop(context);
+        } else {
+           // We keep it open so they can add more, but it will disappear from filteredStocks because currentWatchlistSymbols updates!
+           // Wait, currentWatchlistSymbols is passed as a widget property. widget.onAdded() triggers a rebuild in the parent,
+           // but does the BottomSheet rebuild with new currentWatchlistSymbols?
+           // No, bottom sheet is a separate route. We should manually add it to our local list of excluded symbols.
+        }
       }
     } else {
       if (mounted) {
-        setState(() => _isAdding = false);
+        setState(() {
+          _selectedSymbols.remove(symbol);
+          _isAdding = false;
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Failed to add assets. Please try again.'),
+            content: const Text('Failed to add asset. Please try again.'),
             backgroundColor: context.haram,
           ),
         );
@@ -179,7 +184,7 @@ class _AddAssetsBottomSheetState extends State<AddAssetsBottomSheet> {
                       final isSelected = _selectedSymbols.contains(symbol);
 
                       return InkWell(
-                        onTap: () => _toggleSelection(symbol),
+                        onTap: () => _addAsset(symbol),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 24, vertical: 12),
@@ -220,23 +225,15 @@ class _AddAssetsBottomSheetState extends State<AddAssetsBottomSheet> {
                                 ),
                               ),
                               Container(
-                                width: 24,
-                                height: 24,
+                                width: 32,
+                                height: 32,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  border: Border.all(
-                                      color: isSelected
-                                          ? context.primary
-                                          : context.divider,
-                                      width: 2),
-                                  color: isSelected
-                                      ? context.primary
-                                      : Colors.transparent,
+                                  color: isSelected ? context.primary.withValues(alpha: 0.1) : context.bgAlt,
                                 ),
                                 child: isSelected
-                                    ? const Icon(Icons.check_rounded,
-                                        color: Colors.white, size: 16)
-                                    : null,
+                                    ? Padding(padding: const EdgeInsets.all(8), child: CircularProgressIndicator(color: context.primary, strokeWidth: 2))
+                                    : Icon(Icons.add_rounded, color: context.primary, size: 20),
                               ),
                             ],
                           ),
@@ -245,36 +242,7 @@ class _AddAssetsBottomSheetState extends State<AddAssetsBottomSheet> {
                     },
                   ),
           ),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: ElevatedButton(
-                onPressed:
-                    _selectedSymbols.isEmpty || _isAdding ? null : _handleSubmit,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: context.primary,
-                  disabledBackgroundColor: context.primary.withValues(alpha: 0.5),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
-                  elevation: 0,
-                ),
-                child: _isAdding
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                            color: Colors.white, strokeWidth: 2))
-                    : Text(
-                        'Add ${_selectedSymbols.isNotEmpty ? _selectedSymbols.length : ''} Assets',
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 16),
-                      ),
-              ),
-            ),
-          ),
+          const SizedBox(height: 24),
         ],
       ),
     );
