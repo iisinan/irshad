@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 
 
@@ -96,7 +97,7 @@ class UpdatesIpoTab extends StatelessWidget {
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(color: context.appColors.divider),
                     ),
-                    child: Image.network(ipo['logo'], fit: BoxFit.contain, errorBuilder: (_, __, ___) => const Icon(Icons.business)),
+                    child: SvgPicture.network(ipo['logo'], fit: BoxFit.contain, placeholderBuilder: (_) => const Icon(Icons.business)),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -201,7 +202,7 @@ class UpdatesIpoTab extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: context.appColors.divider),
                     ),
-                    child: Image.network(ipo['logo'], fit: BoxFit.contain, errorBuilder: (_, __, ___) => const Icon(Icons.business)),
+                    child: SvgPicture.network(ipo['logo'], fit: BoxFit.contain, placeholderBuilder: (_) => const Icon(Icons.business)),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
