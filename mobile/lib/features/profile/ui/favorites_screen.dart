@@ -110,7 +110,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> with WidgetsBindingOb
   void _removeWatchlist(String symbol) async {
     // Optimistic UI update
     setState(() {
-      _watchlists.removeWhere((w) => w['symbol'] == symbol);
+      _watchlists.removeWhere((w) => (w['symbol'] as String?)?.toLowerCase() == symbol.toLowerCase());
     });
 
     final success = await _activityRepository.removeFromWatchlist(symbol);
@@ -613,7 +613,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> with WidgetsBindingOb
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) => AddAssetsBottomSheet(
-        currentWatchlistSymbols: _watchlists.map((w) => w['symbol'] as String).toList(),
+        currentWatchlistSymbols: _watchlists.map((w) => w['symbol']?.toString() ?? '').toList(),
         onAdded: _onAssetAdded,
       ),
     );

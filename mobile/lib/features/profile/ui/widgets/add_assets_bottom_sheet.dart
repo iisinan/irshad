@@ -85,11 +85,7 @@ class _AddAssetsBottomSheetState extends State<AddAssetsBottomSheet> {
   @override
   Widget build(BuildContext context) {
     final stocks = Provider.of<StockProvider>(context).ngxStocks;
-    final availableStocks = stocks
-        .where((s) => !widget.currentWatchlistSymbols.contains(s['symbol']) && !_addedSymbols.contains(s['symbol']))
-        .toList();
-    
-    final filteredStocks = availableStocks.where((s) {
+    final filteredStocks = stocks.where((s) {
       final query = _searchQuery.toLowerCase();
       final symbol = (s['symbol'] as String?)?.toLowerCase() ?? '';
       final name = (s['name'] as String?)?.toLowerCase() ?? '';
@@ -177,10 +173,11 @@ class _AddAssetsBottomSheetState extends State<AddAssetsBottomSheet> {
                       final stock = filteredStocks[index];
                       final symbol = stock['symbol'] as String;
                       final name = stock['name'] as String? ?? '';
+                      final isAlreadyAdded = widget.currentWatchlistSymbols.contains(symbol) || _addedSymbols.contains(symbol);
                       final isAdding = _addingSymbols.contains(symbol);
 
                       return InkWell(
-                        onTap: () => _addAsset(symbol),
+                        onTap: isAlreadyAdded ? null : () => _addAsset(symbol),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 24, vertical: 12),
@@ -225,11 +222,15 @@ class _AddAssetsBottomSheetState extends State<AddAssetsBottomSheet> {
                                 height: 32,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: isAdding ? context.primary.withValues(alpha: 0.1) : context.bgAlt,
+                                  color: isAlreadyAdded 
+                                      ? context.primary 
+                                      : (isAdding ? context.primary.withValues(alpha: 0.1) : context.bgAlt),
                                 ),
-                                child: isAdding
-                                    ? Padding(padding: const EdgeInsets.all(8), child: CircularProgressIndicator(color: context.primary, strokeWidth: 2))
-                                    : Icon(Icons.add_rounded, color: context.primary, size: 20),
+                                child: isAlreadyAdded
+                                    ? const Icon(Icons.check_rounded, color: Colors.white, size: 20)
+                                    : (isAdding
+                                        ? Padding(padding: const EdgeInsets.all(8), child: CircularProgressIndicator(color: context.primary, strokeWidth: 2))
+                                        : Icon(Icons.add_rounded, color: context.primary, size: 20)),
                               ),
                             ],
                           ),

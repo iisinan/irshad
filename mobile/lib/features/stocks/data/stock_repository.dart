@@ -58,7 +58,7 @@ class StockRepository {
 
   Future<Map<String, dynamic>> getNgxStocksPaginated(int page) async {
     try {
-      final response = await _apiService.get('stocks/ngx?page=$page');
+      final response = await _apiService.get('stocks/ngx?page=$page&per_page=1000');
       if (response.statusCode == 200) {
         final data = response.data['data'];
         if (data is List) {
