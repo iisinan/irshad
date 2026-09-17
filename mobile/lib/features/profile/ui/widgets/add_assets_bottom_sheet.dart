@@ -7,7 +7,7 @@ import 'package:irshad_mobile/core/widgets/company_avatar.dart';
 
 class AddAssetsBottomSheet extends StatefulWidget {
   final List<String> currentWatchlistSymbols;
-  final Function(String) onAdded;
+  final void Function(String symbol, bool isComplete) onAdded;
   final String? preSelectedSymbol;
 
   const AddAssetsBottomSheet({
@@ -42,35 +42,29 @@ class _AddAssetsBottomSheetState extends State<AddAssetsBottomSheet> {
     super.dispose();
   }
 
-  void _addAsset(String symbol) async {
+  void _addAsset(String symbol) {
     if (_addingSymbols.contains(symbol) || _addedSymbols.contains(symbol)) return;
     
+    // Optimistically update the UI instantly
     setState(() {
-      _addingSymbols.add(symbol);
+      _addedSymbols.add(symbol);
     });
     
-    final success = await _repository.addMultipleToWatchlist(
+    widget.onAdded(symbol, false);
+
+    if (widget.preSelectedSymbol != null && widget.preSelectedSymbol == symbol && mounted) {
+       Navigator.pop(context);
+    }
+    
+    // Call backend asynchronously
+    _repository.addMultipleToWatchlist(
       [symbol],
       alertEmail: true,
       alertInApp: true,
-    );
-    
-    if (success) {
-      widget.onAdded(symbol);
-      if (mounted) {
+    ).then((success) {
+      if (success) { widget.onAdded(symbol, true); } else if (mounted) {
         setState(() {
-          _addingSymbols.remove(symbol);
-          _addedSymbols.add(symbol);
-        });
-        
-        if (widget.preSelectedSymbol != null && widget.preSelectedSymbol == symbol) {
-           Navigator.pop(context);
-        }
-      }
-    } else {
-      if (mounted) {
-        setState(() {
-          _addingSymbols.remove(symbol);
+          _addedSymbols.remove(symbol);
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -79,7 +73,7 @@ class _AddAssetsBottomSheetState extends State<AddAssetsBottomSheet> {
           ),
         );
       }
-    }
+    });
   }
 
   @override

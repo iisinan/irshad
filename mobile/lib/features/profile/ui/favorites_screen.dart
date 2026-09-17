@@ -586,25 +586,32 @@ class _FavoritesScreenState extends State<FavoritesScreen> with WidgetsBindingOb
     );
   }
 
-  void _onAssetAdded(String symbol) {
+  void _onAssetAdded(String symbol, bool isComplete) {
+    if (isComplete) {
+      // Backend is done, now it's safe to fetch the real data (with correct IDs)
+      _fetchData();
+      return;
+    }
+    
+    // Optimistic UI insert
     final stocks = Provider.of<StockProvider>(context, listen: false).ngxStocks;
     final stock = stocks.firstWhere((s) => s['symbol'] == symbol, orElse: () => <String, dynamic>{});
     
     if (stock.isNotEmpty) {
-      setState(() {
-        _watchlists.add({
-          'id': DateTime.now().millisecondsSinceEpoch,
-          'symbol': symbol,
-          'name': stock['name'],
-          'status': 'active',
-          'alert_inapp': true,
-          'alert_email': true,
+      // Check if it's already there to prevent duplicates during optimistic add
+      if (!_watchlists.any((w) => w['symbol'] == symbol)) {
+        setState(() {
+          _watchlists.insert(0, {
+            'id': DateTime.now().millisecondsSinceEpoch,
+            'symbol': symbol,
+            'name': stock['name'],
+            'status': 'active',
+            'alert_inapp': true,
+            'alert_email': true,
+          });
         });
-      });
+      }
     }
-    
-    // Fetch in background just to ensure everything is perfectly synced with the backend
-    Future.delayed(const Duration(milliseconds: 500), () => _fetchData());
   }
 
   void _showAddBottomSheet(BuildContext context) {
