@@ -592,7 +592,25 @@ class _FavoritesScreenState extends State<FavoritesScreen> with WidgetsBindingOb
   void _onAssetAdded(String symbol, bool isComplete) {
     if (isComplete) {
       // Backend is done, now it's safe to fetch the real data (with correct IDs)
-      _fetchData();
+      _fetchData().then((_) {
+        if (!mounted) return;
+        final newItem = _watchlists.firstWhere((w) => (w['symbol'] as String?)?.toLowerCase() == symbol.toLowerCase(), orElse: () => <String, dynamic>{});
+        if (newItem.isNotEmpty) {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (ctx) => AlertPreferencesBottomSheet(
+              item: newItem,
+              isProduct: false,
+              onSave: (prefs) async {
+                await _activityRepository.updateWatchlistAlerts(symbol, prefs);
+                _fetchData();
+              },
+            ),
+          );
+        }
+      });
       return;
     }
     
