@@ -670,9 +670,15 @@ const AaoifiScreening = () => {
                     {stock?.industry}
                   </p>
                 )}
-
               </div>
             </div>
+            
+            {stock?.trading_board && (
+              <div style={{ padding: '6px 12px', background: 'rgba(91,41,113,0.06)', borderRadius: '8px', border: '1px solid rgba(91,41,113,0.15)', display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                <span style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-muted)' }}>Trading Board:</span>
+                <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--primary)' }}>{stock.trading_board}</span>
+              </div>
+            )}
           </div>
 
 
