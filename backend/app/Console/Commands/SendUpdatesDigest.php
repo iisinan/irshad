@@ -36,7 +36,7 @@ class SendUpdatesDigest extends Command
 
         $oneWeekAgo = now()->subDays(7)->toDateString();
 
-        $halalCompanies = Company::whereHas('stockStatus', function($q) {
+        $halalCompanies = Company::whereHas('status', function($q) {
             $q->whereIn('status', ['halal', 'compliant']);
         })->get();
 

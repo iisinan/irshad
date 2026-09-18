@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Jobs\NotifyUsersOfAssetChange;
 use App\Models\Favorite;
 use App\Models\User;
+use Google\Client as GoogleClient;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -28,7 +29,7 @@ class NotificationService
                 'body' => ($type === 'product' ? $item->name : $item->symbol).' has been reclassified as '.strtoupper($newStatus).'. Reason: '.$reason,
                 'data' => [
                     'type' => $type,
-                    'reference_id' => $item->id,
+                    'reference_id' => (string) $item->id,
                     'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
                 ],
             ]);
@@ -39,25 +40,79 @@ class NotificationService
     }
 
     /**
-     * Send push notification via FCM (Placeholder logic).
+     * Get OAuth 2.0 token for FCM v1 using Google API Client.
+     */
+    private function getAccessToken(): ?string
+    {
+        $credentialsPath = env('GOOGLE_APPLICATION_CREDENTIALS');
+
+        if (!$credentialsPath || !file_exists($credentialsPath)) {
+            Log::warning("FCM Error: GOOGLE_APPLICATION_CREDENTIALS not set or file missing.");
+            return null;
+        }
+
+        try {
+            $client = new GoogleClient();
+            $client->setAuthConfig($credentialsPath);
+            $client->addScope('https://www.googleapis.com/auth/firebase.messaging');
+            $client->fetchAccessTokenWithAssertion();
+            $token = $client->getAccessToken();
+            return $token['access_token'] ?? null;
+        } catch (\Exception $e) {
+            Log::error("FCM Token Error: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Send push notification via FCM v1 API.
      */
     protected function sendPushNotification(string $token, array $notification)
     {
-        // Placeholder for FCM v1 API call
         Log::info("Sending push notification to token: {$token}", $notification);
 
-        // Example:
-        // Http::withToken(config('services.fcm.key'))
-        //     ->post('https://fcm.googleapis.com/v1/projects/' . config('services.fcm.project_id') . '/messages:send', [
-        //         'message' => [
-        //             'token' => $token,
-        //             'notification' => [
-        //                 'title' => $notification['title'],
-        //                 'body' => $notification['body'],
-        //             ],
-        //             'data' => $notification['data'],
-        //         ]
-        //     ]);
+        $projectId = env('FCM_PROJECT_ID');
+        if (!$projectId) {
+            Log::warning("FCM Error: FCM_PROJECT_ID is not set in .env.");
+            return;
+        }
+
+        $accessToken = $this->getAccessToken();
+        if (!$accessToken) {
+            Log::warning("FCM Error: Could not get access token.");
+            return;
+        }
+
+        $response = Http::withToken($accessToken)
+            ->post("https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send", [
+                'message' => [
+                    'token' => $token,
+                    'notification' => [
+                        'title' => $notification['title'],
+                        'body' => $notification['body'],
+                    ],
+                    'data' => $notification['data'] ?? [],
+                    'android' => [
+                        'priority' => 'high',
+                        'notification' => [
+                            'sound' => 'default',
+                        ]
+                    ],
+                    'apns' => [
+                        'payload' => [
+                            'aps' => [
+                                'sound' => 'default',
+                            ]
+                        ]
+                    ]
+                ]
+            ]);
+
+        if ($response->successful()) {
+            Log::info("FCM Success: Notification sent successfully to {$token}");
+        } else {
+            Log::error("FCM Failed: " . $response->body());
+        }
     }
 
     /**
