@@ -675,32 +675,7 @@ const AaoifiScreening = () => {
             </div>
           </div>
 
-          {/* Trading Board Stats */}
-          {stock && (
-            <div style={{ display:'flex', gap:0, flexWrap:'wrap', background:'rgba(255,255,255,0.6)', borderRadius:14, border:'1px solid rgba(91,41,113,0.07)', backdropFilter:'blur(12px)', boxShadow:'0 2px 10px rgba(0,0,0,0.03)', overflow:'hidden', marginTop: 16 }}>
-              {[
-                { label:'OPEN', value: stock.open_price, fmt: fmtRaw },
-                { label:'PREV CLOSE', value: stock.previous_close, fmt: fmtRaw },
-                { label:'DAY HIGH', value: stock.day_high, fmt: fmtRaw, up: true },
-                { label:'DAY LOW', value: stock.day_low, fmt: fmtRaw, down: true },
-                { label:'VOLUME', value: stock.volume, fmt: fmtCount },
-                { label:'52W HIGH', value: stock.fifty_two_week_high, fmt: fmtRaw },
-                { label:'52W LOW', value: stock.fifty_two_week_low, fmt: fmtRaw },
-              ].filter(item => item.value != null && item.value !== '').map((item, idx, arr) => (
-                <div key={idx} style={{ padding:'10px 18px', borderRight: idx < arr.length - 1 ? '1px solid rgba(91,41,113,0.07)' : 'none', textAlign:'left', minWidth:80 }}>
-                  <div style={{ fontSize:'0.55rem', fontWeight:800, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.9px', marginBottom:4 }}>{item.label}</div>
-                  <div style={{ fontSize:'0.88rem', fontWeight:900, color: item.up ? 'var(--halal)' : item.down ? 'var(--non-compliant)' : 'var(--text-dark)', letterSpacing:'-0.3px', fontVariantNumeric:'tabular-nums' }}>
-                    {businessFailed ? '—' : (item.fmt ? item.fmt(item.value) : item.value)}
-                  </div>
-                  {idx === 0 && !businessFailed && priceChangePct !== 0 && (
-                    <div style={{ fontSize:'0.6rem', fontWeight:800, color: priceChangePct >= 0 ? 'var(--halal)' : 'var(--non-compliant)', marginTop:2 }}>
-                      {priceChangePct >= 0 ? '▲' : '▼'} {Math.abs(priceChangePct).toFixed(2)}%
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
+
         </div>
 
         {/* ══ VERDICT CARD ══ */}
