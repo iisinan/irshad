@@ -36,7 +36,7 @@ class UserActivityRepository {
         'alert_whatsapp': alertWhatsapp,
         'alert_email': alertEmail,
       });
-      return response.statusCode == 200;
+      return response.statusCode != null && response.statusCode! >= 200 && response.statusCode! < 300;
     } catch (e) {
       return false;
     }
@@ -45,7 +45,7 @@ class UserActivityRepository {
   Future<bool> removeFromFavorites(int favoriteId) async {
     try {
       final response = await _apiService.delete('favorites/$favoriteId');
-      return response.statusCode == 200;
+      return response.statusCode != null && response.statusCode! >= 200 && response.statusCode! < 300;
     } catch (e) {
       return false;
     }
@@ -94,7 +94,7 @@ class UserActivityRepository {
   Future<bool> updateWatchlistAlerts(String symbol, Map<String, bool> alerts) async {
     try {
       final response = await _apiService.put('watchlist/$symbol', alerts);
-      return response.statusCode == 200;
+      return response.statusCode != null && response.statusCode! >= 200 && response.statusCode! < 300;
     } catch (e) {
       return false;
     }
@@ -103,7 +103,7 @@ class UserActivityRepository {
   Future<bool> removeFromWatchlist(String symbol) async {
     try {
       final response = await _apiService.delete('watchlist/$symbol');
-      return response.statusCode == 200;
+      return response.statusCode != null && response.statusCode! >= 200 && response.statusCode! < 300;
     } catch (e) {
       return false;
     }

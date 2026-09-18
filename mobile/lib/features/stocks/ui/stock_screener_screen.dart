@@ -412,27 +412,6 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            GestureDetector(
-              onTap: _showFilterBottomSheet,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                decoration: BoxDecoration(
-                  color: activeFiltersCount > 0 ? context.primary.withValues(alpha: 0.2) : Colors.transparent,
-                  border: Border.all(color: activeFiltersCount > 0 ? context.primary : context.divider),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.tune_rounded, color: activeFiltersCount > 0 ? context.primary : context.textMuted, size: 16),
-                    if (activeFiltersCount > 0) ...[
-                      const SizedBox(width: 4),
-                      Text('$activeFiltersCount', style: TextStyle(color: context.primary, fontSize: 13, fontWeight: FontWeight.bold)),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               decoration: BoxDecoration(

@@ -335,18 +335,8 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
 
     List<dynamic> items = [];
     if (_activeSection == 'market') {
-      final business = (_data?['business_updates'] as List?)?.map((e) {
-        final m = Map<String, dynamic>.from(e as Map);
-        m['_cardType'] = 'business';
-        return m;
-      }).toList() ?? [];
-      
-      final market = (_data?['market_intelligence'] as List?)?.map((e) {
-        final m = Map<String, dynamic>.from(e as Map);
-        m['_cardType'] = 'market';
-        return m;
-      }).toList() ?? [];
-      
+      final business = (_data?['business_updates'] as List?)?.map((e) => Map<String, dynamic>.from(e as Map)..['_cardType'] = 'business').toList() ?? [];
+      final market = (_data?['market_intelligence'] as List?)?.map((e) => Map<String, dynamic>.from(e as Map)..['_cardType'] = 'market').toList() ?? [];
       items = [...business, ...market];
       items.sort((a, b) {
         final dateA = DateTime.tryParse(a['published_at']?.toString() ?? '') ?? DateTime.fromMillisecondsSinceEpoch(0);
@@ -354,9 +344,9 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
         return dateB.compareTo(dateA);
       });
     } else if (_activeSection == 'dividends') {
-      items = _data?['dividends'] ?? [];
+      items = (_data?['dividends'] as List?)?.map((e) => Map<String, dynamic>.from(e as Map)).toList() ?? [];
     } else if (_activeSection == 'analysis') {
-      items = _data?['analysis'] ?? [];
+      items = (_data?['analysis'] as List?)?.map((e) => Map<String, dynamic>.from(e as Map)).toList() ?? [];
     }
 
     return Column(
@@ -374,7 +364,8 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
             ),
           )
         else
-          ...items.map((item) {
+          ...items.map((rawItem) {
+            final item = Map<String, dynamic>.from(rawItem as Map);
             if (item['_cardType'] == 'business') return _buildBusinessCard(item);
             return _buildMarketCard(item);
           }),

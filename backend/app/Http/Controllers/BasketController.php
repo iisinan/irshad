@@ -66,7 +66,7 @@ class BasketController extends Controller
             'is_active' => true,
         ]);
 
-        return $this->success($basket, 201);
+        return $this->success($basket, 'Basket created successfully', 201);
     }
 
     /**

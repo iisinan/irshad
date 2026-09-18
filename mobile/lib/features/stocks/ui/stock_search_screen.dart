@@ -125,8 +125,9 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
       
       // Filter by sector
       if (!ignoreSector && _selectedSector != 'All') {
-        final stockSector = stock['sector']?.toString().toLowerCase() ?? '';
-        if (stockSector != _selectedSector.toLowerCase()) return false;
+        final stockSector = stock['sector']?.toString().toLowerCase().replaceAll(RegExp(r'\s+'), '') ?? '';
+        final selected = _selectedSector.toLowerCase().replaceAll(RegExp(r'\s+'), '');
+        if (stockSector != selected) return false;
       }
       
       return true;

@@ -84,6 +84,32 @@ class _BasketDetailScreenState extends State<BasketDetailScreen> {
     });
   }
 
+  Future<void> _deleteBasket() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Basket'),
+        content: const Text('Are you sure you want to delete this custom basket?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete', style: TextStyle(color: Colors.red))),
+        ],
+      )
+    );
+    if (confirm != true) return;
+    
+    try {
+      final response = await ApiService().delete('stocks/baskets/${widget.basket['id']}');
+      if (response.statusCode != null && response.statusCode! >= 200 && response.statusCode! < 300) {
+        if (mounted) Navigator.pop(context, true);
+      } else {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to delete basket')));
+      }
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -99,24 +125,32 @@ class _BasketDetailScreenState extends State<BasketDetailScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        widget.basket['name'] ?? 'Sector Details',
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.w900,
-                          color: context.textDark,
-                          letterSpacing: -1,
-                          height: 1.1,
-                        ),
+                      // SECTOR HEADER
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              widget.basket['name'] ?? 'Basket Details',
+                              style: TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.w900,
+                                color: context.textDark,
+                                letterSpacing: -1,
+                                height: 1.1,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
                       Text(
-                        widget.basket['description'] ?? '',
+                        widget.basket['description'] ?? 'No description provided.',
                         style: TextStyle(
-                          color: context.textBody,
-                          fontSize: 16,
-                          height: 1.6,
-                          fontWeight: FontWeight.w400,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color: context.textMuted,
+                          height: 1.5,
                         ),
                       ),
                       const SizedBox(height: 32),
@@ -260,26 +294,47 @@ class _BasketDetailScreenState extends State<BasketDetailScreen> {
       ),
       actions: [
         if (widget.basket['user_id'] != null)
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: Container(
-                  color: Colors.white.withOpacity(0.2),
-                  child: IconButton(
-                    icon: const Icon(Icons.edit_rounded, color: Colors.white, size: 20),
-                    onPressed: () async {
-                      final result = await Navigator.pushNamed(context, '/edit_basket', arguments: widget.basket);
-                      if (result == true) {
-                        Navigator.pop(context, true);
-                      }
-                    },
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: Container(
+                      color: Colors.white.withOpacity(0.2),
+                      child: IconButton(
+                        icon: const Icon(Icons.delete_rounded, color: Colors.white, size: 20),
+                        onPressed: _deleteBasket,
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
+              Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: Container(
+                      color: Colors.white.withOpacity(0.2),
+                      child: IconButton(
+                        icon: const Icon(Icons.edit_rounded, color: Colors.white, size: 20),
+                        onPressed: () async {
+                          final result = await Navigator.pushNamed(context, '/edit_basket', arguments: widget.basket);
+                          if (result == true) {
+                            Navigator.pop(context, true);
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           )
       ],
       flexibleSpace: FlexibleSpaceBar(

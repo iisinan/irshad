@@ -4,6 +4,7 @@ class Basket {
   final String? description;
   final List<String> symbols;
   final bool isActive;
+  final int? userId;
 
   Basket({
     required this.id,
@@ -11,6 +12,7 @@ class Basket {
     this.description,
     required this.symbols,
     required this.isActive,
+    this.userId,
   });
 
   factory Basket.fromJson(Map<String, dynamic> json) {
@@ -20,6 +22,7 @@ class Basket {
       description: json['description'],
       symbols: List<String>.from(json['symbols'] ?? []),
       isActive: json['is_active'] == 1 || json['is_active'] == true,
+      userId: json['user_id'],
     );
   }
 
@@ -30,6 +33,7 @@ class Basket {
       'description': description,
       'symbols': symbols,
       'is_active': isActive,
+      'user_id': userId,
     };
   }
 }

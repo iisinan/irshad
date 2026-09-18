@@ -85,7 +85,7 @@ class _CreateBasketScreenState extends State<CreateBasketScreen> {
         'symbols': _selectedSymbols,
       });
 
-      if (response.statusCode == 201) {
+      if (response.statusCode != null && response.statusCode! >= 200 && response.statusCode! < 300) {
         if (mounted) {
           Navigator.pop(context, true); // Return true to indicate success
         }
