@@ -129,6 +129,24 @@ export default function UpdatesTab({ unreadCount = 0 }) {
       description: 'Compliance updates, business activity & market intelligence',
     },
     {
+      id: 'compliance',
+      label: 'Compliance Changes',
+      icon: Shield,
+      description: 'Recent status changes for screened companies',
+    },
+    {
+      id: 'ipo',
+      label: 'IPO',
+      icon: Rocket,
+      description: 'Upcoming Initial Public Offerings & Shariah analysis',
+    },
+    {
+      id: 'dividends',
+      label: 'Dividends',
+      icon: Star,
+      description: 'Recent dividend announcements and payouts',
+    },
+    {
       id: 'inbox',
       label: 'Inbox',
       icon: Bell,
@@ -140,24 +158,6 @@ export default function UpdatesTab({ unreadCount = 0 }) {
       label: 'Irshad Digest',
       icon: Mail,
       description: 'Portfolio compliance status summary',
-    },
-    {
-      id: 'compliance',
-      label: 'Compliance Changes',
-      icon: Shield,
-      description: 'Recent status changes for screened companies',
-    },
-    {
-      id: 'dividends',
-      label: 'Dividends',
-      icon: Star,
-      description: 'Recent dividend announcements and payouts',
-    },
-    {
-      id: 'ipo',
-      label: 'IPO',
-      icon: Rocket,
-      description: 'Upcoming Initial Public Offerings & Shariah analysis',
     },
   ];
 
