@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  TrendingUp, AlertTriangle, CheckCircle2, BarChart2,
+  TrendingUp, AlertTriangle, Droplet, CheckCircle2, BarChart2,
   ExternalLink, RefreshCw, Mail, Bell, ChevronRight,
   ArrowRight, Newspaper, Zap, Shield, Star
 } from 'lucide-react';
@@ -9,9 +9,10 @@ import { fetchUpdatesNews } from '../../services/api';
 import { toastSuccess, toastError } from '../../utils/toast';
 import CompanyLogo from '../CompanyLogo';
 import localforage from 'localforage';
+import UpdatesPurification from './UpdatesPurification';
 
 /* ── Skeleton ── */
-const CardSkeleton = () => {
+export const CardSkeleton = () => {
   const sh = {
     background: 'linear-gradient(90deg,var(--bg-section) 0%,rgba(255,255,255,0.7) 50%,var(--bg-section) 100%)',
     backgroundSize: '200% 100%',
@@ -24,7 +25,7 @@ const CardSkeleton = () => {
       <div style={{ flex: 1 }}>
         <div style={{ ...sh, width: '40%', height: '12px', marginBottom: '10px' }} />
         <div style={{ ...sh, width: '80%', height: '16px', marginBottom: '8px' }} />
-        <div style={{ ...sh, width: '60%', height: '12px' }} />
+        <div style={{ ...sh, width: '60%', height: '16px' }} />
       </div>
     </div>
   );
@@ -118,7 +119,7 @@ const BusinessCard = ({ item }) => {
 };
 
 /* ── Market Intelligence Card ── */
-const MarketCard = ({ item }) => {
+export const MarketCard = ({ item }) => {
   const navigate = useNavigate();
   const categoryIcons = {
     market_intelligence: BarChart2,
@@ -170,7 +171,7 @@ const MarketCard = ({ item }) => {
 };
 
 /* ── Empty State ── */
-const EmptyState = ({ icon: Icon, title, subtitle, color = 'var(--primary)' }) => (
+export const EmptyState = ({ icon: Icon, title, subtitle, color = 'var(--primary)' }) => (
   <div style={{ textAlign: 'center', padding: '48px 24px', background: 'var(--bg-section)', borderRadius: '16px', border: '1.5px dashed var(--border)' }}>
     <div style={{ width: '54px', height: '54px', borderRadius: '16px', background: `color-mix(in srgb, ${color} 10%, transparent)`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
       <Icon size={24} color={color} style={{ opacity: 0.7 }} />
@@ -215,9 +216,9 @@ export default function UpdatesNews() {
   }, []);
 
   const sections = [
-    { id: 'market',      label: 'Market Intelligence', icon: BarChart2,    color: 'var(--primary)' },
-    { id: 'dividends',   label: 'Dividends',           icon: Star,       color: 'var(--gold)' },
-    { id: 'analysis',    label: 'Analysis',            icon: TrendingUp, color: '#8b5cf6' },
+    { id: 'market',       label: 'Market Intelligence', icon: BarChart2,    color: 'var(--primary)' },
+    { id: 'analysis',     label: 'Analysis',            icon: TrendingUp,   color: '#8b5cf6' },
+    { id: 'purification', label: 'Why Purification',    icon: Droplet,      color: '#0ea5e9' },
   ];
 
   const complianceChanges  = data?.compliance_changes  || [];
@@ -291,16 +292,10 @@ export default function UpdatesNews() {
             </>
           )}
 
-          {activeSection === 'dividends' && (
-            <>
-              <SectionHeader icon={Star} title="Dividends & Payouts" count={dividendsData.length} color="var(--gold)" />
-              <div style={{ maxHeight: '600px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingRight: '6px' }} className="custom-scrollbar">
-                {dividendsData.length === 0
-                  ? <EmptyState icon={Star} title="No Dividend News" subtitle="No recent dividend announcements detected." color="var(--gold)" />
-                  : dividendsData.map(item => <MarketCard key={item.id} item={item} />)
-                }
-              </div>
-            </>
+          {activeSection === 'purification' && (
+            <div style={{ maxHeight: '700px', overflowY: 'auto', paddingRight: '6px' }} className="custom-scrollbar">
+              <UpdatesPurification />
+            </div>
           )}
 
           {activeSection === 'analysis' && (

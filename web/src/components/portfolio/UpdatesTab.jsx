@@ -5,7 +5,7 @@ import IslamicQuote from '../IslamicQuote';
 import UpdatesNews    from './UpdatesNews';
 import UpdatesInbox   from './UpdatesInbox';
 import UpdatesDigest  from './UpdatesDigest';
-import UpdatesPurification from './UpdatesPurification';
+import UpdatesDividends from './UpdatesDividends';
 import UpdatesCompliance  from './UpdatesCompliance';
 import UpdatesIPO from './UpdatesIPO';
 
@@ -148,10 +148,10 @@ export default function UpdatesTab({ unreadCount = 0 }) {
       description: 'Recent status changes for screened companies',
     },
     {
-      id: 'purification',
-      label: 'Purification',
-      icon: Droplet,
-      description: 'Understanding stock purification and AAOIFI standards',
+      id: 'dividends',
+      label: 'Dividends',
+      icon: Star,
+      description: 'Recent dividend announcements and payouts',
     },
     {
       id: 'ipo',
@@ -307,7 +307,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
         {activeSubTab === 'inbox'        && <UpdatesInbox />}
         {activeSubTab === 'digest'       && <UpdatesDigest />}
         {activeSubTab === 'compliance'   && <UpdatesCompliance />}
-        {activeSubTab === 'purification' && <UpdatesPurification />}
+        {activeSubTab === 'dividends' && <UpdatesDividends />}
         {activeSubTab === 'ipo'          && <UpdatesIPO />}
       </div>
     </div>
