@@ -9,6 +9,8 @@ use App\Models\DailyPrice;
 use App\Models\Dividend;
 use App\Models\Watchlist;
 use App\Models\Holding;
+use App\Models\UserNotification;
+use App\Services\NotificationService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 
@@ -17,16 +19,18 @@ class SendUpdatesDigest extends Command
     protected $signature = 'irshad:send-updates-digest';
     protected $description = 'Send the weekly/monthly digest of portfolio and market updates to opted-in users.';
 
-    public function handle()
+    public function handle(NotificationService $notificationService)
     {
         $this->info('Starting to send Updates Digest...');
 
         $preferences = WeeklyDigestPreference::where('email_enabled', true)
+            ->orWhere('push_enabled', true)
+            ->orWhere('in_app_enabled', true)
             ->with('user')
             ->get();
 
         if ($preferences->isEmpty()) {
-            $this->info('No users opted in for the email digest.');
+            $this->info('No users opted in for the email or push digest.');
             return self::SUCCESS;
         }
 
@@ -77,17 +81,43 @@ class SendUpdatesDigest extends Command
 
             $userPerformances = collect($performances)->whereIn('symbol', $userSymbols)->values()->all();
 
-            try {
-                Mail::to($pref->user->email)->send(new UpdatesDigestMail(
-                    $pref->user, 
-                    $userPerformances, 
-                    $topGainers, 
-                    $topLosers, 
-                    $dividendsThisWeek
-                ));
-                $this->info("Sent digest to {$pref->user->email}");
-            } catch (\Exception $e) {
-                $this->error("Failed to send digest to {$pref->user->email}: ".$e->getMessage());
+            if ($pref->email_enabled) {
+                try {
+                    Mail::to($pref->user->email)->send(new UpdatesDigestMail(
+                        $pref->user, 
+                        $userPerformances, 
+                        $topGainers, 
+                        $topLosers, 
+                        $dividendsThisWeek
+                    ));
+                    $this->info("Sent digest to {$pref->user->email}");
+                } catch (\Exception $e) {
+                    $this->error("Failed to send digest to {$pref->user->email}: ".$e->getMessage());
+                }
+            }
+
+            if ($pref->in_app_enabled) {
+                UserNotification::notify(
+                    $pref->user->id,
+                    'Irshad Digest is Ready',
+                    'Your weekly portfolio compliance summary and market update is available.',
+                    [
+                        'icon' => '📧',
+                        'category' => 'system',
+                        'action_label' => 'View Digest',
+                    ]
+                );
+            }
+
+            if ($pref->push_enabled && $pref->user->fcm_token) {
+                $notificationService->sendDirectPushNotification($pref->user->fcm_token, [
+                    'title' => 'Irshad Digest is Ready',
+                    'body' => 'Your weekly portfolio compliance summary and market update is available.',
+                    'data' => [
+                        'type' => 'digest',
+                        'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
+                    ],
+                ]);
             }
         }
 

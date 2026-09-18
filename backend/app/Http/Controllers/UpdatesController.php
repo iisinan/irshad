@@ -107,7 +107,7 @@ class UpdatesController extends Controller
     {
         $pref = WeeklyDigestPreference::firstOrCreate(
             ['user_id' => auth()->id()],
-            ['email_enabled' => false, 'in_app_enabled' => true, 'frequency' => 'weekly']
+            ['email_enabled' => false, 'push_enabled' => false, 'in_app_enabled' => true, 'frequency' => 'weekly']
         );
 
         return response()->json(['data' => $pref]);
@@ -117,6 +117,7 @@ class UpdatesController extends Controller
     {
         $validated = $request->validate([
             'email_enabled' => 'boolean',
+            'push_enabled' => 'boolean',
             'in_app_enabled' => 'boolean',
             'frequency' => 'in:weekly,monthly',
         ]);

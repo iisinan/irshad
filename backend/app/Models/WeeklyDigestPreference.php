@@ -9,6 +9,7 @@ class WeeklyDigestPreference extends Model
     protected $fillable = [
         'user_id',
         'email_enabled',
+        'push_enabled',
         'in_app_enabled',
         'frequency',
         'last_sent_at',
@@ -16,6 +17,7 @@ class WeeklyDigestPreference extends Model
 
     protected $casts = [
         'email_enabled' => 'boolean',
+        'push_enabled' => 'boolean',
         'in_app_enabled' => 'boolean',
         'last_sent_at' => 'datetime',
     ];

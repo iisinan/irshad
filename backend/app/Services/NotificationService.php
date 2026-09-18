@@ -59,4 +59,13 @@ class NotificationService
         //         ]
         //     ]);
     }
+
+    /**
+     * Send direct push notification to a specific token.
+     */
+    public function sendDirectPushNotification(string $token, array $notification)
+    {
+        $this->sendPushNotification($token, $notification);
+    }
+
 }

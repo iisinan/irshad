@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
+import 'package:irshad_mobile/core/api/api_service.dart';
+import 'package:irshad_mobile/core/notifications/notification_service.dart';
 
 class UpdatesDigestTab extends StatefulWidget {
   const UpdatesDigestTab({super.key});
@@ -9,6 +11,71 @@ class UpdatesDigestTab extends StatefulWidget {
 }
 
 class _UpdatesDigestTabState extends State<UpdatesDigestTab> {
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPreferences();
+  }
+
+  Future<void> _loadPreferences() async {
+    try {
+      final response = await ApiService().get('updates/digest');
+      final data = response.data['data'];
+      setState(() {
+        _emailEnabled = data['email_enabled'] ?? false;
+        _pushEnabled = data['push_enabled'] ?? false;
+        _frequency = data['frequency'] == 'monthly' ? 'Monthly' : 'Weekly';
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _savePreferences() async {
+    setState(() => _isLoading = true);
+    try {
+      if (_pushEnabled) {
+        final pushService = PushNotificationService();
+        await pushService.initialize();
+        final token = await pushService.getToken();
+        if (token != null) {
+          await ApiService().put('profile', {'fcm_token': token});
+        }
+      }
+      
+      await ApiService().put('updates/digest', {
+        'email_enabled': _emailEnabled,
+        'push_enabled': _pushEnabled,
+        'frequency': _frequency.toLowerCase(),
+      });
+      
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Preferences saved successfully.'),
+            backgroundColor: context.primary,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to save preferences: $e'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
   bool _emailEnabled = false;
   bool _pushEnabled = false;
   String _frequency = 'Weekly';
@@ -134,17 +201,7 @@ class _UpdatesDigestTabState extends State<UpdatesDigestTab> {
             const SizedBox(height: 32),
             
             ElevatedButton(
-              onPressed: () {
-                // TODO: Save preferences to API
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('Preferences saved successfully.'),
-                    backgroundColor: context.primary,
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              },
+              onPressed: _isLoading ? null : _savePreferences,
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.primary,
                 foregroundColor: Colors.white,
