@@ -102,6 +102,8 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
         return const Icon(Icons.bolt, color: Color(0xFFF59E0B));
       case 'price_alerts':
         return const Icon(Icons.notifications_active, color: Color(0xFFFBBF24));
+      case 'digest':
+        return const Icon(Icons.mail_outline_rounded, color: Color(0xFF8B5CF6));
       default:
         return const Icon(Icons.settings, color: Colors.grey);
     }
@@ -119,6 +121,8 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
         return const Color(0xFFF59E0B).withOpacity(0.1);
       case 'price_alerts':
         return const Color(0xFFFBBF24).withOpacity(0.1);
+      case 'digest':
+        return const Color(0xFF8B5CF6).withOpacity(0.1);
       default:
         return Colors.grey.withOpacity(0.1);
     }
@@ -203,7 +207,12 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
         final category = item['category'] ?? 'system';
 
         return InkWell(
-          onTap: isUnread ? () => _markAsRead(item['id']) : null,
+          onTap: () {
+            if (isUnread) _markAsRead(item['id']);
+            if (category == 'digest' && item['meta'] != null) {
+              _showDigestViewer(context, item['meta']);
+            }
+          },
           child: Container(
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(16),
@@ -278,4 +287,119 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
       ],
     );
   }
+
+  void _showDigestViewer(BuildContext context, Map<String, dynamic> meta) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        final gainers = meta['top_gainers'] as List<dynamic>? ?? [];
+        final losers = meta['top_losers'] as List<dynamic>? ?? [];
+        final userPerf = meta['user_performances'] as List<dynamic>? ?? [];
+
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.85,
+          decoration: BoxDecoration(
+            color: context.bg,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                decoration: BoxDecoration(
+                  border: Border(bottom: BorderSide(color: context.appColors.divider)),
+                ),
+                child: Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: context.textMuted.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Weekly Digest',
+                        style: TextStyle(fontWeight: FontWeight.w900, fontSize: 24, color: context.textDark, letterSpacing: -0.5),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Your portfolio compliance summary and market update.',
+                        style: TextStyle(color: context.textMuted, fontSize: 14, height: 1.5),
+                      ),
+                      const SizedBox(height: 32),
+                      
+                      if (userPerf.isNotEmpty) ...[
+                        Text('Your Watchlist & Portfolio', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: context.textDark)),
+                        const SizedBox(height: 16),
+                        ...userPerf.map((p) => _buildPerfItem(context, p)).toList(),
+                        const SizedBox(height: 32),
+                      ],
+
+                      Text('Market Top Gainers', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: context.textDark)),
+                      const SizedBox(height: 16),
+                      ...gainers.map((p) => _buildPerfItem(context, p)).toList(),
+                      const SizedBox(height: 32),
+
+                      Text('Market Top Losers', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: context.textDark)),
+                      const SizedBox(height: 16),
+                      ...losers.map((p) => _buildPerfItem(context, p)).toList(),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPerfItem(BuildContext context, dynamic p) {
+    final symbol = p['symbol'];
+    final pct = (p['change_pct'] as num).toDouble();
+    final isPositive = pct >= 0;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: context.appColors.divider),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(symbol, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: context.textDark)),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: isPositive ? const Color(0xFF10B981).withValues(alpha: 0.1) : const Color(0xFFEF4444).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              '${isPositive ? '+' : ''}${pct.toStringAsFixed(2)}%',
+              style: TextStyle(
+                color: isPositive ? const Color(0xFF10B981) : const Color(0xFFEF4444),
+                fontWeight: FontWeight.w800,
+                fontSize: 13,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 }

@@ -103,8 +103,14 @@ class SendUpdatesDigest extends Command
                     'Your weekly portfolio compliance summary and market update is available.',
                     [
                         'icon' => '📧',
-                        'category' => 'system',
+                        'category' => 'digest',
                         'action_label' => 'View Digest',
+                        'meta' => [
+                            'user_performances' => $userPerformances,
+                            'top_gainers' => $topGainers,
+                            'top_losers' => $topLosers,
+                            'dividends' => $dividendsThisWeek->toArray(),
+                        ],
                     ]
                 );
             }
