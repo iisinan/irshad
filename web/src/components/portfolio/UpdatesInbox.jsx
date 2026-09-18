@@ -266,8 +266,8 @@ export default function UpdatesInbox() {
           )}
         </div>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          <button onClick={() => setShowDigestModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-muted)', fontWeight: 800, fontSize: '0.72rem', cursor: 'pointer' }}>
-            <Mail size={13} /> Irshad Digest
+          <button onClick={() => setShowDigestModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '10px', border: '1px solid var(--primary-100)', background: 'var(--primary-50)', color: 'var(--primary)', fontWeight: 800, fontSize: '0.72rem', cursor: 'pointer', transition: 'all 0.2s' }}>
+            <Mail size={13} /> Irshad Digest Settings
           </button>
           {unreadCount > 0 && (
             <button onClick={handleMarkAllRead} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-muted)', fontWeight: 800, fontSize: '0.72rem', cursor: 'pointer' }}>
@@ -353,17 +353,17 @@ export default function UpdatesInbox() {
           {[1, 2, 3, 4].map(i => <NotifSkeleton key={i} />)}
         </div>
       ) : displayedNotifications.length === 0 ? (
-        <div className="animate-slide-up" style={{ textAlign: 'center', padding: '80px 24px', background: 'var(--bg)', borderRadius: '24px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
+        <div className="animate-slide-up" style={{ textAlign: 'center', padding: '60px 24px', background: 'transparent', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <div style={{ position: 'relative', width: '80px', height: '80px', margin: '0 auto 24px', animation: 'float 6s ease-in-out infinite' }}>
             <div style={{ position: 'absolute', inset: 0, background: 'var(--primary-50)', borderRadius: '24px', transform: 'rotate(-10deg)', transition: 'all 0.3s' }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'var(--bg-section)', borderRadius: '24px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', transform: 'rotate(5deg)', transition: 'all 0.3s' }}>
-              <Inbox size={32} color="var(--primary)" style={{ opacity: 0.8 }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'var(--bg-section)', borderRadius: '24px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', transform: 'rotate(5deg)', transition: 'all 0.3s', boxShadow: '0 8px 24px rgba(0,0,0,0.04)' }}>
+              <Inbox size={32} color="var(--primary)" style={{ opacity: 0.9 }} />
             </div>
           </div>
-          <div style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '8px', letterSpacing: '-0.5px' }}>
+          <div style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '8px', letterSpacing: '-0.3px' }}>
             {search || showUnreadOnly || activeCategory !== 'all' ? 'No Matches Found' : 'You\'re All Caught Up!'}
           </div>
-          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.6, maxWidth: '280px', margin: '0 auto', fontWeight: 500 }}>
+          <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.6, maxWidth: '320px', margin: '0 auto', fontWeight: 600 }}>
             {search || showUnreadOnly || activeCategory !== 'all'
               ? 'Try adjusting your filters or search query to find what you are looking for.'
               : 'Irshad will notify you about compliance changes, portfolio updates, and market alerts right here.'
@@ -413,39 +413,32 @@ export default function UpdatesInbox() {
       {showDigestModal && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
+          background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(8px)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           zIndex: 9999, padding: '20px'
         }}>
           <div className="animate-slide-up" style={{
-            background: 'var(--bg)', borderRadius: '16px', 
+            background: 'var(--bg)', borderRadius: '24px', 
             width: '100%', maxWidth: '600px', position: 'relative',
             boxShadow: '0 24px 48px rgba(0,0,0,0.3)',
             display: 'flex', flexDirection: 'column',
             overflow: 'hidden', maxHeight: '90vh'
           }}>
-            {/* Header */}
-            <div style={{
-              background: 'var(--bg-section)', padding: '16px 20px',
-              borderBottom: '1px solid var(--border)', display: 'flex',
-              justifyContent: 'space-between', alignItems: 'center'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ background: 'var(--primary)', padding: '8px', borderRadius: '10px', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Mail size={18} />
-                </div>
-                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)' }}>Irshad Digest</h3>
-              </div>
-              <button 
-                onClick={() => setShowDigestModal(false)}
-                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
-              >
-                <X size={20} />
-              </button>
-            </div>
+            <button 
+              onClick={() => setShowDigestModal(false)}
+              style={{ 
+                position: 'absolute', top: '16px', right: '16px', zIndex: 10,
+                background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(4px)',
+                border: '1px solid rgba(0,0,0,0.1)', borderRadius: '50%', padding: '6px',
+                cursor: 'pointer', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+              }}
+            >
+              <X size={18} />
+            </button>
 
             {/* Content Body */}
-            <div style={{ padding: '24px 20px', overflowY: 'auto' }}>
+            <div style={{ overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
               <UpdatesDigest />
             </div>
           </div>

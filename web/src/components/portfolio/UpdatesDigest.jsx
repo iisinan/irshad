@@ -76,12 +76,12 @@ export default function UpdatesDigest() {
   return (
     <div className="animate-slide-up" style={{
       background: 'var(--bg)',
-      border: '1px solid var(--border)',
-      borderRadius: '24px',
-      marginBottom: '32px',
+      border: 'none',
+      borderRadius: '0',
+      marginBottom: '0',
       position: 'relative',
       overflow: 'hidden',
-      boxShadow: 'var(--shadow-sm)',
+      boxShadow: 'none',
     }}>
       {/* ── Rich Hero Header ── */}
       <div style={{
@@ -130,7 +130,7 @@ export default function UpdatesDigest() {
               { label: 'Market insights', icon: CheckCircle2, color: 'var(--primary)' }
             ].map(item => (
               <div key={item.label} style={{ 
-                background: 'var(--bg-section)', border: '1px solid var(--border)', borderRadius: '12px', padding: '14px 16px',
+                background: 'var(--bg-section)', border: 'none', borderRadius: '12px', padding: '14px 16px',
                 display: 'flex', alignItems: 'center', gap: '12px', transition: 'transform 0.2s, box-shadow 0.2s', cursor: 'default'
               }}
               onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = 'var(--shadow-sm)'; }}
@@ -188,7 +188,7 @@ export default function UpdatesDigest() {
             marginTop: '24px', padding: '24px', 
             background: 'color-mix(in srgb, var(--bg-section) 80%, transparent)',
             backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
-            border: '1px solid var(--border)', borderRadius: '16px',
+            border: 'none', borderRadius: '16px',
             display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', gap: '32px' 
           }}>
             <div>
