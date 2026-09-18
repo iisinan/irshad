@@ -11,6 +11,8 @@ import {
 import { toastSuccess, toastError } from '../../utils/toast';
 import localforage from 'localforage';
 import { Link } from 'react-router-dom';
+import UpdatesDigest from './UpdatesDigest';
+import { Mail } from 'lucide-react';
 
 /* ── Skeleton ── */
 const NotifSkeleton = () => {
@@ -152,6 +154,7 @@ export default function UpdatesInbox() {
   const [activeCategory, setActiveCategory] = useState('all');
   const [search, setSearch]                 = useState('');
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
+  const [showDigestModal, setShowDigestModal] = useState(false);
   const pollRef = useRef(null);
 
   const load = useCallback(async (params = {}, append = false) => {
@@ -263,6 +266,9 @@ export default function UpdatesInbox() {
           )}
         </div>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <button onClick={() => setShowDigestModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-muted)', fontWeight: 800, fontSize: '0.72rem', cursor: 'pointer' }}>
+            <Mail size={13} /> Irshad Digest
+          </button>
           {unreadCount > 0 && (
             <button onClick={handleMarkAllRead} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-muted)', fontWeight: 800, fontSize: '0.72rem', cursor: 'pointer' }}>
               <CheckCheck size={13} /> Mark All Read
@@ -402,6 +408,48 @@ export default function UpdatesInbox() {
             </div>
           )}
         </>
+      )}
+
+      {showDigestModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 9999, padding: '20px'
+        }}>
+          <div className="animate-slide-up" style={{
+            background: 'var(--bg)', borderRadius: '16px', 
+            width: '100%', maxWidth: '600px', position: 'relative',
+            boxShadow: '0 24px 48px rgba(0,0,0,0.3)',
+            display: 'flex', flexDirection: 'column',
+            overflow: 'hidden', maxHeight: '90vh'
+          }}>
+            {/* Header */}
+            <div style={{
+              background: 'var(--bg-section)', padding: '16px 20px',
+              borderBottom: '1px solid var(--border)', display: 'flex',
+              justifyContent: 'space-between', alignItems: 'center'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ background: 'var(--primary)', padding: '8px', borderRadius: '10px', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Mail size={18} />
+                </div>
+                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)' }}>Irshad Digest</h3>
+              </div>
+              <button 
+                onClick={() => setShowDigestModal(false)}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Content Body */}
+            <div style={{ padding: '24px 20px', overflowY: 'auto' }}>
+              <UpdatesDigest />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

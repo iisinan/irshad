@@ -153,12 +153,6 @@ export default function UpdatesTab({ unreadCount = 0 }) {
       hasNew: unreadCount > 0,
       description: 'Your personal notifications & alerts',
     },
-    {
-      id: 'digest',
-      label: 'Irshad Digest',
-      icon: Mail,
-      description: 'Portfolio compliance status summary',
-    },
   ];
 
   return (
@@ -305,7 +299,6 @@ export default function UpdatesTab({ unreadCount = 0 }) {
       <div className="animate-slide-up stagger-3" key={activeSubTab} style={{ minHeight: '400px' }}>
         {activeSubTab === 'news'         && <UpdatesNews />}
         {activeSubTab === 'inbox'        && <UpdatesInbox />}
-        {activeSubTab === 'digest'       && <UpdatesDigest />}
         {activeSubTab === 'compliance'   && <UpdatesCompliance />}
         {activeSubTab === 'dividends' && <UpdatesDividends />}
         {activeSubTab === 'ipo'          && <UpdatesIPO />}
