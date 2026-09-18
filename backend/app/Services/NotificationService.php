@@ -44,16 +44,21 @@ class NotificationService
      */
     private function getAccessToken(): ?string
     {
-        $credentialsPath = env('GOOGLE_APPLICATION_CREDENTIALS');
-
-        if (!$credentialsPath || !file_exists($credentialsPath)) {
-            Log::warning("FCM Error: GOOGLE_APPLICATION_CREDENTIALS not set or file missing.");
-            return null;
-        }
-
         try {
             $client = new GoogleClient();
-            $client->setAuthConfig($credentialsPath);
+            
+            // Support for raw JSON from env (useful for Railway/Forge)
+            $rawJson = env('FIREBASE_CREDENTIALS');
+            if ($rawJson) {
+                $client->setAuthConfig(json_decode($rawJson, true));
+            } else {
+                $credentialsPath = env('GOOGLE_APPLICATION_CREDENTIALS');
+                if (!$credentialsPath || !file_exists($credentialsPath)) {
+                    Log::warning("FCM Error: Neither FIREBASE_CREDENTIALS nor valid GOOGLE_APPLICATION_CREDENTIALS set.");
+                    return null;
+                }
+                $client->setAuthConfig($credentialsPath);
+            }
             $client->addScope('https://www.googleapis.com/auth/firebase.messaging');
             $client->fetchAccessTokenWithAssertion();
             $token = $client->getAccessToken();
