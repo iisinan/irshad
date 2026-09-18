@@ -1,8 +1,0 @@
-<?php
-require __DIR__.'/vendor/autoload.php';
-$app = require_once __DIR__.'/bootstrap/app.php';
-$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
-
-$companies = \App\Models\Company::with('financials')->get()->toArray();
-echo json_encode($companies, JSON_PRETTY_PRINT);
-

@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:irshad_mobile/core/widgets/company_avatar.dart';
 import 'package:irshad_mobile/features/stocks/ui/stock_detail_screen.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'updates_purification_tab.dart';
 
 class UpdatesNewsTab extends StatefulWidget {
   const UpdatesNewsTab({super.key});
@@ -95,7 +96,7 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
     
     final sections = [
       {'id': 'market', 'label': 'Market Intelligence', 'icon': Icons.bar_chart_outlined, 'color': context.primary},
-      {'id': 'dividends', 'label': 'Dividends', 'icon': Icons.star_outline, 'color': const Color(0xFFEAB308)},
+      {'id': 'purification', 'label': 'Why Purification', 'icon': Icons.water_drop_outlined, 'color': const Color(0xFF0EA5E9)},
       {'id': 'analysis', 'label': 'Analysis', 'icon': Icons.trending_up_outlined, 'color': const Color(0xFF8B5CF6)},
     ];
 
@@ -343,10 +344,18 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
         final dateB = DateTime.tryParse(b['published_at']?.toString() ?? '') ?? DateTime.fromMillisecondsSinceEpoch(0);
         return dateB.compareTo(dateA);
       });
-    } else if (_activeSection == 'dividends') {
-      items = (_data?['dividends'] as List?)?.map((e) => Map<String, dynamic>.from(e as Map)).toList() ?? [];
     } else if (_activeSection == 'analysis') {
       items = (_data?['analysis'] as List?)?.map((e) => Map<String, dynamic>.from(e as Map)).toList() ?? [];
+    }
+
+    if (_activeSection == 'purification') {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildSectionPills(),
+          const UpdatesPurificationTab(),
+        ],
+      );
     }
 
     return Column(

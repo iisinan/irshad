@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
+import 'updates_digest_tab.dart';
 import 'package:irshad_mobile/core/api/api_service.dart';
 import 'package:hive/hive.dart';
 import 'dart:convert';
@@ -133,20 +134,65 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
       return cat != 'market_news' && cat != 'business_activity';
     }).toList();
 
-    if (filteredNotifications.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.inbox, size: 48, color: context.textMuted.withOpacity(0.5)),
-            const SizedBox(height: 16),
-            Text('No notifications yet', style: TextStyle(color: context.textMuted, fontSize: 16)),
-          ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => Container(
+                      decoration: BoxDecoration(
+                        color: context.bg,
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                      ),
+                      padding: const EdgeInsets.only(top: 16),
+                      child: const UpdatesDigestTab(),
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: context.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: context.primary.withValues(alpha: 0.2)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.mail_outline_rounded, size: 16, color: context.primary),
+                      const SizedBox(width: 6),
+                      Text('Irshad Digest Settings', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12, color: context.primary)),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-      );
-    }
-
-    return ListView.builder(
+        if (filteredNotifications.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 48),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.inbox, size: 48, color: context.textMuted.withValues(alpha: 0.5)),
+                  const SizedBox(height: 16),
+                  Text('No notifications yet', style: TextStyle(color: context.textMuted, fontSize: 16)),
+                ],
+              ),
+            ),
+          )
+        else
+          ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
@@ -228,6 +274,8 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
           ),
         );
       },
+    ),
+      ],
     );
   }
 }

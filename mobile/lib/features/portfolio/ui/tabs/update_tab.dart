@@ -7,9 +7,7 @@ import 'package:irshad_mobile/core/providers/app_state_provider.dart';
 
 import 'updates/updates_news_tab.dart';
 import 'updates/updates_inbox_tab.dart';
-import 'updates/updates_digest_tab.dart';
-import 'purification_tab.dart';
-import 'updates/updates_purification_tab.dart';
+import 'updates/updates_dividends_tab.dart';
 import 'updates/updates_compliance_tab.dart';
 import 'updates/updates_ipo_tab.dart';
 import '../widgets/islamic_quote_widget.dart';
@@ -48,11 +46,10 @@ class _UpdateTabState extends State<UpdateTab> {
 
   final List<Map<String, dynamic>> _tabs = [
     {'id': 'news', 'label': 'News & Insights', 'icon': Icons.newspaper_rounded},
-    {'id': 'inbox', 'label': 'Inbox', 'icon': Icons.notifications_none_rounded},
-    {'id': 'digest', 'label': 'Irshad Digest', 'icon': Icons.mail_outline_rounded},
     {'id': 'compliance', 'label': 'Compliance Changes', 'icon': Icons.shield_outlined},
-    {'id': 'purification', 'label': 'Purification', 'icon': Icons.water_drop_outlined},
     {'id': 'ipo', 'label': 'IPO', 'icon': Icons.rocket_launch_outlined},
+    {'id': 'dividends', 'label': 'Dividends', 'icon': Icons.star_outline},
+    {'id': 'inbox', 'label': 'Inbox', 'icon': Icons.notifications_none_rounded},
   ];
 
   @override
@@ -261,16 +258,14 @@ class _UpdateTabState extends State<UpdateTab> {
     switch (_activeTabId) {
       case 'news':
         return const UpdatesNewsTab();
-      case 'inbox':
-        return const UpdatesInboxTab();
-      case 'digest':
-        return const UpdatesDigestTab();
       case 'compliance':
         return const UpdatesComplianceTab();
-      case 'purification':
-        return const UpdatesPurificationTab();
       case 'ipo':
         return const UpdatesIpoTab();
+      case 'dividends':
+        return const UpdatesDividendsTab();
+      case 'inbox':
+        return const UpdatesInboxTab();
       default:
         return const SizedBox.shrink();
     }
