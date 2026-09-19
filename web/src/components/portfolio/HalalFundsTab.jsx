@@ -9,7 +9,7 @@ const funds = [
     launched: '2025',
     trustee: null,
     custodian: null,
-    description: 'Managed by Afrinvest Asset Management Ltd, the asset-management arm of Afrinvest West Africa and overseen by an Advisory Committee of Experts (ACE). Investment Components: 70–100% in Sukuk, 30% Shariah-compliant equities.',
+    description: 'Managed by Afrinvest Asset Management Ltd, the asset-management arm of Afrinvest West Africa, overseen by an Advisory Committee of Experts (ACE). Investment Components: 70–100% in Sukuk, 30% Shariah-compliant equities.',
   },
   { 
     asset: 'ARM Halal Balanced Fund', 
@@ -18,7 +18,7 @@ const funds = [
     launched: '2004',
     trustee: 'Royal Exchange Plc',
     custodian: 'Rand Merchant Bank',
-    description: 'Managed by ARM Investment Managers Ltd (part of Asset & Resource Mgt Holding Co). One of the longest-running halal balanced funds in Nigeria.',
+    description: 'One of the longest-running halal balanced funds in Nigeria. Managed by ARM Investment Managers Ltd (part of Asset & Resource Mgt Holding Co).',
   },
   { 
     asset: 'ARM Sharia Compliant Fixed Income Fund', 
@@ -54,7 +54,7 @@ const funds = [
     launched: null,
     trustee: null,
     custodian: null,
-    description: 'Launched alongside a matching conventional Cordros Fixed Income Fund — with strict ring-fencing to prevent co-mingling of halal and conventional assets.',
+    description: 'Launched alongside a matching conventional Cordros Fixed Income Fund with strict ring-fencing to prevent co-mingling of halal and conventional assets.',
   },
   { 
     asset: "D'Namaz Halal Fixed Income Fund", 
@@ -63,7 +63,7 @@ const funds = [
     launched: '2025',
     trustee: null,
     custodian: null,
-    description: "Benchmarked against a blend of 3-, 5- and 10-year FGN Sukuk plus NITTY, judging whether returns are competitive with conventional savings. Managed by D'Namaz Capital.",
+    description: "Benchmarked against a blend of 3-, 5- and 10-year FGN Sukuk plus NITTY as a yardstick for whether returns are competitive with conventional savings. Managed by D'Namaz Capital.",
   },
   { 
     asset: 'EDC Halal Fund', 
@@ -72,7 +72,7 @@ const funds = [
     launched: '2022',
     trustee: null,
     custodian: null,
-    description: 'Managed by EDC Fund Management, the asset-management subsidiary of Ecobank Nigeria. Positioned as a template for a multi-country Islamic fund beyond Nigeria.',
+    description: 'Asset-management subsidiary of Ecobank Nigeria. Positioned as a template for a multi-country Islamic fund beyond Nigeria.',
   },
   { 
     asset: 'Emerging Africa Halal Fund', 
@@ -81,7 +81,7 @@ const funds = [
     launched: '2024',
     trustee: null,
     custodian: null,
-    description: 'Managed by Emerging Africa Asset Management Ltd (EAAML), part of the Emerging Africa Group. A newer entrant in the growing Nigerian Islamic finance space.',
+    description: 'Managed by EAAML, part of the Emerging Africa Group. A newer entrant in the growing Nigerian Islamic finance landscape.',
   },
   { 
     asset: 'FSDH Halal Fund', 
@@ -90,7 +90,7 @@ const funds = [
     launched: '2023',
     trustee: null,
     custodian: null,
-    description: 'Established as part of FSDH\'s broader "Coral Funds" family. Managed by FSDH Asset Management Ltd (FSDH Group).',
+    description: 'Established as part of FSDH\'s broader "Coral Funds" family. Managed by FSDH Asset Management Ltd.',
   },
   { 
     asset: 'Lotus Halal ETF', 
@@ -117,7 +117,7 @@ const funds = [
     launched: null,
     trustee: null,
     custodian: null,
-    description: 'SEC-registered Shariah-compliant equity fund — equity-based (not fixed-income). Managed by Lotus Capital Ltd.',
+    description: 'SEC-registered Shariah-compliant equity fund — equity-based, not fixed-income. Managed by Lotus Capital Ltd.',
   },
   { 
     asset: 'Lotus Waqf (Endowment) Fund', 
@@ -126,7 +126,7 @@ const funds = [
     launched: null,
     trustee: null,
     custodian: null,
-    description: 'SEC-approved Waqf (endowment) fund — investment income perpetually funds charitable causes (education, healthcare, economic empowerment). A unique structure in Nigerian Islamic finance.',
+    description: 'SEC-approved Waqf (endowment) fund — investment income perpetually funds charitable causes (education, healthcare, economic empowerment).',
   },
   { 
     asset: 'Marble Halal Commodities Fund', 
@@ -135,7 +135,7 @@ const funds = [
     launched: '2021',
     trustee: null,
     custodian: null,
-    description: 'SEC-approved Shariah-compliant commodities fund, investing in securitized commodities (agriculture, precious metals) — distinct from the typical Sukuk/equity mix. Managed by Marble Capital Ltd.',
+    description: 'SEC-approved Shariah-compliant commodities fund, investing in securitized commodities (agriculture, precious metals) — distinct from typical Sukuk/equity funds.',
   },
   { 
     asset: 'Marble Halal Fixed Income Fund', 
@@ -171,7 +171,7 @@ const funds = [
     launched: null,
     trustee: null,
     custodian: null,
-    description: 'Shari\'ah-compliant equity product with min. 70% Shariah-compliant equities and up to 30% Sukuk/Shariah money-market instruments. Managed by Stanbic IBTC Asset Management.',
+    description: 'Shari\'ah-compliant equity product: min. 70% Shariah-compliant equities, up to 30% Sukuk/Shariah money-market instruments.',
   },
   { 
     asset: 'Stanbic IBTC Shariah Fixed Income Fund', 
@@ -184,85 +184,70 @@ const funds = [
   },
 ];
 
+// All type styles use the app's own CSS variable tokens — no hardcoded rainbow
 const TYPE_CONFIG = {
-  'Fixed Income': { bg: 'rgba(59,130,246,0.1)', color: '#3b82f6' },
-  'Balanced':     { bg: 'rgba(16,185,129,0.1)', color: '#10b981' },
-  'Equity':       { bg: 'rgba(139,92,246,0.1)', color: '#8b5cf6' },
-  'ETF':          { bg: 'rgba(245,158,11,0.1)', color: '#f59e0b' },
-  'Endowment':    { bg: 'rgba(236,72,153,0.1)', color: '#ec4899' },
-  'Commodities':  { bg: 'rgba(249,115,22,0.1)', color: '#f97316' },
-  'Ethical':      { bg: 'rgba(14,165,233,0.1)', color: '#0ea5e9' },
+  'Fixed Income': { bg: 'var(--primary-50)',   color: 'var(--primary)',  label: 'Fixed Income' },
+  'Balanced':     { bg: 'var(--halal-bg)',      color: 'var(--halal)',    label: 'Balanced' },
+  'Equity':       { bg: 'var(--primary-100)',   color: 'var(--primary)',  label: 'Equity' },
+  'ETF':          { bg: 'var(--gold-50)',        color: 'var(--accent)',   label: 'ETF' },
+  'Endowment':    { bg: 'var(--gold-100)',       color: 'var(--accent)',   label: 'Endowment' },
+  'Commodities':  { bg: 'var(--gold-50)',        color: 'var(--accent)',   label: 'Commodities' },
+  'Ethical':      { bg: 'var(--halal-bg)',       color: 'var(--halal)',    label: 'Ethical' },
 };
 
-const AVATAR_COLORS = [
-  '#3b82f6','#ef4444','#10b981','#f59e0b','#8b5cf6','#ec4899','#0ea5e9','#f97316',
-];
-
-function getAvatarColor(str) {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
-}
+const ALL_TYPES = ['All', ...Object.keys(TYPE_CONFIG)];
 
 function FundCard({ fund }) {
   const [expanded, setExpanded] = useState(false);
-  const accentColor = getAvatarColor(fund.provider);
-  const typeConfig = TYPE_CONFIG[fund.type] || TYPE_CONFIG['Balanced'];
+  const type = TYPE_CONFIG[fund.type] || TYPE_CONFIG['Balanced'];
+  const hasMeta = fund.trustee || fund.custodian;
+  const isLong = fund.description.length > 120;
 
   return (
-    <div
-      style={{
-        background: 'var(--bg)',
-        border: '1px solid var(--border)',
-        borderRadius: '16px',
-        overflow: 'hidden',
-        transition: 'box-shadow 0.2s, transform 0.2s',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-      onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 8px 30px rgba(0,0,0,0.08)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-      onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; }}
+    <div style={{
+      background: 'var(--bg)',
+      border: '1px solid var(--border)',
+      borderRadius: '16px',
+      overflow: 'hidden',
+      transition: 'box-shadow 0.2s, transform 0.2s',
+      display: 'flex',
+      flexDirection: 'column',
+    }}
+    onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.08)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+    onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; }}
     >
-      {/* Accent Top Bar */}
-      <div style={{ height: '4px', background: accentColor, borderRadius: '16px 16px 0 0' }} />
+      {/* Accent bar uses primary color */}
+      <div style={{ height: '3px', background: 'linear-gradient(90deg, var(--primary), var(--accent))' }} />
 
-      {/* Card Body */}
-      <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column', gap: '14px' }}>
-        
-        {/* Header Row */}
+      <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+
+        {/* Avatar + name + badges */}
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
-          {/* Avatar */}
           <div style={{
-            width: 46, height: 46, borderRadius: '12px', flexShrink: 0,
-            background: `${accentColor}22`,
-            border: `1.5px solid ${accentColor}44`,
+            width: 44, height: 44, borderRadius: '12px', flexShrink: 0,
+            background: 'var(--primary-50)',
+            border: '1.5px solid var(--border-strong)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: 900, fontSize: '1.2rem', color: accentColor,
+            fontWeight: 900, fontSize: '1.1rem', color: 'var(--primary)',
           }}>
             {fund.provider.charAt(0)}
           </div>
-          {/* Title + Badge */}
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
-              <span style={{ fontSize: '0.95rem', fontWeight: 900, color: 'var(--text-dark)', lineHeight: 1.3 }}>
-                {fund.asset}
-              </span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              {/* Fund Type Badge */}
+            <p style={{ margin: 0, fontSize: '0.95rem', fontWeight: 900, color: 'var(--text-dark)', lineHeight: 1.3, marginBottom: '6px' }}>
+              {fund.asset}
+            </p>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
               <span style={{
-                fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.5px',
-                padding: '3px 8px', borderRadius: '20px',
-                background: typeConfig.bg, color: typeConfig.color,
-                textTransform: 'uppercase',
+                fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.4px',
+                padding: '3px 9px', borderRadius: '20px',
+                background: type.bg, color: type.color,
+                textTransform: 'uppercase', border: `1px solid ${type.color}33`,
               }}>
                 {fund.type}
               </span>
-              {/* Launch Year */}
               {fund.launched && (
-                <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                  <Calendar size={11} />
-                  Est. {fund.launched}
+                <span style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                  <Calendar size={10} /> Est. {fund.launched}
                 </span>
               )}
             </div>
@@ -271,60 +256,62 @@ function FundCard({ fund }) {
 
         {/* Provider */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Building2 size={13} color="var(--text-muted)" />
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 700 }}>{fund.provider}</span>
+          <Building2 size={12} color="var(--text-muted)" />
+          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>{fund.provider}</span>
         </div>
+
+        {/* Divider */}
+        <div style={{ borderTop: '1px solid var(--border)' }} />
 
         {/* Description */}
         <p style={{
-          fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.6, margin: 0,
+          fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.65, margin: 0,
           display: '-webkit-box', WebkitLineClamp: expanded ? 'unset' : 2,
           WebkitBoxOrient: 'vertical', overflow: 'hidden',
-          transition: 'all 0.3s',
         }}>
           {fund.description}
         </p>
 
-        {/* Expand / Collapse + Trustee/Custodian */}
-        {(fund.description.length > 120 || fund.trustee || fund.custodian) && (
+        {/* Expand toggle */}
+        {(isLong || hasMeta) && (
           <button
             onClick={() => setExpanded(e => !e)}
             style={{
               background: 'none', border: 'none', padding: 0, cursor: 'pointer',
               display: 'flex', alignItems: 'center', gap: '4px',
-              fontSize: '0.75rem', fontWeight: 700, color: accentColor,
+              fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary)',
               width: 'fit-content',
             }}
           >
-            {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
             {expanded ? 'Show less' : 'Show more'}
           </button>
         )}
 
-        {/* Trustee & Custodian — visible when expanded */}
-        {expanded && (fund.trustee || fund.custodian) && (
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+        {/* Trustee & Custodian chips */}
+        {expanded && hasMeta && (
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             {fund.trustee && (
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: '6px',
-                padding: '5px 10px', borderRadius: '8px',
+              <span style={{
+                display: 'flex', alignItems: 'center', gap: '5px',
+                padding: '4px 10px', borderRadius: '8px',
                 background: 'var(--bg-section)', border: '1px solid var(--border)',
-                fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)',
+                fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600,
               }}>
-                <Shield size={11} />
-                <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>Trustee:</span> {fund.trustee}
-              </div>
+                <Shield size={10} />
+                <span style={{ opacity: 0.7 }}>Trustee:</span> {fund.trustee}
+              </span>
             )}
             {fund.custodian && (
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: '6px',
-                padding: '5px 10px', borderRadius: '8px',
+              <span style={{
+                display: 'flex', alignItems: 'center', gap: '5px',
+                padding: '4px 10px', borderRadius: '8px',
                 background: 'var(--bg-section)', border: '1px solid var(--border)',
-                fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)',
+                fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600,
               }}>
-                <Building2 size={11} />
-                <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>Custodian:</span> {fund.custodian}
-              </div>
+                <Building2 size={10} />
+                <span style={{ opacity: 0.7 }}>Custodian:</span> {fund.custodian}
+              </span>
             )}
           </div>
         )}
@@ -333,67 +320,62 @@ function FundCard({ fund }) {
   );
 }
 
-const ALL_TYPES = ['All', ...Object.keys(TYPE_CONFIG)];
-
 export default function HalalFundsTab() {
   const [search, setSearch] = useState('');
   const [activeType, setActiveType] = useState('All');
 
-  const filteredFunds = funds.filter(f => {
-    const matchesSearch = 
-      f.asset.toLowerCase().includes(search.toLowerCase()) || 
-      f.provider.toLowerCase().includes(search.toLowerCase()) ||
-      f.description.toLowerCase().includes(search.toLowerCase());
-    const matchesType = activeType === 'All' || f.type === activeType;
-    return matchesSearch && matchesType;
+  const filtered = funds.filter(f => {
+    const q = search.toLowerCase();
+    const matchSearch = !q || f.asset.toLowerCase().includes(q) || f.provider.toLowerCase().includes(q) || f.description.toLowerCase().includes(q);
+    const matchType = activeType === 'All' || f.type === activeType;
+    return matchSearch && matchType;
   });
 
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      
+
       {/* Header */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-0.5px', margin: 0 }}>
             Halal Mutual Funds
           </h2>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-            {funds.length} shariah-compliant mutual funds and ETFs in Nigeria
+          <p style={{ fontSize: '0.83rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+            {funds.length} SEC-approved shariah-compliant funds &amp; ETFs in Nigeria
           </p>
         </div>
-        <div style={{ position: 'relative', flex: '1 1 260px', maxWidth: '300px' }}>
-          <Search size={15} color="var(--text-muted)" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
+        <div style={{ position: 'relative', flex: '1 1 240px', maxWidth: '280px' }}>
+          <Search size={14} color="var(--text-muted)" style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)' }} />
           <input
             type="text"
             placeholder="Search funds or providers..."
             value={search}
             onChange={e => setSearch(e.target.value)}
             style={{
-              width: '100%', padding: '10px 14px 10px 38px', borderRadius: '12px',
-              border: '1px solid var(--border)', background: 'var(--bg)',
-              fontSize: '0.85rem', color: 'var(--text-dark)', outline: 'none',
-              boxSizing: 'border-box',
+              width: '100%', padding: '10px 14px 10px 36px', borderRadius: '12px',
+              border: '1px solid var(--border-strong)', background: 'var(--bg)',
+              fontSize: '0.83rem', color: 'var(--text-dark)', outline: 'none', boxSizing: 'border-box',
             }}
           />
         </div>
       </div>
 
-      {/* Type Filter Pills */}
+      {/* Type filter pills — using app token colors */}
       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
         {ALL_TYPES.map(type => {
-          const config = TYPE_CONFIG[type];
+          const cfg = TYPE_CONFIG[type];
           const isActive = activeType === type;
           return (
             <button
               key={type}
               onClick={() => setActiveType(type)}
               style={{
-                padding: '6px 14px', borderRadius: '20px', border: '1.5px solid',
-                fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer',
+                padding: '5px 13px', borderRadius: '20px', cursor: 'pointer',
+                fontSize: '0.77rem', fontWeight: 700, border: '1.5px solid',
                 transition: 'all 0.15s',
-                borderColor: isActive ? (config ? config.color : 'var(--text-dark)') : 'var(--border)',
-                background: isActive ? (config ? config.bg : 'var(--bg-section)') : 'transparent',
-                color: isActive ? (config ? config.color : 'var(--text-dark)') : 'var(--text-muted)',
+                borderColor: isActive ? (cfg ? cfg.color : 'var(--primary)') : 'var(--border-strong)',
+                background: isActive ? (cfg ? cfg.bg : 'var(--primary-50)') : 'transparent',
+                color: isActive ? (cfg ? cfg.color : 'var(--primary)') : 'var(--text-muted)',
               }}
             >
               {type}
@@ -402,28 +384,24 @@ export default function HalalFundsTab() {
         })}
       </div>
 
-      {/* Results count */}
+      {/* Result hint */}
       {(search || activeType !== 'All') && (
-        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>
-          {filteredFunds.length} result{filteredFunds.length !== 1 ? 's' : ''}
+        <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0 }}>
+          {filtered.length} fund{filtered.length !== 1 ? 's' : ''} found
         </p>
       )}
 
-      {/* Card Grid */}
-      {filteredFunds.length > 0 ? (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-          gap: '16px',
-        }}>
-          {filteredFunds.map((fund, idx) => <FundCard key={idx} fund={fund} />)}
+      {/* Grid */}
+      {filtered.length > 0 ? (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(310px, 1fr))', gap: '14px' }}>
+          {filtered.map((fund, i) => <FundCard key={i} fund={fund} />)}
         </div>
       ) : (
         <div style={{
-          textAlign: 'center', padding: '60px 20px',
-          background: 'var(--bg)', borderRadius: '16px', border: '1px solid var(--border)',
+          padding: '60px 20px', textAlign: 'center',
+          background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '16px',
         }}>
-          <p style={{ fontSize: '1rem', color: 'var(--text-muted)', margin: 0 }}>No funds found for "{search}"</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: 0 }}>No funds found for "{search}"</p>
         </div>
       )}
     </div>
