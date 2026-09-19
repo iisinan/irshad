@@ -103,7 +103,7 @@ const StatusBadge = ({ status }) => {
 };
 
 /* ─── Ratio bar ─────────────────────────────────────────── */
-const RatioBar = ({ title, subtitle, ratio, threshold, numLabel, numVal, denLabel, denVal, formula, onInspect }) => {
+const RatioBar = ({ title, subtitle, ratio, threshold, numLabel, numVal, denLabel, denVal, formula, onInspect, isClickable = true }) => {
   const [expanded, setExpanded] = React.useState(false);
 
   if (ratio === null || ratio === undefined || isNaN(parseFloat(ratio))) {
@@ -126,7 +126,7 @@ const RatioBar = ({ title, subtitle, ratio, threshold, numLabel, numVal, denLabe
   const pin = Math.min((thr/maxV)*100, 100);
   const m   = title.match(/^(\d+)\.\s*(.*)/);
   const num = m?m[1]:null; const name=m?m[2]:title;
-  const clickable = true;
+  const clickable = isClickable;
 
   const isDebtOrCash = title.toLowerCase().includes('debt') || title.toLowerCase().includes('cash');
   const isImpure = title.toLowerCase().includes('impure');
@@ -895,11 +895,11 @@ const AaoifiScreening = () => {
             </div>}/>
           <div style={{ padding:'24px' }}>
             <div style={{ marginBottom:28 }}>
-              <RatioBar title="1. Debt ratio"     subtitle={`Total Debt / ${denLabelText} × 100`}               ratio={debtRatio}                        threshold={30} numLabel="Total Debt"        numVal={totalDebt}    denLabel={denLabelText}    denVal={denValAmount}     formula={`Total Debt / ${denLabelText} × 100`}          onInspect={setModalData}/>
+              <RatioBar title="1. Debt ratio"     subtitle={`Total Debt / ${denLabelText} × 100`}               ratio={debtRatio}                        threshold={30} numLabel="Total Debt"        numVal={totalDebt}    denLabel={denLabelText}    denVal={denValAmount}     formula={`Total Debt / ${denLabelText} × 100`}          onInspect={setModalData} isClickable={symbol !== 'JAIZBANK'}/>
               {symbol !== 'JAIZBANK' && (
-                <RatioBar title="2. Cash ratio"     subtitle={`(Cash + Securities) / ${denLabelText} × 100`}      ratio={cashRatio}                        threshold={30} numLabel="Cash & Securities" numVal={cashAndSec}   denLabel={denLabelText}    denVal={denValAmount}     formula={`(Cash + Sec.) / ${denLabelText} × 100`}       onInspect={setModalData}/>
+                <RatioBar title="2. Cash ratio"     subtitle={`(Cash + Securities) / ${denLabelText} × 100`}      ratio={cashRatio}                        threshold={30} numLabel="Cash & Securities" numVal={cashAndSec}   denLabel={denLabelText}    denVal={denValAmount}     formula={`(Cash + Sec.) / ${denLabelText} × 100`}       onInspect={setModalData} isClickable={symbol !== 'JAIZBANK'}/>
               )}
-              <RatioBar title={symbol === 'JAIZBANK' ? '2. Impure revenue' : '3. Impure revenue'} subtitle="Impure Income / Total Revenue × 100"         ratio={impureRatio} threshold={5}  numLabel="Impure Income"    numVal={interestIncome} denLabel="Total Revenue" denVal={totalRevenue}  formula="Impure Income / Total Revenue × 100"    onInspect={setModalData}/>
+              <RatioBar title={symbol === 'JAIZBANK' ? '2. Impure revenue' : '3. Impure revenue'} subtitle="Impure Income / Total Revenue × 100"         ratio={impureRatio} threshold={5}  numLabel="Impure Income"    numVal={interestIncome} denLabel="Total Revenue" denVal={totalRevenue}  formula="Impure Income / Total Revenue × 100"    onInspect={setModalData} isClickable={symbol !== 'JAIZBANK'}/>
             </div>
             <div style={{ padding:'16px 20px',background:'var(--primary-50)',border:'1px dashed var(--primary-100)',borderRadius:16,display:'flex',alignItems:'flex-start',gap:12, boxShadow:'var(--shadow-sm)' }}>
               <Info size={16} color="var(--primary)" style={{ flexShrink:0,marginTop:2 }}/>
