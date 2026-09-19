@@ -1217,7 +1217,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                                   ),
                                 ],
                                 // See Ratios button — blue if passed business activity but failed financial
-                                if (!businessFailed && !label.toUpperCase().contains('DOUBTFUL'))
+                                if (!businessFailed && !label.toUpperCase().contains('DOUBTFUL') && symbol != 'LOTUSHAL15')
                                   Builder(builder: (ctx) {
                                     final bool isNC = label.toUpperCase().contains('NON-COMPLIANT');
                                     final btnColor = isNC ? const Color(0xFF1D6ADB) : ctx.halal;
