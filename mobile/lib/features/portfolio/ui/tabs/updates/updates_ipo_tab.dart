@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 
 
@@ -16,15 +17,16 @@ class UpdatesIpoTab extends StatelessWidget {
       'sector': 'Oil & Gas',
       'exchange': 'NGX (Planned)',
       'valuation': '~\$20B+',
-      'logo': 'assets/logos/dangote.png',
+      'logo': 'assets/logos/DPRP.png',
       'timeline': 'Q4 2026 - Q1 2027 (Est.)',
       'capacity': '650,000 barrels per day',
       'listingLocation': 'Nigerian Exchange (NGX), London (LSE)',
-      'shariahAssessment': 'As a refining business, the core activity (petroleum processing) is generally considered permissible (Halal). A full AAOIFI screening regarding debt ratios (which may be substantial given the project size) and interest-bearing assets will be conducted once the official prospectus and financial statements are released.',
-      'description': "The Dangote Petroleum Refinery and Petrochemicals FZE initial public offering is now live. The offering involves 4.1 billion ordinary shares aimed at raising ₦2.15 trillion (\$1.6 billion), representing one of the largest IPOs in African history. Minimum subscription is 10 shares (₦5,250), with subsequent multiples of 10. Irshad will provide a comprehensive Shariah compliance breakdown of the offer based on the official prospectus.",
+      'shariahAssessment': 'As a refining business, the core activity (petroleum processing) is permissible (Halal). The H1 2026 audited statements have been analyzed: The company holds ₦5.66B in debt (0.0086% Debt Ratio) and ₦4.26B in cash (0.0065% Cash Ratio), while impure income stands safely at 0.35%. It passes all AAOIFI quantitative financial screening ratios. Status: 100% HALAL.',
+      'description': "The Dangote Petroleum Refinery and Petrochemicals FZE initial public offering is now live. The offering involves 4.1 billion ordinary shares aimed at raising ₦2.15 trillion (\$1.6 billion), representing one of the largest IPOs in African history. Minimum subscription is 10 shares (₦5,250), with subsequent multiples of 10. The offering is officially certified as Shariah-compliant.",
       'dateStart': 'Sept 14, 2026',
       'dateEnd': 'Oct 13, 2026',
-      'price': '₦525/share'
+      'price': '₦525/share',
+      'sourceUrl': 'https://acrobat.adobe.com/id/urn:aaid:sc:EU:9676fb4f-2d53-4785-a994-5cac81b2c454?viewer%21megaVerb=group-discover'
     };
 
     return ListView(
@@ -308,6 +310,36 @@ class UpdatesIpoTab extends StatelessWidget {
                               Text('Preliminary Shariah Assessment', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: context.appColors.halal)),
                               const SizedBox(height: 8),
                               Text(ipo['shariahAssessment'], style: TextStyle(fontSize: 13, color: context.textMuted, height: 1.5)),
+                              if (ipo['sourceUrl'] != null) ...[
+                                const SizedBox(height: 16),
+                                GestureDetector(
+                                  onTap: () async {
+                                    final url = Uri.parse(ipo['sourceUrl']);
+                                    if (await canLaunchUrl(url)) {
+                                      await launchUrl(url, mode: LaunchMode.externalApplication);
+                                    }
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                    decoration: BoxDecoration(
+                                      color: context.bgAlt,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: context.appColors.divider),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.open_in_new_rounded, size: 14, color: context.textDark),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          'View Original Document',
+                                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: context.textDark),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                         ),
