@@ -3,34 +3,34 @@ import { BookOpen, X } from 'lucide-react';
 
 const quotes = [
   {
-    arabic: "اللَّهُمَّ إِنِّي أَسْأَلُكَ عِلْمًا نَافِعًا، وَرِزْقًا طَيِّبًا، وَعَمَلًا مُتَقَبَّلًا",
-    transliteration: "Allaahumma 'innee 'as'aluka 'ilman naafi'an, wa rizqan tayyiban, wa 'amalan mutaqabbalan.",
-    translation: "O Allaah, I ask You for beneficial knowledge, good provision, and accepted deeds.",
-    source: "Ibn Majah: 5:925"
+    arabic: "",
+    transliteration: "",
+    translation: "And I said, 'Seek your Lord's forgiveness, for He is truly Most Forgiving. He will shower you with abundant rain, and He will supply you with wealth and children, and give you gardens as well as rivers.'",
+    source: "Surah Nuh (71:10–12)"
   },
   {
     arabic: "",
     transliteration: "",
-    translation: "When the verses of Surat Al-Baqara about the usury (Riba) were revealed, the Prophet went to the mosque and recited them in front of the people and then banned the trade of alcohol.",
-    source: "Sahih al-Bukhari 459 (Narrated `Aisha)"
-  },
-  {
-    arabic: "اللَّهُمَّ إِنِّي أَسْأَلُكَ مِنْ فَضْلِكَ",
-    transliteration: "Allaahumma 'innee 'as'aluka min fadhlika.",
-    translation: "O Allah, I ask You for Your bounty and generosity.",
-    source: "Abu Dawud 2:465"
+    translation: "And when the prayer has been concluded, disperse within the land and seek from the bounty of Allah, and remember Allah often that you may succeed.",
+    source: "Surah Al-Jumu'ah (62:10)"
   },
   {
     arabic: "",
     transliteration: "",
-    translation: "I said, 'O Messenger of Allah, tell me something about Islam which I can ask of no one but you.' He said, 'Say I believe in Allah — and then be steadfast.'",
-    source: "[Muslim] Hadith 21, 40 Hadith an-Nawawi"
+    translation: "It is He who made the earth tame for you - so walk among its slopes and eat of His provision [rizq], and to Him is the resurrection.",
+    source: "Surah Al-Mulk (67:15)"
   },
   {
-    arabic: "اللَّهُمَّ اغْفِرْ لِي، وَارْحَمْنِي، وَاهْدِنِي، وَاجْبُرْنِي، وَعَافِنِي، وَارْزُقْنِي، وَارْفَعْنِي",
-    transliteration: "Allaahum-maghfir lee, warhamnee, wahdinee, wajburnee, wa 'aafinee, warzuqnee, warfa'nee.",
-    translation: "O Allaah, forgive me, have mercy on me, guide me, strengthen me, grant me well-being, provide for me, and elevate me.",
-    source: "Ibn Majah 34:3845, At-Tirmidhi 2:284"
+    arabic: "",
+    transliteration: "",
+    translation: "If you are grateful, I will surely increase you [in favor]",
+    source: "Surah Ibrahim (14:7)"
+  },
+  {
+    arabic: "",
+    transliteration: "",
+    translation: "And whoever relies on Allah, He will make a way out for them, and provide for them from sources they could never imagine. And whoever puts their trust in Allah, then He alone is sufficient for them.",
+    source: "Surah At-Talaq (65:2-3)"
   }
 ];
 
