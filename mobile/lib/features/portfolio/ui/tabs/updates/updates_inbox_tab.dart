@@ -17,6 +17,16 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
   bool _isLoading = true;
   String? _error;
   List<dynamic> _notifications = [];
+  String _activeCategory = 'all';
+
+  final List<Map<String, dynamic>> _categories = [
+    {'id': 'all', 'label': 'All'},
+    {'id': 'portfolio', 'label': 'Portfolio'},
+    {'id': 'screening', 'label': 'Screening'},
+    {'id': 'price_alerts', 'label': 'Price Alerts'},
+    {'id': 'system', 'label': 'System'},
+    {'id': 'security', 'label': 'Security'},
+  ];
 
   @override
   void initState() {
@@ -42,7 +52,7 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
 
     // 2. Fetch live data silently
     try {
-      final response = await ApiService().get('notifications/inbox');
+      final response = await ApiService().get('notifications/inbox', queryParameters: _activeCategory != 'all' ? {'category': _activeCategory} : null);
       if (response.statusCode == 200) {
         if (mounted) {
           final data = response.data['data'] ?? [];
@@ -181,6 +191,45 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
             ],
           ),
         ),
+
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Row(
+            children: _categories.map((cat) {
+              final isActive = _activeCategory == cat['id'];
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _activeCategory = cat['id'];
+                    _isLoading = true;
+                  });
+                  _fetchInbox();
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(right: 8, bottom: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: isActive ? context.primary.withValues(alpha: 0.1) : Colors.transparent,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isActive ? context.primary : context.appColors.divider,
+                    ),
+                  ),
+                  child: Text(
+                    cat['label'],
+                    style: TextStyle(
+                      fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
+                      fontSize: 13,
+                      color: isActive ? context.primary : context.textMuted,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+
         if (filteredNotifications.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 48),
