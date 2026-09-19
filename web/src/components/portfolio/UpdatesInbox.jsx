@@ -11,7 +11,8 @@ import {
 import { toastSuccess, toastError } from '../../utils/toast';
 import localforage from 'localforage';
 import { Link } from 'react-router-dom';
-import UpdatesDigest from './UpdatesDigest';
+import UpdatesDigest from "./UpdatesDigest";
+import UpdatesDigestViewer from "./UpdatesDigestViewer";
 import { Mail } from 'lucide-react';
 
 /* ── Skeleton ── */
@@ -40,6 +41,7 @@ const CATEGORY_CONFIG = {
   screening:         { icon: Shield,     color: 'var(--primary)',   bg: 'var(--primary-50)',   label: 'Screening' },
   price_alerts:      { icon: Bell,       color: 'var(--gold)',      bg: 'var(--gold-50)',      label: 'Price Alerts' },
   system:            { icon: Settings,   color: 'var(--text-muted)', bg: 'var(--bg-section)', label: 'System' },
+  digest:            { icon: Mail,       color: '#14b8a6', bg: 'rgba(20,184,166,0.1)', label: 'Digest' },
   security:          { icon: Lock,       color: 'var(--non-compliant)', bg: 'var(--non-compliant-bg)', label: 'Security' },
 };
 
@@ -48,7 +50,7 @@ const ALL_CATEGORIES = ['all', ...Object.keys(CATEGORY_CONFIG)];
 const getCategoryConfig = (category) => CATEGORY_CONFIG[category] || CATEGORY_CONFIG['system'];
 
 /* ── Single Notification Card ── */
-const NotifCard = ({ notif, onRead, onArchive, onDelete }) => {
+const NotifCard = ({ notif, onRead, onArchive, onDelete, onCardClick }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
   const cfg = getCategoryConfig(notif.category);
@@ -75,9 +77,11 @@ const NotifCard = ({ notif, onRead, onArchive, onDelete }) => {
       alignItems: 'flex-start',
       transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
       position: 'relative',
+      cursor: onCardClick ? 'pointer' : 'default',
     }}
       onMouseEnter={e => { e.currentTarget.style.boxShadow = 'var(--shadow-md)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = isUnread ? `color-mix(in srgb, ${cfg.color} 40%, var(--border))` : 'var(--primary-100)'; }}
       onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderColor = isUnread ? `color-mix(in srgb, ${cfg.color} 20%, var(--border))` : 'var(--border)'; }}
+      onClick={(e) => { if (onCardClick) onCardClick(notif); }}
     >
       {/* Unread dot */}
       {isUnread && (
@@ -155,6 +159,7 @@ export default function UpdatesInbox() {
   const [search, setSearch]                 = useState('');
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
   const [showDigestModal, setShowDigestModal] = useState(false);
+  const [selectedDigest, setSelectedDigest] = useState(null);
   const pollRef = useRef(null);
 
   const load = useCallback(async (params = {}, append = false) => {
@@ -391,6 +396,12 @@ export default function UpdatesInbox() {
                 onRead={handleRead}
                 onArchive={handleArchive}
                 onDelete={handleDelete}
+                onCardClick={(n) => {
+                  if (n.category === 'digest' || n.title === 'Irshad Digest is Ready') {
+                    setSelectedDigest(n);
+                    if (!n.read_at) handleRead(n.id);
+                  }
+                }}
               />
             ))}
           </div>
@@ -408,6 +419,39 @@ export default function UpdatesInbox() {
             </div>
           )}
         </>
+      )}
+
+      {selectedDigest && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(8px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 9999, padding: '20px'
+        }}>
+          <div className="animate-slide-up" style={{
+            background: 'var(--bg)', borderRadius: '24px', 
+            width: '100%', maxWidth: '600px', position: 'relative',
+            boxShadow: '0 24px 48px rgba(0,0,0,0.3)',
+            display: 'flex', flexDirection: 'column',
+            overflow: 'hidden', maxHeight: '90vh'
+          }}>
+            <button 
+              onClick={() => setSelectedDigest(null)}
+              style={{ 
+                position: 'absolute', top: '16px', right: '16px', zIndex: 10,
+                background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(4px)',
+                border: '1px solid rgba(0,0,0,0.1)', borderRadius: '50%', padding: '6px',
+                cursor: 'pointer', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+              }}
+            >
+              <X size={18} />
+            </button>
+            <div style={{ overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+              <UpdatesDigestViewer meta={selectedDigest.meta} />
+            </div>
+          </div>
+        </div>
       )}
 
       {showDigestModal && (
