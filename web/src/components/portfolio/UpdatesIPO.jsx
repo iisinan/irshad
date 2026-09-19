@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Rocket, FileText, BarChart2, Building, Calendar, Info, X, DollarSign, Clock, Shield, ChevronRight } from 'lucide-react';
+import { Rocket, FileText, BarChart2, Building, Calendar, Info, X, DollarSign, Clock, Shield, ChevronRight, ExternalLink } from 'lucide-react';
 
 const IPO_LIST = [
   {
@@ -20,7 +20,8 @@ const IPO_LIST = [
     description: "The Dangote Petroleum Refinery and Petrochemicals FZE initial public offering is now live. The offering involves 4.1 billion ordinary shares aimed at raising ₦2.15 trillion ($1.6 billion), representing one of the largest IPOs in African history. Minimum subscription is 10 shares (₦5,250), with subsequent multiples of 10. The offering is officially certified as Shariah-compliant.",
     dateStart: 'September 14, 2026',
     dateEnd: 'October 13, 2026',
-    price: '₦525 per share'
+    price: '₦525 per share',
+    sourceUrl: 'https://acrobat.adobe.com/id/urn:aaid:sc:EU:9676fb4f-2d53-4785-a994-5cac81b2c454?viewer%21megaVerb=group-discover'
   }
 ];
 
@@ -188,11 +189,22 @@ function IPOModal({ ipo, onClose }) {
 
           <div style={{ display: 'flex', gap: '20px', background: 'linear-gradient(135deg, var(--halal-bg) 0%, rgba(255,255,255,0) 100%)', padding: '24px', borderRadius: '20px', color: 'var(--text-dark)', border: '1px solid var(--halal-border)' }}>
             <Shield size={28} color="var(--halal)" style={{ flexShrink: 0 }} />
-            <div>
+            <div style={{ flex: 1 }}>
               <strong style={{ display: 'block', marginBottom: '8px', fontSize: '0.95rem', fontWeight: 900, color: 'var(--halal)' }}>Preliminary Shariah Assessment</strong>
               <div style={{ fontSize: '0.8rem', lineHeight: 1.7, color: 'var(--text-muted)' }}>
                 {ipo.shariahAssessment}
               </div>
+              {ipo.sourceUrl && (
+                <button 
+                  onClick={() => window.open(ipo.sourceUrl, '_blank')}
+                  style={{ marginTop: '16px', background: 'var(--bg-section)', border: '1px solid var(--border)', padding: '8px 16px', borderRadius: '8px', color: 'var(--text-dark)', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.color = 'var(--primary)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-dark)'; }}
+                >
+                  <ExternalLink size={14} />
+                  View Original Document
+                </button>
+              )}
             </div>
           </div>
 
