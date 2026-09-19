@@ -13,28 +13,106 @@ class _FundsScreenState extends State<FundsScreen> {
   String _searchQuery = '';
 
   final List<Map<String, String>> _funds = const [
-    { 'asset': 'Afrinvest Halal Fund', 'provider': 'Afrinvest Asset Mgt Ltd.' },
-    { 'asset': 'ARM Halal Balanced Fund', 'provider': 'ARM Investment Management' },
-    { 'asset': 'ARM Sharia Compliant Fixed Income Fund', 'provider': 'ARM Investment Management' },
-    { 'asset': 'CapitalTrust Halal Fixed Income Fund', 'provider': 'CapitalTrust Investments' },
-    { 'asset': 'CFG Ethical Fund', 'provider': 'CFG Asset Management' },
-    { 'asset': 'Cordros Halal Fixed Income Fund', 'provider': 'Cordros Asset Management' },
-    { 'asset': 'D\'Namaz Halal Fixed Income Fund', 'provider': 'D\'Namaz Capital Limited' },
-    { 'asset': 'EDC Halal Fund', 'provider': 'EDC Fund Management' },
-    { 'asset': 'Emerging Africa Halal Fund', 'provider': 'Emerging Africa Asset Management' },
-    { 'asset': 'First Asset Halal Fund', 'provider': 'First Asset Management' },
-    { 'asset': 'FSDH Halal Fund', 'provider': 'FSDH Asset Management' },
-    { 'asset': 'Lotus Halal 15 ETF', 'provider': 'Lotus Capital Limited' },
-    { 'asset': 'Lotus Halal ETF', 'provider': 'Lotus Capital Limited' },
-    { 'asset': 'Lotus Halal Fixed Income Fund', 'provider': 'Lotus Capital Limited' },
-    { 'asset': 'Lotus Halal Investment Fund', 'provider': 'Lotus Capital Limited' },
-    { 'asset': 'Lotus Waqf (Endowment) Fund', 'provider': 'Lotus Capital Limited' },
-    { 'asset': 'Marble Halal Commodities Fund', 'provider': 'Marble Capital Limited' },
-    { 'asset': 'Marble Halal Fixed Income Fund', 'provider': 'Marble Capital Limited' },
-    { 'asset': 'Norrenberger Islamic Fund', 'provider': 'Norrenberger Investments' },
-    { 'asset': 'One17 Halal Fund', 'provider': 'One17 Capital Limited' },
-    { 'asset': 'Stanbic IBTC Ethical Fund', 'provider': 'Stanbic IBTC Asset Mgt.' },
-    { 'asset': 'Stanbic IBTC Shariah Fixed Income Fund', 'provider': 'Stanbic IBTC Asset Mgt.' },
+    { 
+      'asset': 'Afrinvest Halal Fund', 
+      'provider': 'Afrinvest Asset Management Ltd',
+      'description': 'Managed by Afrinvest Asset Management Ltd, the asset-management arm of Afrinvest West Africa and overseen by an Advisory Committee of Experts (ACE). Launched July 2025. Investment Components: 70–100% in Sukuk, 30% Shariah-compliant equities.'
+    },
+    { 
+      'asset': 'ARM Halal Balanced Fund', 
+      'provider': 'ARM Investment Managers Ltd',
+      'description': 'Managed by ARM Investment Managers Ltd (part of Asset & Resource Mgt Holding Co). Launched July 2004. Trustee: Royal Exchange Plc. Custodian: Rand Merchant Bank.'
+    },
+    { 
+      'asset': 'ARM Sharia Compliant Fixed Income Fund', 
+      'provider': 'ARM Investment Managers Ltd',
+      'description': 'Managed by ARM Investment Managers Ltd (part of Asset & Resource Mgt Holding Co). Launched July 2024. Trustee: FBNQuest Trustees. Custodian: Rand Merchant Bank. Investment Components: Sukuk, Mudarabah and Murabaha with a minimum BBB rating.'
+    },
+    { 
+      'asset': 'CapitalTrust Halal Fixed Income Fund', 
+      'provider': 'CapitalTrust Investments & Asset Management Ltd',
+      'description': 'Managed by CapitalTrust Investments & Asset Management Ltd (founded 2006, Lagos). Standalone halal fixed-income funds (2021).'
+    },
+    { 
+      'asset': 'CFG Ethical Fund', 
+      'provider': 'CFG Asset',
+      'description': 'Managed by CFG Asset (CFG Africa investment bank). Trustee: AVA Trustees. Custodian: Rand Merchant Bank. Registrar: CardinalStone. Shariah adviser:One17 Capital.'
+    },
+    { 
+      'asset': 'Cordros Halal Fixed Income Fund', 
+      'provider': 'Cordros Asset Management Ltd',
+      'description': 'Managed by Cordros Asset Management Ltd (part of Cordros Capital) but launched alongside a matching conventional Cordros Fixed Income Fund preventing co-mingling.'
+    },
+    { 
+      'asset': 'D\'Namaz Halal Fixed Income Fund', 
+      'provider': 'D\'Namaz Capital',
+      'description': 'Managed by D\'Namaz Capital. Launched May 2025. Components benchmarked against a blend of 3-, 5- and 10-year FGN Sukuk plus NITTY.'
+    },
+    { 
+      'asset': 'EDC Halal Fund', 
+      'provider': 'EDC Fund Management',
+      'description': 'Managed by EDC Fund Management, the asset-management subsidiary of Ecobank Nigeria/Ecobank Capital Group. Launched August 2022 and positioned as a template for a multi-country Islamic fund, not just a domestic product.'
+    },
+    { 
+      'asset': 'Emerging Africa Halal Fund', 
+      'provider': 'Emerging Africa Asset Management Ltd',
+      'description': 'Managed by Emerging Africa Asset Management Ltd (EAAML) and part of the Emerging Africa Group. Launched July 2024.'
+    },
+    { 
+      'asset': 'FSDH Halal Fund', 
+      'provider': 'FSDH Asset Management Ltd',
+      'description': 'Managed by FSDH Asset Management Ltd (FSDH Group). Established October 2023 as part of FSDH\'s broader "Coral Funds" family.'
+    },
+    { 
+      'asset': 'Lotus Halal ETF', 
+      'provider': 'Lotus Capital Ltd',
+      'description': 'Managed by Lotus Capital Ltd. Launched 2014 and tracks the NSE-Lotus Islamic Index. The only halal equity ETF on the NGX.'
+    },
+    { 
+      'asset': 'Lotus Halal Fixed Income Fund', 
+      'provider': 'Lotus Capital Ltd',
+      'description': 'Managed by Lotus Capital. Invests in Sukuk plus Ijarah and Murabaha contracts.'
+    },
+    { 
+      'asset': 'Lotus Halal Investment Fund', 
+      'provider': 'Lotus Capital Ltd',
+      'description': 'Managed by Lotus Capital. SEC-registered Shariah-compliant equity fund, equity-based (not fixed-income).'
+    },
+    { 
+      'asset': 'Lotus Waqf (Endowment) Fund', 
+      'provider': 'Lotus Capital Ltd',
+      'description': 'Managed by Lotus Capital. SEC-approved endowment (Waqf) fund — structured so investment income perpetually funds charitable causes.'
+    },
+    { 
+      'asset': 'Marble Halal Commodities Fund', 
+      'provider': 'Marble Capital Ltd',
+      'description': 'Managed by Marble Capital Ltd. Launched 2021 as a SEC-approved Shariah-compliant commodities fund, investing in securitized commodities rather than the Sukuk/equity mix.'
+    },
+    { 
+      'asset': 'Marble Halal Fixed Income Fund', 
+      'provider': 'Marble Capital Ltd',
+      'description': 'Managed by Marble Capital. Launched 2023. Invests in low risk Sukuk plus Ijarah and Murabaha contracts.'
+    },
+    { 
+      'asset': 'Norrenberger Islamic Fund', 
+      'provider': 'Norrenberger Asset Management Ltd',
+      'description': 'Managed by Norrenberger Asset Management Ltd. Launched 2021 as a shari\'ah compliant fixed-income fund. Trustee: UTL Trust Management Services.'
+    },
+    { 
+      'asset': 'One17 Halal Fund', 
+      'provider': 'One17 Capital Ltd',
+      'description': 'Managed by One17 Capital Ltd. SEC-licensed ethical/Shariah advisory and fund manager.'
+    },
+    { 
+      'asset': 'Stanbic IBTC Ethical Fund (Imaan Fund)', 
+      'provider': 'Stanbic IBTC Asset Management',
+      'description': 'Managed by Stanbic IBTC Asset Management investing in shari\'ah-compliant equity product (min. 70% Shariah-compliant equities, up to 30% Sukuk).'
+    },
+    { 
+      'asset': 'Stanbic IBTC Shariah Fixed Income Fund', 
+      'provider': 'Stanbic IBTC Asset Management',
+      'description': 'Managed by Stanbic IBTC Asset Management. Launched August 2019 and invests in Sukuk (minimum 70%).'
+    },
   ];
 
   Color _getAvatarColor(String str) {
@@ -60,7 +138,8 @@ class _FundsScreenState extends State<FundsScreen> {
     final filteredFunds = _funds.where((fund) {
       final assetMatch = fund['asset']!.toLowerCase().contains(_searchQuery.toLowerCase());
       final providerMatch = fund['provider']!.toLowerCase().contains(_searchQuery.toLowerCase());
-      return assetMatch || providerMatch;
+      final descMatch = fund['description']!.toLowerCase().contains(_searchQuery.toLowerCase());
+      return assetMatch || providerMatch || descMatch;
     }).toList();
 
     return Column(
@@ -77,7 +156,7 @@ class _FundsScreenState extends State<FundsScreen> {
               onChanged: (val) => setState(() => _searchQuery = val),
               style: TextStyle(color: context.textDark, fontSize: 15),
               decoration: InputDecoration(
-                hintText: 'Search funds or providers...',
+                hintText: 'Search funds, providers, or details...',
                 hintStyle: TextStyle(color: context.textMuted, fontSize: 15),
                 prefixIcon: Icon(Icons.search, color: context.textMuted, size: 20),
                 border: InputBorder.none,
@@ -107,10 +186,12 @@ class _FundsScreenState extends State<FundsScreen> {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                         child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Container(
                               width: 44,
                               height: 44,
+                              margin: const EdgeInsets.only(top: 2),
                               decoration: BoxDecoration(
                                 color: color.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(12),
@@ -143,10 +224,29 @@ class _FundsScreenState extends State<FundsScreen> {
                                   Text(
                                     fund['provider']!,
                                     style: TextStyle(
-                                      color: context.textMuted,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 13,
+                                      color: context.primary,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 12,
                                     ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Icon(Icons.info_outline, size: 14, color: context.textMuted),
+                                      const SizedBox(width: 6),
+                                      Expanded(
+                                        child: Text(
+                                          fund['description']!,
+                                          style: TextStyle(
+                                            color: context.textMuted,
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 13,
+                                            height: 1.4,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
