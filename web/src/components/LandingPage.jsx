@@ -135,7 +135,6 @@ export default function LandingPage() {
     { label: 'Equities Screened',     value: stats?.total_companies  ?? stats?.companies ?? 0,  suffix: '+',  icon: BarChart2,   color: 'var(--primary)'  },
     { label: 'Reports Processed',     value: stats?.total_reports    ?? stats?.reports   ?? 0,  suffix: '+',  icon: FileText,    color: '#059669'         },
     { label: 'News Articles',         value: stats?.total_news       ?? stats?.news      ?? 0, suffix: '+',  icon: Globe,       color: 'var(--gold)'     },
-    { label: 'Shariah Compliant',     value: stats?.halal_count      ?? stats?.halal     ?? 0,   suffix: '',   icon: CheckCircle, color: 'var(--primary)'  },
   ];
 
   const features = [
