@@ -16,7 +16,7 @@ const IPO_LIST = [
     timeline: 'Q4 2026 - Q1 2027 (Est.)',
     capacity: '650,000 barrels per day',
     listingLocation: 'Nigerian Exchange (NGX), London (LSE)',
-    shariahAssessment: 'As a refining business, the core activity (petroleum processing) is permissible (Halal). The official prospectus has now been analyzed: The company holds ₦7.8T in debt (11.9% Debt Ratio) and ₦5.9T in cash (8.98% Cash Ratio), while impure income stands safely at 0.36%. It passes all AAOIFI quantitative financial screening ratios. Status: 100% HALAL.',
+    shariahAssessment: 'As a refining business, the core activity (petroleum processing) is permissible (Halal). The H1 2026 audited statements have been analyzed: The company holds ₦5.66B in debt (0.0086% Debt Ratio) and ₦4.26B in cash (0.0065% Cash Ratio), while impure income stands safely at 0.35%. It passes all AAOIFI quantitative financial screening ratios. Status: 100% HALAL.',
     description: "The Dangote Petroleum Refinery and Petrochemicals FZE initial public offering is now live. The offering involves 4.1 billion ordinary shares aimed at raising ₦2.15 trillion ($1.6 billion), representing one of the largest IPOs in African history. Minimum subscription is 10 shares (₦5,250), with subsequent multiples of 10. The offering is officially certified as Shariah-compliant.",
     dateStart: 'September 14, 2026',
     dateEnd: 'October 13, 2026',
