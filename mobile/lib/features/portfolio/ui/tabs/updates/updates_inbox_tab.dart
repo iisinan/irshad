@@ -18,6 +18,11 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
   String? _error;
   List<dynamic> _notifications = [];
   String _activeCategory = 'all';
+  int _currentPage = 1;
+  int _lastPage = 1;
+  bool _isLoadingMore = false;
+  final ScrollController _scrollController = ScrollController();
+
 
   final List<Map<String, dynamic>> _categories = [
     {'id': 'all', 'label': 'All'},
@@ -31,10 +36,27 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     _fetchInbox();
   }
 
-  Future<void> _fetchInbox() async {
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 && !_isLoadingMore && _currentPage < _lastPage) {
+      _loadMore();
+    }
+  }
+
+  Future<void> _fetchInbox({bool loadMore = false}) async {
+    if (!loadMore) {
+      setState(() { _isLoading = true; _currentPage = 1; });
+    }
+
     // 1. Try cache first
     try {
       final box = await Hive.openBox('updatesBox');
@@ -52,10 +74,14 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
 
     // 2. Fetch live data silently
     try {
-      final response = await ApiService().get('notifications/inbox', queryParameters: _activeCategory != 'all' ? {'category': _activeCategory} : null);
+      final response = await ApiService().get('notifications/inbox', queryParameters: {
+        if (_activeCategory != 'all') 'category': _activeCategory,
+        'page': _currentPage,
+      });
       if (response.statusCode == 200) {
         if (mounted) {
           final data = response.data['data'] ?? [];
+          final pagination = response.data['pagination'];
           
           try {
             final box = await Hive.openBox('updatesBox');
@@ -66,26 +92,44 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
           } catch (_) {}
 
           setState(() {
-            _notifications = data;
-            _isLoading = false;
+            if (loadMore) {
+              _notifications.addAll(data);
+              _isLoadingMore = false;
+            } else {
+              _notifications = data;
+              _isLoading = false;
+            }
+            if (pagination != null) {
+              _lastPage = pagination['last_page'];
+            }
           });
         }
       } else {
-        if (mounted && _notifications.isEmpty) {
+        if (mounted) {
           setState(() {
-            _error = 'Failed to fetch inbox';
+            if (_notifications.isEmpty) _error = 'Failed to fetch inbox';
             _isLoading = false;
+            _isLoadingMore = false;
           });
         }
       }
     } catch (e) {
-      if (mounted && _notifications.isEmpty) {
+      if (mounted) {
         setState(() {
-          _error = 'Error loading inbox';
+          if (_notifications.isEmpty) _error = 'Error loading inbox';
           _isLoading = false;
+          _isLoadingMore = false;
         });
       }
     }
+  }
+
+  Future<void> _loadMore() async {
+    setState(() {
+      _isLoadingMore = true;
+      _currentPage++;
+    });
+    await _fetchInbox(loadMore: true);
   }
 
   Future<void> _markAsRead(int id) async {
@@ -97,6 +141,31 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
           _notifications[index]['read_at'] = DateTime.now().toIso8601String();
         }
       });
+    } catch (_) {}
+  }
+
+  Future<void> _markAllAsRead() async {
+    try {
+      await ApiService().put('notifications/read-all', {});
+      setState(() {
+        for (var n in _notifications) {
+          n['read_at'] = DateTime.now().toIso8601String();
+        }
+      });
+    } catch (_) {}
+  }
+
+  Future<void> _archiveNotification(int id) async {
+    try {
+      setState(() => _notifications.removeWhere((n) => n['id'] == id));
+      await ApiService().put('notifications/$id/archive', {});
+    } catch (_) {}
+  }
+
+  Future<void> _deleteNotification(int id) async {
+    try {
+      setState(() => _notifications.removeWhere((n) => n['id'] == id));
+      await ApiService().delete('notifications/$id');
     } catch (_) {}
   }
 
@@ -148,192 +217,243 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
       return cat != 'market_news' && cat != 'business_activity';
     }).toList();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
-                    builder: (context) => Container(
-                      decoration: BoxDecoration(
-                        color: context.bg,
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                      ),
-                      padding: const EdgeInsets.only(top: 16),
-                      child: const UpdatesDigestTab(),
-                    ),
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: context.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: context.primary.withValues(alpha: 0.2)),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.mail_outline_rounded, size: 16, color: context.primary),
-                      const SizedBox(width: 6),
-                      Text('Irshad Digest Settings', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12, color: context.primary)),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Row(
-            children: _categories.map((cat) {
-              final isActive = _activeCategory == cat['id'];
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _activeCategory = cat['id'];
-                    _isLoading = true;
-                  });
-                  _fetchInbox();
-                },
-                child: Container(
-                  margin: const EdgeInsets.only(right: 8, bottom: 12),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: isActive ? context.primary.withValues(alpha: 0.1) : Colors.transparent,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isActive ? context.primary : context.appColors.divider,
-                    ),
-                  ),
-                  child: Text(
-                    cat['label'],
-                    style: TextStyle(
-                      fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
-                      fontSize: 13,
-                      color: isActive ? context.primary : context.textMuted,
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-        ),
-
-        if (filteredNotifications.isEmpty)
+    return SingleChildScrollView(
+      controller: _scrollController,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 48),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.inbox, size: 48, color: context.textMuted.withValues(alpha: 0.5)),
-                  const SizedBox(height: 16),
-                  Text('No notifications yet', style: TextStyle(color: context.textMuted, fontSize: 16)),
-                ],
-              ),
-            ),
-          )
-        else
-          ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-      itemCount: filteredNotifications.length,
-      itemBuilder: (context, index) {
-        final item = filteredNotifications[index];
-        final isUnread = item['read_at'] == null;
-        final category = item['category'] ?? 'system';
-
-        return InkWell(
-          onTap: () {
-            if (isUnread) _markAsRead(item['id']);
-            if ((category == 'digest' || item['title'] == 'Irshad Digest is Ready') && item['meta'] != null) {
-              _showDigestViewer(context, item['meta']);
-            }
-          },
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: isUnread ? context.primary.withValues(alpha: 0.03) : Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: isUnread ? context.primary.withValues(alpha: 0.3) : context.appColors.divider),
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: _getBgColorForCategory(category),
-                    borderRadius: BorderRadius.circular(12),
+                GestureDetector(
+                  onTap: _markAllAsRead,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: context.bg,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: context.appColors.divider),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.done_all, size: 16, color: context.textMuted),
+                        const SizedBox(width: 6),
+                        Text('Mark All Read', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: context.textMuted)),
+                      ],
+                    ),
                   ),
-                  child: _getIconForCategory(category),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              item['title'] ?? '',
-                              style: TextStyle(
-                                fontWeight: isUnread ? FontWeight.w900 : FontWeight.w700,
-                                fontSize: 15,
-                                color: context.textDark,
-                              ),
-                            ),
-                          ),
-                          if (isUnread)
-                            Container(
-                              width: 8,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                color: context.primary,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        item['message'] ?? '',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: context.textMuted,
-                          height: 1.4,
+                GestureDetector(
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (context) => Container(
+                        decoration: BoxDecoration(
+                          color: context.bg,
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
                         ),
+                        padding: const EdgeInsets.only(top: 16),
+                        child: const UpdatesDigestTab(),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        item['created_at'] ?? '', // Ideally parse to readable date
-                        style: TextStyle(fontSize: 12, color: context.textMuted),
-                      ),
-                    ],
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: context.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: context.primary.withValues(alpha: 0.2)),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.mail_outline_rounded, size: 16, color: context.primary),
+                        const SizedBox(width: 6),
+                        Text('Digest Settings', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12, color: context.primary)),
+                      ],
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-        );
-      },
-    ),
-      ],
+
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Row(
+              children: _categories.map((cat) {
+                final isActive = _activeCategory == cat['id'];
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _activeCategory = cat['id'];
+                      _isLoading = true;
+                    });
+                    _fetchInbox();
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(right: 8, bottom: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: isActive ? context.primary.withValues(alpha: 0.1) : Colors.transparent,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isActive ? context.primary : context.appColors.divider,
+                      ),
+                    ),
+                    child: Text(
+                      cat['label'],
+                      style: TextStyle(
+                        fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
+                        fontSize: 13,
+                        color: isActive ? context.primary : context.textMuted,
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+
+          if (filteredNotifications.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 48),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.inbox, size: 48, color: context.textMuted.withValues(alpha: 0.5)),
+                    const SizedBox(height: 16),
+                    Text('No notifications yet', style: TextStyle(color: context.textMuted, fontSize: 16)),
+                  ],
+                ),
+              ),
+            )
+          else
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+              itemCount: filteredNotifications.length,
+              itemBuilder: (context, index) {
+                final item = filteredNotifications[index];
+                final isUnread = item['read_at'] == null;
+                final category = item['category'] ?? 'system';
+
+                return Dismissible(
+                  key: Key(item['id'].toString()),
+                  background: Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    decoration: BoxDecoration(color: Colors.blue, borderRadius: BorderRadius.circular(16)),
+                    alignment: Alignment.centerLeft,
+                    child: const Icon(Icons.archive, color: Colors.white),
+                  ),
+                  secondaryBackground: Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(16)),
+                    alignment: Alignment.centerRight,
+                    child: const Icon(Icons.delete, color: Colors.white),
+                  ),
+                  onDismissed: (direction) {
+                    if (direction == DismissDirection.startToEnd) {
+                      _archiveNotification(item['id']);
+                    } else {
+                      _deleteNotification(item['id']);
+                    }
+                  },
+                  child: InkWell(
+                    onTap: () {
+                      if (isUnread) _markAsRead(item['id']);
+                      if ((category == 'digest' || item['title'] == 'Irshad Digest is Ready') && item['meta'] != null) {
+                        _showDigestViewer(context, item['meta']);
+                      }
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: isUnread ? context.primary.withValues(alpha: 0.03) : Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: isUnread ? context.primary.withValues(alpha: 0.3) : context.appColors.divider),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: _getBgColorForCategory(category),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: _getIconForCategory(category),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        item['title'] ?? '',
+                                        style: TextStyle(
+                                          fontWeight: isUnread ? FontWeight.w900 : FontWeight.w700,
+                                          fontSize: 15,
+                                          color: context.textDark,
+                                        ),
+                                      ),
+                                    ),
+                                    if (isUnread)
+                                      Container(
+                                        width: 8,
+                                        height: 8,
+                                        decoration: BoxDecoration(
+                                          color: context.primary,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  item['message'] ?? '',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: context.textMuted,
+                                    height: 1.4,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  item['created_at']?.toString().split('T')[0] ?? '',
+                                  style: TextStyle(fontSize: 12, color: context.textMuted),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+            
+            if (_isLoadingMore)
+              Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Center(child: CircularProgressIndicator(color: context.primary)),
+              ),
+        ],
+      ),
     );
   }
 
