@@ -51,15 +51,21 @@ export default function StatementTab({ data }) {
     }
 
     // Sort ascending for balance calculation
-    trxs.sort((a, b) => new Date(a.date) - new Date(b.date));
+    trxs.sort((a, b) => {
+      const diff = new Date(a.date) - new Date(b.date);
+      if (diff !== 0) return diff;
+      return a.id.localeCompare(b.id);
+    });
     
     trxs = trxs.map(t => {
-      balance += t.amount;
-      return { ...t, balance };
+      let amt = t.amount;
+      if (Object.is(amt, -0)) amt = 0;
+      balance += amt;
+      return { ...t, amount: amt, balance };
     });
 
-    // Sort descending for display
-    return trxs.sort((a, b) => new Date(b.date) - new Date(a.date));
+    // Reverse for display (this is stable, ensuring items with same date appear in exact reverse chronological order of calculation)
+    return [...trxs].reverse();
   }, [data]);
 
   const filteredTransactions = useMemo(() => {
