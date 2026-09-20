@@ -49,133 +49,218 @@ class PortfolioController extends Controller
                 ->get();
 
             $portfolioData = $holdings->map(function ($holding) use ($userId, $exchangeRate) {
-                $company = $holding->company;
-                $currentPrice = (float) ($company->latest_price ?? 0);
-                $status = $company->current_status ?? $company->aaoifiScreening?->final_status ?? 'doubtful';
+                try {
+                    $company = $holding->company;
+                    $currentPrice = (float) ($company?->latest_price ?? 0);
+                    $status = $company?->current_status ?? $company?->aaoifiScreening?->final_status ?? 'doubtful';
 
-                $screening = $company?->aaoifiScreening;
-                $nonCompliantRatio = $screening?->impermissible_income_ratio ?? 0;
+                    $screening = $company?->aaoifiScreening;
+                    $nonCompliantRatio = (float) ($screening?->impermissible_income_ratio ?? 0);
 
-                $totalValue = $holding->shares * $currentPrice;
+                    $totalValue = (float) ($holding->shares * $currentPrice);
 
-                $isHalal = strtolower($status) === 'halal' || strtolower($status) === 'compliant';
+                    $isHalal = strtolower($status) === 'halal' || strtolower($status) === 'compliant';
 
-                // Fetch latest purification date for this symbol
-                $latestPurificationDate = \App\Models\Purification::where('user_id', $userId)
-                    ->where('symbol', $holding->symbol)
-                    ->latest()
-                    ->value('created_at');
+                    // Fetch latest purification date for this symbol
+                    $latestPurificationDate = \App\Models\Purification::where('user_id', $userId)
+                        ->where('symbol', $holding->symbol)
+                        ->latest()
+                        ->value('created_at');
 
-                $purchaseDate = $holding->purchase_date ? \Carbon\Carbon::parse($holding->purchase_date) : \Carbon\Carbon::parse($holding->created_at);
-
-                // Calculate Purification Due based on paid dividends in the trailing 12 months.
-                $trailingDividendsPerShare = $company?->dividends?->filter(function ($dividend) use ($latestPurificationDate, $purchaseDate) {
-                    $effectiveDate = $dividend->pay_date ? \Carbon\Carbon::parse($dividend->pay_date) : 
-                                  ($dividend->ex_date ? \Carbon\Carbon::parse($dividend->ex_date) : $dividend->created_at);
-                    $exDate = $dividend->ex_date ? \Carbon\Carbon::parse($dividend->ex_date) : $effectiveDate;
-
-                    // 1. Cannot owe purification on dividends not yet received
-                    if ($effectiveDate->isFuture()) return false;
-
-                    // 2. Cannot owe purification on dividends from before you bought the stock
-                    if ($purchaseDate->copy()->startOfDay()->isAfter($exDate->copy()->startOfDay())) return false;
-
-                    // 3. Cannot owe purification on dividends already purified
-                    if ($latestPurificationDate && $effectiveDate->lessThanOrEqualTo($latestPurificationDate)) return false;
-
-                    return true;
-                })->reduce(function ($carry, $dividend) use ($exchangeRate) {
-                    $amount = $dividend->amount;
-                    if (strtoupper($dividend->currency) === 'USD') {
-                        $amount *= $exchangeRate; 
+                    $purchaseDate = null;
+                    try {
+                        if ($holding->purchase_date) {
+                            $purchaseDate = \Carbon\Carbon::parse($holding->purchase_date);
+                        } elseif ($holding->created_at) {
+                            $purchaseDate = \Carbon\Carbon::parse($holding->created_at);
+                        } else {
+                            $purchaseDate = now();
+                        }
+                    } catch (\Throwable $e) {
+                        $purchaseDate = now();
                     }
-                    return $carry + $amount;
-                }, 0) ?? 0;
-                
-                // Calculate Lifetime Dividends (ignores purification date)
-                $lifetimeDividendsPerShare = $company?->dividends?->filter(function ($dividend) use ($purchaseDate) {
-                    $effectiveDate = $dividend->pay_date ? \Carbon\Carbon::parse($dividend->pay_date) : 
-                                  ($dividend->ex_date ? \Carbon\Carbon::parse($dividend->ex_date) : $dividend->created_at);
-                    $exDate = $dividend->ex_date ? \Carbon\Carbon::parse($dividend->ex_date) : $effectiveDate;
-                    if ($effectiveDate->isFuture()) return false;
-                    if ($purchaseDate->copy()->startOfDay()->isAfter($exDate->copy()->startOfDay())) return false;
-                    return true;
-                })->reduce(function ($carry, $dividend) use ($exchangeRate) {
-                    $amount = $dividend->amount;
-                    if (strtoupper($dividend->currency) === 'USD') {
-                        $amount *= $exchangeRate; 
-                    }
-                    return $carry + $amount;
-                }, 0) ?? 0;
-                
-                $totalDividendsReceived = $holding->shares * $trailingDividendsPerShare;
-                $lifetimeDividendsReceived = $holding->shares * $lifetimeDividendsPerShare;
-                $purificationDue = $isHalal ? $totalDividendsReceived * ($nonCompliantRatio / 100) : 0;
 
-                // Calculate return
-                $returnPercentage = 0;
-                if ($holding->average_buy_price && $holding->average_buy_price > 0) {
-                    $returnPercentage = (($currentPrice - $holding->average_buy_price) / $holding->average_buy_price) * 100;
+                    // Calculate Purification Due based on paid dividends in the trailing 12 months.
+                    $trailingDividendsPerShare = 0;
+                    $lifetimeDividendsPerShare = 0;
+
+                    if ($company && $company->dividends) {
+                        $trailingDividendsPerShare = $company->dividends->filter(function ($dividend) use ($latestPurificationDate, $purchaseDate) {
+                            try {
+                                $effectiveDate = $dividend->pay_date ? \Carbon\Carbon::parse($dividend->pay_date) : 
+                                              ($dividend->ex_date ? \Carbon\Carbon::parse($dividend->ex_date) : ($dividend->created_at ? \Carbon\Carbon::parse($dividend->created_at) : now()));
+                                $exDate = $dividend->ex_date ? \Carbon\Carbon::parse($dividend->ex_date) : $effectiveDate;
+
+                                // 1. Cannot owe purification on dividends not yet received
+                                if ($effectiveDate->isFuture()) return false;
+
+                                // 2. Cannot owe purification on dividends from before you bought the stock
+                                if ($purchaseDate->copy()->startOfDay()->isAfter($exDate->copy()->startOfDay())) return false;
+
+                                // 3. Cannot owe purification on dividends already purified
+                                if ($latestPurificationDate && $effectiveDate->lessThanOrEqualTo($latestPurificationDate)) return false;
+
+                                return true;
+                            } catch (\Throwable $e) {
+                                return false;
+                            }
+                        })->reduce(function ($carry, $dividend) use ($exchangeRate) {
+                            $amount = (float) ($dividend->amount ?? 0);
+                            if (strtoupper($dividend->currency ?? 'NGN') === 'USD') {
+                                $amount *= $exchangeRate; 
+                            }
+                            return $carry + $amount;
+                        }, 0) ?? 0;
+                        
+                        // Calculate Lifetime Dividends (ignores purification date)
+                        $lifetimeDividendsPerShare = $company->dividends->filter(function ($dividend) use ($purchaseDate) {
+                            try {
+                                $effectiveDate = $dividend->pay_date ? \Carbon\Carbon::parse($dividend->pay_date) : 
+                                              ($dividend->ex_date ? \Carbon\Carbon::parse($dividend->ex_date) : ($dividend->created_at ? \Carbon\Carbon::parse($dividend->created_at) : now()));
+                                $exDate = $dividend->ex_date ? \Carbon\Carbon::parse($dividend->ex_date) : $effectiveDate;
+                                if ($effectiveDate->isFuture()) return false;
+                                if ($purchaseDate->copy()->startOfDay()->isAfter($exDate->copy()->startOfDay())) return false;
+                                return true;
+                            } catch (\Throwable $e) {
+                                return false;
+                            }
+                        })->reduce(function ($carry, $dividend) use ($exchangeRate) {
+                            $amount = (float) ($dividend->amount ?? 0);
+                            if (strtoupper($dividend->currency ?? 'NGN') === 'USD') {
+                                $amount *= $exchangeRate; 
+                            }
+                            return $carry + $amount;
+                        }, 0) ?? 0;
+                    }
+                    
+                    $totalDividendsReceived = $holding->shares * $trailingDividendsPerShare;
+                    $lifetimeDividendsReceived = $holding->shares * $lifetimeDividendsPerShare;
+                    $purificationDue = $isHalal ? $totalDividendsReceived * ($nonCompliantRatio / 100) : 0;
+
+                    // Calculate return
+                    $returnPercentage = 0;
+                    if ($holding->average_buy_price && (float) $holding->average_buy_price > 0) {
+                        $returnPercentage = (($currentPrice - (float) $holding->average_buy_price) / (float) $holding->average_buy_price) * 100;
+                    }
+
+                    $latestDivData = null;
+                    if ($company?->latestDividend) {
+                        $payDate = null;
+                        if ($company->latestDividend->pay_date) {
+                            if ($company->latestDividend->pay_date instanceof \Carbon\CarbonInterface) {
+                                $payDate = $company->latestDividend->pay_date->toISOString();
+                            } else {
+                                $payDate = (string) $company->latestDividend->pay_date;
+                            }
+                        }
+                        $latestDivData = [
+                            'amount' => $company->latestDividend->amount,
+                            'pay_date' => $payDate,
+                            'status' => $company->latestDividend->status,
+                        ];
+                    }
+
+                    return [
+                        'id' => $holding->id,
+                        'symbol' => $company?->symbol ?? $holding->symbol,
+                        'name' => $company?->name ?? $holding->symbol,
+                        'sector' => $company?->sector ?? 'Equities',
+                        'shares' => (float) $holding->shares,
+                        'average_buy_price' => $holding->average_buy_price,
+                        'current_price' => $currentPrice,
+                        'total_value' => $totalValue,
+                        'return_percentage' => round($returnPercentage, 2),
+                        'status' => strtolower($status),
+                        'is_halal' => $isHalal,
+                        'purification_due' => round($purificationDue, 2),
+                        'total_dividends' => round($totalDividendsReceived, 2),
+                        'lifetime_dividends' => round($lifetimeDividendsReceived, 2),
+                        'latest_dividend' => $latestDivData,
+                        'non_compliant_ratio' => round($nonCompliantRatio, 2),
+                        'logo_url' => $company?->logo_url ?? null,
+                        'purchase_date' => $holding->purchase_date,
+                        'created_at' => $holding->created_at instanceof \Carbon\CarbonInterface ? $holding->created_at->toISOString() : (string) $holding->created_at,
+                        'updated_at' => $holding->updated_at instanceof \Carbon\CarbonInterface ? $holding->updated_at->toISOString() : (string) $holding->updated_at,
+                    ];
+                } catch (\Throwable $err) {
+                    \Illuminate\Support\Facades\Log::warning("Error processing holding ID {$holding->id} ({$holding->symbol}): " . $err->getMessage());
+                    return [
+                        'id' => $holding->id,
+                        'symbol' => $holding->symbol,
+                        'name' => $holding->symbol,
+                        'sector' => 'Equities',
+                        'shares' => (float) $holding->shares,
+                        'average_buy_price' => $holding->average_buy_price,
+                        'current_price' => 0,
+                        'total_value' => 0,
+                        'return_percentage' => 0,
+                        'status' => 'doubtful',
+                        'is_halal' => false,
+                        'purification_due' => 0,
+                        'total_dividends' => 0,
+                        'lifetime_dividends' => 0,
+                        'latest_dividend' => null,
+                        'non_compliant_ratio' => 0,
+                        'logo_url' => null,
+                        'purchase_date' => $holding->purchase_date,
+                        'created_at' => $holding->created_at instanceof \Carbon\CarbonInterface ? $holding->created_at->toISOString() : (string) $holding->created_at,
+                        'updated_at' => $holding->updated_at instanceof \Carbon\CarbonInterface ? $holding->updated_at->toISOString() : (string) $holding->updated_at,
+                    ];
                 }
-
-                return [
-                    'id' => $holding->id,
-                    'symbol' => $company->symbol ?? $holding->symbol,
-                    'name' => $company->name ?? $holding->symbol,
-                    'sector' => $company->sector ?? 'Equities',
-                    'shares' => $holding->shares,
-                    'average_buy_price' => $holding->average_buy_price,
-                    'current_price' => $currentPrice,
-                    'total_value' => $totalValue,
-                    'return_percentage' => round($returnPercentage, 2),
-                    'status' => strtolower($status),
-                    'is_halal' => $isHalal,
-                    'purification_due' => round($purificationDue, 2),
-                    'total_dividends' => round($totalDividendsReceived, 2),
-                    'lifetime_dividends' => round($lifetimeDividendsReceived, 2),
-                    'latest_dividend' => $company->latestDividend ? [
-                        'amount' => $company->latestDividend->amount,
-                        'pay_date' => $company->latestDividend->pay_date?->toISOString(),
-                        'status' => $company->latestDividend->status,
-                    ] : null,
-                    'non_compliant_ratio' => round($nonCompliantRatio, 2),
-                    'logo_url' => $company->logo_url ?? null,
-                    'purchase_date' => $holding->purchase_date,
-                    'created_at' => $holding->created_at?->toISOString(),
-                    'updated_at' => $holding->updated_at?->toISOString(),
-                ];
             });
 
             // Get Brokerage Cash
             $brokerage = BrokerageAccount::where('user_id', $userId)->first();
-            $cashBalance = $brokerage?->cash_balance ?? 0.0;
+            $cashBalance = (float) ($brokerage?->cash_balance ?? 0.0);
 
             // Summary
-            $stocksBalance = $portfolioData->sum('total_value');
+            $stocksBalance = (float) $portfolioData->sum('total_value');
             $totalBalance = $stocksBalance + $cashBalance;
-            $totalPurification = $portfolioData->sum('purification_due');
+            $totalPurification = (float) $portfolioData->sum('purification_due');
 
-            $halalValue = $portfolioData->where('is_halal', true)->sum('total_value');
+            $halalValue = (float) $portfolioData->where('is_halal', true)->sum('total_value');
             $healthPercentage = $stocksBalance > 0 ? round(($halalValue / $stocksBalance) * 100, 1) : 100;
 
-            // Fetch trailing 30 days of history
-            $history = PortfolioSnapshot::where('user_id', $userId)
-                ->where('date', '>=', now()->subDays(30)->toDateString())
-                ->orderBy('date', 'asc')
-                ->get(['date', 'total_balance as value']);
+            // Fetch trailing 30 days of history safely
+            try {
+                $history = PortfolioSnapshot::where('user_id', $userId)
+                    ->where('date', '>=', now()->subDays(30)->toDateString())
+                    ->orderBy('date', 'asc')
+                    ->get(['date', 'total_balance as value']);
+            } catch (\Throwable $e) {
+                $history = collect();
+            }
 
             // If today isn't in history yet, append current balance
-            if ($history->isEmpty() || $history->last()->date->toDateString() !== now()->toDateString()) {
+            $hasToday = false;
+            if ($history->isNotEmpty()) {
+                $lastItem = $history->last();
+                $lastDate = null;
+                if ($lastItem) {
+                    if (isset($lastItem->date) && $lastItem->date instanceof \Carbon\CarbonInterface) {
+                        $lastDate = $lastItem->date->toDateString();
+                    } elseif (is_string($lastItem->date ?? null)) {
+                        $lastDate = substr($lastItem->date, 0, 10);
+                    }
+                }
+                $hasToday = ($lastDate === now()->toDateString());
+            }
+
+            if (!$hasToday) {
                 $history->push([
                     'date' => now()->toDateString(),
                     'value' => $totalBalance,
                 ]);
             }
 
-            // Fetch purifications history
-            $purifications = \App\Models\Purification::where('user_id', $userId)
-                ->orderBy('created_at', 'desc')
-                ->get();
+            // Fetch purifications history safely
+            try {
+                $purifications = \App\Models\Purification::where('user_id', $userId)
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+            } catch (\Throwable $e) {
+                $purifications = collect();
+            }
 
             return [
                 'holdings' => $portfolioData,
@@ -392,26 +477,44 @@ class PortfolioController extends Controller
                 ->latest()
                 ->value('created_at');
 
-            $purchaseDate = $holding->purchase_date ? \Carbon\Carbon::parse($holding->purchase_date) : \Carbon\Carbon::parse($holding->created_at);
+            $purchaseDate = null;
+            try {
+                if ($holding->purchase_date) {
+                    $purchaseDate = \Carbon\Carbon::parse($holding->purchase_date);
+                } elseif ($holding->created_at) {
+                    $purchaseDate = \Carbon\Carbon::parse($holding->created_at);
+                } else {
+                    $purchaseDate = now();
+                }
+            } catch (\Throwable $e) {
+                $purchaseDate = now();
+            }
 
             // Calculate purification due — only count dividends after the last purification date
-            $trailingDividendsPerShare = $company->dividends->filter(function ($dividend) use ($latestPurificationDate, $purchaseDate) {
-                $effectiveDate = $dividend->pay_date ? \Carbon\Carbon::parse($dividend->pay_date) :
-                              ($dividend->ex_date ? \Carbon\Carbon::parse($dividend->ex_date) : $dividend->created_at);
-                $exDate = $dividend->ex_date ? \Carbon\Carbon::parse($dividend->ex_date) : $effectiveDate;
+            $trailingDividendsPerShare = 0;
+            if ($company->dividends) {
+                $trailingDividendsPerShare = $company->dividends->filter(function ($dividend) use ($latestPurificationDate, $purchaseDate) {
+                    try {
+                        $effectiveDate = $dividend->pay_date ? \Carbon\Carbon::parse($dividend->pay_date) :
+                                      ($dividend->ex_date ? \Carbon\Carbon::parse($dividend->ex_date) : ($dividend->created_at ? \Carbon\Carbon::parse($dividend->created_at) : now()));
+                        $exDate = $dividend->ex_date ? \Carbon\Carbon::parse($dividend->ex_date) : $effectiveDate;
 
-                if ($effectiveDate->isFuture()) return false;
-                if ($purchaseDate->copy()->startOfDay()->isAfter($exDate->copy()->startOfDay())) return false;
-                if ($latestPurificationDate && $effectiveDate->lessThanOrEqualTo($latestPurificationDate)) return false;
+                        if ($effectiveDate->isFuture()) return false;
+                        if ($purchaseDate->copy()->startOfDay()->isAfter($exDate->copy()->startOfDay())) return false;
+                        if ($latestPurificationDate && $effectiveDate->lessThanOrEqualTo($latestPurificationDate)) return false;
 
-                return true;
-            })->reduce(function ($carry, $dividend) use ($exchangeRate) {
-                $amount = $dividend->amount;
-                if (strtoupper($dividend->currency) === 'USD') {
-                    $amount *= $exchangeRate;
-                }
-                return $carry + $amount;
-            }, 0) ?? 0;
+                        return true;
+                    } catch (\Throwable $e) {
+                        return false;
+                    }
+                })->reduce(function ($carry, $dividend) use ($exchangeRate) {
+                    $amount = (float) ($dividend->amount ?? 0);
+                    if (strtoupper($dividend->currency ?? 'NGN') === 'USD') {
+                        $amount *= $exchangeRate;
+                    }
+                    return $carry + $amount;
+                }, 0) ?? 0;
+            }
 
             $totalDividendsReceived = $holding->shares * $trailingDividendsPerShare;
             $purificationDue = $totalDividendsReceived * ($nonCompliantRatio / 100);
