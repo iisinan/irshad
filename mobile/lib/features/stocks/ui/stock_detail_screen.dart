@@ -800,25 +800,28 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Row 1: Ticker Symbol & Trading Board
-              SizedBox(
-                width: double.infinity,
-                child: Wrap(
-                  alignment: WrapAlignment.spaceBetween,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 10,
-                  runSpacing: 8,
-                  children: [
-                    Text(
-                      _currentStock['symbol'] ?? '',
-                      style: TextStyle(
-                        fontSize: 34,
-                        fontWeight: FontWeight.w900,
-                        color: context.textDark,
-                        letterSpacing: -1.0,
-                        height: 1.0,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        _currentStock['symbol'] ?? '',
+                        style: TextStyle(
+                          fontSize: 34,
+                          fontWeight: FontWeight.w900,
+                          color: context.textDark,
+                          letterSpacing: -1.0,
+                          height: 1.0,
+                        ),
                       ),
                     ),
-                    Builder(builder: (context) {
+                  ),
+                  const SizedBox(width: 10),
+                  Builder(builder: (context) {
                       final tradingBoard = _currentStock['trading_board']?.toString().trim() ?? '';
                       if (tradingBoard.isEmpty) return const SizedBox.shrink();
                       return Container(
@@ -844,8 +847,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                         ),
                       );
                     }),
-                  ],
-                ),
+                ],
               ),
               const SizedBox(height: 8),
               
