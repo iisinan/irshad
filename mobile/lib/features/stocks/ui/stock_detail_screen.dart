@@ -800,38 +800,52 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Row 1: Ticker Symbol & Trading Board
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(_currentStock['symbol'] ?? '', style: TextStyle(fontSize: 34, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -1.0, height: 1.0)),
-                  Builder(builder: (context) {
-                    final tradingBoard = _currentStock['trading_board']?.toString().trim() ?? '';
-                    if (tradingBoard.isEmpty) return const SizedBox.shrink();
-                    return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: context.primary.withOpacity(0.10),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: context.primary.withOpacity(0.25), width: 1),
+              SizedBox(
+                width: double.infinity,
+                child: Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 10,
+                  runSpacing: 8,
+                  children: [
+                    Text(
+                      _currentStock['symbol'] ?? '',
+                      style: TextStyle(
+                        fontSize: 34,
+                        fontWeight: FontWeight.w900,
+                        color: context.textDark,
+                        letterSpacing: -1.0,
+                        height: 1.0,
                       ),
-                      child: Text.rich(
-                        TextSpan(
-                          children: [
-                            TextSpan(
-                              text: 'Trading Board: ',
-                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: context.primary.withOpacity(0.7)),
-                            ),
-                            TextSpan(
-                              text: tradingBoard,
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: context.primary, letterSpacing: -0.2),
-                            ),
-                          ],
+                    ),
+                    Builder(builder: (context) {
+                      final tradingBoard = _currentStock['trading_board']?.toString().trim() ?? '';
+                      if (tradingBoard.isEmpty) return const SizedBox.shrink();
+                      return Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: context.primary.withOpacity(0.10),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: context.primary.withOpacity(0.25), width: 1),
                         ),
-                      ),
-                    );
-                  }),
-                ],
+                        child: Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: 'Trading Board: ',
+                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: context.primary.withOpacity(0.7)),
+                              ),
+                              TextSpan(
+                                text: tradingBoard,
+                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: context.primary, letterSpacing: -0.2),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+                  ],
+                ),
               ),
               const SizedBox(height: 8),
               
@@ -2572,30 +2586,69 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                 double fillWidth = (value / visualMax) * constraints.maxWidth;
                 double limitPos = (limit / visualMax) * constraints.maxWidth;
                 
-                return Stack(
-                  alignment: Alignment.centerLeft,
-                  clipBehavior: Clip.none,
-                  children: [
-                    Container(height: 6, decoration: BoxDecoration(color: context.divider.withOpacity(0.4), borderRadius: BorderRadius.circular(100))),
-                    Container(width: fillWidth.clamp(0.0, constraints.maxWidth), height: 6, decoration: BoxDecoration(color: isPass ? context.halal : context.haram, borderRadius: BorderRadius.circular(100))),
-                    Positioned(
-                      left: limitPos - 1.5,
-                      child: Container(width: 3, height: 20, decoration: BoxDecoration(color: context.haram, borderRadius: BorderRadius.circular(2))),
-                    ),
-                    Positioned(
-                      left: limitPos - 22,
-                      top: 12,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                        decoration: BoxDecoration(color: context.bgSection, border: Border.all(color: context.haram.withOpacity(0.3)), borderRadius: BorderRadius.circular(4)),
-                        child: Text('${limit.toInt()}% limit', style: TextStyle(color: context.haram, fontSize: 8, fontWeight: FontWeight.w800)),
+                return SizedBox(
+                  height: 34,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Positioned(
+                        top: 7,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: context.divider.withOpacity(0.4),
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                        ),
                       ),
-                    ),
-                  ]
+                      Positioned(
+                        top: 7,
+                        left: 0,
+                        child: Container(
+                          width: fillWidth.clamp(0.0, constraints.maxWidth),
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: isPass ? context.halal : context.haram,
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        left: (limitPos - 1.5).clamp(0.0, constraints.maxWidth - 3),
+                        top: 0,
+                        child: Container(
+                          width: 3,
+                          height: 20,
+                          decoration: BoxDecoration(
+                            color: context.haram,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        left: (limitPos - 22).clamp(0.0, constraints.maxWidth - 46),
+                        top: 16,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: context.bgSection,
+                            border: Border.all(color: context.haram.withOpacity(0.3)),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            '${limit.toInt()}% limit',
+                            style: TextStyle(color: context.haram, fontSize: 8, fontWeight: FontWeight.w800),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 );
               }
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
