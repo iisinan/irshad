@@ -1,3 +1,5 @@
+import '../../../core/utils/suggest_modal_util.dart';
+
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:provider/provider.dart';
@@ -383,6 +385,18 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
               'We couldn\'t find any stocks matching your criteria.\nPlease try a different search or filter.',
               textAlign: TextAlign.center,
               style: TextStyle(color: context.textMuted, height: 1.5, fontSize: 14),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () => SuggestModalUtil.show(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: context.primary,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                elevation: 4,
+              ),
+              icon: const Icon(Icons.mail_outline_rounded, color: Colors.white, size: 20),
+              label: const Text('Suggest for Irshad', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
             ),
           ],
         ),

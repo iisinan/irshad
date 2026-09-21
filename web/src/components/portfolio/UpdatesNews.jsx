@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import {
   TrendingUp, AlertTriangle, Droplet, CheckCircle2, BarChart2,
   ExternalLink, RefreshCw, Mail, Bell, ChevronRight,
-  ArrowRight, Newspaper, Zap, Shield, Star
+  ArrowRight, Newspaper, Zap, Shield, Star, X
 } from 'lucide-react';
-import { fetchUpdatesNews } from '../../services/api';
+import api, { fetchUpdatesNews } from '../../services/api';
 import { toastSuccess, toastError } from '../../utils/toast';
 import CompanyLogo from '../CompanyLogo';
 import localforage from 'localforage';
@@ -68,7 +68,7 @@ const SectionHeader = ({ icon: Icon, title, count, color = 'var(--primary)' }) =
 
 
 /* ── Business Update Card ── */
-const BusinessCard = ({ item }) => {
+const BusinessCard = ({ item, onSelectUrl }) => {
   const typeColors = {
     acquisition:         { color: 'var(--primary)',   bg: 'var(--primary-50)' },
     new_business:        { color: 'var(--review)',     bg: 'var(--review-bg)' },
@@ -82,7 +82,7 @@ const BusinessCard = ({ item }) => {
 
   return (
     <div className="animate-slide-up" style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '16px', padding: '18px', display: 'flex', gap: '14px', alignItems: 'flex-start', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', cursor: 'pointer' }}
-      onClick={() => navigate(`/market/${item.symbol}/aaoifi`)}
+      onClick={() => item.symbol ? navigate(`/market/${item.symbol}/aaoifi`) : (onSelectUrl && item.source_url ? onSelectUrl(item.source_url) : null)}
       onMouseEnter={e => { e.currentTarget.style.boxShadow = 'var(--shadow-md)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = 'var(--primary-100)'; }}
       onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderColor = 'var(--border)'; }}
     >
@@ -108,9 +108,9 @@ const BusinessCard = ({ item }) => {
             <span style={{ fontSize: '0.66rem', color: 'var(--text-muted)', fontWeight: 600 }}>{item.time_ago}</span>
           </div>
           {item.source_url && (
-            <a href={item.source_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.69rem', fontWeight: 800, color: 'var(--primary)', textDecoration: 'none' }}>
+            <div onClick={(e) => { e.stopPropagation(); onSelectUrl ? onSelectUrl(item.source_url) : window.open(item.source_url, '_blank'); }} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.69rem', fontWeight: 800, color: 'var(--primary)', textDecoration: 'none' }}>
               Read Source <ExternalLink size={11} />
-            </a>
+            </div>
           )}
         </div>
       </div>
@@ -119,7 +119,7 @@ const BusinessCard = ({ item }) => {
 };
 
 /* ── Market Intelligence Card ── */
-export const MarketCard = ({ item }) => {
+export const MarketCard = ({ item, onSelectUrl }) => {
   const navigate = useNavigate();
   const categoryIcons = {
     market_intelligence: BarChart2,
@@ -139,7 +139,7 @@ export const MarketCard = ({ item }) => {
 
   return (
     <div className="animate-slide-up" style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px 18px', display: 'flex', gap: '12px', alignItems: 'flex-start', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', cursor: item.symbol ? 'pointer' : 'default' }}
-      onClick={() => item.symbol && navigate(`/market/${item.symbol}/aaoifi`)}
+      onClick={() => item.symbol ? navigate(`/market/${item.symbol}/aaoifi`) : (onSelectUrl && item.source_url ? onSelectUrl(item.source_url) : null)}
       onMouseEnter={e => { e.currentTarget.style.boxShadow = 'var(--shadow-md)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = 'var(--primary-100)'; }}
       onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderColor = 'var(--border)'; }}
     >
@@ -154,9 +154,9 @@ export const MarketCard = ({ item }) => {
             {item.source && <span style={{ fontSize: '0.63rem', color: 'var(--text-muted)', fontWeight: 600 }}>{item.source}</span>}
             <span style={{ fontSize: '0.63rem', color: 'var(--text-muted)', fontWeight: 600 }}>{item.time_ago}</span>
             {item.source_url && (
-              <a href={item.source_url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '0.66rem', fontWeight: 800, color: 'var(--primary)', textDecoration: 'none', marginLeft: 'auto' }}>
+              <div onClick={(e) => { e.stopPropagation(); onSelectUrl ? onSelectUrl(item.source_url) : window.open(item.source_url, '_blank'); }} style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '0.66rem', fontWeight: 800, color: 'var(--primary)', textDecoration: 'none', marginLeft: 'auto' }}>
                 Read More <ExternalLink size={10} />
-              </a>
+              </div>
             )}
           </div>
         </div>
@@ -189,6 +189,20 @@ export default function UpdatesNews() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeSection, setActiveSection] = useState('market');
+  const [selectedUrl, setSelectedUrl] = useState(null);
+
+  const handleSelectUrl = async (url) => {
+    try {
+      const res = await api.get(`/utils/check-iframe?url=${encodeURIComponent(url)}`);
+      if (res.data.can_iframe) {
+        setSelectedUrl(url);
+      } else {
+        window.open(url, '_blank');
+      }
+    } catch (err) {
+      window.open(url, '_blank');
+    }
+  };
 
   const load = async (silent = false) => {
     try {
@@ -237,6 +251,22 @@ export default function UpdatesNews() {
 
   return (
     <div>
+      {selectedUrl && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.6)', zIndex: 99999, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ padding: '16px 24px', background: 'var(--bg)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)' }}>
+            <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-dark)' }}>News Article</div>
+            <button onClick={() => setSelectedUrl(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-dark)', padding: '4px' }}>
+              <X size={22} />
+            </button>
+          </div>
+          <iframe 
+            src={selectedUrl} 
+            style={{ flex: 1, border: 'none', width: '100%', background: '#fff' }} 
+            sandbox="allow-same-origin allow-scripts allow-popups allow-forms" 
+            title="News Article"
+          />
+        </div>
+      )}
       {/* Horizontal Tabs */}
       <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '16px', marginBottom: '8px' }} className="hide-scrollbar">
         {sections.map(s => {
@@ -286,7 +316,7 @@ export default function UpdatesNews() {
               <div style={{ maxHeight: '600px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingRight: '6px' }} className="custom-scrollbar">
                 {marketIntelligence.length === 0
                   ? <EmptyState icon={BarChart2} title="No Market Intelligence" subtitle="No recent updates have been found." color="var(--primary)" />
-                  : marketIntelligence.map(item => item._cardType === 'business' ? <BusinessCard key={'b'+item.id} item={item} /> : <MarketCard key={'m'+item.id} item={item} />)
+                  : marketIntelligence.map(item => item._cardType === 'business' ? <BusinessCard key={'b'+item.id} item={item} onSelectUrl={handleSelectUrl} /> : <MarketCard key={'m'+item.id} item={item} onSelectUrl={handleSelectUrl} />)
                 }
               </div>
             </>
@@ -304,7 +334,7 @@ export default function UpdatesNews() {
               <div style={{ maxHeight: '600px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingRight: '6px' }} className="custom-scrollbar">
                 {analysisData.length === 0
                   ? <EmptyState icon={TrendingUp} title="No Analysis Available" subtitle="No earnings or technical analysis updates right now." color="#8b5cf6" />
-                  : analysisData.map(item => <MarketCard key={item.id} item={item} />)
+                  : analysisData.map(item => <MarketCard key={item.id} item={item} onSelectUrl={handleSelectUrl} />)
                 }
               </div>
             </>

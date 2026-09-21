@@ -316,7 +316,7 @@ class UpdatesIpoTab extends StatelessWidget {
                                   onTap: () async {
                                     final url = Uri.parse(ipo['sourceUrl']);
                                     if (await canLaunchUrl(url)) {
-                                      await launchUrl(url, mode: LaunchMode.externalApplication);
+                                      await launchUrl(url, mode: LaunchMode.inAppWebView);
                                     }
                                   },
                                   child: Container(

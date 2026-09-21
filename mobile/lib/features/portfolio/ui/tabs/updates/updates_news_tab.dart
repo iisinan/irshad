@@ -261,7 +261,7 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
         final url = item['source_url'] as String?;
         if (url != null && url.isNotEmpty) {
           try {
-            await launchUrlString(url, mode: LaunchMode.externalApplication);
+            await launchUrlString(url, mode: LaunchMode.inAppWebView);
           } catch (e) {
             debugPrint("Could not launch $url");
           }

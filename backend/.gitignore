@@ -38,3 +38,6 @@ __pycache__/
 .pytest_cache/
 *.db
 temp.pdf
+
+# Firebase credentials
+firebase-credentials.json
