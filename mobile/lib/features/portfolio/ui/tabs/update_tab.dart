@@ -6,7 +6,6 @@ import 'package:irshad_mobile/core/api/api_service.dart';
 import 'package:irshad_mobile/core/providers/app_state_provider.dart';
 
 import 'updates/updates_news_tab.dart';
-import 'updates/updates_inbox_tab.dart';
 import 'updates/updates_dividends_tab.dart';
 import 'updates/updates_compliance_tab.dart';
 import 'updates/updates_ipo_tab.dart';
@@ -49,7 +48,6 @@ class _UpdateTabState extends State<UpdateTab> {
     {'id': 'compliance', 'label': 'Compliance Changes', 'icon': Icons.shield_outlined},
     {'id': 'ipo', 'label': 'IPO', 'icon': Icons.rocket_launch_outlined},
     {'id': 'dividends', 'label': 'Dividends', 'icon': Icons.star_outline},
-    {'id': 'inbox', 'label': 'Inbox', 'icon': Icons.notifications_none_rounded},
   ];
 
   @override
@@ -152,7 +150,7 @@ class _UpdateTabState extends State<UpdateTab> {
                       alignment: Alignment.centerLeft,
                       child: const Text(
                         'ٱلسَّلَامُ عَلَيْكُمْ وَرَحْمَةُ ٱللَّٰهِ وَبَرَكَاتُهُ',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF5B2971), fontFamily: 'Amiri'),
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF5B2971), fontFamily: 'Amiri'),
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -264,8 +262,6 @@ class _UpdateTabState extends State<UpdateTab> {
         return const UpdatesIpoTab();
       case 'dividends':
         return const UpdatesDividendsTab();
-      case 'inbox':
-        return const UpdatesInboxTab();
       default:
         return const SizedBox.shrink();
     }
