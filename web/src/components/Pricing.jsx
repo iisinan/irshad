@@ -127,28 +127,28 @@ const Pricing = () => {
             {/* RAWDAH */}
             <div style={{ background: '#FFFFFF', borderRadius: '24px', border: '1px solid #E5E7EB', padding: '32px 24px', display: 'flex', flexDirection: 'column' }}>
               <div style={{ marginBottom: '24px' }}>
-                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#2563EB', marginBottom: '8px' }}>Most Popular</div>
+                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#006B46', marginBottom: '8px' }}>Most Popular</div>
                 <h3 style={{ fontSize: '1.5rem', fontWeight: 500, color: '#111827', marginBottom: '12px' }}>Rawdah (Pro)</h3>
                 <p style={{ fontSize: '0.9rem', color: '#6B7280', lineHeight: 1.5, height: '44px' }}>Get more access to custom baskets and deeper portfolio tracking.</p>
               </div>
 
               <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-                <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#2563EB' }}>NGN</span>
-                <span style={{ fontSize: '2.4rem', fontWeight: 500, color: '#2563EB', lineHeight: 1 }}>
+                <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#006B46' }}>NGN</span>
+                <span style={{ fontSize: '2.4rem', fontWeight: 500, color: '#006B46', lineHeight: 1 }}>
                   {billingCycle === 'monthly' ? '2,500' : '24,000'}
                 </span>
                 <span style={{ fontSize: '0.9rem', color: '#6B7280' }}>/{billingCycle === 'monthly' ? 'month' : 'year'}</span>
               </div>
 
               <button onClick={() => handleSubscribe('pro')} disabled={loading} style={{ 
-                width: '100%', padding: '10px', borderRadius: '100px', background: '#3B82F6', 
+                width: '100%', padding: '10px', borderRadius: '100px', background: '#006B46', 
                 border: 'none', color: 'white', fontWeight: 600, fontSize: '0.95rem', cursor: loading ? 'not-allowed' : 'pointer',
                 marginBottom: '24px', transition: 'all 0.2s'
               }} className="hover-lift">{loading ? 'Processing...' : 'Get started'}</button>
 
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', fontWeight: 600, color: '#111827', marginBottom: '16px' }}>
-                  <CheckCircle2 size={16} color="#3B82F6" /> Everything in free and:
+                  <CheckCircle2 size={16} color="#006B46" /> Everything in free and:
                 </div>
                 <div style={{ borderTop: '1px solid #F3F4F6', margin: '0 0 16px 0' }}></div>
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
@@ -165,28 +165,28 @@ const Pricing = () => {
             {/* NOOR */}
             <div style={{ background: '#FFFFFF', borderRadius: '24px', border: '1px solid #E5E7EB', padding: '32px 24px', display: 'flex', flexDirection: 'column' }}>
               <div style={{ marginBottom: '24px' }}>
-                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#2563EB', marginBottom: '8px' }}>Best Value</div>
+                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#D9A05B', marginBottom: '8px' }}>Best Value</div>
                 <h3 style={{ fontSize: '1.5rem', fontWeight: 500, color: '#111827', marginBottom: '12px' }}>Noor (Max)</h3>
                 <p style={{ fontSize: '0.9rem', color: '#6B7280', lineHeight: 1.5, height: '44px' }}>Unlock the highest level of access and exclusive premium features.</p>
               </div>
 
               <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-                <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#2563EB' }}>NGN</span>
-                <span style={{ fontSize: '2.4rem', fontWeight: 500, color: '#2563EB', lineHeight: 1 }}>
+                <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#D9A05B' }}>NGN</span>
+                <span style={{ fontSize: '2.4rem', fontWeight: 500, color: '#D9A05B', lineHeight: 1 }}>
                   {billingCycle === 'monthly' ? '6,500' : '62,000'}
                 </span>
                 <span style={{ fontSize: '0.9rem', color: '#6B7280' }}>/{billingCycle === 'monthly' ? 'month' : 'year'}</span>
               </div>
 
               <button onClick={() => handleSubscribe('max')} disabled={loading} style={{ 
-                width: '100%', padding: '10px', borderRadius: '100px', background: '#3B82F6', 
+                width: '100%', padding: '10px', borderRadius: '100px', background: '#D9A05B', 
                 border: 'none', color: 'white', fontWeight: 600, fontSize: '0.95rem', cursor: loading ? 'not-allowed' : 'pointer',
                 marginBottom: '24px', transition: 'all 0.2s'
               }} className="hover-lift">{loading ? 'Processing...' : 'Get started'}</button>
 
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', fontWeight: 600, color: '#111827', marginBottom: '16px' }}>
-                  <CheckCircle2 size={16} color="#3B82F6" /> Everything in Pro and:
+                  <CheckCircle2 size={16} color="#D9A05B" /> Everything in Pro and:
                 </div>
                 <div style={{ borderTop: '1px solid #F3F4F6', margin: '0 0 16px 0' }}></div>
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
