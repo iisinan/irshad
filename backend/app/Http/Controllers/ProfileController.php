@@ -25,11 +25,12 @@ class ProfileController extends Controller
         $userId = $request->user()->id;
 
         $user = $this->safeTaggedCache(['users'])->remember("user.profile.{$userId}", 3600, function () use ($userId) {
-            $u = User::find($userId);
+            $u = User::with('activeSubscription.plan')->find($userId);
             $u->screened_count = History::where('user_id', $userId)
                 ->whereIn('action', ['scan', 'check'])
                 ->distinct('reference_id')
                 ->count('reference_id');
+            $u->append(['tier', 'has_paid_subscription']);
 
             return $u;
         });

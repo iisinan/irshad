@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, Star, ShieldCheck, Monitor, Briefcase, Eye, PlaySquare, Globe, ShoppingBasket, FileText, Bell, HandCoins, LineChart, Megaphone, Check } from 'lucide-react';
 import api from '../services/api';
 import Footer from './Footer';
+import { useAuth } from '../context/AuthContext';
 
 const Pricing = () => {
   const [loading, setLoading] = useState(false);
@@ -10,6 +11,13 @@ const Pricing = () => {
   const [error, setError] = useState('');
   const [billingCycle, setBillingCycle] = useState('monthly');
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  // Fix #8: Clear stale error when page mounts
+  useEffect(() => { setError(''); setMessage(''); }, []);
+
+  const currentPlanSlug = user?.tier?.slug ?? 'free';
+  const hasPaid = user?.has_paid_subscription ?? false;
 
   const handleSubscribe = async (planSlug) => {
     if (planSlug === 'free') {
@@ -108,11 +116,10 @@ const Pricing = () => {
                 <span style={{ fontSize: '0.9rem', color: '#6B7280' }}>/month</span>
               </div>
 
-              <button onClick={() => handleSubscribe('free')} style={{ 
-                width: '100%', padding: '10px', borderRadius: '100px', background: 'transparent', 
-                border: '1px solid #D1D5DB', color: '#374151', fontWeight: 600, fontSize: '0.95rem', cursor: 'pointer',
-                marginBottom: '32px', transition: 'all 0.2s'
-              }} className="hover-bg-gray">Get started</button>
+              {currentPlanSlug === 'free' && !hasPaid
+                ? <div style={{ width: '100%', padding: '10px', borderRadius: '100px', background: '#F3F4F6', border: '1px solid #D1D5DB', color: '#6B7280', fontWeight: 700, fontSize: '0.95rem', textAlign: 'center', marginBottom: '32px' }}>✓ Your current plan</div>
+                : <button onClick={() => handleSubscribe('free')} style={{ width: '100%', padding: '10px', borderRadius: '100px', background: 'transparent', border: '1px solid #D1D5DB', color: '#374151', fontWeight: 600, fontSize: '0.95rem', cursor: 'pointer', marginBottom: '32px', transition: 'all 0.2s' }} className="hover-bg-gray">Get started</button>
+              }
 
               <div style={{ flex: 1 }}>
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
@@ -140,11 +147,10 @@ const Pricing = () => {
                 <span style={{ fontSize: '0.9rem', color: '#6B7280' }}>/{billingCycle === 'monthly' ? 'month' : 'year'}</span>
               </div>
 
-              <button onClick={() => handleSubscribe('pro')} disabled={loading} style={{ 
-                width: '100%', padding: '10px', borderRadius: '100px', background: '#006B46', 
-                border: 'none', color: 'white', fontWeight: 600, fontSize: '0.95rem', cursor: loading ? 'not-allowed' : 'pointer',
-                marginBottom: '24px', transition: 'all 0.2s'
-              }} className="hover-lift">{loading ? 'Processing...' : 'Get started'}</button>
+              {currentPlanSlug === 'pro' && hasPaid
+                ? <div style={{ width: '100%', padding: '10px', borderRadius: '100px', background: '#E6F4EE', border: '2px solid #006B46', color: '#006B46', fontWeight: 700, fontSize: '0.95rem', textAlign: 'center', marginBottom: '24px' }}>✓ Your current plan</div>
+                : <button onClick={() => handleSubscribe('pro')} disabled={loading} style={{ width: '100%', padding: '10px', borderRadius: '100px', background: '#006B46', border: 'none', color: 'white', fontWeight: 600, fontSize: '0.95rem', cursor: loading ? 'not-allowed' : 'pointer', marginBottom: '24px', transition: 'all 0.2s' }} className="hover-lift">{loading ? 'Processing...' : 'Get started'}</button>
+              }
 
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', fontWeight: 600, color: '#111827', marginBottom: '16px' }}>
@@ -178,11 +184,10 @@ const Pricing = () => {
                 <span style={{ fontSize: '0.9rem', color: '#6B7280' }}>/{billingCycle === 'monthly' ? 'month' : 'year'}</span>
               </div>
 
-              <button onClick={() => handleSubscribe('max')} disabled={loading} style={{ 
-                width: '100%', padding: '10px', borderRadius: '100px', background: '#D9A05B', 
-                border: 'none', color: 'white', fontWeight: 600, fontSize: '0.95rem', cursor: loading ? 'not-allowed' : 'pointer',
-                marginBottom: '24px', transition: 'all 0.2s'
-              }} className="hover-lift">{loading ? 'Processing...' : 'Get started'}</button>
+              {currentPlanSlug === 'max' && hasPaid
+                ? <div style={{ width: '100%', padding: '10px', borderRadius: '100px', background: '#FEF5E7', border: '2px solid #D9A05B', color: '#B8860B', fontWeight: 700, fontSize: '0.95rem', textAlign: 'center', marginBottom: '24px' }}>✓ Your current plan</div>
+                : <button onClick={() => handleSubscribe('max')} disabled={loading} style={{ width: '100%', padding: '10px', borderRadius: '100px', background: '#D9A05B', border: 'none', color: 'white', fontWeight: 600, fontSize: '0.95rem', cursor: loading ? 'not-allowed' : 'pointer', marginBottom: '24px', transition: 'all 0.2s' }} className="hover-lift">{loading ? 'Processing...' : 'Get started'}</button>
+              }
 
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', fontWeight: 600, color: '#111827', marginBottom: '16px' }}>

@@ -288,13 +288,13 @@ export default function Profile() {
                     ) : (
                       <button 
                         onClick={async () => {
-                          if (window.confirm('Are you sure you want to cancel your subscription? You will lose access to premium features.')) {
+                          if (window.confirm('Are you sure you want to cancel your subscription? You will keep access until the end of your current billing period.')) {
                             try {
-                              await api.post('/subscription/initialize', { plan_slug: 'free', billing_cycle: 'monthly' });
-                              alert('Subscription canceled successfully.');
+                              await api.post('/subscription/cancel');
+                              alert('Subscription canceled. You keep access until your billing period ends.');
                               window.location.reload();
                             } catch (e) {
-                              alert('Error canceling subscription');
+                              alert(e.response?.data?.message || 'Error canceling subscription. Please try again.');
                             }
                           }
                         }}
