@@ -108,7 +108,12 @@ const AdminUsers = () => {
     e.preventDefault();
     setFormLoading(true); setFormError('');
     try {
-      await createAdminUser(formData);
+      const res = await createAdminUser(formData);
+      // If a paid plan was chosen, apply it via the override endpoint
+      if (formData.plan && formData.plan !== 'free') {
+        const userId = res?.data?.id ?? res?.id;
+        if (userId) await overrideAdminUserPlan(userId, formData.plan);
+      }
       toast.success('User created successfully');
       setShowCreateModal(false);
       setFormData({ name: '', email: '', password: '', role: 'user', plan: 'free' });
@@ -145,7 +150,9 @@ const AdminUsers = () => {
 
   const openEditModal = (u) => {
     setSelectedUser(u);
-    setFormData({ name: u.name || '', email: u.email || '', role: u.role || 'user', plan: u.plan || 'free' });
+    // Use the real active plan slug from subscription system
+    const realPlanSlug = u._planOverride || u.active_plan_slug || 'free';
+    setFormData({ name: u.name || '', email: u.email || '', role: u.role || 'user', plan: realPlanSlug });
     setFormError('');
     setShowEditModal(true);
   };
@@ -154,7 +161,17 @@ const AdminUsers = () => {
     e.preventDefault();
     setFormLoading(true); setFormError('');
     try {
-      await updateAdminUser(selectedUser.id, { name: formData.name, email: formData.email, role: formData.role, plan: formData.plan });
+      await updateAdminUser(selectedUser.id, { name: formData.name, email: formData.email, role: formData.role });
+      // Apply plan change via the subscription override system
+      const currentSlug = selectedUser._planOverride || selectedUser.active_plan_slug || 'free';
+      if (formData.plan !== currentSlug) {
+        await overrideAdminUserPlan(selectedUser.id, formData.plan);
+        // Update table row immediately
+        setUsers(prev => prev.map(u => u.id === selectedUser.id
+          ? { ...u, _planOverride: formData.plan }
+          : u
+        ));
+      }
       toast.success('User updated successfully');
       setShowEditModal(false);
       loadUsers(page, debouncedSearch);
@@ -466,7 +483,7 @@ const AdminUsers = () => {
         </ModalWrap>
       )}
 
-      {/* ── Create User Modal ──────────────────── */}}
+      {/* ── Create User Modal ──────────────────── */}
       {showCreateModal && (
         <ModalWrap onClose={() => setShowCreateModal(false)}>
           <ModalHeader title="Create User" subtitle="New Account" onClose={() => setShowCreateModal(false)} />

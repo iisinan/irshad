@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   TrendingUp, AlertTriangle, Droplet, CheckCircle2, BarChart2,
   ExternalLink, RefreshCw, Mail, Bell, ChevronRight,
-  ArrowRight, Newspaper, Zap, Shield, Star, X
+  ArrowRight, ArrowLeft, Newspaper, Zap, Shield, Star, X
 } from 'lucide-react';
 import api, { fetchUpdatesNews } from '../../services/api';
 import { toastSuccess, toastError } from '../../utils/toast';
