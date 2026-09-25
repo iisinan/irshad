@@ -15,7 +15,7 @@ class PlanSeeder extends Seeder
                 'slug' => 'free',
                 'price_monthly' => 0,
                 'price_yearly' => 0,
-                'features' => json_encode([
+                'features' => [
                     'stock_screens_per_month' => 3,
                     'portfolio_limit' => 1,
                     'watchlist_limit' => 0,
@@ -26,14 +26,14 @@ class PlanSeeder extends Seeder
                     'dividend_alerts' => false,
                     'drift_tracking' => false,
                     'monthly_spotlight' => false,
-                ]),
+                ],
             ],
             [
                 'name' => 'Rawdah',
                 'slug' => 'pro',
                 'price_monthly' => 2500,
                 'price_yearly' => 24000,
-                'features' => json_encode([
+                'features' => [
                     'stock_screens_per_month' => 5,
                     'portfolio_limit' => 7,
                     'watchlist_limit' => 2,
@@ -44,14 +44,14 @@ class PlanSeeder extends Seeder
                     'dividend_alerts' => false,
                     'drift_tracking' => false,
                     'monthly_spotlight' => false,
-                ]),
+                ],
             ],
             [
                 'name' => 'Noor',
                 'slug' => 'max',
                 'price_monthly' => 6500,
                 'price_yearly' => 62000,
-                'features' => json_encode([
+                'features' => [
                     'stock_screens_per_month' => -1, // -1 for unlimited
                     'portfolio_limit' => -1,
                     'watchlist_limit' => -1,
@@ -62,7 +62,7 @@ class PlanSeeder extends Seeder
                     'dividend_alerts' => true,
                     'drift_tracking' => true,
                     'monthly_spotlight' => true,
-                ]),
+                ],
             ]
         ];
 
