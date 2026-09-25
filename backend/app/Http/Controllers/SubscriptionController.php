@@ -20,22 +20,45 @@ class SubscriptionController extends Controller
         $plan = Plan::where('slug', $request->plan_slug)->first();
         if (!$plan) return response()->json(['error' => 'Plan not found'], 404);
 
+        if ($plan->slug === 'free') {
+            $user = $request->user();
+            $user->subscriptions()->update(['status' => 'canceled']);
+            return response()->json(['message' => 'Downgraded to free plan successfully', 'url' => null]);
+        }
+
         $paystackPlanCode = $request->billing_cycle === 'yearly' 
             ? $plan->paystack_plan_code_yearly 
             : $plan->paystack_plan_code_monthly;
 
+        $amount = $request->billing_cycle === 'yearly' ? $plan->price_yearly : $plan->price_monthly;
+
+        // Auto-create plan on Paystack if it doesn't exist locally
         if (!$paystackPlanCode) {
-            // If they are picking the free plan, just downgrade them
-            if ($plan->slug === 'free') {
-                $user = $request->user();
-                $user->subscriptions()->update(['status' => 'canceled']);
-                return response()->json(['message' => 'Downgraded to free plan successfully', 'url' => null]);
+            $planName = $plan->name . ' (' . ucfirst($request->billing_cycle) . ')';
+            $interval = $request->billing_cycle === 'yearly' ? 'annually' : 'monthly';
+            
+            $createPlanRes = Http::withToken(config('services.paystack.secret'))
+                ->post('https://api.paystack.co/plan', [
+                    'name' => $planName,
+                    'interval' => $interval,
+                    'amount' => $amount * 100, // kobo
+                ]);
+                
+            if ($createPlanRes->successful() && isset($createPlanRes['data']['plan_code'])) {
+                $paystackPlanCode = $createPlanRes['data']['plan_code'];
+                if ($request->billing_cycle === 'yearly') {
+                    $plan->paystack_plan_code_yearly = $paystackPlanCode;
+                } else {
+                    $plan->paystack_plan_code_monthly = $paystackPlanCode;
+                }
+                $plan->save();
+            } else {
+                Log::error('Failed to auto-create Paystack Plan', ['res' => $createPlanRes->json()]);
+                return response()->json(['error' => 'Unable to configure payment plan. Contact support.'], 500);
             }
-            return response()->json(['error' => 'Invalid plan configuration'], 400);
         }
 
         $user = $request->user();
-        $amount = $request->billing_cycle === 'yearly' ? $plan->price_yearly : $plan->price_monthly;
         
         $response = Http::withToken(config('services.paystack.secret'))
             ->post('https://api.paystack.co/transaction/initialize', [

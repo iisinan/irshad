@@ -60,6 +60,8 @@ const AboutPage = lazyWithRetry(() => import('./components/About'));
 const ShariahPage = lazyWithRetry(() => import('./components/Shariah'));
 const ResourcesPage = lazyWithRetry(() => import('./components/Resources'));
 const Profile = lazyWithRetry(() => import('./components/Profile'));
+const BillingCallback = lazyWithRetry(() => import('./components/BillingCallback'));
+
 const AdminDashboard = lazyWithRetry(() => import('./components/AdminDashboard'));
 const AdminOverview = lazyWithRetry(() => import('./components/AdminOverview'));
 const AdminInbox = lazyWithRetry(() => import('./components/AdminInbox'));
@@ -399,6 +401,7 @@ function App() {
                   <Route path="/portfolio" element={
                     <DashboardLayout><Portfolio /></DashboardLayout>
                   } />
+                  <Route path="/settings/billing/callback" element={<BillingCallback />} />
                   <Route path="/profile" element={
                     <DashboardLayout><Profile /></DashboardLayout>
                   } />

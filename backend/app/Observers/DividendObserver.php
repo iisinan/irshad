@@ -19,10 +19,13 @@ class DividendObserver
 
         foreach ($holdings as $holding) {
             if ($holding->user) {
-                try {
-                    $holding->user->notify(new NewDividendAlert($dividend));
-                } catch (\Exception $e) {
-                    Log::error("Failed to notify user {$holding->user->id} for new dividend of {$dividend->ticker}: " . $e->getMessage());
+                // Ensure the user's tier has the dividend_alerts feature
+                if (\App\Services\SubscriptionService::canUseFeature($holding->user, 'dividend_alerts')) {
+                    try {
+                        $holding->user->notify(new NewDividendAlert($dividend));
+                    } catch (\Exception $e) {
+                        Log::error("Failed to notify user {$holding->user->id} for new dividend of {$dividend->ticker}: " . $e->getMessage());
+                    }
                 }
             }
         }

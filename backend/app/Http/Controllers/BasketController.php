@@ -58,6 +58,20 @@ class BasketController extends Controller
             'symbols.*' => 'string',
         ]);
 
+        $user = auth('sanctum')->user();
+        if ($user) {
+            $limit = $user->tier->features['baskets'] ?? 0;
+            if ($limit !== -1) {
+                $existingCount = Basket::where('user_id', $user->id)->count();
+                if ($existingCount >= $limit) {
+                    return response()->json([
+                        'error' => 'Upgrade Required',
+                        'message' => 'You have reached your limit for creating custom baskets. Please upgrade your plan.'
+                    ], 403);
+                }
+            }
+        }
+
         $basket = Basket::create([
             'user_id' => auth('sanctum')->id(),
             'name' => $validated['name'],

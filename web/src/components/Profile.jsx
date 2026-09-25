@@ -21,6 +21,14 @@ export default function Profile() {
   const [profileUser, setProfileUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const searchParams = new URLSearchParams(window.location.search);
+  useEffect(() => {
+    if (searchParams.get('section') === 'billing') {
+      setActiveSection('billing');
+    }
+  }, []);
+
+
   // Settings Forms State
   const [formData, setFormData] = useState({ 
     name: '', email: '', phone_number: '', 
@@ -254,7 +262,78 @@ export default function Profile() {
                 </form>
               )}
 
-              {activeSection === 'security' && (
+              
+          {activeSection === 'billing' && (
+            <div className="animate-fade-in" style={{ background: 'var(--bg)', borderRadius: '24px', padding: '32px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--border)' }}>
+              <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '8px' }}>Subscription & Billing</h2>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '32px' }}>Manage your Irshad payment plan and limits.</p>
+              
+              <div style={{ background: 'var(--bg-section)', border: '1px solid var(--border)', borderRadius: '16px', padding: '24px', marginBottom: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+                  <div>
+                    <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '4px' }}>
+                      Current Plan: {(profileUser || user)?.tier?.name || 'Miftah (Free)'}
+                    </h3>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>
+                      {(profileUser || user)?.tier?.slug === 'max' ? 'You have unlimited access to all features.' : 
+                       (profileUser || user)?.tier?.slug === 'pro' ? 'You are on the Rawdah Pro tier.' : 
+                       'You are on the basic free community tier.'}
+                    </p>
+                  </div>
+                  <div>
+                    {(profileUser || user)?.tier?.slug === 'free' ? (
+                      <button onClick={() => navigate('/pricing')} className="hover-lift" style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '100px', fontWeight: 700, cursor: 'pointer' }}>
+                        Upgrade Plan
+                      </button>
+                    ) : (
+                      <button 
+                        onClick={async () => {
+                          if (window.confirm('Are you sure you want to cancel your subscription? You will lose access to premium features.')) {
+                            try {
+                              await api.post('/subscription/initialize', { plan_slug: 'free', billing_cycle: 'monthly' });
+                              alert('Subscription canceled successfully.');
+                              window.location.reload();
+                            } catch (e) {
+                              alert('Error canceling subscription');
+                            }
+                          }
+                        }}
+                        style={{ background: 'transparent', color: 'var(--non-compliant)', border: '1px solid var(--non-compliant)', padding: '10px 20px', borderRadius: '100px', fontWeight: 700, cursor: 'pointer' }}>
+                        Cancel Subscription
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              <div style={{ padding: '24px', background: 'var(--bg-section)', borderRadius: '16px', border: '1px solid var(--border)' }}>
+                <h4 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '16px' }}>Monthly Usage Limits</h4>
+                
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', fontSize: '0.9rem' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Stock Screens</span>
+                  <span style={{ fontWeight: 700, color: 'var(--text-dark)' }}>
+                    {((profileUser || user)?.tier?.features?.stock_screens_per_month) === -1 ? 'Unlimited' : ((profileUser || user)?.tier?.features?.stock_screens_per_month || 3)}
+                  </span>
+                </div>
+                
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', fontSize: '0.9rem' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Portfolio Size</span>
+                  <span style={{ fontWeight: 700, color: 'var(--text-dark)' }}>
+                    {((profileUser || user)?.tier?.features?.portfolio_limit) === -1 ? 'Unlimited' : ((profileUser || user)?.tier?.features?.portfolio_limit || 1)}
+                  </span>
+                </div>
+                
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Purifications</span>
+                  <span style={{ fontWeight: 700, color: 'var(--text-dark)' }}>
+                    {((profileUser || user)?.tier?.features?.purifications_per_month) === -1 ? 'Unlimited' : ((profileUser || user)?.tier?.features?.purifications_per_month || 0)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeSection === 'security' && (
                 <form onSubmit={e => handleUpdate(e, 'security')} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                   <div><h2 style={{ fontSize: '1.06rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 4px' }}>Security</h2><p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', margin: 0 }}>Update your password to keep your account secure.</p></div>
                   <div style={{ height: '1px', background: 'var(--border)' }} />
