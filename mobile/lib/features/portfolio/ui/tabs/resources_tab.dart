@@ -152,7 +152,7 @@ class _ResourcesTabState extends State<ResourcesTab> {
       return true;
     }).toList();
 
-    return SingleChildScrollView(
+    return Padding(
       padding: const EdgeInsets.only(left: 20.0, right: 20.0, top: 20.0, bottom: 100.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

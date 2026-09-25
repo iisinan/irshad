@@ -7,6 +7,7 @@ import 'package:irshad_mobile/core/providers/app_state_provider.dart';
 
 import 'updates/updates_news_tab.dart';
 import 'updates/updates_dividends_tab.dart';
+import 'resources_tab.dart';
 import 'updates/updates_compliance_tab.dart';
 import 'updates/updates_ipo_tab.dart';
 import '../widgets/islamic_quote_widget.dart';
@@ -48,6 +49,7 @@ class _UpdateTabState extends State<UpdateTab> {
     {'id': 'compliance', 'label': 'Compliance Changes', 'icon': Icons.shield_outlined},
     {'id': 'ipo', 'label': 'IPO', 'icon': Icons.rocket_launch_outlined},
     {'id': 'dividends', 'label': 'Dividends', 'icon': Icons.star_outline},
+    {'id': 'resources', 'label': 'Resources', 'icon': Icons.menu_book_rounded},
   ];
 
   @override
@@ -262,6 +264,8 @@ class _UpdateTabState extends State<UpdateTab> {
         return const UpdatesIpoTab();
       case 'dividends':
         return const UpdatesDividendsTab();
+      case 'resources':
+        return const ResourcesTab();
       default:
         return const SizedBox.shrink();
     }
