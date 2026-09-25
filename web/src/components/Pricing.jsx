@@ -87,22 +87,22 @@ const Pricing = () => {
           </div>
 
           {error && (
-            <div style={{ marginBottom: '32px', padding: '16px', borderRadius: '14px', background: '#FEE2E2', color: '#B91C1C', textAlign: 'center', fontWeight: 700 }}>
+            <div style={{ marginBottom: '32px', padding: '14px', borderRadius: '14px', background: '#FEE2E2', color: '#B91C1C', textAlign: 'center', fontWeight: 700 }}>
               {error}
             </div>
           )}
 
           {/* Pricing Grid */}
-          <div className="pricing-grid stagger-fade-in" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))', gap: '24px', marginBottom: '64px', alignItems: 'stretch' }}>
+          <div className="pricing-grid stagger-fade-in" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', marginBottom: '64px', width: '100%', maxWidth: '440px', margin: '0 auto 64px auto' }}>
             
             {/* MIFTAH */}
-            <div style={{ background: '#FFFFFF', borderRadius: '24px', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 8px 30px rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.05)' }}>
-              <div style={{ background: 'linear-gradient(135deg, #0A192F, #0A5B9C)', color: 'white', textAlign: 'center', padding: '36px 20px 32px' }}>
+            <div style={{ background: '#FFFFFF', borderRadius: '24px', overflow: 'hidden', width: '100%', display: 'flex', flexDirection: 'column', boxShadow: '0 8px 30px rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.05)' }}>
+              <div style={{ background: 'linear-gradient(135deg, #0A192F, #0A5B9C)', color: 'white', textAlign: 'center', padding: '24px 20px 20px' }}>
                 <h3 style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: '8px' }}>MIFTAH (FREE)</h3>
-                <div style={{ fontSize: '3rem', fontWeight: 950, lineHeight: 1 }}>₦0</div>
+                <div style={{ fontSize: '2.4rem', fontWeight: 950, lineHeight: 1 }}>₦0</div>
               </div>
-              <div style={{ padding: '30px 24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 40px', flex: 1 }}>
+              <div style={{ padding: '24px 24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 24px', flex: 1 }}>
                   <FeatureRow icon="Screen" title="Stock screens" text="3 per month" />
                   <FeatureRow icon="Briefcase" title="Portfolio (holdings)" text="1 stock" />
                   <FeatureRow icon="Video" title="Resources" text="(video/docs)" />
@@ -115,24 +115,24 @@ const Pricing = () => {
                   <FeatureRow empty={true} />
                 </ul>
                 <button onClick={() => handleSubscribe('free')} className="hover-lift pricing-btn" style={{ 
-                  width: '100%', padding: '16px', borderRadius: '8px', background: '#0A5B9C', 
+                  width: '100%', padding: '14px', borderRadius: '8px', background: '#0A5B9C', 
                   border: 'none', color: 'white', fontWeight: 900, fontSize: '1rem', cursor: 'pointer'
                 }}>CHOOSE</button>
               </div>
             </div>
 
             {/* RAWDAH */}
-            <div className="pricing-pro-card" style={{ background: '#FFFFFF', borderRadius: '24px', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 50px rgba(0,107,70,0.15)', border: '3px solid #006B46', position: 'relative', zIndex: 10 }}>
-              <div style={{ background: 'linear-gradient(135deg, #004d32, #006B46)', color: 'white', textAlign: 'center', padding: '36px 20px 32px' }}>
+            <div className="pricing-pro-card" style={{ background: '#FFFFFF', borderRadius: '24px', overflow: 'hidden', width: '100%', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 50px rgba(0,107,70,0.15)', border: '3px solid #006B46', position: 'relative', zIndex: 10 }}>
+              <div style={{ background: 'linear-gradient(135deg, #004d32, #006B46)', color: 'white', textAlign: 'center', padding: '24px 20px 20px' }}>
                 <div style={{ background: '#D9A05B', color: '#fff', fontSize: '0.75rem', fontWeight: 900, padding: '6px 14px', borderRadius: '100px', display: 'inline-block', marginBottom: '16px', letterSpacing: '1px' }}>MOST POPULAR</div><h3 style={{ fontSize: '1.6rem', fontWeight: 900, marginBottom: '8px' }}>RAWDAH (PRO)</h3>
-                <div style={{ fontSize: '3rem', fontWeight: 950, lineHeight: 1 }}>
+                <div style={{ fontSize: '2.4rem', fontWeight: 950, lineHeight: 1 }}>
                   {billingCycle === 'monthly' ? '₦2,500' : '₦24,000'}
                   <span style={{ fontSize: '1.2rem', fontWeight: 700 }}>/{billingCycle === 'monthly' ? 'mo' : 'yr'}</span>
                 </div>
                 {billingCycle === 'monthly' && <div style={{ fontSize: '0.85rem', marginTop: '8px', opacity: 0.9 }}>(₦24,000/yr)</div>}
               </div>
-              <div style={{ padding: '30px 24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 40px', flex: 1 }}>
+              <div style={{ padding: '24px 24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 24px', flex: 1 }}>
                   <FeatureRow icon="Screen" title="Stock screens" text="5 per month" />
                   <FeatureRow icon="Briefcase" title="Portfolio (holdings)" text="Up to 7 stocks" />
                   <FeatureRow icon="Eye" title="Watchlist" text="Up to 2 stocks" />
@@ -145,7 +145,7 @@ const Pricing = () => {
                   <FeatureRow empty={true} />
                 </ul>
                 <button onClick={() => handleSubscribe('pro')} disabled={loading} className="hover-lift pricing-btn" style={{ 
-                  width: '100%', padding: '16px', borderRadius: '8px', background: '#D9A05B', 
+                  width: '100%', padding: '14px', borderRadius: '8px', background: '#D9A05B', 
                   border: 'none', color: 'white', fontWeight: 900, fontSize: '1rem', cursor: loading ? 'not-allowed' : 'pointer'
                 }}>
                   {loading ? 'PROCESSING...' : 'CHOOSE PRO'}
@@ -154,17 +154,17 @@ const Pricing = () => {
             </div>
 
             {/* NOOR */}
-            <div style={{ background: '#FFFFFF', borderRadius: '24px', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 12px 40px rgba(184, 134, 11, 0.08)', border: '1px solid #EADDCD', position: 'relative' }}>
-              <div style={{ background: 'linear-gradient(135deg, #8B6508, #B8860B)', color: 'white', textAlign: 'center', padding: '36px 20px 32px' }}>
+            <div style={{ background: '#FFFFFF', borderRadius: '24px', overflow: 'hidden', width: '100%', display: 'flex', flexDirection: 'column', boxShadow: '0 12px 40px rgba(184, 134, 11, 0.08)', border: '1px solid #EADDCD', position: 'relative' }}>
+              <div style={{ background: 'linear-gradient(135deg, #8B6508, #B8860B)', color: 'white', textAlign: 'center', padding: '24px 20px 20px' }}>
                 <div style={{ position: 'absolute', top: 0, right: 0, background: '#B8860B', color: 'white', padding: '4px 30px', transform: 'translate(28px, 16px) rotate(45deg)', fontSize: '0.7rem', fontWeight: 900, letterSpacing: '1px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>BEST VALUE</div><h3 style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: '8px' }}>NOOR (MAX)</h3>
-                <div style={{ fontSize: '3rem', fontWeight: 950, lineHeight: 1 }}>
+                <div style={{ fontSize: '2.4rem', fontWeight: 950, lineHeight: 1 }}>
                   {billingCycle === 'monthly' ? '₦6,500' : '₦62,000'}
                   <span style={{ fontSize: '1.2rem', fontWeight: 700 }}>/{billingCycle === 'monthly' ? 'mo' : 'yr'}</span>
                 </div>
                 {billingCycle === 'monthly' && <div style={{ fontSize: '0.85rem', marginTop: '8px', opacity: 0.9 }}>(₦62,000/yr)</div>}
               </div>
-              <div style={{ padding: '30px 24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 40px', flex: 1 }}>
+              <div style={{ padding: '24px 24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 24px', flex: 1 }}>
                   <FeatureRow icon="Screen" title="Stock screens" text="Unlimited" />
                   <FeatureRow icon="Briefcase" title="Portfolio (holdings)" text="Unlimited" />
                   <FeatureRow icon="Eye" title="Watchlist" text="Unlimited" />
@@ -178,7 +178,7 @@ const Pricing = () => {
                   <FeatureRow icon="Megaphone" title="Monthly spotlight" text="full news, downloadable summaries" />
                 </ul>
                 <button onClick={() => handleSubscribe('max')} disabled={loading} className="hover-lift pricing-btn" style={{ 
-                  width: '100%', padding: '16px', borderRadius: '8px', background: '#0A192F', 
+                  width: '100%', padding: '14px', borderRadius: '8px', background: '#0A192F', 
                   border: 'none', color: 'white', fontWeight: 900, fontSize: '1rem', cursor: loading ? 'not-allowed' : 'pointer'
                 }}>
                   {loading ? 'PROCESSING...' : 'CHOOSE MAX'}

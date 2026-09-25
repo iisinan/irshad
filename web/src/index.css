@@ -5181,6 +5181,6 @@ button, a.nav-link, a.btn-primary, a.btn-secondary, .mobile-col > div[style*="cu
 
 @media (min-width: 1024px) {
   .pricing-pro-card {
-    transform: scale(1.05);
+    /* transform: scale(1.05); removed for vertical layout */
   }
 }
