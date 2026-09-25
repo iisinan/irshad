@@ -18,7 +18,7 @@ class _GuideTabState extends State<GuideTab> {
   final List<Map<String, dynamic>> _sections = [
     {'id': 'getting-started', 'label': 'Getting Started', 'icon': Icons.menu_book_rounded},
     {'id': 'methodology', 'label': 'AAOIFI Standards', 'icon': Icons.verified_user_rounded},
-    {'id': 'navigation', 'label': 'Navigation Guide', 'icon': Icons.explore_rounded},
+    {'id': 'navigation', 'label': 'How to:', 'icon': Icons.explore_rounded},
     {'id': 'faq', 'label': 'FAQs', 'icon': Icons.help_outline_rounded},
     {'id': 'tutorials', 'label': 'Tutorials & Guides', 'icon': Icons.play_circle_outline_rounded},
     {'id': 'support', 'label': 'Support', 'icon': Icons.support_agent_rounded},
@@ -457,7 +457,7 @@ class _GuideTabState extends State<GuideTab> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader(Icons.explore_rounded, 'Navigation Guide'),
+        _buildSectionHeader(Icons.explore_rounded, 'How to:'),
         Text('Here is a quick explanation of each section in Irshad.', style: TextStyle(fontSize: 14, color: context.textMuted)),
         const SizedBox(height: 20),
         ...navItems.map((item) => _buildNavCard(item['icon'] as IconData, item['title'] as String, item['desc'] as String, item['color'] as Color)),
