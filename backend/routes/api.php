@@ -70,6 +70,9 @@ Route::prefix('v1')->group(function () {
         Route::get('/zakat/prices', [ZakatController::class, 'getPrices']);
     });
 
+    // Paystack Webhook (No auth required)
+    Route::post('/webhooks/paystack', [\App\Http\Controllers\SubscriptionController::class, 'webhook']);
+
     Route::middleware('auth:sanctum')->group(function () {
         // Protected Stocks
         Route::get('/stocks', [StockController::class, 'index']);
@@ -225,6 +228,9 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/favorites', [FavoriteController::class, 'store']);
             Route::put('/favorites/{favorite}', [FavoriteController::class, 'update']);
             Route::delete('/favorites/{favorite}', [FavoriteController::class, 'destroy']);
+
+            // Subscriptions
+            Route::post('/subscription/initialize', [\App\Http\Controllers\SubscriptionController::class, 'initialize']);
 
             // History
             Route::get('/history', [HistoryController::class, 'index']);

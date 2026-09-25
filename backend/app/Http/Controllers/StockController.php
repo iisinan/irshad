@@ -524,16 +524,25 @@ class StockController extends Controller
     /**
      * Execute or retrieve the AAOIFI detailed screening for a stock.
      */
-    public function aaoifiScreening(string $symbol): JsonResponse
+    public function aaoifiScreening(Request $request, string $symbol): JsonResponse
     {
+        $user = $request->user();
+        if ($user && !\App\Services\SubscriptionService::canUseFeature($user, 'stock_screens_per_month')) {
+            return response()->json([
+                'error' => 'Upgrade Required',
+                'message' => 'You have reached your limit for stock screenings this month. Please upgrade your plan.'
+            ], 403);
+        }
+
         $cacheKey = "aaoifi.screening.{$symbol}";
         $cached = $this->safeTaggedCache(['stocks'])->get($cacheKey);
         if ($cached !== null) {
+            // Track usage since we are returning successfully
+            if ($user) \App\Services\SubscriptionService::recordFeatureUsage($user, 'stock_screens_per_month');
             return $this->success($cached);
         }
 
         $company = Company::where('symbol', $symbol)->firstOrFail();
-
         $aaoifiScreening = AaoifiScreening::where('company_id', $company->id)->first();
 
         if ($aaoifiScreening) {
@@ -673,6 +682,8 @@ class StockController extends Controller
             ];
 
             $this->safeTaggedCache(['stocks'])->put($cacheKey, $mapped, 300);
+
+            if ($user) \App\Services\SubscriptionService::recordFeatureUsage($user, 'stock_screens_per_month');
 
             return $this->success($mapped);
         }

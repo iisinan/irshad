@@ -289,6 +289,15 @@ class PortfolioController extends Controller
             'average_buy_price' => 'nullable|numeric|min:0',
         ]);
 
+        // Limit Check
+        $exists = Holding::where('user_id', Auth::id())->where('symbol', strtoupper($request->symbol))->exists();
+        if (!$exists && !\App\Services\SubscriptionService::canAddPortfolio(Auth::user())) {
+            return response()->json([
+                'error' => 'Upgrade Required',
+                'message' => 'You have reached your portfolio limit for this plan.'
+            ], 403);
+        }
+
         $holding = Holding::updateOrCreate(
             [
                 'user_id' => Auth::id(),
@@ -366,6 +375,24 @@ class PortfolioController extends Controller
         ]);
 
         $userId = Auth::id();
+        
+        // Limit Check
+        $limit = Auth::user()->tier->features['portfolio_limit'] ?? 0;
+        if ($limit !== -1) {
+            $existingCount = Holding::where('user_id', $userId)->count();
+            // Count unique new symbols
+            $newSymbols = collect($request->holdings)->pluck('symbol')->map(fn($s) => strtoupper($s))->unique();
+            $alreadyOwned = Holding::where('user_id', $userId)->whereIn('symbol', $newSymbols)->count();
+            $newAdditions = $newSymbols->count() - $alreadyOwned;
+            
+            if ($existingCount + $newAdditions > $limit) {
+                return response()->json([
+                    'error' => 'Upgrade Required',
+                    'message' => 'Adding these stocks exceeds your portfolio limit for this plan.'
+                ], 403);
+            }
+        }
+
         $upsertData = [];
 
         foreach ($request->holdings as $holdingData) {
@@ -431,6 +458,14 @@ class PortfolioController extends Controller
             'symbol' => 'nullable|string',
             'all' => 'nullable|boolean'
         ]);
+
+        $user = Auth::user();
+        if (!\App\Services\SubscriptionService::canUseFeature($user, 'purifications_per_month')) {
+            return response()->json([
+                'error' => 'Upgrade Required',
+                'message' => 'You have reached your monthly limit for generating purification statements. Please upgrade your plan.'
+            ], 403);
+        }
 
         try {
             $exchangeRate = (float) (\App\Models\Setting::where('key', 'zakat_exchange_rate')->value('value') ?? 1600.0);
@@ -538,6 +573,7 @@ class PortfolioController extends Controller
 
         if ($purifiedCount > 0) {
             Cache::forget("portfolio_data_" . $userId);
+            \App\Services\SubscriptionService::recordFeatureUsage($user, 'purifications_per_month');
             return $this->success(null, "Purification recorded successfully.");
         }
 

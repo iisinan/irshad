@@ -93,6 +93,15 @@ class WatchlistController extends Controller
 
         $user = $request->user();
 
+        // Limit Check
+        $exists = Watchlist::where('user_id', $user->id)->where('symbol', strtoupper($request->symbol))->exists();
+        if (!$exists && !\App\Services\SubscriptionService::canAddWatchlist($user)) {
+            return response()->json([
+                'error' => 'Upgrade Required',
+                'message' => 'You have reached your watchlist limit for this plan.'
+            ], 403);
+        }
+
         $watchlist = Watchlist::firstOrCreate(
             [
                 'user_id' => $user->id,
@@ -136,6 +145,23 @@ class WatchlistController extends Controller
         ]);
 
         $user = $request->user();
+
+        // Limit Check
+        $limit = $user->tier->features['watchlist_limit'] ?? 0;
+        if ($limit !== -1) {
+            $existingCount = Watchlist::where('user_id', $user->id)->count();
+            // Count unique new symbols
+            $newSymbols = collect($request->symbols)->map(fn($s) => strtoupper($s))->unique();
+            $alreadyOwned = Watchlist::where('user_id', $user->id)->whereIn('symbol', $newSymbols)->count();
+            $newAdditions = $newSymbols->count() - $alreadyOwned;
+            
+            if ($existingCount + $newAdditions > $limit) {
+                return response()->json([
+                    'error' => 'Upgrade Required',
+                    'message' => 'Adding these stocks exceeds your watchlist limit for this plan.'
+                ], 403);
+            }
+        }
         $alertEmail = $request->boolean('alert_email', false);
         $alertInapp = $request->boolean('alert_inapp', false);
         $alertPush = $request->boolean('alert_push', false);
