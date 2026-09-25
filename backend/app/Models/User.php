@@ -89,4 +89,39 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $this->notify(new VerifyEmailNotification);
     }
+
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    public function activeSubscription()
+    {
+        return $this->hasOne(Subscription::class)->where('status', 'active')->latestOfMany();
+    }
+
+    public function usages()
+    {
+        return $this->hasMany(UserUsage::class);
+    }
+
+    public function getTierAttribute()
+    {
+        // October 2nd Rollout Strategy: Free Trial Override
+        if (now()->lt(\Carbon\Carbon::parse('2026-10-02'))) {
+            return Plan::where('slug', 'max')->first() 
+                ?? new Plan(['slug' => 'max', 'name' => 'Noor']); // Fallback if not seeded yet
+        }
+
+        // Fallback to actual subscription check after Oct 2nd
+        $activeSub = $this->activeSubscription;
+        
+        if ($activeSub && $activeSub->plan) {
+            return $activeSub->plan;
+        }
+
+        // Default to Free Tier
+        return Plan::where('slug', 'free')->first() 
+            ?? new Plan(['slug' => 'free', 'name' => 'Miftah']);
+    }
 }
