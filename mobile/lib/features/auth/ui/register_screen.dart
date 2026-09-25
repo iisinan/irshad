@@ -116,6 +116,33 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     }
   }
 
+  void _registerWithApple(BuildContext context) async {
+    setState(() => _isLoading = true);
+    try {
+      final user = await _authRepository.signInWithAppleFlow();
+      if (user != null) {
+        await _secureStorage.write(key: 'login_method', value: 'apple');
+        if (mounted) {
+          Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
+          Navigator.pushReplacementNamed(context, '/');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+
   void _registerWithGoogle() async {
     if (!_agreedToTerms) {
       // For google sign in, they also technically need to agree, but the frontend
@@ -459,7 +486,6 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                   ),
                 ),
                 
-                if (!Platform.isIOS) ...[
                 const SizedBox(height: 24),
                 _FadeSlide(
                   controller: _animationController,
@@ -501,6 +527,33 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                     ),
                   ),
                 ),
+
+                if (Platform.isIOS) ...[
+                  const SizedBox(height: 16),
+                  _FadeSlide(
+                    controller: _animationController,
+                    delay: 0.65,
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: OutlinedButton(
+                        onPressed: _isLoading ? null : () => _registerWithApple(context),
+                        style: OutlinedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          side: const BorderSide(color: Colors.black, width: 1.5),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.apple, color: Colors.white, size: 28),
+                            const SizedBox(width: 12),
+                            const Text('Sign up with Apple', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
                 
                 const SizedBox(height: 32),

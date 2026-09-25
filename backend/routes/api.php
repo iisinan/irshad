@@ -48,6 +48,8 @@ Route::prefix('v1')->group(function () {
         Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink']);
         Route::post('/reset-password', [PasswordResetController::class, 'reset']);
         Route::post('/auth/google', [AuthController::class, 'googleLogin']);
+        Route::post('/auth/apple', [AuthController::class, 'appleLogin']);
+
     });
 
     Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])->name('verification.verify');

@@ -1,3 +1,5 @@
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+
 import 'package:dio/dio.dart';
 import '../../../core/api/api_service.dart';
 import '../../../core/notifications/notification_service.dart';
@@ -96,6 +98,47 @@ class AuthRepository {
       throw 'Google Sign In failed: $e';
     }
   }
+
+  Future<Map<String, dynamic>?> loginWithApple(String identityToken, String? email, String? fullName) async {
+    try {
+      final response = await _apiService.post('auth/apple', {
+        'identityToken': identityToken,
+        'email': email,
+        'fullName': fullName,
+      });
+      if (response.statusCode == 200) {
+        final data = response.data['data'];
+        await _storage.write(key: 'access_token', value: data['access_token']);
+        registerFCMToken();
+        return data['user'];
+      }
+    } on DioException catch (e) {
+      throw e.response?.data['message'] ?? 'Apple login failed';
+    }
+    return null;
+  }
+
+  Future<Map<String, dynamic>?> signInWithAppleFlow() async {
+    try {
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+      final identityToken = credential.identityToken;
+      if (identityToken == null) throw 'Missing Apple Identity Token';
+      
+      // Apple only returns email and fullName on the VERY FIRST login!
+      final email = credential.email;
+      final fullName = credential.givenName != null ? "${credential.givenName} ${credential.familyName ?? ''}".trim() : null;
+      
+      return await loginWithApple(identityToken, email, fullName);
+    } catch (e) {
+      throw 'Apple Sign In failed: $e';
+    }
+  }
+
 
   Future<void> logout() async {
     try {

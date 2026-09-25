@@ -29,7 +29,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'role',
         'plan',
         'preferences',
-        'google_id',
+        'google_id', 'apple_id',
         'avatar',
         'phone_number',
     ];

@@ -197,6 +197,59 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     }
   }
 
+  void _loginWithApple(BuildContext context) async {
+    setState(() => _isLoading = true);
+    try {
+      final user = await _authRepository.signInWithAppleFlow();
+      if (user != null) {
+        await _secureStorage.write(key: 'login_method', value: 'apple');
+        if (mounted) {
+          Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
+          // Prompt for biometrics if not enabled
+          final prefs = await SharedPreferences.getInstance();
+          final isEnabled = prefs.getBool('biometrics_enabled') ?? false;
+          final hasPrompted = prefs.getBool('biometrics_prompted') ?? false;
+          if (!isEnabled && !hasPrompted) {
+            final canCheckBiometrics = await _localAuth.canCheckBiometrics;
+            final isDeviceSupported = await _localAuth.isDeviceSupported();
+            if (canCheckBiometrics && isDeviceSupported) {
+              await prefs.setBool('biometrics_prompted', true);
+              final enable = await showDialog<bool>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: const Text('Enable Biometric Login'),
+                  content: const Text('Would you like to use your fingerprint or face to log in faster next time?'),
+                  actions: [
+                    TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Not Now')),
+                    TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Enable')),
+                  ],
+                ),
+              );
+              if (enable == true) {
+                prefs.setBool('biometrics_enabled', true);
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Biometric login enabled')));
+              }
+            }
+          }
+          Navigator.pushReplacementNamed(context, '/');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+
   void _loginWithGoogle() async {
     setState(() => _isLoading = true);
     try {
@@ -468,7 +521,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                   ),
                 ),
                 
-                if (!Platform.isIOS) ...[
                 const SizedBox(height: 24),
                 _FadeSlide(
                   controller: _animationController,
@@ -510,6 +562,33 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                     ),
                   ),
                 ),
+                
+                if (Platform.isIOS) ...[
+                  const SizedBox(height: 16),
+                  _FadeSlide(
+                    controller: _animationController,
+                    delay: 0.65,
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: OutlinedButton(
+                        onPressed: _isLoading ? null : () => _loginWithApple(context),
+                        style: OutlinedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          side: const BorderSide(color: Colors.black, width: 1.5),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.apple, color: Colors.white, size: 28),
+                            const SizedBox(width: 12),
+                            const Text('Continue with Apple', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
                 
                 const SizedBox(height: 32),
