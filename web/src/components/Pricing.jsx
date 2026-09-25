@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, Star, ShieldCheck, Zap, HelpCircle, ArrowRight } from 'lucide-react';
+import { CheckCircle2, Star, ShieldCheck, Zap, X, Monitor, Briefcase, Eye, PlaySquare, Globe, ShoppingBasket, FileText, Bell, HandCoins, LineChart, Megaphone } from 'lucide-react';
 import api from '../services/api';
 import Footer from './Footer';
 
@@ -8,201 +8,201 @@ const Pricing = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [billingCycle, setBillingCycle] = useState('monthly');
   const navigate = useNavigate();
 
-  const handleSubscribe = async () => {
+  const handleSubscribe = async (planSlug) => {
+    if (planSlug === 'free') {
+      navigate('/portfolio');
+      return;
+    }
+
     setLoading(true);
     setError('');
     setMessage('');
     
     try {
-      const res = await api.post('/billing/upgrade');
-      setMessage(res.data?.message || 'Successfully upgraded to Irshad Pro!');
-      setTimeout(() => navigate('/portfolio'), 2000);
+      const res = await api.post('/subscription/initialize', {
+        plan_slug: planSlug,
+        billing_cycle: billingCycle
+      });
+      
+      if (res.data?.authorization_url) {
+        window.location.href = res.data.authorization_url;
+      } else {
+        setError('Unable to initialize payment. Please try again.');
+      }
     } catch (err) {
-      setError(err.response?.data?.message || 'Payment failed. Please try again.');
+      if (err.response?.status === 401) {
+        navigate('/login', { state: { returnTo: '/pricing' } });
+      } else {
+        setError(err.response?.data?.error || 'Payment failed. Please try again.');
+      }
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
     <>
-      <div className="animate-fade-in page-wrapper" style={{ paddingBottom: '80px' }}>
-        <div style={{ maxWidth: '1080px', margin: '0 auto' }}>
+      <div className="animate-fade-in page-wrapper" style={{ paddingBottom: '80px', background: '#F8F9FA' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
           
           {/* Header */}
-          <div style={{ textAlign: 'center', marginBottom: '56px' }}>
-            <div className="section-label" style={{ marginBottom: '16px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <Zap size={14} color="var(--primary)" />
-              Transparent Pricing
-            </div>
-            <h1 style={{ fontSize: 'clamp(2.2rem, 5vw, 3.2rem)', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-1.2px', marginBottom: '16px' }}>
-              Invest with Absolute <span style={{ color: 'var(--primary)' }}>Clarity</span>
+          <div style={{ textAlign: 'center', marginBottom: '40px', paddingTop: '40px' }}>
+            <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.2rem)', fontWeight: 900, color: '#0A192F', letterSpacing: '-1px', marginBottom: '16px', textTransform: 'uppercase' }}>
+              IRSHAD PAYMENT TIERS
             </h1>
-            <p style={{ fontSize: '1rem', color: 'var(--text-muted)', maxWidth: '600px', margin: '0 auto', lineHeight: 1.7 }}>
-              Transparent, fair pricing designed for Nigerian Muslim investors and wealth managers. No hidden fees. Cancel anytime.
-            </p>
+            
+            {/* Billing Toggle */}
+            <div style={{ 
+              display: 'inline-flex', background: '#E2E8F0', borderRadius: '100px', padding: '4px', margin: '20px auto'
+            }}>
+              <button 
+                onClick={() => setBillingCycle('monthly')}
+                style={{ 
+                  padding: '10px 24px', borderRadius: '100px', border: 'none', 
+                  background: billingCycle === 'monthly' ? '#fff' : 'transparent',
+                  color: billingCycle === 'monthly' ? '#0F172A' : '#64748B',
+                  fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer',
+                  boxShadow: billingCycle === 'monthly' ? '0 2px 8px rgba(0,0,0,0.1)' : 'none',
+                  transition: 'all 0.2s'
+                }}
+              >
+                Monthly
+              </button>
+              <button 
+                onClick={() => setBillingCycle('yearly')}
+                style={{ 
+                  padding: '10px 24px', borderRadius: '100px', border: 'none', 
+                  background: billingCycle === 'yearly' ? '#fff' : 'transparent',
+                  color: billingCycle === 'yearly' ? '#0F172A' : '#64748B',
+                  fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer',
+                  boxShadow: billingCycle === 'yearly' ? '0 2px 8px rgba(0,0,0,0.1)' : 'none',
+                  transition: 'all 0.2s'
+                }}
+              >
+                Yearly <span style={{ color: '#10B981', fontSize: '0.75rem', marginLeft: '4px' }}>Save ~20%</span>
+              </button>
+            </div>
           </div>
 
-          {message && (
-            <div style={{ marginBottom: '32px', padding: '16px', borderRadius: '14px', background: 'var(--halal-bg)', color: 'var(--halal)', textAlign: 'center', fontWeight: 700, border: '1px solid rgba(16,185,129,0.2)' }}>
-              {message}
-            </div>
-          )}
-
           {error && (
-            <div style={{ marginBottom: '32px', padding: '16px', borderRadius: '14px', background: 'var(--non-compliant-bg)', color: 'var(--non-compliant)', textAlign: 'center', fontWeight: 700, border: '1px solid rgba(239,68,68,0.2)' }}>
+            <div style={{ marginBottom: '32px', padding: '16px', borderRadius: '14px', background: '#FEE2E2', color: '#B91C1C', textAlign: 'center', fontWeight: 700 }}>
               {error}
             </div>
           )}
 
           {/* Pricing Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '32px', marginBottom: '64px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))', gap: '20px', marginBottom: '64px' }}>
             
-            {/* Basic Tier */}
+            {/* MIFTAH */}
             <div style={{ 
-              background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '24px', padding: '40px 36px',
-              display: 'flex', flexDirection: 'column', boxShadow: 'var(--shadow-sm)'
+              background: '#F0F7FF', borderRadius: '16px', overflow: 'hidden',
+              display: 'flex', flexDirection: 'column', boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
+              border: '1px solid #D1E5FF'
             }}>
-              <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '8px' }}>Free Community</h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.86rem', marginBottom: '24px', lineHeight: 1.6 }}>Essential screening and market explorer for beginner halal investors.</p>
-              
-              <div style={{ fontSize: '2.4rem', fontWeight: 950, color: 'var(--text-dark)', marginBottom: '32px' }}>
-                ₦0 <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 600 }}>/ forever</span>
+              <div style={{ background: '#0A5B9C', color: 'white', textAlign: 'center', padding: '24px 20px' }}>
+                <h3 style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: '8px' }}>MIFTAH (FREE)</h3>
+                <div style={{ fontSize: '3rem', fontWeight: 950, lineHeight: 1 }}>₦0</div>
               </div>
-              
-              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 40px', flex: 1 }}>
-                {[
-                  'Full NGX Halal / Non-Compliant Screener',
-                  'Basic AAOIFI Compliance Verdicts',
-                  '1 Custom Portfolio Watchlist',
-                  'Manual Dividend Purification Calculator',
-                  'Access to AAOIFI Standards & Guides'
-                ].map((feature, i) => (
-                  <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', color: 'var(--text-dark)', fontWeight: 600, fontSize: '0.88rem' }}>
-                    <CheckCircle2 size={18} color="var(--primary)" style={{ flexShrink: 0 }} /> {feature}
-                  </li>
-                ))}
-              </ul>
-              
-              <button onClick={() => navigate('/portfolio')} style={{ 
-                width: '100%', padding: '16px', borderRadius: '14px', background: 'var(--bg-section)', 
-                border: '1.5px solid var(--border)', color: 'var(--text-dark)', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer',
-                transition: 'all 0.2s'
-              }} className="hover-lift">
-                Get Started Free
-              </button>
+              <div style={{ padding: '30px 24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 40px', flex: 1 }}>
+                  <FeatureRow icon="Screen" title="Stock screens" text="3 per month" />
+                  <FeatureRow icon="Briefcase" title="Portfolio (holdings)" text="1 stock" />
+                  <FeatureRow icon="Video" title="Resources" text="(video/docs)" />
+                  <FeatureRow icon="Globe" title="News and Insight" text="" />
+                  <FeatureRow empty={true} />
+                  <FeatureRow empty={true} />
+                  <FeatureRow empty={true} />
+                  <FeatureRow empty={true} />
+                  <FeatureRow empty={true} />
+                  <FeatureRow empty={true} />
+                </ul>
+                <button onClick={() => handleSubscribe('free')} className="hover-lift" style={{ 
+                  width: '100%', padding: '16px', borderRadius: '8px', background: '#0A5B9C', 
+                  border: 'none', color: 'white', fontWeight: 900, fontSize: '1rem', cursor: 'pointer'
+                }}>CHOOSE</button>
+              </div>
             </div>
 
-            {/* Pro Tier */}
+            {/* RAWDAH */}
             <div style={{ 
-              background: 'linear-gradient(145deg, #0A192F 0%, #0F3A40 50%, #0B4F55 100%)',
-              border: '1.5px solid rgba(201,168,76,0.4)',
-              borderRadius: '24px', padding: '40px 36px',
-              display: 'flex', flexDirection: 'column', position: 'relative',
-              boxShadow: '0 24px 60px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.1)',
-              color: 'white', overflow: 'hidden'
+              background: '#E6F4F1', borderRadius: '16px', overflow: 'hidden',
+              display: 'flex', flexDirection: 'column', boxShadow: '0 16px 40px rgba(0,107,70,0.15)',
+              border: '2px solid #006B46', transform: 'scale(1.02)', position: 'relative', zIndex: 10
             }}>
-              <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '220px', height: '220px', background: 'radial-gradient(circle, rgba(201,168,76,0.2) 0%, transparent 70%)', pointerEvents: 'none' }} />
-              
-              <div style={{ 
-                position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)', 
-                background: 'var(--gold-grad, linear-gradient(135deg, var(--gold) 0%, var(--gold) 100%))',
-                color: '#0F172A', padding: '6px 20px', borderRadius: '20px', 
-                fontSize: '0.72rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '6px', letterSpacing: '1px', textTransform: 'uppercase',
-                boxShadow: '0 4px 16px rgba(209, 165, 98,0.4)'
-              }}>
-                <Star size={14} fill="currentColor" /> Recommended
+              <div style={{ background: '#006B46', color: 'white', textAlign: 'center', padding: '24px 20px' }}>
+                <h3 style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: '8px' }}>RAWDAH (PRO)</h3>
+                <div style={{ fontSize: '3rem', fontWeight: 950, lineHeight: 1 }}>
+                  {billingCycle === 'monthly' ? '₦2,500' : '₦24,000'}
+                  <span style={{ fontSize: '1.2rem', fontWeight: 700 }}>/{billingCycle === 'monthly' ? 'mo' : 'yr'}</span>
+                </div>
+                {billingCycle === 'monthly' && <div style={{ fontSize: '0.85rem', marginTop: '8px', opacity: 0.9 }}>(₦24,000/yr)</div>}
               </div>
-              
-              <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'white', marginBottom: '8px', letterSpacing: '-0.3px' }}>Irshad Pro</h3>
-              <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.86rem', marginBottom: '24px', lineHeight: 1.6 }}>For active stock pickers and funds requiring automated portfolio purification.</p>
-              
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '32px' }}>
-                <span style={{ fontSize: '2.4rem', fontWeight: 950, color: 'white', letterSpacing: '-0.5px' }}>₦2,500</span>
-                <span style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 600, fontSize: '0.9rem' }}>/ month</span>
+              <div style={{ padding: '30px 24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 40px', flex: 1 }}>
+                  <FeatureRow icon="Screen" title="Stock screens" text="5 per month" />
+                  <FeatureRow icon="Briefcase" title="Portfolio (holdings)" text="Up to 7 stocks" />
+                  <FeatureRow icon="Eye" title="Watchlist" text="Up to 2 stocks" />
+                  <FeatureRow icon="Video" title="Resources" text="(video/docs)" />
+                  <FeatureRow icon="Globe" title="News and Insight" text="" />
+                  <FeatureRow icon="Basket" title="Baskets" text="Access to 1 curated basket and 2 Custom baskets" />
+                  <FeatureRow icon="Doc" title="Statements" text="(Purification & Zakat history)" />
+                  <FeatureRow icon="HandCoin" title="Purification & Zakat Calc" text="2 Purifications & Full Zakat Calc" />
+                  <FeatureRow empty={true} />
+                  <FeatureRow empty={true} />
+                </ul>
+                <button onClick={() => handleSubscribe('pro')} disabled={loading} className="hover-lift" style={{ 
+                  width: '100%', padding: '16px', borderRadius: '8px', background: '#D9A05B', 
+                  border: 'none', color: 'white', fontWeight: 900, fontSize: '1rem', cursor: loading ? 'not-allowed' : 'pointer'
+                }}>
+                  {loading ? 'PROCESSING...' : 'CHOOSE PRO'}
+                </button>
               </div>
-              
-              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 40px', flex: 1, position: 'relative', zIndex: 1 }}>
-                {[
-                  'Everything in Free Community, plus:',
-                  'Automated Portfolio Dividend Purification',
-                  'Granular AAOIFI Metric Historical Graphs',
-                  'Instant Compliance Change Alert Push/Email',
-                  'Direct NGX Regulatory Filing Auditing Access',
-                  'Unlimited Multi-Portfolio Tracking',
-                  'One-Click PDF/CSV Audit Reports'
-                ].map((feature, i) => (
-                  <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', color: 'rgba(255,255,255,0.92)', fontWeight: 600, fontSize: '0.88rem' }}>
-                    <CheckCircle2 size={18} color="var(--gold, var(--gold))" style={{ flexShrink: 0 }} /> {feature}
-                  </li>
-                ))}
-              </ul>
-              
-              <button 
-                onClick={handleSubscribe} 
-                disabled={loading}
-                style={{ 
-                  width: '100%', padding: '16px', borderRadius: '14px',
-                  background: 'var(--gold-grad, linear-gradient(135deg, var(--gold) 0%, var(--gold) 100%))', 
-                  border: 'none', color: '#0F172A', fontWeight: 900, fontSize: '0.92rem', cursor: loading ? 'not-allowed' : 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', opacity: loading ? 0.7 : 1,
-                  boxShadow: '0 8px 24px rgba(209, 165, 98, 0.35)', transition: 'all 0.2s', position: 'relative', zIndex: 1
-                }}
-                className="hover-lift"
-              >
-                {loading ? <div className="spinner" style={{ width: '18px', height: '18px', borderTopColor: '#0F172A', borderWidth: '2px' }} /> : (
-                  <>Upgrade to Pro <Zap size={18} fill="currentColor" /></>
-                )}
-              </button>
-              
-              <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '0.74rem', color: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', position: 'relative', zIndex: 1 }}>
-                <ShieldCheck size={14} color="var(--gold)" /> 256-Bit Encrypted Payments via Paystack
+            </div>
+
+            {/* NOOR */}
+            <div style={{ 
+              background: '#FFF8E7', borderRadius: '16px', overflow: 'hidden',
+              display: 'flex', flexDirection: 'column', boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
+              border: '1px solid #EADDCD'
+            }}>
+              <div style={{ background: '#B8860B', color: 'white', textAlign: 'center', padding: '24px 20px' }}>
+                <h3 style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: '8px' }}>NOOR (MAX)</h3>
+                <div style={{ fontSize: '3rem', fontWeight: 950, lineHeight: 1 }}>
+                  {billingCycle === 'monthly' ? '₦6,500' : '₦62,000'}
+                  <span style={{ fontSize: '1.2rem', fontWeight: 700 }}>/{billingCycle === 'monthly' ? 'mo' : 'yr'}</span>
+                </div>
+                {billingCycle === 'monthly' && <div style={{ fontSize: '0.85rem', marginTop: '8px', opacity: 0.9 }}>(₦62,000/yr)</div>}
+              </div>
+              <div style={{ padding: '30px 24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 40px', flex: 1 }}>
+                  <FeatureRow icon="Screen" title="Stock screens" text="Unlimited" />
+                  <FeatureRow icon="Briefcase" title="Portfolio (holdings)" text="Unlimited" />
+                  <FeatureRow icon="Eye" title="Watchlist" text="Unlimited" />
+                  <FeatureRow icon="Video" title="Resources" text="(video/docs)" />
+                  <FeatureRow icon="Globe" title="News and Insight" text="" />
+                  <FeatureRow icon="Basket" title="Baskets" text="Purification & Zakat calc (Unlimited)" />
+                  <FeatureRow icon="Doc" title="Statements" text="(Purification & Zakat history)" />
+                  <FeatureRow icon="Bell" title="Dividend alert" text="(Unlimited)" />
+                  <FeatureRow icon="HandCoin" title="Purification & Zakat Calc" text="(Unlimited)" />
+                  <FeatureRow icon="Chart" title="90-day drift tracking" text="Unlimited stocks" />
+                  <FeatureRow icon="Megaphone" title="Monthly spotlight" text="full news, downloadable summaries" />
+                </ul>
+                <button onClick={() => handleSubscribe('max')} disabled={loading} className="hover-lift" style={{ 
+                  width: '100%', padding: '16px', borderRadius: '8px', background: '#0A192F', 
+                  border: 'none', color: 'white', fontWeight: 900, fontSize: '1rem', cursor: loading ? 'not-allowed' : 'pointer'
+                }}>
+                  {loading ? 'PROCESSING...' : 'CHOOSE MAX'}
+                </button>
               </div>
             </div>
 
           </div>
 
-          {/* FAQ Section */}
-          <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '24px', padding: '48px 40px', boxShadow: 'var(--shadow-sm)' }}>
-            <div style={{ textAlign: 'center', marginBottom: '36px' }}>
-              <div className="section-label" style={{ marginBottom: '12px' }}>FAQ</div>
-              <h2 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-0.5px' }}>
-                Frequently Asked Pricing Questions
-              </h2>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: '28px' }}>
-              <div>
-                <h4 style={{ fontSize: '0.96rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '8px' }}>Can I cancel anytime?</h4>
-                <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: 1.65, margin: 0 }}>
-                  Yes! There are no long-term contracts. You can cancel your subscription at any time directly in your account settings with a single click.
-                </p>
-              </div>
-
-              <div>
-                <h4 style={{ fontSize: '0.96rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '8px' }}>Which payment methods do you support?</h4>
-                <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: 1.65, margin: 0 }}>
-                  We support all Nigerian debit cards (Mastercard, Visa, Verve), bank transfers, and USSD via our licensed payment gateway partner Paystack.
-                </p>
-              </div>
-
-              <div>
-                <h4 style={{ fontSize: '0.96rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '8px' }}>What is Automated Dividend Purification?</h4>
-                <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: 1.65, margin: 0 }}>
-                  Irshad Pro calculates the exact naira amount you must give to charity from each dividend payment received across all portfolio holdings under AAOIFI Rule 3/4/2.
-                </p>
-              </div>
-
-              <div>
-                <h4 style={{ fontSize: '0.96rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '8px' }}>Do you offer enterprise or fund pricing?</h4>
-                <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: 1.65, margin: 0 }}>
-                  Yes! For institutional asset managers, pension fund administrators (PFAs), and Shariah review boards, contact our team at <a href="mailto:institutional@iirshad.com" style={{ color: 'var(--primary)', fontWeight: 700 }}>institutional@iirshad.com</a>.
-                </p>
-              </div>
-            </div>
+          <div style={{ textAlign: 'center', marginBottom: '40px', fontSize: '0.85rem', color: '#64748B', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+            <ShieldCheck size={16} color="#10B981" /> Secure 256-Bit Encrypted Payments via Paystack
           </div>
-
         </div>
       </div>
       <Footer />
@@ -210,5 +210,45 @@ const Pricing = () => {
   );
 };
 
-export default Pricing;
+// Quick helper for rendering rows like the graphic
+const FeatureRow = ({ icon, title, text, empty }) => {
+  if (empty) {
+    return (
+      <li style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px 0', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
+        <div style={{ width: '20px', height: '2px', background: 'rgba(0,0,0,0.1)' }}></div>
+      </li>
+    );
+  }
 
+  let IconComponent = CheckCircle2;
+  switch (icon) {
+    case 'Screen': IconComponent = Monitor; break;
+    case 'Briefcase': IconComponent = Briefcase; break;
+    case 'Eye': IconComponent = Eye; break;
+    case 'Video': IconComponent = PlaySquare; break;
+    case 'Globe': IconComponent = Globe; break;
+    case 'Basket': IconComponent = ShoppingBasket; break;
+    case 'Doc': IconComponent = FileText; break;
+    case 'Bell': IconComponent = Bell; break;
+    case 'HandCoin': IconComponent = HandCoins; break;
+    case 'Chart': IconComponent = LineChart; break;
+    case 'Megaphone': IconComponent = Megaphone; break;
+  }
+
+  return (
+    <li style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', padding: '12px 0', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
+      <div style={{ 
+        width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', 
+        color: '#0A192F', flexShrink: 0 
+      }}>
+        <IconComponent size={24} color="#0A192F" />
+      </div>
+      <div>
+        <div style={{ fontWeight: 800, color: '#0F172A', fontSize: '0.9rem', lineHeight: 1.2 }}>{title}</div>
+        {text && <div style={{ fontSize: '0.8rem', color: '#475569', marginTop: '4px', lineHeight: 1.3 }}>{text}</div>}
+      </div>
+    </li>
+  );
+};
+
+export default Pricing;
