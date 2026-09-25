@@ -308,6 +308,7 @@ class PortfolioController extends Controller
     public function update(Request $request, $id): JsonResponse
     {
         $request->validate([
+            'symbol' => 'nullable|string',
             'shares' => 'required|numeric|min:0',
             'average_buy_price' => 'required|numeric|min:0',
         ]);
@@ -318,10 +319,15 @@ class PortfolioController extends Controller
             return $this->error('Holding not found', 404);
         }
 
-        $holding->update([
+        $updateData = [
             'shares' => $request->shares,
             'average_buy_price' => $request->average_buy_price,
-        ]);
+        ];
+        if ($request->has('symbol') && !empty($request->symbol)) {
+            $updateData['symbol'] = strtoupper($request->symbol);
+        }
+
+        $holding->update($updateData);
 
         Cache::forget("portfolio_data_" . Auth::id());
 

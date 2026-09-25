@@ -199,16 +199,20 @@ class PortfolioProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-  Future<bool> updateHolding(int id, double shares, double averageBuyPrice) async {
+  Future<bool> updateHolding(int id, double shares, double averageBuyPrice, {String? symbol}) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      final response = await ApiService().put('portfolio/$id', {
+      final data = <String, dynamic>{
         'shares': shares,
         'average_buy_price': averageBuyPrice,
-      });
+      };
+      if (symbol != null && symbol.isNotEmpty) {
+        data['symbol'] = symbol;
+      }
+      final response = await ApiService().put('portfolio/$id', data);
 
       if (response.data['status'] == 'success') {
         await fetchPortfolio();

@@ -728,6 +728,119 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
     );
   }
 
+  Widget _buildTickerSymbolField(_HoldingFormData form) {
+    return RawAutocomplete<Map<String, dynamic>>(
+      textEditingController: form.symbol,
+      focusNode: form.symbolFocus,
+      optionsBuilder: (TextEditingValue textEditingValue) {
+        if (textEditingValue.text == '') {
+          return const Iterable<Map<String, dynamic>>.empty();
+        }
+        final stocks = Provider.of<StockProvider>(context, listen: false).ngxStocks;
+        return stocks.where((stock) {
+          final symbol = stock['symbol']?.toString().toLowerCase() ?? '';
+          final name = stock['name']?.toString().toLowerCase() ?? '';
+          final query = textEditingValue.text.toLowerCase();
+          return symbol.contains(query) || name.contains(query);
+        });
+      },
+      displayStringForOption: (option) => option['symbol']?.toString() ?? '',
+      onSelected: (Map<String, dynamic> selection) {
+        form.price.text = selection['latest_price']?.toString() ?? '0.00';
+      },
+      fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
+        return _buildTextField(
+          'Ticker Symbol',
+          controller: textEditingController,
+          focusNode: focusNode,
+          prefixIcon: Icons.search,
+          hint: 'CMFC',
+        );
+      },
+      optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<Map<String, dynamic>> onSelected, Iterable<Map<String, dynamic>> options) {
+        return Align(
+          alignment: Alignment.topLeft,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Material(
+              elevation: 12.0,
+              borderRadius: BorderRadius.circular(16),
+              color: context.bg,
+              shadowColor: Colors.black.withOpacity(0.5),
+              clipBehavior: Clip.antiAlias,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: 260,
+                  maxWidth: MediaQuery.of(context).size.width - 88,
+                  minWidth: MediaQuery.of(context).size.width - 88,
+                ),
+                child: ListView.separated(
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  itemCount: options.length,
+                  separatorBuilder: (context, index) => Divider(height: 1, color: context.divider.withOpacity(0.3)),
+                  itemBuilder: (BuildContext context, int index) {
+                    final option = options.elementAt(index);
+                    return InkWell(
+                      onTap: () => onSelected(option),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(option['symbol'] ?? '', style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, fontSize: 14)),
+                                  Text(option['name'] ?? '', style: TextStyle(color: context.textMuted, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                ],
+                              ),
+                            ),
+                            Text('₦${option['latest_price']}', style: TextStyle(fontWeight: FontWeight.w800, color: context.primary, fontSize: 13)),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildTextField(String label, {required TextEditingController controller, FocusNode? focusNode, String? hint, IconData? prefixIcon, IconData? suffixIcon, TextInputType? keyboardType, bool readOnly = false, VoidCallback? onTap}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800, fontSize: 13)),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          focusNode: focusNode,
+          keyboardType: keyboardType,
+          readOnly: readOnly,
+          onTap: onTap,
+          style: TextStyle(color: context.textDark, fontWeight: FontWeight.w700),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: TextStyle(color: context.textMuted, fontWeight: FontWeight.w600),
+            prefixIcon: prefixIcon != null ? Icon(prefixIcon, color: context.textMuted, size: 20) : null,
+            suffixIcon: suffixIcon != null ? Icon(suffixIcon, color: context.textMuted, size: 20) : null,
+            filled: true,
+            fillColor: context.bg,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: context.divider, width: 2)),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: context.divider, width: 2)),
+            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: context.primary, width: 2)),
+          ),
+        ),
+      ],
+    );
+  }
+
   void _showAddHoldingSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -738,8 +851,10 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
   }
 
   void _showEditHoldingSheet(BuildContext context, dynamic holding) {
-    final qtyController = TextEditingController(text: holding['shares'].toString());
-    final priceController = TextEditingController(text: holding['average_buy_price'].toString());
+    final form = _HoldingFormData();
+    form.symbol.text = holding['symbol']?.toString() ?? '';
+    form.shares.text = holding['shares'].toString();
+    form.price.text = holding['average_buy_price'].toString();
 
     showModalBottomSheet(
       context: context,
@@ -763,7 +878,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Edit ${holding['symbol']}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.3)),
+                          Text('Edit Holding', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.3)),
                           const SizedBox(height: 4),
                           Text('Adjust your position size and average price', style: TextStyle(fontSize: 12, color: context.textMuted)),
                         ],
@@ -784,6 +899,8 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                   padding: const EdgeInsets.all(28),
                   child: Column(
                     children: [
+                      _buildTickerSymbolField(form),
+                      const SizedBox(height: 16),
                       Row(
                         children: [
                           Expanded(
@@ -793,7 +910,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                                 Text('SHARES', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: context.textMuted, letterSpacing: 0.8)),
                                 const SizedBox(height: 8),
                                 TextField(
-                                  controller: qtyController,
+                                  controller: form.shares,
                                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                   style: TextStyle(fontWeight: FontWeight.w800, color: context.textDark, fontSize: 16),
                                   decoration: InputDecoration(
@@ -816,7 +933,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                                 Text('AVG PRICE (₦)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: context.textMuted, letterSpacing: 0.8)),
                                 const SizedBox(height: 8),
                                 TextField(
-                                  controller: priceController,
+                                  controller: form.price,
                                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                   style: TextStyle(fontWeight: FontWeight.w800, color: context.textDark, fontSize: 16),
                                   decoration: InputDecoration(
@@ -856,13 +973,13 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                                 setState(() => isSaving = true);
                                 try {
                                   final provider = Provider.of<PortfolioProvider>(context, listen: false);
-                                  final shares = double.tryParse(qtyController.text) ?? 0.0;
-                                  final price = double.tryParse(priceController.text) ?? 0.0;
+                                  final shares = double.tryParse(form.shares.text) ?? 0.0;
+                                  final price = double.tryParse(form.price.text) ?? 0.0;
                                   if (shares == 0) {
                                     await ApiService().delete('portfolio/${holding['id']}');
                                     await provider.fetchPortfolio();
                                   } else {
-                                    await provider.updateHolding(holding['id'], shares, price);
+                                    await provider.updateHolding(holding['id'], shares, price, symbol: form.symbol.text);
                                   }
                                   if (mounted) Navigator.pop(bottomSheetContext);
                                 } catch (e) {
