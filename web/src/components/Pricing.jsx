@@ -93,7 +93,7 @@ const Pricing = () => {
           )}
 
           {/* Pricing Grid */}
-          <div className="pricing-grid stagger-fade-in" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '64px', alignItems: 'stretch' }}>
+          <div className="pricing-grid stagger-fade-in" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '64px', alignItems: 'stretch' }}>
             
             {/* MIFTAH */}
             <div style={{ background: '#FFFFFF', borderRadius: '24px', border: '1px solid #E5E7EB', padding: '32px 24px', display: 'flex', flexDirection: 'column' }}>
