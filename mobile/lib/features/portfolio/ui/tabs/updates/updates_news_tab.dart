@@ -97,7 +97,7 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
     
     final sections = [
       {'id': 'market', 'label': 'Market Intelligence', 'icon': Icons.bar_chart_outlined, 'color': context.primary},
-      {'id': 'guide', 'label': 'Navigation Guide', 'icon': Icons.menu_book_outlined, 'color': const Color(0xFF10B981)},
+      {'id': 'guide', 'label': 'Navigation Guide', 'icon': Icons.explore_outlined, 'color': const Color(0xFF10B981)},
       {'id': 'purification', 'label': 'Why Purification', 'icon': Icons.water_drop_outlined, 'color': const Color(0xFF0EA5E9)},
     ];
 
