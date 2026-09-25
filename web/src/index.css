@@ -5154,3 +5154,33 @@ button, a.nav-link, a.btn-primary, a.btn-secondary, .mobile-col > div[style*="cu
   }
 }
 
+
+/* PRICING PAGE POLISH */
+.pricing-grid.stagger-fade-in > div {
+  opacity: 0;
+  position: relative;
+  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.pricing-grid.stagger-fade-in > div:nth-child(1) { animation-delay: 0.1s; }
+.pricing-grid.stagger-fade-in > div:nth-child(2) { animation-delay: 0.2s; }
+.pricing-grid.stagger-fade-in > div:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes slideUpFade {
+  0% { opacity: 0; top: 40px; }
+  100% { opacity: 1; top: 0px; }
+}
+
+.pricing-btn {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+}
+.pricing-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+@media (min-width: 1024px) {
+  .pricing-pro-card {
+    transform: scale(1.05);
+  }
+}
