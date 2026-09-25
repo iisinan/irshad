@@ -45,6 +45,11 @@
 		<true/>
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
+		<key>NSCameraUsageDescription</key>
+		<string>This app requires access to your camera so you can take and upload a profile picture.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>This app requires access to your photo library to select a profile picture.</string>
+
 		<key>NSFaceIDUsageDescription</key>
 		<string>This app requires Face ID for quick and secure login.</string>
 		<key>UIStatusBarHidden</key>
