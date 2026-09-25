@@ -97,7 +97,6 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
     final sections = [
       {'id': 'market', 'label': 'Market Intelligence', 'icon': Icons.bar_chart_outlined, 'color': context.primary},
       {'id': 'purification', 'label': 'Why Purification', 'icon': Icons.water_drop_outlined, 'color': const Color(0xFF0EA5E9)},
-      {'id': 'analysis', 'label': 'Analysis', 'icon': Icons.trending_up_outlined, 'color': const Color(0xFF8B5CF6)},
     ];
 
     return SingleChildScrollView(
@@ -338,14 +337,13 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
     if (_activeSection == 'market') {
       final business = (_data?['business_updates'] as List?)?.map((e) => Map<String, dynamic>.from(e as Map)..['_cardType'] = 'business').toList() ?? [];
       final market = (_data?['market_intelligence'] as List?)?.map((e) => Map<String, dynamic>.from(e as Map)..['_cardType'] = 'market').toList() ?? [];
-      items = [...business, ...market];
+      final analysis = (_data?['analysis'] as List?)?.map((e) => Map<String, dynamic>.from(e as Map)..['_cardType'] = 'analysis').toList() ?? [];
+      items = [...business, ...market, ...analysis];
       items.sort((a, b) {
         final dateA = DateTime.tryParse(a['published_at']?.toString() ?? '') ?? DateTime.fromMillisecondsSinceEpoch(0);
         final dateB = DateTime.tryParse(b['published_at']?.toString() ?? '') ?? DateTime.fromMillisecondsSinceEpoch(0);
         return dateB.compareTo(dateA);
       });
-    } else if (_activeSection == 'analysis') {
-      items = (_data?['analysis'] as List?)?.map((e) => Map<String, dynamic>.from(e as Map)).toList() ?? [];
     }
 
     if (_activeSection == 'purification') {
