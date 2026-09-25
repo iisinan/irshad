@@ -39,6 +39,12 @@ class User extends Authenticatable implements MustVerifyEmail
      *
      * @var list<string>
      */
+    
+    protected $appends = [
+        'tier',
+        'has_paid_subscription',
+    ];
+
     protected $hidden = [
         'password',
         'remember_token',
@@ -103,6 +109,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function usages()
     {
         return $this->hasMany(UserUsage::class);
+    }
+
+        public function getHasPaidSubscriptionAttribute()
+    {
+        return $this->subscriptions()->where('status', 'active')->exists();
     }
 
     public function getTierAttribute()
