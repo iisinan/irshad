@@ -668,7 +668,7 @@ class _VideoModalPlayerState extends State<_VideoModalPlayer> {
                 Text('Description', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: context.textDark)),
                 const SizedBox(height: 12),
                 Text(
-                  'This is an educational video provided by our Islamic Finance partners. Please note that the content is for educational purposes and should not be taken as direct financial advice.',
+                  'This is an Educational Video',
                   style: TextStyle(fontSize: 14, color: context.textMuted, height: 1.6),
                 ),
               ],
