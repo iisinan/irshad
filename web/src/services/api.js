@@ -289,6 +289,15 @@ export const deleteAdminUser = async (id) => {
   return response.data;
 };
 
+export const overrideAdminUserPlan = async (id, planSlug, expiresAt = null, note = '') => {
+  const response = await api.post(`/admin/users/${id}/override-plan`, {
+    plan_slug: planSlug,
+    expires_at: expiresAt,
+    note,
+  });
+  return response.data;
+};
+
 export const fetchAdminUserAnalytics = async (id) => {
   const response = await api.get(`/admin/users/${id}/analytics`);
   return response.data;

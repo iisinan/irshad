@@ -100,10 +100,10 @@ class AdminController extends Controller
         $user = User::findOrFail($id);
 
         $validator = Validator::make($request->all(), [
-            'name' => 'sometimes|string|max:255',
+            'name'  => 'sometimes|string|max:255',
             'email' => 'sometimes|string|email|max:255|unique:users,email,'.$user->id,
-            'role' => 'sometimes|string|in:admin,user',
-            'plan' => 'sometimes|string|in:free,paid',
+            'role'  => 'sometimes|string|in:admin,user',
+            'plan'  => 'sometimes|string|in:free,paid',
         ]);
 
         if ($validator->fails()) {
@@ -113,6 +113,63 @@ class AdminController extends Controller
         $user->update($request->only(['name', 'email', 'role', 'plan']));
 
         return $this->success($user, 'User updated successfully');
+    }
+
+    /**
+     * Admin override: manually assign a subscription tier to any user.
+     */
+    public function overridePlan(Request $request, $id)
+    {
+        $request->validate([
+            'plan_slug' => 'required|string|exists:plans,slug',
+            'expires_at' => 'nullable|date|after:today',
+            'note'      => 'nullable|string|max:255',
+        ]);
+
+        $user = User::findOrFail($id);
+        $adminName = $request->user()->name;
+
+        // Cancel any existing active subscriptions
+        $user->subscriptions()->where('status', 'active')->update([
+            'status'  => 'canceled',
+            'ends_at' => now(),
+        ]);
+
+        if ($request->plan_slug === 'free') {
+            // Downgrade to free — just cancel, no new subscription needed
+            \Illuminate\Support\Facades\Cache::tags(['users'])->forget("user.profile.{$user->id}");
+            return response()->json([
+                'message' => "User {$user->name} downgraded to Miftah (Free) by admin.",
+            ]);
+        }
+
+        $plan = \App\Models\Plan::where('slug', $request->plan_slug)->firstOrFail();
+
+        $expiresAt = $request->expires_at
+            ? \Carbon\Carbon::parse($request->expires_at)
+            : \Carbon\Carbon::now()->addYear(); // Default: 1 year
+
+        \App\Models\Subscription::create([
+            'user_id'               => $user->id,
+            'plan_id'               => $plan->id,
+            'billing_cycle'         => 'yearly',
+            'paystack_subscription_code' => null,
+            'paystack_email_token'  => "admin_override_by_{$adminName}",
+            'status'                => 'active',
+            'renews_at'             => $expiresAt,
+            'ends_at'               => null,
+        ]);
+
+        // Bust profile cache so next request reflects new tier
+        try {
+            \Illuminate\Support\Facades\Cache::tags(['users'])->forget("user.profile.{$user->id}");
+        } catch (\Exception $e) { /* driver may not support tags */ }
+
+        return response()->json([
+            'message' => "Plan for {$user->name} overridden to {$plan->name} (expires {$expiresAt->toDateString()}) by admin.",
+            'plan'    => $plan->name,
+            'expires' => $expiresAt->toDateString(),
+        ]);
     }
 
     /**

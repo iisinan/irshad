@@ -281,6 +281,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/admin/users', [AdminController::class, 'getUsers']);
             Route::post('/admin/users', [AdminController::class, 'createAdmin']);
             Route::put('/admin/users/{id}', [AdminController::class, 'updateUser']);
+            Route::post('/admin/users/{id}/override-plan', [AdminController::class, 'overridePlan']);
             Route::delete('/admin/users/{id}', [AdminController::class, 'deleteUser']);
             Route::get('/admin/users/{id}/analytics', [AdminController::class, 'getUserAnalytics']);
 
