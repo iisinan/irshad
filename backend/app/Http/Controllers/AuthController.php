@@ -80,6 +80,11 @@ class AuthController extends Controller
         $payload = $client->verifyIdToken($request->credential);
         
         // Fallback to mobile client ID if web client ID fails
+        if (!$payload && env('GOOGLE_CLIENT_ID_IOS')) {
+            $iosClient = new \Google_Client(['client_id' => env('GOOGLE_CLIENT_ID_IOS')]);
+            $payload = $iosClient->verifyIdToken($request->credential);
+        }
+
         if (!$payload && env('GOOGLE_CLIENT_ID_MOBILE')) {
             $mobileClient = new \Google_Client(['client_id' => env('GOOGLE_CLIENT_ID_MOBILE')]);
             $payload = $mobileClient->verifyIdToken($request->credential);
