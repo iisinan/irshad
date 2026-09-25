@@ -23,3 +23,8 @@ dist/
 /storage/*.key
 /rr
 backend/*.pdf
+
+# Android build outputs — too large for git
+*.aab
+*.apk
+mobile/build/
