@@ -7,7 +7,6 @@ import 'tabs/update_tab.dart';
 import 'tabs/portfolio_overview_tab.dart';
 import 'tabs/purification_tab.dart';
 import 'tabs/resources_tab.dart'; 
-import 'tabs/guide_tab.dart';
 import 'tabs/updates/updates_inbox_tab.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 import '../providers/portfolio_provider.dart';
@@ -62,7 +61,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> with WidgetsBindingOb
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 6,
+      length: 5,
       child: Scaffold(
         backgroundColor: context.bg,
         appBar: AppBar(
@@ -153,7 +152,6 @@ class _PortfolioScreenState extends State<PortfolioScreen> with WidgetsBindingOb
               Tab(text: 'Purification'),
               Tab(text: 'Zakat'),
               Tab(text: 'Resources'),
-              Tab(text: 'Guide'),
             ],
           ),
         ),
@@ -164,7 +162,6 @@ class _PortfolioScreenState extends State<PortfolioScreen> with WidgetsBindingOb
             PurificationTab(),
             ZakatCalculatorScreen(isTab: true),
             ResourcesTab(),
-            GuideTab(),
           ],
         ),
         floatingActionButton: Padding(

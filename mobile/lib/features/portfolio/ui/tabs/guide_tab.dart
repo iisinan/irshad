@@ -70,11 +70,9 @@ class _GuideTabState extends State<GuideTab> {
         ),
 
         // Content Area
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: _buildActiveSection(),
-          ),
+        Padding(
+          padding: const EdgeInsets.all(20),
+          child: _buildActiveSection(),
         ),
       ],
     );

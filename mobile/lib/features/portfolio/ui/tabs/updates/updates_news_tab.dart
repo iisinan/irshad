@@ -7,6 +7,7 @@ import 'package:irshad_mobile/core/widgets/company_avatar.dart';
 import 'package:irshad_mobile/features/stocks/ui/stock_detail_screen.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'updates_purification_tab.dart';
+import '../guide_tab.dart';
 
 class UpdatesNewsTab extends StatefulWidget {
   const UpdatesNewsTab({super.key});
@@ -97,6 +98,7 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
     final sections = [
       {'id': 'market', 'label': 'Market Intelligence', 'icon': Icons.bar_chart_outlined, 'color': context.primary},
       {'id': 'purification', 'label': 'Why Purification', 'icon': Icons.water_drop_outlined, 'color': const Color(0xFF0EA5E9)},
+      {'id': 'guide', 'label': 'Guide', 'icon': Icons.menu_book_outlined, 'color': const Color(0xFF10B981)},
     ];
 
     return SingleChildScrollView(
@@ -352,6 +354,16 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
         children: [
           _buildSectionPills(),
           const UpdatesPurificationTab(),
+        ],
+      );
+    }
+
+    if (_activeSection == 'guide') {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildSectionPills(),
+          const GuideTab(),
         ],
       );
     }
