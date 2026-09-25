@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { fetchAdminUsers, createAdminUser, updateAdminUser, deleteAdminUser, overrideAdminUserPlan } from '../services/api';
-import { Users, Shield, Plus, X, Search, Edit2, Trash2, Crown, ChevronRight, Activity } from 'lucide-react';
+import { Users, Shield, Plus, X, Search, Edit2, Trash2, Crown, ChevronRight, Activity, CreditCard, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -132,8 +132,11 @@ const AdminUsers = () => {
     try {
       const res = await overrideAdminUserPlan(selectedUser.id, planForm.plan_slug, planForm.expires_at || null, planForm.note);
       setPlanOverrideSuccess(res.message || 'Plan updated!');
-      // Update local users list to reflect change
-      setUsers(prev => prev.map(u => u.id === selectedUser.id ? { ...u, _planOverride: planForm.plan_slug } : u));
+      // Optimistically update the table row with new plan + expiry
+      setUsers(prev => prev.map(u => u.id === selectedUser.id
+        ? { ...u, _planOverride: planForm.plan_slug, subscription_ends: res.expires ?? planForm.expires_at }
+        : u
+      ));
     } catch (e) {
       setPlanOverrideSuccess('Error: ' + (e.response?.data?.message || 'Failed to override plan'));
     }
@@ -265,7 +268,7 @@ const AdminUsers = () => {
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '700px' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                {['Name', 'Email', 'Plan', 'Role', 'Joined', 'Actions'].map((h, i) => (
+                {['Name', 'Email', 'Plan / Expiry', 'Role', 'Joined', 'Actions'].map((h, i) => (
                   <th key={h} style={{ padding: '13px 20px', textAlign: i === 5 ? 'right' : 'left', fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px' }}>{h}</th>
                 ))}
               </tr>
@@ -300,15 +303,18 @@ const AdminUsers = () => {
                   <td style={{ padding: '15px 20px', color: 'var(--text-muted)', fontSize: '0.83rem' }}>{u.email}</td>
                   <td style={{ padding: '15px 20px' }}>
                     {(() => {
-                      const slug = u._planOverride || u.tier?.slug || 'free';
+                      const slug = u._planOverride || u.active_plan_slug || 'free';
                       const label = slug === 'max' ? 'Noor' : slug === 'pro' ? 'Rawdah' : 'Miftah';
                       const bg = slug === 'max' ? 'rgba(217,160,91,0.12)' : slug === 'pro' ? 'rgba(0,107,70,0.1)' : 'var(--bg-section)';
                       const color = slug === 'max' ? '#B8860B' : slug === 'pro' ? '#006B46' : 'var(--text-muted)';
                       return (
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 10px', borderRadius: '100px', fontSize: '0.72rem', fontWeight: 700, background: bg, color }}>
-                          {slug !== 'free' && <Crown size={11} />}
-                          {label}
-                        </span>
+                        <div>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 10px', borderRadius: '100px', fontSize: '0.72rem', fontWeight: 700, background: bg, color }}>
+                            {slug !== 'free' && <Crown size={11} />}
+                            {label}
+                          </span>
+                          {u.subscription_ends && <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '3px', paddingLeft: '2px' }}>until {u.subscription_ends}</div>}
+                        </div>
                       );
                     })()}
                   </td>

@@ -22,7 +22,7 @@ class AdminController extends Controller
      */
     public function getUsers(Request $request)
     {
-        $query = User::latest();
+        $query = User::with('activeSubscription.plan')->latest();
 
         if ($request->has('search') && ! empty($request->search)) {
             $search = $request->search;
@@ -33,6 +33,16 @@ class AdminController extends Controller
         }
 
         $users = $query->paginate(20);
+
+        // Append computed tier and subscription info to each user
+        $users->getCollection()->transform(function ($u) {
+            $u->append(['tier', 'has_paid_subscription']);
+            $sub = $u->activeSubscription;
+            $u->active_plan_slug   = $u->tier?->slug ?? 'free';
+            $u->active_plan_name   = $u->tier?->name ?? 'Miftah';
+            $u->subscription_ends  = $sub?->renews_at?->toDateString();
+            return $u;
+        });
 
         return response()->json($users);
     }
