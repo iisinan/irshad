@@ -86,6 +86,23 @@ class SubscriptionController extends Controller
         return response()->json(['status' => 'success']);
     }
 
+    public function sendMagicLink(Request $request)
+    {
+        $user = $request->user();
+        
+        // In a real production app, we would use a Mailable.
+        // For now, we will just use the Notification system or basic Mail facade.
+        \Illuminate\Support\Facades\Mail::raw(
+            "Hello {$user->name},\n\nClick the link below to upgrade your Irshad account to Pro or Max and unlock unlimited features!\n\n" . config('app.frontend_url') . "/pricing\n\nThanks,\nThe Irshad Team",
+            function ($message) use ($user) {
+                $message->to($user->email)
+                        ->subject('Upgrade your Irshad Account');
+            }
+        );
+
+        return response()->json(['message' => 'Magic link sent successfully. Check your email!']);
+    }
+
     private function handleSubscriptionCreated($data)
     {
         // Paystack sends back the subscription code

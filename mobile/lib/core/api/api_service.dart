@@ -6,6 +6,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_state_provider.dart';
 import 'cache_interceptor.dart';
+import '../widgets/upgrade_paywall_bottom_sheet.dart';
+
 
 /// Singleton ApiService — one Dio instance, one interceptor stack, everywhere.
 class ApiService {
@@ -48,8 +50,23 @@ class ApiService {
         }
         return handler.next(options);
       },
+
       onError: (DioException error, handler) async {
+        if (error.response?.statusCode == 403 && error.response?.data?['error'] == 'Upgrade Required') {
+          final context = navigatorKey.currentContext;
+          if (context != null) {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (context) => UpgradePaywallBottomSheet(
+                message: error.response?.data?['message'] ?? 'Please upgrade your plan on the Irshad website to unlock this feature.',
+              ),
+            );
+          }
+        }
         if (error.response?.statusCode == 401) {
+
           final isAuthRoute = error.requestOptions.path.contains('login') || error.requestOptions.path.contains('register') || error.requestOptions.path.contains('auth/google');
           if (!isAuthRoute) {
             debugPrint('401 Unauthorized encountered for ${error.requestOptions.path}');
