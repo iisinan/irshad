@@ -186,11 +186,17 @@ class SyncMarketDataCommand extends Command
                         
                         // Just in case the official doclib api missed the volume, update the volume for today
                         $todayStr = now()->toDateString();
-                        if (isset($stockData['volume']) && $stockData['volume'] > 0) {
-                            DailyPrice::where('company_id', $company->id)
-                                ->where('date', $todayStr)
-                                ->update(['volume' => $stockData['volume']]);
-                        }
+                        
+                        DailyPrice::updateOrCreate(
+                            [
+                                'company_id' => $company->id,
+                                'date' => $todayStr,
+                            ],
+                            [
+                                'price' => $stockData['current_price'] ?? $company->latest_price,
+                                'volume' => $stockData['volume'] ?? 0,
+                            ]
+                        );
                         
                         // Update the company table directly for the API/frontend
                         $company->latest_price = $stockData['current_price'] ?? $company->latest_price;

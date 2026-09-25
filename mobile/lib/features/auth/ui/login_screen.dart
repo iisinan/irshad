@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/providers/app_state_provider.dart';
@@ -466,6 +468,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                   ),
                 ),
                 
+                if (!Platform.isIOS) ...[
                 const SizedBox(height: 24),
                 _FadeSlide(
                   controller: _animationController,
@@ -507,6 +510,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                     ),
                   ),
                 ),
+                ],
                 
                 const SizedBox(height: 32),
 

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/providers/app_state_provider.dart';
@@ -457,6 +459,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                   ),
                 ),
                 
+                if (!Platform.isIOS) ...[
                 const SizedBox(height: 24),
                 _FadeSlide(
                   controller: _animationController,
@@ -498,6 +501,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                     ),
                   ),
                 ),
+                ],
                 
                 const SizedBox(height: 32),
 

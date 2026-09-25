@@ -68,7 +68,6 @@ class SeedHistoricalPrices extends Command
                         'date' => $date->toDateString(),
                         'price' => $prevPrice,
                         'volume' => rand(1000, 5000000), // Random volume
-                        'change_pct' => round($dailyChangePct * 100, 2), // Percentage representation
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];
