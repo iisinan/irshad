@@ -63,3 +63,6 @@ Schedule::command('backup:run --only-db')->timezone('Africa/Lagos')->dailyAt('00
 
 // Scrape NGXPulse market news daily at 5 AM
 Schedule::command('scrape:market-news')->timezone('Africa/Lagos')->dailyAt('05:00')->withoutOverlapping()->description('[Irshad] Market News Scraper — Daily 5 AM')->emailOutputTo('iirshad2026@gmail.com');
+
+// Fetch new videos from YouTube daily at 2 AM
+Schedule::command('fetch:resources')->timezone('Africa/Lagos')->dailyAt('02:00')->withoutOverlapping()->description('[Irshad] YouTube Resources Fetcher — Daily Run')->emailOutputTo('iirshad2026@gmail.com');
