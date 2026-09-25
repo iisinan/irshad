@@ -111,6 +111,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
   bool _isLoadingNews = true;
   final ScrollController _scrollController = ScrollController();
   final ScrollController _tabScrollController = ScrollController();
+  final GlobalKey _contentKey = GlobalKey();
   Map<String, dynamic>? _aaoifiData;
 
   // Alert button animation
@@ -517,6 +518,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
               nearLimitDetected: nearLimitDetected),
             
             Padding(
+              key: _contentKey,
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1240,7 +1242,18 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                                     return Padding(
                                       padding: const EdgeInsets.only(top: 10),
                                       child: GestureDetector(
-                                        onTap: () => setState(() => _selectedTab = 2),
+                                        onTap: () {
+                                          setState(() => _selectedTab = 2);
+                                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                                            if (_contentKey.currentContext != null) {
+                                              Scrollable.ensureVisible(
+                                                _contentKey.currentContext!,
+                                                duration: const Duration(milliseconds: 400),
+                                                curve: Curves.easeInOut,
+                                              );
+                                            }
+                                          });
+                                        },
                                         child: Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                           decoration: BoxDecoration(
