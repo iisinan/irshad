@@ -5,7 +5,7 @@ import api from '../services/api';
 import Footer from './Footer';
 import { useAuth } from '../context/AuthContext';
 
-const Pricing = () => {
+const Pricing = ({ isModal }) => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -213,7 +213,7 @@ const Pricing = () => {
           </div>
         </div>
       </div>
-      <Footer />
+      {!isModal && <Footer />}
     </>
   );
 };
