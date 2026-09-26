@@ -9,6 +9,8 @@ import '../../../../core/api/api_service.dart';
 import '../../../../core/widgets/company_avatar.dart';
 import '../../providers/portfolio_provider.dart';
 import '../../../stocks/providers/stock_provider.dart';
+import '../../../../core/providers/app_state_provider.dart';
+import '../../../../core/widgets/upgrade_paywall_bottom_sheet.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 
 class PortfolioOverviewTab extends StatefulWidget {
