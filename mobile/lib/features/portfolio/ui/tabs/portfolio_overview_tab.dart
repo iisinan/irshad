@@ -842,6 +842,22 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
   }
 
   void _showAddHoldingSheet(BuildContext context) {
+    final appState = Provider.of<AppStateProvider>(context, listen: false);
+    final portfolioProvider = Provider.of<PortfolioProvider>(context, listen: false);
+    final isFreePlan = appState.user?['tier']?['slug'] == 'free';
+    
+    if (isFreePlan && portfolioProvider.holdings.length >= 1) {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (context) => const UpgradePaywallBottomSheet(
+          message: 'You have reached your portfolio limit of 1 stock on the Miftah plan. Upgrade to track more stocks.',
+        ),
+      );
+      return;
+    }
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -1335,6 +1351,7 @@ class _AddHoldingBottomSheetState extends State<AddHoldingBottomSheet> with Sing
               for (int i = 0; i < _holdings.length; i++)
                 _buildHoldingForm(i),
               const SizedBox(height: 16),
+              if (Provider.of<AppStateProvider>(context, listen: false).user?['tier']?['slug'] != 'free')
               GestureDetector(
                 onTap: _addNewHoldingForm,
                 child: Container(
