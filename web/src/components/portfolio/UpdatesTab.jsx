@@ -8,6 +8,7 @@ import UpdatesDigest  from './UpdatesDigest';
 import UpdatesDividends from './UpdatesDividends';
 import UpdatesCompliance  from './UpdatesCompliance';
 import UpdatesIPO from './UpdatesIPO';
+import PricingModal from '../PricingModal';
 
 /* ── Greeting helpers ── */
 function getGreeting() {
@@ -115,6 +116,14 @@ function LiveClock({ hijriDate, compact = false }) {
    ══════════════════════════════════════════════════════════════ */
 export default function UpdatesTab({ unreadCount = 0 }) {
   const [activeSubTab, setActiveSubTab] = useState('news');
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+  const isTabLocked = (tabId) => {
+    const userTier = user?.tier?.slug || 'free';
+    if (userTier === 'max') return false;
+    if (userTier === 'pro') return tabId === 'compliance';
+    return tabId !== 'news';
+  };
   const { user }    = useAuth();
   const greeting    = getGreeting();
   const firstName   = getFirstName(user);
@@ -157,6 +166,8 @@ export default function UpdatesTab({ unreadCount = 0 }) {
 
   return (
     <div style={{ width: '100%', maxWidth: '100%', overflowX: 'hidden', paddingBottom: '40px' }}>
+      {showUpgradeModal && <PricingModal onClose={() => setShowUpgradeModal(false)} />}
+
       {/* ── Compact Greeting Banner ── */}
       <div style={{
         background: 'linear-gradient(145deg, var(--bg) 0%, rgba(91, 41, 113, 0.02) 100%)',
@@ -233,6 +244,10 @@ export default function UpdatesTab({ unreadCount = 0 }) {
               key={tab.id}
               id={`updates-tab-${tab.id}`}
               onClick={() => {
+                if (isTabLocked(tab.id)) {
+                  setShowUpgradeModal(true);
+                  return;
+                }
                 if (tab.isExternal) {
                   window.location.hash = tab.id;
                 } else {
@@ -248,7 +263,8 @@ export default function UpdatesTab({ unreadCount = 0 }) {
                 borderRadius: '30px',
                 background: isActive ? 'var(--primary)' : 'var(--bg-section)',
                 border: isActive ? '1px solid var(--primary)' : '1px solid var(--border)',
-                color: isActive ? 'white' : 'var(--text-dark)',
+                color: isActive ? 'white' : isTabLocked(tab.id) ? 'var(--text-muted)' : 'var(--text-dark)',
+                opacity: isTabLocked(tab.id) ? 0.8 : 1,
                 fontWeight: 700,
                 fontSize: '0.85rem',
                 cursor: 'pointer',
@@ -273,6 +289,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
             >
               <Icon size={16} />
               {tab.label}
+              {isTabLocked(tab.id) && <Lock size={12} style={{ marginLeft: 2, opacity: 0.6 }} />}
               
               {/* Badge */}
               {tab.badge > 0 && (
