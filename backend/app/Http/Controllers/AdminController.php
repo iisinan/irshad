@@ -145,13 +145,7 @@ class AdminController extends Controller
             'ends_at' => now(),
         ]);
 
-        if ($request->plan_slug === 'free') {
-            // Downgrade to free — just cancel, no new subscription needed
-            \Illuminate\Support\Facades\Cache::tags(['users'])->forget("user.profile.{$user->id}");
-            return response()->json([
-                'message' => "User {$user->name} downgraded to Miftah (Free) by admin.",
-            ]);
-        }
+
 
         $plan = \App\Models\Plan::where('slug', $request->plan_slug)->firstOrFail();
 

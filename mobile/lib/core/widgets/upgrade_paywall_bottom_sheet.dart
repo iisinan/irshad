@@ -65,7 +65,7 @@ class _UpgradePaywallBottomSheetState extends State<UpgradePaywallBottomSheet> {
               color: Colors.grey[300],
               borderRadius: BorderRadius.circular(2),
             ),
-            margin: const EdgeInsets.bottom(24),
+            margin: const EdgeInsets.only(bottom: 24),
           ),
           
           Container(

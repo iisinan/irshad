@@ -118,17 +118,17 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function getTierAttribute()
     {
-        // October 2nd Rollout Strategy: Free Trial Override
+        $activeSub = $this->activeSubscription;
+        
+        // If the user has an explicit active subscription (even 'free' set by admin), respect it first
+        if ($activeSub && $activeSub->plan) {
+            return $activeSub->plan;
+        }
+
+        // October 2nd Rollout Strategy: Free Trial Override for users without explicit subscriptions
         if (now()->lt(\Carbon\Carbon::parse('2026-10-02'))) {
             return Plan::where('slug', 'max')->first() 
                 ?? new Plan(['slug' => 'max', 'name' => 'Noor']); // Fallback if not seeded yet
-        }
-
-        // Fallback to actual subscription check after Oct 2nd
-        $activeSub = $this->activeSubscription;
-        
-        if ($activeSub && $activeSub->plan) {
-            return $activeSub->plan;
         }
 
         // Default to Free Tier
