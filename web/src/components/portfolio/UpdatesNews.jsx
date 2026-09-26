@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 import {
   TrendingUp, AlertTriangle, Droplet, CheckCircle2, BarChart2,
   ExternalLink, RefreshCw, Mail, Bell, ChevronRight,
@@ -251,27 +252,30 @@ export default function UpdatesNews() {
 
   return (
     <div>
-      {selectedUrl && (
-        <div className="animate-slide-up" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'var(--bg)', zIndex: 99999, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div style={{ padding: '16px 24px', background: 'var(--bg)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
-            <button 
-              onClick={() => setSelectedUrl(null)} 
-              className="hover-lift"
-              style={{ background: 'var(--bg-section)', border: '1px solid var(--border)', borderRadius: '100px', cursor: 'pointer', color: 'var(--text-dark)', padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, fontSize: '0.9rem' }}
-            >
-              <ArrowLeft size={16} /> Back to Market Intelligence
-            </button>
-            <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Reader View</div>
+      {selectedUrl && createPortal(
+        <div className="animate-fade-in" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)', zIndex: 100000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div className="animate-slide-up" style={{ width: '100%', maxWidth: '1000px', height: '90vh', background: 'var(--bg)', borderRadius: '24px', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 24px 64px rgba(0,0,0,0.3)', border: '1px solid var(--border)' }}>
+            <div style={{ padding: '16px 24px', background: 'var(--bg-section)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)' }}>
+              <button 
+                onClick={() => setSelectedUrl(null)} 
+                className="hover-lift"
+                style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '100px', cursor: 'pointer', color: 'var(--text-dark)', padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, fontSize: '0.9rem' }}
+              >
+                <ArrowLeft size={16} /> Close Reader
+              </button>
+              <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Reader View</div>
+            </div>
+            <div style={{ flex: 1, WebkitOverflowScrolling: 'touch', overflowY: 'auto' }}>
+              <iframe 
+                src={selectedUrl} 
+                style={{ display: 'block', border: 'none', width: '100%', height: '100%', background: '#fff' }} 
+                sandbox="allow-same-origin allow-scripts allow-popups allow-forms" 
+                title="News Article Reader"
+              />
+            </div>
           </div>
-          <div style={{ flex: 1, WebkitOverflowScrolling: 'touch', overflowY: 'auto' }}>
-            <iframe 
-              src={selectedUrl} 
-              style={{ display: 'block', border: 'none', width: '100%', height: '100%', background: '#fff' }} 
-              sandbox="allow-same-origin allow-scripts allow-popups allow-forms" 
-              title="News Article Reader"
-            />
-          </div>
-        </div>
+        </div>,
+        document.body
       )}
       {/* Horizontal Tabs */}
       <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '16px', marginBottom: '8px' }} className="hide-scrollbar">
