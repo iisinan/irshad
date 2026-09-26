@@ -301,10 +301,19 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
                 {(user?.first_name || user?.name || 'U').charAt(0).toUpperCase()}
               </div>
               <div style={{ overflow: 'hidden', flex: 1 }}>
-                <div style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-dark)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {user?.first_name || user?.name || 'User'}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-dark)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {user?.first_name || user?.name || 'User'}
+                  </div>
+                  <span style={{
+                    padding: '2px 6px', borderRadius: '100px', fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px',
+                    background: user?.tier?.slug === 'max' ? 'rgba(217,160,91,0.15)' : user?.tier?.slug === 'pro' ? 'rgba(0,107,70,0.1)' : 'var(--bg-section)',
+                    color: user?.tier?.slug === 'max' ? '#B8860B' : user?.tier?.slug === 'pro' ? '#006B46' : 'var(--text-muted)'
+                  }}>
+                    {user?.tier?.name || 'Miftah'}
+                  </span>
                 </div>
-                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '1px' }}>
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '2px' }}>
                   {user?.email || ''}
                 </div>
               </div>

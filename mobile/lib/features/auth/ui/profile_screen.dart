@@ -233,13 +233,18 @@ Color get cardBg => context.bgAlt;
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: context.primary.withOpacity(0.1),
+                    color: user?['tier']?['slug'] == 'max' ? const Color(0xFFD9A05B).withOpacity(0.15) : user?['tier']?['slug'] == 'pro' ? const Color(0xFF006B46).withOpacity(0.1) : context.bgSection,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: context.primary.withOpacity(0.2)),
+                    border: Border.all(color: user?['tier']?['slug'] == 'max' ? const Color(0xFFD9A05B).withOpacity(0.3) : user?['tier']?['slug'] == 'pro' ? const Color(0xFF006B46).withOpacity(0.2) : context.border),
                   ),
                   child: Text(
-                    'Free Plan',
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: context.primary),
+                    (user?['tier']?['name'] ?? 'Miftah').toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 10, 
+                      fontWeight: FontWeight.w900, 
+                      letterSpacing: 0.5,
+                      color: user?['tier']?['slug'] == 'max' ? const Color(0xFFB8860B) : user?['tier']?['slug'] == 'pro' ? const Color(0xFF006B46) : context.textMuted,
+                    ),
                   ),
                 ),
               ],
