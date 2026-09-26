@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Newspaper, Bell, Moon, Clock, Star, Mail, Droplet, Shield, Rocket } from 'lucide-react';
+import { Newspaper, Lock, Bell, Moon, Clock, Star, Mail, Droplet, Shield, Rocket } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import IslamicQuote from '../IslamicQuote';
 import UpdatesNews    from './UpdatesNews';

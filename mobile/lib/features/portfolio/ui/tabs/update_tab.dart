@@ -11,6 +11,7 @@ import 'resources_tab.dart';
 import 'updates/updates_compliance_tab.dart';
 import 'updates/updates_ipo_tab.dart';
 import '../widgets/islamic_quote_widget.dart';
+import '../../../core/widgets/upgrade_paywall_bottom_sheet.dart';
 
 class UpdateTab extends StatefulWidget {
   const UpdateTab({super.key});
@@ -192,6 +193,13 @@ class _UpdateTabState extends State<UpdateTab> {
     );
   }
 
+  bool _isTabLocked(String tabId, BuildContext context) {
+    final userTier = Provider.of<AppStateProvider>(context, listen: false).userProfile?['tier']?['slug'] ?? 'free';
+    if (userTier == 'max') return false;
+    if (userTier == 'pro') return tabId == 'compliance';
+    return tabId != 'news';
+  }
+
   Widget _buildSubTabNavigation(BuildContext context, int unreadCount) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -201,8 +209,21 @@ class _UpdateTabState extends State<UpdateTab> {
           final isActive = _activeTabId == tab['id'];
           final hasNew = (tab['id'] == 'inbox' && _unreadInbox > 0) || (tab['id'] == 'news' && _unreadNews > 0);
           
+          final isLocked = _isTabLocked(tab['id'], context);
+          
           return GestureDetector(
-            onTap: () => setState(() => _activeTabId = tab['id']),
+            onTap: () {
+              if (isLocked) {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (ctx) => const UpgradePaywallBottomSheet(message: 'Upgrade to view this section and get full access to the market intelligence.'),
+                );
+                return;
+              }
+              setState(() => _activeTabId = tab['id']);
+            },
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               margin: const EdgeInsets.only(right: 12),
@@ -219,19 +240,23 @@ class _UpdateTabState extends State<UpdateTab> {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(tab['icon'], size: 16, color: isActive ? Colors.white : context.textDark),
+                      Icon(tab['icon'], size: 16, color: isActive ? Colors.white : isLocked ? context.textMuted : context.textDark),
                       const SizedBox(width: 8),
                       Text(
                         tab['label'],
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
-                          color: isActive ? Colors.white : context.textDark,
+                          color: isActive ? Colors.white : isLocked ? context.textMuted : context.textDark,
                         ),
                       ),
+                      if (isLocked) ...[
+                        const SizedBox(width: 6),
+                        Icon(Icons.lock_outline_rounded, size: 14, color: context.textMuted),
+                      ],
                     ],
                   ),
-                  if (hasNew)
+                  if (hasNew && !isLocked)
                     Positioned(
                       top: -2,
                       right: -8,
