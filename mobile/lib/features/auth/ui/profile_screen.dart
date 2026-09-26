@@ -235,7 +235,7 @@ Color get cardBg => context.bgAlt;
                   decoration: BoxDecoration(
                     color: user?['tier']?['slug'] == 'max' ? const Color(0xFFD9A05B).withOpacity(0.15) : user?['tier']?['slug'] == 'pro' ? const Color(0xFF006B46).withOpacity(0.1) : context.bgSection,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: user?['tier']?['slug'] == 'max' ? const Color(0xFFD9A05B).withOpacity(0.3) : user?['tier']?['slug'] == 'pro' ? const Color(0xFF006B46).withOpacity(0.2) : context.border),
+                    border: Border.all(color: user?['tier']?['slug'] == 'max' ? const Color(0xFFD9A05B).withOpacity(0.3) : user?['tier']?['slug'] == 'pro' ? const Color(0xFF006B46).withOpacity(0.2) : context.divider),
                   ),
                   child: Text(
                     (user?['tier']?['name'] ?? 'Miftah').toUpperCase(),

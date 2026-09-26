@@ -11,7 +11,7 @@ import 'resources_tab.dart';
 import 'updates/updates_compliance_tab.dart';
 import 'updates/updates_ipo_tab.dart';
 import '../widgets/islamic_quote_widget.dart';
-import '../../../core/widgets/upgrade_paywall_bottom_sheet.dart';
+import 'package:irshad_mobile/core/widgets/upgrade_paywall_bottom_sheet.dart';
 
 class UpdateTab extends StatefulWidget {
   const UpdateTab({super.key});

@@ -53,14 +53,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     GestureDetector(
-                      onTap: () => Navigator.pushNamed(context, '/settings'),
+                      onTap: () => Navigator.pushNamed(context, '/profile'),
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: context.bgAlt,
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(Icons.settings_outlined, color: context.textDark, size: 20),
+                        child: Icon(Icons.person_outline_rounded, color: context.textDark, size: 22),
                       ),
                     ),
                   ],
