@@ -846,7 +846,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
   void _showAddHoldingSheet(BuildContext context) {
     final appState = Provider.of<AppStateProvider>(context, listen: false);
     final portfolioProvider = Provider.of<PortfolioProvider>(context, listen: false);
-    final tierSlug = appState.user?['tier']?['slug'];
+    final tierSlug = appState.userProfile?['tier']?['slug'];
     final currentHoldings = portfolioProvider.holdings.length;
     
     int limit = -1;
@@ -1365,7 +1365,7 @@ class _AddHoldingBottomSheetState extends State<AddHoldingBottomSheet> with Sing
                 _buildHoldingForm(i),
               const SizedBox(height: 16),
               Builder(builder: (context) {
-                final tierSlug = Provider.of<AppStateProvider>(context, listen: false).user?['tier']?['slug'];
+                final tierSlug = Provider.of<AppStateProvider>(context, listen: false).userProfile?['tier']?['slug'];
                 final currentTotal = Provider.of<PortfolioProvider>(context, listen: false).holdings.length + _holdings.length;
                 int limit = -1;
                 if (tierSlug == 'free') limit = 1;
