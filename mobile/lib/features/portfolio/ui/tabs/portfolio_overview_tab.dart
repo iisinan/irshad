@@ -859,6 +859,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
       planName = 'Rawdah';
     }
     
+    print("DEBUG _showAddHoldingSheet: tierSlug=$tierSlug, currentHoldings=$currentHoldings, limit=$limit");
     if (limit != -1 && currentHoldings >= limit) {
       showModalBottomSheet(
         context: context,

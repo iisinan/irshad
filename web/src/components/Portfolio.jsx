@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { fetchPortfolio, removeHolding } from '../services/api';
 import { toastError, toastSuccess } from '../utils/toast';
+import PricingModal from './PricingModal';
 import { useAuth } from '../context/AuthContext';
 import localforage from 'localforage';
 import { Search, BarChart2, Star, Calculator, ShieldCheck, BookOpen, Briefcase, Activity, FileText, Rss, CheckCircle2, XCircle, AlertTriangle, Droplet, HelpCircle, Mail } from 'lucide-react';
@@ -82,6 +83,7 @@ export default function Portfolio() {
   const [activeTab, setActiveTab] = useState(() => getTabFromHash(location.hash));
   const [mountedTabs, setMountedTabs] = useState([activeTab]);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showSuggestModal, setShowSuggestModal] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [activeFilter, setActiveFilter] = useState('halal');
@@ -172,6 +174,19 @@ export default function Portfolio() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
+    const handleOpenAddModal = (mode = true) => {
+    const tierSlug = user?.tier?.slug || 'max';
+    let limit = -1;
+    if (tierSlug === 'free') limit = 1;
+    else if (tierSlug === 'pro') limit = 7;
+    
+    if (limit !== -1 && data?.holdings?.length >= limit) {
+      setShowUpgradeModal(true);
+      return;
+    }
+    setShowAddModal(mode);
+  };
+
   const handleAdd = async (payload) => {
     try {
       setIsAdding(true);
@@ -181,7 +196,12 @@ export default function Portfolio() {
       toastSuccess('Holdings added to portfolio');
       return true;
     } catch (err) {
-      toastError(err?.message || 'Failed to add holdings');
+      if (err?.message?.toLowerCase().includes('upgrade') || err?.message?.toLowerCase().includes('limit') || err?.response?.status === 403) {
+        setShowAddModal(false);
+        setTimeout(() => setShowUpgradeModal(true), 150);
+      } else {
+        toastError(err?.message || 'Failed to add holdings');
+      }
       return false;
     } finally {
       setIsAdding(false);
@@ -279,6 +299,7 @@ export default function Portfolio() {
 
   return (
     <div className="page-wrapper animate-fade-in" style={{ maxWidth: '1400px', margin: '0 auto', padding: '36px 24px 80px' }}>
+      {showUpgradeModal && <PricingModal onClose={() => setShowUpgradeModal(false)} />}
       {showSuggestModal && <SuggestModal onClose={() => setShowSuggestModal(false)} />}
       {showAddModal && (
         <AddHoldingModal 
@@ -302,7 +323,7 @@ export default function Portfolio() {
             <div style={{ display: activeTab === 'holdings' ? 'block' : 'none' }}>
               <PortfolioTab 
                 data={data}
-                setShowAddModal={setShowAddModal}
+                setShowAddModal={handleOpenAddModal}
                 handleDelete={handleDelete}
                 refreshData={loadData}
                 activeFilter={activeFilter}
