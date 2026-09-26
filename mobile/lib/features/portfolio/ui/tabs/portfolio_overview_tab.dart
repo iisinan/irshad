@@ -844,15 +844,26 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
   void _showAddHoldingSheet(BuildContext context) {
     final appState = Provider.of<AppStateProvider>(context, listen: false);
     final portfolioProvider = Provider.of<PortfolioProvider>(context, listen: false);
-    final isFreePlan = appState.user?['tier']?['slug'] == 'free';
+    final tierSlug = appState.user?['tier']?['slug'];
+    final currentHoldings = portfolioProvider.holdings.length;
     
-    if (isFreePlan && portfolioProvider.holdings.length >= 1) {
+    int limit = -1;
+    String planName = 'Noor';
+    if (tierSlug == 'free') {
+      limit = 1;
+      planName = 'Miftah';
+    } else if (tierSlug == 'pro') {
+      limit = 7;
+      planName = 'Rawdah';
+    }
+    
+    if (limit != -1 && currentHoldings >= limit) {
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
-        builder: (context) => const UpgradePaywallBottomSheet(
-          message: 'You have reached your portfolio limit of 1 stock on the Miftah plan. Upgrade to track more stocks.',
+        builder: (context) => UpgradePaywallBottomSheet(
+          message: 'You have reached your portfolio limit of $limit stocks on the $planName plan. Upgrade to track more stocks.',
         ),
       );
       return;
@@ -1351,11 +1362,19 @@ class _AddHoldingBottomSheetState extends State<AddHoldingBottomSheet> with Sing
               for (int i = 0; i < _holdings.length; i++)
                 _buildHoldingForm(i),
               const SizedBox(height: 16),
-              if (Provider.of<AppStateProvider>(context, listen: false).user?['tier']?['slug'] != 'free')
-              GestureDetector(
-                onTap: _addNewHoldingForm,
-                child: Container(
-                  width: double.infinity,
+              Builder(builder: (context) {
+                final tierSlug = Provider.of<AppStateProvider>(context, listen: false).user?['tier']?['slug'];
+                final currentTotal = Provider.of<PortfolioProvider>(context, listen: false).holdings.length + _holdings.length;
+                int limit = -1;
+                if (tierSlug == 'free') limit = 1;
+                else if (tierSlug == 'pro') limit = 7;
+                
+                if (limit != -1 && currentTotal >= limit) return const SizedBox.shrink();
+                
+                return GestureDetector(
+                  onTap: _addNewHoldingForm,
+                  child: Container(
+                    width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   decoration: BoxDecoration(
                     color: context.bgAlt,
@@ -1371,7 +1390,8 @@ class _AddHoldingBottomSheetState extends State<AddHoldingBottomSheet> with Sing
                     ],
                   ),
                 ),
-              ),
+              );
+              }),
             ],
           ),
         ),
