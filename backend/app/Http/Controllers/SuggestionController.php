@@ -75,4 +75,31 @@ class SuggestionController extends Controller
 
         return response()->json(['message' => 'Suggestion deleted.']);
     }
+
+    public function reply(Request $request, $id): JsonResponse
+    {
+        $request->validate([
+            'reply' => 'required|string|max:2000'
+        ]);
+
+        $suggestion = Suggestion::with('user')->findOrFail($id);
+        
+        if (!$suggestion->user || !$suggestion->user->email) {
+            return response()->json(['message' => 'User does not have an email address.'], 400);
+        }
+
+        $user = $suggestion->user;
+        $replyMessage = $request->reply;
+
+        \Illuminate\Support\Facades\Mail::raw(
+            "Hello {$user->name},\n\nThank you for your suggestion:\n\"{$suggestion->message}\"\n\nResponse from Irshad Admin:\n{$replyMessage}\n\nThanks,\nThe Irshad Team",
+            function ($message) use ($user) {
+                $message->to($user->email)->subject('Re: Your Suggestion for Irshad');
+            }
+        );
+
+        $suggestion->update(['status' => 'read']);
+
+        return response()->json(['message' => 'Reply sent successfully.']);
+    }
 }

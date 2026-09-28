@@ -275,6 +275,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/admin/suggestions/unread-count', [SuggestionController::class, 'unreadCount']);
             Route::get('/admin/suggestions', [SuggestionController::class, 'index']);
             Route::put('/admin/suggestions/{id}/status', [SuggestionController::class, 'updateStatus']);
+            Route::post('/admin/suggestions/{id}/reply', [SuggestionController::class, 'reply']);
             Route::delete('/admin/suggestions/{id}', [SuggestionController::class, 'destroy']);
 
             // User Management

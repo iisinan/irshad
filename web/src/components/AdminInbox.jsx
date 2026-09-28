@@ -7,6 +7,9 @@ export default function AdminInbox() {
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [replyingTo, setReplyingTo] = useState(null);
+  const [replyMessage, setReplyMessage] = useState('');
+  const [replyLoading, setReplyLoading] = useState(false);
 
   const loadData = async () => {
     try {
@@ -24,6 +27,25 @@ export default function AdminInbox() {
   useEffect(() => {
     loadData();
   }, []);
+
+    const handleReplySubmit = async (e, id) => {
+    e.preventDefault();
+    if (!replyMessage.trim()) return;
+    
+    try {
+      setReplyLoading(true);
+      await api.post(`/admin/suggestions/${id}/reply`, { reply: replyMessage });
+      toastSuccess('Reply sent successfully');
+      setSuggestions(prev => prev.map(s => s.id === id ? { ...s, status: 'read' } : s));
+      setReplyingTo(null);
+      setReplyMessage('');
+      window.dispatchEvent(new Event('suggestions-updated'));
+    } catch (err) {
+      toastError(err?.response?.data?.message || 'Failed to send reply');
+    } finally {
+      setReplyLoading(false);
+    }
+  };
 
   const handleUpdateStatus = async (id, status) => {
     try {
@@ -117,12 +139,12 @@ export default function AdminInbox() {
                   </button>
                 )}
                 
-                <a href={`mailto:${s.user?.email || ''}?subject=Re: Your Suggestion for Irshad`} style={{
+                <button onClick={() => { setReplyingTo(replyingTo === s.id ? null : s.id); setReplyMessage(''); }} style={{
                   padding: '8px 14px', borderRadius: '8px', border: 'none', background: 'var(--primary-50)', color: 'var(--primary)',
-                  fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none'
+                  fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px'
                 }}>
-                  <Reply size={14} /> Reply
-                </a>
+                  <Reply size={14} /> {replyingTo === s.id ? 'Cancel Reply' : 'Reply'}
+                </button>
                 <button onClick={() => handleDelete(s.id)} style={{
                   padding: '8px 14px', borderRadius: '8px', border: 'none', background: 'rgba(239,68,68,0.1)', color: '#EF4444',
                   fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto'
@@ -130,6 +152,28 @@ export default function AdminInbox() {
                   <Trash2 size={14} /> Delete
                 </button>
               </div>
+              
+              {replyingTo === s.id && (
+                <div style={{ marginTop: '12px', background: 'var(--bg-section)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                  <form onSubmit={(e) => handleReplySubmit(e, s.id)}>
+                    <textarea 
+                      value={replyMessage}
+                      onChange={e => setReplyMessage(e.target.value)}
+                      placeholder={`Draft your reply to ${s.user?.name || 'this user'}...`}
+                      style={{ width: '100%', minHeight: '100px', padding: '12px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-dark)', fontSize: '0.9rem', outline: 'none', resize: 'vertical', fontFamily: 'inherit', marginBottom: '12px' }}
+                      onFocus={e => e.target.style.borderColor = 'var(--primary)'}
+                      onBlur={e => e.target.style.borderColor = 'var(--border)'}
+                      disabled={replyLoading}
+                    />
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                      <button type="button" onClick={() => setReplyingTo(null)} style={{ padding: '10px 16px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-muted)', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}>Cancel</button>
+                      <button type="submit" disabled={replyLoading || !replyMessage.trim()} style={{ padding: '10px 16px', borderRadius: '8px', border: 'none', background: 'var(--primary)', color: 'white', fontWeight: 700, fontSize: '0.8rem', cursor: (replyLoading || !replyMessage.trim()) ? 'not-allowed' : 'pointer', opacity: (replyLoading || !replyMessage.trim()) ? 0.7 : 1 }}>
+                        {replyLoading ? 'Sending...' : 'Send Reply'}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
             </div>
           ))}
         </div>
