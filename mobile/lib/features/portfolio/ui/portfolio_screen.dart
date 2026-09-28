@@ -18,7 +18,9 @@ class PortfolioScreen extends StatefulWidget {
   State<PortfolioScreen> createState() => _PortfolioScreenState();
 }
 
-class _PortfolioScreenState extends State<PortfolioScreen> with WidgetsBindingObserver {
+class _PortfolioScreenState extends State<PortfolioScreen> with WidgetsBindingObserver, TickerProviderStateMixin {
+  late TabController _tabController;
+  int _currentIndex = 0;
   int _unreadInbox = 0;
   Future<void> _fetchUnreadCounts() async {
     try {
@@ -36,6 +38,12 @@ class _PortfolioScreenState extends State<PortfolioScreen> with WidgetsBindingOb
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 4, vsync: this);
+    _tabController.addListener(() {
+      if (_tabController.indexIsChanging || _tabController.index != _currentIndex) {
+        setState(() => _currentIndex = _tabController.index);
+      }
+    });
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<PortfolioProvider>().fetchPortfolio();
@@ -45,6 +53,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> with WidgetsBindingOb
 
   @override
   void dispose() {
+    _tabController.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -59,9 +68,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> with WidgetsBindingOb
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 4,
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: context.bg,
         appBar: AppBar(
           automaticallyImplyLeading: false,
@@ -130,6 +137,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> with WidgetsBindingOb
           ],
           elevation: 0,
           bottom: TabBar(
+            controller: _tabController,
             isScrollable: true,
             labelColor: Colors.white,
             unselectedLabelColor: context.textMuted,
@@ -153,15 +161,16 @@ class _PortfolioScreenState extends State<PortfolioScreen> with WidgetsBindingOb
             ],
           ),
         ),
-        body: const TabBarView(
-          children: [
+        body: TabBarView(
+          controller: _tabController,
+          children: const [
             UpdateTab(),
             PortfolioOverviewTab(),
             PurificationTab(),
             ZakatCalculatorScreen(isTab: true),
           ],
         ),
-        floatingActionButton: Padding(
+        floatingActionButton: _currentIndex == 1 ? null : Padding(
           padding: const EdgeInsets.only(bottom: 88.0),
           child: FloatingActionButton.extended(
             onPressed: () => SuggestModalUtil.show(context),
@@ -171,7 +180,6 @@ class _PortfolioScreenState extends State<PortfolioScreen> with WidgetsBindingOb
             label: const Text('Suggest for Irshad', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ),
-      ),
     );
   }
 }
