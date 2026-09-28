@@ -273,7 +273,7 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
   );
 }
 
-export default function PortfolioTab({ data, setShowAddModal, handleDelete, refreshData, activeFilter = 'halal', setActiveFilter }) {
+export default function PortfolioTab({ data, setShowAddModal, handleDelete, refreshData, activeFilter = 'all', setActiveFilter }) {
   const [editingHolding, setEditingHolding] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -451,6 +451,7 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
             {/* Filters (Segmented Control style) */}
             <div className="hide-scrollbar" style={{ display:'flex', background:'var(--body-bg)', borderRadius:'14px', padding:'6px', gap:'8px', border: '1px solid rgba(0,0,0,0.03)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)', overflowX: 'auto', maxWidth: '100%' }}>
             {[
+              { id:'all', label: 'All', icon: Layers, activeColor: 'var(--primary)' },
               { id:'halal', label: 'Shariah Compliant', icon: ShieldCheck, activeColor: '#16a34a' },
               { id:'purify', label: 'Shariah Compliant (Purify)', icon: Droplet, activeColor: '#eab308' },
               { id:'doubtful', label: 'Doubtful', icon: HelpCircle, activeColor: '#d97706' },
@@ -508,7 +509,7 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
               <Wallet size={36} color="var(--primary)"/>
             </div>
             <div style={{ fontSize: '1.23rem', fontWeight:900, color:'var(--text-dark)', marginBottom:'12px', letterSpacing:'-0.5px' }}>
-              {data.length === 0 ? 'Your Portfolio is Empty' : `No ${activeFilter} holdings found`}
+              {data.length === 0 ? 'Your Portfolio is Empty' : `No ${activeFilter === 'all' ? 'matching' : activeFilter} holdings found`}
             </div>
             <p style={{ color:'var(--text-muted)', marginBottom:'32px', maxWidth:'400px', margin:'0 auto 32px', lineHeight:1.6, fontSize: '0.84rem' }}>
               {data.length === 0 ? 'Start tracking your investments and ensure they align with Islamic financial principles.' : 'Try adjusting your filters to view other assets.'}
