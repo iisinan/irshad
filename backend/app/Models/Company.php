@@ -12,7 +12,9 @@ class Company extends Model
 {
     use HasFactory;
 
-
+    protected $casts = [
+        'fund_details' => 'array',
+    ];
 
     protected $fillable = [
         'asset_class',
