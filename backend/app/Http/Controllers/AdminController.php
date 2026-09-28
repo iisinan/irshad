@@ -235,13 +235,14 @@ class AdminController extends Controller
             'industry' => 'sometimes|string|max:255',
             'description' => 'sometimes|nullable|string',
             'overview' => 'sometimes|nullable|string',
+            'asset_class' => 'sometimes|string|in:equity,mutual_fund',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $company->update($request->only(['name', 'sector', 'industry', 'description', 'overview']));
+        $company->update($request->only(['name', 'sector', 'industry', 'description', 'overview', 'asset_class']));
 
         Cache::tags(['stocks'])->flush();
 

@@ -225,7 +225,7 @@ export default function MarketTab() {
   const [sortBy,    setSortBy]    = useState('default');
 
   // Safely extract from potentially stale cache shapes
-  const actualStocks = useMemo(() => Array.isArray(stocks) ? stocks : (stocks?.data || []), [stocks]);
+  const actualStocks = useMemo(() => (Array.isArray(stocks) ? stocks : (stocks?.data || [])).filter(s => s.asset_class !== 'mutual_fund'), [stocks]);
   const actualInitialWatchlist = useMemo(() => Array.isArray(initialWatchlist) ? initialWatchlist : (initialWatchlist?.data ? initialWatchlist.data.map(w => w.symbol) : []), [initialWatchlist]);
 
   useEffect(() => {

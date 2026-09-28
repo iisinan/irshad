@@ -41,7 +41,7 @@ class StockController extends Controller
         $page = request()->input('page', 1);
         $cacheKey = "stocks.index.page.{$page}";
         $stocks = $this->safeTaggedCache(['stocks'])->remember($cacheKey, 300, function () {
-            return Company::select(['id', 'name', 'symbol', 'sector', 'current_status', 'latest_price', 'price_change_pct', 'logo_url', 'market_cap', 'pe_ratio'])
+            return Company::select(['id', 'name', 'symbol', 'sector', 'current_status', 'asset_class', 'latest_price', 'price_change_pct', 'logo_url', 'market_cap', 'pe_ratio'])
                 ->with('aaoifiScreening:company_id,impermissible_income_ratio')
                 ->orderBy('symbol', 'asc')
                 ->paginate(20)
@@ -233,7 +233,7 @@ class StockController extends Controller
     {
         $query = substr(trim($request->get('q', $request->get('query', ''))), 0, 100);
 
-        $stocks = Company::select(['id', 'name', 'symbol', 'sector', 'current_status', 'latest_price', 'price_change_pct', 'logo_url'])
+        $stocks = Company::select(['id', 'name', 'symbol', 'sector', 'current_status', 'asset_class', 'latest_price', 'price_change_pct', 'logo_url'])
             ->whereNotNull('latest_price')
             ->where('latest_price', '>', 0)
             ->where(function ($q) use ($query) {
@@ -262,7 +262,7 @@ class StockController extends Controller
 
         $stocks = $this->safeTaggedCache(['stocks'])->remember($cacheKey, 300, function () use ($request) {
             $query = Company::select([
-                'id', 'name', 'symbol', 'sector', 'current_status',
+                'id', 'name', 'symbol', 'sector', 'current_status', 'asset_class',
                 'latest_price', 'price_change', 'price_change_pct',
                 'market_cap', 'pe_ratio', 'eps', 'logo_url',
             ])->orderBy('symbol', 'asc');

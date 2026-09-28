@@ -19,7 +19,7 @@ export default function AdminTickerEditor() {
 
   // Form states
   const [verdictForm, setVerdictForm] = useState({ status: 'halal', reason: '' });
-  const [aboutForm, setAboutForm] = useState({ name: '', sector: '', industry: '', description: '', overview: '' });
+  const [aboutForm, setAboutForm] = useState({ name: '', sector: '', industry: '', description: '', overview: '', asset_class: 'equity' });
   const [financialsForm, setFinancialsForm] = useState({ total_assets: 0, total_debt: 0, cash: 0, interest_income: 0, total_revenue: 0, evidence_links: [''] });
   
   // News state
@@ -44,7 +44,7 @@ export default function AdminTickerEditor() {
 
       // Populate forms
       setVerdictForm({ status: data.status?.status || 'halal', reason: data.status?.reason || '' });
-      setAboutForm({ name: data.name || '', sector: data.sector || '', industry: data.industry || '', description: data.description || '', overview: data.overview || '' });
+      setAboutForm({ name: data.name || '', sector: data.sector || '', industry: data.industry || '', description: data.description || '', overview: data.overview || '', asset_class: data.asset_class || 'equity' });
       
       const fin = data.financials?.[0];
       let evLinks = fin?.evidence_link ? fin.evidence_link : [];
@@ -327,6 +327,17 @@ export default function AdminTickerEditor() {
                         style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-dark)', outline: 'none', fontSize: '0.88rem', fontFamily: 'inherit' }} />
                     </div>
                   ))}
+                  <div style={{ gridColumn: '1/-1' }}>
+                    <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' }}>Asset Class</label>
+                    <select 
+                      value={aboutForm.asset_class || 'equity'} 
+                      onChange={e => setAboutForm({...aboutForm, asset_class: e.target.value})}
+                      style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-dark)', outline: 'none', fontSize: '0.88rem', fontFamily: 'inherit' }}
+                    >
+                      <option value="equity">Equity (Stock)</option>
+                      <option value="mutual_fund">Mutual Fund</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 

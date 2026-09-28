@@ -17,6 +17,7 @@ class SectorController extends Controller
                 ->select('sector', 'industry', 'business_type')
                 ->whereNotNull('sector')
                 ->where('sector', '!=', '')
+                ->where('asset_class', '!=', 'mutual_fund')
                 ->get();
 
             $grouped = [];
