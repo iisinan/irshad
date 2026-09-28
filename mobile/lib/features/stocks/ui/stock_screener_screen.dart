@@ -300,7 +300,7 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<StockProvider>(context);
-    final displayList = _isDefaultFilter ? provider.ngxStocks : _results;
+    final displayList = (_isDefaultFilter ? provider.ngxStocks : _results).where((s) => s['asset_class'] != 'mutual_fund').toList();
     final isLoading = _isDefaultFilter ? (provider.isLoading && provider.ngxStocks.isEmpty) : (_isLoading && _results.isEmpty);
     final errorMessage = _isDefaultFilter ? (provider.error ?? '') : _errorMessage;
     final hasMore = _isDefaultFilter ? true : _hasMore; // provider handles its own pagination

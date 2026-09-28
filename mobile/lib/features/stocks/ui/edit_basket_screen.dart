@@ -59,6 +59,7 @@ class _EditBasketScreenState extends State<EditBasketScreen> {
     final provider = Provider.of<StockProvider>(context, listen: false);
     setState(() {
       _allStocks = provider.ngxStocks.where((s) {
+        if (s['asset_class'] == 'mutual_fund') return false;
         final statusObj = s['status'];
         if (statusObj != null) {
           return statusObj['status']?.toString().toLowerCase() == 'halal';
