@@ -11,26 +11,21 @@ class ResourceController extends Controller
     {
         $search = $request->input('search', '');
         $type = $request->input('type', 'all');
-        $page = $request->input('page', 1);
 
-        $cacheKey = "resources_search_{$search}_type_{$type}_page_{$page}";
+        $query = Resource::query();
 
-        $data = \Illuminate\Support\Facades\Cache::remember($cacheKey, now()->addHours(1), function () use ($search, $type) {
-            $query = Resource::query();
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('scholar', 'like', "%{$search}%");
+            });
+        }
 
-            if (!empty($search)) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('title', 'like', "%{$search}%")
-                        ->orWhere('scholar', 'like', "%{$search}%");
-                });
-            }
+        if ($type !== 'all') {
+            $query->where('type', $type);
+        }
 
-            if ($type !== 'all') {
-                $query->where('type', $type);
-            }
-
-            return $query->latest()->paginate(20);
-        });
+        $data = $query->latest()->paginate(20);
 
         return response()->json($data);
     }
