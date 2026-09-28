@@ -38,21 +38,55 @@ class SuggestionController extends Controller
     // Admin methods
     public function unreadCount(): JsonResponse
     {
-        $count = Suggestion::where('status', 'unread')->count();
+        $count = Suggestion::where('status', 'unread')->where('is_admin_reply', false)->count();
         return response()->json(['count' => $count]);
     }
 
     public function index(): JsonResponse
     {
-        $suggestions = Suggestion::with('user:id,name,email')->orderBy('created_at', 'desc')->paginate(20);
+        // Fetch all suggestions, sorted by oldest first so that they appear sequentially in chat
+        $allSuggestions = Suggestion::with('user:id,name,email')
+            ->orderBy('created_at', 'asc')
+            ->get();
+            
+        // Group them by user_id
+        $grouped = $allSuggestions->groupBy('user_id');
+        
+        // Format into a list of conversations
+        $conversations = [];
+        
+        foreach ($grouped as $userId => $userSuggestions) {
+            $user = $userSuggestions->first()->user;
+            
+            // Only include conversations where the user exists
+            if (!$user) continue;
+
+            $hasUnread = $userSuggestions->where('status', 'unread')->where('is_admin_reply', false)->count() > 0;
+            $lastInteraction = $userSuggestions->last()->created_at;
+
+            $conversations[] = [
+                'user' => $user,
+                'has_unread' => $hasUnread,
+                'last_interaction' => $lastInteraction,
+                'messages' => $userSuggestions->map(function ($s) {
+                    return [
+                        'id' => $s->id,
+                        'message' => $s->message,
+                        'status' => $s->status,
+                        'is_admin_reply' => (bool)$s->is_admin_reply,
+                        'created_at' => $s->created_at
+                    ];
+                })->values()
+            ];
+        }
+
+        // Sort conversations by last interaction (newest first)
+        usort($conversations, function ($a, $b) {
+            return $b['last_interaction'] <=> $a['last_interaction'];
+        });
         
         return response()->json([
-            'data' => $suggestions->items(),
-            'pagination' => [
-                'current_page' => $suggestions->currentPage(),
-                'last_page' => $suggestions->lastPage(),
-                'total' => $suggestions->total(),
-            ]
+            'data' => $conversations
         ]);
     }
 
@@ -97,6 +131,14 @@ class SuggestionController extends Controller
                 $message->to($user->email)->subject('Re: Your Suggestion for Irshad');
             }
         );
+
+        // Store the admin reply as a chat message
+        Suggestion::create([
+            'user_id' => $user->id,
+            'message' => $replyMessage,
+            'is_admin_reply' => true,
+            'status' => 'read'
+        ]);
 
         $suggestion->update(['status' => 'read']);
 

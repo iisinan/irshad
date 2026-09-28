@@ -10,7 +10,7 @@ class Suggestion extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'message', 'status'];
+    protected $fillable = ['user_id', 'message', 'status', 'is_admin_reply'];
 
     protected $with = ['user']; // always eager load user if needed, or we can just define the relation
 

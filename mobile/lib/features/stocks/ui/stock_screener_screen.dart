@@ -124,7 +124,7 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
         if (mounted) {
           setState(() {
             _results = data;
-            _results = _results.where((s) => (double.tryParse(s['latest_price']?.toString() ?? '0') ?? 0.0) > 0).toList();
+            _results = _results.where((s) => (double.tryParse(s['latest_price']?.toString() ?? '0') ?? 0.0) > 0 && s['asset_class'] != 'mutual_fund').toList();
             _hasMore = data.length >= 10;
           });
         }

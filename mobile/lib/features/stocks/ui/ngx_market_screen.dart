@@ -52,7 +52,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
   List<Map<String, dynamic>> _getFilteredAndSortedStocks(List<dynamic> allStocks) {
     List<Map<String, dynamic>> list = allStocks
         .cast<Map<String, dynamic>>()
-        .where((s) => (double.tryParse(s['latest_price']?.toString() ?? '0') ?? 0.0) > 0)
+        .where((s) => (double.tryParse(s['latest_price']?.toString() ?? '0') ?? 0.0) > 0 && s['asset_class'] != 'mutual_fund')
         .toList();
     
     if (_selectedSector != 'All') {
@@ -74,6 +74,7 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
 
   List<String> _getSectors(List<dynamic> allStocks) {
     final sectors = allStocks
+        .where((s) => s['asset_class'] != 'mutual_fund')
         .map((s) => s['sector'] as String?)
         .where((s) => s != null && s.isNotEmpty)
         .cast<String>()

@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import re
+
+content = """import React, { useState, useEffect } from 'react';
 import { Mail, Search, CheckCircle, Clock, Trash2, Reply, Send, MessageCircle } from 'lucide-react';
 import api from '../services/api';
 import { toastSuccess, toastError } from '../utils/toast';
@@ -241,3 +243,7 @@ export default function AdminInbox() {
     </div>
   );
 }
+"""
+
+open('web/src/components/AdminInbox.jsx', 'w').write(content)
+print("Patched web inbox")
