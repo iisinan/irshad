@@ -1421,69 +1421,71 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
             child: Row(
               children: [
                 _buildTabItem(0, 'About'),
-                const SizedBox(width: 24),
-                _buildTabItem(1, 'Business Activity'),
-                Builder(
-                  builder: (context) {
-                    final rawStatus = _currentStock['status'] ?? _currentStock['current_status'];
-                    String currentStatus = 'doubtful';
-                    if (rawStatus is Map) {
-                      currentStatus = rawStatus['status']?.toString().toLowerCase() ?? 'doubtful';
-                    } else if (rawStatus is String) {
-                      currentStatus = rawStatus.toLowerCase();
-                    }
-                    
-                    bool hasFinancials = false;
-                    if ((_currentStock['financials'] ?? []).isNotEmpty) {
-                      hasFinancials = true;
-                    } else if (_aaoifiData != null) {
-                      double _getDouble(dynamic val) {
-                        if (val == null) return 0.0;
-                        return double.tryParse(val.toString()) ?? 0.0;
+                if (_currentStock['asset_class'] != 'mutual_fund') ...[
+                  const SizedBox(width: 24),
+                  _buildTabItem(1, 'Business Activity'),
+                  Builder(
+                    builder: (context) {
+                      final rawStatus = _currentStock['status'] ?? _currentStock['current_status'];
+                      String currentStatus = 'doubtful';
+                      if (rawStatus is Map) {
+                        currentStatus = rawStatus['status']?.toString().toLowerCase() ?? 'doubtful';
+                      } else if (rawStatus is String) {
+                        currentStatus = rawStatus.toLowerCase();
                       }
                       
-                      final used = _aaoifiData!['financial_data_used'];
-                      if (used != null && (_getDouble(used['total_assets']) > 0 || _getDouble(used['total_revenue']) > 0)) {
+                      bool hasFinancials = false;
+                      if ((_currentStock['financials'] ?? []).isNotEmpty) {
                         hasFinancials = true;
+                      } else if (_aaoifiData != null) {
+                        double _getDouble(dynamic val) {
+                          if (val == null) return 0.0;
+                          return double.tryParse(val.toString()) ?? 0.0;
+                        }
+                        
+                        final used = _aaoifiData!['financial_data_used'];
+                        if (used != null && (_getDouble(used['total_assets']) > 0 || _getDouble(used['total_revenue']) > 0)) {
+                          hasFinancials = true;
+                        }
+                        if (!hasFinancials && (_getDouble(_aaoifiData!['debt_ratio']) > 0 || 
+                            _getDouble(_aaoifiData!['cash_ratio']) > 0 || 
+                            _getDouble(_aaoifiData!['impermissible_income_ratio']) > 0)) {
+                          hasFinancials = true;
+                        }
                       }
-                      if (!hasFinancials && (_getDouble(_aaoifiData!['debt_ratio']) > 0 || 
-                          _getDouble(_aaoifiData!['cash_ratio']) > 0 || 
-                          _getDouble(_aaoifiData!['impermissible_income_ratio']) > 0)) {
-                        hasFinancials = true;
+                      
+                      if (hasFinancials && 
+                          currentStatus != 'doubtful' && 
+                          (_currentStock['business_status'] != 'fail' && _currentStock['business_status'] != 'non-halal' && _currentStock['business_status'] != 'non-compliant') &&
+                          (_aaoifiData == null || (_aaoifiData!['business_status'] != 'fail' && _aaoifiData!['stage1']?['status'] != 'non-halal' && _aaoifiData!['stage1']?['status'] != 'non-compliant'))) {
+                        return Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const SizedBox(width: 24),
+                            _buildTabItem(2, 'Financial Screening'),
+                          ],
+                        );
                       }
+                      return const SizedBox.shrink();
                     }
-                    
-                    if (hasFinancials && 
-                        currentStatus != 'doubtful' && 
-                        (_currentStock['business_status'] != 'fail' && _currentStock['business_status'] != 'non-halal' && _currentStock['business_status'] != 'non-compliant') &&
-                        (_aaoifiData == null || (_aaoifiData!['business_status'] != 'fail' && _aaoifiData!['stage1']?['status'] != 'non-halal' && _aaoifiData!['stage1']?['status'] != 'non-compliant'))) {
+                  ),
+                  Builder(
+                    builder: (context) {
+                      bool businessFailed = (_currentStock['business_status'] == 'fail' || _currentStock['business_status'] == 'non-halal' || _currentStock['business_status'] == 'non-compliant') ||
+                                            (_aaoifiData != null && (_aaoifiData!['business_status'] == 'fail' || _aaoifiData!['stage1']?['status'] == 'non-halal' || _aaoifiData!['stage1']?['status'] == 'non-compliant'));
+                      if (businessFailed) return const SizedBox.shrink();
                       return Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const SizedBox(width: 24),
-                          _buildTabItem(2, 'Financial Screening'),
+                          _buildTabItem(3, 'Price & Market Data'),
+                          const SizedBox(width: 24),
+                          _buildTabItem(4, 'News'),
                         ],
                       );
                     }
-                    return const SizedBox.shrink();
-                  }
-                ),
-                Builder(
-                  builder: (context) {
-                    bool businessFailed = (_currentStock['business_status'] == 'fail' || _currentStock['business_status'] == 'non-halal' || _currentStock['business_status'] == 'non-compliant') ||
-                                          (_aaoifiData != null && (_aaoifiData!['business_status'] == 'fail' || _aaoifiData!['stage1']?['status'] == 'non-halal' || _aaoifiData!['stage1']?['status'] == 'non-compliant'));
-                    if (businessFailed) return const SizedBox.shrink();
-                    return Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const SizedBox(width: 24),
-                        _buildTabItem(3, 'Price & Market Data'),
-                        const SizedBox(width: 24),
-                        _buildTabItem(4, 'News'),
-                      ],
-                    );
-                  }
-                ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -1603,7 +1605,106 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
     );
   }
 
+  Widget _buildMutualFundOverview() {
+    final fd = _currentStock['fund_details'] ?? {};
+    final history = fd['purification_history'] as List<dynamic>? ?? [];
+
+    Widget buildRow(IconData icon, String label, String value, {bool isLast = false}) {
+      return Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Row(
+              children: [
+                Container(
+                  width: 32, height: 32,
+                  decoration: BoxDecoration(color: context.divider.withOpacity(0.4), borderRadius: BorderRadius.circular(8)),
+                  child: Icon(icon, size: 15, color: context.textMuted),
+                ),
+                const SizedBox(width: 12),
+                Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: context.textMuted)),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(value, textAlign: TextAlign.right, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: context.textDark)),
+                ),
+              ],
+            ),
+          ),
+          if (!isLast) Divider(height: 0, thickness: 0.5, color: context.divider.withOpacity(0.5)),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader('Fund Details'),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+          decoration: BoxDecoration(color: context.bgAlt, borderRadius: BorderRadius.circular(16), border: Border.all(color: context.divider.withValues(alpha: 0.5))),
+          child: Column(
+            children: [
+              buildRow(Icons.business_center_outlined, 'Fund Manager', fd['provider'] ?? 'N/A'),
+              buildRow(Icons.calendar_today_outlined, 'Launched', fd['launched'] ?? 'N/A'),
+              buildRow(Icons.shield_outlined, 'Trustee', fd['trustee'] ?? 'N/A'),
+              buildRow(Icons.account_balance_outlined, 'Custodian', fd['custodian'] ?? 'N/A', isLast: true),
+            ],
+          ),
+        ),
+        const SizedBox(height: 32),
+        
+        _buildSectionHeader('Investment Strategy'),
+        const SizedBox(height: 12),
+        Text('Target Allocation', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: context.textDark)),
+        const SizedBox(height: 4),
+        Text(fd['investment_components_target'] ?? 'Not specified.', style: TextStyle(fontSize: 13, height: 1.5, color: context.textMuted)),
+        const SizedBox(height: 16),
+        Text('Actual Asset Mix', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: context.textDark)),
+        const SizedBox(height: 4),
+        Text(fd['asset_mix'] ?? 'Not available.', style: TextStyle(fontSize: 13, height: 1.5, color: context.textMuted)),
+        const SizedBox(height: 32),
+
+        _buildSectionHeader('Purification Details'),
+        const SizedBox(height: 12),
+        Text(fd['purification_note'] ?? 'Not disclosed in public documents.', style: TextStyle(fontSize: 13, height: 1.5, color: context.textMuted)),
+        const SizedBox(height: 16),
+        if (history.isNotEmpty)
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: context.divider.withValues(alpha: 0.5)),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: history.map<Widget>((h) {
+                final isLast = history.last == h;
+                return Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(h['year'].toString(), style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: context.textDark)),
+                          Text('₦ ${h['per_unit']}', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: context.questionable)),
+                        ],
+                      ),
+                    ),
+                    if (!isLast) Divider(height: 0, thickness: 0.5, color: context.divider.withOpacity(0.5)),
+                  ],
+                );
+              }).toList(),
+            ),
+          ),
+      ],
+    );
+  }
+
   Widget _buildDetailedOverview() {
+    if (_currentStock['asset_class'] == 'mutual_fund') {
+      return _buildMutualFundOverview();
+    }
+    
     final sector = _currentStock['sector'] ?? 'Unknown';
     final industry = _currentStock['industry'] ?? 'Unknown';
     final analystTarget = _currentStock['analysts_target'] != null ? '₦ ${_currentStock['analysts_target']}' : 'N/A';

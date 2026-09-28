@@ -9,6 +9,7 @@ import CompanyLogo from './CompanyLogo';
 import ReactMarkdown from 'react-markdown';
 import { useAuth } from '../context/AuthContext';
 import { formatAppJustification } from '../utils/screeningFormatter';
+import MutualFundOverview from './portfolio/MutualFundOverview';
 
 const LOADING_STEPS = [
   "Initializing AAOIFI Screening...",
@@ -496,7 +497,10 @@ const StockDetails = ({ symbol: propSymbol }) => {
 
       </div>
 
-      {/* ─── Two Column Layout ─── */}
+      {/* ─── Layout ─── */}
+      {stock.asset_class === 'mutual_fund' ? (
+        <MutualFundOverview stock={stock} />
+      ) : (
       <div className="detail-two-col" style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '28px', alignItems: 'start' }}>
         
         {/* Left Column */}
@@ -901,6 +905,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
 
           </div>
         </div>
+      )}
 
         {/* ─── Brokerage Integration Modal ─── */}
         {showBrokerageModal && createPortal(

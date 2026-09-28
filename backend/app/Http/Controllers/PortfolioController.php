@@ -135,7 +135,20 @@ class PortfolioController extends Controller
                     
                     $totalDividendsReceived = $holding->shares * $trailingDividendsPerShare;
                     $lifetimeDividendsReceived = $holding->shares * $lifetimeDividendsPerShare;
-                    $purificationDue = $isHalal ? $totalDividendsReceived * ($nonCompliantRatio / 100) : 0;
+
+                    if ($company && $company->asset_class === 'mutual_fund') {
+                        $fundDetails = $company->fund_details ?? [];
+                        $history = $fundDetails['purification_history'] ?? [];
+                        if (!empty($history) && is_array($history)) {
+                            usort($history, fn($a, $b) => ($b['year'] ?? 0) <=> ($a['year'] ?? 0));
+                            $latestPerUnit = $history[0]['per_unit'] ?? 0;
+                            $purificationDue = $isHalal ? $holding->shares * $latestPerUnit : 0;
+                        } else {
+                            $purificationDue = 0;
+                        }
+                    } else {
+                        $purificationDue = $isHalal ? $totalDividendsReceived * ($nonCompliantRatio / 100) : 0;
+                    }
 
                     // Calculate return
                     $returnPercentage = 0;
@@ -558,7 +571,22 @@ class PortfolioController extends Controller
             }
 
             $totalDividendsReceived = $holding->shares * $trailingDividendsPerShare;
-            $purificationDue = $totalDividendsReceived * ($nonCompliantRatio / 100);
+            
+            $isHalal = strtolower($company->current_status ?? 'doubtful') === 'halal' || strtolower($company->current_status ?? '') === 'compliant';
+            
+            if ($company && $company->asset_class === 'mutual_fund') {
+                $fundDetails = $company->fund_details ?? [];
+                $history = $fundDetails['purification_history'] ?? [];
+                if (!empty($history) && is_array($history)) {
+                    usort($history, fn($a, $b) => ($b['year'] ?? 0) <=> ($a['year'] ?? 0));
+                    $latestPerUnit = $history[0]['per_unit'] ?? 0;
+                    $purificationDue = $isHalal ? $holding->shares * $latestPerUnit : 0;
+                } else {
+                    $purificationDue = 0;
+                }
+            } else {
+                $purificationDue = $totalDividendsReceived * ($nonCompliantRatio / 100);
+            }
 
             // Always create a purification record, even if amount is 0.
             // This acts as a timestamp marker so the stock disappears from the
