@@ -15,6 +15,8 @@ class Company extends Model
 
 
     protected $fillable = [
+        'asset_class',
+        'fund_details',
         'name',
         'symbol',
         'is_sec_registered',
