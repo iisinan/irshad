@@ -78,6 +78,11 @@ export default function SuggestModal({ onClose }) {
           </div>
 
           <textarea
+            id="suggestion_message"
+            name="suggestion_message"
+            autoComplete="off"
+            data-lpignore="true"
+            data-1p-ignore="true"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Type your suggestion or feedback here..."

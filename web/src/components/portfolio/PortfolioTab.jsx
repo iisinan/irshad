@@ -368,6 +368,17 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
                 </div>
               )}
             </div>
+            
+            {(summary.cash_balance > 0) && (
+              <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+                <div style={{ padding: '6px 12px', background: 'var(--primary-10)', borderRadius: '8px', color: 'var(--primary)', fontWeight: 800, fontSize: '0.85rem' }}>
+                  Stocks: ₦{(totalBalance - summary.cash_balance).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                </div>
+                <div style={{ padding: '6px 12px', background: 'rgba(22, 163, 74, 0.1)', borderRadius: '8px', color: '#16a34a', fontWeight: 800, fontSize: '0.85rem' }}>
+                  Cash: ₦{(summary.cash_balance).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                </div>
+              </div>
+            )}
 
             {/* Status Summary */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '4px', flexWrap: 'wrap' }}>
