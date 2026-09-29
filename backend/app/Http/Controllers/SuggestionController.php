@@ -125,12 +125,20 @@ class SuggestionController extends Controller
         $user = $suggestion->user;
         $replyMessage = $request->reply;
 
-        \Illuminate\Support\Facades\Mail::raw(
-            "Hello {$user->name},\n\nThank you for your suggestion:\n\"{$suggestion->message}\"\n\nResponse from Irshad Admin:\n{$replyMessage}\n\nThanks,\nThe Irshad Team",
-            function ($message) use ($user) {
-                $message->to($user->email)->subject('Re: Your Suggestion for Irshad');
-            }
-        );
+        $emailSent = false;
+        $emailError = null;
+        try {
+            \Illuminate\Support\Facades\Mail::raw(
+                "Hello {$user->name},\n\nThank you for your suggestion:\n\"{$suggestion->message}\"\n\nResponse from Irshad Admin:\n{$replyMessage}\n\nThanks,\nThe Irshad Team",
+                function ($message) use ($user) {
+                    $message->to($user->email)->subject('Re: Your Suggestion for Irshad');
+                }
+            );
+            $emailSent = true;
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to send suggestion reply email: ' . $e->getMessage());
+            $emailError = 'Could not send email notification to the user. ' . $e->getMessage();
+        }
 
         // Store the admin reply as a chat message
         Suggestion::create([
@@ -142,6 +150,9 @@ class SuggestionController extends Controller
 
         $suggestion->update(['status' => 'read']);
 
-        return response()->json(['message' => 'Reply sent successfully.']);
+        return response()->json([
+            'message' => $emailSent ? 'Reply sent successfully.' : 'Reply saved successfully, but email notification failed.',
+            'error' => $emailError
+        ]);
     }
 }
