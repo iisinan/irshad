@@ -4,6 +4,8 @@ import { createPortal } from 'react-dom';
 import { addMultipleToWatchlist } from '../../services/api';
 import CompanyLogo from '../CompanyLogo';
 
+import { customAlert } from '../../utils/confirm';
+
 export default function AddWatchlistModal({ onClose, onAdded, allStocks, watchlistSymbols }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSymbols, setSelectedSymbols] = useState([]);
@@ -56,7 +58,7 @@ export default function AddWatchlistModal({ onClose, onAdded, allStocks, watchli
       onAdded(selectedSymbols);
       onClose();
     } catch {
-      alert('Failed to add assets. Please try again.');
+      customAlert('Failed to add assets. Please try again.');
     } finally {
       setIsAdding(false);
     }

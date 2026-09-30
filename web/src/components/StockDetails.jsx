@@ -11,6 +11,8 @@ import { useAuth } from '../context/AuthContext';
 import { formatAppJustification } from '../utils/screeningFormatter';
 import MutualFundOverview from './portfolio/MutualFundOverview';
 
+import { customAlert } from '../utils/confirm';
+
 const LOADING_STEPS = [
   "Initializing AAOIFI Screening...",
   "Reading latest financial statements...",
@@ -998,15 +1000,15 @@ const StockDetails = ({ symbol: propSymbol }) => {
             
             <form onSubmit={async (e) => {
               e.preventDefault();
-              if (!alertPrice) return alert('Enter a target price');
+              if (!alertPrice) return customAlert('Enter a target price');
               setAlertSaving(true);
               try {
                 await setPriceAlert(symbol, alertPrice);
-                alert('Price alert set successfully!');
+                customAlert('Price alert set successfully!');
                 setShowAlertDialog(false);
                 setAlertPrice('');
               } catch (err) {
-                alert(err.response?.data?.message || 'Failed to set price alert');
+                customAlert(err.response?.data?.message || 'Failed to set price alert');
               } finally {
                 setAlertSaving(false);
               }

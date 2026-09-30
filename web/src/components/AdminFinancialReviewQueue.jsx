@@ -6,6 +6,8 @@ import { LineChart, Line, XAxis, CartesianGrid, ResponsiveContainer } from 'rech
 
 import { customConfirm } from '../utils/confirm';
 
+import { customAlert } from '../utils/confirm';
+
 export default function AdminFinancialReviewQueue() {
   useAuth();
   
@@ -76,7 +78,7 @@ export default function AdminFinancialReviewQueue() {
       setQueue(prev => prev.filter(q => q.id !== id));
       setExpandedId(null);
     } catch (err) {
-      alert('Failed to approve: ' + (err.response?.data?.message || err.message));
+      customAlert('Failed to approve: ' + (err.response?.data?.message || err.message));
     } finally {
       setIsSubmitting(false);
     }
@@ -91,7 +93,7 @@ export default function AdminFinancialReviewQueue() {
       setQueue(prev => prev.filter(q => q.id !== id));
       setExpandedId(null);
     } catch (err) {
-      alert('Failed to reject: ' + (err.response?.data?.message || err.message));
+      customAlert('Failed to reject: ' + (err.response?.data?.message || err.message));
     } finally {
       setIsSubmitting(false);
     }

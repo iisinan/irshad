@@ -4,6 +4,8 @@ import { X, Search, Plus, CheckCircle2, Lock, ShieldCheck, Trash2, FileText, Upl
 import api, { fetchNgxStocks, linkBroker } from '../../services/api';
 import CompanyLogo from '../CompanyLogo';
 
+import { customAlert } from '../../utils/confirm';
+
 // ─── Zakat Date Confirmation Popup ──────────────────────────────────────────
 function ZakatDatePrompt({ purchaseDate, onYes, onNo }) {
   const zakatDueDate = (() => {
@@ -206,16 +208,16 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
     for (let i = 0; i < rows.length; i++) {
       const r = rows[i];
       if (r.sym || r.sh || r.pr || r.date) {
-        if (!r.sym) { alert(`Holding #${i + 1}: Ticker symbol cannot be empty.`); return; }
-        if (!r.sh || Number(r.sh) <= 0) { alert(`Holding #${i + 1}: Please enter a valid number of shares.`); return; }
-        if (!r.pr || Number(r.pr) < 0) { alert(`Holding #${i + 1}: Please enter a valid average price.`); return; }
-        if (!r.date) { alert(`Holding #${i + 1}: Purchase date is required.`); return; }
+        if (!r.sym) { customAlert(`Holding #${i + 1}: Ticker symbol cannot be empty.`); return; }
+        if (!r.sh || Number(r.sh) <= 0) { customAlert(`Holding #${i + 1}: Please enter a valid number of shares.`); return; }
+        if (!r.pr || Number(r.pr) < 0) { customAlert(`Holding #${i + 1}: Please enter a valid average price.`); return; }
+        if (!r.date) { customAlert(`Holding #${i + 1}: Purchase date is required.`); return; }
       }
     }
 
     const validRows = rows.filter(r => r.sym && r.sh && r.pr && r.date);
     if (validRows.length === 0) {
-      alert('Please fill out at least one complete holding row (Ticker, Shares, Avg Price, Date).');
+      customAlert('Please fill out at least one complete holding row (Ticker, Shares, Avg Price, Date).');
       return;
     }
 
@@ -542,7 +544,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
                       <div style={{ fontSize: '0.97rem', fontWeight: 800, color: 'var(--text-dark)', textAlign: 'center', marginBottom: '4px' }}>Click to Browse Files</div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center' }}>Supports .pdf, .csv, and .xlsx</div>
                     </div>
-                    <input type="file" id="file-upload" accept=".pdf,.csv,.xlsx" style={{ display: 'none' }} onChange={(e) => { if (e.target.files.length) { alert('File selected: ' + e.target.files[0].name + '\n\nParsing logic will connect to the backend here.'); onClose(); } }} />
+                    <input type="file" id="file-upload" accept=".pdf,.csv,.xlsx" style={{ display: 'none' }} onChange={(e) => { if (e.target.files.length) { customAlert('File selected: ' + e.target.files[0].name + '\n\nParsing logic will connect to the backend here.'); onClose(); } }} />
                   </div>
                 </div>
               </div>

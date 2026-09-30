@@ -11,6 +11,8 @@ import { updateHolding } from '../../services/api';
 import CompanyLogo from '../CompanyLogo';
 import { toastError, toastSuccess } from '../../utils/toast';
 
+import { customAlert } from '../../utils/confirm';
+
 /* ─── Helpers ───────────────────────────────────────────────── */
 const fmtK = (n) => {
   const v = Number(n || 0);
@@ -49,11 +51,11 @@ function EditHoldingModal({ holding, onClose, onSuccess }) {
   const submit = async (e) => {
     e.preventDefault();
     if (!sh || Number(sh) <= 0) {
-      alert('Please enter a valid number of shares.');
+      customAlert('Please enter a valid number of shares.');
       return;
     }
     if (!pr || Number(pr) < 0) {
-      alert('Please enter a valid average price.');
+      customAlert('Please enter a valid average price.');
       return;
     }
     try { setLoading(true); await updateHolding(holding.id, { shares: +sh, average_buy_price: +pr }); onSuccess(); toastSuccess('Holding updated'); }
