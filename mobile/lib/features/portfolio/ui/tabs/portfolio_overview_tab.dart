@@ -1063,6 +1063,33 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                           ),
                         ],
                       ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextButton.icon(
+                          onPressed: isSaving ? null : () async {
+                            setState(() => isSaving = true);
+                            try {
+                              await ApiService().delete('portfolio/${holding['id']}');
+                              if (mounted) {
+                                await Provider.of<PortfolioProvider>(context, listen: false).fetchPortfolio();
+                                Navigator.pop(bottomSheetContext);
+                              }
+                            } catch (e) {
+                              if (mounted) ScaffoldMessenger.of(bottomSheetContext).showSnackBar(SnackBar(content: Text('Failed to delete: $e'), backgroundColor: context.haram));
+                            } finally {
+                              if (mounted) setState(() => isSaving = false);
+                            }
+                          },
+                          icon: const Icon(Icons.delete_outline, size: 20),
+                          label: const Text('Delete Holding', style: TextStyle(fontWeight: FontWeight.w800)),
+                          style: TextButton.styleFrom(
+                            foregroundColor: context.haram,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
