@@ -209,6 +209,7 @@ export default function Portfolio() {
   };
 
   const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this holding?')) return;
     try {
       await removeHolding(id);
       loadData();

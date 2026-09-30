@@ -1068,6 +1068,23 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                         width: double.infinity,
                         child: TextButton.icon(
                           onPressed: isSaving ? null : () async {
+                            bool? confirm = await showDialog<bool>(
+                              context: bottomSheetContext,
+                              builder: (ctx) => AlertDialog(
+                                backgroundColor: context.cardColor,
+                                title: const Text('Delete Holding'),
+                                content: const Text('Are you sure you want to delete this holding?'),
+                                actions: [
+                                  TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(ctx, true),
+                                    child: Text('Delete', style: TextStyle(color: context.haram)),
+                                  ),
+                                ],
+                              ),
+                            );
+                            if (confirm != true) return;
+
                             setState(() => isSaving = true);
                             try {
                               await ApiService().delete('portfolio/${holding['id']}');
