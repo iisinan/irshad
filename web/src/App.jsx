@@ -7,6 +7,7 @@ import { LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage, VerifyE
 import ErrorBoundary from './components/ErrorBoundary';
 import NotFound from './components/NotFound';
 import { useAuth } from './context/AuthContext';
+import { useTheme } from './context/ThemeContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import { Toaster } from 'react-hot-toast';
 import './index.css';
@@ -138,22 +139,11 @@ const DocumentTitleUpdater = () => {
 
 /* ─── Theme Toggle ────────────────────────────────────────── */
 const ThemeToggle = () => {
-  const [theme, setTheme] = useState(() => localStorage.getItem('irshad_theme') || 'light');
-
-  useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.setAttribute('data-theme', 'dark');
-    } else {
-      document.documentElement.removeAttribute('data-theme');
-    }
-    localStorage.setItem('irshad_theme', theme);
-  }, [theme]);
-
-  const toggle = () => setTheme(t => (t === 'light' ? 'dark' : 'light'));
+  const { isDark, toggleTheme } = useTheme();
 
   return (
-    <button onClick={toggle} className="nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Toggle Theme">
-      {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+    <button onClick={toggleTheme} className="nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Toggle Theme">
+      {!isDark ? <Moon size={18} /> : <Sun size={18} />}
     </button>
   );
 };
