@@ -702,7 +702,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                               children: [
                                 const Icon(Icons.monetization_on, size: 20, color: Color(0xFFD1A562)),
                                 const SizedBox(width: 8),
-                                const Text('Financial Wealth', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: context.textDark)),
+                                Text('Financial Wealth', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: context.textDark)),
                               ],
                             ),
                             const SizedBox(height: 4),
