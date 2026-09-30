@@ -3,6 +3,8 @@ import { Mail, Search, CheckCircle, Clock, Trash2, Reply, Send, MessageCircle } 
 import api from '../services/api';
 import { toastSuccess, toastError } from '../utils/toast';
 
+import { customConfirm } from '../utils/confirm';
+
 export default function AdminInbox() {
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -56,7 +58,7 @@ export default function AdminInbox() {
   };
 
   const handleDeleteConversation = async (userId) => {
-    if (!window.confirm('Delete all messages with this user?')) return;
+    if (!await customConfirm('Delete all messages with this user?')) return;
     try {
       const userConv = conversations.find(c => c.user.id === userId);
       await Promise.all(userConv.messages.map(m => api.delete(`/admin/suggestions/${m.id}`)));

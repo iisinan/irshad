@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { User, Shield, Trash2, LogOut, CheckCircle, AlertCircle, Save, Monitor } from 'lucide-react';
 import { fetchProfile, updateProfile, deleteAccount } from '../services/api';
 
+import { customConfirm } from '../utils/confirm';
+
 export default function Settings() {
   const { user, loading: authLoading, logout } = useAuth();
   const navigate = useNavigate();
@@ -104,7 +106,7 @@ export default function Settings() {
   };
 
   const handleDeleteAccount = async () => {
-    if (!window.confirm("Are you sure you want to permanently delete your account? This action cannot be undone.")) return;
+    if (!await customConfirm("Are you sure you want to permanently delete your account? This action cannot be undone.")) return;
     setIsSubmitting(true);
     try {
       await deleteAccount();

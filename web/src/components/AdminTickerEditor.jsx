@@ -6,6 +6,8 @@ import { ArrowLeft, Save, Plus, Trash2, Activity, Info, Newspaper, X, ChevronRig
 import api, { updateTickerAbout, addTickerNews, deleteTickerNews, overrideStockStatus } from '../services/api';
 import toast from 'react-hot-toast';
 
+import { customConfirm } from '../utils/confirm';
+
 export default function AdminTickerEditor() {
   const { symbol } = useParams();
   const { user } = useAuth();
@@ -137,7 +139,7 @@ export default function AdminTickerEditor() {
   };
 
   const handleDeleteNews = async (newsId) => {
-    if(!window.confirm('Delete this news article?')) return;
+    if(!await customConfirm('Delete this news article?')) return;
     try {
       await deleteTickerNews(symbol, newsId);
       toast.success('News deleted');

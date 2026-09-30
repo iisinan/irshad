@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import CompanyLogo from '../CompanyLogo';
 import Skeleton from '../ui/Skeleton';
 
+import { customConfirm } from '../../utils/confirm';
+
 export default function AlertsTab() {
   const [alerts, setAlerts] = useState(() => {
     try {
@@ -37,7 +39,7 @@ export default function AlertsTab() {
 
   const handleDelete = async (e, id) => {
     e.stopPropagation();
-    if (!window.confirm('Delete this price alert?')) return;
+    if (!await customConfirm('Delete this price alert?')) return;
     try {
       await deletePriceAlert(id);
       const newAlerts = alerts.filter(a => a.id !== id);

@@ -9,6 +9,8 @@ import { fetchProfile, updateProfile, deleteAccount } from '../services/api';
 import localforage from 'localforage';
 import { useTour } from '../context/TourContext';
 
+import { customConfirm } from '../utils/confirm';
+
 /* ─── Sub-components ────────────────────────────────── */
 
 /* ─── Main Profile Component ───────────────────────── */
@@ -128,7 +130,7 @@ export default function Profile() {
   };
 
   const handleDeleteAccount = async () => {
-    if (!window.confirm("Are you sure you want to permanently delete your account? This action cannot be undone.")) return;
+    if (!await customConfirm("Are you sure you want to permanently delete your account? This action cannot be undone.")) return;
     setIsSubmitting(true);
     try {
       await deleteAccount();
@@ -288,7 +290,7 @@ export default function Profile() {
                     ) : (
                       <button 
                         onClick={async () => {
-                          if (window.confirm('Are you sure you want to cancel your subscription? You will keep access until the end of your current billing period.')) {
+                          if (await customConfirm('Are you sure you want to cancel your subscription? You will keep access until the end of your current billing period.')) {
                             try {
                               await api.post('/subscription/cancel');
                               alert('Subscription canceled. You keep access until your billing period ends.');

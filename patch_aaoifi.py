@@ -1,64 +1,25 @@
 import re
 
-content = open('web/src/components/AaoifiScreening.jsx').read()
+with open('web/src/components/AaoifiScreening.jsx', 'r') as f:
+    content = f.read()
 
-# 1. Add Crown to lucide-react imports if not there
-if 'Crown' not in content:
-    content = content.replace('ArrowLeft, ArrowRight, CheckCircle', 'ArrowLeft, ArrowRight, CheckCircle, Crown')
+# Replace hardcoded white gradients and solid white with CSS variables
+replacements = [
+    (r"linear-gradient\(135deg,\s*#fff\s*0%,\s*rgba\(255,255,255,0\.\d+\)\s*100%\)", "var(--bg-section)"),
+    (r"rgba\(255,255,255,0\.85\)", "var(--bg-section)"),
+    (r"border:\s*['\"]1px solid #fff['\"]", "border: '1px solid var(--border)'"),
+    (r"inset 0 2px 4px #fff", "inset 0 2px 4px rgba(255,255,255,0.05)"),
+    (r"inset 0 2px 0 #fff", "inset 0 2px 0 rgba(255,255,255,0.05)"),
+    (r"inset 0 2px 4px rgba\(255,255,255,1\)", "inset 0 2px 4px rgba(255,255,255,0.05)"),
+    (r"border:\s*`1px solid \$\{sc\.color\}20`", "border: `1px solid var(--border)`"),
+    (r"boxShadow:\s*`0 8px 24px \$\{sc\.color\}30, inset 0 2px 0 #fff`", "boxShadow: `0 8px 24px ${sc.color}15, inset 0 2px 0 rgba(255,255,255,0.05)`")
+]
 
-# 2. Add PricingModal import
-if 'PricingModal' not in content:
-    content = content.replace("import AddHoldingModal from './portfolio/AddHoldingModal';", "import AddHoldingModal from './portfolio/AddHoldingModal';\nimport PricingModal from './PricingModal';")
+original = content
+for old, new in replacements:
+    content = re.sub(old, new, content)
 
-# 3. Add state for showUpgradeModal
-if 'const [showUpgradeModal, setShowUpgradeModal] = useState(false);' not in content:
-    content = content.replace("const [verdictExpanded, setVerdictExpanded] = useState(false);", "const [verdictExpanded, setVerdictExpanded] = useState(false);\n  const [showUpgradeModal, setShowUpgradeModal] = useState(false);")
+with open('web/src/components/AaoifiScreening.jsx', 'w') as f:
+    f.write(content)
 
-# 4. Modify the error block
-OLD_ERROR = """  /* ── Error ── */
-  if(error) return (
-    <div style={{ maxWidth:520,margin:'80px auto',padding:48,textAlign:'center',background:'var(--bg-section)',borderRadius:28,border:'1px solid var(--border)' }}>
-      <div style={{ width:72,height:72,margin:'0 auto 20px',background:'var(--non-compliant-bg)',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center' }}><AlertTriangle size={36} color="var(--non-compliant)"/></div>
-      <h2 style={{ fontSize:'1.4rem',fontWeight:900,marginBottom:10,color:'var(--text-dark)' }}>Screening Error</h2>
-      <p style={{ color:'var(--text-muted)',fontSize:'0.88rem',lineHeight:1.6,marginBottom:28 }}>{error}</p>
-      <Link to="/portfolio#market" style={{ display:'inline-flex',alignItems:'center',gap:8,padding:'10px 22px',background:'var(--bg)',color:'var(--text-dark)',fontWeight:700,textDecoration:'none',borderRadius:100,border:'1px solid var(--border)' }}><ArrowLeft size={16}/> Back to Screener</Link>
-    </div>
-  );"""
-
-NEW_ERROR = """  /* ── Error ── */
-  if(error) {
-    const isLimitError = error.toLowerCase().includes('limit');
-    return (
-      <div style={{ maxWidth:520,margin:'80px auto',padding:48,textAlign:'center',background:'var(--bg-section)',borderRadius:28,border:'1px solid var(--border)' }}>
-        {showUpgradeModal && <PricingModal onClose={() => setShowUpgradeModal(false)} />}
-        
-        {isLimitError ? (
-          <>
-            <div style={{ width:72,height:72,margin:'0 auto 20px',background:'rgba(217,160,91,0.1)',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center' }}>
-              <Crown size={36} color="#B8860B"/>
-            </div>
-            <h2 style={{ fontSize:'1.4rem',fontWeight:900,marginBottom:10,color:'var(--text-dark)' }}>Upgrade to Unlock</h2>
-            <p style={{ color:'var(--text-muted)',fontSize:'0.88rem',lineHeight:1.6,marginBottom:28 }}>{error}</p>
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-              <Link to="/portfolio#market" style={{ display:'inline-flex',alignItems:'center',gap:8,padding:'12px 24px',background:'var(--bg)',color:'var(--text-dark)',fontWeight:700,textDecoration:'none',borderRadius:100,border:'1px solid var(--border)' }}>Back</Link>
-              <button onClick={() => setShowUpgradeModal(true)} style={{ display:'inline-flex',alignItems:'center',gap:8,padding:'12px 28px',background:'var(--primary)',color:'#fff',fontWeight:700,border:'none',borderRadius:100,cursor:'pointer',boxShadow:'0 4px 14px rgba(0,0,0,0.1)' }}>
-                View Plans <ArrowRight size={16}/>
-              </button>
-            </div>
-          </>
-        ) : (
-          <>
-            <div style={{ width:72,height:72,margin:'0 auto 20px',background:'var(--non-compliant-bg)',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center' }}><AlertTriangle size={36} color="var(--non-compliant)"/></div>
-            <h2 style={{ fontSize:'1.4rem',fontWeight:900,marginBottom:10,color:'var(--text-dark)' }}>Screening Error</h2>
-            <p style={{ color:'var(--text-muted)',fontSize:'0.88rem',lineHeight:1.6,marginBottom:28 }}>{error}</p>
-            <Link to="/portfolio#market" style={{ display:'inline-flex',alignItems:'center',gap:8,padding:'10px 22px',background:'var(--bg)',color:'var(--text-dark)',fontWeight:700,textDecoration:'none',borderRadius:100,border:'1px solid var(--border)' }}><ArrowLeft size={16}/> Back to Screener</Link>
-          </>
-        )}
-      </div>
-    );
-  }"""
-
-content = content.replace(OLD_ERROR, NEW_ERROR)
-
-open('web/src/components/AaoifiScreening.jsx', 'w').write(content)
-print("Updated AaoifiScreening")
+print("Replaced instances:", len(content) != len(original) or content != original)

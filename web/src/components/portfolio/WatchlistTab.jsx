@@ -8,6 +8,8 @@ import AddWatchlistModal from './AddWatchlistModal';
 import WatchlistAlertModal from './WatchlistAlertModal';
 import Skeleton from '../ui/Skeleton';
 
+import { customConfirm } from '../../utils/confirm';
+
 class ModalErrorBoundary extends Component {
   constructor(props) {
     super(props);
@@ -120,7 +122,7 @@ export default function WatchlistTab({ initialSymbol, onClearInitialSymbol }) {
   }, []);
 
   const handleRemove = async (symbol) => {
-    if (!window.confirm(`Are you sure you want to remove ${symbol} from your watchlist?`)) {
+    if (!await customConfirm(`Are you sure you want to remove ${symbol} from your watchlist?`)) {
       return;
     }
     try {

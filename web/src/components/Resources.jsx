@@ -5,6 +5,8 @@ import api, { createResource, updateResource, deleteResource } from '../services
 import Footer from './Footer';
 import { useAuth } from '../context/AuthContext';
 
+import { customConfirm } from '../utils/confirm';
+
 export default function ResourcesPage() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
@@ -128,7 +130,7 @@ export default function ResourcesPage() {
 
   const handleDeleteResource = async (id, e) => {
     e.stopPropagation();
-    if (window.confirm('Are you sure you want to delete this resource?')) {
+    if (await customConfirm('Are you sure you want to delete this resource?')) {
       try {
         await deleteResource(id);
         setResources(resources.filter(r => r.id !== id));

@@ -21,6 +21,8 @@ import CompanyLogo from './CompanyLogo';
 import AddHoldingModal from './portfolio/AddHoldingModal';
 import PricingModal from './PricingModal';
 
+import { customConfirm } from '../utils/confirm';
+
 /* ─── Loading steps ─────────────────────────────────────── */
 const LOADING_STEPS = [
   'Initializing AAOIFI Screening...','Reading latest financial statements...',
@@ -313,7 +315,7 @@ const AaoifiScreening = () => {
   };
 
   const handleDeleteHolding = async () => {
-    if (!window.confirm(`Are you sure you want to remove ${symbol} from your portfolio?`)) return;
+    if (!await customConfirm(`Are you sure you want to remove ${symbol} from your portfolio?`)) return;
     try {
       setAlertLoading(true);
       const { removeHolding } = await import('../services/api');
@@ -677,7 +679,7 @@ const AaoifiScreening = () => {
         </div>
 
         {/* ── Company header ── */}
-        <div className="aaoifi-header" style={{ background:'linear-gradient(145deg, var(--bg) 0%, rgba(91,41,113,0.04) 100%)',border:'1px solid rgba(91,41,113,0.1)',borderRadius:16,padding:'16px 20px',marginBottom:20,boxShadow:'0 4px 16px rgba(91,41,113,0.04), inset 0 1px 0 rgba(255,255,255,0.8)' }}>
+        <div className="aaoifi-header" style={{ background:'linear-gradient(145deg, var(--bg) 0%, rgba(91,41,113,0.04) 100%)',border:'1px solid rgba(91,41,113,0.1)',borderRadius:16,padding:'16px 20px',marginBottom:20,boxShadow:'0 4px 16px rgba(91,41,113,0.04), inset 0 1px 0 rgba(255,255,255,0.1)' }}>
           <div style={{ display:'flex',alignItems:'center',justifyContent:'space-between',gap:16,flexWrap:'wrap' }}>
             <div style={{ display:'flex',alignItems:'center',gap:14 }}>
               <div style={{ position:'relative', padding: '2px', background: 'var(--bg)', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
@@ -710,7 +712,7 @@ const AaoifiScreening = () => {
         </div>
 
         {/* ══ VERDICT CARD ══ */}
-        <div className="hover-lift aaoifi-verdict" style={{ borderRadius:24,background:`linear-gradient(135deg, ${sc.color}35 0%, ${sc.color}15 100%)`,border:`1px solid ${sc.color}`,marginBottom:24,position:'relative',overflow:'hidden', boxShadow:`0 16px 40px -10px ${sc.color}25, 0 8px 24px -5px ${sc.color}15, inset 0 2px 4px rgba(255,255,255,1)` }}>
+        <div className="hover-lift aaoifi-verdict" style={{ borderRadius:24,background:`linear-gradient(135deg, ${sc.color}35 0%, ${sc.color}15 100%)`,border:`1px solid ${sc.color}`,marginBottom:24,position:'relative',overflow:'hidden', boxShadow:`0 16px 40px -10px ${sc.color}25, 0 8px 24px -5px ${sc.color}15, inset 0 2px 4px rgba(255,255,255,0.05)` }}>
           
           <div style={{ position:'absolute', inset: 0, backgroundImage: `radial-gradient(${sc.color}15 1px, transparent 1px)`, backgroundSize: '24px 24px', opacity: 0.6, pointerEvents: 'none' }} />
           
@@ -722,18 +724,18 @@ const AaoifiScreening = () => {
 
           <div style={{ display:'flex',gap:0,flexWrap:'wrap', position:'relative', zIndex:1 }}>
             <div style={{ flex:'1 1 280px',padding:'24px 32px',borderRight:`1px solid ${sc.color}15`,display:'flex',flexDirection:'column',justifyContent:'center',gap:12 }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize:'0.7rem',fontWeight:900,textTransform:'uppercase',letterSpacing:'2px',color:sc.color, background: `linear-gradient(90deg, ${sc.color}15 0%, ${sc.color}05 100%)`, padding: '6px 12px', borderRadius: 100, width: 'fit-content', border: `1px solid ${sc.color}20` }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize:'0.7rem',fontWeight:900,textTransform:'uppercase',letterSpacing:'2px',color:sc.color, background: `linear-gradient(90deg, ${sc.color}15 0%, ${sc.color}05 100%)`, padding: '6px 12px', borderRadius: 100, width: 'fit-content', border: `1px solid var(--border)` }}>
                 <Activity size={12} strokeWidth={2.5}/> AAOIFI Compliance Verdict
               </div>
               
               <div style={{ display:'flex',alignItems:'flex-start',gap:16,flexWrap:'wrap',marginTop:4 }}>
-                <div style={{ marginTop:4, background: 'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%)', borderRadius: 16, padding: 10, boxShadow: `0 8px 24px ${sc.color}30, inset 0 2px 0 #fff`, border: `1px solid ${sc.color}20` }}>
+                <div style={{ marginTop:4, background: 'var(--bg-section)', borderRadius: 16, padding: 10, boxShadow: `0 8px 24px ${sc.color}30, inset 0 2px 0 rgba(255,255,255,0.05)`, border: `1px solid var(--border)` }}>
                   <StatusIcon size={38} color={sc.color} strokeWidth={2.5}/>
                 </div>
                 <div>
                   <div style={{ display:'flex',alignItems:'center',gap:12,flexWrap:'wrap' }}>
                     <h2 style={{ fontFamily:'"Georgia", "Times New Roman", serif',fontSize:'clamp(2rem,4vw,2.8rem)',fontWeight:900,color:sc.color,margin:0,letterSpacing:'-1px',lineHeight:1, textShadow: `0 4px 16px ${sc.color}30` }}>{sc.label}</h2>
-                    {hasPurification&&(<span style={{ fontSize:'0.75rem',fontWeight:900,color:'#D97706',display:'inline-flex',alignItems:'center',gap:6,background:'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 100%)',border:'1px solid rgba(245,158,11,0.3)',padding:'6px 14px',borderRadius:100, boxShadow: '0 4px 16px rgba(245,158,11,0.2)' }}><Droplets size={14} color="#D97706" fill="rgba(245,158,11,0.2)"/> With Purification ({purPct}%)</span>)}
+                    {hasPurification&&(<span style={{ fontSize:'0.75rem',fontWeight:900,color:'#D97706',display:'inline-flex',alignItems:'center',gap:6,background:'var(--bg-section)',border:'1px solid rgba(245,158,11,0.3)',padding:'6px 14px',borderRadius:100, boxShadow: '0 4px 16px rgba(245,158,11,0.2)' }}><Droplets size={14} color="#D97706" fill="rgba(245,158,11,0.2)"/> With Purification ({purPct}%)</span>)}
                   </div>
                   <div style={{ fontSize:'0.9rem',fontWeight:800,color:'var(--text-dark)',marginTop:8, opacity:0.8, letterSpacing: '-0.3px', display: 'flex', alignItems: 'center', gap: 6 }}>
                     <Sparkles size={14} color={sc.color} /> {sc.tag}
@@ -741,7 +743,7 @@ const AaoifiScreening = () => {
                 </div>
               </div>
 
-              <div style={{ padding: '16px 20px', background: 'rgba(255,255,255,0.85)', borderRadius: 16, border: '1px solid #fff', marginTop: 12, boxShadow: '0 4px 16px rgba(0,0,0,0.04), inset 0 2px 4px rgba(255,255,255,1)', backdropFilter: 'blur(20px)' }}>
+              <div style={{ padding: '16px 20px', background: 'var(--bg-section)', borderRadius: 16, border: '1px solid var(--border)', marginTop: 12, boxShadow: '0 4px 16px rgba(0,0,0,0.04), inset 0 2px 4px rgba(255,255,255,0.05)', backdropFilter: 'blur(20px)' }}>
                 <div style={{ color:'var(--text-dark)',fontSize:'0.9rem',lineHeight:1.6,margin:0, fontWeight:600 }}>
                   {cleanStatusReason||'Screened in accordance with AAOIFI Shariah Standard No. 21.'}
                   {(showFinancials) && (
@@ -756,13 +758,13 @@ const AaoifiScreening = () => {
                         e.currentTarget.style.background = `${sc.color}12`;
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.background = '#ffffff';
+                        e.currentTarget.style.background = 'var(--bg)';
                       }}
                       style={{ 
                         marginLeft: '6px', 
                         padding: '1px 6px', 
                         background: 'var(--bg)', 
-                        border: '1px solid #ffffff', 
+                        border: '1px solid var(--border)', 
                         borderRadius: '100px', 
                         color: sc.color, 
                         fontSize: '0.52rem', 
@@ -800,14 +802,14 @@ const AaoifiScreening = () => {
               {(report.reporting_period || report.reporting_year || report.published_date || report.source_url) && (
                 <div style={{ display:'flex', alignItems:'center', gap: '10px', flexWrap: 'wrap', marginTop: 12 }}>
                   {(report.reporting_period || report.reporting_year) && (
-                    <div style={{ display:'inline-flex',alignItems:'center',gap:6,padding:'6px 14px',background:'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%)',borderRadius:100,fontSize:'0.7rem',color:'var(--text-muted)',fontWeight:800,border:`1px solid ${sc.color}20`, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+                    <div style={{ display:'inline-flex',alignItems:'center',gap:6,padding:'6px 14px',background:'var(--bg-section)',borderRadius:100,fontSize:'0.7rem',color:'var(--text-muted)',fontWeight:800,border: `1px solid var(--border)`, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
                       <Calendar size={12} color={sc.color}/> 
                       Financial Results {report.reporting_period||''} {report.reporting_year?`(${report.reporting_year})`:''}
                     </div>
                   )}
                   
                   {report.published_date && (
-                    <div style={{ display:'inline-flex',alignItems:'center',gap:6,padding:'6px 14px',background:'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%)',borderRadius:100,fontSize:'0.7rem',color:'var(--text-muted)',fontWeight:800,border:`1px solid ${sc.color}20`, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+                    <div style={{ display:'inline-flex',alignItems:'center',gap:6,padding:'6px 14px',background:'var(--bg-section)',borderRadius:100,fontSize:'0.7rem',color:'var(--text-muted)',fontWeight:800,border: `1px solid var(--border)`, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
                       <Clock size={12} color={sc.color}/> 
                       Published: {fmtDate(report.published_date)}
                     </div>
@@ -840,14 +842,14 @@ const AaoifiScreening = () => {
                     </button>
                   )
                 ) : (
-                  <Link to="/portfolio#purification" state={{ action: 'purify', targetSymbol: symbol }} className="hover-lift" style={{ display:'inline-flex',alignItems:'center',justifyContent:'center',gap:6,padding:'12px 20px',borderRadius:16,background:'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 100%)',border:'1px solid rgba(245,158,11,0.3)',color:'#D97706',fontSize:'0.85rem',fontWeight:900,textDecoration:'none',marginTop:8, transition:'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: '0 8px 24px rgba(245,158,11,0.15), inset 0 2px 4px #fff' }}>Purify Now <ChevronRight size={16}/></Link>
+                  <Link to="/portfolio#purification" state={{ action: 'purify', targetSymbol: symbol }} className="hover-lift" style={{ display:'inline-flex',alignItems:'center',justifyContent:'center',gap:6,padding:'12px 20px',borderRadius:16,background:'var(--bg-section)',border:'1px solid rgba(245,158,11,0.3)',color:'#D97706',fontSize:'0.85rem',fontWeight:900,textDecoration:'none',marginTop:8, transition:'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: '0 8px 24px rgba(245,158,11,0.15), inset 0 2px 4px rgba(255,255,255,0.05)' }}>Purify Now <ChevronRight size={16}/></Link>
                 )
               )}
             </div>)}
             
             {isNonHalal&&(<div style={{ flex:'1 1 280px',padding:'24px 32px',display:'flex',flexDirection:'column',justifyContent:'center',gap:16,background: (!businessFailed ? 'linear-gradient(135deg, rgba(59,130,246,0.02) 0%, rgba(59,130,246,0.08) 100%)' : 'linear-gradient(135deg, rgba(239,68,68,0.02) 0%, rgba(239,68,68,0.08) 100%)') }}>
               <div style={{ fontSize:'0.7rem',fontWeight:900,textTransform:'uppercase',letterSpacing:'1.5px',color: (!businessFailed ? '#3B82F6' : 'var(--non-compliant)'), display:'flex', alignItems:'center', gap:6 }}><AlertTriangle size={14} strokeWidth={2.5}/> Screening Result</div>
-              <div style={{ display:'flex',alignItems:'center',gap:14, background: 'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 100%)', padding: '16px', borderRadius: 16, boxShadow: (!businessFailed ? '0 8px 24px rgba(59,130,246,0.15), inset 0 2px 4px #fff' : '0 8px 24px rgba(239,68,68,0.15), inset 0 2px 4px #fff'), border: (!businessFailed ? '1px solid rgba(59,130,246,0.2)' : '1px solid rgba(239,68,68,0.2)') }}>
+              <div style={{ display:'flex',alignItems:'center',gap:14, background: 'var(--bg-section)', padding: '16px', borderRadius: 16, boxShadow: (!businessFailed ? '0 8px 24px rgba(59,130,246,0.15), inset 0 2px 4px rgba(255,255,255,0.05)' : '0 8px 24px rgba(239,68,68,0.15), inset 0 2px 4px rgba(255,255,255,0.05)'), border: (!businessFailed ? '1px solid rgba(59,130,246,0.2)' : '1px solid rgba(239,68,68,0.2)') }}>
                 { !businessFailed ? <AlertCircle size={36} color="#3B82F6" strokeWidth={2.5}/> : <XCircle size={36} color="var(--non-compliant)" strokeWidth={2.5}/> }
                 <div>{ (!businessFailed && isNonHalal) ? (<div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#3B82F6', lineHeight: 1.2 }}>Not suitable for investment now</div>) : (<><div style={{ fontSize:'1.1rem',fontWeight:900,color:'var(--non-compliant)' }}>EXCLUDED</div><div style={{ fontSize:'0.75rem',color:'var(--text-muted)',fontWeight:700 }}>Not suitable for investment</div></>) }</div>
               </div>

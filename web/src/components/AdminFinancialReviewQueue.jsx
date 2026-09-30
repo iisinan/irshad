@@ -4,6 +4,8 @@ import api, { fetchStockDetails } from '../services/api';
 import { Check, X, Inbox, ChevronDown, ChevronUp, BarChart2 } from 'lucide-react';
 import { LineChart, Line, XAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
 
+import { customConfirm } from '../utils/confirm';
+
 export default function AdminFinancialReviewQueue() {
   useAuth();
   
@@ -81,7 +83,7 @@ export default function AdminFinancialReviewQueue() {
   };
 
   const handleReject = async (id) => {
-    if (!window.confirm("Are you sure you want to completely delete this extracted data?")) return;
+    if (!await customConfirm("Are you sure you want to completely delete this extracted data?")) return;
     setIsSubmitting(true);
     try {
       await api.post(`/admin/financial-review/${id}/reject`);
