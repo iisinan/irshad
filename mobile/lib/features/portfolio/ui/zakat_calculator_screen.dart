@@ -473,7 +473,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
             // ─── Smart Nisab ───
             Container(
               padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(color: context.bg, borderRadius: BorderRadius.circular(24), border: Border.all(color: context.divider), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.01), blurRadius: 10)]),
+              decoration: BoxDecoration(color: context.bg, borderRadius: BorderRadius.circular(24), border: Border.all(color: context.divider), boxShadow: [BoxShadow(color: context.textDark.withOpacity(0.01), blurRadius: 10)]),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -685,7 +685,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                 color: context.bg,
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(color: context.divider),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
+                boxShadow: [BoxShadow(color: context.textDark.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -702,7 +702,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                               children: [
                                 const Icon(Icons.monetization_on, size: 20, color: Color(0xFFD1A562)),
                                 const SizedBox(width: 8),
-                                const Text('Financial Wealth', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.black)),
+                                const Text('Financial Wealth', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: context.textDark)),
                               ],
                             ),
                             const SizedBox(height: 4),
@@ -1059,7 +1059,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
         const SizedBox(height: 10),
         Container(
           height: 8,
-          decoration: BoxDecoration(color: Colors.black.withOpacity(0.06), borderRadius: BorderRadius.circular(100)),
+          decoration: BoxDecoration(color: context.textDark.withOpacity(0.06), borderRadius: BorderRadius.circular(100)),
           child: FractionallySizedBox(
             alignment: Alignment.centerLeft,
             widthFactor: percentage / 100.0,

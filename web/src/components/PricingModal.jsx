@@ -11,7 +11,7 @@ const PricingModal = ({ onClose }) => {
       padding: '20px'
     }}>
       <div style={{
-        background: '#fff', borderRadius: '24px',
+        background: 'var(--bg)', borderRadius: '24px',
         width: '100%', maxWidth: '1100px', maxHeight: '90vh',
         overflowY: 'auto', position: 'relative',
         boxShadow: '0 20px 40px rgba(0,0,0,0.2)'

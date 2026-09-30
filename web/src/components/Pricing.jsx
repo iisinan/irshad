@@ -52,7 +52,7 @@ const Pricing = ({ isModal }) => {
 
   return (
     <>
-      <div className="animate-fade-in page-wrapper" style={{ paddingBottom: '80px', background: '#FFFFFF' }}>
+      <div className="animate-fade-in page-wrapper" style={{ paddingBottom: '80px', background: 'var(--bg)' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 20px' }}>
           
           {/* Header */}
@@ -63,14 +63,14 @@ const Pricing = ({ isModal }) => {
             
             {/* Billing Toggle */}
             <div style={{ 
-              display: 'inline-flex', background: '#F3F4F6', borderRadius: '100px', padding: '4px', margin: '10px auto 30px'
+              display: 'inline-flex', background: 'var(--bg-alt)', borderRadius: '100px', padding: '4px', margin: '10px auto 30px'
             }}>
               <button 
                 onClick={() => setBillingCycle('monthly')}
                 style={{ 
                   padding: '8px 24px', borderRadius: '100px', border: 'none', 
                   background: billingCycle === 'monthly' ? '#fff' : 'transparent',
-                  color: billingCycle === 'monthly' ? '#111827' : '#4B5563',
+                  color: billingCycle === 'monthly' ? 'var(--text-dark)' : '#4B5563',
                   fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer',
                   boxShadow: billingCycle === 'monthly' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
                   transition: 'all 0.2s'
@@ -83,7 +83,7 @@ const Pricing = ({ isModal }) => {
                 style={{ 
                   padding: '8px 24px', borderRadius: '100px', border: 'none', 
                   background: billingCycle === 'yearly' ? '#fff' : 'transparent',
-                  color: billingCycle === 'yearly' ? '#111827' : '#4B5563',
+                  color: billingCycle === 'yearly' ? 'var(--text-dark)' : '#4B5563',
                   fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer',
                   boxShadow: billingCycle === 'yearly' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
                   transition: 'all 0.2s'
@@ -104,21 +104,21 @@ const Pricing = ({ isModal }) => {
           <div className="pricing-grid stagger-fade-in" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '64px', alignItems: 'stretch' }}>
             
             {/* MIFTAH */}
-            <div style={{ background: '#FFFFFF', borderRadius: '24px', border: '1px solid #E5E7EB', padding: '32px 24px', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid #E5E7EB', padding: '32px 24px', display: 'flex', flexDirection: 'column' }}>
               <div style={{ marginBottom: '24px' }}>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: 500, color: '#111827', marginBottom: '12px' }}>Miftah (Free)</h3>
-                <p style={{ fontSize: '0.9rem', color: '#6B7280', lineHeight: 1.5, height: '44px' }}>Get everyday help with fundamental Islamic finance screening.</p>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: 500, color: 'var(--text-dark)', marginBottom: '12px' }}>Miftah (Free)</h3>
+                <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.5, height: '44px' }}>Get everyday help with fundamental Islamic finance screening.</p>
               </div>
 
               <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-                <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#374151' }}>NGN</span>
-                <span style={{ fontSize: '2.4rem', fontWeight: 500, color: '#111827', lineHeight: 1 }}>0</span>
-                <span style={{ fontSize: '0.9rem', color: '#6B7280' }}>/month</span>
+                <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-dark)' }}>NGN</span>
+                <span style={{ fontSize: '2.4rem', fontWeight: 500, color: 'var(--text-dark)', lineHeight: 1 }}>0</span>
+                <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>/month</span>
               </div>
 
               {currentPlanSlug === 'free' && !hasPaid
-                ? <div style={{ width: '100%', padding: '10px', borderRadius: '100px', background: '#F3F4F6', border: '1px solid #D1D5DB', color: '#6B7280', fontWeight: 700, fontSize: '0.95rem', textAlign: 'center', marginBottom: '32px' }}>✓ Your current plan</div>
-                : <button onClick={() => handleSubscribe('free')} style={{ width: '100%', padding: '10px', borderRadius: '100px', background: 'transparent', border: '1px solid #D1D5DB', color: '#374151', fontWeight: 600, fontSize: '0.95rem', cursor: 'pointer', marginBottom: '32px', transition: 'all 0.2s' }} className="hover-bg-gray">Get started</button>
+                ? <div style={{ width: '100%', padding: '10px', borderRadius: '100px', background: 'var(--bg-alt)', border: '1px solid #D1D5DB', color: 'var(--text-muted)', fontWeight: 700, fontSize: '0.95rem', textAlign: 'center', marginBottom: '32px' }}>✓ Your current plan</div>
+                : <button onClick={() => handleSubscribe('free')} style={{ width: '100%', padding: '10px', borderRadius: '100px', background: 'transparent', border: '1px solid #D1D5DB', color: 'var(--text-dark)', fontWeight: 600, fontSize: '0.95rem', cursor: 'pointer', marginBottom: '32px', transition: 'all 0.2s' }} className="hover-bg-gray">Get started</button>
               }
 
               <div style={{ flex: 1 }}>
@@ -132,11 +132,11 @@ const Pricing = ({ isModal }) => {
             </div>
 
             {/* RAWDAH */}
-            <div style={{ background: '#FFFFFF', borderRadius: '24px', border: '1px solid #E5E7EB', padding: '32px 24px', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid #E5E7EB', padding: '32px 24px', display: 'flex', flexDirection: 'column' }}>
               <div style={{ marginBottom: '24px' }}>
                 <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#006B46', marginBottom: '8px' }}>Most Popular</div>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: 500, color: '#111827', marginBottom: '12px' }}>Rawdah (Pro)</h3>
-                <p style={{ fontSize: '0.9rem', color: '#6B7280', lineHeight: 1.5, height: '44px' }}>Get more access to custom baskets and deeper portfolio tracking.</p>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: 500, color: 'var(--text-dark)', marginBottom: '12px' }}>Rawdah (Pro)</h3>
+                <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.5, height: '44px' }}>Get more access to custom baskets and deeper portfolio tracking.</p>
               </div>
 
               <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'baseline', gap: '4px' }}>
@@ -144,7 +144,7 @@ const Pricing = ({ isModal }) => {
                 <span style={{ fontSize: '2.4rem', fontWeight: 500, color: '#006B46', lineHeight: 1 }}>
                   {billingCycle === 'monthly' ? '2,500' : '24,000'}
                 </span>
-                <span style={{ fontSize: '0.9rem', color: '#6B7280' }}>/{billingCycle === 'monthly' ? 'month' : 'year'}</span>
+                <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>/{billingCycle === 'monthly' ? 'month' : 'year'}</span>
               </div>
 
               {currentPlanSlug === 'pro' && hasPaid
@@ -153,7 +153,7 @@ const Pricing = ({ isModal }) => {
               }
 
               <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', fontWeight: 600, color: '#111827', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-dark)', marginBottom: '16px' }}>
                   <CheckCircle2 size={16} color="#006B46" /> Everything in free and:
                 </div>
                 <div style={{ borderTop: '1px solid #F3F4F6', margin: '0 0 16px 0' }}></div>
@@ -169,11 +169,11 @@ const Pricing = ({ isModal }) => {
             </div>
 
             {/* NOOR */}
-            <div style={{ background: '#FFFFFF', borderRadius: '24px', border: '1px solid #E5E7EB', padding: '32px 24px', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid #E5E7EB', padding: '32px 24px', display: 'flex', flexDirection: 'column' }}>
               <div style={{ marginBottom: '24px' }}>
                 <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#D9A05B', marginBottom: '8px' }}>Best Value</div>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: 500, color: '#111827', marginBottom: '12px' }}>Noor (Max)</h3>
-                <p style={{ fontSize: '0.9rem', color: '#6B7280', lineHeight: 1.5, height: '44px' }}>Unlock the highest level of access and exclusive premium features.</p>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: 500, color: 'var(--text-dark)', marginBottom: '12px' }}>Noor (Max)</h3>
+                <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.5, height: '44px' }}>Unlock the highest level of access and exclusive premium features.</p>
               </div>
 
               <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'baseline', gap: '4px' }}>
@@ -181,7 +181,7 @@ const Pricing = ({ isModal }) => {
                 <span style={{ fontSize: '2.4rem', fontWeight: 500, color: '#D9A05B', lineHeight: 1 }}>
                   {billingCycle === 'monthly' ? '6,500' : '62,000'}
                 </span>
-                <span style={{ fontSize: '0.9rem', color: '#6B7280' }}>/{billingCycle === 'monthly' ? 'month' : 'year'}</span>
+                <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>/{billingCycle === 'monthly' ? 'month' : 'year'}</span>
               </div>
 
               {currentPlanSlug === 'max' && hasPaid
@@ -190,7 +190,7 @@ const Pricing = ({ isModal }) => {
               }
 
               <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', fontWeight: 600, color: '#111827', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-dark)', marginBottom: '16px' }}>
                   <CheckCircle2 size={16} color="#D9A05B" /> Everything in Pro and:
                 </div>
                 <div style={{ borderTop: '1px solid #F3F4F6', margin: '0 0 16px 0' }}></div>
@@ -208,7 +208,7 @@ const Pricing = ({ isModal }) => {
 
           </div>
 
-          <div style={{ textAlign: 'center', marginBottom: '40px', fontSize: '0.85rem', color: '#6B7280', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '40px', fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
             <ShieldCheck size={16} color="#10B981" /> Secure payments powered by Paystack
           </div>
         </div>
@@ -237,12 +237,12 @@ const FeatureRow = ({ icon, title, text }) => {
 
   return (
     <li style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', padding: '12px 0' }}>
-      <div style={{ marginTop: '2px', color: '#111827' }}>
+      <div style={{ marginTop: '2px', color: 'var(--text-dark)' }}>
         <IconComponent size={20} strokeWidth={2} />
       </div>
       <div>
-        <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#111827', marginBottom: '2px' }}>{title}</div>
-        {text && <div style={{ fontSize: '0.85rem', color: '#6B7280', lineHeight: 1.4 }}>{text}</div>}
+        <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-dark)', marginBottom: '2px' }}>{title}</div>
+        {text && <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>{text}</div>}
       </div>
     </li>
   );

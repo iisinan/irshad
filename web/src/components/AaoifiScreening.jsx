@@ -631,7 +631,7 @@ const AaoifiScreening = () => {
                         onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.transform = 'scale(1)'; }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12, overflow: 'hidden' }}>
-                          <div style={{ width: 34, height: 34, borderRadius: 10, background: '#fff', border: '1px solid var(--border)', flexShrink: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+                          <div style={{ width: 34, height: 34, borderRadius: 10, background: 'var(--bg)', border: '1px solid var(--border)', flexShrink: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
                             <CompanyLogo symbol={s.symbol} logoUrl={s.logo_url} size={34} radius={10} />
                           </div>
                           <div style={{ display:'flex', flexDirection:'column', overflow: 'hidden' }}>
@@ -680,7 +680,7 @@ const AaoifiScreening = () => {
         <div className="aaoifi-header" style={{ background:'linear-gradient(145deg, var(--bg) 0%, rgba(91,41,113,0.04) 100%)',border:'1px solid rgba(91,41,113,0.1)',borderRadius:16,padding:'16px 20px',marginBottom:20,boxShadow:'0 4px 16px rgba(91,41,113,0.04), inset 0 1px 0 rgba(255,255,255,0.8)' }}>
           <div style={{ display:'flex',alignItems:'center',justifyContent:'space-between',gap:16,flexWrap:'wrap' }}>
             <div style={{ display:'flex',alignItems:'center',gap:14 }}>
-              <div style={{ position:'relative', padding: '2px', background: '#fff', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+              <div style={{ position:'relative', padding: '2px', background: 'var(--bg)', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
                 <CompanyLogo symbol={symbol} logoUrl={stock?.logo_url} size={42} radius={10}/>
                 <div style={{ position:'absolute',bottom:-2,right:-2,width:14,height:14,borderRadius:'50%',background:finalStatus==='halal'?'var(--halal)':finalStatus==='non-compliant'?'var(--non-compliant)':'#D97706',border:'2px solid #fff',boxShadow:'0 2px 4px rgba(0,0,0,0.1)' }}/>
               </div>
@@ -761,7 +761,7 @@ const AaoifiScreening = () => {
                       style={{ 
                         marginLeft: '6px', 
                         padding: '1px 6px', 
-                        background: '#ffffff', 
+                        background: 'var(--bg)', 
                         border: '1px solid #ffffff', 
                         borderRadius: '100px', 
                         color: sc.color, 
@@ -788,7 +788,7 @@ const AaoifiScreening = () => {
 
               {hasNearLimit && (
                 <div style={{ padding: '8px 14px', background: 'linear-gradient(90deg, rgba(217, 119, 6, 0.1) 0%, rgba(217, 119, 6, 0.05) 100%)', borderRadius: 12, border: '1px solid rgba(217, 119, 6, 0.2)', marginTop: 8, display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff', borderRadius: '50%', width: 24, height: 24, boxShadow: '0 2px 4px rgba(217, 119, 6, 0.15)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)', borderRadius: '50%', width: 24, height: 24, boxShadow: '0 2px 4px rgba(217, 119, 6, 0.15)' }}>
                     <AlertTriangle size={12} color="#D97706" />
                   </div>
                   <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#92400E' }}>

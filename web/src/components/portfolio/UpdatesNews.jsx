@@ -268,7 +268,7 @@ export default function UpdatesNews() {
             <div style={{ flex: 1, WebkitOverflowScrolling: 'touch', overflowY: 'auto' }}>
               <iframe 
                 src={selectedUrl} 
-                style={{ display: 'block', border: 'none', width: '100%', height: '100%', background: '#fff' }} 
+                style={{ display: 'block', border: 'none', width: '100%', height: '100%', background: 'var(--bg)' }} 
                 sandbox="allow-same-origin allow-scripts allow-popups allow-forms" 
                 title="News Article Reader"
               />

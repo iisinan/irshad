@@ -17,7 +17,7 @@ const STATUS_CFG = {
 };
 
 const StatusPill = ({ status, size = 'sm' }) => {
-  const c = STATUS_CFG[status] ?? { label: (status || 'UNKNOWN').toUpperCase(), bg: 'rgba(100,100,100,.1)', color: '#6B7280', border: 'rgba(100,100,100,.2)' };
+  const c = STATUS_CFG[status] ?? { label: (status || 'UNKNOWN').toUpperCase(), bg: 'rgba(100,100,100,.1)', color: 'var(--text-muted)', border: 'rgba(100,100,100,.2)' };
   return (
     <span style={{
       display: 'inline-flex', alignItems: 'center', gap: 4,
@@ -395,7 +395,7 @@ export default function AdminComplianceReviews() {
             <button onClick={handleBulkApprove} style={{
               display: 'flex', alignItems: 'center', gap: 6,
               padding: '7px 16px', borderRadius: 10, border: 'none',
-              background: 'white', color: '#065F46', fontWeight: 800, fontSize: '0.82rem', cursor: 'pointer'
+              background: 'var(--bg)', color: '#065F46', fontWeight: 800, fontSize: '0.82rem', cursor: 'pointer'
             }}>
               <Check size={13}/> Approve all
             </button>

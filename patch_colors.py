@@ -1,20 +1,34 @@
-import re
+import os
 
-content = open('web/src/components/Pricing.jsx').read()
+replacements = {
+    "'#FFFFFF'": "'var(--bg)'",
+    "'#ffffff'": "'var(--bg)'",
+    "'#fff'": "'var(--bg)'",
+    "'white'": "'var(--bg)'",
+    "'#F9FAFB'": "'var(--bg-alt)'",
+    "'#F3F4F6'": "'var(--bg-section)'",
+}
 
-# Rawdah: Replace blues (#2563EB text, #3B82F6 background) with Irshad Green (#006B46 and #059669)
-# Badges and prices used #2563EB
-rawdah_block = content[content.find('{/* RAWDAH */}'):content.find('{/* NOOR */}')]
-new_rawdah = rawdah_block.replace('#2563EB', '#006B46') # Text / Prices
-new_rawdah = new_rawdah.replace('#3B82F6', '#006B46') # Buttons / Checkmarks
-content = content.replace(rawdah_block, new_rawdah)
+skip_files = ['CompanyLogo.jsx', 'ZakatTab.jsx', 'LandingPage.jsx', 'UpdatesDigest.jsx', 'WatchlistAlertModal.jsx']
 
-# Noor: Replace blues with Irshad Gold (#B8860B)
-noor_block = content[content.find('{/* NOOR */}'):]
-new_noor = noor_block.replace('#2563EB', '#B8860B') # Text / Prices
-new_noor = new_noor.replace('#3B82F6', '#B8860B') # Buttons / Checkmarks
-content = content.replace(noor_block, new_noor)
+def process_file(filepath):
+    if any(s in filepath for s in skip_files): return
+    with open(filepath, 'r') as f:
+        content = f.read()
+        
+    original = content
+    for old, new in replacements.items():
+        # specifically look for background: 'old'
+        content = content.replace(f"background: {old}", f"background: {new}")
+        content = content.replace(f"backgroundColor: {old}", f"backgroundColor: {new}")
 
-with open('web/src/components/Pricing.jsx', 'w') as f:
-    f.write(content)
-print("done")
+    if original != content:
+        with open(filepath, 'w') as f:
+            f.write(content)
+        print(f"Patched {filepath}")
+
+for root, _, files in os.walk('web/src/components'):
+    for file in files:
+        if file.endswith('.jsx'):
+            process_file(os.path.join(root, file))
+

@@ -23,7 +23,7 @@ class ModalErrorBoundary extends Component {
     if (this.state.hasError) {
       return (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 99999, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
-          <div style={{ background: 'white', padding: '24px', borderRadius: '12px', maxWidth: '500px', width: '100%', wordBreak: 'break-word' }}>
+          <div style={{ background: 'var(--bg)', padding: '24px', borderRadius: '12px', maxWidth: '500px', width: '100%', wordBreak: 'break-word' }}>
             <h2 style={{ color: 'red', marginTop: 0 }}>Modal Error</h2>
             <p><strong>Message:</strong> {this.state.error?.message}</p>
             <pre style={{ fontSize: '11px', overflowX: 'auto', background: 'var(--bg)', padding: '10px' }}>{this.state.error?.stack}</pre>

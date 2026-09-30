@@ -361,7 +361,7 @@ export default function UpdatesPurification() {
           </div>
 
           {/* Niyyah warning */}
-          <div style={{ display: 'flex', gap: '16px', background: 'white', padding: '20px 22px', borderRadius: '18px', border: '1px solid rgba(34,197,94,0.2)', boxShadow: '0 4px 16px rgba(0,0,0,0.04)', position: 'relative', zIndex: 1 }}>
+          <div style={{ display: 'flex', gap: '16px', background: 'var(--bg)', padding: '20px 22px', borderRadius: '18px', border: '1px solid rgba(34,197,94,0.2)', boxShadow: '0 4px 16px rgba(0,0,0,0.04)', position: 'relative', zIndex: 1 }}>
             <AlertCircle size={26} color="#22c55e" style={{ flexShrink: 0, marginTop: '2px' }} />
             <div>
               <h4 style={{ margin: '0 0 6px 0', fontSize: '0.93rem', fontWeight: 800, color: 'var(--text-dark)' }}>
