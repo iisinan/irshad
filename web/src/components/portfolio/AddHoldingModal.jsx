@@ -410,9 +410,9 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
 
             {tab === 'manual' ? (
               <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1 }}>
-                <div className="modal-body" style={{ minHeight: 0, padding: '32px', flex: 1, overflowY: 'auto', background: '#FFFFFF' }}>
+                <div className="modal-body" style={{ minHeight: 0, padding: '32px', flex: 1, overflowY: 'auto', background: 'var(--bg)' }}>
                   {rows.map((row, index) => (
-                    <div key={row.id} className="holding-row-card" style={{ background: '#FFFFFF', padding: '24px', borderRadius: '16px', marginBottom: '24px', border: '1px solid var(--border)', position: 'relative' }}>
+                    <div key={row.id} className="holding-row-card" style={{ background: 'var(--bg)', padding: '24px', borderRadius: '16px', marginBottom: '24px', border: '1px solid var(--border)', position: 'relative' }}>
                       {/* Row Header & Delete */}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                         <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>HOLDING #{index + 1}</div>
@@ -430,7 +430,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
                           <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '10px' }}>Ticker Symbol</label>
                           <div style={{ position: 'relative' }}>
                             <Search size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
-                            <input value={row.sym} onChange={e => handleRowChange(row.id, 'sym', e.target.value)} onFocus={() => { if (row.sym) setActiveRowId(row.id); }} onBlur={() => setTimeout(() => setActiveRowId(null), 200)} placeholder="SEARCH STOCK..." style={{ width: '100%', padding: '12px 14px 12px 42px', borderRadius: '10px', border: '1px solid var(--border)', fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-dark)', outline: 'none', transition: 'border-color 0.2s', background: '#FFFFFF' }} onFocusCapture={e => { e.target.style.borderColor = 'var(--primary)'; }} onBlurCapture={e => { e.target.style.borderColor = 'var(--border)'; }} />
+                            <input value={row.sym} onChange={e => handleRowChange(row.id, 'sym', e.target.value)} onFocus={() => { if (row.sym) setActiveRowId(row.id); }} onBlur={() => setTimeout(() => setActiveRowId(null), 200)} placeholder="SEARCH STOCK..." style={{ width: '100%', padding: '12px 14px 12px 42px', borderRadius: '10px', border: '1px solid var(--border)', fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-dark)', outline: 'none', transition: 'border-color 0.2s', background: 'var(--bg)' }} onFocusCapture={e => { e.target.style.borderColor = 'var(--primary)'; }} onBlurCapture={e => { e.target.style.borderColor = 'var(--border)'; }} />
                             {activeRowId === row.id && filteredStocks.length > 0 && (
                               <div style={{ position: 'absolute', top: 'calc(100% + 8px)', left: 0, right: 0, background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '12px', zIndex: 50, boxShadow: '0 8px 32px rgba(0,0,0,0.1)', overflow: 'hidden', animation: 'slideUpFade 0.2s ease', minWidth: '300px' }}>
                                 {filteredStocks.map((stock, i) => (
@@ -456,13 +456,13 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
                         {/* Shares */}
                         <div>
                           <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '10px' }}>Shares</label>
-                          <input type="number" value={row.sh} onChange={e => handleRowChange(row.id, 'sh', e.target.value)} placeholder="0" min="0" step="any" style={{ width: '100%', padding: '12px 16px', borderRadius: '10px', border: '1px solid var(--border)', fontSize: '0.9rem', fontWeight: 700, outline: 'none', background: '#FFFFFF', transition: 'border-color 0.2s' }} onFocus={e => { e.target.style.borderColor = 'var(--primary)'; }} onBlur={e => { e.target.style.borderColor = 'var(--border)'; }} />
+                          <input type="number" value={row.sh} onChange={e => handleRowChange(row.id, 'sh', e.target.value)} placeholder="0" min="0" step="any" style={{ width: '100%', padding: '12px 16px', borderRadius: '10px', border: '1px solid var(--border)', fontSize: '0.9rem', fontWeight: 700, outline: 'none', background: 'var(--bg)', transition: 'border-color 0.2s' }} onFocus={e => { e.target.style.borderColor = 'var(--primary)'; }} onBlur={e => { e.target.style.borderColor = 'var(--border)'; }} />
                         </div>
 
                         {/* Avg Price */}
                         <div>
                           <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '10px' }}>Avg Price (₦)</label>
-                          <input type="number" value={row.pr} onChange={e => handleRowChange(row.id, 'pr', e.target.value)} placeholder="0.00" min="0" step="any" style={{ width: '100%', padding: '12px 16px', borderRadius: '10px', border: '1px solid var(--border)', fontSize: '0.9rem', fontWeight: 700, outline: 'none', background: '#FFFFFF', transition: 'border-color 0.2s' }} onFocus={e => { e.target.style.borderColor = 'var(--primary)'; }} onBlur={e => { e.target.style.borderColor = 'var(--border)'; }} />
+                          <input type="number" value={row.pr} onChange={e => handleRowChange(row.id, 'pr', e.target.value)} placeholder="0.00" min="0" step="any" style={{ width: '100%', padding: '12px 16px', borderRadius: '10px', border: '1px solid var(--border)', fontSize: '0.9rem', fontWeight: 700, outline: 'none', background: 'var(--bg)', transition: 'border-color 0.2s' }} onFocus={e => { e.target.style.borderColor = 'var(--primary)'; }} onBlur={e => { e.target.style.borderColor = 'var(--border)'; }} />
                         </div>
 
                         {/* Date — REQUIRED */}
@@ -475,22 +475,22 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
                             value={row.date}
                             max={new Date().toISOString().split('T')[0]}
                             onChange={e => handleRowChange(row.id, 'date', e.target.value)}
-                            style={{ width: '100%', padding: '12px 16px', borderRadius: '10px', border: '1px solid var(--border)', fontSize: '0.9rem', fontWeight: 700, outline: 'none', background: '#FFFFFF', transition: 'border-color 0.2s', color: row.date ? 'var(--text-dark)' : 'var(--text-muted)' }}
-                            onFocus={e => { e.target.style.borderColor = 'var(--primary)'; e.target.style.background = '#FFFFFF'; }}
-                            onBlur={e => { e.target.style.borderColor = 'var(--border)'; e.target.style.background = '#FFFFFF'; }}
+                            style={{ width: '100%', padding: '12px 16px', borderRadius: '10px', border: '1px solid var(--border)', fontSize: '0.9rem', fontWeight: 700, outline: 'none', background: 'var(--bg)', transition: 'border-color 0.2s', color: row.date ? 'var(--text-dark)' : 'var(--text-muted)' }}
+                            onFocus={e => { e.target.style.borderColor = 'var(--primary)'; e.target.style.background = 'var(--bg)'; }}
+                            onBlur={e => { e.target.style.borderColor = 'var(--border)'; e.target.style.background = 'var(--bg)'; }}
                           />
                         </div>
                       </div>
                     </div>
                   ))}
 
-                  <button type="button" onClick={addRow} style={{ width: '100%', padding: '16px', borderRadius: '16px', background: '#FFFFFF', border: '1px dashed var(--primary)', color: 'var(--primary)', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }} onMouseEnter={e => { e.currentTarget.style.background = 'var(--primary-10)'; }} onMouseLeave={e => { e.currentTarget.style.background = '#FFFFFF'; }}>
+                  <button type="button" onClick={addRow} style={{ width: '100%', padding: '16px', borderRadius: '16px', background: 'var(--bg)', border: '1px dashed var(--primary)', color: 'var(--primary)', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }} onMouseEnter={e => { e.currentTarget.style.background = 'var(--primary-10)'; }} onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg)'; }}>
                     <Plus size={18} /> Add Another Holding
                   </button>
                 </div>
 
                 {/* Footer */}
-                <div className="modal-footer" style={{ flexShrink: 0, padding: '24px 32px', borderTop: '1px solid var(--border)', background: '#FFFFFF' }}>
+                <div className="modal-footer" style={{ flexShrink: 0, padding: '24px 32px', borderTop: '1px solid var(--border)', background: 'var(--bg)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                     <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-dark)' }}>Estimated Total</span>
                     <span style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--primary)' }}>₦{totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>

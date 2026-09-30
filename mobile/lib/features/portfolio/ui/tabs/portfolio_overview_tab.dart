@@ -1565,7 +1565,7 @@ class _AddHoldingBottomSheetState extends State<AddHoldingBottomSheet> with Sing
                     builder: (context, child) {
                       return Theme(
                         data: Theme.of(context).copyWith(
-                          colorScheme: ColorScheme.light(
+                          colorScheme: Theme.of(context).colorScheme.copyWith(
                             primary: context.primary,
                             onPrimary: Colors.white,
                             onSurface: context.textDark,

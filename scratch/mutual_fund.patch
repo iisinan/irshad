@@ -1,0 +1,80 @@
+--- mobile/lib/features/stocks/ui/stock_detail_screen.dart
++++ mobile/lib/features/stocks/ui/stock_detail_screen.dart
+@@ -1604,6 +1604,78 @@
+     );
+   }
+ 
++  Widget _buildMutualFundOverview() {
++    final fd = _currentStock['fund_details'] ?? {};
++    final history = fd['purification_history'] as List<dynamic>? ?? [];
++
++    Widget buildRow(IconData icon, String label, String value, {bool isLast = false}) {
++      return Column(
++        children: [
++          Padding(
++            padding: const EdgeInsets.symmetric(vertical: 12),
++            child: Row(
++              children: [
++                Container(
++                  width: 32, height: 32,
++                  decoration: BoxDecoration(color: context.divider.withOpacity(0.4), borderRadius: BorderRadius.circular(8)),
++                  child: Icon(icon, size: 15, color: context.textMuted),
++                ),
++                const SizedBox(width: 12),
++                Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: context.textMuted)),
++                const SizedBox(width: 16),
++                Expanded(
++                  child: Text(value, textAlign: TextAlign.right, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: context.textDark)),
++                ),
++              ],
++            ),
++          ),
++          if (!isLast) Divider(height: 0, thickness: 0.5, color: context.divider.withOpacity(0.5)),
++        ],
++      );
++    }
++
++    return Column(
++      crossAxisAlignment: CrossAxisAlignment.start,
++      children: [
++        _buildSectionHeader('Fund Details'),
++        const SizedBox(height: 12),
++        Container(
++          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
++          decoration: BoxDecoration(color: context.bgAlt, borderRadius: BorderRadius.circular(16), border: Border.all(color: context.divider.withValues(alpha: 0.5))),
++          child: Column(
++            children: [
++              buildRow(Icons.business_center_outlined, 'Fund Manager', fd['provider'] ?? 'N/A'),
++              buildRow(Icons.calendar_today_outlined, 'Launched', fd['launched'] ?? 'N/A'),
++              buildRow(Icons.shield_outlined, 'Trustee', fd['trustee'] ?? 'N/A'),
++              buildRow(Icons.account_balance_outlined, 'Custodian', fd['custodian'] ?? 'N/A', isLast: true),
++            ],
++          ),
++        ),
++        const SizedBox(height: 32),
++        
++        _buildSectionHeader('Investment Strategy'),
++        const SizedBox(height: 12),
++        Text('Target Allocation', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: context.textDark)),
++        const SizedBox(height: 4),
++        Text(fd['investment_components_target'] ?? 'Not specified.', style: TextStyle(fontSize: 13, height: 1.5, color: context.textMuted)),
++        const SizedBox(height: 16),
++        Text('Actual Asset Mix', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: context.textDark)),
++        const SizedBox(height: 4),
++        Text(fd['asset_mix'] ?? 'Not available.', style: TextStyle(fontSize: 13, height: 1.5, color: context.textMuted)),
++        const SizedBox(height: 32),
++
++        _buildSectionHeader('Purification Details'),
++        const SizedBox(height: 12),
++        Text(fd['purification_note'] ?? 'Not disclosed in public documents.', style: TextStyle(fontSize: 13, height: 1.5, color: context.textMuted)),
++        const SizedBox(height: 16),
++      ],
++    );
++  }
++
+   Widget _buildDetailedOverview() {
++    if (_currentStock['asset_class'] == 'mutual_fund') {
++      return _buildMutualFundOverview();
++    }
+     final sector = _currentStock['sector'] ?? 'Unknown';
+     final industry = _currentStock['industry'] ?? 'Unknown';

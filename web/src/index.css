@@ -82,6 +82,7 @@
 }
 
 [data-theme="dark"] {
+  color-scheme: dark;
   --bg:           #1E1420;
   --bg-alt:       rgba(40, 28, 44, 0.88);
 
