@@ -5,7 +5,7 @@ import api, { createResource, updateResource, deleteResource } from '../services
 import Footer from './Footer';
 import { useAuth } from '../context/AuthContext';
 
-import { customConfirm } from '../utils/confirm';
+import { customConfirm, customAlert } from '../utils/confirm';
 
 export default function ResourcesPage() {
   const [search, setSearch] = useState('');
@@ -135,7 +135,7 @@ export default function ResourcesPage() {
         await deleteResource(id);
         setResources(resources.filter(r => r.id !== id));
       } catch (err) {
-        alert(err.response?.data?.message || 'Failed to delete resource');
+        await customAlert(err.response?.data?.message || 'Failed to delete resource', 'error');
       }
     }
   };

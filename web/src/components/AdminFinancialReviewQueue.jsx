@@ -78,7 +78,7 @@ export default function AdminFinancialReviewQueue() {
       setQueue(prev => prev.filter(q => q.id !== id));
       setExpandedId(null);
     } catch (err) {
-      customAlert('Failed to approve: ' + (err.response?.data?.message || err.message));
+      await customAlert('Failed to approve: ' + (err.response?.data?.message || err.message));
     } finally {
       setIsSubmitting(false);
     }
@@ -93,7 +93,7 @@ export default function AdminFinancialReviewQueue() {
       setQueue(prev => prev.filter(q => q.id !== id));
       setExpandedId(null);
     } catch (err) {
-      customAlert('Failed to reject: ' + (err.response?.data?.message || err.message));
+      await customAlert('Failed to reject: ' + (err.response?.data?.message || err.message));
     } finally {
       setIsSubmitting(false);
     }

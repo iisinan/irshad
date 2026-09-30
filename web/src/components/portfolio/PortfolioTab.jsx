@@ -51,11 +51,11 @@ function EditHoldingModal({ holding, onClose, onSuccess }) {
   const submit = async (e) => {
     e.preventDefault();
     if (!sh || Number(sh) <= 0) {
-      customAlert('Please enter a valid number of shares.');
+      await customAlert('Please enter a valid number of shares.');
       return;
     }
     if (!pr || Number(pr) < 0) {
-      customAlert('Please enter a valid average price.');
+      await customAlert('Please enter a valid average price.');
       return;
     }
     try { setLoading(true); await updateHolding(holding.id, { shares: +sh, average_buy_price: +pr }); onSuccess(); toastSuccess('Holding updated'); }

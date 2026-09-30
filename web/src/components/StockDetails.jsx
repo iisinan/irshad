@@ -1000,15 +1000,15 @@ const StockDetails = ({ symbol: propSymbol }) => {
             
             <form onSubmit={async (e) => {
               e.preventDefault();
-              if (!alertPrice) return customAlert('Enter a target price');
+              if (!alertPrice) return await customAlert('Enter a target price');
               setAlertSaving(true);
               try {
                 await setPriceAlert(symbol, alertPrice);
-                customAlert('Price alert set successfully!');
+                await customAlert('Price alert set successfully!');
                 setShowAlertDialog(false);
                 setAlertPrice('');
               } catch (err) {
-                customAlert(err.response?.data?.message || 'Failed to set price alert');
+                await customAlert(err.response?.data?.message || 'Failed to set price alert');
               } finally {
                 setAlertSaving(false);
               }

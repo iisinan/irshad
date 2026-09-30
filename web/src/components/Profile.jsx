@@ -295,10 +295,10 @@ export default function Profile() {
                           if (await customConfirm('Are you sure you want to cancel your subscription? You will keep access until the end of your current billing period.')) {
                             try {
                               await api.post('/subscription/cancel');
-                              customAlert('Subscription canceled. You keep access until your billing period ends.');
+                              await customAlert('Subscription canceled. You keep access until your billing period ends.');
                               window.location.reload();
                             } catch (e) {
-                              customAlert(e.response?.data?.message || 'Error canceling subscription. Please try again.');
+                              await customAlert(e.response?.data?.message || 'Error canceling subscription. Please try again.');
                             }
                           }
                         }}

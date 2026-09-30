@@ -58,7 +58,7 @@ export default function AddWatchlistModal({ onClose, onAdded, allStocks, watchli
       onAdded(selectedSymbols);
       onClose();
     } catch {
-      customAlert('Failed to add assets. Please try again.');
+      await customAlert('Failed to add assets. Please try again.');
     } finally {
       setIsAdding(false);
     }
