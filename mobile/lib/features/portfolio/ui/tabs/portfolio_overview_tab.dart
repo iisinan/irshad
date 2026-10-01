@@ -1072,7 +1072,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                               context: bottomSheetContext,
                               barrierDismissible: true,
                               builder: (ctx) => Dialog(
-                                backgroundColor: context.cardColor,
+                                backgroundColor: context.bg,
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                                 child: Padding(
                                   padding: const EdgeInsets.all(24),
