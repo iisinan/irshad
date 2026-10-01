@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { fetchPortfolio, removeHolding } from '../services/api';
 import { toastError, toastSuccess } from '../utils/toast';
+import { customConfirm } from '../utils/confirm';
 import PricingModal from './PricingModal';
 import { useAuth } from '../context/AuthContext';
 import localforage from 'localforage';
@@ -209,7 +210,8 @@ export default function Portfolio() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this holding?')) return;
+    const isConfirmed = await customConfirm('Are you sure you want to delete this holding?');
+    if (!isConfirmed) return;
     try {
       await removeHolding(id);
       loadData();
