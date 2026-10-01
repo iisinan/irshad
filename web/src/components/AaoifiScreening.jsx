@@ -13,7 +13,7 @@ import {
   ChevronDown, ChevronUp, MessageSquare, DollarSign, Percent,
   Info, TrendingDown, Award, BookOpen, Zap, Bell, Search, User
 } from 'lucide-react';
-import { fetchAaoifiScreening, fetchStockDetails, updateAaoifiData, chatAboutStock, fetchNgxStocks, fetchPortfolio, addToWatchlist, fetchWatchlist, removeFromWatchlist } from '../services/api';
+import api, { fetchAaoifiScreening, fetchStockDetails, updateAaoifiData, chatAboutStock, fetchNgxStocks, fetchPortfolio, addToWatchlist, fetchWatchlist, removeFromWatchlist } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { formatAppJustification } from '../utils/screeningFormatter';
 import { toastSuccess, toastError } from '../utils/toast';
@@ -215,7 +215,22 @@ const AaoifiScreening = () => {
   /* ── Search State ── */
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedUrl, setSelectedUrl] = useState(null);
   const searchInputRef = useRef(null);
+
+  const handleSelectUrl = async (e, url) => {
+    e.preventDefault();
+    try {
+      const res = await api.get(`/utils/check-iframe?url=${encodeURIComponent(url)}`);
+      if (res.data.can_iframe) {
+        setSelectedUrl(url);
+      } else {
+        window.open(url, '_blank');
+      }
+    } catch (err) {
+      window.open(url, '_blank');
+    }
+  };
 
   useEffect(() => {
     if (isSearchOpen && searchInputRef.current) searchInputRef.current.focus();
@@ -566,6 +581,31 @@ const AaoifiScreening = () => {
      ╚═══════════════════════════════════════════════════════╝ */
   return (
     <>
+    {selectedUrl && createPortal(
+      <div className="animate-fade-in" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)', zIndex: 100000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+        <div className="animate-slide-up" style={{ width: '100%', maxWidth: '1000px', height: '90vh', background: 'var(--bg)', borderRadius: '24px', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 24px 64px rgba(0,0,0,0.3)', border: '1px solid var(--border)' }}>
+          <div style={{ padding: '16px 24px', background: 'var(--bg-section)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)' }}>
+            <button 
+              onClick={() => setSelectedUrl(null)} 
+              className="hover-lift"
+              style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '100px', cursor: 'pointer', color: 'var(--text-dark)', padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, fontSize: '0.9rem' }}
+            >
+              <ArrowLeft size={16} /> Close Reader
+            </button>
+            <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Reader View</div>
+          </div>
+          <div style={{ flex: 1, WebkitOverflowScrolling: 'touch', overflowY: 'auto' }}>
+            <iframe 
+              src={selectedUrl} 
+              style={{ display: 'block', border: 'none', width: '100%', height: '100%', background: 'var(--bg)' }} 
+              sandbox="allow-same-origin allow-scripts allow-popups allow-forms" 
+              title="News Article Reader"
+            />
+          </div>
+        </div>
+      </div>,
+      document.body
+    )}
     {/* ══ STICKY MOBILE HEADER ══ */}
     <div className="aaoifi-sticky-header" style={{ display: 'none' }}>
       <Link to="/portfolio#market" style={{ display:'flex',alignItems:'center',color:'var(--text-dark)',textDecoration:'none',gap:8 }}>
@@ -958,8 +998,8 @@ const AaoifiScreening = () => {
               const desc  = item.description||item.summary||item.snippet||item.excerpt||null;
               const date  = item.date||item.published_at||item.publishedAt||null;
               return (
-                <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="hover-lift"
-                  style={{ display:'flex',alignItems:'flex-start',gap:16,padding:'18px 20px',background:'var(--bg)',border:'1px solid var(--border)',borderRadius:16,textDecoration:'none',transition:'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',boxShadow:'var(--shadow-sm)' }}>
+                <a key={i} href={url} onClick={(e) => handleSelectUrl(e, url)} className="hover-lift"
+                  style={{ cursor:'pointer', display:'flex',alignItems:'flex-start',gap:16,padding:'18px 20px',background:'var(--bg)',border:'1px solid var(--border)',borderRadius:16,textDecoration:'none',transition:'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',boxShadow:'var(--shadow-sm)' }}>
                   <div style={{ width:42,height:42,borderRadius:12,background:'rgba(37,99,235,0.08)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,color:'#2563EB' }}><Newspaper size={18} strokeWidth={2}/></div>
                   <div style={{ flex:1,minWidth:0 }}>
                     <div style={{ fontWeight:800,color:'var(--text-dark)',fontSize:'0.9rem',marginBottom:4,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',letterSpacing:'-0.3px' }}>{title}</div>
