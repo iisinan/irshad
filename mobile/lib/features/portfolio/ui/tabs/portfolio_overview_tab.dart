@@ -1070,17 +1070,59 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                           onPressed: isSaving ? null : () async {
                             bool? confirm = await showDialog<bool>(
                               context: bottomSheetContext,
-                              builder: (ctx) => AlertDialog(
+                              barrierDismissible: true,
+                              builder: (ctx) => Dialog(
                                 backgroundColor: context.cardColor,
-                                title: const Text('Delete Holding'),
-                                content: const Text('Are you sure you want to delete this holding?'),
-                                actions: [
-                                  TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(ctx, true),
-                                    child: Text('Delete', style: TextStyle(color: context.haram)),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(24),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(16),
+                                        decoration: BoxDecoration(color: context.haram.withOpacity(0.1), shape: BoxShape.circle),
+                                        child: Icon(Icons.warning_amber_rounded, color: context.haram, size: 36),
+                                      ),
+                                      const SizedBox(height: 20),
+                                      Text('Confirm Action', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        'Are you sure you want to delete this holding? This action cannot be undone.',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(fontSize: 14, color: context.textMuted, height: 1.5, fontWeight: FontWeight.w500),
+                                      ),
+                                      const SizedBox(height: 28),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: TextButton(
+                                              onPressed: () => Navigator.pop(ctx, false),
+                                              style: TextButton.styleFrom(
+                                                backgroundColor: context.bgAlt,
+                                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                                              ),
+                                              child: Text('Cancel', style: TextStyle(color: context.textDark, fontWeight: FontWeight.w700)),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: TextButton(
+                                              onPressed: () => Navigator.pop(ctx, true),
+                                              style: TextButton.styleFrom(
+                                                backgroundColor: context.haram,
+                                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                                              ),
+                                              child: const Text('Delete', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
                             );
                             if (confirm != true) return;
