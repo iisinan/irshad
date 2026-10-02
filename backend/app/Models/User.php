@@ -125,14 +125,9 @@ class User extends Authenticatable implements MustVerifyEmail
             return $activeSub->plan;
         }
 
-        // October 2nd Rollout Strategy: Free Trial Override for users without explicit subscriptions
-        if (now()->lt(\Carbon\Carbon::parse('2026-10-02'))) {
-            return Plan::where('slug', 'max')->first() 
-                ?? new Plan(['slug' => 'max', 'name' => 'Noor']); // Fallback if not seeded yet
-        }
-
-        // Default to Free Tier
-        return Plan::where('slug', 'free')->first() 
-            ?? new Plan(['slug' => 'free', 'name' => 'Miftah']);
+        // Ongoing Free Trial Strategy: All users without explicit subscriptions get 'Noor' (Max) plan
+        // The exact end date of the free trial will be determined in the future.
+        return Plan::where('slug', 'max')->first() 
+            ?? new Plan(['slug' => 'max', 'name' => 'Noor']); // Fallback if not seeded yet
     }
 }
