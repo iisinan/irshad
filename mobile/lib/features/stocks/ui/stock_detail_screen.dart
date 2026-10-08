@@ -1166,7 +1166,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: context.bg,
+                              color: bg,
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(color: color.withOpacity(0.15)),
                               boxShadow: [
