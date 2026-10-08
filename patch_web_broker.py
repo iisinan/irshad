@@ -2,7 +2,7 @@ import re
 
 content = open('web/src/components/portfolio/AddHoldingModal.jsx').read()
 
-OLD = """                  <button type="button" onClick={handleLinkBroker} disabled={linking || !brokerName} style={{ width: '100%', padding: '16px', borderRadius: '16px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.88rem', cursor: (linking || !brokerName) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 8px 24px rgba(91, 41, 113,0.25)', opacity: (linking || !brokerName) ? 0.7 : 1, transition: 'all 0.2s' }}>
+OLD = """                  <button type="button" onClick={handleLinkBroker} disabled={linking || !brokerName} style={{ width: '100%', padding: '16px', borderRadius: '16px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.88rem', cursor: (linking || !brokerName) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 8px 24px rgba(69, 165, 138,0.25)', opacity: (linking || !brokerName) ? 0.7 : 1, transition: 'all 0.2s' }}>
                     {linking ? <div className="spinner" style={{ width: '20px', height: '20px', borderTopColor: 'white' }} /> : 'Continue'}
                   </button>"""
 

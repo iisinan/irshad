@@ -257,9 +257,9 @@ function CalcModal({ h, onClose, onPurify }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '4px' }}>
             <button
               onClick={handlePurify}
-              style={{ width: '100%', padding: '17px', borderRadius: '16px', background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.95rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 10px 28px rgba(91,41,113,0.35)', transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)' }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 32px rgba(91,41,113,0.45)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 28px rgba(91,41,113,0.35)'; }}
+              style={{ width: '100%', padding: '17px', borderRadius: '16px', background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.95rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 10px 28px rgba(69, 165, 138,0.35)', transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)' }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 32px rgba(69, 165, 138,0.45)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 28px rgba(69, 165, 138,0.35)'; }}
             >
               <Heart size={17} fill="rgba(255,255,255,0.35)" /> Donate {fmt(due)} Securely
             </button>
@@ -404,7 +404,7 @@ function StatDetailModal({ holding: h, statKey, onClose, onOpenPurification }) {
           <div style={{ display: 'flex', gap: '10px' }}>
             <button
               onClick={() => { onClose(); onOpenPurification(h); }}
-              style={{ flex: 1, padding: '13px', borderRadius: '14px', background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 8px 20px rgba(91,41,113,0.3)' }}
+              style={{ flex: 1, padding: '13px', borderRadius: '14px', background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 8px 20px rgba(69, 165, 138,0.3)' }}
             >
               <Calculator size={15} /> View Purification Breakdown
             </button>

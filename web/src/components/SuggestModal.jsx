@@ -112,7 +112,7 @@ export default function SuggestModal({ onClose }) {
               background: 'var(--primary)', color: 'white', border: 'none',
               fontWeight: 700, fontSize: '0.9rem', cursor: loading ? 'not-allowed' : 'pointer',
               opacity: loading ? 0.7 : 1, display: 'flex', alignItems: 'center', gap: '8px',
-              boxShadow: '0 4px 12px rgba(91,41,113,0.3)'
+              boxShadow: '0 4px 12px rgba(69, 165, 138,0.3)'
             }}>
               {loading ? 'Sending...' : 'Send'} <Send size={16} />
             </button>

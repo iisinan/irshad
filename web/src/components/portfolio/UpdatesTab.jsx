@@ -271,7 +271,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
                 transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
                 whiteSpace: 'nowrap',
                 flexShrink: 0,
-                boxShadow: isActive ? '0 4px 14px rgba(91,41,113,0.3)' : 'none',
+                boxShadow: isActive ? '0 4px 14px rgba(69, 165, 138,0.3)' : 'none',
               }}
               onMouseEnter={e => {
                 if (!isActive) e.currentTarget.style.borderColor = 'var(--primary-100)';
@@ -302,7 +302,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
                   borderRadius: '20px',
                   marginLeft: '4px',
                   lineHeight: 1,
-                  boxShadow: isActive ? 'none' : '0 2px 8px rgba(91,41,113,0.3)',
+                  boxShadow: isActive ? 'none' : '0 2px 8px rgba(69, 165, 138,0.3)',
                 }}>
                   {tab.badge > 99 ? '99+' : tab.badge}
                 </span>

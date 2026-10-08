@@ -838,7 +838,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                             children: [
                               TextSpan(
                                 text: 'Trading Board: ',
-                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: context.primary.withOpacity(0.7)),
+                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: context.primary.withOpacity(1.0)),
                               ),
                               TextSpan(
                                 text: tradingBoard,

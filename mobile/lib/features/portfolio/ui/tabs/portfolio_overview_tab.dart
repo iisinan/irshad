@@ -381,30 +381,35 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Expanded(
-                      child: RichText(
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: '₦',
-                              style: TextStyle(
-                                color: context.textDark.withOpacity(0.5),
-                                fontSize: 22,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: RichText(
+                          maxLines: 1,
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: '₦',
+                                style: TextStyle(
+                                  color: context.textDark.withOpacity(0.5),
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0,
+                                ),
                               ),
-                            ),
-                            TextSpan(
-                              text: NumberFormat('#,##0', 'en_US').format(
-                                (provider.summary['total_balance'] as num).toDouble(),
+                              TextSpan(
+                                text: NumberFormat('#,##0', 'en_US').format(
+                                  (provider.summary['total_balance'] as num).toDouble(),
+                                ),
+                                style: TextStyle(
+                                  color: context.textDark,
+                                  fontSize: 42,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: -2.0,
+                                ),
                               ),
-                              style: TextStyle(
-                                color: context.textDark,
-                                fontSize: 42,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: -2.0,
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),

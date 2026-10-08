@@ -99,8 +99,8 @@ class AppTheme {
   static const Color darkAccentSoft = Color(0xFF3A2E22); 
 
   // Light Colors
-  static const Color lightBg = Color(0xFFE4F0E8);
-  static const Color lightBgAlt = Color(0xFFF2F7F4);
+  static const Color lightBg = Color(0xFFF2F9F5);
+  static const Color lightBgAlt = Color(0xFFF7FCF9);
   static const Color lightBgSection = Color(0xFFFFFFFF);
   static const Color lightDivider = Color(0xFFD0E3D8);
   static const Color lightText = Color(0xFF111827);

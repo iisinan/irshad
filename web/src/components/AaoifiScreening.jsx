@@ -644,7 +644,7 @@ const AaoifiScreening = () => {
                       setSearchQuery('');
                     } 
                   }}
-                  style={{ display:'flex',alignItems:'center',background:'var(--bg)',border:'1px solid var(--primary)',borderRadius:12,padding:'4px 12px',boxShadow:'0 0 0 3px rgba(91,41,113,0.1)', transition:'all 0.2s' }}
+                  style={{ display:'flex',alignItems:'center',background:'var(--bg)',border:'1px solid var(--primary)',borderRadius:12,padding:'4px 12px',boxShadow:'0 0 0 3px rgba(69, 165, 138,0.1)', transition:'all 0.2s' }}
                 >
                   <Search size={15} color="var(--primary)"/>
                   <input 
@@ -669,7 +669,7 @@ const AaoifiScreening = () => {
                           setSearchQuery('');
                         }}
                         style={{ padding:'10px 12px', cursor:'pointer', marginBottom: idx === arr.length - 1 ? 0 : 4, borderRadius: 12, display:'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)' }}
-                        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(91,41,113,0.06)'; e.currentTarget.style.transform = 'scale(0.99)'; }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(69, 165, 138,0.06)'; e.currentTarget.style.transform = 'scale(0.99)'; }}
                         onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.transform = 'scale(1)'; }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12, overflow: 'hidden' }}>
@@ -693,7 +693,7 @@ const AaoifiScreening = () => {
                 )}
               </div>
             ) : ((isFetching || isStockFetching) && isInlineSearch) ? (
-              <div style={{ display:'flex',alignItems:'center',gap:8,padding:'8px 16px',background:'var(--bg)',border:'1px solid var(--primary)',borderRadius:12,fontWeight:700,color:'var(--primary)',fontSize:'0.8rem',boxShadow:'0 0 0 3px rgba(91,41,113,0.1)' }}>
+              <div style={{ display:'flex',alignItems:'center',gap:8,padding:'8px 16px',background:'var(--bg)',border:'1px solid var(--primary)',borderRadius:12,fontWeight:700,color:'var(--primary)',fontSize:'0.8rem',boxShadow:'0 0 0 3px rgba(69, 165, 138,0.1)' }}>
                 <div style={{ width:14, height:14, borderRadius:'50%', border:'2px solid var(--primary)', borderTopColor:'transparent', animation:'spin 1s linear infinite' }}/>
                 Screening {symbol}...
               </div>
@@ -709,7 +709,7 @@ const AaoifiScreening = () => {
               {hasBought ? <CheckCircle size={15} color="var(--primary)"/> : <Plus size={15}/>} 
               {hasBought ? 'Added to holdings' : 'Add to holdings'}
             </button>
-            {user?.role==='admin'&&(<button className="hover-lift" onClick={openOverride} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background:'var(--primary)',border:'none',borderRadius:12,cursor:'pointer',fontWeight:800,color:'#fff',fontSize:'0.8rem',transition:'all 0.25s',boxShadow:'0 4px 12px rgba(91,41,113,0.3)' }}>
+            {user?.role==='admin'&&(<button className="hover-lift" onClick={openOverride} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background:'var(--primary)',border:'none',borderRadius:12,cursor:'pointer',fontWeight:800,color:'#fff',fontSize:'0.8rem',transition:'all 0.25s',boxShadow:'0 4px 12px rgba(69, 165, 138,0.3)' }}>
               <ShieldCheck size={15}/> Edit Data
             </button>)}
             <button className="hover-lift" onClick={()=>window.print()} style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background:'var(--bg)',border:'1px solid var(--border)',borderRadius:12,cursor:'pointer',fontWeight:700,color:'var(--text-dark)',fontSize:'0.8rem',boxShadow:'var(--shadow-sm)' }}>
@@ -719,7 +719,7 @@ const AaoifiScreening = () => {
         </div>
 
         {/* ── Company header ── */}
-        <div className="aaoifi-header" style={{ background:'linear-gradient(145deg, var(--bg) 0%, rgba(91,41,113,0.04) 100%)',border:'1px solid rgba(91,41,113,0.1)',borderRadius:16,padding:'16px 20px',marginBottom:20,boxShadow:'0 4px 16px rgba(91,41,113,0.04), inset 0 1px 0 rgba(255,255,255,0.1)' }}>
+        <div className="aaoifi-header" style={{ background:'linear-gradient(145deg, var(--bg) 0%, rgba(69, 165, 138,0.04) 100%)',border:'1px solid rgba(69, 165, 138,0.1)',borderRadius:16,padding:'16px 20px',marginBottom:20,boxShadow:'0 4px 16px rgba(69, 165, 138,0.04), inset 0 1px 0 rgba(255,255,255,0.1)' }}>
           <div style={{ display:'flex',alignItems:'center',justifyContent:'space-between',gap:16,flexWrap:'wrap' }}>
             <div style={{ display:'flex',alignItems:'center',gap:14 }}>
               <div style={{ position:'relative', padding: '2px', background: 'var(--bg)', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
@@ -741,8 +741,8 @@ const AaoifiScreening = () => {
             </div>
             
             {stock?.trading_board && (
-              <div style={{ padding: '6px 12px', background: 'rgba(91,41,113,0.06)', borderRadius: '8px', border: '1px solid rgba(91,41,113,0.15)', display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-                <span style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-muted)' }}>Trading Board:</span>
+              <div style={{ padding: '6px 12px', background: 'rgba(69, 165, 138,0.06)', borderRadius: '8px', border: '1px solid rgba(69, 165, 138,0.15)', display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                <span style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--primary)' }}>Trading Board:</span>
                 <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--primary)' }}>{stock.trading_board}</span>
               </div>
             )}
@@ -1036,16 +1036,16 @@ const AaoifiScreening = () => {
           if (priceDataItems.length === 0) return null;
 
           return (
-            <div className="aaoifi-price" style={{ borderRadius:24,border:'1px solid rgba(91,41,113,0.08)',background:'var(--bg)',padding:'28px 32px',boxShadow:'0 12px 40px rgba(91,41,113,0.04)' }}>
+            <div className="aaoifi-price" style={{ borderRadius:24,border:'1px solid rgba(69, 165, 138,0.08)',background:'var(--bg)',padding:'28px 32px',boxShadow:'0 12px 40px rgba(69, 165, 138,0.04)' }}>
               <div style={{ display:'flex',alignItems:'center',gap:12,marginBottom:28 }}>
-                <div style={{ width:'40px', height:'40px', borderRadius:'14px', background:'var(--primary-50)', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--primary)', boxShadow:'0 4px 12px rgba(91,41,113,0.1)' }}>
+                <div style={{ width:'40px', height:'40px', borderRadius:'14px', background:'var(--primary-50)', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--primary)', boxShadow:'0 4px 12px rgba(69, 165, 138,0.1)' }}>
                   <BarChart2 size={20} strokeWidth={2.5} />
                 </div>
                 <div style={{ fontSize:'0.9rem',fontWeight:900,letterSpacing:'1px',color:'var(--text-dark)' }}>PRICE DATA</div>
               </div>
               <div style={{ display:'flex',flexDirection:'column',gap:18 }}>
                 {priceDataItems.map((item, idx, arr) => (
-                  <div key={idx} style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:idx === arr.length - 1 ? 'none' : '1px solid rgba(91,41,113,0.06)',paddingBottom:idx === arr.length - 1 ? 0 : 14 }}>
+                  <div key={idx} style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:idx === arr.length - 1 ? 'none' : '1px solid rgba(69, 165, 138,0.06)',paddingBottom:idx === arr.length - 1 ? 0 : 14 }}>
                     <span style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:600 }}>{item.label}</span>
                     <span style={{ fontSize:'0.95rem',fontWeight:800,color:'var(--text-dark)',letterSpacing:'-0.3px',fontVariantNumeric:'tabular-nums' }}>{item.fmt ? item.fmt(item.value) : item.value}</span>
                   </div>
@@ -1071,16 +1071,16 @@ const AaoifiScreening = () => {
           if (marketDataItems.length === 0) return null;
 
           return (
-            <div className="aaoifi-market" style={{ borderRadius:24,border:'1px solid rgba(91,41,113,0.08)',background:'var(--bg)',padding:'28px 32px',boxShadow:'0 12px 40px rgba(91,41,113,0.04)' }}>
+            <div className="aaoifi-market" style={{ borderRadius:24,border:'1px solid rgba(69, 165, 138,0.08)',background:'var(--bg)',padding:'28px 32px',boxShadow:'0 12px 40px rgba(69, 165, 138,0.04)' }}>
               <div style={{ display:'flex',alignItems:'center',gap:12,marginBottom:28 }}>
-                <div style={{ width:'40px', height:'40px', borderRadius:'14px', background:'var(--primary-50)', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--primary)', boxShadow:'0 4px 12px rgba(91,41,113,0.1)' }}>
+                <div style={{ width:'40px', height:'40px', borderRadius:'14px', background:'var(--primary-50)', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--primary)', boxShadow:'0 4px 12px rgba(69, 165, 138,0.1)' }}>
                   <TrendingUp size={20} strokeWidth={2.5} />
                 </div>
                 <div style={{ fontSize:'0.9rem',fontWeight:900,letterSpacing:'1px',color:'var(--text-dark)' }}>MARKET DATA</div>
               </div>
               <div style={{ display:'flex',flexDirection:'column',gap:18 }}>
                 {marketDataItems.map((item, idx, arr) => (
-                  <div key={idx} style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:idx === arr.length - 1 ? 'none' : '1px solid rgba(91,41,113,0.06)',paddingBottom:idx === arr.length - 1 ? 0 : 14 }}>
+                  <div key={idx} style={{ display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:idx === arr.length - 1 ? 'none' : '1px solid rgba(69, 165, 138,0.06)',paddingBottom:idx === arr.length - 1 ? 0 : 14 }}>
                     <div>
                       <div style={{ fontSize:'0.85rem',color:'var(--text-muted)', fontWeight:600 }}>{item.label}</div>
                       {item.sub && <div style={{ fontSize:'0.65rem',color:'var(--primary)',marginTop:4, fontWeight:700 }}>{item.sub}</div>}

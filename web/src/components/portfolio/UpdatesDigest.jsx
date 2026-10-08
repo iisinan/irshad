@@ -171,7 +171,7 @@ export default function UpdatesDigest() {
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              boxShadow: isEnabled ? 'none' : '0 4px 14px rgba(91,41,113,0.3)',
+              boxShadow: isEnabled ? 'none' : '0 4px 14px rgba(69, 165, 138,0.3)',
               opacity: saving ? 0.7 : 1,
             }}
             onMouseDown={e => { if (!saving) e.currentTarget.style.transform = 'scale(0.95)'; }}

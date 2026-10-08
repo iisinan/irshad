@@ -3,11 +3,11 @@
   --text-h: #111827;
   --bg: #FFFFFF;
   --border: #E5E7EB;
-  --code-bg: #E4F0E8;
+  --code-bg: #F2F9F5;
   --accent: #45A58A;
   --accent-bg: rgba(69, 165, 138, 0.1);
   --accent-border: rgba(69, 165, 138, 0.5);
-  --social-bg: rgba(228, 240, 232, 0.5);
+  --social-bg: rgba(213, 239, 224, 0.5);
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
@@ -36,11 +36,11 @@
     --text-h: #111827;
     --bg: #141A18;
     --border: #E5E7EB;
-    --code-bg: #E4F0E8;
+    --code-bg: #F2F9F5;
     --accent: #45A58A;
     --accent-bg: rgba(69, 165, 138, 0.1);
     --accent-border: rgba(69, 165, 138, 0.5);
-    --social-bg: rgba(228, 240, 232, 0.5);
+    --social-bg: rgba(213, 239, 224, 0.5);
     --shadow:
       rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
   }
