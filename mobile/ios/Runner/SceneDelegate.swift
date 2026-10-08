@@ -9,6 +9,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = scene as? UIWindowScene else { return }
         
         let flutterViewController = FlutterViewController()
+        GeneratedPluginRegistrant.register(with: flutterViewController)
+        
         window = UIWindow(windowScene: windowScene)
         window?.rootViewController = flutterViewController
         window?.makeKeyAndVisible()

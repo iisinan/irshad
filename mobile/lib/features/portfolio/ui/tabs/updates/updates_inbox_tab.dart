@@ -5,6 +5,7 @@ import 'package:irshad_mobile/core/api/api_service.dart';
 import 'package:hive/hive.dart';
 import 'dart:convert';
 import 'package:provider/provider.dart';
+import 'package:irshad_mobile/core/utils/suggest_modal_util.dart';
 
 class UpdatesInboxTab extends StatefulWidget {
   const UpdatesInboxTab({super.key});
@@ -217,8 +218,20 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
       return cat != 'market_news' && cat != 'business_activity';
     }).toList();
 
-    return SingleChildScrollView(
-      controller: _scrollController,
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 88.0),
+        child: FloatingActionButton.extended(
+          onPressed: () => SuggestModalUtil.show(context),
+          backgroundColor: context.primary,
+          elevation: 4,
+          icon: const Icon(Icons.mail_outline_rounded, color: Colors.white, size: 20),
+          label: const Text('Suggest for Irshad', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        ),
+      ),
+      body: SingleChildScrollView(
+        controller: _scrollController,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -454,7 +467,7 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
               ),
         ],
       ),
-    );
+    ));
   }
 
   void _showDigestViewer(BuildContext context, Map<String, dynamic> meta) {

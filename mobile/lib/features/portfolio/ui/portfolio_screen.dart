@@ -1,4 +1,4 @@
-import '../../../core/utils/suggest_modal_util.dart';
+
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -169,16 +169,6 @@ class _PortfolioScreenState extends State<PortfolioScreen> with WidgetsBindingOb
             PurificationTab(),
             ZakatCalculatorScreen(isTab: true),
           ],
-        ),
-        floatingActionButton: _currentIndex == 1 ? null : Padding(
-          padding: const EdgeInsets.only(bottom: 88.0),
-          child: FloatingActionButton.extended(
-            onPressed: () => SuggestModalUtil.show(context),
-            backgroundColor: context.primary,
-            elevation: 4,
-            icon: const Icon(Icons.mail_outline_rounded, color: Colors.white, size: 20),
-            label: const Text('Suggest for Irshad', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-          ),
         ),
     );
   }

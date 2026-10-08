@@ -1,12 +1,8 @@
-import re
+with open('web/src/index.css', 'r') as f:
+    content = f.read()
 
-content = open('web/src/components/Pricing.jsx').read()
+content = content.replace("--body-bg:      #F6F5F8;", "--body-bg:      #F3F4F6;")
+content = content.replace("--bg-alt:       #FCFBFC;", "--bg-alt:       #F9FAFB;")
 
-# Make Noor use the brighter gold for the button and accents
-noor_block = content[content.find('{/* NOOR */}'):]
-new_noor = noor_block.replace('#B8860B', '#D9A05B')
-content = content.replace(noor_block, new_noor)
-
-with open('web/src/components/Pricing.jsx', 'w') as f:
+with open('web/src/index.css', 'w') as f:
     f.write(content)
-print("done")

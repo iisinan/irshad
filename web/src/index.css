@@ -10,10 +10,10 @@
    =================================================== */
 :root {
   --bg:           #FFFFFF;
-  --bg-alt:       #FFFFFF;
+  --bg-alt:       #F9FAFB;
 
   /* Cool grey background for clean separation */
-  --body-bg:      #FFFFFF;
+  --body-bg:      #F3F4F6;
 
   --bg-section:   #FFFFFF;
 
