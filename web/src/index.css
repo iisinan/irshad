@@ -9,13 +9,13 @@
    Text Muted:var(--text-muted)  (muted purple-grey)
    =================================================== */
 :root {
-  --bg:           #FFFFFF;
-  --bg-alt:       #F9FAFB;
+  --bg:           #FCFBFC;
+  --bg-alt:       #F7F5F8;
 
   /* Cool grey background for clean separation */
-  --body-bg:      #F3F4F6;
+  --body-bg:      #F0EEF1;
 
-  --bg-section:   #FFFFFF;
+  --bg-section:   #FCFBFC;
 
   /* Primary: Lighter Soft Purple */
   --primary:      #8A4C9E;
@@ -38,8 +38,8 @@
   --gold-grad:    linear-gradient(135deg, #E6C893 0%, #D1A562 50%, #B38640 100%);
 
   /* Text */
-  --text-dark:    #1F2937;
-  --text-body:    #4B5563;
+  --text-dark:    #2A2F35;
+  --text-body:    #545B64;
   --text-muted:   #9CA3AF;
   --text-light:   #D1D5DB;
 
