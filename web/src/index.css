@@ -1,27 +1,27 @@
 @import url('https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&display=swap');
 
 /* ===================================================
-   IRSHAD — Mauve Bloom Color Palette
-   Main:      var(--primary)  (deep mauve-purple)
+   IRSHAD — Finova Mint & Teal Palette
+   Main:      var(--primary)  (deep teal/mint)
    Secondary: var(--text-light)  (soft lavender)
    Gold:      var(--gold)  (antique gold — refined from #FFDF7E)
    Text Dark: var(--text-dark)  (deep plum)
    Text Muted:var(--text-muted)  (muted purple-grey)
    =================================================== */
 :root {
-  --bg:           #FCFBFC;
-  --bg-alt:       #F7F5F8;
+  --bg:           #FFFFFF;
+  --bg-alt:       #F2F7F4;
 
   /* Cool grey background for clean separation */
-  --body-bg:      #F0EEF1;
+  --body-bg:      #E4F0E8;
 
-  --bg-section:   #FCFBFC;
+  --bg-section:   #FFFFFF;
 
   /* Primary: Lighter Soft Purple */
-  --primary:      #8A4C9E;
-  --primary-hover:#743B87;
-  --primary-50:   rgba(138, 76, 158, 0.07);
-  --primary-100:  rgba(138, 76, 158, 0.14);
+  --primary:      #45A58A;
+  --primary-hover:#358770;
+  --primary-50:   rgba(69, 165, 138, 0.08);
+  --primary-100:  rgba(69, 165, 138, 0.15);
 
   /* Secondary lavender */
   --secondary:    var(--text-light);
@@ -35,12 +35,12 @@
   --gold-50:      rgba(209, 165, 98, 0.08);
   --gold-100:     rgba(209, 165, 98, 0.16);
   --gold-border:  rgba(209, 165, 98, 0.35);
-  --gold-grad:    linear-gradient(135deg, #E6C893 0%, #D1A562 50%, #B38640 100%);
+  --gold-grad:    linear-gradient(135deg, #74C6A9 0%, #45A58A 50%, #297D66 100%);
 
   /* Text */
-  --text-dark:    #2A2F35;
-  --text-body:    #545B64;
-  --text-muted:   #9CA3AF;
+  --text-dark:    #111827;
+  --text-body:    #374151;
+  --text-muted:   #6B7280;
   --text-light:   #D1D5DB;
 
   /* Borders */
@@ -69,7 +69,7 @@
   --shadow-md: 0 8px 24px rgba(20, 25, 40, 0.05);
   --shadow-lg: 0 16px 48px rgba(20, 25, 40, 0.08);
   --shadow-gold: 0 12px 40px rgba(209, 165, 98, 0.15);
-  --shadow-purple: 0 12px 40px rgba(138, 76, 158, 0.12);
+  --shadow-purple: 0 12px 40px rgba(69, 165, 138, 0.15);
 
   --radius-sm:  12px;
   --radius-md:  16px;
@@ -83,21 +83,19 @@
 
 [data-theme="dark"] {
   color-scheme: dark;
-  --bg:           #1E1420;
-  --bg-alt:       rgba(40, 28, 44, 0.88);
+  --bg:           #141A18;
+  --bg-alt:       rgba(24, 33, 29, 0.88);
 
   /* Deep plum dark mesh */
-  --body-bg:      radial-gradient(at 0% 0%, rgba(91, 41, 113, 0.15) 0px, transparent 50%),
-                  radial-gradient(at 100% 100%, rgba(209, 165, 98, 0.08) 0px, transparent 50%),
-                  #1A1020;
+  --body-bg:      radial-gradient(at 0% 0%, rgba(69, 165, 138, 0.15) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(209, 165, 98, 0.08) 0px, transparent 50%), #0F1412;
 
-  --bg-section:   rgba(40, 28, 44, 0.90);
+  --bg-section:   rgba(24, 33, 29, 0.90);
 
   /* In dark mode, secondary lavender takes primary role */
-  --primary:      var(--text-light);
-  --primary-hover:var(--border-strong);
-  --primary-50:   rgba(190, 169, 193, 0.12);
-  --primary-100:  rgba(190, 169, 193, 0.22);
+  --primary:      #66C2A6;
+  --primary-hover:#4DB395;
+  --primary-50:   rgba(102, 194, 166, 0.12);
+  --primary-100:  rgba(102, 194, 166, 0.22);
 
   --secondary:    var(--primary);
   --secondary-50: rgba(91, 41, 113, 0.20);
