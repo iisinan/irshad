@@ -474,7 +474,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
           borderRadius: 6,
           fontSize: 12,
         ),
-        backgroundColor: context.bg,
+        backgroundColor: statusColor.withOpacity(0.06),
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: context.textDark, size: 20),
@@ -786,6 +786,14 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
       width: double.infinity,
       decoration: BoxDecoration(
         color: context.bg,
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            color.withOpacity(0.06),
+            context.bg,
+          ],
+        ),
       ),
       padding: const EdgeInsets.only(left: 24, right: 24, top: 0, bottom: 8),
       child: Column(
@@ -915,7 +923,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
-                            color: context.bg,
+                            color: Colors.white,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: const Color(0xFFDC2626).withOpacity(0.2), width: 1),
                             boxShadow: [
@@ -973,7 +981,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                           child: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: context.bg,
+                              color: Colors.white,
                               shape: BoxShape.circle,
                               border: Border.all(
                                 color: isDonated ? context.halal.withOpacity(0.3) : const Color(0xFFF59E0B).withOpacity(0.3),
@@ -1071,7 +1079,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                           width: double.infinity,
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           decoration: BoxDecoration(
-                            color: context.bg,
+                            color: Colors.white,
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
@@ -1249,9 +1257,9 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                                         child: Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                           decoration: BoxDecoration(
-                                            color: context.bg,
+                                            color: Colors.white,
                                             borderRadius: BorderRadius.circular(100),
-                                            border: Border.all(color: context.bg, width: 1),
+                                            border: Border.all(color: Colors.white, width: 1),
                                             boxShadow: [
                                               BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 6, offset: const Offset(0, 2)),
                                             ],
