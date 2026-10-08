@@ -30,7 +30,7 @@ class CompanyAvatar extends StatelessWidget {
 
   Widget _buildInitials(BuildContext context) {
     const colors = [
-      Color(0xFF5B2971), // Brand purple
+      Color(0xFF45A58A), // Brand purple
       Color(0xFF14B8A6), // Teal
       Color(0xFFF59E0B), // Amber
       Color(0xFF8B5CF6), // Violet

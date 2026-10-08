@@ -83,15 +83,15 @@ class AppColors extends ThemeExtension<AppColors> {
 
 class AppTheme {
   // Core Palette
-  static const Color primary = Color(0xFF8A4C9E); // Mauve Bloom
-  static const Color primaryHover = Color(0xFF743B87);
+  static const Color primary = Color(0xFF45A58A); // Finova Teal
+  static const Color primaryHover = Color(0xFF358770);
   static const Color accent = Color(0xFFD1A562); // Antique Gold
 
   // Dark Colors
-  static const Color darkBg = Color(0xFF1E1420);
-  static const Color darkBgAlt = Color(0xFF281C2C);
-  static const Color darkBgSection = Color(0xFF332537);
-  static const Color darkDivider = Color(0xFF433047);
+  static const Color darkBg = Color(0xFF141A18);
+  static const Color darkBgAlt = Color(0xFF18211D);
+  static const Color darkBgSection = Color(0xFF1E2A25);
+  static const Color darkDivider = Color(0xFF2A3A33);
   static const Color darkText = Color(0xFFFFFFFF);
   static const Color darkTextBody = Color(0xFFD1D5DB);
   static const Color darkTextMuted = Color(0xFF9CA3AF);
@@ -99,12 +99,12 @@ class AppTheme {
   static const Color darkAccentSoft = Color(0xFF3A2E22); 
 
   // Light Colors
-  static const Color lightBg = Color(0xFFFFFFFF);
-  static const Color lightBgAlt = Color(0xFFFFFFFF);
+  static const Color lightBg = Color(0xFFE4F0E8);
+  static const Color lightBgAlt = Color(0xFFF2F7F4);
   static const Color lightBgSection = Color(0xFFFFFFFF);
-  static const Color lightDivider = Color(0xFFE5E7EB);
-  static const Color lightText = Color(0xFF1F2937);
-  static const Color lightTextBody = Color(0xFF4B5563);
+  static const Color lightDivider = Color(0xFFD0E3D8);
+  static const Color lightText = Color(0xFF111827);
+  static const Color lightTextBody = Color(0xFF374151);
   static const Color lightTextMuted = Color(0xFF9CA3AF);
   static const Color lightTextDisabled = Color(0xFFD1D5DB);
   static const Color lightAccentSoft = Color(0xFFF9F2E8); 

@@ -128,7 +128,7 @@ export default function UpdatesPurification() {
 
       {/* ── 1. Hero ── */}
       <div style={{
-        background: 'linear-gradient(140deg, #5B2971 0%, #3b0764 60%, #1e003d 100%)',
+        background: 'linear-gradient(140deg, #45A58A 0%, #358770 60%, #297D66 100%)',
         borderRadius: '28px',
         padding: '48px 44px',
         color: 'white',
@@ -195,7 +195,7 @@ export default function UpdatesPurification() {
       <div style={{ marginBottom: '40px' }}>
         <SectionHeading>Why Do We Need Purification?</SectionHeading>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '16px' }}>
-          <InfoCard icon={Coins} iconColor="#8A4C9E" iconBg="var(--primary-50)" title="No Company is Perfectly Pure">
+          <InfoCard icon={Coins} iconColor="#45A58A" iconBg="var(--primary-50)" title="No Company is Perfectly Pure">
             In the modern economy, virtually every listed company keeps cash in conventional bank accounts that generate interest. This is unavoidable — even the most halal-intentioned business does it. The impure income is a by-product of participation in the global financial system.
           </InfoCard>
           <InfoCard icon={Landmark} iconColor="#D1A562" iconBg="rgba(209,165,98,0.1)" title="Dividends Carry Trace Impurity">

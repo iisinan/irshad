@@ -332,7 +332,7 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
         {/* ─── DASHBOARD HERO & FILTERS COMBINED ─── */}
         <div className="stagger-1 hover-card" style={{ 
           background: 'linear-gradient(135deg, var(--bg) 0%, var(--bg-section) 100%)',
-          backgroundImage: 'radial-gradient(circle at top right, rgba(91, 41, 113, 0.03) 0%, transparent 60%), linear-gradient(135deg, var(--bg) 0%, var(--bg-section) 100%), linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px)',
+          backgroundImage: 'radial-gradient(circle at top right, rgba(69, 165, 138, 0.03) 0%, transparent 60%), linear-gradient(135deg, var(--bg) 0%, var(--bg-section) 100%), linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px)',
           backgroundSize: '100% 100%, 100% 100%, 30px 30px, 30px 30px',
           border: '1px solid var(--border)',
           borderRadius: '16px', 
@@ -345,7 +345,7 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
           color: 'var(--text-dark)'
         }}>
           {/* Decorative Glowing Orbs */}
-          <div style={{ position: 'absolute', bottom: '-40%', left: '5%', width: '300px', height: '300px', background: 'radial-gradient(circle, rgba(91, 41, 113, 0.03) 0%, transparent 70%)', zIndex: 0, pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', bottom: '-40%', left: '5%', width: '300px', height: '300px', background: 'radial-gradient(circle, rgba(69, 165, 138, 0.03) 0%, transparent 70%)', zIndex: 0, pointerEvents: 'none' }} />
           
           {/* Top Section: Balance & Stats */}
           <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '10px', position: 'relative', zIndex: 1 }}>
@@ -435,8 +435,8 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
                 <circle cx="200" cy="80" r="60" stroke="url(#ring2)" strokeWidth="20" opacity="0.25" />
                 <defs>
                   <linearGradient id="ring1" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#5b2971" />
-                    <stop offset="100%" stopColor="#5b2971" stopOpacity="0" />
+                    <stop offset="0%" stopColor="#45A58A" />
+                    <stop offset="100%" stopColor="#45A58A" stopOpacity="0" />
                   </linearGradient>
                   <linearGradient id="ring2" x1="100%" y1="0%" x2="0%" y2="100%">
                     <stop offset="0%" stopColor="#16a34a" />
@@ -476,9 +476,9 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
           <div style={{ display: 'flex', gap: '10px' }}>
             <button
               onClick={() => setShowAddModal('manual')}
-              style={{ display:'flex', alignItems:'center', gap:'8px', padding:'12px 24px', borderRadius:'14px', background:'linear-gradient(135deg, var(--primary) 0%, #3a164a 100%)', color:'#FFFFFF', border:'none', fontWeight:800, fontSize: '0.8rem', cursor:'pointer', boxShadow:'0 8px 24px rgba(91, 41, 113, 0.25)', transition:'all 0.2s' }}
-              onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 12px 32px rgba(91, 41, 113, 0.35)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='0 8px 24px rgba(91, 41, 113, 0.25)'; }}
+              style={{ display:'flex', alignItems:'center', gap:'8px', padding:'12px 24px', borderRadius:'14px', background:'linear-gradient(135deg, var(--primary) 0%, #297D66 100%)', color:'#FFFFFF', border:'none', fontWeight:800, fontSize: '0.8rem', cursor:'pointer', boxShadow:'0 8px 24px rgba(69, 165, 138, 0.25)', transition:'all 0.2s' }}
+              onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 12px 32px rgba(69, 165, 138, 0.35)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='0 8px 24px rgba(69, 165, 138, 0.25)'; }}
             >
               <Plus size={18}/> Add Holding
             </button>
@@ -517,7 +517,7 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
               {data.length === 0 ? 'Start tracking your investments and ensure they align with Islamic financial principles.' : 'Try adjusting your filters to view other assets.'}
             </p>
             {data.length === 0 && (
-              <button onClick={() => setShowAddModal(true)} style={{ display:'inline-flex', alignItems:'center', gap:'8px', padding:'14px 28px', borderRadius:'14px', background:'var(--primary)', color:'#FFFFFF', border:'none', fontWeight:800, fontSize: '0.84rem', cursor:'pointer', boxShadow:'var(--shadow-sm)', transition:'all 0.2s' }} onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 8px 24px rgba(91, 41, 113, 0.3)'; }} onMouseLeave={e => { e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='var(--shadow-sm)'; }}>
+              <button onClick={() => setShowAddModal(true)} style={{ display:'inline-flex', alignItems:'center', gap:'8px', padding:'14px 28px', borderRadius:'14px', background:'var(--primary)', color:'#FFFFFF', border:'none', fontWeight:800, fontSize: '0.84rem', cursor:'pointer', boxShadow:'var(--shadow-sm)', transition:'all 0.2s' }} onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 8px 24px rgba(69, 165, 138, 0.3)'; }} onMouseLeave={e => { e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='var(--shadow-sm)'; }}>
                 <Plus size={18}/> Add Your First Asset
               </button>
             )}

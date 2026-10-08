@@ -480,7 +480,7 @@ export default function Portfolio() {
               <button 
                 onClick={() => handleTabChange('market')} 
                 style={{ display:'flex', alignItems:'center', justifyContent:'center', gap: '8px', marginTop:'16px', padding:'14px 16px', borderRadius:'14px', background:'var(--primary)', color:'#FFFFFF', border:'none', width:'100%', cursor:'pointer', transition:'all 0.2s', boxShadow: 'var(--shadow-sm)' }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(91, 41, 113, 0.25)'; }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(69, 165, 138, 0.25)'; }}
                 onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'var(--shadow-sm)'; }}
               >
                 <span style={{ fontSize: '0.8rem', fontWeight:800 }}>Screen More Stocks</span>
@@ -509,14 +509,14 @@ export default function Portfolio() {
           alignItems: 'center',
           gap: '8px',
           textDecoration: 'none',
-          boxShadow: '0 4px 14px rgba(91, 41, 113, 0.4)',
+          boxShadow: '0 4px 14px rgba(69, 165, 138, 0.4)',
           zIndex: 1000,
           transition: 'all 0.2s',
           fontWeight: 800,
           fontSize: '0.85rem'
         }}
-        onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(91, 41, 113, 0.6)'; }}
-        onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(91, 41, 113, 0.4)'; }}
+        onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(69, 165, 138, 0.6)'; }}
+        onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(69, 165, 138, 0.4)'; }}
       >
         <Mail size={18} strokeWidth={2.5} />
         Suggest for Irshad

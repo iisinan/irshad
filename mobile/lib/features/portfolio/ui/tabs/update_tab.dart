@@ -153,7 +153,7 @@ class _UpdateTabState extends State<UpdateTab> {
                       alignment: Alignment.centerLeft,
                       child: const Text(
                         'ٱلسَّلَامُ عَلَيْكُمْ وَرَحْمَةُ ٱللَّٰهِ وَبَرَكَاتُهُ',
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF5B2971), fontFamily: 'Amiri'),
+                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF45A58A), fontFamily: 'Amiri'),
                       ),
                     ),
                     const SizedBox(height: 4),

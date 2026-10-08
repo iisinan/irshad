@@ -175,7 +175,7 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
       case 'portfolio':
         return const Icon(Icons.trending_up, color: Color(0xFF8B5CF6));
       case 'screening':
-        return const Icon(Icons.shield_outlined, color: Color(0xFF5B2971));
+        return const Icon(Icons.shield_outlined, color: Color(0xFF45A58A));
       case 'market_news':
         return const Icon(Icons.bar_chart, color: Color(0xFF0EA5E9));
       case 'business_activity':
@@ -194,7 +194,7 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
       case 'portfolio':
         return const Color(0xFF8B5CF6).withValues(alpha: 0.1);
       case 'screening':
-        return const Color(0xFF5B2971).withValues(alpha: 0.1);
+        return const Color(0xFF45A58A).withValues(alpha: 0.1);
       case 'market_news':
         return const Color(0xFF0EA5E9).withValues(alpha: 0.1);
       case 'business_activity':

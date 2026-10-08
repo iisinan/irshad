@@ -300,7 +300,7 @@ export default function MarketTab() {
         </div>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', zIndex: 1 }}>
-          <div style={{ width: '48px', height: '48px', background: 'rgba(91, 41, 113, 0.06)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', border: '1px solid rgba(91, 41, 113, 0.1)', boxShadow: '0 4px 12px rgba(91, 41, 113, 0.05)' }}>
+          <div style={{ width: '48px', height: '48px', background: 'rgba(69, 165, 138, 0.06)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', border: '1px solid rgba(69, 165, 138, 0.1)', boxShadow: '0 4px 12px rgba(69, 165, 138, 0.05)' }}>
             <BarChart2 size={24} strokeWidth={2.5} />
           </div>
           <div>

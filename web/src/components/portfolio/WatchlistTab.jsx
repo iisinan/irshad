@@ -260,7 +260,7 @@ export default function WatchlistTab({ initialSymbol, onClearInitialSymbol }) {
           <div style={{ 
             width:'80px', height:'80px', background:'var(--primary-50)', borderRadius:'24px', 
             display:'flex', alignItems:'center', justifyContent:'center', marginBottom:'24px',
-            border:'1px solid var(--primary-100)', boxShadow:'0 12px 32px rgba(91, 41, 113, 0.1)'
+            border:'1px solid var(--primary-100)', boxShadow:'0 12px 32px rgba(69, 165, 138, 0.1)'
           }}>
             <Star size={36} color="var(--primary)" fill="var(--primary)" opacity={0.8} />
           </div>

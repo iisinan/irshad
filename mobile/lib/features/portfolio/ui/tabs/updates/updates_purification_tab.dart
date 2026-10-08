@@ -66,13 +66,13 @@ class UpdatesPurificationTab extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF5B2971), Color(0xFF3b0764), Color(0xFF1e003d)],
+          colors: [Color(0xFF45A58A), Color(0xFF358770), Color(0xFF297D66)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
-          BoxShadow(color: const Color(0xFF3b0764).withValues(alpha: 0.35), blurRadius: 24, offset: const Offset(0, 12)),
+          BoxShadow(color: const Color(0xFF358770).withValues(alpha: 0.35), blurRadius: 24, offset: const Offset(0, 12)),
         ],
       ),
       clipBehavior: Clip.hardEdge,
@@ -166,7 +166,7 @@ class UpdatesPurificationTab extends StatelessWidget {
   Widget _buildWhyWeNeedPurification(BuildContext context) {
     return Column(
       children: [
-        _buildInfoCard(context, Icons.monetization_on, const Color(0xFF8A4C9E), context.primary.withValues(alpha: 0.1), 'No Company is Perfectly Pure', 'In the modern economy, virtually every listed company keeps cash in conventional bank accounts that generate interest. This is unavoidable — even the most halal-intentioned business does it. The impure income is a by-product of participation in the global financial system.'),
+        _buildInfoCard(context, Icons.monetization_on, const Color(0xFF45A58A), context.primary.withValues(alpha: 0.1), 'No Company is Perfectly Pure', 'In the modern economy, virtually every listed company keeps cash in conventional bank accounts that generate interest. This is unavoidable — even the most halal-intentioned business does it. The impure income is a by-product of participation in the global financial system.'),
         const SizedBox(height: 16),
         _buildInfoCard(context, Icons.account_balance, const Color(0xFFD1A562), const Color(0xFFD1A562).withValues(alpha: 0.1), 'Dividends Carry Trace Impurity', 'When you receive dividends, you receive a proportional slice of all of the company\'s earnings — including the tiny amount from interest. Even if the proportion is 0.3%, that fraction is not yours to keep. You must give it away without expectation of reward.'),
         const SizedBox(height: 16),

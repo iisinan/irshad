@@ -41,7 +41,7 @@ function IPOCard({ ipo, onClick }) {
       }}
       onMouseEnter={e => {
         e.currentTarget.style.transform = 'translateY(-3px)';
-        e.currentTarget.style.boxShadow = '0 12px 32px rgba(91, 41, 113, 0.08)';
+        e.currentTarget.style.boxShadow = '0 12px 32px rgba(69, 165, 138, 0.08)';
         e.currentTarget.style.borderColor = 'var(--primary-100)';
       }}
       onMouseLeave={e => {

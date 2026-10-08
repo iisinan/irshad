@@ -170,7 +170,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
 
       {/* ── Compact Greeting Banner ── */}
       <div style={{
-        background: 'linear-gradient(145deg, var(--bg) 0%, rgba(91, 41, 113, 0.02) 100%)',
+        background: 'linear-gradient(145deg, var(--bg) 0%, rgba(69, 165, 138, 0.02) 100%)',
         border: '1px solid var(--border)',
         borderRadius: '20px',
         padding: '16px 24px',
@@ -180,7 +180,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
         justifyContent: 'space-between',
         flexWrap: 'wrap',
         gap: '16px',
-        boxShadow: '0 8px 32px rgba(91, 41, 113, 0.04), inset 0 2px 0 rgba(255,255,255,0.7)',
+        boxShadow: '0 8px 32px rgba(69, 165, 138, 0.04), inset 0 2px 0 rgba(255,255,255,0.7)',
         position: 'relative',
         overflow: 'hidden'
       }}>
