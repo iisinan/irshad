@@ -483,12 +483,12 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
         actions: [
           IconButton(
             icon: Icon(_isAlreadyFavorited ? Icons.notifications_active_rounded : Icons.notifications_none_rounded, 
-              color: _isAlreadyFavorited ? context.primary : context.textDark, size: 22),
+              color: _isAlreadyFavorited ? statusColor : context.textDark, size: 22),
             onPressed: _isFavoriting ? null : _onFavorite,
           ),
           IconButton(
             tooltip: 'Add to Holdings',
-            icon: Icon(Icons.add_chart_rounded, color: context.textDark, size: 22),
+            icon: Icon(Icons.add_chart_rounded, color: statusColor, size: 22),
             onPressed: () {
               showModalBottomSheet(
                 context: context,
@@ -829,20 +829,20 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                       return Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
-                          color: context.primary.withOpacity(0.10),
+                          color: color.withOpacity(0.10),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: context.primary.withOpacity(0.25), width: 1),
+                          border: Border.all(color: color.withOpacity(0.25), width: 1),
                         ),
                         child: Text.rich(
                           TextSpan(
                             children: [
                               TextSpan(
                                 text: 'Trading Board: ',
-                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: context.primary.withOpacity(1.0)),
+                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: color),
                               ),
                               TextSpan(
                                 text: tradingBoard,
-                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: context.primary, letterSpacing: -0.2),
+                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: color, letterSpacing: -0.2),
                               ),
                             ],
                           ),
