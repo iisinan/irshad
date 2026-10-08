@@ -232,23 +232,23 @@ export default function UpdatesNews() {
 
   const sections = [
     { id: 'market',       label: 'Market Intelligence', icon: BarChart2,    color: 'var(--primary)' },
-    { id: 'analysis',     label: 'Analysis',            icon: TrendingUp,   color: '#8b5cf6' },
     { id: 'purification', label: 'Why Purification',    icon: Droplet,      color: '#0ea5e9' },
   ];
 
   const complianceChanges  = data?.compliance_changes  || [];
   const rawBusiness        = data?.business_updates    || [];
   const rawMarket          = data?.market_intelligence || [];
+  const analysisData       = data?.analysis            || [];
   
-  // Merge Business Activity and Market Intelligence
+  // Merge Business Activity, Market Intelligence, and Analysis
   const businessItems = rawBusiness.map(e => ({ ...e, _cardType: 'business' }));
   const marketItems = rawMarket.map(e => ({ ...e, _cardType: 'market' }));
-  const marketIntelligence = [...businessItems, ...marketItems].sort((a, b) => {
+  const analysisItems = analysisData.map(e => ({ ...e, _cardType: 'analysis' }));
+  const marketIntelligence = [...businessItems, ...marketItems, ...analysisItems].sort((a, b) => {
     return new Date(b.published_at || 0) - new Date(a.published_at || 0);
   });
 
   const dividendsData      = data?.dividends           || [];
-  const analysisData       = data?.analysis            || [];
 
   return (
     <div>
@@ -326,7 +326,7 @@ export default function UpdatesNews() {
               <div style={{ maxHeight: '600px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingRight: '6px' }} className="custom-scrollbar">
                 {marketIntelligence.length === 0
                   ? <EmptyState icon={BarChart2} title="No Market Intelligence" subtitle="No recent updates have been found." color="var(--primary)" />
-                  : marketIntelligence.map(item => item._cardType === 'business' ? <BusinessCard key={'b'+item.id} item={item} onSelectUrl={handleSelectUrl} /> : <MarketCard key={'m'+item.id} item={item} onSelectUrl={handleSelectUrl} />)
+                  : marketIntelligence.map(item => item._cardType === 'business' ? <BusinessCard key={'b'+item.id} item={item} onSelectUrl={handleSelectUrl} /> : <MarketCard key={`${item._cardType}-${item.id}`} item={item} onSelectUrl={handleSelectUrl} />)
                 }
               </div>
             </>
@@ -336,18 +336,6 @@ export default function UpdatesNews() {
             <div style={{ maxHeight: '700px', overflowY: 'auto', paddingRight: '6px' }} className="custom-scrollbar">
               <UpdatesPurification />
             </div>
-          )}
-
-          {activeSection === 'analysis' && (
-            <>
-              <SectionHeader icon={TrendingUp} title="Earnings & Analysis" count={analysisData.length} color="#8b5cf6" />
-              <div style={{ maxHeight: '600px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingRight: '6px' }} className="custom-scrollbar">
-                {analysisData.length === 0
-                  ? <EmptyState icon={TrendingUp} title="No Analysis Available" subtitle="No earnings or technical analysis updates right now." color="#8b5cf6" />
-                  : analysisData.map(item => <MarketCard key={item.id} item={item} onSelectUrl={handleSelectUrl} />)
-                }
-              </div>
-            </>
           )}
         </div>
       )}
