@@ -232,10 +232,15 @@ class PurificationTab extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 20),
-                            Text('Your Portfolio is Clean!', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
+                            Text(
+                              holdingsNoDividends.isNotEmpty ? 'No Pending Purifications' : 'Your Portfolio is Clean!', 
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)
+                            ),
                             const SizedBox(height: 8),
                             Text(
-                              'Alhamdulillah. All your dividend income is derived from Shariah-compliant sources. There are no pending purifications at this time.',
+                              holdingsNoDividends.isNotEmpty 
+                                ? 'Alhamdulillah. There are no pending purifications at this time. We will monitor your watched stocks for any future dividends.'
+                                : 'Alhamdulillah. All your dividend income is derived from Shariah-compliant sources. There are no pending purifications at this time.',
                               textAlign: TextAlign.center,
                               style: TextStyle(color: context.textMuted, fontSize: 13, height: 1.5),
                             ),

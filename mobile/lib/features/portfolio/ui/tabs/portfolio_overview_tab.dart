@@ -536,9 +536,12 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
     String badgeText;
 
     if (finalStatus == 'halal' || finalStatus == 'compliant') {
-      if (purificationDue > 0 || nonCompliantRatio > 0) {
+      if (purificationDue > 0) {
         accentColor = const Color(0xFFEAB308);
         badgeText = 'Purification Due';
+      } else if (nonCompliantRatio > 0) {
+        accentColor = const Color(0xFFEAB308);
+        badgeText = 'Watching';
       } else {
         accentColor = context.halal;
         badgeText = 'Compliant';
@@ -683,8 +686,8 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                               ),
                             ],
                             const Spacer(),
-                            if (badgeText == 'Purification Due')
-                              hasBeenPurified
+                            if (badgeText == 'Purification Due' || badgeText == 'Watching')
+                              (badgeText == 'Purification Due' && hasBeenPurified)
                                   ? Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                       decoration: BoxDecoration(
@@ -712,12 +715,12 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                                           border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.25)),
                                           borderRadius: BorderRadius.circular(8),
                                         ),
-                                        child: const Row(
+                                        child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Icon(Icons.water_drop_outlined, size: 12, color: Color(0xFFD97706)),
-                                            SizedBox(width: 4),
-                                            Text('Purify Now', style: TextStyle(color: Color(0xFFD97706), fontSize: 10, fontWeight: FontWeight.w800)),
+                                            Icon(badgeText == 'Watching' ? Icons.visibility_outlined : Icons.water_drop_outlined, size: 12, color: const Color(0xFFD97706)),
+                                            const SizedBox(width: 4),
+                                            Text(badgeText == 'Watching' ? 'Watching' : 'Purify Now', style: const TextStyle(color: Color(0xFFD97706), fontSize: 10, fontWeight: FontWeight.w800)),
                                           ],
                                         ),
                                       ),
