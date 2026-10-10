@@ -79,13 +79,10 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
         minHeight: '68px',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden' }}>
-          <div style={{
+          <img src="/favicon.svg" alt="Irshad Logo" style={{
             width: '36px', height: '36px', borderRadius: '10px',
-            background: 'var(--primary)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: 900, fontSize: '0.9rem', color: '#FFFFFF',
-            flexShrink: 0,
-          }}>إ</div>
+            flexShrink: 0, objectFit: 'cover'
+          }} />
           {!isCollapsed && (
             <div>
               <div style={{

@@ -42,13 +42,10 @@ const Footer = () => (
       <div className="footer-brand-col">
         {/* Logo mark */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-          <div style={{
+          <img src="/favicon.svg" alt="Irshad Logo" style={{
             width: '40px', height: '40px', borderRadius: '12px',
-            background: 'var(--gold-grad)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: 900, fontSize: '1.1rem', color: '#1A0E00',
-            flexShrink: 0,
-          }}>إ</div>
+            flexShrink: 0, objectFit: 'cover'
+          }} />
           <span style={{ fontWeight: 900, fontSize: '1.2rem', color: 'white', letterSpacing: '-0.5px' }}>
             Irshad
           </span>

@@ -55,12 +55,10 @@ export default function AdminLayout() {
         {/* Mobile Header (Hidden on Desktop) */}
         <header className="mobile-dashboard-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{
+            <img src="/favicon.svg" alt="Irshad Logo" style={{
               width: '32px', height: '32px', borderRadius: '8px',
-              background: 'var(--gold-grad)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontWeight: 900, fontSize: '0.7rem', color: 'white',
-            }}>إ</div>
+              objectFit: 'cover'
+            }} />
             <span style={{ fontWeight: 800, fontSize: '0.92rem', color: 'var(--text-dark)', letterSpacing: '-0.3px' }}>
               Irshad Admin
             </span>
