@@ -8,6 +8,51 @@ import { toastSuccess, toastError } from '../../utils/toast';
 
 const fmt = (n, d = 2) => `₦${Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d })}`;
 
+const formatDetailedCountdown = (targetDate, now) => {
+  if (!targetDate) return null;
+  const target = new Date(targetDate);
+  const diffMs = target.getTime() - now;
+  if (diffMs <= 0) {
+    return {
+      isToday: true,
+      badge: 'Pays Today',
+      subtitle: 'Dividend pays today!',
+    };
+  }
+
+  const totalSec = Math.floor(diffMs / 1000);
+  const totalDays = Math.floor(totalSec / 86400);
+  const months = Math.floor(totalDays / 30);
+  const remDays = totalDays % 30;
+  const weeks = Math.floor(remDays / 7);
+  const days = remDays % 7;
+  const hours = Math.floor((totalSec % 86400) / 3600);
+  const minutes = Math.floor((totalSec % 3600) / 60);
+  const seconds = totalSec % 60;
+
+  const badgeParts = [];
+  if (months > 0) badgeParts.push(`${months}m`);
+  if (weeks > 0) badgeParts.push(`${weeks}w`);
+  if (days > 0) badgeParts.push(`${days}d`);
+  badgeParts.push(`${hours}h`);
+  badgeParts.push(`${minutes}m`);
+  badgeParts.push(`${seconds}s`);
+
+  const subParts = [];
+  if (months > 0) subParts.push(`${months} ${months === 1 ? 'month' : 'months'}`);
+  if (weeks > 0) subParts.push(`${weeks} ${weeks === 1 ? 'week' : 'weeks'}`);
+  if (days > 0) subParts.push(`${days} ${days === 1 ? 'day' : 'days'}`);
+  if (hours > 0) subParts.push(`${hours} ${hours === 1 ? 'hr' : 'hrs'}`);
+  if (minutes > 0) subParts.push(`${minutes} ${minutes === 1 ? 'min' : 'mins'}`);
+  subParts.push(`${seconds} ${seconds === 1 ? 'sec' : 'secs'}`);
+
+  return {
+    isToday: false,
+    badge: badgeParts.join(' '),
+    subtitle: `Dividend pays in ${subParts.join(', ')}`,
+  };
+};
+
 const CHARITIES = [
   {
     id: 1,
@@ -536,6 +581,12 @@ export default function PurificationTab({ data, initialSymbol, refreshData, onCl
   const [selectedHolding, setSelectedHolding] = useState(null);
   const [activeStatTarget, setActiveStatTarget] = useState(null);
   const [charityModalTarget, setCharityModalTarget] = useState(null);
+  const [nowTime, setNowTime] = useState(Date.now());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNowTime(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     if (initialSymbol && data?.holdings) {
@@ -735,15 +786,7 @@ export default function PurificationTab({ data, initialSymbol, refreshData, onCl
                   ? h.latest_dividend
                   : null
               );
-              let daysLeft = null;
-              if (upcoming) {
-                if (upcoming.days_left !== undefined && upcoming.days_left !== null) {
-                  daysLeft = Number(upcoming.days_left);
-                } else if (upcoming.pay_date) {
-                  const diff = Math.ceil((new Date(upcoming.pay_date) - new Date()) / (1000 * 60 * 60 * 24));
-                  daysLeft = Math.max(0, diff);
-                }
-              }
+              const countdown = upcoming?.pay_date ? formatDetailedCountdown(upcoming.pay_date, nowTime) : null;
 
               return (
                 <div key={h.id} style={{ display: 'flex', alignItems: 'center', padding: '16px 0', borderTop: i === 0 ? 'none' : '1px solid var(--border)' }}>
@@ -752,13 +795,13 @@ export default function PurificationTab({ data, initialSymbol, refreshData, onCl
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '2px' }}>{h.symbol}</div>
-                    <div style={{ fontSize: '0.75rem', color: daysLeft !== null ? 'var(--text-dark)' : 'var(--text-muted)', fontWeight: daysLeft !== null ? 600 : 400 }}>
-                      {ratioOf(h).toFixed(2)}% impure ratio · {daysLeft !== null ? (daysLeft === 0 ? 'Dividend pays today!' : `Dividend pays in ${daysLeft} ${daysLeft === 1 ? 'day' : 'days'}`) : 'No dividends in 12M'}
+                    <div style={{ fontSize: '0.75rem', color: countdown ? 'var(--text-dark)' : 'var(--text-muted)', fontWeight: countdown ? 600 : 400 }}>
+                      {ratioOf(h).toFixed(2)}% impure ratio · {countdown ? countdown.subtitle : 'No dividends in 12M'}
                     </div>
                   </div>
-                  {daysLeft !== null ? (
-                    <div style={{ background: daysLeft === 0 ? 'rgba(34,197,94,0.12)' : 'rgba(245, 158, 11, 0.12)', border: `1px solid ${daysLeft === 0 ? 'rgba(34,197,94,0.3)' : 'rgba(245, 158, 11, 0.3)'}`, color: daysLeft === 0 ? '#16A34A' : '#D97706', padding: '6px 12px', borderRadius: '8px', fontSize: '0.72rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      ⏱️ {daysLeft === 0 ? 'Pays Today' : `Pays in ${daysLeft}d`}
+                  {countdown ? (
+                    <div style={{ background: countdown.isToday ? 'rgba(34,197,94,0.12)' : 'rgba(245, 158, 11, 0.12)', border: `1px solid ${countdown.isToday ? 'rgba(34,197,94,0.3)' : 'rgba(245, 158, 11, 0.3)'}`, color: countdown.isToday ? '#16A34A' : '#D97706', padding: '6px 12px', borderRadius: '8px', fontSize: '0.72rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px', letterSpacing: '-0.2px' }}>
+                      ⏱️ {countdown.badge}
                     </div>
                   ) : (
                     <div style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#D97706', padding: '6px 12px', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 800 }}>

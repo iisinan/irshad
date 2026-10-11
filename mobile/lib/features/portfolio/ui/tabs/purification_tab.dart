@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/portfolio_provider.dart';
@@ -306,93 +307,7 @@ class PurificationTab extends StatelessWidget {
                         itemCount: holdingsNoDividends.length,
                         separatorBuilder: (_, __) => Divider(color: context.divider, height: 24),
                         itemBuilder: (context, index) {
-                          final h = holdingsNoDividends[index];
-                          final symbol = h['symbol'] ?? '';
-                          final ratio = num.tryParse(h['non_compliant_ratio']?.toString() ?? '0')?.toDouble() ?? 0.0;
-
-                          final upcoming = h['upcoming_dividend'] ?? (
-                            (h['latest_dividend'] != null && DateTime.tryParse(h['latest_dividend']['pay_date'] ?? '')?.isAfter(DateTime.now()) == true)
-                              ? h['latest_dividend']
-                              : null
-                          );
-
-                          int? daysLeft;
-                          if (upcoming != null) {
-                            if (upcoming['days_left'] != null) {
-                              daysLeft = num.tryParse(upcoming['days_left'].toString())?.toInt();
-                            } else if (upcoming['pay_date'] != null) {
-                              final d = DateTime.tryParse(upcoming['pay_date'].toString());
-                              if (d != null) {
-                                final diff = d.difference(DateTime.now()).inDays;
-                                daysLeft = diff < 0 ? 0 : diff;
-                              }
-                            }
-                          }
-
-                          return Row(
-                            children: [
-                              Container(
-                                width: 36, height: 36,
-                                decoration: BoxDecoration(
-                                  color: context.bgAlt,
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(color: context.divider),
-                                ),
-                                child: Center(child: Text(symbol.length > 4 ? symbol.substring(0, 4) : symbol, style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: context.textMuted))),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(symbol, style: TextStyle(fontWeight: FontWeight.w700, color: context.textDark, fontSize: 14)),
-                                    Text(
-                                      daysLeft != null
-                                        ? '${ratio.toStringAsFixed(2)}% impure ratio · ${daysLeft == 0 ? "Dividend pays today!" : "Dividend pays in $daysLeft ${daysLeft == 1 ? 'day' : 'days'}"}'
-                                        : '${ratio.toStringAsFixed(2)}% impure ratio · No dividends in 12M',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        color: daysLeft != null ? (daysLeft == 0 ? context.halal : context.textDark) : context.textMuted,
-                                        fontWeight: daysLeft != null ? FontWeight.w600 : FontWeight.w400,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              daysLeft != null
-                                ? Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                    decoration: BoxDecoration(
-                                      color: (daysLeft == 0 ? context.halal : const Color(0xFFF59E0B)).withOpacity(0.12),
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(color: (daysLeft == 0 ? context.halal : const Color(0xFFF59E0B)).withOpacity(0.3)),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(Icons.schedule_rounded, size: 12, color: daysLeft == 0 ? context.halal : const Color(0xFFD97706)),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          daysLeft == 0 ? 'Pays Today' : 'Pays in ${daysLeft}d',
-                                          style: TextStyle(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.w800,
-                                            color: daysLeft == 0 ? context.halal : const Color(0xFFD97706),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                : Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFF59E0B).withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: const Text('Watching', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Color(0xFFF59E0B))),
-                                  ),
-                            ],
-                          );
+                          return _LiveWatchingRow(holding: holdingsNoDividends[index]);
                         },
                       ),
                     ],
@@ -405,4 +320,179 @@ class PurificationTab extends StatelessWidget {
       },
     );
   }
+}
+
+class _LiveWatchingRow extends StatefulWidget {
+  final Map<String, dynamic> holding;
+
+  const _LiveWatchingRow({required this.holding});
+
+  @override
+  State<_LiveWatchingRow> createState() => _LiveWatchingRowState();
+}
+
+class _LiveWatchingRowState extends State<_LiveWatchingRow> {
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    final upcoming = _getUpcoming();
+    if (upcoming != null && upcoming['pay_date'] != null) {
+      _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+        if (mounted) setState(() {});
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  Map<String, dynamic>? _getUpcoming() {
+    final h = widget.holding;
+    return h['upcoming_dividend'] ?? (
+      (h['latest_dividend'] != null && DateTime.tryParse(h['latest_dividend']['pay_date'] ?? '')?.isAfter(DateTime.now()) == true)
+        ? h['latest_dividend']
+        : null
+    );
+  }
+
+  _CountdownInfo? _getCountdown(String? payDateStr) {
+    if (payDateStr == null) return null;
+    final target = DateTime.tryParse(payDateStr);
+    if (target == null) return null;
+
+    final now = DateTime.now();
+    final diff = target.difference(now);
+    if (diff.isNegative || diff.inSeconds <= 0) {
+      return _CountdownInfo(
+        isToday: true,
+        badgeText: 'Pays Today',
+        subtitleText: 'Dividend pays today!',
+      );
+    }
+
+    final totalSec = diff.inSeconds;
+    final totalDays = diff.inDays;
+    final months = totalDays ~/ 30;
+    final remDays = totalDays % 30;
+    final weeks = remDays ~/ 7;
+    final days = remDays % 7;
+    final hours = (totalSec % 86400) ~/ 3600;
+    final minutes = (totalSec % 3600) ~/ 60;
+    final seconds = totalSec % 60;
+
+    final badgeParts = <String>[];
+    if (months > 0) badgeParts.add('${months}m');
+    if (weeks > 0) badgeParts.add('${weeks}w');
+    if (days > 0) badgeParts.add('${days}d');
+    badgeParts.add('${hours}h');
+    badgeParts.add('${minutes}m');
+    badgeParts.add('${seconds}s');
+
+    final subParts = <String>[];
+    if (months > 0) subParts.add('$months ${months == 1 ? "month" : "months"}');
+    if (weeks > 0) subParts.add('$weeks ${weeks == 1 ? "week" : "weeks"}');
+    if (days > 0) subParts.add('$days ${days == 1 ? "day" : "days"}');
+    if (hours > 0) subParts.add('$hours ${hours == 1 ? "hr" : "hrs"}');
+    if (minutes > 0) subParts.add('$minutes ${minutes == 1 ? "min" : "mins"}');
+    subParts.add('$seconds ${seconds == 1 ? "sec" : "secs"}');
+
+    return _CountdownInfo(
+      isToday: false,
+      badgeText: badgeParts.join(' '),
+      subtitleText: 'Dividend pays in ${subParts.join(", ")}',
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final h = widget.holding;
+    final symbol = h['symbol'] ?? '';
+    final ratio = num.tryParse(h['non_compliant_ratio']?.toString() ?? '0')?.toDouble() ?? 0.0;
+    final upcoming = _getUpcoming();
+    final countdown = upcoming != null ? _getCountdown(upcoming['pay_date']?.toString()) : null;
+
+    return Row(
+      children: [
+        Container(
+          width: 36, height: 36,
+          decoration: BoxDecoration(
+            color: context.bgAlt,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: context.divider),
+          ),
+          child: Center(
+            child: Text(
+              symbol.length > 4 ? symbol.substring(0, 4) : symbol,
+              style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: context.textMuted),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(symbol, style: TextStyle(fontWeight: FontWeight.w700, color: context.textDark, fontSize: 14)),
+              Text(
+                countdown != null
+                  ? '${ratio.toStringAsFixed(2)}% impure ratio · ${countdown.subtitleText}'
+                  : '${ratio.toStringAsFixed(2)}% impure ratio · No dividends in 12M',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: countdown != null ? (countdown.isToday ? context.halal : context.textDark) : context.textMuted,
+                  fontWeight: countdown != null ? FontWeight.w600 : FontWeight.w400,
+                ),
+              ),
+            ],
+          ),
+        ),
+        countdown != null
+          ? Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: (countdown.isToday ? context.halal : const Color(0xFFF59E0B)).withOpacity(0.12),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: (countdown.isToday ? context.halal : const Color(0xFFF59E0B)).withOpacity(0.3)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.schedule_rounded, size: 12, color: countdown.isToday ? context.halal : const Color(0xFFD97706)),
+                  const SizedBox(width: 4),
+                  Text(
+                    countdown.badgeText,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: countdown.isToday ? context.halal : const Color(0xFFD97706),
+                      letterSpacing: -0.2,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF59E0B).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Text('Watching', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Color(0xFFF59E0B))),
+            ),
+      ],
+    );
+  }
+}
+
+class _CountdownInfo {
+  final bool isToday;
+  final String badgeText;
+  final String subtitleText;
+
+  _CountdownInfo({required this.isToday, required this.badgeText, required this.subtitleText});
 }
