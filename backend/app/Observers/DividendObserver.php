@@ -14,6 +14,16 @@ class DividendObserver
      */
     public function created(Dividend $dividend): void
     {
+        // Don't send "New Dividend Announced" alerts for past historical dividends that were already paid
+        if ($dividend->pay_date) {
+            try {
+                $payDate = \Carbon\Carbon::parse($dividend->pay_date)->startOfDay();
+                if ($payDate->isBefore(now()->startOfDay())) {
+                    return; // Historical dividend, do not alert as "new"
+                }
+            } catch (\Throwable $e) {}
+        }
+
         // Find all users who currently hold this stock
         $holdings = Holding::with('user')->where('symbol', $dividend->ticker)->get();
 
