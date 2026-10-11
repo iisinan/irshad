@@ -309,6 +309,26 @@ class PurificationTab extends StatelessWidget {
                           final h = holdingsNoDividends[index];
                           final symbol = h['symbol'] ?? '';
                           final ratio = num.tryParse(h['non_compliant_ratio']?.toString() ?? '0')?.toDouble() ?? 0.0;
+
+                          final upcoming = h['upcoming_dividend'] ?? (
+                            (h['latest_dividend'] != null && DateTime.tryParse(h['latest_dividend']['pay_date'] ?? '')?.isAfter(DateTime.now()) == true)
+                              ? h['latest_dividend']
+                              : null
+                          );
+
+                          int? daysLeft;
+                          if (upcoming != null) {
+                            if (upcoming['days_left'] != null) {
+                              daysLeft = num.tryParse(upcoming['days_left'].toString())?.toInt();
+                            } else if (upcoming['pay_date'] != null) {
+                              final d = DateTime.tryParse(upcoming['pay_date'].toString());
+                              if (d != null) {
+                                final diff = d.difference(DateTime.now()).inDays;
+                                daysLeft = diff < 0 ? 0 : diff;
+                              }
+                            }
+                          }
+
                           return Row(
                             children: [
                               Container(
@@ -326,18 +346,51 @@ class PurificationTab extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(symbol, style: TextStyle(fontWeight: FontWeight.w700, color: context.textDark, fontSize: 14)),
-                                    Text('${ratio.toStringAsFixed(2)}% impure ratio · No dividends in 12M', style: TextStyle(fontSize: 11, color: context.textMuted)),
+                                    Text(
+                                      daysLeft != null
+                                        ? '${ratio.toStringAsFixed(2)}% impure ratio · ${daysLeft == 0 ? "Dividend pays today!" : "Dividend pays in $daysLeft ${daysLeft == 1 ? 'day' : 'days'}"}'
+                                        : '${ratio.toStringAsFixed(2)}% impure ratio · No dividends in 12M',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: daysLeft != null ? (daysLeft == 0 ? context.halal : context.textDark) : context.textMuted,
+                                        fontWeight: daysLeft != null ? FontWeight.w600 : FontWeight.w400,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFF59E0B).withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Text('Watching', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Color(0xFFF59E0B))),
-                              ),
+                              daysLeft != null
+                                ? Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                    decoration: BoxDecoration(
+                                      color: (daysLeft == 0 ? context.halal : const Color(0xFFF59E0B)).withOpacity(0.12),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: (daysLeft == 0 ? context.halal : const Color(0xFFF59E0B)).withOpacity(0.3)),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.schedule_rounded, size: 12, color: daysLeft == 0 ? context.halal : const Color(0xFFD97706)),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          daysLeft == 0 ? 'Pays Today' : 'Pays in ${daysLeft}d',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w800,
+                                            color: daysLeft == 0 ? context.halal : const Color(0xFFD97706),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                : Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF59E0B).withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: const Text('Watching', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Color(0xFFF59E0B))),
+                                  ),
                             ],
                           );
                         },

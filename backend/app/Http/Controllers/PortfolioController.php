@@ -177,6 +177,33 @@ class PortfolioController extends Controller
                         ];
                     }
 
+                    // Find upcoming announced dividend if any
+                    $upcomingDivData = null;
+                    if ($company && $company->dividends) {
+                        $upcoming = $company->dividends->filter(function ($d) {
+                            if (!$d->pay_date) return false;
+                            try {
+                                $effectiveDate = \Carbon\Carbon::parse($d->pay_date)->startOfDay();
+                                return $effectiveDate->greaterThanOrEqualTo(now()->startOfDay());
+                            } catch (\Throwable $e) {
+                                return false;
+                            }
+                        })->sortBy(function ($d) {
+                            return \Carbon\Carbon::parse($d->pay_date)->timestamp;
+                        })->first();
+
+                        if ($upcoming) {
+                            $payDateCarbon = \Carbon\Carbon::parse($upcoming->pay_date)->startOfDay();
+                            $daysLeft = (int) now()->startOfDay()->diffInDays($payDateCarbon, false);
+                            $upcomingDivData = [
+                                'amount' => (float) ($upcoming->amount ?? 0),
+                                'pay_date' => $payDateCarbon->toISOString(),
+                                'days_left' => max(0, $daysLeft),
+                                'status' => $upcoming->status ?? 'upcoming',
+                            ];
+                        }
+                    }
+
                     return [
                         'id' => $holding->id,
                         'symbol' => $company?->symbol ?? $holding->symbol,
@@ -193,6 +220,7 @@ class PortfolioController extends Controller
                         'total_dividends' => round($totalDividendsReceived, 2),
                         'lifetime_dividends' => round($lifetimeDividendsReceived, 2),
                         'latest_dividend' => $latestDivData,
+                        'upcoming_dividend' => $upcomingDivData,
                         'non_compliant_ratio' => round($nonCompliantRatio, 2),
                         'logo_url' => $company?->logo_url ?? null,
                         'purchase_date' => $holding->purchase_date,

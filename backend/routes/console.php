@@ -48,6 +48,9 @@ Schedule::command('irshad:send-updates-digest')->weeklyOn(5, '15:00')->withoutOv
 // Send Zakat Reminders daily at 8:00 AM
 Schedule::command('app:send-zakat-reminders')->dailyAt('08:00')->withoutOverlapping()->description('[Irshad] Zakat Hawl Reminders — Daily Run')->emailOutputTo('iirshad2026@gmail.com');
 
+// Send Dividend Purification Due Reminders daily at 9:00 AM (Lagos time)
+Schedule::command('app:send-dividend-purification-reminders')->timezone('Africa/Lagos')->dailyAt('09:00')->withoutOverlapping()->description('[Irshad] Dividend Purification Due Reminders — Daily Run')->emailOutputTo('iirshad2026@gmail.com');
+
 // Prune old NGXPulse audit logs daily
 Schedule::command('irshad:prune-audits')->daily()->withoutOverlapping()->description('[Irshad] NGXPulse Audit Log Pruner — Daily Cleanup')->emailOutputTo('iirshad2026@gmail.com');
 

@@ -729,22 +729,45 @@ export default function PurificationTab({ data, initialSymbol, refreshData, onCl
           </div>
           
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            {holdingsNoDividends.map((h, i) => (
-              <div key={h.id} style={{ display: 'flex', alignItems: 'center', padding: '16px 0', borderTop: i === 0 ? 'none' : '1px solid var(--border)' }}>
-                <div style={{ marginRight: '16px' }}>
-                  <CompanyLogo symbol={h.symbol} logoUrl={h.logo_url} size={44} radius={14} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '2px' }}>{h.symbol}</div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                    {ratioOf(h).toFixed(2)}% impure ratio · No dividends in 12M
+            {holdingsNoDividends.map((h, i) => {
+              const upcoming = h.upcoming_dividend || (
+                h.latest_dividend && new Date(h.latest_dividend.pay_date) > new Date()
+                  ? h.latest_dividend
+                  : null
+              );
+              let daysLeft = null;
+              if (upcoming) {
+                if (upcoming.days_left !== undefined && upcoming.days_left !== null) {
+                  daysLeft = Number(upcoming.days_left);
+                } else if (upcoming.pay_date) {
+                  const diff = Math.ceil((new Date(upcoming.pay_date) - new Date()) / (1000 * 60 * 60 * 24));
+                  daysLeft = Math.max(0, diff);
+                }
+              }
+
+              return (
+                <div key={h.id} style={{ display: 'flex', alignItems: 'center', padding: '16px 0', borderTop: i === 0 ? 'none' : '1px solid var(--border)' }}>
+                  <div style={{ marginRight: '16px' }}>
+                    <CompanyLogo symbol={h.symbol} logoUrl={h.logo_url} size={44} radius={14} />
                   </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '2px' }}>{h.symbol}</div>
+                    <div style={{ fontSize: '0.75rem', color: daysLeft !== null ? 'var(--text-dark)' : 'var(--text-muted)', fontWeight: daysLeft !== null ? 600 : 400 }}>
+                      {ratioOf(h).toFixed(2)}% impure ratio · {daysLeft !== null ? (daysLeft === 0 ? 'Dividend pays today!' : `Dividend pays in ${daysLeft} ${daysLeft === 1 ? 'day' : 'days'}`) : 'No dividends in 12M'}
+                    </div>
+                  </div>
+                  {daysLeft !== null ? (
+                    <div style={{ background: daysLeft === 0 ? 'rgba(34,197,94,0.12)' : 'rgba(245, 158, 11, 0.12)', border: `1px solid ${daysLeft === 0 ? 'rgba(34,197,94,0.3)' : 'rgba(245, 158, 11, 0.3)'}`, color: daysLeft === 0 ? '#16A34A' : '#D97706', padding: '6px 12px', borderRadius: '8px', fontSize: '0.72rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      ⏱️ {daysLeft === 0 ? 'Pays Today' : `Pays in ${daysLeft}d`}
+                    </div>
+                  ) : (
+                    <div style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#D97706', padding: '6px 12px', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 800 }}>
+                      Watching
+                    </div>
+                  )}
                 </div>
-                <div style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#D97706', padding: '6px 12px', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 800 }}>
-                  Watching
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
