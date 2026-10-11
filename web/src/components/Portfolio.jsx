@@ -286,7 +286,7 @@ export default function Portfolio() {
   if (pieData.length === 0) pieData.push({ name: 'No Holdings', value: 1, color: 'var(--border)' });
 
   const isHoldingHalal = h => !!h.is_halal || ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(h.symbol);
-  const needsPurif = holdings.filter(h => isHoldingHalal(h) && (Number(h.purification_due || 0) > 0 || Number(h.non_compliant_ratio || 0) > 0)).length;
+  const needsPurif = holdings.filter(h => isHoldingHalal(h) && Number(h.purification_due || 0) > 0).length;
   const halalCount = holdings.filter(isHoldingHalal).length - needsPurif;
   const doubtfulCount = holdings.filter(h => h.status === 'doubtful').length;
   const nonHalalCount = holdings.filter(h => !isHoldingHalal(h) && h.status !== 'doubtful').length;

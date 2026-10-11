@@ -285,7 +285,7 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
   const totalBalance    = summary.total_balance    || 0;
   const compliance      = summary.health_percentage ?? 100;
   const isHoldingHalal = h => !!h.is_halal || ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(h.symbol);
-  const needsPurif = holdings.filter(h => isHoldingHalal(h) && (Number(h.purification_due || 0) > 0 || Number(h.non_compliant_ratio || 0) > 0)).length;
+  const needsPurif = holdings.filter(h => isHoldingHalal(h) && Number(h.purification_due || 0) > 0).length;
   const halalCount = holdings.filter(isHoldingHalal).length - needsPurif;
   const nonHalalCount = holdings.filter(h => !isHoldingHalal(h) && h.status !== 'doubtful').length;
   const doubtfulCount = holdings.filter(h => h.status === 'doubtful').length;
@@ -302,7 +302,7 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
     const finalStatus = ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(h.symbol) ? 'halal' : statusRaw;
     const isHalal = finalStatus === 'halal' || finalStatus === 'compliant';
     
-    const needsPurification = Number(h.purification_due || 0) > 0 || Number(h.non_compliant_ratio || 0) > 0;
+    const needsPurification = Number(h.purification_due || 0) > 0;
 
     if (activeFilter === 'halal')    return isHalal && !needsPurification;
     if (activeFilter === 'purify')   return isHalal && needsPurification;

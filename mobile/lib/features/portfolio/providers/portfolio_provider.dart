@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive/hive.dart';
 import 'dart:convert';
+import 'package:dio/dio.dart';
 import '../../../../core/api/api_service.dart';
 
 class PortfolioProvider extends ChangeNotifier {
@@ -159,12 +160,21 @@ class PortfolioProvider extends ChangeNotifier {
       final response = await ApiService().post('portfolio/purify', payload);
 
       if (response.data['status'] == 'success') {
+        // Invalidate stale cache so the purified state is never overwritten by old data
+        try {
+          final box = await Hive.openBox('portfolioBox');
+          await box.delete('portfolio_data');
+        } catch (_) {}
         await fetchPortfolio(); // Refresh portfolio after purification
         return true;
       } else {
         _error = response.data['message'] ?? 'Purification failed';
         return false;
       }
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      _error = (data is Map ? data['message']?.toString() : null) ?? 'Failed to record purification. Please try again.';
+      return false;
     } catch (e) {
       _error = e.toString();
       return false;

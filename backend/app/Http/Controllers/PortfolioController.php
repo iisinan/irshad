@@ -141,8 +141,12 @@ class PortfolioController extends Controller
                         $history = $fundDetails['purification_history'] ?? [];
                         if (!empty($history) && is_array($history)) {
                             usort($history, fn($a, $b) => ($b['year'] ?? 0) <=> ($a['year'] ?? 0));
+                            $latestYear = (int) ($history[0]['year'] ?? 0);
                             $latestPerUnit = $history[0]['per_unit'] ?? 0;
-                            $purificationDue = $isHalal ? $holding->shares * $latestPerUnit : 0;
+                            // Already settled if the user purified after that entry's year began
+                            $alreadyPurified = $latestPurificationDate && $latestYear > 0
+                                && \Carbon\Carbon::parse($latestPurificationDate)->greaterThanOrEqualTo(\Carbon\Carbon::create($latestYear, 1, 1));
+                            $purificationDue = ($isHalal && !$alreadyPurified) ? $holding->shares * $latestPerUnit : 0;
                         } else {
                             $purificationDue = 0;
                         }
@@ -571,16 +575,18 @@ class PortfolioController extends Controller
             }
 
             $totalDividendsReceived = $holding->shares * $trailingDividendsPerShare;
-            
-            $isHalal = strtolower($company->current_status ?? 'doubtful') === 'halal' || strtolower($company->current_status ?? '') === 'compliant';
-            
-            if ($company && $company->asset_class === 'mutual_fund') {
+
+            if ($company->asset_class === 'mutual_fund') {
                 $fundDetails = $company->fund_details ?? [];
                 $history = $fundDetails['purification_history'] ?? [];
                 if (!empty($history) && is_array($history)) {
                     usort($history, fn($a, $b) => ($b['year'] ?? 0) <=> ($a['year'] ?? 0));
+                    $latestYear = (int) ($history[0]['year'] ?? 0);
                     $latestPerUnit = $history[0]['per_unit'] ?? 0;
-                    $purificationDue = $isHalal ? $holding->shares * $latestPerUnit : 0;
+                    // A fund entry is already settled if the user purified after that year began
+                    $alreadyPurified = $latestPurificationDate && $latestYear > 0
+                        && \Carbon\Carbon::parse($latestPurificationDate)->greaterThanOrEqualTo(\Carbon\Carbon::create($latestYear, 1, 1));
+                    $purificationDue = $alreadyPurified ? 0 : $holding->shares * $latestPerUnit;
                 } else {
                     $purificationDue = 0;
                 }
@@ -588,9 +594,11 @@ class PortfolioController extends Controller
                 $purificationDue = $totalDividendsReceived * ($nonCompliantRatio / 100);
             }
 
-            // Always create a purification record, even if amount is 0.
-            // This acts as a timestamp marker so the stock disappears from the
-            // purification tab and does not reappear until new dividends are paid.
+            // Nothing owed -> nothing to record. This keeps history clean, does not burn the
+            // user's monthly purification quota, and makes double-submits idempotent
+            // (a second request sees the first record and computes zero).
+            if (round($purificationDue, 2) <= 0) continue;
+
             \App\Models\Purification::create([
                 'user_id' => $userId,
                 'symbol'  => $symbol,

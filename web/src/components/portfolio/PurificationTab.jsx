@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { ShieldAlert, ArrowRight, Heart, CheckCircle, Sparkles, X, ChevronRight, Calculator, Loader2, Info } from 'lucide-react';
 import CompanyLogo from '../CompanyLogo';
 import api from '../../services/api';
+import localforage from 'localforage';
 import { toastSuccess, toastError } from '../../utils/toast';
 
 const fmt = (n, d = 2) => `₦${Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d })}`;
@@ -544,10 +545,13 @@ export default function PurificationTab({ data, initialSymbol, refreshData, onCl
   }, [initialSymbol, data?.holdings]);
 
   const holdings = data?.holdings || [];
-  const needsPurification = holdings.filter(h => h.purification_due > 0 && !purifiedSymbols.includes(h.symbol));
-  const holdingsNoDividends = holdings.filter(h => Number(h.purification_due) === 0 && Number(h.non_compliant_ratio) > 0);
-  const purificationDue = needsPurification.reduce((acc, h) => acc + Number(h.purification_due), 0);
-  const totalDivs = needsPurification.reduce((acc, h) => acc + Number(h.total_dividends || 0), 0);
+  const dueOf = (h) => { const n = Number(h.purification_due); return Number.isFinite(n) ? n : 0; };
+  const ratioOf = (h) => { const n = Number(h.non_compliant_ratio); return Number.isFinite(n) ? n : 0; };
+  const needsPurification = holdings.filter(h => dueOf(h) > 0 && !purifiedSymbols.includes(h.symbol));
+  // Only halal stocks with impure income but nothing owed yet (non-halal stocks are never "watched")
+  const holdingsNoDividends = holdings.filter(h => !!h.is_halal && dueOf(h) === 0 && ratioOf(h) > 0);
+  const purificationDue = needsPurification.reduce((acc, h) => acc + dueOf(h), 0);
+  const totalDivs = needsPurification.reduce((acc, h) => acc + (Number(h.total_dividends) || 0), 0);
 
   const handleSuccess = (symbol) => {
     setPurifiedSymbols(prev => [...prev, symbol]);
@@ -566,23 +570,30 @@ export default function PurificationTab({ data, initialSymbol, refreshData, onCl
   const [isPurifying, setIsPurifying] = useState(false);
 
   const handleConfirmPurify = async () => {
+    if (isPurifying) return; // guard against double-submit
     setIsPurifying(true);
     try {
+      let optimistic = [];
       if (charityModalTarget?.type === 'all') {
         await api.post('/portfolio/purify', { all: true });
-        setPurifiedSymbols(prev => [...prev, ...needsPurification.map(h => h.symbol)]);
+        optimistic = needsPurification.map(h => h.symbol);
       } else if (charityModalTarget?.type === 'single') {
         await api.post('/portfolio/purify', { symbol: charityModalTarget.symbol });
-        setPurifiedSymbols(prev => [...prev, charityModalTarget.symbol]);
+        optimistic = [charityModalTarget.symbol];
       }
+      // Hide instantly, then let fresh server data take over
+      setPurifiedSymbols(prev => [...prev, ...optimistic]);
+      try { await localforage.removeItem('irshad_portfolio_cache'); } catch (_) {}
       toastSuccess('Purification recorded successfully');
       setCharityModalTarget(null);
       if (refreshData) {
-        refreshData();
+        await refreshData();
+        // Backend is now the source of truth; clearing prevents a later dividend staying hidden
+        setPurifiedSymbols([]);
       }
     } catch (err) {
       console.error('Error purifying:', err);
-      toastError('Failed to record purification. Please try again.');
+      toastError(err?.response?.data?.message || 'Failed to record purification. Please try again.');
     } finally {
       setIsPurifying(false);
     }
@@ -682,9 +693,11 @@ export default function PurificationTab({ data, initialSymbol, refreshData, onCl
             <div style={{ width: '80px', height: '80px', background: '#dcfce7', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', border: '1px solid #86efac', boxShadow: '0 12px 32px rgba(34,197,94,0.15)' }}>
               <CheckCircle size={36} color="#16A34A" fill="rgba(34,197,94,0.2)" />
             </div>
-            <div style={{ fontSize: '1.23rem', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '12px', letterSpacing: '-0.5px' }}>Your Portfolio is Clean!</div>
+            <div style={{ fontSize: '1.23rem', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '12px', letterSpacing: '-0.5px' }}>{holdingsNoDividends.length > 0 ? 'No Pending Purifications' : 'Your Portfolio is Clean!'}</div>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', maxWidth: '400px', lineHeight: 1.6 }}>
-              Alhamdulillah. All your dividend income is derived from Shariah-compliant sources. There are no pending purifications at this time.
+              {holdingsNoDividends.length > 0
+                ? 'Alhamdulillah. There are no pending purifications at this time. We will monitor your watched stocks for any future dividends.'
+                : 'Alhamdulillah. All your dividend income is derived from Shariah-compliant sources. There are no pending purifications at this time.'}
             </p>
           </div>
         ) : (
@@ -724,7 +737,7 @@ export default function PurificationTab({ data, initialSymbol, refreshData, onCl
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '2px' }}>{h.symbol}</div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                    {h.non_compliant_ratio}% impure ratio · No dividends in 12M
+                    {ratioOf(h).toFixed(2)}% impure ratio · No dividends in 12M
                   </div>
                 </div>
                 <div style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#D97706', padding: '6px 12px', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 800 }}>

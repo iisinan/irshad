@@ -24,7 +24,8 @@ class PurificationTab extends StatelessWidget {
         final holdingsNoDividends = provider.holdings.where((h) {
           final due = num.tryParse(h['purification_due']?.toString() ?? '0')?.toDouble() ?? 0.0;
           final ratio = num.tryParse(h['non_compliant_ratio']?.toString() ?? '0')?.toDouble() ?? 0.0;
-          return due == 0 && ratio > 0;
+          // Non-halal / doubtful stocks never belong on the purification tab
+          return h['is_halal'] == true && due == 0 && ratio > 0;
         }).toList();
 
         final totalPurificationDue = holdingsRequiringPurification.fold<double>(0.0, (sum, h) {

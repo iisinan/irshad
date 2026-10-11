@@ -94,7 +94,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
             
             final purificationDue = num.tryParse(h['purification_due']?.toString() ?? '0')?.toDouble() ?? 0.0;
             final nonCompliantRatio = num.tryParse(h['non_compliant_ratio']?.toString() ?? '0')?.toDouble() ?? 0.0;
-            final needsPurification = purificationDue > 0 || nonCompliantRatio > 0;
+            final needsPurification = purificationDue > 0;
             
             if (isHalal) {
               if (needsPurification) needsPurif++;
@@ -118,7 +118,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
             
             final purificationDue = num.tryParse(h['purification_due']?.toString() ?? '0')?.toDouble() ?? 0.0;
             final nonCompliantRatio = num.tryParse(h['non_compliant_ratio']?.toString() ?? '0')?.toDouble() ?? 0.0;
-            final needsPurification = purificationDue > 0 || nonCompliantRatio > 0;
+            final needsPurification = purificationDue > 0;
 
             if (_selectedFilter == 'All') return true;
             if (_selectedFilter == 'Compliant') return isHalal && !needsPurification;
@@ -687,7 +687,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                             ],
                             const Spacer(),
                             if (badgeText == 'Purification Due' || badgeText == 'Watching')
-                              (badgeText == 'Purification Due' && hasBeenPurified)
+                              (badgeText == 'Watching' && hasBeenPurified)
                                   ? Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                       decoration: BoxDecoration(
