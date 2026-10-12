@@ -70,8 +70,9 @@ Route::prefix('v1')->group(function () {
         Route::get('/zakat/prices', [ZakatController::class, 'getPrices']);
     });
 
-    // Paystack Webhook (No auth required)
+    // Webhooks (No auth required)
     Route::post('/webhooks/paystack', [\App\Http\Controllers\SubscriptionController::class, 'webhook']);
+    Route::post('/webhooks/ses', [\App\Http\Controllers\SesWebhookController::class, 'handle']);
 
     Route::middleware('auth:sanctum')->group(function () {
         // Protected Stocks

@@ -6,10 +6,11 @@ use App\Models\Company;
 use App\Models\Dividend;
 use App\Models\Holding;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class DividendPurificationDueNotification extends Notification
+class DividendPurificationDueNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 

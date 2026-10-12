@@ -5,9 +5,10 @@ namespace App\Notifications;
 use App\Models\Company;
 use App\Models\StockStatus;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
-class StockStatusUpdatedNotification extends Notification
+class StockStatusUpdatedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
