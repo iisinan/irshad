@@ -19,13 +19,10 @@ return [
     ],
 
     'ses' => [
-        'key' => env('AWS_ACCESS_KEY_ID'),
-        'secret' => env('AWS_SECRET_ACCESS_KEY'),
-        'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
-    ],
-
-    'resend' => [
-        'key' => env('RESEND_KEY'),
+        'key' => env('AWS_SES_KEY', env('AWS_ACCESS_KEY_ID')),
+        'secret' => env('AWS_SES_SECRET', env('AWS_SECRET_ACCESS_KEY')),
+        'region' => env('AWS_SES_REGION', 'us-east-1'),
+        'endpoint' => env('AWS_SES_ENDPOINT', 'https://email.us-east-1.amazonaws.com'),
     ],
 
     'slack' => [

@@ -13,7 +13,7 @@ class PasswordResetController extends Controller
     use ApiResponder;
 
     /**
-     * Send the password reset link via Resend email.
+     * Send the password reset link via email.
      * Always returns 200 to prevent user enumeration.
      */
     public function sendResetLink(Request $request)

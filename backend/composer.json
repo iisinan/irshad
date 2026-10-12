@@ -7,6 +7,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "aws/aws-sdk-php": "^3.0",
         "doctrine/dbal": "^4.4",
         "google/apiclient": "^2.19",
         "guzzlehttp/guzzle": "^7.12",
@@ -18,8 +19,6 @@
         "livewire/livewire": "^4.3",
         "predis/predis": "^3.5",
         "promphp/prometheus_client_php": "^2.15",
-        "resend/resend-laravel": "^1.4",
-        "resend/resend-php": "^1.5",
         "sentry/sentry-laravel": "^4.27",
         "smalot/pdfparser": "^2.12",
         "spatie/laravel-backup": "^9.3",
