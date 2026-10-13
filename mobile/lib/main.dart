@@ -39,6 +39,7 @@ import 'features/profile/providers/alerts_provider.dart'; // Added
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'core/notifications/notification_service.dart';
 import 'features/stocks/providers/stock_provider.dart';
 import 'features/baskets/providers/basket_provider.dart';
@@ -131,6 +132,7 @@ void main() async {
   // Initialize Firebase safely
   try {
     await Firebase.initializeApp();
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
     await PushNotificationService().initialize();
   } catch (e) {
     debugPrint("Firebase init failed: $e");
