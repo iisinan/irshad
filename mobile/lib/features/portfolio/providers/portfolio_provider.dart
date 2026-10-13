@@ -30,7 +30,10 @@ class PortfolioProvider extends ChangeNotifier {
   }
 
   Future<void> fetchPortfolio() async {
-    const storage = FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
+    const storage = FlutterSecureStorage(
+      aOptions: AndroidOptions(encryptedSharedPreferences: true),
+      iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
+    );
     final token = await storage.read(key: 'access_token');
     
     if (token == null) {

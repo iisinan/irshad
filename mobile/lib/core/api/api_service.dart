@@ -15,7 +15,10 @@ class ApiService {
   factory ApiService() => _instance;
 
   late final Dio dio;
-  final FlutterSecureStorage _storage = const FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
+  final FlutterSecureStorage _storage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+    iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
+  );
 
   /// Global navigator key for redirecting to /login on 401.
   static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();

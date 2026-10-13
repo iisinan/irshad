@@ -27,7 +27,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final LocalAuthentication _localAuth = LocalAuthentication();
   final AuthRepository _authRepository = AuthRepository();
   final ApiService _apiService = ApiService();
-  final FlutterSecureStorage _storage = const FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
+  final FlutterSecureStorage _storage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+    iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
+  );
 
   @override
   void initState() {
