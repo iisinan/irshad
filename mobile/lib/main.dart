@@ -297,6 +297,7 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _selectedIndex = 0;
+  int _unreadAlertsCount = 0;
   final _storage = const FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
     iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
@@ -307,6 +308,18 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     super.initState();
     _checkInitialAuth();
     _checkForUpdate();
+    _fetchUnreadAlerts();
+  }
+
+  Future<void> _fetchUnreadAlerts() async {
+    try {
+      final response = await ApiService().get('notifications/unread-count');
+      if (response.statusCode == 200 && mounted) {
+        setState(() {
+          _unreadAlertsCount = response.data['data']?['count'] ?? response.data['count'] ?? 0;
+        });
+      }
+    } catch (_) {}
   }
 
   Future<void> _checkForUpdate() async {
@@ -426,10 +439,28 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              isSelected ? iconFilled : iconOutlined,
-              color: isSelected ? context.primary : context.textMuted,
-              size: 22,
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Icon(
+                  isSelected ? iconFilled : iconOutlined,
+                  color: isSelected ? context.primary : context.textMuted,
+                  size: 22,
+                ),
+                if (index == 2 && _unreadAlertsCount > 0)
+                  Positioned(
+                    right: -2,
+                    top: -2,
+                    child: Container(
+                      width: 7,
+                      height: 7,
+                      decoration: BoxDecoration(
+                        color: context.haram,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+              ],
             ),
             if (isSelected)
               Text(

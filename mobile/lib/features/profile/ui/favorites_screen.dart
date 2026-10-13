@@ -217,17 +217,31 @@ class _FavoritesScreenState extends State<FavoritesScreen> with WidgetsBindingOb
                       ),
                     ],
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: context.bg,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: context.divider, width: 1.5),
-                    ),
-                    child: Text(
-                      '${_combinedItems.length} Assets',
-                      style: TextStyle(color: context.primary, fontWeight: FontWeight.w900, fontSize: 13),
-                    ),
+                  Row(
+                    children: [
+                      IconButton(
+                        tooltip: 'Notifications Inbox',
+                        icon: Icon(Icons.notifications_none_rounded, color: context.primary, size: 22),
+                        onPressed: () => Navigator.pushNamed(context, '/notifications'),
+                      ),
+                      IconButton(
+                        tooltip: 'Active Price Alerts',
+                        icon: Icon(Icons.price_change_outlined, color: context.primary, size: 22),
+                        onPressed: () => Navigator.pushNamed(context, '/alerts'),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: context.bg,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: context.divider, width: 1.5),
+                        ),
+                        child: Text(
+                          '${_combinedItems.length} Assets',
+                          style: TextStyle(color: context.primary, fontWeight: FontWeight.w900, fontSize: 12),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

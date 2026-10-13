@@ -39,7 +39,11 @@ class ProcessPriceAlerts extends Command
         $triggeredCount = 0;
 
         foreach ($alerts as $alert) {
-            $latestPriceRecord = $alert->company->dailyPrices->first();
+            if (! $alert->user) {
+                continue;
+            }
+
+            $latestPriceRecord = $alert->company?->dailyPrices->first();
 
             if (! $latestPriceRecord) {
                 continue;

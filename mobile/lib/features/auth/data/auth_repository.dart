@@ -224,6 +224,7 @@ class AuthRepository {
   void registerFCMToken() async {
     try {
       final pushService = PushNotificationService();
+      await pushService.initialize();
       final token = await pushService.getToken();
       if (token != null) {
         await _apiService.post('notifications/subscribe', {'fcm_token': token});

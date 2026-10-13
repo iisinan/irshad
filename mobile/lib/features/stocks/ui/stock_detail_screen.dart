@@ -12,6 +12,8 @@ import 'ai_analysis_sheet.dart';
 import 'aaoifi_screening_screen.dart';
 import 'trade_bottom_sheet.dart';
 import 'alert_bottom_sheet.dart';
+import '../../profile/ui/widgets/alert_preferences_bottom_sheet.dart';
+import '../../../core/notifications/notification_service.dart';
 
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 import '../../../core/api/api_service.dart';
@@ -257,32 +259,156 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
   void _onFavorite() async {
     // Press animation
     _alertScaleController.forward().then((_) => _alertScaleController.reverse());
-    setState(() => _isFavoriting = true);
-    
+
     if (_isAlreadyFavorited) {
-      final success = await _activityRepository.removeFromWatchlist(_currentStock['symbol']);
-      if (success && mounted) {
-        _alertPulseController.stop();
-        _alertPulseController.reset();
-        setState(() => _isAlreadyFavorited = false);
-        Provider.of<AppStateProvider>(context, listen: false).decrementWatchlist();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Removed ${_currentStock['symbol']} from alerts'), behavior: SnackBarBehavior.floating, backgroundColor: context.textDark),
-        );
-      }
-    } else {
-      final success = await _activityRepository.addToWatchlist(_currentStock['symbol']);
-      if (success && mounted) {
-        setState(() => _isAlreadyFavorited = true);
-        // Start pulse animation loop
-        _alertPulseController.repeat(reverse: true);
-        Provider.of<AppStateProvider>(context, listen: false).incrementWatchlist();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Added ${_currentStock['symbol']} to alerts'), behavior: SnackBarBehavior.floating, backgroundColor: context.textDark),
-        );
-      }
+      _showNotificationOptions();
+      return;
     }
-    setState(() => _isFavoriting = false);
+
+    setState(() => _isFavoriting = true);
+    final success = await _activityRepository.addToWatchlist(_currentStock['symbol']);
+    if (success && mounted) {
+      setState(() => _isAlreadyFavorited = true);
+      // Start pulse animation loop
+      _alertPulseController.repeat(reverse: true);
+      Provider.of<AppStateProvider>(context, listen: false).incrementWatchlist();
+
+      // Register device FCM token for push notifications
+      try {
+        final pushService = PushNotificationService();
+        await pushService.initialize();
+        final token = await pushService.getToken();
+        if (token != null) {
+          await ApiService().post('notifications/subscribe', {'fcm_token': token});
+        }
+      } catch (_) {}
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Alerts activated for ${_currentStock['symbol']}'),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: context.textDark,
+          action: SnackBarAction(
+            label: 'Set Price Alert',
+            textColor: context.primary,
+            onPressed: () {
+              AlertBottomSheet.show(context, _currentStock);
+            },
+          ),
+        ),
+      );
+    }
+    if (mounted) setState(() => _isFavoriting = false);
+  }
+
+  void _showNotificationOptions() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: context.bgAlt,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${_currentStock['symbol']} Alert Options',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark),
+                ),
+                IconButton(
+                  icon: Icon(Icons.close_rounded, color: context.textMuted),
+                  onPressed: () => Navigator.pop(ctx),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: context.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(Icons.price_change_outlined, color: context.primary, size: 22),
+              ),
+              title: Text('Set Price Target Alert', style: TextStyle(fontWeight: FontWeight.w800, color: context.textDark)),
+              subtitle: Text('Get phone notification when stock reaches a specific price.', style: TextStyle(color: context.textMuted, fontSize: 12)),
+              onTap: () {
+                Navigator.pop(ctx);
+                AlertBottomSheet.show(context, _currentStock);
+              },
+            ),
+            Divider(color: context.divider, height: 16),
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: context.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(Icons.tune_rounded, color: context.primary, size: 22),
+              ),
+              title: Text('Alert Preferences', style: TextStyle(fontWeight: FontWeight.w800, color: context.textDark)),
+              subtitle: Text('Toggle push notifications, compliance risk, and status alerts.', style: TextStyle(color: context.textMuted, fontSize: 12)),
+              onTap: () {
+                Navigator.pop(ctx);
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (_) => AlertPreferencesBottomSheet(
+                    item: _currentStock,
+                    isProduct: false,
+                    onSave: (prefs) async {
+                      await _activityRepository.updateWatchlistAlerts(_currentStock['symbol'], prefs);
+                    },
+                  ),
+                );
+              },
+            ),
+            Divider(color: context.divider, height: 16),
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: context.haram.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(Icons.notifications_off_outlined, color: context.haram, size: 22),
+              ),
+              title: Text('Turn Off Alerts', style: TextStyle(fontWeight: FontWeight.w800, color: context.haram)),
+              subtitle: Text('Remove ${_currentStock['symbol']} from watchlist and stop all notifications.', style: TextStyle(color: context.textMuted, fontSize: 12)),
+              onTap: () async {
+                Navigator.pop(ctx);
+                setState(() => _isFavoriting = true);
+                final success = await _activityRepository.removeFromWatchlist(_currentStock['symbol']);
+                if (success && mounted) {
+                  _alertPulseController.stop();
+                  _alertPulseController.reset();
+                  setState(() => _isAlreadyFavorited = false);
+                  Provider.of<AppStateProvider>(context, listen: false).decrementWatchlist();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Alerts turned off for ${_currentStock['symbol']}'),
+                      behavior: SnackBarBehavior.floating,
+                      backgroundColor: context.textDark,
+                    ),
+                  );
+                }
+                if (mounted) setState(() => _isFavoriting = false);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _runScreening() async {
