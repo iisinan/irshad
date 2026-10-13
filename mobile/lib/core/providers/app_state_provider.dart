@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../features/auth/data/auth_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -33,12 +34,16 @@ class AppStateProvider extends ChangeNotifier {
   }
 
   Future<void> loadProfile() async {
-    final profile = await _authRepository.getProfile();
-    if (profile != null) {
-      _userProfile = profile;
-      _isAuthenticated = true;
-      _syncHawlDate(profile);
-      notifyListeners();
+    try {
+      final profile = await _authRepository.getProfile();
+      if (profile != null) {
+        _userProfile = profile;
+        _isAuthenticated = true;
+        _syncHawlDate(profile);
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint("loadProfile error: $e");
     }
   }
 
@@ -49,14 +54,32 @@ class AppStateProvider extends ChangeNotifier {
   }
 
   Future<void> _syncHawlDate(Map<String, dynamic> profile) async {
-    if (profile.containsKey('preferences') && profile['preferences'] != null) {
-      final hawlDate = profile['preferences']['zakat_hawl_date'];
+    try {
+      dynamic prefsRaw = profile['preferences'];
+      Map<String, dynamic>? prefsMap;
+      
+      if (prefsRaw is Map<String, dynamic>) {
+        prefsMap = prefsRaw;
+      } else if (prefsRaw is Map) {
+        prefsMap = Map<String, dynamic>.from(prefsRaw);
+      } else if (prefsRaw is String && prefsRaw.trim().isNotEmpty) {
+        try {
+          final decoded = jsonDecode(prefsRaw);
+          if (decoded is Map) {
+            prefsMap = Map<String, dynamic>.from(decoded);
+          }
+        } catch (_) {}
+      }
+
+      final hawlDate = prefsMap?['zakat_hawl_date']?.toString();
       final prefs = await SharedPreferences.getInstance();
-      if (hawlDate != null) {
+      if (hawlDate != null && hawlDate.isNotEmpty) {
         await prefs.setString('irshad_zakat_hawl_date', hawlDate);
       } else {
         await prefs.remove('irshad_zakat_hawl_date');
       }
+    } catch (e) {
+      debugPrint("Error syncing hawl date: $e");
     }
   }
 
