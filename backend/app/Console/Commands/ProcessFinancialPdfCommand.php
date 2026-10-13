@@ -77,7 +77,7 @@ Return ONLY a valid JSON object matching this schema exactly, with NO markdown f
         $maxRetries = 3;
         
         for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
-            $this->info("Sending PDF to Gemini 1.5 Pro... Attempt {$attempt} of {$maxRetries}");
+            $this->info("Sending PDF to Gemini... Attempt {$attempt} of {$maxRetries}");
             
             $currentPrompt = $basePrompt;
             if ($attempt > 1 && $manualAssets > 0) {
@@ -86,7 +86,7 @@ Return ONLY a valid JSON object matching this schema exactly, with NO markdown f
 
             $response = Http::timeout(120)->withHeaders([
                 'Content-Type' => 'application/json',
-            ])->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key={$apiKey}", [
+            ])->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key={$apiKey}", [
                 'contents' => [
                     [
                         'parts' => [
@@ -126,10 +126,17 @@ Return ONLY a valid JSON object matching this schema exactly, with NO markdown f
             // Check against manual extraction
             $geminiAssets = $attemptData['total_assets'] ?? 0;
             if ($manualAssets > 0) {
-                // Allow a small 1% margin for rounding differences or units (e.g., 500.5 vs 500)
-                $diff = abs($manualAssets - $geminiAssets) / max($manualAssets, 1);
+                // Allow a small 1% margin for rounding differences or units (e.g., thousands or millions)
+                $matchesUnit = false;
+                foreach ([1, 1000, 1000000] as $multiplier) {
+                    $scaledManual = $manualAssets * $multiplier;
+                    if (abs($scaledManual - $geminiAssets) / max($scaledManual, 1) <= 0.01) {
+                        $matchesUnit = true;
+                        break;
+                    }
+                }
                 
-                if ($diff <= 0.01 || $geminiAssets == $manualAssets) {
+                if ($matchesUnit) {
                     $this->info("Triple Validation PASSED: Gemini and Manual extraction match.");
                     $extractedData = $attemptData;
                     break;
@@ -207,6 +214,7 @@ Return ONLY a valid JSON object matching this schema exactly, with NO markdown f
             $finDataUsed['total_assets'] = $financials->total_assets;
             $finDataUsed['total_debt'] = $financials->total_debt;
             $finDataUsed['cash'] = $financials->cash_and_equivalents;
+            $finDataUsed['cash_and_equivalents'] = $financials->cash_and_equivalents;
             $finDataUsed['interest_bearing_securities'] = $financials->interest_bearing_securities;
             $finDataUsed['interest_income'] = $financials->interest_income;
             $finDataUsed['total_revenue'] = $financials->total_revenue;
