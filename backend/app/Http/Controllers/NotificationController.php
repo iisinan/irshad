@@ -120,14 +120,20 @@ class NotificationController extends Controller
     public function sendTestNotification(Request $request): JsonResponse
     {
         $user = $request->user();
-        $title = $request->input('title', 'Irshad Test Alert 🔔');
-        $message = $request->input('message', 'Your mobile notifications are successfully connected and working!');
+        $title = $request->input('title', 'Price Target Alert: AAPL 🎯');
+        $message = $request->input('message', 'AAPL reached your target price of $240.00! Current price: $242.50.');
+        $category = $request->input('category', 'price_alerts');
+        $actionUrl = $request->input('action_url', '/market/AAPL');
+        $actionLabel = $request->input('action_label', 'View Stock (AAPL)');
+        $meta = $request->input('meta', ['symbol' => 'AAPL', 'target_price' => 240.0, 'current_price' => 242.5]);
 
         // 1. Create in-app notification
         $notification = UserNotification::notify($user->id, $title, $message, [
-            'icon' => '🔔',
-            'category' => 'system',
-            'meta' => ['type' => 'test'],
+            'icon' => $request->input('icon', '📈'),
+            'category' => $category,
+            'action_url' => $actionUrl,
+            'action_label' => $actionLabel,
+            'meta' => $meta,
         ]);
 
         // 2. Dispatch push notification if device token is present
@@ -135,8 +141,9 @@ class NotificationController extends Controller
         if (!empty($user->fcm_token)) {
             $pushService = app(\App\Services\PushNotificationService::class);
             $pushSent = $pushService->sendToUser($user, $title, $message, [
-                'type' => 'test',
+                'type' => $category,
                 'notification_id' => (string) $notification->id,
+                'symbol' => $meta['symbol'] ?? 'AAPL',
             ]);
         }
 
