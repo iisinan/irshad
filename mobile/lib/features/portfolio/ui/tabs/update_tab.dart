@@ -196,10 +196,11 @@ class _UpdateTabState extends State<UpdateTab> {
   }
 
   bool _isTabLocked(String tabId, BuildContext context) {
+    if (tabId == 'news' || tabId == 'inbox') return false;
     final userTier = Provider.of<AppStateProvider>(context, listen: false).userProfile?['tier']?['slug'] ?? 'free';
     if (userTier == 'max') return false;
     if (userTier == 'pro') return tabId == 'compliance';
-    return tabId != 'news';
+    return true;
   }
 
   Widget _buildSubTabNavigation(BuildContext context, int unreadCount) {

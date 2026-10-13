@@ -6,8 +6,8 @@ import 'package:hive/hive.dart';
 import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'package:irshad_mobile/core/utils/suggest_modal_util.dart';
-import '../../../stocks/ui/stock_detail_screen.dart';
-import '../../../../core/notifications/notification_service.dart';
+import 'package:irshad_mobile/features/stocks/ui/stock_detail_screen.dart';
+import 'package:irshad_mobile/core/notifications/notification_service.dart';
 
 class UpdatesInboxTab extends StatefulWidget {
   const UpdatesInboxTab({super.key});
@@ -586,18 +586,11 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
 
     final unreadCount = filteredNotifications.where((n) => n['read_at'] == null).length;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: RefreshIndicator(
-        color: context.primary,
-        onRefresh: () => _fetchInbox(),
-        child: CustomScrollView(
-          controller: _scrollController,
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            // 1. Controls bar
-            SliverToBoxAdapter(
-              child: Padding(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // 1. Controls bar
+        Padding(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -710,11 +703,9 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
                   ],
                 ),
               ),
-            ),
 
             // 2. Categories Filter Chips
-            SliverToBoxAdapter(
-              child: SingleChildScrollView(
+            SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
@@ -752,13 +743,10 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
                   }).toList(),
                 ),
               ),
-            ),
 
             // 3. Notification List or Empty State
             if (filteredNotifications.isEmpty)
-              SliverFillRemaining(
-                hasScrollBody: false,
-                child: Padding(
+              Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 48),
                   child: Center(
                     child: Column(
@@ -802,8 +790,10 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                        Wrap(
+                          alignment: WrapAlignment.center,
+                          spacing: 10,
+                          runSpacing: 10,
                           children: [
                             OutlinedButton.icon(
                               onPressed: () => Navigator.pushNamed(context, '/alerts'),
@@ -815,7 +805,6 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
                                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                               ),
                             ),
-                            const SizedBox(width: 10),
                             ElevatedButton.icon(
                               onPressed: _sendTestAlert,
                               icon: const Icon(Icons.notification_add_outlined, size: 16, color: Colors.white),
@@ -832,14 +821,14 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
                       ],
                     ),
                   ),
-                ),
-              )
+                )
             else
-              SliverPadding(
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
                 padding: const EdgeInsets.fromLTRB(20, 10, 20, 40),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
+                itemCount: filteredNotifications.length,
+                itemBuilder: (context, index) {
                       final item = filteredNotifications[index];
                       final isUnread = item['read_at'] == null;
                       final category = item['category'] ?? 'system';
@@ -1114,22 +1103,15 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
                         ),
                       );
                     },
-                    childCount: filteredNotifications.length,
                   ),
-                ),
-              ),
 
             if (_isLoadingMore)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Center(child: CircularProgressIndicator(color: context.primary)),
-                ),
+              Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Center(child: CircularProgressIndicator(color: context.primary)),
               ),
           ],
-        ),
-      ),
-    );
+        );
   }
 
   void _showDigestViewer(BuildContext context, Map<String, dynamic> meta) {

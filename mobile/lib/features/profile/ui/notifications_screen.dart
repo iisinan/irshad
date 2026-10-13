@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
-import '../../../core/api/api_service.dart';
-import '../../../core/notifications/notification_service.dart';
-import '../../portfolio/ui/tabs/updates/updates_inbox_tab.dart';
+import 'package:irshad_mobile/core/api/api_service.dart';
+import 'package:irshad_mobile/core/notifications/notification_service.dart';
+import 'package:irshad_mobile/features/portfolio/ui/tabs/updates/updates_inbox_tab.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
