@@ -10,6 +10,7 @@ import 'updates/updates_dividends_tab.dart';
 import 'resources_tab.dart';
 import 'updates/updates_compliance_tab.dart';
 import 'updates/updates_ipo_tab.dart';
+import 'updates/updates_inbox_tab.dart';
 import '../widgets/islamic_quote_widget.dart';
 import 'package:irshad_mobile/core/widgets/upgrade_paywall_bottom_sheet.dart';
 
@@ -47,6 +48,7 @@ class _UpdateTabState extends State<UpdateTab> {
 
   final List<Map<String, dynamic>> _tabs = [
     {'id': 'news', 'label': 'News & Insights', 'icon': Icons.newspaper_rounded},
+    {'id': 'inbox', 'label': 'Inbox', 'icon': Icons.notifications_none_rounded},
     {'id': 'resources', 'label': 'Resources', 'icon': Icons.menu_book_rounded},
     {'id': 'compliance', 'label': 'Compliance Changes', 'icon': Icons.shield_outlined},
     {'id': 'ipo', 'label': 'IPO', 'icon': Icons.rocket_launch_outlined},
@@ -283,6 +285,8 @@ class _UpdateTabState extends State<UpdateTab> {
     switch (_activeTabId) {
       case 'news':
         return const UpdatesNewsTab();
+      case 'inbox':
+        return const UpdatesInboxTab();
       case 'compliance':
         return const UpdatesComplianceTab();
       case 'ipo':

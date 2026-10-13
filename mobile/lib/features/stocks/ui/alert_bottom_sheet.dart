@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../core/api/api_service.dart';
 
+import '../../../core/notifications/notification_service.dart';
+
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 class AlertBottomSheet extends StatefulWidget {
   final Map<String, dynamic> stock;
@@ -57,6 +59,16 @@ class _AlertBottomSheetState extends State<AlertBottomSheet> {
       await _apiService.post('stocks/$symbol/alerts', {
         'target_price': target,
       });
+
+      // Ensure device is registered for phone push notifications
+      try {
+        final pushService = PushNotificationService();
+        await pushService.initialize();
+        final token = await pushService.getToken();
+        if (token != null) {
+          await _apiService.post('notifications/subscribe', {'fcm_token': token});
+        }
+      } catch (_) {}
 
       if (mounted) {
         Navigator.pop(context);

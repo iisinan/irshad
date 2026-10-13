@@ -76,12 +76,12 @@ class ProcessPriceAlerts extends Command
                 }
 
                 // In-app notification
-                $alert->user->notifications()->create([
-                    'title' => "Price Alert: {$symbol}",
-                    'message' => $message,
-                    'type' => 'price_alert',
-                    'data' => ['symbol' => $symbol, 'price' => $currentPrice],
-                    'is_read' => false,
+                \App\Models\UserNotification::notify($alert->user_id, "Price Alert: {$symbol}", $message, [
+                    'icon' => '📈',
+                    'category' => 'price_alerts',
+                    'action_url' => "/market/{$symbol}",
+                    'action_label' => 'View Stock',
+                    'meta' => ['symbol' => $symbol, 'price' => $currentPrice],
                 ]);
 
                 // Mark alert as inactive so it doesn't trigger repeatedly

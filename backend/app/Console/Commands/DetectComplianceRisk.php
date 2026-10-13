@@ -21,7 +21,7 @@ class DetectComplianceRisk extends Command
     {
         $this->info('Checking compliance risks...');
 
-        $companies = Company::with('aaoifiScreenings')->whereHas('stockStatus', function($q) {
+        $companies = Company::with('aaoifiScreenings')->whereHas('status', function($q) {
             $q->where('status', 'halal');
         })->get();
 

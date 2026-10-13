@@ -8,6 +8,8 @@ import '../stocks/ui/stock_screener_screen.dart';
 import '../baskets/ui/baskets_screen.dart';
 import 'ui/funds_screen.dart';
 
+import '../../core/api/api_service.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -16,6 +18,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  int _unreadNotifications = 0;
+
   @override
   void initState() {
     super.initState();
@@ -25,7 +29,19 @@ class _HomeScreenState extends State<HomeScreen> {
       if (appState.isAuthenticated && appState.userProfile == null) {
         appState.loadProfile();
       }
+      _fetchUnreadNotifications();
     });
+  }
+
+  Future<void> _fetchUnreadNotifications() async {
+    try {
+      final response = await ApiService().get('notifications/unread-count');
+      if (response.statusCode == 200 && mounted) {
+        setState(() {
+          _unreadNotifications = response.data['data']?['count'] ?? response.data['count'] ?? 0;
+        });
+      }
+    } catch (_) {}
   }
 
   @override
@@ -52,16 +68,56 @@ class _HomeScreenState extends State<HomeScreen> {
                         letterSpacing: -0.5,
                       ),
                     ),
-                    GestureDetector(
-                      onTap: () => Navigator.pushNamed(context, '/profile'),
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: context.bgAlt,
-                          shape: BoxShape.circle,
+                    Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () async {
+                            await Navigator.pushNamed(context, '/notifications');
+                            _fetchUnreadNotifications();
+                          },
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: context.bgAlt,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(Icons.notifications_none_rounded, color: context.textDark, size: 22),
+                              ),
+                              if (_unreadNotifications > 0)
+                                Positioned(
+                                  right: 0,
+                                  top: 0,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      color: context.haram,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Text(
+                                      _unreadNotifications > 9 ? '9+' : _unreadNotifications.toString(),
+                                      style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
-                        child: Icon(Icons.person_outline_rounded, color: context.textDark, size: 22),
-                      ),
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          onTap: () => Navigator.pushNamed(context, '/profile'),
+                          child: Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: context.bgAlt,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(Icons.person_outline_rounded, color: context.textDark, size: 22),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

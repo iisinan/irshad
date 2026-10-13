@@ -247,12 +247,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/alerts/{id}', [PriceAlertController::class, 'destroy']);
 
         // Notifications (Inbox)
+        Route::get('/notifications', [NotificationController::class, 'inbox']);
         Route::get('/notifications/inbox', [NotificationController::class, 'inbox']);
         Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
         Route::put('/notifications/read-all', [NotificationController::class, 'markAllRead']);
         Route::put('/notifications/{id}/read', [NotificationController::class, 'markRead']);
         Route::put('/notifications/{id}/archive', [NotificationController::class, 'archive']);
         Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
+        Route::post('/notifications/test', [NotificationController::class, 'sendTestNotification']);
         Route::post('/notifications/subscribe', function (Request $request) {
             $request->validate(['fcm_token' => 'required|string']);
             auth()->user()->update(['fcm_token' => $request->fcm_token]);

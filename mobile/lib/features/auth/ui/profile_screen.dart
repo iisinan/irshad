@@ -317,6 +317,19 @@ Color get cardBg => context.bgAlt;
             leading: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(color: context.bg, borderRadius: BorderRadius.circular(8)),
+              child: Icon(Icons.notifications_none_rounded, color: context.textMuted, size: 20),
+            ),
+            title: Text('Notifications', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: context.textDark)),
+            trailing: Icon(Icons.arrow_forward_ios_rounded, size: 14, color: context.textMuted),
+            onTap: () {
+              Navigator.pushNamed(context, '/notifications');
+            },
+          ),
+          Divider(color: context.divider, height: 1, indent: 56),
+          ListTile(
+            leading: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(color: context.bg, borderRadius: BorderRadius.circular(8)),
               child: Icon(Icons.notifications_active_outlined, color: context.textMuted, size: 20),
             ),
             title: Text('My Alerts', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: context.textDark)),

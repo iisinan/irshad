@@ -84,6 +84,11 @@ class Company extends Model
         return $this->hasOne(AaoifiScreening::class);
     }
 
+    public function aaoifiScreenings(): HasMany
+    {
+        return $this->hasMany(AaoifiScreening::class);
+    }
+
     public function dailyPrices(): HasMany
     {
         return $this->hasMany(DailyPrice::class);

@@ -96,11 +96,14 @@ class NotificationService
                         'title' => $notification['title'],
                         'body' => $notification['body'],
                     ],
-                    'data' => $notification['data'] ?? [],
+                    'data' => array_map(fn($v) => is_scalar($v) ? (string)$v : json_encode($v), $notification['data'] ?? []),
                     'android' => [
                         'priority' => 'high',
                         'notification' => [
+                            'channel_id' => 'irshad_alerts_channel',
                             'sound' => 'default',
+                            'default_sound' => true,
+                            'default_vibrate_timings' => true,
                         ]
                     ],
                     'apns' => [

@@ -94,8 +94,11 @@ class DetectComplianceChanges extends Command
 
         $allUserIds = $watchlistUserIds->merge($holdingUserIds)->unique();
 
-        foreach ($allUserIds as $userId) {
-            UserNotification::notify($userId, $title, $message, [
+        $pushService = app(\App\Services\PushNotificationService::class);
+        $users = \App\Models\User::whereIn('id', $allUserIds)->get();
+
+        foreach ($users as $user) {
+            UserNotification::notify($user->id, $title, $message, [
                 'icon' => $icon,
                 'category' => 'screening',
                 'action_url' => "/market/{$company->symbol}",
@@ -106,8 +109,15 @@ class DetectComplianceChanges extends Command
                     'new_status' => $change->new_status,
                 ],
             ]);
+
+            if ($user->fcm_token) {
+                $pushService->sendToUser($user, $title, $message, [
+                    'type' => 'compliance',
+                    'symbol' => $company->symbol,
+                ]);
+            }
         }
 
-        $this->info("Notified {$allUserIds->count()} user(s).");
+        $this->info("Notified {$allUserIds->count()} user(s) via in-app and push notifications.");
     }
 }

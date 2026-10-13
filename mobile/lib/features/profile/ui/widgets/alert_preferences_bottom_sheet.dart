@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
+import '../../../../core/notifications/notification_service.dart';
+import '../../../../core/api/api_service.dart';
 
 class AlertPreferencesBottomSheet extends StatefulWidget {
   final Map<String, dynamic> item;
@@ -63,6 +65,18 @@ class _AlertPreferencesBottomSheetState extends State<AlertPreferencesBottomShee
     }
 
     setState(() => _isSaving = true);
+
+    if (prefs['alert_push'] == true) {
+      try {
+        final pushService = PushNotificationService();
+        await pushService.initialize();
+        final token = await pushService.getToken();
+        if (token != null) {
+          await ApiService().post('notifications/subscribe', {'fcm_token': token});
+        }
+      } catch (_) {}
+    }
+
     await widget.onSave(prefs);
     if (mounted) {
       Navigator.pop(context);

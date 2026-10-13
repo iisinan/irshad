@@ -112,4 +112,41 @@ class NotificationController extends Controller
 
         return response()->json(['data' => ['count' => $count]]);
     }
+
+    /**
+     * POST /v1/notifications/test
+     * Dispatch an immediate test notification to the user's phone and inbox.
+     */
+    public function sendTestNotification(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $title = $request->input('title', 'Irshad Test Alert 🔔');
+        $message = $request->input('message', 'Your mobile notifications are successfully connected and working!');
+
+        // 1. Create in-app notification
+        $notification = UserNotification::notify($user->id, $title, $message, [
+            'icon' => '🔔',
+            'category' => 'system',
+            'meta' => ['type' => 'test'],
+        ]);
+
+        // 2. Dispatch push notification if device token is present
+        $pushSent = false;
+        if (!empty($user->fcm_token)) {
+            $pushService = app(\App\Services\PushNotificationService::class);
+            $pushSent = $pushService->sendToUser($user, $title, $message, [
+                'type' => 'test',
+                'notification_id' => (string) $notification->id,
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => $pushSent 
+                ? 'Test notification sent to your phone!' 
+                : 'In-app notification created. To receive phone alerts, ensure push notifications are allowed on your device.',
+            'push_sent' => $pushSent,
+            'notification' => $notification,
+        ]);
+    }
 }
