@@ -120,40 +120,68 @@ void callbackDispatcher() {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env");
 
-  // Initialize Firebase
+  // Safely load environment variables
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    debugPrint("Failed to load .env: $e");
+  }
+
+  // Initialize Firebase safely
   try {
     await Firebase.initializeApp();
     await PushNotificationService().initialize();
   } catch (e) {
-    debugPrint("Firebase init failed (missing google-services.json?): $e");
+    debugPrint("Firebase init failed: $e");
   }
 
-  Workmanager().initialize(
-    callbackDispatcher, 
-    isInDebugMode: true 
+  // Background Workmanager is Android-only; registerPeriodicTask is unsupported on iOS
+  if (Platform.isAndroid) {
+    try {
+      Workmanager().initialize(
+        callbackDispatcher,
+      );
+
+      Workmanager().registerPeriodicTask(
+        "syncTask",
+        "backgroundSync",
+        frequency: const Duration(minutes: 15),
+      );
+    } catch (e) {
+      debugPrint("Workmanager init failed: $e");
+    }
+  }
+
+  // Initialize Hive cache safely
+  try {
+    await Hive.initFlutter();
+    await Hive.openBox('api_cache');
+  } catch (e) {
+    debugPrint("Hive init error: $e");
+  }
+
+  bool hasSeenOnboarding = false;
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    hasSeenOnboarding = prefs.getBool('hasSeenOnboarding') ?? false;
+  } catch (e) {
+    debugPrint("SharedPreferences error: $e");
+  }
+
+  final storage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+    iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
   );
 
-  Workmanager().registerPeriodicTask(
-    "syncTask",
-    "backgroundSync",
-    frequency: const Duration(minutes: 15),
-  );
-
-  await Hive.initFlutter();
-  await Hive.openBox('api_cache');
-
-  final prefs = await SharedPreferences.getInstance();
-  final hasSeenOnboarding = prefs.getBool('hasSeenOnboarding') ?? false;
-
-  final storage = const FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
   String? token;
   try {
     token = await storage.read(key: 'access_token');
   } catch (e) {
-    debugPrint('FlutterSecureStorage read failed (likely Keystore corruption): $e');
-    await storage.deleteAll();
+    debugPrint('FlutterSecureStorage read failed: $e');
+    try {
+      await storage.deleteAll();
+    } catch (_) {}
   }
   final bool hasToken = token != null && token.isNotEmpty;
 
@@ -163,7 +191,12 @@ void main() async {
       : (hasToken ? '/main' : '/welcome');
 
   final appState = AppStateProvider();
-  await appState.loadThemeMode();
+  try {
+    await appState.loadThemeMode();
+  } catch (e) {
+    debugPrint("loadThemeMode error: $e");
+  }
+
   if (hasToken) {
     appState.setAuthenticated(true);
   }
@@ -262,7 +295,10 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _selectedIndex = 0;
-  final _storage = const FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
+  final _storage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+    iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
+  );
 
   @override
   void initState() {
