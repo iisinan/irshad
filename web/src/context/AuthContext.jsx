@@ -34,7 +34,11 @@ export const AuthProvider = ({ children }) => {
           // Pre-load from cache for instant render
           const cachedUser = localStorage.getItem('auth_user');
           if (cachedUser) {
-            setUser(JSON.parse(cachedUser));
+            const parsed = JSON.parse(cachedUser);
+            setUser(parsed);
+            if (parsed?.preferences?.zakat_hawl_date) {
+              localStorage.setItem('irshad_zakat_hawl_date', parsed.preferences.zakat_hawl_date);
+            }
             setLoading(false);
           }
 
@@ -42,6 +46,9 @@ export const AuthProvider = ({ children }) => {
           const userData = profile.data || profile;
           setUser(userData);
           localStorage.setItem('auth_user', JSON.stringify(userData));
+          if (userData?.preferences?.zakat_hawl_date) {
+            localStorage.setItem('irshad_zakat_hawl_date', userData.preferences.zakat_hawl_date);
+          }
 
           const currentPath = window.location.pathname;
           if (currentPath === '/login' || currentPath === '/register') {

@@ -1273,8 +1273,12 @@ class _AddHoldingBottomSheetState extends State<AddHoldingBottomSheet> with Sing
 
     if (success) {
       final prefs = await SharedPreferences.getInstance();
-      final hasZakatDate = prefs.getString('ZAKAT_DATE_KEY') != null;
-      if (!hasZakatDate) {
+      const zakatDateKey = 'irshad_zakat_hawl_date';
+      final existingDate = prefs.getString(zakatDateKey);
+      final hasZakatDate = existingDate != null && existingDate.trim().isNotEmpty;
+      final isDismissed = prefs.getBool('irshad_zakat_date_dismissed') ?? false;
+
+      if (!hasZakatDate && !isDismissed) {
         String firstPurchaseDate = payload.firstWhere((p) => p['purchase_date'] != null, orElse: () => {'purchase_date': DateTime.now().toString().substring(0, 10)})['purchase_date'];
         if (mounted) _showZakatDatePrompt(firstPurchaseDate);
       } else {
@@ -1317,8 +1321,10 @@ class _AddHoldingBottomSheetState extends State<AddHoldingBottomSheet> with Sing
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () {
-                        Navigator.pop(ctx);
+                      onPressed: () async {
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.setBool('irshad_zakat_date_dismissed', true);
+                        if (mounted) Navigator.pop(ctx);
                         if (mounted) Navigator.pop(this.context);
                       },
                       style: OutlinedButton.styleFrom(

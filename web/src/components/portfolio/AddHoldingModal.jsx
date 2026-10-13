@@ -233,8 +233,19 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
     if (!success) return; // if it failed, do not proceed to close or prompt
 
     // Decide whether to show zakat prompt
-    const zakatAlreadySet = !!localStorage.getItem(ZAKAT_DATE_KEY);
+    let profileHawlDate = null;
+    try {
+      const authUser = JSON.parse(localStorage.getItem('auth_user') || '{}');
+      profileHawlDate = authUser?.preferences?.zakat_hawl_date;
+    } catch (_) {}
+
+    const localHawlDate = localStorage.getItem(ZAKAT_DATE_KEY);
+    const zakatAlreadySet = !!localHawlDate || !!profileHawlDate;
     const alreadyAsked = !!localStorage.getItem(ZAKAT_ASKED_KEY);
+
+    if (profileHawlDate && !localHawlDate) {
+      localStorage.setItem(ZAKAT_DATE_KEY, profileHawlDate);
+    }
 
     if (!zakatAlreadySet && !alreadyAsked) {
       // Use the earliest purchase date among new holdings
@@ -254,8 +265,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
   };
 
   const handleZakatNo = () => {
-    // Mark as asked so we will ask again next time they add a holding
-    // (we intentionally do NOT set ZAKAT_ASKED_KEY permanently — we ask each session)
+    localStorage.setItem(ZAKAT_ASKED_KEY, 'dismissed');
     setZakatPromptDate(null);
     onClose();
   };
