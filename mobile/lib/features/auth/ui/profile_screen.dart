@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/providers/app_state_provider.dart';
 import '../data/auth_repository.dart';
 import '../../portfolio/ui/zakat_calculator_screen.dart';
@@ -18,6 +19,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _authRepository = AuthRepository();
   bool _isLoading = true;
   String _selectedLanguage = 'English';
+  bool _notificationsEnabled = true;
 
   final List<String> _languages = ['English', 'Hausa', 'Yoruba', 'Igbo'];
 
@@ -27,6 +29,42 @@ Color get cardBg => context.bgAlt;
   void initState() {
     super.initState();
     _fetchProfile();
+    _loadPreferences();
+  }
+
+  Future<void> _loadPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() {
+        _notificationsEnabled = prefs.getBool('notifications_enabled') ?? true;
+        _selectedLanguage = prefs.getString('language') ?? 'English';
+      });
+    }
+  }
+
+  Future<void> _toggleNotifications(bool val) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('notifications_enabled', val);
+    setState(() => _notificationsEnabled = val);
+    if (val) {
+      _authRepository.registerFCMToken();
+    } else {
+      await _authRepository.unsubscribeFCMToken();
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            val ? 'Push notifications activated' : 'Push notifications deactivated',
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+          backgroundColor: val ? context.primary : const Color(0xFF64748B),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   void _fetchProfile() async {
@@ -43,8 +81,8 @@ Color get cardBg => context.bgAlt;
     await _authRepository.logout();
     if (mounted) {
       Provider.of<PortfolioProvider>(context, listen: false).clear();
+      Navigator.pushReplacementNamed(context, '/login');
     }
-    Navigator.pushReplacementNamed(context, '/login');
   }
 
   @override
@@ -95,7 +133,7 @@ Color get cardBg => context.bgAlt;
                       const SizedBox(height: 12),
                       _buildPreferencesCard(),
 
-                      if (user?['role'] == 'admin' || user?['role'] == 'superadmin' || user?['is_admin'] == true) ...[
+                      if (user['role'] == 'admin' || user['role'] == 'superadmin' || user['is_admin'] == true) ...[
                         const SizedBox(height: 32),
                         _buildSectionHeader('Administration'),
                         const SizedBox(height: 12),
@@ -181,10 +219,12 @@ Color get cardBg => context.bgAlt;
           ),
           ElevatedButton(
             onPressed: () async {
+              final navigator = Navigator.of(context);
               Navigator.pop(ctx);
               setState(() => _isLoading = true);
               await _authRepository.deleteAccount();
-              if (mounted) Navigator.pushReplacementNamed(context, '/login');
+              if (!mounted) return;
+              navigator.pushReplacementNamed('/login');
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: context.haram,
@@ -282,10 +322,19 @@ Color get cardBg => context.bgAlt;
           Divider(color: context.divider, height: 1, indent: 56),
           _buildInfoTile(Icons.location_on_outlined, 'Location', user?['location'] ?? 'Nigeria'),
           Divider(color: context.divider, height: 1, indent: 56),
-          _buildInfoTile(Icons.calendar_today_outlined, 'Member Since', 
+          _buildInfoTile(
+            Icons.calendar_today_outlined,
+            'Member Since', 
             user?['created_at'] != null 
-              ? DateFormat('MMMM yyyy').format(DateTime.parse(user!['created_at']))
-              : 'March 2024'),
+              ? () {
+                  try {
+                    return DateFormat('MMMM yyyy').format(DateTime.parse(user!['created_at'].toString()).toLocal());
+                  } catch (_) {
+                    return DateFormat('MMMM yyyy').format(DateTime.now());
+                  }
+                }()
+              : DateFormat('MMMM yyyy').format(DateTime.now()),
+          ),
         ],
       ),
     );
@@ -345,37 +394,82 @@ Color get cardBg => context.bgAlt;
 
   Widget _buildPreferencesCard() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
         color: context.bgAlt,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: context.divider),
       ),
-      child: Row(
+      child: Column(
         children: [
-          Icon(Icons.language_rounded, color: context.textMuted, size: 20),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Text(
-              'Preferred Language',
+          // Push Notifications activate/deactivate toggle
+          ListTile(
+            leading: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: _notificationsEnabled ? context.primary.withValues(alpha: 0.1) : context.bg,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                _notificationsEnabled ? Icons.notifications_active_rounded : Icons.notifications_off_outlined,
+                color: _notificationsEnabled ? context.primary : context.textMuted,
+                size: 20,
+              ),
+            ),
+            title: Text(
+              'Push Notifications',
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: context.textDark),
             ),
+            subtitle: Text(
+              _notificationsEnabled ? 'Active (stocks, compliance & digest)' : 'Deactivated',
+              style: TextStyle(fontSize: 12, color: context.textMuted),
+            ),
+            trailing: Switch.adaptive(
+              value: _notificationsEnabled,
+              activeTrackColor: context.primary,
+              onChanged: _toggleNotifications,
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           ),
-          DropdownButton<String>(
-            value: _selectedLanguage,
-            dropdownColor: context.bgAlt,
-            underline: const SizedBox(),
-            icon: Icon(Icons.keyboard_arrow_down_rounded, color: context.textMuted),
-            style: TextStyle(color: context.primary, fontWeight: FontWeight.w800, fontSize: 14),
-            items: _languages.map((String lang) {
-              return DropdownMenuItem<String>(
-                value: lang,
-                child: Text(lang),
-              );
-            }).toList(),
-            onChanged: (lang) {
-              if (lang != null) setState(() => _selectedLanguage = lang);
-            },
+          Divider(color: context.divider, height: 1, indent: 56),
+          // Preferred Language
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(color: context.bg, borderRadius: BorderRadius.circular(8)),
+                  child: Icon(Icons.language_rounded, color: context.textMuted, size: 20),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    'Preferred Language',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: context.textDark),
+                  ),
+                ),
+                DropdownButton<String>(
+                  value: _selectedLanguage,
+                  dropdownColor: context.bgAlt,
+                  underline: const SizedBox(),
+                  icon: Icon(Icons.keyboard_arrow_down_rounded, color: context.textMuted),
+                  style: TextStyle(color: context.primary, fontWeight: FontWeight.w800, fontSize: 14),
+                  items: _languages.map((String lang) {
+                    return DropdownMenuItem<String>(
+                      value: lang,
+                      child: Text(lang),
+                    );
+                  }).toList(),
+                  onChanged: (lang) async {
+                    if (lang != null) {
+                      setState(() => _selectedLanguage = lang);
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setString('language', lang);
+                    }
+                  },
+                ),
+              ],
+            ),
           ),
         ],
       ),
