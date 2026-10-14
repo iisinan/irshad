@@ -6,8 +6,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
 import '../../../core/providers/app_state_provider.dart';
 import '../../auth/data/auth_repository.dart';
-import 'package:local_auth/local_auth.dart';
-import 'package:flutter/services.dart';
 
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 class SettingsScreen extends StatefulWidget {
@@ -20,11 +18,9 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _notificationsEnabled = true;
   bool _digestEnabled = true;
-  bool _biometricsEnabled = false;
   String _selectedLanguage = 'English';
   final List<String> _languages = ['English', 'Hausa', 'Yoruba', 'Igbo'];
   
-  final LocalAuthentication _localAuth = LocalAuthentication();
   final AuthRepository _authRepository = AuthRepository();
   final ApiService _apiService = ApiService();
   final FlutterSecureStorage _storage = const FlutterSecureStorage(
@@ -41,48 +37,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _biometricsEnabled = prefs.getBool('biometrics_enabled') ?? false;
       _notificationsEnabled = prefs.getBool('notifications_enabled') ?? true;
       _digestEnabled = prefs.getBool('digest_enabled') ?? true;
       _selectedLanguage = prefs.getString('language') ?? 'English';
     });
-  }
-
-  Future<void> _toggleBiometrics(bool val) async {
-    if (val) {
-      try {
-        final canCheckBiometrics = await _localAuth.canCheckBiometrics;
-        final isDeviceSupported = await _localAuth.isDeviceSupported();
-        
-        if (canCheckBiometrics && isDeviceSupported) {
-          final authenticated = await _localAuth.authenticate(
-            localizedReason: 'Authenticate to enable biometric login',
-            biometricOnly: true,
-            persistAcrossBackgrounding: true,
-          );
-          if (authenticated) {
-            final prefs = await SharedPreferences.getInstance();
-            await prefs.setBool('biometrics_enabled', true);
-            setState(() => _biometricsEnabled = true);
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Biometric login enabled.')));
-            }
-          }
-        } else {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Biometrics not supported on this device.')));
-          }
-        }
-      } on PlatformException catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Biometrics error: ${e.message}')));
-        }
-      }
-    } else {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('biometrics_enabled', false);
-      setState(() => _biometricsEnabled = false);
-    }
   }
 
   Future<void> _launchUrl(String urlString) async {
@@ -253,12 +211,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 icon: Icons.lock_outline_rounded,
                 title: 'Change Password',
                 onTap: () => Navigator.pushNamed(context, '/edit_profile'),
-              ),
-              _buildSwitchTile(
-                icon: Icons.fingerprint_rounded,
-                title: 'Biometric Login',
-                value: _biometricsEnabled,
-                onChanged: _toggleBiometrics,
               ),
             ]),
 

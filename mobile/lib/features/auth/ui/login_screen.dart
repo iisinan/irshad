@@ -3,8 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/providers/app_state_provider.dart';
-import 'package:local_auth/local_auth.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../data/auth_repository.dart';
 import 'forgot_password_screen.dart';
@@ -23,7 +21,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _authRepository = AuthRepository();
-  final LocalAuthentication _localAuth = LocalAuthentication();
   final _secureStorage = const FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
     iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
@@ -32,14 +29,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   late AnimationController _animationController;
   bool _isLoading = false;
   bool _obscurePassword = true;
-  bool _biometricsEnabled = false;
 
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 1000));
     _animationController.forward();
-    _checkBiometrics();
   }
 
   @override
@@ -48,84 +43,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
-  }
-
-  Future<void> _checkBiometrics() async {
-    final prefs = await SharedPreferences.getInstance();
-    final enabled = prefs.getBool('biometrics_enabled') ?? false;
-    
-    final loginMethod = await _secureStorage.read(key: 'login_method');
-    final savedEmail = await _secureStorage.read(key: 'saved_email');
-    final savedPassword = await _secureStorage.read(key: 'saved_password');
-    
-    final hasCreds = loginMethod == 'google' || (savedEmail != null && savedPassword != null);
-    
-    if (enabled && hasCreds) {
-      final canCheckBiometrics = await _localAuth.canCheckBiometrics;
-      final isDeviceSupported = await _localAuth.isDeviceSupported();
-      if (canCheckBiometrics && isDeviceSupported) {
-        setState(() {
-          _biometricsEnabled = true;
-        });
-        // Auto-prompt on launch
-        _authenticateWithBiometrics();
-      }
-    }
-  }
-
-  Future<void> _authenticateWithBiometrics() async {
-    try {
-      final authenticated = await _localAuth.authenticate(
-        localizedReason: 'Authenticate to log in securely',
-        biometricOnly: true,
-        persistAcrossBackgrounding: true,
-      );
-      
-      if (authenticated) {
-        setState(() => _isLoading = true);
-        final loginMethod = await _secureStorage.read(key: 'login_method');
-        
-        if (loginMethod == 'google') {
-          try {
-            final user = await _authRepository.signInWithGoogleFlow();
-            if (user != null && mounted) {
-              Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
-              Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/main', (route) => false);
-            } else {
-              setState(() => _isLoading = false);
-              _showError('Google authentication failed.');
-            }
-          } catch (e) {
-            setState(() => _isLoading = false);
-            _showError(e.toString());
-          }
-        } else {
-          final savedEmail = await _secureStorage.read(key: 'saved_email');
-          final savedPassword = await _secureStorage.read(key: 'saved_password');
-          
-          if (savedEmail != null && savedPassword != null) {
-            try {
-              final user = await _authRepository.login(savedEmail, savedPassword);
-              if (user != null && mounted) {
-                Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
-                Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/main', (route) => false);
-              } else {
-                setState(() => _isLoading = false);
-                _showError('Saved credentials invalid or expired. Please log in with your password.');
-              }
-            } catch (e) {
-              setState(() => _isLoading = false);
-              _showError(e.toString());
-            }
-          } else {
-            setState(() => _isLoading = false);
-            _showError('No saved credentials found. Please log in manually once.');
-          }
-        }
-      }
-    } catch (e) {
-      _showError('Biometric authentication failed.');
-    }
   }
 
   Color get cardBg => context.bgAlt;
@@ -145,52 +62,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         await _secureStorage.write(key: 'saved_password', value: _passwordController.text);
         if (mounted) {
           Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
-          
-          // Prompt for biometrics if not enabled
-          final prefs = await SharedPreferences.getInstance();
-          final isEnabled = prefs.getBool('biometrics_enabled') ?? false;
-          final hasPrompted = prefs.getBool('biometrics_prompted') ?? false;
-          
-          if (!isEnabled && !hasPrompted) {
-            final canCheckBiometrics = await _localAuth.canCheckBiometrics;
-            final isDeviceSupported = await _localAuth.isDeviceSupported();
-            
-            if (canCheckBiometrics && isDeviceSupported) {
-              await prefs.setBool('biometrics_prompted', true);
-              
-              final enable = await showDialog<bool>(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  title: const Text('Enable Biometric Login'),
-                  content: const Text('Would you like to use your fingerprint or face to log in faster next time?'),
-                  actions: [
-                    TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Not Now')),
-                    ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Enable')),
-                  ],
-                ),
-              );
-              
-              if (enable == true) {
-                try {
-                  final authenticated = await _localAuth.authenticate(
-                    localizedReason: 'Authenticate to enable biometric login',
-                    biometricOnly: true,
-                    persistAcrossBackgrounding: true,
-                  );
-                  if (authenticated) {
-                    await prefs.setBool('biometrics_enabled', true);
-                    if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Biometric login enabled.')));
-                  }
-                } catch (e) {
-                  debugPrint('Biometric enable error: $e');
-                }
-              }
-            }
-          }
-          
-          if (mounted) {
-            Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/main', (route) => false);
-          }
+          Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/main', (route) => false);
         }
       }
     } catch (e) {
@@ -208,32 +80,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         await _secureStorage.write(key: 'login_method', value: 'apple');
         if (mounted) {
           Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
-          // Prompt for biometrics if not enabled
-          final prefs = await SharedPreferences.getInstance();
-          final isEnabled = prefs.getBool('biometrics_enabled') ?? false;
-          final hasPrompted = prefs.getBool('biometrics_prompted') ?? false;
-          if (!isEnabled && !hasPrompted) {
-            final canCheckBiometrics = await _localAuth.canCheckBiometrics;
-            final isDeviceSupported = await _localAuth.isDeviceSupported();
-            if (canCheckBiometrics && isDeviceSupported) {
-              await prefs.setBool('biometrics_prompted', true);
-              final enable = await showDialog<bool>(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  title: const Text('Enable Biometric Login'),
-                  content: const Text('Would you like to use your fingerprint or face to log in faster next time?'),
-                  actions: [
-                    TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Not Now')),
-                    TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Enable')),
-                  ],
-                ),
-              );
-              if (enable == true) {
-                prefs.setBool('biometrics_enabled', true);
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Biometric login enabled')));
-              }
-            }
-          }
           Navigator.pushReplacementNamed(context, '/');
         }
       }
@@ -252,7 +98,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     }
   }
 
-
   void _loginWithGoogle() async {
     setState(() => _isLoading = true);
     try {
@@ -261,52 +106,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         await _secureStorage.write(key: 'login_method', value: 'google');
         if (mounted) {
           Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
-          
-          // Prompt for biometrics if not enabled
-          final prefs = await SharedPreferences.getInstance();
-          final isEnabled = prefs.getBool('biometrics_enabled') ?? false;
-          final hasPrompted = prefs.getBool('biometrics_prompted') ?? false;
-          
-          if (!isEnabled && !hasPrompted) {
-            final canCheckBiometrics = await _localAuth.canCheckBiometrics;
-            final isDeviceSupported = await _localAuth.isDeviceSupported();
-            
-            if (canCheckBiometrics && isDeviceSupported) {
-              await prefs.setBool('biometrics_prompted', true);
-              
-              final enable = await showDialog<bool>(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  title: const Text('Enable Biometric Login'),
-                  content: const Text('Would you like to use your fingerprint or face to log in faster next time?'),
-                  actions: [
-                    TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Not Now')),
-                    ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Enable')),
-                  ],
-                ),
-              );
-              
-              if (enable == true) {
-                try {
-                  final authenticated = await _localAuth.authenticate(
-                    localizedReason: 'Authenticate to enable biometric login',
-                    biometricOnly: true,
-                    persistAcrossBackgrounding: true,
-                  );
-                  if (authenticated) {
-                    await prefs.setBool('biometrics_enabled', true);
-                    if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Biometric login enabled.')));
-                  }
-                } catch (e) {
-                  debugPrint('Biometric enable error: $e');
-                }
-              }
-            }
-          }
-
-          if (mounted) {
-            Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/main', (route) => false);
-          }
+          Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/main', (route) => false);
         }
       }
     } catch (e) {
@@ -458,69 +258,36 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                 ),
                 const SizedBox(height: 40),
 
-                // Login Button & Biometrics
+                // Login Button
                 _FadeSlide(
                   controller: _animationController,
                   delay: 0.4,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            boxShadow: [
-                              BoxShadow(
-                                color: context.primary.withValues(alpha: 0.25),
-                                blurRadius: 20,
-                                offset: const Offset(0, 8),
-                              ),
-                            ],
-                          ),
-                          child: SizedBox(
-                            height: 56,
-                            child: ElevatedButton(
-                              onPressed: _isLoading ? null : _login,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: context.primary,
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-                                elevation: 0,
-                              ),
-                              child: _isLoading 
-                                ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) 
-                                : const Text('Sign In', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
-                            ),
-                          ),
-                        ),
-                      ),
-                      if (_biometricsEnabled) ...[
-                        const SizedBox(width: 16),
-                        Container(
-                          decoration: BoxDecoration(
-                            boxShadow: [
-                              BoxShadow(
-                                color: context.textDark.withValues(alpha: 0.05),
-                                blurRadius: 15,
-                                offset: const Offset(0, 5),
-                              ),
-                            ],
-                          ),
-                          child: SizedBox(
-                            height: 56,
-                            width: 56,
-                            child: OutlinedButton(
-                              onPressed: _isLoading ? null : _authenticateWithBiometrics,
-                              style: OutlinedButton.styleFrom(
-                                padding: EdgeInsets.zero,
-                                backgroundColor: context.bg,
-                                side: BorderSide(color: context.divider, width: 1.5),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-                              ),
-                              child: Icon(Icons.fingerprint_rounded, color: context.primary, size: 28),
-                            ),
-                          ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color: context.primary.withValues(alpha: 0.25),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
                         ),
                       ],
-                    ],
+                    ),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _login,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: context.primary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                          elevation: 0,
+                        ),
+                        child: _isLoading 
+                          ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) 
+                          : const Text('Sign In', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+                      ),
+                    ),
                   ),
                 ),
                 
