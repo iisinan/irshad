@@ -19,6 +19,7 @@ class CacheInterceptor extends Interceptor {
     if (url.contains('/watchlist')) return Duration.zero; // Never cache watchlist so deletes reflect immediately
     if (url.contains('/favorites')) return Duration.zero; // Never cache favorites
     if (url.contains('/alerts')) return Duration.zero; // Never cache alerts
+    if (url.contains('/notifications')) return Duration.zero; // Never cache notifications for real-time delivery
     if (url.contains('/stocks/baskets')) return Duration.zero; // Never cache baskets so deletes reflect immediately
     if (url.contains('/stocks/ngx')) return const Duration(minutes: 5);
     if (url.contains('/stocks/') && !url.contains('search')) return const Duration(minutes: 10);

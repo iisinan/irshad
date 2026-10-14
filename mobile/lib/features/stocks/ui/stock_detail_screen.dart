@@ -72,23 +72,103 @@ class StockDetailScreen extends StatefulWidget {
       }
 
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(cachedStock != null 
-                ? 'Network error. Showing offline data. Please check your connection.'
-                : 'Network error. Please check your internet connection.'),
-            backgroundColor: context.haram,
-            behavior: SnackBarBehavior.floating,
-          )
-        );
-
         if (cachedStock != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Showing offline data. Live refresh will resume when connection restores.'),
+              backgroundColor: context.primary,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
           Navigator.pushNamed(context, '/stock_details', arguments: {
             'prefetched': true,
             'needs_refresh': true, // attempt refresh later if we fell back to cache
             'stock': mergedStock,
             'aaoifiData': cachedAaoifi,
           });
+        } else {
+          showModalBottomSheet(
+            context: context,
+            backgroundColor: Colors.transparent,
+            builder: (ctx) => Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+              decoration: BoxDecoration(
+                color: context.bg,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: context.textMuted.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFEF3C7),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(Icons.info_outline_rounded, color: Color(0xFFD97706), size: 24),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Stock Unavailable',
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w900,
+                                color: context.textDark,
+                                letterSpacing: -0.3,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              symbol.toString().toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: context.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'We were unable to load real-time market data and Shariah compliance metrics for $symbol. The ticker may belong to another exchange or the quote is currently pending update.',
+                    style: TextStyle(fontSize: 13.5, color: context.textMuted, height: 1.45),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: context.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      elevation: 0,
+                    ),
+                    child: const Text('Dismiss', style: TextStyle(fontWeight: FontWeight.w800, color: Colors.white)),
+                  ),
+                ],
+              ),
+            ),
+          );
         }
       }
     }

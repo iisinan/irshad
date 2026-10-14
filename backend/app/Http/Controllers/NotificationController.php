@@ -19,7 +19,23 @@ class NotificationController extends Controller
             ->orderBy('created_at', 'desc');
 
         if ($request->has('category') && $request->category !== 'all') {
-            $query->where('category', $request->category);
+            $cat = $request->category;
+            $query->where(function ($q) use ($cat) {
+                $q->where('category', $cat);
+                if ($cat === 'price_alerts') {
+                    $q->orWhere('title', 'like', '%Price%')
+                      ->orWhere('title', 'like', '%Target%');
+                } elseif ($cat === 'screening') {
+                    $q->orWhere('title', 'like', '%Compliance%')
+                      ->orWhere('title', 'like', '%AAOIFI%')
+                      ->orWhere('title', 'like', '%Risk%');
+                } elseif ($cat === 'digest') {
+                    $q->orWhere('title', 'like', '%Digest%');
+                } elseif ($cat === 'portfolio') {
+                    $q->orWhere('title', 'like', '%Dividend%')
+                      ->orWhere('title', 'like', '%Portfolio%');
+                }
+            });
         }
 
         if ($request->has('unread') && $request->boolean('unread')) {
@@ -114,18 +130,29 @@ class NotificationController extends Controller
     }
 
     /**
+     * DELETE /v1/notifications/clear-all
+     * Clear all notifications for the authenticated user.
+     */
+    public function clearAll(): JsonResponse
+    {
+        UserNotification::where('user_id', auth()->id())->delete();
+
+        return response()->json(['message' => 'All notifications cleared']);
+    }
+
+    /**
      * POST /v1/notifications/test
      * Dispatch an immediate test notification to the user's phone and inbox.
      */
     public function sendTestNotification(Request $request): JsonResponse
     {
         $user = $request->user();
-        $title = $request->input('title', 'Price Target Alert: AAPL 🎯');
-        $message = $request->input('message', 'AAPL reached your target price of $240.00! Current price: $242.50.');
+        $title = $request->input('title', 'Price Target Alert: DANGCEM 🎯');
+        $message = $request->input('message', 'DANGCEM reached your target price of ₦650.00! Current price: ₦655.00.');
         $category = $request->input('category', 'price_alerts');
-        $actionUrl = $request->input('action_url', '/market/AAPL');
-        $actionLabel = $request->input('action_label', 'View Stock (AAPL)');
-        $meta = $request->input('meta', ['symbol' => 'AAPL', 'target_price' => 240.0, 'current_price' => 242.5]);
+        $actionUrl = $request->input('action_url', '/stocks/DANGCEM');
+        $actionLabel = $request->input('action_label', 'View Stock (DANGCEM)');
+        $meta = $request->input('meta', ['symbol' => 'DANGCEM', 'target_price' => 650.0, 'current_price' => 655.0]);
 
         // 1. Create in-app notification
         $notification = UserNotification::notify($user->id, $title, $message, [
@@ -143,7 +170,7 @@ class NotificationController extends Controller
             $pushSent = $pushService->sendToUser($user, $title, $message, [
                 'type' => $category,
                 'notification_id' => (string) $notification->id,
-                'symbol' => $meta['symbol'] ?? 'AAPL',
+                'symbol' => $meta['symbol'] ?? 'DANGCEM',
             ]);
         }
 
@@ -151,7 +178,7 @@ class NotificationController extends Controller
             'success' => true,
             'message' => $pushSent 
                 ? 'Test notification sent to your phone!' 
-                : 'In-app notification created. To receive phone alerts, ensure push notifications are allowed on your device.',
+                : 'Notification added to your inbox.',
             'push_sent' => $pushSent,
             'notification' => $notification,
         ]);

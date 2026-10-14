@@ -4,13 +4,12 @@ import 'updates_digest_tab.dart';
 import 'package:irshad_mobile/core/api/api_service.dart';
 import 'package:hive/hive.dart';
 import 'dart:convert';
-import 'package:provider/provider.dart';
-import 'package:irshad_mobile/core/utils/suggest_modal_util.dart';
 import 'package:irshad_mobile/features/stocks/ui/stock_detail_screen.dart';
 import 'package:irshad_mobile/core/notifications/notification_service.dart';
 
 class UpdatesInboxTab extends StatefulWidget {
-  const UpdatesInboxTab({super.key});
+  final ValueChanged<int>? onUnreadCountChanged;
+  const UpdatesInboxTab({super.key, this.onUnreadCountChanged});
 
   @override
   State<UpdatesInboxTab> createState() => _UpdatesInboxTabState();
@@ -59,7 +58,7 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
   Future<void> _fetchInbox({bool loadMore = false}) async {
     if (!loadMore) {
       setState(() {
-        _isLoading = true;
+        _isLoading = _notifications.isEmpty;
         _currentPage = 1;
       });
     }
@@ -70,11 +69,13 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
       final cachedStr = box.get('inbox_data');
       if (cachedStr != null) {
         final Map<String, dynamic> cached = jsonDecode(cachedStr);
-        if (mounted) {
+        final list = cached['data'];
+        if (mounted && list is List && list.isNotEmpty && _notifications.isEmpty) {
           setState(() {
-            _notifications = cached['data'] ?? [];
+            _notifications = List<dynamic>.from(list);
             _isLoading = false;
           });
+          _notifyUnread();
         }
       }
     } catch (_) {}
@@ -82,7 +83,6 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
     // 2. Fetch live data silently
     try {
       final response = await ApiService().get('notifications/inbox', queryParameters: {
-        if (_activeCategory != 'all') 'category': _activeCategory,
         'page': _currentPage,
       });
       if (response.statusCode == 200) {
@@ -90,29 +90,32 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
           final data = response.data['data'] ?? [];
           final pagination = response.data['pagination'];
 
-          try {
-            final box = await Hive.openBox('updatesBox');
-            await box.put(
-              'inbox_data',
-              jsonEncode({
-                'data': data,
-                'expiry': DateTime.now().add(const Duration(minutes: 5)).millisecondsSinceEpoch,
-              }),
-            );
-          } catch (_) {}
+          if (data is List && data.isNotEmpty && _currentPage == 1) {
+            try {
+              final box = await Hive.openBox('updatesBox');
+              await box.put(
+                'inbox_data',
+                jsonEncode({
+                  'data': data,
+                  'expiry': DateTime.now().add(const Duration(minutes: 5)).millisecondsSinceEpoch,
+                }),
+              );
+            } catch (_) {}
+          }
 
           setState(() {
             if (loadMore) {
-              _notifications.addAll(data);
+              _notifications.addAll(List<dynamic>.from(data));
               _isLoadingMore = false;
             } else {
-              _notifications = data;
+              _notifications = List<dynamic>.from(data);
               _isLoading = false;
             }
             if (pagination != null) {
               _lastPage = pagination['last_page'] ?? 1;
             }
           });
+          _notifyUnread();
         }
       } else {
         if (mounted) {
@@ -134,6 +137,14 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
     }
   }
 
+  void _notifyUnread() {
+    final unread = _notifications.where((n) {
+      if (n is Map) return n['read_at'] == null;
+      return false;
+    }).length;
+    widget.onUnreadCountChanged?.call(unread);
+  }
+
   Future<void> _loadMore() async {
     setState(() {
       _isLoadingMore = true;
@@ -151,6 +162,7 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
           _notifications[index]['read_at'] = DateTime.now().toIso8601String();
         }
       });
+      _notifyUnread();
     } catch (_) {}
   }
 
@@ -162,6 +174,7 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
           n['read_at'] = DateTime.now().toIso8601String();
         }
       });
+      _notifyUnread();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -175,39 +188,170 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
     } catch (_) {}
   }
 
-  Future<void> _archiveNotification(int id) async {
+  void _archiveNotificationWithUndo(Map<String, dynamic> item) {
+    final id = item['id'];
+    final index = _notifications.indexWhere((n) => n['id'] == id);
+    if (index == -1) return;
+
+    final removedItem = _notifications[index];
+    setState(() => _notifications.removeAt(index));
+    _notifyUnread();
+
+    bool undone = false;
+    ScaffoldMessenger.of(context).removeCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text(
+          'Notification archived',
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+        ),
+        action: SnackBarAction(
+          label: 'UNDO',
+          textColor: const Color(0xFF6EE7B7),
+          onPressed: () {
+            undone = true;
+            setState(() => _notifications.insert(index, removedItem));
+            _notifyUnread();
+          },
+        ),
+        duration: const Duration(seconds: 4),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    ).closed.then((reason) async {
+      if (!undone) {
+        try {
+          await ApiService().put('notifications/$id/archive', {});
+        } catch (_) {}
+      }
+    });
+  }
+
+  void _dismissNotificationWithUndo(Map<String, dynamic> item) {
+    final id = item['id'];
+    final index = _notifications.indexWhere((n) => n['id'] == id);
+    if (index == -1) return;
+
+    final removedItem = _notifications[index];
+    setState(() => _notifications.removeAt(index));
+    _notifyUnread();
+
+    bool undone = false;
+    ScaffoldMessenger.of(context).removeCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text(
+          'Notification dismissed',
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+        ),
+        action: SnackBarAction(
+          label: 'UNDO',
+          textColor: const Color(0xFF6EE7B7),
+          onPressed: () {
+            undone = true;
+            setState(() => _notifications.insert(index, removedItem));
+            _notifyUnread();
+          },
+        ),
+        duration: const Duration(seconds: 4),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    ).closed.then((reason) async {
+      if (!undone) {
+        try {
+          await ApiService().delete('notifications/$id');
+        } catch (_) {}
+      }
+    });
+  }
+
+  Future<void> _clearAllNotifications() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: context.bg,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          'Clear Notifications?',
+          style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.3),
+        ),
+        content: Text(
+          'This will remove all notifications from your inbox.',
+          style: TextStyle(color: context.textMuted, fontSize: 13.5),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('Cancel', style: TextStyle(color: context.textMuted, fontWeight: FontWeight.w700)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFEF4444),
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            child: const Text('Clear All', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
     try {
-      setState(() => _notifications.removeWhere((n) => n['id'] == id));
-      await ApiService().put('notifications/$id/archive', {});
+      setState(() => _notifications.clear());
+      _notifyUnread();
+      await ApiService().delete('notifications/clear-all');
+      final box = await Hive.openBox('updatesBox');
+      await box.delete('inbox_data');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('All notifications cleared'),
+            backgroundColor: context.primary,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
     } catch (_) {}
   }
 
-  Future<void> _deleteNotification(int id) async {
-    try {
-      setState(() => _notifications.removeWhere((n) => n['id'] == id));
-      await ApiService().delete('notifications/$id');
-    } catch (_) {}
-  }
-
-  Future<void> _sendTestAlert() async {
+  Future<void> _dispatchTestAlert({
+    required String title,
+    required String body,
+    required String category,
+    String? actionUrl,
+    String? actionLabel,
+    Map<String, dynamic>? meta,
+  }) async {
     try {
       await PushNotificationService().showLocalNotificationDirect(
-        title: 'Price Target Alert: AAPL 🎯',
-        body: 'AAPL reached your target price of \$240.00! Current price: \$242.50.',
-        payload: 'AAPL',
+        title: title,
+        body: body,
+        payload: meta?['symbol'] ?? 'inbox',
       );
 
       final res = await ApiService().post('notifications/test', {
-        'title': 'Price Target Alert: AAPL 🎯',
-        'message': 'AAPL reached your target price of \$240.00! Current price: \$242.50.',
-        'category': 'price_alerts',
-        'action_url': '/market/AAPL',
-        'action_label': 'View Stock (AAPL)',
-        'meta': {'symbol': 'AAPL', 'target_price': 240.0, 'current_price': 242.5},
+        'title': title,
+        'message': body,
+        'category': category,
+        'action_url': actionUrl,
+        'action_label': actionLabel,
+        'meta': meta,
       });
 
       if (mounted) {
         final msg = res.data['message'] ?? 'Test alert sent!';
+        final newNotification = res.data['notification'];
+        if (newNotification != null && newNotification is Map) {
+          setState(() {
+            _notifications.insert(0, newNotification);
+          });
+          _notifyUnread();
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(msg),
@@ -221,14 +365,159 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Test alert triggered on device.'),
+            content: const Text('Test alert triggered locally on device.'),
             backgroundColor: context.primary,
             behavior: SnackBarBehavior.floating,
           ),
         );
+        _fetchInbox();
       }
     }
   }
+
+  void _showTestAlertOptions() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          decoration: BoxDecoration(
+            color: context.bg,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: SafeArea(
+            top: false,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: context.textMuted.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Send Sample Notification',
+                style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: context.textDark, letterSpacing: -0.4),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Choose a notification type to test on your device and inbox:',
+                style: TextStyle(fontSize: 13, color: context.textMuted),
+              ),
+              const SizedBox(height: 18),
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                tileColor: Colors.white,
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(color: const Color(0xFFFEF3C7), borderRadius: BorderRadius.circular(10)),
+                  child: const Icon(Icons.notifications_active_rounded, color: Color(0xFFD97706), size: 20),
+                ),
+                title: const Text('Stock Price Target Alert', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
+                subtitle: const Text('DANGCEM reached target price of ₦650.00', style: TextStyle(fontSize: 12)),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _dispatchTestAlert(
+                    title: 'Price Target Alert: DANGCEM 🎯',
+                    body: 'DANGCEM reached your target price of ₦650.00! Current price: ₦655.00.',
+                    category: 'price_alerts',
+                    actionUrl: '/stocks/DANGCEM',
+                    actionLabel: 'View Stock (DANGCEM)',
+                    meta: {'symbol': 'DANGCEM', 'target_price': 650.0, 'current_price': 655.0},
+                  );
+                },
+              ),
+              const SizedBox(height: 8),
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                tileColor: Colors.white,
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(color: const Color(0xFFD1FAE5), borderRadius: BorderRadius.circular(10)),
+                  child: const Icon(Icons.shield_outlined, color: Color(0xFF059669), size: 20),
+                ),
+                title: const Text('Shariah Compliance Warning', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
+                subtitle: const Text('MTNN debt ratio approaching 30% limit', style: TextStyle(fontSize: 12)),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _dispatchTestAlert(
+                    title: 'Compliance Risk Warning: MTNN ⚠️',
+                    body: 'MTNN is approaching non-compliant thresholds: Interest-bearing debt exceeds 28% of market cap.',
+                    category: 'screening',
+                    actionUrl: '/stocks/MTNN',
+                    actionLabel: 'View AAOIFI Ratios',
+                    meta: {'symbol': 'MTNN', 'metric': 'debt_ratio', 'value': 28.5},
+                  );
+                },
+              ),
+              const SizedBox(height: 8),
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                tileColor: Colors.white,
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(color: const Color(0xFFEEF2FF), borderRadius: BorderRadius.circular(10)),
+                  child: const Icon(Icons.auto_stories_rounded, color: Color(0xFF4F46E5), size: 20),
+                ),
+                title: const Text('Irshad Weekly Digest', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
+                subtitle: const Text('Your weekly portfolio compliance summary is ready', style: TextStyle(fontSize: 12)),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _dispatchTestAlert(
+                    title: 'Irshad Digest is Ready 📧',
+                    body: 'Your weekly portfolio compliance summary and market update is available.',
+                    category: 'digest',
+                    actionLabel: 'Read Digest',
+                    meta: {'frequency': 'weekly'},
+                  );
+                },
+              ),
+              const SizedBox(height: 8),
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                tileColor: Colors.white,
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(color: const Color(0xFFF3E8FF), borderRadius: BorderRadius.circular(10)),
+                  child: const Icon(Icons.account_balance_wallet_outlined, color: Color(0xFF7E22CE), size: 20),
+                ),
+                title: const Text('Dividend Payment Declared', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
+                subtitle: const Text('ZENITHBANK declared interim dividend of ₦1.00', style: TextStyle(fontSize: 12)),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _dispatchTestAlert(
+                    title: 'Dividend Declared: ZENITHBANK 💰',
+                    body: 'Zenith Bank Plc declared interim dividend of ₦1.00/share. Purification estimate: 0.12%.',
+                    category: 'portfolio',
+                    actionUrl: '/stocks/ZENITHBANK',
+                    actionLabel: 'View Dividend',
+                    meta: {'symbol': 'ZENITHBANK', 'dividend_amount': 1.0, 'purification_pct': 0.12},
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  },
+);
+}
 
   String _formatTimeAgo(dynamic dateVal) {
     if (dateVal == null) return '';
@@ -256,25 +545,65 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
     }
   }
 
-  String? _extractSymbol(Map<String, dynamic> item) {
+  String? _extractSymbol(dynamic rawItem) {
+    if (rawItem is! Map) return null;
+    final item = Map<String, dynamic>.from(rawItem);
     if (item['meta'] is Map && item['meta']['symbol'] != null) {
       return item['meta']['symbol'].toString().toUpperCase();
     }
+    if (item['company'] is Map && item['company']['symbol'] != null) {
+      return item['company']['symbol'].toString().toUpperCase();
+    }
     final actionUrl = item['action_url']?.toString();
-    if (actionUrl != null && actionUrl.contains('/market/')) {
-      final parts = actionUrl.split('/market/').last.split('?').first.split('/');
+    if (actionUrl != null && (actionUrl.contains('/stocks/') || actionUrl.contains('/market/'))) {
+      final sanitized = actionUrl.replaceAll('/stocks/', '/market/');
+      final parts = sanitized.split('/market/').last.split('?').first.split('/');
       if (parts.isNotEmpty && parts.first.isNotEmpty) {
         return parts.first.toUpperCase();
       }
     }
     final title = item['title']?.toString() ?? '';
-    if (title.contains(':')) {
-      final candidate = title.split(':').last.replaceAll('🎯', '').replaceAll('🔔', '').trim();
-      if (candidate.isNotEmpty && candidate.length <= 8 && !candidate.contains(' ')) {
-        return candidate.toUpperCase();
+    final regex = RegExp(r'[:—\-]\s*([A-Za-z0-9\.]+)\b');
+    final match = regex.firstMatch(title);
+    if (match != null) {
+      final candidate = match.group(1)!.trim().replaceAll('🎯', '').replaceAll('🔔', '').replaceAll('⚠️', '').trim().toUpperCase();
+      if (candidate.length >= 2 && candidate.length <= 10 && candidate != 'STATUS' && candidate != 'CHANGED') {
+        return candidate;
+      }
+    }
+    final leadingRegex = RegExp(r'^([A-Za-z0-9\.]+)\s*[:—\-]');
+    final leadingMatch = leadingRegex.firstMatch(title);
+    if (leadingMatch != null) {
+      final candidate = leadingMatch.group(1)!.trim().toUpperCase();
+      if (candidate.length >= 2 && candidate.length <= 10) {
+        return candidate;
       }
     }
     return null;
+  }
+
+  String _resolveCategory(dynamic rawItem) {
+    if (rawItem is! Map) return 'system';
+    final item = Map<String, dynamic>.from(rawItem);
+    final explicitCat = item['category']?.toString();
+    if (explicitCat != null && explicitCat != 'system' && explicitCat.isNotEmpty) {
+      return explicitCat;
+    }
+    final title = (item['title'] ?? '').toString().toLowerCase();
+    final message = (item['message'] ?? '').toString().toLowerCase();
+    if (title.contains('price') || title.contains('target') || title.contains('🎯') || message.contains('target price')) {
+      return 'price_alerts';
+    }
+    if (title.contains('compliance') || title.contains('screening') || title.contains('halal') || title.contains('status changed') || title.contains('aaoifi') || message.contains('aaoifi') || title.contains('⚠️')) {
+      return 'screening';
+    }
+    if (title.contains('digest') || message.contains('digest') || title.contains('📧')) {
+      return 'digest';
+    }
+    if (title.contains('portfolio') || title.contains('dividend') || message.contains('holdings')) {
+      return 'portfolio';
+    }
+    return explicitCat ?? 'system';
   }
 
   Widget _getIconForCategory(String category) {
@@ -344,20 +673,20 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
     switch (category) {
       case 'price_alerts':
       case 'price_alert':
-        return const Color(0xFFD97706);
+        return const Color(0xFFB45309);
       case 'screening':
       case 'compliance':
-        return const Color(0xFF059669);
+        return const Color(0xFF047857);
       case 'digest':
-        return const Color(0xFF4F46E5);
+        return const Color(0xFF4338CA);
       case 'portfolio':
         return const Color(0xFF7E22CE);
       case 'security':
-        return const Color(0xFFE11D48);
+        return const Color(0xFFBE123C);
       case 'market_news':
-        return const Color(0xFF0284C7);
+        return const Color(0xFF0369A1);
       default:
-        return const Color(0xFF475569);
+        return const Color(0xFF334155);
     }
   }
 
@@ -367,7 +696,7 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
       _markAsRead(item['id']);
     }
 
-    final category = item['category']?.toString() ?? '';
+    final category = _resolveCategory(item);
     final meta = item['meta'] is Map ? Map<String, dynamic>.from(item['meta']) : null;
     final symbol = _extractSymbol(item);
 
@@ -395,16 +724,26 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
 
     // 2. Stock Target or Compliance Notification with symbol
     if (symbol != null && symbol.isNotEmpty) {
-      StockDetailScreen.openWithLoading(context, {'symbol': symbol});
+      StockDetailScreen.openWithLoading(context, {
+        'symbol': symbol,
+        if (category == 'screening') 'initialTab': 1,
+      });
       return;
     }
 
-    // 3. Fallback: Show detail bottom sheet modal
+    // 3. Action URL routing
+    final actionUrl = item['action_url']?.toString();
+    if (actionUrl == '/alerts') {
+      Navigator.pushNamed(context, '/alerts');
+      return;
+    }
+
+    // 4. Fallback: Show detail bottom sheet modal
     _showNotificationDetailModal(context, item);
   }
 
   void _showNotificationDetailModal(BuildContext context, Map<String, dynamic> item) {
-    final category = item['category']?.toString() ?? 'system';
+    final category = _resolveCategory(item);
     final symbol = _extractSymbol(item);
     final meta = item['meta'] is Map ? Map<String, dynamic>.from(item['meta']) : null;
 
@@ -557,6 +896,16 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
     );
   }
 
+  int _countForCategory(String catId) {
+    if (catId == 'all') {
+      return _notifications.where((n) {
+        final c = _resolveCategory(n);
+        return c != 'market_news' && c != 'business_activity';
+      }).length;
+    }
+    return _notifications.where((n) => _resolveCategory(n) == catId).length;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) return Center(child: CircularProgressIndicator(color: context.primary));
@@ -580,7 +929,10 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
     }
 
     final filteredNotifications = _notifications.where((n) {
-      final cat = n['category'];
+      final cat = _resolveCategory(n);
+      if (_activeCategory != 'all' && cat != _activeCategory) {
+        return false;
+      }
       return cat != 'market_news' && cat != 'business_activity';
     }).toList();
 
@@ -589,521 +941,694 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // 1. Controls bar
-        Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Mark all read with unread counter
-                    GestureDetector(
-                      onTap: unreadCount > 0 ? _markAllAsRead : null,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                        decoration: BoxDecoration(
-                          color: unreadCount > 0 ? context.primary.withValues(alpha: 0.08) : context.bg,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: unreadCount > 0
-                                ? context.primary.withValues(alpha: 0.3)
-                                : context.appColors.divider,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.done_all_rounded,
-                              size: 15,
-                              color: unreadCount > 0 ? context.primary : context.textMuted,
+        // 1. Categories Filter Chips with Mini-Badges
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          child: Row(
+            children: _categories.map((cat) {
+              final isActive = _activeCategory == cat['id'];
+              final count = _countForCategory(cat['id']);
+
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _activeCategory = cat['id'];
+                  });
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(right: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 7.5),
+                  decoration: BoxDecoration(
+                    color: isActive ? context.primary : Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isActive ? context.primary : const Color(0xFFE2E8F0),
+                      width: isActive ? 1.4 : 1,
+                    ),
+                    boxShadow: isActive
+                        ? [
+                            BoxShadow(
+                              color: context.primary.withValues(alpha: 0.25),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
                             ),
-                            const SizedBox(width: 6),
-                            Text(
-                              unreadCount > 0 ? 'Mark All Read ($unreadCount)' : 'All Read',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 12,
-                                color: unreadCount > 0 ? context.primary : context.textMuted,
-                              ),
+                          ]
+                        : [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.02),
+                              blurRadius: 3,
+                              offset: const Offset(0, 1),
                             ),
                           ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        cat['label'],
+                        style: TextStyle(
+                          fontWeight: isActive ? FontWeight.w800 : FontWeight.w700,
+                          fontSize: 12.5,
+                          color: isActive ? Colors.white : const Color(0xFF334155),
                         ),
                       ),
-                    ),
-
-                    // Digest & Alert settings shortcuts
-                    Row(
-                      children: [
-                        GestureDetector(
-                          onTap: () => Navigator.pushNamed(context, '/alerts'),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                            decoration: BoxDecoration(
-                              color: context.bg,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: context.appColors.divider),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(Icons.tune_rounded, size: 14, color: context.textDark),
-                                const SizedBox(width: 4),
-                                Text(
-                                  'Alerts',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 12,
-                                    color: context.textDark,
-                                  ),
-                                ),
-                              ],
-                            ),
+                      if (count > 0) ...[
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                          decoration: BoxDecoration(
+                            color: isActive ? Colors.white.withValues(alpha: 0.25) : const Color(0xFFF1F5F9),
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        GestureDetector(
-                          onTap: () {
-                            showModalBottomSheet(
-                              context: context,
-                              isScrollControlled: true,
-                              backgroundColor: Colors.transparent,
-                              builder: (context) => Container(
-                                decoration: BoxDecoration(
-                                  color: context.bg,
-                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                                ),
-                                padding: const EdgeInsets.only(top: 16),
-                                child: const UpdatesDigestTab(),
-                              ),
-                            );
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF6366F1).withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: const Color(0xFF6366F1).withValues(alpha: 0.25)),
-                            ),
-                            child: const Row(
-                              children: [
-                                Icon(Icons.auto_stories_rounded, size: 14, color: Color(0xFF4F46E5)),
-                                SizedBox(width: 4),
-                                Text(
-                                  'Digest',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 12,
-                                    color: Color(0xFF4F46E5),
-                                  ),
-                                ),
-                              ],
+                          child: Text(
+                            count.toString(),
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w800,
+                              color: isActive ? Colors.white : const Color(0xFF475569),
                             ),
                           ),
                         ),
                       ],
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+
+        // 2. Micro Utility Sub-Bar
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 2, 20, 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Left status
+              if (unreadCount > 0)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 7,
+                      height: 7,
+                      decoration: BoxDecoration(
+                        color: context.primary,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: context.primary.withValues(alpha: 0.5),
+                            blurRadius: 4,
+                            spreadRadius: 1,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      '$unreadCount unread ${unreadCount == 1 ? 'alert' : 'alerts'}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                        color: context.primary,
+                      ),
                     ),
                   ],
-                ),
-              ),
+                )
+              else if (filteredNotifications.isNotEmpty)
+                Text(
+                  'All caught up (${filteredNotifications.length})',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF64748B),
+                  ),
+                )
+              else
+                const SizedBox.shrink(),
 
-            // 2. Categories Filter Chips
-            SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  children: _categories.map((cat) {
-                    final isActive = _activeCategory == cat['id'];
-                    return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _activeCategory = cat['id'];
-                          _isLoading = true;
-                        });
-                        _fetchInbox();
-                      },
+              // Right micro-actions
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (unreadCount > 0)
+                    InkWell(
+                      onTap: _markAllAsRead,
+                      borderRadius: BorderRadius.circular(8),
                       child: Container(
-                        margin: const EdgeInsets.only(right: 8, bottom: 8),
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4.5),
                         decoration: BoxDecoration(
-                          color: isActive ? context.primary.withValues(alpha: 0.12) : Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: isActive ? context.primary : context.appColors.divider,
-                            width: isActive ? 1.5 : 1,
-                          ),
+                          color: context.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: context.primary.withValues(alpha: 0.25)),
                         ),
-                        child: Text(
-                          cat['label'],
-                          style: TextStyle(
-                            fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
-                            fontSize: 12.5,
-                            color: isActive ? context.primary : context.textMuted,
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-
-            // 3. Notification List or Empty State
-            if (filteredNotifications.isEmpty)
-              Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 48),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            color: context.primary.withValues(alpha: 0.1),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            _activeCategory == 'all'
-                                ? Icons.notifications_none_rounded
-                                : Icons.filter_list_off_rounded,
-                            size: 40,
-                            color: context.primary,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        Text(
-                          _activeCategory == 'all' ? 'All Caught Up!' : 'No Alerts in this Category',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w900,
-                            color: context.textDark,
-                            letterSpacing: -0.3,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          _activeCategory == 'all'
-                              ? 'You have no alerts right now. Active stock price alerts, AAOIFI Shariah compliance changes, and your Irshad Digest will appear here.'
-                              : 'No notifications matched the selected filter.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 13.5,
-                            color: context.textMuted,
-                            height: 1.45,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        Wrap(
-                          alignment: WrapAlignment.center,
-                          spacing: 10,
-                          runSpacing: 10,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            OutlinedButton.icon(
-                              onPressed: () => Navigator.pushNamed(context, '/alerts'),
-                              icon: Icon(Icons.tune_rounded, size: 16, color: context.primary),
-                              label: Text('Manage Active Alerts', style: TextStyle(fontWeight: FontWeight.w700, color: context.primary)),
-                              style: OutlinedButton.styleFrom(
-                                side: BorderSide(color: context.primary.withValues(alpha: 0.4)),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                              ),
-                            ),
-                            ElevatedButton.icon(
-                              onPressed: _sendTestAlert,
-                              icon: const Icon(Icons.notification_add_outlined, size: 16, color: Colors.white),
-                              label: const Text('Send Test Alert', style: TextStyle(fontWeight: FontWeight.w700, color: Colors.white)),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: context.primary,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                elevation: 0,
+                            Icon(Icons.done_all_rounded, size: 13, color: context.primary),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Mark all read',
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w800,
+                                color: context.primary,
                               ),
                             ),
                           ],
                         ),
-                      ],
+                      ),
+                    ),
+                  if (filteredNotifications.isNotEmpty) ...[
+                    const SizedBox(width: 6),
+                    InkWell(
+                      onTap: _clearAllNotifications,
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4.5),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.delete_sweep_outlined, size: 13, color: Color(0xFF64748B)),
+                            SizedBox(width: 3),
+                            Text(
+                              'Clear',
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF64748B),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(width: 6),
+                  InkWell(
+                    onTap: _showTestAlertOptions,
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4.5),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.notification_add_outlined, size: 13, color: context.primary),
+                          const SizedBox(width: 3),
+                          Text(
+                            'Test',
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w800,
+                              color: context.primary,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                )
-            else
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(20, 10, 20, 40),
-                itemCount: filteredNotifications.length,
-                itemBuilder: (context, index) {
-                      final item = filteredNotifications[index];
-                      final isUnread = item['read_at'] == null;
-                      final category = item['category'] ?? 'system';
-                      final symbol = _extractSymbol(item);
+                ],
+              ),
+            ],
+          ),
+        ),
 
-                      return Dismissible(
-                        key: Key(item['id'].toString()),
-                        direction: DismissDirection.horizontal,
-                        background: Container(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF0EA5E9),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          alignment: Alignment.centerLeft,
-                          child: const Row(
-                            children: [
-                              Icon(Icons.archive_outlined, color: Colors.white, size: 20),
-                              SizedBox(width: 6),
-                              Text('Archive', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
-                            ],
-                          ),
+        // 3. Notification List or Empty State
+        if (filteredNotifications.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 48),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 76,
+                    height: 76,
+                    decoration: BoxDecoration(
+                      color: context.primary.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      _activeCategory == 'all'
+                          ? Icons.notifications_none_rounded
+                          : Icons.filter_list_off_rounded,
+                      size: 38,
+                      color: context.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  Text(
+                    _activeCategory == 'all' ? 'All Caught Up!' : 'No Alerts in this Category',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                      color: context.textDark,
+                      letterSpacing: -0.3,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _activeCategory == 'all'
+                        ? 'You have no alerts right now. Active stock price alerts, AAOIFI Shariah compliance changes, and your Irshad Digest will appear here.'
+                        : 'No notifications matched the selected filter.',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 13.5,
+                      color: Color(0xFF64748B),
+                      height: 1.45,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: () => Navigator.pushNamed(context, '/alerts'),
+                        icon: Icon(Icons.tune_rounded, size: 16, color: context.primary),
+                        label: Text('Manage Active Alerts', style: TextStyle(fontWeight: FontWeight.w700, color: context.primary)),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: context.primary.withValues(alpha: 0.4)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                         ),
-                        secondaryBackground: Container(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFEF4444),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          alignment: Alignment.centerRight,
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Text('Delete', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
-                              SizedBox(width: 6),
-                              Icon(Icons.delete_outline_rounded, color: Colors.white, size: 20),
-                            ],
-                          ),
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: _showTestAlertOptions,
+                        icon: const Icon(Icons.notification_add_outlined, size: 16, color: Colors.white),
+                        label: const Text('Send Test Alert', style: TextStyle(fontWeight: FontWeight.w700, color: Colors.white)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: context.primary,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          elevation: 0,
                         ),
-                        onDismissed: (direction) {
-                          if (direction == DismissDirection.startToEnd) {
-                            _archiveNotification(item['id']);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Notification archived'),
-                                duration: Duration(seconds: 2),
-                                behavior: SnackBarBehavior.floating,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          )
+        else
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(20, 6, 20, 36),
+            itemCount: filteredNotifications.length,
+            itemBuilder: (context, index) {
+              final item = filteredNotifications[index];
+              final isUnread = item['read_at'] == null;
+              final category = _resolveCategory(item);
+              final symbol = _extractSymbol(item);
+
+              return Dismissible(
+                key: Key('notif_${item['id']}_$index'),
+                direction: DismissDirection.horizontal,
+                background: Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0EA5E9),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  alignment: Alignment.centerLeft,
+                  child: const Row(
+                    children: [
+                      Icon(Icons.archive_outlined, color: Colors.white, size: 20),
+                      SizedBox(width: 6),
+                      Text('Archive', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                    ],
+                  ),
+                ),
+                secondaryBackground: Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEF4444),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  alignment: Alignment.centerRight,
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text('Delete', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                      SizedBox(width: 6),
+                      Icon(Icons.delete_outline_rounded, color: Colors.white, size: 20),
+                    ],
+                  ),
+                ),
+                onDismissed: (direction) {
+                  if (direction == DismissDirection.startToEnd) {
+                    _archiveNotificationWithUndo(item);
+                  } else {
+                    _dismissNotificationWithUndo(item);
+                  }
+                },
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () => _handleNotificationTap(item),
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      color: isUnread ? const Color(0xFFFAFDFA) : Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isUnread
+                            ? context.primary.withValues(alpha: 0.4)
+                            : const Color(0xFFE2E8F0),
+                        width: isUnread ? 1.5 : 1.0,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: isUnread
+                              ? context.primary.withValues(alpha: 0.08)
+                              : Colors.black.withValues(alpha: 0.02),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (isUnread)
+                              Container(
+                                width: 4.5,
+                                color: context.primary,
                               ),
-                            );
-                          } else {
-                            _deleteNotification(item['id']);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Notification deleted'),
-                                duration: Duration(seconds: 2),
-                                behavior: SnackBarBehavior.floating,
-                              ),
-                            );
-                          }
-                        },
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(16),
-                          onTap: () => _handleNotificationTap(item),
-                          child: Container(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: isUnread
-                                    ? context.primary.withValues(alpha: 0.4)
-                                    : context.appColors.divider.withValues(alpha: 0.8),
-                                width: isUnread ? 1.3 : 1,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: isUnread
-                                      ? context.primary.withValues(alpha: 0.08)
-                                      : Colors.black.withValues(alpha: 0.02),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 3),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.all(15),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                        // Top row: Category Chip + Symbol Badge + Time + Unread Dot
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: _getBgColorForCategory(category),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      _getIconForCategory(category),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        _getCategoryLabel(category).toUpperCase(),
+                                        style: TextStyle(
+                                          fontSize: 9.5,
+                                          fontWeight: FontWeight.w800,
+                                          color: _getCategoryTextColor(category),
+                                          letterSpacing: 0.4,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
+                                if (symbol != null && symbol.isNotEmpty) ...[
+                                  const SizedBox(width: 6),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF1F5F9),
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                                    ),
+                                    child: Text(
+                                      symbol,
+                                      style: const TextStyle(
+                                        fontSize: 9.5,
+                                        fontWeight: FontWeight.w900,
+                                        color: Color(0xFF0F172A),
+                                        letterSpacing: 0.3,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            Row(
                               children: [
-                                // Top row: Category Chip + Time + Unread Dot
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                                Text(
+                                  _formatTimeAgo(item['created_at']),
+                                  style: const TextStyle(
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF64748B),
+                                  ),
+                                ),
+                                if (isUnread) ...[
+                                  const SizedBox(width: 6),
+                                  Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: BoxDecoration(
+                                      color: context.primary,
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: context.primary.withValues(alpha: 0.5),
+                                          blurRadius: 4,
+                                          spreadRadius: 1,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+
+                        // Title
+                        Text(
+                          item['title'] ?? '',
+                          style: TextStyle(
+                            fontWeight: isUnread ? FontWeight.w900 : FontWeight.w800,
+                            fontSize: 14.5,
+                            color: const Color(0xFF0F172A),
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+
+                        // Message (High contrast, never faded)
+                        Text(
+                          item['message'] ?? '',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFF475569),
+                            height: 1.45,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+
+                        // Bottom Action Row
+                        const SizedBox(height: 12),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            if (symbol != null && symbol.isNotEmpty && category == 'screening')
+                              GestureDetector(
+                                onTap: () => _handleNotificationTap(item),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5.5),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFD1FAE5),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: const Color(0xFF059669).withValues(alpha: 0.3)),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.shield_outlined, size: 12, color: Color(0xFF047857)),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'View Compliance ($symbol)',
+                                        style: const TextStyle(
+                                          fontSize: 11.5,
+                                          fontWeight: FontWeight.w800,
+                                          color: Color(0xFF047857),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      const Icon(Icons.arrow_forward_rounded, size: 12, color: Color(0xFF047857)),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            else if (symbol != null && symbol.isNotEmpty)
+                              GestureDetector(
+                                onTap: () => _handleNotificationTap(item),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5.5),
+                                  decoration: BoxDecoration(
+                                    color: context.primary.withValues(alpha: 0.08),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: context.primary.withValues(alpha: 0.2)),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.trending_up_rounded, size: 13, color: context.primary),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        item['action_label'] ?? 'View $symbol',
+                                        style: TextStyle(
+                                          fontSize: 11.5,
+                                          fontWeight: FontWeight.w800,
+                                          color: context.primary,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Icon(Icons.arrow_forward_rounded, size: 12, color: context.primary),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            else if (category == 'digest' || item['title'] == 'Irshad Digest is Ready')
+                              GestureDetector(
+                                onTap: () => _handleNotificationTap(item),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5.5),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFEEF2FF),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: const Color(0xFF4F46E5).withValues(alpha: 0.25)),
+                                  ),
+                                  child: const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.auto_stories_rounded, size: 12, color: Color(0xFF4338CA)),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        'Read Digest',
+                                        style: TextStyle(
+                                          fontSize: 11.5,
+                                          fontWeight: FontWeight.w800,
+                                          color: Color(0xFF4338CA),
+                                        ),
+                                      ),
+                                      SizedBox(width: 4),
+                                      Icon(Icons.arrow_forward_rounded, size: 12, color: Color(0xFF4338CA)),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            else
+                              GestureDetector(
+                                onTap: () => _handleNotificationTap(item),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5.5),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF1F5F9),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                                  ),
+                                  child: const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        'View Details',
+                                        style: TextStyle(
+                                          fontSize: 11.5,
+                                          fontWeight: FontWeight.w700,
+                                          color: Color(0xFF334155),
+                                        ),
+                                      ),
+                                      SizedBox(width: 4),
+                                      Icon(Icons.arrow_forward_rounded, size: 12, color: Color(0xFF334155)),
+                                    ],
+                                  ),
+                                ),
+                              ),
+
+                            // Quick card actions
+                            Row(
+                              children: [
+                                if (isUnread)
+                                  GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () => _markAsRead(item['id']),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                                      margin: const EdgeInsets.only(right: 6),
                                       decoration: BoxDecoration(
-                                        color: _getBgColorForCategory(category),
-                                        borderRadius: BorderRadius.circular(6),
+                                        color: context.primary.withValues(alpha: 0.08),
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(color: context.primary.withValues(alpha: 0.2)),
                                       ),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          _getIconForCategory(category),
-                                          const SizedBox(width: 5),
+                                          Icon(Icons.check_rounded, size: 13, color: context.primary),
+                                          const SizedBox(width: 3),
                                           Text(
-                                            _getCategoryLabel(category).toUpperCase(),
+                                            'Read',
                                             style: TextStyle(
-                                              fontSize: 10,
+                                              fontSize: 11,
                                               fontWeight: FontWeight.w800,
-                                              color: _getCategoryTextColor(category),
-                                              letterSpacing: 0.4,
+                                              color: context.primary,
                                             ),
                                           ),
                                         ],
                                       ),
                                     ),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          _formatTimeAgo(item['created_at']),
-                                          style: TextStyle(
-                                            fontSize: 11.5,
-                                            fontWeight: FontWeight.w500,
-                                            color: context.textMuted,
-                                          ),
-                                        ),
-                                        if (isUnread) ...[
-                                          const SizedBox(width: 6),
-                                          Container(
-                                            width: 7,
-                                            height: 7,
-                                            decoration: BoxDecoration(
-                                              color: context.primary,
-                                              shape: BoxShape.circle,
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: context.primary.withValues(alpha: 0.5),
-                                                  blurRadius: 4,
-                                                  spreadRadius: 1,
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-
-                                // Title
-                                Text(
-                                  item['title'] ?? '',
-                                  style: TextStyle(
-                                    fontWeight: isUnread ? FontWeight.w900 : FontWeight.w700,
-                                    fontSize: 15,
-                                    color: context.textDark,
-                                    letterSpacing: -0.2,
                                   ),
-                                ),
-                                const SizedBox(height: 6),
-
-                                // Message
-                                Text(
-                                  item['message'] ?? '',
-                                  style: TextStyle(
-                                    fontSize: 13.5,
-                                    color: context.textMuted,
-                                    height: 1.45,
-                                  ),
-                                ),
-
-                                // Bottom Action Row
-                                const SizedBox(height: 12),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    if (symbol != null && symbol.isNotEmpty)
-                                      GestureDetector(
-                                        onTap: () => _handleNotificationTap(item),
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                          decoration: BoxDecoration(
-                                            color: context.primary.withValues(alpha: 0.08),
-                                            borderRadius: BorderRadius.circular(8),
-                                            border: Border.all(color: context.primary.withValues(alpha: 0.2)),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Text(
-                                                item['action_label'] ?? 'View $symbol',
-                                                style: TextStyle(
-                                                  fontSize: 11.5,
-                                                  fontWeight: FontWeight.w800,
-                                                  color: context.primary,
-                                                ),
-                                              ),
-                                              const SizedBox(width: 4),
-                                              Icon(Icons.arrow_forward_rounded, size: 12, color: context.primary),
-                                            ],
-                                          ),
-                                        ),
-                                      )
-                                    else if (category == 'digest' || item['title'] == 'Irshad Digest is Ready')
-                                      GestureDetector(
-                                        onTap: () => _handleNotificationTap(item),
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFF6366F1).withValues(alpha: 0.1),
-                                            borderRadius: BorderRadius.circular(8),
-                                            border: Border.all(color: const Color(0xFF6366F1).withValues(alpha: 0.25)),
-                                          ),
-                                          child: const Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Icon(Icons.auto_stories_rounded, size: 12, color: Color(0xFF4F46E5)),
-                                              SizedBox(width: 4),
-                                              Text(
-                                                'Read Digest',
-                                                style: TextStyle(
-                                                  fontSize: 11.5,
-                                                  fontWeight: FontWeight.w800,
-                                                  color: Color(0xFF4F46E5),
-                                                ),
-                                              ),
-                                              SizedBox(width: 4),
-                                              Icon(Icons.arrow_forward_rounded, size: 12, color: Color(0xFF4F46E5)),
-                                            ],
-                                          ),
-                                        ),
-                                      )
-                                    else
-                                      const SizedBox.shrink(),
-
-                                    // Quick card actions
-                                    Row(
-                                      children: [
-                                        if (isUnread)
-                                          GestureDetector(
-                                            onTap: () => _markAsRead(item['id']),
-                                            child: Container(
-                                              padding: const EdgeInsets.all(6),
-                                              margin: const EdgeInsets.only(right: 6),
-                                              decoration: BoxDecoration(
-                                                color: context.bg,
-                                                borderRadius: BorderRadius.circular(6),
-                                              ),
-                                              child: Icon(Icons.check_rounded, size: 15, color: context.textMuted),
-                                            ),
-                                          ),
-                                        GestureDetector(
-                                          onTap: () => _deleteNotification(item['id']),
-                                          child: Container(
-                                            padding: const EdgeInsets.all(6),
-                                            decoration: BoxDecoration(
-                                              color: context.bg,
-                                              borderRadius: BorderRadius.circular(6),
-                                            ),
-                                            child: Icon(Icons.close_rounded, size: 15, color: context.textMuted),
-                                          ),
-                                        ),
-                                      ],
+                                GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () => _dismissNotificationWithUndo(item),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF1F5F9),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: const Color(0xFFE2E8F0)),
                                     ),
-                                  ],
+                                    child: const Icon(Icons.close_rounded, size: 14, color: Color(0xFF64748B)),
+                                  ),
                                 ),
                               ],
                             ),
-                          ),
+                          ],
                         ),
-                      );
-                    },
+                      ],
+                    ),
                   ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+},
+          ),
 
             if (_isLoadingMore)
               Padding(

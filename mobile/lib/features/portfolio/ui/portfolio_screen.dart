@@ -105,32 +105,136 @@ class _PortfolioScreenState extends State<PortfolioScreen> with WidgetsBindingOb
                     context: context,
                     isScrollControlled: true,
                     backgroundColor: Colors.transparent,
-                    builder: (context) => Container(
-                      height: MediaQuery.of(context).size.height * 0.9,
-                      decoration: BoxDecoration(
-                        color: context.bg,
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                      ),
-                      child: Column(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            child: Center(
-                              child: Container(
-                                width: 40,
-                                height: 4,
-                                decoration: BoxDecoration(
-                                  color: context.textMuted.withValues(alpha: 0.2),
-                                  borderRadius: BorderRadius.circular(2),
+                    builder: (context) => StatefulBuilder(
+                      builder: (context, setModalState) {
+                        return ScaffoldMessenger(
+                          child: Scaffold(
+                            backgroundColor: Colors.transparent,
+                            body: Stack(
+                              children: [
+                                Positioned.fill(
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () => Navigator.pop(context),
+                                  ),
                                 ),
-                              ),
+                                Align(
+                                  alignment: Alignment.bottomCenter,
+                                  child: Container(
+                                    height: MediaQuery.of(context).size.height * 0.9,
+                                    decoration: BoxDecoration(
+                                      color: context.bg,
+                                      borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        // 1. Drag handle
+                                        Container(
+                                          padding: const EdgeInsets.only(top: 12, bottom: 8),
+                                          child: Center(
+                                            child: Container(
+                                              width: 38,
+                                              height: 4.5,
+                                              decoration: BoxDecoration(
+                                                color: context.textMuted.withValues(alpha: 0.25),
+                                                borderRadius: BorderRadius.circular(3),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        // 2. Header Bar
+                                        Padding(
+                                          padding: const EdgeInsets.fromLTRB(20, 4, 12, 12),
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Container(
+                                                    padding: const EdgeInsets.all(8),
+                                                    decoration: BoxDecoration(
+                                                      color: context.primary.withValues(alpha: 0.1),
+                                                      borderRadius: BorderRadius.circular(12),
+                                                    ),
+                                                    child: Icon(Icons.notifications_rounded, color: context.primary, size: 20),
+                                                  ),
+                                                  const SizedBox(width: 10),
+                                                  Text(
+                                                    'Notifications',
+                                                    style: TextStyle(
+                                                      fontSize: 20,
+                                                      fontWeight: FontWeight.w900,
+                                                      color: context.textDark,
+                                                      letterSpacing: -0.4,
+                                                    ),
+                                                  ),
+                                                  if (_unreadInbox > 0) ...[
+                                                    const SizedBox(width: 8),
+                                                    Container(
+                                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                                      decoration: BoxDecoration(
+                                                        color: context.primary.withValues(alpha: 0.12),
+                                                        borderRadius: BorderRadius.circular(12),
+                                                      ),
+                                                      child: Text(
+                                                        '$_unreadInbox new',
+                                                        style: TextStyle(
+                                                          color: context.primary,
+                                                          fontWeight: FontWeight.w800,
+                                                          fontSize: 11,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ],
+                                              ),
+                                              Row(
+                                                children: [
+                                                  IconButton(
+                                                    tooltip: 'Alert Settings',
+                                                    icon: Icon(Icons.tune_rounded, color: context.textDark, size: 20),
+                                                    onPressed: () {
+                                                      Navigator.pop(context);
+                                                      Navigator.pushNamed(context, '/alerts');
+                                                    },
+                                                  ),
+                                                  IconButton(
+                                                    tooltip: 'Close',
+                                                    icon: Icon(Icons.close_rounded, color: context.textMuted, size: 22),
+                                                    onPressed: () => Navigator.pop(context),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Divider(height: 1, color: context.appColors.divider.withValues(alpha: 0.7)),
+                                        // 3. Notifications content
+                                        Expanded(
+                                          child: SingleChildScrollView(
+                                            child: UpdatesInboxTab(
+                                              onUnreadCountChanged: (count) {
+                                                if (mounted) {
+                                                  setState(() => _unreadInbox = count);
+                                                  setModalState(() {});
+                                                }
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          Expanded(child: const UpdatesInboxTab()),
-                        ],
-                      ),
+                        );
+                      },
                     ),
-                  );
+                  ).then((_) {
+                    if (mounted) _fetchUnreadCounts();
+                  });
                 },
               ),
             ),
