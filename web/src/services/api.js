@@ -3,7 +3,7 @@ import axiosRetry from 'axios-retry';
 import localforage from 'localforage';
 
 // Force use of the Railway backend in production since Cloudflare Pages has the old Railway URL cached in VITE_API_URL
-const PROD_API = 'https://irshad-backend-production.up.railway.app/api/v1';
+const PROD_API = 'https://irshad.178.104.179.166.sslip.io/api/v1';
 const API_BASE = import.meta.env.DEV && import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL : PROD_API;
 const api = axios.create({
   baseURL: API_BASE,
@@ -18,7 +18,7 @@ export const formatLogoUrl = (url) => {
   if (!url || typeof url !== 'string') return null;
   if (url.startsWith('http')) return url;
   // Fallback to prod or local URL
-  const baseUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/api\/v1$/, '') : 'https://irshad-backend-production.up.railway.app';
+  const baseUrl = API_BASE.replace(/\/api\/v1$/, '');
   return `${baseUrl.replace(/\/api\/v1$/, '')}${url}`;
 };
 

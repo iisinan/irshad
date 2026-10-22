@@ -1,2 +1,2 @@
-/api/*  https://api.iirshad.com/api/:splat  200
+/api/*  https://irshad.178.104.179.166.sslip.io/api/:splat  200
 /*      /index.html                           200

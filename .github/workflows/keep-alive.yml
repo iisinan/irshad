@@ -11,4 +11,4 @@ jobs:
     steps:
       - name: Ping Backend API
         run: |
-          curl -sS https://irshad-backend-production.up.railway.app/api/v1/ping || echo "Ping failed"
+          curl -sS https://irshad.178.104.179.166.sslip.io/api/v1/ping || echo "Ping failed"
