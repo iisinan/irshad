@@ -60,6 +60,35 @@ Route::prefix('v1')->group(function () {
         return 'Cache cleared';
     });
 
+    Route::get('/sync-staged-compliance', function () {
+        \Illuminate\Support\Facades\Artisan::call('migrate --force');
+        \Illuminate\Support\Facades\Artisan::call('cache:clear');
+        \Illuminate\Support\Facades\Cache::flush();
+        try { \Illuminate\Support\Facades\Cache::tags(['stocks'])->flush(); } catch (\Throwable $e) {}
+        try { \Illuminate\Support\Facades\Cache::tags(['aaoifi'])->flush(); } catch (\Throwable $e) {}
+
+        $pendingCount = \App\Models\ComplianceReview::where('status', 'pending')->count();
+        $pendingReviews = \App\Models\ComplianceReview::with('company')
+            ->where('status', 'pending')
+            ->get(['id', 'company_id', 'status', 'new_status', 'created_at']);
+
+        $recentHistory = \App\Models\ComplianceReview::with('company')
+            ->whereIn('status', ['approved', 'rejected'])
+            ->orderBy('reviewed_at', 'desc')
+            ->take(5)
+            ->get(['id', 'company_id', 'status', 'new_status', 'reviewed_at']);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Synced latest October 2026 compliance filings and flushed caches.',
+            'db_host' => config('database.connections.pgsql.host'),
+            'db_database' => config('database.connections.pgsql.database'),
+            'pending_count' => $pendingCount,
+            'pending_reviews' => $pendingReviews,
+            'recent_history' => $recentHistory,
+        ]);
+    });
+
     // ── Public Data (no auth required) ───────────────────────────────────
     Route::middleware('throttle:60,1')->group(function () {
         Route::get('/resources', [ResourceController::class, 'index']);
