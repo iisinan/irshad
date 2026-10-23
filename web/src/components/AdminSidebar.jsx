@@ -1,5 +1,7 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import {
@@ -14,15 +16,29 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
   const { user, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
 
+  const { data: stats } = useQuery({
+    queryKey: ['admin-stats'],
+    queryFn: async () => {
+      const res = await api.get('/admin/stats');
+      return res.data;
+    },
+    staleTime: 30000,
+  });
+
   const ADMIN_NAV_ITEMS = [
     { section: 'Admin' },
     { label: 'Overview',            icon: LayoutDashboard, to: '/admin' },
     { label: 'Alerts & Stocks',     icon: Activity,        to: '/admin/alerts' },
-    { label: 'Inbox, Mail',               icon: Mail,            to: '/admin/inbox' },
-    { label: 'Compliance Reviews',  icon: Shield,          to: '/admin/compliance-reviews' },
+    { label: 'Inbox, Mail',         icon: Mail,            to: '/admin/inbox' },
+    {
+      label: 'Compliance Reviews',
+      icon: Shield,
+      to: '/admin/compliance-reviews',
+      badge: stats?.pending_reviews > 0 ? stats.pending_reviews : null,
+    },
     { label: 'Registered Users',    icon: Users,           to: '/admin/users' },
     { label: 'Resources',           icon: BookOpen,        to: '/admin/resources' },
-    { label: 'Financial Data Queue',icon: Inbox, Mail,           to: '/admin/financial-queue' },
+    { label: 'Financial Data Queue',icon: Inbox,           to: '/admin/financial-queue' },
     { label: 'Zakat Settings',      icon: HeartHandshake,  to: '/admin/zakat-settings' },
     { section: 'Exit' },
     { label: 'Back to App',         icon: ArrowLeft,       to: '/portfolio' },

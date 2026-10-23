@@ -12,7 +12,7 @@ use Carbon\Carbon;
 
 class ProcessFinancialPdfCommand extends Command
 {
-    protected $signature = 'aaoifi:process-pdf {ticker} {pdf_path} {--url= : The source URL of the PDF}';
+    protected $signature = 'aaoifi:process-pdf {ticker} {pdf_path} {--url= : The source URL of the PDF} {--auto-approve : Automatically approve any staged compliance review}';
     protected $description = 'Extract financial data from a PDF using Gemini and recalculate AAOIFI compliance';
 
     public function handle(AaoifiComplianceService $aaoifiService)
@@ -275,26 +275,35 @@ Return ONLY a valid JSON object matching this schema exactly, with NO markdown f
         $screeningService = app(\App\Services\AaoifiScreeningService::class);
         $screeningService->screenCompany($company);
         
-        // Auto-approve and apply if staged in review
+        // Check if staged in review
         $pendingReview = \App\Models\ComplianceReview::where('company_id', $company->id)->where('status', 'pending')->first();
         if ($pendingReview) {
-            $pendingReview->update(['status' => 'approved', 'reviewed_at' => now()]);
-            $cleanReason = preg_replace('/^SCHOLAR REVIEW REQUIRED:\s*/i', '', $pendingReview->reason);
-            $company->update(['current_status' => $pendingReview->new_status]);
-            \App\Models\StockStatus::updateOrCreate(
-                ['company_id' => $company->id],
-                [
-                    'status' => $pendingReview->new_status,
-                    'reason' => $cleanReason,
-                    'verified_by_scholar' => false,
-                    'last_updated' => now()
-                ]
-            );
-            $aaoifiScreening = \App\Models\AaoifiScreening::where('company_id', $company->id)->latest()->first();
-            if ($aaoifiScreening) {
-                $aaoifiScreening->update(['final_status' => $pendingReview->new_status]);
+            if ($this->option('auto-approve')) {
+                $pendingReview->update(['status' => 'approved', 'reviewed_at' => now()]);
+                $cleanReason = preg_replace('/^SCHOLAR REVIEW REQUIRED:\s*/i', '', $pendingReview->reason);
+                $company->update(['current_status' => $pendingReview->new_status]);
+                \App\Models\StockStatus::updateOrCreate(
+                    ['company_id' => $company->id],
+                    [
+                        'status' => $pendingReview->new_status,
+                        'reason' => $cleanReason,
+                        'verified_by_scholar' => false,
+                        'last_updated' => now()
+                    ]
+                );
+                $aaoifiScreening = \App\Models\AaoifiScreening::where('company_id', $company->id)->latest()->first();
+                if ($aaoifiScreening) {
+                    $aaoifiScreening->update(['final_status' => $pendingReview->new_status]);
+                }
+                $newStatus = $company->status()->first();
+                $this->info("Compliance change automatically approved via --auto-approve.");
+            } else {
+                $this->warn("==================================================");
+                $this->warn("COMPLIANCE CHANGE DETECTED: Review staged for Admin approval!");
+                $this->warn("Status change: " . ($pendingReview->old_status ?? 'unknown') . " -> " . $pendingReview->new_status);
+                $this->warn("This notification is now active on the Admin Overview dashboard.");
+                $this->warn("==================================================");
             }
-            $newStatus = $company->status()->first();
         }
         
         $this->info("====================================");

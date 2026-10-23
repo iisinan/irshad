@@ -49,12 +49,26 @@ class AdminComplianceController extends Controller
         $doubtfulStocks = Company::where('current_status', 'doubtful')->count();
         $pendingReviews = ComplianceReview::where('status', 'pending')->count();
 
+        $pendingList = ComplianceReview::with(['company', 'company.aaoifiScreening'])
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->take(10)
+            ->get();
+
+        $recentHistory = ComplianceReview::with(['company'])
+            ->whereIn('status', ['approved', 'rejected'])
+            ->orderBy('reviewed_at', 'desc')
+            ->take(5)
+            ->get();
+
         return response()->json([
             'total_stocks' => $totalStocks,
             'halal_stocks' => $halalStocks,
             'non_halal_stocks' => $nonHalalStocks,
             'doubtful_stocks' => $doubtfulStocks,
             'pending_reviews' => $pendingReviews,
+            'pending_list' => $pendingList,
+            'recent_history' => $recentHistory,
         ]);
     }
 
