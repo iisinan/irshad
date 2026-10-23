@@ -154,13 +154,35 @@ class AaoifiComplianceService
         );
     }
 
+    public static function normalizeStatus(?string $status): string
+    {
+        if (! $status) {
+            return 'unknown';
+        }
+        $s = strtolower(trim($status));
+        if (in_array($s, ['halal', 'compliant', 'shariah compliant', 'shariah-compliant'])) {
+            return 'halal';
+        }
+        if (in_array($s, ['non-compliant', 'non_compliant', 'noncompliant', 'shariah non-compliant', 'shariah-non-compliant', 'non-halal', 'non_halal'])) {
+            return 'non-compliant';
+        }
+        if (in_array($s, ['doubtful', 'questionable', 'warning'])) {
+            return 'doubtful';
+        }
+
+        return $s;
+    }
+
     private function saveStatus(Company $company, string $status, string $reasonText)
     {
         $stockStatus = $company->status()->first();
-        $oldStatus = $stockStatus ? $stockStatus->status : null;
+        $oldRawStatus = $stockStatus ? $stockStatus->status : ($company->current_status ?? null);
+
+        $oldNormalized = self::normalizeStatus($oldRawStatus);
+        $newNormalized = self::normalizeStatus($status);
 
         if ($stockStatus && $stockStatus->verified_by_scholar) {
-            if ($oldStatus !== $status) {
+            if ($oldNormalized !== $newNormalized) {
                 // Status has drifted from the scholar's verification, stage a review to notify them
                 $existingReview = ComplianceReview::where('company_id', $company->id)
                     ->where('status', 'pending')
@@ -170,7 +192,7 @@ class AaoifiComplianceService
                 if (! $existingReview) {
                     $review = ComplianceReview::create([
                         'company_id' => $company->id,
-                        'old_status' => $oldStatus,
+                        'old_status' => $oldRawStatus ?? $oldNormalized,
                         'new_status' => $status,
                         'reason' => 'SCHOLAR REVIEW REQUIRED: '.$reasonText,
                         'status' => 'pending',
@@ -182,12 +204,12 @@ class AaoifiComplianceService
             return $stockStatus;
         }
 
-        $oldStatus = $stockStatus ? $stockStatus->status : null;
-
-        if ($oldStatus !== $status) {
+        // If the stock moves to a DIFFERENT compliance category (e.g. halal -> non-compliant, non-compliant -> halal, doubtful -> non-compliant),
+        // it requires administrator approval before reflecting live.
+        if ($oldNormalized !== $newNormalized && $oldNormalized !== 'unknown') {
             // Auto-approve downgrades to non-compliant if it failed Business Activity (Rule 1)
             // But only if it was NOT halal before (e.g. from pending or doubtful). Any change from halal to non-compliant must go to admin review.
-            if ($status === 'non-compliant' && str_contains($reasonText, 'Rule 1') && $oldStatus !== 'halal') {
+            if ($status === 'non-compliant' && str_contains($reasonText, 'Rule 1') && $oldNormalized !== 'halal') {
                 // Apply immediately
                 StockStatus::updateOrCreate(
                     ['company_id' => $company->id],
@@ -198,7 +220,10 @@ class AaoifiComplianceService
                         'last_updated' => now(),
                     ]
                 );
+                app()->instance('verdict.unlock', true);
                 $company->update(['current_status' => $status]);
+                app()->instance('verdict.unlock', false);
+
                 $aaoifiScreening = AaoifiScreening::where('company_id', $company->id)->latest()->first();
                 if ($aaoifiScreening) {
                     $aaoifiScreening->update(['final_status' => $status]);
@@ -206,7 +231,7 @@ class AaoifiComplianceService
                 // Record the history for the automatic change
                 ComplianceHistory::create([
                     'company_id' => $company->id,
-                    'old_status' => $oldStatus,
+                    'old_status' => $oldRawStatus ?? $oldNormalized,
                     'new_status' => $status,
                     'reason' => $reasonText.' (Auto-applied)',
                     'changed_at' => now(),
@@ -215,29 +240,36 @@ class AaoifiComplianceService
                 return $company->status()->first();
             }
 
-            // Check if there is already a pending review for this exact change
+            // Check if there is already a pending review for this company
             $existingReview = ComplianceReview::where('company_id', $company->id)
                 ->where('status', 'pending')
-                ->where('new_status', $status)
                 ->first();
 
             if (! $existingReview) {
                 $review = ComplianceReview::create([
                     'company_id' => $company->id,
-                    'old_status' => $oldStatus,
+                    'old_status' => $oldRawStatus ?? $oldNormalized,
                     'new_status' => $status,
                     'reason' => $reasonText,
                     'status' => 'pending',
                 ]);
 
                 $this->notifyAdminsOfReview($review);
+            } else {
+                $existingReview->update([
+                    'old_status' => $oldRawStatus ?? $oldNormalized,
+                    'new_status' => $status,
+                    'reason' => $reasonText,
+                ]);
             }
 
-            // Return existing status without modifying the database
+            // Return existing status without modifying the database until approved
             return $stockStatus ?? (object) ['status' => 'pending'];
         }
 
-        // If status hasn't changed, just update the timestamp
+        // If the stock moves within the SAME compliance category (e.g. halal -> halal, non-compliant -> non-compliant, doubtful -> doubtful),
+        // or initial calculation from unknown:
+        // Automatically insert and update the details directly into the database without requiring admin review.
         $newStatus = StockStatus::updateOrCreate(
             ['company_id' => $company->id],
             [
@@ -248,12 +280,23 @@ class AaoifiComplianceService
             ]
         );
 
+        app()->instance('verdict.unlock', true);
         $company->update(['current_status' => $status]);
+        app()->instance('verdict.unlock', false);
 
         $aaoifiScreening = AaoifiScreening::where('company_id', $company->id)->latest()->first();
         if ($aaoifiScreening) {
             $aaoifiScreening->update(['final_status' => $status]);
         }
+
+        // Auto-resolve any pending review that had the same compliance
+        ComplianceReview::where('company_id', $company->id)
+            ->where('status', 'pending')
+            ->where('new_status', $status)
+            ->update([
+                'status' => 'approved',
+                'reviewed_at' => now(),
+            ]);
 
         return $newStatus;
     }

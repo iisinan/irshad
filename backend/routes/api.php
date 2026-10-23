@@ -62,29 +62,63 @@ Route::prefix('v1')->group(function () {
 
     Route::get('/sync-staged-compliance', function () {
         \Illuminate\Support\Facades\Artisan::call('migrate --force');
+
+        // Resolve any reviews where the compliance tier did not change (same compliance)
+        $pendingReviews = \App\Models\ComplianceReview::where('status', 'pending')->get();
+        foreach ($pendingReviews as $rev) {
+            $normOld = \App\Services\AaoifiComplianceService::normalizeStatus($rev->old_status);
+            $normNew = \App\Services\AaoifiComplianceService::normalizeStatus($rev->new_status);
+
+            if ($normOld === $normNew) {
+                $rev->update([
+                    'status' => 'approved',
+                    'reviewed_at' => now(),
+                ]);
+
+                if ($rev->company) {
+                    app()->instance('verdict.unlock', true);
+                    $rev->company->update(['current_status' => $rev->new_status]);
+                    app()->instance('verdict.unlock', false);
+
+                    \App\Models\StockStatus::updateOrCreate(
+                        ['company_id' => $rev->company_id],
+                        [
+                            'status' => $rev->new_status,
+                            'reason' => preg_replace('/^SCHOLAR REVIEW REQUIRED:\s*/i', '', $rev->reason),
+                            'verified_by_scholar' => false,
+                            'last_updated' => now(),
+                        ]
+                    );
+
+                    $aaoifiScreening = \App\Models\AaoifiScreening::where('company_id', $rev->company_id)->latest()->first();
+                    if ($aaoifiScreening) {
+                        $aaoifiScreening->update(['final_status' => $rev->new_status]);
+                    }
+                }
+            }
+        }
+
         \Illuminate\Support\Facades\Artisan::call('cache:clear');
         \Illuminate\Support\Facades\Cache::flush();
         try { \Illuminate\Support\Facades\Cache::tags(['stocks'])->flush(); } catch (\Throwable $e) {}
         try { \Illuminate\Support\Facades\Cache::tags(['aaoifi'])->flush(); } catch (\Throwable $e) {}
 
         $pendingCount = \App\Models\ComplianceReview::where('status', 'pending')->count();
-        $pendingReviews = \App\Models\ComplianceReview::with('company')
+        $remainingPending = \App\Models\ComplianceReview::with('company')
             ->where('status', 'pending')
-            ->get(['id', 'company_id', 'status', 'new_status', 'created_at']);
+            ->get(['id', 'company_id', 'status', 'old_status', 'new_status', 'created_at']);
 
         $recentHistory = \App\Models\ComplianceReview::with('company')
             ->whereIn('status', ['approved', 'rejected'])
             ->orderBy('reviewed_at', 'desc')
-            ->take(5)
-            ->get(['id', 'company_id', 'status', 'new_status', 'reviewed_at']);
+            ->take(6)
+            ->get(['id', 'company_id', 'status', 'old_status', 'new_status', 'reviewed_at']);
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Synced latest October 2026 compliance filings and flushed caches.',
-            'db_host' => config('database.connections.pgsql.host'),
-            'db_database' => config('database.connections.pgsql.database'),
+            'message' => 'Processed same-compliance auto-approvals and flushed caches.',
             'pending_count' => $pendingCount,
-            'pending_reviews' => $pendingReviews,
+            'remaining_pending' => $remainingPending,
             'recent_history' => $recentHistory,
         ]);
     });

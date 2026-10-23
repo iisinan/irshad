@@ -278,17 +278,45 @@ Return ONLY a valid JSON object matching this schema exactly, with NO markdown f
         // Check if staged in review
         $pendingReview = \App\Models\ComplianceReview::where('company_id', $company->id)->where('status', 'pending')->first();
         if ($pendingReview) {
-            if ($this->option('auto-approve')) {
+            $normOld = \App\Services\AaoifiComplianceService::normalizeStatus($pendingReview->old_status);
+            $normNew = \App\Services\AaoifiComplianceService::normalizeStatus($pendingReview->new_status);
+
+            // USER RULE: If stocks move within the SAME compliance category (e.g. halal to halal, non-compliant to non-compliant),
+            // insert the details to the database automatically without needing admin approval.
+            if ($normOld === $normNew) {
                 $pendingReview->update(['status' => 'approved', 'reviewed_at' => now()]);
                 $cleanReason = preg_replace('/^SCHOLAR REVIEW REQUIRED:\s*/i', '', $pendingReview->reason);
+                app()->instance('verdict.unlock', true);
                 $company->update(['current_status' => $pendingReview->new_status]);
+                app()->instance('verdict.unlock', false);
                 \App\Models\StockStatus::updateOrCreate(
                     ['company_id' => $company->id],
                     [
                         'status' => $pendingReview->new_status,
                         'reason' => $cleanReason,
                         'verified_by_scholar' => false,
-                        'last_updated' => now()
+                        'last_updated' => now(),
+                    ]
+                );
+                $aaoifiScreening = \App\Models\AaoifiScreening::where('company_id', $company->id)->latest()->first();
+                if ($aaoifiScreening) {
+                    $aaoifiScreening->update(['final_status' => $pendingReview->new_status]);
+                }
+                $newStatus = $company->status()->first();
+                $this->info("Same compliance category ({$normNew} -> {$normNew}). Details inserted to database automatically without requiring admin approval.");
+            } elseif ($this->option('auto-approve')) {
+                $pendingReview->update(['status' => 'approved', 'reviewed_at' => now()]);
+                $cleanReason = preg_replace('/^SCHOLAR REVIEW REQUIRED:\s*/i', '', $pendingReview->reason);
+                app()->instance('verdict.unlock', true);
+                $company->update(['current_status' => $pendingReview->new_status]);
+                app()->instance('verdict.unlock', false);
+                \App\Models\StockStatus::updateOrCreate(
+                    ['company_id' => $company->id],
+                    [
+                        'status' => $pendingReview->new_status,
+                        'reason' => $cleanReason,
+                        'verified_by_scholar' => false,
+                        'last_updated' => now(),
                     ]
                 );
                 $aaoifiScreening = \App\Models\AaoifiScreening::where('company_id', $company->id)->latest()->first();
