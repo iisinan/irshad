@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api, { fetchStockDetails } from '../services/api';
+import CompanyLogo from './CompanyLogo';
 import { Check, X, Inbox, ChevronDown, ChevronUp, BarChart2 } from 'lucide-react';
 import { LineChart, Line, XAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
 
@@ -164,9 +165,12 @@ export default function AdminFinancialReviewQueue() {
                 style={{ padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', background: expandedId === item.id ? 'var(--bg-hover)' : 'transparent', transition: 'background 0.2s' }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'var(--bg)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.9rem', color: 'var(--text-dark)' }}>
-                    {item.company?.symbol?.substring(0, 2)}
-                  </div>
+                  <CompanyLogo
+                    symbol={item.company?.symbol}
+                    logoUrl={item.company?.logo_url}
+                    size={40}
+                    radius={10}
+                  />
                   <div>
                     <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-dark)' }}>{item.company?.symbol} <span style={{ fontWeight: 400, color: 'var(--text-muted)', fontSize: '0.9rem' }}>— {item.company?.name}</span></h4>
                     <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import CompanyLogo from './CompanyLogo';
 import {
   Check, X, Shield, Clock, AlertTriangle, Edit2, Save,
   RefreshCw, TrendingUp, TrendingDown, ArrowRight,
@@ -493,13 +494,13 @@ export default function AdminComplianceReviews() {
                               : <Square size={18} color="var(--text-muted)"/>}
                           </div>
 
-                          {/* Number badge */}
-                          <div style={{
-                            width: 34, height: 34, borderRadius: 10, flexShrink: 0,
-                            background: 'linear-gradient(135deg,#065F46,#047857)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            color: 'white', fontWeight: 900, fontSize: '0.75rem'
-                          }}>{idx + 1}</div>
+                          {/* Company Logo */}
+                          <CompanyLogo
+                            symbol={review.company?.symbol}
+                            logoUrl={review.company?.logo_url}
+                            size={40}
+                            radius={10}
+                          />
 
                           {/* Company info */}
                           <div style={{ flex: 1, minWidth: 0 }}>
@@ -847,9 +848,17 @@ export default function AdminComplianceReviews() {
                   padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 14
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14 }}>
-                    <Badge color={review.status === 'approved' ? '#059669' : '#DC2626'}>
-                      {review.status === 'approved' ? '✓ Approved' : '✗ Rejected'}
-                    </Badge>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <Badge color={review.status === 'approved' ? '#059669' : '#DC2626'}>
+                        {review.status === 'approved' ? '✓ Approved' : '✗ Rejected'}
+                      </Badge>
+                      <CompanyLogo
+                        symbol={review.company?.symbol}
+                        logoUrl={review.company?.logo_url}
+                        size={36}
+                        radius={9}
+                      />
+                    </div>
 
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
@@ -1043,10 +1052,18 @@ export default function AdminComplianceReviews() {
                   padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 14
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14 }}>
-                    <Badge color="#6366F1">
-                      <Settings size={10} style={{ marginRight: 4, display: 'inline-block', verticalAlign: 'text-top' }}/>
-                      Auto-Applied
-                    </Badge>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <Badge color="#6366F1">
+                        <Settings size={10} style={{ marginRight: 4, display: 'inline-block', verticalAlign: 'text-top' }}/>
+                        Auto-Applied
+                      </Badge>
+                      <CompanyLogo
+                        symbol={review.company?.symbol}
+                        logoUrl={review.company?.logo_url}
+                        size={36}
+                        radius={9}
+                      />
+                    </div>
 
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
