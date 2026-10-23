@@ -307,8 +307,10 @@ Return ONLY a valid JSON object matching this schema exactly, with NO markdown f
         }
         
         $this->info("====================================");
-        $this->info("Final Status: " . strtoupper($newStatus->status));
-        $this->info("Reason: " . $newStatus->reason);
+        $statusStr = is_object($newStatus) ? ($newStatus->status ?? 'pending') : 'pending';
+        $reasonStr = is_object($newStatus) ? ($newStatus->reason ?? ($pendingReview->reason ?? 'Pending admin review')) : 'Pending admin review';
+        $this->info("Final Status: " . strtoupper($statusStr));
+        $this->info("Reason: " . $reasonStr);
         $this->info("====================================");
         
         // Clear caches so UI shows the correct financial details
