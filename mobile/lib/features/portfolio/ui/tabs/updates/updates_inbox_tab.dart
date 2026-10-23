@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 import 'updates_digest_tab.dart';
 import 'package:irshad_mobile/core/api/api_service.dart';
 import 'package:hive/hive.dart';
 import 'dart:convert';
 import 'package:irshad_mobile/features/stocks/ui/stock_detail_screen.dart';
+import 'package:irshad_mobile/features/profile/providers/alerts_provider.dart';
 
 class UpdatesInboxTab extends StatefulWidget {
   final ValueChanged<int>? onUnreadCountChanged;
@@ -33,11 +35,18 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
     {'id': 'system', 'label': 'System'},
   ];
 
+  Set<String> _userAlertSymbols = {};
+
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    _fetchInbox();
+    _initData();
+  }
+
+  Future<void> _initData() async {
+    await _loadCachedAlertSymbols();
+    await _fetchInbox();
   }
 
   @override
@@ -54,6 +63,88 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
     }
   }
 
+  Future<void> _loadCachedAlertSymbols() async {
+    try {
+      final box = await Hive.openBox('updatesBox');
+      final cachedSymbols = box.get('user_alert_symbols');
+      if (cachedSymbols is List && cachedSymbols.isNotEmpty) {
+        _userAlertSymbols = cachedSymbols.map((e) => e.toString().toUpperCase().trim()).toSet();
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _fetchUserAlertSymbols() async {
+    final Set<String> symbols = {};
+    // 1. Fetch active alerts from /alerts
+    try {
+      final alertsRes = await ApiService().get('alerts');
+      final rawAlerts = alertsRes.data['data'] ?? alertsRes.data['alerts'] ?? [];
+      if (rawAlerts is List) {
+        for (final a in rawAlerts) {
+          if (a is Map) {
+            final active = a['active'] ?? a['is_active'] ?? true;
+            final symbol = (a['symbol'] ?? '').toString().toUpperCase().trim();
+            if (active == true && symbol.isNotEmpty) {
+              symbols.add(symbol);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Error fetching active alerts: $e');
+    }
+
+    // 2. Fetch watchlist stocks where any alert is enabled
+    try {
+      final watchlistRes = await ApiService().get('watchlist');
+      final rawWatchlist = watchlistRes.data is List
+          ? watchlistRes.data as List
+          : (watchlistRes.data is Map && watchlistRes.data['data'] is List ? watchlistRes.data['data'] as List : []);
+      for (final w in rawWatchlist) {
+        if (w is Map) {
+          final bool hasDelivery = (w['alert_inapp'] == true) || (w['alert_push'] == true) || (w['alert_email'] == true);
+          final bool hasType = (w['alert_verdict_change'] == true) ||
+              (w['alert_compliance_risk'] == true) ||
+              (w['alert_price_change'] == true);
+          final bool hasAlert = (hasDelivery && hasType) ||
+              (w['alert_verdict_change'] == true) ||
+              (w['alert_compliance_risk'] == true) ||
+              (w['alert_price_change'] == true);
+          final symbol = (w['symbol'] ?? '').toString().toUpperCase().trim();
+          if (hasAlert && symbol.isNotEmpty) {
+            symbols.add(symbol);
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Error fetching watchlist alerts: $e');
+    }
+
+    // 3. Portfolio Holdings (for dividend/portfolio alerts on owned stocks)
+    try {
+      final holdingsRes = await ApiService().get('portfolio/holdings');
+      final rawHoldings = holdingsRes.data is List
+          ? holdingsRes.data as List
+          : (holdingsRes.data is Map && holdingsRes.data['data'] is List ? holdingsRes.data['data'] as List : []);
+      for (final h in rawHoldings) {
+        if (h is Map) {
+          final symbol = (h['symbol'] ?? '').toString().toUpperCase().trim();
+          if (symbol.isNotEmpty) {
+            symbols.add(symbol);
+          }
+        }
+      }
+    } catch (_) {}
+
+    _userAlertSymbols = symbols;
+
+    // Cache to Hive
+    try {
+      final box = await Hive.openBox('updatesBox');
+      await box.put('user_alert_symbols', symbols.toList());
+    } catch (_) {}
+  }
+
   List<dynamic> _sanitizeNotifications(List<dynamic> rawList) {
     return rawList.where((n) {
       if (n is! Map) return false;
@@ -63,6 +154,8 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
 
       // Exclude test category or simulated alerts
       if (category == 'test' || category == 'sample') return false;
+      final meta = n['meta'] is Map ? n['meta'] as Map : null;
+      if (meta != null && meta['type'] == 'test') return false;
       if (title.contains('DANGCEM 🎯') || message.contains('DANGCEM reached your target price')) {
         return false;
       }
@@ -81,6 +174,19 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
           if (dt.year < 2024 || dt.year > DateTime.now().year + 1) {
             return false;
           }
+        }
+      }
+
+      // STRICT CHECK: The inbox and notification should ONLY show what the user selected for his alerts
+      final symbol = _extractSymbol(n);
+      if (symbol != null && symbol.isNotEmpty) {
+        if (!_userAlertSymbols.contains(symbol)) {
+          return false;
+        }
+      } else {
+        // Non-symbol notifications must be valid system or digest announcements
+        if (category != 'system' && category != 'digest' && category != 'security') {
+          return false;
         }
       }
 
@@ -105,16 +211,23 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
         final list = cached['data'];
         if (mounted && list is List && list.isNotEmpty && _notifications.isEmpty) {
           final cleanList = _sanitizeNotifications(list);
-          setState(() {
-            _notifications = List<dynamic>.from(cleanList);
-            _isLoading = false;
-          });
-          _notifyUnread();
+          if (cleanList.isNotEmpty) {
+            setState(() {
+              _notifications = List<dynamic>.from(cleanList);
+              _isLoading = false;
+            });
+            _notifyUnread();
+          }
         }
       }
     } catch (_) {}
 
-    // 2. Fetch live data silently
+    // 2. Refresh active user alert symbols
+    if (!loadMore) {
+      await _fetchUserAlertSymbols();
+    }
+
+    // 3. Fetch live data silently
     try {
       final response = await ApiService().get('notifications/inbox', queryParameters: {
         'page': _currentPage,
@@ -125,16 +238,20 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
           final pagination = response.data['pagination'];
           final data = rawData is List ? _sanitizeNotifications(rawData) : [];
 
-          if (data.isNotEmpty && _currentPage == 1) {
+          if (_currentPage == 1) {
             try {
               final box = await Hive.openBox('updatesBox');
-              await box.put(
-                'inbox_data',
-                jsonEncode({
-                  'data': data,
-                  'expiry': DateTime.now().add(const Duration(minutes: 5)).millisecondsSinceEpoch,
-                }),
-              );
+              if (data.isNotEmpty) {
+                await box.put(
+                  'inbox_data',
+                  jsonEncode({
+                    'data': data,
+                    'expiry': DateTime.now().add(const Duration(minutes: 5)).millisecondsSinceEpoch,
+                  }),
+                );
+              } else {
+                await box.delete('inbox_data');
+              }
             } catch (_) {}
           }
 
@@ -746,14 +863,14 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
     );
   }
 
-  int _countForCategory(String catId) {
+  int _countForCategory(String catId, List<dynamic> source) {
     if (catId == 'all') {
-      return _notifications.where((n) {
+      return source.where((n) {
         final c = _resolveCategory(n);
         return c != 'market_news' && c != 'business_activity';
       }).length;
     }
-    return _notifications.where((n) => _resolveCategory(n) == catId).length;
+    return source.where((n) => _resolveCategory(n) == catId).length;
   }
 
   @override
@@ -778,7 +895,39 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
       );
     }
 
-    final filteredNotifications = _notifications.where((n) {
+    final alertsProvider = context.watch<AlertsProvider>();
+    final Set<String> activeProviderSymbols = alertsProvider.alerts
+        .where((a) => a['active'] == true)
+        .map((a) => (a['symbol'] ?? '').toString().toUpperCase().trim())
+        .where((s) => s.isNotEmpty)
+        .toSet();
+
+    final Set<String> inactiveProviderSymbols = alertsProvider.alerts
+        .where((a) => a['active'] == false)
+        .map((a) => (a['symbol'] ?? '').toString().toUpperCase().trim())
+        .where((s) => s.isNotEmpty)
+        .toSet();
+
+    final effectiveAlertSymbols = {..._userAlertSymbols, ...activeProviderSymbols}
+        .difference(inactiveProviderSymbols);
+
+    final displayNotifications = _notifications.where((n) {
+      if (n is! Map) return false;
+      final symbol = _extractSymbol(n);
+      if (symbol != null && symbol.isNotEmpty) {
+        if (!effectiveAlertSymbols.contains(symbol)) {
+          return false;
+        }
+      } else {
+        final cat = (n['category'] ?? '').toString().toLowerCase();
+        if (cat != 'system' && cat != 'digest' && cat != 'security') {
+          return false;
+        }
+      }
+      return true;
+    }).toList();
+
+    final filteredNotifications = displayNotifications.where((n) {
       final cat = _resolveCategory(n);
       if (_activeCategory != 'all' && cat != _activeCategory) {
         return false;
@@ -798,7 +947,7 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
           child: Row(
             children: _categories.map((cat) {
               final isActive = _activeCategory == cat['id'];
-              final count = _countForCategory(cat['id']);
+              final count = _countForCategory(cat['id'], displayNotifications);
 
               return GestureDetector(
                 onTap: () {
@@ -1038,7 +1187,10 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
                     runSpacing: 10,
                     children: [
                       ElevatedButton.icon(
-                        onPressed: () => Navigator.pushNamed(context, '/alerts'),
+                        onPressed: () async {
+                          await Navigator.pushNamed(context, '/alerts');
+                          if (mounted) _fetchInbox();
+                        },
                         icon: const Icon(Icons.tune_rounded, size: 16, color: Colors.white),
                         label: const Text('Manage Active Alerts', style: TextStyle(fontWeight: FontWeight.w700, color: Colors.white)),
                         style: ElevatedButton.styleFrom(

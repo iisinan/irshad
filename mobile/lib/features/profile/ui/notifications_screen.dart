@@ -10,7 +10,13 @@ class NotificationsScreen extends StatefulWidget {
 }
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
-  final Key _inboxKey = UniqueKey();
+  Key _inboxKey = UniqueKey();
+
+  void _refreshInbox() {
+    setState(() {
+      _inboxKey = UniqueKey();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,13 +37,23 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           IconButton(
             tooltip: 'Active Alerts',
             icon: Icon(Icons.tune_rounded, color: context.textDark, size: 22),
-            onPressed: () => Navigator.pushNamed(context, '/alerts'),
+            onPressed: () async {
+              await Navigator.pushNamed(context, '/alerts');
+              if (mounted) _refreshInbox();
+            },
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: UpdatesInboxTab(key: _inboxKey),
+      body: RefreshIndicator(
+        color: context.primary,
+        onRefresh: () async {
+          _refreshInbox();
+          await Future.delayed(const Duration(milliseconds: 600));
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: UpdatesInboxTab(key: _inboxKey),
+        ),
       ),
     );
   }

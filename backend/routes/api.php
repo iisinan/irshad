@@ -244,6 +244,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Price Alerts
         Route::get('/alerts', [PriceAlertController::class, 'index']);
         Route::post('/stocks/{symbol}/alerts', [PriceAlertController::class, 'store']);
+        Route::put('/alerts/{id}', [PriceAlertController::class, 'update']);
         Route::delete('/alerts/{id}', [PriceAlertController::class, 'destroy']);
 
         // Notifications (Inbox)

@@ -73,30 +73,35 @@ class UpgradeScreen extends StatelessWidget {
 
               // --- Feature list ---
               _buildFeature(
+                context,
                 Icons.verified_rounded,
                 'Unlimited Shariah Screening',
                 'Screen any stock globally against AAOIFI standards',
                 context.primary,
               ),
               _buildFeature(
+                context,
                 Icons.show_chart_rounded,
                 'Real-Time Price Data',
                 'Live prices, charts and market cap data',
                 const Color(0xFF2563EB),
               ),
               _buildFeature(
+                context,
                 Icons.bookmark_rounded,
                 'Unlimited Alerts',
                 'Track as many stocks as you want',
                 const Color(0xFF7C3AED),
               ),
               _buildFeature(
+                context,
                 Icons.pie_chart_rounded,
                 'Portfolio Analytics',
                 'Halal score, purification calculator & more',
                 context.questionable,
               ),
               _buildFeature(
+                context,
                 Icons.notifications_active_rounded,
                 'Price Alerts',
                 'Get notified when your stocks move',
@@ -185,7 +190,7 @@ class UpgradeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFeature(IconData icon, String title, String subtitle, Color color) {
+  Widget _buildFeature(BuildContext context, IconData icon, String title, String subtitle, Color color) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Row(

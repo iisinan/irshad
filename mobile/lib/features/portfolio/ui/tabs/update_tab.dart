@@ -24,7 +24,7 @@ class UpdateTab extends StatefulWidget {
 class _UpdateTabState extends State<UpdateTab> {
   String _activeTabId = 'news';
   int _unreadInbox = 0;
-  int _unreadNews = 1; // Default to 1 to show the red dot
+  final int _unreadNews = 1; // Default to 1 to show the red dot
 
   @override
   void initState() {
@@ -59,21 +59,29 @@ class _UpdateTabState extends State<UpdateTab> {
   Widget build(BuildContext context) {
     
 
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            child: _buildGreetingBanner(context, _unreadInbox),
-          ),
-          const IslamicQuoteWidget(compact: true),
-          const SizedBox(height: 8),
-          _buildSubTabNavigation(context, _unreadInbox),
-          const SizedBox(height: 16),
-          _buildActiveTabContent(),
-          const SizedBox(height: 100),
-        ],
+    return RefreshIndicator(
+      color: context.primary,
+      onRefresh: () async {
+        await _fetchUnreadCounts();
+        setState(() {});
+      },
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: _buildGreetingBanner(context, _unreadInbox),
+            ),
+            const IslamicQuoteWidget(compact: true),
+            const SizedBox(height: 8),
+            _buildSubTabNavigation(context, _unreadInbox),
+            const SizedBox(height: 16),
+            _buildActiveTabContent(),
+            const SizedBox(height: 100),
+          ],
+        ),
       ),
     );
   }
@@ -287,7 +295,11 @@ class _UpdateTabState extends State<UpdateTab> {
       case 'news':
         return const UpdatesNewsTab();
       case 'inbox':
-        return const UpdatesInboxTab();
+        return UpdatesInboxTab(
+          onUnreadCountChanged: (count) {
+            if (mounted) setState(() => _unreadInbox = count);
+          },
+        );
       case 'compliance':
         return const UpdatesComplianceTab();
       case 'ipo':

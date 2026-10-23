@@ -49,7 +49,7 @@ class AdminComplianceController extends Controller
         $doubtfulStocks = Company::where('current_status', 'doubtful')->count();
         $pendingReviews = ComplianceReview::where('status', 'pending')->count();
 
-        $pendingList = ComplianceReview::with(['company', 'company.aaoifiScreening'])
+        $pendingList = ComplianceReview::with(['company', 'company.aaoifiScreening', 'company.latestFinancial'])
             ->where('status', 'pending')
             ->orderBy('created_at', 'desc')
             ->take(10)
@@ -183,6 +183,13 @@ class AdminComplianceController extends Controller
 
                 ComplianceHistory::create(['company_id' => $company->id, 'old_status' => $review->old_status, 'new_status' => $review->new_status, 'reason' => $review->reason, 'changed_at' => now()]);
                 $review->update(['status' => 'approved', 'reviewed_by' => auth()->id(), 'reviewed_at' => now()]);
+                
+                try {
+                    \Illuminate\Support\Facades\Cache::forget("stocks.show.full.{$company->symbol}");
+                    \Illuminate\Support\Facades\Cache::forget("aaoifi.screening.{$company->symbol}");
+                    \Illuminate\Support\Facades\Cache::forget("stocks.index");
+                } catch (\Throwable $e) {}
+
                 $approved++;
             } catch (\Exception $e) {
                 continue;
@@ -279,6 +286,12 @@ class AdminComplianceController extends Controller
             'reviewed_by' => auth()->id(),
             'reviewed_at' => now(),
         ]);
+
+        try {
+            \Illuminate\Support\Facades\Cache::forget("stocks.show.full.{$company->symbol}");
+            \Illuminate\Support\Facades\Cache::forget("aaoifi.screening.{$company->symbol}");
+            \Illuminate\Support\Facades\Cache::forget("stocks.index");
+        } catch (\Throwable $e) {}
 
         return response()->json(['message' => 'Review approved and applied', 'review' => $review]);
     }

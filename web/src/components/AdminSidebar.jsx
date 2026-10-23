@@ -208,14 +208,23 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
                 }
               }}
             >
-              <Icon
-                size={16}
-                style={{
-                  flexShrink: 0,
-                  color: active ? 'var(--primary)' : isExit ? 'var(--text-muted)' : 'var(--text-muted)',
-                  transition: 'color 0.15s',
-                }}
-              />
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Icon
+                  size={16}
+                  style={{
+                    flexShrink: 0,
+                    color: active ? 'var(--primary)' : isExit ? 'var(--text-muted)' : 'var(--text-muted)',
+                    transition: 'color 0.15s',
+                  }}
+                />
+                {isCollapsed && item.badge > 0 && (
+                  <span style={{
+                    position: 'absolute', top: -3, right: -4,
+                    width: 7, height: 7, borderRadius: '50%',
+                    background: 'var(--non-compliant)', border: '1.5px solid var(--bg)',
+                  }} />
+                )}
+              </div>
                             {!isCollapsed && <span style={{ flex: 1 }}>{item.label}</span>}
               {!isCollapsed && item.badge > 0 && (
                 <span style={{

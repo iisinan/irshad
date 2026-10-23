@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:hive/hive.dart';
 import '../../../core/api/api_service.dart';
 
 class AlertsProvider with ChangeNotifier {
@@ -10,19 +11,44 @@ class AlertsProvider with ChangeNotifier {
   List<Map<String, dynamic>> _alerts = [];
   List<Map<String, dynamic>> get alerts => _alerts;
 
+  Future<void> _syncAlertSymbolsToHive() async {
+    try {
+      final symbols = _alerts
+          .where((a) => a['active'] == true)
+          .map((a) => (a['symbol'] ?? '').toString().toUpperCase().trim())
+          .where((s) => s.isNotEmpty)
+          .toSet()
+          .toList();
+      final box = await Hive.openBox('updatesBox');
+      await box.put('user_alert_symbols', symbols);
+    } catch (_) {}
+  }
+
   Future<void> fetchAlerts() async {
     _isLoading = true;
     notifyListeners();
     try {
       final response = await _api.get('alerts');
-      _alerts = List<Map<String, dynamic>>.from(response.data['alerts'] ?? []);
+      final dynamic raw = response.data['data'] ?? response.data['alerts'] ?? [];
+      if (raw is List) {
+        _alerts = raw.map<Map<String, dynamic>>((a) {
+          final map = Map<String, dynamic>.from(a as Map);
+          return {
+            'id': map['id'],
+            'symbol': map['symbol'] ?? '',
+            'type': map['type'] ?? 'Price',
+            'condition': map['condition']?.toString() ?? 'Target',
+            'value': map['value'] ?? map['target_price'],
+            'active': map['active'] ?? map['is_active'] ?? true,
+          };
+        }).toList();
+      } else {
+        _alerts = [];
+      }
+      await _syncAlertSymbolsToHive();
     } catch (e) {
       debugPrint('Error fetching alerts: $e');
-      // Fallback for demo
-      _alerts = [
-        {'id': 1, 'symbol': 'MTNN', 'type': 'Price', 'condition': 'Above', 'value': 250.00, 'active': true},
-        {'id': 2, 'symbol': 'ZENITHBANK', 'type': 'Compliance', 'condition': 'Status Change', 'value': null, 'active': true},
-      ];
+      _alerts = [];
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -34,6 +60,7 @@ class AlertsProvider with ChangeNotifier {
     if (index != -1) {
       _alerts[index]['active'] = isActive;
       notifyListeners();
+      await _syncAlertSymbolsToHive();
       try {
         await _api.put('alerts/$alertId', {'active': isActive});
       } catch (e) {
@@ -41,6 +68,7 @@ class AlertsProvider with ChangeNotifier {
         // Revert on error
         _alerts[index]['active'] = !isActive;
         notifyListeners();
+        await _syncAlertSymbolsToHive();
       }
     }
   }
@@ -50,12 +78,14 @@ class AlertsProvider with ChangeNotifier {
     if (index != -1) {
       final removed = _alerts.removeAt(index);
       notifyListeners();
+      await _syncAlertSymbolsToHive();
       try {
         await _api.delete('alerts/$alertId');
       } catch (e) {
         debugPrint('Error deleting alert: $e');
         _alerts.insert(index, removed);
         notifyListeners();
+        await _syncAlertSymbolsToHive();
       }
     }
   }
