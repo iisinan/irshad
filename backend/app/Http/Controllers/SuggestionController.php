@@ -13,12 +13,22 @@ class SuggestionController extends Controller
     public function store(Request $request): JsonResponse
     {
         $request->validate([
-            'message' => 'required|string|max:1000'
+            'message' => 'required|string|min:10|max:2000'
         ]);
+
+        $trimmedMessage = trim($request->message);
+        $user = auth()->user();
+
+        // Prevent accidental email autofill submission
+        if (filter_var($trimmedMessage, FILTER_VALIDATE_EMAIL) || ($user && strtolower($trimmedMessage) === strtolower($user->email))) {
+            return response()->json([
+                'message' => 'Please provide a detailed suggestion or feedback rather than only an email address.'
+            ], 422);
+        }
 
         $suggestion = Suggestion::create([
             'user_id' => auth()->id(),
-            'message' => $request->message,
+            'message' => $trimmedMessage,
             'status' => 'unread'
         ]);
 

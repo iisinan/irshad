@@ -11,11 +11,23 @@ export default function SuggestModal({ onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!message.trim()) return;
+    const clean = message.trim();
+    if (!clean) return;
+
+    if (clean.length < 10) {
+      toastError('Please enter at least 10 characters for your suggestion.');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (emailRegex.test(clean) || (user?.email && clean.toLowerCase() === user.email.toLowerCase())) {
+      toastError('Please type your suggestion or feedback in the message box, not just an email address.');
+      return;
+    }
     
     setLoading(true);
     try {
-      await api.post('/suggestions', { message });
+      await api.post('/suggestions', { message: clean });
       toastSuccess('Suggestion submitted successfully! Thank you.');
       onClose();
     } catch (err) {
@@ -60,7 +72,7 @@ export default function SuggestModal({ onClose }) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column' }}>
+        <form onSubmit={handleSubmit} autoComplete="off" data-lpignore="true" style={{ display: 'flex', flexDirection: 'column' }}>
           {/* Email To/From fields mockup */}
           <div style={{ padding: '0 20px' }}>
             <div style={{ padding: '16px 0', borderBottom: '1px solid var(--border)', display: 'flex', gap: '12px', alignItems: 'center' }}>
@@ -83,10 +95,10 @@ export default function SuggestModal({ onClose }) {
             autoComplete="off"
             data-lpignore="true"
             data-1p-ignore="true"
+            data-form-type="other"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Type your suggestion or feedback here..."
-            autoFocus
             style={{
               width: '100%', minHeight: '200px', padding: '20px',
               border: 'none', background: 'transparent',

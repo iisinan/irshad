@@ -1,31 +1,21 @@
 # Use the official PHP 8.2 FPM image as a base
 FROM php:8.2-fpm-alpine
 
-# Install system dependencies
+# Install essential system dependencies (lean, no bloated compilers or LLVM)
 RUN apk add --no-cache \
-    nginx \
     postgresql-client \
     supervisor \
     curl \
-    libpng-dev \
-    libxml2-dev \
     unzip \
     git \
     redis \
-    postgresql-dev \
-    oniguruma-dev \
-    libzip-dev \
-    linux-headers \
     python3 \
-    py3-pip \
-    python3-dev \
-    gcc \
-    musl-dev
+    py3-pip
 
-# Install PHP extensions
-RUN docker-php-ext-install pdo_pgsql mbstring exif pcntl bcmath gd xml zip sockets
-
-
+# Install PHP extensions reliably using official extension installer
+# Uses pre-compiled binaries or minimal temporary build tools, preventing OOM crashes
+COPY --from=mlocati/php-extension-installer:latest /usr/bin/install-php-extensions /usr/local/bin/
+RUN install-php-extensions pdo_pgsql exif pcntl bcmath gd zip sockets redis opcache
 
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -36,10 +26,10 @@ WORKDIR /var/www
 # Copy existing application directory contents
 COPY . /var/www
 
-# Install Python dependencies for AI Engine
-# We use a virtual environment as recommended by modern pip
-RUN python3 -m venv /var/www/ai-engine/venv && \
-    /var/www/ai-engine/venv/bin/pip install --no-cache-dir -r /var/www/ai-engine/requirements.txt
+# Set up Python venv for Laravel background scripts (PDF extraction, Gemini overviews, TradingView data)
+ENV PATH="/var/www/venv/bin:$PATH"
+RUN python3 -m venv /var/www/venv && \
+    /var/www/venv/bin/pip install --no-cache-dir requests pypdf google-generativeai
 
 # Install dependencies
 ENV COMPOSER_MEMORY_LIMIT=-1

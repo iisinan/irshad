@@ -2,6 +2,7 @@
 .github
 vendor
 node_modules
+venv
 ai-engine/venv
 storage/logs/*
 storage/framework/cache/*
