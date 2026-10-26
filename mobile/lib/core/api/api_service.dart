@@ -25,7 +25,7 @@ class ApiService {
 
   ApiService._internal() {
     dio = Dio(BaseOptions(
-      baseUrl: dotenv.env['API_BASE_URL'] ?? 'https://irshad.178.104.179.166.sslip.io/api/v1/',
+      baseUrl: dotenv.env['API_BASE_URL'] ?? 'https://irshad-backend-production.up.railway.app/api/v1/',
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 30),
       receiveDataWhenStatusError: true,
