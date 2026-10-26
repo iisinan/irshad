@@ -3,7 +3,7 @@ import axiosRetry from 'axios-retry';
 import localforage from 'localforage';
 
 // Production backend API URL
-const PROD_API = 'https://api.iirshad.com/api/v1';
+const PROD_API = 'https://irshad-backend-production.up.railway.app/api/v1';
 const API_BASE = import.meta.env.DEV && import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL : PROD_API;
 const api = axios.create({
   baseURL: API_BASE,
