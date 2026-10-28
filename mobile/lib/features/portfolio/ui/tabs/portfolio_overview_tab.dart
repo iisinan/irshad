@@ -12,6 +12,7 @@ import '../../../stocks/providers/stock_provider.dart';
 import '../../../../core/providers/app_state_provider.dart';
 import '../../../../core/widgets/upgrade_paywall_bottom_sheet.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
+import 'package:file_picker/file_picker.dart';
 
 class PortfolioOverviewTab extends StatefulWidget {
   const PortfolioOverviewTab({super.key});
@@ -1185,6 +1186,38 @@ class _HoldingFormData {
   }
 }
 
+class _ImportHoldingItem {
+  String symbol;
+  String companyName;
+  String status;
+  String? logoUrl;
+  bool matched;
+  double currentPrice;
+  final TextEditingController sharesController;
+  final TextEditingController priceController;
+  final TextEditingController dateController;
+
+  _ImportHoldingItem({
+    required this.symbol,
+    required this.companyName,
+    required this.status,
+    this.logoUrl,
+    required this.matched,
+    this.currentPrice = 0.0,
+    required double shares,
+    required double price,
+    required String date,
+  })  : sharesController = TextEditingController(text: shares > 0 ? (shares == shares.roundToDouble() ? shares.toInt().toString() : shares.toString()) : ''),
+        priceController = TextEditingController(text: price > 0 ? price.toStringAsFixed(2) : ''),
+        dateController = TextEditingController(text: date);
+
+  void dispose() {
+    sharesController.dispose();
+    priceController.dispose();
+    dateController.dispose();
+  }
+}
+
 class AddHoldingBottomSheet extends StatefulWidget {
   final String? preSelectedSymbol;
   final double? preSelectedPrice;
@@ -1200,6 +1233,17 @@ class _AddHoldingBottomSheetState extends State<AddHoldingBottomSheet> with Sing
   bool _isSubmitting = false;
   String? _brokerName;
   bool _isLinking = false;
+
+  // Import Statement State
+  String _importStage = 'upload'; // 'upload' | 'parsing' | 'preview'
+  final List<_ImportHoldingItem> _importHoldings = [];
+  String _detectedBroker = '';
+  String? _statementParseError;
+  bool _isStatementPasswordRequired = false;
+  final TextEditingController _statementPasswordController = TextEditingController();
+  PlatformFile? _pendingPlatformFile;
+  bool _isSubmittingImport = false;
+  double _importEstimatedTotal = 0.0;
 
   @override
   void initState() {
@@ -1245,8 +1289,185 @@ class _AddHoldingBottomSheetState extends State<AddHoldingBottomSheet> with Sing
       form.price.removeListener(_calculateTotal);
       form.dispose();
     }
+    for (var item in _importHoldings) {
+      item.sharesController.removeListener(_calculateImportTotal);
+      item.priceController.removeListener(_calculateImportTotal);
+      item.dispose();
+    }
+    _statementPasswordController.dispose();
     _tabController.dispose();
     super.dispose();
+  }
+
+  void _calculateImportTotal() {
+    double total = 0.0;
+    for (var item in _importHoldings) {
+      double sh = double.tryParse(item.sharesController.text) ?? 0.0;
+      double pr = double.tryParse(item.priceController.text) ?? 0.0;
+      total += (sh * pr);
+    }
+    setState(() {
+      _importEstimatedTotal = total;
+    });
+  }
+
+  Future<void> _pickAndParseStatement({String? password}) async {
+    PlatformFile? targetFile = _pendingPlatformFile;
+
+    if (targetFile == null) {
+      try {
+        final result = await FilePicker.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: ['pdf', 'csv', 'xlsx', 'xls', 'txt'],
+        );
+
+        if (result.isEmpty) return;
+        targetFile = result.first;
+      } catch (e) {
+        setState(() {
+          _statementParseError = 'Error picking file: $e';
+        });
+        return;
+      }
+    }
+
+    final selectedFile = targetFile!;
+
+    setState(() {
+      _statementParseError = null;
+      _importStage = 'parsing';
+    });
+
+    final fileBytes = await selectedFile.readAsBytes();
+
+    if (!mounted) return;
+    final provider = Provider.of<PortfolioProvider>(context, listen: false);
+    final response = await provider.parseStatement(
+      filePath: selectedFile.path,
+      fileBytes: fileBytes,
+      fileName: selectedFile.name,
+      password: password,
+    );
+
+    if (!mounted) return;
+
+    if (response != null && response['password_required'] == true) {
+      setState(() {
+        _isStatementPasswordRequired = true;
+        _pendingPlatformFile = selectedFile;
+        _statementParseError = response['message']?.toString() ?? 'This PDF statement is password-protected.';
+        _importStage = 'upload';
+      });
+      return;
+    }
+
+    if (response != null && response['holdings'] != null) {
+      final List rawHoldings = response['holdings'] as List;
+      if (rawHoldings.isEmpty) {
+        setState(() {
+          _statementParseError = 'No equity holdings could be extracted. Please check the file or use Manual Entry.';
+          _importStage = 'upload';
+        });
+        return;
+      }
+
+      for (var item in _importHoldings) {
+        item.dispose();
+      }
+      _importHoldings.clear();
+
+      for (var h in rawHoldings) {
+        final item = _ImportHoldingItem(
+          symbol: (h['symbol'] ?? '').toString().toUpperCase(),
+          companyName: (h['company_name'] ?? h['symbol'] ?? '').toString(),
+          status: (h['status'] ?? 'doubtful').toString().toLowerCase(),
+          logoUrl: h['logo_url'],
+          matched: h['matched'] == true,
+          currentPrice: num.tryParse(h['current_price']?.toString() ?? '0')?.toDouble() ?? 0.0,
+          shares: num.tryParse(h['shares']?.toString() ?? '0')?.toDouble() ?? 0.0,
+          price: num.tryParse(h['average_buy_price']?.toString() ?? h['current_price']?.toString() ?? '0')?.toDouble() ?? 0.0,
+          date: (h['purchase_date'] ?? DateTime.now().toString().substring(0, 10)).toString(),
+        );
+
+        item.sharesController.addListener(_calculateImportTotal);
+        item.priceController.addListener(_calculateImportTotal);
+        _importHoldings.add(item);
+      }
+
+      setState(() {
+        _detectedBroker = (response['broker'] ?? 'Broker Statement').toString();
+        _isStatementPasswordRequired = false;
+        _statementPasswordController.clear();
+        _pendingPlatformFile = null;
+        _importStage = 'preview';
+      });
+      _calculateImportTotal();
+    } else {
+      setState(() {
+        _statementParseError = provider.error ?? 'Failed to parse statement. Please ensure it is a valid broker statement.';
+        _importStage = 'upload';
+      });
+    }
+  }
+
+  Future<void> _submitImportedHoldings() async {
+    List<Map<String, dynamic>> payload = [];
+    for (var item in _importHoldings) {
+      if (item.symbol.trim().isEmpty) continue;
+      double shares = double.tryParse(item.sharesController.text) ?? 0.0;
+      double price = double.tryParse(item.priceController.text) ?? 0.0;
+      if (shares <= 0) continue;
+
+      payload.add({
+        'symbol': item.symbol.trim().toUpperCase(),
+        'shares': shares,
+        'average_buy_price': price,
+        'purchase_date': item.dateController.text.trim().isEmpty ? null : item.dateController.text.trim(),
+      });
+    }
+
+    if (payload.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: const Text('Please make sure at least one holding has valid shares.'), backgroundColor: context.haram),
+      );
+      return;
+    }
+
+    setState(() => _isSubmittingImport = true);
+    final provider = Provider.of<PortfolioProvider>(context, listen: false);
+    bool success = await provider.bulkAddHoldings(payload);
+    setState(() => _isSubmittingImport = false);
+
+    if (success) {
+      final prefs = await SharedPreferences.getInstance();
+      const zakatDateKey = 'irshad_zakat_hawl_date';
+      final existingDate = prefs.getString(zakatDateKey);
+      final hasZakatDate = existingDate != null && existingDate.trim().isNotEmpty;
+      final isDismissed = prefs.getBool('irshad_zakat_date_dismissed') ?? false;
+
+      if (!hasZakatDate && !isDismissed) {
+        String firstPurchaseDate = payload.firstWhere(
+          (p) => p['purchase_date'] != null,
+          orElse: () => {'purchase_date': DateTime.now().toString().substring(0, 10)},
+        )['purchase_date'];
+        if (mounted) _showZakatDatePrompt(firstPurchaseDate);
+      } else {
+        if (mounted) {
+          final messenger = ScaffoldMessenger.of(context);
+          final halalColor = context.halal;
+          Navigator.pop(context);
+          messenger.showSnackBar(
+            SnackBar(content: Text('Successfully added ${payload.length} holdings from statement!'), backgroundColor: halalColor),
+          );
+        }
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(provider.error ?? 'Failed to add holdings.'), backgroundColor: context.haram),
+        );
+      }
+    }
   }
 
   Future<void> _submitHoldings() async {
@@ -1775,8 +1996,17 @@ class _AddHoldingBottomSheetState extends State<AddHoldingBottomSheet> with Sing
   }
 
   Widget _buildImportTab() {
-    return Padding(
-      padding: const EdgeInsets.all(32),
+    if (_importStage == 'parsing') {
+      return _buildImportParsingView();
+    } else if (_importStage == 'preview') {
+      return _buildImportPreviewView();
+    }
+    return _buildImportUploadView();
+  }
+
+  Widget _buildImportUploadView() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
       child: Column(
         children: [
           Container(
@@ -1794,54 +2024,422 @@ class _AddHoldingBottomSheetState extends State<AddHoldingBottomSheet> with Sing
               ],
             ),
           ),
-          const SizedBox(height: 24),
-          Text('Upload Statement', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
           const SizedBox(height: 16),
+          Text('Upload Statement', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
+          const SizedBox(height: 8),
           Text(
-            'Upload your trade log or portfolio statement (PDF/CSV) to automatically extract your holdings.',
+            'Upload your trade log or portfolio statement (PDF, CSV, or Excel) to automatically extract your holdings.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: context.textMuted, fontSize: 14, height: 1.6),
+            style: TextStyle(color: context.textMuted, fontSize: 13, height: 1.5),
           ),
-          const SizedBox(height: 32),
-          Expanded(
-            child: GestureDetector(
-              onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (_) => AlertDialog(
-                    title: const Text('File selected', style: TextStyle(fontWeight: FontWeight.bold)),
-                    content: const Text('Parsing logic will connect to the backend here.'),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    actions: [
-                      TextButton(onPressed: () { Navigator.pop(context); Navigator.pop(this.context); }, child: Text('OK', style: TextStyle(color: context.primary, fontWeight: FontWeight.bold))),
+          const SizedBox(height: 20),
+
+          if (_statementParseError != null) ...[
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: context.haram.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: context.haram.withOpacity(0.2)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.error_outline, color: context.haram, size: 20),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      _statementParseError!,
+                      style: TextStyle(color: context.textDark, fontSize: 12, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => setState(() => _statementParseError = null),
+                    child: Icon(Icons.close, size: 16, color: context.textMuted),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+
+          if (_isStatementPasswordRequired) ...[
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: context.primary.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: context.primary.withOpacity(0.2)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.lock_outline, color: context.primary, size: 18),
+                      const SizedBox(width: 8),
+                      Text('Password-Protected PDF', style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800, fontSize: 14)),
                     ],
                   ),
-                );
-              },
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: context.bgAlt,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: context.divider, style: BorderStyle.solid, width: 2),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 64,
-                      height: 64,
-                      decoration: BoxDecoration(color: context.bg, shape: BoxShape.circle),
-                      child: Icon(Icons.cloud_upload_outlined, size: 28, color: context.textMuted),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Enter your password (e.g. CSCS number, Date of Birth DDMMYYYY, or phone number) to unlock:',
+                    style: TextStyle(color: context.textMuted, fontSize: 12),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _statementPasswordController,
+                    obscureText: true,
+                    style: TextStyle(color: context.textDark, fontWeight: FontWeight.w700),
+                    decoration: InputDecoration(
+                      hintText: 'Enter statement password',
+                      hintStyle: TextStyle(color: context.textMuted, fontSize: 13),
+                      filled: true,
+                      fillColor: context.bg,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                     ),
-                    const SizedBox(height: 16),
-                    Text('Tap to Browse Files', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: context.textDark)),
-                    const SizedBox(height: 4),
-                    Text('Supports .pdf, .csv, and .xlsx', style: TextStyle(fontSize: 12, color: context.textMuted)),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            if (_statementPasswordController.text.trim().isNotEmpty) {
+                              _pickAndParseStatement(password: _statementPasswordController.text.trim());
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: context.primary,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          child: const Text('Unlock & Parse', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      TextButton(
+                        onPressed: () {
+                          setState(() {
+                            _isStatementPasswordRequired = false;
+                            _pendingPlatformFile = null;
+                            _statementPasswordController.clear();
+                            _statementParseError = null;
+                          });
+                        },
+                        child: Text('Cancel', style: TextStyle(color: context.textMuted, fontWeight: FontWeight.w700)),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+
+          GestureDetector(
+            onTap: () => _pickAndParseStatement(),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+              decoration: BoxDecoration(
+                color: context.bgAlt,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: context.divider, style: BorderStyle.solid, width: 2),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(color: context.bg, shape: BoxShape.circle),
+                    child: Icon(Icons.cloud_upload_outlined, size: 28, color: context.primary),
+                  ),
+                  const SizedBox(height: 16),
+                  Text('Tap to Browse Statement', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: context.textDark)),
+                  const SizedBox(height: 6),
+                  Text('Supports PDF, CSV, and XLSX (up to 15MB)', style: TextStyle(fontSize: 12, color: context.textMuted)),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: context.bg,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: context.divider.withOpacity(0.5)),
+                    ),
+                    child: Text(
+                      'Meristem • Stanbic IBTC • CSCS • Bamboo • Chapel Hill',
+                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: context.textMuted),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImportParsingView() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 50,
+              height: 50,
+              child: CircularProgressIndicator(color: context.primary, strokeWidth: 3),
+            ),
+            const SizedBox(height: 24),
+            Text('Analyzing Statement...', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark)),
+            const SizedBox(height: 8),
+            Text(
+              'Extracting stocks, calculating weighted-average purchase prices, and screening Shariah compliance against AAOIFI standards...',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: context.textMuted, fontSize: 13, height: 1.5),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImportPreviewView() {
+    return Column(
+      children: [
+        // Top banner: broker name & holding count
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          decoration: BoxDecoration(
+            color: context.bgAlt,
+            border: Border(bottom: BorderSide(color: context.divider.withOpacity(0.5))),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: context.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      _detectedBroker.isEmpty ? 'Broker Statement' : _detectedBroker,
+                      style: TextStyle(color: context.primary, fontWeight: FontWeight.w800, fontSize: 11),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${_importHoldings.length} stocks detected',
+                    style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800, fontSize: 13),
+                  ),
+                ],
+              ),
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _importStage = 'upload';
+                    _pendingPlatformFile = null;
+                  });
+                },
+                child: Row(
+                  children: [
+                    Icon(Icons.refresh, size: 14, color: context.textMuted),
+                    const SizedBox(width: 4),
+                    Text('Re-upload', style: TextStyle(color: context.textMuted, fontSize: 12, fontWeight: FontWeight.w700)),
                   ],
                 ),
               ),
-            ),
+            ],
+          ),
+        ),
+
+        // Scrollable list of holding cards
+        Expanded(
+          child: ListView.separated(
+            padding: const EdgeInsets.all(16),
+            itemCount: _importHoldings.length,
+            separatorBuilder: (context, index) => const SizedBox(height: 12),
+            itemBuilder: (context, index) => _buildImportHoldingCard(index),
+          ),
+        ),
+
+        // Bottom confirmation summary
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: context.bg,
+            border: Border(top: BorderSide(color: context.divider)),
+          ),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Estimated Investment', style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800, fontSize: 15)),
+                  Text(
+                    '₦${_importEstimatedTotal.toStringAsFixed(2)}',
+                    style: TextStyle(color: context.primary, fontWeight: FontWeight.w900, fontSize: 20),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text('Cancel', style: TextStyle(color: context.textDark, fontWeight: FontWeight.w800, fontSize: 15)),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 2,
+                    child: ElevatedButton(
+                      onPressed: _isSubmittingImport ? null : _submitImportedHoldings,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: context.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 0,
+                      ),
+                      child: _isSubmittingImport
+                          ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                          : Text('Confirm & Add (${_importHoldings.length})', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildImportHoldingCard(int index) {
+    final item = _importHoldings[index];
+    Color badgeBg;
+    Color badgeColor;
+    String badgeText;
+
+    switch (item.status) {
+      case 'halal':
+      case 'compliant':
+        badgeBg = context.halal.withOpacity(0.12);
+        badgeColor = context.halal;
+        badgeText = 'HALAL';
+        break;
+      case 'purify':
+        badgeBg = Colors.orange.withOpacity(0.12);
+        badgeColor = Colors.orange[800] ?? Colors.orange;
+        badgeText = 'PURIFY';
+        break;
+      case 'doubtful':
+        badgeBg = Colors.amber.withOpacity(0.15);
+        badgeColor = Colors.amber[900] ?? Colors.amber;
+        badgeText = 'DOUBTFUL';
+        break;
+      default:
+        badgeBg = context.haram.withOpacity(0.12);
+        badgeColor = context.haram;
+        badgeText = 'NON-COMPLIANT';
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: context.bgAlt,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: context.divider.withOpacity(0.6)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CompanyAvatar(symbol: item.symbol, logoUrl: item.logoUrl, size: 36),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(item.symbol, style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, fontSize: 14)),
+                    const SizedBox(height: 2),
+                    Text(item.companyName, style: TextStyle(color: context.textMuted, fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(color: badgeBg, borderRadius: BorderRadius.circular(8)),
+                child: Text(badgeText, style: TextStyle(color: badgeColor, fontWeight: FontWeight.w900, fontSize: 10)),
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    item.sharesController.removeListener(_calculateImportTotal);
+                    item.priceController.removeListener(_calculateImportTotal);
+                    item.dispose();
+                    _importHoldings.removeAt(index);
+                    _calculateImportTotal();
+                  });
+                },
+                child: Icon(Icons.delete_outline, size: 18, color: context.textMuted),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildTextField(
+                  'Shares',
+                  controller: item.sharesController,
+                  hint: '0',
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _buildTextField(
+                  'Avg Price (₦)',
+                  controller: item.priceController,
+                  hint: '0.00',
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _buildTextField(
+                  'Date',
+                  controller: item.dateController,
+                  hint: 'yyyy-mm-dd',
+                  readOnly: true,
+                  suffixIcon: Icons.calendar_today_outlined,
+                  onTap: () async {
+                    DateTime? picked = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.tryParse(item.dateController.text) ?? DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime.now(),
+                    );
+                    if (picked != null) {
+                      item.dateController.text = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+                    }
+                  },
+                ),
+              ),
+            ],
           ),
         ],
       ),

@@ -164,12 +164,25 @@ class StatementParserService
                 $brokerDetected = $result['broker'] ?? 'Excel Statement';
             } elseif ($extension === 'pdf') {
                 $result = $this->parsePdf($filePath, $password);
+                if (!empty($result['password_required'])) {
+                    return $result;
+                }
                 $extracted = $result['holdings'] ?? [];
                 $brokerDetected = $result['broker'] ?? 'PDF Statement';
             } else {
                 throw new \InvalidArgumentException("Unsupported file extension: .{$extension}");
             }
         } catch (\Throwable $e) {
+            $errMsg = strtolower($e->getMessage());
+            if (str_contains($errMsg, 'secured') || str_contains($errMsg, 'password') || str_contains($errMsg, 'encrypt')) {
+                return [
+                    'password_required' => true,
+                    'broker' => 'Encrypted PDF',
+                    'holdings' => [],
+                    'message' => 'This PDF statement is password-protected. Please enter your password to unlock it.',
+                ];
+            }
+
             Log::error("[StatementParserService] Error parsing file: " . $e->getMessage(), [
                 'file' => $file->getClientOriginalName(),
                 'trace' => $e->getTraceAsString(),
@@ -389,9 +402,50 @@ class StatementParserService
      */
     public function parsePdf(string $filePath, ?string $password = null): array
     {
-        $parser = new PdfParser();
-        $pdf = $parser->parseFile($filePath);
-        $text = $pdf->getText();
+        // 1. Check if the PDF has encryption indicators
+        $raw = @file_get_contents($filePath);
+        $isEncrypted = $raw !== false && (str_contains($raw, '/Encrypt') || str_contains($raw, 'Encrypt'));
+
+        if ($isEncrypted) {
+            if (empty($password)) {
+                return [
+                    'password_required' => true,
+                    'broker' => 'Encrypted PDF',
+                    'holdings' => [],
+                    'message' => 'This PDF statement is password-protected. Please enter your password to unlock it.',
+                ];
+            }
+
+            // Attempt decryption via Python pypdf
+            $decrypted = $this->decryptPdfWithPython($filePath, $password);
+            if ($decrypted && file_exists($decrypted)) {
+                $filePath = $decrypted;
+            } else {
+                return [
+                    'password_required' => true,
+                    'broker' => 'Encrypted PDF',
+                    'holdings' => [],
+                    'message' => 'Incorrect password or unable to unlock this statement. Please verify the password.',
+                ];
+            }
+        }
+
+        try {
+            $parser = new PdfParser();
+            $pdf = $parser->parseFile($filePath);
+            $text = $pdf->getText();
+        } catch (\Throwable $e) {
+            $err = strtolower($e->getMessage());
+            if (str_contains($err, 'secured') || str_contains($err, 'password') || str_contains($err, 'encrypt')) {
+                return [
+                    'password_required' => true,
+                    'broker' => 'Encrypted PDF',
+                    'holdings' => [],
+                    'message' => 'This PDF statement is password-protected. Please enter your password to unlock it.',
+                ];
+            }
+            $text = '';
+        }
 
         if (empty(trim($text)) || strlen($text) < 50) {
             // Text is sparse or scanned; delegate directly to Gemini
@@ -563,8 +617,7 @@ class StatementParserService
             }
         }
 
-        $reconciled = [];
-        $matchedCount = 0;
+        $aggregated = [];
 
         foreach ($extracted as $item) {
             $raw = trim($item['symbol_or_name'] ?? '');
@@ -603,6 +656,48 @@ class StatementParserService
             $avgBuyPrice = (float) ($item['average_buy_price'] ?? 0);
             $purchaseDate = !empty($item['purchase_date']) ? $this->cleanDate($item['purchase_date']) : null;
 
+            $groupKey = $matchedCompany
+                ? 'comp_' . $matchedCompany->id
+                : 'raw_' . strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $raw));
+
+            if (!isset($aggregated[$groupKey])) {
+                $aggregated[$groupKey] = [
+                    'matched_company' => $matchedCompany,
+                    'raw_symbol' => $raw,
+                    'total_shares' => 0.0,
+                    'total_cost' => 0.0,
+                    'earliest_date' => $purchaseDate,
+                    'fallback_price' => $avgBuyPrice,
+                ];
+            }
+
+            if ($shares > 0) {
+                $aggregated[$groupKey]['total_shares'] += $shares;
+                $costPrice = $avgBuyPrice > 0 ? $avgBuyPrice : (float) ($matchedCompany?->latest_price ?? 0);
+                $aggregated[$groupKey]['total_cost'] += ($shares * $costPrice);
+            }
+
+            if ($purchaseDate) {
+                if (!$aggregated[$groupKey]['earliest_date'] || $purchaseDate < $aggregated[$groupKey]['earliest_date']) {
+                    $aggregated[$groupKey]['earliest_date'] = $purchaseDate;
+                }
+            }
+        }
+
+        $reconciled = [];
+        $matchedCount = 0;
+
+        foreach ($aggregated as $entry) {
+            $matchedCompany = $entry['matched_company'];
+            $raw = $entry['raw_symbol'];
+            $shares = $entry['total_shares'];
+            $totalCost = $entry['total_cost'];
+            $date = $entry['earliest_date'] ?? now()->format('Y-m-d');
+
+            if ($shares <= 0) continue;
+
+            $weightedPrice = $totalCost > 0 ? round($totalCost / $shares, 2) : $entry['fallback_price'];
+
             if ($matchedCompany) {
                 $matchedCount++;
                 $status = $matchedCompany->current_status ?? $matchedCompany->aaoifiScreening?->final_status ?? 'doubtful';
@@ -611,9 +706,9 @@ class StatementParserService
                     'symbol' => $matchedCompany->symbol,
                     'company_name' => $matchedCompany->name,
                     'shares' => $shares,
-                    'average_buy_price' => $avgBuyPrice > 0 ? $avgBuyPrice : (float) ($matchedCompany->latest_price ?? 0),
+                    'average_buy_price' => $weightedPrice > 0 ? $weightedPrice : (float) ($matchedCompany->latest_price ?? 0),
                     'current_price' => (float) ($matchedCompany->latest_price ?? 0),
-                    'purchase_date' => $purchaseDate ?? now()->format('Y-m-d'),
+                    'purchase_date' => $date,
                     'status' => strtolower($status),
                     'logo_url' => $matchedCompany->logo_url,
                     'matched' => true,
@@ -625,9 +720,9 @@ class StatementParserService
                     'symbol' => strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $raw), 0, 10)),
                     'company_name' => $raw,
                     'shares' => $shares,
-                    'average_buy_price' => $avgBuyPrice,
+                    'average_buy_price' => $weightedPrice,
                     'current_price' => 0.0,
-                    'purchase_date' => $purchaseDate ?? now()->format('Y-m-d'),
+                    'purchase_date' => $date,
                     'status' => 'doubtful',
                     'logo_url' => null,
                     'matched' => false,
@@ -642,6 +737,68 @@ class StatementParserService
             'matched_count' => $matchedCount,
             'holdings' => $reconciled,
         ];
+    }
+
+    /**
+     * Decrypt password-protected PDF using python pypdf.
+     */
+    protected function decryptPdfWithPython(string $filePath, string $password): ?string
+    {
+        $pythonBinary = null;
+        $possibleBinaries = [
+            '/var/www/venv/bin/python3',
+            '/var/www/venv/bin/python',
+            'python3',
+            'python',
+        ];
+
+        foreach ($possibleBinaries as $bin) {
+            $check = @shell_exec("which $bin 2>/dev/null");
+            if (!empty($check) || file_exists($bin)) {
+                $pythonBinary = $bin;
+                break;
+            }
+        }
+
+        if (!$pythonBinary) {
+            return null;
+        }
+
+        $outPath = tempnam(sys_get_temp_dir(), 'pdf_dec_') . '.pdf';
+        
+        $script = <<<'PY'
+import sys, pypdf
+try:
+    reader = pypdf.PdfReader(sys.argv[1])
+    if reader.is_encrypted:
+        if not reader.decrypt(sys.argv[2]):
+            sys.exit(1)
+    writer = pypdf.PdfWriter()
+    for page in reader.pages:
+        writer.add_page(page)
+    with open(sys.argv[3], "wb") as f:
+        writer.write(f)
+    sys.exit(0)
+except Exception:
+    sys.exit(1)
+PY;
+
+        $scriptFile = tempnam(sys_get_temp_dir(), 'py_dec_') . '.py';
+        file_put_contents($scriptFile, $script);
+
+        $cmd = escapeshellcmd($pythonBinary) . ' ' . escapeshellarg($scriptFile) . ' ' . escapeshellarg($filePath) . ' ' . escapeshellarg($password) . ' ' . escapeshellarg($outPath);
+        $output = [];
+        $returnVar = 0;
+        exec($cmd, $output, $returnVar);
+
+        @unlink($scriptFile);
+
+        if ($returnVar === 0 && file_exists($outPath) && filesize($outPath) > 0) {
+            return $outPath;
+        }
+
+        @unlink($outPath);
+        return null;
     }
 
     /**

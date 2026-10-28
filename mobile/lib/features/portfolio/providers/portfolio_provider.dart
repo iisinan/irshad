@@ -255,6 +255,74 @@ class PortfolioProvider extends ChangeNotifier {
     }
   }
 
+  Future<Map<String, dynamic>?> parseStatement({
+    String? filePath,
+    List<int>? fileBytes,
+    required String fileName,
+    String? password,
+  }) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      MultipartFile multipartFile;
+      if (fileBytes != null) {
+        multipartFile = MultipartFile.fromBytes(fileBytes, filename: fileName);
+      } else if (filePath != null) {
+        multipartFile = await MultipartFile.fromFile(filePath, filename: fileName);
+      } else {
+        throw Exception('No file data provided');
+      }
+
+      final formData = FormData.fromMap({
+        'statement': multipartFile,
+        if (password != null && password.isNotEmpty) 'password': password,
+      });
+
+      final response = await ApiService().dio.post(
+        'portfolio/statement/parse',
+        data: formData,
+        options: Options(
+          headers: {
+            'Accept': 'application/json',
+          },
+        ),
+      );
+
+      final data = response.data;
+      if (data is Map && (data['status'] == 'password_required' || data['data']?['password_required'] == true)) {
+        return {
+          'password_required': true,
+          'message': data['message'] ?? 'Statement is password-protected.',
+        };
+      }
+
+      if (data is Map && data['status'] == 'success') {
+        return data['data'] as Map<String, dynamic>;
+      } else {
+        _error = data['message'] ?? 'Unable to parse statement.';
+        return null;
+      }
+    } on DioException catch (e) {
+      final resData = e.response?.data;
+      if (resData is Map && (resData['status'] == 'password_required' || resData['data']?['password_required'] == true)) {
+        return {
+          'password_required': true,
+          'message': resData['message'] ?? 'Statement is password-protected.',
+        };
+      }
+      _error = (resData is Map ? resData['message']?.toString() : null) ?? e.message ?? 'Failed to parse statement.';
+      return null;
+    } catch (e) {
+      _error = e.toString();
+      return null;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
 
   void clear() {
     _summary = {

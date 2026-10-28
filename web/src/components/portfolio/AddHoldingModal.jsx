@@ -210,6 +210,9 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
   const [parsingMessage, setParsingMessage] = useState('');
   const [parseError, setParseError] = useState('');
   const [activeImportRowId, setActiveImportRowId] = useState(null);
+  const [passwordRequired, setPasswordRequired] = useState(false);
+  const [statementPassword, setStatementPassword] = useState('');
+  const [pendingFile, setPendingFile] = useState(null);
   const fileInputRef = useRef(null);
 
   // Common Save Handler for both manual and imported holdings
@@ -270,14 +273,22 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
   };
 
   // Statement Parsing Handlers
-  const handleFileSelected = async (file) => {
+  const handleFileSelected = async (file, password = '') => {
     if (!file) return;
     setParseError('');
     setImportStage('parsing');
     setParsingMessage(`Analyzing ${file.name}...`);
 
     try {
-      const res = await parseStatement(file);
+      const res = await parseStatement(file, password);
+      if (res.status === 'password_required' || res.data?.password_required) {
+        setPendingFile(file);
+        setPasswordRequired(true);
+        setParseError(res.message || 'This statement is password-protected. Please provide the unlock password.');
+        setImportStage('upload');
+        return;
+      }
+
       if (res.status === 'success' && res.data) {
         const { broker, holdings } = res.data;
         if (!holdings || holdings.length === 0) {
@@ -285,6 +296,9 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
           setImportStage('upload');
           return;
         }
+        setPasswordRequired(false);
+        setStatementPassword('');
+        setPendingFile(null);
         setDetectedBroker(broker || 'Broker Statement');
         setImportHoldings(holdings.map((h, i) => ({
           ...h,
@@ -300,8 +314,14 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
         setImportStage('upload');
       }
     } catch (err) {
-      const msg = err.response?.data?.message || err.message || 'Failed to parse statement.';
-      setParseError(msg);
+      if (err.response?.data?.status === 'password_required' || err.response?.data?.data?.password_required) {
+        setPendingFile(file);
+        setPasswordRequired(true);
+        setParseError(err.response?.data?.message || 'Password required to unlock this PDF.');
+      } else {
+        const msg = err.response?.data?.message || err.message || 'Failed to parse statement.';
+        setParseError(msg);
+      }
       setImportStage('upload');
     }
   };
@@ -728,6 +748,44 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
                           <button onClick={() => setParseError('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '4px' }}>
                             <X size={16} />
                           </button>
+                        </div>
+                      )}
+
+                      {passwordRequired && (
+                        <div style={{ width: '100%', marginBottom: '20px', padding: '20px', borderRadius: '16px', background: 'var(--primary-50)', border: '1px solid var(--primary-100)' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                            <Lock size={18} color="var(--primary)" />
+                            <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-dark)' }}>Password-Protected PDF</span>
+                          </div>
+                          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '0 0 14px', lineHeight: 1.5 }}>
+                            Your broker protected this file. Enter the password (e.g. your CSCS clearing number, Date of Birth in DDMMYYYY, or phone number) to unlock:
+                          </p>
+                          <div style={{ display: 'flex', gap: '10px' }}>
+                            <input
+                              type="password"
+                              value={statementPassword}
+                              onChange={e => setStatementPassword(e.target.value)}
+                              placeholder="Enter statement password"
+                              autoFocus
+                              style={{ flex: 1, padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border)', fontSize: '0.88rem', fontWeight: 700, outline: 'none', background: 'var(--bg)' }}
+                              onKeyDown={e => { if (e.key === 'Enter' && statementPassword) handleFileSelected(pendingFile, statementPassword); }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleFileSelected(pendingFile, statementPassword)}
+                              disabled={!statementPassword}
+                              style={{ padding: '10px 18px', borderRadius: '10px', background: 'var(--primary)', color: 'white', border: 'none', fontWeight: 800, fontSize: '0.84rem', cursor: statementPassword ? 'pointer' : 'not-allowed', opacity: statementPassword ? 1 : 0.6 }}
+                            >
+                              Unlock & Parse
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => { setPasswordRequired(false); setPendingFile(null); setStatementPassword(''); setParseError(''); }}
+                              style={{ padding: '10px 14px', borderRadius: '10px', background: 'none', border: '1px solid var(--border)', color: 'var(--text-dark)', fontWeight: 700, fontSize: '0.84rem', cursor: 'pointer' }}
+                            >
+                              Cancel
+                            </button>
+                          </div>
                         </div>
                       )}
 

@@ -481,6 +481,14 @@ class PortfolioController extends Controller
         try {
             $result = $parser->parse($file, $password);
 
+            if (!empty($result['password_required'])) {
+                return response()->json([
+                    'status' => 'password_required',
+                    'message' => $result['message'] ?? 'This statement is password protected.',
+                    'data' => $result,
+                ], 200);
+            }
+
             return $this->success($result, 'Statement parsed successfully.');
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('[PortfolioController] parseStatement error: ' . $e->getMessage(), [
