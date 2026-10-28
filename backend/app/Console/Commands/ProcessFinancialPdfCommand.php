@@ -76,7 +76,7 @@ Return ONLY a valid JSON object matching this schema exactly, with NO markdown f
         $extractedData = null;
         $maxRetries = 3;
         
-        $models = ['gemini-2.5-flash', 'gemini-3.5-flash', 'gemini-flash-latest', 'gemini-3.1-flash-lite'];
+        $models = ['gemini-3.5-flash-lite', 'gemini-3.6-flash', 'gemini-3.1-flash-lite', 'gemini-3.1-flash-lite-preview'];
 
         for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
             $model = $models[($attempt - 1) % count($models)];
