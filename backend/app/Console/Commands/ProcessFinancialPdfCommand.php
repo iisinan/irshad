@@ -61,7 +61,7 @@ Extract the following exact figures for the most recent period (e.g., FY 2023 or
 Return ONLY a valid JSON object matching this schema exactly, with NO markdown formatting (no ```json blocks), NO extra text, NO comments.
 {
   \"total_assets\": 0,
-  \"total_debt\": 0, // Total borrowings + commercial papers (short term + long term)
+  \"total_debt\": 0, // Total interest-bearing debt: borrowings, bank overdrafts, commercial papers, and interest-bearing intragroup/related-party loans (short term + long term)
   \"cash_and_equivalents\": 0, // Cash and bank balances
   \"interest_bearing_securities\": 0, // Short term investments, treasury bills, etc.
   \"interest_income\": 0, // Finance income / Interest income
