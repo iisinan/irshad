@@ -289,6 +289,15 @@ class AaoifiComplianceService
             $aaoifiScreening->update(['final_status' => $status]);
         }
 
+        // Record compliance history audit log for this screening update
+        ComplianceHistory::create([
+            'company_id' => $company->id,
+            'old_status' => $oldRawStatus ?? $oldNormalized,
+            'new_status' => $status,
+            'reason' => $reasonText.' (Auto-applied)',
+            'changed_at' => now(),
+        ]);
+
         // Auto-resolve any pending review that had the same compliance
         ComplianceReview::where('company_id', $company->id)
             ->where('status', 'pending')
