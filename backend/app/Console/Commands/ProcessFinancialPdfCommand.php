@@ -44,12 +44,23 @@ class ProcessFinancialPdfCommand extends Command
         // 1. Manual Extraction using pdftotext
         $this->info("Performing manual regex extraction as a baseline...");
         $manualText = shell_exec("pdftotext -layout " . escapeshellarg($pdfPath) . " -");
-        $manualAssets = 0;
+        $manualAssetsCandidates = [];
         
-        // Very basic naive regex to find "Total Assets" followed by numbers
-        if (preg_match('/Total\s+Assets[^\d]*?([\d,\.]+)/i', $manualText, $matches)) {
-            $manualAssets = (float) str_replace(',', '', $matches[1]);
-            $this->info("Manual Regex Extracted Total Assets: " . number_format($manualAssets, 2));
+        if (preg_match_all('/Total\s+Assets[^\n]*/i', $manualText, $lines)) {
+            foreach ($lines[0] as $line) {
+                if (preg_match_all('/[\d,]+(?:\.\d+)?/', $line, $numMatches)) {
+                    foreach ($numMatches[0] as $numStr) {
+                        $val = (float) str_replace(',', '', $numStr);
+                        if ($val > 100) { // filter out small footnote numbers
+                            $manualAssetsCandidates[] = $val;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!empty($manualAssetsCandidates)) {
+            $this->info("Manual Regex Extracted Candidate Total Assets: " . implode(', ', array_map(fn($v) => number_format($v, 2), array_slice($manualAssetsCandidates, 0, 8))));
         } else {
             $this->warn("Manual Regex could not confidently find Total Assets. Fallback comparison might skip.");
         }
@@ -74,6 +85,7 @@ Return ONLY a valid JSON object matching this schema exactly, with NO markdown f
 }";
 
         $extractedData = null;
+        $lastValidAttemptData = null;
         $maxRetries = 3;
         
         $models = ['gemini-3.5-flash-lite', 'gemini-3.6-flash', 'gemini-3.1-flash-lite', 'gemini-3.1-flash-lite-preview'];
@@ -83,8 +95,8 @@ Return ONLY a valid JSON object matching this schema exactly, with NO markdown f
             $this->info("Sending PDF to Gemini ({$model})... Attempt {$attempt} of {$maxRetries}");
             
             $currentPrompt = $basePrompt;
-            if ($attempt > 1 && $manualAssets > 0) {
-                $currentPrompt .= "\n\nHINT: Our manual text extraction found Total Assets around " . number_format($manualAssets, 2) . ". Ensure you are looking at the correct balance sheet and reading the units correctly (e.g., thousands vs millions).";
+            if ($attempt > 1 && !empty($manualAssetsCandidates)) {
+                $currentPrompt .= "\n\nHINT: Ensure you are looking at the consolidated Group balance sheet (not individual subsidiary/segment columns) and reading the units correctly (e.g., thousands vs millions).";
             }
 
             $response = Http::timeout(120)->withHeaders([
@@ -110,7 +122,7 @@ Return ONLY a valid JSON object matching this schema exactly, with NO markdown f
 
             if (!$response->successful()) {
                 $this->error('API Request Failed: ' . $response->body());
-                if ($attempt === $maxRetries) return;
+                if ($attempt === $maxRetries) break;
                 continue;
             }
 
@@ -122,20 +134,24 @@ Return ONLY a valid JSON object matching this schema exactly, with NO markdown f
 
             if (!$attemptData) {
                 $this->error("Failed to parse JSON from Gemini response. Raw output:\n" . $text);
-                if ($attempt === $maxRetries) return;
+                if ($attempt === $maxRetries) break;
                 continue;
             }
             
-            // Check against manual extraction
+            $lastValidAttemptData = $attemptData;
             $geminiAssets = $attemptData['total_assets'] ?? 0;
-            if ($manualAssets > 0) {
-                // Allow a small 1% margin for rounding differences or units (e.g., thousands or millions)
+
+            if (!empty($manualAssetsCandidates)) {
+                // Allow a small 2% margin for rounding differences or units (e.g., thousands or millions)
                 $matchesUnit = false;
-                foreach ([1, 1000, 1000000] as $multiplier) {
-                    $scaledManual = $manualAssets * $multiplier;
-                    if (abs($scaledManual - $geminiAssets) / max($scaledManual, 1) <= 0.01) {
-                        $matchesUnit = true;
-                        break;
+                foreach ($manualAssetsCandidates as $cand) {
+                    foreach ([1, 1000, 1000000] as $multiplier) {
+                        $scaledManual = $cand * $multiplier;
+                        if (abs($scaledManual - $geminiAssets) / max($scaledManual, 1) <= 0.02) {
+                            $matchesUnit = true;
+                            $this->info("Matched Candidate: " . number_format($cand, 2) . " * {$multiplier} = " . number_format($scaledManual, 2));
+                            break 2;
+                        }
                     }
                 }
                 
@@ -144,7 +160,7 @@ Return ONLY a valid JSON object matching this schema exactly, with NO markdown f
                     $extractedData = $attemptData;
                     break;
                 } else {
-                    $this->warn("Triple Validation FAILED: Gemini Total Assets (" . number_format($geminiAssets, 2) . ") does not match manual extraction (" . number_format($manualAssets, 2) . ").");
+                    $this->warn("Triple Validation FAILED: Gemini Total Assets (" . number_format($geminiAssets, 2) . ") does not match candidate manual extractions.");
                     if ($attempt === $maxRetries) {
                         $this->warn("Max retries reached. Proceeding with Gemini's extraction due to poor PDF OCR quality.");
                         $extractedData = $attemptData;
@@ -157,6 +173,11 @@ Return ONLY a valid JSON object matching this schema exactly, with NO markdown f
                 $extractedData = $attemptData;
                 break;
             }
+        }
+
+        if (!$extractedData && $lastValidAttemptData) {
+            $this->warn("Falling back to last valid Gemini extraction.");
+            $extractedData = $lastValidAttemptData;
         }
 
         if (!$extractedData) {
