@@ -123,6 +123,19 @@ export const addBulkHoldings = async (holdings) => {
   return response.data;
 };
 
+export const parseStatement = async (file, password = '') => {
+  const formData = new FormData();
+  formData.append('statement', file);
+  if (password) {
+    formData.append('password', password);
+  }
+  const response = await api.post('/portfolio/statement/parse', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    timeout: 60000,
+  });
+  return response.data;
+};
+
 export const removeHolding = async (id) => {
   const response = await api.delete(`/portfolio/${id}`);
   return response.data;

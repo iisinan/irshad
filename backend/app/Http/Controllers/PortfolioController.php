@@ -8,6 +8,7 @@ use App\Models\Holding;
 use App\Models\Setting;
 use App\Models\PortfolioSnapshot;
 use App\Models\Watchlist;
+use App\Services\StatementParserService;
 use App\Traits\ApiResponder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -462,6 +463,35 @@ class PortfolioController extends Controller
         Cache::forget("portfolio_data_" . $userId);
 
         return $this->success(null, 'Holdings added to portfolio successfully.');
+    }
+
+    /**
+     * Parse an uploaded broker statement (PDF, CSV, XLSX) and return reconciled holdings.
+     */
+    public function parseStatement(Request $request, StatementParserService $parser): JsonResponse
+    {
+        $request->validate([
+            'statement' => 'required|file|max:15360', // max 15MB
+            'password' => 'nullable|string',
+        ]);
+
+        $file = $request->file('statement');
+        $password = $request->input('password');
+
+        try {
+            $result = $parser->parse($file, $password);
+
+            return $this->success($result, 'Statement parsed successfully.');
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('[PortfolioController] parseStatement error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unable to parse statement: ' . $e->getMessage(),
+            ], 422);
+        }
     }
 
     /**

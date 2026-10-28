@@ -274,6 +274,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
             Route::post('/portfolio', [PortfolioController::class, 'store']);
             Route::post('/portfolio/bulk', [PortfolioController::class, 'bulkStore']);
+            Route::post('/portfolio/statement/parse', [PortfolioController::class, 'parseStatement']);
             Route::put('/portfolio/{id}', [PortfolioController::class, 'update']);
             Route::delete('/portfolio/{id}', [PortfolioController::class, 'destroy']);
 

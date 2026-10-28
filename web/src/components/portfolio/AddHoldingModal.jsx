@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Search, Plus, CheckCircle2, Lock, ShieldCheck, Trash2, FileText, UploadCloud, Calendar, Bell } from 'lucide-react';
-import api, { fetchNgxStocks, linkBroker } from '../../services/api';
+import { X, Search, Plus, CheckCircle2, Lock, ShieldCheck, Trash2, FileText, UploadCloud, Calendar, Bell, ArrowLeft, AlertCircle, RefreshCw, Sparkles, Check } from 'lucide-react';
+import api, { fetchNgxStocks, linkBroker, parseStatement } from '../../services/api';
 import CompanyLogo from '../CompanyLogo';
 
 import { customAlert } from '../../utils/confirm';
@@ -202,6 +202,44 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
 
   const totalCost = rows.reduce((acc, r) => acc + ((Number(r.sh) || 0) * (Number(r.pr) || 0)), 0);
 
+  // Import Statement State
+  const [importStage, setImportStage] = useState('upload'); // 'upload' | 'parsing' | 'preview'
+  const [importHoldings, setImportHoldings] = useState([]);
+  const [detectedBroker, setDetectedBroker] = useState('');
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [parsingMessage, setParsingMessage] = useState('');
+  const [parseError, setParseError] = useState('');
+  const [activeImportRowId, setActiveImportRowId] = useState(null);
+  const fileInputRef = useRef(null);
+
+  // Common Save Handler for both manual and imported holdings
+  const handleSaveHoldings = async (holdingsToSave) => {
+    const success = await onAdd(holdingsToSave);
+    if (!success) return;
+
+    let profileHawlDate = null;
+    try {
+      const authUser = JSON.parse(localStorage.getItem('auth_user') || '{}');
+      profileHawlDate = authUser?.preferences?.zakat_hawl_date;
+    } catch (_) {}
+
+    const localHawlDate = localStorage.getItem(ZAKAT_DATE_KEY);
+    const zakatAlreadySet = !!localHawlDate || !!profileHawlDate;
+    const alreadyAsked = !!localStorage.getItem(ZAKAT_ASKED_KEY);
+
+    if (profileHawlDate && !localHawlDate) {
+      localStorage.setItem(ZAKAT_DATE_KEY, profileHawlDate);
+    }
+
+    if (!zakatAlreadySet && !alreadyAsked) {
+      const validDates = holdingsToSave.map(r => r.purchase_date).filter(Boolean).sort();
+      const earliestDate = validDates[0] || new Date().toISOString().split('T')[0];
+      setZakatPromptDate(earliestDate);
+    } else {
+      onClose();
+    }
+  };
+
   const submit = async (e) => {
     e.preventDefault();
 
@@ -228,32 +266,158 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
       purchase_date: r.date,
     }));
 
-    // Save holdings first
-    const success = await onAdd(holdings);
-    if (!success) return; // if it failed, do not proceed to close or prompt
+    await handleSaveHoldings(holdings);
+  };
 
-    // Decide whether to show zakat prompt
-    let profileHawlDate = null;
+  // Statement Parsing Handlers
+  const handleFileSelected = async (file) => {
+    if (!file) return;
+    setParseError('');
+    setImportStage('parsing');
+    setParsingMessage(`Analyzing ${file.name}...`);
+
     try {
-      const authUser = JSON.parse(localStorage.getItem('auth_user') || '{}');
-      profileHawlDate = authUser?.preferences?.zakat_hawl_date;
-    } catch (_) {}
+      const res = await parseStatement(file);
+      if (res.status === 'success' && res.data) {
+        const { broker, holdings } = res.data;
+        if (!holdings || holdings.length === 0) {
+          setParseError('No stock holdings could be extracted. Please ensure the statement contains equity balances or trade logs, or add them via Manual Entry.');
+          setImportStage('upload');
+          return;
+        }
+        setDetectedBroker(broker || 'Broker Statement');
+        setImportHoldings(holdings.map((h, i) => ({
+          ...h,
+          id: `imp-${i}-${Date.now()}`,
+          sh: String(h.shares || ''),
+          pr: String(h.average_buy_price || h.current_price || ''),
+          date: h.purchase_date || new Date().toISOString().split('T')[0],
+          sym: h.symbol || '',
+        })));
+        setImportStage('preview');
+      } else {
+        setParseError(res.message || 'Unable to parse statement.');
+        setImportStage('upload');
+      }
+    } catch (err) {
+      const msg = err.response?.data?.message || err.message || 'Failed to parse statement.';
+      setParseError(msg);
+      setImportStage('upload');
+    }
+  };
 
-    const localHawlDate = localStorage.getItem(ZAKAT_DATE_KEY);
-    const zakatAlreadySet = !!localHawlDate || !!profileHawlDate;
-    const alreadyAsked = !!localStorage.getItem(ZAKAT_ASKED_KEY);
+  const handleImportRowChange = (id, field, value) => {
+    setImportHoldings(prev => prev.map(r => {
+      if (r.id !== id) return r;
+      const updated = { ...r, [field]: value };
+      if (field === 'sym') {
+        const val = value.toUpperCase();
+        updated.symbol = val;
+        const match = allStocks.find(x => x.symbol === val);
+        if (match) {
+          updated.company_name = match.name;
+          updated.status = match.current_status || 'doubtful';
+          updated.current_price = match.latest_price || 0;
+          updated.logo_url = match.logo_url;
+          updated.matched = true;
+        }
+      }
+      return updated;
+    }));
 
-    if (profileHawlDate && !localHawlDate) {
-      localStorage.setItem(ZAKAT_DATE_KEY, profileHawlDate);
+    if (field === 'sym') {
+      const val = value.toUpperCase();
+      if (val.length > 0) {
+        const filtered = allStocks.filter(s => s.symbol.includes(val) || s.name.toUpperCase().includes(val)).slice(0, 5);
+        setFilteredStocks(filtered);
+        setActiveImportRowId(id);
+      } else {
+        setActiveImportRowId(null);
+      }
+    }
+  };
+
+  const selectImportSymbolForRow = (id, stock) => {
+    setImportHoldings(prev => prev.map(r => {
+      if (r.id !== id) return r;
+      const latestPrice = stock.daily_prices?.[0]?.price || stock.latest_price || 0;
+      return {
+        ...r,
+        symbol: stock.symbol,
+        sym: stock.symbol,
+        company_name: stock.name,
+        status: stock.current_status || 'doubtful',
+        current_price: latestPrice,
+        logo_url: stock.logo_url,
+        pr: r.pr || (latestPrice ? Number(latestPrice).toFixed(2) : ''),
+        matched: true,
+      };
+    }));
+    setActiveImportRowId(null);
+  };
+
+  const removeImportRow = (id) => {
+    setImportHoldings(prev => prev.filter(r => r.id !== id));
+  };
+
+  const addImportRow = () => {
+    setImportHoldings(prev => [
+      ...prev,
+      {
+        id: `imp-${Date.now()}`,
+        symbol: '',
+        sym: '',
+        company_name: '',
+        shares: '',
+        sh: '',
+        average_buy_price: '',
+        pr: '',
+        date: new Date().toISOString().split('T')[0],
+        purchase_date: new Date().toISOString().split('T')[0],
+        current_price: 0,
+        status: 'doubtful',
+        matched: false,
+      }
+    ]);
+  };
+
+  const submitImport = async () => {
+    for (let i = 0; i < importHoldings.length; i++) {
+      const h = importHoldings[i];
+      const ticker = (h.symbol || h.sym || '').trim();
+      if (!ticker) { await customAlert(`Holding #${i + 1}: Ticker symbol cannot be empty.`); return; }
+      const sharesNum = Number(h.sh || h.shares);
+      if (!sharesNum || sharesNum <= 0) { await customAlert(`Holding #${i + 1} (${ticker}): Please enter valid shares.`); return; }
+      const priceNum = Number(h.pr || h.average_buy_price);
+      if (isNaN(priceNum) || priceNum < 0) { await customAlert(`Holding #${i + 1} (${ticker}): Price cannot be negative.`); return; }
+      const dt = h.date || h.purchase_date;
+      if (!dt) { await customAlert(`Holding #${i + 1} (${ticker}): Purchase date is required.`); return; }
     }
 
-    if (!zakatAlreadySet && !alreadyAsked) {
-      // Use the earliest purchase date among new holdings
-      const earliestDate = validRows.map(r => r.date).sort()[0];
-      setZakatPromptDate(earliestDate);
-    } else {
-      onClose();
+    const payload = importHoldings.map(h => ({
+      symbol: (h.symbol || h.sym).trim().toUpperCase(),
+      shares: Number(h.sh || h.shares),
+      average_buy_price: Number(h.pr || h.average_buy_price) || 0,
+      purchase_date: h.date || h.purchase_date,
+    }));
+
+    await handleSaveHoldings(payload);
+  };
+
+  const totalImportCost = importHoldings.reduce((acc, r) => acc + ((Number(r.sh || r.shares) || 0) * (Number(r.pr || r.average_buy_price) || 0)), 0);
+
+  const getStatusBadge = (status) => {
+    const s = (status || '').toLowerCase();
+    if (s === 'compliant' || s === 'halal') {
+      return { text: 'Halal', bg: 'rgba(34, 197, 94, 0.1)', color: 'var(--halal)' };
     }
+    if (s === 'purify') {
+      return { text: 'Purify', bg: 'rgba(234, 179, 8, 0.1)', color: 'var(--doubtful)' };
+    }
+    if (s === 'non-compliant') {
+      return { text: 'Non-Compliant', bg: 'rgba(239, 68, 68, 0.1)', color: 'var(--non-compliant)' };
+    }
+    return { text: 'Doubtful', bg: 'rgba(245, 158, 11, 0.1)', color: '#d97706' };
   };
 
   const handleZakatYes = () => {
@@ -542,21 +706,315 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
               </div>
             ) : (
               <div style={{ padding: '0', display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-                <div style={{ padding: '40px 32px 32px', textAlign: 'center', background: 'var(--bg)' }}>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 16px', background: 'var(--primary-50)', color: 'var(--primary)', borderRadius: '24px', fontSize: '0.75rem', fontWeight: 800, marginBottom: '24px' }}><FileText size={16} /> Bulk Import</div>
-                  <h4 style={{ fontSize: '1.41rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 16px', letterSpacing: '-0.5px' }}>Upload Statement</h4>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: '0 auto', lineHeight: 1.6, maxWidth: '320px' }}>Upload your trade log or portfolio statement (PDF/CSV) to automatically extract your holdings.</p>
-                </div>
-                <div className="modal-body" style={{ minHeight: 0, padding: '32px', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                  <div style={{ width: '100%', padding: '48px 24px', borderRadius: '20px', border: '2px dashed var(--border)', background: 'var(--bg)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.background = 'var(--primary-50)'; }} onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'var(--bg)'; }} onClick={() => document.getElementById('file-upload').click()}>
-                    <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'var(--bg-section)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}><UploadCloud size={28} /></div>
-                    <div>
-                      <div style={{ fontSize: '0.97rem', fontWeight: 800, color: 'var(--text-dark)', textAlign: 'center', marginBottom: '4px' }}>Click to Browse Files</div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center' }}>Supports .pdf, .csv, and .xlsx</div>
+                {importStage === 'upload' ? (
+                  <>
+                    <div style={{ padding: '36px 32px 24px', textAlign: 'center', background: 'var(--bg)', flexShrink: 0 }}>
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 16px', background: 'var(--primary-50)', color: 'var(--primary)', borderRadius: '24px', fontSize: '0.75rem', fontWeight: 800, marginBottom: '20px' }}>
+                        <FileText size={16} /> Bulk Import
+                      </div>
+                      <h4 style={{ fontSize: '1.41rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 12px', letterSpacing: '-0.5px' }}>Upload Statement</h4>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: '0 auto', lineHeight: 1.6, maxWidth: '360px' }}>
+                        Upload your trade log or portfolio statement (PDF, CSV, or Excel) to automatically extract your holdings.
+                      </p>
                     </div>
-                    <input type="file" id="file-upload" accept=".pdf,.csv,.xlsx" style={{ display: 'none' }} onChange={async (e) => { if (e.target.files.length) { await customAlert('File selected: ' + e.target.files[0].name + '\n\nParsing logic will connect to the backend here.'); onClose(); } }} />
+
+                    <div className="modal-body" style={{ minHeight: 0, padding: '16px 32px 32px', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                      {parseError && (
+                        <div style={{ width: '100%', marginBottom: '20px', padding: '16px 20px', borderRadius: '16px', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <AlertCircle size={20} color="var(--non-compliant)" style={{ flexShrink: 0 }} />
+                          <div style={{ flex: 1, fontSize: '0.84rem', color: 'var(--text-dark)', fontWeight: 600, lineHeight: 1.5 }}>
+                            {parseError}
+                          </div>
+                          <button onClick={() => setParseError('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '4px' }}>
+                            <X size={16} />
+                          </button>
+                        </div>
+                      )}
+
+                      <div
+                        onDragOver={e => { e.preventDefault(); setIsDragOver(true); }}
+                        onDragLeave={() => setIsDragOver(false)}
+                        onDrop={e => {
+                          e.preventDefault();
+                          setIsDragOver(false);
+                          if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                            handleFileSelected(e.dataTransfer.files[0]);
+                          }
+                        }}
+                        onClick={() => fileInputRef.current?.click()}
+                        style={{
+                          width: '100%',
+                          padding: '48px 24px',
+                          borderRadius: '20px',
+                          border: `2px dashed ${isDragOver ? 'var(--primary)' : 'var(--border)'}`,
+                          background: isDragOver ? 'var(--primary-50)' : 'var(--bg)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: '16px',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.background = 'var(--primary-50)'; }}
+                        onMouseLeave={e => { if (!isDragOver) { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'var(--bg)'; } }}
+                      >
+                        <div style={{ width: '68px', height: '68px', borderRadius: '50%', background: 'var(--bg-section)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isDragOver ? 'var(--primary)' : 'var(--text-muted)', transition: 'all 0.2s' }}>
+                          <UploadCloud size={32} />
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-dark)', textAlign: 'center', marginBottom: '6px' }}>
+                            Click to Browse or Drag & Drop File
+                          </div>
+                          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', textAlign: 'center' }}>
+                            Supports .pdf, .csv, .xlsx, .xls, and .txt (up to 15MB)
+                          </div>
+                        </div>
+
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept=".pdf,.csv,.xlsx,.xls,.txt"
+                          style={{ display: 'none' }}
+                          onChange={e => {
+                            if (e.target.files && e.target.files[0]) {
+                              handleFileSelected(e.target.files[0]);
+                              e.target.value = '';
+                            }
+                          }}
+                        />
+                      </div>
+
+                      <div style={{ marginTop: '24px', textAlign: 'center' }}>
+                        <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                          <Sparkles size={14} color="var(--primary)" />
+                          Compatible with Meristem, Stanbic IBTC, Bamboo, CSCS, Trove, Chaka & any trade log.
+                        </span>
+                      </div>
+                    </div>
+                  </>
+                ) : importStage === 'parsing' ? (
+                  <div className="modal-body" style={{ minHeight: '360px', padding: '48px 32px', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+                    <div style={{ position: 'relative', width: '80px', height: '80px', marginBottom: '28px' }}>
+                      <div className="spinner" style={{ width: '80px', height: '80px', borderWidth: '3px', borderTopColor: 'var(--primary)' }} />
+                      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Sparkles size={28} color="var(--primary)" />
+                      </div>
+                    </div>
+                    <h4 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-dark)', margin: '0 0 10px' }}>
+                      {parsingMessage || 'Analyzing Statement...'}
+                    </h4>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', maxWidth: '380px', lineHeight: 1.6, margin: 0 }}>
+                      Detecting broker tables, extracting holding balances, and reconciling ticker symbols against the NGX Shariah database.
+                    </p>
                   </div>
-                </div>
+                ) : (
+                  /* Preview Stage */
+                  <>
+                    <div style={{ padding: '24px 32px 16px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: '12px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <button
+                            type="button"
+                            onClick={() => setImportStage('upload')}
+                            style={{ background: 'var(--bg-section)', border: '1px solid var(--border)', width: '34px', height: '34px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-dark)', cursor: 'pointer', transition: 'all 0.2s' }}
+                          >
+                            <ArrowLeft size={16} />
+                          </button>
+                          <div>
+                            <h4 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-dark)', margin: 0 }}>
+                              Review Extracted Holdings
+                            </h4>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+                              <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)', background: 'var(--primary-50)', padding: '2px 8px', borderRadius: '12px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                <CheckCircle2 size={12} /> {detectedBroker}
+                              </span>
+                              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                                {importHoldings.length} {importHoldings.length === 1 ? 'holding' : 'holdings'} detected
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={addImportRow}
+                          style={{ padding: '8px 14px', borderRadius: '10px', background: 'var(--bg-section)', border: '1px solid var(--border)', color: 'var(--primary)', fontSize: '0.78rem', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+                        >
+                          <Plus size={14} /> Add Stock
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="modal-body" style={{ minHeight: 0, padding: '20px 32px', flex: 1, overflowY: 'auto' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                        {importHoldings.map((h, idx) => {
+                          const badge = getStatusBadge(h.status);
+                          return (
+                            <div
+                              key={h.id}
+                              className="holding-row-card"
+                              style={{
+                                background: 'var(--bg)',
+                                border: '1px solid var(--border)',
+                                borderRadius: '16px',
+                                padding: '16px 20px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '14px',
+                                position: 'relative',
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+                                  <CompanyLogo symbol={h.sym || h.symbol} logoUrl={h.logo_url} size={36} />
+                                  <div style={{ minWidth: 0 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                      <span style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--text-dark)' }}>
+                                        {h.sym || h.symbol || 'Select Ticker'}
+                                      </span>
+                                      <span style={{ fontSize: '0.65rem', fontWeight: 800, padding: '2px 8px', borderRadius: '10px', background: badge.bg, color: badge.color }}>
+                                        {badge.text}
+                                      </span>
+                                    </div>
+                                    <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                      {h.company_name || 'Unmatched stock'}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <button
+                                  type="button"
+                                  onClick={() => removeImportRow(h.id)}
+                                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '6px', borderRadius: '8px', transition: 'all 0.2s' }}
+                                  onMouseEnter={e => { e.currentTarget.style.color = 'var(--non-compliant)'; e.currentTarget.style.background = 'rgba(239, 68, 68, 0.08)'; }}
+                                  onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.background = 'none'; }}
+                                  title="Remove holding"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </div>
+
+                              {/* Inputs Grid */}
+                              <div className="holding-inputs-grid" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: '12px' }}>
+                                <div>
+                                  <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '6px' }}>
+                                    Ticker Symbol
+                                  </label>
+                                  <div style={{ position: 'relative' }}>
+                                    <input
+                                      type="text"
+                                      value={h.sym || h.symbol}
+                                      onChange={e => handleImportRowChange(h.id, 'sym', e.target.value)}
+                                      placeholder="e.g. MTNN"
+                                      style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--border)', fontSize: '0.85rem', fontWeight: 700, outline: 'none', background: 'var(--bg-section)', color: 'var(--text-dark)' }}
+                                    />
+                                    {activeImportRowId === h.id && filteredStocks.length > 0 && (
+                                      <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '12px', marginTop: '6px', boxShadow: '0 12px 32px rgba(0,0,0,0.15)', zIndex: 100, maxHeight: '200px', overflowY: 'auto' }}>
+                                        {filteredStocks.map(s => (
+                                          <div
+                                            key={s.symbol}
+                                            onClick={() => selectImportSymbolForRow(h.id, s)}
+                                            style={{ padding: '10px 14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border)' }}
+                                            onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-section)'}
+                                            onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                                          >
+                                            <span style={{ fontSize: '0.84rem', fontWeight: 800, color: 'var(--text-dark)' }}>{s.symbol}</span>
+                                            <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>{s.name}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '6px' }}>
+                                    Shares / Units
+                                  </label>
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    step="any"
+                                    value={h.sh || h.shares}
+                                    onChange={e => handleImportRowChange(h.id, 'sh', e.target.value)}
+                                    placeholder="0"
+                                    style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--border)', fontSize: '0.85rem', fontWeight: 700, outline: 'none', background: 'var(--bg-section)', color: 'var(--text-dark)' }}
+                                  />
+                                </div>
+
+                                <div>
+                                  <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '6px' }}>
+                                    Avg Price (₦)
+                                  </label>
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    step="any"
+                                    value={h.pr !== undefined ? h.pr : (h.average_buy_price || '')}
+                                    onChange={e => handleImportRowChange(h.id, 'pr', e.target.value)}
+                                    placeholder="0.00"
+                                    style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--border)', fontSize: '0.85rem', fontWeight: 700, outline: 'none', background: 'var(--bg-section)', color: 'var(--text-dark)' }}
+                                  />
+                                </div>
+
+                                <div style={{ gridColumn: 'span 3' }}>
+                                  <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '6px' }}>
+                                    Purchase Date
+                                  </label>
+                                  <input
+                                    type="date"
+                                    value={h.date || h.purchase_date}
+                                    max={new Date().toISOString().split('T')[0]}
+                                    onChange={e => handleImportRowChange(h.id, 'date', e.target.value)}
+                                    style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--border)', fontSize: '0.85rem', fontWeight: 700, outline: 'none', background: 'var(--bg-section)', color: 'var(--text-dark)' }}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Preview Footer */}
+                    <div className="modal-footer" style={{ flexShrink: 0, padding: '20px 32px 24px', borderTop: '1px solid var(--border)', background: 'var(--bg)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                        <div>
+                          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>Estimated Investment</div>
+                          <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--primary)' }}>
+                            ₦{totalImportCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </div>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>Total Positions</div>
+                          <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)' }}>
+                            {importHoldings.length}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '14px' }}>
+                        <button
+                          type="button"
+                          onClick={() => setImportStage('upload')}
+                          style={{ flex: 1, padding: '14px', background: 'none', border: '1px solid var(--border)', color: 'var(--text-dark)', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer', transition: 'all 0.2s', borderRadius: '12px' }}
+                          onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-section)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                        >
+                          Re-upload
+                        </button>
+                        <button
+                          type="button"
+                          onClick={submitImport}
+                          disabled={isAdding || importHoldings.length === 0}
+                          style={{ flex: 2, padding: '14px', borderRadius: '12px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.9rem', cursor: (isAdding || importHoldings.length === 0) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', transition: 'opacity 0.2s', opacity: (isAdding || importHoldings.length === 0) ? 0.7 : 1 }}
+                        >
+                          {isAdding ? <div className="spinner" style={{ width: '20px', height: '20px', borderTopColor: 'white' }} /> : `Confirm & Add (${importHoldings.length})`}
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>
