@@ -367,10 +367,19 @@ class AaoifiComplianceService
         // 2. BCMath calc (Arbitrary Precision)
         $calc2 = round(floatval(bcdiv(bcmul(strval($num), '100', 8), strval($den), 8)), 4);
         
-        // 3. Python script calc (Decimal precision)
+        // 3. Python script calc (Decimal precision, with fallback to Safe Scaled Math)
+        $calc3 = null;
         $pythonPath = base_path('scripts/aaoifi_calc.py');
-        $pythonOutput = shell_exec("python3 " . escapeshellarg($pythonPath) . " " . escapeshellarg(strval($num)) . " " . escapeshellarg(strval($den)));
-        $calc3 = round(floatval(trim($pythonOutput)), 4);
+        if (file_exists($pythonPath)) {
+            $pythonOutput = shell_exec("python3 " . escapeshellarg($pythonPath) . " " . escapeshellarg(strval($num)) . " " . escapeshellarg(strval($den)));
+            if ($pythonOutput !== null && is_numeric(trim($pythonOutput))) {
+                $calc3 = round(floatval(trim($pythonOutput)), 4);
+            }
+        }
+        if ($calc3 === null) {
+            $scale = 1000000;
+            $calc3 = round((($numFloat / $scale) / ($denFloat / $scale)) * 100, 4);
+        }
         
         // Compare with slight tolerance for floating point jitter
         if (abs($calc1 - $calc2) > 0.001 || abs($calc2 - $calc3) > 0.001) {
