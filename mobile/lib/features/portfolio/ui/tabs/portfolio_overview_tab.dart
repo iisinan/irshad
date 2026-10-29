@@ -21,13 +21,17 @@ class PortfolioOverviewTab extends StatefulWidget {
   State<PortfolioOverviewTab> createState() => _PortfolioOverviewTabState();
 }
 
-class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
+class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> with AutomaticKeepAliveClientMixin {
   String _selectedFilter = 'All';
   String _chartMode = 'Compliance';
   bool _fabPressed = false;
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     final provider = context.watch<PortfolioProvider>();
 
     return Scaffold(
