@@ -300,8 +300,8 @@ export default function Portfolio() {
   );
   
   // Compliance breakdown by both value and count
-  let compliantValue = 0, halalCount = 0;
-  let purifyValue = 0, needsPurif = 0;
+  let compliantValue = 0, compliantCount = 0;
+  let purifyValue = 0, purifyCount = 0;
   let doubtfulValue = 0, doubtfulCount = 0;
   let nonHalalValue = 0, nonHalalCount = 0;
 
@@ -314,10 +314,10 @@ export default function Portfolio() {
 
     if (isHalal && !hasPurify) {
       compliantValue += val;
-      halalCount++;
+      compliantCount++;
     } else if (isHalal && hasPurify) {
       purifyValue += val;
-      needsPurif++;
+      purifyCount++;
     } else if (finalStatus === 'doubtful') {
       doubtfulValue += val;
       doubtfulCount++;
@@ -326,6 +326,9 @@ export default function Portfolio() {
       nonHalalCount++;
     }
   });
+
+  const halalCount = compliantCount;
+  const needsPurif = purifyCount;
 
   const complianceCategories = [
     {
