@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'dart:ui';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/providers/app_state_provider.dart';
-import '../portfolio/providers/portfolio_provider.dart';
 import '../stocks/ui/stock_screener_screen.dart';
 import '../baskets/ui/baskets_screen.dart';
 import 'ui/funds_screen.dart';
@@ -167,58 +165,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-
-  Widget _buildComingSoonState(BuildContext context, IconData icon, String title, String description) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.only(left: 40.0, right: 40.0, bottom: 100.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(40),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                child: Container(
-                  padding: const EdgeInsets.all(32),
-                  decoration: BoxDecoration(
-                    color: context.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(40),
-                    border: Border.all(color: context.primary.withValues(alpha: 0.2), width: 1.5),
-                  ),
-                  child: Icon(icon, size: 48, color: context.primary),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              title,
-              style: TextStyle(fontSize: 22, color: context.textDark, fontWeight: FontWeight.w900),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              description,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: context.textMuted, height: 1.5, fontSize: 15),
-            ),
-            const SizedBox(height: 32),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: context.textDark,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Text(
-                'COMING SOON',
-                style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.5),
-              ),
-            ),
-          ],
         ),
       ),
     );

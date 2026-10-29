@@ -160,7 +160,7 @@ class _FundsScreenState extends State<FundsScreen> {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 20),
             itemCount: _allTypes.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            separatorBuilder: (_, _) => const SizedBox(width: 8),
             itemBuilder: (context, i) {
               final type = _allTypes[i];
               final isActive = _activeType == type;
@@ -564,8 +564,7 @@ class _FundCardState extends State<_FundCard> {
                                     ],
                                   ),
                                 ),
-                              )
-                              .toList(),
+                              ),
                         ],
                       ),
                     ),
