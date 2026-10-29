@@ -23,6 +23,7 @@ class PortfolioOverviewTab extends StatefulWidget {
 
 class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
   String _selectedFilter = 'All';
+  String _chartMode = 'Compliance';
   bool _fabPressed = false;
 
   @override
@@ -98,8 +99,11 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
             final needsPurification = h['purification_required'] == true || purificationDue > 0 || nonCompliantRatio > 0;
             
             if (isHalal) {
-              halalCount++;
-              if (needsPurification) needsPurif++;
+              if (needsPurification) {
+                needsPurif++;
+              } else {
+                halalCount++;
+              }
             } else if (finalStatus == 'doubtful') {
               doubtfulCount++;
             } else {
@@ -122,7 +126,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
             final needsPurification = h['purification_required'] == true || purificationDue > 0 || nonCompliantRatio > 0;
 
             if (_selectedFilter == 'All') return true;
-            if (_selectedFilter == 'Compliant') return isHalal;
+            if (_selectedFilter == 'Compliant') return isHalal && !needsPurification;
             if (_selectedFilter == 'Compliant (Purify)') return isHalal && needsPurification;
             if (_selectedFilter == 'Doubtful') return finalStatus == 'doubtful';
             if (_selectedFilter == 'Non-Compliant') return !isHalal && finalStatus != 'doubtful';
@@ -141,6 +145,10 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildBalanceCard(context, provider, halalCount, needsPurif, nonHalalCount, doubtfulCount, avgReturn),
+                    if (provider.holdings.isNotEmpty) ...[
+                      const SizedBox(height: 20),
+                      _buildBreakdownCard(context, provider),
+                    ],
                     const SizedBox(height: 24),
                     _buildFilterTabs(context),
                     const SizedBox(height: 24),
@@ -522,6 +530,552 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
     );
   }
 
+  static const List<Color> _allocationPalette = [
+    Color(0xFF0D9488), // Teal
+    Color(0xFF06B6D4), // Cyan
+    Color(0xFFF59E0B), // Amber
+    Color(0xFFF43F5E), // Rose
+    Color(0xFF3B82F6), // Blue
+    Color(0xFF10B981), // Emerald
+    Color(0xFF8B5CF6), // Violet
+    Color(0xFFEC4899), // Pink
+  ];
+
+  String _formatK(double v) {
+    if (v >= 1000000000) return '₦${(v / 1000000000).toStringAsFixed(2)}B';
+    if (v >= 1000000) return '₦${(v / 1000000).toStringAsFixed(2)}M';
+    if (v >= 1000) return '₦${(v / 1000).toStringAsFixed(1)}K';
+    return '₦${NumberFormat('#,##0', 'en_US').format(v)}';
+  }
+
+  Widget _buildBreakdownCard(BuildContext context, PortfolioProvider provider) {
+    final holdings = provider.holdings;
+    final totalBalance = (provider.summary['total_balance'] as num?)?.toDouble() ?? 0.0;
+
+    // Sorted holdings for allocation (largest value first)
+    final sortedHoldings = List<dynamic>.from(holdings)
+      ..sort((a, b) {
+        final valA = num.tryParse(a['total_value']?.toString() ?? '0')?.toDouble() ?? 0.0;
+        final valB = num.tryParse(b['total_value']?.toString() ?? '0')?.toDouble() ?? 0.0;
+        return valB.compareTo(valA);
+      });
+
+    // Compliance breakdown by value & count
+    double compliantValue = 0;
+    int compliantCount = 0;
+    double purifyValue = 0;
+    int purifyCount = 0;
+    double doubtfulValue = 0;
+    int doubtfulCount = 0;
+    double nonHalalValue = 0;
+    int nonHalalCount = 0;
+
+    for (var h in holdings) {
+      final val = num.tryParse(h['total_value']?.toString() ?? '0')?.toDouble() ?? 0.0;
+      final symbol = h['symbol'] ?? 'S';
+      final statusRaw = h['status']?.toString().toLowerCase() ?? (h['is_halal'] == true ? 'halal' : 'non-halal');
+      final finalStatus = ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].contains(symbol) ? 'halal' : statusRaw;
+      final isHalal = finalStatus == 'halal' || finalStatus == 'compliant';
+      final purificationDue = num.tryParse(h['purification_due']?.toString() ?? '0')?.toDouble() ?? 0.0;
+      final nonCompliantRatio = num.tryParse(h['non_compliant_ratio']?.toString() ?? '0')?.toDouble() ?? 0.0;
+      final needsPurification = h['purification_required'] == true || purificationDue > 0 || nonCompliantRatio > 0;
+
+      if (isHalal && !needsPurification) {
+        compliantValue += val;
+        compliantCount++;
+      } else if (isHalal && needsPurification) {
+        purifyValue += val;
+        purifyCount++;
+      } else if (finalStatus == 'doubtful') {
+        doubtfulValue += val;
+        doubtfulCount++;
+      } else {
+        nonHalalValue += val;
+        nonHalalCount++;
+      }
+    }
+
+    final isAllocation = _chartMode == 'Allocation';
+
+    // Build chart sections
+    List<PieChartSectionData> sections = [];
+    if (isAllocation) {
+      final nonZeroHoldings = sortedHoldings.where((h) {
+        return (num.tryParse(h['total_value']?.toString() ?? '0')?.toDouble() ?? 0.0) > 0;
+      }).toList();
+
+      if (nonZeroHoldings.isNotEmpty) {
+        sections = nonZeroHoldings.asMap().entries.map((entry) {
+          final val = num.tryParse(entry.value['total_value']?.toString() ?? '0')?.toDouble() ?? 0.0;
+          return PieChartSectionData(
+            color: _allocationPalette[entry.key % _allocationPalette.length],
+            value: val,
+            title: '',
+            radius: 20,
+            showTitle: false,
+          );
+        }).toList();
+      }
+    } else {
+      final List<Map<String, dynamic>> compTiers = [
+        {'val': compliantValue, 'color': context.halal},
+        {'val': purifyValue, 'color': const Color(0xFFC69249)},
+        {'val': doubtfulValue, 'color': const Color(0xFFD97706)},
+        {'val': nonHalalValue, 'color': context.haram},
+      ];
+      final nonZeroTiers = compTiers.where((t) => (t['val'] as double) > 0).toList();
+      if (nonZeroTiers.isNotEmpty) {
+        sections = nonZeroTiers.map((t) {
+          return PieChartSectionData(
+            color: t['color'] as Color,
+            value: t['val'] as double,
+            title: '',
+            radius: 20,
+            showTitle: false,
+          );
+        }).toList();
+      }
+    }
+
+    if (sections.isEmpty) {
+      sections = [
+        PieChartSectionData(
+          color: context.divider.withOpacity(0.3),
+          value: 1,
+          title: '',
+          radius: 20,
+          showTitle: false,
+        ),
+      ];
+    }
+
+    final healthScore = totalBalance > 0
+        ? (((compliantValue + purifyValue) / totalBalance) * 100).round()
+        : (provider.summary['health_percentage'] as num?)?.toInt() ?? 100;
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: context.bgAlt,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: context.divider.withOpacity(0.5)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(22),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header Row with Title and Pill Toggle
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isAllocation ? context.primary : context.halal,
+                      boxShadow: [
+                        BoxShadow(
+                          color: (isAllocation ? context.primary : context.halal).withOpacity(0.4),
+                          blurRadius: 8,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    _chartMode,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: context.textDark,
+                      letterSpacing: -0.3,
+                    ),
+                  ),
+                ],
+              ),
+              // Segmented Toggle
+              Container(
+                padding: const EdgeInsets.all(3),
+                decoration: BoxDecoration(
+                  color: context.bg,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: context.divider.withOpacity(0.6)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildToggleBtn(context, 'Allocation'),
+                    _buildToggleBtn(context, 'Compliance'),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // Donut Chart with Center Information
+          SizedBox(
+            height: 190,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                PieChart(
+                  PieChartData(
+                    sectionsSpace: sections.length > 1 ? 3 : 0,
+                    centerSpaceRadius: 58,
+                    sections: sections,
+                    borderData: FlBorderData(show: false),
+                  ),
+                ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      isAllocation ? 'TOTAL' : 'HEALTH SCORE',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        color: context.textMuted,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      isAllocation ? _formatK(totalBalance) : '$healthScore%',
+                      style: TextStyle(
+                        fontSize: isAllocation ? 20 : 26,
+                        fontWeight: FontWeight.w900,
+                        color: isAllocation ? context.textDark : context.halal,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      isAllocation
+                          ? '${holdings.length} ${holdings.length == 1 ? 'stock' : 'stocks'}'
+                          : '${_formatK(compliantValue + purifyValue)} Compliant',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: context.textMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // List Breakdown
+          if (isAllocation) ...[
+            ...sortedHoldings.asMap().entries.map((entry) {
+              final h = entry.value;
+              final val = num.tryParse(h['total_value']?.toString() ?? '0')?.toDouble() ?? 0.0;
+              final pct = totalBalance > 0 ? (val / totalBalance) * 100 : 0.0;
+              final color = _allocationPalette[entry.key % _allocationPalette.length];
+
+              final symbol = h['symbol'] ?? 'S';
+              final statusRaw = h['status']?.toString().toLowerCase() ?? (h['is_halal'] == true ? 'halal' : 'non-halal');
+              final finalStatus = ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].contains(symbol) ? 'halal' : statusRaw;
+              final isHalal = finalStatus == 'halal' || finalStatus == 'compliant';
+              final purificationDue = num.tryParse(h['purification_due']?.toString() ?? '0')?.toDouble() ?? 0.0;
+              final nonCompliantRatio = num.tryParse(h['non_compliant_ratio']?.toString() ?? '0')?.toDouble() ?? 0.0;
+              final needsPurification = h['purification_required'] == true || purificationDue > 0 || nonCompliantRatio > 0;
+
+              final statusDotColor = isHalal
+                  ? (needsPurification ? const Color(0xFFC69249) : context.halal)
+                  : (finalStatus == 'doubtful' ? const Color(0xFFD97706) : context.haram);
+
+              return InkWell(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  _showEditHoldingSheet(context, h);
+                },
+                borderRadius: BorderRadius.circular(10),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 4.0),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 10,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          color: color,
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                symbol,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: context.textDark,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 5),
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: statusDotColor,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              _formatK(val),
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                color: context.textMuted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      // Progress bar
+                      Container(
+                        width: 50,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: context.bg,
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                        alignment: Alignment.centerLeft,
+                        child: FractionallySizedBox(
+                          widthFactor: (pct / 100).clamp(0.0, 1.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: color,
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      SizedBox(
+                        width: 38,
+                        child: Text(
+                          totalBalance > 0
+                              ? (pct > 0 && pct < 1 ? '<1%' : '${pct.toStringAsFixed(0)}%')
+                              : '0%',
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            color: context.textMuted,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }),
+          ] else ...[
+            // Compliance Tiers
+            _buildComplianceRow(
+              context,
+              title: 'Compliant',
+              stocksCount: compliantCount,
+              value: compliantValue,
+              totalBalance: totalBalance,
+              color: context.halal,
+              filterKey: 'Compliant',
+            ),
+            _buildComplianceRow(
+              context,
+              title: 'Purify',
+              stocksCount: purifyCount,
+              value: purifyValue,
+              totalBalance: totalBalance,
+              color: const Color(0xFFC69249),
+              filterKey: 'Compliant (Purify)',
+            ),
+            _buildComplianceRow(
+              context,
+              title: 'Doubtful',
+              stocksCount: doubtfulCount,
+              value: doubtfulValue,
+              totalBalance: totalBalance,
+              color: const Color(0xFFD97706),
+              filterKey: 'Doubtful',
+            ),
+            _buildComplianceRow(
+              context,
+              title: 'Non-Compliant',
+              stocksCount: nonHalalCount,
+              value: nonHalalValue,
+              totalBalance: totalBalance,
+              color: context.haram,
+              filterKey: 'Non-Compliant',
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildComplianceRow(
+    BuildContext context, {
+    required String title,
+    required int stocksCount,
+    required double value,
+    required double totalBalance,
+    required Color color,
+    required String filterKey,
+  }) {
+    final pct = totalBalance > 0 ? (value / totalBalance) * 100 : 0.0;
+    final isSelected = _selectedFilter == filterKey;
+
+    return InkWell(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        setState(() {
+          _selectedFilter = isSelected ? 'All' : filterKey;
+        });
+      },
+      borderRadius: BorderRadius.circular(10),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+        margin: const EdgeInsets.symmetric(vertical: 2),
+        decoration: BoxDecoration(
+          color: isSelected ? color.withOpacity(0.08) : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: isSelected ? color.withOpacity(0.5) : Colors.transparent,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(3),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: context.textDark,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '$stocksCount stocks • ${_formatK(value)}',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: context.textMuted,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Progress Bar
+            Container(
+              width: 50,
+              height: 6,
+              decoration: BoxDecoration(
+                color: context.bg,
+                borderRadius: BorderRadius.circular(3),
+              ),
+              alignment: Alignment.centerLeft,
+              child: FractionallySizedBox(
+                widthFactor: (pct / 100).clamp(0.0, 1.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            SizedBox(
+              width: 38,
+              child: Text(
+                totalBalance > 0
+                    ? (pct > 0 && pct < 1 ? '<1%' : '${pct.toStringAsFixed(0)}%')
+                    : '0%',
+                textAlign: TextAlign.right,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color: stocksCount > 0 ? color : context.textMuted,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildToggleBtn(BuildContext context, String mode) {
+    final isSelected = _chartMode == mode;
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.selectionClick();
+        setState(() => _chartMode = mode);
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOutCubic,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? context.bgAlt : Colors.transparent,
+          borderRadius: BorderRadius.circular(9),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.06),
+                    blurRadius: 4,
+                    offset: const Offset(0, 1),
+                  ),
+                ]
+              : [],
+        ),
+        child: Text(
+          mode,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+            color: isSelected ? context.textDark : context.textMuted,
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget _buildHoldingItem(BuildContext context, dynamic holding, int index) {
     final symbol = holding['symbol'] ?? 'S';
