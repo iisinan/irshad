@@ -57,8 +57,8 @@ class PortfolioController extends Controller
 
                     $screening = $company?->aaoifiScreening;
                     $nonCompliantRatio = (float) ($screening?->impermissible_income_ratio ?? 0);
-                    if ($nonCompliantRatio <= 0 && $company?->financials) {
-                        $fin = $company->financials;
+                    if ($nonCompliantRatio <= 0 && $company && $company->financials && $company->financials->isNotEmpty()) {
+                        $fin = $company->financials->sortByDesc('id')->first();
                         if ((float)($fin->total_revenue ?? 0) > 0 && (float)($fin->interest_income ?? 0) > 0) {
                             $nonCompliantRatio = ((float)$fin->interest_income / (float)$fin->total_revenue) * 100;
                         }

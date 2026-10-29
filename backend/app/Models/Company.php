@@ -81,7 +81,7 @@ class Company extends Model
 
     public function aaoifiScreening(): HasOne
     {
-        return $this->hasOne(AaoifiScreening::class);
+        return $this->hasOne(AaoifiScreening::class)->latestOfMany();
     }
 
     public function aaoifiScreenings(): HasMany
