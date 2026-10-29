@@ -42,7 +42,7 @@ class StockController extends Controller
         $cacheKey = "stocks.index.page.{$page}";
         $stocks = $this->safeTaggedCache(['stocks'])->remember($cacheKey, 300, function () {
             return Company::select(['id', 'name', 'symbol', 'sector', 'current_status', 'asset_class', 'latest_price', 'price_change_pct', 'logo_url', 'fund_details', 'market_cap', 'pe_ratio'])
-                ->with('aaoifiScreening:company_id,impermissible_income_ratio')
+                ->with('aaoifiScreening')
                 ->orderBy('symbol', 'asc')
                 ->paginate(20)
                 ->through(function ($company) {

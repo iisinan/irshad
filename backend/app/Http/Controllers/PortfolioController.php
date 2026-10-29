@@ -36,7 +36,7 @@ class PortfolioController extends Controller
 
             $holdings = Holding::with([
                 'company.financials:id,company_id,total_revenue,interest_income',
-                'company.aaoifiScreening:id,company_id,impermissible_income_ratio,final_status',
+                'company.aaoifiScreening',
                 'company.latestDividend',
                                 'company.dividends' => function ($query) {
                     $query->whereIn('status', ['paid', 'upcoming', 'declared'])

@@ -194,6 +194,7 @@ export default function Portfolio() {
       setIsAdding(true);
       const { addBulkHoldings } = await import('../services/api');
       await addBulkHoldings(payload);
+      setActiveFilter('all');
       loadData();
       toastSuccess('Holdings added to portfolio');
       return true;

@@ -1044,6 +1044,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
   Widget _buildToggleBtn(BuildContext context, String mode) {
     final isSelected = _chartMode == mode;
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: () {
         HapticFeedback.selectionClick();
         setState(() => _chartMode = mode);

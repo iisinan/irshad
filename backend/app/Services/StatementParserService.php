@@ -597,7 +597,7 @@ class StatementParserService
      */
     protected function reconcileHoldings(array $extracted, string $brokerName): array
     {
-        $companies = Company::with('aaoifiScreening:id,company_id,final_status')
+        $companies = Company::with('aaoifiScreening')
             ->get(['id', 'symbol', 'name', 'current_status', 'latest_price', 'logo_url']);
 
         $symbolMap = [];
