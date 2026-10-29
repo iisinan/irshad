@@ -17,8 +17,8 @@ RUN apk add --no-cache \
 COPY --from=mlocati/php-extension-installer:latest /usr/bin/install-php-extensions /usr/local/bin/
 RUN install-php-extensions pdo_pgsql exif pcntl bcmath gd zip sockets redis opcache
 
-# Get latest Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Get Composer 2
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Set working directory
 WORKDIR /var/www
@@ -38,8 +38,9 @@ RUN composer install --no-interaction --optimize-autoloader --no-dev --ignore-pl
 # Set permissions for Laravel
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-# Install RoadRunner by copying the binary from the official image to bypass GitHub API rate limits
-COPY --from=ghcr.io/roadrunner-server/roadrunner:latest /usr/bin/rr /usr/local/bin/rr
+# Install RoadRunner 2025 by copying the binary from the official image to bypass GitHub API rate limits
+COPY --from=ghcr.io/roadrunner-server/roadrunner:2025 /usr/bin/rr /usr/local/bin/rr
+RUN cp /usr/local/bin/rr /var/www/rr && chmod +x /var/www/rr /usr/local/bin/rr
 
 # Expose port 8080 (Render's default)
 EXPOSE 8080
