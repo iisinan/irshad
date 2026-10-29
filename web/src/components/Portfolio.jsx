@@ -89,6 +89,7 @@ export default function Portfolio() {
   const [isAdding, setIsAdding] = useState(false);
   const [activeFilter, setActiveFilter] = useState('all');
   const [initialHoldingSymbol, setInitialHoldingSymbol] = useState(null);
+  const [chartMode, setChartMode] = useState('allocation'); // 'allocation' | 'compliance'
 
   // Auto-open add modal or purification modal if navigated with state
   useEffect(() => {
@@ -279,11 +280,17 @@ export default function Portfolio() {
   const summary = data?.summary || {};
   const totalBalance = summary.total_balance || 0;
   
-  const PIE_COLORS = ['var(--primary)', '#06b6d4', '#f59e0b', '#f43f5e', '#3b82f6', '#10b981', '#8b5cf6', '#ec4899'];
-  const pieData = (holdings || []).map((h,i) => ({
-    name: h.symbol, value: h.total_value || 0, color: PIE_COLORS[i % PIE_COLORS.length],
-  }));
-  if (pieData.length === 0) pieData.push({ name: 'No Holdings', value: 1, color: 'var(--border)' });
+  const PIE_COLORS = ['#0d9488', '#06b6d4', '#f59e0b', '#f43f5e', '#3b82f6', '#10b981', '#8b5cf6', '#ec4899'];
+  
+  // Sorted holdings for allocation (highest value first)
+  const sortedHoldings = [...(holdings || [])].sort((a, b) => Number(b.total_value || 0) - Number(a.total_value || 0));
+  const allocationPieData = sortedHoldings
+    .filter(h => Number(h.total_value || 0) > 0)
+    .map((h, i) => ({
+      name: h.symbol,
+      value: Number(h.total_value || 0),
+      color: PIE_COLORS[i % PIE_COLORS.length],
+    }));
 
   const isHoldingHalal = h => !!h.is_halal || ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(h.symbol);
   const isPurifyHolding = h => isHoldingHalal(h) && (
@@ -291,10 +298,88 @@ export default function Portfolio() {
     Number(h.purification_due || 0) > 0 ||
     Number(h.non_compliant_ratio || 0) > 0
   );
-  const halalCount = holdings.filter(isHoldingHalal).length;
-  const needsPurif = holdings.filter(isPurifyHolding).length;
-  const doubtfulCount = holdings.filter(h => h.status === 'doubtful').length;
-  const nonHalalCount = holdings.filter(h => !isHoldingHalal(h) && h.status !== 'doubtful').length;
+  
+  // Compliance breakdown by both value and count
+  let compliantValue = 0, halalCount = 0;
+  let purifyValue = 0, needsPurif = 0;
+  let doubtfulValue = 0, doubtfulCount = 0;
+  let nonHalalValue = 0, nonHalalCount = 0;
+
+  (holdings || []).forEach(h => {
+    const val = Number(h.total_value || 0);
+    const statusRaw = h.status ? h.status.toLowerCase() : (h.is_halal ? 'halal' : 'non-compliant');
+    const finalStatus = ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(h.symbol) ? 'halal' : statusRaw;
+    const isHalal = finalStatus === 'halal' || finalStatus === 'compliant' || finalStatus === 'pass';
+    const hasPurify = isPurifyHolding(h);
+
+    if (isHalal && !hasPurify) {
+      compliantValue += val;
+      halalCount++;
+    } else if (isHalal && hasPurify) {
+      purifyValue += val;
+      needsPurif++;
+    } else if (finalStatus === 'doubtful') {
+      doubtfulValue += val;
+      doubtfulCount++;
+    } else {
+      nonHalalValue += val;
+      nonHalalCount++;
+    }
+  });
+
+  const complianceCategories = [
+    {
+      id: 'halal',
+      name: 'Shariah Compliant',
+      shortName: 'Compliant',
+      value: compliantValue,
+      count: compliantCount,
+      color: 'var(--halal)',
+      bg: 'rgba(34,197,94,0.06)',
+      action: () => { setActiveFilter(prev => prev === 'halal' ? 'all' : 'halal'); handleTabChange('holdings'); }
+    },
+    {
+      id: 'purify',
+      name: 'Compliant (Purify)',
+      shortName: 'Purify',
+      value: purifyValue,
+      count: purifyCount,
+      color: 'var(--doubtful)',
+      bg: 'rgba(234,179,8,0.06)',
+      action: () => { setActiveFilter(prev => prev === 'purify' ? 'all' : 'purify'); handleTabChange('holdings'); }
+    },
+    {
+      id: 'doubtful',
+      name: 'Doubtful',
+      shortName: 'Doubtful',
+      value: doubtfulValue,
+      count: doubtfulCount,
+      color: '#d97706',
+      bg: 'rgba(245,158,11,0.06)',
+      action: () => { setActiveFilter(prev => prev === 'doubtful' ? 'all' : 'doubtful'); handleTabChange('holdings'); }
+    },
+    {
+      id: 'nonhalal',
+      name: 'Shariah Non-Compliant',
+      shortName: 'Non-Compliant',
+      value: nonHalalValue,
+      count: nonHalalCount,
+      color: 'var(--non-compliant)',
+      bg: 'rgba(239,68,68,0.06)',
+      action: () => { setActiveFilter(prev => prev === 'nonhalal' ? 'all' : 'nonhalal'); handleTabChange('holdings'); }
+    },
+  ];
+
+  const compliancePieData = complianceCategories
+    .filter(c => c.value > 0)
+    .map(c => ({
+      name: c.shortName,
+      fullName: c.name,
+      value: c.value,
+      color: c.color,
+    }));
+
+  const activePieData = chartMode === 'allocation' ? allocationPieData : compliancePieData;
 
 
   const fmtK = (n) => {
@@ -390,61 +475,230 @@ export default function Portfolio() {
         {/* ── Right Sidebar (Only Visible on Holdings) ── */}
         {activeTab === 'holdings' && (
           <div className="stagger-3" style={{ display:'flex', flexDirection:'column', gap:'18px', position:'sticky', top:'24px' }}>
-            {/* Pie Chart */}
-          <div style={{ background: 'var(--bg)', border:'1px solid var(--border)', borderRadius:'24px', padding:'26px', boxShadow:'var(--shadow-sm)', transition:'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', position:'relative', overflow:'hidden' }}
-            onMouseEnter={e => { e.currentTarget.style.boxShadow='var(--shadow-md)'; e.currentTarget.style.transform='translateY(-2px)'; }}
-            onMouseLeave={e => { e.currentTarget.style.boxShadow='var(--shadow-sm)'; e.currentTarget.style.transform='none'; }}>
-            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'10px', position:'relative', zIndex:1 }}>
-              <h3 style={{ fontSize: '0.88rem', fontWeight:800, color:'var(--text-dark)', display:'flex', alignItems:'center', gap:'8px' }}>
-                <div style={{ width:'10px', height:'10px', borderRadius:'50%', background:'var(--primary)' }}/> Allocation
-              </h3>
-            </div>
-            {holdings.length === 0 ? (
-              <div style={{ height:'180px', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', color:'var(--text-muted)', fontSize: '0.79rem', fontWeight:600, background:'linear-gradient(180deg, var(--bg-section) 0%, #ffffff 100%)', borderRadius:'16px', border:'1.5px dashed var(--border)' }}>
-                <Activity size={28} style={{ marginBottom:'12px', opacity:0.3, color:'var(--primary)' }} />
-                <span>No allocation data</span>
-              </div>
-            ) : (
-              <>
-                <div style={{ height:'200px', position:'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <div style={{ position: 'absolute', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>Total</span>
-                    <span style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text-dark)' }}>{fmtK(totalBalance)}</span>
-                  </div>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie data={pieData.filter(d => d.value > 0).length > 0 ? pieData.filter(d => d.value > 0) : [{name: 'Empty', value: 1, color: 'var(--border)'}]} dataKey="value" cx="50%" cy="50%" innerRadius={70} outerRadius={90} paddingAngle={4} cornerRadius={6} stroke="none">
-                        {(pieData.filter(d => d.value > 0).length > 0 ? pieData.filter(d => d.value > 0) : [{name: 'Empty', value: 1, color: 'var(--border)'}]).map((entry,i) => <Cell key={i} fill={entry.color} style={{ filter: 'drop-shadow(0px 4px 6px rgba(0,0,0,0.06))' }}/>)}
-                      </Pie>
-                      <Tooltip formatter={(v) => [fmtK(v),'Value']} contentStyle={{ borderRadius:'12px', border:'1px solid var(--border)', fontSize: '0.75rem', fontWeight:800, boxShadow: 'var(--shadow-md)', padding: '8px 12px' }}/>
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="custom-scroll-container" style={{ 
-                  display:'flex', flexDirection:'column', gap:'8px', marginTop:'16px', maxHeight:'280px', paddingRight:'6px', paddingBottom: '30px',
-                  WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)',
-                  maskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)'
+            {/* Pie Chart Card */}
+            <div style={{ background: 'var(--bg)', border:'1px solid var(--border)', borderRadius:'24px', padding:'24px 22px', boxShadow:'var(--shadow-sm)', transition:'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', position:'relative', overflow:'hidden' }}
+              onMouseEnter={e => { e.currentTarget.style.boxShadow='var(--shadow-md)'; e.currentTarget.style.transform='translateY(-2px)'; }}
+              onMouseLeave={e => { e.currentTarget.style.boxShadow='var(--shadow-sm)'; e.currentTarget.style.transform='none'; }}>
+              
+              {/* Header with Switch */}
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'14px', position:'relative', zIndex:1, gap:'8px', flexWrap:'wrap' }}>
+                <h3 style={{ fontSize: '0.88rem', fontWeight:800, color:'var(--text-dark)', display:'flex', alignItems:'center', gap:'8px', margin: 0 }}>
+                  <div style={{ 
+                    width:'10px', 
+                    height:'10px', 
+                    borderRadius:'50%', 
+                    background: chartMode === 'allocation' ? 'var(--primary)' : 'var(--halal)',
+                    boxShadow: chartMode === 'compliance' ? '0 0 10px rgba(34,197,94,0.4)' : '0 0 10px rgba(13,148,136,0.3)',
+                    transition: 'all 0.3s ease'
+                  }}/> 
+                  {chartMode === 'allocation' ? 'Allocation' : 'Compliance'}
+                </h3>
+
+                {/* Segmented Toggle */}
+                <div style={{
+                  display: 'inline-flex',
+                  background: 'var(--bg-section)',
+                  padding: '3px',
+                  borderRadius: '10px',
+                  border: '1px solid var(--border)',
+                  gap: '2px'
                 }}>
-                  {pieData.map((d,i) => (
-                    <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding: '6px 0', borderBottom: i !== pieData.length - 1 ? '1px solid var(--border-light)' : 'none', flexShrink: 0 }}>
-                      <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
-                        <div style={{ width:'12px', height:'12px', borderRadius:'4px', background:d.color, flexShrink:0 }}/>
-                        <span style={{ fontSize: '0.75rem', fontWeight:700, color:'var(--text-dark)' }}>{d.name}</span>
-                      </div>
-                      <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
-                        <div style={{ width:'50px', height:'6px', borderRadius:'3px', background:'var(--bg-section)', overflow:'hidden' }}>
-                          <div style={{ width:`${totalBalance > 0 ? ((d.value / totalBalance)*100) : 0}%`, height:'100%', background:d.color, borderRadius:'3px' }}/>
-                        </div>
-                        <span style={{ fontSize: '0.72rem', fontWeight:800, color:'var(--text-muted)', minWidth:'36px', textAlign:'right' }}>
-                          {totalBalance > 0 ? `${((d.value / totalBalance)*100).toFixed(0)}%` : '—'}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setChartMode('allocation')}
+                    style={{
+                      padding: '4px 10px',
+                      fontSize: '0.7rem',
+                      fontWeight: 700,
+                      borderRadius: '7px',
+                      border: 'none',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                      background: chartMode === 'allocation' ? 'var(--bg)' : 'transparent',
+                      color: chartMode === 'allocation' ? 'var(--text-dark)' : 'var(--text-muted)',
+                      boxShadow: chartMode === 'allocation' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none'
+                    }}
+                  >
+                    Allocation
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setChartMode('compliance')}
+                    style={{
+                      padding: '4px 10px',
+                      fontSize: '0.7rem',
+                      fontWeight: 700,
+                      borderRadius: '7px',
+                      border: 'none',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                      background: chartMode === 'compliance' ? 'var(--bg)' : 'transparent',
+                      color: chartMode === 'compliance' ? 'var(--text-dark)' : 'var(--text-muted)',
+                      boxShadow: chartMode === 'compliance' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none'
+                    }}
+                  >
+                    Compliance
+                  </button>
                 </div>
-              </>
-            )}
-          </div>
+              </div>
+
+              {holdings.length === 0 ? (
+                <div style={{ height:'180px', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', color:'var(--text-muted)', fontSize: '0.79rem', fontWeight:600, background:'linear-gradient(180deg, var(--bg-section) 0%, #ffffff 100%)', borderRadius:'16px', border:'1.5px dashed var(--border)' }}>
+                  <Activity size={28} style={{ marginBottom:'12px', opacity:0.3, color:'var(--primary)' }} />
+                  <span>No {chartMode} data</span>
+                </div>
+              ) : (
+                <>
+                  <div style={{ height:'200px', position:'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ position: 'absolute', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', pointerEvents: 'none' }}>
+                      <span style={{ fontSize: '0.62rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                        {chartMode === 'allocation' ? 'Total' : 'Health Score'}
+                      </span>
+                      <span style={{ fontSize: '1.25rem', fontWeight: 900, color: chartMode === 'allocation' ? 'var(--text-dark)' : 'var(--halal)', lineHeight: 1.2 }}>
+                        {chartMode === 'allocation' 
+                          ? fmtK(totalBalance) 
+                          : `${totalBalance > 0 ? Math.round(((compliantValue + purifyValue) / totalBalance) * 100) : (summary.health_percentage ?? 100)}%`
+                        }
+                      </span>
+                      <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', marginTop: '2px' }}>
+                        {chartMode === 'allocation' 
+                          ? `${holdings.length} ${holdings.length === 1 ? 'stock' : 'stocks'}` 
+                          : `${fmtK(compliantValue + purifyValue)} Compliant`
+                        }
+                      </span>
+                    </div>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie 
+                          data={activePieData.length > 0 ? activePieData : [{ name: 'Empty', value: 1, color: 'var(--border)' }]} 
+                          dataKey="value" 
+                          cx="50%" 
+                          cy="50%" 
+                          innerRadius={68} 
+                          outerRadius={88} 
+                          paddingAngle={activePieData.length > 1 ? 3 : 0} 
+                          cornerRadius={4} 
+                          stroke="none"
+                          isAnimationActive={true}
+                          animationDuration={500}
+                        >
+                          {(activePieData.length > 0 ? activePieData : [{ name: 'Empty', value: 1, color: 'var(--border)' }]).map((entry, i) => (
+                            <Cell key={i} fill={entry.color} style={{ filter: 'drop-shadow(0px 3px 5px rgba(0,0,0,0.06))' }} />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          formatter={(v, name) => [
+                            `${fmtK(v)} (${totalBalance > 0 ? ((v / totalBalance) * 100).toFixed(1) : 0}%)`, 
+                            name
+                          ]} 
+                          contentStyle={{ 
+                            borderRadius:'12px', 
+                            border:'1px solid var(--border)', 
+                            fontSize: '0.75rem', 
+                            fontWeight:800, 
+                            boxShadow: 'var(--shadow-md)', 
+                            padding: '8px 12px',
+                            background: 'var(--bg)',
+                            color: 'var(--text-dark)'
+                          }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  {/* List / Legend Section */}
+                  <div className="custom-scroll-container" style={{ 
+                    display:'flex', flexDirection:'column', gap:'6px', marginTop:'16px', maxHeight:'280px', paddingRight:'4px', paddingBottom: '20px',
+                    WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)',
+                    maskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)'
+                  }}>
+                    {chartMode === 'allocation' ? (
+                      /* Allocation List */
+                      sortedHoldings.map((h, i) => {
+                        const val = Number(h.total_value || 0);
+                        const pct = totalBalance > 0 ? (val / totalBalance) * 100 : 0;
+                        const color = PIE_COLORS[i % PIE_COLORS.length];
+                        const statusRaw = h.status ? h.status.toLowerCase() : (h.is_halal ? 'halal' : 'non-compliant');
+                        const isHalal = ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(h.symbol) || statusRaw === 'halal' || statusRaw === 'compliant' || statusRaw === 'pass';
+                        const hasPurify = Number(h.purification_due || 0) > 0 || Number(h.non_compliant_ratio || 0) > 0;
+                        const statusDotColor = isHalal ? (hasPurify ? 'var(--doubtful)' : 'var(--halal)') : (statusRaw === 'doubtful' ? '#d97706' : 'var(--non-compliant)');
+
+                        return (
+                          <div key={h.id || h.symbol || i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding: '6px 4px', borderBottom: i !== sortedHoldings.length - 1 ? '1px solid var(--border-light)' : 'none', flexShrink: 0 }}>
+                            <div style={{ display:'flex', alignItems:'center', gap:'8px', minWidth: 0 }}>
+                              <div style={{ width:'10px', height:'10px', borderRadius:'3px', background: color, flexShrink: 0 }}/>
+                              <span style={{ fontSize: '0.75rem', fontWeight:700, color:'var(--text-dark)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                                {h.symbol}
+                              </span>
+                              <span 
+                                title={isHalal ? (hasPurify ? 'Compliant (Purify)' : 'Compliant') : (statusRaw === 'doubtful' ? 'Doubtful' : 'Non-Compliant')}
+                                style={{ width:'6px', height:'6px', borderRadius:'50%', background: statusDotColor, flexShrink: 0 }}
+                              />
+                            </div>
+                            <div style={{ display:'flex', alignItems:'center', gap:'10px', flexShrink: 0 }}>
+                              <div style={{ width:'50px', height:'6px', borderRadius:'3px', background:'var(--bg-section)', overflow:'hidden' }}>
+                                <div style={{ width:`${Math.min(pct, 100)}%`, height:'100%', background: color, borderRadius:'3px' }}/>
+                              </div>
+                              <span style={{ fontSize: '0.72rem', fontWeight:800, color:'var(--text-muted)', minWidth:'36px', textAlign:'right' }}>
+                                {totalBalance > 0 ? (pct < 1 && pct > 0 ? '<1%' : `${pct.toFixed(0)}%`) : '—'}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      /* Compliance Categories List */
+                      complianceCategories.map((c) => {
+                        const pct = totalBalance > 0 ? (c.value / totalBalance) * 100 : 0;
+                        const isFilterActive = activeFilter === c.id;
+
+                        return (
+                          <div 
+                            key={c.id} 
+                            onClick={c.action}
+                            title={`Click to filter holdings by ${c.name}`}
+                            style={{ 
+                              display:'flex', 
+                              alignItems:'center', 
+                              justifyContent:'space-between', 
+                              padding: '6px 8px', 
+                              borderRadius:'8px', 
+                              background: isFilterActive ? c.bg : 'transparent',
+                              border: isFilterActive ? `1px solid ${c.color}` : '1px solid transparent',
+                              cursor:'pointer', 
+                              transition:'all 0.15s ease', 
+                              flexShrink: 0 
+                            }}
+                            onMouseEnter={e => { if (!isFilterActive) e.currentTarget.style.background = 'var(--bg-section)'; }}
+                            onMouseLeave={e => { if (!isFilterActive) e.currentTarget.style.background = 'transparent'; }}
+                          >
+                            <div style={{ display:'flex', alignItems:'center', gap:'8px', minWidth: 0 }}>
+                              <div style={{ width:'10px', height:'10px', borderRadius:'3px', background: c.color, flexShrink: 0 }}/>
+                              <div style={{ display:'flex', flexDirection:'column', minWidth: 0 }}>
+                                <span style={{ fontSize: '0.75rem', fontWeight:700, color:'var(--text-dark)', whiteSpace: 'nowrap' }}>
+                                  {c.shortName}
+                                </span>
+                                <span style={{ fontSize: '0.62rem', fontWeight:600, color:'var(--text-muted)' }}>
+                                  {c.count} {c.count === 1 ? 'stock' : 'stocks'} • {fmtK(c.value)}
+                                </span>
+                              </div>
+                            </div>
+                            <div style={{ display:'flex', alignItems:'center', gap:'10px', flexShrink: 0 }}>
+                              <div style={{ width:'50px', height:'6px', borderRadius:'3px', background:'var(--bg-section)', overflow:'hidden' }}>
+                                <div style={{ width:`${Math.min(pct, 100)}%`, height:'100%', background: c.color, borderRadius:'3px' }}/>
+                              </div>
+                              <span style={{ fontSize: '0.72rem', fontWeight:800, color: c.count > 0 ? c.color : 'var(--text-muted)', minWidth:'36px', textAlign:'right' }}>
+                                {totalBalance > 0 ? (pct < 1 && pct > 0 ? '<1%' : `${pct.toFixed(0)}%`) : '—'}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
 
           {/* Shariah Summary */}
           <div style={{ background: 'var(--bg)', border:'1px solid var(--border)', borderRadius:'24px', padding:'26px', boxShadow:'var(--shadow-sm)', transition:'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', position:'relative', overflow:'hidden' }}
