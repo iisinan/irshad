@@ -140,7 +140,7 @@ class _FundsScreenState extends State<FundsScreen> {
               onChanged: (v) => setState(() => _searchQuery = v),
               style: TextStyle(color: context.textDark, fontSize: 14),
               decoration: InputDecoration(
-                hintText: 'Search funds, providers, or details...',
+                hintText: 'Search directory, funds, or providers...',
                 hintStyle: TextStyle(color: context.textMuted, fontSize: 14),
                 prefixIcon: Icon(
                   Icons.search,

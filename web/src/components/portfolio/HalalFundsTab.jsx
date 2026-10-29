@@ -207,10 +207,10 @@ export default function HalalFundsTab() {
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-0.5px', margin: 0 }}>
-            Halal Mutual Funds
+            Halal Directory
           </h2>
           <p style={{ fontSize: '0.83rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-            {funds.length} SEC-approved shariah-compliant funds &amp; ETFs in Nigeria
+            {funds.length} SEC-approved shariah-compliant funds, ETFs &amp; instruments in Nigeria
           </p>
         </div>
         <div style={{ position: 'relative', flex: '1 1 240px', maxWidth: '280px' }}>

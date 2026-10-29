@@ -150,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   unselectedLabelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                   tabs: const [
                     Tab(text: 'Stocks'),
-                    Tab(text: 'Funds'),
+                    Tab(text: 'Directory'),
                     Tab(text: 'Baskets'),
                   ],
                 ),
