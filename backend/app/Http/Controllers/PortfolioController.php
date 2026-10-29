@@ -36,7 +36,7 @@ class PortfolioController extends Controller
 
             $holdings = Holding::with([
                 'company.financials:id,company_id,total_revenue,interest_income',
-                'company.aaoifiScreening:id,company_id,impermissible_income_ratio',
+                'company.aaoifiScreening:id,company_id,impermissible_income_ratio,final_status',
                 'company.latestDividend',
                                 'company.dividends' => function ($query) {
                     $query->whereIn('status', ['paid', 'upcoming', 'declared'])
@@ -57,6 +57,12 @@ class PortfolioController extends Controller
 
                     $screening = $company?->aaoifiScreening;
                     $nonCompliantRatio = (float) ($screening?->impermissible_income_ratio ?? 0);
+                    if ($nonCompliantRatio <= 0 && $company?->financials) {
+                        $fin = $company->financials;
+                        if ((float)($fin->total_revenue ?? 0) > 0 && (float)($fin->interest_income ?? 0) > 0) {
+                            $nonCompliantRatio = ((float)$fin->interest_income / (float)$fin->total_revenue) * 100;
+                        }
+                    }
 
                     $totalValue = (float) ($holding->shares * $currentPrice);
 
@@ -218,6 +224,7 @@ class PortfolioController extends Controller
                         'status' => strtolower($status),
                         'is_halal' => $isHalal,
                         'purification_due' => round($purificationDue, 2),
+                        'purification_required' => $isHalal && ($nonCompliantRatio > 0 || $purificationDue > 0),
                         'total_dividends' => round($totalDividendsReceived, 2),
                         'lifetime_dividends' => round($lifetimeDividendsReceived, 2),
                         'latest_dividend' => $latestDivData,
@@ -243,6 +250,7 @@ class PortfolioController extends Controller
                         'status' => 'doubtful',
                         'is_halal' => false,
                         'purification_due' => 0,
+                        'purification_required' => false,
                         'total_dividends' => 0,
                         'lifetime_dividends' => 0,
                         'latest_dividend' => null,

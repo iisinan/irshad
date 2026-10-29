@@ -95,7 +95,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
             
             final purificationDue = num.tryParse(h['purification_due']?.toString() ?? '0')?.toDouble() ?? 0.0;
             final nonCompliantRatio = num.tryParse(h['non_compliant_ratio']?.toString() ?? '0')?.toDouble() ?? 0.0;
-            final needsPurification = purificationDue > 0;
+            final needsPurification = h['purification_required'] == true || purificationDue > 0 || nonCompliantRatio > 0;
             
             if (isHalal) {
               if (needsPurification) needsPurif++;
@@ -119,7 +119,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
             
             final purificationDue = num.tryParse(h['purification_due']?.toString() ?? '0')?.toDouble() ?? 0.0;
             final nonCompliantRatio = num.tryParse(h['non_compliant_ratio']?.toString() ?? '0')?.toDouble() ?? 0.0;
-            final needsPurification = purificationDue > 0;
+            final needsPurification = h['purification_required'] == true || purificationDue > 0 || nonCompliantRatio > 0;
 
             if (_selectedFilter == 'All') return true;
             if (_selectedFilter == 'Compliant') return isHalal && !needsPurification;
@@ -540,7 +540,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
       if (purificationDue > 0) {
         accentColor = const Color(0xFFEAB308);
         badgeText = 'Purification Due';
-      } else if (nonCompliantRatio > 0) {
+      } else if (nonCompliantRatio > 0 || holding['purification_required'] == true) {
         accentColor = const Color(0xFFEAB308);
         badgeText = 'Watching';
       } else {

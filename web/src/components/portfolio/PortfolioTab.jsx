@@ -133,9 +133,9 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
   const statusRaw = holding.status ? holding.status.toLowerCase() : (holding.is_halal ? 'halal' : 'non-compliant');
   const finalStatus = ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(holding.symbol) ? 'halal' : statusRaw;
   
-  const getBadgeStyle = (status, purificationDue, nonCompliantRatio) => {
+  const getBadgeStyle = (status, purificationDue, nonCompliantRatio, purificationRequired) => {
     if (status === 'halal' || status === 'compliant' || status === 'pass') {
-      if (Number(purificationDue || 0) > 0 || Number(nonCompliantRatio || 0) > 0) {
+      if (Number(purificationDue || 0) > 0 || Number(nonCompliantRatio || 0) > 0 || !!purificationRequired) {
         return { bg: 'rgba(234, 179, 8, 0.12)', color: '#d97706', text: 'Shariah Compliant w/ Purification' };
       }
       return { bg: 'rgba(34, 197, 94, 0.1)', color: 'var(--halal)', text: 'Shariah Compliant' };
@@ -144,7 +144,7 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
       return { bg: 'rgba(239, 68, 68, 0.1)', color: 'var(--non-compliant)', text: 'Shariah Non-Compliant' };
     return { bg: 'rgba(245, 158, 11, 0.1)', color: 'var(--questionable)', text: 'Doubtful' };
   };
-  const badge = getBadgeStyle(finalStatus, holding.purification_due, holding.non_compliant_ratio);
+  const badge = getBadgeStyle(finalStatus, holding.purification_due, holding.non_compliant_ratio, holding.purification_required);
 
   const hasDivs   = Number(holding.lifetime_dividends || holding.total_dividends || 0) > 0;
   const hasPurify = Number(holding.purification_due || 0) > 0;
@@ -285,8 +285,13 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
   const totalBalance    = summary.total_balance    || 0;
   const compliance      = summary.health_percentage ?? 100;
   const isHoldingHalal = h => !!h.is_halal || ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(h.symbol);
-  const needsPurif = holdings.filter(h => isHoldingHalal(h) && Number(h.purification_due || 0) > 0).length;
-  const halalCount = holdings.filter(isHoldingHalal).length - needsPurif;
+  const isPurifyHolding = h => isHoldingHalal(h) && (
+    !!h.purification_required ||
+    Number(h.purification_due || 0) > 0 ||
+    Number(h.non_compliant_ratio || 0) > 0
+  );
+  const needsPurif = holdings.filter(isPurifyHolding).length;
+  const halalCount = holdings.filter(h => isHoldingHalal(h) && !isPurifyHolding(h)).length;
   const nonHalalCount = holdings.filter(h => !isHoldingHalal(h) && h.status !== 'doubtful').length;
   const doubtfulCount = holdings.filter(h => h.status === 'doubtful').length;
   const totalGainPct    = holdings.length ? (holdings.reduce((s,h) => s + (h.return_percentage||0), 0) / holdings.length).toFixed(2) : null;
@@ -302,7 +307,7 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
     const finalStatus = ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(h.symbol) ? 'halal' : statusRaw;
     const isHalal = finalStatus === 'halal' || finalStatus === 'compliant';
     
-    const needsPurification = Number(h.purification_due || 0) > 0;
+    const needsPurification = !!h.purification_required || Number(h.purification_due || 0) > 0 || Number(h.non_compliant_ratio || 0) > 0;
 
     if (activeFilter === 'halal')    return isHalal && !needsPurification;
     if (activeFilter === 'purify')   return isHalal && needsPurification;
@@ -511,7 +516,7 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
               <Wallet size={36} color="var(--primary)"/>
             </div>
             <div style={{ fontSize: '1.23rem', fontWeight:900, color:'var(--text-dark)', marginBottom:'12px', letterSpacing:'-0.5px' }}>
-              {data.length === 0 ? 'Your Portfolio is Empty' : `No ${activeFilter === 'all' ? 'matching' : activeFilter} holdings found`}
+              {data.length === 0 ? 'Your Portfolio is Empty' : `No ${activeFilter === 'purify' ? 'purification' : (activeFilter === 'halal' ? 'compliant' : (activeFilter === 'nonhalal' ? 'non-compliant' : (activeFilter === 'all' ? 'matching' : activeFilter)))} holdings found`}
             </div>
             <p style={{ color:'var(--text-muted)', marginBottom:'32px', maxWidth:'400px', margin:'0 auto 32px', lineHeight:1.6, fontSize: '0.84rem' }}>
               {data.length === 0 ? 'Start tracking your investments and ensure they align with Islamic financial principles.' : 'Try adjusting your filters to view other assets.'}
