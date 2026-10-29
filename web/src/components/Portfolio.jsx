@@ -291,8 +291,8 @@ export default function Portfolio() {
     Number(h.purification_due || 0) > 0 ||
     Number(h.non_compliant_ratio || 0) > 0
   );
+  const halalCount = holdings.filter(isHoldingHalal).length;
   const needsPurif = holdings.filter(isPurifyHolding).length;
-  const halalCount = holdings.filter(h => isHoldingHalal(h) && !isPurifyHolding(h)).length;
   const doubtfulCount = holdings.filter(h => h.status === 'doubtful').length;
   const nonHalalCount = holdings.filter(h => !isHoldingHalal(h) && h.status !== 'doubtful').length;
 

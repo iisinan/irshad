@@ -290,8 +290,8 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
     Number(h.purification_due || 0) > 0 ||
     Number(h.non_compliant_ratio || 0) > 0
   );
+  const halalCount = holdings.filter(isHoldingHalal).length;
   const needsPurif = holdings.filter(isPurifyHolding).length;
-  const halalCount = holdings.filter(h => isHoldingHalal(h) && !isPurifyHolding(h)).length;
   const nonHalalCount = holdings.filter(h => !isHoldingHalal(h) && h.status !== 'doubtful').length;
   const doubtfulCount = holdings.filter(h => h.status === 'doubtful').length;
   const totalGainPct    = holdings.length ? (holdings.reduce((s,h) => s + (h.return_percentage||0), 0) / holdings.length).toFixed(2) : null;
@@ -309,7 +309,7 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
     
     const needsPurification = !!h.purification_required || Number(h.purification_due || 0) > 0 || Number(h.non_compliant_ratio || 0) > 0;
 
-    if (activeFilter === 'halal')    return isHalal && !needsPurification;
+    if (activeFilter === 'halal')    return isHalal;
     if (activeFilter === 'purify')   return isHalal && needsPurification;
     if (activeFilter === 'doubtful') return finalStatus === 'doubtful';
     if (activeFilter === 'nonhalal') return !isHalal && finalStatus !== 'doubtful';

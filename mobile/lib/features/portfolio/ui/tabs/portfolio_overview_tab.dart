@@ -98,8 +98,8 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
             final needsPurification = h['purification_required'] == true || purificationDue > 0 || nonCompliantRatio > 0;
             
             if (isHalal) {
+              halalCount++;
               if (needsPurification) needsPurif++;
-              else halalCount++;
             } else if (finalStatus == 'doubtful') {
               doubtfulCount++;
             } else {
@@ -122,7 +122,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> {
             final needsPurification = h['purification_required'] == true || purificationDue > 0 || nonCompliantRatio > 0;
 
             if (_selectedFilter == 'All') return true;
-            if (_selectedFilter == 'Compliant') return isHalal && !needsPurification;
+            if (_selectedFilter == 'Compliant') return isHalal;
             if (_selectedFilter == 'Compliant (Purify)') return isHalal && needsPurification;
             if (_selectedFilter == 'Doubtful') return finalStatus == 'doubtful';
             if (_selectedFilter == 'Non-Compliant') return !isHalal && finalStatus != 'doubtful';
