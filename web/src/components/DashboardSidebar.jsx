@@ -6,7 +6,7 @@ import {
   BarChart2, Activity, Briefcase,
   HeartHandshake, Calculator, BookOpen,
   User, LogOut, ChevronLeft, ChevronRight,
-  X, Moon, Sun, Shield, FileText, Bell, HelpCircle, Star
+  X, Moon, Sun, Shield, FileText, Bell, HelpCircle, Star, CreditCard
 } from 'lucide-react';
 
 const SidebarClock = () => {
@@ -40,6 +40,7 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
     { label: 'Zakat',            icon: Calculator,     to: '/portfolio#zakat', className: 'tour-zakat-tab' },
     { label: 'Resources',        icon: BookOpen,       to: '/portfolio#lectures' },
     { section: 'Account' },
+    { label: 'Pricing Plans',    icon: CreditCard,     to: '/pricing' },
     { label: 'Statements',       icon: FileText,       to: '/portfolio#statement' },
     { label: 'Profile & Settings', icon: User,         to: '/profile' },
     { label: 'Help & Guide',     icon: HelpCircle,     to: '/portfolio#guide' },

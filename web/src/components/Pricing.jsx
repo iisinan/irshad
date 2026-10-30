@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, Star, ShieldCheck, Monitor, Briefcase, Eye, PlaySquare, Globe, ShoppingBasket, FileText, Bell, HandCoins, LineChart, Megaphone, Check } from 'lucide-react';
+import { CheckCircle2, Star, ShieldCheck, Monitor, Briefcase, Eye, PlaySquare, Globe, ShoppingBasket, FileText, Bell, HandCoins, LineChart, Megaphone, Check, Calculator } from 'lucide-react';
 import api from '../services/api';
 import Footer from './Footer';
 import { useAuth } from '../context/AuthContext';
@@ -63,7 +63,8 @@ const Pricing = ({ isModal }) => {
             
             {/* Billing Toggle */}
             <div style={{ 
-              display: 'inline-flex', background: 'var(--bg-alt)', borderRadius: '100px', padding: '4px', margin: '10px auto 30px'
+              display: 'inline-flex', background: 'var(--bg-alt)', borderRadius: '100px', padding: '4px', margin: '10px auto 30px',
+              border: '1px solid var(--border)'
             }}>
               <button 
                 onClick={() => setBillingCycle('monthly')}
@@ -86,10 +87,16 @@ const Pricing = ({ isModal }) => {
                   color: billingCycle === 'yearly' ? 'var(--text-dark)' : '#4B5563',
                   fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer',
                   boxShadow: billingCycle === 'yearly' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                  transition: 'all 0.2s'
+                  transition: 'all 0.2s',
+                  display: 'inline-flex', alignItems: 'center', gap: '8px'
                 }}
               >
-                Yearly
+                <span>Yearly</span>
+                <span style={{ 
+                  background: '#10B981', color: '#fff', fontSize: '0.65rem', 
+                  fontWeight: 800, padding: '2px 8px', borderRadius: '100px',
+                  textTransform: 'uppercase'
+                }}>Save ~20%</span>
               </button>
             </div>
           </div>
@@ -124,7 +131,7 @@ const Pricing = ({ isModal }) => {
               <div style={{ flex: 1 }}>
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                   <FeatureRow icon="Screen" title="Stock screens" text="3 per month" />
-                  <FeatureRow icon="Briefcase" title="Portfolio (holdings)" text="1 stock" />
+                  <FeatureRow icon="Briefcase" title="Portfolio (holdings)" text="3 stocks" />
                   <FeatureRow icon="Video" title="Resources" text="(video/docs)" />
                   <FeatureRow icon="Globe" title="News and Insight" />
                 </ul>
@@ -139,12 +146,19 @@ const Pricing = ({ isModal }) => {
                 <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.5, height: '44px' }}>Get more access to custom baskets and deeper portfolio tracking.</p>
               </div>
 
-              <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-                <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#006B46' }}>NGN</span>
-                <span style={{ fontSize: '2.4rem', fontWeight: 500, color: '#006B46', lineHeight: 1 }}>
-                  {billingCycle === 'monthly' ? '2,500' : '24,000'}
-                </span>
-                <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>/{billingCycle === 'monthly' ? 'month' : 'year'}</span>
+              <div style={{ marginBottom: '24px' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#006B46' }}>NGN</span>
+                  <span style={{ fontSize: '2.4rem', fontWeight: 500, color: '#006B46', lineHeight: 1 }}>
+                    {billingCycle === 'monthly' ? '2,500' : '24,000'}
+                  </span>
+                  <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>/{billingCycle === 'monthly' ? 'month' : 'year'}</span>
+                </div>
+                {billingCycle === 'yearly' && (
+                  <div style={{ fontSize: '0.78rem', color: '#006B46', fontWeight: 600, marginTop: '4px' }}>
+                    Equivalent to ₦2,000/month (Save 20%)
+                  </div>
+                )}
               </div>
 
               {currentPlanSlug === 'pro' && hasPaid
@@ -158,11 +172,12 @@ const Pricing = ({ isModal }) => {
                 </div>
                 <div style={{ borderTop: '1px solid #F3F4F6', margin: '0 0 16px 0' }}></div>
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                  <FeatureRow icon="Screen" title="Stock screens" text="5 per month" />
+                  <FeatureRow icon="Screen" title="Stock screens" text="10 per month" />
                   <FeatureRow icon="Briefcase" title="Portfolio (holdings)" text="Up to 7 stocks" />
                   <FeatureRow icon="Eye" title="Watchlist" text="Up to 2 stocks" />
                   <FeatureRow icon="Basket" title="Baskets" text="1 curated, 2 custom" />
-                  <FeatureRow icon="HandCoin" title="Purification & Zakat" text="2 purifications & calc" />
+                  <FeatureRow icon="HandCoin" title="Automated purification calculation" text="2 per month" />
+                  <FeatureRow icon="Calculator" title="Automated zakat calculation" text="Included" />
                   <FeatureRow icon="Doc" title="Statements" text="History tracking" />
                 </ul>
               </div>
@@ -176,12 +191,19 @@ const Pricing = ({ isModal }) => {
                 <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.5, height: '44px' }}>Unlock the highest level of access and exclusive premium features.</p>
               </div>
 
-              <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-                <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#D9A05B' }}>NGN</span>
-                <span style={{ fontSize: '2.4rem', fontWeight: 500, color: '#D9A05B', lineHeight: 1 }}>
-                  {billingCycle === 'monthly' ? '6,500' : '62,000'}
-                </span>
-                <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>/{billingCycle === 'monthly' ? 'month' : 'year'}</span>
+              <div style={{ marginBottom: '24px' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#D9A05B' }}>NGN</span>
+                  <span style={{ fontSize: '2.4rem', fontWeight: 500, color: '#D9A05B', lineHeight: 1 }}>
+                    {billingCycle === 'monthly' ? '6,500' : '62,000'}
+                  </span>
+                  <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>/{billingCycle === 'monthly' ? 'month' : 'year'}</span>
+                </div>
+                {billingCycle === 'yearly' && (
+                  <div style={{ fontSize: '0.78rem', color: '#B8860B', fontWeight: 600, marginTop: '4px' }}>
+                    Equivalent to ~₦5,166/month (Save 20%)
+                  </div>
+                )}
               </div>
 
               {currentPlanSlug === 'max' && hasPaid
@@ -198,7 +220,9 @@ const Pricing = ({ isModal }) => {
                   <FeatureRow icon="Screen" title="Stock screens" text="Unlimited" />
                   <FeatureRow icon="Briefcase" title="Portfolio (holdings)" text="Unlimited" />
                   <FeatureRow icon="Eye" title="Watchlist" text="Unlimited" />
-                  <FeatureRow icon="Basket" title="Baskets & Zakat" text="Unlimited" />
+                  <FeatureRow icon="Basket" title="Baskets" text="Unlimited" />
+                  <FeatureRow icon="HandCoin" title="Automated purification calculation" text="Unlimited" />
+                  <FeatureRow icon="Calculator" title="Automated zakat calculation" text="Unlimited" />
                   <FeatureRow icon="Bell" title="Dividend alerts" text="Unlimited" />
                   <FeatureRow icon="Chart" title="Drift tracking" text="90-day tracking" />
                   <FeatureRow icon="Megaphone" title="Monthly spotlight" text="Full insights" />
@@ -233,6 +257,7 @@ const FeatureRow = ({ icon, title, text }) => {
     case 'HandCoin': IconComponent = HandCoins; break;
     case 'Chart': IconComponent = LineChart; break;
     case 'Megaphone': IconComponent = Megaphone; break;
+    case 'Calculator': IconComponent = Calculator; break;
   }
 
   return (

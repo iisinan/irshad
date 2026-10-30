@@ -17,7 +17,7 @@ class PlanSeeder extends Seeder
                 'price_yearly' => 0,
                 'features' => [
                     'stock_screens_per_month' => 3,
-                    'portfolio_limit' => 1,
+                    'portfolio_limit' => 3,
                     'watchlist_limit' => 0,
                     'baskets' => 0,
                     'statements' => false,
@@ -34,7 +34,7 @@ class PlanSeeder extends Seeder
                 'price_monthly' => 2500,
                 'price_yearly' => 24000,
                 'features' => [
-                    'stock_screens_per_month' => 5,
+                    'stock_screens_per_month' => 10,
                     'portfolio_limit' => 7,
                     'watchlist_limit' => 2,
                     'baskets' => 3, // 1 curated, 2 custom

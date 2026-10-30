@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   Shield, CheckCircle,
-  Trash2, User, Monitor, LogOut, AlertCircle, Award, Save
+  Trash2, User, Monitor, LogOut, AlertCircle, Award, Save, CreditCard
 } from 'lucide-react';
 import { fetchProfile, updateProfile, deleteAccount } from '../services/api';
 import localforage from 'localforage';
@@ -153,6 +153,7 @@ export default function Profile() {
 
   const sections = [
     { id: 'profile', icon: User, label: 'Personal Info' },
+    { id: 'billing', icon: CreditCard, label: 'Plan & Billing' },
     { id: 'security', icon: Shield, label: 'Security' },
     // { id: 'preferences', icon: BookOpen, label: 'Shariah Preferences' },
     { id: 'appearance', icon: Monitor, label: 'Appearance' },
@@ -311,26 +312,33 @@ export default function Profile() {
               </div>
               
               <div style={{ padding: '24px', background: 'var(--bg-section)', borderRadius: '16px', border: '1px solid var(--border)' }}>
-                <h4 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '16px' }}>Monthly Usage Limits</h4>
+                <h4 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '16px' }}>Monthly Usage Limits & Benefits</h4>
                 
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', fontSize: '0.9rem' }}>
                   <span style={{ color: 'var(--text-muted)' }}>Stock Screens</span>
                   <span style={{ fontWeight: 700, color: 'var(--text-dark)' }}>
-                    {((profileUser || user)?.tier?.features?.stock_screens_per_month) === -1 ? 'Unlimited' : ((profileUser || user)?.tier?.features?.stock_screens_per_month || 3)}
+                    {((profileUser || user)?.tier?.features?.stock_screens_per_month) === -1 ? 'Unlimited' : ((profileUser || user)?.tier?.features?.stock_screens_per_month ?? ((profileUser || user)?.tier?.slug === 'pro' ? 10 : 3))}
                   </span>
                 </div>
                 
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', fontSize: '0.9rem' }}>
                   <span style={{ color: 'var(--text-muted)' }}>Portfolio Size</span>
                   <span style={{ fontWeight: 700, color: 'var(--text-dark)' }}>
-                    {((profileUser || user)?.tier?.features?.portfolio_limit) === -1 ? 'Unlimited' : ((profileUser || user)?.tier?.features?.portfolio_limit || 1)}
+                    {((profileUser || user)?.tier?.features?.portfolio_limit) === -1 ? 'Unlimited' : ((profileUser || user)?.tier?.features?.portfolio_limit ?? ((profileUser || user)?.tier?.slug === 'pro' ? 7 : 3))}
                   </span>
                 </div>
                 
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Purifications</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', fontSize: '0.9rem' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Automated Purification Calculation</span>
                   <span style={{ fontWeight: 700, color: 'var(--text-dark)' }}>
-                    {((profileUser || user)?.tier?.features?.purifications_per_month) === -1 ? 'Unlimited' : ((profileUser || user)?.tier?.features?.purifications_per_month || 0)}
+                    {((profileUser || user)?.tier?.features?.purifications_per_month) === -1 ? 'Unlimited' : ((profileUser || user)?.tier?.features?.purifications_per_month ? `${(profileUser || user)?.tier?.features?.purifications_per_month} per month` : ((profileUser || user)?.tier?.slug === 'pro' ? '2 per month' : 'Not included'))}
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Automated Zakat Calculation</span>
+                  <span style={{ fontWeight: 700, color: 'var(--text-dark)' }}>
+                    {((profileUser || user)?.tier?.slug === 'free' || !(profileUser || user)?.tier?.features?.zakat_calc) ? 'Not included' : 'Included'}
                   </span>
                 </div>
               </div>
