@@ -1451,7 +1451,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> with Automa
     int limit = -1;
     String planName = 'Noor';
     if (tierSlug == 'free') {
-      limit = 1;
+      limit = 3;
       planName = 'Miftah';
     } else if (tierSlug == 'pro') {
       limit = 7;
@@ -2280,7 +2280,7 @@ class _AddHoldingBottomSheetState extends State<AddHoldingBottomSheet> with Sing
                 final tierSlug = Provider.of<AppStateProvider>(context, listen: false).userProfile?['tier']?['slug'];
                 final currentTotal = Provider.of<PortfolioProvider>(context, listen: false).holdings.length + _holdings.length;
                 int limit = -1;
-                if (tierSlug == 'free') limit = 1;
+                if (tierSlug == 'free') limit = 3;
                 else if (tierSlug == 'pro') limit = 7;
                 
                 if (limit != -1 && currentTotal >= limit) return const SizedBox.shrink();
