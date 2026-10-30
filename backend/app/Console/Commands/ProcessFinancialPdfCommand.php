@@ -44,9 +44,27 @@ class ProcessFinancialPdfCommand extends Command
         // 1. Manual Extraction using pdftotext
         $this->info("Performing manual regex extraction as a baseline...");
         $manualText = shell_exec("pdftotext -layout " . escapeshellarg($pdfPath) . " -");
+        
+        // If pdftotext yields empty text (scanned image PDF), fallback to OCR on the first 10 pages
+        if (strlen(preg_replace('/[^a-zA-Z0-9]/', '', (string)$manualText)) < 50) {
+            $this->info("Scanned PDF detected (no text layer). Running OCR fallback for baseline validation...");
+            $tmpDir = sys_get_temp_dir() . '/ocr_' . uniqid();
+            @mkdir($tmpDir, 0777, true);
+            shell_exec("pdftoppm -png -r 150 -f 1 -l 10 " . escapeshellarg($pdfPath) . " " . escapeshellarg($tmpDir . '/page') . " 2>/dev/null");
+            $ocrFiles = glob($tmpDir . '/*.png');
+            if (!empty($ocrFiles)) {
+                sort($ocrFiles);
+                foreach ($ocrFiles as $ocrFile) {
+                    $manualText .= "\n" . shell_exec("tesseract " . escapeshellarg($ocrFile) . " stdout --psm 6 2>/dev/null");
+                    @unlink($ocrFile);
+                }
+            }
+            @rmdir($tmpDir);
+        }
+
         $manualAssetsCandidates = [];
         
-        if (preg_match_all('/Total\s+Assets[^\n]*/i', $manualText, $lines)) {
+        if (preg_match_all('/(?:Total|otal)\s+Assets[^\n]*/i', $manualText, $lines)) {
             foreach ($lines[0] as $line) {
                 if (preg_match_all('/[\d,]+(?:\.\d+)?/', $line, $numMatches)) {
                     foreach ($numMatches[0] as $numStr) {
