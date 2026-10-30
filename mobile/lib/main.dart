@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'dart:convert';
@@ -122,6 +123,18 @@ void callbackDispatcher() {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Catch any unhandled Flutter framework errors
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    debugPrint("Caught FlutterError: ${details.exceptionAsString()}");
+  };
+
+  // Catch any uncaught async/Dart errors so they never crash the app
+  PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
+    debugPrint("Caught uncaught async error: $error");
+    return true; // Mark as handled to prevent process crash
+  };
+
   // Safely load environment variables
   try {
     await dotenv.load(fileName: ".env");
@@ -133,7 +146,6 @@ void main() async {
   try {
     await Firebase.initializeApp();
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-    await PushNotificationService().initialize();
   } catch (e) {
     debugPrint("Firebase init failed: $e");
   }
@@ -216,6 +228,9 @@ void main() async {
       child: IrshadApp(initialRoute: startRoute),
     ),
   );
+
+  // Initialize notifications asynchronously in background without blocking first frame or launch watchdog
+  unawaited(PushNotificationService().initialize());
 }
 
 class IrshadApp extends StatelessWidget {
