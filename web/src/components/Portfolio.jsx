@@ -199,11 +199,12 @@ export default function Portfolio() {
       toastSuccess('Holdings added to portfolio');
       return true;
     } catch (err) {
-      if (err?.message?.toLowerCase().includes('upgrade') || err?.message?.toLowerCase().includes('limit') || err?.response?.status === 403) {
+      const errorMsg = err.response?.data?.message || err?.message || 'Failed to add holdings';
+      if (errorMsg.toLowerCase().includes('upgrade') || errorMsg.toLowerCase().includes('limit') || err?.response?.status === 403) {
         setShowAddModal(false);
         setTimeout(() => setShowUpgradeModal(true), 150);
       } else {
-        toastError(err?.message || 'Failed to add holdings');
+        toastError(errorMsg);
       }
       return false;
     } finally {

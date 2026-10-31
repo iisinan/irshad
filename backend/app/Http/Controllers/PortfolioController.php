@@ -53,6 +53,9 @@ class PortfolioController extends Controller
                 try {
                     $company = $holding->company;
                     $currentPrice = (float) ($company?->latest_price ?? 0);
+                    if ($currentPrice <= 0 && (float) ($holding->average_buy_price ?? 0) > 0) {
+                        $currentPrice = (float) $holding->average_buy_price;
+                    }
                     $status = $company?->current_status ?? $company?->aaoifiScreening?->final_status ?? 'doubtful';
 
                     $screening = $company?->aaoifiScreening;
@@ -339,12 +342,34 @@ class PortfolioController extends Controller
     {
         $request->validate([
             'symbol' => 'required|string',
-            'shares' => 'required|numeric|min:0.01',
+            'name' => 'nullable|string',
+            'shares' => 'required|numeric|min:0.0001',
             'average_buy_price' => 'nullable|numeric|min:0',
+            'purchase_date' => 'nullable|date',
         ]);
 
+        $sym = strtoupper(trim($request->symbol));
+        $price = $request->has('average_buy_price') ? (float) $request->average_buy_price : 0.0;
+        $name = !empty($request->name) ? trim($request->name) : $sym;
+
+        // Ensure company exists in companies table
+        $company = Company::where('symbol', $sym)->first();
+        if (!$company) {
+            Company::create([
+                'symbol' => $sym,
+                'name' => $name,
+                'sector' => 'Equities',
+                'current_status' => 'doubtful',
+                'latest_price' => $price,
+                'activity_reason' => 'User-added holding; pending compliance verification.',
+                'is_active' => true,
+                'is_sec_registered' => false,
+                'asset_class' => 'equity',
+            ]);
+        }
+
         // Limit Check
-        $exists = Holding::where('user_id', Auth::id())->where('symbol', strtoupper($request->symbol))->exists();
+        $exists = Holding::where('user_id', Auth::id())->where('symbol', $sym)->exists();
         if (!$exists && !\App\Services\SubscriptionService::canAddPortfolio(Auth::user())) {
             return response()->json([
                 'error' => 'Upgrade Required',
@@ -355,11 +380,12 @@ class PortfolioController extends Controller
         $holding = Holding::updateOrCreate(
             [
                 'user_id' => Auth::id(),
-                'symbol' => strtoupper($request->symbol),
+                'symbol' => $sym,
             ],
             [
                 'shares' => $request->shares,
                 'average_buy_price' => $request->average_buy_price,
+                'purchase_date' => $request->purchase_date ?? now(),
             ]
         );
 
@@ -422,8 +448,9 @@ class PortfolioController extends Controller
     {
         $request->validate([
             'holdings' => 'required|array',
-            'holdings.*.symbol' => 'required|string|exists:companies,symbol',
-            'holdings.*.shares' => 'required|numeric|min:0.01',
+            'holdings.*.symbol' => 'required|string',
+            'holdings.*.name' => 'nullable|string',
+            'holdings.*.shares' => 'required|numeric|min:0.0001',
             'holdings.*.average_buy_price' => 'nullable|numeric|min:0',
             'holdings.*.purchase_date' => 'nullable|date',
         ]);
@@ -435,7 +462,7 @@ class PortfolioController extends Controller
         if ($limit !== -1) {
             $existingCount = Holding::where('user_id', $userId)->count();
             // Count unique new symbols
-            $newSymbols = collect($request->holdings)->pluck('symbol')->map(fn($s) => strtoupper($s))->unique();
+            $newSymbols = collect($request->holdings)->pluck('symbol')->map(fn($s) => strtoupper(trim($s)))->unique();
             $alreadyOwned = Holding::where('user_id', $userId)->whereIn('symbol', $newSymbols)->count();
             $newAdditions = $newSymbols->count() - $alreadyOwned;
             
@@ -450,11 +477,32 @@ class PortfolioController extends Controller
         $upsertData = [];
 
         foreach ($request->holdings as $holdingData) {
+            $sym = strtoupper(trim($holdingData['symbol']));
+            $shares = (float) $holdingData['shares'];
+            $price = isset($holdingData['average_buy_price']) ? (float) $holdingData['average_buy_price'] : 0.0;
+            $name = !empty($holdingData['name']) ? trim($holdingData['name']) : $sym;
+
+            // Ensure company exists in companies table so holding is cleanly linked and displayed
+            $company = Company::where('symbol', $sym)->first();
+            if (!$company) {
+                Company::create([
+                    'symbol' => $sym,
+                    'name' => $name,
+                    'sector' => 'Equities',
+                    'current_status' => 'doubtful',
+                    'latest_price' => $price,
+                    'activity_reason' => 'User-added / statement imported holding; pending compliance verification.',
+                    'is_active' => true,
+                    'is_sec_registered' => false,
+                    'asset_class' => 'equity',
+                ]);
+            }
+
             $upsertData[] = [
                 'user_id' => $userId,
-                'symbol' => strtoupper($holdingData['symbol']),
-                'shares' => $holdingData['shares'],
-                'average_buy_price' => $holdingData['average_buy_price'] ?? null,
+                'symbol' => $sym,
+                'shares' => $shares,
+                'average_buy_price' => $price > 0 ? $price : null,
                 'purchase_date' => $holdingData['purchase_date'] ?? null,
                 'created_at' => now(),
                 'updated_at' => now(),

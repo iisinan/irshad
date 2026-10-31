@@ -416,6 +416,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
 
     const payload = importHoldings.map(h => ({
       symbol: (h.symbol || h.sym).trim().toUpperCase(),
+      name: h.company_name || h.name || (h.symbol || h.sym).trim().toUpperCase(),
       shares: Number(h.sh || h.shares),
       average_buy_price: Number(h.pr || h.average_buy_price) || 0,
       purchase_date: h.date || h.purchase_date,

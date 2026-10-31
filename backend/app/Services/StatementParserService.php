@@ -471,9 +471,11 @@ class StatementParserService
             if (empty($line)) continue;
 
             // Pattern: Ticker/Name followed by numbers (quantity, price)
-            if (preg_match('/^([A-Z0-9\.\-\& ]{3,35})\s+([\d,]+(?:\.\d+)?)\s+(?:₦|N|\$)?\s*([\d,]+(?:\.\d+)?)/i', $line, $matches)) {
+            if (preg_match('/^([A-Z0-9\.\-\& ]{2,35})\s+([\d,]+(?:\.\d+)?)\s+(?:₦|N|\$)?\s*([\d,]+(?:\.\d+)?)/i', $line, $matches)) {
                 $sym = trim($matches[1]);
                 if (preg_match('/^(total|subtotal|account|statement|date|page|client|balance)/i', $sym)) continue;
+                // Exclude lines ending with a period or punctuation (prose/sentences)
+                if (preg_match('/[\.\?\!]$/', $sym)) continue;
 
                 $shares = $this->cleanNumber($matches[2]);
                 $price = $this->cleanNumber($matches[3]);
@@ -489,8 +491,18 @@ class StatementParserService
             }
         }
 
-        // If regex extraction yielded good results, return it; otherwise invoke Gemini
-        if (count($holdings) >= 1) {
+        // Check if any extracted holding matches a known company symbol or alias
+        $hasKnownMatch = false;
+        foreach ($holdings as $h) {
+            $s = strtoupper(trim($h['symbol_or_name'] ?? ''));
+            if (Company::where('symbol', $s)->exists() || isset($this->aliases[$s])) {
+                $hasKnownMatch = true;
+                break;
+            }
+        }
+
+        // If regex extraction yielded verified matches, or if Gemini key is absent, return it; otherwise invoke Gemini
+        if ($hasKnownMatch || (count($holdings) >= 1 && empty(config('services.gemini.key')))) {
             return ['broker' => $broker, 'holdings' => $holdings];
         }
 
