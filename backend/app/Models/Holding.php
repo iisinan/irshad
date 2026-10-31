@@ -14,11 +14,13 @@ class Holding extends Model
         'symbol',
         'shares',
         'average_buy_price',
+        'purchase_date',
         'grace_period_ends_at',
         'grace_period_notified',
     ];
 
     protected $casts = [
+        'purchase_date' => 'date',
         'grace_period_ends_at' => 'datetime',
         'grace_period_notified' => 'boolean',
     ];

@@ -470,12 +470,20 @@ class StatementParserService
             $line = trim($line);
             if (empty($line)) continue;
 
+            // Optional leading row index (e.g. "1." or "1)") or date (e.g. "12/03/2024")
+            $rowDate = null;
+            if (preg_match('/^(\d{1,4}[\/\-\.]\d{1,2}[\/\-\.]\d{1,4})\s+(.+)$/', $line, $dateMatches)) {
+                $rowDate = $this->cleanDate($dateMatches[1]);
+                $line = trim($dateMatches[2]);
+            } elseif (preg_match('/^\d+[\.\)\-]\s+(.+)$/', $line, $numMatches)) {
+                $line = trim($numMatches[1]);
+            }
+
             // Pattern: Ticker/Name followed by numbers (quantity, price)
-            if (preg_match('/^([A-Z0-9\.\-\& ]{2,35})\s+([\d,]+(?:\.\d+)?)\s+(?:₦|N|\$)?\s*([\d,]+(?:\.\d+)?)/i', $line, $matches)) {
-                $sym = trim($matches[1]);
+            if (preg_match('/^([A-Z0-9\.\-\& ]{2,40})\s+([\d,]+(?:\.\d+)?)\s+(?:₦|N|\$)?\s*([\d,]+(?:\.\d+)?)/i', $line, $matches)) {
+                $sym = trim($matches[1], " \t\n\r\0\x0B.,:;");
+                if (empty($sym)) continue;
                 if (preg_match('/^(total|subtotal|account|statement|date|page|client|balance)/i', $sym)) continue;
-                // Exclude lines ending with a period or punctuation (prose/sentences)
-                if (preg_match('/[\.\?\!]$/', $sym)) continue;
 
                 $shares = $this->cleanNumber($matches[2]);
                 $price = $this->cleanNumber($matches[3]);
@@ -485,24 +493,14 @@ class StatementParserService
                         'symbol_or_name' => $sym,
                         'shares' => $shares,
                         'average_buy_price' => $price,
-                        'purchase_date' => null,
+                        'purchase_date' => $rowDate,
                     ];
                 }
             }
         }
 
-        // Check if any extracted holding matches a known company symbol or alias
-        $hasKnownMatch = false;
-        foreach ($holdings as $h) {
-            $s = strtoupper(trim($h['symbol_or_name'] ?? ''));
-            if (Company::where('symbol', $s)->exists() || isset($this->aliases[$s])) {
-                $hasKnownMatch = true;
-                break;
-            }
-        }
-
-        // If regex extraction yielded verified matches, or if Gemini key is absent, return it; otherwise invoke Gemini
-        if ($hasKnownMatch || (count($holdings) >= 1 && empty(config('services.gemini.key')))) {
+        // If regex extraction yielded results, return them
+        if (count($holdings) >= 1) {
             return ['broker' => $broker, 'holdings' => $holdings];
         }
 
@@ -527,32 +525,27 @@ class StatementParserService
         try {
             // Upload file to Gemini Files API
             $uploadUrl = 'https://generativelanguage.googleapis.com/upload/v1beta/files?key=' . $apiKey;
-            $fileSize = filesize($filePath);
-            $fileResource = fopen($filePath, 'r');
+            $fileData = file_get_contents($filePath);
+            $fileSize = strlen($fileData);
+            $uploadResponse = Http::withHeaders([
+                'X-Goog-Upload-Command' => 'start, upload, finalize',
+                'X-Goog-Upload-Header-Content-Length' => (string) $fileSize,
+                'X-Goog-Upload-Header-Content-Type' => $mimeType,
+                'Content-Type' => $mimeType,
+            ])->withBody($fileData, $mimeType)
+              ->timeout(60)
+              ->post($uploadUrl);
 
-            $ch = curl_init($uploadUrl);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 60);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'X-Goog-Upload-Command: start, upload, finalize',
-                'X-Goog-Upload-Header-Content-Length: ' . $fileSize,
-                'X-Goog-Upload-Header-Content-Type: ' . $mimeType,
-                'Content-Type: ' . $mimeType,
-            ]);
-            curl_setopt($ch, CURLOPT_PUT, true);
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-            curl_setopt($ch, CURLOPT_INFILE, $fileResource);
-            curl_setopt($ch, CURLOPT_INFILESIZE, $fileSize);
+            if ($uploadResponse->failed()) {
+                Log::error("[StatementParserService] Gemini file upload failed: " . $uploadResponse->body());
+                return ['broker' => 'Statement Import', 'holdings' => []];
+            }
 
-            $responseBody = curl_exec($ch);
-            fclose($fileResource);
-
-            $uploadData = json_decode($responseBody, true);
+            $uploadData = $uploadResponse->json();
             $fileUri = $uploadData['file']['uri'] ?? null;
 
             if (!$fileUri) {
-                Log::error("[StatementParserService] Gemini file upload failed: " . $responseBody);
+                Log::error("[StatementParserService] Gemini file upload returned no URI: " . $uploadResponse->body());
                 return ['broker' => 'Statement Import', 'holdings' => []];
             }
 
@@ -733,7 +726,7 @@ class StatementParserService
                     'company_name' => $raw,
                     'shares' => $shares,
                     'average_buy_price' => $weightedPrice,
-                    'current_price' => 0.0,
+                    'current_price' => $weightedPrice > 0 ? $weightedPrice : 0.0,
                     'purchase_date' => $date,
                     'status' => 'doubtful',
                     'logo_url' => null,
