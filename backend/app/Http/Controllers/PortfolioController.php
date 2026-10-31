@@ -234,6 +234,7 @@ class PortfolioController extends Controller
                         'upcoming_dividend' => $upcomingDivData,
                         'non_compliant_ratio' => round($nonCompliantRatio, 2),
                         'logo_url' => $company?->logo_url ?? null,
+                        'grace_period_ends_at' => $holding->grace_period_ends_at ? ($holding->grace_period_ends_at instanceof \Carbon\CarbonInterface ? $holding->grace_period_ends_at->toISOString() : (string) $holding->grace_period_ends_at) : null,
                         'purchase_date' => $holding->purchase_date,
                         'created_at' => $holding->created_at instanceof \Carbon\CarbonInterface ? $holding->created_at->toISOString() : (string) $holding->created_at,
                         'updated_at' => $holding->updated_at instanceof \Carbon\CarbonInterface ? $holding->updated_at->toISOString() : (string) $holding->updated_at,
@@ -259,6 +260,7 @@ class PortfolioController extends Controller
                         'latest_dividend' => null,
                         'non_compliant_ratio' => 0,
                         'logo_url' => null,
+                        'grace_period_ends_at' => $holding->grace_period_ends_at ? ($holding->grace_period_ends_at instanceof \Carbon\CarbonInterface ? $holding->grace_period_ends_at->toISOString() : (string) $holding->grace_period_ends_at) : null,
                         'purchase_date' => $holding->purchase_date,
                         'created_at' => $holding->created_at instanceof \Carbon\CarbonInterface ? $holding->created_at->toISOString() : (string) $holding->created_at,
                         'updated_at' => $holding->updated_at instanceof \Carbon\CarbonInterface ? $holding->updated_at->toISOString() : (string) $holding->updated_at,
@@ -377,16 +379,26 @@ class PortfolioController extends Controller
             ], 403);
         }
 
+        $holdingData = [
+            'shares' => $request->shares,
+            'average_buy_price' => $request->average_buy_price,
+            'purchase_date' => $request->purchase_date ?? now(),
+        ];
+
+        if ($company && in_array(strtolower($company->current_status ?? ''), ['non-compliant', 'non_compliant', 'non-halal', 'non_halal'])) {
+            $existingHolding = Holding::where('user_id', Auth::id())->where('symbol', $sym)->first();
+            if (!$existingHolding || !$existingHolding->grace_period_ends_at) {
+                $holdingData['grace_period_ends_at'] = now()->addDays(90);
+                $holdingData['grace_period_notified'] = false;
+            }
+        }
+
         $holding = Holding::updateOrCreate(
             [
                 'user_id' => Auth::id(),
                 'symbol' => $sym,
             ],
-            [
-                'shares' => $request->shares,
-                'average_buy_price' => $request->average_buy_price,
-                'purchase_date' => $request->purchase_date ?? now(),
-            ]
+            $holdingData
         );
 
         Cache::forget("portfolio_data_" . Auth::id());

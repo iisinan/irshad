@@ -85,6 +85,13 @@ class DetectComplianceChanges extends Command
                     'grace_period_ends_at' => now()->addDays(90),
                     'grace_period_notified' => false,
                 ]);
+        } elseif (in_array(strtolower($change->new_status), ['halal', 'compliant'])) {
+            Holding::where('symbol', $company->symbol)
+                ->whereNotNull('grace_period_ends_at')
+                ->update([
+                    'grace_period_ends_at' => null,
+                    'grace_period_notified' => false,
+                ]);
         }
 
         // Users who hold this stock

@@ -79,6 +79,16 @@ class AaoifiComplianceService
             );
         }
 
+        // Islamic non-interest banks deal exclusively in non-interest Shariah structures
+        $islamicBanks = ['JAIZBANK', 'JAIZ', 'TAJBANK', 'TAJ', 'LOTUS', 'LOTUSBANK'];
+        if (in_array(strtoupper($company->symbol), $islamicBanks)) {
+            return $this->saveStatus(
+                $company,
+                'halal',
+                'Stock passes all screens. Status is 100% Halal and Shariah-compliant. Notes: Categorically permissible business activity. Non-interest bank, licensed by CBN and Shariah-compliant.'
+            );
+        }
+
         // Sync with frontend logic: Prefer LIVE market cap from the companies table, fallback to extracted financials market cap
         $liveMarketCap = (string) ($company->market_cap > 0 ? $company->market_cap : 0);
         $finMarketCap = (string) ($financials->market_cap > 0 ? $financials->market_cap : 0);

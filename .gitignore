@@ -28,3 +28,6 @@ backend/*.pdf
 *.aab
 *.apk
 mobile/build/
+
+# Local assets
+instadoodle_assets/

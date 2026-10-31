@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Favorite;
+use App\Models\Holding;
 use App\Models\User;
 use App\Models\Watchlist;
 use App\Notifications\AssetStatusAlert;
@@ -49,6 +50,17 @@ class NotifyUsersOfAssetChange implements ShouldQueue
         $usersToNotify = []; // Format: userId => ['user' => User, 'channels' => ['mail', 'whatsapp']]
 
         if ($this->assetType === 'stock') {
+            // Find in Holdings (Users who own the stock in their portfolio)
+            $holdings = Holding::where('symbol', $this->asset->symbol)->get();
+            foreach ($holdings as $holding) {
+                if (! isset($usersToNotify[$holding->user_id])) {
+                    $usersToNotify[$holding->user_id] = ['user_id' => $holding->user_id, 'channels' => []];
+                }
+                if (! in_array('mail', $usersToNotify[$holding->user_id]['channels'])) {
+                    $usersToNotify[$holding->user_id]['channels'][] = 'mail';
+                }
+            }
+
             // Find in Watchlists (Web) who opted in for verdict changes
             $watchlists = Watchlist::where('symbol', $this->asset->symbol)
                 ->where('alert_verdict_change', true)

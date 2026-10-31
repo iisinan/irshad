@@ -87,6 +87,7 @@ class ProcessFinancialPdfCommand extends Command
 
         $basePrompt = "You are an expert financial analyst. Analyze the attached financial report PDF.
 Extract the following exact figures for the most recent period (e.g., FY 2023 or Q1 2024) in absolute numbers (e.g. 5000000, not '5 million').
+CRITICAL: Pay extreme attention to the currency scale in table headers (e.g., ₦'000 or N'000 means thousands of Naira, multiply every figure by 1,000; ₦'m or ₦'million means millions of Naira, multiply by 1,000,000). The returned figures MUST be the full exact absolute Naira amounts.
 Return ONLY a valid JSON object matching this schema exactly, with NO markdown formatting (no ```json blocks), NO extra text, NO comments.
 {
   \"total_assets\": 0,
