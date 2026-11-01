@@ -175,7 +175,7 @@ const Pricing = ({ isModal }) => {
                   <FeatureRow icon="Screen" title="Stock screens" text="10 per month" />
                   <FeatureRow icon="Briefcase" title="Portfolio (holdings)" text="Up to 7 stocks" />
                   <FeatureRow icon="Eye" title="Watchlist" text="Up to 2 stocks" />
-                  <FeatureRow icon="Basket" title="Baskets" text="1 curated, 2 custom" />
+                  <FeatureRow icon="Basket" title="Thematic baskets" text="Limited access" />
                   <FeatureRow icon="HandCoin" title="Automated purification calculation" text="2 per month" />
                   <FeatureRow icon="Calculator" title="Automated zakat calculation" text="Included" />
                   <FeatureRow icon="Doc" title="Statements" text="History tracking" />
@@ -220,7 +220,7 @@ const Pricing = ({ isModal }) => {
                   <FeatureRow icon="Screen" title="Stock screens" text="Unlimited" />
                   <FeatureRow icon="Briefcase" title="Portfolio (holdings)" text="Unlimited" />
                   <FeatureRow icon="Eye" title="Watchlist" text="Unlimited" />
-                  <FeatureRow icon="Basket" title="Baskets" text="Unlimited" />
+                  <FeatureRow icon="Basket" title="Thematic baskets" text="Full access" />
                   <FeatureRow icon="HandCoin" title="Automated purification calculation" text="Unlimited" />
                   <FeatureRow icon="Calculator" title="Automated zakat calculation" text="Unlimited" />
                   <FeatureRow icon="Bell" title="Dividend alerts" text="Unlimited" />

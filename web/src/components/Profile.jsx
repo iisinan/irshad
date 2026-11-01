@@ -327,6 +327,13 @@ export default function Profile() {
                     {((profileUser || user)?.tier?.features?.portfolio_limit) === -1 ? 'Unlimited' : ((profileUser || user)?.tier?.features?.portfolio_limit ?? ((profileUser || user)?.tier?.slug === 'pro' ? 7 : 3))}
                   </span>
                 </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', fontSize: '0.9rem' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Thematic Baskets</span>
+                  <span style={{ fontWeight: 700, color: 'var(--text-dark)' }}>
+                    {((profileUser || user)?.tier?.slug === 'max') ? 'Full access' : ((profileUser || user)?.tier?.slug === 'pro' ? 'Limited access' : 'Not included')}
+                  </span>
+                </div>
                 
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', fontSize: '0.9rem' }}>
                   <span style={{ color: 'var(--text-muted)' }}>Automated Purification Calculation</span>
