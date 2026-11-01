@@ -288,6 +288,7 @@ Return ONLY a valid JSON object matching this schema exactly, with NO markdown f
                 $finDataUsed['financial_year'] = $extractedData['reporting_year'];
             }
 
+            $aaoifi->published_date = $financials->published_date;
             $aaoifi->financial_data_used = json_encode($finDataUsed);
             $aaoifi->save();
         }

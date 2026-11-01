@@ -108,6 +108,9 @@ class AaoifiScreeningService
                 'impermissible_income_status' => $impIncomeStatus,
                 'final_status' => $finalStatus,
                 'news_sources' => $combinedNews,
+                'published_date' => $financials?->published_date,
+                'reporting_period' => $financials?->reporting_period,
+                'reporting_year' => $financials ? ($financials->period_year ?? (preg_match('/20\d{2}/', $financials->reporting_period ?? '', $matches) ? $matches[0] : null)) : null,
                 'financial_data_used' => [
                     'source' => 'Data aggregated from Nigerian Exchange Group (NGX), AfricanFinancials, and Yahoo Finance.',
                     'market_cap' => $marketCap,
