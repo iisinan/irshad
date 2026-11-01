@@ -673,7 +673,7 @@ class StockController extends Controller
                 'final_status'                => $finalStatus,
                 'published_date'              => $companyFin?->published_date ?? $aaoifiScreening->published_date,
                 'reporting_period'            => $companyFin?->reporting_period ?? $aaoifiScreening->reporting_period,
-                'reporting_year'              => $companyFin?->period_year ?? $aaoifiScreening->reporting_year,
+                'reporting_year'              => $aaoifiScreening->reporting_year ?: ($companyFin?->published_date ? (int) substr($companyFin->published_date, 0, 4) : ($aaoifiScreening->published_date ? (int) substr($aaoifiScreening->published_date, 0, 4) : null)),
                 'source_url'                  => $companyFin?->source_url ?? $aaoifiScreening->evidence_links,
                 'news_sources'                => $aaoifiScreening->news_sources ?? [],
                 'financial_data_used'         => $frontendFinData,
