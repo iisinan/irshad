@@ -96,7 +96,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> with Automa
             final symbol = h['symbol'] ?? 'S';
             final statusRaw = h['status']?.toString().toLowerCase() ?? (h['is_halal'] == true ? 'halal' : 'non-halal');
             final finalStatus = ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].contains(symbol) ? 'halal' : statusRaw;
-            final isHalal = finalStatus == 'halal' || finalStatus == 'compliant';
+            final isHalal = finalStatus == 'halal' || finalStatus == 'compliant' || finalStatus == 'pass' || h['is_halal'] == true;
             
             final purificationDue = num.tryParse(h['purification_due']?.toString() ?? '0')?.toDouble() ?? 0.0;
             final nonCompliantRatio = num.tryParse(h['non_compliant_ratio']?.toString() ?? '0')?.toDouble() ?? 0.0;
@@ -123,7 +123,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> with Automa
             final symbol = h['symbol'] ?? 'S';
             final statusRaw = h['status']?.toString().toLowerCase() ?? (h['is_halal'] == true ? 'halal' : 'non-halal');
             final finalStatus = ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].contains(symbol) ? 'halal' : statusRaw;
-            final isHalal = finalStatus == 'halal' || finalStatus == 'compliant';
+            final isHalal = finalStatus == 'halal' || finalStatus == 'compliant' || finalStatus == 'pass' || h['is_halal'] == true;
             
             final purificationDue = num.tryParse(h['purification_due']?.toString() ?? '0')?.toDouble() ?? 0.0;
             final nonCompliantRatio = num.tryParse(h['non_compliant_ratio']?.toString() ?? '0')?.toDouble() ?? 0.0;
@@ -792,7 +792,7 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> with Automa
               final symbol = h['symbol'] ?? 'S';
               final statusRaw = h['status']?.toString().toLowerCase() ?? (h['is_halal'] == true ? 'halal' : 'non-halal');
               final finalStatus = ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].contains(symbol) ? 'halal' : statusRaw;
-              final isHalal = finalStatus == 'halal' || finalStatus == 'compliant';
+              final isHalal = finalStatus == 'halal' || finalStatus == 'compliant' || finalStatus == 'pass' || h['is_halal'] == true;
               final purificationDue = num.tryParse(h['purification_due']?.toString() ?? '0')?.toDouble() ?? 0.0;
               final nonCompliantRatio = num.tryParse(h['non_compliant_ratio']?.toString() ?? '0')?.toDouble() ?? 0.0;
               final needsPurification = h['purification_required'] == true || purificationDue > 0 || nonCompliantRatio > 0;

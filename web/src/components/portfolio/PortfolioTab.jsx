@@ -305,7 +305,7 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
   const filterFn = h => {
     const statusRaw = h.status ? h.status.toLowerCase() : (h.is_halal ? 'halal' : 'non-compliant');
     const finalStatus = ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(h.symbol) ? 'halal' : statusRaw;
-    const isHalal = finalStatus === 'halal' || finalStatus === 'compliant';
+    const isHalal = finalStatus === 'halal' || finalStatus === 'compliant' || finalStatus === 'pass' || !!h.is_halal;
     
     const needsPurification = !!h.purification_required || Number(h.purification_due || 0) > 0 || Number(h.non_compliant_ratio || 0) > 0;
 

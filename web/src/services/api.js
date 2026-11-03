@@ -207,6 +207,16 @@ export const fetchNgxStocks = async () => {
   return res;
 };
 
+export const fetchHalalDirectory = async (params = {}) => {
+  try {
+    const response = await api.get('/directory', { params: { _cb: Date.now(), ...params } });
+    return response.data?.data || response.data;
+  } catch (err) {
+    console.error('Failed to fetch halal directory from API:', err);
+    return null;
+  }
+};
+
 export const searchStocks = async (query) => {
   const response = await api.get('/stocks/search', { params: { query } });
   return response.data;

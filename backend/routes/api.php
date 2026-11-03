@@ -8,6 +8,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BasketController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\BrokerageController;
+use App\Http\Controllers\DirectoryController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\NewsController;
@@ -131,6 +132,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/disclosures', [CorporateDisclosureController::class, 'index']);
         Route::get('/news', [NewsController::class, 'index']);
         Route::get('/zakat/prices', [ZakatController::class, 'getPrices']);
+        Route::get('/directory', [DirectoryController::class, 'index']);
     });
 
     // Webhooks (No auth required)
