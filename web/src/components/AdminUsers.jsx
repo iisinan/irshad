@@ -432,7 +432,7 @@ const AdminUsers = () => {
               <>
                 <div style={{ background: 'var(--bg-section)', borderRadius: '12px', padding: '12px 16px', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
                   Current plan: <strong style={{ color: 'var(--text-dark)' }}>
-                    {selectedUser.tier?.slug === 'max' ? 'Noor (Max)' : selectedUser.tier?.slug === 'pro' ? 'Rawdah (Pro)' : 'Miftah (Free)'}
+                    {selectedUser.tier?.slug === 'max' ? 'Noor (Max)' : selectedUser.tier?.slug === 'pro' ? 'Rawdha (Pro)' : 'Miftah (Free)'}
                   </strong>
                 </div>
 
@@ -441,7 +441,7 @@ const AdminUsers = () => {
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
                     {[
                       { slug: 'free', label: 'Miftah', sub: 'Free', color: 'var(--text-muted)', border: 'var(--border)' },
-                      { slug: 'pro', label: 'Rawdah', sub: 'Pro', color: '#006B46', border: '#006B46' },
+                      { slug: 'pro', label: 'Rawdha', sub: 'Pro', color: '#006B46', border: '#006B46' },
                       { slug: 'max', label: 'Noor', sub: 'Max', color: '#B8860B', border: '#D9A05B' },
                     ].map(p => (
                       <button key={p.slug} onClick={() => setPlanForm(f => ({ ...f, plan_slug: p.slug }))} style={{

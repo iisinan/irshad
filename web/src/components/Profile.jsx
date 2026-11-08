@@ -281,11 +281,31 @@ export default function Profile() {
                     </h3>
                     <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>
                       {(profileUser || user)?.tier?.slug === 'max' ? 'You have unlimited access to all features.' : 
-                       (profileUser || user)?.tier?.slug === 'pro' ? 'You are on the Rawdah Pro tier.' : 
+                       (profileUser || user)?.tier?.slug === 'pro' ? 'You are on the Rawdha Pro tier.' : 
                        'You are on the basic free community tier.'}
                     </p>
+                    {(profileUser || user)?.active_subscription && (
+                      <div style={{ marginTop: '10px', display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                        <span style={{ 
+                          fontSize: '0.74rem', fontWeight: 800, padding: '3px 10px', borderRadius: '100px', 
+                          background: 'rgba(0, 107, 70, 0.1)', color: '#006B46', textTransform: 'capitalize', letterSpacing: '0.3px'
+                        }}>
+                          {((profileUser || user)?.active_subscription?.billing_cycle || 'Quarterly')} Billing
+                        </span>
+                        {(profileUser || user)?.active_subscription?.renews_at && (
+                          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                            Renews on {new Date((profileUser || user)?.active_subscription?.renews_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  <div>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    {(profileUser || user)?.tier?.slug === 'pro' && (
+                      <button onClick={() => navigate('/pricing')} className="hover-lift" style={{ background: '#D9A05B', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '100px', fontWeight: 700, cursor: 'pointer' }}>
+                        Upgrade to Noor
+                      </button>
+                    )}
                     {(profileUser || user)?.tier?.slug === 'free' ? (
                       <button onClick={() => navigate('/pricing')} className="hover-lift" style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '100px', fontWeight: 700, cursor: 'pointer' }}>
                         Upgrade Plan

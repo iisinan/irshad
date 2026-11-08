@@ -144,6 +144,7 @@ Route::prefix('v1')->group(function () {
     Route::get('/stocks/baskets/{basket}', [BasketController::class, 'show']);
     Route::get('/baskets', [BasketController::class, 'index']);
     Route::get('/baskets/{basket}', [BasketController::class, 'show']);
+    Route::get('/plans', [\App\Http\Controllers\SubscriptionController::class, 'plans']);
 
     Route::middleware('auth:sanctum')->group(function () {
         // Protected Stocks

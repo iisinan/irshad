@@ -14,7 +14,10 @@ class PlanSeeder extends Seeder
                 'name' => 'Miftah',
                 'slug' => 'free',
                 'price_monthly' => 0,
+                'price_quarterly' => 0,
+                'price_quarterly_regular' => 0,
                 'price_yearly' => 0,
+                'price_yearly_regular' => 0,
                 'features' => [
                     'stock_screens_per_month' => 3,
                     'portfolio_limit' => 3,
@@ -29,10 +32,13 @@ class PlanSeeder extends Seeder
                 ],
             ],
             [
-                'name' => 'Rawdah',
+                'name' => 'Rawdha',
                 'slug' => 'pro',
-                'price_monthly' => 2500,
-                'price_yearly' => 24000,
+                'price_monthly' => 0,
+                'price_quarterly' => 6500,
+                'price_quarterly_regular' => 7500,
+                'price_yearly' => 25000,
+                'price_yearly_regular' => 30000,
                 'features' => [
                     'stock_screens_per_month' => 10,
                     'portfolio_limit' => 7,
@@ -49,8 +55,11 @@ class PlanSeeder extends Seeder
             [
                 'name' => 'Noor',
                 'slug' => 'max',
-                'price_monthly' => 6500,
-                'price_yearly' => 62000,
+                'price_monthly' => 0,
+                'price_quarterly' => 8500,
+                'price_quarterly_regular' => 10000,
+                'price_yearly' => 33000,
+                'price_yearly_regular' => 40000,
                 'features' => [
                     'stock_screens_per_month' => -1, // -1 for unlimited
                     'portfolio_limit' => -1,

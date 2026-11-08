@@ -15,7 +15,7 @@ class SubscriptionController extends Controller
     {
         $request->validate([
             'plan_slug'     => 'required|string|exists:plans,slug',
-            'billing_cycle' => 'required|in:monthly,yearly',
+            'billing_cycle' => 'required|in:quarterly,yearly,monthly',
         ]);
 
         $plan = Plan::where('slug', $request->plan_slug)->first();
@@ -38,15 +38,25 @@ class SubscriptionController extends Controller
         }
 
         // ── Resolve or auto-create Paystack plan code ─────────────────────
-        $paystackPlanCode = $request->billing_cycle === 'yearly'
-            ? $plan->paystack_plan_code_yearly
-            : $plan->paystack_plan_code_monthly;
+        $paystackPlanCode = match($request->billing_cycle) {
+            'yearly'    => $plan->paystack_plan_code_yearly,
+            'quarterly' => $plan->paystack_plan_code_quarterly,
+            default     => $plan->paystack_plan_code_monthly,
+        };
 
-        $amount = $request->billing_cycle === 'yearly' ? $plan->price_yearly : $plan->price_monthly;
+        $amount = match($request->billing_cycle) {
+            'yearly'    => $plan->price_yearly,
+            'quarterly' => $plan->price_quarterly ?: ($plan->price_monthly * 3),
+            default     => $plan->price_monthly,
+        };
 
         if (!$paystackPlanCode) {
             $planName = $plan->name . ' (' . ucfirst($request->billing_cycle) . ')';
-            $interval = $request->billing_cycle === 'yearly' ? 'annually' : 'monthly';
+            $interval = match($request->billing_cycle) {
+                'yearly'    => 'annually',
+                'quarterly' => 'quarterly',
+                default     => 'monthly',
+            };
 
             $createPlanRes = Http::withToken(config('services.paystack.secret'))
                 ->post('https://api.paystack.co/plan', [
@@ -59,6 +69,8 @@ class SubscriptionController extends Controller
                 $paystackPlanCode = $createPlanRes['data']['plan_code'];
                 if ($request->billing_cycle === 'yearly') {
                     $plan->paystack_plan_code_yearly = $paystackPlanCode;
+                } elseif ($request->billing_cycle === 'quarterly') {
+                    $plan->paystack_plan_code_quarterly = $paystackPlanCode;
                 } else {
                     $plan->paystack_plan_code_monthly = $paystackPlanCode;
                 }
@@ -118,6 +130,12 @@ class SubscriptionController extends Controller
         ]);
     }
 
+    public function plans()
+    {
+        $plans = Plan::all();
+        return response()->json($plans);
+    }
+
     // ── Fix #6: Status polling endpoint for BillingCallback ──────────────
     public function status(Request $request)
     {
@@ -126,9 +144,10 @@ class SubscriptionController extends Controller
 
         return response()->json([
             'has_active_subscription' => (bool) $sub,
-            'plan'    => $sub?->plan?->name,
-            'slug'    => $sub?->plan?->slug,
-            'renews_at' => $sub?->renews_at?->toDateString(),
+            'plan'          => $sub?->plan?->name,
+            'slug'          => $sub?->plan?->slug,
+            'billing_cycle' => $sub?->billing_cycle,
+            'renews_at'     => $sub?->renews_at?->toDateString(),
         ]);
     }
 
@@ -200,10 +219,18 @@ class SubscriptionController extends Controller
         $planCode = $data['plan']['plan_code'];
         $plan = Plan::where('paystack_plan_code_monthly', $planCode)
             ->orWhere('paystack_plan_code_yearly', $planCode)
+            ->orWhere('paystack_plan_code_quarterly', $planCode)
             ->first();
         if (!$plan) return;
 
-        $billingCycle = $plan->paystack_plan_code_yearly === $planCode ? 'yearly' : 'monthly';
+        $billingCycle = 'quarterly';
+        if ($plan->paystack_plan_code_yearly === $planCode) {
+            $billingCycle = 'yearly';
+        } elseif ($plan->paystack_plan_code_quarterly === $planCode) {
+            $billingCycle = 'quarterly';
+        } elseif ($plan->paystack_plan_code_monthly === $planCode) {
+            $billingCycle = 'monthly';
+        }
 
         Subscription::updateOrCreate(
             ['user_id' => $user->id, 'plan_id' => $plan->id],
@@ -234,16 +261,26 @@ class SubscriptionController extends Controller
 
         $plan = Plan::where('paystack_plan_code_monthly', $planCode)
             ->orWhere('paystack_plan_code_yearly', $planCode)
+            ->orWhere('paystack_plan_code_quarterly', $planCode)
             ->first();
         if (!$plan) return;
 
-        $billingCycle = $plan->paystack_plan_code_yearly === $planCode ? 'yearly' : 'monthly';
+        $billingCycle = 'quarterly';
+        if ($plan->paystack_plan_code_yearly === $planCode) {
+            $billingCycle = 'yearly';
+        } elseif ($plan->paystack_plan_code_quarterly === $planCode) {
+            $billingCycle = 'quarterly';
+        } elseif ($plan->paystack_plan_code_monthly === $planCode) {
+            $billingCycle = 'monthly';
+        }
 
         // Calculate next renewal based on billing cycle
         $paidAt   = Carbon::parse($data['paid_at'] ?? now());
-        $renewsAt = $billingCycle === 'yearly'
-            ? $paidAt->addYear()
-            : $paidAt->addMonth();
+        $renewsAt = match($billingCycle) {
+            'yearly'    => $paidAt->addYear(),
+            'quarterly' => $paidAt->addMonths(3),
+            default     => $paidAt->addMonth(),
+        };
 
         $subscriptionCode = $data['subscription_code'] ?? ($data['metadata']['subscription_code'] ?? null);
 

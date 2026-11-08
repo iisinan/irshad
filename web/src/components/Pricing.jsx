@@ -9,7 +9,7 @@ const Pricing = ({ isModal }) => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [billingCycle, setBillingCycle] = useState('monthly');
+  const [billingCycle, setBillingCycle] = useState('quarterly');
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -67,17 +67,17 @@ const Pricing = ({ isModal }) => {
               border: '1px solid var(--border)'
             }}>
               <button 
-                onClick={() => setBillingCycle('monthly')}
+                onClick={() => setBillingCycle('quarterly')}
                 style={{ 
                   padding: '8px 24px', borderRadius: '100px', border: 'none', 
-                  background: billingCycle === 'monthly' ? '#fff' : 'transparent',
-                  color: billingCycle === 'monthly' ? 'var(--text-dark)' : '#4B5563',
+                  background: billingCycle === 'quarterly' ? '#fff' : 'transparent',
+                  color: billingCycle === 'quarterly' ? 'var(--text-dark)' : '#4B5563',
                   fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer',
-                  boxShadow: billingCycle === 'monthly' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  boxShadow: billingCycle === 'quarterly' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
                   transition: 'all 0.2s'
                 }}
               >
-                Monthly
+                Quarterly
               </button>
               <button 
                 onClick={() => setBillingCycle('yearly')}
@@ -96,7 +96,7 @@ const Pricing = ({ isModal }) => {
                   background: '#10B981', color: '#fff', fontSize: '0.65rem', 
                   fontWeight: 800, padding: '2px 8px', borderRadius: '100px',
                   textTransform: 'uppercase'
-                }}>Save ~20%</span>
+                }}>Save More</span>
               </button>
             </div>
           </div>
@@ -120,7 +120,7 @@ const Pricing = ({ isModal }) => {
               <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'baseline', gap: '4px' }}>
                 <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-dark)' }}>NGN</span>
                 <span style={{ fontSize: '2.4rem', fontWeight: 500, color: 'var(--text-dark)', lineHeight: 1 }}>0</span>
-                <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>/month</span>
+                <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>/forever</span>
               </div>
 
               {currentPlanSlug === 'free' && !hasPaid
@@ -138,25 +138,40 @@ const Pricing = ({ isModal }) => {
               </div>
             </div>
 
-            {/* RAWDAH */}
+            {/* RAWDHA */}
             <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid #E5E7EB', padding: '32px 24px', display: 'flex', flexDirection: 'column' }}>
               <div style={{ marginBottom: '24px' }}>
-                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#006B46', marginBottom: '8px' }}>Most Popular</div>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: 500, color: 'var(--text-dark)', marginBottom: '12px' }}>Rawdah (Pro)</h3>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#006B46' }}>Most Popular</span>
+                  <span style={{ 
+                    fontSize: '0.68rem', fontWeight: 800, color: '#006B46', background: 'rgba(0, 107, 70, 0.1)', 
+                    padding: '2px 8px', borderRadius: '100px', textTransform: 'uppercase', letterSpacing: '0.3px' 
+                  }}>Promo Entry Price</span>
+                </div>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: 500, color: 'var(--text-dark)', marginBottom: '12px' }}>Rawdha (Pro)</h3>
                 <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.5, height: '44px' }}>Get more access to custom baskets and deeper portfolio tracking.</p>
               </div>
 
               <div style={{ marginBottom: '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', flexWrap: 'wrap' }}>
                   <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#006B46' }}>NGN</span>
                   <span style={{ fontSize: '2.4rem', fontWeight: 500, color: '#006B46', lineHeight: 1 }}>
-                    {billingCycle === 'monthly' ? '2,500' : '24,000'}
+                    {billingCycle === 'quarterly' ? '6,500' : '25,000'}
                   </span>
-                  <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>/{billingCycle === 'monthly' ? 'month' : 'year'}</span>
+                  <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                    /{billingCycle === 'quarterly' ? 'quarter' : 'year'}
+                  </span>
+                  <span style={{ fontSize: '1.05rem', color: '#9CA3AF', textDecoration: 'line-through', fontWeight: 500, marginLeft: '4px' }}>
+                    {billingCycle === 'quarterly' ? '₦7,500' : '₦30,000'}
+                  </span>
                 </div>
-                {billingCycle === 'yearly' && (
-                  <div style={{ fontSize: '0.78rem', color: '#006B46', fontWeight: 600, marginTop: '4px' }}>
-                    Equivalent to ₦2,000/month (Save 20%)
+                {billingCycle === 'yearly' ? (
+                  <div style={{ fontSize: '0.78rem', color: '#006B46', fontWeight: 600, marginTop: '6px' }}>
+                    Equivalent to ₦6,250/quarter • Save ₦5,000 off standard
+                  </div>
+                ) : (
+                  <div style={{ fontSize: '0.78rem', color: '#006B46', fontWeight: 600, marginTop: '6px' }}>
+                    Save ₦1,000 with promo entry price
                   </div>
                 )}
               </div>
@@ -186,22 +201,37 @@ const Pricing = ({ isModal }) => {
             {/* NOOR */}
             <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid #E5E7EB', padding: '32px 24px', display: 'flex', flexDirection: 'column' }}>
               <div style={{ marginBottom: '24px' }}>
-                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#D9A05B', marginBottom: '8px' }}>Best Value</div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#D9A05B' }}>Best Value</span>
+                  <span style={{ 
+                    fontSize: '0.68rem', fontWeight: 800, color: '#B8860B', background: 'rgba(217, 160, 91, 0.15)', 
+                    padding: '2px 8px', borderRadius: '100px', textTransform: 'uppercase', letterSpacing: '0.3px' 
+                  }}>Promo Entry Price</span>
+                </div>
                 <h3 style={{ fontSize: '1.5rem', fontWeight: 500, color: 'var(--text-dark)', marginBottom: '12px' }}>Noor (Max)</h3>
                 <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.5, height: '44px' }}>Unlock the highest level of access and exclusive premium features.</p>
               </div>
 
               <div style={{ marginBottom: '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', flexWrap: 'wrap' }}>
                   <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#D9A05B' }}>NGN</span>
                   <span style={{ fontSize: '2.4rem', fontWeight: 500, color: '#D9A05B', lineHeight: 1 }}>
-                    {billingCycle === 'monthly' ? '6,500' : '62,000'}
+                    {billingCycle === 'quarterly' ? '8,500' : '33,000'}
                   </span>
-                  <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>/{billingCycle === 'monthly' ? 'month' : 'year'}</span>
+                  <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                    /{billingCycle === 'quarterly' ? 'quarter' : 'year'}
+                  </span>
+                  <span style={{ fontSize: '1.05rem', color: '#9CA3AF', textDecoration: 'line-through', fontWeight: 500, marginLeft: '4px' }}>
+                    {billingCycle === 'quarterly' ? '₦10,000' : '₦40,000'}
+                  </span>
                 </div>
-                {billingCycle === 'yearly' && (
-                  <div style={{ fontSize: '0.78rem', color: '#B8860B', fontWeight: 600, marginTop: '4px' }}>
-                    Equivalent to ~₦5,166/month (Save 20%)
+                {billingCycle === 'yearly' ? (
+                  <div style={{ fontSize: '0.78rem', color: '#B8860B', fontWeight: 600, marginTop: '6px' }}>
+                    Equivalent to ₦8,250/quarter • Save ₦7,000 off standard
+                  </div>
+                ) : (
+                  <div style={{ fontSize: '0.78rem', color: '#B8860B', fontWeight: 600, marginTop: '6px' }}>
+                    Save ₦1,500 with promo entry price
                   </div>
                 )}
               </div>
