@@ -34,8 +34,11 @@ RUN python3 -m venv /var/www/venv && \
 
 # Install Composer dependencies (cached as long as composer.json/lock don't change)
 COPY composer.json composer.lock ./
-ENV COMPOSER_MEMORY_LIMIT=-1
-RUN composer install --no-interaction --no-scripts --no-autoloader --no-dev --ignore-platform-reqs
+ENV COMPOSER_MEMORY_LIMIT=-1 \
+    COMPOSER_NO_INTERACTION=1 \
+    COMPOSER_ALLOW_SUPERUSER=1
+RUN composer config --global process-timeout 600 && \
+    composer install --no-interaction --no-scripts --no-autoloader --no-dev --ignore-platform-reqs
 
 # Copy application source code
 COPY . /var/www
