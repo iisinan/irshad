@@ -8,8 +8,8 @@ const NAV = [
     links: [
       { label: 'Market Explorer', to: '/portfolio#market' },
       { label: 'Portfolio Tracker', to: '/portfolio' },
-      { label: 'Halal Baskets', to: '/portfolio#market' },
-      { label: 'Purification Calc', to: '/portfolio#market' },
+      { label: 'Halal Baskets', to: '/portfolio#baskets' },
+      { label: 'Purification Calc', to: '/portfolio#purification' },
     ],
   },
   {

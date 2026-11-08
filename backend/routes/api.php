@@ -145,8 +145,6 @@ Route::prefix('v1')->group(function () {
         Route::get('/stocks/compliance-changes', [StockController::class, 'complianceChanges']);
         Route::get('/stocks/search', [StockController::class, 'search']);
         Route::get('/stocks/ngx', [StockController::class, 'ngx']);
-        Route::get('/stocks/baskets', [BasketController::class, 'index']);
-        Route::get('/stocks/baskets/{basket}', [BasketController::class, 'show']);
 
         // Strict rate limit on proprietary data to prevent authenticated scraping
         Route::middleware('throttle:60,1')->group(function () {
@@ -163,6 +161,8 @@ Route::prefix('v1')->group(function () {
     Route::get('/public/recent-screenings', [PublicOverviewController::class, 'recentScreenings']);
     Route::get('/public/latest-reports', [PublicOverviewController::class, 'latestReports']);
     Route::get('/public/business-news', [PublicOverviewController::class, 'businessNews']);
+    Route::get('/stocks/baskets', [BasketController::class, 'index']);
+    Route::get('/stocks/baskets/{basket}', [BasketController::class, 'show']);
 
     // One-click email link routes — no login required, UUID is the security token
     Route::get('/admin/compliance-reviews/{id}/approve-link', [AdminComplianceController::class, 'approveViaLink']);

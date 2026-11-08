@@ -20,6 +20,7 @@ import StatementTab from './portfolio/StatementTab';
 import UpdatesTab from './portfolio/UpdatesTab';
 import GuideTab from './portfolio/GuideTab';
 import HalalFundsTab from './portfolio/HalalFundsTab';
+import BasketsTab from './portfolio/BasketsTab';
 import AddHoldingModal from "./portfolio/AddHoldingModal";
 
 /* ─── Skeleton ─────────────────────────────────────────────── */
@@ -78,7 +79,7 @@ export default function Portfolio() {
   const location = useLocation();
   const getTabFromHash = (hash) => {
     const h = hash.replace('#', '');
-    return ['holdings', 'market', 'funds', 'watchlist', 'zakat', 'purification', 'lectures', 'statement', 'updates', 'guide'].includes(h) ? h : 'updates';
+    return ['holdings', 'market', 'funds', 'baskets', 'watchlist', 'zakat', 'purification', 'lectures', 'statement', 'updates', 'guide'].includes(h) ? h : 'updates';
   };
   
   const [activeTab, setActiveTab] = useState(() => getTabFromHash(location.hash));
@@ -437,6 +438,11 @@ export default function Portfolio() {
           {mountedTabs.includes('funds') && (
             <div style={{ display: activeTab === 'funds' ? 'block' : 'none' }}>
               <HalalFundsTab />
+            </div>
+          )}
+          {mountedTabs.includes('baskets') && (
+            <div style={{ display: activeTab === 'baskets' ? 'block' : 'none' }}>
+              <BasketsTab onUpgrade={() => setShowUpgradeModal(true)} />
             </div>
           )}
           {mountedTabs.includes('watchlist') && (

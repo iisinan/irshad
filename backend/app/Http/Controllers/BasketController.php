@@ -28,6 +28,7 @@ class BasketController extends Controller
                     $query->orWhere('user_id', $userId);
                 }
             })
+            ->orderBy('id', 'asc')
             ->get();
 
         return $this->success($baskets);
@@ -54,6 +55,7 @@ class BasketController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'category' => 'nullable|string|max:100',
             'symbols' => 'required|array',
             'symbols.*' => 'string',
         ]);
@@ -72,11 +74,14 @@ class BasketController extends Controller
             }
         }
 
+        $symbols = array_values(array_unique(array_map('strtoupper', $validated['symbols'])));
+
         $basket = Basket::create([
             'user_id' => auth('sanctum')->id(),
             'name' => $validated['name'],
-            'description' => $validated['description'],
-            'symbols' => $validated['symbols'],
+            'description' => $validated['description'] ?? null,
+            'category' => $validated['category'] ?? 'Custom',
+            'symbols' => $symbols,
             'is_active' => true,
         ]);
 
@@ -95,9 +100,14 @@ class BasketController extends Controller
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
+            'category' => 'nullable|string|max:100',
             'symbols' => 'sometimes|array',
             'symbols.*' => 'string',
         ]);
+
+        if (isset($validated['symbols'])) {
+            $validated['symbols'] = array_values(array_unique(array_map('strtoupper', $validated['symbols'])));
+        }
 
         $basket->update($validated);
 
@@ -134,8 +144,11 @@ class BasketController extends Controller
         $user = auth('sanctum')->user();
         $totalAmount = $request->amount;
         $symbols = is_string($basket->symbols) ? json_decode($basket->symbols, true) : $basket->symbols;
+        if (is_string($symbols)) {
+            $symbols = json_decode($symbols, true);
+        }
 
-        if (empty($symbols)) {
+        if (empty($symbols) || !is_array($symbols)) {
             return $this->error('This basket has no stocks to invest in.', 400);
         }
 
@@ -144,12 +157,12 @@ class BasketController extends Controller
         $skippedSymbols = [];
 
         foreach ($symbols as $symbol) {
-            $company = Company::with('status')->where('symbol', $symbol)->first();
+            $company = Company::with(['status', 'aaoifiScreening'])->where('symbol', $symbol)->first();
             if (! $company) {
                 continue;
             }
 
-            $statusStr = strtolower($company->status?->status ?? 'unknown');
+            $statusStr = strtolower($company->current_status ?? $company->status?->status ?? $company->aaoifiScreening?->final_status ?? 'unknown');
             if (in_array($statusStr, ['halal', 'compliant'])) {
                 $investableSymbols[] = $symbol;
             } else {

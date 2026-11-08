@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import {
-  BarChart2, Activity, Briefcase,
+  BarChart2, Activity, Briefcase, Layers,
   HeartHandshake, Calculator, BookOpen,
   User, LogOut, ChevronLeft, ChevronRight,
   X, Moon, Sun, Shield, FileText, Bell, HelpCircle, Star, CreditCard
@@ -33,6 +33,7 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
     { label: 'Updates',          icon: Bell,           to: '/portfolio#updates', className: 'tour-updates-tab' },
     { label: 'Holdings',         icon: Activity,       to: '/portfolio#holdings', className: 'tour-portfolio-tab' },
     { label: 'Market Screener',  icon: BarChart2,      to: '/portfolio#market', className: 'tour-market-tab' },
+    { label: 'Thematic Baskets', icon: Layers,         to: '/portfolio#baskets', className: 'tour-baskets-tab' },
     { label: 'Halal Directory',  icon: Briefcase,      to: '/portfolio#funds', className: 'tour-funds-tab' },
     { label: 'Alert',            icon: Star,           to: '/portfolio#watchlist' },
     { section: 'Islamic Finance' },

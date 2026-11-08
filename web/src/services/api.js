@@ -222,6 +222,40 @@ export const searchStocks = async (query) => {
   return response.data;
 };
 
+export const fetchBaskets = async () => {
+  const response = await api.get('/stocks/baskets', { params: { _cb: Date.now() } });
+  return response.data;
+};
+
+export const fetchBasketDetails = async (id) => {
+  const response = await api.get(`/stocks/baskets/${id}`, { params: { _cb: Date.now() } });
+  return response.data;
+};
+
+export const createBasket = async (data) => {
+  const response = await api.post('/stocks/baskets', data);
+  localforage.removeItem('irshad_baskets_cache').catch(() => {});
+  return response.data;
+};
+
+export const updateBasket = async (id, data) => {
+  const response = await api.put(`/stocks/baskets/${id}`, data);
+  localforage.removeItem('irshad_baskets_cache').catch(() => {});
+  return response.data;
+};
+
+export const deleteBasket = async (id) => {
+  const response = await api.delete(`/stocks/baskets/${id}`);
+  localforage.removeItem('irshad_baskets_cache').catch(() => {});
+  return response.data;
+};
+
+export const investInBasket = async (id, amount) => {
+  const response = await api.post(`/stocks/baskets/${id}/invest`, { amount });
+  localforage.removeItem('irshad_portfolio_cache').catch(() => {});
+  return response.data;
+};
+
 
 export const fetchStockDetails = async (symbol) => {
   const response = await api.get(`/stocks/${symbol}`, { params: { _cb: Date.now() } });
