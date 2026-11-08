@@ -139,6 +139,12 @@ Route::prefix('v1')->group(function () {
     Route::post('/webhooks/paystack', [\App\Http\Controllers\SubscriptionController::class, 'webhook']);
     Route::post('/webhooks/ses', [\App\Http\Controllers\SesWebhookController::class, 'handle']);
 
+    // Baskets Public Routes (placed before /stocks/{symbol} wildcard)
+    Route::get('/stocks/baskets', [BasketController::class, 'index']);
+    Route::get('/stocks/baskets/{basket}', [BasketController::class, 'show']);
+    Route::get('/baskets', [BasketController::class, 'index']);
+    Route::get('/baskets/{basket}', [BasketController::class, 'show']);
+
     Route::middleware('auth:sanctum')->group(function () {
         // Protected Stocks
         Route::get('/stocks', [StockController::class, 'index']);
@@ -153,7 +159,7 @@ Route::prefix('v1')->group(function () {
         });
 
         Route::post('/stocks/{symbol}/chat', [StockController::class, 'chatAboutStock']);
-        Route::get('/stocks/{symbol}', [StockController::class, 'show']);
+        Route::get('/stocks/{symbol}', [StockController::class, 'show'])->where('symbol', '^(?!baskets$).*');
     });
 
     // ── Public Overview / Landing Page ──
@@ -161,8 +167,6 @@ Route::prefix('v1')->group(function () {
     Route::get('/public/recent-screenings', [PublicOverviewController::class, 'recentScreenings']);
     Route::get('/public/latest-reports', [PublicOverviewController::class, 'latestReports']);
     Route::get('/public/business-news', [PublicOverviewController::class, 'businessNews']);
-    Route::get('/stocks/baskets', [BasketController::class, 'index']);
-    Route::get('/stocks/baskets/{basket}', [BasketController::class, 'show']);
 
     // One-click email link routes — no login required, UUID is the security token
     Route::get('/admin/compliance-reviews/{id}/approve-link', [AdminComplianceController::class, 'approveViaLink']);
