@@ -12,3 +12,9 @@ storage/framework/views/*
 .env.*
 !.env.example
 *.log
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.csv
+scratch/
