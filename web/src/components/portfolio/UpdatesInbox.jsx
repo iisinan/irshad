@@ -45,7 +45,7 @@ const CATEGORY_CONFIG = {
   security:          { icon: Lock,       color: 'var(--non-compliant)', bg: 'var(--non-compliant-bg)', label: 'Security' },
 };
 
-const ALL_CATEGORIES = ['all', ...Object.keys(CATEGORY_CONFIG)];
+const ALL_CATEGORIES = ['all', 'price_alerts', 'screening', 'digest'];
 
 const getCategoryConfig = (category) => CATEGORY_CONFIG[category] || CATEGORY_CONFIG['system'];
 

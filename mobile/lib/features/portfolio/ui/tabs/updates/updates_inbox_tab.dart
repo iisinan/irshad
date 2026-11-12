@@ -31,8 +31,6 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
     {'id': 'price_alerts', 'label': 'Price Alerts'},
     {'id': 'screening', 'label': 'Screening'},
     {'id': 'digest', 'label': 'Digest'},
-    {'id': 'portfolio', 'label': 'Portfolio'},
-    {'id': 'system', 'label': 'System'},
   ];
 
   Set<String> _userAlertSymbols = {};
