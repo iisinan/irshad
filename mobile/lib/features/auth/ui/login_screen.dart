@@ -72,27 +72,25 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     }
   }
 
-  void _loginWithApple(BuildContext context) async {
+  void _loginWithApple() async {
     setState(() => _isLoading = true);
     try {
       final user = await _authRepository.signInWithAppleFlow();
       if (user != null) {
         await _secureStorage.write(key: 'login_method', value: 'apple');
-        if (mounted) {
-          Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
-          Navigator.pushReplacementNamed(context, '/');
-        }
+        if (!mounted) return;
+        Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
+        Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/main', (route) => false);
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -342,7 +340,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       width: double.infinity,
                       height: 56,
                       child: OutlinedButton(
-                        onPressed: _isLoading ? null : () => _loginWithApple(context),
+                        onPressed: _isLoading ? null : _loginWithApple,
                         style: OutlinedButton.styleFrom(
                           backgroundColor: Colors.black,
                           side: const BorderSide(color: Colors.black, width: 1.5),

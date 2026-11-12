@@ -11,14 +11,44 @@ use Illuminate\Http\Request;
 
 class UpdatesController extends Controller
 {
+    public static function normalizeStatus(?string $status): string
+    {
+        if (! $status) {
+            return 'unknown';
+        }
+        $s = strtolower(trim(str_replace(['_', ' '], '-', $status)));
+        if (in_array($s, ['halal', 'compliant', 'pass', 'shariah-compliant'])) {
+            return 'halal';
+        }
+        if (in_array($s, ['non-compliant', 'non-halal', 'fail', 'shariah-non-compliant', 'haram'])) {
+            return 'non_compliant';
+        }
+        if (in_array($s, ['doubtful', 'questionable'])) {
+            return 'doubtful';
+        }
+
+        return $s;
+    }
+
     public function newsAndInsights(Request $request): JsonResponse
     {
         $data = \Illuminate\Support\Facades\Cache::remember('updates_news_insights', now()->addHours(1), function () {
-            // 1. Compliance Status Changes
+            // 1. Compliance Status Changes (strictly filter out stocks that move from/to the same compliance category)
             $complianceChanges = ComplianceStatusChange::with('company:id,symbol,name,logo_url')
+                ->whereNotNull('previous_status')
+                ->where('previous_status', '!=', '')
+                ->where('previous_status', '!=', 'unknown')
+                ->whereColumn('previous_status', '!=', 'new_status')
                 ->orderBy('updated_at_change', 'desc')
-                ->limit(20)
                 ->get()
+                ->filter(function ($c) {
+                    $prev = self::normalizeStatus($c->previous_status);
+                    $new = self::normalizeStatus($c->new_status);
+                    return $prev !== 'unknown' && $new !== 'unknown' && $prev !== $new;
+                })
+                ->unique('company_id')
+                ->take(20)
+                ->values()
                 ->map(fn ($c) => [
                     'id' => $c->id,
                     'symbol' => $c->company?->symbol,

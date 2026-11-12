@@ -1,4 +1,6 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 /// The Upgrade screen is shown when a guest taps "Upgrade".
@@ -176,10 +178,36 @@ class UpgradeScreen extends StatelessWidget {
 
               // --- Legal note ---
               Center(
-                child: Text(
-                  'By continuing, you agree to our Terms of Service\nand Privacy Policy.',
+                child: RichText(
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: context.textMuted, fontSize: 11, height: 1.5),
+                  text: TextSpan(
+                    style: TextStyle(color: context.textMuted, fontSize: 11, height: 1.5),
+                    children: [
+                      const TextSpan(text: 'By continuing, you agree to our '),
+                      TextSpan(
+                        text: 'Terms of Service',
+                        style: TextStyle(
+                          color: context.primary,
+                          fontWeight: FontWeight.w700,
+                          decoration: TextDecoration.underline,
+                        ),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () => launchUrl(Uri.parse('https://irshad.app/terms'), mode: LaunchMode.externalApplication),
+                      ),
+                      const TextSpan(text: '\nand '),
+                      TextSpan(
+                        text: 'Privacy Policy',
+                        style: TextStyle(
+                          color: context.primary,
+                          fontWeight: FontWeight.w700,
+                          decoration: TextDecoration.underline,
+                        ),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () => launchUrl(Uri.parse('https://irshad.app/privacy'), mode: LaunchMode.externalApplication),
+                      ),
+                      const TextSpan(text: '.'),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 24),

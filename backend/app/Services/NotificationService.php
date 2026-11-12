@@ -9,6 +9,7 @@ use App\Models\Holding;
 use App\Models\User;
 use App\Models\UserNotification;
 use App\Models\Watchlist;
+use App\Http\Controllers\UpdatesController;
 use Google\Client as GoogleClient;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -53,21 +54,26 @@ class NotificationService
                 Cache::forget("portfolio_data_{$uId}");
             }
 
-            // 3. Log compliance status change for the Updates feed
-            $alreadyLogged = ComplianceStatusChange::where('company_id', $item->id)
-                ->where('new_status', $newStatus)
-                ->where('created_at', '>=', now()->subMinutes(5))
-                ->exists();
+            // 3. Log compliance status change for the Updates feed (only if moving between different compliance categories)
+            $oldNormStatus = UpdatesController::normalizeStatus($oldStatus);
+            $newNormStatus = UpdatesController::normalizeStatus($newStatus);
 
-            if (! $alreadyLogged) {
-                ComplianceStatusChange::create([
-                    'company_id' => $item->id,
-                    'previous_status' => $oldStatus,
-                    'new_status' => $newStatus,
-                    'reason' => $reason,
-                    'report_url' => null,
-                    'updated_at_change' => now(),
-                ]);
+            if ($oldNormStatus !== 'unknown' && $newNormStatus !== 'unknown' && $oldNormStatus !== $newNormStatus) {
+                $alreadyLogged = ComplianceStatusChange::where('company_id', $item->id)
+                    ->where('new_status', $newStatus)
+                    ->where('created_at', '>=', now()->subMinutes(5))
+                    ->exists();
+
+                if (! $alreadyLogged) {
+                    ComplianceStatusChange::create([
+                        'company_id' => $item->id,
+                        'previous_status' => $oldStatus,
+                        'new_status' => $newStatus,
+                        'reason' => $reason,
+                        'report_url' => null,
+                        'updated_at_change' => now(),
+                    ]);
+                }
             }
 
             // 4. Collect affected users across Holdings, Watchlists, and Favorites

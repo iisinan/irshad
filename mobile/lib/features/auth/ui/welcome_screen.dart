@@ -1,4 +1,6 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 
 class WelcomeScreen extends StatefulWidget {
@@ -16,6 +18,15 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
     super.initState();
     _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200));
     _controller.forward();
+  }
+
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      debugPrint('Could not launch $url: $e');
+    }
   }
 
   @override
@@ -195,13 +206,36 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                   controller: _controller,
                   delay: 0.9,
                   child: Center(
-                    child: Text(
-                      'By continuing, you agree to our Terms & Privacy Policy',
+                    child: RichText(
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: context.textMuted.withValues(alpha: 0.6),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
+                      text: TextSpan(
+                        style: TextStyle(
+                          color: context.textMuted.withValues(alpha: 0.8),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        children: [
+                          const TextSpan(text: 'By continuing, you agree to our '),
+                          TextSpan(
+                            text: 'Terms',
+                            style: TextStyle(
+                              color: context.primary,
+                              fontWeight: FontWeight.w700,
+                              decoration: TextDecoration.underline,
+                            ),
+                            recognizer: TapGestureRecognizer()..onTap = () => _launchUrl('https://irshad.app/terms'),
+                          ),
+                          const TextSpan(text: ' & '),
+                          TextSpan(
+                            text: 'Privacy Policy',
+                            style: TextStyle(
+                              color: context.primary,
+                              fontWeight: FontWeight.w700,
+                              decoration: TextDecoration.underline,
+                            ),
+                            recognizer: TapGestureRecognizer()..onTap = () => _launchUrl('https://irshad.app/privacy'),
+                          ),
+                        ],
                       ),
                     ),
                   ),

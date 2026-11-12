@@ -12,6 +12,7 @@ use App\Models\Holding;
 use App\Models\UserNotification;
 use App\Models\ComplianceStatusChange;
 use App\Services\NotificationService;
+use App\Http\Controllers\UpdatesController;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 
@@ -154,8 +155,19 @@ class SendUpdatesDigest extends Command
             ->get();
             
         $complianceChanges = ComplianceStatusChange::with('company')
+            ->whereNotNull('previous_status')
+            ->where('previous_status', '!=', '')
+            ->where('previous_status', '!=', 'unknown')
+            ->whereColumn('previous_status', '!=', 'new_status')
             ->where('created_at', '>=', $startDate)
-            ->get();
+            ->get()
+            ->filter(function ($c) {
+                $prev = UpdatesController::normalizeStatus($c->previous_status);
+                $new = UpdatesController::normalizeStatus($c->new_status);
+                return $prev !== 'unknown' && $new !== 'unknown' && $prev !== $new;
+            })
+            ->unique('company_id')
+            ->values();
             
         $ipos = Company::where('date_listed', '>=', $startDate)->get();
 

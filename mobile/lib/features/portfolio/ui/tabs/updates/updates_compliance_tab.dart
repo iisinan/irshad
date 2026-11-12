@@ -85,11 +85,26 @@ class _UpdatesComplianceTabState extends State<UpdatesComplianceTab> {
     }
   }
 
+  String _normalizeStatus(dynamic status) {
+    if (status == null) return 'unknown';
+    final s = status.toString().trim().toLowerCase().replaceAll(RegExp(r'[-_\s]'), '');
+    if (['halal', 'compliant', 'pass', 'shariahcompliant'].contains(s)) {
+      return 'halal';
+    }
+    if (['noncompliant', 'nonhalal', 'fail', 'shariahhoncompliant', 'shariahoncompliant', 'shariahncompliant', 'shariahnnoncompliant', 'shariahnoncompliant', 'haram'].contains(s)) {
+      return 'non_compliant';
+    }
+    if (['doubtful', 'questionable'].contains(s)) {
+      return 'doubtful';
+    }
+    return s;
+  }
+
   Widget _buildStatusBadge(String? status) {
-    if (status == null) return const SizedBox.shrink();
-    final s = status.toLowerCase().replaceAll('-', '_');
-    final isHalal = s == 'halal' || s == 'compliant';
-    final isHaram = s == 'non_compliant';
+    final norm = _normalizeStatus(status);
+    if (norm == 'unknown') return const SizedBox.shrink();
+    final isHalal = norm == 'halal';
+    final isHaram = norm == 'non_compliant';
     final color = isHalal ? const Color(0xFF22c55e) : isHaram ? const Color(0xFFef4444) : const Color(0xFFf59e0b);
     final bg = isHalal ? const Color(0xFFf0fdf4) : isHaram ? const Color(0xFFfef2f2) : const Color(0xFFFFFBEB);
     final label = isHalal ? 'Compliant' : isHaram ? 'Non-Compliant' : 'Doubtful';
@@ -101,8 +116,10 @@ class _UpdatesComplianceTabState extends State<UpdatesComplianceTab> {
   }
 
   Widget _buildComplianceCard(Map<String, dynamic> item) {
-    final isWorsening = item['new_status'] == 'non_compliant' || item['new_status'] == 'non-compliant';
-    final isImproving = item['new_status'] == 'halal' && (item['previous_status'] == 'non_compliant' || item['previous_status'] == 'non-compliant');
+    final prevNorm = _normalizeStatus(item['previous_status']);
+    final nextNorm = _normalizeStatus(item['new_status']);
+    final isWorsening = nextNorm == 'non_compliant';
+    final isImproving = nextNorm == 'halal' && prevNorm == 'non_compliant';
     final borderColor = isWorsening ? context.appColors.haram : isImproving ? context.appColors.halal : context.appColors.divider;
 
     return GestureDetector(
@@ -187,7 +204,25 @@ class _UpdatesComplianceTabState extends State<UpdatesComplianceTab> {
     if (_isLoading) return Center(child: CircularProgressIndicator(color: context.primary));
     if (_error != null) return Center(child: Text(_error!, style: const TextStyle(color: Colors.red)));
 
-    List<dynamic> items = _data?['compliance_changes'] ?? [];
+    final rawItems = _data?['compliance_changes'];
+    final List<Map<String, dynamic>> items = [];
+    final Set<String> seen = {};
+
+    if (rawItems is List) {
+      for (final raw in rawItems) {
+        if (raw is Map) {
+          final item = Map<String, dynamic>.from(raw);
+          final prevNorm = _normalizeStatus(item['previous_status']);
+          final nextNorm = _normalizeStatus(item['new_status']);
+          if (prevNorm != 'unknown' && nextNorm != 'unknown' && prevNorm != nextNorm) {
+            final key = (item['symbol'] ?? item['company_id'] ?? item['id'] ?? '').toString();
+            if (key.isNotEmpty && seen.contains(key)) continue;
+            if (key.isNotEmpty) seen.add(key);
+            items.add(item);
+          }
+        }
+      }
+    }
 
     return ListView(
       shrinkWrap: true,

@@ -272,6 +272,7 @@ class IrshadApp extends StatelessWidget {
         return null;
       },
       routes: {
+        '/':                 (context) => const MainNavigationScreen(),
         '/onboarding':       (context) => const OnboardingScreen(),
         '/welcome':          (context) => const WelcomeScreen(),
         '/login':            (context) => const LoginScreen(),

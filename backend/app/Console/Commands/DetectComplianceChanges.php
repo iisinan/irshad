@@ -8,6 +8,7 @@ use App\Models\ComplianceStatusChange;
 use App\Models\Holding;
 use App\Models\UserNotification;
 use App\Models\Watchlist;
+use App\Http\Controllers\UpdatesController;
 use Illuminate\Console\Command;
 
 class DetectComplianceChanges extends Command
@@ -28,6 +29,13 @@ class DetectComplianceChanges extends Command
 
         foreach ($recentChanges as $change) {
             if (! $change->company) {
+                continue;
+            }
+
+            // Skip if it moved from/to the same compliance status (e.g. halal -> halal, non-compliant -> non-compliant)
+            $oldNorm = UpdatesController::normalizeStatus($change->old_status);
+            $newNorm = UpdatesController::normalizeStatus($change->new_status);
+            if ($oldNorm === 'unknown' || $newNorm === 'unknown' || $oldNorm === $newNorm) {
                 continue;
             }
 

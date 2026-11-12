@@ -2,8 +2,10 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'dart:io';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/providers/app_state_provider.dart';
 import '../data/auth_repository.dart';
 
@@ -123,27 +125,34 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     }
   }
 
-  void _registerWithApple(BuildContext context) async {
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      debugPrint('Could not launch $url: $e');
+    }
+  }
+
+  void _registerWithApple() async {
     setState(() => _isLoading = true);
     try {
       final user = await _authRepository.signInWithAppleFlow();
       if (user != null) {
         await _secureStorage.write(key: 'login_method', value: 'apple');
-        if (mounted) {
-          Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
-          Navigator.pushReplacementNamed(context, '/');
-        }
+        if (!mounted) return;
+        Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
+        Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/main', (route) => false);
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -327,7 +336,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildLabel('Phone Number'),
+                            _buildLabel('Phone Number (Optional)'),
                             _buildTextField(
                               controller: _phoneController,
                               hint: '+234 800...',
@@ -447,9 +456,43 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: Text(
-                            'I agree to the Terms of Service, Privacy Policy, and acknowledge the Shariah Methodology.',
-                            style: TextStyle(color: context.textMuted, fontSize: 13, height: 1.4),
+                          child: RichText(
+                            text: TextSpan(
+                              style: TextStyle(color: context.textMuted, fontSize: 13, height: 1.4),
+                              children: [
+                                const TextSpan(text: 'I agree to the '),
+                                TextSpan(
+                                  text: 'Terms of Service',
+                                  style: TextStyle(
+                                    color: context.primary,
+                                    fontWeight: FontWeight.w700,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                  recognizer: TapGestureRecognizer()..onTap = () => _launchUrl('https://irshad.app/terms'),
+                                ),
+                                const TextSpan(text: ', '),
+                                TextSpan(
+                                  text: 'Privacy Policy',
+                                  style: TextStyle(
+                                    color: context.primary,
+                                    fontWeight: FontWeight.w700,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                  recognizer: TapGestureRecognizer()..onTap = () => _launchUrl('https://irshad.app/privacy'),
+                                ),
+                                const TextSpan(text: ', and acknowledge the '),
+                                TextSpan(
+                                  text: 'Shariah Methodology',
+                                  style: TextStyle(
+                                    color: context.primary,
+                                    fontWeight: FontWeight.w700,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                  recognizer: TapGestureRecognizer()..onTap = () => _launchUrl('https://irshad.app/shariah'),
+                                ),
+                                const TextSpan(text: '.'),
+                              ],
+                            ),
                           ),
                         ),
                       ],
@@ -544,7 +587,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                       width: double.infinity,
                       height: 56,
                       child: OutlinedButton(
-                        onPressed: _isLoading ? null : () => _registerWithApple(context),
+                        onPressed: _isLoading ? null : _registerWithApple,
                         style: OutlinedButton.styleFrom(
                           backgroundColor: Colors.black,
                           side: const BorderSide(color: Colors.black, width: 1.5),

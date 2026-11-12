@@ -30,6 +30,17 @@ const CardSkeleton = () => {
   );
 };
 
+/* ── Normalize status helper ── */
+export const normalizeComplianceStatus = (status) => {
+  if (!status) return 'unknown';
+  const s = String(status).trim().toLowerCase().replace(/[-_\s]/g, '');
+  if (['halal', 'compliant', 'pass', 'shariahcompliant'].includes(s)) return 'halal';
+  if (['noncompliant', 'nonhalal', 'fail', 'shariahhoncompliant', 'shariahoncompliant', 'shariahncompliant', 'shariahnnoncompliant', 'shariahnoncompliant', 'haram'].includes(s)) return 'non_compliant';
+  if (['doubtful', 'questionable'].includes(s)) return 'doubtful';
+  if (['watchlist', 'review'].includes(s)) return 'watchlist';
+  return s;
+};
+
 /* ── Status badge ── */
 const StatusBadge = ({ status }) => {
   const cfg = {
@@ -97,8 +108,10 @@ const SectionHeader = ({ icon: Icon, title, count, color = 'var(--primary)' }) =
 
 /* ── Compliance Change Card ── */
 const ComplianceCard = ({ item }) => {
-  const isWorsening = item.new_status === 'non_compliant' || item.new_status === 'non-compliant';
-  const isImproving = (item.new_status === 'halal') && (item.previous_status === 'non_compliant' || item.previous_status === 'non-compliant');
+  const prevNorm = normalizeComplianceStatus(item.previous_status);
+  const nextNorm = normalizeComplianceStatus(item.new_status);
+  const isWorsening = nextNorm === 'non_compliant';
+  const isImproving = nextNorm === 'halal' && prevNorm === 'non_compliant';
   const navigate = useNavigate();
 
   return (
@@ -127,9 +140,9 @@ const ComplianceCard = ({ item }) => {
             <div style={{ fontSize: '0.69rem', fontWeight: 700, color: 'var(--text-muted)' }}>{item.symbol}</div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <StatusBadge status={item.previous_status?.replace('-', '_')} />
+            <StatusBadge status={prevNorm} />
             <ArrowRight size={12} color="var(--text-muted)" />
-            <StatusBadge status={item.new_status?.replace('-', '_')} />
+            <StatusBadge status={nextNorm} />
           </div>
         </div>
         {item.reason && (
@@ -157,13 +170,15 @@ export default function UpdatesCompliance() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const CACHE_KEY = 'irshad_updates_compliance_cache_v2';
+
   const load = async (silent = false) => {
     try {
       if (!silent) setLoading(true);
       setError(null);
       const res = await fetchUpdatesNews();
       setData(res.data);
-      localforage.setItem('irshad_updates_compliance_cache', res.data);
+      localforage.setItem(CACHE_KEY, res.data);
     } catch (err) {
       if (!data && !silent) setError(err?.response?.data?.message || 'Failed to load compliance changes.');
     } finally {
@@ -172,7 +187,9 @@ export default function UpdatesCompliance() {
   };
 
   useEffect(() => {
-    localforage.getItem('irshad_updates_compliance_cache').then(cached => {
+    // Clear legacy stale cache if present
+    localforage.removeItem('irshad_updates_compliance_cache').catch(() => {});
+    localforage.getItem(CACHE_KEY).then(cached => {
       if (cached) {
         setData(cached);
         setLoading(false);
@@ -181,7 +198,21 @@ export default function UpdatesCompliance() {
     load(true);
   }, []);
 
-  const complianceChanges = data?.compliance_changes || [];
+  const rawList = Array.isArray(data?.compliance_changes) ? data.compliance_changes : [];
+  const seenCompanies = new Set();
+  const complianceChanges = rawList.filter(item => {
+    const prev = normalizeComplianceStatus(item.previous_status);
+    const next = normalizeComplianceStatus(item.new_status);
+    if (!prev || !next || prev === 'unknown' || next === 'unknown' || prev === next) {
+      return false;
+    }
+    const key = item.symbol || item.company_id || item.id;
+    if (key && seenCompanies.has(key)) {
+      return false;
+    }
+    if (key) seenCompanies.add(key);
+    return true;
+  });
 
   if (loading && !data) return <SkeletonLoader />;
   if (error) return (
