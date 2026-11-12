@@ -72,6 +72,294 @@ const fmtNaira = (n) => {
   return `₦${v.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 };
 
+/* ─── Irshad Thematic Baskets Data (Coming Soon) ──────────────────────────── */
+const IRSHAD_THEMATIC_BASKETS = [
+  {
+    id: 'irshad-shariah-titans',
+    name: 'Irshad Shariah Titans 10',
+    tagline: 'Flagship Core NGX Allocation',
+    description: 'The definitive basket of Nigeria’s highest-capitalization, highest-liquidity companies meeting strict AAOIFI Shariah standards. Built for capital preservation and dividend compounding.',
+    targetYield: '14.8%',
+    riskLevel: 'Moderate',
+    rebalanceFreq: 'Quarterly',
+    aaoifiScore: '100% Halal',
+    category: 'Flagship',
+    color: '#10b981',
+    bg: 'rgba(16, 185, 129, 0.1)',
+    border: 'rgba(16, 185, 129, 0.25)',
+    icon: Award,
+    constituents: [
+      { symbol: 'MTNN', weight: '22%' },
+      { symbol: 'DANGCEM', weight: '20%' },
+      { symbol: 'BUAFOODS', weight: '18%' },
+      { symbol: 'SEPLAT', weight: '15%' },
+      { symbol: 'PRESCO', weight: '13%' },
+      { symbol: 'OKOMUOIL', weight: '12%' }
+    ]
+  },
+  {
+    id: 'irshad-dividend-aristocrats',
+    name: 'Shariah Dividend Aristocrats',
+    tagline: 'High Yield & Cashflow Compounding',
+    description: 'Companies with a 5+ year uninterrupted dividend distribution history, low debt-to-equity ratios (<30%), and negligible impermissible interest income.',
+    targetYield: '17.2%',
+    riskLevel: 'Conservative',
+    rebalanceFreq: 'Semi-Annual',
+    aaoifiScore: '100% Halal',
+    category: 'High Yield',
+    color: '#f59e0b',
+    bg: 'rgba(245, 158, 11, 0.1)',
+    border: 'rgba(245, 158, 11, 0.25)',
+    icon: Coins,
+    constituents: [
+      { symbol: 'SEPLAT', weight: '25%' },
+      { symbol: 'PRESCO', weight: '20%' },
+      { symbol: 'OKOMUOIL', weight: '20%' },
+      { symbol: 'TOTAL', weight: '18%' },
+      { symbol: 'NASCON', weight: '17%' }
+    ]
+  },
+  {
+    id: 'irshad-food-security',
+    name: 'Halal Food Security & FMCG',
+    tagline: 'Essential Consumption & Agriculture',
+    description: 'High-margin consumer goods, food staples, and agribusiness powerhouses feeding over 220 million people with continuous pricing power against inflation.',
+    targetYield: '15.4%',
+    riskLevel: 'Moderate',
+    rebalanceFreq: 'Quarterly',
+    aaoifiScore: '100% Halal',
+    category: 'Consumer Staples',
+    color: '#06b6d4',
+    bg: 'rgba(6, 182, 212, 0.1)',
+    border: 'rgba(6, 182, 212, 0.25)',
+    icon: ShoppingBag,
+    constituents: [
+      { symbol: 'BUAFOODS', weight: '30%' },
+      { symbol: 'FLOURMILL', weight: '25%' },
+      { symbol: 'PRESCO', weight: '20%' },
+      { symbol: 'NASCON', weight: '15%' },
+      { symbol: 'UNILEVER', weight: '10%' }
+    ]
+  },
+  {
+    id: 'irshad-infrastructure',
+    name: 'Islamic Green Infrastructure',
+    tagline: 'Cement, Energy & Heavy Industry',
+    description: 'Industrial giants driving West African infrastructure development, housing, and urban expansion, adhering to zero-interest project financing frameworks.',
+    targetYield: '13.9%',
+    riskLevel: 'Growth',
+    rebalanceFreq: 'Quarterly',
+    aaoifiScore: '100% Halal',
+    category: 'Heavy Industry',
+    color: '#8b5cf6',
+    bg: 'rgba(139, 92, 246, 0.1)',
+    border: 'rgba(139, 92, 246, 0.25)',
+    icon: Hammer,
+    constituents: [
+      { symbol: 'DANGCEM', weight: '35%' },
+      { symbol: 'BUACEMENT', weight: '30%' },
+      { symbol: 'WAPCO', weight: '20%' },
+      { symbol: 'CUTIX', weight: '15%' }
+    ]
+  }
+];
+
+const IrshadThematicBlurredSection = ({ isWaitlisted, onToggleWaitlist }) => {
+  return (
+    <div style={{
+      position: 'relative',
+      borderRadius: '24px',
+      overflow: 'hidden',
+      border: '1px solid var(--border)',
+      background: 'var(--bg)',
+      padding: '24px',
+      minHeight: '460px',
+      boxShadow: 'var(--shadow-sm)'
+    }}>
+      {/* Blurred constituent cards grid */}
+      <div
+        aria-hidden="true"
+        style={{
+          filter: 'blur(7px)',
+          opacity: 0.55,
+          pointerEvents: 'none',
+          userSelect: 'none',
+          transform: 'scale(0.995)',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+          gap: '22px'
+        }}
+      >
+        {IRSHAD_THEMATIC_BASKETS.map(item => {
+          const IconComp = item.icon;
+          return (
+            <div
+              key={item.id}
+              style={{
+                background: 'var(--bg)',
+                border: '1px solid var(--border)',
+                borderRadius: '22px',
+                padding: '22px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                position: 'relative',
+                overflow: 'hidden',
+                minHeight: '270px'
+              }}
+            >
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: item.color }} />
+              <div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', marginBottom: '14px' }}>
+                  <div style={{
+                    width: '44px', height: '44px', borderRadius: '12px',
+                    background: item.bg, border: `1px solid ${item.border}`,
+                    color: item.color, display: 'flex', alignItems: 'center',
+                    justifyContent: 'center', flexShrink: 0
+                  }}>
+                    <IconComp size={22} />
+                  </div>
+                  <span style={{
+                    fontSize: '0.68rem', fontWeight: 800, padding: '4px 10px',
+                    borderRadius: '20px', background: item.bg, color: item.color,
+                    border: `1px solid ${item.border}`, textTransform: 'uppercase', letterSpacing: '0.4px'
+                  }}>
+                    {item.category}
+                  </span>
+                </div>
+
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: 'var(--text-dark)', margin: '0 0 4px', letterSpacing: '-0.3px' }}>
+                  {item.name}
+                </h3>
+                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: item.color, marginBottom: '8px' }}>
+                  {item.tagline}
+                </div>
+                <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: '0 0 16px', lineHeight: 1.5 }}>
+                  {item.description}
+                </p>
+
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '16px' }}>
+                  {item.constituents.map(c => (
+                    <span
+                      key={c.symbol}
+                      style={{
+                        padding: '4px 9px', borderRadius: '8px', background: 'var(--bg-section)',
+                        border: '1px solid var(--border)', fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-dark)'
+                      }}
+                    >
+                      {c.symbol} <span style={{ color: 'var(--primary)', fontWeight: 800 }}>{c.weight}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{
+                borderTop: '1px solid var(--border)', paddingTop: '12px',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.76rem'
+              }}>
+                <span style={{ fontWeight: 800, color: 'var(--halal)' }}>
+                  Target Yield: {item.targetYield}
+                </span>
+                <span style={{ fontWeight: 800, color: 'var(--primary)' }}>
+                  {item.aaoifiScore}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Frosted "Coming Soon" Glass Overlay */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '24px',
+        background: 'rgba(15, 23, 42, 0.42)',
+        backdropFilter: 'blur(4px)',
+        zIndex: 20
+      }}>
+        <div style={{
+          maxWidth: '560px',
+          width: '100%',
+          background: 'var(--bg)',
+          border: '1.5px solid rgba(21, 128, 61, 0.35)',
+          borderRadius: '24px',
+          padding: '36px 32px',
+          textAlign: 'center',
+          boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.35), 0 0 40px rgba(21, 128, 61, 0.15)',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          {/* Top rainbow highlight line */}
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'linear-gradient(90deg, #10b981, #0ea5e9, #f59e0b)' }} />
+
+          {/* Sparkling pill */}
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: '8px',
+            padding: '6px 16px', borderRadius: '30px',
+            background: 'rgba(21, 128, 61, 0.1)', border: '1px solid rgba(21, 128, 61, 0.25)',
+            color: 'var(--primary)', fontSize: '0.78rem', fontWeight: 800,
+            letterSpacing: '0.6px', textTransform: 'uppercase', marginBottom: '16px'
+          }}>
+            <Sparkles size={14} /> Irshad Exclusive • Coming Soon
+          </div>
+
+          <h3 style={{ fontSize: '1.65rem', fontWeight: 900, color: 'var(--text-dark)', margin: '0 0 10px', letterSpacing: '-0.5px' }}>
+            Irshad Thematic Baskets
+          </h3>
+
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', lineHeight: 1.6, margin: '0 auto 20px', maxWidth: '460px' }}>
+            Institutional-grade, algorithmically rebalanced Shariah portfolios designed by certified Islamic finance scholars.
+            Automated quarterly rebalancing, dividend compounding, and one-click execution.
+          </p>
+
+          {/* Feature Highlights */}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-dark)', background: 'var(--bg-section)', padding: '6px 12px', borderRadius: '10px', border: '1px solid var(--border)' }}>
+              <ShieldCheck size={14} color="var(--halal)" /> 100% AAOIFI Certified
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-dark)', background: 'var(--bg-section)', padding: '6px 12px', borderRadius: '10px', border: '1px solid var(--border)' }}>
+              <RefreshCw size={14} color="#0ea5e9" /> Auto-Rebalanced
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-dark)', background: 'var(--bg-section)', padding: '6px 12px', borderRadius: '10px', border: '1px solid var(--border)' }}>
+              <Award size={14} color="#f59e0b" /> Noor & Rawdah Access
+            </div>
+          </div>
+
+          {/* Waitlist action button */}
+          <button
+            onClick={onToggleWaitlist}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: '10px',
+              background: isWaitlisted ? 'var(--halal)' : 'linear-gradient(135deg, var(--primary) 0%, #166534 100%)',
+              border: 'none', borderRadius: '14px', padding: '14px 28px',
+              color: 'white', fontWeight: 800, fontSize: '0.95rem',
+              cursor: 'pointer', transition: 'all 0.25s',
+              boxShadow: isWaitlisted ? '0 10px 24px rgba(34, 197, 94, 0.3)' : '0 10px 24px rgba(21, 128, 61, 0.3)'
+            }}
+          >
+            {isWaitlisted ? (
+              <>
+                <CheckCircle2 size={18} /> You're on the Priority Waitlist!
+              </>
+            ) : (
+              <>
+                <Sparkles size={18} /> Notify Me When Ready
+              </>
+            )}
+          </button>
+          <div style={{ marginTop: '10px', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+            {isWaitlisted ? 'We will notify you the moment early beta access goes live.' : 'Be the first to invest when Irshad Thematic Baskets launch.'}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 /* ─── Main Component ──────────────────────────────────────────────────────── */
 export default function BasketsTab({ onUpgrade }) {
   const { user } = useAuth();
@@ -84,8 +372,26 @@ export default function BasketsTab({ onUpgrade }) {
   const [cashBalance, setCashBalance] = useState(0);
 
   // Filters & Search
-  const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'curated' | 'custom'
+  const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'curated' | 'custom' | 'irshad_thematic'
   const [searchQuery, setSearchQuery] = useState('');
+  const [isWaitlisted, setIsWaitlisted] = useState(() => {
+    try {
+      return localStorage.getItem('irshad_thematic_waitlist') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const handleWaitlistToggle = () => {
+    const next = !isWaitlisted;
+    setIsWaitlisted(next);
+    try {
+      localStorage.setItem('irshad_thematic_waitlist', next ? 'true' : 'false');
+    } catch {}
+    if (next) {
+      toastSuccess("You're on the priority waitlist! We'll notify you as soon as Irshad Thematic Baskets launch.");
+    }
+  };
 
   // Modals
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -166,6 +472,7 @@ export default function BasketsTab({ onUpgrade }) {
 
   // Filtered baskets
   const filteredBaskets = useMemo(() => {
+    if (activeFilter === 'irshad_thematic') return [];
     return baskets.filter(b => {
       if (activeFilter === 'curated' && b.user_id !== null) return false;
       if (activeFilter === 'custom' && b.user_id === null) return false;
@@ -714,11 +1021,11 @@ export default function BasketsTab({ onUpgrade }) {
                   fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase',
                   letterSpacing: '0.6px', marginBottom: '12px'
                 }}>
-                  <Sparkles size={13} /> Thematic Investing
+                  <Sparkles size={13} /> Investing Baskets
                 </div>
 
                 <h1 style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--text-dark)', margin: '0 0 10px', letterSpacing: '-0.6px' }}>
-                  Thematic Halal Baskets
+                  Investing Baskets
                 </h1>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', lineHeight: 1.6, margin: 0 }}>
                   Curated collections of verified Shariah-compliant Nigerian equities grouped by market themes,
@@ -726,21 +1033,63 @@ export default function BasketsTab({ onUpgrade }) {
                 </p>
               </div>
 
-              <button
-                onClick={handleOpenCreateModal}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '8px',
-                  background: 'linear-gradient(135deg, var(--primary) 0%, #166534 100%)',
-                  border: 'none', borderRadius: '14px', padding: '14px 24px',
-                  color: 'white', fontWeight: 800, fontSize: '0.92rem',
-                  cursor: 'pointer', transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)',
-                  boxShadow: '0 10px 24px rgba(21, 128, 61, 0.25)'
-                }}
-                onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-                onMouseLeave={e => e.currentTarget.style.transform = 'none'}
-              >
-                <Plus size={18} /> Create Custom Basket
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                <button
+                  onClick={handleOpenCreateModal}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '8px',
+                    background: 'linear-gradient(135deg, var(--primary) 0%, #166534 100%)',
+                    border: 'none', borderRadius: '14px', padding: '14px 24px',
+                    color: 'white', fontWeight: 800, fontSize: '0.92rem',
+                    cursor: 'pointer', transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)',
+                    boxShadow: '0 10px 24px rgba(21, 128, 61, 0.25)'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+                  onMouseLeave={e => e.currentTarget.style.transform = 'none'}
+                >
+                  <Plus size={18} /> Create Custom Basket
+                </button>
+
+                <button
+                  onClick={() => {
+                    setActiveFilter('irshad_thematic');
+                    setTimeout(() => {
+                      const el = document.getElementById('irshad-thematic-section');
+                      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 50);
+                  }}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '8px',
+                    background: activeFilter === 'irshad_thematic'
+                      ? 'linear-gradient(135deg, #0f766e 0%, #115e59 100%)'
+                      : 'var(--bg)',
+                    border: '1.5px solid var(--primary)',
+                    borderRadius: '14px', padding: '13px 22px',
+                    color: activeFilter === 'irshad_thematic' ? 'white' : 'var(--primary)',
+                    fontWeight: 800, fontSize: '0.92rem',
+                    cursor: 'pointer', transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)',
+                    boxShadow: '0 6px 18px rgba(15, 118, 110, 0.12)'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+                  onMouseLeave={e => e.currentTarget.style.transform = 'none'}
+                >
+                  <Sparkles size={18} color={activeFilter === 'irshad_thematic' ? '#fef08a' : 'var(--primary)'} />
+                  <span>Irshad Thematic Basket</span>
+                  <span style={{
+                    fontSize: '0.65rem',
+                    padding: '2px 8px',
+                    borderRadius: '20px',
+                    background: activeFilter === 'irshad_thematic' ? 'rgba(255,255,255,0.2)' : 'var(--primary-50)',
+                    color: activeFilter === 'irshad_thematic' ? '#fef08a' : 'var(--primary)',
+                    fontWeight: 800,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.4px',
+                    marginLeft: '4px'
+                  }}>
+                    Soon
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -808,6 +1157,7 @@ export default function BasketsTab({ onUpgrade }) {
                 { id: 'all', label: `All (${baskets.length})` },
                 { id: 'curated', label: `Curated (${curatedCount})` },
                 { id: 'custom', label: `Custom (${customCount})` },
+                { id: 'irshad_thematic', label: 'Irshad Thematic', isNew: true },
               ].map(tab => (
                 <button
                   key={tab.id}
@@ -817,10 +1167,25 @@ export default function BasketsTab({ onUpgrade }) {
                     fontWeight: 800, fontSize: '0.82rem', cursor: 'pointer',
                     transition: 'all 0.2s',
                     background: activeFilter === tab.id ? 'var(--primary)' : 'transparent',
-                    color: activeFilter === tab.id ? 'white' : 'var(--text-muted)'
+                    color: activeFilter === tab.id ? 'white' : 'var(--text-muted)',
+                    display: 'inline-flex', alignItems: 'center', gap: '6px'
                   }}
                 >
-                  {tab.label}
+                  <span>{tab.label}</span>
+                  {tab.isNew && (
+                    <span style={{
+                      fontSize: '0.62rem',
+                      padding: '1px 6px',
+                      borderRadius: '8px',
+                      background: activeFilter === tab.id ? 'rgba(255,255,255,0.25)' : 'rgba(245, 158, 11, 0.15)',
+                      color: activeFilter === tab.id ? '#ffffff' : '#f59e0b',
+                      fontWeight: 800,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.3px'
+                    }}>
+                      Soon
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
@@ -854,7 +1219,28 @@ export default function BasketsTab({ onUpgrade }) {
           </div>
 
           {/* Baskets Grid */}
-          {loading && baskets.length === 0 ? (
+          {activeFilter === 'irshad_thematic' ? (
+            <div id="irshad-thematic-section">
+              <div style={{ marginBottom: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                  <h2 style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text-dark)', margin: 0, letterSpacing: '-0.3px' }}>
+                    Irshad Thematic Baskets
+                  </h2>
+                  <span style={{
+                    fontSize: '0.68rem', fontWeight: 800, padding: '3px 10px',
+                    borderRadius: '20px', background: 'rgba(245, 158, 11, 0.12)', color: '#f59e0b',
+                    border: '1px solid rgba(245, 158, 11, 0.25)', textTransform: 'uppercase', letterSpacing: '0.4px'
+                  }}>
+                    Coming Soon
+                  </span>
+                </div>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', margin: 0 }}>
+                  Proprietary algorithmic portfolios curated and managed by Irshad's Islamic Finance research desk.
+                </p>
+              </div>
+              <IrshadThematicBlurredSection isWaitlisted={isWaitlisted} onToggleWaitlist={handleWaitlistToggle} />
+            </div>
+          ) : loading && baskets.length === 0 ? (
             <div style={{
               display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px'
             }}>
@@ -897,9 +1283,10 @@ export default function BasketsTab({ onUpgrade }) {
               )}
             </div>
           ) : (
-            <div style={{
-              display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '22px'
-            }}>
+            <>
+              <div style={{
+                display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '22px'
+              }}>
               {filteredBaskets.map(basket => {
                 const meta = getCategoryMeta(basket.category || (basket.user_id ? 'Custom' : 'Thematic'));
                 const IconComp = meta.icon;
@@ -1062,7 +1449,34 @@ export default function BasketsTab({ onUpgrade }) {
                 );
               })}
             </div>
-          )}
+
+            {/* In All tab, also show the Irshad Thematic preview below */}
+            {activeFilter === 'all' && !searchQuery.trim() && (
+              <div id="irshad-thematic-section" style={{ marginTop: '48px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <h2 style={{ fontSize: '1.3rem', fontWeight: 900, color: 'var(--text-dark)', margin: 0, letterSpacing: '-0.4px' }}>
+                        Irshad Thematic Baskets
+                      </h2>
+                      <span style={{
+                        fontSize: '0.68rem', fontWeight: 800, padding: '3px 10px',
+                        borderRadius: '20px', background: 'rgba(245, 158, 11, 0.12)', color: '#f59e0b',
+                        border: '1px solid rgba(245, 158, 11, 0.25)', textTransform: 'uppercase', letterSpacing: '0.4px'
+                      }}>
+                        Coming Soon
+                      </span>
+                    </div>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', margin: '4px 0 0', lineHeight: 1.5 }}>
+                      Proprietary algorithmic portfolios curated and managed by Irshad's Islamic Finance research desk.
+                    </p>
+                  </div>
+                </div>
+                <IrshadThematicBlurredSection isWaitlisted={isWaitlisted} onToggleWaitlist={handleWaitlistToggle} />
+              </div>
+            )}
+          </>
+        )}
         </>
       )}
 
