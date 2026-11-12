@@ -1,12 +1,11 @@
 import React from 'react';
-import { TrendingUp, TrendingDown, Minus, ShieldAlert, Activity } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Activity } from 'lucide-react';
 
 export default function UpdatesDigestViewer({ meta }) {
   const gainers = meta?.top_gainers || [];
   const losers = meta?.top_losers || [];
   const userPerf = meta?.user_performances || [];
   const dividends = meta?.dividends || [];
-  const complianceChanges = meta?.compliance_changes || [];
   const ipos = meta?.ipos || [];
 
   const renderPerfItem = (item, i) => {
@@ -34,22 +33,7 @@ export default function UpdatesDigestViewer({ meta }) {
   return (
     <div style={{ padding: '24px', background: 'var(--bg)', borderRadius: '20px', color: 'var(--text-dark)' }}>
       <h2 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '8px' }}>Irshad Digest</h2>
-      <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '24px' }}>Your portfolio compliance summary and market update.</p>
-      
-      {complianceChanges.length > 0 && (
-        <div style={{ marginBottom: '24px' }}>
-          <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '12px', color: 'var(--non-compliant)' }}>Compliance Alerts</h3>
-          {complianceChanges.map((c, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', background: 'var(--non-compliant-bg)', borderRadius: '12px', marginBottom: '8px', border: '1px solid color-mix(in srgb, var(--non-compliant) 20%, transparent)' }}>
-              <ShieldAlert size={20} color="var(--non-compliant)" />
-              <div>
-                <div style={{ fontWeight: 800, fontSize: '0.85rem' }}>{c.company?.symbol || 'Unknown'} - {c.new_status}</div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Was previously {c.previous_status}.</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '24px' }}>Your portfolio summary and market update.</p>
 
       {userPerf.length > 0 && (
         <div style={{ marginBottom: '24px' }}>

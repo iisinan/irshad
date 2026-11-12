@@ -667,7 +667,7 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
 
     // 1. Digest Notification
     if (category == 'digest' || item['title'] == 'Irshad Digest is Ready') {
-      if (meta != null && (meta['top_gainers'] != null || meta['user_performances'] != null || meta['compliance_changes'] != null)) {
+      if (meta != null && (meta['top_gainers'] != null || meta['user_performances'] != null || meta['dividends'] != null)) {
         _showDigestViewer(context, meta);
       } else {
         showModalBottomSheet(
@@ -1611,7 +1611,6 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
         final losers = meta['top_losers'] as List<dynamic>? ?? [];
         final userPerf = meta['user_performances'] as List<dynamic>? ?? [];
         final dividends = meta['dividends'] as List<dynamic>? ?? [];
-        final complianceChanges = meta['compliance_changes'] as List<dynamic>? ?? [];
         final ipos = meta['ipos'] as List<dynamic>? ?? [];
 
         Widget buildPerfItem(dynamic item) {
@@ -1700,52 +1699,11 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Your portfolio compliance summary and market update.',
+                        'Your portfolio summary and market update.',
                         style: TextStyle(color: context.textMuted, fontSize: 14, height: 1.5),
                       ),
                       const SizedBox(height: 32),
 
-                      if (complianceChanges.isNotEmpty) ...[
-                        const Text('Compliance Alerts', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFFEF4444))),
-                        const SizedBox(height: 12),
-                        ...complianceChanges.map((c) {
-                          final sym = c['company']?['symbol'] ?? 'Unknown';
-                          return GestureDetector(
-                            onTap: () {
-                              if (sym != 'Unknown') {
-                                Navigator.pop(context);
-                                StockDetailScreen.openWithLoading(context, {'symbol': sym});
-                              }
-                            },
-                            child: Container(
-                              margin: const EdgeInsets.only(bottom: 8),
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFEF4444).withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: const Color(0xFFEF4444).withValues(alpha: 0.2)),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.shield_outlined, color: Color(0xFFEF4444), size: 20),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text("$sym - ${c['new_status']}", style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
-                                        Text("Was previously ${c['previous_status']}.", style: TextStyle(fontSize: 12, color: context.textMuted)),
-                                      ],
-                                    ),
-                                  ),
-                                  Icon(Icons.arrow_forward_ios_rounded, size: 14, color: context.textMuted),
-                                ],
-                              ),
-                            ),
-                          );
-                        }),
-                        const SizedBox(height: 24),
-                      ],
                       if (userPerf.isNotEmpty) ...[
                         Text('Your Watchlist & Portfolio', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: context.textDark)),
                         const SizedBox(height: 12),

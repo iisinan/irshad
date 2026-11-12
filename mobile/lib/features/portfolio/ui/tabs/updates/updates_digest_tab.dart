@@ -123,18 +123,18 @@ class _UpdatesDigestTabState extends State<UpdatesDigestTab> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Your weekly portfolio compliance summary delivered straight to you.',
+                    'Your weekly portfolio performance and market update delivered straight to you.',
                     style: TextStyle(color: context.textMuted, fontSize: 14, height: 1.5),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
-            _buildFeatureRow(context, Icons.check_circle_rounded, 'Compliance status of all tracked assets'),
+            _buildFeatureRow(context, Icons.check_circle_rounded, 'Performance of your tracked assets & watchlist'),
             const SizedBox(height: 16),
-            _buildFeatureRow(context, Icons.check_circle_rounded, 'Recent Shariah verdicts and rating changes'),
+            _buildFeatureRow(context, Icons.check_circle_rounded, 'Top market gainers and decliners on NGX'),
             const SizedBox(height: 16),
-            _buildFeatureRow(context, Icons.check_circle_rounded, 'Purification dividend updates'),
+            _buildFeatureRow(context, Icons.check_circle_rounded, 'Dividend calendar and payout updates'),
             const SizedBox(height: 32),
             
             Text(

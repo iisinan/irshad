@@ -110,7 +110,7 @@ export default function UpdatesDigest() {
               Irshad Digest
             </h2>
             <p style={{ fontSize: '0.9rem', color: 'var(--text-body)', margin: 0, fontWeight: 600, maxWidth: '400px', lineHeight: 1.5 }}>
-              Stay effortlessly informed. We deliver your portfolio's Shariah compliance status straight to you.
+              Stay effortlessly informed. We deliver your portfolio summary and market movements straight to you.
             </p>
           </div>
         </div>
@@ -124,10 +124,10 @@ export default function UpdatesDigest() {
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
             {[
-              { label: 'New Halal stocks', icon: CheckCircle2, color: 'var(--halal)' },
-              { label: 'Non-Compliant changes', icon: Bell, color: 'var(--non-compliant)' },
-              { label: 'Business activity', icon: ChevronRight, color: 'var(--doubtful)' },
-              { label: 'Market insights', icon: CheckCircle2, color: 'var(--primary)' }
+              { label: 'Portfolio movements', icon: CheckCircle2, color: 'var(--halal)' },
+              { label: 'Dividend updates', icon: Bell, color: 'var(--gold)' },
+              { label: 'Top gainers & losers', icon: ChevronRight, color: 'var(--primary)' },
+              { label: 'IPOs & listings', icon: CheckCircle2, color: 'var(--doubtful)' }
             ].map(item => (
               <div key={item.label} style={{ 
                 background: 'var(--bg-section)', border: 'none', borderRadius: '12px', padding: '14px 16px',

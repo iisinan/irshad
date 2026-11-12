@@ -10,9 +10,7 @@ use App\Models\Dividend;
 use App\Models\Watchlist;
 use App\Models\Holding;
 use App\Models\UserNotification;
-use App\Models\ComplianceStatusChange;
 use App\Services\NotificationService;
-use App\Http\Controllers\UpdatesController;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 
@@ -68,7 +66,6 @@ class SendUpdatesDigest extends Command
                 'top_gainers' => $data[$freq]['top_gainers'],
                 'top_losers' => $data[$freq]['top_losers'],
                 'dividends' => $data[$freq]['dividends'],
-                'compliance_changes' => $data[$freq]['compliance_changes'],
                 'ipos' => $data[$freq]['ipos'],
             ];
 
@@ -92,7 +89,7 @@ class SendUpdatesDigest extends Command
                 UserNotification::notify(
                     $pref->user->id,
                     'Irshad Digest is Ready',
-                    'Your ' . $freq . ' portfolio compliance summary and market update is available.',
+                    'Your ' . $freq . ' portfolio summary and market update is available.',
                     [
                         'icon' => '📧',
                         'category' => 'digest',
@@ -105,7 +102,7 @@ class SendUpdatesDigest extends Command
             if ($pref->push_enabled && $pref->user->fcm_token) {
                 $notificationService->sendDirectPushNotification($pref->user->fcm_token, [
                     'title' => 'Irshad Digest is Ready',
-                    'body' => 'Your ' . $freq . ' portfolio compliance summary and market update is available.',
+                    'body' => 'Your ' . $freq . ' portfolio summary and market update is available.',
                     'data' => [
                         'type' => 'digest',
                         'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
@@ -154,21 +151,6 @@ class SendUpdatesDigest extends Command
             ->where('created_at', '>=', $startDate)
             ->get();
             
-        $complianceChanges = ComplianceStatusChange::with('company')
-            ->whereNotNull('previous_status')
-            ->where('previous_status', '!=', '')
-            ->where('previous_status', '!=', 'unknown')
-            ->whereColumn('previous_status', '!=', 'new_status')
-            ->where('created_at', '>=', $startDate)
-            ->get()
-            ->filter(function ($c) {
-                $prev = UpdatesController::normalizeStatus($c->previous_status);
-                $new = UpdatesController::normalizeStatus($c->new_status);
-                return $prev !== 'unknown' && $new !== 'unknown' && $prev !== $new;
-            })
-            ->unique('company_id')
-            ->values();
-            
         $ipos = Company::where('date_listed', '>=', $startDate)->get();
 
         return [
@@ -176,7 +158,6 @@ class SendUpdatesDigest extends Command
             'top_gainers' => $topGainers,
             'top_losers' => $topLosers,
             'dividends' => $dividends->toArray(),
-            'compliance_changes' => $complianceChanges->toArray(),
             'ipos' => $ipos->toArray(),
         ];
     }
