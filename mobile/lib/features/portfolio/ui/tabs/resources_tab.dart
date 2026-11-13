@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
+import 'package:video_player/video_player.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 import 'package:irshad_mobile/core/api/api_service.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -336,10 +337,18 @@ class _ResourcesTabState extends State<ResourcesTab> {
                   children: [
                     if (r['thumbnail'] != null)
                       Image.network(r['thumbnail'], fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Container(color: Colors.black),
+                        errorBuilder: (context, error, stackTrace) => Container(color: const Color(0xFF0F172A)),
                       )
                     else
-                      Container(color: Colors.black),
+                      Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                      ),
                     
                     // Dark overlay
                     Container(color: Colors.black.withValues(alpha: 0.3)),
@@ -594,69 +603,310 @@ class _ResourcesTabState extends State<ResourcesTab> {
 
 class _VideoModalPlayer extends StatefulWidget {
   final dynamic r;
-  const _VideoModalPlayer({Key? key, required this.r}) : super(key: key);
+  const _VideoModalPlayer({required this.r});
 
   @override
   State<_VideoModalPlayer> createState() => _VideoModalPlayerState();
 }
 
 class _VideoModalPlayerState extends State<_VideoModalPlayer> {
-  YoutubePlayerController? _controller;
+  YoutubePlayerController? _youtubeController;
+  VideoPlayerController? _videoController;
+  bool _isVideoInitialized = false;
+  bool _showControls = true;
+  String? _videoError;
+  String? _resolvedUrl;
 
-  String? _extractVideoId(String url) {
-    final RegExp regExp = RegExp(
-      r'(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})',
+  String? _extractYoutubeId(String url) {
+    final regExp = RegExp(
+      r'(?:https?:\/\/)?(?:www\.|m\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})',
     );
-    final Match? match = regExp.firstMatch(url);
-    return match?.group(1);
+    return regExp.firstMatch(url)?.group(1);
+  }
+
+  /// Upgrade non-local http:// media URLs (e.g. legacy cached Railway URLs) to https:// for Android/iOS playback.
+  String _normalizeMediaUrl(String rawUrl) {
+    final trimmed = rawUrl.trim();
+    if (trimmed.startsWith('http://') &&
+        !RegExp(r'^http://(localhost|127\.0\.0\.1|10\.0\.2\.2)(:\d+)?/', caseSensitive: false).hasMatch(trimmed)) {
+      return 'https://${trimmed.substring(7)}';
+    }
+    return trimmed;
   }
 
   @override
   void initState() {
     super.initState();
-    final url = widget.r['url'];
-    if (url != null) {
-      final regExp = RegExp(r'.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*');
-      final match = regExp.firstMatch(url);
-      final videoId = (match != null && match.group(1)?.length == 11) ? match.group(1) : null;
-      
-      if (videoId != null) {
-        _controller = YoutubePlayerController.fromVideoId(
-          videoId: videoId,
-          autoPlay: true,
-          params: const YoutubePlayerParams(
-            showControls: true,
-            mute: false,
-            showFullscreenButton: true,
-          ),
-        );
+    _initPlayer();
+  }
+
+  void _initPlayer() {
+    final rawUrl = widget.r['url']?.toString();
+    if (rawUrl == null || rawUrl.trim().isEmpty) {
+      _videoError = 'No video URL provided.';
+      return;
+    }
+
+    final normalizedUrl = _normalizeMediaUrl(rawUrl);
+    _resolvedUrl = normalizedUrl;
+
+    final youtubeId = _extractYoutubeId(normalizedUrl);
+    if (youtubeId != null) {
+      _youtubeController = YoutubePlayerController.fromVideoId(
+        videoId: youtubeId,
+        autoPlay: true,
+        params: const YoutubePlayerParams(
+          showControls: true,
+          mute: false,
+          showFullscreenButton: true,
+        ),
+      );
+      return;
+    }
+
+    final uri = Uri.tryParse(normalizedUrl);
+    if (uri == null || !uri.hasScheme || (uri.scheme != 'http' && uri.scheme != 'https')) {
+      _videoError = 'Invalid video URL';
+      return;
+    }
+
+    _startNativeVideo(uri);
+  }
+
+  Future<void> _startNativeVideo(Uri uri) async {
+    final oldController = _videoController;
+    _videoController = VideoPlayerController.networkUrl(uri);
+    await oldController?.dispose();
+
+    if (mounted) {
+      setState(() {
+        _isVideoInitialized = false;
+        _videoError = null;
+      });
+    }
+
+    try {
+      await _videoController!.initialize();
+      await _videoController!.play();
+      if (mounted) {
+        setState(() {
+          _isVideoInitialized = true;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _videoError = 'Could not load video.';
+        });
       }
     }
   }
 
+  Future<void> _openExternally() async {
+    if (_resolvedUrl == null) return;
+    final uri = Uri.tryParse(_resolvedUrl!);
+    if (uri != null) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  Future<void> _openFullscreen() async {
+    final controller = _videoController;
+    if (controller == null) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => _FullscreenVideoPage(
+          controller: controller,
+          formatDuration: _formatDuration,
+        ),
+      ),
+    );
+  }
+
+  String _formatDuration(Duration d) {
+    final minutes = d.inMinutes.remainder(60).toString().padLeft(1, '0');
+    final seconds = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+    if (d.inHours > 0) {
+      return '${d.inHours}:${d.inMinutes.remainder(60).toString().padLeft(2, '0')}:$seconds';
+    }
+    return '$minutes:$seconds';
+  }
+
   @override
   void dispose() {
-    _controller?.close();
+    _youtubeController?.close();
+    _videoController?.dispose();
     super.dispose();
+  }
+
+  Widget _buildNativePlayerArea() {
+    if (_videoError != null) {
+      return Container(
+        color: Colors.black,
+        padding: const EdgeInsets.all(16),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.error_outline_rounded, color: Colors.white70, size: 32),
+              const SizedBox(height: 8),
+              Text(_videoError!, style: const TextStyle(color: Colors.white), textAlign: TextAlign.center),
+              if (_resolvedUrl != null) ...[
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: () {
+                        final uri = Uri.tryParse(_resolvedUrl!);
+                        if (uri != null) _startNativeVideo(uri);
+                      },
+                      icon: const Icon(Icons.refresh_rounded, size: 16, color: Colors.white),
+                      label: const Text('Retry', style: TextStyle(color: Colors.white)),
+                      style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.white38)),
+                    ),
+                    TextButton.icon(
+                      onPressed: _openExternally,
+                      icon: const Icon(Icons.open_in_new_rounded, size: 16, color: Colors.white70),
+                      label: const Text('Open Externally', style: TextStyle(color: Colors.white70)),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        ),
+      );
+    }
+
+    final controller = _videoController;
+    if (controller == null || !_isVideoInitialized) {
+      return Container(
+        color: Colors.black,
+        child: const Center(
+          child: CircularProgressIndicator(color: Colors.white),
+        ),
+      );
+    }
+
+    return Container(
+      color: Colors.black,
+      child: ValueListenableBuilder<VideoPlayerValue>(
+        valueListenable: controller,
+        builder: (context, value, _) {
+          final isMuted = value.volume == 0;
+          return GestureDetector(
+            onTap: () => setState(() => _showControls = !_showControls),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Center(
+                  child: AspectRatio(
+                    aspectRatio: value.aspectRatio > 0 ? value.aspectRatio : 16 / 9,
+                    child: VideoPlayer(controller),
+                  ),
+                ),
+                if (value.isBuffering)
+                  const Center(child: CircularProgressIndicator(color: Colors.white70)),
+                if (_showControls) ...[
+                  GestureDetector(
+                    onTap: () {
+                      if (value.isPlaying) {
+                        controller.pause();
+                      } else {
+                        if (value.position >= value.duration && value.duration > Duration.zero) {
+                          controller.seekTo(Duration.zero);
+                        }
+                        controller.play();
+                      }
+                    },
+                    child: Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.55),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        value.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                        color: Colors.white,
+                        size: 32,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(12, 8, 8, 4),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                          colors: [Colors.black.withValues(alpha: 0.8), Colors.transparent],
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          VideoProgressIndicator(
+                            controller,
+                            allowScrubbing: true,
+                            colors: VideoProgressColors(
+                              playedColor: context.primary,
+                              bufferedColor: Colors.white38,
+                              backgroundColor: Colors.white24,
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                '${_formatDuration(value.position)} / ${_formatDuration(value.duration)}',
+                                style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
+                              ),
+                              const Spacer(),
+                              IconButton(
+                                icon: Icon(
+                                  isMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                                onPressed: () => controller.setVolume(isMuted ? 1.0 : 0.0),
+                                visualDensity: VisualDensity.compact,
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.fullscreen_rounded, color: Colors.white, size: 22),
+                                onPressed: _openFullscreen,
+                                visualDensity: VisualDensity.compact,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          );
+        },
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final description = widget.r['description']?.toString().trim();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SizedBox(
-          height: 220,
-          child: _controller != null 
-            ? YoutubePlayer(
-                controller: _controller!,
-              )
-            : Container(
-                color: Colors.black,
-                child: const Center(
-                  child: Text('Invalid video URL', style: TextStyle(color: Colors.white)),
-                ),
-              ),
+          height: 240,
+          child: _youtubeController != null
+              ? YoutubePlayer(controller: _youtubeController!)
+              : _buildNativePlayerArea(),
         ),
         Expanded(
           child: Container(
@@ -668,7 +918,7 @@ class _VideoModalPlayerState extends State<_VideoModalPlayer> {
                 Text('Description', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: context.textDark)),
                 const SizedBox(height: 12),
                 Text(
-                  'This is an Educational Video',
+                  (description != null && description.isNotEmpty) ? description : 'This is an Educational Video',
                   style: TextStyle(fontSize: 14, color: context.textMuted, height: 1.6),
                 ),
               ],
@@ -676,6 +926,104 @@ class _VideoModalPlayerState extends State<_VideoModalPlayer> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _FullscreenVideoPage extends StatefulWidget {
+  final VideoPlayerController controller;
+  final String Function(Duration) formatDuration;
+
+  const _FullscreenVideoPage({
+    required this.controller,
+    required this.formatDuration,
+  });
+
+  @override
+  State<_FullscreenVideoPage> createState() => _FullscreenVideoPageState();
+}
+
+class _FullscreenVideoPageState extends State<_FullscreenVideoPage> {
+  bool _showControls = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: ValueListenableBuilder<VideoPlayerValue>(
+          valueListenable: widget.controller,
+          builder: (context, value, _) {
+            return GestureDetector(
+              onTap: () => setState(() => _showControls = !_showControls),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Center(
+                    child: AspectRatio(
+                      aspectRatio: value.aspectRatio > 0 ? value.aspectRatio : 16 / 9,
+                      child: VideoPlayer(widget.controller),
+                    ),
+                  ),
+                  if (_showControls) ...[
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: IconButton(
+                        icon: const Icon(Icons.fullscreen_exit_rounded, color: Colors.white, size: 28),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => value.isPlaying ? widget.controller.pause() : widget.controller.play(),
+                      child: Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.55),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          value.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                          color: Colors.white,
+                          size: 38,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      left: 16,
+                      right: 16,
+                      bottom: 16,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          VideoProgressIndicator(
+                            widget.controller,
+                            allowScrubbing: true,
+                            colors: const VideoProgressColors(
+                              playedColor: Colors.white,
+                              bufferedColor: Colors.white38,
+                              backgroundColor: Colors.white24,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              '${widget.formatDuration(value.position)} / ${widget.formatDuration(value.duration)}',
+                              style: const TextStyle(color: Colors.white, fontSize: 12),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 }

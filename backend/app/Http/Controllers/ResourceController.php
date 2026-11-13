@@ -49,7 +49,12 @@ class ResourceController extends Controller
             'ContentType' => $file->getMimeType() ?: 'application/octet-stream',
         ]);
 
-        return rtrim($request->getSchemeAndHttpHost(), '/').'/api/v1/resources/media/'.$filename;
+        $base = rtrim($request->getSchemeAndHttpHost(), '/');
+        if (str_starts_with($base, 'http://') && ! preg_match('#^http://(localhost|127\.0\.0\.1)(:\d+)?$#i', $base)) {
+            $base = 'https://'.substr($base, 7);
+        }
+
+        return $base.'/api/v1/resources/media/'.$filename;
     }
 
     /**
