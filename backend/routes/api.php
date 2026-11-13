@@ -127,6 +127,7 @@ Route::prefix('v1')->group(function () {
     // ── Public Data (no auth required) ───────────────────────────────────
     Route::middleware('throttle:60,1')->group(function () {
         Route::get('/resources', [ResourceController::class, 'index']);
+        Route::get('/resources/media/{filename}', [ResourceController::class, 'media'])->where('filename', '[A-Za-z0-9._-]+');
         Route::get('/settings', [SettingsController::class, 'index']);
         Route::get('/sectors', [SectorController::class, 'index']);
         Route::get('/disclosures', [CorporateDisclosureController::class, 'index']);

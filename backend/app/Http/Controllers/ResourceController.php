@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Resource;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ResourceController extends Controller
 {
@@ -31,7 +33,7 @@ class ResourceController extends Controller
     }
 
     /**
-     * Store an uploaded resource file on the public disk and return its URL.
+     * Store an uploaded resource file in Cloudflare R2 (s3 disk) and return its stable media URL.
      */
     private function storeUploadedFile(Request $request): ?string
     {
@@ -39,9 +41,46 @@ class ResourceController extends Controller
             return null;
         }
 
-        $path = $request->file('file')->store('resources', 'public');
+        $file = $request->file('file');
+        $ext = strtolower($file->getClientOriginalExtension() ?: $file->guessExtension() ?: 'bin');
+        $filename = Str::random(40).'.'.$ext;
 
-        return rtrim($request->getSchemeAndHttpHost(), '/').'/storage/'.$path;
+        Storage::disk('s3')->putFileAs('resources', $file, $filename, [
+            'ContentType' => $file->getMimeType() ?: 'application/octet-stream',
+        ]);
+
+        return rtrim($request->getSchemeAndHttpHost(), '/').'/api/v1/resources/media/'.$filename;
+    }
+
+    /**
+     * Remove a previously uploaded R2 resource file if the URL points to our media endpoint.
+     */
+    private function deleteManagedMedia(?string $url): void
+    {
+        if (! $url || ! preg_match('#/api/v1/resources/media/([A-Za-z0-9._-]+)$#', $url, $matches)) {
+            return;
+        }
+
+        Storage::disk('s3')->delete('resources/'.$matches[1]);
+    }
+
+    /**
+     * Redirect requests for uploaded R2 resource files to a fresh presigned URL.
+     */
+    public function media(string $filename)
+    {
+        if (! preg_match('/^[A-Za-z0-9._-]+$/', $filename)) {
+            abort(404);
+        }
+
+        $key = 'resources/'.$filename;
+        if (! Storage::disk('s3')->exists($key)) {
+            abort(404);
+        }
+
+        $signedUrl = Storage::disk('s3')->temporaryUrl($key, now()->addHours(6));
+
+        return redirect()->away($signedUrl, 302);
     }
 
     public function store(Request $request)
@@ -86,6 +125,7 @@ class ResourceController extends Controller
         ]);
 
         if ($uploadedUrl = $this->storeUploadedFile($request)) {
+            $this->deleteManagedMedia($resource->url);
             $validated['url'] = $uploadedUrl;
         }
         unset($validated['file']);
@@ -101,6 +141,7 @@ class ResourceController extends Controller
     public function destroy($id)
     {
         $resource = Resource::findOrFail($id);
+        $this->deleteManagedMedia($resource->url);
         $resource->delete();
 
         return response()->json([
