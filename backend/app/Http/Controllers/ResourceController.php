@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Resource;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class ResourceController extends Controller
 {
@@ -42,7 +41,7 @@ class ResourceController extends Controller
 
         $path = $request->file('file')->store('resources', 'public');
 
-        return Storage::disk('public')->url($path);
+        return rtrim($request->getSchemeAndHttpHost(), '/').'/storage/'.$path;
     }
 
     public function store(Request $request)
