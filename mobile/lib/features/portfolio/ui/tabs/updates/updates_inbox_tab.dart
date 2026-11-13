@@ -624,13 +624,13 @@ class _UpdatesInboxTabState extends State<UpdatesInboxTab> {
       case 'digest':
         return 'Irshad Digest';
       case 'portfolio':
-        return 'Portfolio';
+        return 'Alert';
       case 'security':
         return 'Security';
       case 'market_news':
         return 'Market';
       default:
-        return 'System';
+        return 'Alert';
     }
   }
 

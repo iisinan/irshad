@@ -20,7 +20,7 @@ final List<Map<String, String>> _onboardingData = [
       'icon': 'search',
     },
     {
-      'title': 'Thematic Baskets',
+      'title': 'Investing Baskets',
       'subtitle': 'Explore curated collections of halal Nigerian stocks like "Market Blue Chips" or "Halal Agriculture".',
       'image': 'assets/onboarding_baskets.png',
       'icon': 'widgets',
