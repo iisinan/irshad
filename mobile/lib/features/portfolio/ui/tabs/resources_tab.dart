@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 import 'package:video_player/video_player.dart';
@@ -616,10 +617,19 @@ class _VideoModalPlayerState extends State<_VideoModalPlayer> {
   bool _showControls = true;
   String? _videoError;
   String? _resolvedUrl;
+  String? _originalUrl;
 
   String? _extractYoutubeId(String url) {
     final regExp = RegExp(
       r'(?:https?:\/\/)?(?:www\.|m\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})',
+    );
+    return regExp.firstMatch(url)?.group(1);
+  }
+
+  String? _extractCloudflareStreamId(String url) {
+    final regExp = RegExp(
+      r'(?:https?:\/\/)?(?:(?:iframe\.)?videodelivery\.net|(?:watch\.)?cloudflarestream\.com)\/([a-zA-Z0-9]{32,})',
+      caseSensitive: false,
     );
     return regExp.firstMatch(url)?.group(1);
   }
@@ -634,6 +644,27 @@ class _VideoModalPlayerState extends State<_VideoModalPlayer> {
     return trimmed;
   }
 
+  /// Pre-resolves HTTP 302 redirects (such as /api/v1/resources/media/...) to obtain direct Cloudflare R2 presigned URLs.
+  Future<Uri> _resolveFinalMediaUri(Uri uri) async {
+    if (uri.path.contains('/api/v1/resources/media/')) {
+      try {
+        final client = HttpClient();
+        client.connectionTimeout = const Duration(seconds: 8);
+        final request = await client.getUrl(uri);
+        request.followRedirects = false;
+        final response = await request.close();
+        if (response.isRedirect && response.headers.value(HttpHeaders.locationHeader) != null) {
+          final location = response.headers.value(HttpHeaders.locationHeader)!;
+          final resolvedUri = Uri.tryParse(location);
+          if (resolvedUri != null) {
+            return resolvedUri;
+          }
+        }
+      } catch (_) {}
+    }
+    return uri;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -643,15 +674,16 @@ class _VideoModalPlayerState extends State<_VideoModalPlayer> {
   void _initPlayer() {
     final rawUrl = widget.r['url']?.toString();
     if (rawUrl == null || rawUrl.trim().isEmpty) {
-      _videoError = 'No video URL provided.';
+      setState(() => _videoError = 'No video URL provided.');
       return;
     }
 
-    final normalizedUrl = _normalizeMediaUrl(rawUrl);
-    _resolvedUrl = normalizedUrl;
+    var normalizedUrl = _normalizeMediaUrl(rawUrl);
+    _originalUrl = normalizedUrl;
 
     final youtubeId = _extractYoutubeId(normalizedUrl);
     if (youtubeId != null) {
+      _resolvedUrl = normalizedUrl;
       _youtubeController = YoutubePlayerController.fromVideoId(
         videoId: youtubeId,
         autoPlay: true,
@@ -664,9 +696,17 @@ class _VideoModalPlayerState extends State<_VideoModalPlayer> {
       return;
     }
 
+    // Support Cloudflare Stream watch or iframe URLs
+    final cfStreamId = _extractCloudflareStreamId(normalizedUrl);
+    if (cfStreamId != null) {
+      normalizedUrl = 'https://videodelivery.net/$cfStreamId/manifest/video.m3u8';
+    }
+
+    _resolvedUrl = normalizedUrl;
+
     final uri = Uri.tryParse(normalizedUrl);
     if (uri == null || !uri.hasScheme || (uri.scheme != 'http' && uri.scheme != 'https')) {
-      _videoError = 'Invalid video URL';
+      setState(() => _videoError = 'Invalid video URL');
       return;
     }
 
@@ -675,7 +715,6 @@ class _VideoModalPlayerState extends State<_VideoModalPlayer> {
 
   Future<void> _startNativeVideo(Uri uri) async {
     final oldController = _videoController;
-    _videoController = VideoPlayerController.networkUrl(uri);
     await oldController?.dispose();
 
     if (mounted) {
@@ -686,8 +725,39 @@ class _VideoModalPlayerState extends State<_VideoModalPlayer> {
     }
 
     try {
-      await _videoController!.initialize();
-      await _videoController!.play();
+      final effectiveUri = await _resolveFinalMediaUri(uri);
+      _resolvedUrl = effectiveUri.toString();
+
+      VideoFormat? formatHint;
+      final fullUrl = effectiveUri.toString().toLowerCase();
+      if (fullUrl.contains('.m3u8') || fullUrl.contains('manifest/video.m3u8')) {
+        formatHint = VideoFormat.hls;
+      } else if (fullUrl.contains('.mp4') || fullUrl.contains('.mov') || fullUrl.contains('.webm') || fullUrl.contains('.mkv')) {
+        formatHint = VideoFormat.other;
+      }
+
+      final controller = VideoPlayerController.networkUrl(
+        effectiveUri,
+        formatHint: formatHint,
+        httpHeaders: const {
+          'User-Agent': 'IrshadApp/2.0 (Mobile; Android)',
+          'Accept': '*/*',
+        },
+      );
+
+      _videoController = controller;
+
+      controller.addListener(() {
+        if (mounted && controller.value.hasError) {
+          setState(() {
+            _videoError = controller.value.errorDescription ?? 'Error playing video.';
+          });
+        }
+      });
+
+      await controller.initialize();
+      await controller.play();
+
       if (mounted) {
         setState(() {
           _isVideoInitialized = true;
@@ -703,8 +773,9 @@ class _VideoModalPlayerState extends State<_VideoModalPlayer> {
   }
 
   Future<void> _openExternally() async {
-    if (_resolvedUrl == null) return;
-    final uri = Uri.tryParse(_resolvedUrl!);
+    final target = _originalUrl ?? _resolvedUrl;
+    if (target == null) return;
+    final uri = Uri.tryParse(target);
     if (uri != null) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
@@ -758,8 +829,11 @@ class _VideoModalPlayerState extends State<_VideoModalPlayer> {
                   children: [
                     OutlinedButton.icon(
                       onPressed: () {
-                        final uri = Uri.tryParse(_resolvedUrl!);
-                        if (uri != null) _startNativeVideo(uri);
+                        final raw = _originalUrl ?? _resolvedUrl;
+                        if (raw != null) {
+                          final uri = Uri.tryParse(raw);
+                          if (uri != null) _startNativeVideo(uri);
+                        }
                       },
                       icon: const Icon(Icons.refresh_rounded, size: 16, color: Colors.white),
                       label: const Text('Retry', style: TextStyle(color: Colors.white)),
