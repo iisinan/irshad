@@ -36,7 +36,11 @@ return new class extends Migration
             ComplianceStatusChange::whereIn('id', $toDelete)->delete();
         }
 
-        Cache::forget('updates_news_insights');
+        try {
+            Cache::forget('updates_news_insights');
+        } catch (\Throwable $e) {
+            // Redis may not be running yet during container entrypoint migrations
+        }
     }
 
     /**
