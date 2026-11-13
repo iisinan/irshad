@@ -17,6 +17,9 @@ RUN apk add --no-cache \
 COPY --from=mlocati/php-extension-installer:latest /usr/bin/install-php-extensions /usr/local/bin/
 RUN install-php-extensions pdo_pgsql exif pcntl bcmath gd zip sockets redis opcache
 
+# Increase PHP upload and POST limits for resource media uploads (videos/documents)
+RUN printf "upload_max_filesize = 100M\npost_max_size = 105M\nmemory_limit = 512M\n" > /usr/local/etc/php/conf.d/uploads.ini
+
 # Get Composer 2
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 

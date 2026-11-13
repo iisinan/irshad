@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Resource;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ResourceController extends Controller
 {
@@ -30,19 +31,39 @@ class ResourceController extends Controller
         return response()->json($data);
     }
 
+    /**
+     * Store an uploaded resource file on the public disk and return its URL.
+     */
+    private function storeUploadedFile(Request $request): ?string
+    {
+        if (! $request->hasFile('file')) {
+            return null;
+        }
+
+        $path = $request->file('file')->store('resources', 'public');
+
+        return Storage::disk('public')->url($path);
+    }
+
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'title' => 'required|string|max:255',
             'scholar' => 'nullable|string|max:255',
             'type' => 'required|in:video,document',
-            'url' => 'required|url',
+            'url' => 'required_without:file|nullable|url',
+            'file' => 'required_without:url|nullable|file|max:102400|mimes:mp4,mov,avi,webm,mkv,pdf,doc,docx,ppt,pptx',
             'duration' => 'nullable|string|max:50',
             'thumbnail' => 'nullable|url',
             'category' => 'nullable|string|max:255',
         ]);
 
-        $resource = Resource::create($request->all());
+        if ($uploadedUrl = $this->storeUploadedFile($request)) {
+            $validated['url'] = $uploadedUrl;
+        }
+        unset($validated['file']);
+
+        $resource = Resource::create($validated);
 
         return response()->json([
             'message' => 'Resource created successfully',
@@ -54,17 +75,23 @@ class ResourceController extends Controller
     {
         $resource = Resource::findOrFail($id);
 
-        $request->validate([
+        $validated = $request->validate([
             'title' => 'sometimes|required|string|max:255',
             'scholar' => 'nullable|string|max:255',
             'type' => 'sometimes|required|in:video,document',
-            'url' => 'sometimes|required|url',
+            'url' => 'sometimes|nullable|url',
+            'file' => 'nullable|file|max:102400|mimes:mp4,mov,avi,webm,mkv,pdf,doc,docx,ppt,pptx',
             'duration' => 'nullable|string|max:50',
             'thumbnail' => 'nullable|url',
             'category' => 'nullable|string|max:255',
         ]);
 
-        $resource->update($request->all());
+        if ($uploadedUrl = $this->storeUploadedFile($request)) {
+            $validated['url'] = $uploadedUrl;
+        }
+        unset($validated['file']);
+
+        $resource->update($validated);
 
         return response()->json([
             'message' => 'Resource updated successfully',

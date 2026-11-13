@@ -12,6 +12,9 @@ php artisan config:clear
 php artisan route:clear
 php artisan view:clear
 
+# Ensure public/storage symlink exists for uploaded resources/products
+php artisan storage:link || true
+
 # Export default PORT if not set
 export PORT=${PORT:-8080}
 sed -i "s/--port=8080/--port=${PORT}/g" /var/www/supervisord.conf
