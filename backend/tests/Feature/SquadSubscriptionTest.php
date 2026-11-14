@@ -87,7 +87,7 @@ class SquadSubscriptionTest extends TestCase
                 && $request['email'] === $user->email
                 && $request['amount'] === 650000
                 && $request['currency'] === 'NGN'
-                && $request['is_recurring'] === true
+                && !isset($request['is_recurring'])
                 && $request['transaction_ref'] === $ref
                 && $request['callback_url'] === 'https://iirshad.com/settings/billing/callback';
         });
@@ -95,6 +95,8 @@ class SquadSubscriptionTest extends TestCase
 
     public function test_initialize_falls_back_when_merchant_lacks_recurring_authorization(): void
     {
+        config(['services.squad.recurring' => true]);
+
         Http::fake([
             'https://sandbox-api-d.squadco.com/transaction/initiate' => Http::sequence()
                 ->push([

@@ -49,7 +49,8 @@ class SquadService
             'metadata'        => $metadata,
         ];
 
-        $tryRecurring = (bool) config('services.squad.recurring', true);
+        $tryRecurring = (bool) config('services.squad.recurring', false)
+            && !Cache::get('squad:recurring_unauthorized', false);
         if ($tryRecurring) {
             $payload['is_recurring'] = true;
         }
@@ -61,7 +62,7 @@ class SquadService
         $json = $response->json() ?? [];
 
         // If merchant account does not yet have recurring/tokenization enabled by Squad,
-        // automatically fall back to standard checkout so users can still subscribe immediately.
+        // cache that state and fall back to standard checkout so users can still subscribe immediately.
         if (
             $tryRecurring
             && !$response->successful()
@@ -69,6 +70,7 @@ class SquadService
             && str_contains(strtolower((string) data_get($json, 'message', '')), 'not authorized')
         ) {
             Log::warning('Squad recurring not yet authorized on merchant account; retrying standard checkout');
+            Cache::put('squad:recurring_unauthorized', true, now()->addHours(6));
             unset($payload['is_recurring']);
             $response = Http::withToken($this->secret())
                 ->timeout(15)

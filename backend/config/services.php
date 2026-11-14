@@ -57,7 +57,7 @@ return [
         'secret'    => env('SQUAD_SECRET_KEY'),
         'public'    => env('SQUAD_PUBLIC_KEY'),
         'base_url'  => rtrim(env('SQUAD_BASE_URL', 'https://sandbox-api-d.squadco.com'), '/'),
-        'recurring' => filter_var(env('SQUAD_RECURRING_ENABLED', true), FILTER_VALIDATE_BOOLEAN),
+        'recurring' => filter_var(env('SQUAD_RECURRING_ENABLED', false), FILTER_VALIDATE_BOOLEAN),
     ],
 
 ];
