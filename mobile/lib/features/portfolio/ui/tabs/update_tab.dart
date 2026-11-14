@@ -232,7 +232,12 @@ class _UpdateTabState extends State<UpdateTab> {
                   context: context,
                   isScrollControlled: true,
                   backgroundColor: Colors.transparent,
-                  builder: (ctx) => const UpgradePaywallBottomSheet(message: 'Upgrade to view this section and get full access to the market intelligence.'),
+                  builder: (ctx) => UpgradePaywallBottomSheet(
+                    requiredTier: 'max',
+                    message: tab['id'] == 'dividends'
+                        ? 'Dividend Alerts & purification payout insights are exclusive to the Noor (Max) plan.'
+                        : '90-Day Drift Tracking & compliance status alerts are exclusive to the Noor (Max) plan.',
+                  ),
                 );
                 return;
               }

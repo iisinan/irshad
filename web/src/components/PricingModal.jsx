@@ -31,7 +31,7 @@ const PricingModal = ({ onClose }) => {
         
         {/* Pass a prop to hide footer in modal if possible, but for now just wrap it */}
         <div className="pricing-modal-wrapper" style={{ padding: '20px 0' }}>
-          <Pricing isModal={true} />
+          <Pricing isModal={true} onClose={onClose} />
         </div>
       </div>
     </div>

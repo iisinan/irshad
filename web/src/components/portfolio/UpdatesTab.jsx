@@ -105,6 +105,77 @@ function MonthlySpotlightView() {
           </div>
         </div>
       </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+        <div style={{ background: 'var(--bg)', borderRadius: '20px', padding: '22px', border: '1px solid var(--border)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.95rem' }}>
+            <Star size={18} color="#d97706" /> Dividend Yield Leaders
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {(spotlight.dividend_yield_leaders || []).length === 0 ? (
+              <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>No upcoming Halal dividend leaders recorded this month.</div>
+            ) : (
+              (spotlight.dividend_yield_leaders || []).map((item, idx) => (
+                <div key={`${item.symbol}-${idx}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', borderRadius: '12px', background: 'var(--bg-section)' }}>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: '0.88rem', color: 'var(--text-dark)' }}>{item.symbol}</div>
+                    <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>{item.name}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontWeight: 800, fontSize: '0.86rem', color: 'var(--halal)' }}>₦{Number(item.dividend_amount || 0).toLocaleString()}</div>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Pay: {item.pay_date || 'TBA'}</div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        <div style={{ background: 'var(--bg)', borderRadius: '20px', padding: '22px', border: '1px solid var(--border)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.95rem' }}>
+            <Shield size={18} color="var(--primary)" /> Sector Shariah Compliance
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {(spotlight.sector_breakdown || []).map(sec => (
+              <div key={sec.sector} style={{ padding: '10px 12px', borderRadius: '12px', background: 'var(--bg-section)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <span style={{ fontWeight: 800, fontSize: '0.84rem', color: 'var(--text-dark)' }}>{sec.sector}</span>
+                  <span style={{ fontWeight: 800, fontSize: '0.76rem', color: 'var(--halal)' }}>
+                    {sec.halal_companies}/{sec.total_companies} Halal ({sec.compliance_rate}%)
+                  </span>
+                </div>
+                <div style={{ height: '6px', borderRadius: '999px', background: 'var(--border)', overflow: 'hidden' }}>
+                  <div style={{ width: `${Math.min(100, Number(sec.compliance_rate || 0))}%`, height: '100%', background: 'var(--halal)', borderRadius: '999px' }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {(spotlight.spotlight_articles || []).length > 0 && (
+        <div style={{ background: 'var(--bg)', borderRadius: '20px', padding: '22px', border: '1px solid var(--border)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.95rem' }}>
+            <Newspaper size={18} color="var(--primary)" /> Curated Market Intelligence Briefs
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px' }}>
+            {(spotlight.spotlight_articles || []).map(art => (
+              <div key={art.id} style={{ padding: '14px', borderRadius: '14px', background: 'var(--bg-section)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--primary)' }}>{art.symbol || art.category}</span>
+                  {art.time_ago && <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{art.time_ago}</span>}
+                </div>
+                <div style={{ fontWeight: 800, fontSize: '0.86rem', color: 'var(--text-dark)', lineHeight: 1.35 }}>{art.title}</div>
+                {art.source_url && (
+                  <a href={art.source_url} target="_blank" rel="noreferrer" style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--primary)', marginTop: 'auto', textDecoration: 'none' }}>
+                    Read source →
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -290,13 +361,12 @@ export default function UpdatesTab({ unreadCount = 0 }) {
         flexWrap: 'wrap',
         gap: '16px',
         boxShadow: '0 8px 32px rgba(69, 165, 138, 0.04), inset 0 2px 0 rgba(255,255,255,0.7)',
-        position: 'relative',
         overflow: 'hidden'
       }}>
         {/* Subtle decorative glow orb */}
         <div style={{ position: 'absolute', top: '-50%', left: '-5%', width: '150px', height: '150px', background: 'radial-gradient(circle, var(--primary-50) 0%, transparent 70%)', zIndex: 0, opacity: 0.6, pointerEvents: 'none' }} />
         
-        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', zIndex: 1 }}>
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '16px', zIndex: 1 }}>
           <div style={{ 
             fontSize: '1.8rem', 
             lineHeight: 1, 

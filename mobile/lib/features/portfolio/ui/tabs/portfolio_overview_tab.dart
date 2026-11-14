@@ -1120,7 +1120,18 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> with Automa
     final bool isUp = returnPct >= 0;
     final fmt = NumberFormat('#,##0', 'en_US');
 
-    final String? gracePeriodEndsAtStr = holding['grace_period_ends_at'];
+    final appState = Provider.of<AppStateProvider>(context, listen: false);
+    final portfolioProvider = context.read<PortfolioProvider>();
+    final tier = appState.userProfile?['tier'] as Map<String, dynamic>?;
+    final tierSlug = (tier?['slug'] ?? 'free').toString();
+    final tierFeatures = tier?['features'] as Map<String, dynamic>? ?? {};
+    final driftTrackingEnabled = portfolioProvider.summary['drift_tracking_enabled'] == true ||
+        tierFeatures['drift_tracking'] == true ||
+        tierSlug == 'max';
+    final driftMap = holding['drift_tracking'] as Map<String, dynamic>?;
+    final bool isNearDriftThreshold = driftTrackingEnabled && (driftMap?['is_near_threshold'] == true);
+
+    final String? gracePeriodEndsAtStr = driftTrackingEnabled ? holding['grace_period_ends_at']?.toString() : null;
     int? daysLeft;
     if (gracePeriodEndsAtStr != null) {
       final end = DateTime.tryParse(gracePeriodEndsAtStr);
@@ -1323,6 +1334,32 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> with Automa
                   ],
                 ),
               ),
+            if (isNearDriftThreshold && daysLeft == null)
+              Container(
+                margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD97706).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFFD97706).withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.trending_up_rounded, size: 14, color: Color(0xFFD97706)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '90-Day Drift Tracking: Approaching AAOIFI threshold (Impure Rev: ${(num.tryParse(driftMap?['impure_income_ratio']?.toString() ?? '0') ?? 0).toStringAsFixed(1)}%, Debt: ${(num.tryParse(driftMap?['debt_ratio']?.toString() ?? '0') ?? 0).toStringAsFixed(1)}%).',
+                        style: const TextStyle(
+                          color: Color(0xFFB45309),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
           ],
         ),
       ),
@@ -1449,22 +1486,23 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> with Automa
     final currentHoldings = portfolioProvider.holdings.length;
     
     int limit = -1;
-    String planName = 'Noor';
-    if (tierSlug == 'free') {
+    final dynamic rawLimit = (appState.userProfile?['tier']?['features'] as Map<String, dynamic>?)?['portfolio_limit'];
+    if (rawLimit is num) {
+      limit = rawLimit.toInt();
+    } else if (tierSlug == 'free') {
       limit = 3;
-      planName = 'Miftah';
     } else if (tierSlug == 'pro') {
       limit = 7;
-      planName = 'Rawdah';
     }
+    final String planName = tierSlug == 'max' ? 'Noor' : (tierSlug == 'pro' ? 'Rawdha' : 'Miftah');
     
-    print("DEBUG _showAddHoldingSheet: tierSlug=$tierSlug, currentHoldings=$currentHoldings, limit=$limit");
     if (limit != -1 && currentHoldings >= limit) {
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
         builder: (context) => UpgradePaywallBottomSheet(
+          requiredTier: tierSlug == 'pro' ? 'max' : 'pro',
           message: 'You have reached your portfolio limit of $limit stocks on the $planName plan. Upgrade to track more stocks.',
         ),
       );

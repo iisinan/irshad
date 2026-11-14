@@ -8,6 +8,7 @@ import '../../portfolio/ui/zakat_calculator_screen.dart';
 import '../../portfolio/providers/portfolio_provider.dart';
 
 import 'package:irshad_mobile/core/theme/app_theme.dart';
+import 'package:irshad_mobile/core/widgets/upgrade_paywall_bottom_sheet.dart';
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -122,6 +123,11 @@ Color get cardBg => context.bgAlt;
                       _buildSectionHeader('Account Information'),
                       const SizedBox(height: 12),
                       _buildInfoCard(),
+
+                      const SizedBox(height: 32),
+                      _buildSectionHeader('Plan & Monthly Usage'),
+                      const SizedBox(height: 12),
+                      _buildPlanUsageCard(user),
                       
                       const SizedBox(height: 32),
                       _buildSectionHeader('Tools'),
@@ -335,6 +341,164 @@ Color get cardBg => context.bgAlt;
                 }()
               : DateFormat('MMMM yyyy').format(DateTime.now()),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPlanUsageCard(Map<String, dynamic> user) {
+    final tier = user['tier'] as Map<String, dynamic>? ?? {};
+    final slug = (tier['slug'] ?? 'free').toString();
+    final planName = (tier['name'] ?? 'Miftah (Free)').toString();
+    final features = tier['features'] as Map<String, dynamic>? ?? {};
+    final usage = user['usage_summary'] as Map<String, dynamic>? ?? {};
+    final activeSub = user['active_subscription'] as Map<String, dynamic>?;
+
+    int limitOf(String key, int fallback) {
+      final raw = features[key];
+      if (raw is num) return raw.toInt();
+      return fallback;
+    }
+
+    int usedOf(String key) {
+      final u = usage[key];
+      if (u is Map && u['used'] is num) return (u['used'] as num).toInt();
+      return 0;
+    }
+
+    final rows = [
+      (
+        'Stock Screens (Monthly)',
+        usedOf('stock_screens_per_month'),
+        limitOf('stock_screens_per_month', slug == 'max' ? -1 : slug == 'pro' ? 10 : 3),
+      ),
+      (
+        'Portfolio Holdings',
+        usedOf('portfolio_limit'),
+        limitOf('portfolio_limit', slug == 'max' ? -1 : slug == 'pro' ? 7 : 3),
+      ),
+      (
+        'Watchlist Alerts',
+        usedOf('watchlist_limit'),
+        limitOf('watchlist_limit', slug == 'max' ? -1 : slug == 'pro' ? 2 : 0),
+      ),
+      (
+        'Custom Baskets',
+        usedOf('baskets'),
+        limitOf('baskets', slug == 'max' ? -1 : slug == 'pro' ? 3 : 0),
+      ),
+      (
+        'Purification Runs (Monthly)',
+        usedOf('purifications_per_month'),
+        limitOf('purifications_per_month', slug == 'max' ? -1 : slug == 'pro' ? 2 : 0),
+      ),
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: context.bgAlt,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: context.divider),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      planName,
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: context.textDark),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      activeSub != null
+                          ? '${(activeSub['billing_cycle'] ?? 'quarterly').toString().toUpperCase()} • ${(activeSub['status'] ?? 'active').toString().toUpperCase()}'
+                          : 'Free Community Plan',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: context.textMuted),
+                    ),
+                  ],
+                ),
+              ),
+              if (slug != 'max')
+                TextButton(
+                  onPressed: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (ctx) => UpgradePaywallBottomSheet(
+                        requiredTier: slug == 'pro' ? 'max' : 'pro',
+                        message: slug == 'pro'
+                            ? 'Upgrade to Noor (Max) for unlimited screens, holdings, Dividend Alerts, 90-Day Drift Tracking, and Monthly Spotlight.'
+                            : 'Upgrade to Rawdha (Pro) or Noor (Max) on the Irshad website to unlock higher quotas, Zakat, and Purification.',
+                      ),
+                    );
+                  },
+                  style: TextButton.styleFrom(
+                    backgroundColor: context.primary.withValues(alpha: 0.1),
+                    foregroundColor: context.primary,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  ),
+                  child: Text(slug == 'pro' ? 'Go Noor' : 'Upgrade', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12)),
+                ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Divider(color: context.divider, height: 1),
+          const SizedBox(height: 14),
+          ...rows.map((r) {
+            final label = r.$1;
+            final used = r.$2;
+            final limit = r.$3;
+            final valueText = limit < 0
+                ? 'Unlimited ($used used)'
+                : limit == 0
+                    ? 'Locked'
+                    : '$used / $limit';
+            final pct = limit > 0 ? (used / limit).clamp(0.0, 1.0) : 0.0;
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: context.textMuted)),
+                      Text(
+                        valueText,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                          color: limit == 0 ? context.textMuted : context.textDark,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (limit > 0) ...[
+                    const SizedBox(height: 5),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: pct,
+                        minHeight: 5,
+                        backgroundColor: context.divider,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          pct >= 1.0 ? context.haram : (pct >= 0.75 ? const Color(0xFFD97706) : context.primary),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            );
+          }),
         ],
       ),
     );

@@ -11,7 +11,7 @@ const DEFAULT_PRICES = {
   max: { quarterly: 8500, yearly: 33000, stdQuarterly: 10000, stdYearly: 40000 },
 };
 
-const Pricing = ({ isModal }) => {
+const Pricing = ({ isModal, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -82,12 +82,14 @@ const Pricing = ({ isModal }) => {
           await api.post('/subscription/cancel');
           if (fetchUser) await fetchUser();
           await customAlert('Your subscription has been canceled. You keep paid access until your current billing period ends.');
+          if (onClose) onClose();
         } catch (err) {
           setError(err.response?.data?.message || 'Unable to downgrade subscription right now.');
         } finally {
           setLoading(false);
         }
       } else {
+        if (onClose) onClose();
         navigate('/portfolio');
       }
       return;

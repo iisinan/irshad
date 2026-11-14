@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:hive/hive.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/upgrade_paywall_bottom_sheet.dart';
 import '../providers/basket_provider.dart';
 import '../models/basket.dart';
 import '../../stocks/ui/basket_detail_screen.dart';
@@ -261,6 +262,19 @@ class _BasketsScreenState extends State<BasketsScreen> {
                             child: _BasketCard(
                               basket: basket,
                               onTap: () async {
+                                if (basket.isLocked) {
+                                  final tier = basket.requiredTier == 'max' ? 'Noor (Max)' : 'Rawdha (Pro)';
+                                  showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    backgroundColor: Colors.transparent,
+                                    builder: (ctx) => UpgradePaywallBottomSheet(
+                                      requiredTier: basket.requiredTier ?? 'pro',
+                                      message: 'Upgrade to $tier on the Irshad website to unlock "${basket.name}" and full curated baskets.',
+                                    ),
+                                  );
+                                  return;
+                                }
                                 final result = await Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -1053,26 +1067,36 @@ class _BasketCard extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
-                          color: isCustom
-                              ? context.primary.withValues(alpha: 0.08)
-                              : const Color(0xFF10B981).withValues(alpha: 0.08),
+                          color: basket.isLocked
+                              ? const Color(0xFFD97706).withValues(alpha: 0.12)
+                              : isCustom
+                                  ? context.primary.withValues(alpha: 0.08)
+                                  : const Color(0xFF10B981).withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              isCustom ? Icons.tune_rounded : Icons.auto_awesome_rounded,
+                              basket.isLocked
+                                  ? Icons.lock_outline_rounded
+                                  : (isCustom ? Icons.tune_rounded : Icons.auto_awesome_rounded),
                               size: 11,
-                              color: isCustom ? context.primary : const Color(0xFF10B981),
+                              color: basket.isLocked
+                                  ? const Color(0xFFD97706)
+                                  : (isCustom ? context.primary : const Color(0xFF10B981)),
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              isCustom ? 'CUSTOM' : 'THEMATIC',
+                              basket.isLocked
+                                  ? (basket.requiredTier == 'max' ? 'NOOR (MAX)' : 'RAWDHA (PRO)')
+                                  : (isCustom ? 'CUSTOM' : 'THEMATIC'),
                               style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w900,
-                                color: isCustom ? context.primary : const Color(0xFF10B981),
+                                color: basket.isLocked
+                                    ? const Color(0xFFD97706)
+                                    : (isCustom ? context.primary : const Color(0xFF10B981)),
                                 letterSpacing: 0.5,
                               ),
                             ),
