@@ -4,12 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import {
   Wallet, Layers, ShieldAlert, AlertTriangle, Sparkles, Target,
   Plus, X, Trash2, ArrowUpRight, ArrowDownRight,
-  RefreshCw, Edit2, ShieldCheck, Droplet, HelpCircle, CheckCircle
+  RefreshCw, Edit2, ShieldCheck, Droplet, HelpCircle, CheckCircle, Lock
 } from 'lucide-react';
 
 import { updateHolding } from '../../services/api';
 import CompanyLogo from '../CompanyLogo';
 import { toastError, toastSuccess } from '../../utils/toast';
+import { useAuth } from '../../context/AuthContext';
 
 import { customAlert } from '../../utils/confirm';
 
@@ -124,7 +125,7 @@ function EditHoldingModal({ holding, onClose, onSuccess }) {
 }
 
 /* ─── Holding Card (Sleek List Item) ────────────────────────── */
-function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
+function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified, driftTrackingEnabled, onUpgrade }) {
   const navigate = useNavigate();
   const [hov, setHov] = useState(false);
 
@@ -262,26 +263,53 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified }) {
         </div>
       </div>
 
+      {/* ── 90-Day Drift Near-Threshold Warning (Noor Max) ── */}
+      {driftTrackingEnabled && holding.drift_tracking?.is_near_threshold && !gracePeriodEndsAt && (
+        <div style={{ padding: '5px 12px', background: 'rgba(217,119,6,0.08)', borderTop: '1px solid rgba(217,119,6,0.18)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <AlertTriangle size={10} color="#d97706"/>
+          <span style={{ fontSize: '0.58rem', color: '#b45309', fontWeight: 700 }}>
+            90-Day Drift Tracking: Financial ratios approaching AAOIFI threshold (Non-halal rev: {Number(holding.drift_tracking?.non_halal_revenue_pct || 0).toFixed(1)}%, Debt: {Number(holding.drift_tracking?.debt_ratio_pct || 0).toFixed(1)}%).
+          </span>
+        </div>
+      )}
+
       {/* ── Grace Period Banner ── */}
       {gracePeriodEndsAt && (
-        <div style={{ padding: '5px 12px', background: 'rgba(239,68,68,0.05)', borderTop: '1px solid rgba(239,68,68,0.1)', display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <AlertTriangle size={10} color="#dc2626"/>
-          <span style={{ fontSize: '0.58rem', color: '#dc2626', fontWeight: 600 }}>
-            {daysLeft > 0 ? `Grace period ends in ${daysLeft} day${daysLeft > 1 ? 's' : ''}. Please plan to exit.` : 'Grace period expired. Please sell immediately.'}
-          </span>
+        <div style={{ padding: '5px 12px', background: 'rgba(239,68,68,0.05)', borderTop: '1px solid rgba(239,68,68,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <AlertTriangle size={10} color="#dc2626"/>
+            <span style={{ fontSize: '0.58rem', color: '#dc2626', fontWeight: 600 }}>
+              {driftTrackingEnabled
+                ? (daysLeft > 0 ? `90-Day Drift Tracking: Grace period ends in ${daysLeft} day${daysLeft > 1 ? 's' : ''}. Please plan to exit.` : '90-Day Drift Tracking: Grace period expired. Please sell immediately.')
+                : 'Non-compliant holding detected. Upgrade to Noor (Max) for automated 90-day drift & divestment countdown.'}
+            </span>
+          </div>
+          {!driftTrackingEnabled && onUpgrade && (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onUpgrade(); }}
+              style={{ background: '#D9A05B', color: '#fff', border: 'none', borderRadius: '999px', padding: '2px 8px', fontSize: '0.55rem', fontWeight: 800, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+            >
+              <Lock size={9} /> Unlock 90D Drift
+            </button>
+          )}
         </div>
       )}
     </div>
   );
 }
 
-export default function PortfolioTab({ data, setShowAddModal, handleDelete, refreshData, activeFilter = 'all', setActiveFilter }) {
+export default function PortfolioTab({ data, setShowAddModal, handleDelete, refreshData, activeFilter = 'all', setActiveFilter, onUpgrade }) {
+  const { user } = useAuth();
   const [editingHolding, setEditingHolding] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
 
   const summary         = data?.summary || {};
   const holdings        = data?.holdings || [];
   const purifications   = data?.purifications || [];
+  const tierSlug        = user?.tier?.slug || 'free';
+  const portfolioLimit  = summary.portfolio_limit ?? user?.tier?.features?.portfolio_limit ?? (tierSlug === 'max' ? -1 : tierSlug === 'pro' ? 7 : 3);
+  const driftTrackingEnabled = Boolean(summary.drift_tracking_enabled ?? user?.tier?.features?.drift_tracking ?? (tierSlug === 'max'));
   const totalBalance    = summary.total_balance    || 0;
   const compliance      = summary.health_percentage ?? 100;
   const isHoldingHalal = h => !!h.is_halal || ['JAIZBANK', 'TAJBANK', 'LOTUS', 'NREIT'].includes(h.symbol);
@@ -391,8 +419,26 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '4px', flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Layers size={16} color="var(--primary)" />
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>All Holdings <strong style={{ color: 'var(--text-dark)', fontWeight: 800, marginLeft: '4px' }}>{holdings.length}</strong></span>
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                  All Holdings <strong style={{ color: 'var(--text-dark)', fontWeight: 800, marginLeft: '4px' }}>{holdings.length}{portfolioLimit === -1 ? '' : ` / ${portfolioLimit}`}</strong>
+                </span>
               </div>
+
+              <div style={{ width: '1px', height: '14px', background: 'var(--border)' }} />
+
+              {driftTrackingEnabled ? (
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '3px 10px', borderRadius: '999px', background: 'rgba(217, 160, 91, 0.14)', color: '#b45309', fontSize: '0.73rem', fontWeight: 800 }}>
+                  <Sparkles size={12} /> 90-Day Drift Tracking Active
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onUpgrade?.()}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '3px 10px', borderRadius: '999px', background: 'var(--bg-section)', border: '1px solid var(--border)', color: 'var(--text-muted)', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}
+                >
+                  <Lock size={11} /> 90-Day Drift Tracking (Noor)
+                </button>
+              )}
               
               <div style={{ width: '1px', height: '14px', background: 'var(--border)' }} />
 
@@ -543,7 +589,7 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
             
 
             {displayHoldings.map((h) => (
-              <HoldingRow key={h.id} holding={h} onDelete={handleDelete} onEdit={setEditingHolding} hasBeenPurified={purifications.some(p => p.symbol === h.symbol)} />
+              <HoldingRow key={h.id} holding={h} onDelete={handleDelete} onEdit={setEditingHolding} hasBeenPurified={purifications.some(p => p.symbol === h.symbol)} driftTrackingEnabled={driftTrackingEnabled} onUpgrade={onUpgrade} />
             ))}
             </div>
           </div>

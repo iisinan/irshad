@@ -334,40 +334,99 @@ export default function Profile() {
               <div style={{ padding: '24px', background: 'var(--bg-section)', borderRadius: '16px', border: '1px solid var(--border)' }}>
                 <h4 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '16px' }}>Monthly Usage Limits & Benefits</h4>
                 
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', fontSize: '0.9rem' }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Stock Screens</span>
-                  <span style={{ fontWeight: 700, color: 'var(--text-dark)' }}>
-                    {((profileUser || user)?.tier?.features?.stock_screens_per_month) === -1 ? 'Unlimited' : ((profileUser || user)?.tier?.features?.stock_screens_per_month ?? ((profileUser || user)?.tier?.slug === 'pro' ? 10 : 3))}
-                  </span>
-                </div>
-                
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', fontSize: '0.9rem' }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Portfolio Size</span>
-                  <span style={{ fontWeight: 700, color: 'var(--text-dark)' }}>
-                    {((profileUser || user)?.tier?.features?.portfolio_limit) === -1 ? 'Unlimited' : ((profileUser || user)?.tier?.features?.portfolio_limit ?? ((profileUser || user)?.tier?.slug === 'pro' ? 7 : 3))}
-                  </span>
-                </div>
+                {(() => {
+                  const activeUser = profileUser || user;
+                  const slug = activeUser?.tier?.slug || 'free';
+                  const features = activeUser?.tier?.features || {};
+                  const usage = activeUser?.usage_summary || {};
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', fontSize: '0.9rem' }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Thematic Baskets</span>
-                  <span style={{ fontWeight: 700, color: 'var(--text-dark)' }}>
-                    {((profileUser || user)?.tier?.slug === 'max') ? 'Full access' : ((profileUser || user)?.tier?.slug === 'pro' ? 'Limited access' : 'Not included')}
-                  </span>
-                </div>
-                
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', fontSize: '0.9rem' }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Automated Purification Calculation</span>
-                  <span style={{ fontWeight: 700, color: 'var(--text-dark)' }}>
-                    {((profileUser || user)?.tier?.features?.purifications_per_month) === -1 ? 'Unlimited' : ((profileUser || user)?.tier?.features?.purifications_per_month ? `${(profileUser || user)?.tier?.features?.purifications_per_month} per month` : ((profileUser || user)?.tier?.slug === 'pro' ? '2 per month' : 'Not included'))}
-                  </span>
-                </div>
+                  const stockLimit = features.stock_screens_per_month ?? (slug === 'max' ? -1 : slug === 'pro' ? 10 : 3);
+                  const stockUsed = usage.stock_screens?.used ?? 0;
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Automated Zakat Calculation</span>
-                  <span style={{ fontWeight: 700, color: 'var(--text-dark)' }}>
-                    {((profileUser || user)?.tier?.slug === 'free' || !(profileUser || user)?.tier?.features?.zakat_calc) ? 'Not included' : 'Included'}
-                  </span>
-                </div>
+                  const portfolioLimit = features.portfolio_limit ?? (slug === 'max' ? -1 : slug === 'pro' ? 7 : 3);
+                  const portfolioUsed = usage.portfolio_holdings?.used ?? 0;
+
+                  const watchlistLimit = features.watchlist_limit ?? (slug === 'max' ? -1 : slug === 'pro' ? 2 : 0);
+                  const watchlistUsed = usage.watchlist?.used ?? 0;
+
+                  const basketsLimit = features.baskets ?? (slug === 'max' ? -1 : slug === 'pro' ? 3 : 0);
+                  const basketsUsed = usage.custom_baskets?.used ?? 0;
+
+                  const purifyLimit = features.purifications_per_month ?? (slug === 'max' ? -1 : slug === 'pro' ? 2 : 0);
+                  const purifyUsed = usage.purifications?.used ?? 0;
+
+                  const formatQuota = (used, limit, unitLabel = '') => {
+                    if (limit === -1) return `${used} used · Unlimited`;
+                    if (limit === 0) return 'Not included';
+                    return `${used} / ${limit}${unitLabel ? ` ${unitLabel}` : ''}`;
+                  };
+
+                  const quotaRows = [
+                    { label: 'Stock Screens (Monthly)', used: stockUsed, limit: stockLimit, text: formatQuota(stockUsed, stockLimit, 'this month') },
+                    { label: 'Portfolio (Holdings)', used: portfolioUsed, limit: portfolioLimit, text: formatQuota(portfolioUsed, portfolioLimit, 'stocks') },
+                    { label: 'Watchlist', used: watchlistUsed, limit: watchlistLimit, text: formatQuota(watchlistUsed, watchlistLimit, 'stocks') },
+                    {
+                      label: 'Thematic Baskets',
+                      used: basketsUsed,
+                      limit: basketsLimit,
+                      text: slug === 'max'
+                        ? `Full access (${basketsUsed} custom)`
+                        : slug === 'pro'
+                          ? `Limited access (3 system + ${basketsUsed}/${basketsLimit} custom)`
+                          : 'Not included',
+                    },
+                    { label: 'Automated Purification Calculation', used: purifyUsed, limit: purifyLimit, text: formatQuota(purifyUsed, purifyLimit, 'this month') },
+                  ];
+
+                  const boolRows = [
+                    { label: 'Automated Zakat Calculation', enabled: Boolean(features.zakat_calc ?? (slug !== 'free')), detail: slug === 'max' ? 'Unlimited' : 'Included' },
+                    { label: 'Broker Statements (History Tracking)', enabled: Boolean(features.statements ?? (slug !== 'free')), detail: 'Included' },
+                    { label: 'Dividend Alerts', enabled: Boolean(features.dividend_alerts ?? (slug === 'max')), detail: 'Unlimited (Noor)' },
+                    { label: 'Drift Tracking (90-Day Tracking)', enabled: Boolean(features.drift_tracking ?? (slug === 'max')), detail: '90-day tracking (Noor)' },
+                    { label: 'Monthly Spotlight', enabled: Boolean(features.monthly_spotlight ?? (slug === 'max')), detail: 'Full insights (Noor)' },
+                  ];
+
+                  return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                      {quotaRows.map((row) => {
+                        const pct = row.limit > 0 ? Math.min(100, Math.round((row.used / row.limit) * 100)) : 0;
+                        return (
+                          <div key={row.label} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem' }}>
+                              <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>{row.label}</span>
+                              <span style={{ fontWeight: 800, color: row.limit === 0 ? 'var(--text-muted)' : 'var(--text-dark)' }}>{row.text}</span>
+                            </div>
+                            {row.limit > 0 && (
+                              <div style={{ height: '6px', borderRadius: '999px', background: 'var(--border)', overflow: 'hidden' }}>
+                                <div style={{
+                                  width: `${pct}%`,
+                                  height: '100%',
+                                  borderRadius: '999px',
+                                  background: pct >= 100 ? '#dc2626' : pct >= 75 ? '#d97706' : 'var(--primary)',
+                                  transition: 'width 0.3s ease',
+                                }} />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+
+                      <div style={{ height: '1px', background: 'var(--border)', margin: '4px 0' }} />
+
+                      {boolRows.map((item) => (
+                        <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem' }}>
+                          <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>{item.label}</span>
+                          <span style={{
+                            fontWeight: 800,
+                            color: item.enabled ? '#006B46' : 'var(--text-muted)',
+                          }}>
+                            {item.enabled ? `✓ ${item.detail}` : 'Not included'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           )}

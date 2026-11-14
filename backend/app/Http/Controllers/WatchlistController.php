@@ -109,6 +109,8 @@ class WatchlistController extends Controller
             ], 403);
         }
 
+        $canDriftTrack = \App\Services\SubscriptionService::canUseFeature($user, 'drift_tracking');
+
         $watchlist = Watchlist::firstOrCreate(
             [
                 'user_id' => $user->id,
@@ -119,7 +121,7 @@ class WatchlistController extends Controller
                 'alert_push' => $request->input('alert_push', false),
                 'alert_email' => $request->input('alert_email', false),
                 'alert_verdict_change' => $request->input('alert_verdict_change', false),
-                'alert_compliance_risk' => $request->input('alert_compliance_risk', false),
+                'alert_compliance_risk' => $canDriftTrack ? $request->input('alert_compliance_risk', false) : false,
                 'alert_weekly_digest' => $request->input('alert_weekly_digest', false),
                 'alert_price_change' => $request->input('alert_price_change', false),
             ]
@@ -127,7 +129,11 @@ class WatchlistController extends Controller
 
         // If it already existed but alerts were passed, update them.
         if (! $watchlist->wasRecentlyCreated) {
-            $watchlist->update($request->only(['alert_inapp', 'alert_push', 'alert_email', 'alert_verdict_change', 'alert_compliance_risk', 'alert_weekly_digest', 'alert_price_change']));
+            $updatePayload = $request->only(['alert_inapp', 'alert_push', 'alert_email', 'alert_verdict_change', 'alert_compliance_risk', 'alert_weekly_digest', 'alert_price_change']);
+            if (!$canDriftTrack) {
+                $updatePayload['alert_compliance_risk'] = false;
+            }
+            $watchlist->update($updatePayload);
         }
 
         return response()->json(['message' => 'Added to watchlist', 'data' => $watchlist], 201);
@@ -175,11 +181,12 @@ class WatchlistController extends Controller
                 ], 403);
             }
         }
+        $canDriftTrack = \App\Services\SubscriptionService::canUseFeature($user, 'drift_tracking');
         $alertEmail = $request->boolean('alert_email', false);
         $alertInapp = $request->boolean('alert_inapp', false);
         $alertPush = $request->boolean('alert_push', false);
         $alertVerdict = $request->boolean('alert_verdict_change', false);
-        $alertRisk = $request->boolean('alert_compliance_risk', false);
+        $alertRisk = $canDriftTrack ? $request->boolean('alert_compliance_risk', false) : false;
         $alertWeekly = $request->boolean('alert_weekly_digest', false);
         $alertPrice = $request->boolean('alert_price_change', false);
         $now = now();
@@ -312,7 +319,12 @@ class WatchlistController extends Controller
             ->where('symbol', strtoupper($symbol))
             ->firstOrFail();
 
-        $watchlist->update($request->only(['alert_inapp', 'alert_push', 'alert_email', 'alert_verdict_change', 'alert_compliance_risk', 'alert_weekly_digest', 'alert_price_change']));
+        $updatePayload = $request->only(['alert_inapp', 'alert_push', 'alert_email', 'alert_verdict_change', 'alert_compliance_risk', 'alert_weekly_digest', 'alert_price_change']);
+        if (!\App\Services\SubscriptionService::canUseFeature($user, 'drift_tracking')) {
+            $updatePayload['alert_compliance_risk'] = false;
+        }
+
+        $watchlist->update($updatePayload);
 
         return response()->json(['message' => 'Watchlist alerts updated', 'data' => $watchlist]);
     }

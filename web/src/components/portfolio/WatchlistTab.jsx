@@ -392,6 +392,7 @@ export default function WatchlistTab({ initialSymbol, onClearInitialSymbol, onUp
             watchlistData={watchlistItems.find(w => w.symbol === activeAlertStock.symbol) || {}}
             onClose={handleCloseAlertModal}
             onUpdated={handleAlertUpdate}
+            onUpgrade={onUpgrade}
           />
         </ModalErrorBoundary>
       )}

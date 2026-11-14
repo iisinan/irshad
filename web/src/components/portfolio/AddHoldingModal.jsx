@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { X, Search, Plus, CheckCircle2, Lock, ShieldCheck, Trash2, FileText, UploadCloud, Calendar, Bell, ArrowLeft, AlertCircle, RefreshCw, Sparkles, Check } from 'lucide-react';
 import api, { fetchNgxStocks, linkBroker, parseStatement } from '../../services/api';
 import CompanyLogo from '../CompanyLogo';
+import { useAuth } from '../../context/AuthContext';
 
 import { customAlert } from '../../utils/confirm';
 
@@ -140,8 +141,12 @@ function ZakatConfirmation({ purchaseDate, onDone }) {
 const ZAKAT_DATE_KEY = 'irshad_zakat_hawl_date';
 const ZAKAT_ASKED_KEY = 'irshad_zakat_date_asked';
 
-export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLinked, initialTab, initialSymbol, initialPrice }) {
-  const [tab, setTab] = useState(initialTab || 'manual');
+export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLinked, initialTab, initialSymbol, initialPrice, onUpgrade }) {
+  const { user } = useAuth();
+  const tierSlug = user?.tier?.slug || 'free';
+  const canUseStatements = Boolean(user?.tier?.features?.statements ?? (tierSlug !== 'free'));
+  const canUseZakat = Boolean(user?.tier?.features?.zakat_calc ?? (tierSlug !== 'free'));
+  const [tab, setTab] = useState(initialTab === 'import' && !canUseStatements ? 'manual' : (initialTab || 'manual'));
   const [rows, setRows] = useState([{ id: Date.now(), sym: initialSymbol || '', sh: '', pr: initialPrice || '', date: '' }]);
   const [activeRowId, setActiveRowId] = useState(null);
   const [allStocks, setAllStocks] = useState([]);
@@ -234,7 +239,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
       localStorage.setItem(ZAKAT_DATE_KEY, profileHawlDate);
     }
 
-    if (!zakatAlreadySet && !alreadyAsked) {
+    if (canUseZakat && !zakatAlreadySet && !alreadyAsked) {
       const validDates = holdingsToSave.map(r => r.purchase_date).filter(Boolean).sort();
       const earliestDate = validDates[0] || new Date().toISOString().split('T')[0];
       setZakatPromptDate(earliestDate);
@@ -318,6 +323,12 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
         setPendingFile(file);
         setPasswordRequired(true);
         setParseError(err.response?.data?.message || 'Password required to unlock this PDF.');
+      } else if (err.response?.status === 403 || err.response?.data?.upgrade_required) {
+        if (onUpgrade) {
+          onUpgrade();
+          return;
+        }
+        setParseError(err.response?.data?.message || 'Broker statement import is available on Rawdha (Pro) and Noor (Max) plans.');
       } else {
         const msg = err.response?.data?.message || err.message || 'Failed to parse statement.';
         setParseError(msg);
@@ -601,7 +612,7 @@ export default function AddHoldingModal({ onClose, onAdd, isAdding, onBrokerLink
             {/* Tabs */}
             <div className="modal-tabs" style={{ display: 'flex', padding: '0 32px', background: 'var(--bg)', borderBottom: '1px solid var(--border)' }}>
               <button onClick={() => setTab('manual')} style={{ flex: 1, padding: '16px 0', background: 'none', border: 'none', fontSize: '0.88rem', fontWeight: 800, color: tab === 'manual' ? 'var(--primary)' : 'var(--text-muted)', borderBottom: tab === 'manual' ? '2px solid var(--primary)' : '2px solid transparent', cursor: 'pointer', transition: 'all 0.2s' }}>Manual Entry</button>
-              <button onClick={() => setTab('import')} style={{ flex: 1, padding: '16px 0', background: 'none', border: 'none', fontSize: '0.88rem', fontWeight: 700, color: tab === 'import' ? 'var(--primary)' : 'var(--text-muted)', borderBottom: tab === 'import' ? '2px solid var(--primary)' : '2px solid transparent', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}><FileText size={16} /> Import Statement</button>
+              <button onClick={() => { if (!canUseStatements && onUpgrade) { onUpgrade(); return; } setTab('import'); }} style={{ flex: 1, padding: '16px 0', background: 'none', border: 'none', fontSize: '0.88rem', fontWeight: 700, color: tab === 'import' ? 'var(--primary)' : 'var(--text-muted)', borderBottom: tab === 'import' ? '2px solid var(--primary)' : '2px solid transparent', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>{canUseStatements ? <FileText size={16} /> : <Lock size={15} />} Import Statement {!canUseStatements && <span style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: '999px', background: 'rgba(217,160,91,0.15)', color: '#b45309', fontWeight: 800 }}>PRO</span>}</button>
               <button onClick={() => setTab('broker')} style={{ flex: 1, padding: '16px 0', background: 'none', border: 'none', fontSize: '0.88rem', fontWeight: 700, color: tab === 'broker' ? 'var(--primary)' : 'var(--text-muted)', borderBottom: tab === 'broker' ? '2px solid var(--primary)' : '2px solid transparent', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}><Lock size={16} /> Link Broker</button>
             </div>
 

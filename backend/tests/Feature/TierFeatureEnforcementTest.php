@@ -250,4 +250,28 @@ class TierFeatureEnforcementTest extends TestCase
         $this->assignPlan($user, $this->maxPlan);
         $this->getJson("/api/v1/stocks/baskets/{$fourthBasket->id}")->assertOk();
     }
+
+    public function test_watchlist_compliance_risk_alert_requires_max_drift_tracking(): void
+    {
+        $user = User::factory()->create(['email_verified_at' => now()]);
+        Sanctum::actingAs($user);
+
+        // Pro user adds MTNN with alert_compliance_risk = true -> backend forces false
+        $this->assignPlan($user, $this->proPlan);
+        $proRes = $this->postJson('/api/v1/watchlist', [
+            'symbol' => 'MTNN',
+            'alert_inapp' => true,
+            'alert_compliance_risk' => true,
+        ])->assertCreated();
+
+        $this->assertFalse((bool) $proRes->json('data.alert_compliance_risk'));
+
+        // Max user enables alert_compliance_risk -> persists as true
+        $this->assignPlan($user, $this->maxPlan);
+        $maxRes = $this->putJson('/api/v1/watchlist/MTNN', [
+            'alert_compliance_risk' => true,
+        ])->assertOk();
+
+        $this->assertTrue((bool) $maxRes->json('data.alert_compliance_risk'));
+    }
 }

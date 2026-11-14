@@ -322,7 +322,12 @@ const AaoifiScreening = () => {
       refetchPortfolio();
       return true;
     } catch (err) {
-      toastError(err?.message || 'Failed to add holdings');
+      if (err?.response?.status === 403 || err?.response?.data?.upgrade_required) {
+        setShowAddHolding(false);
+        setShowUpgradeModal(true);
+      } else {
+        toastError(err?.response?.data?.message || err?.message || 'Failed to add holdings');
+      }
       return false;
     } finally {
       setIsAddingHolding(false);
@@ -360,7 +365,11 @@ const AaoifiScreening = () => {
       }
       refetchWatchlist();
     } catch (err) {
-      toastError(err?.response?.data?.message || err.message || `Failed to update alert for ${symbol}`);
+      if (err?.response?.status === 403 || err?.response?.data?.upgrade_required) {
+        setShowUpgradeModal(true);
+      } else {
+        toastError(err?.response?.data?.message || err.message || `Failed to update alert for ${symbol}`);
+      }
     } finally {
       setAlertLoading(false);
     }
@@ -740,12 +749,25 @@ const AaoifiScreening = () => {
               </div>
             </div>
             
-            {stock?.trading_board && (
-              <div style={{ padding: '6px 12px', background: 'rgba(69, 165, 138,0.06)', borderRadius: '8px', border: '1px solid rgba(69, 165, 138,0.15)', display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-                <span style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--primary)' }}>Trading Board:</span>
-                <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--primary)' }}>{stock.trading_board}</span>
-              </div>
-            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              {report?.screen_usage && report.screen_usage.limit !== -1 && (
+                <div
+                  onClick={() => setShowUpgradeModal(true)}
+                  title="Monthly AAOIFI stock screen quota"
+                  style={{ padding: '6px 12px', background: report.screen_usage.remaining === 0 ? 'rgba(220,38,38,0.08)' : 'rgba(217,160,91,0.12)', borderRadius: '8px', border: `1px solid ${report.screen_usage.remaining === 0 ? 'rgba(220,38,38,0.25)' : 'rgba(217,160,91,0.3)'}`, display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}
+                >
+                  <span style={{ fontSize: '0.68rem', fontWeight: 700, color: report.screen_usage.remaining === 0 ? '#dc2626' : '#b45309' }}>
+                    Monthly Screens: {report.screen_usage.used} / {report.screen_usage.limit}
+                  </span>
+                </div>
+              )}
+              {stock?.trading_board && (
+                <div style={{ padding: '6px 12px', background: 'rgba(69, 165, 138,0.06)', borderRadius: '8px', border: '1px solid rgba(69, 165, 138,0.15)', display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                  <span style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--primary)' }}>Trading Board:</span>
+                  <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--primary)' }}>{stock.trading_board}</span>
+                </div>
+              )}
+            </div>
           </div>
 
 
@@ -908,7 +930,11 @@ const AaoifiScreening = () => {
                         toastSuccess('Added to alerts! You will be emailed when the status changes.');
                       }
                     } catch (err) {
-                      toastError(hasAlert ? 'Failed to remove alert.' : 'Failed to add alert.');
+                      if (err?.response?.status === 403 || err?.response?.data?.upgrade_required) {
+                        setShowUpgradeModal(true);
+                      } else {
+                        toastError(err?.response?.data?.message || (hasAlert ? 'Failed to remove alert.' : 'Failed to add alert.'));
+                      }
                     } finally {
                       setAlertLoading(false);
                     }
@@ -1139,6 +1165,8 @@ const AaoifiScreening = () => {
         document.body
       )}
 
+      {showUpgradeModal && <PricingModal onClose={() => setShowUpgradeModal(false)} />}
+
       {showAddHolding && (
         <AddHoldingModal 
           onClose={() => setShowAddHolding(false)}
@@ -1147,6 +1175,7 @@ const AaoifiScreening = () => {
           initialTab="manual"
           initialSymbol={symbol}
           initialPrice={stock?.latest_price}
+          onUpgrade={() => { setShowAddHolding(false); setShowUpgradeModal(true); }}
         />
       )}
 

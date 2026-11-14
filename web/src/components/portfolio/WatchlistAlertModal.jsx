@@ -1,36 +1,49 @@
 import React, { useState } from 'react';
-import { X, Bell, Mail, Smartphone, Inbox, AlertTriangle, ShieldAlert, FileText, TrendingUp } from 'lucide-react';
+import { X, Bell, Mail, Smartphone, Inbox, AlertTriangle, ShieldAlert, FileText, TrendingUp, Lock } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { toastError, toastSuccess } from '../../utils/toast';
 import { updateWatchlist } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
-const ToggleRow = ({ field, icon: Icon, title, description, prefs, handleToggle }) => (
-  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', background: 'var(--bg)', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '12px' }}>
+const ToggleRow = ({ field, icon: Icon, title, description, prefs, handleToggle, locked = false, badgeText = null, onLockedClick }) => (
+  <div
+    onClick={locked ? onLockedClick : undefined}
+    style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', background: 'var(--bg)', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '12px', opacity: locked ? 0.72 : 1, cursor: locked ? 'pointer' : 'default' }}
+  >
     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-      <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'var(--bg-section)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
-        <Icon size={20} />
+      <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'var(--bg-section)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: locked ? '#D9A05B' : 'var(--primary)' }}>
+        {locked ? <Lock size={18} /> : <Icon size={20} />}
       </div>
       <div>
-        <div style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.88rem' }}>{title}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.88rem' }}>
+          <span>{title}</span>
+          {badgeText && (
+            <span style={{ fontSize: '0.62rem', fontWeight: 800, padding: '2px 7px', borderRadius: '999px', background: 'rgba(217,160,91,0.16)', color: '#b45309' }}>
+              {badgeText}
+            </span>
+          )}
+        </div>
         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>{description}</div>
       </div>
     </div>
     <div 
-      onClick={() => handleToggle(field)}
+      onClick={() => !locked && handleToggle(field)}
       style={{ 
-        width: '44px', height: '24px', borderRadius: '12px', background: prefs[field] ? 'var(--primary)' : 'var(--bg-section)',
-        position: 'relative', cursor: 'pointer', transition: 'all 0.3s', border: `1px solid ${prefs[field] ? 'var(--primary)' : 'var(--border)'}`
+        width: '44px', height: '24px', borderRadius: '12px', background: !locked && prefs[field] ? 'var(--primary)' : 'var(--bg-section)',
+        position: 'relative', cursor: locked ? 'not-allowed' : 'pointer', transition: 'all 0.3s', border: `1px solid ${!locked && prefs[field] ? 'var(--primary)' : 'var(--border)'}`, flexShrink: 0
       }}
     >
       <div style={{
         width: '18px', height: '18px', borderRadius: '50%', background: 'white', position: 'absolute', top: '2px',
-        left: prefs[field] ? '22px' : '2px', transition: 'all 0.3s', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        left: !locked && prefs[field] ? '22px' : '2px', transition: 'all 0.3s', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
       }} />
     </div>
   </div>
 );
 
-export default function WatchlistAlertModal({ stock, watchlistData, onClose, onUpdated }) {
+export default function WatchlistAlertModal({ stock, watchlistData, onClose, onUpdated, onUpgrade }) {
+  const { user } = useAuth();
+  const canDriftTrack = Boolean(user?.tier?.features?.drift_tracking ?? ((user?.tier?.slug || 'free') === 'max'));
   const [saving, setSaving] = useState(false);
   
   // Local state for the toggles
@@ -39,11 +52,16 @@ export default function WatchlistAlertModal({ stock, watchlistData, onClose, onU
     alert_inapp: watchlistData?.alert_inapp || false,
     alert_push: watchlistData?.alert_push || false,
     alert_verdict_change: watchlistData?.alert_verdict_change || false,
-    alert_compliance_risk: watchlistData?.alert_compliance_risk || false,
+    alert_compliance_risk: canDriftTrack ? (watchlistData?.alert_compliance_risk || false) : false,
     alert_price_change: watchlistData?.alert_price_change || false,
   });
 
   const handleToggle = (field) => {
+    if (field === 'alert_compliance_risk' && !canDriftTrack) {
+      if (onUpgrade) onUpgrade();
+      else toastError('Compliance drift alerts require the Noor (Max) plan.');
+      return;
+    }
     setPrefs(prev => ({ ...prev, [field]: !prev[field] }));
   };
 
@@ -157,10 +175,16 @@ export default function WatchlistAlertModal({ stock, watchlistData, onClose, onU
             <ToggleRow 
               field="alert_compliance_risk" 
               icon={ShieldAlert} 
-              title="Compliance Risk" 
-              description="Non-compliant revenue approaches thresholds" 
+              title="Compliance Risk (90-Day Drift)" 
+              description={canDriftTrack ? 'Non-compliant revenue approaches thresholds' : 'Upgrade to Noor (Max) for automated compliance drift alerts'} 
               prefs={prefs}
               handleToggle={handleToggle}
+              locked={!canDriftTrack}
+              badgeText={!canDriftTrack ? 'NOOR' : null}
+              onLockedClick={() => {
+                if (onUpgrade) onUpgrade();
+                else toastError('Compliance drift alerts require the Noor (Max) plan.');
+              }}
             />
             <ToggleRow 
               field="alert_price_change" 

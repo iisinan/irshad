@@ -406,6 +406,7 @@ export default function Portfolio() {
           onAdd={handleAdd} 
           isAdding={isAdding} 
           onBrokerLinked={() => loadData(true)} // instantly reload when broker seeded
+          onUpgrade={() => { setShowAddModal(false); setShowUpgradeModal(true); }}
         />
       )}
 
@@ -425,6 +426,7 @@ export default function Portfolio() {
                 refreshData={loadData}
                 activeFilter={activeFilter}
                 setActiveFilter={setActiveFilter}
+                onUpgrade={() => setShowUpgradeModal(true)}
               />
             </div>
           )}
