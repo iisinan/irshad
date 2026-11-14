@@ -26,8 +26,9 @@ const Pricing = ({ isModal, onClose }) => {
     let cancelled = false;
     api.get('/plans')
       .then((res) => {
-        if (!cancelled && Array.isArray(res.data?.plans)) {
-          setLivePlans(res.data.plans);
+        const list = Array.isArray(res.data) ? res.data : res.data?.plans;
+        if (!cancelled && Array.isArray(list)) {
+          setLivePlans(list);
         }
       })
       .catch(() => {});
@@ -45,10 +46,14 @@ const Pricing = ({ isModal, onClose }) => {
     };
     livePlans.forEach((p) => {
       if (p.slug === 'pro' || p.slug === 'max') {
-        const q = Number(p.quarterly_price ?? p.price_ngn ?? map[p.slug].quarterly);
-        const y = Number(p.yearly_price ?? map[p.slug].yearly);
+        const q = Number(p.price_quarterly ?? p.quarterly_price ?? map[p.slug].quarterly);
+        const y = Number(p.price_yearly ?? p.yearly_price ?? map[p.slug].yearly);
+        const sq = Number(p.price_quarterly_regular ?? map[p.slug].stdQuarterly);
+        const sy = Number(p.price_yearly_regular ?? map[p.slug].stdYearly);
         map[p.slug].quarterly = q > 0 ? q : map[p.slug].quarterly;
         map[p.slug].yearly = y > 0 ? y : map[p.slug].yearly;
+        map[p.slug].stdQuarterly = sq > 0 ? sq : map[p.slug].stdQuarterly;
+        map[p.slug].stdYearly = sy > 0 ? sy : map[p.slug].stdYearly;
       }
     });
     return map;
@@ -353,6 +358,7 @@ const Pricing = ({ isModal, onClose }) => {
                 </thead>
                 <tbody>
                   {[
+                    ['Billing Cycles', 'Free forever', 'Quarterly & Yearly', 'Quarterly & Yearly'],
                     ['Monthly Stock Screens', '3 / month', '10 / month', 'Unlimited'],
                     ['Portfolio Holdings', 'Up to 3 stocks', 'Up to 7 stocks', 'Unlimited'],
                     ['Watchlist & Alerts', '—', 'Up to 2 stocks', 'Unlimited'],
@@ -364,7 +370,7 @@ const Pricing = ({ isModal, onClose }) => {
                     ['90-Day Drift Tracking', '—', '—', '90-day tracking'],
                     ['Monthly Spotlight Insights', '—', '—', 'Full insights'],
                   ].map(([feature, freeVal, proVal, maxVal], idx) => (
-                    <tr key={feature} style={{ borderBottom: idx === 9 ? 'none' : '1px solid #F3F4F6' }}>
+                    <tr key={feature} style={{ borderBottom: idx === 10 ? 'none' : '1px solid #F3F4F6' }}>
                       <td style={{ padding: '12px 20px', fontWeight: 600, color: 'var(--text-dark)' }}>{feature}</td>
                       {[freeVal, proVal, maxVal].map((val, colIdx) => (
                         <td key={colIdx} style={{ textAlign: 'center', padding: '12px 16px', color: val === '—' ? '#9CA3AF' : colIdx === 1 ? '#006B46' : colIdx === 2 ? '#B8860B' : 'var(--text-dark)', fontWeight: val === '—' ? 500 : 600 }}>

@@ -17,15 +17,22 @@ class Plan extends Model
         'features',
     ];
 
+    protected $hidden = [
+        'price_monthly',
+        'paystack_plan_code_monthly',
+        'paystack_plan_code_yearly',
+        'paystack_plan_code_quarterly',
+    ];
+
     /**
-     * Resolve the Naira price for a given billing cycle.
+     * Resolve the Naira price for a given billing cycle (quarterly or yearly only).
      */
     public function priceForCycle(string $cycle): float
     {
         return (float) match ($cycle) {
             'yearly'    => $this->price_yearly,
-            'quarterly' => $this->price_quarterly ?: ($this->price_monthly * 3),
-            default     => $this->price_monthly,
+            'quarterly' => $this->price_quarterly,
+            default     => $this->price_quarterly,
         };
     }
 

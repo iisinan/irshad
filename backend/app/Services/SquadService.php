@@ -271,7 +271,7 @@ class SquadService
         return match ($billingCycle) {
             'yearly'    => $from->copy()->addYear(),
             'quarterly' => $from->copy()->addMonths(3),
-            default     => $from->copy()->addMonth(),
+            default     => $from->copy()->addMonths(3),
         };
     }
 }

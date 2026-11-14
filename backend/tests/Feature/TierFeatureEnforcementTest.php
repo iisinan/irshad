@@ -315,5 +315,11 @@ class TierFeatureEnforcementTest extends TestCase
             ->assertOk()
             ->assertJsonPath('transactions.0.transaction_ref', 'TEST_TX_12345')
             ->assertJsonPath('transactions.0.plan_slug', 'pro');
+
+        // Only quarterly and yearly billing cycles are accepted (no monthly subscription)
+        $this->postJson('/api/v1/subscription/initialize', [
+            'plan_slug' => 'pro',
+            'billing_cycle' => 'monthly',
+        ])->assertStatus(422);
     }
 }
