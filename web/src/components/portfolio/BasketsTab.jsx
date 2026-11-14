@@ -325,7 +325,7 @@ const IrshadThematicBlurredSection = ({ isWaitlisted, onToggleWaitlist }) => {
               <RefreshCw size={14} color="#0ea5e9" /> Auto-Rebalanced
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-dark)', background: 'var(--bg-section)', padding: '6px 12px', borderRadius: '10px', border: '1px solid var(--border)' }}>
-              <Award size={14} color="#f59e0b" /> Noor & Rawdah Access
+              <Award size={14} color="#f59e0b" /> Noor & Rawdha Access
             </div>
           </div>
 

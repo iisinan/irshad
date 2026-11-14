@@ -61,7 +61,7 @@ const AdminUsers = () => {
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [planOverrideLoading, setPlanOverrideLoading] = useState(false);
   const [planOverrideSuccess, setPlanOverrideSuccess] = useState('');
-  const [planForm, setPlanForm] = useState({ plan_slug: 'pro', expires_at: '', note: '' });
+  const [planForm, setPlanForm] = useState({ plan_slug: 'pro', billing_cycle: 'quarterly', expires_at: '', note: '' });
   const [analyticsUserId, setAnalyticsUserId] = useState(null);
 
   const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'user', plan: 'free' });
@@ -128,18 +128,24 @@ const AdminUsers = () => {
   const openPlanModal = (u) => {
     setSelectedUser(u);
     setPlanOverrideSuccess('');
-    setPlanForm({ plan_slug: 'pro', expires_at: '', note: '' });
+    setPlanForm({ plan_slug: 'pro', billing_cycle: 'quarterly', expires_at: '', note: '' });
     setShowPlanModal(true);
   };
 
   const submitPlanOverride = async () => {
     setPlanOverrideLoading(true);
     try {
-      const res = await overrideAdminUserPlan(selectedUser.id, planForm.plan_slug, planForm.expires_at || null, planForm.note);
+      const res = await overrideAdminUserPlan(
+        selectedUser.id,
+        planForm.plan_slug,
+        planForm.expires_at || null,
+        planForm.note,
+        planForm.billing_cycle
+      );
       setPlanOverrideSuccess(res.message || 'Plan updated!');
       // Optimistically update the table row with new plan + expiry
       setUsers(prev => prev.map(u => u.id === selectedUser.id
-        ? { ...u, _planOverride: planForm.plan_slug, subscription_ends: res.expires ?? planForm.expires_at }
+        ? { ...u, _planOverride: planForm.plan_slug, subscription_ends: res.expires ?? (planForm.plan_slug === 'free' ? null : planForm.expires_at) }
         : u
       ));
     } catch (e) {
@@ -321,7 +327,7 @@ const AdminUsers = () => {
                   <td style={{ padding: '15px 20px' }}>
                     {(() => {
                       const slug = u._planOverride || u.active_plan_slug || 'free';
-                      const label = slug === 'max' ? 'Noor' : slug === 'pro' ? 'Rawdah' : 'Miftah';
+                      const label = slug === 'max' ? 'Noor' : slug === 'pro' ? 'Rawdha' : 'Miftah';
                       const bg = slug === 'max' ? 'rgba(217,160,91,0.12)' : slug === 'pro' ? 'rgba(0,107,70,0.1)' : 'var(--bg-section)';
                       const color = slug === 'max' ? '#B8860B' : slug === 'pro' ? '#006B46' : 'var(--text-muted)';
                       return (
@@ -456,12 +462,36 @@ const AdminUsers = () => {
                   </div>
                 </div>
 
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>EXPIRY DATE <span style={{ fontWeight: 500 }}>(leave blank for 1 year)</span></label>
-                  <input type="date" value={planForm.expires_at} onChange={e => setPlanForm(f => ({ ...f, expires_at: e.target.value }))}
-                    min={new Date(Date.now() + 86400000).toISOString().split('T')[0]}
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-dark)', fontSize: '0.88rem', boxSizing: 'border-box' }} />
-                </div>
+                {planForm.plan_slug !== 'free' && (
+                  <>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>BILLING CYCLE</label>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                        {[
+                          { id: 'quarterly', label: 'Quarterly (3 months)' },
+                          { id: 'yearly', label: 'Yearly (12 months)' },
+                        ].map(c => (
+                          <button key={c.id} type="button" onClick={() => setPlanForm(f => ({ ...f, billing_cycle: c.id }))} style={{
+                            padding: '10px 12px', borderRadius: '10px',
+                            border: `1.5px solid ${planForm.billing_cycle === c.id ? 'var(--primary)' : 'var(--border)'}`,
+                            background: planForm.billing_cycle === c.id ? 'var(--primary-50)' : 'var(--bg)',
+                            color: planForm.billing_cycle === c.id ? 'var(--primary)' : 'var(--text-muted)',
+                            fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer', transition: 'all 0.2s',
+                          }}>
+                            {c.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>EXPIRY DATE <span style={{ fontWeight: 500 }}>(leave blank for {planForm.billing_cycle === 'quarterly' ? '3 months' : '1 year'})</span></label>
+                      <input type="date" value={planForm.expires_at} onChange={e => setPlanForm(f => ({ ...f, expires_at: e.target.value }))}
+                        min={new Date(Date.now() + 86400000).toISOString().split('T')[0]}
+                        style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-dark)', fontSize: '0.88rem', boxSizing: 'border-box' }} />
+                    </div>
+                  </>
+                )}
 
                 <div>
                   <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>NOTE (optional)</label>
@@ -475,7 +505,7 @@ const AdminUsers = () => {
                   border: 'none', color: 'white', fontWeight: 800, fontSize: '1rem', cursor: planOverrideLoading ? 'not-allowed' : 'pointer',
                   opacity: planOverrideLoading ? 0.7 : 1, transition: 'all 0.2s'
                 }}>
-                  {planOverrideLoading ? 'Applying...' : `Move to ${planForm.plan_slug === 'max' ? 'Noor (Max)' : planForm.plan_slug === 'pro' ? 'Rawdah (Pro)' : 'Miftah (Free)'}`}
+                  {planOverrideLoading ? 'Applying...' : `Move to ${planForm.plan_slug === 'max' ? 'Noor (Max)' : planForm.plan_slug === 'pro' ? 'Rawdha (Pro)' : 'Miftah (Free)'}`}
                 </button>
               </>
             )}
@@ -523,7 +553,7 @@ const AdminUsers = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
                   {[
                     { slug: 'free', label: 'Miftah', color: 'var(--text-muted)', border: 'var(--border)' },
-                    { slug: 'pro',  label: 'Rawdah', color: '#006B46', border: '#006B46' },
+                    { slug: 'pro',  label: 'Rawdha', color: '#006B46', border: '#006B46' },
                     { slug: 'max',  label: 'Noor',   color: '#B8860B', border: '#D9A05B' },
                   ].map(p => (
                     <button key={p.slug} type="button" onClick={() => setFormData({...formData, plan: p.slug})} style={{
@@ -585,7 +615,7 @@ const AdminUsers = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
                   {[
                     { slug: 'free', label: 'Miftah', color: 'var(--text-muted)', border: 'var(--border)' },
-                    { slug: 'pro',  label: 'Rawdah', color: '#006B46', border: '#006B46' },
+                    { slug: 'pro',  label: 'Rawdha', color: '#006B46', border: '#006B46' },
                     { slug: 'max',  label: 'Noor',   color: '#B8860B', border: '#D9A05B' },
                   ].map(p => (
                     <button key={p.slug} type="button" onClick={() => setFormData({...formData, plan: p.slug})} style={{

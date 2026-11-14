@@ -131,39 +131,46 @@ class AdminController extends Controller
     public function overridePlan(Request $request, $id)
     {
         $request->validate([
-            'plan_slug' => 'required|string|exists:plans,slug',
-            'expires_at' => 'nullable|date|after:today',
-            'note'      => 'nullable|string|max:255',
+            'plan_slug'     => 'required|string|exists:plans,slug',
+            'billing_cycle' => 'nullable|in:quarterly,yearly',
+            'expires_at'    => 'nullable|date|after:today',
+            'note'          => 'nullable|string|max:255',
         ]);
 
         $user = User::findOrFail($id);
         $adminName = $request->user()->name;
 
-        // Cancel any existing active subscriptions
-        $user->subscriptions()->where('status', 'active')->update([
+        // Cancel any existing active or past-due subscriptions
+        $user->subscriptions()->whereIn('status', ['active', 'past_due'])->update([
             'status'  => 'canceled',
             'ends_at' => now(),
         ]);
 
-
-
         $plan = \App\Models\Plan::where('slug', $request->plan_slug)->firstOrFail();
+        $billingCycle = $request->input('billing_cycle') ?: 'yearly';
 
-        $expiresAt = $request->expires_at
-            ? \Carbon\Carbon::parse($request->expires_at)
-            : \Carbon\Carbon::now()->addYear(); // Default: 1 year
+        $expiresAt = null;
+        if ($plan->slug !== 'free') {
+            $expiresAt = $request->expires_at
+                ? \Carbon\Carbon::parse($request->expires_at)
+                : ($billingCycle === 'quarterly'
+                    ? \Carbon\Carbon::now()->addMonths(3)
+                    : \Carbon\Carbon::now()->addYear());
 
-        \App\Models\Subscription::create([
-            'user_id'       => $user->id,
-            'plan_id'       => $plan->id,
-            'billing_cycle' => 'yearly',
-            'gateway'       => 'admin_override',
-            'auto_renew'    => false,
-            'notes'         => "admin_override_by_{$adminName}",
-            'status'        => 'active',
-            'renews_at'     => $expiresAt,
-            'ends_at'       => null,
-        ]);
+            \App\Models\Subscription::create([
+                'user_id'       => $user->id,
+                'plan_id'       => $plan->id,
+                'billing_cycle' => $billingCycle,
+                'gateway'       => 'admin_override',
+                'auto_renew'    => false,
+                'notes'         => $request->note
+                    ? "admin_override_by_{$adminName}: {$request->note}"
+                    : "admin_override_by_{$adminName}",
+                'status'        => 'active',
+                'renews_at'     => $expiresAt,
+                'ends_at'       => null,
+            ]);
+        }
 
         // Bust profile cache so next request reflects new tier
         try {
@@ -171,9 +178,11 @@ class AdminController extends Controller
         } catch (\Exception $e) { /* driver may not support tags */ }
 
         return response()->json([
-            'message' => "Plan for {$user->name} overridden to {$plan->name} (expires {$expiresAt->toDateString()}) by admin.",
+            'message' => $expiresAt
+                ? "Plan for {$user->name} overridden to {$plan->name} ({$billingCycle}, expires {$expiresAt->toDateString()}) by admin."
+                : "Plan for {$user->name} reset to {$plan->name} by admin.",
             'plan'    => $plan->name,
-            'expires' => $expiresAt->toDateString(),
+            'expires' => $expiresAt?->toDateString(),
         ]);
     }
 

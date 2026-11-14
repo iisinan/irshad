@@ -434,7 +434,7 @@ class _BasketsScreenState extends State<BasketsScreen> {
                         children: [
                           _buildPreviewChip(context, Icons.verified_rounded, '100% AAOIFI Certified', const Color(0xFF10B981)),
                           _buildPreviewChip(context, Icons.autorenew_rounded, 'Auto-Rebalanced', const Color(0xFF06B6D4)),
-                          _buildPreviewChip(context, Icons.workspace_premium_rounded, 'Noor & Rawdah Access', const Color(0xFFF59E0B)),
+                          _buildPreviewChip(context, Icons.workspace_premium_rounded, 'Noor & Rawdha Access', const Color(0xFFF59E0B)),
                         ],
                       ),
                       const SizedBox(height: 16),
