@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, CheckCircle2, Bell, ChevronRight } from 'lucide-react';
+import { Mail, CheckCircle2, Bell, ChevronRight, Lock } from 'lucide-react';
 import { fetchDigestPreference, updateDigestPreference } from '../../services/api';
 import { toastSuccess, toastError } from '../../utils/toast';
+import { useAuth } from '../../context/AuthContext';
+import PricingModal from '../PricingModal';
 
 export default function UpdatesDigest() {
+  const { user } = useAuth();
+  const canMonthly = Boolean(user?.tier?.features?.monthly_spotlight ?? (user?.tier?.slug === 'max'));
   const [pref, setPref] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   useEffect(() => {
     fetchDigestPreference()
@@ -38,6 +43,12 @@ export default function UpdatesDigest() {
   };
 
   const handleFrequency = async (freq) => {
+    if (freq === 'monthly' && !canMonthly) {
+      toastError('Monthly Spotlight digest is exclusive to the Noor (Max) plan.');
+      setShowUpgradeModal(true);
+      return;
+    }
+
     const oldPref = { ...pref };
     // Optimistic Update
     setPref({ ...pref, frequency: freq });
@@ -46,9 +57,14 @@ export default function UpdatesDigest() {
       setSaving(true);
       const res = await updateDigestPreference({ ...pref, frequency: freq });
       setPref(res.data);
-    } catch {
+    } catch (err) {
       setPref(oldPref); // Revert on failure
-      toastError('Failed to update preference');
+      if (err?.response?.status === 403 || err?.response?.data?.upgrade_required) {
+        toastError(err.response?.data?.message || 'Monthly Spotlight digest requires Noor (Max).');
+        setShowUpgradeModal(true);
+      } else {
+        toastError('Failed to update preference');
+      }
     } finally {
       setSaving(false);
     }
@@ -83,6 +99,7 @@ export default function UpdatesDigest() {
       overflow: 'hidden',
       boxShadow: 'none',
     }}>
+      {showUpgradeModal && <PricingModal onClose={() => setShowUpgradeModal(false)} />}
       {/* ── Rich Hero Header ── */}
       <div style={{
         position: 'relative',
@@ -211,16 +228,20 @@ export default function UpdatesDigest() {
             <div>
               <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '16px' }}>Frequency</div>
               <div style={{ display: 'flex', gap: '12px' }}>
-                {['weekly', 'monthly'].map(f => (
-                  <button key={f} disabled={saving} onClick={() => handleFrequency(f)} 
-                          style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: pref.frequency === f ? 'var(--primary-50)' : 'var(--bg)', border: `1px solid ${pref.frequency === f ? 'var(--primary-100)' : 'var(--border)'}`, borderRadius: '12px', padding: '14px', cursor: saving ? 'not-allowed' : 'pointer', transition: 'all 0.15s', opacity: saving ? 0.6 : 1 }}
-                          onMouseDown={e => { if (!saving) e.currentTarget.style.transform = 'scale(0.95)'; }}
-                          onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)'; }}
-                          onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}>
-                    <div style={{ width: '18px', height: '18px', borderRadius: '50%', border: `2px solid ${pref.frequency === f ? 'var(--primary)' : 'var(--border)'}`, background: pref.frequency === f ? 'var(--primary)' : 'transparent', flexShrink: 0, transition: 'all 0.2s' }} />
-                    <span style={{ fontSize: '0.85rem', fontWeight: 800, color: pref.frequency === f ? 'var(--primary)' : 'var(--text-muted)', textTransform: 'capitalize' }}>{f}</span>
-                  </button>
-                ))}
+                {['weekly', 'monthly'].map(f => {
+                  const lockedMonthly = f === 'monthly' && !canMonthly;
+                  return (
+                    <button key={f} disabled={saving} onClick={() => handleFrequency(f)} 
+                            style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: pref.frequency === f ? 'var(--primary-50)' : 'var(--bg)', border: `1px solid ${pref.frequency === f ? 'var(--primary-100)' : 'var(--border)'}`, borderRadius: '12px', padding: '14px', cursor: saving ? 'not-allowed' : 'pointer', transition: 'all 0.15s', opacity: saving ? 0.6 : lockedMonthly ? 0.78 : 1 }}
+                            onMouseDown={e => { if (!saving) e.currentTarget.style.transform = 'scale(0.95)'; }}
+                            onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}>
+                      <div style={{ width: '18px', height: '18px', borderRadius: '50%', border: `2px solid ${pref.frequency === f ? 'var(--primary)' : 'var(--border)'}`, background: pref.frequency === f ? 'var(--primary)' : 'transparent', flexShrink: 0, transition: 'all 0.2s' }} />
+                      <span style={{ fontSize: '0.85rem', fontWeight: 800, color: pref.frequency === f ? 'var(--primary)' : 'var(--text-muted)', textTransform: 'capitalize' }}>{f}</span>
+                      {lockedMonthly && <Lock size={12} color="#d97706" />}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>

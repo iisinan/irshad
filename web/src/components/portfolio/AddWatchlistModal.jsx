@@ -4,9 +4,10 @@ import { createPortal } from 'react-dom';
 import { addMultipleToWatchlist } from '../../services/api';
 import CompanyLogo from '../CompanyLogo';
 
+import { toastError } from '../../utils/toast';
 import { customAlert } from '../../utils/confirm';
 
-export default function AddWatchlistModal({ onClose, onAdded, allStocks, watchlistSymbols }) {
+export default function AddWatchlistModal({ onClose, onAdded, allStocks, watchlistSymbols, onUpgrade }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSymbols, setSelectedSymbols] = useState([]);
   const [isAdding, setIsAdding] = useState(false);
@@ -57,8 +58,14 @@ export default function AddWatchlistModal({ onClose, onAdded, allStocks, watchli
       await addMultipleToWatchlist(selectedSymbols, false, true); // Opt-in to email by default
       onAdded(selectedSymbols);
       onClose();
-    } catch {
-      await customAlert('Failed to add assets. Please try again.');
+    } catch (err) {
+      if (err?.response?.status === 403 || err?.response?.data?.upgrade_required) {
+        toastError(err.response?.data?.message || 'Watchlist limit reached. Upgrade your plan for more slots.');
+        onClose();
+        if (onUpgrade) onUpgrade();
+      } else {
+        await customAlert(err?.response?.data?.message || 'Failed to add assets. Please try again.');
+      }
     } finally {
       setIsAdding(false);
     }

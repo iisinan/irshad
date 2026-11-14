@@ -1428,15 +1428,20 @@ export default function BasketsTab({ onUpgrade }) {
                             {sym}
                           </span>
                         ))}
-                        {syms.length > 5 && (
-                          <span style={{
-                            padding: '3px 8px', borderRadius: '8px',
-                            background: 'var(--primary-50)', color: 'var(--primary)',
-                            fontSize: '0.72rem', fontWeight: 800
-                          }}>
-                            +{syms.length - 5} more
-                          </span>
-                        )}
+                        {(() => {
+                          const totalCount = basket.stock_count ?? syms.length;
+                          const shownCount = Math.min(syms.length, 5);
+                          const hiddenCount = totalCount - shownCount;
+                          return hiddenCount > 0 ? (
+                            <span style={{
+                              padding: '3px 8px', borderRadius: '8px',
+                              background: 'var(--primary-50)', color: 'var(--primary)',
+                              fontSize: '0.72rem', fontWeight: 800
+                            }}>
+                              +{hiddenCount} more
+                            </span>
+                          ) : null;
+                        })()}
                       </div>
                     </div>
 

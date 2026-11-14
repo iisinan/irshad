@@ -10,6 +10,8 @@ import ReactMarkdown from 'react-markdown';
 import { useAuth } from '../context/AuthContext';
 import { formatAppJustification } from '../utils/screeningFormatter';
 import MutualFundOverview from './portfolio/MutualFundOverview';
+import PricingModal from './PricingModal';
+import { toastError } from '../utils/toast';
 
 import { customAlert } from '../utils/confirm';
 
@@ -54,6 +56,8 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const [showBrokerageModal, setShowBrokerageModal] = useState(false);
   const [showAlertDialog, setShowAlertDialog] = useState(false);
   const [showPurificationModal, setShowPurificationModal] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [aiUpgradeRequired, setAiUpgradeRequired] = useState(false);
   const [alertPrice, setAlertPrice] = useState('');
   const [alertSaving, setAlertSaving] = useState(false);
   const [inWatchlist, setInWatchlist] = useState(false);
@@ -101,6 +105,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
   const handleAskAI = () => {
     setAiLoading(true);
     setAiError(null);
+    setAiUpgradeRequired(false);
     setIsAiExpanded(true);
     fetchAiAnalysis(symbol)
       .then(r => {
@@ -111,7 +116,13 @@ const StockDetails = ({ symbol: propSymbol }) => {
       })
       .catch(e => {
         console.error(e);
-        if (e.response?.status === 401) {
+        if (e.response?.status === 403 || e.response?.data?.upgrade_required) {
+          const msg = e.response?.data?.message || 'You have reached your monthly stock screening limit. Upgrade your plan for more.';
+          setAiError(msg);
+          setAiUpgradeRequired(true);
+          toastError(msg);
+          setShowUpgradeModal(true);
+        } else if (e.response?.status === 401) {
           setAiError('Unauthorized. Please log in or wait for the backend to update public access.');
         } else {
           setAiError(e.response?.data?.message || 'Failed to get analysis. Ensure the backend is updated.');
@@ -300,6 +311,12 @@ const StockDetails = ({ symbol: propSymbol }) => {
       }
     } catch (err) {
       console.error("Watchlist error", err);
+      if (err.response?.status === 403 || err.response?.data?.upgrade_required) {
+        toastError(err.response?.data?.message || 'Upgrade to Rawdha (Pro) or Noor (Max) to add stocks to your watchlist.');
+        setShowUpgradeModal(true);
+      } else {
+        toastError(err.response?.data?.message || 'Unable to update watchlist. Please try again.');
+      }
     } finally {
       setWatchlistLoading(false);
     }
@@ -307,6 +324,7 @@ const StockDetails = ({ symbol: propSymbol }) => {
 
   return (
     <div className="animate-fade-in page-wrapper">
+      {showUpgradeModal && <PricingModal onClose={() => setShowUpgradeModal(false)} />}
       {/* Back link */}
       <button onClick={() => window.history.back()} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', textDecoration: 'none', fontWeight: 600, marginBottom: '28px', fontSize: '0.79rem' }}>
         <ArrowLeft size={16} /> Back
@@ -693,7 +711,20 @@ const StockDetails = ({ symbol: propSymbol }) => {
             
             <div style={{ position: 'relative', zIndex: 1 }}>
               {aiLoading && <div style={{ color: 'var(--text-muted)', fontSize: '0.84rem', fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: '8px' }}><div className="spinner" style={{width: '14px', height: '14px', borderWidth: '2px'}} /> Irshad is searching corporate disclosures & analyzing financials...</div>}
-              {aiError && <div style={{ color: 'var(--non-compliant)', fontSize: '0.79rem' }}>{aiError}</div>}
+              {aiError && (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', color: 'var(--non-compliant)', fontSize: '0.8rem' }}>
+                  <span>{aiError}</span>
+                  {aiUpgradeRequired && (
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); setShowUpgradeModal(true); }}
+                      style={{ padding: '6px 14px', borderRadius: '100px', background: 'var(--primary)', color: '#fff', border: 'none', fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer' }}
+                    >
+                      Upgrade Plan
+                    </button>
+                  )}
+                </div>
+              )}
               {aiAnalysis && isAiExpanded && (
                 <div className="animate-fade-in" style={{ background: 'rgba(255,255,255,0.03)', padding: '24px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', marginTop: '8px' }}>
                   <div style={{ color: 'var(--text-body)', lineHeight: 1.7, fontSize: '0.9rem' }}>

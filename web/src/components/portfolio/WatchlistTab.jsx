@@ -382,6 +382,7 @@ export default function WatchlistTab({ initialSymbol, onClearInitialSymbol, onUp
           onAdded={() => {
             loadData(); // reload watchlist items from backend
           }}
+          onUpgrade={onUpgrade}
         />
       )}
 

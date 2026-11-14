@@ -40,13 +40,8 @@ class StockDetailScreen extends StatefulWidget {
     );
 
     try {
-      final futures = await Future.wait([
-        repository.getStockDetails(symbol),
-        repository.fetchAaoifiScreening(symbol).catchError((_) => null),
-      ]);
-      
-      final fullData = futures[0] ?? {};
-      final aaoifiData = futures[1] as Map<String, dynamic>?;
+      final fullData = await repository.getStockDetails(symbol);
+      final cachedAaoifi = repository.getCachedDataForUrl('stocks/$symbol/aaoifi-screening');
 
       if (context.mounted) Navigator.pop(context);
 
@@ -54,8 +49,8 @@ class StockDetailScreen extends StatefulWidget {
         Navigator.pushNamed(context, '/stock_details', arguments: {
           'prefetched': true,
           'needs_refresh': false,
-          'stock': {...initialStock, ...fullData},
-          'aaoifiData': aaoifiData,
+          'stock': {...initialStock, ...(fullData ?? {})},
+          'aaoifiData': cachedAaoifi,
         });
       }
     } catch (e) {
@@ -288,14 +283,8 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
         hasStaleData = true;
       }
       
-      // 2. Network fetch (Concurrent)
-      final futures = await Future.wait([
-        _stockRepository.getStockDetails(symbol),
-        _stockRepository.fetchAaoifiScreening(symbol).catchError((_) => null),
-      ]);
-      
-      final fullData = futures[0];
-      final aaoifiData = futures[1] as Map<String, dynamic>?;
+      // 2. Network fetch (do NOT auto-call aaoifi-screening here so we don't consume monthly screen quota on passive stock views)
+      final fullData = await _stockRepository.getStockDetails(symbol);
       
       if (fullData != null && mounted) {
         setState(() {
@@ -304,14 +293,14 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
           if (fullData['status'] != null) {
             _currentStock['status'] = fullData['status'];
             
-            // Inject the highly polished status reason from the AAOIFI screening endpoint
-            if (aaoifiData != null && aaoifiData['status_reason'] != null) {
+            // Inject the cached status reason from AAOIFI screening if previously run
+            if (cachedAaoifi != null && cachedAaoifi['status_reason'] != null) {
               if (_currentStock['status'] is Map) {
-                _currentStock['status']['reason'] = aaoifiData['status_reason'];
+                _currentStock['status']['reason'] = cachedAaoifi['status_reason'];
               }
             }
           }
-          _aaoifiData = aaoifiData;
+          _aaoifiData = cachedAaoifi;
           _isLoadingDetails = false;
         });
       } else if (!hasStaleData) {

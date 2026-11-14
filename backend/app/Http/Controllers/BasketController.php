@@ -60,7 +60,9 @@ class BasketController extends Controller
             $data['required_tier'] = $requiredTier;
 
             if ($isLocked) {
-                $data['symbols_preview'] = array_slice($rawSymbols, 0, 2);
+                $preview = array_slice($rawSymbols, 0, 2);
+                $data['symbols'] = $preview;
+                $data['symbols_preview'] = $preview;
             }
 
             return $data;
@@ -81,32 +83,40 @@ class BasketController extends Controller
             return $this->error('Unauthorized', 403);
         }
 
-        if ($user) {
-            $basketsLimit = $user->tier->features['baskets'] ?? 0;
-            if ($basketsLimit === 0) {
+        if (!$user) {
+            return response()->json([
+                'error' => 'Upgrade Required',
+                'upgrade_required' => true,
+                'feature' => 'baskets',
+                'required_tier' => 'pro',
+                'message' => 'Thematic baskets are available on Rawdha (Pro) and Noor (Max) plans. Please log in and upgrade to view curated baskets.',
+            ], 403);
+        }
+
+        $basketsLimit = $user->tier->features['baskets'] ?? 0;
+        if ($basketsLimit === 0) {
+            return response()->json([
+                'error' => 'Upgrade Required',
+                'upgrade_required' => true,
+                'feature' => 'baskets',
+                'required_tier' => 'pro',
+                'message' => 'Thematic baskets are available on Rawdha (Pro) and Noor (Max) plans. Please upgrade to view and invest in baskets.',
+            ], 403);
+        }
+
+        if ($basket->user_id === null && $basketsLimit > 0) {
+            $curatedRank = Basket::where('is_active', true)
+                ->whereNull('user_id')
+                ->where('id', '<=', $basket->id)
+                ->count();
+            if ($curatedRank > $basketsLimit) {
                 return response()->json([
                     'error' => 'Upgrade Required',
                     'upgrade_required' => true,
                     'feature' => 'baskets',
-                    'required_tier' => 'pro',
-                    'message' => 'Thematic baskets are available on Rawdha (Pro) and Noor (Max) plans. Please upgrade to view and invest in baskets.',
+                    'required_tier' => 'max',
+                    'message' => 'Full access to all thematic baskets requires the Noor (Max) plan.',
                 ], 403);
-            }
-
-            if ($basket->user_id === null && $basketsLimit > 0) {
-                $curatedRank = Basket::where('is_active', true)
-                    ->whereNull('user_id')
-                    ->where('id', '<=', $basket->id)
-                    ->count();
-                if ($curatedRank > $basketsLimit) {
-                    return response()->json([
-                        'error' => 'Upgrade Required',
-                        'upgrade_required' => true,
-                        'feature' => 'baskets',
-                        'required_tier' => 'max',
-                        'message' => 'Full access to all thematic baskets requires the Noor (Max) plan.',
-                    ], 403);
-                }
             }
         }
 

@@ -1,7 +1,11 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 import 'package:irshad_mobile/core/api/api_service.dart';
 import 'package:irshad_mobile/core/notifications/notification_service.dart';
+import 'package:irshad_mobile/core/providers/app_state_provider.dart';
+import 'package:irshad_mobile/core/widgets/upgrade_paywall_bottom_sheet.dart';
 
 class UpdatesDigestTab extends StatefulWidget {
   const UpdatesDigestTab({super.key});
@@ -65,13 +69,18 @@ class _UpdatesDigestTabState extends State<UpdatesDigestTab> {
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to save preferences: $e'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        final isUpgrade403 = e is DioException &&
+            e.response?.statusCode == 403 &&
+            e.response?.data?['error'] == 'Upgrade Required';
+        if (!isUpgrade403) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to save preferences: $e'),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
       }
     }
   }
@@ -82,6 +91,10 @@ class _UpdatesDigestTabState extends State<UpdatesDigestTab> {
 
   @override
   Widget build(BuildContext context) {
+    final profile = context.watch<AppStateProvider>().userProfile;
+    final tier = profile?['tier'] is Map ? Map<String, dynamic>.from(profile!['tier']) : null;
+    final features = tier?['features'] is Map ? Map<String, dynamic>.from(tier!['features']) : null;
+    final bool canMonthly = features?['monthly_spotlight'] == true || tier?['slug'] == 'max';
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       child: SingleChildScrollView(
@@ -172,13 +185,27 @@ class _UpdatesDigestTabState extends State<UpdatesDigestTab> {
                         icon: Icon(Icons.keyboard_arrow_down, color: context.textMuted),
                         style: TextStyle(fontWeight: FontWeight.w700, color: context.primary, fontSize: 14),
                         items: ['Weekly', 'Monthly'].map((String value) {
+                          final label = (value == 'Monthly' && !canMonthly) ? 'Monthly (Noor)' : value;
                           return DropdownMenuItem<String>(
                             value: value,
-                            child: Text(value),
+                            child: Text(label),
                           );
                         }).toList(),
                         onChanged: (val) {
-                          if (val != null) setState(() => _frequency = val);
+                          if (val == null) return;
+                          if (val == 'Monthly' && !canMonthly) {
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (ctx) => const UpgradePaywallBottomSheet(
+                                requiredTier: 'max',
+                                message: 'Monthly Spotlight digest is exclusive to the Noor (Max) plan.',
+                              ),
+                            );
+                            return;
+                          }
+                          setState(() => _frequency = val);
                         },
                       ),
                     ),

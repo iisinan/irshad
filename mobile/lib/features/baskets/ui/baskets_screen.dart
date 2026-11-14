@@ -1003,8 +1003,9 @@ class _BasketCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<String> symbols = basket.symbols.map((s) => s.toString()).toList();
+    final totalCount = basket.stockCount ?? symbols.length;
     final displaySymbols = symbols.take(4).toList();
-    final remainingCount = symbols.length > 4 ? symbols.length - 4 : 0;
+    final remainingCount = totalCount > displaySymbols.length ? totalCount - displaySymbols.length : 0;
     final isCustom = basket.userId != null;
 
     return GestureDetector(
@@ -1152,7 +1153,7 @@ class _BasketCard extends StatelessWidget {
                         Text('No assets', style: TextStyle(color: context.textMuted, fontWeight: FontWeight.w600, fontSize: 13)),
                       const Spacer(),
                       Text(
-                        '${symbols.length} stock${symbols.length == 1 ? '' : 's'}',
+                        '$totalCount stock${totalCount == 1 ? '' : 's'}',
                         style: TextStyle(color: context.textMuted, fontWeight: FontWeight.w600, fontSize: 13),
                       ),
                       const SizedBox(width: 8),
