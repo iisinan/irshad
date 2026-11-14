@@ -38,21 +38,44 @@ class SquadService
         string $callbackUrl,
         array $metadata = []
     ): array {
+        $payload = [
+            'email'           => $user->email,
+            'amount'          => $amountKobo,
+            'currency'        => 'NGN',
+            'initiate_type'   => 'inline',
+            'transaction_ref' => $transactionRef,
+            'callback_url'    => $callbackUrl,
+            'customer_name'   => $user->name,
+            'metadata'        => $metadata,
+        ];
+
+        $tryRecurring = (bool) config('services.squad.recurring', true);
+        if ($tryRecurring) {
+            $payload['is_recurring'] = true;
+        }
+
         $response = Http::withToken($this->secret())
             ->timeout(15)
-            ->post("{$this->baseUrl()}/transaction/initiate", [
-                'email'           => $user->email,
-                'amount'          => $amountKobo,
-                'currency'        => 'NGN',
-                'initiate_type'   => 'inline',
-                'transaction_ref' => $transactionRef,
-                'callback_url'    => $callbackUrl,
-                'is_recurring'    => true,
-                'customer_name'   => $user->name,
-                'metadata'        => $metadata,
-            ]);
+            ->post("{$this->baseUrl()}/transaction/initiate", $payload);
 
         $json = $response->json() ?? [];
+
+        // If merchant account does not yet have recurring/tokenization enabled by Squad,
+        // automatically fall back to standard checkout so users can still subscribe immediately.
+        if (
+            $tryRecurring
+            && !$response->successful()
+            && in_array($response->status(), [400, 403], true)
+            && str_contains(strtolower((string) data_get($json, 'message', '')), 'not authorized')
+        ) {
+            Log::warning('Squad recurring not yet authorized on merchant account; retrying standard checkout');
+            unset($payload['is_recurring']);
+            $response = Http::withToken($this->secret())
+                ->timeout(15)
+                ->post("{$this->baseUrl()}/transaction/initiate", $payload);
+            $json = $response->json() ?? [];
+        }
+
         $checkoutUrl = data_get($json, 'data.checkout_url');
 
         if ($response->successful() && !empty($checkoutUrl)) {

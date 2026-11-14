@@ -93,6 +93,40 @@ class SquadSubscriptionTest extends TestCase
         });
     }
 
+    public function test_initialize_falls_back_when_merchant_lacks_recurring_authorization(): void
+    {
+        Http::fake([
+            'https://sandbox-api-d.squadco.com/transaction/initiate' => Http::sequence()
+                ->push([
+                    'status'  => 400,
+                    'success' => false,
+                    'message' => 'You are not authorized to use this resource.',
+                    'data'    => [],
+                ], 400)
+                ->push([
+                    'status'  => 200,
+                    'success' => true,
+                    'data'    => [
+                        'checkout_url' => 'https://sandbox-pay.squadco.com/checkout/fallback123',
+                    ],
+                ], 200),
+        ]);
+
+        $user = User::factory()->create(['email_verified_at' => now()]);
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/subscription/initialize', [
+            'plan_slug'     => 'pro',
+            'billing_cycle' => 'quarterly',
+        ]);
+
+        $response->assertOk()->assertJson([
+            'authorization_url' => 'https://sandbox-pay.squadco.com/checkout/fallback123',
+        ]);
+
+        Http::assertSentCount(2);
+    }
+
     public function test_verify_activates_subscription_idempotently(): void
     {
         $user = User::factory()->create(['email_verified_at' => now()]);
