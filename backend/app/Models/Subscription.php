@@ -10,14 +10,18 @@ class Subscription extends Model
         'user_id',
         'plan_id',
         'billing_cycle',
-        'paystack_subscription_code',
-        'paystack_email_token',
+        'gateway',
+        'squad_token_id',
+        'last_transaction_ref',
+        'auto_renew',
+        'notes',
         'status',
         'renews_at',
         'ends_at',
     ];
 
     protected $casts = [
+        'auto_renew' => 'boolean',
         'renews_at' => 'datetime',
         'ends_at' => 'datetime',
     ];

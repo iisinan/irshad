@@ -53,9 +53,10 @@ return [
         'token' => env('APIFY_TOKEN'),
     ],
 
-    'paystack' => [
-        'secret' => env('PAYSTACK_SECRET_KEY'),
-        'public' => env('PAYSTACK_PUBLIC_KEY'),
+    'squad' => [
+        'secret'   => env('SQUAD_SECRET_KEY'),
+        'public'   => env('SQUAD_PUBLIC_KEY'),
+        'base_url' => rtrim(env('SQUAD_BASE_URL', 'https://sandbox-api-d.squadco.com'), '/'),
     ],
 
 ];

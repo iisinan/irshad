@@ -36,15 +36,19 @@ const Pricing = ({ isModal }) => {
       });
       
       if (res.data?.authorization_url) {
+        if (res.data?.reference) {
+          sessionStorage.setItem('pending_payment_ref', res.data.reference);
+        }
         window.location.href = res.data.authorization_url;
       } else {
         setError('Unable to initialize payment. Please try again.');
+        setLoading(false);
       }
     } catch (err) {
       if (err.response?.status === 401) {
         navigate('/login', { state: { returnTo: '/pricing' } });
       } else {
-        setError(err.response?.data?.error || 'Payment failed. Please try again.');
+        setError(err.response?.data?.error || err.response?.data?.message || 'Payment failed. Please try again.');
       }
       setLoading(false);
     }
@@ -263,7 +267,7 @@ const Pricing = ({ isModal }) => {
           </div>
 
           <div style={{ textAlign: 'center', marginBottom: '40px', fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-            <ShieldCheck size={16} color="#10B981" /> Secure payments powered by Paystack
+            <ShieldCheck size={16} color="#10B981" /> Secure payments powered by Squad
           </div>
         </div>
       </div>

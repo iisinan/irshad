@@ -123,7 +123,16 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function activeSubscription()
     {
-        return $this->hasOne(Subscription::class)->where('status', 'active')->latestOfMany();
+        return $this->hasOne(Subscription::class)
+            ->where(function ($query) {
+                $query->where('status', 'active')
+                    ->orWhere(function ($q) {
+                        $q->where('status', 'canceled')
+                          ->whereNotNull('ends_at')
+                          ->where('ends_at', '>', now());
+                    });
+            })
+            ->latestOfMany();
     }
 
     public function usages()
@@ -131,9 +140,10 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(UserUsage::class);
     }
 
-        public function getHasPaidSubscriptionAttribute()
+    public function getHasPaidSubscriptionAttribute()
     {
-        return $this->subscriptions()->where('status', 'active')->exists();
+        $sub = $this->activeSubscription;
+        return (bool) ($sub && $sub->plan && $sub->plan->slug !== 'free');
     }
 
     public function getTierAttribute()

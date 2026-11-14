@@ -154,14 +154,15 @@ class AdminController extends Controller
             : \Carbon\Carbon::now()->addYear(); // Default: 1 year
 
         \App\Models\Subscription::create([
-            'user_id'               => $user->id,
-            'plan_id'               => $plan->id,
-            'billing_cycle'         => 'yearly',
-            'paystack_subscription_code' => null,
-            'paystack_email_token'  => "admin_override_by_{$adminName}",
-            'status'                => 'active',
-            'renews_at'             => $expiresAt,
-            'ends_at'               => null,
+            'user_id'       => $user->id,
+            'plan_id'       => $plan->id,
+            'billing_cycle' => 'yearly',
+            'gateway'       => 'admin_override',
+            'auto_renew'    => false,
+            'notes'         => "admin_override_by_{$adminName}",
+            'status'        => 'active',
+            'renews_at'     => $expiresAt,
+            'ends_at'       => null,
         ]);
 
         // Bust profile cache so next request reflects new tier

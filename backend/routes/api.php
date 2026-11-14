@@ -137,7 +137,7 @@ Route::prefix('v1')->group(function () {
     });
 
     // Webhooks (No auth required)
-    Route::post('/webhooks/paystack', [\App\Http\Controllers\SubscriptionController::class, 'webhook']);
+    Route::post('/webhooks/squad', [\App\Http\Controllers\SubscriptionController::class, 'webhook']);
     Route::post('/webhooks/ses', [\App\Http\Controllers\SesWebhookController::class, 'handle']);
 
     // Baskets Public Routes (placed before /stocks/{symbol} wildcard)
@@ -304,6 +304,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
             // Subscriptions
             Route::post('/subscription/initialize', [\App\Http\Controllers\SubscriptionController::class, 'initialize']);
+            Route::post('/subscription/verify', [\App\Http\Controllers\SubscriptionController::class, 'verify']);
             Route::post('/subscription/cancel', [\App\Http\Controllers\SubscriptionController::class, 'cancel']);
             Route::get('/subscription/status', [\App\Http\Controllers\SubscriptionController::class, 'status']);
             Route::post('/subscription/magic-link', [\App\Http\Controllers\SubscriptionController::class, 'sendMagicLink']);
@@ -393,4 +394,7 @@ Route::middleware('auth:sanctum')->group(function () {
         });
     });
 });
+
+// Root-level alias for Squad webhook (matches https://api.iirshad.com/api/webhooks/squad)
+Route::post('/webhooks/squad', [\App\Http\Controllers\SubscriptionController::class, 'webhook']);
 

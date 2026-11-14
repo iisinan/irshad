@@ -14,11 +14,20 @@ class Plan extends Model
         'price_quarterly_regular',
         'price_yearly',
         'price_yearly_regular',
-        'paystack_plan_code_monthly',
-        'paystack_plan_code_quarterly',
-        'paystack_plan_code_yearly',
         'features',
     ];
+
+    /**
+     * Resolve the Naira price for a given billing cycle.
+     */
+    public function priceForCycle(string $cycle): float
+    {
+        return (float) match ($cycle) {
+            'yearly'    => $this->price_yearly,
+            'quarterly' => $this->price_quarterly ?: ($this->price_monthly * 3),
+            default     => $this->price_monthly,
+        };
+    }
 
     protected $casts = [
         'price_monthly' => 'decimal:2',
