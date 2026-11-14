@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo, Component } from 'react';
-import { Eye, BarChart2, Star, TrendingUp, TrendingDown, Trash2, AlertCircle, HelpCircle, CheckCircle, ChevronRight, Mail, Plus, Bell, Layers, ShieldCheck, Droplet, AlertTriangle } from 'lucide-react';
+import { Eye, BarChart2, Star, TrendingUp, TrendingDown, Trash2, AlertCircle, HelpCircle, CheckCircle, ChevronRight, Mail, Plus, Bell, Layers, ShieldCheck, Droplet, AlertTriangle, Lock } from 'lucide-react';
 import { fetchWatchlist, removeFromWatchlist, fetchNgxStocks } from '../../services/api';
 import CompanyLogo from '../CompanyLogo';
 import { toastError, toastSuccess } from '../../utils/toast';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import AddWatchlistModal from './AddWatchlistModal';
 import WatchlistAlertModal from './WatchlistAlertModal';
 import Skeleton from '../ui/Skeleton';
@@ -38,7 +39,11 @@ class ModalErrorBoundary extends Component {
   }
 }
 
-export default function WatchlistTab({ initialSymbol, onClearInitialSymbol }) {
+export default function WatchlistTab({ initialSymbol, onClearInitialSymbol, onUpgrade }) {
+  const { user } = useAuth();
+  const tierSlug = user?.tier?.slug || 'free';
+  const watchlistLimit = user?.tier?.features?.watchlist_limit ?? (tierSlug === 'max' ? -1 : tierSlug === 'pro' ? 2 : 0);
+
   const [watchlistItems, setWatchlistItems] = useState(() => {
     try {
       const cached = localStorage.getItem('irshad_watchlist_items_cache_v3');
@@ -201,12 +206,30 @@ export default function WatchlistTab({ initialSymbol, onClearInitialSymbol }) {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', zIndex: 1 }}>
           <div style={{ color: 'var(--primary)', fontSize: '0.85rem', fontWeight: 800, background: 'var(--bg)', padding: '10px 20px', borderRadius: '14px', border: '1px solid var(--border)', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
-            {watchlistSymbols.length} {watchlistSymbols.length === 1 ? 'Asset' : 'Assets'}
+            {watchlistSymbols.length}{watchlistLimit !== -1 ? ` / ${watchlistLimit}` : ''} {watchlistSymbols.length === 1 && watchlistLimit === -1 ? 'Asset' : 'Assets'}
           </div>
         </div>
       </div>
 
       <div style={{ padding: '24px 32px 32px 32px' }}>
+        {watchlistLimit === 0 && (
+          <div style={{ marginBottom: '24px', padding: '18px 24px', borderRadius: '18px', background: 'linear-gradient(135deg, rgba(217, 119, 6, 0.08) 0%, rgba(21, 128, 61, 0.06) 100%)', border: '1px solid rgba(217, 119, 6, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(217, 119, 6, 0.14)', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Lock size={18} />
+              </div>
+              <div>
+                <div style={{ fontWeight: 800, fontSize: '0.92rem', color: 'var(--text-dark)' }}>Watchlist is Locked on Miftah (Free)</div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px' }}>Upgrade to Rawdha (Pro) for up to 2 watchlist stocks, or Noor (Max) for unlimited watchlist tracking & alerts.</div>
+              </div>
+            </div>
+            {onUpgrade && (
+              <button onClick={onUpgrade} style={{ padding: '10px 20px', borderRadius: '12px', background: 'var(--primary)', color: 'white', border: 'none', fontWeight: 800, fontSize: '0.82rem', cursor: 'pointer' }}>
+                Upgrade Plan
+              </button>
+            )}
+          </div>
+        )}
         <div className="watchlist-action-bar" style={{ display: 'flex', gap: '16px', marginBottom: '32px', position: 'relative', zIndex: 10, flexWrap: 'wrap', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
           <div className="hide-scrollbar" style={{ display:'flex', background:'var(--body-bg)', borderRadius:'14px', padding:'6px', gap:'8px', border: '1px solid var(--border)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)', overflowX: 'auto', maxWidth: '100%' }}>
@@ -234,11 +257,18 @@ export default function WatchlistTab({ initialSymbol, onClearInitialSymbol }) {
             ))}
           </div>
           <button 
-            onClick={() => setShowAddModal(true)}
+            onClick={() => {
+              if (watchlistLimit !== -1 && watchlistSymbols.length >= watchlistLimit) {
+                if (onUpgrade) onUpgrade();
+                else toastError('You have reached your watchlist limit for this plan. Please upgrade.');
+                return;
+              }
+              setShowAddModal(true);
+            }}
             style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '14px 24px', borderRadius: '16px', background: 'var(--primary)', color: 'white', border: 'none', fontWeight: 800, fontSize: '0.84rem', cursor: 'pointer', transition: 'all 0.2s', boxShadow: 'var(--shadow-sm)' }}
             className="hover-lift"
           >
-            <Plus size={18} strokeWidth={2.5} /> Add Assets
+            {watchlistLimit !== -1 && watchlistSymbols.length >= watchlistLimit ? <Lock size={16} /> : <Plus size={18} strokeWidth={2.5} />} Add Assets
           </button>
         </div>
       </div>

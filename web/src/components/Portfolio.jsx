@@ -177,13 +177,11 @@ export default function Portfolio() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
-    const handleOpenAddModal = (mode = true) => {
-    const tierSlug = user?.tier?.slug || 'max';
-    let limit = -1;
-    if (tierSlug === 'free') limit = 1;
-    else if (tierSlug === 'pro') limit = 7;
+  const handleOpenAddModal = (mode = true) => {
+    const tierSlug = user?.tier?.slug || 'free';
+    const limit = user?.tier?.features?.portfolio_limit ?? (tierSlug === 'free' ? 3 : tierSlug === 'pro' ? 7 : -1);
     
-    if (limit !== -1 && data?.holdings?.length >= limit) {
+    if (limit !== -1 && (data?.holdings?.length || 0) >= limit) {
       setShowUpgradeModal(true);
       return;
     }
@@ -447,17 +445,17 @@ export default function Portfolio() {
           )}
           {mountedTabs.includes('watchlist') && (
             <div style={{ display: activeTab === 'watchlist' ? 'block' : 'none' }}>
-              <WatchlistTab data={data} refreshData={loadData} initialSymbol={initialHoldingSymbol} onClearInitialSymbol={() => setInitialHoldingSymbol(null)} />
+              <WatchlistTab data={data} refreshData={loadData} initialSymbol={initialHoldingSymbol} onClearInitialSymbol={() => setInitialHoldingSymbol(null)} onUpgrade={() => setShowUpgradeModal(true)} />
             </div>
           )}
           {mountedTabs.includes('zakat') && (
             <div style={{ display: activeTab === 'zakat' ? 'block' : 'none' }}>
-              <ZakatTab data={data} />
+              <ZakatTab data={data} onUpgrade={() => setShowUpgradeModal(true)} />
             </div>
           )}
           {mountedTabs.includes('purification') && (
             <div style={{ display: activeTab === 'purification' ? 'block' : 'none' }}>
-              <PurificationTab data={data} initialSymbol={initialHoldingSymbol} refreshData={loadData} onClearInitialSymbol={() => setInitialHoldingSymbol(null)} />
+              <PurificationTab data={data} initialSymbol={initialHoldingSymbol} refreshData={loadData} onClearInitialSymbol={() => setInitialHoldingSymbol(null)} onUpgrade={() => setShowUpgradeModal(true)} />
             </div>
           )}
           {mountedTabs.includes('lectures') && (
@@ -467,7 +465,7 @@ export default function Portfolio() {
           )}
           {mountedTabs.includes('statement') && (
             <div style={{ display: activeTab === 'statement' ? 'block' : 'none' }}>
-              <StatementTab data={data} />
+              <StatementTab data={data} onUpgrade={() => setShowUpgradeModal(true)} />
             </div>
           )}
           {mountedTabs.includes('updates') && (

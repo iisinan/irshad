@@ -22,18 +22,17 @@ class ProfileController extends Controller
      */
     public function show(Request $request): JsonResponse
     {
-        $userId = $request->user()->id;
+        $user = $request->user()->load('activeSubscription.plan');
+        $userId = $user->id;
 
-        $user = $this->safeTaggedCache(['users'])->remember("user.profile.{$userId}", 3600, function () use ($userId) {
-            $u = User::with('activeSubscription.plan')->find($userId);
-            $u->screened_count = History::where('user_id', $userId)
+        $user->screened_count = $this->safeTaggedCache(['users'])->remember("user.screened_count.{$userId}", 300, function () use ($userId) {
+            return History::where('user_id', $userId)
                 ->whereIn('action', ['scan', 'check'])
                 ->distinct('reference_id')
                 ->count('reference_id');
-            $u->append(['tier', 'has_paid_subscription']);
-
-            return $u;
         });
+        $user->append(['tier', 'has_paid_subscription']);
+        $user->usage_summary = \App\Services\SubscriptionService::getUsageSummary($user);
 
         return $this->success($user, 'Profile retrieved successfully');
     }
@@ -60,6 +59,15 @@ class ProfileController extends Controller
         }
 
         if (isset($validated['preferences'])) {
+            if (array_key_exists('zakat_hawl_date', $validated['preferences']) && !\App\Services\SubscriptionService::canUseFeature($user, 'zakat_calc')) {
+                return response()->json([
+                    'error' => 'Upgrade Required',
+                    'upgrade_required' => true,
+                    'feature' => 'zakat_calc',
+                    'required_tier' => 'pro',
+                    'message' => 'Automated Zakat calculation and Hawl tracking require the Rawdha (Pro) or Noor (Max) plan.',
+                ], 403);
+            }
             $existingPreferences = $user->preferences ?? [];
             $validated['preferences'] = array_merge($existingPreferences, $validated['preferences']);
         }

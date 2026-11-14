@@ -223,11 +223,14 @@ class SubscriptionController extends Controller
     {
         $user = $request->user();
         $sub  = $user->activeSubscription()->with('plan')->first();
+        $tier = $user->tier;
 
         return response()->json([
-            'has_active_subscription' => (bool) $sub,
-            'plan'                    => $sub?->plan?->name,
-            'slug'                    => $sub?->plan?->slug,
+            'has_active_subscription' => (bool) ($sub && $sub->plan && $sub->plan->slug !== 'free'),
+            'plan'                    => $tier?->name ?? 'Miftah',
+            'slug'                    => $tier?->slug ?? 'free',
+            'features'                => $tier?->features ?? [],
+            'usage_summary'           => \App\Services\SubscriptionService::getUsageSummary($user),
             'billing_cycle'           => $sub?->billing_cycle,
             'renews_at'               => $sub?->renews_at?->toDateString(),
             'ends_at'                 => $sub?->ends_at?->toDateString(),

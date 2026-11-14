@@ -1,8 +1,13 @@
 import React, { useState, useMemo } from 'react';
-import { FileText, Download, Filter, Building2, Heart } from 'lucide-react';
+import { FileText, Download, Filter, Building2, Heart, Lock, ArrowRight } from 'lucide-react';
 import { toastSuccess, toastInfo } from '../../utils/toast';
+import { useAuth } from '../../context/AuthContext';
 
-export default function StatementTab({ data }) {
+export default function StatementTab({ data, onUpgrade }) {
+  const { user } = useAuth();
+  const tierSlug = user?.tier?.slug || 'free';
+  const isStatementsLocked = data?.tier_locks?.statements_locked ?? !(user?.tier?.features?.statements ?? (tierSlug !== 'free'));
+
   const [dateRange, setDateRange] = useState('all');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -81,6 +86,27 @@ export default function StatementTab({ data }) {
       toastInfo("Select 'Save as PDF' in the print dialog.");
     }, 800);
   };
+
+  if (isStatementsLocked) {
+    return (
+      <div className="fade-in">
+        <div style={{ background: 'var(--bg)', borderRadius: '24px', padding: '56px 32px', textAlign: 'center', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
+          <div style={{ width: '64px', height: '64px', borderRadius: '20px', background: 'rgba(217, 119, 6, 0.12)', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+            <Lock size={28} />
+          </div>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-dark)', margin: '0 0 10px' }}>Statements & History Tracking</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', maxWidth: '500px', margin: '0 auto 24px', lineHeight: 1.6 }}>
+            Track your historical holdings and purification ledger, import broker statements, and export bank-style PDF statements. Available on <strong>Rawdha (Pro)</strong> and <strong>Noor (Max)</strong>.
+          </p>
+          {onUpgrade && (
+            <button onClick={onUpgrade} style={{ padding: '14px 28px', borderRadius: '14px', background: 'var(--primary)', color: 'white', border: 'none', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+              Upgrade to Unlock <ArrowRight size={16} />
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fade-in">

@@ -81,6 +81,11 @@ class SendDividendPurificationReminders extends Command
                     continue;
                 }
 
+                // Dividend alerts are exclusive to Noor (Max) tier
+                if (!\App\Services\SubscriptionService::canUseFeature($user, 'dividend_alerts')) {
+                    continue;
+                }
+
                 $cacheKey = "div_purif_sent_{$user->id}_{$dividend->id}";
                 if (Cache::has($cacheKey)) {
                     continue; // Already notified

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/portfolio_provider.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
+import 'package:irshad_mobile/core/providers/app_state_provider.dart';
+import 'package:irshad_mobile/core/widgets/upgrade_paywall_bottom_sheet.dart';
 import '../widgets/purification_card.dart';
 import '../widgets/charities_bottom_sheet.dart';
 
@@ -11,6 +13,57 @@ class PurificationTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tier = Provider.of<AppStateProvider>(context).userProfile?['tier'];
+    final tierSlug = tier?['slug'] ?? 'free';
+    final purificationsLimit = tier?['features']?['purifications_per_month'] ?? (tierSlug == 'max' ? -1 : tierSlug == 'pro' ? 2 : 0);
+    if (purificationsLimit == 0) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(28.0),
+          child: Container(
+            padding: const EdgeInsets.all(28),
+            decoration: BoxDecoration(
+              color: context.bg,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: context.divider),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.lock_outline_rounded, size: 42, color: context.primary),
+                const SizedBox(height: 16),
+                Text('Automated Purification Locked', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark), textAlign: TextAlign.center),
+                const SizedBox(height: 8),
+                Text(
+                  'Upgrade to Rawdha (Pro) for 2 automated purification calculations per month, or Noor (Max) for unlimited access.',
+                  style: TextStyle(fontSize: 13, color: context.textMuted, height: 1.5),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (ctx) => const UpgradePaywallBottomSheet(message: 'Upgrade to Rawdha (Pro) or Noor (Max) to unlock automated dividend purification calculations.'),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: context.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  ),
+                  child: const Text('Upgrade Plan', style: TextStyle(fontWeight: FontWeight.w800)),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     return Consumer<PortfolioProvider>(
       builder: (context, provider, child) {
         final isLoading = provider.isLoading;

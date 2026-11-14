@@ -128,8 +128,144 @@ class UpdatesController extends Controller
             ];
         });
 
+        $user = $request->user();
+        $dividendAlertsAllowed = $user ? \App\Services\SubscriptionService::canUseFeature($user, 'dividend_alerts') : false;
+        $driftTrackingAllowed = $user ? \App\Services\SubscriptionService::canUseFeature($user, 'drift_tracking') : false;
+        $monthlySpotlightAllowed = $user ? \App\Services\SubscriptionService::canUseFeature($user, 'monthly_spotlight') : false;
+
+        $responsePayload = $data;
+        if (!$dividendAlertsAllowed) {
+            $responsePayload['dividends'] = [];
+        }
+        if (!$driftTrackingAllowed) {
+            $responsePayload['compliance_changes'] = [];
+        }
+        $responsePayload['tier_locks'] = [
+            'dividend_alerts_locked' => !$dividendAlertsAllowed,
+            'drift_tracking_locked' => !$driftTrackingAllowed,
+            'monthly_spotlight_locked' => !$monthlySpotlightAllowed,
+        ];
+
         return response()->json([
-            'data' => $data,
+            'data' => $responsePayload,
+        ]);
+    }
+
+    /**
+     * Monthly Spotlight — Full insights (Exclusive to Noor / Max tier).
+     */
+    public function monthlySpotlight(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        if (!$user || !\App\Services\SubscriptionService::canUseFeature($user, 'monthly_spotlight')) {
+            return response()->json([
+                'error' => 'Upgrade Required',
+                'upgrade_required' => true,
+                'feature' => 'monthly_spotlight',
+                'required_tier' => 'max',
+                'message' => 'Monthly Spotlight full insights are exclusive to the Noor (Max) plan.',
+            ], 403);
+        }
+
+        $spotlight = \Illuminate\Support\Facades\Cache::remember('updates_monthly_spotlight', now()->addHours(2), function () {
+            $halalCompanies = \App\Models\Company::with(['aaoifiScreening', 'latestDividend'])
+                ->where(function ($q) {
+                    $q->whereIn('current_status', ['halal', 'compliant'])
+                      ->orWhereHas('status', fn ($sq) => $sq->whereIn('status', ['halal', 'compliant']));
+                })
+                ->get();
+
+            $topGainers = $halalCompanies
+                ->whereNotNull('price_change_pct')
+                ->sortByDesc('price_change_pct')
+                ->take(5)
+                ->values()
+                ->map(fn ($c) => [
+                    'symbol' => $c->symbol,
+                    'name' => $c->name,
+                    'sector' => $c->sector ?? 'Equities',
+                    'latest_price' => (float) ($c->latest_price ?? 0),
+                    'price_change_pct' => round((float) ($c->price_change_pct ?? 0), 2),
+                    'logo_url' => $c->logo_url,
+                ]);
+
+            $ratioLeaders = $halalCompanies
+                ->filter(fn ($c) => $c->aaoifiScreening !== null)
+                ->sortBy(fn ($c) => ((float) ($c->aaoifiScreening->debt_ratio ?? 0)) + ((float) ($c->aaoifiScreening->impermissible_income_ratio ?? 0)))
+                ->take(5)
+                ->values()
+                ->map(fn ($c) => [
+                    'symbol' => $c->symbol,
+                    'name' => $c->name,
+                    'sector' => $c->sector ?? 'Equities',
+                    'debt_ratio' => round((float) ($c->aaoifiScreening->debt_ratio ?? 0), 2),
+                    'cash_ratio' => round((float) ($c->aaoifiScreening->cash_ratio ?? 0), 2),
+                    'impure_income_ratio' => round((float) ($c->aaoifiScreening->impermissible_income_ratio ?? 0), 2),
+                    'logo_url' => $c->logo_url,
+                ]);
+
+            $dividendLeaders = $halalCompanies
+                ->filter(fn ($c) => $c->latestDividend && (float) ($c->latestDividend->amount ?? 0) > 0)
+                ->sortByDesc(fn ($c) => (float) ($c->latestDividend->amount ?? 0))
+                ->take(5)
+                ->values()
+                ->map(fn ($c) => [
+                    'symbol' => $c->symbol,
+                    'name' => $c->name,
+                    'sector' => $c->sector ?? 'Equities',
+                    'dividend_amount' => (float) ($c->latestDividend->amount ?? 0),
+                    'pay_date' => $c->latestDividend->pay_date,
+                    'latest_price' => (float) ($c->latest_price ?? 0),
+                ]);
+
+            $allCompanies = \App\Models\Company::select(['id', 'sector', 'current_status'])->get();
+            $sectorBreakdown = $allCompanies
+                ->groupBy(fn ($c) => $c->sector ?: 'Other')
+                ->map(function ($group, $sector) {
+                    $total = $group->count();
+                    $halal = $group->filter(fn ($c) => in_array(strtolower((string) $c->current_status), ['halal', 'compliant']))->count();
+                    return [
+                        'sector' => $sector,
+                        'total_companies' => $total,
+                        'halal_companies' => $halal,
+                        'compliance_rate' => $total > 0 ? round(($halal / $total) * 100, 1) : 0,
+                    ];
+                })
+                ->sortByDesc('halal_companies')
+                ->take(6)
+                ->values();
+
+            $spotlightArticles = NewsArticle::with('company:id,symbol,name')
+                ->whereIn('category', ['market_intelligence', 'aaoifi', 'earnings'])
+                ->orderBy('published_at', 'desc')
+                ->limit(6)
+                ->get()
+                ->map(fn ($n) => [
+                    'id' => $n->id,
+                    'symbol' => $n->company?->symbol,
+                    'name' => $n->company?->name,
+                    'title' => $n->title,
+                    'category' => $n->category,
+                    'content' => $n->content,
+                    'source' => $n->source,
+                    'source_url' => $n->source_url,
+                    'published_at' => $n->published_at,
+                    'time_ago' => $n->published_at?->diffForHumans(),
+                ]);
+
+            return [
+                'month' => now()->format('F Y'),
+                'top_halal_gainers' => $topGainers,
+                'ratio_health_leaders' => $ratioLeaders,
+                'dividend_yield_leaders' => $dividendLeaders,
+                'sector_breakdown' => $sectorBreakdown,
+                'spotlight_articles' => $spotlightArticles,
+            ];
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $spotlight,
         ]);
     }
 
@@ -151,6 +287,17 @@ class UpdatesController extends Controller
             'in_app_enabled' => 'boolean',
             'frequency' => 'in:weekly,monthly',
         ]);
+
+        $user = $request->user();
+        if (($validated['frequency'] ?? null) === 'monthly' && $user && !\App\Services\SubscriptionService::canUseFeature($user, 'monthly_spotlight')) {
+            return response()->json([
+                'error' => 'Upgrade Required',
+                'upgrade_required' => true,
+                'feature' => 'monthly_spotlight',
+                'required_tier' => 'max',
+                'message' => 'Monthly Spotlight digest is exclusive to the Noor (Max) plan.',
+            ], 403);
+        }
 
         $pref = WeeklyDigestPreference::updateOrCreate(
             ['user_id' => auth()->id()],

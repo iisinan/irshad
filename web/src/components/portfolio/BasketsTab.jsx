@@ -5,7 +5,7 @@ import {
   Layers, Search, ArrowLeft, Plus, Check, X, Wallet, Edit2, Trash2,
   ShieldCheck, Sparkles, TrendingUp, TrendingDown, Info,
   ChevronRight, Award, Leaf, Zap, ShoppingBag, Hammer, Coins,
-  ExternalLink, CheckCircle2, RefreshCw
+  ExternalLink, CheckCircle2, RefreshCw, Lock
 } from 'lucide-react';
 import {
   fetchBaskets, createBasket, updateBasket,
@@ -679,7 +679,12 @@ export default function BasketsTab({ onUpgrade }) {
       setInvestAmount('');
       await loadData(true);
     } catch (err) {
-      toastError(err.response?.data?.message || 'Failed to execute basket investment.');
+      if (err.response?.status === 403 && onUpgrade) {
+        setShowInvestModal(false);
+        onUpgrade();
+      } else {
+        toastError(err.response?.data?.message || 'Failed to execute basket investment.');
+      }
     } finally {
       setInvesting(false);
     }
@@ -1308,7 +1313,15 @@ export default function BasketsTab({ onUpgrade }) {
                 return (
                   <div
                     key={basket.id}
-                    onClick={() => setSelectedBasket(basket)}
+                    onClick={() => {
+                      const basketsLimit = user?.tier?.features?.baskets ?? 0;
+                      if (basket.is_locked || basketsLimit === 0) {
+                        if (onUpgrade) onUpgrade();
+                        else toastError('Please upgrade your plan to unlock thematic baskets.');
+                        return;
+                      }
+                      setSelectedBasket(basket);
+                    }}
                     style={{
                       background: 'var(--bg)',
                       border: '1px solid var(--border)',
@@ -1320,7 +1333,8 @@ export default function BasketsTab({ onUpgrade }) {
                       cursor: 'pointer',
                       transition: 'all 0.3s cubic-bezier(0.16,1,0.3,1)',
                       position: 'relative',
-                      overflow: 'hidden'
+                      overflow: 'hidden',
+                      opacity: basket.is_locked ? 0.88 : 1
                     }}
                     onMouseEnter={e => {
                       e.currentTarget.style.transform = 'translateY(-3px)';
@@ -1360,10 +1374,13 @@ export default function BasketsTab({ onUpgrade }) {
                           {basket.user_id === null ? (
                             <span style={{
                               padding: '3px 8px', borderRadius: '14px',
-                              background: 'rgba(21, 128, 61, 0.1)', color: 'var(--halal)',
-                              fontSize: '0.65rem', fontWeight: 800
+                              background: basket.is_locked ? 'rgba(217, 119, 6, 0.12)' : 'rgba(21, 128, 61, 0.1)',
+                              color: basket.is_locked ? '#d97706' : 'var(--halal)',
+                              fontSize: '0.65rem', fontWeight: 800,
+                              display: 'inline-flex', alignItems: 'center', gap: '4px'
                             }}>
-                              Curated
+                              {basket.is_locked && <Lock size={11} />}
+                              {basket.is_locked ? (basket.required_tier === 'max' ? 'Noor (Max)' : 'Rawdha (Pro)') : 'Curated'}
                             </span>
                           ) : (
                             <div style={{ display: 'flex', gap: '4px' }}>

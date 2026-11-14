@@ -34,6 +34,9 @@ class SendZakatReminders extends Command
         $count = 0;
 
         foreach ($users as $user) {
+            if (!\App\Services\SubscriptionService::canUseFeature($user, 'zakat_calc')) {
+                continue;
+            }
             $hawlDate = $user->preferences['zakat_hawl_date'] ?? null;
             if (! $hawlDate) {
                 continue;

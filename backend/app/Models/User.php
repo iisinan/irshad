@@ -125,12 +125,18 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasOne(Subscription::class)
             ->where(function ($query) {
-                $query->where('status', 'active')
-                    ->orWhere(function ($q) {
-                        $q->where('status', 'canceled')
-                          ->whereNotNull('ends_at')
-                          ->where('ends_at', '>', now());
-                    });
+                $query->where(function ($q) {
+                    $q->where('status', 'active')
+                      ->where(function ($subQ) {
+                          $subQ->whereNull('ends_at')
+                               ->orWhere('ends_at', '>', now());
+                      });
+                })
+                ->orWhere(function ($q) {
+                    $q->where('status', 'canceled')
+                      ->whereNotNull('ends_at')
+                      ->where('ends_at', '>', now());
+                });
             })
             ->latestOfMany();
     }
@@ -150,14 +156,28 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $activeSub = $this->activeSubscription;
         
-        // If the user has an explicit active subscription (even 'free' set by admin), respect it first
+        // If the user has an explicit active subscription, return its plan
         if ($activeSub && $activeSub->plan) {
             return $activeSub->plan;
         }
 
-        // Ongoing Free Trial Strategy: All users without explicit subscriptions get 'Noor' (Max) plan
-        // The exact end date of the free trial will be determined in the future.
-        return Plan::where('slug', 'max')->first() 
-            ?? new Plan(['slug' => 'max', 'name' => 'Noor']); // Fallback if not seeded yet
+        // Default unsubscribed users to Miftah (Free) tier
+        return Plan::where('slug', 'free')->first()
+            ?? new Plan([
+                'slug' => 'free',
+                'name' => 'Miftah',
+                'features' => [
+                    'stock_screens_per_month' => 3,
+                    'portfolio_limit' => 3,
+                    'watchlist_limit' => 0,
+                    'baskets' => 0,
+                    'statements' => false,
+                    'purifications_per_month' => 0,
+                    'zakat_calc' => false,
+                    'dividend_alerts' => false,
+                    'drift_tracking' => false,
+                    'monthly_spotlight' => false,
+                ],
+            ]);
     }
 }

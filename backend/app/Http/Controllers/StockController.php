@@ -489,14 +489,31 @@ class StockController extends Controller
     /**
      * Ask Perplexity AI for a Shariah analysis of the stock with confidence score and sources.
      */
-    public function getAiAnalysis(string $symbol, PerplexityAiService $aiService): JsonResponse
+    public function getAiAnalysis(Request $request, string $symbol, PerplexityAiService $aiService): JsonResponse
     {
+        $user = $request->user();
+        if ($user && !\App\Services\SubscriptionService::canScreenStock($user, $symbol)) {
+            $limit = $user->tier->features['stock_screens_per_month'] ?? 3;
+            return response()->json([
+                'error' => 'Upgrade Required',
+                'upgrade_required' => true,
+                'feature' => 'stock_screens_per_month',
+                'limit' => $limit,
+                'required_tier' => ($user->tier->slug ?? 'free') === 'free' ? 'pro' : 'max',
+                'message' => "You have reached your monthly limit of {$limit} stock screenings. Please upgrade your plan.",
+            ], 403);
+        }
+
         $company = Company::with(['status', 'financials' => fn ($q) => $q->latest()])->where('symbol', $symbol)->firstOrFail();
 
         $statusStr = $company->status ? $company->status->status : 'unknown';
         $financials = $company->financials->first();
 
         $result = $aiService->analyzeCompliance($company, $financials, $statusStr);
+
+        if ($user) {
+            \App\Services\SubscriptionService::recordStockScreen($user, $symbol);
+        }
 
         return $this->success([
             'reasoning' => $result['reasoning'],
@@ -511,12 +528,29 @@ class StockController extends Controller
      */
     public function chatAboutStock(Request $request, string $symbol, PerplexityAiService $aiService): JsonResponse
     {
+        $user = $request->user();
+        if ($user && !\App\Services\SubscriptionService::canScreenStock($user, $symbol)) {
+            $limit = $user->tier->features['stock_screens_per_month'] ?? 3;
+            return response()->json([
+                'error' => 'Upgrade Required',
+                'upgrade_required' => true,
+                'feature' => 'stock_screens_per_month',
+                'limit' => $limit,
+                'required_tier' => ($user->tier->slug ?? 'free') === 'free' ? 'pro' : 'max',
+                'message' => "You have reached your monthly limit of {$limit} stock screenings. Please upgrade your plan.",
+            ], 403);
+        }
+
         $request->validate(['question' => 'required|string|max:500']);
 
         $company   = Company::where('symbol', $symbol)->firstOrFail();
         $screening = \App\Models\AaoifiScreening::where('company_id', $company->id)->first();
 
         $answer = $aiService->chatAboutStock($company, $screening, $request->input('question'));
+
+        if ($user) {
+            \App\Services\SubscriptionService::recordStockScreen($user, $symbol);
+        }
 
         return $this->success(['answer' => $answer]);
     }
@@ -527,18 +561,26 @@ class StockController extends Controller
     public function aaoifiScreening(Request $request, string $symbol): JsonResponse
     {
         $user = $request->user();
-        if ($user && !\App\Services\SubscriptionService::canUseFeature($user, 'stock_screens_per_month')) {
+        if ($user && !\App\Services\SubscriptionService::canScreenStock($user, $symbol)) {
+            $limit = $user->tier->features['stock_screens_per_month'] ?? 3;
             return response()->json([
                 'error' => 'Upgrade Required',
-                'message' => 'You have reached your limit for stock screenings this month. Please upgrade your plan.'
+                'upgrade_required' => true,
+                'feature' => 'stock_screens_per_month',
+                'limit' => $limit,
+                'required_tier' => ($user->tier->slug ?? 'free') === 'free' ? 'pro' : 'max',
+                'message' => "You have reached your limit of {$limit} stock screenings this month. Please upgrade your plan.",
             ], 403);
         }
 
         $cacheKey = "aaoifi.screening.{$symbol}";
         $cached = $this->safeTaggedCache(['stocks'])->get($cacheKey);
         if ($cached !== null) {
-            // Track usage since we are returning successfully
-            if ($user) \App\Services\SubscriptionService::recordFeatureUsage($user, 'stock_screens_per_month');
+            // Track unique symbol usage for the current month
+            if ($user) {
+                \App\Services\SubscriptionService::recordStockScreen($user, $symbol);
+                $cached['screen_usage'] = \App\Services\SubscriptionService::getUsageSummary($user)['stock_screens_per_month'];
+            }
             return $this->success($cached);
         }
 
@@ -683,7 +725,10 @@ class StockController extends Controller
 
             $this->safeTaggedCache(['stocks'])->put($cacheKey, $mapped, 300);
 
-            if ($user) \App\Services\SubscriptionService::recordFeatureUsage($user, 'stock_screens_per_month');
+            if ($user) {
+                \App\Services\SubscriptionService::recordStockScreen($user, $symbol);
+                $mapped['screen_usage'] = \App\Services\SubscriptionService::getUsageSummary($user)['stock_screens_per_month'];
+            }
 
             return $this->success($mapped);
         }

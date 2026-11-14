@@ -40,6 +40,10 @@ class NotifyGracePeriodEnd extends Command
         $count = 0;
         foreach ($expiredHoldings as $holding) {
             if ($holding->user) {
+                // 90-day drift tracking & grace period notifications are exclusive to Noor (Max)
+                if (!\App\Services\SubscriptionService::canUseFeature($holding->user, 'drift_tracking')) {
+                    continue;
+                }
                 try {
                     $holding->user->notify(new GracePeriodEndedNotification($holding));
                     $holding->update(['grace_period_notified' => true]);

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { ShieldAlert, ArrowRight, Heart, CheckCircle, Sparkles, X, ChevronRight, Calculator, Loader2, Info } from 'lucide-react';
+import { ShieldAlert, ArrowRight, Heart, CheckCircle, Sparkles, X, ChevronRight, Calculator, Loader2, Info, Lock } from 'lucide-react';
 import CompanyLogo from '../CompanyLogo';
 import api from '../../services/api';
 import localforage from 'localforage';
 import { toastSuccess, toastError } from '../../utils/toast';
+import { useAuth } from '../../context/AuthContext';
 
 const fmt = (n, d = 2) => `₦${Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d })}`;
 
@@ -576,7 +577,14 @@ function PurificationCard({ h, onPurify, onStatClick }) {
   );
 }
 
-export default function PurificationTab({ data, initialSymbol, refreshData, onClearInitialSymbol }) {
+export default function PurificationTab({ data, initialSymbol, refreshData, onClearInitialSymbol, onUpgrade }) {
+  const { user } = useAuth();
+  const tierSlug = user?.tier?.slug || 'free';
+  const purificationsLimit = user?.tier?.features?.purifications_per_month ?? (tierSlug === 'max' ? -1 : tierSlug === 'pro' ? 2 : 0);
+  const isPurificationLocked = data?.tier_locks?.purification_locked ?? (purificationsLimit === 0);
+  const purificationUsage = data?.usage_summary?.purifications_per_month;
+  const lockedHoldingsCount = data?.summary?.purification_holdings_count ?? (data?.holdings || []).filter(h => h.purification_required).length;
+
   const [purifiedSymbols, setPurifiedSymbols] = useState([]);
   const [selectedHolding, setSelectedHolding] = useState(null);
   const [activeStatTarget, setActiveStatTarget] = useState(null);
@@ -644,11 +652,40 @@ export default function PurificationTab({ data, initialSymbol, refreshData, onCl
       }
     } catch (err) {
       console.error('Error purifying:', err);
-      toastError(err?.response?.data?.message || 'Failed to record purification. Please try again.');
+      if (err?.response?.status === 403 && onUpgrade) {
+        setCharityModalTarget(null);
+        onUpgrade();
+      } else {
+        toastError(err?.response?.data?.message || 'Failed to record purification. Please try again.');
+      }
     } finally {
       setIsPurifying(false);
     }
   };
+
+  if (isPurificationLocked) {
+    return (
+      <div className="animate-fade-in stagger-1 purification-tab-outer">
+        <div style={{ background: 'var(--bg)', borderRadius: '24px', padding: '56px 32px', textAlign: 'center', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
+          <div style={{ width: '64px', height: '64px', borderRadius: '20px', background: 'rgba(217, 119, 6, 0.12)', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+            <Lock size={28} />
+          </div>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-dark)', margin: '0 0 10px' }}>Automated Purification Calculation</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', maxWidth: '480px', margin: '0 auto 24px', lineHeight: 1.6 }}>
+            {lockedHoldingsCount > 0
+              ? `You currently have ${lockedHoldingsCount} holding${lockedHoldingsCount > 1 ? 's' : ''} requiring dividend purification.`
+              : 'Automatically calculate exact dividend purification amounts based on each company’s AAOIFI impure income ratio.'}{' '}
+            Upgrade to <strong>Rawdha (Pro)</strong> for 2 calculations per month or <strong>Noor (Max)</strong> for unlimited automated purification.
+          </p>
+          {onUpgrade && (
+            <button onClick={onUpgrade} style={{ padding: '14px 28px', borderRadius: '14px', background: 'var(--primary)', color: 'white', border: 'none', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+              Upgrade to Unlock <ArrowRight size={16} />
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="animate-fade-in stagger-1 purification-tab-outer">
@@ -699,7 +736,14 @@ export default function PurificationTab({ data, initialSymbol, refreshData, onCl
             </div>
             <div>
               <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-dark)', letterSpacing: '-0.5px', marginBottom: '4px', margin: 0 }}>Dividend Purification</h2>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', margin: 0, fontWeight: 500 }}>Cleanse your portfolio of non-compliant income</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', margin: 0, fontWeight: 500 }}>
+                Cleanse your portfolio of non-compliant income
+                {purificationUsage && purificationUsage.limit !== -1 && (
+                  <span style={{ marginLeft: '10px', padding: '2px 10px', borderRadius: '12px', background: 'var(--primary-50)', color: 'var(--primary)', fontWeight: 800, fontSize: '0.75rem' }}>
+                    {purificationUsage.used} / {purificationUsage.limit} used this month
+                  </span>
+                )}
+              </p>
             </div>
           </div>
 

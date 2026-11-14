@@ -76,6 +76,9 @@ class ZakatController extends Controller
         $nisabGold = $goldPrice * 85;
         $nisabSilver = $silverPrice * 595;
         
+        $user = auth('sanctum')->user();
+        $zakatAllowed = $user ? \App\Services\SubscriptionService::canUseFeature($user, 'zakat_calc') : false;
+
         return response()->json([
             'status' => 'success',
             'data' => [
@@ -85,7 +88,73 @@ class ZakatController extends Controller
                 'nisab_silver' => $nisabSilver,
                 'override_active' => $overrideActive,
                 'exchange_rate' => $exchangeRate,
+                'zakat_locked' => $user ? !$zakatAllowed : false,
             ]
+        ]);
+    }
+
+    /**
+     * Automated portfolio & wealth Zakat calculation (Rawdha Pro & Noor Max).
+     */
+    public function calculate(Request $request)
+    {
+        $user = $request->user();
+        if (!$user || !\App\Services\SubscriptionService::canUseFeature($user, 'zakat_calc')) {
+            return response()->json([
+                'error' => 'Upgrade Required',
+                'upgrade_required' => true,
+                'feature' => 'zakat_calc',
+                'required_tier' => 'pro',
+                'message' => 'Automated Zakat calculation is available on Rawdha (Pro) and Noor (Max) plans.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'cash_savings' => 'nullable|numeric|min:0',
+            'gold_silver_value' => 'nullable|numeric|min:0',
+            'business_assets' => 'nullable|numeric|min:0',
+            'liabilities' => 'nullable|numeric|min:0',
+            'nisab_standard' => 'nullable|in:gold,silver',
+            'investment_intent' => 'nullable|in:trading,long_term',
+        ]);
+
+        $pricesResponse = $this->getPrices($request)->getData(true)['data'] ?? [];
+        $nisabStandard = $validated['nisab_standard'] ?? 'gold';
+        $nisabThreshold = $nisabStandard === 'silver'
+            ? (float) ($pricesResponse['nisab_silver'] ?? 0)
+            : (float) ($pricesResponse['nisab_gold'] ?? 0);
+
+        $holdings = \App\Models\Holding::with('company')->where('user_id', $user->id)->get();
+        $portfolioValue = $holdings->sum(function ($h) {
+            $price = (float) ($h->company?->latest_price ?: $h->average_buy_price ?: 0);
+            return (float) $h->shares * $price;
+        });
+
+        $intent = $validated['investment_intent'] ?? 'trading';
+        // Trading intent: 100% of market value is zakatable; long-term intent: 30% liquid asset proxy per AAOIFI
+        $zakatablePortfolio = $intent === 'long_term' ? ($portfolioValue * 0.30) : $portfolioValue;
+
+        $cash = (float) ($validated['cash_savings'] ?? 0);
+        $goldSilver = (float) ($validated['gold_silver_value'] ?? 0);
+        $business = (float) ($validated['business_assets'] ?? 0);
+        $liabilities = (float) ($validated['liabilities'] ?? 0);
+
+        $netZakatableWealth = max(0, $zakatablePortfolio + $cash + $goldSilver + $business - $liabilities);
+        $isAboveNisab = $netZakatableWealth >= $nisabThreshold && $nisabThreshold > 0;
+        $zakatDue = $isAboveNisab ? round($netZakatableWealth * 0.025, 2) : 0.0;
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'portfolio_market_value' => round($portfolioValue, 2),
+                'zakatable_portfolio_value' => round($zakatablePortfolio, 2),
+                'net_zakatable_wealth' => round($netZakatableWealth, 2),
+                'nisab_standard' => $nisabStandard,
+                'nisab_threshold' => round($nisabThreshold, 2),
+                'is_above_nisab' => $isAboveNisab,
+                'zakat_due' => $zakatDue,
+                'rate' => 0.025,
+            ],
         ]);
     }
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Newspaper, Lock, Bell, Moon, Clock, Star, Mail, Droplet, Shield, Rocket } from 'lucide-react';
+import { Newspaper, Lock, Bell, Moon, Clock, Star, Mail, Droplet, Shield, Rocket, Sparkles, TrendingUp, Award } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import api from '../../services/api';
 import IslamicQuote from '../IslamicQuote';
 import UpdatesNews    from './UpdatesNews';
 import UpdatesInbox   from './UpdatesInbox';
@@ -9,6 +10,104 @@ import UpdatesDividends from './UpdatesDividends';
 import UpdatesCompliance  from './UpdatesCompliance';
 import UpdatesIPO from './UpdatesIPO';
 import PricingModal from '../PricingModal';
+
+function MonthlySpotlightView() {
+  const [spotlight, setSpotlight] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let mounted = true;
+    api.get('/updates/monthly-spotlight')
+      .then(res => {
+        if (mounted) {
+          setSpotlight(res.data?.data || null);
+          setLoading(false);
+        }
+      })
+      .catch(err => {
+        if (mounted) {
+          setError(err.response?.data?.message || 'Unable to load Monthly Spotlight insights.');
+          setLoading(false);
+        }
+      });
+    return () => { mounted = false; };
+  }, []);
+
+  if (loading) {
+    return (
+      <div style={{ padding: '48px 24px', textAlign: 'center', color: 'var(--text-muted)', fontWeight: 600 }}>
+        Loading Monthly Spotlight insights...
+      </div>
+    );
+  }
+
+  if (error || !spotlight) {
+    return (
+      <div style={{ padding: '40px 24px', textAlign: 'center', background: 'var(--bg)', borderRadius: '20px', border: '1px solid var(--border)' }}>
+        <p style={{ color: 'var(--text-muted)', margin: 0 }}>{error || 'No spotlight insights available yet.'}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <div style={{ background: 'linear-gradient(135deg, var(--bg) 0%, var(--primary-50) 100%)', borderRadius: '20px', padding: '24px 28px', border: '1px solid var(--border)' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 12px', borderRadius: '100px', background: 'var(--bg)', border: '1px solid var(--border)', fontSize: '0.72rem', fontWeight: 800, color: 'var(--primary)', marginBottom: '10px' }}>
+          <Sparkles size={13} /> Noor (Max) Exclusive • {spotlight.month}
+        </div>
+        <h3 style={{ margin: '0 0 6px', fontSize: '1.35rem', fontWeight: 900, color: 'var(--text-dark)' }}>Monthly Shariah Market Spotlight</h3>
+        <p style={{ margin: 0, fontSize: '0.88rem', color: 'var(--text-muted)' }}>
+          Deep-dive monthly screening leaders, top-performing Halal equities, and sector compliance health across the NGX.
+        </p>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+        <div style={{ background: 'var(--bg)', borderRadius: '20px', padding: '22px', border: '1px solid var(--border)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.95rem' }}>
+            <TrendingUp size={18} color="var(--halal)" /> Top Halal Performers
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {(spotlight.top_halal_gainers || []).map(item => (
+              <div key={item.symbol} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', borderRadius: '12px', background: 'var(--bg-section)' }}>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: '0.88rem', color: 'var(--text-dark)' }}>{item.symbol}</div>
+                  <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>{item.sector}</div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontWeight: 800, fontSize: '0.88rem', color: 'var(--text-dark)' }}>₦{Number(item.latest_price || 0).toLocaleString()}</div>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 800, color: Number(item.price_change_pct) >= 0 ? 'var(--halal)' : 'var(--non-compliant)' }}>
+                    {Number(item.price_change_pct) >= 0 ? '+' : ''}{item.price_change_pct}%
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ background: 'var(--bg)', borderRadius: '20px', padding: '22px', border: '1px solid var(--border)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.95rem' }}>
+            <Award size={18} color="var(--primary)" /> AAOIFI Ratio Health Leaders
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {(spotlight.ratio_health_leaders || []).map(item => (
+              <div key={item.symbol} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', borderRadius: '12px', background: 'var(--bg-section)' }}>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: '0.88rem', color: 'var(--text-dark)' }}>{item.symbol}</div>
+                  <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>{item.sector}</div>
+                </div>
+                <div style={{ textAlign: 'right', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>
+                  <div>Debt: <strong style={{ color: 'var(--halal)' }}>{item.debt_ratio}%</strong></div>
+                  <div>Impure: <strong style={{ color: 'var(--halal)' }}>{item.impure_income_ratio}%</strong></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /* ── Greeting helpers ── */
 function getGreeting() {
@@ -118,13 +217,17 @@ export default function UpdatesTab({ unreadCount = 0 }) {
   const [activeSubTab, setActiveSubTab] = useState('news');
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
+  const { user }    = useAuth();
   const isTabLocked = (tabId) => {
     const userTier = user?.tier?.slug || 'free';
+    const features = user?.tier?.features || {};
     if (userTier === 'max') return false;
-    if (userTier === 'pro') return tabId === 'compliance';
-    return tabId !== 'news';
+    if (tabId === 'news' || tabId === 'inbox' || tabId === 'ipo') return false;
+    if (tabId === 'dividends') return !(features.dividend_alerts ?? false);
+    if (tabId === 'compliance') return !(features.drift_tracking ?? false);
+    if (tabId === 'spotlight') return !(features.monthly_spotlight ?? false);
+    return true;
   };
-  const { user }    = useAuth();
   const greeting    = getGreeting();
   const firstName   = getFirstName(user);
   const hijriDate   = getHijriDate();
@@ -141,7 +244,13 @@ export default function UpdatesTab({ unreadCount = 0 }) {
       id: 'compliance',
       label: 'Compliance Changes',
       icon: Shield,
-      description: 'Recent status changes for screened companies',
+      description: '90-day drift tracking & status changes for screened companies',
+    },
+    {
+      id: 'spotlight',
+      label: 'Monthly Spotlight',
+      icon: Sparkles,
+      description: 'Full monthly Shariah market insights & ratio leaders',
     },
     {
       id: 'ipo',
@@ -317,6 +426,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
         {activeSubTab === 'news'         && <UpdatesNews />}
         {activeSubTab === 'inbox'        && <UpdatesInbox />}
         {activeSubTab === 'compliance'   && <UpdatesCompliance />}
+        {activeSubTab === 'spotlight'    && <MonthlySpotlightView />}
         {activeSubTab === 'dividends' && <UpdatesDividends />}
         {activeSubTab === 'ipo'          && <UpdatesIPO />}
       </div>

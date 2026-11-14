@@ -55,6 +55,11 @@ class DetectComplianceRisk extends Command
                 foreach ($watchlists as $wl) {
                     if (!$wl->user) continue;
 
+                    // Drift tracking alerts are exclusive to Noor (Max) tier
+                    if (!\App\Services\SubscriptionService::canUseFeature($wl->user, 'drift_tracking')) {
+                        continue;
+                    }
+
                     $message = "{$company->symbol} is approaching non-compliant thresholds: " . implode(', ', $riskReasons);
 
                     if ($wl->alert_inapp) {

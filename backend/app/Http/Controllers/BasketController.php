@@ -16,11 +16,14 @@ class BasketController extends Controller
     use ApiResponder;
 
     /**
-     * List all active baskets.
+     * List all active baskets with tier-based lock metadata.
      */
     public function index(): JsonResponse
     {
-        $userId = auth('sanctum')->id();
+        $user = auth('sanctum')->user();
+        $userId = $user?->id;
+        $basketsLimit = $user ? ($user->tier->features['baskets'] ?? 0) : 0;
+
         $baskets = Basket::where('is_active', true)
             ->where(function ($query) use ($userId) {
                 $query->whereNull('user_id');
@@ -31,7 +34,39 @@ class BasketController extends Controller
             ->orderBy('id', 'asc')
             ->get();
 
-        return $this->success($baskets);
+        $curatedIndex = 0;
+        $transformed = $baskets->map(function (Basket $basket) use ($basketsLimit, &$curatedIndex) {
+            $isCustom = $basket->user_id !== null;
+            $isLocked = false;
+            $requiredTier = null;
+
+            if (!$isCustom) {
+                $curatedIndex++;
+                if ($basketsLimit === 0) {
+                    $isLocked = true;
+                    $requiredTier = 'pro';
+                } elseif ($basketsLimit > 0 && $curatedIndex > $basketsLimit) {
+                    $isLocked = true;
+                    $requiredTier = 'max';
+                }
+            }
+
+            $data = $basket->toArray();
+            $rawSymbols = is_array($basket->symbols)
+                ? $basket->symbols
+                : (json_decode((string) $basket->symbols, true) ?: []);
+            $data['stock_count'] = count($rawSymbols);
+            $data['is_locked'] = $isLocked;
+            $data['required_tier'] = $requiredTier;
+
+            if ($isLocked) {
+                $data['symbols_preview'] = array_slice($rawSymbols, 0, 2);
+            }
+
+            return $data;
+        });
+
+        return $this->success($transformed);
     }
 
     /**
@@ -39,9 +74,40 @@ class BasketController extends Controller
      */
     public function show(Basket $basket): JsonResponse
     {
+        $user = auth('sanctum')->user();
+
         // If it's a private basket, ensure the user owns it
-        if ($basket->user_id !== null && $basket->user_id !== auth('sanctum')->id()) {
+        if ($basket->user_id !== null && $basket->user_id !== $user?->id) {
             return $this->error('Unauthorized', 403);
+        }
+
+        if ($user) {
+            $basketsLimit = $user->tier->features['baskets'] ?? 0;
+            if ($basketsLimit === 0) {
+                return response()->json([
+                    'error' => 'Upgrade Required',
+                    'upgrade_required' => true,
+                    'feature' => 'baskets',
+                    'required_tier' => 'pro',
+                    'message' => 'Thematic baskets are available on Rawdha (Pro) and Noor (Max) plans. Please upgrade to view and invest in baskets.',
+                ], 403);
+            }
+
+            if ($basket->user_id === null && $basketsLimit > 0) {
+                $curatedRank = Basket::where('is_active', true)
+                    ->whereNull('user_id')
+                    ->where('id', '<=', $basket->id)
+                    ->count();
+                if ($curatedRank > $basketsLimit) {
+                    return response()->json([
+                        'error' => 'Upgrade Required',
+                        'upgrade_required' => true,
+                        'feature' => 'baskets',
+                        'required_tier' => 'max',
+                        'message' => 'Full access to all thematic baskets requires the Noor (Max) plan.',
+                    ], 403);
+                }
+            }
         }
 
         return $this->success($basket);
@@ -68,7 +134,13 @@ class BasketController extends Controller
                 if ($existingCount >= $limit) {
                     return response()->json([
                         'error' => 'Upgrade Required',
-                        'message' => 'You have reached your limit for creating custom baskets. Please upgrade your plan.'
+                        'upgrade_required' => true,
+                        'feature' => 'baskets',
+                        'limit' => $limit,
+                        'required_tier' => $limit === 0 ? 'pro' : 'max',
+                        'message' => $limit === 0
+                            ? 'Custom and thematic baskets are available on Rawdha (Pro) and Noor (Max) plans.'
+                            : "You have reached your limit of {$limit} custom baskets. Upgrade to Noor (Max) for unlimited baskets.",
                     ], 403);
                 }
             }
@@ -142,6 +214,34 @@ class BasketController extends Controller
         }
 
         $user = auth('sanctum')->user();
+        if ($user) {
+            $basketsLimit = $user->tier->features['baskets'] ?? 0;
+            if ($basketsLimit === 0) {
+                return response()->json([
+                    'error' => 'Upgrade Required',
+                    'upgrade_required' => true,
+                    'feature' => 'baskets',
+                    'required_tier' => 'pro',
+                    'message' => 'Investing in thematic baskets requires Rawdha (Pro) or Noor (Max).',
+                ], 403);
+            }
+            if ($basket->user_id === null && $basketsLimit > 0) {
+                $curatedRank = Basket::where('is_active', true)
+                    ->whereNull('user_id')
+                    ->where('id', '<=', $basket->id)
+                    ->count();
+                if ($curatedRank > $basketsLimit) {
+                    return response()->json([
+                        'error' => 'Upgrade Required',
+                        'upgrade_required' => true,
+                        'feature' => 'baskets',
+                        'required_tier' => 'max',
+                        'message' => 'This thematic basket requires the Noor (Max) plan.',
+                    ], 403);
+                }
+            }
+        }
+
         $totalAmount = $request->amount;
         $symbols = is_string($basket->symbols) ? json_decode($basket->symbols, true) : $basket->symbols;
         if (is_string($symbols)) {
@@ -172,6 +272,23 @@ class BasketController extends Controller
 
         if (empty($investableSymbols)) {
             return $this->error('Investment blocked: None of the stocks in this basket are currently Shariah-compliant.', 400);
+        }
+
+        // Check portfolio holdings limit before executing basket purchase
+        if ($user) {
+            $existingSymbols = Holding::where('user_id', $user->id)->pluck('symbol')->map('strtoupper')->toArray();
+            $newUniqueSymbols = array_diff(array_map('strtoupper', $investableSymbols), $existingSymbols);
+            if (!empty($newUniqueSymbols) && !\App\Services\SubscriptionService::canAddPortfolio($user, count($newUniqueSymbols))) {
+                $portfolioLimit = $user->tier->features['portfolio_limit'] ?? 3;
+                return response()->json([
+                    'error' => 'Upgrade Required',
+                    'upgrade_required' => true,
+                    'feature' => 'portfolio_limit',
+                    'limit' => $portfolioLimit,
+                    'required_tier' => ($user->tier->slug ?? 'free') === 'free' ? 'pro' : 'max',
+                    'message' => "Investing in this basket would exceed your plan's limit of {$portfolioLimit} portfolio holdings. Please upgrade your plan.",
+                ], 403);
+            }
         }
 
         $allocationPerStock = $totalAmount / count($investableSymbols);

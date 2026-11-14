@@ -204,10 +204,13 @@ class _UpdateTabState extends State<UpdateTab> {
   }
 
   bool _isTabLocked(String tabId, BuildContext context) {
-    if (tabId == 'news' || tabId == 'inbox') return false;
-    final userTier = Provider.of<AppStateProvider>(context, listen: false).userProfile?['tier']?['slug'] ?? 'free';
+    if (tabId == 'news' || tabId == 'inbox' || tabId == 'resources' || tabId == 'ipo') return false;
+    final tier = Provider.of<AppStateProvider>(context, listen: false).userProfile?['tier'];
+    final userTier = tier?['slug'] ?? 'free';
+    final features = tier?['features'] as Map<String, dynamic>? ?? {};
     if (userTier == 'max') return false;
-    if (userTier == 'pro') return tabId == 'compliance';
+    if (tabId == 'dividends') return !(features['dividend_alerts'] == true);
+    if (tabId == 'compliance') return !(features['drift_tracking'] == true);
     return true;
   }
 

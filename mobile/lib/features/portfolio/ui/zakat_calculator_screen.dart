@@ -7,6 +7,8 @@ import 'package:dio/dio.dart';
 import '../providers/portfolio_provider.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 import 'package:irshad_mobile/core/api/api_service.dart';
+import 'package:irshad_mobile/core/providers/app_state_provider.dart';
+import 'package:irshad_mobile/core/widgets/upgrade_paywall_bottom_sheet.dart';
 import 'package:irshad_mobile/features/portfolio/ui/zakat_statement_screen.dart';
 import 'dart:ui' as ui;
 
@@ -233,6 +235,10 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
       daysUntilDue = hawlDueDate.difference(today).inDays;
     }
 
+    final tier = Provider.of<AppStateProvider>(context).userProfile?['tier'];
+    final tierSlug = tier?['slug'] ?? 'free';
+    final isZakatLocked = !(tier?['features']?['zakat_calc'] == true || tierSlug == 'pro' || tierSlug == 'max');
+
     return Scaffold(
       backgroundColor: context.bg,
       appBar: widget.isTab ? null : AppBar(
@@ -244,7 +250,53 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SingleChildScrollView(
+      body: isZakatLocked
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(28.0),
+                child: Container(
+                  padding: const EdgeInsets.all(28),
+                  decoration: BoxDecoration(
+                    color: context.bg,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: context.divider),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.lock_outline_rounded, size: 42, color: context.primary),
+                      const SizedBox(height: 16),
+                      Text('Automated Zakat Locked', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark), textAlign: TextAlign.center),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Upgrade to Rawdha (Pro) or Noor (Max) to unlock automated portfolio Zakat calculations, Hawl tracking, and Zakat statements.',
+                        style: TextStyle(fontSize: 13, color: context.textMuted, height: 1.5),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (ctx) => const UpgradePaywallBottomSheet(message: 'Upgrade to Rawdha (Pro) or Noor (Max) to unlock automated Zakat calculations.'),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: context.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        ),
+                        child: const Text('Upgrade Plan', style: TextStyle(fontWeight: FontWeight.w800)),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          : SingleChildScrollView(
         padding: const EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 100),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

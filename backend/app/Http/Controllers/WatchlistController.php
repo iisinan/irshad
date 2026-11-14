@@ -96,9 +96,16 @@ class WatchlistController extends Controller
         // Limit Check
         $exists = Watchlist::where('user_id', $user->id)->where('symbol', strtoupper($request->symbol))->exists();
         if (!$exists && !\App\Services\SubscriptionService::canAddWatchlist($user)) {
+            $limit = $user->tier->features['watchlist_limit'] ?? 0;
             return response()->json([
                 'error' => 'Upgrade Required',
-                'message' => 'You have reached your watchlist limit for this plan.'
+                'upgrade_required' => true,
+                'feature' => 'watchlist_limit',
+                'limit' => $limit,
+                'required_tier' => ($user->tier->slug ?? 'free') === 'free' ? 'pro' : 'max',
+                'message' => $limit === 0
+                    ? 'Watchlist tracking is available on Rawdha (Pro) and Noor (Max) plans.'
+                    : "You have reached your watchlist limit of {$limit} stocks for this plan.",
             ], 403);
         }
 
@@ -158,7 +165,13 @@ class WatchlistController extends Controller
             if ($existingCount + $newAdditions > $limit) {
                 return response()->json([
                     'error' => 'Upgrade Required',
-                    'message' => 'Adding these stocks exceeds your watchlist limit for this plan.'
+                    'upgrade_required' => true,
+                    'feature' => 'watchlist_limit',
+                    'limit' => $limit,
+                    'required_tier' => ($user->tier->slug ?? 'free') === 'free' ? 'pro' : 'max',
+                    'message' => $limit === 0
+                        ? 'Watchlist tracking is available on Rawdha (Pro) and Noor (Max) plans.'
+                        : "Adding these stocks exceeds your watchlist limit of {$limit} stocks for this plan.",
                 ], 403);
             }
         }
@@ -216,6 +229,26 @@ class WatchlistController extends Controller
         ]);
 
         $user = $request->user();
+        $limit = $user->tier->features['watchlist_limit'] ?? 0;
+        if ($limit !== -1) {
+            $incomingSymbols = array_unique(array_map('strtoupper', $request->symbols));
+            $existingSymbols = Watchlist::where('user_id', $user->id)->pluck('symbol')->map('strtoupper')->toArray();
+            $totalUnique = count(array_unique(array_merge($existingSymbols, $incomingSymbols)));
+
+            if ($totalUnique > $limit) {
+                return response()->json([
+                    'error' => 'Upgrade Required',
+                    'upgrade_required' => true,
+                    'feature' => 'watchlist_limit',
+                    'limit' => $limit,
+                    'required_tier' => ($user->tier->slug ?? 'free') === 'free' ? 'pro' : 'max',
+                    'message' => $limit === 0
+                        ? 'Watchlist tracking is available on Rawdha (Pro) and Noor (Max) plans. Please upgrade to add stocks to your watchlist.'
+                        : "Adding these stocks exceeds your plan's limit of {$limit} watchlist items. Please upgrade your plan.",
+                ], 403);
+            }
+        }
+
         $alertEmail = $request->boolean('alert_email', false);
         $alertInapp = $request->boolean('alert_inapp', false);
         $alertPush = $request->boolean('alert_push', false);

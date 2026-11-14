@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calculator, Download, Coins, Wheat, Bug as Cow, Scale, CheckCircle2, RefreshCw, AlertCircle, Calendar, Bell, Edit2, ChevronDown, ChevronUp, Info, Sliders } from 'lucide-react';
+import { Calculator, Download, Coins, Wheat, Bug as Cow, Scale, CheckCircle2, RefreshCw, AlertCircle, Calendar, Bell, Edit2, ChevronDown, ChevronUp, Info, Sliders, Lock, ArrowRight } from 'lucide-react';
 import api, { getSettings } from '../../services/api';
 import { toastSuccess, toastError } from '../../utils/toast';
 import { useAuth } from '../../context/AuthContext';
@@ -32,9 +32,11 @@ function getSheepZakat(n) {
   return `${Math.floor(n / 100)} Sheep/Goats`;
 }
 
-export default function ZakatTab({ data }) {
+export default function ZakatTab({ data, onUpgrade }) {
   const authContext = useAuth();
   const user = authContext ? authContext.user : null;
+  const tierSlug = user?.tier?.slug || 'free';
+  const isZakatLocked = data?.tier_locks?.zakat_locked ?? !(user?.tier?.features?.zakat_calc ?? (tierSlug !== 'free'));
   
   // ─── Hawl date from localStorage (set via AddHoldingModal) ───────────────
   const ZAKAT_DATE_KEY = 'irshad_zakat_hawl_date';
@@ -77,7 +79,11 @@ export default function ZakatTab({ data }) {
         await api.put('/profile', { preferences: { zakat_hawl_date: hawlInput } });
         toastSuccess('Zakat date saved');
       } catch (err) {
-        toastError('Failed to save to cloud, but saved locally');
+        if (err.response?.status === 403 && onUpgrade) {
+          onUpgrade();
+        } else {
+          toastError('Failed to save to cloud, but saved locally');
+        }
       }
     }
   };
@@ -184,6 +190,27 @@ export default function ZakatTab({ data }) {
   const handlePrint = () => {
     window.print();
   };
+
+  if (isZakatLocked) {
+    return (
+      <div className="animate-fade-in stagger-1" style={{ paddingBottom: '60px' }}>
+        <div style={{ background: 'var(--bg)', borderRadius: '24px', padding: '56px 32px', textAlign: 'center', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
+          <div style={{ width: '64px', height: '64px', borderRadius: '20px', background: 'rgba(217, 119, 6, 0.12)', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+            <Lock size={28} />
+          </div>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-dark)', margin: '0 0 10px' }}>Automated Zakat Calculation</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', maxWidth: '500px', margin: '0 auto 24px', lineHeight: 1.6 }}>
+            Automatically sync your equity portfolio with live Gold & Silver Nisab thresholds, track your Hawl anniversary, and generate printable Zakat statements. Available on <strong>Rawdha (Pro)</strong> and <strong>Noor (Max)</strong>.
+          </p>
+          {onUpgrade && (
+            <button onClick={onUpgrade} style={{ padding: '14px 28px', borderRadius: '14px', background: 'var(--primary)', color: 'white', border: 'none', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+              Upgrade to Unlock <ArrowRight size={16} />
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="animate-fade-in stagger-1 zakat-print-container" style={{ paddingBottom: '60px' }}>

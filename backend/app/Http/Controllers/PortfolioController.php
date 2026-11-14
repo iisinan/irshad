@@ -214,6 +214,25 @@ class PortfolioController extends Controller
                         }
                     }
 
+                    $graceEndsAtIso = $holding->grace_period_ends_at
+                        ? ($holding->grace_period_ends_at instanceof \Carbon\CarbonInterface
+                            ? $holding->grace_period_ends_at->toISOString()
+                            : (string) $holding->grace_period_ends_at)
+                        : null;
+
+                    $graceDaysRemaining = null;
+                    if ($holding->grace_period_ends_at) {
+                        try {
+                            $graceDaysRemaining = max(0, (int) now()->startOfDay()->diffInDays(\Carbon\Carbon::parse($holding->grace_period_ends_at)->startOfDay(), false));
+                        } catch (\Throwable $e) {
+                            $graceDaysRemaining = null;
+                        }
+                    }
+
+                    $debtRatio = round((float) ($screening?->debt_ratio ?? 0), 2);
+                    $cashRatio = round((float) ($screening?->cash_ratio ?? 0), 2);
+                    $impureRatio = round($nonCompliantRatio, 2);
+
                     return [
                         'id' => $holding->id,
                         'symbol' => $company?->symbol ?? $holding->symbol,
@@ -232,9 +251,16 @@ class PortfolioController extends Controller
                         'lifetime_dividends' => round($lifetimeDividendsReceived, 2),
                         'latest_dividend' => $latestDivData,
                         'upcoming_dividend' => $upcomingDivData,
-                        'non_compliant_ratio' => round($nonCompliantRatio, 2),
+                        'non_compliant_ratio' => $impureRatio,
                         'logo_url' => $company?->logo_url ?? null,
-                        'grace_period_ends_at' => $holding->grace_period_ends_at ? ($holding->grace_period_ends_at instanceof \Carbon\CarbonInterface ? $holding->grace_period_ends_at->toISOString() : (string) $holding->grace_period_ends_at) : null,
+                        'grace_period_ends_at' => $graceEndsAtIso,
+                        'drift_tracking' => [
+                            'grace_days_remaining' => $graceDaysRemaining,
+                            'debt_ratio' => $debtRatio,
+                            'cash_ratio' => $cashRatio,
+                            'impure_income_ratio' => $impureRatio,
+                            'is_near_threshold' => $isHalal && ($debtRatio >= 25 || $cashRatio >= 25 || $impureRatio >= 4.0),
+                        ],
                         'purchase_date' => $holding->purchase_date,
                         'created_at' => $holding->created_at instanceof \Carbon\CarbonInterface ? $holding->created_at->toISOString() : (string) $holding->created_at,
                         'updated_at' => $holding->updated_at instanceof \Carbon\CarbonInterface ? $holding->updated_at->toISOString() : (string) $holding->updated_at,
@@ -280,10 +306,10 @@ class PortfolioController extends Controller
             $halalValue = (float) $portfolioData->where('is_halal', true)->sum('total_value');
             $healthPercentage = $stocksBalance > 0 ? round(($halalValue / $stocksBalance) * 100, 1) : 100;
 
-            // Fetch trailing 30 days of history safely
+            // Fetch trailing 90 days of history safely (sliced per tier below)
             try {
                 $history = PortfolioSnapshot::where('user_id', $userId)
-                    ->where('date', '>=', now()->subDays(30)->toDateString())
+                    ->where('date', '>=', now()->subDays(90)->toDateString())
                     ->orderBy('date', 'asc')
                     ->get(['date', 'total_balance as value']);
             } catch (\Throwable $e) {
@@ -334,6 +360,65 @@ class PortfolioController extends Controller
             ];
         });
 
+        // Apply live subscription tier enforcement on top of cached portfolio data
+        $user = Auth::user();
+        $features = $user?->tier?->features ?? [];
+        $purificationsLimit = $features['purifications_per_month'] ?? 0;
+        $purificationLocked = ($purificationsLimit === 0);
+        $statementsAllowed = (bool) ($features['statements'] ?? false);
+        $zakatAllowed = (bool) ($features['zakat_calc'] ?? false);
+        $driftTrackingAllowed = (bool) ($features['drift_tracking'] ?? false);
+
+        $holdingsCol = collect($data['holdings'] ?? []);
+        $purificationHoldingsCount = $holdingsCol->where('purification_required', true)->count();
+
+        if ($purificationLocked || !$driftTrackingAllowed) {
+            $holdingsCol = $holdingsCol->map(function ($h) use ($purificationLocked, $driftTrackingAllowed) {
+                if ($purificationLocked) {
+                    $h['purification_due'] = 0;
+                    $h['purification_locked'] = true;
+                }
+                if (!$driftTrackingAllowed) {
+                    $h['drift_tracking'] = null;
+                }
+                return $h;
+            });
+            $data['holdings'] = $holdingsCol->values()->all();
+        }
+
+        if ($purificationLocked) {
+            $data['summary']['purification_due'] = 0;
+        }
+        $data['summary']['purification_holdings_count'] = $purificationHoldingsCount;
+
+        // Slice history window: 90 days for Noor (Max), 30 days for Rawdha (Pro), 7 days for Miftah (Free)
+        $historyDays = $driftTrackingAllowed ? 90 : ($statementsAllowed ? 30 : 7);
+        $cutoffDate = now()->subDays($historyDays)->toDateString();
+        $data['history'] = collect($data['history'] ?? [])->filter(function ($item) use ($cutoffDate) {
+            $d = is_array($item) ? ($item['date'] ?? null) : ($item->date ?? null);
+            if ($d instanceof \Carbon\CarbonInterface) {
+                $d = $d->toDateString();
+            } elseif (is_string($d)) {
+                $d = substr($d, 0, 10);
+            }
+            return !$d || $d >= $cutoffDate;
+        })->values()->all();
+
+        if (!$statementsAllowed) {
+            $data['purifications'] = [];
+        }
+
+        $data['tier_locks'] = [
+            'purification_locked' => $purificationLocked,
+            'statements_locked' => !$statementsAllowed,
+            'zakat_locked' => !$zakatAllowed,
+            'drift_tracking_locked' => !$driftTrackingAllowed,
+            'history_days' => $historyDays,
+        ];
+        if ($user) {
+            $data['usage_summary'] = \App\Services\SubscriptionService::getUsageSummary($user);
+        }
+
         return $this->success($data);
     }
 
@@ -371,11 +456,17 @@ class PortfolioController extends Controller
         }
 
         // Limit Check
+        $user = Auth::user();
         $exists = Holding::where('user_id', Auth::id())->where('symbol', $sym)->exists();
-        if (!$exists && !\App\Services\SubscriptionService::canAddPortfolio(Auth::user())) {
+        if (!$exists && !\App\Services\SubscriptionService::canAddPortfolio($user)) {
+            $limit = $user->tier->features['portfolio_limit'] ?? 3;
             return response()->json([
                 'error' => 'Upgrade Required',
-                'message' => 'You have reached your portfolio limit for this plan.'
+                'upgrade_required' => true,
+                'feature' => 'portfolio_limit',
+                'limit' => $limit,
+                'required_tier' => ($user->tier->slug ?? 'free') === 'free' ? 'pro' : 'max',
+                'message' => "You have reached your portfolio limit of {$limit} holdings for this plan.",
             ], 403);
         }
 
@@ -479,9 +570,14 @@ class PortfolioController extends Controller
             $newAdditions = $newSymbols->count() - $alreadyOwned;
             
             if ($existingCount + $newAdditions > $limit) {
+                $user = Auth::user();
                 return response()->json([
                     'error' => 'Upgrade Required',
-                    'message' => 'Adding these stocks exceeds your portfolio limit for this plan.'
+                    'upgrade_required' => true,
+                    'feature' => 'portfolio_limit',
+                    'limit' => $limit,
+                    'required_tier' => ($user->tier->slug ?? 'free') === 'free' ? 'pro' : 'max',
+                    'message' => "Adding these stocks exceeds your portfolio limit of {$limit} holdings for this plan.",
                 ], 403);
             }
         }
@@ -538,6 +634,17 @@ class PortfolioController extends Controller
      */
     public function parseStatement(Request $request, StatementParserService $parser): JsonResponse
     {
+        $user = $request->user();
+        if ($user && !\App\Services\SubscriptionService::canUseFeature($user, 'statements')) {
+            return response()->json([
+                'error' => 'Upgrade Required',
+                'upgrade_required' => true,
+                'feature' => 'statements',
+                'required_tier' => 'pro',
+                'message' => 'Broker statement import and history tracking require the Rawdha (Pro) or Noor (Max) plan.',
+            ], 403);
+        }
+
         $request->validate([
             'statement' => 'required|file|max:15360', // max 15MB
             'password' => 'nullable|string',
@@ -612,9 +719,16 @@ class PortfolioController extends Controller
 
         $user = Auth::user();
         if (!\App\Services\SubscriptionService::canUseFeature($user, 'purifications_per_month')) {
+            $limit = $user->tier->features['purifications_per_month'] ?? 0;
             return response()->json([
                 'error' => 'Upgrade Required',
-                'message' => 'You have reached your monthly limit for generating purification statements. Please upgrade your plan.'
+                'upgrade_required' => true,
+                'feature' => 'purifications_per_month',
+                'limit' => $limit,
+                'required_tier' => $limit === 0 ? 'pro' : 'max',
+                'message' => $limit === 0
+                    ? 'Automated purification calculation is available on Rawdha (Pro) and Noor (Max) plans.'
+                    : "You have reached your monthly limit of {$limit} purification calculations. Upgrade to Noor (Max) for unlimited purifications.",
             ], 403);
         }
 

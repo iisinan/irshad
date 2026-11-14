@@ -50,9 +50,14 @@ class SendUpdatesDigest extends Command
 
             $freq = $pref->frequency === 'monthly' ? 'monthly' : 'weekly';
 
-            if ($freq === 'monthly' && now()->day > 7) {
-                // Not the first Friday of the month
-                continue;
+            if ($freq === 'monthly') {
+                if (!\App\Services\SubscriptionService::canUseFeature($pref->user, 'monthly_spotlight')) {
+                    continue;
+                }
+                if (now()->day > 7) {
+                    // Not the first Friday of the month
+                    continue;
+                }
             }
 
             $userSymbols = Watchlist::where('user_id', $pref->user->id)->pluck('symbol')

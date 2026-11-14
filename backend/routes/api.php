@@ -342,10 +342,14 @@ Route::middleware('auth:sanctum')->group(function () {
             return response()->json(['message' => 'Successfully unsubscribed from push notifications']);
         });
 
-        // Updates — News & Insights, Digest preferences
+        // Updates — News & Insights, Monthly Spotlight, Digest preferences
         Route::get('/updates/news', [UpdatesController::class, 'newsAndInsights']);
+        Route::get('/updates/monthly-spotlight', [UpdatesController::class, 'monthlySpotlight']);
         Route::get('/updates/digest', [UpdatesController::class, 'digestPreference']);
         Route::put('/updates/digest', [UpdatesController::class, 'updateDigestPreference']);
+
+        // Automated Zakat Calculation
+        Route::post('/zakat/calculate', [ZakatController::class, 'calculate']);
 
         // ── Admin Routes ─────────────────────────────────────────────────────
         Route::middleware(AdminMiddleware::class)->group(function () {

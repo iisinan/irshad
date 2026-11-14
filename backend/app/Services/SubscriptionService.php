@@ -2,46 +2,221 @@
 
 namespace App\Services;
 
-use App\Models\User;
+use App\Models\Basket;
 use App\Models\Holding;
-use App\Models\Watchlist;
+use App\Models\User;
 use App\Models\UserUsage;
+use App\Models\Watchlist;
 use Carbon\Carbon;
 
 class SubscriptionService
 {
-    public static function canAddPortfolio(User $user)
+    public static function canAddPortfolio(User $user, int $additionalCount = 1): bool
     {
-        $limit = $user->tier->features['portfolio_limit'] ?? 0;
-        if ($limit === -1) return true;
-        
+        $limit = $user->tier->features['portfolio_limit'] ?? 3;
+        if ($limit === -1) {
+            return true;
+        }
+
         $currentCount = Holding::where('user_id', $user->id)->count();
-        return $currentCount < $limit;
+        return ($currentCount + $additionalCount) <= $limit;
     }
 
-    public static function canAddWatchlist(User $user)
+    public static function canAddWatchlist(User $user, int $additionalCount = 1): bool
     {
         $limit = $user->tier->features['watchlist_limit'] ?? 0;
-        if ($limit === -1) return true;
-        
+        if ($limit === -1) {
+            return true;
+        }
+        if ($limit <= 0) {
+            return false;
+        }
+
         $currentCount = Watchlist::where('user_id', $user->id)->count();
-        return $currentCount < $limit;
+        return ($currentCount + $additionalCount) <= $limit;
     }
 
-    public static function canUseFeature(User $user, string $featureKey)
+    public static function canUseFeature(User $user, string $featureKey): bool
     {
         $limit = $user->tier->features[$featureKey] ?? 0;
-        
-        // Booleans
-        if (is_bool($limit)) return $limit;
-        
-        // Unlimited
-        if ($limit === -1) return true;
-        
-        // Zero
-        if ($limit === 0) return false;
 
-        // Consumables (e.g. stock_screens_per_month)
+        // Booleans
+        if (is_bool($limit)) {
+            return $limit;
+        }
+
+        // Unlimited
+        if ($limit === -1) {
+            return true;
+        }
+
+        // Zero
+        if ($limit <= 0) {
+            return false;
+        }
+
+        // Consumables (e.g. stock_screens_per_month, purifications_per_month)
+        $usage = self::getOrResetMonthlyUsage($user, $featureKey);
+
+        return $usage->used_count < $limit;
+    }
+
+    public static function recordFeatureUsage(User $user, string $featureKey): void
+    {
+        $limit = $user->tier->features[$featureKey] ?? 0;
+        if ($limit === -1 || is_bool($limit)) {
+            return; // Don't track unlimited/boolean
+        }
+
+        $usage = self::getOrResetMonthlyUsage($user, $featureKey);
+        $usage->increment('used_count');
+    }
+
+    /**
+     * Check whether a user can screen a specific stock symbol this month.
+     * Re-viewing an already-screened symbol in the same calendar month is free.
+     */
+    public static function canScreenStock(User $user, string $symbol): bool
+    {
+        $limit = $user->tier->features['stock_screens_per_month'] ?? 3;
+        if ($limit === -1) {
+            return true;
+        }
+        if ($limit <= 0) {
+            return false;
+        }
+
+        if (self::hasScreenedSymbolThisMonth($user, $symbol)) {
+            return true;
+        }
+
+        return self::canUseFeature($user, 'stock_screens_per_month');
+    }
+
+    /**
+     * Record a stock screen for a specific symbol, deduplicated per user per calendar month.
+     */
+    public static function recordStockScreen(User $user, string $symbol): void
+    {
+        $limit = $user->tier->features['stock_screens_per_month'] ?? 3;
+        if ($limit === -1) {
+            return;
+        }
+
+        $normalized = strtoupper(trim($symbol));
+        if ($normalized === '') {
+            return;
+        }
+
+        if (self::hasScreenedSymbolThisMonth($user, $normalized)) {
+            return;
+        }
+
+        $symbolFeatureKey = 'stock_screen:' . $normalized;
+        $symbolUsage = self::getOrResetMonthlyUsage($user, $symbolFeatureKey);
+        $symbolUsage->update(['used_count' => 1]);
+
+        self::recordFeatureUsage($user, 'stock_screens_per_month');
+    }
+
+    public static function hasScreenedSymbolThisMonth(User $user, string $symbol): bool
+    {
+        $normalized = strtoupper(trim($symbol));
+        if ($normalized === '') {
+            return false;
+        }
+
+        $symbolFeatureKey = 'stock_screen:' . $normalized;
+        $usage = UserUsage::where('user_id', $user->id)
+            ->where('feature', $symbolFeatureKey)
+            ->first();
+
+        if (!$usage) {
+            return false;
+        }
+
+        if ($usage->reset_at && Carbon::now()->greaterThanOrEqualTo($usage->reset_at)) {
+            $usage->update([
+                'used_count' => 0,
+                'reset_at' => Carbon::now()->startOfMonth()->addMonth(),
+            ]);
+            return false;
+        }
+
+        return $usage->used_count > 0;
+    }
+
+    public static function getFeatureUsageCount(User $user, string $featureKey): int
+    {
+        $usage = UserUsage::where('user_id', $user->id)
+            ->where('feature', $featureKey)
+            ->first();
+
+        if (!$usage) {
+            return 0;
+        }
+
+        if ($usage->reset_at && Carbon::now()->greaterThanOrEqualTo($usage->reset_at)) {
+            $usage->update([
+                'used_count' => 0,
+                'reset_at' => Carbon::now()->startOfMonth()->addMonth(),
+            ]);
+            return 0;
+        }
+
+        return (int) $usage->used_count;
+    }
+
+    public static function getUsageSummary(User $user): array
+    {
+        $features = $user->tier->features ?? [];
+
+        $screensLimit = $features['stock_screens_per_month'] ?? 3;
+        $screensUsed = self::getFeatureUsageCount($user, 'stock_screens_per_month');
+
+        $purificationsLimit = $features['purifications_per_month'] ?? 0;
+        $purificationsUsed = self::getFeatureUsageCount($user, 'purifications_per_month');
+
+        $portfolioLimit = $features['portfolio_limit'] ?? 3;
+        $portfolioUsed = Holding::where('user_id', $user->id)->count();
+
+        $watchlistLimit = $features['watchlist_limit'] ?? 0;
+        $watchlistUsed = Watchlist::where('user_id', $user->id)->count();
+
+        $basketsLimit = $features['baskets'] ?? 0;
+        $basketsUsed = Basket::where('user_id', $user->id)->count();
+
+        return [
+            'stock_screens_per_month' => [
+                'used' => $screensUsed,
+                'limit' => $screensLimit,
+                'remaining' => $screensLimit === -1 ? -1 : max(0, $screensLimit - $screensUsed),
+            ],
+            'purifications_per_month' => [
+                'used' => $purificationsUsed,
+                'limit' => $purificationsLimit,
+                'remaining' => $purificationsLimit === -1 ? -1 : max(0, $purificationsLimit - $purificationsUsed),
+            ],
+            'portfolio_limit' => [
+                'used' => $portfolioUsed,
+                'limit' => $portfolioLimit,
+                'remaining' => $portfolioLimit === -1 ? -1 : max(0, $portfolioLimit - $portfolioUsed),
+            ],
+            'watchlist_limit' => [
+                'used' => $watchlistUsed,
+                'limit' => $watchlistLimit,
+                'remaining' => $watchlistLimit === -1 ? -1 : max(0, $watchlistLimit - $watchlistUsed),
+            ],
+            'baskets' => [
+                'used' => $basketsUsed,
+                'limit' => $basketsLimit,
+                'remaining' => $basketsLimit === -1 ? -1 : max(0, $basketsLimit - $basketsUsed),
+            ],
+        ];
+    }
+
+    private static function getOrResetMonthlyUsage(User $user, string $featureKey): UserUsage
+    {
         $usage = UserUsage::firstOrCreate(
             ['user_id' => $user->id, 'feature' => $featureKey],
             ['used_count' => 0, 'reset_at' => Carbon::now()->startOfMonth()->addMonth()]
@@ -50,23 +225,10 @@ class SubscriptionService
         if ($usage->reset_at && Carbon::now()->greaterThanOrEqualTo($usage->reset_at)) {
             $usage->update([
                 'used_count' => 0,
-                'reset_at' => Carbon::now()->startOfMonth()->addMonth()
+                'reset_at' => Carbon::now()->startOfMonth()->addMonth(),
             ]);
         }
 
-        return $usage->used_count < $limit;
-    }
-
-    public static function recordFeatureUsage(User $user, string $featureKey)
-    {
-        $limit = $user->tier->features[$featureKey] ?? 0;
-        if ($limit === -1 || is_bool($limit)) return; // Don't track unlimited/boolean
-
-        $usage = UserUsage::firstOrCreate(
-            ['user_id' => $user->id, 'feature' => $featureKey],
-            ['used_count' => 0, 'reset_at' => Carbon::now()->startOfMonth()->addMonth()]
-        );
-
-        $usage->increment('used_count');
+        return $usage;
     }
 }
