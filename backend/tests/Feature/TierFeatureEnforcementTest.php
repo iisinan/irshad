@@ -6,6 +6,7 @@ use App\Models\AaoifiScreening;
 use App\Models\Basket;
 use App\Models\Company;
 use App\Models\Holding;
+use App\Models\PaymentTransaction;
 use App\Models\Plan;
 use App\Models\Subscription;
 use App\Models\User;
@@ -273,5 +274,46 @@ class TierFeatureEnforcementTest extends TestCase
         ])->assertOk();
 
         $this->assertTrue((bool) $maxRes->json('data.alert_compliance_risk'));
+    }
+
+    public function test_past_due_grace_period_preserves_access_until_ends_at_and_transactions_endpoint_works(): void
+    {
+        $user = User::factory()->create(['email_verified_at' => now()]);
+        Sanctum::actingAs($user);
+
+        $sub = Subscription::create([
+            'user_id' => $user->id,
+            'plan_id' => $this->proPlan->id,
+            'billing_cycle' => 'quarterly',
+            'status' => 'past_due',
+            'auto_renew' => true,
+            'renews_at' => now()->subDay(),
+            'ends_at' => now()->addDays(2),
+        ]);
+
+        // Within 3-day dunning grace window, user keeps Pro tier
+        $this->assertEquals('pro', $user->fresh()->tier->slug);
+
+        // Once grace window expires, user falls back to Free tier
+        $sub->update(['ends_at' => now()->subMinute()]);
+        $this->assertEquals('free', $user->fresh()->tier->slug);
+
+        PaymentTransaction::create([
+            'user_id' => $user->id,
+            'plan_id' => $this->proPlan->id,
+            'billing_cycle' => 'quarterly',
+            'gateway' => 'squad',
+            'transaction_ref' => 'TEST_TX_12345',
+            'amount_kobo' => 650000,
+            'currency' => 'NGN',
+            'status' => 'success',
+            'type' => 'initial',
+            'paid_at' => now(),
+        ]);
+
+        $this->getJson('/api/v1/subscription/transactions')
+            ->assertOk()
+            ->assertJsonPath('transactions.0.transaction_ref', 'TEST_TX_12345')
+            ->assertJsonPath('transactions.0.plan_slug', 'pro');
     }
 }

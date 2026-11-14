@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../api/api_service.dart';
 
 class UpgradePaywallBottomSheet extends StatefulWidget {
   final String message;
+  final String? requiredTier;
   
-  const UpgradePaywallBottomSheet({super.key, required this.message});
+  const UpgradePaywallBottomSheet({super.key, required this.message, this.requiredTier});
 
   @override
   State<UpgradePaywallBottomSheet> createState() => _UpgradePaywallBottomSheetState();
@@ -75,12 +75,14 @@ class _UpgradePaywallBottomSheetState extends State<UpgradePaywallBottomSheet> {
               color: const Color(0xFF0F3A40).withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: const Icon(LucideIcons.unlock, color: Color(0xFF0A192F), size: 32),
+            child: const Icon(Icons.lock_open_rounded, color: Color(0xFF0A192F), size: 32),
           ),
           const SizedBox(height: 24),
           
           Text(
-            'Upgrade to Irshad Pro',
+            widget.requiredTier?.toLowerCase() == 'max'
+                ? 'Upgrade to Noor (Max)'
+                : 'Upgrade to Rawdha (Pro)',
             style: GoogleFonts.inter(
               fontSize: 24,
               fontWeight: FontWeight.w900,
@@ -110,7 +112,7 @@ class _UpgradePaywallBottomSheetState extends State<UpgradePaywallBottomSheet> {
             ),
             child: Row(
               children: [
-                const Icon(LucideIcons.mail, color: Color(0xFFD9A05B), size: 24),
+                const Icon(Icons.mail_outline_rounded, color: Color(0xFFD9A05B), size: 24),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Text(
@@ -148,7 +150,7 @@ class _UpgradePaywallBottomSheetState extends State<UpgradePaywallBottomSheet> {
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(_sent ? LucideIcons.checkCircle2 : LucideIcons.send, color: Colors.white),
+                        Icon(_sent ? Icons.check_circle_rounded : Icons.send_rounded, color: Colors.white),
                         const SizedBox(width: 12),
                         Text(
                           _sent ? 'Email Sent!' : 'Send me an Upgrade Link',

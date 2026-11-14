@@ -307,6 +307,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/subscription/verify', [\App\Http\Controllers\SubscriptionController::class, 'verify']);
             Route::post('/subscription/cancel', [\App\Http\Controllers\SubscriptionController::class, 'cancel']);
             Route::get('/subscription/status', [\App\Http\Controllers\SubscriptionController::class, 'status']);
+            Route::get('/subscription/transactions', [\App\Http\Controllers\SubscriptionController::class, 'transactions']);
             Route::post('/subscription/magic-link', [\App\Http\Controllers\SubscriptionController::class, 'sendMagicLink']);
 
             // History

@@ -582,6 +582,10 @@ class PortfolioController extends Controller
             }
         }
 
+        $existingHoldings = Holding::where('user_id', $userId)
+            ->get()
+            ->keyBy('symbol');
+
         $upsertData = [];
 
         foreach ($request->holdings as $holdingData) {
@@ -593,7 +597,7 @@ class PortfolioController extends Controller
             // Ensure company exists in companies table so holding is cleanly linked and displayed
             $company = Company::where('symbol', $sym)->first();
             if (!$company) {
-                Company::create([
+                $company = Company::create([
                     'symbol' => $sym,
                     'name' => $name,
                     'sector' => 'Equities',
@@ -606,12 +610,26 @@ class PortfolioController extends Controller
                 ]);
             }
 
+            $existing = $existingHoldings->get($sym);
+            $isNonCompliant = in_array(strtolower((string) $company->current_status), ['non_halal', 'non-halal', 'non-compliant', 'non_compliant'], true);
+            $gracePeriodEndsAt = $existing?->grace_period_ends_at;
+            $gracePeriodNotified = (bool) ($existing?->grace_period_notified ?? false);
+            if ($isNonCompliant && !$gracePeriodEndsAt) {
+                $gracePeriodEndsAt = now()->addDays(90);
+                $gracePeriodNotified = false;
+            } elseif (!$isNonCompliant) {
+                $gracePeriodEndsAt = null;
+                $gracePeriodNotified = false;
+            }
+
             $upsertData[] = [
                 'user_id' => $userId,
                 'symbol' => $sym,
                 'shares' => $shares,
                 'average_buy_price' => $price > 0 ? $price : null,
                 'purchase_date' => $holdingData['purchase_date'] ?? null,
+                'grace_period_ends_at' => $gracePeriodEndsAt,
+                'grace_period_notified' => $gracePeriodNotified,
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
@@ -621,7 +639,7 @@ class PortfolioController extends Controller
         Holding::upsert(
             $upsertData,
             ['user_id', 'symbol'], // Unique keys
-            ['shares', 'average_buy_price', 'purchase_date', 'updated_at'] // Columns to update if exists
+            ['shares', 'average_buy_price', 'purchase_date', 'grace_period_ends_at', 'grace_period_notified', 'updated_at'] // Columns to update if exists
         );
 
         Cache::forget("portfolio_data_" . $userId);

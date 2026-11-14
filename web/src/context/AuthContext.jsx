@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginUser, registerUser, fetchProfile, googleLoginUser, updateProfile } from '../services/api';
 import localforage from 'localforage';
@@ -142,6 +142,26 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const fetchUser = useCallback(async () => {
+    const token = localStorage.getItem('auth_token');
+    if (!token) return null;
+    try {
+      const profile = await fetchProfile();
+      const userData = profile?.data || profile;
+      if (userData) {
+        setUser(userData);
+        localStorage.setItem('auth_user', JSON.stringify(userData));
+        if (userData?.preferences?.zakat_hawl_date) {
+          localStorage.setItem('irshad_zakat_hawl_date', userData.preferences.zakat_hawl_date);
+        }
+        return userData;
+      }
+    } catch (error) {
+      // Handled silently unless explicit caller needs it
+    }
+    return null;
+  }, []);
+
   const logout = () => {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_user');
@@ -153,7 +173,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser, login, register, loginWithGoogle, logout, updateUser, loading }}>
+    <AuthContext.Provider value={{ user, setUser, fetchUser, login, register, loginWithGoogle, logout, updateUser, loading }}>
       {children}
     </AuthContext.Provider>
   );

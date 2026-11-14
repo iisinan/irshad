@@ -133,7 +133,7 @@ class User extends Authenticatable implements MustVerifyEmail
                       });
                 })
                 ->orWhere(function ($q) {
-                    $q->where('status', 'canceled')
+                    $q->whereIn('status', ['canceled', 'past_due'])
                       ->whereNotNull('ends_at')
                       ->where('ends_at', '>', now());
                 });

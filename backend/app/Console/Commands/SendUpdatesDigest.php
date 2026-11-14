@@ -65,12 +65,15 @@ class SendUpdatesDigest extends Command
                 ->unique();
 
             $userPerformances = collect($data[$freq]['performances'])->whereIn('symbol', $userSymbols)->values()->all();
+            $digestDividends = \App\Services\SubscriptionService::canUseFeature($pref->user, 'dividend_alerts')
+                ? $data[$freq]['dividends']
+                : [];
             
             $payload = [
                 'user_performances' => $userPerformances,
                 'top_gainers' => $data[$freq]['top_gainers'],
                 'top_losers' => $data[$freq]['top_losers'],
-                'dividends' => $data[$freq]['dividends'],
+                'dividends' => $digestDividends,
                 'ipos' => $data[$freq]['ipos'],
             ];
 
@@ -85,7 +88,7 @@ class SendUpdatesDigest extends Command
                         $userPerformances, 
                         $data[$freq]['top_gainers'], 
                         $data[$freq]['top_losers'], 
-                        $data[$freq]['dividends']
+                        $digestDividends
                     ));
                 } catch (\Exception $e) {}
             }

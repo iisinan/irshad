@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\PaymentTransaction;
 use App\Models\Subscription;
+use App\Models\UserNotification;
 use App\Services\SquadService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
@@ -15,14 +16,14 @@ class ChargeSquadRenewals extends Command
 
     public function handle(SquadService $squad): int
     {
-        // 1. Mark canceled grace-period subscriptions as expired once ends_at passes
-        $expiredCanceled = Subscription::where('status', 'canceled')
+        // 1. Mark canceled and past_due grace-period subscriptions as expired once ends_at passes
+        $expiredCanceled = Subscription::whereIn('status', ['canceled', 'past_due'])
             ->whereNotNull('ends_at')
             ->where('ends_at', '<=', now())
             ->update(['status' => 'expired']);
 
         if ($expiredCanceled > 0) {
-            $this->info("Marked {$expiredCanceled} canceled subscription(s) as expired.");
+            $this->info("Marked {$expiredCanceled} canceled/past-due subscription(s) as expired.");
         }
 
         // 2. Expire active subscriptions with auto_renew disabled or missing token when renews_at passes
@@ -43,18 +44,37 @@ class ChargeSquadRenewals extends Command
             return self::SUCCESS;
         }
 
-        // 3. Charge due tokenized Squad subscriptions
+        // 3. Charge due tokenized Squad subscriptions (including past_due within their 3-day dunning grace window)
         $dueSubscriptions = Subscription::with(['user', 'plan'])
             ->where('gateway', 'squad')
-            ->where('status', 'active')
+            ->whereIn('status', ['active', 'past_due'])
             ->where('auto_renew', true)
-            ->whereNull('ends_at')
+            ->where(function ($q) {
+                $q->where(function ($active) {
+                    $active->where('status', 'active')->whereNull('ends_at');
+                })->orWhere(function ($pastDue) {
+                    $pastDue->where('status', 'past_due')
+                        ->whereNotNull('ends_at')
+                        ->where('ends_at', '>', now());
+                });
+            })
             ->whereNotNull('squad_token_id')
             ->where('renews_at', '<=', now())
             ->get();
 
         foreach ($dueSubscriptions as $sub) {
             if (!$sub->user || !$sub->plan) {
+                continue;
+            }
+
+            // Avoid charging the same subscription multiple times within the same calendar day
+            $alreadyTriedToday = PaymentTransaction::where('user_id', $sub->user_id)
+                ->where('plan_id', $sub->plan_id)
+                ->where('type', 'renewal')
+                ->where('created_at', '>=', now()->startOfDay())
+                ->exists();
+
+            if ($alreadyTriedToday) {
                 continue;
             }
 
@@ -86,7 +106,28 @@ class ChargeSquadRenewals extends Command
                     'status'      => 'failed',
                     'raw_payload' => $result['data'],
                 ]);
-                $sub->update(['status' => 'past_due']);
+
+                $graceEndsAt = ($sub->status === 'past_due' && $sub->ends_at)
+                    ? $sub->ends_at
+                    : now()->addDays(3);
+
+                $sub->update([
+                    'status'  => 'past_due',
+                    'ends_at' => $graceEndsAt,
+                ]);
+
+                UserNotification::notify(
+                    $sub->user_id,
+                    'Subscription Renewal Failed',
+                    "We could not charge your saved card for {$sub->plan->name}. Your access remains active until {$graceEndsAt->toFormattedDateString()} while we retry. Please renew via Pricing to keep uninterrupted access.",
+                    [
+                        'icon'         => '⚠️',
+                        'category'     => 'billing',
+                        'action_url'   => '/pricing',
+                        'action_label' => 'Update Plan',
+                    ]
+                );
+
                 $this->warn("Renewal failed for subscription #{$sub->id}: " . ($result['message'] ?? 'unknown error'));
             }
         }

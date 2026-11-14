@@ -216,9 +216,9 @@ class SquadService
                 'raw_payload' => $gatewayData,
             ]);
 
-            // Cancel active subscriptions on other plans when switching/upgrading
+            // Cancel active or past_due subscriptions on other plans when switching/upgrading
             Subscription::where('user_id', $lockedTx->user_id)
-                ->where('status', 'active')
+                ->whereIn('status', ['active', 'past_due'])
                 ->where('plan_id', '!=', $lockedTx->plan_id)
                 ->update([
                     'status'     => 'canceled',

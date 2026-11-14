@@ -111,8 +111,18 @@ class DetectComplianceChanges extends Command
 
         $pushService = app(\App\Services\PushNotificationService::class);
         $users = \App\Models\User::whereIn('id', $allUserIds)->get();
+        $notifiedCount = 0;
 
         foreach ($users as $user) {
+            // Holding-only compliance status change alerts belong to 90-Day Drift Tracking (Noor Max);
+            // watchlist subscribers with verdict change alerts opted in still receive their watchlist alert.
+            $isWatchlisted = $watchlistUserIds->contains($user->id);
+            $hasDriftTracking = \App\Services\SubscriptionService::canUseFeature($user, 'drift_tracking');
+            if (!$isWatchlisted && !$hasDriftTracking) {
+                continue;
+            }
+
+            $notifiedCount++;
             UserNotification::notify($user->id, $title, $message, [
                 'icon' => $icon,
                 'category' => 'screening',
@@ -133,6 +143,6 @@ class DetectComplianceChanges extends Command
             }
         }
 
-        $this->info("Notified {$allUserIds->count()} user(s) via in-app and push notifications.");
+        $this->info("Notified {$notifiedCount} user(s) via in-app and push notifications.");
     }
 }

@@ -268,7 +268,7 @@ function HoldingRow({ holding, onDelete, onEdit, hasBeenPurified, driftTrackingE
         <div style={{ padding: '5px 12px', background: 'rgba(217,119,6,0.08)', borderTop: '1px solid rgba(217,119,6,0.18)', display: 'flex', alignItems: 'center', gap: '6px' }}>
           <AlertTriangle size={10} color="#d97706"/>
           <span style={{ fontSize: '0.58rem', color: '#b45309', fontWeight: 700 }}>
-            90-Day Drift Tracking: Financial ratios approaching AAOIFI threshold (Non-halal rev: {Number(holding.drift_tracking?.non_halal_revenue_pct || 0).toFixed(1)}%, Debt: {Number(holding.drift_tracking?.debt_ratio_pct || 0).toFixed(1)}%).
+            90-Day Drift Tracking: Financial ratios approaching AAOIFI threshold (Impure Rev: {Number(holding.drift_tracking?.impure_income_ratio || 0).toFixed(1)}%, Debt: {Number(holding.drift_tracking?.debt_ratio || 0).toFixed(1)}%, Cash: {Number(holding.drift_tracking?.cash_ratio || 0).toFixed(1)}%).
           </span>
         </div>
       )}

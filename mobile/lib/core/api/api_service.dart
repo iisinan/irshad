@@ -64,6 +64,7 @@ class ApiService {
               backgroundColor: Colors.transparent,
               builder: (context) => UpgradePaywallBottomSheet(
                 message: error.response?.data?['message'] ?? 'Please upgrade your plan on the Irshad website to unlock this feature.',
+                requiredTier: error.response?.data?['required_tier']?.toString(),
               ),
             );
           }

@@ -193,7 +193,7 @@ class SubscriptionController extends Controller
     public function cancel(Request $request)
     {
         $user = $request->user();
-        $sub  = $user->subscriptions()->where('status', 'active')->latest('id')->first();
+        $sub  = $user->subscriptions()->whereIn('status', ['active', 'past_due'])->latest('id')->first();
 
         if (!$sub) {
             return response()->json(['message' => 'No active subscription found.'], 404);
@@ -282,6 +282,33 @@ class SubscriptionController extends Controller
         }
 
         return response()->json(['status' => 'success']);
+    }
+
+    public function transactions(Request $request)
+    {
+        $txs = $request->user()
+            ->paymentTransactions()
+            ->with('plan:id,name,slug')
+            ->orderByDesc('created_at')
+            ->limit(25)
+            ->get()
+            ->map(function (PaymentTransaction $tx) {
+                return [
+                    'id'              => $tx->id,
+                    'transaction_ref' => $tx->transaction_ref,
+                    'plan_name'       => $tx->plan?->name ?? 'Subscription',
+                    'plan_slug'       => $tx->plan?->slug,
+                    'billing_cycle'   => $tx->billing_cycle,
+                    'amount_ngn'      => round(($tx->amount_kobo ?? 0) / 100, 2),
+                    'currency'        => $tx->currency ?? 'NGN',
+                    'status'          => $tx->status,
+                    'type'            => $tx->type ?? 'initial',
+                    'paid_at'         => $tx->paid_at?->toIso8601String(),
+                    'created_at'      => $tx->created_at?->toIso8601String(),
+                ];
+            });
+
+        return response()->json(['transactions' => $txs]);
     }
 
     public function sendMagicLink(Request $request)

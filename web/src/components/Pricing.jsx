@@ -1,27 +1,95 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, Star, ShieldCheck, Monitor, Briefcase, Eye, PlaySquare, Globe, ShoppingBasket, FileText, Bell, HandCoins, LineChart, Megaphone, Check, Calculator } from 'lucide-react';
+import { CheckCircle2, Star, ShieldCheck, Monitor, Briefcase, Eye, PlaySquare, Globe, ShoppingBasket, FileText, Bell, HandCoins, LineChart, Megaphone, Check, Calculator, Minus } from 'lucide-react';
 import api from '../services/api';
 import Footer from './Footer';
 import { useAuth } from '../context/AuthContext';
+import { customConfirm, customAlert } from '../utils/confirm';
+
+const DEFAULT_PRICES = {
+  pro: { quarterly: 6500, yearly: 25000, stdQuarterly: 7500, stdYearly: 30000 },
+  max: { quarterly: 8500, yearly: 33000, stdQuarterly: 10000, stdYearly: 40000 },
+};
 
 const Pricing = ({ isModal }) => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [billingCycle, setBillingCycle] = useState('quarterly');
+  const [livePlans, setLivePlans] = useState([]);
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, fetchUser } = useAuth();
 
-  // Fix #8: Clear stale error when page mounts
-  useEffect(() => { setError(''); setMessage(''); }, []);
+  useEffect(() => {
+    setError('');
+    setMessage('');
+    let cancelled = false;
+    api.get('/plans')
+      .then((res) => {
+        if (!cancelled && Array.isArray(res.data?.plans)) {
+          setLivePlans(res.data.plans);
+        }
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
 
   const currentPlanSlug = user?.tier?.slug ?? 'free';
   const hasPaid = user?.has_paid_subscription ?? false;
+  const currentBillingCycle = user?.active_subscription?.billing_cycle ?? null;
+
+  const prices = useMemo(() => {
+    const map = {
+      pro: { ...DEFAULT_PRICES.pro },
+      max: { ...DEFAULT_PRICES.max },
+    };
+    livePlans.forEach((p) => {
+      if (p.slug === 'pro' || p.slug === 'max') {
+        const q = Number(p.quarterly_price ?? p.price_ngn ?? map[p.slug].quarterly);
+        const y = Number(p.yearly_price ?? map[p.slug].yearly);
+        map[p.slug].quarterly = q > 0 ? q : map[p.slug].quarterly;
+        map[p.slug].yearly = y > 0 ? y : map[p.slug].yearly;
+      }
+    });
+    return map;
+  }, [livePlans]);
+
+  const isExactCurrentPlan = (slug) => {
+    if (slug === 'free') return currentPlanSlug === 'free' && !hasPaid;
+    return currentPlanSlug === slug && hasPaid && (!currentBillingCycle || currentBillingCycle === billingCycle);
+  };
+
+  const getCtaLabel = (slug) => {
+    if (loading) return 'Processing...';
+    if (slug === 'free') {
+      return hasPaid ? 'Downgrade to Free' : 'Get started';
+    }
+    if (currentPlanSlug === slug && hasPaid && currentBillingCycle && currentBillingCycle !== billingCycle) {
+      return `Switch to ${billingCycle === 'yearly' ? 'Yearly' : 'Quarterly'}`;
+    }
+    if (currentPlanSlug === 'pro' && slug === 'max') return 'Upgrade to Noor';
+    return 'Get started';
+  };
 
   const handleSubscribe = async (planSlug) => {
     if (planSlug === 'free') {
-      navigate('/portfolio');
+      if (hasPaid) {
+        const ok = await customConfirm('Downgrade to Miftah (Free)? Your current paid subscription auto-renewal will be canceled and you will keep access until the end of your current billing period.');
+        if (!ok) return;
+        setLoading(true);
+        setError('');
+        try {
+          await api.post('/subscription/cancel');
+          if (fetchUser) await fetchUser();
+          await customAlert('Your subscription has been canceled. You keep paid access until your current billing period ends.');
+        } catch (err) {
+          setError(err.response?.data?.message || 'Unable to downgrade subscription right now.');
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        navigate('/portfolio');
+      }
       return;
     }
 
@@ -127,9 +195,9 @@ const Pricing = ({ isModal }) => {
                 <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>/forever</span>
               </div>
 
-              {currentPlanSlug === 'free' && !hasPaid
+              {isExactCurrentPlan('free')
                 ? <div style={{ width: '100%', padding: '10px', borderRadius: '100px', background: 'var(--bg-alt)', border: '1px solid #D1D5DB', color: 'var(--text-muted)', fontWeight: 700, fontSize: '0.95rem', textAlign: 'center', marginBottom: '32px' }}>✓ Your current plan</div>
-                : <button onClick={() => handleSubscribe('free')} style={{ width: '100%', padding: '10px', borderRadius: '100px', background: 'transparent', border: '1px solid #D1D5DB', color: 'var(--text-dark)', fontWeight: 600, fontSize: '0.95rem', cursor: 'pointer', marginBottom: '32px', transition: 'all 0.2s' }} className="hover-bg-gray">Get started</button>
+                : <button onClick={() => handleSubscribe('free')} disabled={loading} style={{ width: '100%', padding: '10px', borderRadius: '100px', background: 'transparent', border: '1px solid #D1D5DB', color: 'var(--text-dark)', fontWeight: 600, fontSize: '0.95rem', cursor: loading ? 'not-allowed' : 'pointer', marginBottom: '32px', transition: 'all 0.2s' }} className="hover-bg-gray">{getCtaLabel('free')}</button>
               }
 
               <div style={{ flex: 1 }}>
@@ -160,29 +228,29 @@ const Pricing = ({ isModal }) => {
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', flexWrap: 'wrap' }}>
                   <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#006B46' }}>NGN</span>
                   <span style={{ fontSize: '2.4rem', fontWeight: 500, color: '#006B46', lineHeight: 1 }}>
-                    {billingCycle === 'quarterly' ? '6,500' : '25,000'}
+                    {(billingCycle === 'quarterly' ? prices.pro.quarterly : prices.pro.yearly).toLocaleString()}
                   </span>
                   <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
                     /{billingCycle === 'quarterly' ? 'quarter' : 'year'}
                   </span>
                   <span style={{ fontSize: '1.05rem', color: '#9CA3AF', textDecoration: 'line-through', fontWeight: 500, marginLeft: '4px' }}>
-                    {billingCycle === 'quarterly' ? '₦7,500' : '₦30,000'}
+                    ₦{(billingCycle === 'quarterly' ? prices.pro.stdQuarterly : prices.pro.stdYearly).toLocaleString()}
                   </span>
                 </div>
                 {billingCycle === 'yearly' ? (
                   <div style={{ fontSize: '0.78rem', color: '#006B46', fontWeight: 600, marginTop: '6px' }}>
-                    Equivalent to ₦6,250/quarter • Save ₦5,000 off standard
+                    Equivalent to ₦{Math.round(prices.pro.yearly / 4).toLocaleString()}/quarter • Save ₦{(prices.pro.stdYearly - prices.pro.yearly).toLocaleString()} off standard
                   </div>
                 ) : (
                   <div style={{ fontSize: '0.78rem', color: '#006B46', fontWeight: 600, marginTop: '6px' }}>
-                    Save ₦1,000 with promo entry price
+                    Save ₦{(prices.pro.stdQuarterly - prices.pro.quarterly).toLocaleString()} with promo entry price
                   </div>
                 )}
               </div>
 
-              {currentPlanSlug === 'pro' && hasPaid
+              {isExactCurrentPlan('pro')
                 ? <div style={{ width: '100%', padding: '10px', borderRadius: '100px', background: '#E6F4EE', border: '2px solid #006B46', color: '#006B46', fontWeight: 700, fontSize: '0.95rem', textAlign: 'center', marginBottom: '24px' }}>✓ Your current plan</div>
-                : <button onClick={() => handleSubscribe('pro')} disabled={loading} style={{ width: '100%', padding: '10px', borderRadius: '100px', background: '#006B46', border: 'none', color: 'white', fontWeight: 600, fontSize: '0.95rem', cursor: loading ? 'not-allowed' : 'pointer', marginBottom: '24px', transition: 'all 0.2s' }} className="hover-lift">{loading ? 'Processing...' : 'Get started'}</button>
+                : <button onClick={() => handleSubscribe('pro')} disabled={loading} style={{ width: '100%', padding: '10px', borderRadius: '100px', background: '#006B46', border: 'none', color: 'white', fontWeight: 600, fontSize: '0.95rem', cursor: loading ? 'not-allowed' : 'pointer', marginBottom: '24px', transition: 'all 0.2s' }} className="hover-lift">{getCtaLabel('pro')}</button>
               }
 
               <div style={{ flex: 1 }}>
@@ -220,29 +288,29 @@ const Pricing = ({ isModal }) => {
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', flexWrap: 'wrap' }}>
                   <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#D9A05B' }}>NGN</span>
                   <span style={{ fontSize: '2.4rem', fontWeight: 500, color: '#D9A05B', lineHeight: 1 }}>
-                    {billingCycle === 'quarterly' ? '8,500' : '33,000'}
+                    {(billingCycle === 'quarterly' ? prices.max.quarterly : prices.max.yearly).toLocaleString()}
                   </span>
                   <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
                     /{billingCycle === 'quarterly' ? 'quarter' : 'year'}
                   </span>
                   <span style={{ fontSize: '1.05rem', color: '#9CA3AF', textDecoration: 'line-through', fontWeight: 500, marginLeft: '4px' }}>
-                    {billingCycle === 'quarterly' ? '₦10,000' : '₦40,000'}
+                    ₦{(billingCycle === 'quarterly' ? prices.max.stdQuarterly : prices.max.stdYearly).toLocaleString()}
                   </span>
                 </div>
                 {billingCycle === 'yearly' ? (
                   <div style={{ fontSize: '0.78rem', color: '#B8860B', fontWeight: 600, marginTop: '6px' }}>
-                    Equivalent to ₦8,250/quarter • Save ₦7,000 off standard
+                    Equivalent to ₦{Math.round(prices.max.yearly / 4).toLocaleString()}/quarter • Save ₦{(prices.max.stdYearly - prices.max.yearly).toLocaleString()} off standard
                   </div>
                 ) : (
                   <div style={{ fontSize: '0.78rem', color: '#B8860B', fontWeight: 600, marginTop: '6px' }}>
-                    Save ₦1,500 with promo entry price
+                    Save ₦{(prices.max.stdQuarterly - prices.max.quarterly).toLocaleString()} with promo entry price
                   </div>
                 )}
               </div>
 
-              {currentPlanSlug === 'max' && hasPaid
+              {isExactCurrentPlan('max')
                 ? <div style={{ width: '100%', padding: '10px', borderRadius: '100px', background: '#FEF5E7', border: '2px solid #D9A05B', color: '#B8860B', fontWeight: 700, fontSize: '0.95rem', textAlign: 'center', marginBottom: '24px' }}>✓ Your current plan</div>
-                : <button onClick={() => handleSubscribe('max')} disabled={loading} style={{ width: '100%', padding: '10px', borderRadius: '100px', background: '#D9A05B', border: 'none', color: 'white', fontWeight: 600, fontSize: '0.95rem', cursor: loading ? 'not-allowed' : 'pointer', marginBottom: '24px', transition: 'all 0.2s' }} className="hover-lift">{loading ? 'Processing...' : 'Get started'}</button>
+                : <button onClick={() => handleSubscribe('max')} disabled={loading} style={{ width: '100%', padding: '10px', borderRadius: '100px', background: '#D9A05B', border: 'none', color: 'white', fontWeight: 600, fontSize: '0.95rem', cursor: loading ? 'not-allowed' : 'pointer', marginBottom: '24px', transition: 'all 0.2s' }} className="hover-lift">{getCtaLabel('max')}</button>
               }
 
               <div style={{ flex: 1 }}>
@@ -264,6 +332,48 @@ const Pricing = ({ isModal }) => {
               </div>
             </div>
 
+          </div>
+
+          {/* Feature Comparison Matrix */}
+          <div style={{ marginBottom: '44px', border: '1px solid #E5E7EB', borderRadius: '20px', overflow: 'hidden', background: 'var(--bg)' }}>
+            <div style={{ padding: '18px 24px', borderBottom: '1px solid #E5E7EB', background: 'var(--bg-alt)' }}>
+              <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-dark)' }}>Compare all plan features</h3>
+            </div>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.86rem' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid #E5E7EB', background: 'var(--bg)' }}>
+                    <th style={{ textAlign: 'left', padding: '14px 20px', color: 'var(--text-muted)', fontWeight: 600 }}>Feature</th>
+                    <th style={{ textAlign: 'center', padding: '14px 16px', color: 'var(--text-dark)', fontWeight: 700 }}>Miftah (Free)</th>
+                    <th style={{ textAlign: 'center', padding: '14px 16px', color: '#006B46', fontWeight: 700 }}>Rawdha (Pro)</th>
+                    <th style={{ textAlign: 'center', padding: '14px 16px', color: '#B8860B', fontWeight: 700 }}>Noor (Max)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    ['Monthly Stock Screens', '3 / month', '10 / month', 'Unlimited'],
+                    ['Portfolio Holdings', 'Up to 3 stocks', 'Up to 7 stocks', 'Unlimited'],
+                    ['Watchlist & Alerts', '—', 'Up to 2 stocks', 'Unlimited'],
+                    ['Thematic Baskets', '—', '3 curated + 3 custom', 'Full + Unlimited custom'],
+                    ['Purification Calculator', '—', '2 / month', 'Unlimited'],
+                    ['Automated Zakat Calculator', '—', 'Included', 'Unlimited'],
+                    ['Broker Statements & History', '—', 'Included', 'Included'],
+                    ['Dividend Alerts', '—', '—', 'Unlimited'],
+                    ['90-Day Drift Tracking', '—', '—', '90-day tracking'],
+                    ['Monthly Spotlight Insights', '—', '—', 'Full insights'],
+                  ].map(([feature, freeVal, proVal, maxVal], idx) => (
+                    <tr key={feature} style={{ borderBottom: idx === 9 ? 'none' : '1px solid #F3F4F6' }}>
+                      <td style={{ padding: '12px 20px', fontWeight: 600, color: 'var(--text-dark)' }}>{feature}</td>
+                      {[freeVal, proVal, maxVal].map((val, colIdx) => (
+                        <td key={colIdx} style={{ textAlign: 'center', padding: '12px 16px', color: val === '—' ? '#9CA3AF' : colIdx === 1 ? '#006B46' : colIdx === 2 ? '#B8860B' : 'var(--text-dark)', fontWeight: val === '—' ? 500 : 600 }}>
+                          {val === '—' ? <Minus size={14} style={{ opacity: 0.45 }} /> : val}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           <div style={{ textAlign: 'center', marginBottom: '40px', fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>

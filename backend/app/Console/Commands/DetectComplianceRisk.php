@@ -35,8 +35,8 @@ class DetectComplianceRisk extends Command
                 $riskReasons[] = "Debt ratio is at " . number_format($screening->debt_ratio, 2) . "% (Limit: 30%)";
             }
             // Impure Income threshold is 5%
-            if ($screening->impure_income_ratio >= 4.5 && $screening->impure_income_ratio < 5) {
-                $riskReasons[] = "Impure Income ratio is at " . number_format($screening->impure_income_ratio, 2) . "% (Limit: 5%)";
+            if ($screening->impermissible_income_ratio >= 4.5 && $screening->impermissible_income_ratio < 5) {
+                $riskReasons[] = "Impure Income ratio is at " . number_format($screening->impermissible_income_ratio, 2) . "% (Limit: 5%)";
             }
             // Cash threshold is 30%
             if ($screening->cash_ratio >= 27 && $screening->cash_ratio < 30) {

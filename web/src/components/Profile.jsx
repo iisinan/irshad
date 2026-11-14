@@ -5,7 +5,7 @@ import {
   Shield, CheckCircle,
   Trash2, User, Monitor, LogOut, AlertCircle, Award, Save, CreditCard
 } from 'lucide-react';
-import { fetchProfile, updateProfile, deleteAccount } from '../services/api';
+import api, { fetchProfile, updateProfile, deleteAccount } from '../services/api';
 import localforage from 'localforage';
 import { useTour } from '../context/TourContext';
 
@@ -17,13 +17,15 @@ import { customAlert } from '../utils/confirm';
 
 /* ─── Main Profile Component ───────────────────────── */
 export default function Profile() {
-  const { user, loading: authLoading, logout } = useAuth();
+  const { user, loading: authLoading, logout, fetchUser } = useAuth();
   const { startTour } = useTour();
   const navigate = useNavigate();
 
   const [activeSection, setActiveSection] = useState('profile');
   const [profileUser, setProfileUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [transactions, setTransactions] = useState([]);
+  const [txLoading, setTxLoading] = useState(false);
 
   const searchParams = new URLSearchParams(window.location.search);
   useEffect(() => {
@@ -76,6 +78,21 @@ export default function Profile() {
     };
     if (!authLoading && user) loadData();
   }, [user, authLoading]);
+
+  useEffect(() => {
+    if (activeSection !== 'billing' || !user) return;
+    let cancelled = false;
+    setTxLoading(true);
+    api.get('/subscription/transactions')
+      .then((res) => {
+        if (!cancelled) setTransactions(res.data?.transactions || []);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setTxLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [activeSection, user]);
 
   useEffect(() => {
     if (profileUser || user) {
@@ -316,8 +333,13 @@ export default function Profile() {
                           if (await customConfirm('Are you sure you want to cancel your subscription? You will keep access until the end of your current billing period.')) {
                             try {
                               await api.post('/subscription/cancel');
+                              if (fetchUser) await fetchUser();
+                              const refreshed = await fetchProfile().catch(() => null);
+                              if (refreshed?.data) {
+                                setProfileUser(refreshed.data);
+                                localforage.setItem('irshad_profile_cache', refreshed.data);
+                              }
                               await customAlert('Subscription canceled. You keep access until your billing period ends.');
-                              window.location.reload();
                             } catch (e) {
                               await customAlert(e.response?.data?.message || 'Error canceling subscription. Please try again.');
                             }
@@ -341,19 +363,19 @@ export default function Profile() {
                   const usage = activeUser?.usage_summary || {};
 
                   const stockLimit = features.stock_screens_per_month ?? (slug === 'max' ? -1 : slug === 'pro' ? 10 : 3);
-                  const stockUsed = usage.stock_screens?.used ?? 0;
+                  const stockUsed = usage.stock_screens_per_month?.used ?? usage.stock_screens?.used ?? 0;
 
                   const portfolioLimit = features.portfolio_limit ?? (slug === 'max' ? -1 : slug === 'pro' ? 7 : 3);
-                  const portfolioUsed = usage.portfolio_holdings?.used ?? 0;
+                  const portfolioUsed = usage.portfolio_limit?.used ?? usage.portfolio_holdings?.used ?? 0;
 
                   const watchlistLimit = features.watchlist_limit ?? (slug === 'max' ? -1 : slug === 'pro' ? 2 : 0);
-                  const watchlistUsed = usage.watchlist?.used ?? 0;
+                  const watchlistUsed = usage.watchlist_limit?.used ?? usage.watchlist?.used ?? 0;
 
                   const basketsLimit = features.baskets ?? (slug === 'max' ? -1 : slug === 'pro' ? 3 : 0);
-                  const basketsUsed = usage.custom_baskets?.used ?? 0;
+                  const basketsUsed = usage.baskets?.used ?? usage.custom_baskets?.used ?? 0;
 
                   const purifyLimit = features.purifications_per_month ?? (slug === 'max' ? -1 : slug === 'pro' ? 2 : 0);
-                  const purifyUsed = usage.purifications?.used ?? 0;
+                  const purifyUsed = usage.purifications_per_month?.used ?? usage.purifications?.used ?? 0;
 
                   const formatQuota = (used, limit, unitLabel = '') => {
                     if (limit === -1) return `${used} used · Unlimited`;
@@ -427,6 +449,42 @@ export default function Profile() {
                     </div>
                   );
                 })()}
+              </div>
+
+              <div style={{ marginTop: '24px', padding: '24px', background: 'var(--bg-section)', borderRadius: '16px', border: '1px solid var(--border)' }}>
+                <h4 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '14px' }}>Billing History & Receipts</h4>
+                {txLoading ? (
+                  <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', margin: 0 }}>Loading payment history...</p>
+                ) : transactions.length === 0 ? (
+                  <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', margin: 0 }}>No subscription payments recorded yet.</p>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {transactions.map((tx) => (
+                      <div key={tx.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', padding: '12px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)' }}>
+                        <div>
+                          <div style={{ fontSize: '0.86rem', fontWeight: 700, color: 'var(--text-dark)' }}>
+                            {tx.plan_name} <span style={{ textTransform: 'capitalize', color: 'var(--text-muted)', fontWeight: 600 }}>({tx.billing_cycle})</span>
+                          </div>
+                          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                            Ref: {tx.transaction_ref} · {new Date(tx.paid_at || tx.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <span style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-dark)' }}>
+                            ₦{Number(tx.amount_ngn || 0).toLocaleString()}
+                          </span>
+                          <span style={{
+                            fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', padding: '3px 9px', borderRadius: '100px',
+                            background: tx.status === 'success' ? 'rgba(0,107,70,0.1)' : tx.status === 'failed' ? 'rgba(220,38,38,0.1)' : 'rgba(217,119,6,0.1)',
+                            color: tx.status === 'success' ? '#006B46' : tx.status === 'failed' ? '#dc2626' : '#b45309'
+                          }}>
+                            {tx.status}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
