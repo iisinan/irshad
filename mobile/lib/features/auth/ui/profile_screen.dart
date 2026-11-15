@@ -372,7 +372,7 @@ Color get cardBg => context.bgAlt;
 
     final rows = [
       (
-        isQuarterly ? 'Stock Screens (Quarterly)' : 'Stock Screens (Monthly)',
+        isQuarterly ? 'Stock Screens (Quarterly Quota)' : 'Stock Screens (Monthly Quota)',
         usedOf('stock_screens_per_month'),
         limitOf('stock_screens_per_month', slug == 'max' ? -1 : slug == 'pro' ? 30 : 3),
       ),
@@ -392,11 +392,30 @@ Color get cardBg => context.bgAlt;
         limitOf('baskets', slug == 'max' ? -1 : slug == 'pro' ? 3 : 0),
       ),
       (
-        isQuarterly ? 'Purification Runs (Quarterly)' : 'Purification Runs (Monthly)',
+        isQuarterly ? 'Purification Runs (Quarterly Quota)' : 'Purification Runs (Monthly Quota)',
         usedOf('purifications_per_month'),
         limitOf('purifications_per_month', slug == 'max' ? -1 : slug == 'pro' ? 6 : 0),
       ),
     ];
+
+    String buildSubscriptionSubtitle() {
+      if (activeSub == null) return 'Free Community Plan';
+      final rawCycle = activeSub['billing_cycle']?.toString().trim();
+      final status = (activeSub['status'] ?? 'active').toString().trim().toUpperCase();
+      final parts = <String>[
+        if (rawCycle != null && rawCycle.isNotEmpty) '${rawCycle.toUpperCase()} BILLING',
+        status,
+      ];
+      final dateRaw = (activeSub['ends_at'] ?? activeSub['renews_at'])?.toString();
+      if (dateRaw != null && dateRaw.isNotEmpty) {
+        try {
+          final parsed = DateTime.parse(dateRaw).toLocal();
+          final prefix = activeSub['ends_at'] != null ? 'Ends' : 'Renews';
+          parts.add('$prefix ${DateFormat('MMM d, yyyy').format(parsed)}');
+        } catch (_) {}
+      }
+      return parts.join(' • ');
+    }
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -420,9 +439,7 @@ Color get cardBg => context.bgAlt;
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      activeSub != null
-                          ? '${(activeSub['billing_cycle'] ?? 'quarterly').toString().toUpperCase()} • ${(activeSub['status'] ?? 'active').toString().toUpperCase()}'
-                          : 'Free Community Plan',
+                      buildSubscriptionSubtitle(),
                       style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: context.textMuted),
                     ),
                   ],

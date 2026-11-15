@@ -42,9 +42,10 @@ class AdminController extends Controller
         $users->getCollection()->transform(function ($u) {
             $u->append(['tier', 'has_paid_subscription']);
             $sub = $u->activeSubscription;
-            $u->active_plan_slug   = $u->tier?->slug ?? 'free';
-            $u->active_plan_name   = $u->tier?->name ?? 'Miftah';
-            $u->subscription_ends  = $sub?->renews_at?->toDateString();
+            $u->active_plan_slug     = $u->tier?->slug ?? 'free';
+            $u->active_plan_name     = $u->tier?->name ?? 'Miftah';
+            $u->active_billing_cycle = $sub?->billing_cycle;
+            $u->subscription_ends    = $sub?->renews_at?->toDateString();
             return $u;
         });
 
@@ -185,8 +186,10 @@ class AdminController extends Controller
             'message' => $expiresAt
                 ? "Plan for {$user->name} overridden to {$plan->name} ({$billingCycle}, expires {$expiresAt->toDateString()}) by admin."
                 : "Plan for {$user->name} reset to {$plan->name} by admin.",
-            'plan'    => $plan->name,
-            'expires' => $expiresAt?->toDateString(),
+            'plan'             => $plan->name,
+            'active_plan_slug' => $plan->slug,
+            'billing_cycle'    => $plan->slug !== 'free' ? $billingCycle : null,
+            'expires'          => $expiresAt?->toDateString(),
         ]);
     }
 

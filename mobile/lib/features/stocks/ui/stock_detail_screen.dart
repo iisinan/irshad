@@ -18,6 +18,7 @@ import '../../../core/notifications/notification_service.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 import '../../../core/api/api_service.dart';
 import '../../../core/widgets/upgrade_paywall_bottom_sheet.dart';
+import '../../../core/widgets/stock_screen_counter_badge.dart';
 import '../../../core/widgets/company_avatar.dart';
 import '../../profile/ui/widgets/add_assets_bottom_sheet.dart';
 import '../../portfolio/ui/tabs/portfolio_overview_tab.dart';
@@ -1168,6 +1169,12 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 10),
+              StockScreenCounterBadge(
+                fallbackUsage: _aaoifiData?['screen_usage'] is Map
+                    ? Map<String, dynamic>.from(_aaoifiData!['screen_usage'] as Map)
+                    : null,
               ),
               const SizedBox(height: 12),
               

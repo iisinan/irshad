@@ -39,6 +39,7 @@ class AuthController extends Controller
         event(new Registered($user));
 
         $token = $user->createToken('auth_token')->plainTextToken;
+        $user = $this->hydrateUserForClient($user);
 
         return $this->success([
             'user' => $user,
@@ -59,6 +60,7 @@ class AuthController extends Controller
         // Auth::user() returns the already-loaded user — no second DB query needed
         $user = Auth::user();
         $token = $user->createToken('auth_token')->plainTextToken;
+        $user = $this->hydrateUserForClient($user);
 
         return $this->success([
             'user' => $user,
@@ -134,6 +136,7 @@ class AuthController extends Controller
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
+        $user = $this->hydrateUserForClient($user);
 
         return $this->success([
             'user' => $user,
@@ -213,6 +216,7 @@ class AuthController extends Controller
             }
 
             $token = $user->createToken('auth_token')->plainTextToken;
+            $user = $this->hydrateUserForClient($user);
 
             return $this->success([
                 'user' => $user,
@@ -238,6 +242,18 @@ class AuthController extends Controller
      */
     public function me(Request $request): JsonResponse
     {
-        return $this->success($request->user());
+        return $this->success($this->hydrateUserForClient($request->user()));
+    }
+
+    /**
+     * Ensure subscription/tier metadata and usage summary are present on auth user responses.
+     */
+    private function hydrateUserForClient(User $user): User
+    {
+        $user->load('activeSubscription.plan');
+        $user->append(['tier', 'has_paid_subscription']);
+        $user->usage_summary = \App\Services\SubscriptionService::getUsageSummary($user);
+
+        return $user;
     }
 }

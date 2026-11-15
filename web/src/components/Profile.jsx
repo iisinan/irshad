@@ -303,12 +303,14 @@ export default function Profile() {
                     </p>
                     {(profileUser || user)?.active_subscription && (
                       <div style={{ marginTop: '10px', display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-                        <span style={{ 
-                          fontSize: '0.74rem', fontWeight: 800, padding: '3px 10px', borderRadius: '100px', 
-                          background: 'rgba(0, 107, 70, 0.1)', color: '#006B46', textTransform: 'capitalize', letterSpacing: '0.3px'
-                        }}>
-                          {((profileUser || user)?.active_subscription?.billing_cycle || 'Quarterly')} Billing
-                        </span>
+                        {(profileUser || user)?.active_subscription?.billing_cycle && (
+                          <span style={{ 
+                            fontSize: '0.74rem', fontWeight: 800, padding: '3px 10px', borderRadius: '100px', 
+                            background: 'rgba(0, 107, 70, 0.1)', color: '#006B46', textTransform: 'capitalize', letterSpacing: '0.3px'
+                          }}>
+                            {(profileUser || user)?.active_subscription?.billing_cycle} Billing
+                          </span>
+                        )}
                         {(profileUser || user)?.active_subscription?.renews_at && (
                           <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 500 }}>
                             Renews on {new Date((profileUser || user)?.active_subscription?.renews_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -387,7 +389,7 @@ export default function Profile() {
                   };
 
                   const quotaRows = [
-                    { label: `Stock Screens (${periodAdj})`, used: stockUsed, limit: stockLimit, text: formatQuota(stockUsed, stockLimit, periodUnit) },
+                    { label: `Stock Screens (${periodAdj} Quota)`, used: stockUsed, limit: stockLimit, text: formatQuota(stockUsed, stockLimit, periodUnit) },
                     { label: 'Portfolio (Holdings)', used: portfolioUsed, limit: portfolioLimit, text: formatQuota(portfolioUsed, portfolioLimit, 'stocks') },
                     { label: 'Watchlist', used: watchlistUsed, limit: watchlistLimit, text: formatQuota(watchlistUsed, watchlistLimit, 'stocks') },
                     {
@@ -400,7 +402,7 @@ export default function Profile() {
                           ? `Limited access (3 system + ${basketsUsed}/${basketsLimit} custom)`
                           : 'Not included',
                     },
-                    { label: `Automated Purification Calculation (${periodAdj})`, used: purifyUsed, limit: purifyLimit, text: formatQuota(purifyUsed, purifyLimit, periodUnit) },
+                    { label: `Automated Purification (${periodAdj} Quota)`, used: purifyUsed, limit: purifyLimit, text: formatQuota(purifyUsed, purifyLimit, periodUnit) },
                   ];
 
                   const boolRows = [

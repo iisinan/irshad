@@ -29,10 +29,20 @@ const Pricing = ({ isModal = false, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [billingCycle, setBillingCycle] = useState('quarterly');
   const [livePlans, setLivePlans] = useState([]);
   const navigate = useNavigate();
   const { user, fetchUser } = useAuth();
+  const [hasManualCycleSelection, setHasManualCycleSelection] = useState(false);
+  const [billingCycle, setBillingCycle] = useState(() =>
+    user?.active_subscription?.billing_cycle === 'yearly' ? 'yearly' : 'quarterly'
+  );
+
+  useEffect(() => {
+    const activeCycle = user?.active_subscription?.billing_cycle;
+    if (!hasManualCycleSelection && (activeCycle === 'quarterly' || activeCycle === 'yearly')) {
+      setBillingCycle(activeCycle);
+    }
+  }, [user?.active_subscription?.billing_cycle, hasManualCycleSelection]);
 
   useEffect(() => {
     setError('');
@@ -161,7 +171,10 @@ const Pricing = ({ isModal = false, onClose }) => {
                 type="button"
                 role="tab"
                 aria-selected={billingCycle === 'quarterly'}
-                onClick={() => setBillingCycle('quarterly')}
+                onClick={() => {
+                  setHasManualCycleSelection(true);
+                  setBillingCycle('quarterly');
+                }}
                 className={`pricing-toggle-btn ${billingCycle === 'quarterly' ? 'is-active' : ''}`}
               >
                 Quarterly
@@ -170,7 +183,10 @@ const Pricing = ({ isModal = false, onClose }) => {
                 type="button"
                 role="tab"
                 aria-selected={billingCycle === 'yearly'}
-                onClick={() => setBillingCycle('yearly')}
+                onClick={() => {
+                  setHasManualCycleSelection(true);
+                  setBillingCycle('yearly');
+                }}
                 className={`pricing-toggle-btn ${billingCycle === 'yearly' ? 'is-active' : ''}`}
               >
                 <span>Yearly</span>

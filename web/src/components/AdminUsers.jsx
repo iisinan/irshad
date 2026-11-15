@@ -128,7 +128,18 @@ const AdminUsers = () => {
   const openPlanModal = (u) => {
     setSelectedUser(u);
     setPlanOverrideSuccess('');
-    setPlanForm({ plan_slug: 'pro', billing_cycle: 'quarterly', expires_at: '', note: '' });
+    const currentSlug = u._planOverride || u.active_plan_slug || u.tier?.slug || 'free';
+    const currentCycle =
+      u._billingCycleOverride ||
+      u.active_subscription?.billing_cycle ||
+      u.active_billing_cycle ||
+      'yearly';
+    setPlanForm({
+      plan_slug: currentSlug === 'free' ? 'pro' : currentSlug,
+      billing_cycle: currentCycle === 'quarterly' ? 'quarterly' : 'yearly',
+      expires_at: '',
+      note: '',
+    });
     setShowPlanModal(true);
   };
 
@@ -143,11 +154,23 @@ const AdminUsers = () => {
         planForm.billing_cycle
       );
       setPlanOverrideSuccess(res.message || 'Plan updated!');
-      // Optimistically update the table row with new plan + expiry
+      const nextCycle = planForm.plan_slug === 'free' ? null : (res.billing_cycle || planForm.billing_cycle);
+      // Optimistically update the table row with new plan, cycle + expiry
       setUsers(prev => prev.map(u => u.id === selectedUser.id
-        ? { ...u, _planOverride: planForm.plan_slug, subscription_ends: res.expires ?? (planForm.plan_slug === 'free' ? null : planForm.expires_at) }
+        ? {
+            ...u,
+            _planOverride: planForm.plan_slug,
+            _billingCycleOverride: nextCycle,
+            active_plan_slug: planForm.plan_slug,
+            active_billing_cycle: nextCycle,
+            active_subscription: planForm.plan_slug === 'free'
+              ? null
+              : { ...(u.active_subscription || {}), billing_cycle: nextCycle, renews_at: res.expires ?? u.active_subscription?.renews_at },
+            subscription_ends: res.expires ?? (planForm.plan_slug === 'free' ? null : planForm.expires_at),
+          }
         : u
       ));
+      loadUsers(page, debouncedSearch);
     } catch (e) {
       setPlanOverrideSuccess('Error: ' + (e.response?.data?.message || 'Failed to override plan'));
     }
@@ -327,6 +350,10 @@ const AdminUsers = () => {
                   <td style={{ padding: '15px 20px' }}>
                     {(() => {
                       const slug = u._planOverride || u.active_plan_slug || 'free';
+                      const cycle = slug === 'free'
+                        ? null
+                        : (u._billingCycleOverride || u.active_subscription?.billing_cycle || u.active_billing_cycle || null);
+                      const cycleLabel = cycle === 'yearly' ? 'Yearly' : cycle === 'quarterly' ? 'Quarterly' : null;
                       const label = slug === 'max' ? 'Noor' : slug === 'pro' ? 'Rawdha' : 'Miftah';
                       const bg = slug === 'max' ? 'rgba(217,160,91,0.12)' : slug === 'pro' ? 'rgba(0,107,70,0.1)' : 'var(--bg-section)';
                       const color = slug === 'max' ? '#B8860B' : slug === 'pro' ? '#006B46' : 'var(--text-muted)';
@@ -334,7 +361,7 @@ const AdminUsers = () => {
                         <div>
                           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 10px', borderRadius: '100px', fontSize: '0.72rem', fontWeight: 700, background: bg, color }}>
                             {slug !== 'free' && <Crown size={11} />}
-                            {label}
+                            {label}{cycleLabel ? ` · ${cycleLabel}` : ''}
                           </span>
                           {u.subscription_ends && <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '3px', paddingLeft: '2px' }}>until {u.subscription_ends}</div>}
                         </div>
@@ -438,7 +465,15 @@ const AdminUsers = () => {
               <>
                 <div style={{ background: 'var(--bg-section)', borderRadius: '12px', padding: '12px 16px', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
                   Current plan: <strong style={{ color: 'var(--text-dark)' }}>
-                    {selectedUser.tier?.slug === 'max' ? 'Noor (Max)' : selectedUser.tier?.slug === 'pro' ? 'Rawdha (Pro)' : 'Miftah (Free)'}
+                    {(() => {
+                      const s = selectedUser._planOverride || selectedUser.active_plan_slug || selectedUser.tier?.slug || 'free';
+                      const c = s === 'free'
+                        ? null
+                        : (selectedUser._billingCycleOverride || selectedUser.active_subscription?.billing_cycle || selectedUser.active_billing_cycle);
+                      const planLabel = s === 'max' ? 'Noor (Max)' : s === 'pro' ? 'Rawdha (Pro)' : 'Miftah (Free)';
+                      const cLabel = c === 'yearly' ? ' · Yearly' : c === 'quarterly' ? ' · Quarterly' : '';
+                      return `${planLabel}${cLabel}`;
+                    })()}
                   </strong>
                 </div>
 

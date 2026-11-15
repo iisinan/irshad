@@ -25,7 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // Load profile if authenticated
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final appState = Provider.of<AppStateProvider>(context, listen: false);
-      if (appState.isAuthenticated && appState.userProfile == null) {
+      if (appState.isAuthenticated) {
         appState.loadProfile();
       }
       _fetchUnreadNotifications();

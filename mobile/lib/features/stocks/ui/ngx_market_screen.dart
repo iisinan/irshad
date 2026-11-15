@@ -5,6 +5,7 @@ import 'stock_detail_screen.dart';
 
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 import '../../../core/widgets/company_avatar.dart';
+import '../../../core/widgets/stock_screen_counter_badge.dart';
 class NgxMarketScreen extends StatefulWidget {
   final bool isTab;
   const NgxMarketScreen({super.key, this.isTab = false});
@@ -196,6 +197,9 @@ class _NgxMarketScreenState extends State<NgxMarketScreen> {
                     },
                   ),
                 ),
+                const Spacer(),
+                const StockScreenCounterBadge(compact: true),
+                const SizedBox(width: 4),
                 IconButton(
                   icon: Icon(_isGridView ? Icons.view_agenda_rounded : Icons.grid_view_rounded, color: context.textDark, size: 22),
                   onPressed: () => setState(() => _isGridView = !_isGridView),

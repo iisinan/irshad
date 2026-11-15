@@ -7,6 +7,7 @@ import '../data/stock_repository.dart';
 import '../providers/stock_provider.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 import '../../../core/widgets/company_avatar.dart';
+import '../../../core/widgets/stock_screen_counter_badge.dart';
 import 'stock_detail_screen.dart';
 
 class StockSearchScreen extends StatefulWidget {
@@ -167,6 +168,12 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
         backgroundColor: context.bg,
         elevation: 0,
         centerTitle: false,
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 16),
+            child: Center(child: StockScreenCounterBadge(compact: true)),
+          ),
+        ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 import 'package:irshad_mobile/core/api/api_service.dart';
+import 'package:irshad_mobile/core/widgets/stock_screen_counter_badge.dart';
 import 'package:irshad_mobile/core/widgets/upgrade_paywall_bottom_sheet.dart';
 import '../data/stock_repository.dart';
 import 'dart:async';
@@ -252,41 +253,12 @@ class _AaoifiScreeningScreenState extends State<AaoifiScreeningScreen> with Sing
                 "AAOIFI Compliance Verdict",
                 style: TextStyle(color: Colors.grey, fontSize: 14, fontWeight: FontWeight.w600),
               ),
-              if (_report!['screen_usage'] is Map && (_report!['screen_usage']['limit'] ?? -1) != -1) ...[
-                const SizedBox(height: 12),
-                Builder(
-                  builder: (context) {
-                    final usage = _report!['screen_usage'] as Map;
-                    final used = usage['used'] ?? 0;
-                    final limit = usage['limit'] ?? 3;
-                    final remaining = usage['remaining'] ?? 0;
-                    final isQuarterly = usage['period']?.toString() == 'quarter' || limit == 30;
-                    final isExhausted = remaining == 0;
-                    return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: isExhausted
-                            ? Colors.red.withValues(alpha: 0.12)
-                            : const Color(0xFFD9A05B).withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: isExhausted
-                              ? Colors.red.withValues(alpha: 0.35)
-                              : const Color(0xFFD9A05B).withValues(alpha: 0.4),
-                        ),
-                      ),
-                      child: Text(
-                        '${isQuarterly ? 'Quarterly' : 'Monthly'} Screens: $used / $limit',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
-                          color: isExhausted ? Colors.red.shade700 : const Color(0xFFB45309),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ],
+              const SizedBox(height: 12),
+              StockScreenCounterBadge(
+                fallbackUsage: _report!['screen_usage'] is Map
+                    ? Map<String, dynamic>.from(_report!['screen_usage'] as Map)
+                    : null,
+              ),
               const SizedBox(height: 20),
               Container(height: 1, color: statusColor.withValues(alpha: 0.3)),
               const SizedBox(height: 16),
@@ -847,6 +819,19 @@ class _AaoifiScreeningScreenState extends State<AaoifiScreeningScreen> with Sing
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: Center(
+              child: StockScreenCounterBadge(
+                compact: true,
+                fallbackUsage: _report?['screen_usage'] is Map
+                    ? Map<String, dynamic>.from(_report!['screen_usage'] as Map)
+                    : null,
+              ),
+            ),
+          ),
+        ],
       ),
       backgroundColor: const Color(0xFFF8F9FA),
       body: _isLoading 

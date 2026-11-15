@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../core/api/api_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/company_avatar.dart';
+import '../../../core/widgets/stock_screen_counter_badge.dart';
 import 'stock_detail_screen.dart';
 import '../providers/stock_provider.dart';
 
@@ -412,6 +413,8 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
+            const StockScreenCounterBadge(),
+            const SizedBox(width: 10),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               decoration: BoxDecoration(
