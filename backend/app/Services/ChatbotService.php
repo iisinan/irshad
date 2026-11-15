@@ -135,47 +135,55 @@ PROMPT;
             $startIndex = 0;
         }
 
+        $models = ['gemini-flash-lite-latest', 'gemini-3.1-flash-lite'];
         $keyCount = count($apiKeys);
-        for ($attempt = 0; $attempt < $keyCount; $attempt++) {
-            $idx = ($startIndex + $attempt) % $keyCount;
-            $apiKey = $apiKeys[$idx];
 
-            try {
-                $response = Http::withHeaders([
-                    'Content-Type' => 'application/json',
-                ])->timeout(25)->post("{$this->geminiBaseUrl}/gemini-flash-latest:generateContent?key={$apiKey}", [
-                    'systemInstruction' => [
-                        'parts' => [['text' => $systemInstruction]],
-                    ],
-                    'contents' => $contents,
-                    'generationConfig' => [
-                        'temperature' => 0.3,
-                        'responseMimeType' => 'application/json',
-                    ],
-                ]);
+        foreach ($models as $model) {
+            for ($attempt = 0; $attempt < $keyCount; $attempt++) {
+                $idx = ($startIndex + $attempt) % $keyCount;
+                $apiKey = $apiKeys[$idx];
 
-                if ($response->successful()) {
-                    Cache::put('gemini_key_index', $idx);
-                    $text = $response->json('candidates.0.content.parts.0.text', '');
+                try {
+                    $response = Http::withHeaders([
+                        'Content-Type' => 'application/json',
+                    ])->withOptions([
+                        'force_ip_resolve' => 'v4',
+                    ])->timeout(15)->post("{$this->geminiBaseUrl}/{$model}:generateContent?key={$apiKey}", [
+                        'systemInstruction' => [
+                            'parts' => [['text' => $systemInstruction]],
+                        ],
+                        'contents' => $contents,
+                        'generationConfig' => [
+                            'temperature' => 0.3,
+                            'responseMimeType' => 'application/json',
+                        ],
+                    ]);
 
-                    return $this->parseModelPayload($text);
+                    if ($response->successful()) {
+                        Cache::put('gemini_key_index', $idx);
+                        $text = $response->json('candidates.0.content.parts.0.text', '');
+
+                        return $this->parseModelPayload($text);
+                    }
+
+                    if ($response->status() === 429) {
+                        Log::warning('ChatbotService Gemini key hit 429; rotating key.', ['index' => $idx, 'model' => $model]);
+                        continue;
+                    }
+
+                    Log::error('ChatbotService Gemini API error', [
+                        'model' => $model,
+                        'status' => $response->status(),
+                        'body' => substr($response->body(), 0, 500),
+                    ]);
+
+                    break; // Try next model rather than retrying same bad payload on every key
+                } catch (\Throwable $e) {
+                    $safeMsg = preg_replace('/key=[^&\s]+/', 'key=***', $e->getMessage()) ?? $e->getMessage();
+                    Log::error("ChatbotService Gemini exception ({$model}): {$safeMsg}");
+
+                    break;
                 }
-
-                if ($response->status() === 429) {
-                    Log::warning('ChatbotService Gemini key hit 429; rotating key.', ['index' => $idx]);
-                    continue;
-                }
-
-                Log::error('ChatbotService Gemini API error', [
-                    'status' => $response->status(),
-                    'body' => substr($response->body(), 0, 500),
-                ]);
-
-                return null;
-            } catch (\Throwable $e) {
-                Log::error('ChatbotService Gemini exception: '.$e->getMessage());
-
-                return null;
             }
         }
 

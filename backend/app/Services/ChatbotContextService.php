@@ -149,7 +149,8 @@ class ChatbotContextService
         $found = collect();
 
         if (! empty($symbolCandidates)) {
-            $bySymbol = Company::with(['status', 'aaoifiScreening'])
+            $bySymbol = Company::with(['status:id,company_id,status,verified_by_scholar', 'aaoifiScreening'])
+                ->select(['id', 'name', 'symbol', 'sector', 'current_status', 'latest_price', 'activity_reason'])
                 ->whereIn('symbol', array_values(array_unique($symbolCandidates)))
                 ->limit(3)
                 ->get();
@@ -160,7 +161,8 @@ class ChatbotContextService
             $remaining = 3 - $found->count();
             $existingIds = $found->pluck('id')->all();
 
-            $byName = Company::with(['status', 'aaoifiScreening'])
+            $byName = Company::with(['status:id,company_id,status,verified_by_scholar', 'aaoifiScreening'])
+                ->select(['id', 'name', 'symbol', 'sector', 'current_status', 'latest_price', 'activity_reason'])
                 ->when(! empty($existingIds), fn ($q) => $q->whereNotIn('id', $existingIds))
                 ->where(function ($q) use ($nameTokens) {
                     foreach (array_slice(array_unique($nameTokens), 0, 5) as $word) {
