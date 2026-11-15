@@ -76,22 +76,31 @@ class AuthController extends Controller
             'credential' => 'required|string',
         ]);
 
-        $client = new \Google_Client(['client_id' => env('GOOGLE_CLIENT_ID')]);
-        $payload = $client->verifyIdToken($request->credential);
-        
-        // Fallback to mobile client ID if web client ID fails
-        if (!$payload && env('GOOGLE_CLIENT_ID_IOS')) {
-            $iosClient = new \Google_Client(['client_id' => env('GOOGLE_CLIENT_ID_IOS')]);
-            $payload = $iosClient->verifyIdToken($request->credential);
-        }
+        $clientIds = array_values(array_unique(array_filter([
+            config('services.google.client_id'),
+            config('services.google.web_client_id'),
+            config('services.google.ios_client_id'),
+            config('services.google.mobile_client_id'),
+        ])));
 
-        if (!$payload && env('GOOGLE_CLIENT_ID_MOBILE')) {
-            $mobileClient = new \Google_Client(['client_id' => env('GOOGLE_CLIENT_ID_MOBILE')]);
-            $payload = $mobileClient->verifyIdToken($request->credential);
+        $payload = null;
+        foreach ($clientIds as $clientId) {
+            try {
+                $client = new \Google_Client(['client_id' => $clientId]);
+                $verified = $client->verifyIdToken($request->credential);
+                if (is_array($verified)) {
+                    $payload = $verified;
+                    break;
+                }
+            } catch (\Throwable $e) {
+                // Continue trying remaining configured client IDs before failing.
+            }
         }
 
         if (!$payload) {
-            \Log::error('Invalid Google token verification failed for credential: ' . $request->credential . ' with expected client id: ' . env('GOOGLE_CLIENT_ID'));
+            \Log::error('Invalid Google token verification failed', [
+                'configured_client_ids' => $clientIds,
+            ]);
             return $this->unauthorized('Invalid Google token');
         }
 

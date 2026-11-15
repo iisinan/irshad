@@ -60,4 +60,11 @@ return [
         'recurring' => filter_var(env('SQUAD_RECURRING_ENABLED', false), FILTER_VALIDATE_BOOLEAN),
     ],
 
+    'google' => [
+        'client_id'        => env('GOOGLE_CLIENT_ID'),
+        'web_client_id'    => env('GOOGLE_WEB_CLIENT_ID', '695007449342-h6pllbs2fctnjlnq5tr0j9ktlmoaohed.apps.googleusercontent.com'),
+        'ios_client_id'    => env('GOOGLE_CLIENT_ID_IOS'),
+        'mobile_client_id' => env('GOOGLE_CLIENT_ID_MOBILE'),
+    ],
+
 ];
