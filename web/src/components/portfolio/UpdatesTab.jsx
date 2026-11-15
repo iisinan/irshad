@@ -443,7 +443,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
                 background: isActive ? 'var(--primary)' : 'var(--bg-section)',
                 border: isActive ? '1px solid var(--primary)' : '1px solid var(--border)',
                 color: isActive ? 'white' : isTabLocked(tab.id) ? 'var(--text-muted)' : 'var(--text-dark)',
-                opacity: isTabLocked(tab.id) ? 0.8 : 1,
+                opacity: 1,
                 fontWeight: 700,
                 fontSize: '0.85rem',
                 cursor: 'pointer',
@@ -468,7 +468,7 @@ export default function UpdatesTab({ unreadCount = 0 }) {
             >
               <Icon size={16} />
               {tab.label}
-              {isTabLocked(tab.id) && <Lock size={12} style={{ marginLeft: 2, opacity: 0.6 }} />}
+              {isTabLocked(tab.id) && <Lock size={13} color={isActive ? '#fde68a' : '#d97706'} strokeWidth={2.3} style={{ marginLeft: 2, flexShrink: 0 }} />}
               
               {/* Badge */}
               {tab.badge > 0 && (

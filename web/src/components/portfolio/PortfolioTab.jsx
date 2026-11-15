@@ -436,7 +436,7 @@ export default function PortfolioTab({ data, setShowAddModal, handleDelete, refr
                   onClick={() => onUpgrade?.()}
                   style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '3px 10px', borderRadius: '999px', background: 'var(--bg-section)', border: '1px solid var(--border)', color: 'var(--text-muted)', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}
                 >
-                  <Lock size={11} /> 90-Day Drift Tracking (Noor)
+                  <Lock size={11} color="#d97706" /> 90-Day Drift Tracking (Noor)
                 </button>
               )}
               

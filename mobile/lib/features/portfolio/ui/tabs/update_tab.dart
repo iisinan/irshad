@@ -271,7 +271,11 @@ class _UpdateTabState extends State<UpdateTab> {
                       ),
                       if (isLocked) ...[
                         const SizedBox(width: 6),
-                        Icon(Icons.lock_outline_rounded, size: 14, color: context.textMuted),
+                        Icon(
+                          Icons.lock_outline_rounded,
+                          size: 14,
+                          color: isActive ? const Color(0xFFFDE68A) : const Color(0xFFD97706),
+                        ),
                       ],
                     ],
                   ),
