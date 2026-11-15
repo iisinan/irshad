@@ -7,7 +7,15 @@ import { useAuth } from '../context/AuthContext';
 
 import { customConfirm, customAlert } from '../utils/confirm';
 
-const isDirectVideoUrl = (url) => /\.(mp4|webm|mov|mkv|avi)(\?.*)?$/i.test(url || '');
+const isDirectVideoUrl = (url) => {
+  if (!url) return false;
+  const clean = url.split('?')[0].toLowerCase();
+  return (
+    /\.(mp4|webm|mov|mkv|avi|m4v)$/i.test(clean) ||
+    url.includes('/api/v1/resources/media/') ||
+    url.includes('.r2.cloudflarestorage.com')
+  );
+};
 
 export default function ResourcesPage() {
   const [search, setSearch] = useState('');
@@ -273,7 +281,12 @@ export default function ResourcesPage() {
                     {item.type === 'video' ? (
                       <div style={{ width: '100%', height: '180px', position: 'relative', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', overflow: 'hidden' }}>
                         {item.thumbnail ? (
-                          <img src={item.thumbnail} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} />
+                          <img 
+                            src={item.thumbnail} 
+                            alt={item.title} 
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} 
+                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                          />
                         ) : isDirectVideoUrl(item.url) ? (
                           <video src={`${item.url}#t=0.5`} preload="metadata" muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.85, pointerEvents: 'none' }} />
                         ) : null}

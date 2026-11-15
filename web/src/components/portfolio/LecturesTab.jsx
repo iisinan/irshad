@@ -4,6 +4,16 @@ import { Play, FileText, Download, BookOpen, Search, X } from 'lucide-react';
 import api from '../../services/api';
 import localforage from 'localforage';
 
+const isDirectVideoUrl = (url) => {
+  if (!url) return false;
+  const clean = url.split('?')[0].toLowerCase();
+  return (
+    /\.(mp4|webm|mov|mkv|avi|m4v)$/i.test(clean) ||
+    url.includes('/api/v1/resources/media/') ||
+    url.includes('.r2.cloudflarestorage.com')
+  );
+};
+
 export default function LecturesTab() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
@@ -145,16 +155,34 @@ export default function LecturesTab() {
                 onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.03)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
               >
                 {item.type === 'video' ? (
-                  <div style={{ width: '100%', height: '180px', position: 'relative', background: '#000' }}>
-                    <img loading="lazy" src={item.thumbnail} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} />
+                  <div style={{ width: '100%', height: '180px', position: 'relative', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', overflow: 'hidden' }}>
+                    {item.thumbnail ? (
+                      <img 
+                        loading="lazy" 
+                        src={item.thumbnail} 
+                        alt={item.title} 
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.85 }} 
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                      />
+                    ) : isDirectVideoUrl(item.url) ? (
+                      <video 
+                        src={`${item.url}#t=0.5`} 
+                        preload="metadata" 
+                        muted 
+                        playsInline 
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.85, pointerEvents: 'none' }} 
+                      />
+                    ) : null}
                     <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <div style={{ width: '48px', height: '48px', background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(4px)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--bg)' }}>
                         <Play size={20} fill="currentColor" style={{ marginLeft: '4px' }} />
                       </div>
                     </div>
-                    <div style={{ position: 'absolute', bottom: '8px', right: '8px', background: 'rgba(0,0,0,0.7)', color: 'var(--bg)', fontSize: '0.62rem', fontWeight: 700, padding: '4px 8px', borderRadius: '6px' }}>
-                      {item.duration}
-                    </div>
+                    {item.duration && (
+                      <div style={{ position: 'absolute', bottom: '8px', right: '8px', background: 'rgba(0,0,0,0.7)', color: 'var(--bg)', fontSize: '0.62rem', fontWeight: 700, padding: '4px 8px', borderRadius: '6px' }}>
+                        {item.duration}
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div style={{ width: '100%', height: '180px', background: 'linear-gradient(145deg, var(--primary-50) 0%, var(--bg-section) 100%)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', borderBottom: '1px solid var(--border)' }}>
@@ -230,13 +258,23 @@ export default function LecturesTab() {
                 {selectedItem.type === 'video' ? (
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                     <div style={{ width: '100%', flex: 1, background: 'black', position: 'relative' }}>
-                      <iframe 
-                        src={selectedItem.url} 
-                        title={selectedItem.title}
-                        style={{ width: '100%', height: '100%', border: 'none' }}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                        allowFullScreen
-                      ></iframe>
+                      {isDirectVideoUrl(selectedItem.url) ? (
+                        <video
+                          src={selectedItem.url}
+                          controls
+                          autoPlay
+                          playsInline
+                          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                        />
+                      ) : (
+                        <iframe 
+                          src={selectedItem.url} 
+                          title={selectedItem.title}
+                          style={{ width: '100%', height: '100%', border: 'none' }}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                          allowFullScreen
+                        ></iframe>
+                      )}
                     </div>
                     <div style={{ padding: '24px', background: 'var(--bg)', borderTop: '1px solid var(--border)' }}>
                       <h4 style={{ fontSize: '0.97rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '8px' }}>Description</h4>
